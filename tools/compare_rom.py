@@ -38,12 +38,20 @@ def main() -> int:
     parser.add_argument("--map", type=Path, required=True)
     parser.add_argument("--version", default="jpn_rev1")
     parser.add_argument("--diff", metavar="ADDRESS")
+    parser.add_argument("--module", default="main", help="main, or an overlay as ov074")
     args = parser.parse_args()
 
+    global BASE
+    config = ROOT / "config" / args.version / "arm9"
     rom_path = ROOT / "extract" / args.version / "arm9" / "arm9.bin"
+    if args.module != "main":
+        config = config / "overlays" / args.module
+        rom_path = ROOT / "extract" / args.version / "arm9_overlays" / f"{args.module}.bin"
+        # An overlay's code is the first thing in it
+        BASE = int(re.search(r"\.text\s+start:0x([0-9a-f]+)", (config / "delinks.txt").read_text())[1], 16)
     rom = rom_path.read_bytes()
     sizes = {}
-    for line in (ROOT / "config" / args.version / "arm9" / "symbols.txt").read_text(encoding="utf-8").splitlines():
+    for line in (config / "symbols.txt").read_text(encoding="utf-8").splitlines():
         match = re.match(r"\S+ kind:function\(\w+,size=0x([0-9a-f]+)[^)]*\) addr:0x([0-9a-f]+)", line)
         if match:
             sizes[int(match[2], 16)] = int(match[1], 16)
