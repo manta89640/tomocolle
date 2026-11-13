@@ -17,6 +17,9 @@ arm7_bios.bin
 /.ninja_lock
 /objdiff.json
 
+# A ByteMatch token, for tools/upload_report.py
+/.bytematch-token
+
 __pycache__/
 .venv/
 .vscode/

@@ -31,14 +31,12 @@ repository's CI.
 
 ### Without the ROM in CI
 
-A report can be sent from your own machine instead, with a token from the project's Manage page:
+A report can be sent from your own machine instead. Create a token on the project's Manage page, put it in the file
+`.bytematch-token` in this directory (git ignores it) or in the environment as `BYTEMATCH_TOKEN`, and run:
 
 ```sh
-ninja report
-curl --fail -X POST \
-  -H "Authorization: Bearer $BYTEMATCH_TOKEN" \
-  --data-binary @build/jpn_rev1/report.json \
-  "https://bytematch.dev/api/v1/projects/manta89640/tomocolle/reports?version=jpn_rev1&commit=$(git rev-parse HEAD)"
+ninja upload
 ```
 
-Send it for a commit that is pushed, since ByteMatch reads the source it links to from GitHub at that commit.
+That builds the report and sends it as the progress of the commit that is checked out, which has to be pushed and
+without uncommitted changes: ByteMatch reads the source it links to from GitHub at that commit.

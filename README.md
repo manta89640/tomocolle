@@ -46,6 +46,7 @@ the original.
 | ------------------ | ----------------------------------------------------------------------------------- |
 | `ninja`            | Builds and checks everything, and writes `objdiff.json` for the objdiff GUI          |
 | `ninja report`     | Writes the progress report, `build/jpn_rev1/report.json`                             |
+| `ninja upload`     | Sends that report to ByteMatch, see [docs/bytematch.md](docs/bytematch.md)           |
 | `ninja dis`        | Disassembles the whole game into `build/jpn_rev1/asm/`, to read                      |
 | `ninja compile`    | Compiles the sources only, which needs no ROM                                        |
 

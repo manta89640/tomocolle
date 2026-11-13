@@ -384,6 +384,8 @@ def main():
            f"--compiler {DECOMP_ME_COMPILER} --c-flags {shlex.quote(decomp_me_flags)} -o $out",
            "Writing $out")
     n.rule("report", "$objdiff report generate -p . -o $out", "Generating $out")
+    # Sends the report to ByteMatch as the progress of HEAD, for when CI has no base ROM to make it with
+    n.rule("upload_report", f"$python tools/upload_report.py $in --version {version}", "Uploading $in", pool="console")
     n.rule("disassemble", "$dsd dis --config-path $config --asm-path $asm_dir --ual && touch $out", "Disassembling")
 
     n.build(["build.ninja"], "configure", implicit=["configure.py", *configs])
@@ -430,6 +432,7 @@ def main():
     n.build(["objdiff.json"], "objdiff_config", configs, implicit=["tools/objdiff_config.py", *compiled])
     n.build([report], "report", ["objdiff.json"], implicit=[*delink_outputs, *compiled])
     n.build(["report"], "phony", [report])
+    n.build(["upload"], "upload_report", [report], implicit=["tools/upload_report.py"])
 
     # A listing of the whole game to read, not to assemble
     asm_ok = build_dir / "asm.ok"
