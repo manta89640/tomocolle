@@ -9,8 +9,8 @@ repository's CI.
 | ByteMatch | Here |
 | --- | --- |
 | A report per game version, as a CI artifact named `<version>_report` | `jpn_rev1_report`, uploaded by `.github/workflows/build.yml` from successful pushes to `main` |
-| Units, drawn as a map by the directories in their names | `src/...` for decompiled files, and `main/gap_<n>`, `overlays/ov<nnn>/gap_<n>` for what is left of each module |
-| Progress categories | `main`, `itcm` and `overlays`, by module |
+| Units, drawn as a map by the directories in their names | `src/...` and `lib/...` for the files named in a `delinks.txt`, written or not, and `main/gap_<n>`, `overlays/ov<nnn>/gap_<n>` for what is left of each module |
+| Progress categories | By module: `main`, `itcm`, `overlays`. By origin: `game` for `src/`, `libs` for `lib/` |
 | A unit's source file, for "View source" | `metadata.source_path`, set by dsd |
 | Complete units | Files marked `complete` in `delinks.txt` |
 

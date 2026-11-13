@@ -4,8 +4,11 @@
 dsd writes the units. This adds what a progress tracker reads from them:
   - short paths, relative to the repository's root
   - a path-like name for each unit, since the tracker draws a name's directories as nested boxes
-  - each unit's module as a progress category, so that the main program and the overlays are counted apart
+  - progress categories: each unit's kind of module, and whether it is the game's own code or a library's
   - the source file of a decompiled unit, for links to the code
+
+A delinks.txt may name a source file that is not written yet, to give a known file a unit of its own. Such a unit has
+nothing to compare with, so it gets no object to build and no source to link to.
 """
 import argparse
 import json
@@ -22,7 +25,11 @@ CATEGORIES = [
     {"id": "main", "name": "Main program"},
     {"id": "itcm", "name": "ITCM"},
     {"id": "overlays", "name": "Overlays"},
+    # By directory. What no source file claims yet is in neither, since nobody has said which it is.
+    {"id": "game", "name": "Game"},
+    {"id": "libs", "name": "Libraries"},
 ]
+ORIGINS = {"src": "game", "lib": "libs"}
 
 
 def clean(path: str) -> str:
@@ -87,10 +94,20 @@ def main() -> int:
             module = gap["module"]
             folder = f"overlays/{module}" if module.startswith("ov") else module
             unit["name"] = f"{folder}/gap_{gap['index']}"
+            categories = [category(module)]
         else:
-            # dsd names a decompiled unit after its source file, less the extension, and gives the file's path
-            module = modules.get(metadata.get("source_path", name), "main")
-        metadata["progress_categories"] = [category(module)]
+            # dsd names a unit after its source file, less the extension, and gives the file's path
+            source = metadata.get("source_path", name)
+            module = modules.get(source, "main")
+            categories = [category(module)]
+            origin = ORIGINS.get(Path(source).parts[0])
+            if origin:
+                categories.append(origin)
+            if not Path(source).exists():
+                for key in ("base_path", "scratch"):
+                    unit.pop(key, None)
+                metadata.pop("source_path", None)
+        metadata["progress_categories"] = categories
 
     args.output.write_text(json.dumps(objdiff, indent=2) + "\n", encoding="utf-8")
     return 0

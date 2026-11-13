@@ -330,11 +330,10 @@ def main():
     delink_outputs = sorted({f["delink_file"] for f in files})
     link_inputs = sorted({f["object_to_link"] for f in files})
 
-    # A source file takes part in the build once a delinks.txt names it
-    listed = {f["name"] for f in files if f["name"].endswith(SOURCE_SUFFIXES)}
-    for name in sorted(listed):
-        if not Path(name).exists():
-            sys.exit(f"{name} is in a delinks.txt but does not exist")
+    # A delinks.txt names the source files of a module. One that exists takes part in the build. One that does not is
+    # a file whose bounds are known and whose code is not written yet: it is delinked as a unit of its own.
+    named = {f["name"] for f in files if f["name"].endswith(SOURCE_SUFFIXES)}
+    listed = {name for name in named if Path(name).exists()}
     for directory in ("src", "lib"):
         for path in sorted(Path(directory).rglob("*")):
             if path.suffix in SOURCE_SUFFIXES and path.as_posix() not in listed:
@@ -442,7 +441,8 @@ def main():
     n.default(["objdiff.json", "check", *compiled])
 
     Path("build.ninja").write_text(n.out.getvalue(), encoding="utf-8")
-    print(f"Wrote build.ninja for {version}: {len(compiled)} source files, {len(delink_outputs)} delinked objects")
+    print(f"Wrote build.ninja for {version}: {len(delink_outputs)} units, of which {len(named)} are source files "
+          f"and {len(compiled)} of those are written")
 
 
 if __name__ == "__main__":
