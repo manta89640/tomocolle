@@ -571,7 +571,7 @@ extern const char data_020bbf34[0x90][4];
 
 void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engine);
 
-void func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine);
+int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine);
 
 int func_02087bd4(char *text, char *out, Shtts *engine);
 

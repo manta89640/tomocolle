@@ -1324,16 +1324,8 @@ void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_020
 // Splits a word's text into its sounds, each a syllable that ends in a vowel, "N" or "-", and writes the text
 // again from them. A vowel in upper case marks its sound with 'U', a 'Q' marks the sound that follows, and '?' and
 // '!' are counted in the word.
-// Not matching yet: four instructions of the last loop have r0 and r1 the other way round. The original shifts
-// the incremented counter into r1 and loads word->count into r0 ("lsl r1, r0, #16; ldrsb r0, [sl, #4]; asr r4,
-// r1, #16; cmp r0, r1, asr #16"); this shifts in r0 and loads into r1. The loop alone in a function compiles as
-// it does here whatever its form. Tried without effect: for, while, do-while and goto forms with and without a
-// guard, the counter set before the guard, the increment in the body or the header and as ++i, i += 1, i = i + 1,
-// the comparison either way round and with casts, the counter as i, j, length or a new s16, int or s8 variable
-// (int with an (s16) cast at each assignment too), the count read into c, j, max, length or a new variable of
-// each type before the loop and in it, inline functions for the count, the step and the comparison, and char,
-// signed char, const and volatile for the field.
-void func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine) {
+// Returns how many sounds the word has.
+int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine) {
     char *p;
     s16 length;
     s16 i;
@@ -1428,6 +1420,7 @@ void func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, S
         strcat(word->text, sound->name);
         sound = sound->next;
     }
+    return word->count;
 }
 
 // Carries out one command of the text: '#', a letter, and for most a number, which after a '+' is added to the
