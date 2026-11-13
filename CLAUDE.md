@@ -9,6 +9,8 @@ A matching decompilation of the DS game, built with dsd and checked with objdiff
 - `ninja`: build, and check every module, symbol and the ROM against the original. Run it before every commit.
 - `ninja report`: write `build/jpn_rev1/report.json`, the progress report.
 - `ninja dis`: disassemble the game into `build/jpn_rev1/asm/`.
+- `python3 tools/check_relocs.py`: check that matched functions refer to the same symbols as the original (after
+  `ninja`). objdiff does not: a call to the wrong function, or by a name `symbols.txt` does not have, scores 100%.
 
 ## Rules
 

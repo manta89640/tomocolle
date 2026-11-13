@@ -181,3 +181,20 @@ The order that the code itself suggests:
   constructed through `__cxa_vec_ctor`, a single one registered with `__register_global_object`.
 - **Virtual tables are not placed yet.** They are emitted in every file that uses the class, and the linker keeps
   one: which file's is not known, so `TextCanvas.cpp` and `MessageText.cpp` are not linked from source.
+
+## A match is instructions and references
+
+objdiff compares instructions, and counts a call or an address load as equal whatever it refers to. So after `ninja`,
+run `python3 tools/check_relocs.py`: it compares, function by function, the symbol each relocation of the compiled
+object refers to with the original's. What it reports is one of:
+
+- **A source that calls something by an address name** (`func_ov074_0216a514`) that has since been named: declare and
+  call it by its name.
+- **A placeholder in `symbols.txt` that the compiled code names**: when a matching function of the SDK refers to
+  `sDispMode` where the original has `data_02119574`, that is the symbol's name. 197 data symbols of the libraries
+  were named this way.
+- **A constructor or destructor variant named wrongly**: one copy survives in the ROM, and the call shows whether it
+  is the complete (`C1`) or the base (`C2`) one.
+- **A real mistake**: the wrong function or object.
+
+The `@number` names of the speech engine's literals differ by design and can be ignored.
