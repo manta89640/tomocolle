@@ -51,9 +51,9 @@ typedef struct Shtts {
     /* 0x0B740 */ u8 echoBuffer[0x2EE4];
     /* 0x0E624 */ u32 unk_0E624;
     /* 0x0E628 */ u8 pad_0E628[0x4];
-    /* 0x0E62C */ u8 firBuffer[0x7D2];
+    /* 0x0E62C */ s16 firBuffer[1001];
     /* 0x0EDFE */ u8 pad_0EDFE[0x2];
-    /* 0x0EE00 */ u32 unk_0EE00;
+    /* 0x0EE00 */ s32 unk_0EE00; // How many samples have gone into firBuffer
     /* 0x0EE04 */ u32 unk_0EE04;
     /* 0x0EE08 */ u32 unk_0EE08;
     /* 0x0EE0C */ u16 unk_0EE0C;

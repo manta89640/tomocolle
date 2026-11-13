@@ -101,7 +101,8 @@ typedef struct ShttsUnk_02087d98 {
 // The first field of each 16-byte entry of a table that func_0208aba8 is given
 typedef struct ShttsUnk_0208aba8 {
     /* 0x0 */ s16 unk_0;
-    /* 0x2 */ u8 pad_2[14];
+    /* 0x2 */ s8 unk_2;
+    /* 0x3 */ u8 pad_3[13];
 } ShttsUnk_0208aba8; // 0x10
 
 // A sorted list of words that func_02084794 searches
@@ -338,5 +339,58 @@ int func_0208e2c0(Shtts *engine, int value);
 int func_0208e2e8(Shtts *engine, int value);
 int func_0208e310(Shtts *engine, int value);
 int func_0208e81c(int a, int b);
+
+// ---- From the decompilation of group d
+// The three levels above ShttsUnk_02087d98. Each has a count of the ones below it, which are linked.
+typedef struct ShttsUnk_0208a25c {
+    /* 0x00 */ void *unk_00; // What func_020857e8 takes
+    /* 0x04 */ s8 count;
+    /* 0x05 */ s8 unk_05;
+    /* 0x06 */ s8 unk_06;
+    /* 0x07 */ s8 unk_07;
+    /* 0x08 */ u8 pad_08[0xA];
+    /* 0x12 */ s16 unk_12;
+    /* 0x14 */ u8 pad_14[4];
+    /* 0x18 */ ShttsUnk_02087d98 *first;
+    /* 0x1C */ struct ShttsUnk_0208a25c *next;
+} ShttsUnk_0208a25c;
+
+typedef struct ShttsUnk_0208a5b4 {
+    /* 0x0 */ s8 count;
+    /* 0x1 */ s8 unk_1;
+    /* 0x2 */ s8 unk_2;
+    /* 0x4 */ ShttsUnk_0208a25c *first;
+    /* 0x8 */ ShttsUnk_0208a25c *last;
+    /* 0xC */ struct ShttsUnk_0208a5b4 *next;
+} ShttsUnk_0208a5b4; // 0x10
+
+typedef struct ShttsUnk_0208a038 {
+    /* 0x0 */ s8 count;
+    /* 0x1 */ s8 unk_1;
+    /* 0x4 */ ShttsUnk_0208a5b4 *first; // They are also an array
+    /* 0x8 */ struct ShttsUnk_0208a038 *next;
+} ShttsUnk_0208a038;
+
+void func_020897c8(int order, u16 *in, s16 *out);
+
+void func_02089a3c(int level, s16 *in, s16 *out, int count);
+
+int func_02089bb0(int x);
+
+void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine);
+
+int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, int kind, s16 notFirst, Shtts *engine);
+
+void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine);
+
+s16 func_0208ab18(int a, int b);
+
+extern s16 *data_020bbf30;
+
+extern s16 data_020bc20c[5];
+
+extern s16 data_020bc216[5];
+
+extern s16 data_020bc220[5];
 
 #endif // SHTTS_H

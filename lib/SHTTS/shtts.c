@@ -1871,6 +1871,126 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
     return count;
 }
 
+// Turns `order` values into as many filter coefficients. Each value is first looked up, with interpolation, in the
+// cosine table that data_020bbf30 points to, and negated. Then an impulse (0x2000000, then zeros) is put through two
+// chains of order / 2 second-order sections, whose coefficients are the even and the odd cosines, and half the sum
+// of the two chains' outputs, from the second on, is the result.
+//
+// Not matching yet: 30 instructions differ, all of them register choices in the first loop, and the order of the
+// two stores of `order` and `out` to the stack at the start; every instruction is otherwise the original's. The
+// original keeps the address of `cosines` in r0, the counter in r2 (and its shifted next value in r7), the read
+// value in r4, the table in r5 and the mask in r6; this has them in r7, r6, r3, r4 and r5. The other three loops
+// match, and only do with exactly this sharing of variables (`t` for all three read values, `j` for the table index,
+// the counter of the second loop and of the inner one) and the chained assignment in the second loop.
+// Tried for the first loop without any change to it: every other sharing of its counter and temporaries with the
+// other loops' variables (three exhaustive searches, about 1,400 builds); the order of declarations; int, s16 and
+// u16 counters and `i++`, `++i`, `i += 1`, `i = (s16)(i + 1)`; while and do-while forms, with and without a guard
+// and with the counter set before it; the body as one expression, with variables for the low entry, the difference
+// and the sum, and with `*=`; an inline function for the lookup, for the loop, and for the whole body; a pointer
+// to the element taken first; `order` as s16 or copied to a local; a const extern; 2D arrays. A local pointer to
+// `cosines` or to the table does move the registers (so what is live across the loop decides them), but each takes
+// a register the original gives to something else.
+void func_020897c8(int order, u16 *in, s16 *out) {
+    s16 cosines[10];
+    s16 result[11];
+    int p[6];
+    int d[6];
+    int c[6];
+    int q[6];
+    int b[6];
+    int a[6];
+    s16 half = order >> 1;
+    int prev;
+    s16 i;
+    s16 j;
+    s16 n;
+    s16 frac;
+    int x;
+    int t;
+    int r;
+    int old;
+
+    for (i = 0; i < order; i++) {
+        t = (in[i] << 7) >> 1;
+        j = t >> 15;
+        frac = t & 0x7FFF;
+        cosines[i] = -(s16)(data_020bbf30[j] + ((((s16)(data_020bbf30[j + 1] - data_020bbf30[j]) * frac) << 1) >> 16));
+    }
+    for (j = 0; j < half + 1; j++) {
+        d[j] = c[j] = b[j] = a[j] = 0;
+    }
+    prev = 0;
+    x = 0x2000000;
+    for (i = 0; i <= order; i++) {
+        p[0] = x + prev;
+        q[0] = x - prev;
+        prev = x;
+        for (j = 0; j < half; j++) {
+            t = d[j];
+            r = func_02089b5c(cosines[j * 2] << 16, t);
+            old = c[j];
+            c[j] = t;
+            p[j + 1] = old + (p[j] + (r << 2));
+            t = b[j];
+            d[j] = p[j];
+            r = func_02089b5c(cosines[j * 2 + 1] << 16, t);
+            old = a[j];
+            a[j] = t;
+            q[j + 1] = old + (q[j] + (r << 2));
+            b[j] = q[j];
+        }
+        result[i] = (p[half] + q[half]) >> 15;
+        x = 0;
+    }
+    for (n = 0; n < order; n++) {
+        out[n] = result[n + 1];
+    }
+}
+
+// Scales `count` samples so that their root mean square is `level`, and keeps them in 16 bits. The roots of the
+// usual counts (55, 60, 120 and 240) are constants.
+void func_02089a3c(int level, s16 *in, s16 *out, int count) {
+    s16 root;
+    u32 sum;
+    s16 i;
+    int gain;
+    int v;
+
+    if (count == 55) {
+        root = 59;
+    } else if (count == 60) {
+        root = 62;
+    } else if (count == 120) {
+        root = 88;
+    } else if (count == 240) {
+        root = 124;
+    } else {
+        root = func_02089bb0(count) >> 5;
+    }
+    sum = 0;
+    for (i = 0; i < count; i++) {
+        sum += (in[i] * in[i]) >> 6;
+    }
+    if (sum == 0) {
+        gain = 1;
+    } else {
+        if (sum > 0x3FFF0001) {
+            sum = 0x3FFF0001;
+        }
+        sum = (s16)(func_02089bb0(sum) >> 8);
+        gain = func_02089444((s16)level * root, (s16)sum);
+    }
+    for (i = 0; i < count; i++) {
+        v = (gain * in[i]) >> 6;
+        if (v < -0x8000) {
+            v = -0x8000;
+        } else if (v > 0x7FFF) {
+            v = 0x7FFF;
+        }
+        out[i] = v;
+    }
+}
+
 // The product of two numbers in 16.16 fixed point
 int func_02089b5c(int a, int b) {
     int sign = 1;
@@ -1886,6 +2006,36 @@ int func_02089b5c(int a, int b) {
     }
     product = (a >> 16) * (b >> 16) + (((a >> 16) * (u16)b + (u16)a * (b >> 16) + 0x8000) >> 16);
     return product * sign;
+}
+
+// The square root of a number, times 256, approximated with a quadratic after scaling to a fixed range
+int func_02089bb0(int x) {
+    s16 shift = 15;
+    int bit;
+    int y;
+
+    for (bit = 0x40000000; bit > 1; bit >>= 1) {
+        if (x & bit) {
+            break;
+        }
+        shift--;
+    }
+    if (shift & 1) {
+        shift++;
+    }
+    if (shift > 0) {
+        x >>= shift;
+    } else {
+        x <<= -shift;
+    }
+    y = (x * 0x4767) >> 16;
+    y = -y;
+    y += 0x28A;
+    y = x + ((y * x) >> 16) + 0x44E0;
+    if (shift > 0) {
+        return y << (shift / 2);
+    }
+    return y >> (-shift / 2);
 }
 
 // Sets up the engine's state for a new text
@@ -2001,10 +2151,366 @@ void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
     }
 }
 
+// The "Fir" effect: adds to each sample the one cur.firDelay samples before it, times cur.firGain / 100. The
+// history is a ring of 1001 samples.
+void func_02089ed4(int count, s16 *in, s16 *out, Shtts *engine) {
+    int gain = (int)(engine->cur.firGain << 8) / 100;
+    int i;
+    int v;
+
+    for (i = 0; i < count; i++) {
+        if (engine->unk_0EE00 < engine->cur.firDelay) {
+            out[i] = in[i];
+        } else {
+            v = in[i] + ((gain * engine->firBuffer[(engine->unk_0EE00 - engine->cur.firDelay) % 1001]) >> 8);
+            if (v > 0x7FFF) {
+                v = 0x7FFF;
+            } else if (v < -0x8000) {
+                v = -0x8000;
+            }
+            out[i] = v;
+        }
+        engine->firBuffer[engine->unk_0EE00 % 1001] = in[i];
+        engine->unk_0EE00++;
+    }
+}
+
 // Empties the FIR filter's history
 void func_0208a010(Shtts *engine) {
     engine->unk_0EE00 = 0;
     memset(engine->firBuffer, 0, sizeof(engine->firBuffer));
+}
+
+// Shapes the pitch of everything in a list: first func_0208a5b4 for each ShttsUnk_0208a5b4, then, for each stretch
+// that ends at a ShttsUnk_0208a25c with unk_12 set, or at the list's end, func_0208a25c with the sum of unk_06 and
+// unk_08 of its ShttsUnk_02087d98s.
+void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine) {
+    ShttsUnk_0208a038 *a;
+    ShttsUnk_0208a038 *cur;
+    ShttsUnk_0208a5b4 *b;
+    ShttsUnk_0208a038 *e;
+    ShttsUnk_0208a25c *c;
+    ShttsUnk_02087d98 *d;
+    s16 i;
+    s16 j;
+    s16 k;
+    s16 notFirst;
+    int length;
+
+    for (e = list; e != NULL; e = e->next) {
+        b = e->first;
+        for (i = 0; i < e->count; i++) {
+            func_0208a5b4(b, engine);
+            b = b->next;
+        }
+    }
+    cur = list;
+    notFirst = 0;
+    for (;;) {
+        if (cur == NULL) {
+            return;
+        }
+        length = 0;
+        for (a = cur; a != NULL; a = a->next) {
+            b = a->first;
+            for (i = 0; i < a->count; i++) {
+                c = b->first;
+                for (j = 0; j < b->count; j++, c = c->next) {
+                    d = c->first;
+                    for (k = 0; k < c->count - 1; k++) {
+                        length += d->unk_06 + d->unk_08;
+                        d = d->next;
+                    }
+                    length += d->unk_06 + d->unk_08;
+                    if (c->unk_12 != 0 || (a->next == NULL && b->next == NULL && b->last == c)) {
+                        if (cur->next == NULL) {
+                            if (c->unk_07 != 0) {
+                                func_0208a25c(cur, length, d, 2, notFirst, engine);
+                            } else {
+                                func_0208a25c(cur, length, d, 1, notFirst, engine);
+                            }
+                        } else {
+                            func_0208a25c(cur, length, d, 0, notFirst, engine);
+                        }
+                        if (list != a) {
+                            notFirst = 1;
+                        } else {
+                            notFirst = 0;
+                        }
+                        cur = cur->next;
+                        goto next;
+                    }
+                }
+                b = b->next;
+            }
+        }
+        return;
+    next:;
+    }
+}
+
+// Adds a curve (func_0208ab18) to the pitch of each ShttsUnk_02087d98 from the first of `unk` to `last`, at a rate
+// that falls with `length`, and lowers the pitch of the last one when the unk_12 of the last ShttsUnk_0208a25c is
+// near certain multiples of cur.speed. `kind` is 0 when more follows, 1 or 2 at the end.
+int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, int kind, s16 notFirst,
+                  Shtts *engine) {
+    s16 offset;
+    ShttsUnk_0208a5b4 *b;
+    s16 depth;
+    ShttsUnk_0208a25c *c;
+    ShttsUnk_02087d98 *d;
+    int pos;
+    int rate;
+
+    if (kind > 0) {
+        if (length <= 400) {
+            rate = 0x189D;
+        } else {
+            rate = (s16)(0x3E8000 / (length + 250));
+        }
+    } else {
+        if (length <= 0x438) {
+            rate = 0xA66;
+        } else {
+            rate = (s16)(0x35E800 / (length + 250));
+        }
+    }
+    b = unk->first;
+    if (notFirst == 1) {
+        if (unk->unk_1 == 1) {
+            if (engine->unk_0EE04 == 1 && engine->unk_0EE08 == 1) {
+                depth = 60;
+            } else {
+                depth = 200;
+            }
+        } else {
+            depth = unk->unk_1 * 105 - (b->first->first->pitch - engine->cur.pitch);
+        }
+    } else {
+        depth = unk->unk_1 * 105;
+    }
+    engine->unk_0EE04 = notFirst;
+    engine->unk_0EE08 = unk->unk_1;
+    if (depth < 0) {
+        depth = 0;
+    }
+    d = b->first->first;
+    offset = func_02089444(0xFA000, rate) + (-83 - (d->unk_06 + ((d->unk_08 + 1) >> 1)));
+    pos = 0;
+    while (d != last) {
+        pos += d->unk_06 + ((d->unk_08 + 1) >> 1);
+        d->pitch += (s16)((func_0208ab18(rate, pos + offset) * (depth * 3) + 0x400) >> 11);
+        pos += d->unk_08 >> 1;
+        d = d->next;
+    }
+    d->pitch +=
+        (s16)((depth * 3 * func_0208ab18(rate, pos + (d->unk_06 + ((d->unk_08 + 1) >> 1)) + offset) + 0x400) >> 11);
+    c = b[unk->count - 1].last;
+    if (kind == 1 && c->unk_12 > (1 - engine->cur.speed) * -10 && c->unk_12 < (engine->cur.speed + 1) * 10) {
+        last->pitch -= unk->unk_1 / 10 * 170;
+    } else if (kind == 0 && c->unk_12 > engine->cur.speed * 3 - 10 && c->unk_12 < engine->cur.speed * 3 + 10) {
+        last->pitch -= unk->unk_1 / 10 * 120;
+    } else if (kind == 0 && c->unk_12 > engine->cur.speed * 2 - 10 && c->unk_12 < engine->cur.speed * 2 + 10) {
+        last->pitch -= unk->unk_1 / 10 * 70;
+    }
+    return 0;
+}
+
+// Raises and lowers the pitch of the ShttsUnk_02087d98s of one ShttsUnk_0208a5b4 around the position unk_1, by an
+// amount that unk_2 scales. unk_1 from 30 up carries a direction in its tens, and cur.unk_14 chooses how unk_1 is
+// reworked from the number that func_020857e8 counts.
+void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
+    ShttsUnk_02087d98 *first;
+    int depth;
+    int end;
+    s16 i;
+    int total;
+    ShttsUnk_0208a25c *c;
+    s16 n;
+    ShttsUnk_02087d98 *next;
+    ShttsUnk_02087d98 *d;
+    int k;
+    int dir;
+    s8 accent;
+    char lastA;
+    char lastB;
+
+    c = unk->first;
+    first = c->first;
+    end = 0;
+    if ((first->unk_05 == 'L' || first[1].unk_04 == 'Q' || first[1].name[0] == 'N') && unk->unk_1 != 1) {
+        depth = unk->unk_2 * 0x84B6;
+    } else {
+        depth = unk->unk_2 * 0x9375;
+    }
+    if (unk->last->unk_12 > engine->cur.speed * 3) {
+        if (unk->last->unk_06 == 0) {
+            depth = (depth * 0x666) >> 12;
+        } else if (unk->last->unk_06 == 1) {
+            if (unk->last->count < 3) {
+                depth >>= 2;
+            }
+        } else if (unk->last->count - unk->last->unk_06 < 2) {
+            depth >>= 1;
+        }
+    }
+    total = 0;
+    for (i = 0; i < unk->count; i++) {
+        total = (s16)(total + func_020857e8(c->unk_00));
+        c = c->next;
+    }
+    if (unk->unk_1 / 30 == 1) {
+        unk->unk_1 -= 30;
+        dir = -1;
+    } else if (unk->unk_1 / 30 == 2) {
+        unk->unk_1 -= 60;
+        dir = 1;
+    } else if (unk->unk_1 / 30 == 3) {
+        unk->unk_1 -= 90;
+        dir = 0;
+    } else if (engine->cur.unk_14 == 1) {
+        if (total == 2) {
+            if (unk->unk_1 == 0) {
+                unk->unk_1 = 1;
+            } else if (unk->unk_1 == 1) {
+                unk->unk_1 = 0;
+            }
+        } else if (total > 2 && unk->unk_1 == 1 && first->unk_05 != 'L') {
+            n = 0;
+            if (first->name[n] != 0) {
+                while (first->name[n] != 0) {
+                    n++;
+                }
+                lastA = first->name[(s16)(n - 1)];
+            }
+            next = first->next;
+            n = 0;
+            if (next->name[n] != 0) {
+                while (next->name[n] != 0) {
+                    n++;
+                }
+                lastB = next->name[(s16)(n - 1)];
+            }
+            if (lastA != lastB && next->unk_04 != 'Q') {
+                unk->unk_1 = 2;
+            }
+        }
+        if (unk->unk_1 == 2) {
+            dir = -1;
+        } else if (unk->unk_1 >= total) {
+            dir = 1;
+        } else if (total == 2) {
+            dir = -1;
+        } else if (total % 2 == 1) {
+            dir = -1;
+        } else {
+            dir = 1;
+        }
+    } else if (engine->cur.unk_14 == 2) {
+        dir = -1;
+        if (total <= 3) {
+            unk->unk_1 = total;
+        } else {
+            unk->unk_1 = total - 1 + total % 2;
+        }
+    } else {
+        dir = 0;
+    }
+    if (unk->unk_1 == 1) {
+        depth -= depth >> 2;
+        end = 1;
+        first->pitch += (s16)((depth + 0x200) >> 10);
+        d = first->next;
+        if (d == NULL) {
+            return;
+        }
+    } else {
+        if (dir == 1) {
+            first->pitch += (s16)((depth + 0x200) >> 10);
+        } else if (dir == -1) {
+            first->pitch -= (s16)((depth + 0x400) >> 11);
+        }
+        accent = unk->unk_1;
+        d = first->next;
+        k = 3;
+        if (accent == 0 || total < accent) {
+            end = total;
+        } else if (accent > 0) {
+            end = accent;
+        } else if (accent < 0) {
+            k = 2;
+            d = first;
+            if (accent == -1) {
+                end = total;
+            } else {
+                end = (s16)-accent;
+            }
+        }
+        if (d == NULL) {
+            return;
+        }
+        if (d->unk_04 != 'Q') {
+            if (total > 1) {
+                if (dir == 0) {
+                    d->pitch += (s16)((depth * 3 + 0x800) >> 12);
+                } else if (dir != -1 || accent == 2 || (total == 2 && accent == 0)) {
+                    d->pitch += (s16)((depth + 0x200) >> 10);
+                }
+            }
+            d = d->next;
+        } else {
+            k = (s16)(k - 1);
+        }
+        for (; k <= end; k = (s16)(k + 1)) {
+            if (dir == 0) {
+                d->pitch += (s16)((depth + 0x200) >> 10);
+            } else if (k == end || (dir == 1 && k <= end)) {
+                d->pitch += (s16)((depth + 0x200) >> 10);
+            }
+            if (d->unk_04 == 'Q' && k >= 2 && unk->unk_1 != 0 && total >= unk->unk_1) {
+                k = (s16)(k + 1);
+            }
+            d = d->next;
+        }
+    }
+    if (d == NULL) {
+        return;
+    }
+    if (total - 1 > end) {
+        if (dir == 0) {
+            d->pitch += (s16)((depth + 0x400) >> 11);
+        }
+        return;
+    }
+    if (d == NULL) {
+        return;
+    }
+    if (unk->last->unk_12 != 0) {
+        return;
+    }
+    if (total <= 1) {
+        return;
+    }
+    if (dir == 0) {
+        d->pitch += (s16)((depth + 0x800) >> 12);
+    }
+}
+
+// The value at a * b / 256 of a curve of five points: data_020bc20c holds where they are, data_020bc216 their
+// values (which the result has divided by 16), and data_020bc220 the distance from each to the one before.
+s16 func_0208ab18(int a, int b) {
+    int x = (a * b) >> 8;
+    s16 i;
+
+    for (i = 1; i < 5; i++) {
+        if (x < data_020bc20c[i]) {
+            s16 lo = data_020bc216[i - 1];
+
+            return func_02089444(((x - data_020bc20c[i - 1]) * (data_020bc216[i] - lo)) >> 4, data_020bc220[i]) +
+                   (lo >> 4);
+        }
+    }
+    return 0;
 }
 
 void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
@@ -2019,6 +2525,59 @@ void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
         b = (s16)(b - table[count - 1].unk_0);
     }
     func_0208abf4(table, count, a, b);
+}
+
+// Adds to unk_0 of each entry an amount that goes from `a` at the first to `b` at the last, each kept within 400
+// either way, changing only past entries whose unk_2 is positive, and keeps the results from 0 to the greater of
+// the two ends' new values.
+void func_0208abf4(ShttsUnk_0208aba8 *table, int count, int a, int b) {
+    s16 max;
+    s16 i;
+    int step;
+    int y;
+    int x;
+    s16 v;
+
+    if (a > 400 || a < -400) {
+        a = (s16)(a > 0 ? 400 : -400);
+    }
+    if (b > 400 || b < -400) {
+        b = (s16)(b > 0 ? 400 : -400);
+    }
+    if (table[0].unk_0 + a > (table + count)[-1].unk_0 + b) {
+        max = table[0].unk_0 + a;
+    } else {
+        max = (table + count)[-1].unk_0 + b;
+    }
+    step = func_02089444((b - a) << 11, (s16)(count - 1)) << 5;
+    if (step > 0x640000 || step < -0x640000) {
+        step = step > 0 ? 0x640000 : -0x640000;
+    }
+    table = table + count - 1;
+    x = b << 16;
+    y = x;
+    i = 0;
+    if (count <= 0) {
+        return;
+    }
+    for (; i < count; i++, table--) {
+        if (table->unk_2 > 0) {
+            v = table->unk_0 + (s16)(x >> 16);
+        } else {
+            v = table->unk_0 + (s16)(y >> 16);
+        }
+        if (v < 0) {
+            v = 0;
+        }
+        if (max < v) {
+            v = max;
+        }
+        table->unk_0 = v;
+        x -= step;
+        if (table->unk_2 > 0) {
+            y = x;
+        }
+    }
 }
 
 // The ring effect: multiplies samples by a sine wave of a frequency
