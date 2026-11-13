@@ -44,6 +44,13 @@ public:
     void Reload();
     void StartPattern();
 
+    void SetPosition(VecFx32 position) { mPosition = position; }
+    void SetPosition(fx32 x, fx32 y, fx32 z) {
+        mPosition.x = x;
+        mPosition.y = y;
+        mPosition.z = z;
+    }
+
     /* 0x0E0 */ int mResourceId;
     /* 0x0E4 */ int mShowState;
     /* 0x0E8 */ int mLoadState;

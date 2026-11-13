@@ -24,16 +24,48 @@ class RoomCamera;
 struct FloorPos {
     /* 0x0 */ fx32 x;
     /* 0x4 */ fx32 z;
-
-    FloorPos() {}
-    FloorPos(fx32 x_, fx32 z_) {
-        x = x_;
-        z = z_;
-    }
-    FloorPos operator-(const FloorPos &other) const { return FloorPos(x - other.x, z - other.z); }
-    FloorPos operator+(const FloorPos &other) const { return FloorPos(x + other.x, z + other.z); }
-    fx32 LengthSq() const { return FX_Mul(x, x) + FX_Mul(z, z); }
 };
+
+// A rectangle on the floor.
+struct FloorRect {
+    /* 0x0 */ fx32 x;
+    /* 0x4 */ fx32 z;
+    /* 0x8 */ fx32 w;
+    /* 0xC */ fx32 h;
+};
+
+static inline FloorPos Add(FloorPos a, FloorPos b) {
+    FloorPos sum;
+    sum.x = a.x + b.x;
+    sum.z = a.z + b.z;
+    return sum;
+}
+
+static inline FloorPos Sub(FloorPos a, FloorPos b) {
+    FloorPos difference;
+    difference.x = a.x - b.x;
+    difference.z = a.z - b.z;
+    return difference;
+}
+
+static inline FloorPos Half(FloorPos a) {
+    FloorPos half;
+    half.x = a.x >> 1;
+    half.z = a.z >> 1;
+    return half;
+}
+
+// The point turned around the origin by an angle
+static inline FloorPos Rotate(const FloorPos &a, int angle) {
+    FloorPos turned;
+    turned.x = FX_Mul(a.x, FX_CosIdx(angle)) - FX_Mul(a.z, FX_SinIdx(angle));
+    turned.z = FX_Mul(a.x, FX_SinIdx(angle)) + FX_Mul(a.z, FX_CosIdx(angle));
+    return turned;
+}
+
+static inline fx32 LengthSq(const FloorPos &a) {
+    return FX_Mul(a.x, a.x) + FX_Mul(a.z, a.z);
+}
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each (func_0202c264 copies one
 // out by index, func_0202c28c back in). Main-program class, not decompiled; func_020979c0 is its constructor. The
@@ -80,7 +112,8 @@ struct SavedCharacter {
 // The character as the main program draws it: the saved character and its model's resources. Main-program class,
 // not decompiled; func_0208fcf8 is its constructor.
 struct CharacterBase : public SavedCharacter {
-    CharacterBase(); // func_0208fcf8
+    CharacterBase();  // func_0208fcf8
+    ~CharacterBase(); // func_0208fd64
 
     /* 0x02C0 */ u8 mUnknown02C0[0x2240];
     /* 0x2500 */ int mFace;              // Character_SetFace sets it (name is group a2's)
@@ -161,7 +194,7 @@ public:
     int GetWalkAreaSide(fx32 x, fx32 z);
     int SnapAngle(u16 angle);
     BOOL GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin);
-    void GetAngleAroundPartner(u16 *angle, int margin);
+    BOOL GetAngleAroundPartner(u16 *angle, int margin);
     u16 GetHeadYaw(u16 angle, int limit);
     void SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames);
     u16 GetHeadYawTo(FloorPos pos, int limit);
@@ -191,7 +224,15 @@ public:
     void Save();
 
     VecFx32 GetPos() const { return mModel.mPos; }
-    FloorPos GetFloorPos() const { return FloorPos(mModel.mPos.x, mModel.mPos.z); }
+    FloorPos GetFloorPos() const {
+        FloorPos pos;
+        pos.x = mModel.mPos.x;
+        pos.z = mModel.mPos.z;
+        return pos;
+    }
+    MtxFx43 *GetNodes() { return mNodes; }
+    MtxFx43 *GetNode(int i) { return &mNodes[i]; }
+    MtxFx33 *GetNodeRotation(int i) { return &mNodeRotations[i]; }
 
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x26F8 */ MtxFx33 mNodeRotations[10]; // The rotation and the matrix of the model's nodes (2 and 1 are the

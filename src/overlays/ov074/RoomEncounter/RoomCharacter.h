@@ -22,6 +22,32 @@ struct FloorPos {
     fx32 LengthSq() const { return FX_Mul(x, x) + FX_Mul(z, z); }
 };
 
+inline FloorPos operator+(FloorPos a, FloorPos b) {
+    FloorPos result;
+    result.x = a.x + b.x;
+    result.z = a.z + b.z;
+    return result;
+}
+
+inline FloorPos operator-(FloorPos a, FloorPos b) {
+    FloorPos result;
+    result.x = a.x - b.x;
+    result.z = a.z - b.z;
+    return result;
+}
+
+inline FloorPos Half(FloorPos pos) {
+    FloorPos result;
+    result.x = pos.x >> 1;
+    result.z = pos.z >> 1;
+    return result;
+}
+
+// The direction of an offset on the floor, as an angle index
+inline u16 Angle(FloorPos offset) {
+    return FX_Atan2Idx(offset.z, offset.x);
+}
+
 // The character as the main program knows it and saves it: name, personality, and what it feels for each of the
 // others. Main-program class, not decompiled; func_0208fcf8 is its constructor. Only what this file uses is named.
 struct CharacterBase {
@@ -132,6 +158,19 @@ public:
     void ShowHeadIcon();
     void Update();
 
+    // Other units' (0x02168798 to 0x02168c28)
+    BOOL IsOneTwoOrFour(int value);
+    BOOL IsState8Or9();
+    BOOL IsState10To12();
+    void GetRandomPosInArea(FloorPos *out);
+    void GetRandomPos(FloorPos *out);
+    BOOL ClampToWalkArea(FloorPos *pos);
+    BOOL ClampToRect4E4(FloorPos *pos);
+    BOOL ClampToRect534(FloorPos *pos);
+    void GetRandomCorner(FloorPos *out);
+    void GetRandomEdgePos(FloorPos *out);
+
+    PositionedNode *GetNode(int i) { return &mNodes[i]; }
     FloorPos GetFloorPos() const {
         FloorPos pos;
         pos.x = mModel.mPos.x;
@@ -147,6 +186,21 @@ public:
         mTarget.x = x;
         mTarget.z = z;
     }
+    void SetFloorPos(fx32 x, fx32 z) {
+        mModel.mPos.x = x;
+        mModel.mPos.z = z;
+    }
+    void SetSavedTarget(VecFx32 target) {
+        mSavedTarget.x = target.x;
+        mSavedTarget.y = target.y;
+        mSavedTarget.z = target.z;
+    }
+    BOOL ClampOwnPosToRect4E4() {
+        FloorPos pos = GetFloorPos();
+        return ClampToRect4E4(&pos);
+    }
+    // From where the character stands to a point
+    FloorPos GetOffsetTo(const FloorPos &to) { return to - GetFloorPos(); }
 
     // The main program's tests of where another character is, seen from this one
     BOOL IsBeside(const RoomCharacter *other, fx32 width) {
@@ -174,8 +228,8 @@ public:
 
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x26F8 */ u8 mUnknown26F8[0x168];
-    /* 0x2860 */ PositionedNode mHeadNode; // Where the head icon is put
-    /* 0x2890 */ u8 mUnknown2890[0x25C];
+    /* 0x2860 */ PositionedNode mNodes[12]; // The model's joints (MtxFx43 each, group a5); node 0 is where the head icon is put
+    /* 0x2AA0 */ u8 mUnknown2AA0[0x4C];
     /* 0x2AEC */ fx32 mSpeed;
     /* 0x2AF0 */ fx32 mUnknown2AF0;        // func_02091174 multiplies a distance by it
     /* 0x2AF4 */ fx32 mUnknown2AF4;

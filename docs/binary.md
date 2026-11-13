@@ -242,41 +242,56 @@ Measured, from the decompiled code in `src/text/`:
 ## The apartment scene
 
 Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
-254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Overlay 73 is its tutorial variant
-(`ScenePlayRoomTut`, 133 functions, 78 of them byte-identical to overlay 74's) and is not decompiled.
-
-Decompiled in `src/overlays/ov074/`, 202 functions matching:
+254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Decompiled in `src/overlays/ov074/`,
+244 functions matching:
 
 | Unit | Range | Holds | Matching |
 | --- | --- | --- | --- |
-| `RoomScene` | `0x02149A40` to `0x0214E5F8` | `RoomScene` (0x1D7C8 bytes, scene ids 0x11 to 0x13): loading, input, the building front's buttons, room changes, timed events | 28 of 30 |
-| `RoomEncounter` | to `0x02152690` | What two characters in a room do to each other (`RoomScene`), and `RoomCharacter`'s constructor, state setter and `Update` | 26 of 36 |
+| `RoomScene` | `0x02149A40` to `0x0214E5F8` | `RoomScene` (0x1D7C8 bytes, scene ids 0x11 to 0x13): loading, input, the building front's buttons, room changes, and `UpdateEvent`, the 17 states of what happens in the room over time | 30 of 30 |
+| `RoomEncounter` | to `0x02152690` | What two characters in a room do to each other (`RoomScene`), and `RoomCharacter`'s constructor, state setter and `Update` | 33 of 36 |
 | `RoomCharacterTalkStates` | to `0x02154608` | `RoomCharacter` states 0x01 to 0x1C: talking | 1 of 1 |
 | `RoomCharacterSoloStates1D`, `...SoloStates40` | to `0x0215B45C` | States 0x1D to 0x6F: what a character does alone | 3 of 3 |
 | `RoomCharacterPairStates70` | to `0x0215F610` | States 0x70 to 0xB2: what the two do together | 2 of 2 |
 | `RoomCharacterStatesB3` | to `0x0216420C` | States 0xB3 to 0xF1 | 3 of 3 |
 | `RoomCharacterStatesF2` | to `0x02168D24` | States 0xF2 to 0x117 (leaving and entering by the door among them), and the walking, animation and floor-area helpers | 39 of 40 |
-| `RoomObjects` | to `0x0216D400` | `HeldItem`, `ApartmentRoom`, `RoomCamera`, `RoomLight`, `ApartmentFront` with its cursor and buttons, `SkyBackground`, `NamePanel`, `TouchButton`, `Clock`, `ClockDisplay`, `TimedMessage` | 100 of 138 |
+| `RoomObjects` | to `0x0216D400` | The rest of `RoomCharacter` (head turning, walking steps, held items, sounds), `HeldItem`, `ApartmentRoom`, `RoomCamera`, `RoomLight`, `ApartmentFront` with its cursor and buttons, `SkyBackground`, `NamePanel`, `TouchButton`, `Clock`, `ClockDisplay`, `TimedMessage`, the scene's destructor and the static initialiser | 133 of 138 |
 
 - A `RoomCharacter` (0x2D98 bytes, two per scene) is a state machine of 0x118 states; `RoomCharacter::Update`
   dispatches on the state to the functions above, each a `switch` over a range of states. In the states for two
   characters, the one in slot 0 decides for both.
 - The state functions are named by their range of states where the code does not show what the activity is.
+- The six state units share the headers in `src/overlays/ov074/` (`RoomCharacter.h`, `Character.h`, `Model.h`,
+  `HeldItem.h`, `Room.h`, `RoomCamera.h`, `FloorPos.h`), and `RoomScene` uses them too.
 
-Inferred: the units are one group of functions each as they were handed out for decompiling, not the original
-files. `RoomCharacter`'s functions are probably one file, and the classes of `RoomObjects` several.
+Overlay 73 is the tutorial's apartment (`ScenePlayRoomTut`, scene id 0x6B): 133 functions, 29 KB. Decompiled in
+`src/overlays/ov073/`, 126 matching: `TutorialRoomScene` (0x134E8 bytes; 12 of 13), `TutorialRoomCharacter` (the
+scene's remaining functions and the character's 18 states; 19 of 19), `TutorialRoomObjects` (95 of 100).
+
+- 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its `RoomCharacter` is
+  0x2B94 bytes with 18 states and no held items, its `RoomCamera` 0x5C bytes without the close-up mode, its
+  `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
+- The program is linked as one, so two classes cannot share a name: `TutorialNames.h` gives overlay 73's versions the
+  prefix `Tutorial`.
+
+Inferred, from several measurements that agree: each of the two overlays is ONE source file. Overlay 73's small
+constants are in one pool that functions throughout it address by offset; overlay 74 has one static initialiser,
+whose objects sort into one `.data` pool with `HeldItem`'s table; and each scene's implicit destructor is at the
+very end. The units here are the groups of functions as they were handed out for decompiling.
 
 Not done:
 
-- 51 functions: `RoomScene::UpdateEvent` (8 KB) and six of `RoomEncounter` are not written, 31 small `RoomCharacter`
-  functions at `0x02168D24` to `0x02169D90`, the scene's two destructors and the static initialiser neither; ten
-  are written and differ by a few instructions, each with a comment saying how.
-- Each unit has its own header with its own view of `RoomCharacter` and the classes around it. They agree on
-  offsets and mostly on names, but they are not one header yet, and they disagree in places (the joint matrices
-  are members of the character in some and of its model in others).
-- The sources still call about 300 functions by their address names: the main program's that nobody has named
-  with evidence yet, and functions of other units of this overlay that are now named in `symbols.txt`.
-- `docs/notes/ov074.md` keeps the working notes of the decompilation, with the evidence for names and layouts.
+- 17 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions`,
+  `StartPairEvent`, `StartMeeting` (registers and one load's place), `GetRandomEdgePos`, `GetAngleAround`,
+  `RoomCamera::Update` (16 instructions of 792), `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`,
+  `ClockDisplay::Refresh`; in overlay 73 the same last three, `TutorialRoomScene::Init` (six pool offsets that
+  only a single file can give) and the scene's destructor (emitted only where the scene's first virtual function is).
+- `tools/check_relocs.py` still lists references by other names than the symbols': string literals (expected), and
+  calls that some units still make by address names to functions that were named after those units were finished,
+  mostly the `RoomCharacter` helpers of `RoomObjects`.
+- `RoomEncounter`, `RoomObjects` and the three units of overlay 73 have headers of their own; they are not yet on
+  the shared ones.
+- Joining each overlay's units into the one file it evidently was.
+- `docs/notes/ov074.md` and `docs/notes/ov073.md` keep the working notes, with the evidence for names and layouts.
 
 ## Compiler
 

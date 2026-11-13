@@ -23,6 +23,21 @@ struct EncounterJudge {
     u8 mUnknown[4];
 };
 
+// The room's light and the building front on the touch screen (unit RoomObjects): only what this unit calls.
+class RoomLight {
+public:
+    void SetState(int state); // 0x0216b8a8
+
+    u8 mUnknown[0x1C];
+};
+
+class ApartmentFront {
+public:
+    void DrawWindow(int room); // 0x0216c1f0
+
+    u8 mUnknown[0x200];
+};
+
 class RoomScene {
 public:
     void ChooseEncounter();
@@ -64,8 +79,9 @@ public:
     /* 0x05B50 */ RoomCharacter *mActor;      // The two characters of what is going on, in the order the
     /* 0x05B54 */ RoomCharacter *mActorOther; // encounter functions take them
     /* 0x05B58 */ u8 mUnknown05B58[0xDD4];
-    /* 0x0692C */ u8 mUnknown0692C[0x1C];     // An object of the overlay: func_ov074_0216b8a8 sets its state
-    /* 0x06948 */ u8 mUnknown06948[0x16D8];   // An object of the overlay: func_ov074_0216c1f0
+    /* 0x0692C */ RoomLight mLight;
+    /* 0x06948 */ ApartmentFront mFront;
+    /* 0x06B48 */ u8 mUnknown06B48[0x14D8];
     /* 0x08020 */ s64 mTime;                  // The clock (group a0): its first field
     /* 0x08028 */ u8 mUnknown08028[0x7D8];
     /* 0x08800 */ MessageText mMessage;

@@ -10,6 +10,7 @@
 #include "RoomCamera.h"
 #include "RoomCharacter.h"
 #include "RoomLight.h"
+#include "RoomScene.h"
 #include "SkyBackground.h"
 #include "SpeechBalloon.h"
 #include "TimedMessage.h"
@@ -80,6 +81,460 @@ extern u32 data_0211d604[];
 extern MATHRandContext16 gRandom;
 
 } // extern "C"
+
+// --- RoomCharacter: the floor area, head turns, walking steps, held items, loading, sounds and speech texts ---
+
+extern "C" {
+// Limits an angle to +-limit
+BOOL func_02090c78(RoomCharacter *character, u16 *angle, int limit);
+// The position of one of the model's joints
+VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
+// Starts a sound of a sequence archive when the animation passes certain points
+int func_02091fbc(RoomCharacter *character, int player, int index, int seqArcNo);
+// A distance multiplied by the character's mUnknown2AF0
+fx32 func_02091174(RoomCharacter *character, fx32 distance);
+// Turns to the walk target and sets the speed; TRUE when the character is within reach of it
+BOOL func_02091194(RoomCharacter *character, fx32 reach, int speed, int turnShift);
+// Moves by mSpeed along mMoveAngle
+void Character_MoveAlongAngle(RoomCharacter *character);
+// Turns towards mTarget; TRUE when facing it
+BOOL Character_TurnToWalkTarget(RoomCharacter *character, int speed, int accel);
+// Restarts one slot's progress of the sounds played at points of the animation; both slots
+void Character_ResetSoundPhase(RoomCharacter *character, int slot);
+void func_02091fa0(RoomCharacter *character);
+// Sets the face (expression) and restarts its animation
+void Character_SetFace(RoomCharacter *character, int face);
+void func_02091a14(CharacterBase *character, int value);
+// Takes the model's animations of a resource type away
+void func_0208f0f8(CharacterModel *model, u32 resourceType);
+void HeadIcon_SetMode(HeadIcon *icon, int mode);
+void func_0208fefc(CharacterBase *character);
+// Writes the name and path of the character's archive (mArchiveName, mArchivePath)
+void func_0209107c(RoomCharacter *character);
+void func_02091a24(CharacterBase *character);
+// Computes the personality (0..15) of a saved character
+s8 func_02098f2c(SavedCharacter *character);
+// Makes the model from the resources of an id
+void func_0208ef5c(CharacterModel *model, int resourceId, int unk);
+void func_02091a88(CharacterBase *character);
+// A value up to 200 of the saved character, from which the pitch and volume of its sounds are taken
+int func_02098ec4(CharacterBase *character);
+// Copies a text, of at most that many bytes
+void func_020372d0(wchar_t *dest, const wchar_t *src, int size);
+// Whether the saved character of that index exists; writes one
+BOOL func_0202c3dc(void *gameData, int index);
+void func_0202c28c(void *gameData, int index, SavedCharacter *character);
+}
+
+// The rectangle of the floor the characters walk on, and its corners. The static initialiser 0x0216d67c computes
+// the size and the corners from the origin. The corners are in .data although nothing of them is constant, which
+// this compiler only does for a const object; and the initialiser reaches both through one pointer, which it does
+// for the static objects of one file (it sorts them by size: these two, then HeldItem's sHeldItemDigits).
+static FloorRect gWalkArea = { -FX32_CONST(2.5), -FX32_CONST(2.5), -gWalkArea.x * 2, -gWalkArea.z * 2 };
+static const FloorPos gWalkAreaCorners[4] = {
+    { -gWalkArea.x, -gWalkArea.z },
+    { -gWalkArea.x, gWalkArea.z },
+    { gWalkArea.x, gWalkArea.z },
+    { gWalkArea.x, -gWalkArea.z },
+};
+
+// @0x02168d24
+void RoomCharacter::GetWalkAreaCorner(FloorPos pos, FloorPos *corner) {
+    *corner = gWalkAreaCorners[GetWalkAreaSide(pos.x, pos.z)];
+}
+
+// @0x02168d64
+int RoomCharacter::GetWalkAreaSide(fx32 x, fx32 z) {
+    if (z == x && z == 0) {
+        return 0;
+    }
+    if (z > x && z >= -x) {
+        return 0;
+    }
+    if (z <= x && z > -x) {
+        return 1;
+    }
+    if (z < x && z <= -x) {
+        return 2;
+    }
+    return 3;
+}
+
+// @0x02168dc4
+int RoomCharacter::SnapAngle(u16 angle) {
+    if (angle < 0x2000) {
+        angle = 0;
+    } else if (angle < 0x6000) {
+        angle = 0x4000;
+    } else if (angle < 0xA000) {
+        angle = 0x8000;
+    } else if (angle < 0xE000) {
+        angle = 0xC000;
+    } else {
+        angle = 0;
+    }
+    return angle;
+}
+
+// Not matching yet: 0x32c bytes against 0x348. The stack frame's 21 FloorPos slots are all where the original has
+// them (so the inline helpers and their order are right), and the arithmetic is the same; what differs is register
+// allocation after the call of FX_Atan2Idx: the original keeps offset.x and offset.z in r5/r4 across the call (and
+// spills the high words of the four sines and cosines to five more stack words), this reloads them from the
+// stack. Tried: Rotate taking a reference, a pointer, the value, two scalars, or the sine and cosine; the sines and
+// cosines as locals; offset.x/z as locals before the call (keeps z in a register, not x); the angle through an
+// inline; the two distances right after each point (this) or after both (0x340 bytes) or in the conditions.
+// @0x02168dfc
+BOOL RoomCharacter::GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin) {
+    FloorPos middle;
+    middle = Half(Add(from, to));
+    FloorPos offset = Sub(from, to);
+    u16 direction = FX_Atan2Idx(offset.z, offset.x);
+    FloorPos right = Add(Rotate(offset, 0x4000), middle);
+    fx32 rightDistance = LengthSq(right);
+    FloorPos left = Add(Rotate(offset, 0xC000), middle);
+    fx32 leftDistance = LengthSq(left);
+    if (rightDistance == leftDistance || (middle.x == 0 && middle.z == 0)) {
+        *angle = direction;
+        return FALSE;
+    }
+    if (rightDistance > leftDistance) {
+        *angle = direction + 0xC000 + margin;
+    } else {
+        *angle = direction + 0x4000 - margin;
+    }
+    return TRUE;
+}
+
+// @0x02169144
+BOOL RoomCharacter::GetAngleAroundPartner(u16 *angle, int margin) {
+    BOOL found = GetAngleAround(angle, mPartner->GetFloorPos(), GetFloorPos(), margin);
+    if (!found) {
+        *angle = mAngle;
+    }
+    return found;
+}
+
+// @0x021691b0
+u16 RoomCharacter::GetHeadYaw(u16 angle, int limit) {
+    u16 yaw = angle + mAngle;
+    func_02090c78(this, &yaw, limit);
+    return yaw;
+}
+
+// @0x021691d4
+void RoomCharacter::SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames) {
+    mHeadPitch = pitch;
+    mHeadYaw = yaw;
+    mHeadRoll = roll;
+    mHeadTurnFrames = frames;
+    mHeadTurnActive = TRUE;
+}
+
+// @0x021691fc
+u16 RoomCharacter::GetHeadYawTo(FloorPos pos, int limit) {
+    FloorPos offset = Sub(pos, GetFloorPos());
+    return GetHeadYaw(-FX_Atan2Idx(offset.z, offset.x), limit);
+}
+
+// @0x02169280
+u16 RoomCharacter::GetHeadPitch(VecFx32 from, VecFx32 to, u16 limit) {
+    VecFx32 offset;
+    VEC_Subtract(&to, &from, &offset);
+    fx32 z = MATH_ABS(offset.z);
+    fx32 x = MATH_ABS(offset.x);
+    u16 pitch = -FX_Atan2Idx(offset.y, FX_Mul((x + z) >> 1, 0x2CCC));
+    func_02090c78(this, &pitch, limit);
+    return pitch;
+}
+
+// @0x02169318
+u16 RoomCharacter::GetHeadPitchToPartner(int node, u16 limit) {
+    return GetHeadPitch(CharacterModel_GetJointPosition(&mModel, 0),
+                        CharacterModel_GetJointPosition(&mPartner->mModel, node), limit);
+}
+
+// @0x02169388
+BOOL RoomCharacter::StepWalkLooking(u32 lookLimit, int lookAngle, fx32 reach, int speed, int turnShift) {
+    BOOL arrived = FALSE;
+    func_02091fbc(this, 1, 0, 0x1A);
+    if (func_02091194(this, func_02091174(this, reach), speed, turnShift)) {
+        arrived = TRUE;
+    }
+    Character_MoveAlongAngle(this);
+    if (lookLimit < 0x4000) {
+        SetHeadTurn(mHeadPitch, GetHeadYaw(lookAngle - mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+    }
+    return arrived;
+}
+
+// @0x0216943c
+BOOL RoomCharacter::StepTurnLooking(int speed, int accel, u32 lookLimit) {
+    BOOL facing = FALSE;
+    func_02091fbc(this, 1, 0, 0x1A);
+    if (Character_TurnToWalkTarget(this, speed, accel)) {
+        facing = TRUE;
+    }
+    if (accel != 0) {
+        Character_MoveAlongAngle(this);
+    }
+    if (lookLimit < 0x4000) {
+        SetHeadTurn(mHeadPitch, GetHeadYaw(-mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+    }
+    return facing;
+}
+
+// @0x021694e8
+void RoomCharacter::RestartStepSound() {
+    if (IsMovingAnim()) {
+        return;
+    }
+    Character_ResetSoundPhase(this, 0);
+}
+
+// @0x0216950c
+void RoomCharacter::SetHeldItemsShowState(int state) {
+    for (int i = 0; i < 2; i++) {
+        mHeldItems[i]->SetShowState(state);
+    }
+}
+
+// @0x02169540
+void RoomCharacter::SetHeldItemsVisible(BOOL visible) {
+    for (int i = 0; i < 2; i++) {
+        mHeldItems[i]->mVisible = visible;
+    }
+}
+
+// @0x02169564
+BOOL RoomCharacter::AreHeldItemsLoaded() {
+    for (int i = 0; i < 2; i++) {
+        if (mHeldItems[i]->mLoadState != HeldItem::LOAD_IDLE) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+// @0x02169598
+void RoomCharacter::PlaceHeldItemBetweenHands(fx32 height) {
+    VecFx32 middle;
+    mHeldItems[0]->mRotY = 0x4000 - mAngle;
+    GetMidpoint((PositionedNode *)GetNode(2), (PositionedNode *)GetNode(1), &middle);
+    middle.y += FX_Mul(height, mModel.mScale);
+    mHeldItems[0]->SetPosition(middle);
+}
+
+// @0x02169634
+void RoomCharacter::PlaceHeldItemsInHands() {
+    mHeldItems[1]->SetJointOffset(GetNode(2), GetNodeRotation(2), 0, 0x800, 0);
+    mHeldItems[0]->mRotY = 0x4000 - mAngle;
+    MtxFx43 *hand = GetNode(1);
+    HeldItem *item = mHeldItems[0];
+    item->SetPosition(hand->m[3][0], hand->m[3][1], hand->m[3][2]);
+}
+
+// @0x021696b8
+void RoomCharacter::PlaceHeldItemAtHead() {
+    mHeldItems[0]->mRotX = mUnknown25D6;
+    mHeldItems[0]->SetJointOffset(GetNode(0), GetNodeRotation(0), 0xBD7, 0, 0);
+}
+
+// @0x02169708
+void RoomCharacter::PlaceHeldItemsAtStart() {
+    mHeldItems[0]->mRotY = 0x8000;
+    mHeldItems[1]->SetPosition(0, 0, 0x3000);
+    mHeldItems[1]->mRotY = 0x8000;
+}
+
+// @0x0216973c
+BOOL RoomCharacter::StepPutHeldItemsDown(int anim) {
+    BOOL done = FALSE;
+    if (mSubStep == 0) {
+        mSubStep++;
+        ShowHeadIcon();
+        SetHeadTurn(0, 0, 0, 4);
+    } else if (mSubStep == 1) {
+        if (mSlot == 0) {
+            if (StepChangeHeldItems(2, 3) && mModel.mBlendFrames <= 0) {
+                mSubStep++;
+                StartSound3IfAnimOfGroup();
+                SetAnimation(RESOURCE_BCA0, anim);
+                Character_SetFace(this, 8);
+                PlaceHeldItemsAtStart();
+                done = TRUE;
+            }
+        } else {
+            if (StepChangeHeldItems(2, 0xFF) && mModel.mBlendFrames <= 0) {
+                mSubStep++;
+                StartSound3IfAnimOfGroup();
+                SetAnimation(RESOURCE_BCA0, anim);
+                Character_SetFace(this, 8);
+                mHeldItems[0]->mRotY = 0x8000;
+                done = TRUE;
+            }
+        }
+    } else {
+        done = TRUE;
+    }
+    return done;
+}
+
+// @0x02169890
+void RoomCharacter::SetOverrideState(int state) {
+    mOverrideState = state;
+    mOverrideStep = 0;
+}
+
+// @0x021698a8
+void RoomCharacter::UpdateOverrideState() {
+    switch (mOverrideState) {
+    case OVERRIDE_NONE:
+        break;
+    case OVERRIDE_UNLOAD:
+        SetOverrideState(OVERRIDE_NONE);
+        SetState(0);
+        mReaction = 0;
+        mPrevEvent = 0;
+        func_02091a14(this, 0);
+        CopyName();
+        func_0208f0f8(&mModel, RESOURCE_BCA0);
+        HeadIcon_SetMode(&mHeadIcon, 1);
+        SetHeldItemsShowState(HeldItem::SHOW_HIDE);
+        ClearSpeechTexts();
+        func_02091fa0(this);
+        mSoundArmed = FALSE;
+        func_0202aecc(data_021223e4, mSlot);
+        ArchiveManager_Unmount(gArchiveManager, mArchiveName);
+        break;
+    case OVERRIDE_LOAD_ARCHIVE:
+        if (mOverrideStep == 0) {
+            mOverrideStep++;
+            SetState(0);
+            func_0208fefc(this);
+            func_0209107c(this);
+            ArchiveManager_MountCompressed(gArchiveManager, mArchiveName, mArchivePath, 0);
+        } else if (mOverrideStep == 1) {
+            if (ArchiveManager_IsIdle(gArchiveManager)) {
+                SetOverrideState(OVERRIDE_NONE);
+                func_02091a24(this);
+                mPersonality = func_02098f2c(this);
+                RefreshSpeechTexts();
+            }
+        }
+        break;
+    case OVERRIDE_MAKE_MODEL:
+        if (mOverrideStep == 0) {
+            func_0202ad04(data_021223e4, mSlot, mArchiveName, 0);
+            func_0208ef5c(&mModel, mSlot, 0);
+            func_02091a88(this);
+            ResetBody();
+            mUnknown25D4 = 0;
+            mUnknown25D6 = 0;
+            mUnknown25D8 = 0;
+            mHeadPitch = 0;
+            mHeadYaw = 0;
+            mHeadRoll = 0;
+            func_02091a14(this, 0);
+            SetOverrideState(OVERRIDE_NONE);
+        }
+        break;
+    }
+}
+
+// @0x02169a98
+void RoomCharacter::UpdateVoiceOfSound() {
+    int volume = (func_02098ec4(this) * 0x333) >> 12;
+    int pitch = func_02098ec4(this) * 4 - 60;
+    if (pitch < 0) {
+        pitch = 0;
+    }
+    gSoundManager.SetSeqArcVolume(mSoundHandle, volume + 90);
+    gSoundManager.SetSeqArcTrackPitch(mSoundHandle, 0xFFFF, pitch);
+}
+
+// @0x02169b00
+void RoomCharacter::StartSound3IfAnimOfGroup() {
+    if (mSoundArmed) {
+        if (IsAnimOfGroupA(mModel.mAnimId) || IsAnimOfGroupB(mModel.mAnimId)) {
+            gSoundManager.StartSeqArc(1, 0x1E, 3);
+        }
+    } else {
+        mSoundArmed = TRUE;
+    }
+}
+
+// @0x02169b68
+void RoomCharacter::StartSound0UnlessGroupA() {
+    if (mSoundArmed) {
+        if (!IsAnimOfGroupA(mModel.mAnimId)) {
+            gSoundManager.StartSeqArc(1, 0x1E, 0);
+        }
+    } else {
+        mSoundArmed = TRUE;
+    }
+}
+
+// @0x02169bb4
+void RoomCharacter::StartSoundUnlessGroupB(int index) {
+    if (mSoundArmed) {
+        if (!IsAnimOfGroupB(mModel.mAnimId)) {
+            gSoundManager.StartSeqArc(1, 0x1E, index);
+        }
+    } else {
+        mSoundArmed = TRUE;
+    }
+}
+
+// @0x02169c04
+void RoomCharacter::StartSound0UnlessGroup() {
+    if (mSoundArmed) {
+        if (!IsAnimOfGroupB(mModel.mAnimId) && !IsAnimOfGroupA(mModel.mAnimId)) {
+            gSoundManager.StartSeqArc(1, 0x1E, 0);
+        }
+    } else {
+        mSoundArmed = TRUE;
+    }
+}
+
+// @0x02169c6c
+void RoomCharacter::RefreshSpeechTexts() {
+    ConvertSpeechTexts();
+}
+
+// @0x02169c78
+void RoomCharacter::ConvertSpeechTexts() {
+    wchar_t text[0x80];
+    if (mSpeechDefault[0] == L'\0') {
+        MI_CpuFill8(mSpeechTextDefault, 0, 4);
+    } else {
+        func_020372d0(text, mSpeechDefault, sizeof(mSpeechTextDefault));
+        STD_ConvertStringUnicodeToSjis(mSpeechTextDefault, NULL, (const u16 *)text, NULL, NULL);
+    }
+    for (int i = 0; i < 4; i++) {
+        const wchar_t *source = mSpeechByMood[i];
+        char *dest = mSpeechTextByMood[i];
+        if (source[0] == L'\0') {
+            MI_CpuFill8(dest, 0, 4);
+        } else {
+            func_020372d0(text, source, sizeof(mSpeechTextByMood[i]));
+            STD_ConvertStringUnicodeToSjis(dest, NULL, (const u16 *)text, NULL, NULL);
+        }
+    }
+}
+
+// @0x02169d5c
+void RoomCharacter::ClearSpeechTexts() {
+    MI_CpuFill8(mSpeechTextDefault, 0, sizeof(mSpeechTextDefault));
+    MI_CpuFill8(mSpeechTextByMood, 0, sizeof(mSpeechTextByMood));
+}
+
+// @0x02169d90
+void RoomCharacter::Save() {
+    u16 index = mIndex;
+    if (func_0202c3dc(gGameData, index)) {
+        func_0202c28c(gGameData, index, this);
+    }
+}
 
 // --- HeldItem ---
 
@@ -1561,42 +2016,16 @@ void TimedMessage::SetVisible(BOOL visible) {
     }
 }
 
+// --- RoomScene ---
+
+// The members with destructors, in reverse: the speech synthesizer, the two message files, the camera, the room
+// (its six parts and its door), the four held items and the two characters.
+// @0x0216d240 @0x0216d31c:D0
+RoomScene::~RoomScene() {
+}
+
 // --- Emitted by the compiler ---
 
 // HeldItem's destructor is implicit. The copy that only destroys is the main program's func_0203ef44; the
 // deleting one is here.
 // @0x0216d1fc:D0
-
-// --- NOT WRITTEN YET (34 functions): RoomCharacter's members 0x02168d24 to 0x02169d90, the scene's destructors
-// 0x0216d240 (D1) and 0x0216d31c (D0), and the static initialiser 0x0216d67c. They are declared, with the names
-// their code suggests, in RoomCharacter.h; what each does:
-//   0x02168d24 GetWalkAreaCorner(FloorPos, FloorPos *out): the corner (data_ov074_0216d734) of GetWalkAreaSide
-//   0x02168d64 GetWalkAreaSide(x, z): 0..3, which side of the two diagonals the point is on
-//   0x02168dc4 SnapAngle(u16): the nearest multiple of 0x4000
-//   0x02168dfc GetAngleAround(u16 *angle, FloorPos, FloorPos, int margin): Atan2 of the difference, turned 90
-//              degrees to the side that is further from the room's middle, less the margin; FALSE if neither is
-//   0x02169144 GetAngleAroundPartner(u16 *angle, int margin): the same for the partner and this; mAngle if FALSE
-//   0x021691b0 GetHeadYaw(u16 angle, int limit): angle + mAngle, limited by func_02090c78
-//   0x021691d4 SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames): 0x25da.., 0x25e2, sets mHeadTurnActive
-//   0x021691fc GetHeadYawTo(FloorPos, int limit); 0x02169280 GetHeadPitch(VecFx32 from, VecFx32 to, u16 limit)
-//   0x02169318 GetHeadPitchToPartner(int node, u16 limit): from CharacterModel_GetJointPosition(model, 0) to the partner's node
-//   0x02169388 StepWalkLooking(lookLimit, lookAngle, reach, speed, turnShift): func_02091fbc(1, 0, 0x1a),
-//              func_02091194 (TRUE when there), Character_MoveAlongAngle, then the head turn if lookLimit < 0x4000
-//   0x0216943c StepTurnLooking(a, b, lookLimit): the same with Character_TurnToWalkTarget
-//   0x021694e8 RestartStepSound(): Character_ResetSoundPhase(0) unless IsMovingAnim()
-//   0x0216950c SetHeldItemsShowState(int); 0x02169540 SetHeldItemsVisible(BOOL); 0x02169564 AreHeldItemsLoaded()
-//   0x02169598 PlaceHeldItemBetweenHands(fx32 height): GetMidpoint of nodes 2 and 1, raised by height * scale
-//   0x02169634 PlaceHeldItemsInHands(): item 1 on node 2 with SetJointOffset(0, 0x800, 0), item 0 at node 1
-//   0x021696b8 PlaceHeldItemAtHead(): item 0 on node 0 with SetJointOffset(0xbd7, 0, 0)
-//   0x02169708 PlaceHeldItemsAtStart(): item 1 at (0, 0, 0x3000), both turned 0x8000
-//   0x0216973c StepPutHeldItemsDown(int anim): by mSubStep: ShowHeadIcon, StepChangeHeldItems(2, 3 or 0xff), ...
-//   0x02169890 SetOverrideState(int): mOverrideState, clears mOverrideStep
-//   0x021698a8 UpdateOverrideState(): 1 unloads the character, 2 mounts its archive, 3 makes its model
-//   0x02169a98 UpdateVoiceOfSound(): SetSeqArcVolume and SetSeqArcTrackPitch of mSoundHandle from func_02098ec4
-//   0x02169b00, 0x02169b68, 0x02169bb4, 0x02169c04: StartSeqArc(1, 0x1e, 3 / 0 / n / 0) depending on
-//              IsAnimOfGroupA/B(mModel.mAnimId); the first call only sets mSoundArmed
-//   0x02169c6c RefreshSpeechTexts(): only calls ConvertSpeechTexts()
-//   0x02169c78 ConvertSpeechTexts(): the saved character's five texts (0x84, 0xa6..) to Shift JIS at 0x2bec, 0x2c74
-//   0x02169d5c ClearSpeechTexts(); 0x02169d90 Save(): func_0202c28c(gGameData, mIndex, this) if func_0202c3dc
-//   0x0216d240, 0x0216d31c: the scene's implicit destructor (members with destructors: see NOTES.md)
-//   0x0216d67c: fills the walk area's size and four corners (data_ov074_0216d72c, 0x0216d734) from its origin
