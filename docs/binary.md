@@ -119,6 +119,34 @@ The engine takes Shift JIS text with control codes in it, such as `<\Spk_male` t
 `#S90`, `#X90`, `#I500`, `#J20` for what are probably pitch and speed settings. It hands back 16-bit samples a block
 at a time through a callback, and the game plays them at 22,000 Hz.
 
+The engine is built with the game's compiler and flags, as C: its decompiled functions match with them. So it was
+most likely compiled from Sharp's source as part of the game's build.
+
+Its state is one struct of `0x14000` bytes that the caller provides (`Shtts` in `lib/SHTTS/shtts.h`), with a thread
+of its own that synthesizes, and two copies of the voice settings: those a caller sets, at `0xEF20`, and those in
+use, at `0xEF50`. `func_0208db2c` sets a setting by number, and refuses while the engine is synthesizing. Measured
+from the setters, the settings and the values each accepts:
+
+| Setting | Values | Field of `ShttsParams` |
+| --- | --- | --- |
+| 1, 2 | Set by name, not decompiled yet | |
+| 3 | 20 to 2200 | `unk_0A` |
+| 4 | 3500 to 7000 | `unk_02`, 5058 by default |
+| 5 | -10000 to 360 | `unk_08` |
+| 6 | 80 to 130 | Passed to `func_0208c4dc` |
+| 7 | 0 to 5000 | `unk_20` |
+| 8 | 0 to 3000 | `unk_0E` |
+| 9 | 0 to 100 | `unk_0C` |
+| 10 | 0 to 1000 | `unk_16` |
+| 11 | 0 to 100 | `unk_1C` |
+| 12 | 0 to 3, a mode | `unk_10` and `unk_14` |
+| 13 | 0 to 100 | `unk_18` |
+| 14, 15 | 0 to 400 | `unk_04`, `unk_06`, 100 by default |
+| 16 | 0 to 1000 | `unk_2C` |
+
+What each setting means is not established. The `#B4800` in the game's control strings fits setting 4's range, which
+is a lead, not a finding.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").

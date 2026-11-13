@@ -19,7 +19,7 @@ typedef struct ShttsParams {
     /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;
     /* 0x10 */ u32 unk_10;
-    /* 0x14 */ u16 unk_14;
+    /* 0x14 */ s16 unk_14;
     /* 0x16 */ u16 unk_16;
     /* 0x18 */ u32 unk_18;
     /* 0x1C */ u32 unk_1C;
@@ -94,5 +94,9 @@ int func_0208d8fc(Shtts *engine);
 int func_0208dab4(Shtts *engine);
 int func_0208dac4(Shtts *engine);
 const char *func_0208daf8(Shtts *engine);
+int func_0208db2c(Shtts *engine, int param, int value);
+int func_0208dda4(Shtts *engine, int value);
+int func_0208de90(Shtts *engine, int value);
+void func_0208c4dc(int value, int unk, Shtts *engine);
 
 #endif // SHTTS_H

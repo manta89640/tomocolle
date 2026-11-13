@@ -169,3 +169,191 @@ const char *func_0208daf8(Shtts *engine) {
     }
     return data_020bc174[engine->error];
 }
+
+int func_0208e09c(Shtts *engine, int value);
+int func_0208e0cc(Shtts *engine, int value);
+int func_0208e0fc(Shtts *engine, int value);
+int func_0208e12c(Shtts *engine, int value);
+int func_0208e160(Shtts *engine, int value);
+int func_0208e190(Shtts *engine, int value);
+int func_0208e1c0(Shtts *engine, int value);
+int func_0208e1e8(Shtts *engine, int value);
+int func_0208e210(Shtts *engine, int value);
+int func_0208e238(Shtts *engine, int value);
+int func_0208e298(Shtts *engine, int value);
+int func_0208e2c0(Shtts *engine, int value);
+int func_0208e2e8(Shtts *engine, int value);
+int func_0208e310(Shtts *engine, int value);
+
+// Sets one of the caller's voice settings, which only works while the engine is idle. Each setting has its own
+// range of values, see the functions below.
+// objdiff scores this 99.95%, though its instructions and relocations are those of the original.
+int func_0208db2c(Shtts *engine, int param, int value) {
+    if (func_02089d1c(engine) != 0) {
+        return -2;
+    }
+    switch (param) {
+    case 1:
+        return func_0208dda4(engine, value);
+    case 2:
+        return func_0208de90(engine, value);
+    case 3:
+        return func_0208e09c(engine, value);
+    case 4:
+        return func_0208e0cc(engine, value);
+    case 5:
+        return func_0208e0fc(engine, value);
+    case 6:
+        return func_0208e12c(engine, value);
+    case 7:
+        return func_0208e160(engine, value);
+    case 8:
+        return func_0208e190(engine, value);
+    case 9:
+        return func_0208e1c0(engine, value);
+    case 10:
+        return func_0208e1e8(engine, value);
+    case 11:
+        return func_0208e210(engine, value);
+    case 12:
+        return func_0208e238(engine, value);
+    case 13:
+        return func_0208e298(engine, value);
+    case 14:
+        return func_0208e2c0(engine, value);
+    case 15:
+        return func_0208e2e8(engine, value);
+    case 16:
+        return func_0208e310(engine, value);
+    default:
+        return -1;
+    }
+}
+
+int func_0208e09c(Shtts *engine, int value) {
+    if (value < 20 || value > 2200) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_0A = value;
+    return 0;
+}
+
+int func_0208e0cc(Shtts *engine, int value) {
+    if (value < 3500 || value > 7000) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_02 = value;
+    return 0;
+}
+
+int func_0208e0fc(Shtts *engine, int value) {
+    if (value < -10000 || value > 360) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_08 = value;
+    return 0;
+}
+
+int func_0208e12c(Shtts *engine, int value) {
+    if (value < 80 || value > 130) {
+        return -1;
+    }
+    func_0208c4dc(value, 0, engine);
+    return 0;
+}
+
+int func_0208e160(Shtts *engine, int value) {
+    if (value < 0 || value > 5000) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_20 = value;
+    return 0;
+}
+
+int func_0208e190(Shtts *engine, int value) {
+    if (value < 0 || value > 3000) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_0E = value;
+    return 0;
+}
+
+int func_0208e1c0(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_0C = value;
+    return 0;
+}
+
+int func_0208e1e8(Shtts *engine, int value) {
+    if (value < 0 || value > 1000) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_16 = value;
+    return 0;
+}
+
+int func_0208e210(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_1C = value;
+    return 0;
+}
+
+int func_0208e238(Shtts *engine, int value) {
+    if (value < 0 || value > 3) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_14 = 0;
+    engine->unk_0EF20.unk_10 = 0;
+    if (value == 1) {
+        engine->unk_0EF20.unk_10 = 1;
+    } else if (value == 2) {
+        engine->unk_0EF20.unk_10 = 2;
+    } else if (value == 3) {
+        engine->unk_0EF20.unk_14 = 1;
+    }
+    return 0;
+}
+
+int func_0208e298(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_18 = value;
+    return 0;
+}
+
+int func_0208e2c0(Shtts *engine, int value) {
+    if (value < 0 || value > 400) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_04 = value;
+    return 0;
+}
+
+int func_0208e2e8(Shtts *engine, int value) {
+    if (value < 0 || value > 400) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_06 = value;
+    return 0;
+}
+
+int func_0208e310(Shtts *engine, int value) {
+    if (value < 0 || value > 1000) {
+        return -1;
+    }
+    engine->unk_0EF20.unk_2C = value;
+    return 0;
+}
+
+// The value that func_0208e238 was given
+int func_0208e338(Shtts *engine) {
+    if (engine->unk_0EF20.unk_14 == 0) {
+        return engine->unk_0EF20.unk_10;
+    }
+    return 3;
+}
