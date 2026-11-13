@@ -726,54 +726,41 @@ void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
     } while (last != NULL);
 }
 
-// Works out three numbers for each sound of a list, unk_06, unk_08 and unk_0A, by adding up what the tables give
-// for the sound, its neighbours and its place in the list. The list is counted from 1, and has one sound more
-// after its last.
-// Not matching yet: 8 bytes short (0x8a0 of 0x8a8). The instructions are the original's but for the registers of
-// the second loop and what that makes of the spills: the original has the place in r2, the counter in r3, the
-// vowel in r4 and the two neighbours in r6 and r7, with r0 for scratch, and this has the counter in r1, the place
-// in r4 and the neighbours in r0 and r2. The first loop keeps the pointer into vowels in a register where the
-// original keeps the one into kinds, and "count + 1" is at sp+0x20 instead of sp+0x10. Tried without effect on
-// that: every order of the declarations, block scope against function scope, int/s16/s8 for each local, separate
-// variables against one reused for the kind and the consonant before (and for the vowel before and the consonant
-// after), a second counter for the later loops, a local for list[i], a copy of unk6, the Q flag as an if, a
-// ternary or inside the index (inside the index gives mla for the table's row where the original has mul, a
-// frame of 456 and registers nearer the original's), the sum split over statements or locals, an inline
-// function for the multiply by 0x599A, one s16 reused for every intermediate, chained assignments of the flags.
+// Gives each sound of a word its two lengths and its pitch, from tables indexed by the sound's vowel, its
+// consonant class, its neighbours and its place in the word.
+// Not matching yet: the same size as the original (0x8a8), with 59 instructions different. What is left is which
+// registers and stack slots some values of the two loops get. Work on it was stopped part-way; the closest
+// earlier attempts and what was tried are in the history of this file.
 void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8,
                    Shtts *engine) {
     char consonants[0x80];
     char vowels[0x80];
     char kinds[0x80];
-    const char *name;
-    int v;
-    int group = 0;
+    int index = 0;
     s16 j;
-    s8 after;
+    s16 m = 0;
+    int group = 0;
+    const char * name;
+    int limit = 0;
     int voiced = 0;
-    s16 i;
-    int limit;
     int place;
-    int index;
-    s16 value;
-    s8 q;
-    int base;
-
+    s16 i;
+    s8 k = 0;
     vowels[0] = *vowel;
     kinds[0] = *vowel;
     limit = count + 1;
-    for (i = 1; i <= limit; i++) {
-        name = list[i]->name;
+    for (m = 1; m <= limit; m++) {
+        name = list[m]->name;
         if (name[0] == '-') {
-            consonants[i] = 0x1B;
-            kinds[i] = kinds[i - 1];
-            vowels[i] = vowels[i - 1];
+            consonants[m] = 0x1B;
+            vowels[m] = vowels[m - 1];
+            kinds[m] = kinds[m - 1];
         } else {
             for (j = 0; j < 0x90; j++) {
                 if (strcmp(name, data_020bbf34[j]) == 0) {
-                    consonants[i] = data_020b9d60[j];
-                    kinds[i] = data_020b9df0[j];
-                    vowels[i] = data_020b9cd0[j];
+                    consonants[m] = data_020b9d60[j];
+                    vowels[m] = data_020b9cd0[j];
+                    kinds[m] = data_020b9df0[j];
                     break;
                 }
             }
@@ -782,6 +769,9 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
     *vowel = vowels[count];
     index = func_02086628(unk3);
     for (i = 1; i <= count; i++) {
+        char b;
+        s16 v;
+
         if (last && i == count) {
             place = 2;
         } else if (first && i == 1) {
@@ -797,8 +787,11 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
             unk6 = 1;
         }
         if (consonants[i] < 0x1A) {
-            j = kinds[i];
-            switch (j) {
+            s8 q;
+            s16 value;
+
+            k = kinds[i];
+            switch (k) {
             case 6:
             case 7:
             case 8:
@@ -844,51 +837,52 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
                 break;
             case 26:
             case 28:
-                j = (s8)(j - 20);
+                k = (s8)(k - 20);
                 group = 0;
                 voiced = 1;
                 break;
             case 29:
             case 31:
-                j = (s8)(j - 20);
+                k = (s8)(k - 20);
                 group = 1;
                 voiced = 1;
                 break;
             case 32:
             case 33:
-                j = (s8)(j - 20);
+                k = (s8)(k - 20);
                 group = 2;
                 voiced = 1;
                 break;
             case 25:
-                j = (s8)(j - 10);
+                k = (s8)(k - 10);
                 group = 3;
                 voiced = 1;
                 break;
             case 34:
-                j = (s8)(j - 15);
+                k = (s8)(k - 15);
                 group = 5;
                 voiced = 1;
                 break;
             case 40:
-                j = (s8)(j - 30);
+                k = (s8)(k - 30);
                 group = 1;
                 voiced = 1;
                 break;
             }
-            after = vowels[i - 1];
+            b = vowels[i - 1];
             if (place == 0) {
-                after = 0x1A;
+                b = 0x1A;
             }
+            v = vowels[i];
             if (list[i]->unk_04 == 'Q') {
                 q = 1;
             } else {
                 q = 0;
             }
-            value = data_020ba288[group].unk_00 + data_020ba288[group].unk_02[j] + data_020ba288[group].unk_3A[after] + data_020ba288[group].unk_70[vowels[i]] +
+            value = data_020ba288[group].unk_00 + data_020ba288[group].unk_02[k] + data_020ba288[group].unk_3A[b] + data_020ba288[group].unk_70[v] +
                     data_020ba288[group].unk_A6[q] + data_020ba288[group].unk_AA[unk6] + data_020ba288[group].unk_B2[place];
             if (voiced == 1) {
-                switch (j) {
+                switch (k) {
                 case 9:
                     value += 0xE40;
                     break;
@@ -926,51 +920,54 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
             list[i]->unk_06 = 0;
         }
 
-        v = vowels[i];
-        j = consonants[i];
-        if (j == 0x1B) {
-            if (place == 0) {
-                j = 0x1A;
+        {
+            int base;
+
+            k = consonants[i];
+            if (k == 0x1B) {
+                if (place == 0) {
+                    k = 0x1A;
+                } else {
+                    k = vowels[i - 1];
+                }
+            }
+            b = consonants[i + 1];
+            if (b == 0x1B) {
+                b = vowels[i + 1];
+            }
+            if (place == 2) {
+                b = 12;
+            }
+            v = vowels[i];
+            if (v == 5) {
+                list[i]->unk_08 = (data_020b9fb4.unk_02[k] + 0x1E00 + data_020b9fb4.unk_38[b] +
+                                   data_020b9fb4.unk_B8[unk6] + data_020b9fb4.unk_C2[place]) >>
+                                  6;
+                list[i]->unk_0A = (s16)((data_020b9e80.unk_0C[k] + data_020b9e80.unk_42[b] +
+                                         data_020b9e80.unk_A0[index] + data_020b9e80.unk_D8[unk6] +
+                                         data_020b9e80.unk_EA[place]) >>
+                                        6) +
+                                  600;
+                list[i]->unk_06 = 0;
             } else {
-                j = vowels[i - 1];
-            }
-        }
-        after = consonants[i + 1];
-        if (after == 0x1B) {
-            after = vowels[i + 1];
-        }
-        if (place == 2) {
-            after = 12;
-        }
-        if (v == 5) {
-            list[i]->unk_08 = (data_020b9fb4.unk_02[j] + 0x1E00 + data_020b9fb4.unk_38[after] +
-                               data_020b9fb4.unk_B8[unk6] + data_020b9fb4.unk_C2[place]) >>
-                              6;
-            list[i]->unk_0A = (s16)((data_020b9e80.unk_0C[j] + data_020b9e80.unk_42[after] +
-                                     data_020b9e80.unk_A0[index] + data_020b9e80.unk_D8[unk6] +
-                                     data_020b9e80.unk_EA[place]) >>
-                                    6) +
-                              600;
-            list[i]->unk_06 = 0;
-        } else {
-            base = data_020ba0f4.unk_02[v] + 0x12FC;
-            list[i]->unk_08 = (base + data_020ba0f4.unk_0C[j] + data_020ba0f4.unk_42[after] +
-                               data_020ba0f4.unk_CA[unk6] + data_020ba0f4.unk_D2[place]) >>
-                              6;
-            if (list[i]->unk_08 < 70) {
-                list[i]->unk_08 = 70;
-            }
-            list[i]->unk_0A = (s16)((data_020b9e80.unk_02[v] + data_020b9e80.unk_0C[j] +
-                                     data_020b9e80.unk_42[after] + data_020b9e80.unk_A0[index] +
-                                     data_020b9e80.unk_D8[unk6] + data_020b9e80.unk_EA[place]) >>
-                                    6) +
-                              600;
-            if (list[i]->unk_04 == 'L') {
-                list[i]->unk_08 += (s16)((base + data_020ba0f4.unk_42[v] + data_020ba0f4.unk_0C[v] - 0x5D) >> 6);
-            }
-            if (list[i]->unk_05 == 'U') {
-                list[i]->unk_08 = (list[i]->unk_08 * 0x599A) >> 15;
-                list[i]->unk_0A -= 30;
+                list[i]->unk_08 = ((base = data_020ba0f4.unk_02[v] + 0x12FC) + data_020ba0f4.unk_0C[k] + data_020ba0f4.unk_42[b] +
+                                   data_020ba0f4.unk_CA[unk6] + data_020ba0f4.unk_D2[place]) >>
+                                  6;
+                if (list[i]->unk_08 < 70) {
+                    list[i]->unk_08 = 70;
+                }
+                list[i]->unk_0A = (s16)((data_020b9e80.unk_02[v] + data_020b9e80.unk_0C[k] +
+                                         data_020b9e80.unk_42[b] + data_020b9e80.unk_A0[index] +
+                                         data_020b9e80.unk_D8[unk6] + data_020b9e80.unk_EA[place]) >>
+                                        6) +
+                                  600;
+                if (list[i]->unk_04 == 'L') {
+                    list[i]->unk_08 += (s16)((base + data_020ba0f4.unk_42[v] + data_020ba0f4.unk_0C[v] - 0x5D) >> 6);
+                }
+                if (list[i]->unk_05 == 'U') {
+                    list[i]->unk_08 = (list[i]->unk_08 * 0x599A) >> 15;
+                    list[i]->unk_0A -= 30;
+                }
             }
         }
     }
