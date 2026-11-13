@@ -108,6 +108,20 @@ Cut where the evidence is: a library's known file, a run of functions that only 
 data, a static initializer (each belongs to one file), a table of virtual functions. Do not cut on a guess: a wrong
 boundary makes two files that can never match, and costs more than a large gap does.
 
+## Library sources
+
+The SDK's files are not written here but fetched (see the README), and take part in the build like any other: a
+`delinks.txt` names the file by its path under `lib/NitroSDK/` or `lib/NitroSystem/`, and the build compiles it with
+its library's compiler and flags, from the `LIBRARIES` table in `configure.py`.
+
+`tools/complete_units.py` then marks the units `complete` whose every function matches, a batch at a time, and keeps
+each only if the ROM still matches when it is linked from the compiled object. It leaves a unit alone whose object
+has data that its entry in `delinks.txt` does not place yet.
+
+Linking strips what nothing refers to, as the original link did: a compiled file of a library holds many functions
+the game never calls. The objects that dsd delinks are exempt, since only as much of them is known to be referred to
+as `relocs.txt` knows: `tools/force_active.py` lists every symbol of theirs in the linker script as one to keep.
+
 ## Conventions
 
 - **Source files are UTF-8.** The compiler receives them as Shift JIS, so Japanese text in a string literal is written

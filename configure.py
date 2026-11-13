@@ -128,9 +128,9 @@ SOURCE_SUFFIXES = tuple(LANG_FLAGS)
 
 LD_FLAGS = [
     "-proc arm946e",
-    # Keep everything. The original link stripped dead code, but -dead only reproduces that once relocs.txt knows
-    # every reference: today it strips real code out of the main program and a number of overlays.
-    "-nodead",
+    # Strip what nothing refers to, as the original link did: a compiled file holds functions the game never calls.
+    # What dsd delinked is kept whole all the same, by name, see tools/force_active.py.
+    "-dead",
     "-nostdlib",
     "-interworking",
     "-map closure,unused",
@@ -510,6 +510,8 @@ def main():
     n.rule("mwcc_lib", "$wrapper $cc $flags $includes -gccdep -MD -c $in -o $out "
            "&& $python tools/fix_depfile.py $dep", "Compiling $in", depfile="$dep", deps="gcc")
     n.rule("fx_const", "$python $script $in $out", "Generating $out")
+    n.rule("force_active", "$python tools/force_active.py $lcf $out --objects $out.rsp", "Writing $out",
+           rspfile="$out.rsp", rspfile_content="$in_newline")
     n.rule("mwld", "$wrapper $mwld $ld_flags @$objects $lcf -o $out", "Linking $out")
     n.rule("rom_config", "$dsd rom config --elf $in --config $config", "Configuring the ROM")
     n.rule("rom_build", "$dsd rom build --config $in --rom $out $bios", "Building $out")
@@ -574,8 +576,13 @@ def main():
     n.build(["compile"], "phony", compiled)
 
     # Link and build the ROM
-    n.build([elf], "mwld", link_inputs, implicit=[lcf_file, objects_file],
-            variables={"lcf": lcf_file, "objects": objects_file})
+    # The linker script, with every symbol of the original kept from being stripped. That takes the delinked object
+    # of every unit, a complete one's too: its symbols are the ones of its compiled object that the game has.
+    link_lcf = build_dir / "arm9_link.lcf"
+    n.build([link_lcf], "force_active", delink_outputs, implicit=[lcf_file, "tools/force_active.py"],
+            variables={"lcf": lcf_file})
+    n.build([elf], "mwld", link_inputs, implicit=[link_lcf, objects_file],
+            variables={"lcf": link_lcf, "objects": objects_file})
     rom_config = build_dir / "build" / "rom_config.yaml"
     n.build([rom_config], "rom_config", [elf], implicit=[extract_config])
     n.build([rom], "rom_build", [rom_config])

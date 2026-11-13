@@ -120,8 +120,11 @@ guess until a function that depends on it matches.
 
 ## Linking
 
-The original was linked with dead-stripping, as C++ needs: the compiler emits variants of constructors and destructors
-that nothing calls. The build links with `-nodead` for now. With `-dead`, the linker strips code that is in the ROM,
-because `relocs.txt` does not yet know every reference to it (a pointer in a table that the analysis took for a
-number). Switching back to `-dead` is a milestone of its own, and files with unused variants cannot be marked complete
-before it.
+The original was linked with dead-stripping, as a game built on libraries is: an object of the SDK holds functions
+that the game never calls, and of `os_cache.c`'s 25 only ten are in the ROM. The build links with `-dead` too.
+
+On its own that strips code that is in the ROM, because `relocs.txt` does not know every reference to it (a pointer
+in a table that the analysis took for a number): the first try lost code from the main program and from a number of
+overlays. So the linker script names every symbol of the delinked objects in a `FORCE_ACTIVE` list, which keeps the
+original whole, and stripping only acts on compiled objects. With that, the ROM matches, and a library file linked
+from its compiled object comes out with exactly the functions the game has.
