@@ -1,5 +1,7 @@
 #include "shtts.h"
 
+#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
 void func_02089cf4(Shtts *engine) {
@@ -20,26 +22,321 @@ int func_02089d1c(Shtts *engine) {
     return busy;
 }
 
+// Empties the echo's history
+void func_02086814(Shtts *engine) {
+    engine->unk_0E624 = 0;
+    memset(engine->echoBuffer, 0, sizeof(engine->echoBuffer));
+}
+
+// Carries out one command of the text: '#', a letter, and for most a number, which after a '+' is added to the
+// value in use instead of replacing it. With live set it changes the settings in use, otherwise the caller's.
+// Returns 0 if the text is not a command, and -3 if it is, known or not.
+int func_020873a4(const char *command, int live, Shtts *engine) {
+    int value;
+
+    if (command[0] == '#') {
+        switch (command[1]) {
+        case 'F':
+            engine->cur.pitch = 0x13C2;
+            engine->cur.unk_00 = 0;
+            return -3;
+        case 'M':
+            engine->cur.pitch = 0x1200;
+            return -3;
+        case 'B':
+            if (live) {
+                if (command[2] == '+') {
+                    value = engine->cur.pitch + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->cur.pitch = func_02087e44(value, 3500, 7000, "Pitch");
+            } else {
+                if (command[2] == '+') {
+                    value = engine->set.pitch + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->set.pitch = func_02087e44(value, 3500, 7000, "Pitch");
+            }
+            return -3;
+        case 'C':
+            if (live) {
+                value = atoi(command + 2);
+                engine->cur.unk_14 = 0;
+                engine->cur.mode = 0;
+                if (value == 1) {
+                    engine->cur.mode = 1;
+                } else if (value == 2) {
+                    engine->cur.mode = 2;
+                } else if (value != 0) {
+                    engine->cur.unk_14 = 1;
+                }
+            } else {
+                value = atoi(command + 2);
+                engine->set.unk_14 = 0;
+                engine->set.mode = 0;
+                if (value == 1) {
+                    engine->set.mode = 1;
+                } else if (value == 2) {
+                    engine->set.mode = 2;
+                } else if (value != 0) {
+                    engine->set.unk_14 = 1;
+                }
+            }
+            return -3;
+        case 'E':
+            // Emphasis: higher, stronger, slower and louder
+            engine->cur.pitch = func_02087e44(engine->cur.pitch + 100, 3500, 7000, "Pitch");
+            engine->cur.accent = func_02087e44(engine->cur.accent + 5, 0, 400, "Accent");
+            engine->cur.phrase = func_02087e44(engine->cur.phrase + 5, 0, 400, "Phrase");
+            engine->cur.speed = func_02087e44(engine->cur.speed - 10, 20, 2200, "Speed");
+            engine->cur.volume = func_02087e44(engine->cur.volume + 10, -10000, 360, "Volume");
+            return -3;
+        case 'D':
+            // The opposite
+            engine->cur.pitch = func_02087e44(engine->cur.pitch - 100, 3500, 7000, "Pitch");
+            engine->cur.accent = func_02087e44(engine->cur.accent - 5, 0, 400, "Accent");
+            engine->cur.phrase = func_02087e44(engine->cur.phrase - 5, 0, 400, "Phrase");
+            engine->cur.speed = func_02087e44(engine->cur.speed + 10, 20, 2200, "Speed");
+            engine->cur.volume = func_02087e44(engine->cur.volume - 10, -10000, 360, "Volume");
+            return -3;
+        case 'A':
+            value = func_02087e44(atoi(command + 2), 0, 400, "Accent");
+            if (live) {
+                engine->cur.accent = value;
+            } else {
+                engine->set.accent = value;
+            }
+            return -3;
+        case 'P':
+            if (live) {
+                if (command[2] == '+') {
+                    value = engine->cur.phrase + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->cur.phrase = func_02087e44(value, 0, 400, "Phrase");
+            } else {
+                if (command[2] == '+') {
+                    value = engine->set.phrase + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->set.phrase = func_02087e44(value, 0, 400, "Phrase");
+            }
+            return -3;
+        case 'S':
+            if (live) {
+                if (command[2] == '+') {
+                    value = engine->cur.speed + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->cur.speed = func_02087e44(value, 20, 2200, "Speed");
+            } else {
+                if (command[2] == '+') {
+                    value = engine->set.speed + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->set.speed = func_02087e44(value, 20, 2200, "Speed");
+            }
+            return -3;
+        case 'V':
+            if (live) {
+                if (command[2] == '+') {
+                    value = engine->cur.volume + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->cur.volume = func_02087e44(value, -10000, 360, "Volume");
+            } else {
+                if (command[2] == '+') {
+                    value = engine->set.volume + func_02087e64(command + 3);
+                } else {
+                    value = atoi(command + 2);
+                }
+                engine->set.volume = func_02087e44(value, -10000, 360, "Volume");
+            }
+            return -3;
+        case 'I':
+            value = func_02087e44(atoi(command + 2), 0, 3000, "Echo Delay");
+            if (!live) {
+                engine->set.echoDelay = value;
+            } else {
+                engine->cur.echoDelay = value;
+                func_02086814(engine);
+            }
+            return -3;
+        case 'J':
+            value = func_02087e44(atoi(command + 2), 0, 100, "Echo Gain");
+            if (live) {
+                engine->cur.echoGain = value;
+            } else {
+                engine->set.echoGain = value;
+            }
+            return -3;
+        case 'R':
+            value = func_02087e44(atoi(command + 2), 0, 1000, "Fir Delay");
+            if (!live) {
+                engine->set.firDelay = value;
+            } else {
+                func_0208a010(engine);
+                engine->cur.firDelay = value;
+            }
+            return -3;
+        case 'G':
+            value = func_02087e44(atoi(command + 2), 0, 100, "Fir Gain");
+            if (!live) {
+                engine->set.firGain = value;
+            } else {
+                func_0208a010(engine);
+                engine->cur.firGain = value;
+            }
+            return -3;
+        case 'r':
+            value = func_02087e44(atoi(command + 2), 0, 5000, "Ring");
+            if (live) {
+                engine->cur.ring = value;
+            } else {
+                engine->set.ring = value;
+            }
+            return -3;
+        case 'k':
+            value = func_02087e44(atoi(command + 2), 0, 100, "Chorus");
+            if (live) {
+                engine->cur.chorus = value;
+            } else {
+                engine->set.chorus = value;
+            }
+            return -3;
+        case 'X':
+            func_0208c4dc(func_02087e44(atoi(command + 2), 80, 130, "Warp"), live, engine);
+            return -3;
+        case 'Z':
+            func_0208c404(engine);
+            return -3;
+        case 'T':
+            if (isdigit(command[2])) {
+                value = func_02087e44(atoi(command + 2), 0, 1000, "PTrans");
+                if (live) {
+                    engine->cur.pitchTrans = value;
+                } else {
+                    engine->set.pitchTrans = value;
+                }
+            }
+            return -3;
+        default:
+            return -3;
+        }
+    }
+    return 0;
+}
+
+// A value kept within a range
+int func_02087e44(int value, int min, int max, const char *name) {
+    int result = min;
+
+    if (value >= min) {
+        if (value > max) {
+            result = max;
+        } else {
+            result = (s16)value;
+        }
+    }
+    return result;
+}
+
+// The number that text starts with, kept within what 16 bits hold
+int func_02087e64(const char *text) {
+    int value = atoi(text);
+    int result = -0x8000;
+
+    if (value >= -0x8000) {
+        if (value > 0x7FFF) {
+            result = 0x7FFF;
+        } else {
+            result = (s16)value;
+        }
+    }
+    return result;
+}
+
+// Empties the FIR filter's history
+void func_0208a010(Shtts *engine) {
+    engine->unk_0EE00 = 0;
+    memset(engine->firBuffer, 0, sizeof(engine->firBuffer));
+}
+
 // Sets the caller's voice settings back to their defaults
 void func_0208c398(Shtts *engine) {
-    engine->unk_0EF20.unk_00 = 0;
-    engine->unk_0EF20.unk_02 = 0x13C2;
-    engine->unk_0EF20.unk_04 = 100;
-    engine->unk_0EF20.unk_06 = 100;
-    engine->unk_0EF20.unk_0A = 100;
-    engine->unk_0EF20.unk_08 = 0;
-    engine->unk_0EF20.unk_24 = 100;
-    engine->unk_0EF20.unk_28 = 0x400;
-    engine->unk_0EF20.unk_2A = 10;
-    engine->unk_0EF20.unk_14 = 0;
-    engine->unk_0EF20.unk_10 = 0;
-    engine->unk_0EF20.unk_0E = 0;
-    engine->unk_0EF20.unk_0C = 0;
-    engine->unk_0EF20.unk_1C = 0;
-    engine->unk_0EF20.unk_16 = 0;
-    engine->unk_0EF20.unk_20 = 0;
-    engine->unk_0EF20.unk_18 = 0;
-    engine->unk_0EF20.unk_2C = 0;
+    engine->set.unk_00 = 0;
+    engine->set.pitch = 0x13C2;
+    engine->set.accent = 100;
+    engine->set.phrase = 100;
+    engine->set.speed = 100;
+    engine->set.volume = 0;
+    engine->set.warp = 100;
+    engine->set.unk_28 = 0x400;
+    engine->set.unk_2A = 10;
+    engine->set.unk_14 = 0;
+    engine->set.mode = 0;
+    engine->set.echoDelay = 0;
+    engine->set.echoGain = 0;
+    engine->set.firGain = 0;
+    engine->set.firDelay = 0;
+    engine->set.ring = 0;
+    engine->set.chorus = 0;
+    engine->set.pitchTrans = 0;
+}
+
+// Puts the caller's settings in use
+void func_0208c404(Shtts *engine) {
+    engine->cur.unk_00 = engine->set.unk_00;
+    engine->cur.pitch = engine->set.pitch;
+    engine->cur.accent = engine->set.accent;
+    engine->cur.phrase = engine->set.phrase;
+    engine->cur.speed = engine->set.speed;
+    engine->cur.volume = engine->set.volume;
+    engine->cur.warp = engine->set.warp;
+    engine->cur.unk_28 = engine->set.unk_28;
+    engine->cur.unk_2A = engine->set.unk_2A;
+    engine->cur.unk_14 = engine->set.unk_14;
+    engine->cur.mode = engine->set.mode;
+    engine->cur.echoDelay = engine->set.echoDelay;
+    if (engine->cur.echoDelay != 0) {
+        func_02086814(engine);
+    }
+    engine->cur.echoGain = engine->set.echoGain;
+    engine->cur.firGain = engine->set.firGain;
+    engine->cur.firDelay = engine->set.firDelay;
+    if (engine->cur.firDelay != 0 || engine->cur.firGain != 0) {
+        func_0208a010(engine);
+    }
+    engine->cur.ring = engine->set.ring;
+    engine->cur.chorus = engine->set.chorus;
+    engine->cur.pitchTrans = engine->set.pitchTrans;
+}
+
+// Sets the warp, 80 to 200, and the two values worked out from it.
+// Not matching yet: the original multiplies once, before it tests live, and this does in each branch.
+void func_0208c4dc(int warp, int live, Shtts *engine) {
+    if (warp < 80) {
+        warp = 80;
+    }
+    if (warp > 200) {
+        warp = 200;
+    }
+    if (live) {
+        engine->cur.warp = warp;
+        engine->cur.unk_28 = (warp * 0x28F) >> 6;
+        engine->cur.unk_2A = func_02089444(1000, (s16)warp);
+    } else {
+        engine->set.warp = warp;
+        engine->set.unk_28 = (warp * 0x28F) >> 6;
+        engine->set.unk_2A = func_02089444(1000, (s16)warp);
+    }
 }
 
 void func_0208d4f0(Shtts *engine, ShttsCallback callback, void *arg) {
@@ -80,32 +377,32 @@ int func_0208d8fc(Shtts *engine) {
     engine->unk_00004 = 0x37;
     engine->unk_00008 = 0;
     engine->unk_0000C = 0;
-    engine->unk_0EF50.unk_00 = 0;
-    engine->unk_0EF50.unk_02 = 0x13C2;
-    engine->unk_0EF50.unk_04 = 100;
-    engine->unk_0EF50.unk_06 = 100;
-    engine->unk_0EF50.unk_0A = 120;
-    engine->unk_0EF50.unk_08 = 0;
+    engine->cur.unk_00 = 0;
+    engine->cur.pitch = 0x13C2;
+    engine->cur.accent = 100;
+    engine->cur.phrase = 100;
+    engine->cur.speed = 120;
+    engine->cur.volume = 0;
     engine->unk_01B21 = 0;
-    engine->unk_0EF50.unk_0C = 30;
-    engine->unk_0EF50.unk_0E = 0;
-    engine->unk_0EF50.unk_14 = 0;
+    engine->cur.echoGain = 30;
+    engine->cur.echoDelay = 0;
+    engine->cur.unk_14 = 0;
     engine->unk_08CE4 = 0;
-    engine->unk_0EF50.unk_16 = 0;
-    engine->unk_0EF50.unk_18 = 0;
-    engine->unk_0EF50.unk_1C = 0;
-    engine->unk_0EF50.unk_20 = 0;
+    engine->cur.firDelay = 0;
+    engine->cur.chorus = 0;
+    engine->cur.firGain = 0;
+    engine->cur.ring = 0;
     engine->unk_0B6FC = 0;
     engine->unk_08906 = 0;
     engine->unk_08CDC = 480;
     engine->unk_08CDE = 240;
     engine->unk_08CE0 = 0;
-    engine->unk_0EF50.unk_14 = 0;
+    engine->cur.unk_14 = 0;
     engine->unk_08CE4 = 0;
-    engine->unk_0EF50.unk_16 = 0;
-    engine->unk_0EF50.unk_18 = 0;
-    engine->unk_0EF50.unk_1C = 0;
-    engine->unk_0EF50.unk_20 = 0;
+    engine->cur.firDelay = 0;
+    engine->cur.chorus = 0;
+    engine->cur.firGain = 0;
+    engine->cur.ring = 0;
     engine->unk_0B6FC = 0;
     p = engine->unk_0B730;
     engine->unk_0B720 = 0;
@@ -131,9 +428,9 @@ int func_0208d8fc(Shtts *engine) {
     engine->stopRequested = 0;
     engine->unk_0EE11 = 0;
     engine->unk_0EE14 = 0;
-    engine->unk_0EF50.unk_24 = 100;
-    engine->unk_0EF50.unk_28 = 0x400;
-    engine->unk_0EF50.unk_2A = 10;
+    engine->cur.warp = 100;
+    engine->cur.unk_28 = 0x400;
+    engine->cur.unk_2A = 10;
     engine->unk_0EE18 = 1;
     OS_InitMutex(&engine->mutex);
     OS_InitMutex(&engine->unk_0EF08);
@@ -233,7 +530,7 @@ int func_0208e09c(Shtts *engine, int value) {
     if (value < 20 || value > 2200) {
         return -1;
     }
-    engine->unk_0EF20.unk_0A = value;
+    engine->set.speed = value;
     return 0;
 }
 
@@ -241,7 +538,7 @@ int func_0208e0cc(Shtts *engine, int value) {
     if (value < 3500 || value > 7000) {
         return -1;
     }
-    engine->unk_0EF20.unk_02 = value;
+    engine->set.pitch = value;
     return 0;
 }
 
@@ -249,7 +546,7 @@ int func_0208e0fc(Shtts *engine, int value) {
     if (value < -10000 || value > 360) {
         return -1;
     }
-    engine->unk_0EF20.unk_08 = value;
+    engine->set.volume = value;
     return 0;
 }
 
@@ -265,7 +562,7 @@ int func_0208e160(Shtts *engine, int value) {
     if (value < 0 || value > 5000) {
         return -1;
     }
-    engine->unk_0EF20.unk_20 = value;
+    engine->set.ring = value;
     return 0;
 }
 
@@ -273,7 +570,7 @@ int func_0208e190(Shtts *engine, int value) {
     if (value < 0 || value > 3000) {
         return -1;
     }
-    engine->unk_0EF20.unk_0E = value;
+    engine->set.echoDelay = value;
     return 0;
 }
 
@@ -281,7 +578,7 @@ int func_0208e1c0(Shtts *engine, int value) {
     if (value < 0 || value > 100) {
         return -1;
     }
-    engine->unk_0EF20.unk_0C = value;
+    engine->set.echoGain = value;
     return 0;
 }
 
@@ -289,7 +586,7 @@ int func_0208e1e8(Shtts *engine, int value) {
     if (value < 0 || value > 1000) {
         return -1;
     }
-    engine->unk_0EF20.unk_16 = value;
+    engine->set.firDelay = value;
     return 0;
 }
 
@@ -297,7 +594,7 @@ int func_0208e210(Shtts *engine, int value) {
     if (value < 0 || value > 100) {
         return -1;
     }
-    engine->unk_0EF20.unk_1C = value;
+    engine->set.firGain = value;
     return 0;
 }
 
@@ -305,14 +602,14 @@ int func_0208e238(Shtts *engine, int value) {
     if (value < 0 || value > 3) {
         return -1;
     }
-    engine->unk_0EF20.unk_14 = 0;
-    engine->unk_0EF20.unk_10 = 0;
+    engine->set.unk_14 = 0;
+    engine->set.mode = 0;
     if (value == 1) {
-        engine->unk_0EF20.unk_10 = 1;
+        engine->set.mode = 1;
     } else if (value == 2) {
-        engine->unk_0EF20.unk_10 = 2;
+        engine->set.mode = 2;
     } else if (value == 3) {
-        engine->unk_0EF20.unk_14 = 1;
+        engine->set.unk_14 = 1;
     }
     return 0;
 }
@@ -321,7 +618,7 @@ int func_0208e298(Shtts *engine, int value) {
     if (value < 0 || value > 100) {
         return -1;
     }
-    engine->unk_0EF20.unk_18 = value;
+    engine->set.chorus = value;
     return 0;
 }
 
@@ -329,7 +626,7 @@ int func_0208e2c0(Shtts *engine, int value) {
     if (value < 0 || value > 400) {
         return -1;
     }
-    engine->unk_0EF20.unk_04 = value;
+    engine->set.accent = value;
     return 0;
 }
 
@@ -337,7 +634,7 @@ int func_0208e2e8(Shtts *engine, int value) {
     if (value < 0 || value > 400) {
         return -1;
     }
-    engine->unk_0EF20.unk_06 = value;
+    engine->set.phrase = value;
     return 0;
 }
 
@@ -345,7 +642,7 @@ int func_0208e310(Shtts *engine, int value) {
     if (value < 0 || value > 1000) {
         return -1;
     }
-    engine->unk_0EF20.unk_2C = value;
+    engine->set.pitchTrans = value;
     return 0;
 }
 
@@ -354,33 +651,33 @@ int func_0208e310(Shtts *engine, int value) {
 int func_0208dca4(Shtts *engine, int param) {
     switch (param) {
     case 3:
-        return engine->unk_0EF20.unk_0A;
+        return engine->set.speed;
     case 4:
-        return engine->unk_0EF20.unk_02;
+        return engine->set.pitch;
     case 5:
-        return engine->unk_0EF20.unk_08;
+        return engine->set.volume;
     case 6:
-        return engine->unk_0EF20.unk_24;
+        return engine->set.warp;
     case 7:
-        return engine->unk_0EF20.unk_20;
+        return engine->set.ring;
     case 8:
-        return engine->unk_0EF20.unk_0E;
+        return engine->set.echoDelay;
     case 9:
-        return engine->unk_0EF20.unk_0C;
+        return engine->set.echoGain;
     case 10:
-        return engine->unk_0EF20.unk_16;
+        return engine->set.firDelay;
     case 11:
-        return engine->unk_0EF20.unk_1C;
+        return engine->set.firGain;
     case 12:
         return func_0208e338(engine);
     case 13:
-        return engine->unk_0EF20.unk_18;
+        return engine->set.chorus;
     case 14:
-        return engine->unk_0EF20.unk_04;
+        return engine->set.accent;
     case 15:
-        return engine->unk_0EF20.unk_06;
+        return engine->set.phrase;
     case 16:
-        return engine->unk_0EF20.unk_2C;
+        return engine->set.pitchTrans;
     default:
         return 0x80000000;
     }
@@ -533,8 +830,8 @@ int func_0208e04c(Shtts *engine, const char *commands) {
 
 // The value that func_0208e238 was given
 int func_0208e338(Shtts *engine) {
-    if (engine->unk_0EF20.unk_14 == 0) {
-        return engine->unk_0EF20.unk_10;
+    if (engine->set.unk_14 == 0) {
+        return engine->set.mode;
     }
     return 3;
 }

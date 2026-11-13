@@ -127,26 +127,41 @@ of its own that synthesizes, and two copies of the voice settings: those a calle
 use, at `0xEF50`. `func_0208db2c` sets a setting by number, and refuses while the engine is synthesizing. Measured
 from the setters, the settings and the values each accepts:
 
-| Setting | Values | Field of `ShttsParams` |
-| --- | --- | --- |
-| 1 | `0x101` to `0x10C`: the speaker | A preset, see below |
-| 2 | `0x201` to `0x211`: the way of speaking | A preset |
-| 3 | 20 to 2200 | `unk_0A` |
-| 4 | 3500 to 7000 | `unk_02`, 5058 by default |
-| 5 | -10000 to 360 | `unk_08` |
-| 6 | 80 to 130 | Passed to `func_0208c4dc` |
-| 7 | 0 to 5000 | `unk_20` |
-| 8 | 0 to 3000 | `unk_0E` |
-| 9 | 0 to 100 | `unk_0C` |
-| 10 | 0 to 1000 | `unk_16` |
-| 11 | 0 to 100 | `unk_1C` |
-| 12 | 0 to 3, a mode | `unk_10` and `unk_14` |
-| 13 | 0 to 100 | `unk_18` |
-| 14, 15 | 0 to 400 | `unk_04`, `unk_06`, 100 by default |
-| 16 | 0 to 1000 | `unk_2C` |
+| Setting | Command | Name | Values | Field of `ShttsParams` |
+| --- | --- | --- | --- | --- |
+| 1 | | The speaker | `0x101` to `0x10C` | A preset, see below |
+| 2 | | The way of speaking | `0x201` to `0x211` | A preset |
+| 3 | `#S` | Speed | 20 to 2200 | `speed`, 100 by default |
+| 4 | `#B` | Pitch | 3500 to 7000 | `pitch`, 5058 by default |
+| 5 | `#V` | Volume | -10000 to 360 | `volume` |
+| 6 | `#X` | Warp | 80 to 130 | `warp`, 100 by default |
+| 7 | `#r` | Ring | 0 to 5000 | `ring` |
+| 8 | `#I` | Echo Delay | 0 to 3000 | `echoDelay` |
+| 9 | `#J` | Echo Gain | 0 to 100 | `echoGain` |
+| 10 | `#R` | Fir Delay | 0 to 1000 | `firDelay` |
+| 11 | `#G` | Fir Gain | 0 to 100 | `firGain` |
+| 12 | `#C` | Not named | 0 to 3, a mode | `mode` and `unk_14` |
+| 13 | `#k` | Chorus | 0 to 100 | `chorus` |
+| 14 | `#A` | Accent | 0 to 400 | `accent`, 100 by default |
+| 15 | `#P` | Phrase | 0 to 400 | `phrase`, 100 by default |
+| 16 | `#T` | PTrans | 0 to 1000 | `pitchTrans` |
 
-What settings 3 to 16 mean is not established. The `#B4800` in the game's control strings fits setting 4's range,
-which is a lead, not a finding.
+The names are the engine's own: `func_020873a4`, which carries out a command, passes each to the function that keeps
+a value in range, though that function does nothing with it (most likely it named the setting in a message that the
+retail build leaves out). The same function shows what the commands in text do. A number after `+` is added to the
+value in use, for `#B`, `#P`, `#S` and `#V`. Besides the settings there are:
+
+| Command | Effect |
+| --- | --- |
+| `#E` | Emphasis: pitch +100, accent +5, phrase +5, speed -10, volume +10 |
+| `#D` | The opposite of `#E` |
+| `#F` | Pitch back to its default, 5058 |
+| `#M` | Pitch to 4608 |
+| `#Z` | All settings back to what the caller set |
+
+So the `#B4800`, `#S90`, `#X90`, `#I500` and `#J20` of a preset are a pitch, a speed, a warp, an echo delay and an
+echo gain. A command changes either the caller's settings or the ones in use, by an argument: presets change the
+caller's.
 
 Settings 1 and 2 pick a preset by name. `ShttsPresets`, at `0x020F2708`, is a table of 53 of them: a name as it is
 written in text, and a string of `#` commands that the preset stands for. Measured from the two setters:
@@ -181,7 +196,8 @@ it must come out as it is in the ROM. Compiling it needs the SDK's headers and t
 include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
-guess until a function that depends on it matches.
+guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's
+command function has "Pitch" three times, and the original holds three separate strings for them.
 
 ## Linking
 

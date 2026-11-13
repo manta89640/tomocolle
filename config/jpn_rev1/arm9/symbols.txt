@@ -800,7 +800,7 @@ __strtold kind:function(arm,size=0x124c) addr:0x02018d84
 __strtoul kind:function(arm,size=0x3e8) addr:0x02019fd0
 __strtoull kind:function(arm,size=0x46c) addr:0x0201a3b8
 strtol kind:function(arm,size=0xc8) addr:0x0201a824
-func_0201a8ec kind:function(arm,size=0x14) addr:0x0201a8ec
+atoi kind:function(arm,size=0x14) addr:0x0201a8ec
 __fwide kind:function(arm,size=0xc) addr:0x0201a900
 fwide kind:function(arm,size=0x74) addr:0x0201a90c
 wmemcpy kind:function(arm,size=0x10) addr:0x0201a980
@@ -4223,7 +4223,7 @@ data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
 data_020b5534 kind:data(any) addr:0x020b5534
 data_020b555c kind:data(any) addr:0x020b555c
-data_020b55dc kind:data(any) addr:0x020b55dc
+__ctype_mapC kind:data(any) addr:0x020b55dc
 data_020b56dc kind:data(any) addr:0x020b56dc
 data_020b5704 kind:data(any) addr:0x020b5704
 data_020b5709 kind:data(any) addr:0x020b5709

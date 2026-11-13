@@ -8,26 +8,28 @@
 
 typedef void (*ShttsCallback)(int samples, s16 *data, void *arg);
 
-// Settings of a voice. The engine has two of these: the ones in use, and the ones a caller has set.
+// Settings of a voice. The engine has two of these: the ones a caller has set, and the ones in use, which start as
+// a copy of those and which commands in the text then change. The names of the fields are the engine's own, from
+// the strings in func_020873a4, where they are known.
 typedef struct ShttsParams {
-    /* 0x00 */ u8 unk_00;
-    /* 0x02 */ s16 unk_02;
-    /* 0x04 */ s16 unk_04;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s16 unk_0C;
-    /* 0x0E */ s16 unk_0E;
-    /* 0x10 */ u32 unk_10;
+    /* 0x00 */ s8 unk_00;
+    /* 0x02 */ s16 pitch;
+    /* 0x04 */ s16 accent;
+    /* 0x06 */ s16 phrase;
+    /* 0x08 */ s16 volume;
+    /* 0x0A */ s16 speed;
+    /* 0x0C */ s16 echoGain;
+    /* 0x0E */ s16 echoDelay;
+    /* 0x10 */ u32 mode;
     /* 0x14 */ s16 unk_14;
-    /* 0x16 */ s16 unk_16;
-    /* 0x18 */ u32 unk_18;
-    /* 0x1C */ u32 unk_1C;
-    /* 0x20 */ u32 unk_20;
-    /* 0x24 */ u32 unk_24;
+    /* 0x16 */ s16 firDelay;
+    /* 0x18 */ u32 chorus;
+    /* 0x1C */ u32 firGain;
+    /* 0x20 */ u32 ring;
+    /* 0x24 */ u32 warp;
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
-    /* 0x2C */ s16 unk_2C;
+    /* 0x2C */ s16 pitchTrans;
 } ShttsParams; // 0x30
 
 // The engine's whole state, 0x14000 bytes that the caller provides
@@ -61,9 +63,11 @@ typedef struct Shtts {
     /* 0x0B72D */ u8 unk_0B72D;
     /* 0x0B72E */ u8 pad_0B72E[2];
     /* 0x0B730 */ u8 unk_0B730[16];
-    /* 0x0B740 */ u8 pad_0B740[0xE624 - 0xB740];
+    /* 0x0B740 */ u8 echoBuffer[0x2EE4];
     /* 0x0E624 */ u32 unk_0E624;
-    /* 0x0E628 */ u8 pad_0E628[0xEE00 - 0xE628];
+    /* 0x0E628 */ u8 pad_0E628[4];
+    /* 0x0E62C */ u8 firBuffer[0x7D2];
+    /* 0x0EDFE */ u8 pad_0EDFE[2];
     /* 0x0EE00 */ u32 unk_0EE00;
     /* 0x0EE04 */ u32 unk_0EE04;
     /* 0x0EE08 */ u32 unk_0EE08;
@@ -78,8 +82,8 @@ typedef struct Shtts {
     /* 0x0EEDC */ u8 pad_0EEDC[0xEEF0 - 0xEEDC];
     /* 0x0EEF0 */ OSMutex mutex;    // Guards busy and stopRequested
     /* 0x0EF08 */ OSMutex unk_0EF08;
-    /* 0x0EF20 */ ShttsParams unk_0EF20;
-    /* 0x0EF50 */ ShttsParams unk_0EF50;
+    /* 0x0EF20 */ ShttsParams set;     // What the caller has set
+    /* 0x0EF50 */ ShttsParams cur;     // What is in use
     /* 0x0EF80 */ s32 phoneme;      // Index in ShttsPhonemeNames of the sound being spoken
     /* 0x0EF84 */ u8 pad_0EF84[0x14000 - 0xEF84];
 } Shtts; // 0x14000
@@ -97,14 +101,20 @@ const char *func_0208daf8(Shtts *engine);
 int func_0208db2c(Shtts *engine, int param, int value);
 int func_0208dda4(Shtts *engine, int value);
 int func_0208de90(Shtts *engine, int value);
-void func_0208c4dc(int value, int unk, Shtts *engine);
+void func_0208c4dc(int warp, int live, Shtts *engine);
 int func_0208dca4(Shtts *engine, int param);
 int func_0208dfcc(Shtts *engine, const char *name);
 const char *func_0208dff8(const char *name);
 int func_0208e04c(Shtts *engine, const char *commands);
 int func_0208e338(Shtts *engine);
 int func_0208e354(const char *name);
-void func_020873a4(const char *command, int unk, Shtts *engine);
+int func_020873a4(const char *command, int live, Shtts *engine);
+void func_02086814(Shtts *engine);
+int func_02087e44(int value, int min, int max, const char *name);
+int func_02087e64(const char *text);
+void func_0208a010(Shtts *engine);
+void func_0208c404(Shtts *engine);
+s16 func_02089444(int a, int b);
 
 // A named set of commands, such as a speaker or a way of speaking
 typedef struct ShttsPreset {

@@ -118,6 +118,7 @@ CC_FLAGS = [
     "-Cpp_exceptions off",  # The exception table of every module is empty
     "-RTTI off",            # No runtime type information
     "-inline on,noauto",    # Only inline functions marked inline
+    "-str noreuse",         # Equal string literals are separate objects: the speech engine has "Pitch" three times
     "-gccext,on",           # GCC extensions
     "-gccinc",              # #include "..." and <...> search the same paths
     "-sym on",              # Debug info, which objdiff shows as line numbers
