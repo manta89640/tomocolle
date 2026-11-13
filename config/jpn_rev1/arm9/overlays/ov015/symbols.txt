@@ -14,14 +14,14 @@ func_ov015_0214a530 kind:function(arm,size=0x4c) addr:0x0214a530
 data_ov015_0214a57c kind:data(any) addr:0x0214a57c
 data_ov015_0214a588 kind:data(any) addr:0x0214a588 ambiguous
 data_ov015_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
-data_ov015_0214a5c4 kind:data(any) addr:0x0214a5c4
+gStr_S00_ov015_0214a5c4 kind:data(any) addr:0x0214a5c4
 data_ov015_0214a5c8 kind:data(any) addr:0x0214a5c8
 data_ov015_0214a5d4 kind:data(any) addr:0x0214a5d4 ambiguous
-data_ov015_0214a5e8 kind:data(any) addr:0x0214a5e8
-data_ov015_0214a5fc kind:data(any) addr:0x0214a5fc
-data_ov015_0214a610 kind:data(any) addr:0x0214a610
-data_ov015_0214a624 kind:data(any) addr:0x0214a624
-data_ov015_0214a638 kind:data(any) addr:0x0214a638
+gStr_S00_BG_down_nsc kind:data(any) addr:0x0214a5e8
+gStr_S00_BG_down_ncg_ov015_0214a5fc kind:data(any) addr:0x0214a5fc
+gStr_S00_BG_down_ncl_ov015_0214a610 kind:data(any) addr:0x0214a610
+gStr_S00_Obj_down_nsc kind:data(any) addr:0x0214a624
+gStr_S00_Obj_down_ncg_ov015_0214a638 kind:data(any) addr:0x0214a638
 data_ov015_0214a648 kind:data(any) addr:0x0214a648 ambiguous
-data_ov015_0214a64c kind:data(any) addr:0x0214a64c
-data_ov015_0214a660 kind:data(any) addr:0x0214a660
+gStr_S00_Obj_down_ncl_ov015_0214a64c kind:data(any) addr:0x0214a64c
+gStr_S00_ov015_0214a660 kind:data(any) addr:0x0214a660

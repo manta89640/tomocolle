@@ -24,37 +24,37 @@ data_ov027_0214a6fc kind:data(any) addr:0x0214a6fc
 data_ov027_0214a714 kind:data(any) addr:0x0214a714
 data_ov027_0214a718 kind:data(any) addr:0x0214a718 ambiguous
 data_ov027_0214a72c kind:data(any) addr:0x0214a72c
-data_ov027_0214a760 kind:data(any) addr:0x0214a760
-data_ov027_0214a768 kind:data(any) addr:0x0214a768
-data_ov027_0214a770 kind:data(any) addr:0x0214a770
+gStr_nsc kind:data(any) addr:0x0214a760
+gStr_ncl kind:data(any) addr:0x0214a768
+gStr_ncg kind:data(any) addr:0x0214a770
 data_ov027_0214a778 kind:data(any) addr:0x0214a778
 data_ov027_0214a780 kind:data(any) addr:0x0214a780
 data_ov027_0214a788 kind:data(any) addr:0x0214a788
 data_ov027_0214a790 kind:data(any) addr:0x0214a790
 data_ov027_0214a7a4 kind:data(any) addr:0x0214a7a4
 data_ov027_0214a7a8 kind:data(any) addr:0x0214a7a8 ambiguous
-data_ov027_0214a7ac kind:data(any) addr:0x0214a7ac
-data_ov027_0214a7b4 kind:data(any) addr:0x0214a7b4
-data_ov027_0214a7c4 kind:data(any) addr:0x0214a7c4
-data_ov027_0214a7d4 kind:data(any) addr:0x0214a7d4
-data_ov027_0214a7e4 kind:data(any) addr:0x0214a7e4
-data_ov027_0214a7f4 kind:data(any) addr:0x0214a7f4
+gStr_M01_bg kind:data(any) addr:0x0214a7ac
+gStr_M01_body_imd_ov027_0214a7b4 kind:data(any) addr:0x0214a7b4
+gStr_M00_body_imd kind:data(any) addr:0x0214a7c4
+gText_Matabagudesuka kind:data(any) addr:0x0214a7d4
+gStr_M00_anim00_itp kind:data(any) addr:0x0214a7e4
+gStr_M01_anim00_itp kind:data(any) addr:0x0214a7f4
 data_ov027_0214a80c kind:data(any) addr:0x0214a80c ambiguous
 data_ov027_0214a828 kind:data(any) addr:0x0214a828
 data_ov027_0214a838 kind:data(any) addr:0x0214a838 ambiguous
 data_ov027_0214a848 kind:data(any) addr:0x0214a848 ambiguous
-data_ov027_0214a850 kind:data(any) addr:0x0214a850
-data_ov027_0214a854 kind:data(any) addr:0x0214a854
-data_ov027_0214a874 kind:data(any) addr:0x0214a874
-data_ov027_0214a878 kind:data(any) addr:0x0214a878
-data_ov027_0214a88c kind:data(any) addr:0x0214a88c
-data_ov027_0214a890 kind:data(any) addr:0x0214a890
-data_ov027_0214a8b0 kind:data(any) addr:0x0214a8b0
+gStr_M00_ov027_0214a850 kind:data(any) addr:0x0214a850
+gStr_Scn_Scene_nagashisoumen_LZ_bin kind:data(any) addr:0x0214a854
+gStr_M01_ov027_0214a874 kind:data(any) addr:0x0214a874
+gStr_job_job010_LZ_bin kind:data(any) addr:0x0214a878
+gStr_TBM_ov027_0214a88c kind:data(any) addr:0x0214a88c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov027_0214a890 kind:data(any) addr:0x0214a890
+gStr_SFL_ov027_0214a8b0 kind:data(any) addr:0x0214a8b0
 data_ov027_0214a8b4 kind:data(any) addr:0x0214a8b4
 data_ov027_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
-data_ov027_0214a8d0 kind:data(any) addr:0x0214a8d0
-data_ov027_0214a8f4 kind:data(any) addr:0x0214a8f4
-data_ov027_0214a8f8 kind:data(any) addr:0x0214a8f8
-data_ov027_0214a8fc kind:data(any) addr:0x0214a8fc
-data_ov027_0214a900 kind:data(any) addr:0x0214a900
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov027_0214a8d0 kind:data(any) addr:0x0214a8d0
+gStr_M00_ov027_0214a8f4 kind:data(any) addr:0x0214a8f4
+gStr_M01_ov027_0214a8f8 kind:data(any) addr:0x0214a8f8
+gStr_TBM_ov027_0214a8fc kind:data(any) addr:0x0214a8fc
+gStr_SFL_ov027_0214a900 kind:data(any) addr:0x0214a900
 data_ov027_0214a90c kind:data(any) addr:0x0214a90c ambiguous

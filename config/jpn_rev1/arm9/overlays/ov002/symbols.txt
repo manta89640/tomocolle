@@ -6,13 +6,13 @@ func_ov002_02149fc8 kind:function(arm,size=0x48) addr:0x02149fc8
 func_ov002_0214a010 kind:function(arm,size=0x84) addr:0x0214a010
 func_ov002_0214a094 kind:function(arm,size=0x8c) addr:0x0214a094
 data_ov002_0214a148 kind:data(any) addr:0x0214a148 ambiguous
-data_ov002_0214a164 kind:data(any) addr:0x0214a164
-data_ov002_0214a168 kind:data(any) addr:0x0214a168
-data_ov002_0214a188 kind:data(any) addr:0x0214a188
+gStr_TG3_ov002_0214a164 kind:data(any) addr:0x0214a164
+gStr_Scn_Scene_SceneTestG3d_LZ_bin_ov002_0214a168 kind:data(any) addr:0x0214a168
+gStr_TGH_ov002_0214a188 kind:data(any) addr:0x0214a188
 data_ov002_0214a18c kind:data(any) addr:0x0214a18c
 data_ov002_0214a194 kind:data(any) addr:0x0214a194 ambiguous
-data_ov002_0214a1a4 kind:data(any) addr:0x0214a1a4
-data_ov002_0214a1b4 kind:data(any) addr:0x0214a1b4
-data_ov002_0214a1c4 kind:data(any) addr:0x0214a1c4
-data_ov002_0214a1d4 kind:data(any) addr:0x0214a1d4
-data_ov002_0214a1d8 kind:data(any) addr:0x0214a1d8
+gStr_TG3_Glass6_imd_ov002_0214a1a4 kind:data(any) addr:0x0214a1a4
+gStr_TGH_head_imd kind:data(any) addr:0x0214a1b4
+gStr_TGH_wait00_ica kind:data(any) addr:0x0214a1c4
+gStr_TG3_ov002_0214a1d4 kind:data(any) addr:0x0214a1d4
+gStr_TGH_ov002_0214a1d8 kind:data(any) addr:0x0214a1d8

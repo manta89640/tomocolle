@@ -9,44 +9,44 @@ func_ov020_0214b180 kind:function(arm,size=0x70) addr:0x0214b180
 func_ov020_0214b1f0 kind:function(arm,size=0x78) addr:0x0214b1f0
 data_ov020_0214b268 kind:data(any) addr:0x0214b268
 data_ov020_0214b270 kind:data(any) addr:0x0214b270
-data_ov020_0214b278 kind:data(any) addr:0x0214b278
+gText_ov020_0214b278 kind:data(any) addr:0x0214b278
 data_ov020_0214b284 kind:data(any) addr:0x0214b284
 data_ov020_0214b29c kind:data(any) addr:0x0214b29c
-data_ov020_0214b2b4 kind:data(any) addr:0x0214b2b4
+gText_ov020_0214b2b4 kind:data(any) addr:0x0214b2b4
 data_ov020_0214b2c4 kind:data(any) addr:0x0214b2c4
 data_ov020_0214b2c8 kind:data(any) addr:0x0214b2c8 ambiguous
 data_ov020_0214b308 kind:data(any) addr:0x0214b308 ambiguous
-data_ov020_0214b324 kind:data(any) addr:0x0214b324
-data_ov020_0214b34c kind:data(any) addr:0x0214b34c
-data_ov020_0214b350 kind:data(any) addr:0x0214b350
-data_ov020_0214b370 kind:data(any) addr:0x0214b370
-data_ov020_0214b374 kind:data(any) addr:0x0214b374
-data_ov020_0214b390 kind:data(any) addr:0x0214b390
-data_ov020_0214b394 kind:data(any) addr:0x0214b394
-data_ov020_0214b3b8 kind:data(any) addr:0x0214b3b8
+gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov020_0214b324 kind:data(any) addr:0x0214b324
+gStr_TBM_ov020_0214b34c kind:data(any) addr:0x0214b34c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov020_0214b350 kind:data(any) addr:0x0214b350
+gStr_SFL_ov020_0214b370 kind:data(any) addr:0x0214b370
+gStr_Scn_Scene_NgCaption_LZ_bin_ov020_0214b374 kind:data(any) addr:0x0214b374
+gStr_RM0_ov020_0214b390 kind:data(any) addr:0x0214b390
+gStr_Mdl_Misc_fountain_school_3D_LZ_bin kind:data(any) addr:0x0214b394
+gStr_M01_ov020_0214b3b8 kind:data(any) addr:0x0214b3b8
 data_ov020_0214b3bc kind:data(any) addr:0x0214b3bc
 data_ov020_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
 data_ov020_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
-data_ov020_0214b3e4 kind:data(any) addr:0x0214b3e4
-data_ov020_0214b3e8 kind:data(any) addr:0x0214b3e8
-data_ov020_0214b400 kind:data(any) addr:0x0214b400
-data_ov020_0214b414 kind:data(any) addr:0x0214b414
-data_ov020_0214b428 kind:data(any) addr:0x0214b428
-data_ov020_0214b448 kind:data(any) addr:0x0214b448
+gStr_SKY_ov020_0214b3e4 kind:data(any) addr:0x0214b3e4
+gStr_Scn_Scene_Sky_LZ_bin_ov020_0214b3e8 kind:data(any) addr:0x0214b3e8
+gStr_RM0_fountain_imd_ov020_0214b400 kind:data(any) addr:0x0214b400
+gStr_RM0_fountain_ita_ov020_0214b414 kind:data(any) addr:0x0214b414
+gStr_M01_SplCollectBillsEffect_spa_ov020_0214b428 kind:data(any) addr:0x0214b428
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov020_0214b448 kind:data(any) addr:0x0214b448
 data_ov020_0214b468 kind:data(any) addr:0x0214b468 ambiguous
-data_ov020_0214b46c kind:data(any) addr:0x0214b46c
-data_ov020_0214b480 kind:data(any) addr:0x0214b480
-data_ov020_0214b494 kind:data(any) addr:0x0214b494
+gStr_SFL_caption_ncg_ov020_0214b46c kind:data(any) addr:0x0214b46c
+gStr_SFL_caption_nsc_ov020_0214b480 kind:data(any) addr:0x0214b480
+gStr_SKY_Obj_up_ncl_ov020_0214b494 kind:data(any) addr:0x0214b494
 data_ov020_0214b4a4 kind:data(any) addr:0x0214b4a4
 data_ov020_0214b4a8 kind:data(any) addr:0x0214b4a8 ambiguous
-data_ov020_0214b4b4 kind:data(any) addr:0x0214b4b4
-data_ov020_0214b4c4 kind:data(any) addr:0x0214b4c4
-data_ov020_0214b4d4 kind:data(any) addr:0x0214b4d4
-data_ov020_0214b4e4 kind:data(any) addr:0x0214b4e4
-data_ov020_0214b4f4 kind:data(any) addr:0x0214b4f4
-data_ov020_0214b4f8 kind:data(any) addr:0x0214b4f8
-data_ov020_0214b4fc kind:data(any) addr:0x0214b4fc
-data_ov020_0214b500 kind:data(any) addr:0x0214b500
-data_ov020_0214b504 kind:data(any) addr:0x0214b504
-data_ov020_0214b508 kind:data(any) addr:0x0214b508
-data_ov020_0214b50c kind:data(any) addr:0x0214b50c
+gStr_SKY_Obj_up_nce_ov020_0214b4b4 kind:data(any) addr:0x0214b4b4
+gStr_SKY_BG_up_ncl_ov020_0214b4c4 kind:data(any) addr:0x0214b4c4
+gStr_SKY_BG_up_nsc_ov020_0214b4d4 kind:data(any) addr:0x0214b4d4
+gStr_SKY_BG_up_ncg_ov020_0214b4e4 kind:data(any) addr:0x0214b4e4
+gStr_SKY_ov020_0214b4f4 kind:data(any) addr:0x0214b4f4
+gStr_TBM_ov020_0214b4f8 kind:data(any) addr:0x0214b4f8
+gStr_SFL_ov020_0214b4fc kind:data(any) addr:0x0214b4fc
+gStr_RM0_ov020_0214b500 kind:data(any) addr:0x0214b500
+gStr_M01_ov020_0214b504 kind:data(any) addr:0x0214b504
+gStr_M02_ov020_0214b508 kind:data(any) addr:0x0214b508
+gStr_SKY_ov020_0214b50c kind:data(any) addr:0x0214b50c

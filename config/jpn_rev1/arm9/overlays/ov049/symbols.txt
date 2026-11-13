@@ -10,12 +10,12 @@ data_ov049_0214a0f0 kind:data(any) addr:0x0214a0f0
 data_ov049_0214a128 kind:data(any) addr:0x0214a128 ambiguous
 data_ov049_0214a144 kind:data(any) addr:0x0214a144
 data_ov049_0214a148 kind:data(any) addr:0x0214a148 ambiguous
-data_ov049_0214a16c kind:data(any) addr:0x0214a16c
-data_ov049_0214a170 kind:data(any) addr:0x0214a170
-data_ov049_0214a190 kind:data(any) addr:0x0214a190
-data_ov049_0214a194 kind:data(any) addr:0x0214a194
-data_ov049_0214a1b0 kind:data(any) addr:0x0214a1b0
-data_ov049_0214a1d4 kind:data(any) addr:0x0214a1d4
-data_ov049_0214a1e8 kind:data(any) addr:0x0214a1e8
-data_ov049_0214a1fc kind:data(any) addr:0x0214a1fc
-data_ov049_0214a200 kind:data(any) addr:0x0214a200
+gStr_TBM_ov049_0214a16c kind:data(any) addr:0x0214a16c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov049_0214a170 kind:data(any) addr:0x0214a170
+gStr_SFL_ov049_0214a190 kind:data(any) addr:0x0214a190
+gStr_Scn_Scene_NgCaption_LZ_bin_ov049_0214a194 kind:data(any) addr:0x0214a194
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov049_0214a1b0 kind:data(any) addr:0x0214a1b0
+gStr_SFL_caption_ncg_ov049_0214a1d4 kind:data(any) addr:0x0214a1d4
+gStr_SFL_caption_nsc_ov049_0214a1e8 kind:data(any) addr:0x0214a1e8
+gStr_TBM_ov049_0214a1fc kind:data(any) addr:0x0214a1fc
+gStr_SFL_ov049_0214a200 kind:data(any) addr:0x0214a200

@@ -13,25 +13,25 @@ data_ov060_0214a5c8 kind:data(any) addr:0x0214a5c8 ambiguous
 data_ov060_0214a5d4 kind:data(any) addr:0x0214a5d4 ambiguous
 data_ov060_0214a5e4 kind:data(any) addr:0x0214a5e4
 data_ov060_0214a5e8 kind:data(any) addr:0x0214a5e8 ambiguous
-data_ov060_0214a60c kind:data(any) addr:0x0214a60c
-data_ov060_0214a610 kind:data(any) addr:0x0214a610
-data_ov060_0214a630 kind:data(any) addr:0x0214a630
+gStr_TBM_ov060_0214a60c kind:data(any) addr:0x0214a60c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov060_0214a610 kind:data(any) addr:0x0214a610
+gStr_SFL_ov060_0214a630 kind:data(any) addr:0x0214a630
 data_ov060_0214a634 kind:data(any) addr:0x0214a634
 data_ov060_0214a648 kind:data(any) addr:0x0214a648 ambiguous
-data_ov060_0214a650 kind:data(any) addr:0x0214a650
-data_ov060_0214a654 kind:data(any) addr:0x0214a654
-data_ov060_0214a670 kind:data(any) addr:0x0214a670
+gStr_M03_ov060_0214a650 kind:data(any) addr:0x0214a650
+gStr_Mdl_Misc_fureai_3D_LZ_bin kind:data(any) addr:0x0214a654
+gStr_SBG_ov060_0214a670 kind:data(any) addr:0x0214a670
 data_ov060_0214a674 kind:data(any) addr:0x0214a674
 data_ov060_0214a688 kind:data(any) addr:0x0214a688 ambiguous
-data_ov060_0214a690 kind:data(any) addr:0x0214a690
-data_ov060_0214a6ac kind:data(any) addr:0x0214a6ac
-data_ov060_0214a6d0 kind:data(any) addr:0x0214a6d0
+gStr_M03_cheek_shadow_c0_imd_ov060_0214a690 kind:data(any) addr:0x0214a690
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov060_0214a6ac kind:data(any) addr:0x0214a6ac
+gStr_SFL_caption_ncg_ov060_0214a6d0 kind:data(any) addr:0x0214a6d0
 data_ov060_0214a6e4 kind:data(any) addr:0x0214a6e4
 data_ov060_0214a6ec kind:data(any) addr:0x0214a6ec ambiguous
-data_ov060_0214a6f8 kind:data(any) addr:0x0214a6f8
-data_ov060_0214a708 kind:data(any) addr:0x0214a708
-data_ov060_0214a718 kind:data(any) addr:0x0214a718
-data_ov060_0214a728 kind:data(any) addr:0x0214a728
-data_ov060_0214a72c kind:data(any) addr:0x0214a72c
-data_ov060_0214a730 kind:data(any) addr:0x0214a730
-data_ov060_0214a734 kind:data(any) addr:0x0214a734
+gStr_SBG_BG_up_ncl_ov060_0214a6f8 kind:data(any) addr:0x0214a6f8
+gStr_SBG_BG_up_nsc_ov060_0214a708 kind:data(any) addr:0x0214a708
+gStr_SBG_BG_up_ncg_ov060_0214a718 kind:data(any) addr:0x0214a718
+gStr_TBM_ov060_0214a728 kind:data(any) addr:0x0214a728
+gStr_SFL_ov060_0214a72c kind:data(any) addr:0x0214a72c
+gStr_M03_ov060_0214a730 kind:data(any) addr:0x0214a730
+gStr_SBG_ov060_0214a734 kind:data(any) addr:0x0214a734

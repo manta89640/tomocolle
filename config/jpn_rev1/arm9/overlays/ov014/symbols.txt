@@ -17,15 +17,15 @@ data_ov014_0214a19c kind:data(any) addr:0x0214a19c
 data_ov014_0214a1a8 kind:data(any) addr:0x0214a1a8
 data_ov014_0214a1b4 kind:data(any) addr:0x0214a1b4
 data_ov014_0214a1cc kind:data(any) addr:0x0214a1cc
-data_ov014_0214a1e4 kind:data(any) addr:0x0214a1e4
+gText_ov014_0214a1e4 kind:data(any) addr:0x0214a1e4
 data_ov014_0214a1fc kind:data(any) addr:0x0214a1fc
 data_ov014_0214a228 kind:data(any) addr:0x0214a228 ambiguous
-data_ov014_0214a244 kind:data(any) addr:0x0214a244
-data_ov014_0214a248 kind:data(any) addr:0x0214a248
-data_ov014_0214a268 kind:data(any) addr:0x0214a268
-data_ov014_0214a27c kind:data(any) addr:0x0214a27c
-data_ov014_0214a290 kind:data(any) addr:0x0214a290
-data_ov014_0214a2a4 kind:data(any) addr:0x0214a2a4
-data_ov014_0214a2b8 kind:data(any) addr:0x0214a2b8
-data_ov014_0214a2cc kind:data(any) addr:0x0214a2cc
-data_ov014_0214a2e0 kind:data(any) addr:0x0214a2e0
+gStr_M00_ov014_0214a244 kind:data(any) addr:0x0214a244
+gStr_Scn_Scene_SceneTestNg50_LZ_bin kind:data(any) addr:0x0214a248
+gStr_M00_Obj_down_nce_ov014_0214a268 kind:data(any) addr:0x0214a268
+gStr_M00_Obj_down_ncg_ov014_0214a27c kind:data(any) addr:0x0214a27c
+gStr_M00_Obj_down_ncl_ov014_0214a290 kind:data(any) addr:0x0214a290
+gStr_M00_BG_down_nsc_ov014_0214a2a4 kind:data(any) addr:0x0214a2a4
+gStr_M00_BG_down_ncg_ov014_0214a2b8 kind:data(any) addr:0x0214a2b8
+gStr_M00_BG_down_ncl_ov014_0214a2cc kind:data(any) addr:0x0214a2cc
+gStr_M00_ov014_0214a2e0 kind:data(any) addr:0x0214a2e0

@@ -13,10 +13,10 @@ data_ov081_0214b220 kind:data(any) addr:0x0214b220
 data_ov081_0214b270 kind:data(any) addr:0x0214b270
 data_ov081_0214b288 kind:data(any) addr:0x0214b288
 data_ov081_0214b294 kind:data(any) addr:0x0214b294
-data_ov081_0214b2ac kind:data(any) addr:0x0214b2ac
+gText_ov081_0214b2ac kind:data(any) addr:0x0214b2ac
 data_ov081_0214b2bc kind:data(any) addr:0x0214b2bc
 data_ov081_0214b2c8 kind:data(any) addr:0x0214b2c8 ambiguous
-data_ov081_0214b2cc kind:data(any) addr:0x0214b2cc
+gStr_M00_Window_common_nsc_ov081_0214b2cc kind:data(any) addr:0x0214b2cc
 data_ov081_0214b2e4 kind:data(any) addr:0x0214b2e4
 data_ov081_0214b2e8 kind:data(any) addr:0x0214b2e8
 data_ov081_0214b2ec kind:data(any) addr:0x0214b2ec
@@ -28,34 +28,34 @@ data_ov081_0214b3a0 kind:data(any) addr:0x0214b3a0
 data_ov081_0214b3a8 kind:data(any) addr:0x0214b3a8
 data_ov081_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
 data_ov081_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
-data_ov081_0214b3ec kind:data(any) addr:0x0214b3ec
-data_ov081_0214b40c kind:data(any) addr:0x0214b40c
-data_ov081_0214b410 kind:data(any) addr:0x0214b410
-data_ov081_0214b430 kind:data(any) addr:0x0214b430
-data_ov081_0214b434 kind:data(any) addr:0x0214b434
-data_ov081_0214b450 kind:data(any) addr:0x0214b450
-data_ov081_0214b454 kind:data(any) addr:0x0214b454
+gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov081_0214b3ec kind:data(any) addr:0x0214b3ec
+gStr_RM0_ov081_0214b40c kind:data(any) addr:0x0214b40c
+gStr_Mdl_Misc_fountain_box_3D_LZ_bin kind:data(any) addr:0x0214b410
+gStr_TCM_ov081_0214b430 kind:data(any) addr:0x0214b430
+gStr_Msg_TmdCommonMsgJP_LZ_bin_ov081_0214b434 kind:data(any) addr:0x0214b434
+gStr_TEM_ov081_0214b450 kind:data(any) addr:0x0214b450
+gStr_Msg_TmdEtcMsgJP_LZ_bin_ov081_0214b454 kind:data(any) addr:0x0214b454
 data_ov081_0214b468 kind:data(any) addr:0x0214b468 ambiguous
-data_ov081_0214b46c kind:data(any) addr:0x0214b46c
-data_ov081_0214b470 kind:data(any) addr:0x0214b470
-data_ov081_0214b494 kind:data(any) addr:0x0214b494
+gStr_M00_ov081_0214b46c kind:data(any) addr:0x0214b46c
+gStr_Scn_Scene_SceneCollectBills_LZ_bin_ov081_0214b470 kind:data(any) addr:0x0214b470
+gStr_M01_ov081_0214b494 kind:data(any) addr:0x0214b494
 data_ov081_0214b498 kind:data(any) addr:0x0214b498
 data_ov081_0214b4a8 kind:data(any) addr:0x0214b4a8 ambiguous
-data_ov081_0214b4c0 kind:data(any) addr:0x0214b4c0
-data_ov081_0214b4d4 kind:data(any) addr:0x0214b4d4
-data_ov081_0214b4e8 kind:data(any) addr:0x0214b4e8
-data_ov081_0214b4fc kind:data(any) addr:0x0214b4fc
-data_ov081_0214b510 kind:data(any) addr:0x0214b510
-data_ov081_0214b524 kind:data(any) addr:0x0214b524
-data_ov081_0214b53c kind:data(any) addr:0x0214b53c
-data_ov081_0214b550 kind:data(any) addr:0x0214b550
-data_ov081_0214b564 kind:data(any) addr:0x0214b564
-data_ov081_0214b578 kind:data(any) addr:0x0214b578
-data_ov081_0214b594 kind:data(any) addr:0x0214b594
-data_ov081_0214b5ac kind:data(any) addr:0x0214b5ac
+gStr_RM0_fountain_imd_ov081_0214b4c0 kind:data(any) addr:0x0214b4c0
+gStr_RM0_fountain_ita_ov081_0214b4d4 kind:data(any) addr:0x0214b4d4
+gStr_M00_BG_down_nsc_ov081_0214b4e8 kind:data(any) addr:0x0214b4e8
+gStr_M00_BG_down_ncg_ov081_0214b4fc kind:data(any) addr:0x0214b4fc
+gStr_M00_BG_down_ncl_ov081_0214b510 kind:data(any) addr:0x0214b510
+gStr_M00_Window_common_nsc_ov081_0214b524 kind:data(any) addr:0x0214b524
+gStr_M00_Obj_down_nce_ov081_0214b53c kind:data(any) addr:0x0214b53c
+gStr_M00_Obj_down_ncg_ov081_0214b550 kind:data(any) addr:0x0214b550
+gStr_M00_Obj_down_ncl_ov081_0214b564 kind:data(any) addr:0x0214b564
+gStr_TCM_tmd_common_msg_JP_bmg_ov081_0214b578 kind:data(any) addr:0x0214b578
+gStr_TEM_tmd_etc_msg_JP_bmg_ov081_0214b594 kind:data(any) addr:0x0214b594
+gStr_M01_SplCollectBillsEffect_spa_ov081_0214b5ac kind:data(any) addr:0x0214b5ac
 data_ov081_0214b5c8 kind:data(any) addr:0x0214b5c8 ambiguous
-data_ov081_0214b5cc kind:data(any) addr:0x0214b5cc
-data_ov081_0214b5d0 kind:data(any) addr:0x0214b5d0
-data_ov081_0214b5d4 kind:data(any) addr:0x0214b5d4
-data_ov081_0214b5d8 kind:data(any) addr:0x0214b5d8
-data_ov081_0214b5dc kind:data(any) addr:0x0214b5dc
+gStr_RM0_ov081_0214b5cc kind:data(any) addr:0x0214b5cc
+gStr_TCM_ov081_0214b5d0 kind:data(any) addr:0x0214b5d0
+gStr_TEM_ov081_0214b5d4 kind:data(any) addr:0x0214b5d4
+gStr_M00_ov081_0214b5d8 kind:data(any) addr:0x0214b5d8
+gStr_M01_ov081_0214b5dc kind:data(any) addr:0x0214b5dc

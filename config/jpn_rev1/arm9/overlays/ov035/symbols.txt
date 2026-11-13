@@ -13,21 +13,21 @@ func_ov035_0214a520 kind:function(arm,size=0x7c) addr:0x0214a520
 func_ov035_0214a59c kind:function(arm,size=0x5c) addr:0x0214a59c
 func_ov035_0214a5f8 kind:function(arm,size=0x38) addr:0x0214a5f8
 func_ov035_0214a630 kind:function(arm,size=0x40) addr:0x0214a630
-data_ov035_0214a670 kind:data(any) addr:0x0214a670
+gText_ov035_0214a670 kind:data(any) addr:0x0214a670
 data_ov035_0214a688 kind:data(any) addr:0x0214a688 ambiguous
-data_ov035_0214a6a8 kind:data(any) addr:0x0214a6a8
-data_ov035_0214a6b8 kind:data(any) addr:0x0214a6b8
+gStr_b_ov035_0214a6a8 kind:data(any) addr:0x0214a6a8
+gText_ov035_0214a6b8 kind:data(any) addr:0x0214a6b8
 __sinit_ov035_0214a6c8 kind:function(arm,size=0x1c) addr:0x0214a6c8
 .p__sinit_ov035_0214a6c8 kind:data(word) addr:0x0214a6e4
 data_ov035_0214a700 kind:data(any) addr:0x0214a700
 data_ov035_0214a718 kind:data(any) addr:0x0214a718 ambiguous
-data_ov035_0214a734 kind:data(any) addr:0x0214a734
-data_ov035_0214a75c kind:data(any) addr:0x0214a75c
-data_ov035_0214a760 kind:data(any) addr:0x0214a760
-data_ov035_0214a780 kind:data(any) addr:0x0214a780
-data_ov035_0214a794 kind:data(any) addr:0x0214a794
-data_ov035_0214a7a8 kind:data(any) addr:0x0214a7a8
-data_ov035_0214a7bc kind:data(any) addr:0x0214a7bc
-data_ov035_0214a7d0 kind:data(any) addr:0x0214a7d0
-data_ov035_0214a7e4 kind:data(any) addr:0x0214a7e4
-data_ov035_0214a7f8 kind:data(any) addr:0x0214a7f8
+gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov035_0214a734 kind:data(any) addr:0x0214a734
+gStr_M00_ov035_0214a75c kind:data(any) addr:0x0214a75c
+gStr_Scn_Scene_SceneTestNg105_LZ_bin kind:data(any) addr:0x0214a760
+gStr_M00_Obj_down_ncl_ov035_0214a780 kind:data(any) addr:0x0214a780
+gStr_M00_Obj_down_nce_ov035_0214a794 kind:data(any) addr:0x0214a794
+gStr_M00_Obj_down_ncg_ov035_0214a7a8 kind:data(any) addr:0x0214a7a8
+gStr_M00_BG_down_nsc_ov035_0214a7bc kind:data(any) addr:0x0214a7bc
+gStr_M00_BG_down_ncg_ov035_0214a7d0 kind:data(any) addr:0x0214a7d0
+gStr_M00_BG_down_ncl_ov035_0214a7e4 kind:data(any) addr:0x0214a7e4
+gStr_M00_ov035_0214a7f8 kind:data(any) addr:0x0214a7f8

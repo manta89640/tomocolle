@@ -18,25 +18,25 @@ data_ov051_0214a940 kind:data(any) addr:0x0214a940
 data_ov051_0214a948 kind:data(any) addr:0x0214a948 ambiguous
 data_ov051_0214a968 kind:data(any) addr:0x0214a968
 data_ov051_0214a978 kind:data(any) addr:0x0214a978
-data_ov051_0214a9a0 kind:data(any) addr:0x0214a9a0
+gText_ov051_0214a9a0 kind:data(any) addr:0x0214a9a0
 data_ov051_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous
-data_ov051_0214a9c8 kind:data(any) addr:0x0214a9c8
-data_ov051_0214a9f0 kind:data(any) addr:0x0214a9f0
-data_ov051_0214a9f4 kind:data(any) addr:0x0214a9f4
-data_ov051_0214aa10 kind:data(any) addr:0x0214aa10
+gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov051_0214a9c8 kind:data(any) addr:0x0214a9c8
+gStr_3HT_ov051_0214a9f0 kind:data(any) addr:0x0214a9f0
+gStr_Mdl_Goods_gd10_3D_LZ_bin_ov051_0214a9f4 kind:data(any) addr:0x0214a9f4
+gStr_S00_ov051_0214aa10 kind:data(any) addr:0x0214aa10
 data_ov051_0214aa14 kind:data(any) addr:0x0214aa14
 data_ov051_0214aa28 kind:data(any) addr:0x0214aa28 ambiguous
-data_ov051_0214aa34 kind:data(any) addr:0x0214aa34
-data_ov051_0214aa38 kind:data(any) addr:0x0214aa38
-data_ov051_0214aa54 kind:data(any) addr:0x0214aa54
-data_ov051_0214aa64 kind:data(any) addr:0x0214aa64
-data_ov051_0214aa78 kind:data(any) addr:0x0214aa78
-data_ov051_0214aa8c kind:data(any) addr:0x0214aa8c
-data_ov051_0214aaa0 kind:data(any) addr:0x0214aaa0
-data_ov051_0214aab4 kind:data(any) addr:0x0214aab4
+gStr_SBG_ov051_0214aa34 kind:data(any) addr:0x0214aa34
+gStr_Scn_Scene_SceneBG_LZ_bin_ov051_0214aa38 kind:data(any) addr:0x0214aa38
+gStr_3HT_goods_imd_ov051_0214aa54 kind:data(any) addr:0x0214aa54
+gStr_S00_Obj_down_ncl_ov051_0214aa64 kind:data(any) addr:0x0214aa64
+gStr_S00_Obj_down_nce_ov051_0214aa78 kind:data(any) addr:0x0214aa78
+gStr_S00_Obj_down_ncg_ov051_0214aa8c kind:data(any) addr:0x0214aa8c
+gStr_S00_Obj_down_ncl_ov051_0214aaa0 kind:data(any) addr:0x0214aaa0
+gStr_SBG_BG_up_ncl_ov051_0214aab4 kind:data(any) addr:0x0214aab4
 data_ov051_0214aac4 kind:data(any) addr:0x0214aac4
 data_ov051_0214aacc kind:data(any) addr:0x0214aacc ambiguous
-data_ov051_0214aad4 kind:data(any) addr:0x0214aad4
-data_ov051_0214aae4 kind:data(any) addr:0x0214aae4
-data_ov051_0214aae8 kind:data(any) addr:0x0214aae8
-data_ov051_0214aaec kind:data(any) addr:0x0214aaec
+gStr_SBG_BG_up_ncg_ov051_0214aad4 kind:data(any) addr:0x0214aad4
+gStr_3HT_ov051_0214aae4 kind:data(any) addr:0x0214aae4
+gStr_S00_ov051_0214aae8 kind:data(any) addr:0x0214aae8
+gStr_SBG_ov051_0214aaec kind:data(any) addr:0x0214aaec

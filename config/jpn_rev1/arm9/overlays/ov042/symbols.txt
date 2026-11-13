@@ -21,30 +21,30 @@ data_ov042_0214b398 kind:data(any) addr:0x0214b398
 data_ov042_0214b3a0 kind:data(any) addr:0x0214b3a0
 data_ov042_0214b3b0 kind:data(any) addr:0x0214b3b0
 data_ov042_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
-data_ov042_0214b3d4 kind:data(any) addr:0x0214b3d4
+gText_ov042_0214b3d4 kind:data(any) addr:0x0214b3d4
 data_ov042_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
 data_ov042_0214b3e4 kind:data(any) addr:0x0214b3e4
 data_ov042_0214b3f4 kind:data(any) addr:0x0214b3f4
 data_ov042_0214b414 kind:data(any) addr:0x0214b414
 data_ov042_0214b468 kind:data(any) addr:0x0214b468 ambiguous
-data_ov042_0214b484 kind:data(any) addr:0x0214b484
+gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov042_0214b484 kind:data(any) addr:0x0214b484
 data_ov042_0214b4a8 kind:data(any) addr:0x0214b4a8 ambiguous
-data_ov042_0214b4ac kind:data(any) addr:0x0214b4ac
-data_ov042_0214b4b0 kind:data(any) addr:0x0214b4b0
-data_ov042_0214b4d0 kind:data(any) addr:0x0214b4d0
-data_ov042_0214b4d4 kind:data(any) addr:0x0214b4d4
-data_ov042_0214b4f4 kind:data(any) addr:0x0214b4f4
-data_ov042_0214b4f8 kind:data(any) addr:0x0214b4f8
-data_ov042_0214b514 kind:data(any) addr:0x0214b514
-data_ov042_0214b528 kind:data(any) addr:0x0214b528
-data_ov042_0214b53c kind:data(any) addr:0x0214b53c
-data_ov042_0214b550 kind:data(any) addr:0x0214b550
-data_ov042_0214b560 kind:data(any) addr:0x0214b560
-data_ov042_0214b570 kind:data(any) addr:0x0214b570
-data_ov042_0214b584 kind:data(any) addr:0x0214b584
-data_ov042_0214b5a8 kind:data(any) addr:0x0214b5a8
+gStr_N56_ov042_0214b4ac kind:data(any) addr:0x0214b4ac
+gStr_Scn_Scene_SceneTestNg119_LZ_bin kind:data(any) addr:0x0214b4b0
+gStr_TBM_ov042_0214b4d0 kind:data(any) addr:0x0214b4d0
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov042_0214b4d4 kind:data(any) addr:0x0214b4d4
+gStr_SFL_ov042_0214b4f4 kind:data(any) addr:0x0214b4f4
+gStr_Scn_Scene_NgCaption_LZ_bin_ov042_0214b4f8 kind:data(any) addr:0x0214b4f8
+gStr_N56_Obj_down_nsc_ov042_0214b514 kind:data(any) addr:0x0214b514
+gStr_N56_Obj_down_ncg_ov042_0214b528 kind:data(any) addr:0x0214b528
+gStr_N56_Obj_down_ncl_ov042_0214b53c kind:data(any) addr:0x0214b53c
+gStr_N56_BG_up_ncl_ov042_0214b550 kind:data(any) addr:0x0214b550
+gStr_N56_BG_up_ncg kind:data(any) addr:0x0214b560
+gStr_N56_BG_frame_nsc_ov042_0214b570 kind:data(any) addr:0x0214b570
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov042_0214b584 kind:data(any) addr:0x0214b584
+gStr_SFL_caption_ncg_ov042_0214b5a8 kind:data(any) addr:0x0214b5a8
 data_ov042_0214b5bc kind:data(any) addr:0x0214b5bc
 data_ov042_0214b5c8 kind:data(any) addr:0x0214b5c8 ambiguous
-data_ov042_0214b5d0 kind:data(any) addr:0x0214b5d0
-data_ov042_0214b5d4 kind:data(any) addr:0x0214b5d4
-data_ov042_0214b5d8 kind:data(any) addr:0x0214b5d8
+gStr_N56_ov042_0214b5d0 kind:data(any) addr:0x0214b5d0
+gStr_TBM_ov042_0214b5d4 kind:data(any) addr:0x0214b5d4
+gStr_SFL_ov042_0214b5d8 kind:data(any) addr:0x0214b5d8

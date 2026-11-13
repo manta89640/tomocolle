@@ -11,51 +11,51 @@ func_ov021_0214a2c8 kind:function(arm,size=0x70) addr:0x0214a2c8
 func_ov021_0214a338 kind:function(arm,size=0x78) addr:0x0214a338
 data_ov021_0214a3b0 kind:data(any) addr:0x0214a3b0
 data_ov021_0214a3c8 kind:data(any) addr:0x0214a3c8
-data_ov021_0214a400 kind:data(any) addr:0x0214a400
-data_ov021_0214a404 kind:data(any) addr:0x0214a404
-data_ov021_0214a408 kind:data(any) addr:0x0214a408
-data_ov021_0214a40c kind:data(any) addr:0x0214a40c
-data_ov021_0214a410 kind:data(any) addr:0x0214a410
-data_ov021_0214a414 kind:data(any) addr:0x0214a414
-data_ov021_0214a418 kind:data(any) addr:0x0214a418
-data_ov021_0214a41c kind:data(any) addr:0x0214a41c
-data_ov021_0214a420 kind:data(any) addr:0x0214a420
-data_ov021_0214a424 kind:data(any) addr:0x0214a424
+gStr_P13_ov021_0214a400 kind:data(any) addr:0x0214a400
+gStr_P15_ov021_0214a404 kind:data(any) addr:0x0214a404
+gStr_P14_ov021_0214a408 kind:data(any) addr:0x0214a408
+gStr_P12_ov021_0214a40c kind:data(any) addr:0x0214a40c
+gStr_P02_ov021_0214a410 kind:data(any) addr:0x0214a410
+gStr_P03_ov021_0214a414 kind:data(any) addr:0x0214a414
+gStr_P09_ov021_0214a418 kind:data(any) addr:0x0214a418
+gStr_P08_ov021_0214a41c kind:data(any) addr:0x0214a41c
+gStr_P11_ov021_0214a420 kind:data(any) addr:0x0214a420
+gStr_P18_ov021_0214a424 kind:data(any) addr:0x0214a424
 data_ov021_0214a428 kind:data(any) addr:0x0214a428
-data_ov021_0214a42c kind:data(any) addr:0x0214a42c
-data_ov021_0214a430 kind:data(any) addr:0x0214a430
-data_ov021_0214a434 kind:data(any) addr:0x0214a434
-data_ov021_0214a438 kind:data(any) addr:0x0214a438
-data_ov021_0214a43c kind:data(any) addr:0x0214a43c
-data_ov021_0214a440 kind:data(any) addr:0x0214a440
-data_ov021_0214a444 kind:data(any) addr:0x0214a444
-data_ov021_0214a448 kind:data(any) addr:0x0214a448
-data_ov021_0214a44c kind:data(any) addr:0x0214a44c
-data_ov021_0214a450 kind:data(any) addr:0x0214a450
-data_ov021_0214a454 kind:data(any) addr:0x0214a454
-data_ov021_0214a464 kind:data(any) addr:0x0214a464
-data_ov021_0214a474 kind:data(any) addr:0x0214a474
-data_ov021_0214a484 kind:data(any) addr:0x0214a484
-data_ov021_0214a494 kind:data(any) addr:0x0214a494
+gStr_P16_ov021_0214a42c kind:data(any) addr:0x0214a42c
+gStr_P17_ov021_0214a430 kind:data(any) addr:0x0214a430
+gStr_P10_ov021_0214a434 kind:data(any) addr:0x0214a434
+gStr_P00_ov021_0214a438 kind:data(any) addr:0x0214a438
+gStr_P01_ov021_0214a43c kind:data(any) addr:0x0214a43c
+gStr_P05_ov021_0214a440 kind:data(any) addr:0x0214a440
+gStr_P04_ov021_0214a444 kind:data(any) addr:0x0214a444
+gStr_P06_ov021_0214a448 kind:data(any) addr:0x0214a448
+gStr_P07_ov021_0214a44c kind:data(any) addr:0x0214a44c
+gStr_P19_ov021_0214a450 kind:data(any) addr:0x0214a450
+gStr_P11_item_imd_ov021_0214a454 kind:data(any) addr:0x0214a454
+gStr_P12_item_imd_ov021_0214a464 kind:data(any) addr:0x0214a464
+gStr_P19_item_imd_ov021_0214a474 kind:data(any) addr:0x0214a474
+gStr_P00_item_imd_ov021_0214a484 kind:data(any) addr:0x0214a484
+gStr_P13_item_imd_ov021_0214a494 kind:data(any) addr:0x0214a494
 data_ov021_0214a4a4 kind:data(any) addr:0x0214a4a4
 data_ov021_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
-data_ov021_0214a4b4 kind:data(any) addr:0x0214a4b4
+gStr_P02_item_imd_ov021_0214a4b4 kind:data(any) addr:0x0214a4b4
 data_ov021_0214a4c4 kind:data(any) addr:0x0214a4c4
 data_ov021_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
-data_ov021_0214a4d4 kind:data(any) addr:0x0214a4d4
-data_ov021_0214a4e4 kind:data(any) addr:0x0214a4e4
-data_ov021_0214a4f4 kind:data(any) addr:0x0214a4f4
+gStr_P03_item_imd_ov021_0214a4d4 kind:data(any) addr:0x0214a4d4
+gStr_P04_item_imd_ov021_0214a4e4 kind:data(any) addr:0x0214a4e4
+gStr_P15_item_imd_ov021_0214a4f4 kind:data(any) addr:0x0214a4f4
 data_ov021_0214a504 kind:data(any) addr:0x0214a504
 data_ov021_0214a508 kind:data(any) addr:0x0214a508 ambiguous
-data_ov021_0214a514 kind:data(any) addr:0x0214a514
-data_ov021_0214a524 kind:data(any) addr:0x0214a524
-data_ov021_0214a534 kind:data(any) addr:0x0214a534
+gStr_P06_item_imd_ov021_0214a514 kind:data(any) addr:0x0214a514
+gStr_P16_item_imd_ov021_0214a524 kind:data(any) addr:0x0214a524
+gStr_P07_item_imd_ov021_0214a534 kind:data(any) addr:0x0214a534
 data_ov021_0214a544 kind:data(any) addr:0x0214a544
 data_ov021_0214a548 kind:data(any) addr:0x0214a548 ambiguous
-data_ov021_0214a554 kind:data(any) addr:0x0214a554
+gStr_P17_item_imd_ov021_0214a554 kind:data(any) addr:0x0214a554
 data_ov021_0214a564 kind:data(any) addr:0x0214a564
 data_ov021_0214a568 kind:data(any) addr:0x0214a568 ambiguous
-data_ov021_0214a574 kind:data(any) addr:0x0214a574
+gStr_P10_item_imd_ov021_0214a574 kind:data(any) addr:0x0214a574
 data_ov021_0214a584 kind:data(any) addr:0x0214a584
 data_ov021_0214a588 kind:data(any) addr:0x0214a588 ambiguous
 data_ov021_0214a594 kind:data(any) addr:0x0214a594
@@ -68,11 +68,11 @@ data_ov021_0214a5f0 kind:data(any) addr:0x0214a5f0
 data_ov021_0214a640 kind:data(any) addr:0x0214a640
 data_ov021_0214a648 kind:data(any) addr:0x0214a648 ambiguous
 data_ov021_0214a688 kind:data(any) addr:0x0214a688 ambiguous
-data_ov021_0214a690 kind:data(any) addr:0x0214a690
-data_ov021_0214a6ac kind:data(any) addr:0x0214a6ac
-data_ov021_0214a6b0 kind:data(any) addr:0x0214a6b0
-data_ov021_0214a6d0 kind:data(any) addr:0x0214a6d0
-data_ov021_0214a6dc kind:data(any) addr:0x0214a6dc
+gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov021_0214a690 kind:data(any) addr:0x0214a690
+gStr_N69_ov021_0214a6ac kind:data(any) addr:0x0214a6ac
+gStr_Scn_Scene_SceneTestNg69_LZ_bin kind:data(any) addr:0x0214a6b0
+gStr_N69_BG_ncl kind:data(any) addr:0x0214a6d0
+gStr_N69_BG_nsc kind:data(any) addr:0x0214a6dc
 data_ov021_0214a6e8 kind:data(any) addr:0x0214a6e8
 data_ov021_0214a6ec kind:data(any) addr:0x0214a6ec ambiguous
-data_ov021_0214a6f4 kind:data(any) addr:0x0214a6f4
+gStr_N69_ov021_0214a6f4 kind:data(any) addr:0x0214a6f4

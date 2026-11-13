@@ -19,12 +19,12 @@ data_ov005_0214a4a0 kind:data(any) addr:0x0214a4a0
 data_ov005_0214a4a4 kind:data(any) addr:0x0214a4a4
 data_ov005_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
 data_ov005_0214a4ac kind:data(any) addr:0x0214a4ac
-data_ov005_0214a4b8 kind:data(any) addr:0x0214a4b8
+gText_ov005_0214a4b8 kind:data(any) addr:0x0214a4b8
 data_ov005_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
 data_ov005_0214a4e8 kind:data(any) addr:0x0214a4e8
 data_ov005_0214a504 kind:data(any) addr:0x0214a504 ambiguous
 data_ov005_0214a508 kind:data(any) addr:0x0214a508 ambiguous
-data_ov005_0214a520 kind:data(any) addr:0x0214a520
-data_ov005_0214a524 kind:data(any) addr:0x0214a524
-data_ov005_0214a548 kind:data(any) addr:0x0214a548
-data_ov005_0214a558 kind:data(any) addr:0x0214a558
+gStr_SME_ov005_0214a520 kind:data(any) addr:0x0214a520
+gStr_Scn_Scene_SceneTestDrawMii_LZ_bin kind:data(any) addr:0x0214a524
+gStr_SME_room_imd kind:data(any) addr:0x0214a548
+gStr_SME_ov005_0214a558 kind:data(any) addr:0x0214a558

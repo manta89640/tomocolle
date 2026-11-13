@@ -22,7 +22,7 @@ data_ov097_0214a988 kind:data(any) addr:0x0214a988 ambiguous
 data_ov097_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous
 data_ov097_0214aa28 kind:data(any) addr:0x0214aa28 ambiguous
 data_ov097_0214aacc kind:data(any) addr:0x0214aacc ambiguous
-data_ov097_0214abf8 kind:data(any) addr:0x0214abf8
+gText_ov097_0214abf8 kind:data(any) addr:0x0214abf8
 data_ov097_0214ac88 kind:data(any) addr:0x0214ac88 ambiguous
 data_ov097_0214acdc kind:data(any) addr:0x0214acdc ambiguous
 data_ov097_0214ad18 kind:data(any) addr:0x0214ad18 ambiguous
@@ -41,24 +41,24 @@ data_ov097_0214b020 kind:data(any) addr:0x0214b020
 data_ov097_0214b024 kind:data(any) addr:0x0214b024
 data_ov097_0214b028 kind:data(any) addr:0x0214b028 ambiguous
 data_ov097_0214b044 kind:data(any) addr:0x0214b044 ambiguous
-data_ov097_0214b060 kind:data(any) addr:0x0214b060
-data_ov097_0214b064 kind:data(any) addr:0x0214b064
-data_ov097_0214b084 kind:data(any) addr:0x0214b084
-data_ov097_0214b088 kind:data(any) addr:0x0214b088
-data_ov097_0214b0a4 kind:data(any) addr:0x0214b0a4
-data_ov097_0214b0a8 kind:data(any) addr:0x0214b0a8
-data_ov097_0214b0ac kind:data(any) addr:0x0214b0ac
-data_ov097_0214b0b0 kind:data(any) addr:0x0214b0b0
-data_ov097_0214b0c4 kind:data(any) addr:0x0214b0c4
+gStr_M00_ov097_0214b060 kind:data(any) addr:0x0214b060
+gStr_Scn_Scene_SceneMarriage2_LZ_bin kind:data(any) addr:0x0214b064
+gStr_TBM_ov097_0214b084 kind:data(any) addr:0x0214b084
+gStr_Msg_TmdStaffMsgJP_LZ_bin kind:data(any) addr:0x0214b088
+gStr_M00_ov097_0214b0a4 kind:data(any) addr:0x0214b0a4
+gStr_TBM_ov097_0214b0a8 kind:data(any) addr:0x0214b0a8
+gStr_3BG_ov097_0214b0ac kind:data(any) addr:0x0214b0ac
+gStr_M00_BG_down_nsc_ov097_0214b0b0 kind:data(any) addr:0x0214b0b0
+gStr_M00_BG_down_ncg_ov097_0214b0c4 kind:data(any) addr:0x0214b0c4
 data_ov097_0214b0d8 kind:data(any) addr:0x0214b0d8
 data_ov097_0214b0e4 kind:data(any) addr:0x0214b0e4 ambiguous
-data_ov097_0214b0ec kind:data(any) addr:0x0214b0ec
-data_ov097_0214b100 kind:data(any) addr:0x0214b100
-data_ov097_0214b114 kind:data(any) addr:0x0214b114
-data_ov097_0214b128 kind:data(any) addr:0x0214b128
-data_ov097_0214b144 kind:data(any) addr:0x0214b144
-data_ov097_0214b148 kind:data(any) addr:0x0214b148
-data_ov097_0214b14c kind:data(any) addr:0x0214b14c
-data_ov097_0214b158 kind:data(any) addr:0x0214b158
-data_ov097_0214b164 kind:data(any) addr:0x0214b164
-data_ov097_0214b170 kind:data(any) addr:0x0214b170
+gStr_M00_Obj_down_nce_ov097_0214b0ec kind:data(any) addr:0x0214b0ec
+gStr_M00_Obj_down_ncg_ov097_0214b100 kind:data(any) addr:0x0214b100
+gStr_M00_Obj_down_ncl_ov097_0214b114 kind:data(any) addr:0x0214b114
+gStr_TBM_tmd_staff_msg_JP_bmg kind:data(any) addr:0x0214b128
+gStr_3BG_ov097_0214b144 kind:data(any) addr:0x0214b144
+gStr_3BG_ov097_0214b148 kind:data(any) addr:0x0214b148
+gStr_3BG_bg_nsc_ov097_0214b14c kind:data(any) addr:0x0214b14c
+gStr_3BG_bg_ncg_ov097_0214b158 kind:data(any) addr:0x0214b158
+gStr_3BG_bg_ncl_ov097_0214b164 kind:data(any) addr:0x0214b164
+gStr_3BG_body_imd_ov097_0214b170 kind:data(any) addr:0x0214b170

@@ -9,22 +9,22 @@ data_ov064_02149ec0 kind:data(any) addr:0x02149ec0
 data_ov064_02149ec4 kind:data(any) addr:0x02149ec4
 data_ov064_02149ec8 kind:data(any) addr:0x02149ec8 ambiguous
 data_ov064_02149ee0 kind:data(any) addr:0x02149ee0 ambiguous
-data_ov064_02149efc kind:data(any) addr:0x02149efc
-data_ov064_02149f00 kind:data(any) addr:0x02149f00
+gStr_3BG_ov064_02149efc kind:data(any) addr:0x02149efc
+gStr_M00_ov064_02149f00 kind:data(any) addr:0x02149f00
 data_ov064_02149f04 kind:data(any) addr:0x02149f04
 data_ov064_02149f08 kind:data(any) addr:0x02149f08 ambiguous
 data_ov064_02149f10 kind:data(any) addr:0x02149f10 ambiguous
-data_ov064_02149f24 kind:data(any) addr:0x02149f24
-data_ov064_02149f28 kind:data(any) addr:0x02149f28
-data_ov064_02149f48 kind:data(any) addr:0x02149f48
-data_ov064_02149f54 kind:data(any) addr:0x02149f54
-data_ov064_02149f60 kind:data(any) addr:0x02149f60
-data_ov064_02149f6c kind:data(any) addr:0x02149f6c
-data_ov064_02149f80 kind:data(any) addr:0x02149f80
-data_ov064_02149f94 kind:data(any) addr:0x02149f94
-data_ov064_02149fa8 kind:data(any) addr:0x02149fa8
-data_ov064_02149fb8 kind:data(any) addr:0x02149fb8
-data_ov064_02149fc8 kind:data(any) addr:0x02149fc8
-data_ov064_02149fec kind:data(any) addr:0x02149fec
-data_ov064_02149ff0 kind:data(any) addr:0x02149ff0
-data_ov064_02149ff4 kind:data(any) addr:0x02149ff4
+gStr_TBM_ov064_02149f24 kind:data(any) addr:0x02149f24
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov064_02149f28 kind:data(any) addr:0x02149f28
+gStr_3BG_bg_nsc_ov064_02149f48 kind:data(any) addr:0x02149f48
+gStr_3BG_bg_ncg_ov064_02149f54 kind:data(any) addr:0x02149f54
+gStr_3BG_bg_ncl_ov064_02149f60 kind:data(any) addr:0x02149f60
+gStr_M00_BG_down_nsc_ov064_02149f6c kind:data(any) addr:0x02149f6c
+gStr_M00_BG_down_ncg_ov064_02149f80 kind:data(any) addr:0x02149f80
+gStr_M00_BG_down_ncl_ov064_02149f94 kind:data(any) addr:0x02149f94
+gStr_M00_BG_up_nsc_ov064_02149fa8 kind:data(any) addr:0x02149fa8
+gStr_M00_BG_up_ncg_ov064_02149fb8 kind:data(any) addr:0x02149fb8
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov064_02149fc8 kind:data(any) addr:0x02149fc8
+gStr_3BG_ov064_02149fec kind:data(any) addr:0x02149fec
+gStr_M00_ov064_02149ff0 kind:data(any) addr:0x02149ff0
+gStr_TBM_ov064_02149ff4 kind:data(any) addr:0x02149ff4

@@ -67,6 +67,15 @@ be finished:
   field. A guessed name reads as knowledge, and is worse than none.
 - `dsd sig apply --all` names the functions dsd has signatures for. Run it again when dsd is updated.
 
+### Strings, in bulk
+
+`tools/strings.py` writes a table of every string the game's code refers to, `build/jpn_rev1/strings.tsv` (game data,
+so it is generated and not committed), and `tools/name_strings.py --apply` names each of them in `symbols.txt` from
+its text: `gStr_M00_sky_imd` for `"M00:/sky.imd"`, `gText_Watashi` for `ワタシ`, and `gText_<address>` for text with
+kanji, which has no spelling as an identifier. Equal strings in different places get their address after the name.
+It leaves alone what already has a name, the strings a source file owns, and any symbol the sources still refer to
+by its placeholder name. Run both again after dsd's analysis finds more references.
+
 ### Library code, in bulk
 
 Library functions are not named one at a time. `tools/match_objects.py` finds them by comparing the game with compiled
