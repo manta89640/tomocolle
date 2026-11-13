@@ -3,8 +3,8 @@
 
 #include <nitro.h>
 
-// Sharp's text-to-speech engine, SHTTS 1.2.0. None of its names survive in the ROM, so functions are named by
-// address, and fields by offset until what they hold is clear.
+// Sharp's text-to-speech engine, SHTTS 1.2.0. None of its names survive in the ROM, so the names here are ours, from
+// what the code shows; a field keeps its offset as its name (unk_C) until what it holds is clear.
 
 typedef void (*ShttsCallback)(int samples, s16 *data, void *arg);
 
@@ -12,7 +12,7 @@ typedef void (*ShttsCallback)(int samples, s16 *data, void *arg);
 // a copy of those and which commands in the text then change. The names of the fields are the engine's own, from
 // the strings in ShttsParam_RunCommand, where they are known.
 typedef struct ShttsParams {
-    /* 0x00 */ s8 unk_00;
+    /* 0x00 */ s8 unitSet;
     /* 0x02 */ s16 pitch;
     /* 0x04 */ s16 accent;
     /* 0x06 */ s16 phrase;
@@ -21,7 +21,7 @@ typedef struct ShttsParams {
     /* 0x0C */ s16 echoGain;
     /* 0x0E */ s16 echoDelay;
     /* 0x10 */ u32 mode;
-    /* 0x14 */ s16 unk_14;
+    /* 0x14 */ s16 accentRule;
     /* 0x16 */ s16 firDelay;
     /* 0x18 */ u32 chorus;
     /* 0x1C */ u32 firGain;
@@ -80,9 +80,9 @@ typedef struct ShttsPreset {
 
 // One entry of the table at 0x020e8f08, which is indexed by four numbers
 typedef struct ShttsUnit {
-    /* 0x0 */ u16 unk_0;   // The index of its first record in ShttsUnitFrames
-    /* 0x2 */ s16 unk_2;   // 0 if there is no such unit
-    /* 0x4 */ u8 unk_4[4]; // unk_4[k] and unk_4[k + 1] bound the records of its k-th sound
+    /* 0x0 */ u16 firstFrame;   // The index of its first record in ShttsUnitFrames
+    /* 0x2 */ s16 exists;   // 0 if there is no such unit
+    /* 0x4 */ u8 bounds[4]; // bounds[k] and bounds[k + 1] bound the records of its k-th sound
 } ShttsUnit; // 0x8
 
 extern ShttsUnit ShttsUnits[][8][38][8];
@@ -90,9 +90,9 @@ extern ShttsUnit ShttsUnits[][8][38][8];
 typedef struct ShttsSyllable {
     /* 0x00 */ char name[4];
     /* 0x04 */ s8 qMark;
-    /* 0x05 */ s8 unk_05;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
+    /* 0x05 */ s8 vowelMark;
+    /* 0x06 */ s16 consonantLength;
+    /* 0x08 */ s16 vowelLength;
     /* 0x0A */ s16 gain;
     /* 0x0C */ s16 pitch;
     /* 0x10 */ struct ShttsSyllable *next;
@@ -101,11 +101,11 @@ typedef struct ShttsSyllable {
 
 // The first field of each 16-byte entry of a table that ShttsSynth_FitFrameGains is given
 typedef struct ShttsRunFrame {
-    /* 0x0 */ s16 unk_0;
-    /* 0x2 */ s8 unk_2;
-    /* 0x3 */ s8 unk_3;
+    /* 0x0 */ s16 gain;
+    /* 0x2 */ s8 voiced;
+    /* 0x3 */ s8 sampleCount;
     /* 0x4 */ int kind;
-    /* 0x8 */ s8 unk_8[5];
+    /* 0x8 */ s8 lspIndices[5];
     /* 0xD */ u8 pad_D[3];
 } ShttsRunFrame; // 0x10
 
@@ -156,11 +156,11 @@ int ShttsSynth_SumFilter10(const int *state, const s16 *coefficients);
 
 // One frame of speech as it is stored: ShttsSynth_DecodeFrame decodes it into samples
 typedef struct ShttsFrame {
-    /* 0x0 */ s16 unk_0;
-    /* 0x2 */ s8 unk_2;
-    /* 0x3 */ u8 unk_3;
-    /* 0x4 */ s32 unk_4; // Index in ShttsPhonemeFlags
-    /* 0x8 */ s8 unk_8[5]; // Ten indices of four bits each
+    /* 0x0 */ s16 gain;
+    /* 0x2 */ s8 voiced;
+    /* 0x3 */ u8 sampleCount;
+    /* 0x4 */ s32 phoneme; // Index in ShttsPhonemeFlags
+    /* 0x8 */ s8 lspIndices[5]; // Ten indices of four bits each
 } ShttsFrame;
 
 // ---- From the decompilation of group a
@@ -176,8 +176,8 @@ typedef struct ShttsStretchSegment {
 
 // One entry of the array that ShttsSynth_StretchFrames spreads over a number of pointers, 16 bytes
 typedef struct ShttsStretchFrame {
-    /* 0x0 */ s16 unk_0;
-    /* 0x2 */ s8 unk_2;
+    /* 0x0 */ s16 gain;
+    /* 0x2 */ s8 voiced;
     /* 0x3 */ u8 pad_3[13];
 } ShttsStretchFrame; // 0x10
 
@@ -202,13 +202,13 @@ typedef struct ShttsDurationWord {
 
 typedef struct ShttsDurationLastWord {
     /* 0x00 */ u8 pad_00[0x12];
-    /* 0x12 */ s16 unk_12;
+    /* 0x12 */ s16 pause;
 } ShttsDurationLastWord;
 
 typedef struct ShttsDurationAccentGroup {
     /* 0x0 */ s8 count; // Of the list at first
     /* 0x4 */ ShttsDurationWord *first;
-    /* 0x8 */ ShttsDurationLastWord *unk_8;
+    /* 0x8 */ ShttsDurationLastWord *last;
     /* 0xC */ struct ShttsDurationAccentGroup *next;
 } ShttsDurationAccentGroup; // 0x10
 
@@ -222,11 +222,11 @@ extern ShttsStretchFrame *const ShttsFillerFrame;
 void ShttsText_ExpandPresets(char *text);
 s16 ShttsSynth_StretchSegments(ShttsStretchSegment *first, ShttsStretchSegment *last, ShttsStretchFrame *frames, ShttsStretchFrame **out, Shtts *engine);
 void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount, ShttsStretchFrame **dst, Shtts *engine);
-void ShttsEffect_ApplyChorus(ShttsChorus *unk, s16 *in, s16 *out, int count);
-int ShttsSynth_PrepareFrame(ShttsPreparedFrame *unk, int b, Shtts *engine);
+void ShttsEffect_ApplyChorus(ShttsChorus *chorus, s16 *in, s16 *out, int count);
+int ShttsSynth_PrepareFrame(ShttsPreparedFrame *frame, int b, Shtts *engine);
 void ShttsSynth_CopyFrameWave(Shtts *engine);
 void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine);
-void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8, Shtts *engine);
+void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 moraCount, s8 first, s8 last, s8 textPlace, char *vowel, s16 volume, Shtts *engine);
 
 
 // ---- From the decompilation of group c
@@ -260,7 +260,7 @@ typedef struct ShttsPhoneWord {
     /* 0x00 */ u8 pad_00[4];
     /* 0x04 */ s8 count;
     /* 0x05 */ u8 pad_05[0xD];
-    /* 0x12 */ s16 unk_12; // If not 0, the length of a silence after this
+    /* 0x12 */ s16 pause; // If not 0, the length of a silence after this
     /* 0x14 */ u8 pad_14[4];
     /* 0x18 */ ShttsSyllable *first;
     /* 0x1C */ struct ShttsPhoneWord *next;
@@ -281,26 +281,25 @@ typedef struct ShttsPhonePhraseGroup {
 // with one whose phoneme is 7.
 typedef struct ShttsSound {
     /* 0x0 */ s32 phoneme; // Index in ShttsPhonemeNames
-    /* 0x4 */ s16 unk_4;
-    /* 0x6 */ s16 unk_6;
-    /* 0x8 */ s16 unk_8;
-    /* 0xA */ s16 unk_A;
+    /* 0x4 */ s16 length;
+    /* 0x6 */ s16 gain;
+    /* 0x8 */ s16 pitch;
+    /* 0xA */ s16 endPitch;
     /* 0xC */ s16 unk_C;
-    /* 0xE */ s8 unk_E;
-    /* 0xF */ s8 unk_F;
+    /* 0xE */ s8 qMark;
+    /* 0xF */ s8 vowelMark;
 } ShttsSound; // 0x10
 
 int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *sounds, int max);
 int ShttsPhone_ReadStdin(ShttsSound *sounds, Shtts *engine);
 void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *engine);
-int Shtts_Speak(Shtts *engine, const char *text, u32 mode, u32 unk, ShttsCallback callback, void *arg);
+int Shtts_Speak(Shtts *engine, const char *text, u32 mode, u32 priority, ShttsCallback callback, void *arg);
 void ShttsSynth_FadeWave(int unk, Shtts *engine);
 int ShttsSynth_FilterRecursive(int count, int order, const s16 *coefficients, int *state, s16 *src, s16 *dst, Shtts *engine);
 void ShttsEngine_Start(Shtts *engine);
 void ShttsEffect_ApplyFir(int count, s16 *src, s16 *dst, Shtts *engine);
 void ShttsEffect_ApplyEcho(int count, s16 *src, s16 *dst, Shtts *engine);
-// sscanf
-int func_020188f4(const char *text, const char *format, ...);
+int sscanf(const char *text, const char *format, ...);
 
 // "[SDK+SHARP:SHTTS-1_2_0]", the engine's tag in the SDK's list of libraries. It has no symbol in symbols.txt.
 extern char ShttsMiddlewareTag[];
@@ -309,14 +308,14 @@ extern char ShttsMiddlewareTag[];
 int ShttsDict_CompareWords(const char *a, const char *b);
 int ShttsDict_FindWord(char *text, ShttsDict *list);
 int ShttsWord_GetDefaultAccent(void *arg);
-void ShttsEffect_InitChorus(ShttsChorus *unk, int rate);
+void ShttsEffect_InitChorus(ShttsChorus *chorus, int rate);
 int ShttsSynth_GetPitchPeriod(Shtts *engine);
 int ShttsDuration_ClassifyMoraCount(s16 value);
 int ShttsEffect_SumEchoFilter(const int *state, const s16 *coefficients, int input);
 void ShttsLine_SetCursor(char *value, char **out);
 int ShttsLine_ReadNext(char *dst, int size, char **cursor);
 void ShttsText_ReadStdin(Shtts *engine);
-void ShttsWord_ClearSyllable(ShttsSyllable *unk, Shtts *engine);
+void ShttsWord_ClearSyllable(ShttsSyllable *syllable, Shtts *engine);
 int ShttsUtil_FindString(const char *text, const char *find);
 int ShttsMath_MultiplyFixed(int a, int b);
 int ShttsEngine_EndThread(Shtts *engine);
@@ -347,13 +346,13 @@ int ShttsEffect_MultiplyDoubled(int a, int b);
 // ---- From the decompilation of group d
 // The three levels above ShttsSyllable. Each has a count of the ones below it, which are linked.
 typedef struct ShttsPitchWord {
-    /* 0x00 */ void *unk_00; // What ShttsWord_CountMorae takes
+    /* 0x00 */ void *text; // What ShttsWord_CountMorae takes
     /* 0x04 */ s8 count;
-    /* 0x05 */ s8 unk_05;
-    /* 0x06 */ s8 unk_06;
-    /* 0x07 */ s8 unk_07;
+    /* 0x05 */ s8 accentGiven;
+    /* 0x06 */ s8 accentPosition;
+    /* 0x07 */ s8 marks;
     /* 0x08 */ u8 pad_08[0xA];
-    /* 0x12 */ s16 unk_12;
+    /* 0x12 */ s16 pause;
     /* 0x14 */ u8 pad_14[4];
     /* 0x18 */ ShttsSyllable *first;
     /* 0x1C */ struct ShttsPitchWord *next;
@@ -361,8 +360,8 @@ typedef struct ShttsPitchWord {
 
 typedef struct ShttsPitchAccentGroup {
     /* 0x0 */ s8 count;
-    /* 0x1 */ s8 unk_1;
-    /* 0x2 */ s8 unk_2;
+    /* 0x1 */ s8 accentPosition;
+    /* 0x2 */ s8 accentStrength;
     /* 0x4 */ ShttsPitchWord *first;
     /* 0x8 */ ShttsPitchWord *last;
     /* 0xC */ struct ShttsPitchAccentGroup *next;
@@ -370,7 +369,7 @@ typedef struct ShttsPitchAccentGroup {
 
 typedef struct ShttsPitchPhraseGroup {
     /* 0x0 */ s8 count;
-    /* 0x1 */ s8 unk_1;
+    /* 0x1 */ s8 phraseStrength;
     /* 0x4 */ ShttsPitchAccentGroup *first; // They are also an array
     /* 0x8 */ struct ShttsPitchPhraseGroup *next;
 } ShttsPitchPhraseGroup;
@@ -383,9 +382,9 @@ int ShttsMath_ApproximateSqrt(int x);
 
 void ShttsPitch_ShapeGroups(ShttsPitchPhraseGroup *list, Shtts *engine);
 
-int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *unk, int length, ShttsSyllable *last, int kind, s16 notFirst, Shtts *engine);
+int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *group, int length, ShttsSyllable *last, int kind, s16 notFirst, Shtts *engine);
 
-void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine);
+void ShttsPitch_AddAccent(ShttsPitchAccentGroup *group, Shtts *engine);
 
 s16 ShttsPitch_EvalPhraseCurve(int a, int b);
 
@@ -402,22 +401,22 @@ extern s16 ShttsPhraseCurveDX[5];
 typedef struct ShttsPhone {
     /* 0x0 */ int kind; // An index in ShttsPhonemeNames (0 is silence), or 7 at the end of the list
     /* 0x4 */ s16 length;
-    /* 0x6 */ s16 unk_6;
-    /* 0x8 */ s16 unk_8;
-    /* 0xA */ s16 unk_A;
+    /* 0x6 */ s16 gain;
+    /* 0x8 */ s16 pitch;
+    /* 0xA */ s16 endPitch;
     /* 0xC */ s16 unk_C;
-    /* 0xE */ s8 unk_E;
-    /* 0xF */ s8 unk_F;
+    /* 0xE */ s8 qMark;
+    /* 0xF */ s8 vowelMark;
 } ShttsPhone; // 0x10
 
 // One sound to synthesize, which ShttsUnit_AddSegments makes from a ShttsPhone and a ShttsUnit
 typedef struct ShttsSegment {
     /* 0x0 */ int kind;
     /* 0x4 */ s16 length;
-    /* 0x6 */ s16 unk_6;
-    /* 0x8 */ s16 unk_8;
+    /* 0x6 */ s16 pitch;
+    /* 0x8 */ s16 gain;
     /* 0xA */ s16 unk_A;
-    /* 0xC */ u16 unit;  // The unit's unk_0, an index in ShttsUnitFrames
+    /* 0xC */ u16 unit;  // The unit's firstFrame, an index in ShttsUnitFrames
     /* 0xE */ u8 first;  // The first and the last of the unit's entries in ShttsUnitFrames that are this sound's
     /* 0xF */ u8 last;
 } ShttsSegment; // 0x10
@@ -425,20 +424,20 @@ typedef struct ShttsSegment {
 // What the pointers at 0x5D38 point to
 typedef struct ShttsFrameRef {
     /* 0x0 */ u8 pad_0[3];
-    /* 0x3 */ u8 unk_3;
+    /* 0x3 */ u8 sampleCount;
     /* 0x4 */ int phoneme;
 } ShttsFrameRef;
 
 // One entry of the table at 0x020bc26c
 typedef struct ShttsStoredFrame {
-    /* 0x0 */ s8 unk_0;
-    /* 0x1 */ s8 unk_1[5];
+    /* 0x0 */ s8 gainAndVoiced;
+    /* 0x1 */ s8 lspIndices[5];
 } ShttsStoredFrame; // 0x6
 
 // A list that ShttsEngine_RunThread walks
 typedef struct ShttsThreadAccentGroup {
     /* 0x0 */ u8 pad_0[8];
-    /* 0x8 */ s8 *unk_8;
+    /* 0x8 */ s8 *last;
     /* 0xC */ u8 pad_C[4];
 } ShttsThreadAccentGroup; // 0x10
 
@@ -477,17 +476,17 @@ void ShttsEngine_RunThread(void *arg);
 typedef struct ShttsSpokenWord {
     /* 0x00 */ char *text;
     /* 0x04 */ s8 count; // How many sounds it has
-    /* 0x05 */ s8 unk_05;
-    /* 0x06 */ s8 unk_06;
-    /* 0x07 */ s8 unk_07; // How many '?' it has, up to 3, and how many '!' in the next four bits
-    /* 0x08 */ s8 unk_08;
+    /* 0x05 */ s8 accentGiven;
+    /* 0x06 */ s8 accentPosition;
+    /* 0x07 */ s8 marks; // How many '?' it has, up to 3, and how many '!' in the next four bits
+    /* 0x08 */ s8 accentStrength;
     /* 0x09 */ s8 phraseStrength;
     /* 0x0A */ s16 speed;
-    /* 0x0C */ s8 unk_0C;
+    /* 0x0C */ s8 unitSet;
     /* 0x0E */ s16 lineValue6;
     /* 0x10 */ u8 pad_10[2];
     /* 0x12 */ s16 pause;
-    /* 0x14 */ s16 unk_14;
+    /* 0x14 */ s16 lineValue7;
     /* 0x16 */ s16 volume;
     /* 0x18 */ ShttsSyllable *first; // Its first sound
     /* 0x1C */ struct ShttsSpokenWord *next;
@@ -496,8 +495,8 @@ typedef struct ShttsSpokenWord {
 // A run of words that ShttsWord_GroupWords makes
 typedef struct ShttsAccentGroup {
     /* 0x0 */ s8 count; // How many words
-    /* 0x1 */ s8 unk_1;
-    /* 0x2 */ s8 unk_2;
+    /* 0x1 */ s8 accentPosition;
+    /* 0x2 */ s8 accentStrength;
     /* 0x4 */ ShttsSpokenWord *first;
     /* 0x8 */ ShttsSpokenWord *last;
     /* 0xC */ struct ShttsAccentGroup *next;
@@ -506,7 +505,7 @@ typedef struct ShttsAccentGroup {
 // A run of those runs
 typedef struct ShttsPhraseGroup {
     /* 0x0 */ s8 count; // How many runs
-    /* 0x1 */ s8 unk_1;
+    /* 0x1 */ s8 phraseStrength;
     /* 0x4 */ ShttsAccentGroup *first;
     /* 0x8 */ struct ShttsPhraseGroup *next;
 } ShttsPhraseGroup; // 0xC
@@ -519,8 +518,8 @@ extern const char ShttsSyllableConsonantClass[0x90];
 extern const char ShttsSyllableLengthKind[0x90];
 
 typedef struct ShttsConsonantLengthTable {
-    /* 0x00 */ s16 unk_00;
-    /* 0x02 */ s16 unk_02[28];
+    /* 0x00 */ s16 base;
+    /* 0x02 */ s16 byKind[28];
     /* 0x3A */ s16 byPrevVowel[27];
     /* 0x70 */ s16 byVowel[27];
     /* 0xA6 */ s16 byQMark[2];
@@ -530,9 +529,9 @@ typedef struct ShttsConsonantLengthTable {
 
 typedef struct ShttsSyllableGainTable {
     /* 0x00 */ s16 unk_00;
-    /* 0x02 */ s16 unk_02[5];
-    /* 0x0C */ s16 unk_0C[27];
-    /* 0x42 */ s16 unk_42[47];
+    /* 0x02 */ s16 byVowel[5];
+    /* 0x0C */ s16 byConsonant[27];
+    /* 0x42 */ s16 byNext[47];
     /* 0xA0 */ s16 byMoraCount[28];
     /* 0xD8 */ s16 byTextPlace[9];
     /* 0xEA */ s16 byRunPlace[37];
@@ -540,7 +539,7 @@ typedef struct ShttsSyllableGainTable {
 
 typedef struct ShttsVowel5LengthTable {
     /* 0x00 */ s16 unk_00;
-    /* 0x02 */ s16 unk_02[27];
+    /* 0x02 */ s16 byConsonant[27];
     /* 0x38 */ s16 byNext[64];
     /* 0xB8 */ s16 byTextPlace[5];
     /* 0xC2 */ s16 byRunPlace[63];
@@ -548,9 +547,9 @@ typedef struct ShttsVowel5LengthTable {
 
 typedef struct ShttsVowelLengthTable {
     /* 0x00 */ s16 unk_00;
-    /* 0x02 */ s16 unk_02[5];
-    /* 0x0C */ s16 unk_0C[27];
-    /* 0x42 */ s16 unk_42[68];
+    /* 0x02 */ s16 byVowel[5];
+    /* 0x0C */ s16 byConsonant[27];
+    /* 0x42 */ s16 byNext[68];
     /* 0xCA */ s16 byTextPlace[4];
     /* 0xD2 */ s16 byRunPlace[97];
 } ShttsVowelLengthTable; // 0x194

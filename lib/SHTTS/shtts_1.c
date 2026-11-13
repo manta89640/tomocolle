@@ -30,8 +30,8 @@ int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 // not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
 
 // Takes a text and starts the thread that speaks it
-static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->runInCaller = unk;
+static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int runInCaller) {
+    engine->runInCaller = runInCaller;
     ShttsEngine_SetCallback(engine, callback, arg);
     ShttsEngine_ResetSynthesis(engine);
     memset(engine->inputText, 0, sizeof(engine->inputText));
@@ -47,7 +47,7 @@ static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback cal
 }
 
 // Fractional multiply of two Q15 values.
-static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
+static inline s16 ShttsMath_MultiplyQ15(s16 a, s16 b) { return (a * b) >> 15; }
 
 // Compares two strings, taking 'I' and 'U' for 'i' and 'u'
 int ShttsDict_CompareWords(const char *a, const char *b) {
@@ -428,7 +428,7 @@ void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount
     n = 0;
     first = -1;
     for (i = 0; i < srcCount; i++) {
-        if (src[i].unk_2 == 0) {
+        if (src[i].voiced == 0) {
             first = i;
             break;
         }
@@ -437,7 +437,7 @@ void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount
         int limit = srcCount - first;
 
         for (i = first; i < limit; i++) {
-            if (src[i].unk_2 > 0) {
+            if (src[i].voiced > 0) {
                 break;
             }
         }
@@ -470,10 +470,10 @@ void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount
                 for (i = 0; i < 6; i++) {
                     int v = (6 - i) * 40;
 
-                    if (src[i].unk_0 > (s16)v) {
-                        src[i].unk_0 -= v;
+                    if (src[i].gain > (s16)v) {
+                        src[i].gain -= v;
                     } else {
-                        src[i].unk_0 = 0;
+                        src[i].gain = 0;
                     }
                 }
             }
@@ -508,46 +508,46 @@ void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount
     }
 }
 
-void ShttsEffect_InitChorus(ShttsChorus *unk, int rate) {
+void ShttsEffect_InitChorus(ShttsChorus *chorus, int rate) {
     if (rate <= 0) {
         rate = 1;
     }
-    unk->sweepPeriod = ((0x12C00 / rate) << 5) / 256;
-    if (unk->sweepPeriod == 0) {
-        unk->sweepPeriod = 1;
+    chorus->sweepPeriod = ((0x12C00 / rate) << 5) / 256;
+    if (chorus->sweepPeriod == 0) {
+        chorus->sweepPeriod = 1;
     }
-    unk->writePos = 0;
-    unk->sweepPos = 0;
-    unk->sweepTimer = 0;
-    memset(unk->ring, 0, sizeof(unk->ring));
+    chorus->writePos = 0;
+    chorus->sweepPos = 0;
+    chorus->sweepTimer = 0;
+    memset(chorus->ring, 0, sizeof(chorus->ring));
 }
 
 // A chorus: gives for each sample the mean of two earlier ones, at delays that sweep up and down and add up to 255
-void ShttsEffect_ApplyChorus(ShttsChorus *unk, s16 *in, s16 *out, int count) {
+void ShttsEffect_ApplyChorus(ShttsChorus *chorus, s16 *in, s16 *out, int count) {
     int i;
 
     for (i = 0; i < count; i++) {
         int delay;
 
-        unk->ring[unk->writePos] = in[i];
+        chorus->ring[chorus->writePos] = in[i];
         out[i] = 0;
-        delay = unk->sweepPos;
+        delay = chorus->sweepPos;
         if (delay >= 0x100) {
             delay = 0x1FF - delay;
         }
-        out[i] += unk->ring[(unk->writePos - delay) & 0xFFu] >> 1;
+        out[i] += chorus->ring[(chorus->writePos - delay) & 0xFFu] >> 1;
         delay = 0xFF - delay;
-        out[i] += unk->ring[(unk->writePos - delay) & 0xFFu] >> 1;
-        unk->writePos++;
-        if (unk->writePos >= 0x100) {
-            unk->writePos = 0;
+        out[i] += chorus->ring[(chorus->writePos - delay) & 0xFFu] >> 1;
+        chorus->writePos++;
+        if (chorus->writePos >= 0x100) {
+            chorus->writePos = 0;
         }
-        unk->sweepTimer += 0x20;
-        if (unk->sweepTimer >= unk->sweepPeriod) {
-            unk->sweepTimer = 0;
-            unk->sweepPos++;
-            if (unk->sweepPos >= 0x1FF) {
-                unk->sweepPos = 0;
+        chorus->sweepTimer += 0x20;
+        if (chorus->sweepTimer >= chorus->sweepPeriod) {
+            chorus->sweepTimer = 0;
+            chorus->sweepPos++;
+            if (chorus->sweepPos >= 0x1FF) {
+                chorus->sweepPos = 0;
             }
         }
     }
@@ -586,15 +586,15 @@ int ShttsWord_CountMorae(const char *text) {
 
 // Has ShttsSynth_DecodeFrame fill frameWave from its second entry on, works out gainIndex (0 to 90) and pitchPeriod (0 to 239),
 // scales what was filled in by twice the entry of ShttsGainLevels that gainIndex picks, and keeps the count first
-int ShttsSynth_PrepareFrame(ShttsPreparedFrame *unk, int b, Shtts *engine) {
+int ShttsSynth_PrepareFrame(ShttsPreparedFrame *frame, int b, Shtts *engine) {
     s16 count;
     int gain;
 
-    engine->frameWaveCount = ShttsSynth_DecodeFrame(unk, engine->frameWave, engine);
-    if (unk->unk_3 == (s8)engine->frameLength || unk->unk_3 == 0) {
+    engine->frameWaveCount = ShttsSynth_DecodeFrame(frame, engine->frameWave, engine);
+    if (frame->sampleCount == (s8)engine->frameLength || frame->sampleCount == 0) {
         b = 0;
     }
-    engine->gainIndex = (unk->unk_0 * 0xCCD + 0x4000) >> 15;
+    engine->gainIndex = (frame->gain * 0xCCD + 0x4000) >> 15;
     if (engine->gainIndex > 90) {
         engine->gainIndex = 90;
     }
@@ -656,13 +656,13 @@ void ShttsSynth_CopyFrameWave(Shtts *engine) {
     }
 }
 
-// Walks the list in runs: a run ends at the entry whose count is 0 or whose unk_8->unk_12 is not 0. For each run it
+// Walks the list in runs: a run ends at the entry whose count is 0 or whose last->pause is not 0. For each run it
 // adds up ShttsWord_CountMorae of the texts, and then calls ShttsDuration_SetWordSyllables for each B of each entry with a list of pointers:
 // ShttsBoundarySyllable for the entry's first B and otherwise where the walk of the B before ended, then the B's units, then
 // the first unit of the next B, or ShttsBoundarySyllable if there is none.
 void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine) {
     ShttsDurationSyllable *units[98];
-    char unk = 0x1A;
+    char prevVowel = 0x1A;
     ShttsDurationAccentGroup *last = list;
     ShttsDurationAccentGroup *first = list;
     ShttsDurationAccentGroup *a;
@@ -673,7 +673,7 @@ void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine) 
     s16 i;
     s8 isFirst;
     s8 isLast;
-    int position;
+    s8 position;
 
     if (list == NULL) {
         return;
@@ -685,7 +685,7 @@ void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine) 
             total += ShttsWord_CountMorae(b->text);
             b = b->next;
         }
-        while (last->count != 0 && last->unk_8->unk_12 == 0) {
+        while (last->count != 0 && last->last->pause == 0) {
             last = last->next;
             for (i = 0; i < last->count; i++) {
                 total += ShttsWord_CountMorae(b->text);
@@ -723,7 +723,7 @@ void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine) 
                     position = 1;
                 }
                 engine->cur.speed = b->speed;
-                ShttsDuration_SetWordSyllables((void *)units, b->count, total, isFirst, isLast, position, &unk, b->volume, engine);
+                ShttsDuration_SetWordSyllables((void *)units, b->count, total, isFirst, isLast, position, &prevVowel, b->volume, engine);
             }
         }
         last = last->next;

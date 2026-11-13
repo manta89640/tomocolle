@@ -109,7 +109,7 @@ tags). Measured:
 | | Where | |
 | --- | --- | --- |
 | `TtsPlayer`, the game's wrapper | `0x02083DC4` to `0x0208473C`, 28 functions | Decompiled, `src/voice/TtsPlayer.cpp` |
-| The engine | `0x0208473C` to `0x0208EB18`, 123 functions, 44 KB | Decompiled, `lib/SHTTS/`: 122 functions match and are linked from source |
+| The engine | `0x0208473C` to `0x0208EB18`, 123 functions, 44 KB | Decompiled, `lib/SHTTS/`: all 123 functions match and are linked from source |
 
 The engine's bounds are those of a closed module: nothing in that range is called from outside it but by `TtsPlayer`,
 and it calls nothing but the C library and the OS (threads, mutexes, `OS_Sleep`). It is one unit for now, because
@@ -189,8 +189,8 @@ instructions for 16-bit fixed point. They are written as assembly functions here
 The engine's source is four files, `shtts_1.c` to `shtts_4.c`, and three of them are linked into the ROM in place of
 the original's bytes. Where the engine's own files began and ended is not known; these are cut where linking needs:
 
-- `shtts_2.c` is one function, `ShttsDuration_SetWordSyllables`, which does not match yet (the original's size, 59 instructions
-  different), so the file it belongs to cannot be linked from source while it is in it.
+- `shtts_2.c` is one function, `ShttsDuration_SetWordSyllables`, in a file of its own only because it was the last to
+  match. What it took is in the comment above it: three of its parameters are `s8`, and so is its caller's variable.
 - The engine's strings in `.data` are interrupted, between those of `ShttsText_ParseWideStrengthDigit` and `ShttsPhone_BuildFromSyllables`, by the
   names of the phonemes. Those belong to `ShttsPhonemeNames`, which is in `.rodata` and yet is read by the engine's
   code as if it were not `const`: so it is defined in another file, of tables, which is not decompiled.

@@ -1,8 +1,7 @@
-// One function, apart from the rest because it does not match yet: the file it belongs to cannot be
-// linked from source while it is in it.
-// Where the engine's own files begin and end is not known. These four are cut where linking needs them cut:
-// around the one function that does not match, and where the engine's strings are interrupted by those of a
-// file of tables that is not decompiled.
+// One function, which was cut apart from the rest while it did not match.
+// Where the engine's own files begin and end is not known. These four were cut where linking needed them cut:
+// around that function, and where the engine's strings are interrupted by those of a file of tables that is not
+// decompiled.
 
 #include "shtts.h"
 
@@ -31,8 +30,8 @@ int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 // not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
 
 // Takes a text and starts the thread that speaks it
-static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->runInCaller = unk;
+static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int runInCaller) {
+    engine->runInCaller = runInCaller;
     ShttsEngine_SetCallback(engine, callback, arg);
     ShttsEngine_ResetSynthesis(engine);
     memset(engine->inputText, 0, sizeof(engine->inputText));
@@ -48,23 +47,23 @@ static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback cal
 }
 
 // Fractional multiply of two Q15 values.
-static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
+static inline s16 ShttsMath_MultiplyQ15(s16 a, s16 b) { return (a * b) >> 15; }
 
 // Gives each sound of a word its two lengths and its pitch, from tables indexed by the sound's vowel, its
 // consonant class, its neighbours and its place in the word.
-// Not matching yet: the same size as the original (0x8a8), with 59 instructions different. What is left is which
-// registers and stack slots some values of the two loops get. Work on it was stopped part-way; the closest
-// earlier attempts and what was tried are in the history of this file.
-void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8,
+// The flags and the place are s8, as the caller's variables are; the vowel of the second half is a variable of its
+// own, read before the consonant; and the first loop's limit is compared through a cast. Each of those is needed
+// for the registers and the stack slots to come out as the original's.
+void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 moraCount, s8 first, s8 last, s8 textPlace, char *vowel, s16 volume,
                    Shtts *engine) {
     char consonants[0x80];
     char vowels[0x80];
     char kinds[0x80];
     int index = 0;
-    s16 j;
+    const char * name;
     s16 m = 0;
     int group = 0;
-    const char * name;
+    s16 j;
     int limit = 0;
     int voiced = 0;
     int place;
@@ -73,7 +72,7 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
     vowels[0] = *vowel;
     kinds[0] = *vowel;
     limit = count + 1;
-    for (m = 1; m <= limit; m++) {
+    for (m = 1; m <= (int)limit; m++) {
         name = list[m]->name;
         if (name[0] == '-') {
             consonants[m] = 0x1B;
@@ -91,7 +90,7 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
         }
     }
     *vowel = vowels[count];
-    index = ShttsDuration_ClassifyMoraCount(unk3);
+    index = ShttsDuration_ClassifyMoraCount(moraCount);
     for (i = 1; i <= count; i++) {
         char b;
         s16 v;
@@ -103,12 +102,12 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
         } else {
             place = 1;
         }
-        if (place == 2 && unk6 == 2) {
-            unk6 = 2;
-        } else if (place == 0 && unk6 == 0) {
-            unk6 = 0;
+        if (place == 2 && textPlace == 2) {
+            textPlace = 2;
+        } else if (place == 0 && textPlace == 0) {
+            textPlace = 0;
         } else {
-            unk6 = 1;
+            textPlace = 1;
         }
         if (consonants[i] < 0x1A) {
             s8 q;
@@ -203,8 +202,8 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
             } else {
                 q = 0;
             }
-            value = ShttsConsonantLengths[group].unk_00 + ShttsConsonantLengths[group].unk_02[k] + ShttsConsonantLengths[group].byPrevVowel[b] + ShttsConsonantLengths[group].byVowel[v] +
-                    ShttsConsonantLengths[group].byQMark[q] + ShttsConsonantLengths[group].byTextPlace[unk6] + ShttsConsonantLengths[group].byRunPlace[place];
+            value = ShttsConsonantLengths[group].base + ShttsConsonantLengths[group].byKind[k] + ShttsConsonantLengths[group].byPrevVowel[b] + ShttsConsonantLengths[group].byVowel[v] +
+                    ShttsConsonantLengths[group].byQMark[q] + ShttsConsonantLengths[group].byTextPlace[textPlace] + ShttsConsonantLengths[group].byRunPlace[place];
             if (voiced == 1) {
                 switch (k) {
                 case 9:
@@ -236,18 +235,20 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
                     break;
                 }
             }
-            list[i]->unk_06 = value >> 6;
-            if (list[i]->unk_06 < 25) {
-                list[i]->unk_06 = 25;
+            list[i]->consonantLength = value >> 6;
+            if (list[i]->consonantLength < 25) {
+                list[i]->consonantLength = 25;
             }
         } else {
-            list[i]->unk_06 = 0;
+            list[i]->consonantLength = 0;
         }
 
         {
             int base;
+            s16 vowelClass;
 
             k = consonants[i];
+            vowelClass = vowels[i];
             if (k == 0x1B) {
                 if (place == 0) {
                     k = 0x1A;
@@ -262,34 +263,33 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
             if (place == 2) {
                 b = 12;
             }
-            v = vowels[i];
-            if (v == 5) {
-                list[i]->unk_08 = (ShttsVowel5Lengths.unk_02[k] + 0x1E00 + ShttsVowel5Lengths.byNext[b] +
-                                   ShttsVowel5Lengths.byTextPlace[unk6] + ShttsVowel5Lengths.byRunPlace[place]) >>
+            if (vowelClass == 5) {
+                list[i]->vowelLength = (ShttsVowel5Lengths.byConsonant[k] + 0x1E00 + ShttsVowel5Lengths.byNext[b] +
+                                   ShttsVowel5Lengths.byTextPlace[textPlace] + ShttsVowel5Lengths.byRunPlace[place]) >>
                                   6;
-                list[i]->gain = (s16)((ShttsSyllableGains.unk_0C[k] + ShttsSyllableGains.unk_42[b] +
-                                         ShttsSyllableGains.byMoraCount[index] + ShttsSyllableGains.byTextPlace[unk6] +
+                list[i]->gain = (s16)((ShttsSyllableGains.byConsonant[k] + ShttsSyllableGains.byNext[b] +
+                                         ShttsSyllableGains.byMoraCount[index] + ShttsSyllableGains.byTextPlace[textPlace] +
                                          ShttsSyllableGains.byRunPlace[place]) >>
                                         6) +
                                   600;
-                list[i]->unk_06 = 0;
+                list[i]->consonantLength = 0;
             } else {
-                list[i]->unk_08 = ((base = ShttsVowelLengths.unk_02[v] + 0x12FC) + ShttsVowelLengths.unk_0C[k] + ShttsVowelLengths.unk_42[b] +
-                                   ShttsVowelLengths.byTextPlace[unk6] + ShttsVowelLengths.byRunPlace[place]) >>
+                list[i]->vowelLength = ((base = ShttsVowelLengths.byVowel[vowelClass] + 0x12FC) + ShttsVowelLengths.byConsonant[k] + ShttsVowelLengths.byNext[b] +
+                                   ShttsVowelLengths.byTextPlace[textPlace] + ShttsVowelLengths.byRunPlace[place]) >>
                                   6;
-                if (list[i]->unk_08 < 70) {
-                    list[i]->unk_08 = 70;
+                if (list[i]->vowelLength < 70) {
+                    list[i]->vowelLength = 70;
                 }
-                list[i]->gain = (s16)((ShttsSyllableGains.unk_02[v] + ShttsSyllableGains.unk_0C[k] +
-                                         ShttsSyllableGains.unk_42[b] + ShttsSyllableGains.byMoraCount[index] +
-                                         ShttsSyllableGains.byTextPlace[unk6] + ShttsSyllableGains.byRunPlace[place]) >>
+                list[i]->gain = (s16)((ShttsSyllableGains.byVowel[vowelClass] + ShttsSyllableGains.byConsonant[k] +
+                                         ShttsSyllableGains.byNext[b] + ShttsSyllableGains.byMoraCount[index] +
+                                         ShttsSyllableGains.byTextPlace[textPlace] + ShttsSyllableGains.byRunPlace[place]) >>
                                         6) +
                                   600;
                 if (list[i]->qMark == 'L') {
-                    list[i]->unk_08 += (s16)((base + ShttsVowelLengths.unk_42[v] + ShttsVowelLengths.unk_0C[v] - 0x5D) >> 6);
+                    list[i]->vowelLength += (s16)((ShttsVowelLengths.byConsonant[vowelClass] + (base + ShttsVowelLengths.byNext[vowelClass]) - 0x5D) >> 6);
                 }
-                if (list[i]->unk_05 == 'U') {
-                    list[i]->unk_08 = (list[i]->unk_08 * 0x599A) >> 15;
+                if (list[i]->vowelMark == 'U') {
+                    list[i]->vowelLength = (list[i]->vowelLength * 0x599A) >> 15;
                     list[i]->gain -= 30;
                 }
             }
@@ -297,6 +297,6 @@ void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, i
     }
     ShttsDuration_ApplySpeed(list, kinds, count, engine);
     for (i = 1; i <= count; i++) {
-        list[i]->gain = unk8 + list[i]->gain;
+        list[i]->gain = volume + list[i]->gain;
     }
 }

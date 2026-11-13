@@ -31,8 +31,8 @@ int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 // not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
 
 // Takes a text and starts the thread that speaks it
-static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->runInCaller = unk;
+static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int runInCaller) {
+    engine->runInCaller = runInCaller;
     ShttsEngine_SetCallback(engine, callback, arg);
     ShttsEngine_ResetSynthesis(engine);
     memset(engine->inputText, 0, sizeof(engine->inputText));
@@ -48,7 +48,7 @@ static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback cal
 }
 
 // Fractional multiply of two Q15 values.
-static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
+static inline s16 ShttsMath_MultiplyQ15(s16 a, s16 b) { return (a * b) >> 15; }
 
 int ShttsDuration_ClassifyMoraCount(s16 value) {
     if (value <= 3) {
@@ -75,7 +75,7 @@ int ShttsDuration_ClassifyMoraCount(s16 value) {
     return -1;
 }
 
-// Scales unk_06 and unk_08 of each sound of a list by the speed, a percentage. For some kinds of sound, unk_06 only
+// Scales consonantLength and vowelLength of each sound of a list by the speed, a percentage. For some kinds of sound, consonantLength only
 // if the sound has a 'Q'.
 void ShttsDuration_ApplySpeed(ShttsSyllable **list, char *kinds, int count, Shtts *engine) {
     s16 i;
@@ -92,13 +92,13 @@ void ShttsDuration_ApplySpeed(ShttsSyllable **list, char *kinds, int count, Shtt
         case 27:
         case 28:
             if (list[i]->qMark == 'Q') {
-                list[i]->unk_06 = (engine->cur.speed * list[i]->unk_06 + 50) / 100;
+                list[i]->consonantLength = (engine->cur.speed * list[i]->consonantLength + 50) / 100;
             }
-            list[i]->unk_08 = (engine->cur.speed * list[i]->unk_08 + 50) / 100;
+            list[i]->vowelLength = (engine->cur.speed * list[i]->vowelLength + 50) / 100;
             break;
         default:
-            list[i]->unk_06 = (engine->cur.speed * list[i]->unk_06 + 50) / 100;
-            list[i]->unk_08 = (engine->cur.speed * list[i]->unk_08 + 50) / 100;
+            list[i]->consonantLength = (engine->cur.speed * list[i]->consonantLength + 50) / 100;
+            list[i]->vowelLength = (engine->cur.speed * list[i]->vowelLength + 50) / 100;
             break;
         }
     }
@@ -249,7 +249,7 @@ int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *en
             line[i - 1] = 0;
         }
         accent = 10;
-        words->lineValue6 = words->unk_14 = n = 0;
+        words->lineValue6 = words->lineValue7 = n = 0;
         phrase = accent;
         word[0] = 0;
         cursor = line;
@@ -280,7 +280,7 @@ int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *en
         }
         token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
-            words->unk_14 = atoi(token);
+            words->lineValue7 = atoi(token);
         }
 
         // Drops control characters, and a 'Q' that starts the word or follows another
@@ -301,20 +301,20 @@ int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *en
         if (strlen(word) > 0x60) {
             word[0x60] = 0;
         }
-        words->unk_05 = n;
-        words->unk_06 = n;
-        words->unk_08 = (accent * engine->cur.accent * 0x28F + 0x8000) >> 16;
+        words->accentGiven = n;
+        words->accentPosition = n;
+        words->accentStrength = (accent * engine->cur.accent * 0x28F + 0x8000) >> 16;
         words->phraseStrength = (phrase * engine->cur.phrase * 0x28F + 0x8000) >> 16;
         n = (engine->cur.speed * 0x28F + 0x80) >> 8;
         words->pause = ShttsParam_Clamp((n * pause + 0x80) >> 8, 0, 30000, "pause*speed");
-        words->unk_0C = engine->cur.unk_00;
+        words->unitSet = engine->cur.unitSet;
         words->speed = engine->cur.speed;
         words->volume = engine->cur.volume;
-        words->unk_07 = 0;
-        if (words->unk_06 == -1) {
-            words->unk_06 = ShttsDict_FindWord(word, (ShttsDict *)engine);
-            if (words->unk_06 == -1) {
-                words->unk_06 = ShttsWord_GetDefaultAccent(word);
+        words->marks = 0;
+        if (words->accentPosition == -1) {
+            words->accentPosition = ShttsDict_FindWord(word, (ShttsDict *)engine);
+            if (words->accentPosition == -1) {
+                words->accentPosition = ShttsWord_GetDefaultAccent(word);
             }
         }
         end = ShttsWord_PrepareText(word, line, engine);
@@ -331,8 +331,8 @@ int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *en
             }
             sounds += words->count;
             soundCount += words->count;
-            if (words->unk_07 & 0x70) {
-                words->unk_08 = words->unk_08 * ((((words->unk_07 & 0x70) >> 4) + 2) >> 1);
+            if (words->marks & 0x70) {
+                words->accentStrength = words->accentStrength * ((((words->marks & 0x70) >> 4) + 2) >> 1);
             }
             words->next = words + 1;
             words = words->next;
@@ -357,28 +357,28 @@ int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *en
     return count;
 }
 
-// Groups a list of words into runs, and the runs into runs of those. A word starts a run if its unk_08 or phraseStrength
+// Groups a list of words into runs, and the runs into runs of those. A word starts a run if its accentStrength or phraseStrength
 // is set, if the word before it has a pause, or if it is the first; it starts a run of runs for the same reasons
-// but unk_08.
+// but accentStrength.
 void ShttsWord_GroupWords(ShttsSpokenWord *word, ShttsAccentGroup *a, ShttsPhraseGroup *b) {
     ShttsSpokenWord *first = word;
 
     a->count = 0;
     for (; word != NULL; word = word->next) {
-        if ((word->unk_08 != 0 || word->phraseStrength != 0) || a->count == 0 || word[-1].pause != 0 || word == first) {
+        if ((word->accentStrength != 0 || word->phraseStrength != 0) || a->count == 0 || word[-1].pause != 0 || word == first) {
             a->next = a + 1;
             a++;
             a->first = word;
             a->last = word;
             a->count = 1;
-            a->unk_2 = word->unk_08;
-            a->unk_1 = word->unk_06;
+            a->accentStrength = word->accentStrength;
+            a->accentPosition = word->accentPosition;
             if (word->phraseStrength != 0 || word[-1].pause != 0 || word == first) {
                 b->next = b + 1;
                 b++;
                 b->first = a;
                 b->count = 1;
-                b->unk_1 = word->phraseStrength;
+                b->phraseStrength = word->phraseStrength;
             } else {
                 b->count++;
             }
@@ -414,13 +414,13 @@ int ShttsWord_SplitSyllables(ShttsSpokenWord *word, ShttsSyllable *sound, int ma
         c = word->text[i];
         switch (c) {
         case '?':
-            if ((word->unk_07 & 7) < 3) {
-                word->unk_07++;
+            if ((word->marks & 7) < 3) {
+                word->marks++;
             }
             break;
         case '!':
-            if (((word->unk_07 & 0x70) >> 4) < 3) {
-                word->unk_07 += 0x10;
+            if (((word->marks & 0x70) >> 4) < 3) {
+                word->marks += 0x10;
             }
             break;
         case 'Q':
@@ -434,7 +434,7 @@ int ShttsWord_SplitSyllables(ShttsSpokenWord *word, ShttsSyllable *sound, int ma
             if (c <= 'Z' && c >= 'A') {
                 c += 0x20;
             }
-            sound->unk_05 = 'U';
+            sound->vowelMark = 'U';
             c = (char)c;
             // Fall through
         case 'a':
@@ -451,7 +451,7 @@ int ShttsWord_SplitSyllables(ShttsSpokenWord *word, ShttsSyllable *sound, int ma
                 if (sound->name[0] != 0) {
                     break;
                 }
-                sound[-1].unk_05 = 'L';
+                sound[-1].vowelMark = 'L';
             }
             p[0] = c;
             p[1] = 0;
@@ -503,7 +503,7 @@ int ShttsParam_RunCommand(const char *command, int live, Shtts *engine) {
         switch (command[1]) {
         case 'F':
             engine->cur.pitch = 0x13C2;
-            engine->cur.unk_00 = 0;
+            engine->cur.unitSet = 0;
             return -3;
         case 'M':
             engine->cur.pitch = 0x1200;
@@ -528,25 +528,25 @@ int ShttsParam_RunCommand(const char *command, int live, Shtts *engine) {
         case 'C':
             if (live) {
                 value = atoi(command + 2);
-                engine->cur.unk_14 = 0;
+                engine->cur.accentRule = 0;
                 engine->cur.mode = 0;
                 if (value == 1) {
                     engine->cur.mode = 1;
                 } else if (value == 2) {
                     engine->cur.mode = 2;
                 } else if (value != 0) {
-                    engine->cur.unk_14 = 1;
+                    engine->cur.accentRule = 1;
                 }
             } else {
                 value = atoi(command + 2);
-                engine->set.unk_14 = 0;
+                engine->set.accentRule = 0;
                 engine->set.mode = 0;
                 if (value == 1) {
                     engine->set.mode = 1;
                 } else if (value == 2) {
                     engine->set.mode = 2;
                 } else if (value != 0) {
-                    engine->set.unk_14 = 1;
+                    engine->set.accentRule = 1;
                 }
             }
             return -3;
@@ -764,13 +764,13 @@ int ShttsWord_PrepareText(char *text, char *out, Shtts *engine) {
     return 0;
 }
 
-void ShttsWord_ClearSyllable(ShttsSyllable *unk, Shtts *engine) {
-    unk->name[0] = '\0';
-    unk->qMark = unk->unk_05 = '-';
-    unk->unk_08 = 0;
-    unk->unk_06 = 0;
-    unk->next = NULL;
-    unk->pitch = engine->cur.pitch;
+void ShttsWord_ClearSyllable(ShttsSyllable *syllable, Shtts *engine) {
+    syllable->name[0] = '\0';
+    syllable->qMark = syllable->vowelMark = '-';
+    syllable->vowelLength = 0;
+    syllable->consonantLength = 0;
+    syllable->next = NULL;
+    syllable->pitch = engine->cur.pitch;
 }
 
 // Where one string first is in another, or -1
@@ -1531,15 +1531,15 @@ int ShttsSynth_DecodeFrame(ShttsFrame *frame, s16 *out, Shtts *engine) {
     s16 n;
     int nibble;
 
-    if (frame->unk_3 == 0) {
+    if (frame->sampleCount == 0) {
         *out = 0;
         return 0;
     }
     for (n = 0; n < 10; n++) {
         if (n % 2 == 1) {
-            nibble = frame->unk_8[n / 2] & 0xF;
+            nibble = frame->lspIndices[n / 2] & 0xF;
         } else {
-            nibble = (frame->unk_8[n / 2] >> 4) & 0xF;
+            nibble = (frame->lspIndices[n / 2] >> 4) & 0xF;
         }
         if (n == 0) {
             freq[n] = ShttsLspCodebook[n][nibble];
@@ -1580,9 +1580,9 @@ int ShttsSynth_DecodeFrame(ShttsFrame *frame, s16 *out, Shtts *engine) {
     }
     ShttsSynth_ConvertLspToLpc(10 - cut, freq, &coef[1]);
     memset(&coef[11] - cut, 0, cut * 2);
-    if (frame->unk_2 != 0) {
+    if (frame->voiced != 0) {
         memset(state, 0, sizeof(state));
-        if (ShttsPhonemeFlags[frame->unk_4] & 0x84) {
+        if (ShttsPhonemeFlags[frame->phoneme] & 0x84) {
             ShttsSynth_FilterRecursive(0x100, 10, coef, state, ShttsVoicedExcitationAlt, buffer, engine);
         } else {
             ShttsSynth_FilterRecursive(0x100, 10, coef, state, ShttsVoicedExcitation, buffer, engine);
@@ -1600,7 +1600,7 @@ int ShttsSynth_DecodeFrame(ShttsFrame *frame, s16 *out, Shtts *engine) {
         ShttsSynth_NormalizeLevel(0x800, buffer, out + 1, count);
     }
     *out = count;
-    frame->unk_3 = count;
+    frame->sampleCount = count;
     return count;
 }
 
@@ -1609,7 +1609,7 @@ int ShttsSynth_DecodeFrame(ShttsFrame *frame, s16 *out, Shtts *engine) {
 // chains of order / 2 second-order sections, whose coefficients are the even and the odd cosines, and half the sum
 // of the two chains' outputs, from the second on, is the result.
 //
-// The first loop only matches with the multiplication as an inline function returning s16 (func_020897c8_mult) and
+// The first loop only matches with the multiplication as an inline function returning s16 (ShttsMath_MultiplyQ15) and
 // with `frac` reused for the product and then for the sum.
 void ShttsSynth_ConvertLspToLpc(int order, u16 *in, s16 *out) {
     s16 cosines[10];
@@ -1635,7 +1635,7 @@ void ShttsSynth_ConvertLspToLpc(int order, u16 *in, s16 *out) {
         t = (in[i] << 7) >> 1;
         j = t >> 15;
         frac = t & 0x7FFF;
-        frac = func_020897c8_mult(ShttsCosineTable[j + 1] - ShttsCosineTable[j], frac);
+        frac = ShttsMath_MultiplyQ15(ShttsCosineTable[j + 1] - ShttsCosineTable[j], frac);
         frac += ShttsCosineTable[j];
         cosines[i] = -frac;
     }
@@ -1905,8 +1905,8 @@ void ShttsEffect_ResetFir(Shtts *engine) {
 }
 
 // Shapes the pitch of everything in a list: first ShttsPitch_AddAccent for each ShttsPitchAccentGroup, then, for each stretch
-// that ends at a ShttsPitchWord with unk_12 set, or at the list's end, ShttsPitch_AddPhraseCurve with the sum of unk_06 and
-// unk_08 of its ShttsUnk_02087d98s.
+// that ends at a ShttsPitchWord with pause set, or at the list's end, ShttsPitch_AddPhraseCurve with the sum of consonantLength and
+// vowelLength of its ShttsSyllables.
 void ShttsPitch_ShapeGroups(ShttsPitchPhraseGroup *list, Shtts *engine) {
     ShttsPitchPhraseGroup *a;
     ShttsPitchPhraseGroup *cur;
@@ -1941,13 +1941,13 @@ void ShttsPitch_ShapeGroups(ShttsPitchPhraseGroup *list, Shtts *engine) {
                 for (j = 0; j < b->count; j++, c = c->next) {
                     d = c->first;
                     for (k = 0; k < c->count - 1; k++) {
-                        length += d->unk_06 + d->unk_08;
+                        length += d->consonantLength + d->vowelLength;
                         d = d->next;
                     }
-                    length += d->unk_06 + d->unk_08;
-                    if (c->unk_12 != 0 || (a->next == NULL && b->next == NULL && b->last == c)) {
+                    length += d->consonantLength + d->vowelLength;
+                    if (c->pause != 0 || (a->next == NULL && b->next == NULL && b->last == c)) {
                         if (cur->next == NULL) {
-                            if (c->unk_07 != 0) {
+                            if (c->marks != 0) {
                                 ShttsPitch_AddPhraseCurve(cur, length, d, 2, notFirst, engine);
                             } else {
                                 ShttsPitch_AddPhraseCurve(cur, length, d, 1, notFirst, engine);
@@ -1972,10 +1972,10 @@ void ShttsPitch_ShapeGroups(ShttsPitchPhraseGroup *list, Shtts *engine) {
     }
 }
 
-// Adds a curve (ShttsPitch_EvalPhraseCurve) to the pitch of each ShttsSyllable from the first of `unk` to `last`, at a rate
-// that falls with `length`, and lowers the pitch of the last one when the unk_12 of the last ShttsPitchWord is
+// Adds a curve (ShttsPitch_EvalPhraseCurve) to the pitch of each ShttsSyllable from the first of `group` to `last`, at a rate
+// that falls with `length`, and lowers the pitch of the last one when the pause of the last ShttsPitchWord is
 // near certain multiples of cur.speed. `kind` is 0 when more follows, 1 or 2 at the end.
-int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *unk, int length, ShttsSyllable *last, int kind, s16 notFirst,
+int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *group, int length, ShttsSyllable *last, int kind, s16 notFirst,
                   Shtts *engine) {
     s16 offset;
     ShttsPitchAccentGroup *b;
@@ -1998,51 +1998,51 @@ int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *unk, int length, ShttsSylla
             rate = (s16)(0x35E800 / (length + 250));
         }
     }
-    b = unk->first;
+    b = group->first;
     if (notFirst == 1) {
-        if (unk->unk_1 == 1) {
+        if (group->phraseStrength == 1) {
             if (engine->prevPhraseNotFirst == 1 && engine->prevPhraseStrength == 1) {
                 depth = 60;
             } else {
                 depth = 200;
             }
         } else {
-            depth = unk->unk_1 * 105 - (b->first->first->pitch - engine->cur.pitch);
+            depth = group->phraseStrength * 105 - (b->first->first->pitch - engine->cur.pitch);
         }
     } else {
-        depth = unk->unk_1 * 105;
+        depth = group->phraseStrength * 105;
     }
     engine->prevPhraseNotFirst = notFirst;
-    engine->prevPhraseStrength = unk->unk_1;
+    engine->prevPhraseStrength = group->phraseStrength;
     if (depth < 0) {
         depth = 0;
     }
     d = b->first->first;
-    offset = ShttsMath_DivideRounded(0xFA000, rate) + (-83 - (d->unk_06 + ((d->unk_08 + 1) >> 1)));
+    offset = ShttsMath_DivideRounded(0xFA000, rate) + (-83 - (d->consonantLength + ((d->vowelLength + 1) >> 1)));
     pos = 0;
     while (d != last) {
-        pos += d->unk_06 + ((d->unk_08 + 1) >> 1);
+        pos += d->consonantLength + ((d->vowelLength + 1) >> 1);
         d->pitch += (s16)((ShttsPitch_EvalPhraseCurve(rate, pos + offset) * (depth * 3) + 0x400) >> 11);
-        pos += d->unk_08 >> 1;
+        pos += d->vowelLength >> 1;
         d = d->next;
     }
     d->pitch +=
-        (s16)((depth * 3 * ShttsPitch_EvalPhraseCurve(rate, pos + (d->unk_06 + ((d->unk_08 + 1) >> 1)) + offset) + 0x400) >> 11);
-    c = b[unk->count - 1].last;
-    if (kind == 1 && c->unk_12 > (1 - engine->cur.speed) * -10 && c->unk_12 < (engine->cur.speed + 1) * 10) {
-        last->pitch -= unk->unk_1 / 10 * 170;
-    } else if (kind == 0 && c->unk_12 > engine->cur.speed * 3 - 10 && c->unk_12 < engine->cur.speed * 3 + 10) {
-        last->pitch -= unk->unk_1 / 10 * 120;
-    } else if (kind == 0 && c->unk_12 > engine->cur.speed * 2 - 10 && c->unk_12 < engine->cur.speed * 2 + 10) {
-        last->pitch -= unk->unk_1 / 10 * 70;
+        (s16)((depth * 3 * ShttsPitch_EvalPhraseCurve(rate, pos + (d->consonantLength + ((d->vowelLength + 1) >> 1)) + offset) + 0x400) >> 11);
+    c = b[group->count - 1].last;
+    if (kind == 1 && c->pause > (1 - engine->cur.speed) * -10 && c->pause < (engine->cur.speed + 1) * 10) {
+        last->pitch -= group->phraseStrength / 10 * 170;
+    } else if (kind == 0 && c->pause > engine->cur.speed * 3 - 10 && c->pause < engine->cur.speed * 3 + 10) {
+        last->pitch -= group->phraseStrength / 10 * 120;
+    } else if (kind == 0 && c->pause > engine->cur.speed * 2 - 10 && c->pause < engine->cur.speed * 2 + 10) {
+        last->pitch -= group->phraseStrength / 10 * 70;
     }
     return 0;
 }
 
-// Raises and lowers the pitch of the ShttsUnk_02087d98s of one ShttsPitchAccentGroup around the position unk_1, by an
-// amount that unk_2 scales. unk_1 from 30 up carries a direction in its tens, and cur.unk_14 chooses how unk_1 is
+// Raises and lowers the pitch of the ShttsSyllables of one ShttsPitchAccentGroup around the position accentPosition, by an
+// amount that accentStrength scales. accentPosition from 30 up carries a direction in its tens, and cur.accentRule chooses how accentPosition is
 // reworked from the number that ShttsWord_CountMorae counts.
-void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
+void ShttsPitch_AddAccent(ShttsPitchAccentGroup *group, Shtts *engine) {
     ShttsSyllable *first;
     int depth;
     int end;
@@ -2058,47 +2058,47 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
     char lastA;
     char lastB;
 
-    c = unk->first;
+    c = group->first;
     first = c->first;
     end = 0;
-    if ((first->unk_05 == 'L' || first[1].qMark == 'Q' || first[1].name[0] == 'N') && unk->unk_1 != 1) {
-        depth = unk->unk_2 * 0x84B6;
+    if ((first->vowelMark == 'L' || first[1].qMark == 'Q' || first[1].name[0] == 'N') && group->accentPosition != 1) {
+        depth = group->accentStrength * 0x84B6;
     } else {
-        depth = unk->unk_2 * 0x9375;
+        depth = group->accentStrength * 0x9375;
     }
-    if (unk->last->unk_12 > engine->cur.speed * 3) {
-        if (unk->last->unk_06 == 0) {
+    if (group->last->pause > engine->cur.speed * 3) {
+        if (group->last->accentPosition == 0) {
             depth = (depth * 0x666) >> 12;
-        } else if (unk->last->unk_06 == 1) {
-            if (unk->last->count < 3) {
+        } else if (group->last->accentPosition == 1) {
+            if (group->last->count < 3) {
                 depth >>= 2;
             }
-        } else if (unk->last->count - unk->last->unk_06 < 2) {
+        } else if (group->last->count - group->last->accentPosition < 2) {
             depth >>= 1;
         }
     }
     total = 0;
-    for (i = 0; i < unk->count; i++) {
-        total = (s16)(total + ShttsWord_CountMorae(c->unk_00));
+    for (i = 0; i < group->count; i++) {
+        total = (s16)(total + ShttsWord_CountMorae(c->text));
         c = c->next;
     }
-    if (unk->unk_1 / 30 == 1) {
-        unk->unk_1 -= 30;
+    if (group->accentPosition / 30 == 1) {
+        group->accentPosition -= 30;
         dir = -1;
-    } else if (unk->unk_1 / 30 == 2) {
-        unk->unk_1 -= 60;
+    } else if (group->accentPosition / 30 == 2) {
+        group->accentPosition -= 60;
         dir = 1;
-    } else if (unk->unk_1 / 30 == 3) {
-        unk->unk_1 -= 90;
+    } else if (group->accentPosition / 30 == 3) {
+        group->accentPosition -= 90;
         dir = 0;
-    } else if (engine->cur.unk_14 == 1) {
+    } else if (engine->cur.accentRule == 1) {
         if (total == 2) {
-            if (unk->unk_1 == 0) {
-                unk->unk_1 = 1;
-            } else if (unk->unk_1 == 1) {
-                unk->unk_1 = 0;
+            if (group->accentPosition == 0) {
+                group->accentPosition = 1;
+            } else if (group->accentPosition == 1) {
+                group->accentPosition = 0;
             }
-        } else if (total > 2 && unk->unk_1 == 1 && first->unk_05 != 'L') {
+        } else if (total > 2 && group->accentPosition == 1 && first->vowelMark != 'L') {
             n = 0;
             if (first->name[n] != 0) {
                 while (first->name[n] != 0) {
@@ -2115,12 +2115,12 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
                 lastB = next->name[(s16)(n - 1)];
             }
             if (lastA != lastB && next->qMark != 'Q') {
-                unk->unk_1 = 2;
+                group->accentPosition = 2;
             }
         }
-        if (unk->unk_1 == 2) {
+        if (group->accentPosition == 2) {
             dir = -1;
-        } else if (unk->unk_1 >= total) {
+        } else if (group->accentPosition >= total) {
             dir = 1;
         } else if (total == 2) {
             dir = -1;
@@ -2129,17 +2129,17 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
         } else {
             dir = 1;
         }
-    } else if (engine->cur.unk_14 == 2) {
+    } else if (engine->cur.accentRule == 2) {
         dir = -1;
         if (total <= 3) {
-            unk->unk_1 = total;
+            group->accentPosition = total;
         } else {
-            unk->unk_1 = total - 1 + total % 2;
+            group->accentPosition = total - 1 + total % 2;
         }
     } else {
         dir = 0;
     }
-    if (unk->unk_1 == 1) {
+    if (group->accentPosition == 1) {
         depth -= depth >> 2;
         end = 1;
         first->pitch += (s16)((depth + 0x200) >> 10);
@@ -2153,7 +2153,7 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
         } else if (dir == -1) {
             first->pitch -= (s16)((depth + 0x400) >> 11);
         }
-        accent = unk->unk_1;
+        accent = group->accentPosition;
         d = first->next;
         k = 3;
         if (accent == 0 || total < accent) {
@@ -2190,7 +2190,7 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
             } else if (k == end || (dir == 1 && k <= end)) {
                 d->pitch += (s16)((depth + 0x200) >> 10);
             }
-            if (d->qMark == 'Q' && k >= 2 && unk->unk_1 != 0 && total >= unk->unk_1) {
+            if (d->qMark == 'Q' && k >= 2 && group->accentPosition != 0 && total >= group->accentPosition) {
                 k = (s16)(k + 1);
             }
             d = d->next;
@@ -2208,7 +2208,7 @@ void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
     if (d == NULL) {
         return;
     }
-    if (unk->last->unk_12 != 0) {
+    if (group->last->pause != 0) {
         return;
     }
     if (total <= 1) {
@@ -2240,18 +2240,18 @@ void ShttsSynth_FitFrameGains(ShttsRunFrame *table, int count, int a, int b) {
     if (a < 0) {
         a = 0;
     } else {
-        a = (s16)(a - table[0].unk_0);
+        a = (s16)(a - table[0].gain);
     }
     if (b < 0) {
         b = a;
     } else {
-        b = (s16)(b - table[count - 1].unk_0);
+        b = (s16)(b - table[count - 1].gain);
     }
     ShttsSynth_RampFrameGains(table, count, a, b);
 }
 
-// Adds to unk_0 of each entry an amount that goes from `a` at the first to `b` at the last, each kept within 400
-// either way, changing only past entries whose unk_2 is positive, and keeps the results from 0 to the greater of
+// Adds to gain of each entry an amount that goes from `a` at the first to `b` at the last, each kept within 400
+// either way, changing only past entries whose voiced is positive, and keeps the results from 0 to the greater of
 // the two ends' new values.
 void ShttsSynth_RampFrameGains(ShttsRunFrame *table, int count, int a, int b) {
     s16 max;
@@ -2267,10 +2267,10 @@ void ShttsSynth_RampFrameGains(ShttsRunFrame *table, int count, int a, int b) {
     if (b > 400 || b < -400) {
         b = (s16)(b > 0 ? 400 : -400);
     }
-    if (table[0].unk_0 + a > (table + count)[-1].unk_0 + b) {
-        max = table[0].unk_0 + a;
+    if (table[0].gain + a > (table + count)[-1].gain + b) {
+        max = table[0].gain + a;
     } else {
-        max = (table + count)[-1].unk_0 + b;
+        max = (table + count)[-1].gain + b;
     }
     step = ShttsMath_DivideRounded((b - a) << 11, (s16)(count - 1)) << 5;
     if (step > 0x640000 || step < -0x640000) {
@@ -2284,10 +2284,10 @@ void ShttsSynth_RampFrameGains(ShttsRunFrame *table, int count, int a, int b) {
         return;
     }
     for (; i < count; i++, table--) {
-        if (table->unk_2 > 0) {
-            v = table->unk_0 + (s16)(x >> 16);
+        if (table->voiced > 0) {
+            v = table->gain + (s16)(x >> 16);
         } else {
-            v = table->unk_0 + (s16)(y >> 16);
+            v = table->gain + (s16)(y >> 16);
         }
         if (v < 0) {
             v = 0;
@@ -2295,9 +2295,9 @@ void ShttsSynth_RampFrameGains(ShttsRunFrame *table, int count, int a, int b) {
         if (max < v) {
             v = max;
         }
-        table->unk_0 = v;
+        table->gain = v;
         x -= step;
-        if (table->unk_2 > 0) {
+        if (table->voiced > 0) {
             y = x;
         }
     }
@@ -2354,116 +2354,116 @@ void ShttsSynth_SynthesizeSegments(Shtts *engine) {
             cur = start;
             kind = start->kind;
             for (j = 0; j < total; j++) {
-                s8 c = ShttsUnitFrames[start->unit + j].unk_0;
+                s8 c = ShttsUnitFrames[start->unit + j].gainAndVoiced;
                 s16 v = c & 0x7F;
 
-                engine->runFrames[j].unk_0 = v * 10;
-                engine->runFrames[j].unk_2 = (c >> 7) & 1;
+                engine->runFrames[j].gain = v * 10;
+                engine->runFrames[j].voiced = (c >> 7) & 1;
                 if (j >= bound) {
                     cur++;
                     kind = cur->kind;
                     bound = cur->last - start->first + 1;
                 }
                 engine->runFrames[j].kind = kind;
-                if (cur->unk_6 < 0) {
-                    engine->runFrames[j].unk_2 = 0;
+                if (cur->pitch < 0) {
+                    engine->runFrames[j].voiced = 0;
                 }
-                if (engine->runFrames[j].unk_2 == 0) {
-                    engine->runFrames[j].unk_3 = engine->frameLength;
+                if (engine->runFrames[j].voiced == 0) {
+                    engine->runFrames[j].sampleCount = engine->frameLength;
                 } else {
-                    engine->runFrames[j].unk_3 = 120;
+                    engine->runFrames[j].sampleCount = 120;
                 }
                 for (k = 0; k < 5; k++) {
-                    engine->runFrames[j].unk_8[k] = ShttsUnitFrames[start->unit + j].unk_1[k];
+                    engine->runFrames[j].lspIndices[k] = ShttsUnitFrames[start->unit + j].lspIndices[k];
                 }
             }
             for (p = start; p <= end; p++) {
-                if (p->unk_6 < 0) {
-                    p->unk_6 = -p->unk_6;
+                if (p->pitch < 0) {
+                    p->pitch = -p->pitch;
                 }
             }
             if (start == engine->segments) {
-                s16 x = end->unk_8 - engine->runFrames[total - 1].unk_0;
+                s16 x = end->gain - engine->runFrames[total - 1].gain;
 
                 ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
                 engine->runKind = -1;
             } else if (i == last) {
-                s16 x = start->unk_8 - engine->runFrames[0].unk_0;
+                s16 x = start->gain - engine->runFrames[0].gain;
 
                 ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
                 engine->runKind = -2;
             } else if ((ShttsPhonemeFlags[start->kind] & 0x80) && start->kind != 20 && (ShttsPhonemeFlags[end->kind] & 0x80)
                        && end->kind != 20 && start != end) {
-                ShttsSynth_FitFrameGains(engine->runFrames, total, start->unk_8, end->unk_8);
+                ShttsSynth_FitFrameGains(engine->runFrames, total, start->gain, end->gain);
                 engine->runKind = 0;
             } else if (engine->runKind == 1) {
-                s16 x = end->unk_8 - engine->runFrames[total - 1].unk_0;
+                s16 x = end->gain - engine->runFrames[total - 1].gain;
 
                 ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
                 engine->runKind = 2;
             } else {
-                s16 x = start->unk_8 - engine->runFrames[0].unk_0;
+                s16 x = start->gain - engine->runFrames[0].gain;
 
                 ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
                 engine->runKind = 1;
             }
             frames = ShttsSynth_StretchSegments((void *)start, (void *)end, (void *)engine->runFrames, (void *)&engine->framePointers[1], engine);
             if (split > 0 && engine->runKind == 0) {
-                ShttsSynth_WritePitchRamp(contour, (start->length + 1) / 2, start->unk_6, 7000, engine);
-                ShttsSynth_WritePitchRamp(contour + (start->length + 1) / 2, frames - (start->length + 1) / 2, end->unk_6, 7000,
+                ShttsSynth_WritePitchRamp(contour, (start->length + 1) / 2, start->pitch, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour + (start->length + 1) / 2, frames - (start->length + 1) / 2, end->pitch, 7000,
                               engine);
                 split = 0;
-            } else if (end->unk_6 != end[1].unk_6 && engine->runKind != -2 && end->kind == end[1].kind) {
+            } else if (end->pitch != end[1].pitch && engine->runKind != -2 && end->kind == end[1].kind) {
                 if (engine->runKind == -1) {
                     if (engine->prevRunWeight == 0) {
                         if (ShttsPhonemeFlags[start->kind] & 1) {
-                            engine->pitchContour[0] = end->unk_6;
+                            engine->pitchContour[0] = end->pitch;
                         } else {
-                            engine->pitchContour[0] = end->unk_6 - (frames - end->length / 2) * 15;
+                            engine->pitchContour[0] = end->pitch - (frames - end->length / 2) * 15;
                         }
                     } else {
                         engine->pitchContour[0] += ShttsMath_DivideRounded(
-                            engine->prevRunWeight * (end->unk_6 - engine->pitchContour[0]),
+                            engine->prevRunWeight * (end->pitch - engine->pitchContour[0]),
                             (s16)(engine->prevRunWeight + frames - end->length / 2));
                     }
                 }
-                // The original reads end->unk_6 once and keeps it across the call, which this form gives
-                sum = end->unk_6
-                      + ShttsMath_DivideRounded(end->length * (s16)(end[1].unk_6 - end->unk_6),
+                // The original reads end->pitch once and keeps it across the call, which this form gives
+                sum = end->pitch
+                      + ShttsMath_DivideRounded(end->length * (s16)(end[1].pitch - end->pitch),
                                       (s16)(end->length + end[1].length));
                 target = sum < -0x8000 ? -0x8000 : sum > 0x7FFF ? 0x7FFF : sum;
-                ShttsSynth_WritePitchRamp(contour, frames - end->length / 2, end->unk_6, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour, frames - end->length / 2, end->pitch, 7000, engine);
                 ShttsSynth_WritePitchRamp(contour + frames - end->length / 2, end->length / 2, target, 7000, engine);
                 split = 1;
             } else {
                 if (engine->runKind == -1) {
                     if (engine->prevRunWeight == 0 || engine->cur.pitchTrans != 0) {
                         if ((ShttsPhonemeFlags[start->kind] & 1) || engine->cur.phrase == 0) {
-                            engine->pitchContour[0] = end->unk_6;
+                            engine->pitchContour[0] = end->pitch;
                         } else {
-                            engine->pitchContour[0] = end->unk_6 - frames * 15;
+                            engine->pitchContour[0] = end->pitch - frames * 15;
                         }
                     } else {
                         engine->pitchContour[0] += ShttsMath_DivideRounded(
-                            engine->prevRunWeight * (end->unk_6 - engine->pitchContour[0]), (s16)(engine->prevRunWeight + frames));
+                            engine->prevRunWeight * (end->pitch - engine->pitchContour[0]), (s16)(engine->prevRunWeight + frames));
                     }
                 } else if (engine->runKind == -2) {
                     if (engine->cur.phrase == 0) {
-                        end->unk_6 = engine->pitchContour[0];
+                        end->pitch = engine->pitchContour[0];
                     } else {
-                        end->unk_6 = engine->pitchContour[0] - (s16)frames * 10;
+                        end->pitch = engine->pitchContour[0] - (s16)frames * 10;
                     }
                 } else if (engine->pitchContour[0] <= 0) {
-                    engine->pitchContour[0] = start->unk_6;
+                    engine->pitchContour[0] = start->pitch;
                 }
-                ShttsSynth_WritePitchRamp(contour, frames, end->unk_6, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour, frames, end->pitch, 7000, engine);
             }
             ShttsSynth_SynthesizeFrames(&engine->framePointers[1], contour, frames, engine);
             if (ShttsEngine_IsStopRequested(engine) == 1) {
                 return;
             }
             engine->pitchContour[0] = engine->pitchContour[frames];
-            engine->prevRunWeight = engine->framePointers[frames]->unk_3;
+            engine->prevRunWeight = engine->framePointers[frames]->sampleCount;
             start = segment;
         }
     next:
@@ -2608,7 +2608,7 @@ void ShttsUnit_SelectUnits(ShttsPhone *phones, void *unused, Shtts *engine) {
             p++;
             count++;
         }
-        if (end->unk_E == 'Q' && start != end
+        if (end->qMark == 'Q' && start != end
             && (end[-1].kind == 26 || end[-1].kind == 25 || end[-1].kind == 21 || end[-1].kind == 19
                 || end[-1].kind == 18 || end[-1].kind == 15 || end[-1].kind == 20 || end[-1].kind == 23
                 || end[-1].kind == 24)) {
@@ -2735,33 +2735,33 @@ int ShttsUnit_AddSegments(int mode, ShttsPhone *first, ShttsPhone *last, void *u
         if (engine->segmentCount >= 0x180) {
             goto done;
         }
-        if (unit->unk_4[i] == unit->unk_4[i + 1]) {
+        if (unit->bounds[i] == unit->bounds[i + 1]) {
             i++;
         }
-        if (p->unk_A != 0 && p == first && mode != -1) {
-            value = p->unk_A;
+        if (p->endPitch != 0 && p == first && mode != -1) {
+            value = p->endPitch;
         } else {
-            value = p->unk_8;
+            value = p->pitch;
         }
         if (value == 0 && p[-1].kind != 0) {
-            s16 after = p[1].unk_8;
+            s16 after = p[1].pitch;
 
             value = after
-                    + (p[-1].length + p->length) * (p[-1].unk_8 - after)
+                    + (p[-1].length + p->length) * (p[-1].pitch - after)
                           / (p[1].length + (p[-1].length + p->length * 2));
         }
         out->kind = p->kind;
         out->length = lengths[i + 1];
-        if (p->kind >= 1 && p->kind <= 6 && p->unk_F == 'U') {
-            out->unk_6 = -value;
+        if (p->kind >= 1 && p->kind <= 6 && p->vowelMark == 'U') {
+            out->pitch = -value;
         } else {
-            out->unk_6 = value;
+            out->pitch = value;
         }
-        out->unk_8 = p->unk_6;
-        out->first = unit->unk_4[i];
-        out->last = unit->unk_4[i + 1] - 1;
+        out->gain = p->gain;
+        out->first = unit->bounds[i];
+        out->last = unit->bounds[i + 1] - 1;
         i++;
-        out->unit = unit->unk_0;
+        out->unit = unit->firstFrame;
         out->unk_A = p->unk_C;
         out++;
         engine->segmentCount++;
@@ -2776,9 +2776,9 @@ done:
 }
 
 ShttsUnit *ShttsUnit_Find(int *index, Shtts *engine) {
-    ShttsUnit *unit = &ShttsUnits[engine->cur.unk_00][index[0]][index[1]][index[2]];
+    ShttsUnit *unit = &ShttsUnits[engine->cur.unitSet][index[0]][index[1]][index[2]];
 
-    if (unit->unk_2 == 0) {
+    if (unit->exists == 0) {
         return NULL;
     }
     return unit;
@@ -2855,7 +2855,7 @@ void ShttsOutput_Flush(Shtts *engine) {
     engine->mixPos = engine->mixHalf;
 }
 
-// Adds the samples of unk_08726 to the sample buffer, going round to its start at its end and keeping the sums
+// Adds the samples of addWave to the sample buffer, going round to its start at its end and keeping the sums
 // within 16 bits. They go at the buffer's place, or half their count before it if both a and b are above 0.
 void ShttsOutput_AddWave(int a, int b, Shtts *engine) {
     s16 *dst;
@@ -2946,7 +2946,7 @@ void ShttsSynth_SynthesizeFrames(ShttsFrameRef **units, s16 *pitches, s16 count,
 
 // Sets the caller's voice settings back to their defaults
 void ShttsParam_SetDefaults(Shtts *engine) {
-    engine->set.unk_00 = 0;
+    engine->set.unitSet = 0;
     engine->set.pitch = 0x13C2;
     engine->set.accent = 100;
     engine->set.phrase = 100;
@@ -2955,7 +2955,7 @@ void ShttsParam_SetDefaults(Shtts *engine) {
     engine->set.warp = 100;
     engine->set.warpScale = 0x400;
     engine->set.warpOrder = 10;
-    engine->set.unk_14 = 0;
+    engine->set.accentRule = 0;
     engine->set.mode = 0;
     engine->set.echoDelay = 0;
     engine->set.echoGain = 0;
@@ -2968,7 +2968,7 @@ void ShttsParam_SetDefaults(Shtts *engine) {
 
 // Puts the caller's settings in use
 void ShttsParam_UseSetParams(Shtts *engine) {
-    engine->cur.unk_00 = engine->set.unk_00;
+    engine->cur.unitSet = engine->set.unitSet;
     engine->cur.pitch = engine->set.pitch;
     engine->cur.accent = engine->set.accent;
     engine->cur.phrase = engine->set.phrase;
@@ -2977,7 +2977,7 @@ void ShttsParam_UseSetParams(Shtts *engine) {
     engine->cur.warp = engine->set.warp;
     engine->cur.warpScale = engine->set.warpScale;
     engine->cur.warpOrder = engine->set.warpOrder;
-    engine->cur.unk_14 = engine->set.unk_14;
+    engine->cur.accentRule = engine->set.accentRule;
     engine->cur.mode = engine->set.mode;
     engine->cur.echoDelay = engine->set.echoDelay;
     if (engine->cur.echoDelay != 0) {
@@ -3025,9 +3025,9 @@ int ShttsEngine_SetSampleRate(Shtts *engine) {
 void ShttsEngine_Start(Shtts *engine) {
     ShttsEngine_SetSampleRate(engine);
     ShttsEngine_ResetSynthesis(engine);
-    if (engine->cur.unk_00 == 1) {
+    if (engine->cur.unitSet == 1) {
         ShttsParam_UseSetParams(engine);
-        engine->cur.unk_00 = 1;
+        engine->cur.unitSet = 1;
     } else {
         ShttsParam_UseSetParams(engine);
     }
@@ -3078,7 +3078,7 @@ void ShttsEngine_RunThread(void *arg) {
             added = ShttsPhone_BuildFromSyllables((void *)list, (void *)&engine->phones[count], 0x100 - count);
             count += added;
             if (list->next == NULL || (added != 0 && engine->phones[count].kind == 0)) {
-                ShttsPhone_ShapeEnding((void *)engine->phones, count, list->items[list->count - 1].unk_8[7], engine);
+                ShttsPhone_ShapeEnding((void *)engine->phones, count, list->items[list->count - 1].last[7], engine);
                 engine->segmentCount = 0;
                 count = 0;
                 ShttsUnit_SelectUnits(&engine->phones[1], list, engine);

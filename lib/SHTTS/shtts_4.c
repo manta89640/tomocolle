@@ -30,8 +30,8 @@ int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 // not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
 
 // Takes a text and starts the thread that speaks it
-static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->runInCaller = unk;
+static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int runInCaller) {
+    engine->runInCaller = runInCaller;
     ShttsEngine_SetCallback(engine, callback, arg);
     ShttsEngine_ResetSynthesis(engine);
     memset(engine->inputText, 0, sizeof(engine->inputText));
@@ -47,10 +47,10 @@ static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback cal
 }
 
 // Fractional multiply of two Q15 values.
-static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
+static inline s16 ShttsMath_MultiplyQ15(s16 a, s16 b) { return (a * b) >> 15; }
 
 // Writes the sounds of lists of syllables to an array, max at most, and returns how many. A syllable named "-"
-// lengthens the sound before it, or repeats it if that would be too long or would change unk_A.
+// lengthens the sound before it, or repeats it if that would be too long or would change endPitch.
 int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *sounds, int max) {
     char name[12];
     ShttsPhoneAccentGroup *list1;
@@ -68,23 +68,23 @@ int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *soun
     for (i = lists->count, list1 = lists->first; i > 0; i--, list1 = list1->next) {
         for (j = list1->count, list2 = list1->first; j > 0; j--, list2 = list2->next) {
             for (k = list2->count, syllable = list2->first; k > 0; k--, syllable = syllable->next) {
-                if (syllable->unk_05 == 'U' && syllable->unk_08 > 20) {
-                    syllable->unk_06 += syllable->unk_08 - 20;
-                    syllable->unk_08 = 20;
+                if (syllable->vowelMark == 'U' && syllable->vowelLength > 20) {
+                    syllable->consonantLength += syllable->vowelLength - 20;
+                    syllable->vowelLength = 20;
                 }
-                if (syllable->unk_06 != 0) {
+                if (syllable->consonantLength != 0) {
                     // The consonant, which is all of the name but its last letter
                     length = strlen(syllable->name);
                     strncpy(name, syllable->name, length - 1);
                     name[length - 1] = 0;
                     sound->phoneme = ShttsPhone_FindPhoneme(name);
-                    sound->unk_4 = syllable->unk_06;
-                    sound->unk_8 = 0;
-                    sound->unk_6 = 0;
+                    sound->length = syllable->consonantLength;
+                    sound->pitch = 0;
+                    sound->gain = 0;
                     sound->unk_C = 0;
-                    sound->unk_A = 0;
-                    sound->unk_E = syllable->qMark;
-                    sound->unk_F = syllable->unk_05;
+                    sound->endPitch = 0;
+                    sound->qMark = syllable->qMark;
+                    sound->vowelMark = syllable->vowelMark;
                     sound++;
                     count++;
                     if (count < max - 1) {
@@ -96,21 +96,21 @@ int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *soun
                 }
                 last = length - 1;
                 if (syllable->name[last] == '-') {
-                    if (sound[-1].unk_4 + syllable->unk_08 > 0x7FFF
-                        || (sound[-1].unk_A != 0 && sound[-1].unk_A != syllable->pitch)) {
+                    if (sound[-1].length + syllable->vowelLength > 0x7FFF
+                        || (sound[-1].endPitch != 0 && sound[-1].endPitch != syllable->pitch)) {
                         sound->phoneme = sound[-1].phoneme;
-                        sound->unk_4 = syllable->unk_08;
-                        sound->unk_8 = syllable->pitch;
-                        sound->unk_6 = syllable->gain;
+                        sound->length = syllable->vowelLength;
+                        sound->pitch = syllable->pitch;
+                        sound->gain = syllable->gain;
                         sound->unk_C = 0;
-                        sound->unk_A = 0;
-                        sound->unk_E = syllable->qMark;
-                        sound->unk_F = syllable->unk_05;
-                        if (sound->unk_8 <= 0) {
-                            sound->unk_8 = 0;
+                        sound->endPitch = 0;
+                        sound->qMark = syllable->qMark;
+                        sound->vowelMark = syllable->vowelMark;
+                        if (sound->pitch <= 0) {
+                            sound->pitch = 0;
                         }
-                        if (sound->unk_6 <= 0) {
-                            sound->unk_6 = 0;
+                        if (sound->gain <= 0) {
+                            sound->gain = 0;
                         }
                         sound++;
                         count++;
@@ -119,24 +119,24 @@ int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *soun
                             goto end;
                         }
                     } else {
-                        sound[-1].unk_4 = sound[-1].unk_4 + syllable->unk_08;
-                        sound[-1].unk_A = syllable->pitch;
+                        sound[-1].length = sound[-1].length + syllable->vowelLength;
+                        sound[-1].endPitch = syllable->pitch;
                     }
                 } else {
                     // The vowel
                     sound->phoneme = ShttsPhone_FindPhoneme(&syllable->name[last]);
-                    sound->unk_4 = syllable->unk_08;
-                    sound->unk_8 = syllable->pitch;
-                    sound->unk_6 = syllable->gain;
+                    sound->length = syllable->vowelLength;
+                    sound->pitch = syllable->pitch;
+                    sound->gain = syllable->gain;
                     sound->unk_C = 0;
-                    sound->unk_A = 0;
-                    sound->unk_E = syllable->qMark;
-                    sound->unk_F = syllable->unk_05;
-                    if (sound->unk_8 <= 0) {
-                        sound->unk_8 = 0;
+                    sound->endPitch = 0;
+                    sound->qMark = syllable->qMark;
+                    sound->vowelMark = syllable->vowelMark;
+                    if (sound->pitch <= 0) {
+                        sound->pitch = 0;
                     }
-                    if (sound->unk_6 <= 0) {
-                        sound->unk_6 = 0;
+                    if (sound->gain <= 0) {
+                        sound->gain = 0;
                     }
                     sound++;
                     count++;
@@ -146,14 +146,14 @@ int ShttsPhone_BuildFromSyllables(ShttsPhonePhraseGroup *lists, ShttsSound *soun
                     }
                 }
             }
-            if (list2->unk_12 != 0) {
+            if (list2->pause != 0) {
                 sound->phoneme = ShttsPhone_FindPhoneme("S");
-                sound->unk_4 = list2->unk_12;
-                sound->unk_8 = 0;
-                sound->unk_6 = 0;
+                sound->length = list2->pause;
+                sound->pitch = 0;
+                sound->gain = 0;
                 sound->unk_C = 0;
-                sound->unk_A = 0;
-                sound->unk_E = syllable->qMark;
+                sound->endPitch = 0;
+                sound->qMark = syllable->qMark;
                 sound++;
                 count++;
                 if (count < max - 1) {
@@ -192,55 +192,55 @@ int ShttsPhone_ReadStdin(ShttsSound *sounds, Shtts *engine) {
             switch (line[1]) {
             case 'F':
             case 'f':
-                engine->cur.unk_00 = 0;
+                engine->cur.unitSet = 0;
                 break;
             case 'M':
             case 'm':
-                engine->cur.unk_00 = 1;
+                engine->cur.unitSet = 1;
                 break;
             case 'B':
             case 'b':
                 if (line[2] == '+') {
-                    func_020188f4(line + 3, "%hd", &bOffset);
+                    sscanf(line + 3, "%hd", &bOffset);
                 } else if (line[2] == '-') {
-                    func_020188f4(line + 2, "%hd", &bOffset);
+                    sscanf(line + 2, "%hd", &bOffset);
                 }
                 break;
             case 'S':
             case 's':
-                func_020188f4(line + 2, "%hd", &aScale);
+                sscanf(line + 2, "%hd", &aScale);
                 break;
             case 'V':
             case 'v':
-                func_020188f4(line + 2, "%hd", &cOffset);
+                sscanf(line + 2, "%hd", &cOffset);
                 break;
             case 'L':
             case 'l':
-                func_020188f4(line + 2, "%hd", &unk_C);
+                sscanf(line + 2, "%hd", &unk_C);
                 break;
             }
         } else if (line[0] == '*') {
         } else if (line[0] == '-') {
-            func_020188f4(line + 1, "%d %d", &a, &b);
-            sound[-1].unk_4 += (s16)((aScale * a + 50) / 100);
-            sound[-1].unk_A = bOffset + b;
+            sscanf(line + 1, "%d %d", &a, &b);
+            sound[-1].length += (s16)((aScale * a + 50) / 100);
+            sound[-1].endPitch = bOffset + b;
         } else {
             c = 0;
             b = 0;
             a = 0;
-            func_020188f4(line, "%s %d %d %d %c %c", name, &a, &b, &c, &sound->unk_E, &sound->unk_F);
+            sscanf(line, "%s %d %d %d %c %c", name, &a, &b, &c, &sound->qMark, &sound->vowelMark);
             sound->phoneme = ShttsPhone_FindPhoneme(name);
-            sound->unk_4 = (aScale * a + 50) / 100;
+            sound->length = (aScale * a + 50) / 100;
             count++;
-            sound->unk_8 = bOffset + b;
-            sound->unk_6 = cOffset + c;
+            sound->pitch = bOffset + b;
+            sound->gain = cOffset + c;
             sound->unk_C = unk_C;
-            sound->unk_A = 0;
-            if (sound->unk_8 <= 0) {
-                sound->unk_8 = 0;
+            sound->endPitch = 0;
+            if (sound->pitch <= 0) {
+                sound->pitch = 0;
             }
-            if (sound->unk_6 <= 0) {
-                sound->unk_6 = 0;
+            if (sound->gain <= 0) {
+                sound->gain = 0;
             }
             sound++;
             if (sound[-1].phoneme == 0) {
@@ -256,8 +256,8 @@ int ShttsPhone_ReadStdin(ShttsSound *sounds, Shtts *engine) {
 }
 
 // Changes the end of an array of sounds. First by the mode setting: 1 repeats the last sound, 2 changes every
-// second sound that has unk_8, and 10 adds "n a" or "n e N" after a last sound of "N". Then by flags: bits 4 to 6
-// change the last sound, and bits 0 to 2 repeat it, with unk_8 set from the highest in the array.
+// second sound that has a pitch, and 10 adds "n a" or "n e N" after a last sound of "N". Then by flags: bits 4 to 6
+// change the last sound, and bits 0 to 2 repeat it, with the pitch set from the highest in the array.
 void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *engine) {
     int length;
     int pitch;
@@ -283,32 +283,32 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
         if (end->phoneme != 0) {
             return;
         }
-        if (end[-2].unk_8 != 0) {
-            end[-2].unk_8 += 50;
-            end[-2].unk_4 += 50;
-        } else if (end[-3].unk_8 != 0) {
-            end[-3].unk_8 += 50;
-            end[-3].unk_4 += 50;
+        if (end[-2].pitch != 0) {
+            end[-2].pitch += 50;
+            end[-2].length += 50;
+        } else if (end[-3].pitch != 0) {
+            end[-3].pitch += 50;
+            end[-3].length += 50;
         }
-        end[-1].unk_8 += 450;
-        end[-1].unk_4 += 200;
+        end[-1].pitch += 450;
+        end[-1].length += 200;
         last++;
         count++;
         end[1].phoneme = end[0].phoneme;
-        end[1].unk_4 = end[0].unk_4;
+        end[1].length = end[0].length;
         end[0].phoneme = end[-1].phoneme;
-        end[0].unk_8 = end[-1].unk_8 - 40;
-        if (end[0].unk_8 < 0) {
-            end[0].unk_8 = 0;
+        end[0].pitch = end[-1].pitch - 40;
+        if (end[0].pitch < 0) {
+            end[0].pitch = 0;
         }
-        end[0].unk_4 = 10;
-        end[0].unk_6 = end[-1].unk_6 - 200;
-        if (end[0].unk_6 < 0) {
-            end[0].unk_6 = 0;
+        end[0].length = 10;
+        end[0].gain = end[-1].gain - 200;
+        if (end[0].gain < 0) {
+            end[0].gain = 0;
         }
-        end[-1].unk_A = 0;
-        end[0].unk_A = 0;
-        end[0].unk_F = '-';
+        end[-1].endPitch = 0;
+        end[0].endPitch = 0;
+        end[0].vowelMark = '-';
     } else if (engine->cur.mode == 2) {
         int second;
 
@@ -317,12 +317,12 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
         }
         second = 0;
         for (last = sounds + 1; last < end; last++) {
-            if (last->unk_8 != 0) {
+            if (last->pitch != 0) {
                 if (second == 1) {
-                    last->unk_A = 0;
+                    last->endPitch = 0;
                     second = 0;
-                    last->unk_8 += 300;
-                    last->unk_4 += 150;
+                    last->pitch += 300;
+                    last->length += 150;
                 } else {
                     second = 1;
                 }
@@ -336,57 +336,57 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
         if (before != 6) {
             return;
         }
-        length = end[-1].unk_4;
+        length = end[-1].length;
         if (length <= 120) {
-            pitch = end[-1].unk_8;
+            pitch = end[-1].pitch;
             length = 120;
-        } else if (end[-1].unk_A == 0) {
-            pitch = end[-1].unk_8 - 50;
+        } else if (end[-1].endPitch == 0) {
+            pitch = end[-1].pitch - 50;
         } else {
             length /= 2;
-            pitch = end[-1].unk_A - 50;
+            pitch = end[-1].endPitch - 50;
         }
-        if ((end->unk_4 < 800 || count < 8) && !(end[-2].phoneme == 14 && before == 1)
+        if ((end->length < 800 || count < 8) && !(end[-2].phoneme == 14 && before == 1)
             && !(before == 3 && end[-2].phoneme != 8 && end[-2].phoneme != 19)) {
-            end[2].unk_4 = end[0].unk_4;
+            end[2].length = end[0].length;
             end[2].phoneme = ShttsPhone_FindPhoneme("S");
             end[0].phoneme = ShttsPhone_FindPhoneme("n");
-            end[0].unk_4 = length / 2;
-            end[0].unk_6 = 0;
-            end[0].unk_8 = 0;
+            end[0].length = length / 2;
+            end[0].gain = 0;
+            end[0].pitch = 0;
             end[1].phoneme = ShttsPhone_FindPhoneme("a");
-            end[1].unk_4 = length;
-            end[1].unk_8 = pitch + 50;
-            end[1].unk_A = 0;
-            end[1].unk_6 = end[-1].unk_6;
+            end[1].length = length;
+            end[1].pitch = pitch + 50;
+            end[1].endPitch = 0;
+            end[1].gain = end[-1].gain;
             last += 2;
             count += 2;
-        } else if (end->unk_4 >= 800 && before != 5 && before != 4
+        } else if (end->length >= 800 && before != 5 && before != 4
                    && !(before == 1 && end[-2].phoneme != 25 && end[-2].phoneme != 12)) {
-            end[3].unk_4 = end[0].unk_4;
+            end[3].length = end[0].length;
             end[3].phoneme = ShttsPhone_FindPhoneme("S");
             end[0].phoneme = ShttsPhone_FindPhoneme("n");
-            end[0].unk_4 = length / 2;
-            end[0].unk_6 = 0;
-            end[0].unk_8 = 0;
+            end[0].length = length / 2;
+            end[0].gain = 0;
+            end[0].pitch = 0;
             end[1].phoneme = ShttsPhone_FindPhoneme("e");
-            end[1].unk_4 = length;
-            end[1].unk_8 = pitch;
-            if (end[1].unk_8 < 0) {
-                end[1].unk_8 = 0;
+            end[1].length = length;
+            end[1].pitch = pitch;
+            if (end[1].pitch < 0) {
+                end[1].pitch = 0;
             }
-            end[1].unk_A = 0;
-            end[1].unk_6 = end[-1].unk_6;
+            end[1].endPitch = 0;
+            end[1].gain = end[-1].gain;
             end[2].phoneme = ShttsPhone_FindPhoneme("N");
-            end[2].unk_4 = 1.4 * length;
-            end[2].unk_8 = pitch;
+            end[2].length = 1.4 * length;
+            end[2].pitch = pitch;
             last += 3;
             count += 3;
-            if (end[2].unk_8 < 0) {
-                end[2].unk_8 = 0;
+            if (end[2].pitch < 0) {
+                end[2].pitch = 0;
             }
-            end[2].unk_A = 0;
-            end[2].unk_6 = end[-1].unk_6;
+            end[2].endPitch = 0;
+            end[2].gain = end[-1].gain;
         }
     }
     last[1].phoneme = 7;
@@ -401,42 +401,42 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
         return;
     }
     // The lowest is found too, and not used
-    high = sounds[1].unk_8;
+    high = sounds[1].pitch;
     low = high;
     for (i = 1; i < count; i++) {
         sound = &sounds[i];
-        if (sounds[i].unk_8 != 0) {
-            if (sounds[i].unk_8 > high) {
-                high = sound->unk_8;
+        if (sounds[i].pitch != 0) {
+            if (sounds[i].pitch > high) {
+                high = sound->pitch;
             }
-            if (sounds[i].unk_8 < low) {
-                low = sound->unk_8;
+            if (sounds[i].pitch < low) {
+                low = sound->pitch;
             }
-            if (sounds[i].unk_A != 0) {
-                if (sounds[i].unk_A > high) {
-                    high = sound->unk_A;
+            if (sounds[i].endPitch != 0) {
+                if (sounds[i].endPitch > high) {
+                    high = sound->endPitch;
                 }
-                if (sounds[i].unk_A < low) {
-                    low = sound->unk_A;
+                if (sounds[i].endPitch < low) {
+                    low = sound->endPitch;
                 }
             }
         }
     }
     sounds += count;
     sound = sounds - 1;
-    if (sound->unk_A != 0) {
-        p = &sound->unk_A;
+    if (sound->endPitch != 0) {
+        p = &sound->endPitch;
     } else {
-        p = &sound->unk_8;
+        p = &sound->pitch;
     }
     n = flags & 0x70;
     if (n != 0) {
         sound = sounds - 1;
         n >>= 4;
-        sound->unk_6 += n * 30;
-        sound->unk_4 *= 0.8;
-        if (sound->unk_4 < 10) {
-            sound->unk_4 = 10;
+        sound->gain += n * 30;
+        sound->length *= 0.8;
+        if (sound->length < 10) {
+            sound->length = 10;
         }
         *p += n * 100;
     }
@@ -447,9 +447,9 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
         s16 bottom;
 
         sounds[1].phoneme = sounds[0].phoneme;
-        sounds[1].unk_4 = sounds[0].unk_4;
+        sounds[1].length = sounds[0].length;
         sounds[2].phoneme = 7;
-        pitch = sounds[-1].unk_8 + n * (high - sounds[-1].unk_8) / 3;
+        pitch = sounds[-1].pitch + n * (high - sounds[-1].pitch) / 3;
         if (pitch < 0) {
             pitch = 0;
         } else if (pitch > 0x7FFF) {
@@ -463,23 +463,23 @@ void ShttsPhone_ShapeEnding(ShttsSound *sounds, int count, int flags, Shtts *eng
             bottom = 0;
         }
         sounds[0].phoneme = sounds[-1].phoneme;
-        sounds[0].unk_8 = top;
-        sounds[0].unk_A = 0;
-        sounds[0].unk_4 = sounds[-1].unk_4 >> 1;
-        if (sounds[0].unk_4 < 10) {
-            sounds[0].unk_4 = 10;
+        sounds[0].pitch = top;
+        sounds[0].endPitch = 0;
+        sounds[0].length = sounds[-1].length >> 1;
+        if (sounds[0].length < 10) {
+            sounds[0].length = 10;
         }
-        sounds[0].unk_6 = sounds[-1].unk_6 - 90;
-        if (sounds[0].unk_6 < 0) {
-            sounds[0].unk_6 = 0;
+        sounds[0].gain = sounds[-1].gain - 90;
+        if (sounds[0].gain < 0) {
+            sounds[0].gain = 0;
         }
-        if (sounds[-1].unk_A != 0) {
-            sounds[-1].unk_A = bottom;
+        if (sounds[-1].endPitch != 0) {
+            sounds[-1].endPitch = bottom;
         }
-        sounds[-1].unk_8 = bottom;
-        sounds[-1].unk_4 *= 0.8;
-        if (sounds[-1].unk_4 < 10) {
-            sounds[-1].unk_4 = 10;
+        sounds[-1].pitch = bottom;
+        sounds[-1].length *= 0.8;
+        if (sounds[-1].length < 10) {
+            sounds[-1].length = 10;
         }
     }
 }
@@ -491,17 +491,17 @@ void ShttsEngine_SetCallback(Shtts *engine, ShttsCallback callback, void *arg) {
 
 // Speaks a text, of 1023 bytes at most. If the engine is speaking already, mode says what to do: 0 stops that,
 // 1 waits for it to end, and 2 does not speak the new text.
-int Shtts_Speak(Shtts *engine, const char *text, u32 mode, u32 unk, ShttsCallback callback, void *arg) {
+int Shtts_Speak(Shtts *engine, const char *text, u32 mode, u32 priority, ShttsCallback callback, void *arg) {
     int start = 0;
 
     SDK_USING_MIDDLEWARE(ShttsMiddlewareTag);
     if (mode > 2) {
         return -1;
     }
-    if (unk > 31) {
+    if (priority > 31) {
         return -1;
     }
-    engine->threadPriority = unk;
+    engine->threadPriority = priority;
     OS_LockMutex(&engine->speakMutex);
     if (mode == 2) {
         ShttsEngine_Lock(engine);
@@ -576,7 +576,7 @@ int Shtts_Init(Shtts *engine) {
     engine->frameLength = 0x37;
     engine->dictWords = 0;
     engine->dictCount = 0;
-    engine->cur.unk_00 = 0;
+    engine->cur.unitSet = 0;
     engine->cur.pitch = 0x13C2;
     engine->cur.accent = 100;
     engine->cur.phrase = 100;
@@ -585,7 +585,7 @@ int Shtts_Init(Shtts *engine) {
     engine->splitUnitAtConsonant = 0;
     engine->cur.echoGain = 30;
     engine->cur.echoDelay = 0;
-    engine->cur.unk_14 = 0;
+    engine->cur.accentRule = 0;
     engine->useInputText = 0;
     engine->cur.firDelay = 0;
     engine->cur.chorus = 0;
@@ -596,7 +596,7 @@ int Shtts_Init(Shtts *engine) {
     engine->mixSize = 480;
     engine->mixHalfSize = 240;
     engine->mixedCount = 0;
-    engine->cur.unk_14 = 0;
+    engine->cur.accentRule = 0;
     engine->useInputText = 0;
     engine->cur.firDelay = 0;
     engine->cur.chorus = 0;
@@ -961,14 +961,14 @@ int ShttsParam_SetMode(Shtts *engine, int value) {
     if (value < 0 || value > 3) {
         return -1;
     }
-    engine->set.unk_14 = 0;
+    engine->set.accentRule = 0;
     engine->set.mode = 0;
     if (value == 1) {
         engine->set.mode = 1;
     } else if (value == 2) {
         engine->set.mode = 2;
     } else if (value == 3) {
-        engine->set.unk_14 = 1;
+        engine->set.accentRule = 1;
     }
     return 0;
 }
@@ -1007,7 +1007,7 @@ int ShttsParam_SetPitchTrans(Shtts *engine, int value) {
 
 // The value that ShttsParam_SetMode was given
 int ShttsParam_GetMode(Shtts *engine) {
-    if (engine->set.unk_14 == 0) {
+    if (engine->set.accentRule == 0) {
         return engine->set.mode;
     }
     return 3;
