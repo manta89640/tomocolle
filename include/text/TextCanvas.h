@@ -103,18 +103,24 @@ public:
 
 // The sprite class of the main program (Sprite_Init sets one up, Sprite_Draw draws it). It is not decompiled
 // yet: only what the text canvas uses of it is declared here, under a stand-in name.
-struct Sprite {
-    Sprite() { SetPosition(0, 0); }
-
-    // The two copies are what the original does: they leave four dead stores on the stack of every caller
-    // (Sprite_Init has them as well), which only this form reproduces.
-    void SetPosition(fx32 x, fx32 y) {
-        NNSG2dFVec2 position;
-        position.x = x;
-        position.y = y;
-        NNSG2dFVec2 copy = position;
-        mPosition = copy;
+// A point in 20.12 fixed point. It has a constructor and is passed by value, which is what the compiled code
+// shows: every caller of a setter builds one on the stack and copies it to a second before the values are stored.
+struct FxVec2 {
+    FxVec2() {}
+    FxVec2(fx32 x_, fx32 y_) {
+        x = x_;
+        y = y_;
     }
+
+    fx32 x;
+    fx32 y;
+};
+
+struct Sprite {
+    Sprite() { SetPosition(FxVec2(0, 0)); }
+
+    void SetPosition(FxVec2 position) { mPosition = position; }
+    void SetPosition(fx32 x, fx32 y) { SetPosition(FxVec2(x, y)); }
 
     /* 0x00 */ u8 mUnknown00[0x30];
     /* 0x30 */ const NNSG2dCellData *mCell;
@@ -123,7 +129,7 @@ struct Sprite {
     /* 0x78 */ int mOverwritePriority;
     /* 0x7C */ int mPaletteOffset;
     /* 0x80 */ u8 mUnknown80[0x24];
-    /* 0xA4 */ NNSG2dFVec2 mPosition;
+    /* 0xA4 */ FxVec2 mPosition;
     /* 0xAC */ u8 mUnknownAC[4];
 };
 

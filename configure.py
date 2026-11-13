@@ -126,7 +126,10 @@ CC_FLAGS = [
     "-nolink",
     "-msgstyle gcc",        # Messages an editor can jump from
 ]
-LANG_FLAGS = {".c": "-lang=c99", ".cpp": "-lang=c++"}
+# The game's own code is C++ and was compiled a file as a whole (-ipa file): without it every object has the static
+# counter of the SDK's inline GX_SetVCount in its .bss, where the game's files have nothing (gFonts is followed
+# directly by gTextObjResource). The speech engine is C and matches without it only.
+LANG_FLAGS = {".c": "-lang=c99", ".cpp": "-lang=c++ -ipa file"}
 SOURCE_SUFFIXES = tuple(LANG_FLAGS)
 
 LD_FLAGS = [

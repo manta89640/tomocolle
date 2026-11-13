@@ -165,3 +165,19 @@ The order that the code itself suggests:
    main program, so little of an overlay can be finished before its base classes are.
 3. **Then the overlays**, smallest first: each is a self-contained piece of the game and a short path to a complete
    file.
+
+## What the game's C++ taught us
+
+- **`-ipa file`.** The game's C++ files were compiled as a whole. Without the flag every object carries the static
+  counter of the SDK's inline `GX_SetVCount` in its `.bss`, and the ROM has no room for it. The speech engine (C)
+  matches only without it.
+- **Vectors are classes with constructors, passed by value.** A setter such as `SetPosition(FxVec2 position)`
+  called as `SetPosition(FxVec2(x, y))` leaves two dead copies on the caller's stack; that is the natural source of
+  them, not hand-written copies.
+- **A file's `.bss` order tells its bounds.** `gFonts` precedes `gTextObjResource` in the ROM, which one file
+  defining both does not produce, so the fonts are a file of their own.
+- **Static initialisers** are `__sinit_<file>.cpp` in `.init`, with a pointer in `.ctor`; both are local symbols and
+  both sections have to be in the unit's `delinks.txt` entry before it can be complete. An array of objects is
+  constructed through `__cxa_vec_ctor`, a single one registered with `__register_global_object`.
+- **Virtual tables are not placed yet.** They are emitted in every file that uses the class, and the linker keeps
+  one: which file's is not known, so `TextCanvas.cpp` and `MessageText.cpp` are not linked from source.
