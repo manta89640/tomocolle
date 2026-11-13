@@ -236,7 +236,7 @@ void func_ov074_0216a618(RoomCamera *camera, int mode);
 void func_ov074_0216a62c(RoomCamera *camera, int state, s16 timer);
 void func_ov074_0216a638(RoomCamera *camera);
 
-void func_ov074_0216b55c(CameraFollower *follower, RoomCamera *camera);
+void func_ov074_0216b55c(CameraFollower *follower, RoomCamera *camera, RoomModel *room); // RoomLight::Init
 void func_ov074_0216b5bc(CameraFollower *follower);
 void func_ov074_0216b8a8(CameraFollower *follower, int state);
 

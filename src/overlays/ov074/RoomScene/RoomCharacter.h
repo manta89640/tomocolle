@@ -18,13 +18,6 @@ struct FloorPos {
     /* 0x0 */ fx32 x;
     /* 0x4 */ fx32 z;
 
-    FloorPos() {}
-    FloorPos(fx32 x_, fx32 z_) {
-        x = x_;
-        z = z_;
-    }
-    FloorPos operator-(const FloorPos &other) const { return FloorPos(x - other.x, z - other.z); }
-    FloorPos operator+(const FloorPos &other) const { return FloorPos(x + other.x, z + other.z); }
     fx32 LengthSq() const { return FX_Mul(x, x) + FX_Mul(z, z); }
 };
 
@@ -50,10 +43,8 @@ struct SavedCharacter {
     /* 0x00A6 */ u8 mSpeechByMood[4][0x12]; // and mSpeechParam[1..4] here
     /* 0x00EE */ u8 mUnknown00EE[0xE];
     /* 0x00FC */ u8 mAffinity[100];      // For each other character by index: func_02099088 adds to it, 0 to 200
-    /* 0x0160 */ u8 mRelation[0x20];     // For each other character by index: func_020990b0 sets it
-    /* 0x0180 */ u8 mRelationKind[0x9C]; // For each other character by index: row of data_021135c8
-    /* 0x021C */ u32 mEventEndLo;        // A time in seconds (64 bits, as the clock's); 0x7FFFFFFFFFFFFFFF when the
-    /* 0x0220 */ u32 mEventEndHi;        // character has none
+    /* 0x0160 */ u8 mRelation[0xBC];     // For each other character by index: func_020990b0 sets it; row of data_021135c8
+    /* 0x021C */ s64 mEventEnd;          // When its event ends, in seconds as the clock's; 0x7FFFFFFFFFFFFFFF for never
     /* 0x0224 */ u8 mEvent;              // What the character is doing in its room: 0..18 alone, 0x18.. with a partner
     /* 0x0225 */ u8 mEventPartner;       // mIndex of the character it is doing it with
     /* 0x0226 */ u8 mUnknown0226[0x12];
@@ -82,7 +73,6 @@ struct CharacterBase : public SavedCharacter {
 // The model of a character with its animations. Main-program class (func_0208eb18 constructs it), not decompiled.
 struct CharacterModel {
     CharacterModel(); // func_0208eb18
-    VecFx32 GetNodePos(int node); // CharacterModel_GetJointPosition: where one of the model's nodes is (the scene asks for node 3)
 
     /* 0x000 */ u8 mUnknown000[4];
     /* 0x004 */ void *mResource;  // What func_02029660 looks an animation ('BCA0') up for
@@ -111,6 +101,11 @@ struct HeadIcon {
     void Reload();              // func_020810c8
     void SetMode(int mode);     // HeadIcon_SetMode
     void Update();              // func_020810e4
+    void SetPos(fx32 x, fx32 y, fx32 z) {
+        mPos.x = x;
+        mPos.y = y;
+        mPos.z = z;
+    }
 
     /* 0x00 */ void *mUnknown00;
     /* 0x04 */ void *mUnknown04;
@@ -134,7 +129,26 @@ public:
     void ShowHeadIcon();
     void Update();
 
-    FloorPos GetFloorPos() const { return FloorPos(mModel.mPos.x, mModel.mPos.z); }
+    FloorPos GetFloorPos() const {
+        FloorPos pos;
+        pos.x = mModel.mPos.x;
+        pos.z = mModel.mPos.z;
+        return pos;
+    }
+    void SetTarget(FloorPos pos) {
+        mTarget.x = pos.x;
+        mTarget.z = pos.z;
+    }
+
+    // Makes where another character stands the place to walk to
+    void SetTargetTo(const RoomCharacter *other) {
+        FloorPos pos = other->GetFloorPos();
+        mTarget.x = pos.x;
+        mTarget.z = pos.z;
+    }
+    void SetHeadIconMode(int mode);
+    // func_0209171c with where another character stands
+    void WalkAwayFrom(const RoomCharacter *other);
 
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x26F8 */ u8 mUnknown26F8[0x168];
@@ -183,5 +197,22 @@ public:
     /* 0x2D96 */ s8 mSubStep;
     /* 0x2D97 */ s8 mSubSubStep;
 }; // 0x2D98
+
+extern "C" {
+void func_0209171c(CharacterBase *character, FloorPos pos);
+void HeadIcon_SetMode(HeadIcon *icon, int mode); // Sets mMode
+VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
+}
+
+inline void RoomCharacter::SetHeadIconMode(int mode) {
+    HeadIcon_SetMode(&mHeadIcon, mode);
+}
+
+inline void RoomCharacter::WalkAwayFrom(const RoomCharacter *other) {
+    FloorPos pos;
+    pos.x = other->mModel.mPos.x;
+    pos.z = other->mModel.mPos.z;
+    func_0209171c(this, pos);
+}
 
 #endif // OV074_ROOMCHARACTER_H

@@ -103,8 +103,8 @@ struct RoomCamera {
     /* 0x62 */ s16 mZoomTimer;
 }; // 0x64
 
-// Something that follows the camera (0x0216b544 constructs it, 0x0216b55c gives it the camera, 0x0216b8a8 sets
-// its state).
+// Something that follows the camera (0x0216b544 constructs it, 0x0216b55c gives it the camera and the room,
+// 0x0216b8a8 sets its state). The symbols have it as RoomLight.
 struct CameraFollower {
     /* 0x00 */ u8 mUnknown00[0x1C];
 }; // 0x1C
@@ -209,20 +209,20 @@ public:
     enum EventState {
         EVENT_NONE,
         EVENT_CHANGE_ROOM,      // The room is taken away and the chosen one is brought in
-        EVENT_STATE_2,          // 0x0214e5f8 (group a1)
-        EVENT_EMPTY_ROOM,
+        EVENT_CHOOSE,           // ChooseEncounter() decides what comes next, by who is in the room
+        EVENT_EMPTY_ROOM,       // The room has no resident
         EVENT_NOBODY_HOME,      // The room has a resident, who is not in
         EVENT_ALONE,            // One character in the room
         EVENT_TOGETHER,         // Two
         EVENT_APPROACH,         // The two walk up to each other
-        EVENT_MEET,
-        EVENT_CHOOSE_WALKER,
-        EVENT_ENCOUNTER,
+        EVENT_MEET,             // One of them speaks to the other
+        EVENT_CHOOSE_WALKER,    // The one nearer the middle walks off, the other waits
+        EVENT_ENCOUNTER,        // What comes of the meeting is judged and shown
         EVENT_ENCOUNTER_END,
-        EVENT_RESIDENT_LEAVES,
-        EVENT_NEW_RESIDENT,
-        EVENT_STATE_14,
-        EVENT_STATE_15,
+        EVENT_RESIDENT_ARRIVES, // Nobody was in and the resident's event has it at home: it comes in (state 0x10C)
+        EVENT_VISITOR_ARRIVES,  // The partner of the resident's event is loaded and comes in (state 0x10D)
+        EVENT_LAST_LEAVES,      // The only character in the room goes out (state 0x106) until it is not present
+        EVENT_VISITOR_LEAVES,   // One of two goes out (states 0x107 and 0x109) until one is left
         EVENT_AFTER_DISTRIBUTION, // Coming from the character distribution scene
     };
 
@@ -259,7 +259,7 @@ public:
     void UpdateEvent();
 
     // --- Group a1's (0x0214e5f8 to 0x02152228), under the names its notes give them ---
-    void UpdateState2();                                     // 0x0214e5f8
+    void ChooseEncounter();                                  // 0x0214e5f8
     void ChooseReactionsQuiet();                             // 0x0214ea60
     void ChooseReactions();                                  // 0x0214ee90
     void ShowMessage(RoomCharacter *first, RoomCharacter *second, int message, int drawMode); // 0x0214f4ec

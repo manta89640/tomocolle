@@ -2,62 +2,7 @@
 #include <nnsys.h>
 
 #include "sound/SoundManager.h"
-#include "RoomCharacter.h"
-
-extern "C" {
-
-// Main program, not named yet. All take the character (or its model, a held item or the head icon) as their object.
-void Character_SetFace(RoomCharacter *self, int face); // Sets the face (expression) and restarts its animation
-ModelAnimation *AnimModel_FindAnimation(CharacterModel *model, u32 resType, int id); // Finds an animation of the model
-void AnimModel_FinishAnimations(HeldItem *item); // Marks all the item's animations finished
-void func_0208ef00(CharacterModel *model, int playOnce, int finished); // Sets the current animation's two flags
-void func_0208ef28(CharacterModel *model, int playOnce, fx32 frame, int finished); // The same and its frame
-void Character_ResetSoundPhase(RoomCharacter *self, int slot); // Restarts slot's progress of Character_PlaySoundAtAnimPhase
-// Starts sound `index` of sequence archive `seqArc` at given quarters (bit mask) of the current animation
-void Character_PlaySoundAtAnimPhase(RoomCharacter *self, int slot, int handle, int seqArc, int index, int quarters);
-void Character_SetWalkTarget(RoomCharacter *self, VecFx32 target); // Sets mTarget
-BOOL Character_TurnToWalkTarget(RoomCharacter *self, int speed, int accel); // Turns towards mTarget; TRUE when facing it
-void Character_SetAngle(RoomCharacter *self, u16 angle); // Sets mAngle (and the angle at 0x2b08)
-
-// Overlay 74, group a7's range, not named yet
-void func_ov074_021691d4(RoomCharacter *self, u16 pitch, u16 yaw, u16 roll, u8 frames); // Turns the head
-u16 func_ov074_02169280(RoomCharacter *self, VecFx32 from, VecFx32 to, u16 limit); // Head pitch from..to, limited
-// One step of walking to mTarget with sound index of archive seqArc; TRUE when there. Turns the head by headYaw
-// less the walking direction when headLimit is below 0x4000
-BOOL func_ov074_02169388(RoomCharacter *self, u32 headLimit, int headYaw, fx32 speed, int seqArc, int index);
-void func_ov074_021694e8(RoomCharacter *self); // Character_ResetSoundPhase(this, 0) unless the animation is a moving one
-void func_ov074_0216950c(RoomCharacter *self, int a); // Calls 0x02169eac(item, a) for both held items
-void func_ov074_02169598(RoomCharacter *self, fx32 y); // Puts held item 0 between the hands, at height y
-void func_ov074_02169634(RoomCharacter *self); // Puts held item 1 in the hand (joint 2) and item 0 at joint 0
-void func_ov074_021696b8(RoomCharacter *self); // Puts held item 0 at joint 0, turned by the head's yaw
-void func_ov074_02169a98(RoomCharacter *self); // Sets volume and pitch of mSoundHandle's sound by the character
-void func_ov074_02169b00(RoomCharacter *self); // Sound 3 of archive 0x1e when the animation is of group A or B
-void func_ov074_02169b68(RoomCharacter *self); // Sound 0 of archive 0x1e unless the animation is of group A
-void func_ov074_02169bb4(RoomCharacter *self, int index); // Sound index of archive 0x1e unless of group B
-void func_ov074_02169f48(HeldItem *item, MtxFx43 *joint, MtxFx33 *rotation); // Puts the item at a joint
-// The same, moved by an offset in the joint's own directions
-void func_ov074_02169f78(HeldItem *item, MtxFx43 *joint, MtxFx33 *rotation, fx32 x, fx32 y, fx32 z);
-
-} // extern "C"
-
-// Main program, not named yet: these two return a VecFx32
-extern "C" VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint); // Position of one of the model's joints
-extern "C" VecFx32 func_0208fc34(CharacterModel *model);            // Three scale factors from the model's 0xec, 0xf0
-
-#define RES_TYPE_BCA0 0x30414342 // 'BCA0': a character animation
-
-// The SDK's MATH_Rand16 on the game's generator, as a signed number: its results compare signed
-static inline int Random(int max) {
-    return MATH_Rand16(&gRandom, max);
-}
-
-inline ModelAnimation *RoomCharacter::GetCurrentAnimation() {
-    return AnimModel_FindAnimation(&mModel, RES_TYPE_BCA0, mModel.mAnimId);
-}
-
-inline BOOL RoomCharacter::IsAnimationFinished() {
-    return GetCurrentAnimation()->mFinished;
-}
+#include "../RoomCharacter.h"
 
 // The states 0x40 to 0x67: ten activities of one character on its own. Each has a hub state (0x40, 0x44, 0x48,
 // 0x4f, 0x54, 0x58, 0x5b, 0x5e, 0x61, 0x65) that waits for the animation change and then either goes on with the
@@ -66,18 +11,18 @@ void RoomCharacter::UpdateSoloStates40To67() {
     switch (mState) {
     case 0x40:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             if (mPrevState == 0x41 || mPrevState == 0x42 || mPrevState == 0x43) {
                 SetState(Random(3) + 0x41);
             } else if (IsAnimOfGroupB(mModel.mAnimId)) {
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
             }
             func_ov074_0216950c(this, 1);
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(Random(3) + 0x41);
@@ -87,7 +32,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
     case 0x41:
     case 0x42:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -96,10 +41,10 @@ void RoomCharacter::UpdateSoloStates40To67() {
             mTimer3 = 200;
             if (mState == 0x41) {
                 func_ov074_02169b00(this);
-                SetAnimation(RES_TYPE_BCA0, 2);
+                SetAnimation(RESOURCE_BCA0, 2);
             } else {
                 func_ov074_02169b68(this);
-                SetAnimation(RES_TYPE_BCA0, 0x19);
+                SetAnimation(RESOURCE_BCA0, 0x19);
             }
             Character_SetFace(this, 0x12);
             func_ov074_0216950c(this, 1);
@@ -131,7 +76,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x43:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -139,14 +84,14 @@ void RoomCharacter::UpdateSoloStates40To67() {
             mTimer2 = 0;
             func_ov074_02169b00(this);
             func_ov074_021694e8(this);
-            SetAnimation(RES_TYPE_BCA0, 0xC);
+            SetAnimation(RESOURCE_BCA0, 0xC);
             Character_SetFace(this, 0x12);
             func_ov074_0216950c(this, 1);
             func_ov074_021691d4(this, 0, 0, 0, 5);
             ShowHeadIcon();
             FloorPos pos;
             GetRandomPosInArea(&pos);
-            SetTarget(pos.x, pos.z);
+            SetTargetOnFloor(pos.x, pos.z);
         } else {
             if (func_ov074_02169388(this, 0x3000, 0, 0x199, 0x22, 6)) {
                 FloorPos pos;
@@ -155,7 +100,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 } else {
                     GetRandomPosInArea(&pos);
                 }
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
             }
             if (mTimer2-- <= 0) {
                 mTimer2 = 150;
@@ -175,7 +120,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x44:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -188,11 +133,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             } else {
                 func_ov074_0216950c(this, 1);
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
             }
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x47);
@@ -205,29 +150,29 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             func_ov074_021691d4(this, 0, 0, 0, 5);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(7, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(7, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 mTimer = Random(100) + 700;
                 int r = Random(100);
                 if (r < 30) {
                     func_ov074_02169b00(this);
-                    SetAnimation(RES_TYPE_BCA0, GetMoodAnimA());
+                    SetAnimation(RESOURCE_BCA0, GetIdleAnim());
                 } else if (r < 33) {
                     func_ov074_02169b00(this);
                     mTimer >>= 2;
-                    SetAnimation(RES_TYPE_BCA0, 0x4B);
+                    SetAnimation(RESOURCE_BCA0, 0x4B);
                 } else {
                     func_ov074_02169b68(this);
                     if (mMood == 3) {
-                        SetAnimation(RES_TYPE_BCA0, 0x18);
+                        SetAnimation(RESOURCE_BCA0, 0x18);
                     } else if (Random(100) < 50) {
-                        SetAnimation(RES_TYPE_BCA0, 0x19);
+                        SetAnimation(RESOURCE_BCA0, 0x19);
                     } else {
-                        SetAnimation(RES_TYPE_BCA0, 0x1B);
+                        SetAnimation(RESOURCE_BCA0, 0x1B);
                     }
                 }
                 Character_SetFace(this, GetFace());
-                mHeldItems[0]->mAngleZ = 0x4000;
+                mHeldItems[0]->mRotZ = 0x4000;
                 gSoundManager.StartSeqArcIfNotPlaying(mSoundHandle, 0x1C, 5);
             }
         } else {
@@ -251,15 +196,15 @@ void RoomCharacter::UpdateSoloStates40To67() {
             func_ov074_021691d4(this, 0, 0, 0, 5);
             func_ov074_021694e8(this);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(7, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(7, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169b00(this);
-                SetAnimation(RES_TYPE_BCA0, GetMoodAnimB());
+                SetAnimation(RESOURCE_BCA0, GetWalkAnim());
                 Character_SetFace(this, GetFace());
-                mHeldItems[0]->mAngleZ = 0x4000;
+                mHeldItems[0]->mRotZ = 0x4000;
                 FloorPos pos;
                 GetRandomPosInArea(&pos);
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
                 mTimer = Random(100) + 300;
                 gSoundManager.StartSeqArcIfNotPlaying(mSoundHandle, 0x1C, 5);
             }
@@ -280,7 +225,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 } else {
                     GetRandomPosInArea(&pos);
                 }
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
             }
         }
         func_ov074_021696b8(this);
@@ -290,20 +235,20 @@ void RoomCharacter::UpdateSoloStates40To67() {
         if (mStep == 0) {
             if (StepChangeItemsThenAnimation(0x20, 7, 0xFF)) {
                 mStep++;
-                mHeldItems[0]->mAngleZ = 0x4000;
+                mHeldItems[0]->mRotZ = 0x4000;
             }
-        } else if (mModel.mBlendLeft <= 0) {
+        } else if (mModel.mBlendFrames <= 0) {
             if (IsAnimationFinished()) {
                 SetState(0x45);
             }
         }
-        mHeldItems[0]->mAngleX = mHeadYawNow;
-        func_ov074_02169f78(mHeldItems[0], mModel.GetJointMatrix(2), mModel.GetJointRotation(0), 0x666, 0, 0);
+        mHeldItems[0]->mRotX = mUnknown25D6;
+        mHeldItems[0]->SetJointOffset(mModel.GetJointMatrix(2), mModel.GetJointRotation(0), 0x666, 0, 0);
         break;
 
     case 0x48:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -314,11 +259,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             } else {
                 func_ov074_0216950c(this, 1);
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
             }
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x4A);
@@ -332,30 +277,30 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             func_ov074_021691d4(this, 0, 0, 0, 5);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(1, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(1, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169bb4(this, 0);
-                SetAnimation(RES_TYPE_BCA0, 0x3D);
+                SetAnimation(RESOURCE_BCA0, 0x3D);
                 Character_SetFace(this, 8);
-                mHeldItems[0]->mAngleY = 0xC000 - mAngle;
+                mHeldItems[0]->mRotY = 0xC000 - mAngle;
                 if (mState == 0x4C) {
                     VecFx32 pos;
-                    GetMidpoint(mModel.GetJointMatrix(2), mModel.GetJointMatrix(1), &pos);
+                    GetMidpoint(GetNode(2), GetNode(1), &pos);
                     pos.y = 0xCC;
-                    mHeldItems[0]->SetPos(pos);
+                    mHeldItems[0]->SetPosition(pos);
                 } else {
                     gSoundManager.StartSeqArcIfNotPlaying(mSoundHandle, 0x1C, 2);
                 }
             }
         } else if (mStep == 2) {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mStep++;
             }
             if (mState == 0x4C) {
                 VecFx32 pos;
-                GetMidpoint(mModel.GetJointMatrix(2), mModel.GetJointMatrix(1), &pos);
+                GetMidpoint(GetNode(2), GetNode(1), &pos);
                 pos.y = 0xCC;
-                mHeldItems[0]->SetPos(pos);
+                mHeldItems[0]->SetPosition(pos);
                 mTimer = 1;
             } else {
                 mTimer = Random(100) + 300;
@@ -381,12 +326,12 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x4D:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             func_ov074_02169b00(this);
-            SetAnimation(RES_TYPE_BCA0, 0x28);
+            SetAnimation(RESOURCE_BCA0, 0x28);
             func_0208ef00(&mModel, 1, 0);
             Character_SetFace(this, 6);
             AnimModel_FinishAnimations(mHeldItems[0]);
@@ -394,7 +339,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             Character_ResetSoundPhase(this, 0);
         } else if (mStep == 1) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -420,11 +365,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x4E:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
-            SetAnimation(RES_TYPE_BCA0, 0x3D);
+            SetAnimation(RESOURCE_BCA0, 0x3D);
             func_0208ef00(&mModel, 1, 0);
             func_ov074_021691d4(this, 0, 0, 0, 5);
             ShowHeadIcon();
@@ -448,30 +393,30 @@ void RoomCharacter::UpdateSoloStates40To67() {
         if (mStep == 0) {
             if (StepChangeItemsThenAnimation(0x20, 1, 0xFF)) {
                 mStep++;
-                mHeldItems[0]->mAngleY = 0xC000 - mAngle;
+                mHeldItems[0]->mRotY = 0xC000 - mAngle;
                 AnimModel_FinishAnimations(mHeldItems[0]);
             }
-        } else if (mModel.mBlendLeft <= 0) {
+        } else if (mModel.mBlendFrames <= 0) {
             if (IsAnimationFinished()) {
                 SetState(0x4B);
             }
         }
         {
             VecFx32 pos;
-            GetMidpoint(mModel.GetJointMatrix(2), mModel.GetJointMatrix(1), &pos);
+            GetMidpoint(GetNode(2), GetNode(1), &pos);
             pos.y = mModel.GetJointMatrix(2)->m[3][1];
-            mHeldItems[0]->SetPos(pos);
+            mHeldItems[0]->SetPosition(pos);
         }
         break;
 
     case 0x4B:
         if (mStep == 0) {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mStep++;
-                SetAnimation(RES_TYPE_BCA0, 0x3C);
+                SetAnimation(RESOURCE_BCA0, 0x3C);
                 func_0208ef28(&mModel, 1, 0, 0);
                 Character_SetFace(this, 8);
-                mHeldItems[0]->mAngleY = 0xC000 - mAngle;
+                mHeldItems[0]->mRotY = 0xC000 - mAngle;
                 MTX_Identity33(&mHeldItems[0]->mRotation);
                 func_ov074_021691d4(this, 0, 0, 0, 5);
                 ShowHeadIcon();
@@ -483,15 +428,15 @@ void RoomCharacter::UpdateSoloStates40To67() {
         }
         {
             VecFx32 pos;
-            GetMidpoint(mModel.GetJointMatrix(2), mModel.GetJointMatrix(1), &pos);
+            GetMidpoint(GetNode(2), GetNode(1), &pos);
             pos.y = mModel.GetJointMatrix(2)->m[3][1];
-            mHeldItems[0]->SetPos(pos);
+            mHeldItems[0]->SetPosition(pos);
         }
         break;
 
     case 0x4F:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -505,14 +450,14 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 SetState(next);
             } else {
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
-                mNextState = next;
+                mCounter = next;
             }
             func_ov074_021691d4(this, 0, 0, 0, 5);
             func_ov074_0216950c(this, 1);
         } else if (mStep == 1) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -522,11 +467,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             }
             mTimer = Random(30) + 60;
             func_ov074_02169b00(this);
-            SetAnimation(RES_TYPE_BCA0, 7);
+            SetAnimation(RESOURCE_BCA0, 7);
         } else {
             mTimer--;
-            if (mTimer <= 0 && mModel.mBlendLeft <= 0) {
-                SetState(mNextState);
+            if (mTimer <= 0 && mModel.mBlendFrames <= 0) {
+                SetState(mCounter);
             }
         }
         break;
@@ -573,7 +518,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x54:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -582,11 +527,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             } else {
                 func_ov074_0216950c(this, 1);
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
             }
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x57);
@@ -599,12 +544,12 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             func_ov074_021691d4(this, 0, 0, 0, 4);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(9, 5) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(9, 5) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169b68(this);
-                SetAnimation(RES_TYPE_BCA0, 0x53);
+                SetAnimation(RESOURCE_BCA0, 0x53);
                 Character_SetFace(this, 8);
-                mHeldItems[1]->mAngleZ = 0x8000;
+                mHeldItems[1]->mRotZ = 0x8000;
                 mTimer = Random(100) + 500;
                 mTimer2 = Random(60) + 140;
                 gSoundManager.StartSeqArcIfNotPlaying(mSoundHandle, 0x1C, 3);
@@ -618,7 +563,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 } else {
                     SetState(0x56);
                 }
-            } else if (mModel.mBlendLeft <= 0) {
+            } else if (mModel.mBlendFrames <= 0) {
                 mTimer2--;
                 if (mTimer2 <= 0) {
                     mTimer2 = Random(60) + 140;
@@ -646,11 +591,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             func_ov074_021691d4(this, 0, 0, 0, 5);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(9, 5) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(9, 5) && mModel.mBlendFrames <= 0) {
                 mStep++;
-                SetAnimation(RES_TYPE_BCA0, 0x46);
+                SetAnimation(RESOURCE_BCA0, 0x46);
                 Character_SetFace(this, 6);
-                mHeldItems[1]->mAngleZ = 0x8000;
+                mHeldItems[1]->mRotZ = 0x8000;
                 mTimer = Random(60) + 330;
                 if (Random(0) & 1) {
                     Character_SetFace(this, 7);
@@ -675,9 +620,9 @@ void RoomCharacter::UpdateSoloStates40To67() {
             if (StepChangeItemsThenAnimation(0x3B, 9, 5)) {
                 mStep++;
                 AnimModel_FinishAnimations(mHeldItems[1]);
-                mHeldItems[1]->mAngleZ = 0x8000;
+                mHeldItems[1]->mRotZ = 0x8000;
             }
-        } else if (mModel.mBlendLeft <= 0) {
+        } else if (mModel.mBlendFrames <= 0) {
             if (IsAnimationFinished()) {
                 SetState(0x55);
             }
@@ -687,14 +632,14 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x58:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             if (mPrevState == 0x59) {
                 SetState(0x59);
             } else if (IsAnimOfGroupB(mModel.mAnimId)) {
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
             }
             func_ov074_0216950c(this, 1);
         } else {
@@ -704,7 +649,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x59:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -713,15 +658,15 @@ void RoomCharacter::UpdateSoloStates40To67() {
             func_ov074_02169bb4(this, 1);
             int r = Random(4);
             if (r == 0) {
-                SetAnimation(RES_TYPE_BCA0, 0x44);
+                SetAnimation(RESOURCE_BCA0, 0x44);
             } else if (r == 1) {
-                SetAnimation(RES_TYPE_BCA0, 0x45);
+                SetAnimation(RESOURCE_BCA0, 0x45);
             } else if (r == 2) {
-                SetAnimation(RES_TYPE_BCA0, 0x46);
+                SetAnimation(RESOURCE_BCA0, 0x46);
             } else {
-                SetAnimation(RES_TYPE_BCA0, 0x27);
+                SetAnimation(RESOURCE_BCA0, 0x27);
             }
-            if (mModel.mBlendLeft > 0 && wasGroupB) {
+            if (mModel.mBlendFrames > 0 && wasGroupB) {
                 gSoundManager.StartSeqArc(1, 0x1E, 2);
             }
             Character_SetFace(this, 0x12);
@@ -737,12 +682,12 @@ void RoomCharacter::UpdateSoloStates40To67() {
         break;
 
     case 0x5A: {
-        if (LengthSq(GetFloorPos()) < 0x4000) {
-            if (mModel.mBlendLeft > 0) {
+        if (GetFloorPos().LengthSq() < 0x4000) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x59);
-            SetAnimation(RES_TYPE_BCA0, 0x1A);
+            SetAnimation(RESOURCE_BCA0, 0x1A);
         } else {
             mTarget.x = 0;
             mTarget.z = 0;
@@ -753,7 +698,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x5B:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -764,7 +709,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                     SetState(0x5D);
                 }
             } else if (IsAnimOfGroupB(mModel.mAnimId)) {
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
             }
             func_ov074_0216950c(this, 1);
         } else {
@@ -774,14 +719,14 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x5C:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             mTimer = Random(100) + 500;
             mTimer2 = Random(60) + 120;
             func_ov074_02169b00(this);
-            SetAnimation(RES_TYPE_BCA0, 5);
+            SetAnimation(RESOURCE_BCA0, 5);
             Character_SetFace(this, 0x10);
             func_ov074_0216950c(this, 1);
             func_ov074_021691d4(this, 0, 0, 0, 5);
@@ -791,7 +736,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
             if (mTimer <= 0) {
                 SetState(0x5B);
             }
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mTimer2--;
@@ -801,28 +746,28 @@ void RoomCharacter::UpdateSoloStates40To67() {
             mTimer2 = Random(60) + 140;
             if (Random(100) < 30) {
                 Character_SetFace(this, 0x10);
-                SetAnimation(RES_TYPE_BCA0, 4);
+                SetAnimation(RESOURCE_BCA0, 4);
             } else {
                 Character_SetFace(this, 4);
-                SetAnimation(RES_TYPE_BCA0, 5);
+                SetAnimation(RESOURCE_BCA0, 5);
             }
         }
         break;
 
     case 0x5D:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             FloorPos pos;
             GetRandomPosInArea(&pos);
-            SetTarget(pos.x, pos.z);
+            SetTargetOnFloor(pos.x, pos.z);
             func_ov074_021694e8(this);
             mStep++;
             mTimer = Random(100) + 200;
             mTimer2 = Random(60) + 120;
             func_ov074_02169b00(this);
-            SetAnimation(RES_TYPE_BCA0, 0xF);
+            SetAnimation(RESOURCE_BCA0, 0xF);
             Character_SetFace(this, 0x10);
             func_ov074_0216950c(this, 1);
             func_ov074_021691d4(this, 0, 0, 0, 5);
@@ -848,21 +793,21 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 } else {
                     GetRandomPosInArea(&pos);
                 }
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
             }
         }
         break;
 
     case 0x5E:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             if (mPrevState == 0x5F) {
                 SetState(0x5F);
             } else if (IsAnimOfGroupB(mModel.mAnimId)) {
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
             }
             func_ov074_0216950c(this, 1);
         } else {
@@ -872,7 +817,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x5F:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -882,13 +827,13 @@ void RoomCharacter::UpdateSoloStates40To67() {
             func_ov074_02169bb4(this, 1);
             int r = Random(100);
             if (r < 60) {
-                SetAnimation(RES_TYPE_BCA0, 0x27);
+                SetAnimation(RESOURCE_BCA0, 0x27);
             } else if (r < 80) {
-                SetAnimation(RES_TYPE_BCA0, 0x44);
+                SetAnimation(RESOURCE_BCA0, 0x44);
             } else {
-                SetAnimation(RES_TYPE_BCA0, 0x45);
+                SetAnimation(RESOURCE_BCA0, 0x45);
             }
-            if (mModel.mBlendLeft > 0 && wasGroupB) {
+            if (mModel.mBlendFrames > 0 && wasGroupB) {
                 gSoundManager.StartSeqArc(1, 0x1E, 2);
             }
             Character_SetFace(this, 6);
@@ -920,12 +865,12 @@ void RoomCharacter::UpdateSoloStates40To67() {
         break;
 
     case 0x60: {
-        if (LengthSq(GetFloorPos()) < 0x4000) {
-            if (mModel.mBlendLeft > 0) {
+        if (GetFloorPos().LengthSq() < 0x4000) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x5F);
-            SetAnimation(RES_TYPE_BCA0, 0x1A);
+            SetAnimation(RESOURCE_BCA0, 0x1A);
         } else {
             mTarget.x = 0;
             mTarget.z = 0;
@@ -936,7 +881,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
 
     case 0x61:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -945,11 +890,11 @@ void RoomCharacter::UpdateSoloStates40To67() {
             } else {
                 func_ov074_0216950c(this, 1);
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
             }
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x64);
@@ -962,15 +907,15 @@ void RoomCharacter::UpdateSoloStates40To67() {
             ShowHeadIcon();
             func_ov074_021691d4(this, 0, 0, 0, 5);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(0, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(0, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169b00(this);
-                SetAnimation(RES_TYPE_BCA0, 0x21);
+                SetAnimation(RESOURCE_BCA0, 0x21);
                 Character_SetFace(this, 8);
-                mHeldItems[0]->SetAngles(0, 0x7000, 0x1000);
+                mHeldItems[0]->SetRotation(0, 0x7000, 0x1000);
                 mTimer = Random(200) + 800;
                 mTimer2 = 60;
-                if (mModel.mBlendLeft > 0) {
+                if (mModel.mBlendFrames > 0) {
                     Character_ResetSoundPhase(this, 0);
                 }
             }
@@ -1006,7 +951,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 Character_SetFace(this, 8);
             }
         }
-        func_ov074_02169f48(mHeldItems[0], mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
+        mHeldItems[0]->SetJoint(mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
         break;
 
     case 0x63:
@@ -1016,18 +961,18 @@ void RoomCharacter::UpdateSoloStates40To67() {
             func_ov074_021691d4(this, 0, 0, 0, 5);
             func_ov074_021694e8(this);
         } else if (mStep == 1) {
-            if (StepChangeHeldItems(0, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(0, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169b00(this);
-                SetAnimation(RES_TYPE_BCA0, 0x22);
+                SetAnimation(RESOURCE_BCA0, 0x22);
                 Character_SetFace(this, 0x15);
-                mHeldItems[0]->SetAngles(0, 0x7800, 0x1000);
-                if (mModel.mBlendLeft > 0) {
+                mHeldItems[0]->SetRotation(0, 0x7800, 0x1000);
+                if (mModel.mBlendFrames > 0) {
                     Character_ResetSoundPhase(this, 1);
                 }
                 FloorPos pos;
                 GetRandomPosInArea(&pos);
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
                 mHeadTurnFrames = 5;
                 mTimer = Random(200) + 800;
                 mTimer2 = 0;
@@ -1058,10 +1003,10 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 } else {
                     GetRandomPosInArea(&pos);
                 }
-                SetTarget(pos.x, pos.z);
+                SetTargetOnFloor(pos.x, pos.z);
             }
         }
-        func_ov074_02169f48(mHeldItems[0], mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
+        mHeldItems[0]->SetJoint(mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
         break;
 
     case 0x64:
@@ -1070,14 +1015,14 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 mStep++;
                 mTimer = 300;
                 Character_SetFace(this, GetFace());
-                mHeldItems[0]->mAngleY = 0x7000;
+                mHeldItems[0]->mRotY = 0x7000;
                 gSoundManager.StartSeqArc(mSoundHandle, 0x1C, 0);
             }
         } else if (mStep == 1) {
-            if (mModel.mBlendLeft <= 0 && IsAnimationFinished()) {
+            if (mModel.mBlendFrames <= 0 && IsAnimationFinished()) {
                 mStep++;
-                SetAnimation(RES_TYPE_BCA0, 0x21);
-                mHeldItems[0]->mAngleZ = 0x1000;
+                SetAnimation(RESOURCE_BCA0, 0x21);
+                mHeldItems[0]->mRotZ = 0x1000;
             }
         } else {
             mTimer--;
@@ -1085,23 +1030,23 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 SetState(0x62);
             }
         }
-        func_ov074_02169f48(mHeldItems[0], mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
+        mHeldItems[0]->SetJoint(mModel.GetJointMatrix(2), mModel.GetJointRotation(2));
         break;
 
     case 0x65:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
             if (mPrevState == 0x66 || mPrevState == 0x67) {
                 SetState(0x66);
             } else if (IsAnimOfGroupB(mModel.mAnimId)) {
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
             }
             func_ov074_0216950c(this, 1);
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x67);
@@ -1111,7 +1056,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
     case 0x66:
     case 0x67:
         if (mStep == 0) {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mStep++;
                 if (mState == 0x67) {
                     mTimer = 10;
@@ -1122,13 +1067,13 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 if (mModel.mAnimId != 0x31) {
                     Character_ResetSoundPhase(this, 0);
                 }
-                SetAnimation(RES_TYPE_BCA0, 0x31);
+                SetAnimation(RESOURCE_BCA0, 0x31);
                 Character_SetFace(this, 9);
                 func_ov074_0216950c(this, 1);
                 ShowHeadIcon();
             }
         } else {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mTimer--;
                 if (mTimer <= 0) {
                     if (mState == 0x67) {
@@ -1138,34 +1083,34 @@ void RoomCharacter::UpdateSoloStates40To67() {
                         int faceRoll = Random(100);
                         int animRoll = Random(100);
                         if (animRoll < 60) {
-                            SetAnimation(RES_TYPE_BCA0, 0x31);
+                            SetAnimation(RESOURCE_BCA0, 0x31);
                             if (faceRoll < 28) {
                                 Character_SetFace(this, 8);
                             } else {
                                 Character_SetFace(this, 9);
                             }
                         } else if (animRoll < 92) {
-                            SetAnimation(RES_TYPE_BCA0, GetMoodAnimA());
+                            SetAnimation(RESOURCE_BCA0, GetIdleAnim());
                             if (faceRoll < 60) {
                                 Character_SetFace(this, 8);
                             } else {
                                 Character_SetFace(this, GetFace());
                             }
                         } else {
-                            SetAnimation(RES_TYPE_BCA0, 0x54);
+                            SetAnimation(RESOURCE_BCA0, 0x54);
                             if (faceRoll < 60) {
                                 Character_SetFace(this, 6);
                             } else {
                                 Character_SetFace(this, 4);
                             }
                         }
-                        if (mModel.mBlendLeft > 0) {
+                        if (mModel.mBlendFrames > 0) {
                             Character_ResetSoundPhase(this, 0);
                         }
                     }
                 }
             }
-            func_ov074_021691d4(this, func_ov074_02169280(this, CharacterModel_GetJointPosition(&mModel, 0), mLookTarget->mPos, 0x1800), 0, 0, 2);
+            func_ov074_021691d4(this, func_ov074_02169280(this, CharacterModel_GetJointPosition(&mModel, 0), mCamera->mPosition, 0x1800), 0, 0, 2);
         }
         if (mModel.mAnimId == 0x31) {
             Character_PlaySoundAtAnimPhase(this, 0, 1, 0x1F, 3, 10);
@@ -1173,12 +1118,12 @@ void RoomCharacter::UpdateSoloStates40To67() {
             Character_PlaySoundAtAnimPhase(this, 0, 1, 0x20, 3, 2);
         }
         if (mState == 0x67) {
-            Character_SetWalkTarget(this, mLookTarget->mPos);
+            Character_SetWalkTarget(this, mCamera->mPosition);
             if (Character_TurnToWalkTarget(this, 0x300, 0)) {
                 SetState(0x66);
             }
         } else {
-            Character_SetAngle(this, Angle(GetOffsetTo(mLookTarget->GetFloorPos())));
+            Character_SetAngle(this, AngleTo(mCamera->GetFloorPos()));
         }
         break;
     }
@@ -1191,7 +1136,7 @@ void RoomCharacter::UpdateSoloStates68To6F() {
     switch (mState) {
     case 0x68:
         if (mStep == 0) {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             mStep++;
@@ -1201,11 +1146,11 @@ void RoomCharacter::UpdateSoloStates68To6F() {
             } else {
                 func_ov074_0216950c(this, 1);
                 if (IsAnimOfGroupB(mModel.mAnimId)) {
-                    SetAnimation(RES_TYPE_BCA0, 0x1A);
+                    SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
             }
         } else {
-            if (mModel.mBlendLeft > 0) {
+            if (mModel.mBlendFrames > 0) {
                 break;
             }
             SetState(0x6C);
@@ -1216,10 +1161,10 @@ void RoomCharacter::UpdateSoloStates68To6F() {
     case 0x6A:
     case 0x6B:
         if (mStep == 0) {
-            if (StepChangeHeldItems(10, 0xFF) && mModel.mBlendLeft <= 0) {
+            if (StepChangeHeldItems(10, 0xFF) && mModel.mBlendFrames <= 0) {
                 mStep++;
                 func_ov074_02169bb4(this, 1);
-                SetAnimation(RES_TYPE_BCA0, 0x1F);
+                SetAnimation(RESOURCE_BCA0, 0x1F);
                 if (mState == 0x6B) {
                     mTimer = Random(500) + 100;
                     mTimer2 = Random(100) + 200;
@@ -1233,12 +1178,12 @@ void RoomCharacter::UpdateSoloStates68To6F() {
                     HeadIcon_SetMode(&mHeadIcon, 3);
                 }
                 if (mState == 0x6A) {
-                    mHeadYawNow = Random(0x4000) - 0x2000;
+                    mUnknown25D6 = Random(0x4000) - 0x2000;
                 } else {
                     func_ov074_021691d4(this, 0, 0, 0, 5);
                 }
-                mHeldItems[0]->SetAngles(0, 0x4000 - mAngle, 0);
-                mHeldItems[0]->SetPos(mModel.mPos.x, 0, mModel.mPos.z);
+                mHeldItems[0]->SetRotation(0, 0x4000 - mAngle, 0);
+                mHeldItems[0]->SetPosition(mModel.mPos.x, 0, mModel.mPos.z);
             }
             mHeldItems[0]->SetScale(func_0208fc34(&mModel));
         } else {
@@ -1260,7 +1205,7 @@ void RoomCharacter::UpdateSoloStates68To6F() {
         break;
 
     case 0x6C: {
-        if (LengthSq(GetFloorPos()) < 0x4000) {
+        if (GetFloorPos().LengthSq() < 0x4000) {
             SetState(0x6D);
         } else {
             mTarget.x = 0;
@@ -1274,11 +1219,11 @@ void RoomCharacter::UpdateSoloStates68To6F() {
         if (mStep == 0) {
             if (StepChangeItemsThenAnimation(0x20, 10, 0xFF)) {
                 mStep++;
-                mHeldItems[0]->mAngleY = 0x4000 - mAngle;
+                mHeldItems[0]->mRotY = 0x4000 - mAngle;
                 mHeldItems[0]->SetScale(func_0208fc34(&mModel));
                 gSoundManager.StartSeqArc(1, 0x1C, 6);
             }
-        } else if (mModel.mBlendLeft <= 0) {
+        } else if (mModel.mBlendFrames <= 0) {
             if (IsAnimationFinished()) {
                 SetState(0x6E);
             }
@@ -1288,11 +1233,11 @@ void RoomCharacter::UpdateSoloStates68To6F() {
 
     case 0x6E:
         if (mStep == 0) {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mStep++;
-                SetAnimation(RES_TYPE_BCA0, 0x3C);
+                SetAnimation(RESOURCE_BCA0, 0x3C);
                 func_0208ef28(&mModel, 1, 0, 0);
-                mHeldItems[0]->mAngleY = 0x4000 - mAngle;
+                mHeldItems[0]->mRotY = 0x4000 - mAngle;
                 MTX_Identity33(&mHeldItems[0]->mRotation);
                 func_ov074_021691d4(this, 0, 0, 0, 5);
                 ShowHeadIcon();
@@ -1309,12 +1254,12 @@ void RoomCharacter::UpdateSoloStates68To6F() {
 
     case 0x6F:
         if (mStep == 0) {
-            if (mModel.mBlendLeft <= 0) {
+            if (mModel.mBlendFrames <= 0) {
                 mStep++;
-                SetAnimation(RES_TYPE_BCA0, 0x1A);
+                SetAnimation(RESOURCE_BCA0, 0x1A);
                 ShowHeadIcon();
             }
-        } else if (mModel.mBlendLeft <= 0) {
+        } else if (mModel.mBlendFrames <= 0) {
             SetState(0x6B);
         }
         break;

@@ -1,5 +1,10 @@
 #include "prelude.h"
 
+#define RES_TYPE_BCA0 0x30414342 // 'BCA0' as the file has it: a character animation
+
+typedef char CheckSavedCharacterSize[sizeof(SavedCharacter) == 0x2C0 ? 1 : -1];
+typedef char CheckRoomSceneSize[sizeof(RoomScene) == 0x1D7C8 ? 1 : -1];
+
 // The archive of each kind of thing a character can hold, by number (data_ov074_0216d754, used by group a7)
 
 // Counts the saved characters, chooses the two to show, and asks for the scene's archives.
@@ -146,17 +151,7 @@ void RoomScene::ChooseCharacters(int resident) {
 }
 
 // Sets up the screens, the room, the two characters and the touch screen, when the archives are loaded.
-//
-// Not matching yet: 0x92c bytes against 0x930, everything else identical. Three places differ:
-// 1. The loop over the two characters: the original has the counter in r7, &mCharacters[i] in r8 and the pointer
-//    for the indexed fields in r9; this gives r9, r7, r8 (same instructions, registers rotated).
-// 2. `mCamera.mRoom = &mRoom` computes the address into r2 in the original, r0 here.
-// 3. The test of the resident's event end against 0x7FFFFFFFFFFFFFFF is one 64-bit comparison in the original
-//    (mvn r1; ldr hi; ldr lo; sub r0,r1,#0x80000000; cmp hi; cmpeq lo, behind a bne on the scene id); two u32
-//    fields give a chain of conditional instructions instead. It needs the field as an s64 (at 0x21C, so the
-//    saved character's layout has to allow a 64-bit member at an address that is not a multiple of 8).
-// Tried: a pointer variable for the character (wrong: the original indexes), nested call against a variable for
-// the particle file (the variable is right).
+// @0x0214a02c
 void RoomScene::Init() {
     int i;
     void *file;
@@ -229,7 +224,7 @@ void RoomScene::Init() {
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
     animations = func_0202ad04(&data_021223e4, 6, "BIC", 0);
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         func_0208fefc(&mCharacters[i]);
         func_02091a24(&mCharacters[i]);
@@ -239,7 +234,7 @@ void RoomScene::Init() {
         func_ov074_0215243c(&mCharacters[i]);
         mCharacters[i].mTtsPlayer = &mTtsPlayer;
         func_ov074_02169c6c(&mCharacters[i]);
-        func_02029660(mCharacters[i].mModel.mResource, 'BCA0', animations);
+        func_02029660(mCharacters[i].mModel.mResource, RES_TYPE_BCA0, animations);
         func_ov074_02152370(&mCharacters[i], 1);
         func_ov074_02152308(&mCharacters[i], &mParticles);
         mCharacters[i].mRoomModel = &mRoom;
@@ -252,7 +247,7 @@ void RoomScene::Init() {
     mCamera.mCharacters[0] = &mCharacters[0];
     mCamera.mCharacters[1] = &mCharacters[1];
     mCamera.mRoom = &mRoom;
-    func_ov074_0216b55c(&mCameraFollower, &mCamera);
+    func_ov074_0216b55c(&mCameraFollower, &mCamera, &mRoom);
     AimCamera();
     StartRoomEvent();
 
@@ -283,8 +278,7 @@ void RoomScene::Init() {
     func_ov074_0216cd10(&mClockDisplay, &mClock);
 
     // Coming from the character distribution scene with a resident that has just moved in
-    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].mEventEndHi == 0x7FFFFFFF &&
-        mCharacters[0].mEventEndLo == 0xFFFFFFFF) {
+    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].mEventEnd == 0x7FFFFFFFFFFFFFFFLL) {
         SetInputState(INPUT_OFF);
         SetEventState(EVENT_AFTER_DISTRIBUTION, 60);
         func_ov074_0216a62c(&mCamera, 2, 0);
@@ -528,10 +522,10 @@ BOOL RoomScene::CanEnterRoom() {
         return FALSE;
     }
     switch (mEventState) {
-    case EVENT_RESIDENT_LEAVES:
-    case EVENT_NEW_RESIDENT:
-    case EVENT_STATE_14:
-    case EVENT_STATE_15:
+    case EVENT_RESIDENT_ARRIVES:
+    case EVENT_VISITOR_ARRIVES:
+    case EVENT_LAST_LEAVES:
+    case EVENT_VISITOR_LEAVES:
         return FALSE;
     }
     return TRUE;
@@ -1054,5 +1048,654 @@ BOOL RoomScene::StepTransition(int transition) {
     return FALSE;
 }
 
-// NOT WRITTEN: RoomScene::UpdateEvent() at 0x0214c4e8 (0x2110 bytes), the switch on mEventState (17 states, see
-// the EventState enum). What is known of it is in the notes of group a0 in NOTES.md.
+// The numbers of the messages for what comes of an encounter, by what func_ov074_021686f4 says of the resident:
+// when it starts (0x0216d570) and when it ends (0x0216d59c).
+extern "C" {
+extern const int data_ov074_0216d570[];
+extern const int data_ov074_0216d59c[];
+}
+
+// What goes on in the room, each frame: the switch on mEventState. The states of a room with nobody, one or two
+// characters in it (3 to 6) also look at one saved character each frame (mScanIndex), to start and end the events
+// of all of them as the clock says, and at the end of each round give one of them a random event.
+// @0x0214c4e8
+void RoomScene::UpdateEvent() {
+    mEventFrames++;
+
+    switch (mEventState) {
+    case EVENT_NONE:
+        break;
+
+    case EVENT_CHANGE_ROOM: {
+        u8 resident = mPanel.mRoomResidents[mRoom.mRoomNumber & 0xFF];
+
+        if (mEventStep == 0) {
+            if (StepTransition(2)) {
+                mEventStep++;
+                mEventTimer = 0;
+            }
+        } else if (mEventStep == 1) {
+            if (StepTransition(3)) {
+                mEventStep++;
+            }
+        } else if (mEventStep == 2) {
+            mEventStep++;
+            func_02091a14(&mCharacters[0], 1);
+            func_02091a14(&mCharacters[1], 1);
+            func_020a4b74(mRoom.mDoor, 1);
+            if (resident != 0xFF) {
+                mCharacters[0].SetState(1);
+                mCharacters[0].mWait = 0;
+                mCharacters[1].SetState(1);
+                mCharacters[1].mWait = 0;
+                PlaceCharacters();
+                StartCharacterEvents();
+            }
+            AimCamera();
+        } else if (mEventStep == 3) {
+            mEventStep++;
+            mEventTimer = 4;
+            func_020a4ab8(mRoom.mDoor, 3);
+            func_ov074_0216a62c(&mCamera, 1, 0);
+        } else if (mEventStep == 4) {
+            if (!IsTransitionDone()) {
+                break;
+            }
+            if (--mEventTimer > 0) {
+                break;
+            }
+            if (resident == 0xFF) {
+                SetEventState(EVENT_EMPTY_ROOM, -1);
+            } else {
+                StartRoomEvent();
+                ShowEventMessage();
+            }
+            data_0211d604.Show(1);
+        }
+        break;
+    }
+
+    case EVENT_CHOOSE:
+        ChooseEncounter();
+        break;
+
+    case EVENT_EMPTY_ROOM: {
+        s64 now = mClock.mSeconds;
+
+        if (mScanIndex >= 100) {
+            mScanIndex = 0;
+            int index = StartRandomEvent(now);
+            if (index >= 0) {
+                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+            }
+        } else {
+            if (func_0202c3dc(&gGameData, mScanIndex)) {
+                if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                    SavedCharacter temp;
+                    StartDueEvent(now, &temp);
+                    if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
+                        func_ov074_0216c1f0(&mPanel,
+                                            func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                    }
+                } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    int partner = EndDueEvent();
+                    if (partner >= 0) {
+                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                    }
+                } else if (func_020ad348(mScanIndex, now)) {
+                    UpdateAbsentCharacter(now);
+                }
+                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+            }
+            mScanIndex++;
+        }
+        break;
+    }
+
+    case EVENT_NOBODY_HOME:
+        if (mEventStep == 0) {
+            mEventStep++;
+            mEventTimer = 60;
+        } else {
+            s64 now = mClock.mSeconds;
+
+            if (mScanIndex >= 100) {
+                mScanIndex = 0;
+                int index = StartRandomEvent(now);
+                if (index >= 0) {
+                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                }
+            } else {
+                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                        SavedCharacter temp;
+                        StartDueEvent(now, &temp);
+                        // The resident's new event has it at home
+                        if (mScanIndex == mCharacters[0].mIndex && !func_02099c84(&mCharacters[0])) {
+                            SetEventState(EVENT_CHOOSE);
+                        }
+                        if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
+                            func_ov074_0216c1f0(&mPanel,
+                                                func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                        }
+                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                        int partner = EndDueEvent();
+                        if (partner >= 0) {
+                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                        }
+                    } else if (func_020ad348(mScanIndex, now)) {
+                        UpdateAbsentCharacter(now);
+                    }
+                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                }
+                mScanIndex++;
+            }
+            if (--mEventTimer <= 0) {
+                SetEventState(EVENT_CHOOSE);
+            }
+        }
+        break;
+
+    case EVENT_ALONE:
+        if (mEventStep == 0) {
+            mEventStep++;
+            if (mEventTimer < 0) {
+                mEventTimer = 600;
+            } else if (mEventTimer == 0) {
+                SetEventState(EVENT_CHOOSE);
+            }
+        } else if (mEventStep == 1) {
+            BOOL refresh;
+            s64 now = mClock.mSeconds;
+
+            if (mScanIndex >= 100) {
+                mScanIndex = 0;
+                int index = StartRandomEvent(now);
+                if (index >= 0) {
+                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                }
+            } else {
+                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                    refresh = TRUE;
+
+                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                        SavedCharacter temp;
+                        SavedCharacter *character = StartDueEvent(now, &temp);
+
+                        if (character->mIndex == mCharacters[0].mIndex) {
+                            mEventStep++;
+                            if (func_02099c84(&mCharacters[0])) {
+                                refresh = FALSE;
+                                if (mCharacters[0].mPrevEvent == 18) {
+                                    func_ov074_0216c214(&mPanel, 0, mCharacters[0].mRoom);
+                                }
+                            } else if (func_02099da8(&mCharacters[0])) {
+                                mCharacters[0].mWait = 0;
+                                mCharacters[0].SetState(0x117);
+                            }
+                        } else if (func_02099d1c(character) && character->mEventPartner == mCharacters[0].mIndex) {
+                            mEventStep++;
+                            mCharacters[0].mWait = 0;
+                            mCharacters[0].SetState(0x117);
+                            refresh = FALSE;
+                        } else if (func_02099da8(character) && character->mEventPartner == mCharacters[0].mIndex) {
+                            mEventStep++;
+                            mCharacters[0].mWait = 0;
+                            mCharacters[0].SetState(0x117);
+                            refresh = FALSE;
+                        }
+
+                        if (mScanIndex != mCharacters[0].mIndex) {
+                            if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
+                                func_ov074_0216c1f0(
+                                    &mPanel, func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            }
+                        } else if (!func_02099c84(&mCharacters[0]) && func_02099da8(&mCharacters[0])) {
+                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mCharacters[0].mEventPartner));
+                        }
+                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                        int partner = EndDueEvent();
+                        if (partner >= 0) {
+                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                        }
+                    } else if (func_020ad348(mScanIndex, now)) {
+                        UpdateAbsentCharacter(now);
+                    }
+                    if (refresh) {
+                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                    }
+                }
+                mScanIndex++;
+            }
+
+            if (mEventStep == 2) {
+                break;
+            }
+            if (func_02099e64(&mCharacters[0])) {
+                ChooseReactionsQuiet();
+            }
+            if (--mEventTimer <= 0) {
+                SetEventState(EVENT_CHOOSE);
+            }
+        } else {
+            SetEventState(EVENT_CHOOSE);
+            StartEvent(&mCharacters[0], 0);
+        }
+        break;
+
+    case EVENT_TOGETHER:
+        if (mEventStep == 0) {
+            mEventStep++;
+            if (mEventTimer < 0) {
+                mEventTimer = 600;
+            } else if (mEventTimer == 0) {
+                SetEventState(EVENT_CHOOSE);
+            }
+        } else if (mEventStep == 1) {
+            BOOL refresh;
+            s64 now = mClock.mSeconds;
+
+            if (mScanIndex >= 100) {
+                mScanIndex = 0;
+                int index = StartRandomEvent(now);
+                if (index >= 0) {
+                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                }
+            } else {
+                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                    refresh = TRUE;
+
+                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                        SavedCharacter temp;
+                        StartDueEvent(now, &temp);
+
+                        BOOL withPartner = func_02099d1c(&mCharacters[1]);
+                        if (!withPartner || (withPartner && mCharacters[1].mEventPartner != mCharacters[0].mIndex)) {
+                            mEventStep++;
+                            mCharacters[0].SetState(0x117);
+                            mCharacters[1].SetState(0x117);
+                            refresh = FALSE;
+                            mCharacters[0].mWait = 0;
+                            mCharacters[1].mWait = 0;
+                        } else if (withPartner && mCharacters[1].mEventPartner == mCharacters[0].mIndex) {
+                            if (mScanIndex == mCharacters[0].mIndex || mScanIndex == mCharacters[1].mIndex) {
+                                mEventStep++;
+                            }
+                        }
+
+                        if (mScanIndex != mCharacters[0].mIndex && mScanIndex != mCharacters[1].mIndex) {
+                            if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
+                                func_ov074_0216c1f0(
+                                    &mPanel, func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            }
+                        }
+                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                        int partner = EndDueEvent();
+                        if (partner >= 0) {
+                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                        }
+                    } else if (func_020ad348(mScanIndex, now)) {
+                        UpdateAbsentCharacter(now);
+                    }
+                    if (refresh) {
+                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                    }
+                }
+                mScanIndex++;
+            }
+
+            if (mEventStep == 2) {
+                break;
+            }
+            if (func_02099e64(&mCharacters[0])) {
+                UpdateMeeting();
+                ChooseReactions();
+            }
+            if (--mEventTimer <= 0) {
+                SetEventState(EVENT_CHOOSE);
+            }
+        } else {
+            SetEventState(EVENT_CHOOSE);
+            if (func_02099da8(&mCharacters[0])) {
+                StartPairEvent(0);
+            }
+        }
+        break;
+
+    case EVENT_APPROACH:
+        if (AreCharactersNear(0, 1, 0x2333, 0x2666)) {
+            SetEventState(EVENT_MEET);
+            mCharacters[0].SetState(0xF3);
+            mCharacters[0].SetTargetTo(&mCharacters[1]);
+            mCharacters[1].SetState(0xF3);
+            mCharacters[1].SetTargetTo(&mCharacters[0]);
+        }
+        break;
+
+    case EVENT_MEET:
+        if (mEventStep == 0) {
+            if (mCharacters[0].mState != 0 || mCharacters[1].mState != 0) {
+                break;
+            }
+            int index = MATH_Rand16(&gRandom, 0) & 1;
+            mEventStep++;
+            RoomCharacter *partner = mCharacters[index].mPartner;
+            func_02099088(&mCharacters[index], partner->mIndex,
+                          data_021135c8[mCharacters[index].mRelation[partner->mIndex]][1] * 2);
+            StartTalkReaction(index, 1);
+            mCharacters[index].mReaction = 1;
+            partner->mReaction = 1;
+            mCharacters[index].mWait = 0x8E;
+            partner->mWait = 0x8C;
+            mEncounterPending = TRUE;
+            mCharacters[index].SetHeadIconMode(1);
+            partner->SetHeadIconMode(1);
+        } else if (mEventStep == 1) {
+            UpdateEncounter();
+            if (mCharacters[0].mState != 0xF6 || mCharacters[1].mState != 0xF6) {
+                break;
+            }
+            mEventStep++;
+            mEncounterPending = FALSE;
+            mCharacters[0].mReaction = 0;
+            mCharacters[1].mReaction = 0;
+            func_ov074_021686dc(&mCharacters[0]);
+            func_ov074_021686dc(&mCharacters[1]);
+            SaveCharacters();
+        } else {
+            if (JudgeEncounterEnd(mActor, mActorOther) != 10) {
+                SetEventState(EVENT_ENCOUNTER_END);
+                mCharacters[0].mWait = 20;
+                mCharacters[1].mWait = 20;
+            } else if (func_02099e64(&mCharacters[0])) {
+                mCharacters[0].SetState(0x103);
+                mCharacters[1].SetState(0x103);
+                SetEventState(EVENT_CHOOSE_WALKER);
+            } else {
+                StartPairEvent(0);
+                SetEventState(EVENT_TOGETHER, -1);
+            }
+        }
+        break;
+
+    case EVENT_CHOOSE_WALKER:
+        if (mEventStep == 0) {
+            FloorPos target;
+            if (mCharacters[0].mState != 0 || mCharacters[1].mState != 0) {
+                break;
+            }
+            mEventStep++;
+            if (mCharacters[0].GetFloorPos().LengthSq() <= mCharacters[1].GetFloorPos().LengthSq()) {
+                mActor = &mCharacters[0];
+                mActorOther = &mCharacters[1];
+            } else {
+                mActor = &mCharacters[1];
+                mActorOther = &mCharacters[0];
+            }
+            mActor->SetState(0xF5);
+            func_ov074_02168a20(mActor, &target);
+            mActor->SetTarget(target);
+            mActor->mWait = MATH_Rand16(&gRandom, 10) * 2 + 60 + ((200 - func_02098ec4(mActor)) >> 2);
+            mActorOther->SetState(4);
+            mActorOther->mWait = 30;
+        } else {
+            if (mActor->mState == 0 || (mCharacters[0].mWait <= 0 && mCharacters[1].mWait <= 0)) {
+                SetEventState(EVENT_TOGETHER, 240);
+                mActor->SetState(1);
+                mActor->mWait = MATH_Rand16(&gRandom, 10) + 10;
+                mActorOther->SetState(1);
+                mActorOther->mWait = MATH_Rand16(&gRandom, 15) + 30;
+            } else if (AreCharactersNear(0, 1, 0x2333, 0x2666)) {
+                mActor->WalkAwayFrom(mActorOther);
+            }
+        }
+        break;
+
+    case EVENT_ENCOUNTER:
+        if (mEventStep == 0) {
+            if (mCharacters[0].mWait > 0 || mCharacters[1].mWait > 0) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 40;
+            ApplyEncounterResult(&mCharacters[0], &mCharacters[1],
+                                 func_020adfbc(&mEncounterJudge, &mCharacters[0], &mCharacters[1]), 1);
+            mCharacters[0].SetState(0x104);
+            mCharacters[1].SetState(0x104);
+            mIcon[0].mIconId = 4;
+            // The mark goes half way between the two
+            VecFx32 middle = CharacterModel_GetJointPosition(&mCharacters[0].mModel, 3);
+            VecFx32 other = CharacterModel_GetJointPosition(&mCharacters[1].mModel, 3);
+            VEC_Add(&middle, &other, &middle);
+            middle.x >>= 1;
+            middle.y >>= 1;
+            middle.z >>= 1;
+            mIcon[0].SetPos(middle.x, middle.y, middle.z);
+            func_ov074_0216d1a8(&mSpeechText, 4);
+        } else if (mEventStep == 1) {
+            if (--mEventTimer > 0) {
+                break;
+            }
+            mEventStep++;
+            func_02080fc4(&mIcon[0]);
+            func_020810c8(&mIcon[0]);
+            HeadIcon_SetMode(&mIcon[0], 2);
+            int kind = func_ov074_021686f4(&mCharacters[0]);
+            ShowMessage(&mCharacters[0], &mCharacters[1], data_ov074_0216d570[kind], 2);
+            if (kind == 4) {
+                gSoundManager.StartSeqArc(1, 0x26, 2);
+            } else {
+                gSoundManager.StartSeqArc(1, 0x26, 0);
+            }
+        } else {
+            if (mCharacters[0].mState != 0 || mCharacters[1].mState != 0) {
+                break;
+            }
+            SetEventState(EVENT_MEET);
+            HeadIcon_SetMode(&mIcon[0], 1);
+        }
+        break;
+
+    case EVENT_ENCOUNTER_END:
+        if (mEventStep == 0) {
+            if (mCharacters[0].mWait > 0 || mCharacters[1].mWait > 0) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 30;
+            ApplyEncounterResult(&mCharacters[0], &mCharacters[1], JudgeEncounterEnd(mActor, mActorOther), 2);
+            mCharacters[0].SetState(0x105);
+            mCharacters[1].SetState(0x105);
+            func_ov074_0216d1a8(&mSpeechText, 4);
+        } else if (mEventStep == 1) {
+            if (--mEventTimer > 0) {
+                break;
+            }
+            mEventStep++;
+            ShowMessage(&mCharacters[0], &mCharacters[1],
+                        data_ov074_0216d59c[func_ov074_021686f4(&mCharacters[0])], 2);
+            gSoundManager.StartSeqArc(1, 0x26, 1);
+        } else {
+            if (mCharacters[0].mState != 0 || mCharacters[1].mState != 0) {
+                break;
+            }
+            SetEventState(EVENT_TOGETHER, -1);
+        }
+        break;
+
+    case EVENT_LAST_LEAVES:
+        if (mEventStep == 0) {
+            mEventStep++;
+            func_ov074_0216b8a8(&mCameraFollower, 2);
+        } else {
+            if (mActor->mPresent) {
+                break;
+            }
+            SetEventState(EVENT_NOBODY_HOME);
+            func_ov074_0216a618(&mCamera, 1);
+            func_ov074_0216b8a8(&mCameraFollower, 4);
+            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mIndex));
+            if (func_02099d1c(mActor)) {
+                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mEventPartner));
+            }
+            SaveCharacter(mActor);
+        }
+        break;
+
+    case EVENT_VISITOR_LEAVES:
+        if (mEventStep == 0) {
+            if (mActorOther->mState != 0) {
+                break;
+            }
+            mEventStep++;
+            mActor->SetState(0x107);
+            mActorOther->SetState(0x109);
+        } else {
+            if (CountPresent() != 1) {
+                break;
+            }
+            if (func_02099d1c(mActorOther)) {
+                SetEventState(EVENT_CHOOSE, 60);
+            } else {
+                SetEventState(EVENT_ALONE, 60);
+                StartEvent(mActorOther, 0);
+            }
+            func_ov074_0216a618(&mCamera, 2);
+            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mIndex));
+            if (func_02099d1c(mActor)) {
+                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mEventPartner));
+            }
+            SaveCharacter(mActor);
+        }
+        break;
+
+    case EVENT_RESIDENT_ARRIVES:
+        if (mEventStep == 0) {
+            mEventStep++;
+            mCharacters[0].mPresent = TRUE;
+            mCharacters[0].SetState(0x10C);
+            func_ov074_0216a618(&mCamera, 2);
+            func_ov074_0216a62c(&mCamera, 4, 0x474);
+            func_ov074_0216b8a8(&mCameraFollower, 2);
+            if (mCharacters[0].mEvent == 18) {
+                func_ov074_0216c214(&mPanel, 0, mCharacters[0].mRoom);
+            } else {
+                func_ov074_0216c1f0(&mPanel, mCharacters[0].mRoom);
+            }
+            ShowMessage(&mCharacters[0], NULL, 9, 2);
+        } else {
+            if (mCharacters[0].mState != 0) {
+                break;
+            }
+            SetEventState(EVENT_ALONE, 60);
+            if (func_02099e64(&mCharacters[0])) {
+                mCharacters[0].SetState(1);
+            } else {
+                StartEvent(&mCharacters[0], 0);
+            }
+            mCharacters[0].mWait = MATH_Rand16(&gRandom, 20) + 30;
+            mCharacters[0].mReaction = 0;
+        }
+        break;
+
+    case EVENT_VISITOR_ARRIVES:
+        if (mEventStep == 0) {
+            mEventStep++;
+            func_ov074_0216b8a8(&mCameraFollower, 2);
+        } else if (mEventStep == 1) {
+            if (mActorOther->mState != 0) {
+                break;
+            }
+            if (!ArchiveManager_IsIdle(&gArchiveManager)) {
+                break;
+            }
+            if (!IsTransitionDone()) {
+                break;
+            }
+            mEventStep++;
+            mActor->mIndex = GetCharacterCountForDisplay();
+            LoadCharacter(mActor);
+            func_ov074_02169890(mActor, 1);
+        } else if (mEventStep == 2) {
+            if (!IsTransitionDone()) {
+                break;
+            }
+            mEventStep++;
+            func_ov074_02169890(mActor, 2);
+        } else if (mEventStep == 3) {
+            if (!IsTransitionDone()) {
+                break;
+            }
+            mEventStep++;
+            func_ov074_02169890(mActor, 3);
+        } else if (mEventStep == 4) {
+            if (!IsTransitionDone()) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 0;
+            func_ov074_0216c1f0(&mPanel, mActor->mRoom);
+            func_ov074_0216d1a8(&mSpeechText, 4);
+            gSoundManager.StartSeqArc(1, 0x1D, 0x10);
+        } else if (mEventStep == 5) {
+            if (++mEventTimer <= 40) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 0;
+            func_02091a14(mActor, 1);
+            mActor->mPresent = TRUE;
+            mActor->SetState(0x10D);
+            mActorOther->SetState(0x110);
+            func_ov074_0216a618(&mCamera, 3);
+        } else if (mEventStep == 6) {
+            if (++mEventTimer <= 60) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 0;
+            mActor->SetState(0x10E);
+            ShowMessage(mActor, NULL, 9, 2);
+        } else if (mEventStep == 7) {
+            if (mActor->mState != 0) {
+                break;
+            }
+            mEventStep++;
+            mActor->SetState(1);
+            mActor->mWait = MATH_Rand16(&gRandom, 20) + 30;
+        } else {
+            int nearer;
+            int farther;
+            if (mCharacters[0].GetFloorPos().LengthSq() <= mCharacters[1].GetFloorPos().LengthSq()) {
+                nearer = 0;
+                farther = 1;
+            } else {
+                nearer = 1;
+                farther = 0;
+            }
+            StartEncounter(nearer, farther);
+        }
+        break;
+
+    case EVENT_AFTER_DISTRIBUTION:
+        if (mEventStep == 0) {
+            if (--mEventTimer > 0) {
+                break;
+            }
+            mEventStep++;
+            mEventTimer = 60;
+            func_02099324(&mCharacters[0], mClock.mSeconds);
+            func_0209b1d8(&mCharacters[0]);
+            SaveCharacter(&mCharacters[0]);
+            func_ov074_0216c1f0(&mPanel, mCharacters[0].mRoom);
+            func_ov074_0216b8a8(&mCameraFollower, 2);
+        } else {
+            if (--mEventTimer > 0) {
+                break;
+            }
+            SetInputState(INPUT_IDLE);
+            SetEventState(EVENT_CHOOSE);
+        }
+        break;
+    }
+}

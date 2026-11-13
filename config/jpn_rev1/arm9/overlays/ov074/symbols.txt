@@ -27,7 +27,7 @@ _ZN9RoomScene21UpdateAbsentCharacterEx kind:function(arm,size=0xf0) addr:0x0214c
 _ZN9RoomScene16StartRandomEventEx kind:function(arm,size=0x204) addr:0x0214c164
 _ZN9RoomScene16IsTransitionDoneEv kind:function(arm,size=0x6c) addr:0x0214c368
 _ZN9RoomScene14StepTransitionEi kind:function(arm,size=0x114) addr:0x0214c3d4
-func_ov074_0214c4e8 kind:function(arm,size=0x2110) addr:0x0214c4e8
+_ZN9RoomScene11UpdateEventEv kind:function(arm,size=0x2110) addr:0x0214c4e8
 _ZN9RoomScene15ChooseEncounterEv kind:function(arm,size=0x468) addr:0x0214e5f8
 _ZN9RoomScene20ChooseReactionsQuietEv kind:function(arm,size=0x430) addr:0x0214ea60
 func_ov074_0214ee90 kind:function(arm,size=0x65c) addr:0x0214ee90
@@ -252,7 +252,7 @@ _ZN8HeldItemD0Ev kind:function(arm,size=0x44) addr:0x0216d1fc
 func_ov074_0216d240 kind:function(arm,size=0xdc) addr:0x0216d240
 func_ov074_0216d31c kind:function(arm,size=0xe4) addr:0x0216d31c
 gText_TortoiseShellBracket kind:data(any) addr:0x0216d400
-data_ov074_0216d404 kind:data(any) addr:0x0216d404
+gRoomPoints kind:data(any) addr:0x0216d404
 data_ov074_0216d46c kind:data(any) addr:0x0216d46c
 data_ov074_0216d46e kind:data(any) addr:0x0216d46e
 data_ov074_0216d47c kind:data(any) addr:0x0216d47c
@@ -269,7 +269,7 @@ data_ov074_0216d504 kind:data(any) addr:0x0216d504
 data_ov074_0216d514 kind:data(any) addr:0x0216d514
 data_ov074_0216d524 kind:data(any) addr:0x0216d524
 data_ov074_0216d534 kind:data(any) addr:0x0216d534
-data_ov074_0216d544 kind:data(any) addr:0x0216d544
+gMoodFaces kind:data(any) addr:0x0216d544
 data_ov074_0216d558 kind:data(any) addr:0x0216d558
 data_ov074_0216d570 kind:data(any) addr:0x0216d570
 gStr__ov074 kind:data(any) addr:0x0216d59c
@@ -293,8 +293,8 @@ gStr_07 kind:data(any) addr:0x0216d700
 gStr_05 kind:data(any) addr:0x0216d704
 gStr_00 kind:data(any) addr:0x0216d708
 data_ov074_0216d718 kind:data(any) addr:0x0216d718
-data_ov074_0216d724 kind:data(any) addr:0x0216d724
-data_ov074_0216d734 kind:data(any) addr:0x0216d734
+gWalkArea kind:data(any) addr:0x0216d724
+gWalkAreaCorners kind:data(any) addr:0x0216d734
 data_ov074_0216d754 kind:data(any) addr:0x0216d754
 data_ov074_0216d78c kind:data(any) addr:0x0216d78c
 data_ov074_0216d798 kind:data(any) addr:0x0216d798
