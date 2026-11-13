@@ -3,6 +3,6 @@
     .data       start:0x02149c60 end:0x02149ca0 kind:data align:32
     .bss        start:0x02149ca0 end:0x02149ca0 kind:bss align:32
 
-src/overlays/ov000/ov000.cpp:
+src/overlays/ov000/TextTestScene.cpp:
     .text       start:0x02149a40 end:0x02149c50
     .data       start:0x02149c60 end:0x02149ca0

@@ -9,7 +9,17 @@
 
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
-#include "RoomCharacter.h"
+
+// The overlay's shared headers: the character (with Character.h, FloorPos.h, HeldItem.h, Model.h, Room.h and
+// RoomCamera.h), and the scene's other objects, which are the unit RoomObjects'
+#include "../RoomCharacter.h"
+#include "../RoomObjects/ApartmentFront.h"
+#include "../RoomObjects/Clock.h"
+#include "../RoomObjects/RoomLight.h"
+#include "../RoomObjects/SkyBackground.h"
+#include "../RoomObjects/SpeechBalloon.h"
+#include "../RoomObjects/TimedMessage.h"
+#include "../RoomObjects/TouchButton.h"
 
 // The apartment scene (overlay 74): one room of the building with its resident and a visitor in it, and on the
 // touch screen the building with a window for each room.
@@ -46,148 +56,93 @@ public:
 };
 
 // ---------------------------------------------------------------------------------------------------------------
-// STAND-INS for the scene's members whose classes belong to other groups of functions (a7's, mostly, and the main
-// program's). Each has the size the scene's constructor (main program, func_0203ed10) shows and the fields that the
-// scene's own functions touch. Replace them with the real classes.
-
-// A point of the touch screen, as the touch input gives it and the hit tests take it (by value).
-struct TouchPoint {
-    /* 0x0 */ int x;
-    /* 0x4 */ int y;
-};
-
-// One of the things a character holds (0x02169dcc constructs it; name is group a6's). It has virtual functions
-// (table data_ov074_0216d7d0).
-struct HeldItem {
-    virtual void Virtual0();
-    virtual void Virtual1();
-    virtual void Virtual2();
-    virtual void Virtual3();
-    virtual void Draw(); // 0x02169ee0: the scene's Draw calls it
-
-    /* 0x04 */ u8 mUnknown04[0xE4];
-    /* 0xE8 */ int mTransition;      // 0x02169fc8 sets it; not 0 while it runs
-    /* 0xEC */ u8 mUnknownEC[4];
-    /* 0xF0 */ char mArchiveName[4]; // "HI0" to "HI3"
-    /* 0xF4 */ char mArchivePath[0x20];
-}; // 0x114
-
-// The room's model (0x0216a278 constructs it; its base class is the main program's, func_020a54c4...).
-struct RoomModel {
-    /* 0x000 */ u8 mUnknown000[0x14];
-    /* 0x014 */ u8 mDoor[0x188];     // A main-program object (func_020a4a50 draws it); a6 has it as the door
-    /* 0x19C */ int mUnknownSetTo2ByInit;
-    /* 0x1A0 */ u8 mUnknown1A0[0x768];
-    /* 0x908 */ int mTransition;     // 0x0216a354 sets it; not 0 while it runs
-    /* 0x90C */ u8 mUnknown90C[2];
-    /* 0x90E */ u16 mRoomNumber;     // The room that is shown
-    /* 0x910 */ u8 mUnknown910[4];
-    /* 0x914 */ u8 mUnknown914[0xC]; // Given to 0x0216c92c with the resident's name
-}; // 0x920
-
-// The camera on the room (0x0216a4a4 constructs it).
-struct RoomCamera {
-    /* 0x00 */ u8 mUnknown00[4];
-    /* 0x04 */ int mZoomState;       // 0x0216a62c sets it, with mZoomTimer
-    /* 0x08 */ int mTargetMode;      // 0x0216a618 sets it: 1 the room, 2 one character, 3 both
-    /* 0x0C */ u8 mUnknown0C[4];
-    /* 0x10 */ VecFx32 mLookAt;
-    /* 0x1C */ u8 mUnknown1C[0x24];
-    /* 0x40 */ fx32 mTurnSpeedY;     // The scene sets these two from the + Control Pad
-    /* 0x44 */ fx32 mTurnSpeedX;
-    /* 0x48 */ u8 mUnknown48[4];
-    /* 0x4C */ BOOL mLeaving;        // Set when the player goes into the room
-    /* 0x50 */ RoomCharacter *mCharacters[2];
-    /* 0x58 */ RoomModel *mRoom;
-    /* 0x5C */ u8 mUnknown5C[6];
-    /* 0x62 */ s16 mZoomTimer;
-}; // 0x64
-
-// Something that follows the camera (0x0216b544 constructs it, 0x0216b55c gives it the camera and the room,
-// 0x0216b8a8 sets its state). The symbols have it as RoomLight.
-struct CameraFollower {
-    /* 0x00 */ u8 mUnknown00[0x1C];
-}; // 0x1C
-
-// A button of the building panel (0x0216bb20 is its hit test, 0x0216bb18 sets how it is shown).
-struct PanelButton {
-    /* 0x00 */ u8 mUnknown00[0xC0];
-};
-
-// The building on the touch screen, with a window for each room (0x0216bba4 constructs it).
-struct BuildingPanel {
-    /* 0x000 */ u8 mUnknown000[0xB8];
-    /* 0x0B8 */ PanelButton mInfoButton;   // Leads to the information scene
-    /* 0x178 */ void *mWindowScreen;       // What func_02027d7c returns for "APX:/BG_window.nsc"
-    /* 0x17C */ char mArchivePath[0x1C];   // "Scn/AFwBG/Apart0_LZ.bin", for the building's number
-    /* 0x198 */ u16 mSelectedRoom;         // The room the player chose
-    /* 0x19A */ u8 mUnknown19A[2];
-    /* 0x19C */ u8 mRoomResidents[100];    // For each room, the index of its resident, or 0xFF
-}; // 0x200
-
-// The view out of the room's window, which follows the clock (0x0216c374 constructs it).
-struct WindowView {
-    /* 0x00 */ u8 mUnknown00[0x2C];
-    /* 0x2C */ int mLoadState;             // 2 while it is loading
-    /* 0x30 */ void *mSkyPalette;          // What func_02027534 returns for "ASP:/Fw_BG_sky.ncl"
-    /* 0x34 */ void *mPalette;             // and for mPaletteName
-    /* 0x38 */ u8 mUnknown38[4];
-    /* 0x3C */ char mArchivePath[0x1C];    // "Scn/AFwBG/A0FwFBG0_LZ.bin"
-    /* 0x58 */ char mCharName[0x10];       // "ASX:/Fw_BG0.ncg"
-    /* 0x68 */ char mPaletteName[0x10];    // "ASX:/Fw_BG0.ncl"
-}; // 0x78
+// STAND-INS for main-program classes that are not decompiled and not in the overlay's shared headers.
 
 // The main program's particle system for one effect file (func_02080e80 constructs it, func_02080e98 loads it).
 struct ParticleSystem {
     /* 0x0 */ void *mManager; // func_0207b138 updates it
 }; // 0x4
 
-// The plate with the resident's name (0x0216c5e8 constructs it).
-struct NamePlate {
-    /* 0x000 */ u8 mUnknown000[0xC94];
-}; // 0xC94
-
-// A button on the touch screen (0x0216ca30 constructs it).
-struct TouchButton {
-    /* 0x00 */ u8 mUnknown00[0x78];
-    /* 0x78 */ int mUnknownSetWithEnabled; // 11 when the button is disabled, -1 when it is enabled
-    /* 0x7C */ u8 mUnknown7C[0x40];
-    /* 0xBC */ BOOL mEnabled;              // 0x0216ca14 sets it
-    /* 0xC0 */ s16 mAction;                // 0: go into the room, 1: back to the map
-    /* 0xC2 */ u8 mUnknownC2[2];
-    /* 0xC4 */ int mPressState;            // 1: pressed, 2: not pressed, 3: let go on the button
-    /* 0xC8 */ MessageText *mLabel;
-}; // 0xCC
-
-// The time now (0x0216cc70 constructs it, 0x0216ccac and 0x0216ccd4 read the clock into it).
-struct RoomClock {
-    /* 0x00 */ s64 mSeconds; // RTC seconds, what the characters' events are timed by
-    /* 0x08 */ RTCTime mTime;
-    /* 0x14 */ RTCDate mDate;
-}; // 0x24
-
-// The clock shown on the touch screen (0x0216cd10 gives it the RoomClock).
-struct ClockDisplay {
-    /* 0x000 */ u8 mUnknown000[0x78C];
-}; // 0x78C
-
-// The text of what the characters say (0x0216d018 constructs it; 0x0216d1a8 sets its state).
-class SpeechText : public MessageText {
-public:
-    SpeechText();
-
-    // How many sprite characters (tiles) the canvas takes
-    int GetCharCount() { return ((mCanvas.areaWidth * mCanvas.areaHeight - 1) >> mVramMode) + 1; }
-
-    /* 0x588 */ int mState;
-    /* 0x58C */ s16 mStep;
-}; // 0x590 without the canvas, 0x5F8 with it
-
-// What the main program's func_020adfbc... work on, which decide what comes of two characters meeting (name is
-// group a1's). It has no data.
+// What the main program's functions that decide what comes of two characters meeting work on (RoomEncounter's
+// header has the others of them). It has no data.
 struct EncounterJudge {
+    int Judge(RoomCharacter *first, RoomCharacter *second); // 0x020adfbc: 10 when nothing comes of it
+
     u8 mUnknown[4];
 };
+
+// ---------------------------------------------------------------------------------------------------------------
+// ADDITIONS that the shared headers need (they are read-only for this unit). Each is here only until it is there.
+
+// Character.h, HeadIcon: the member functions that symbols.txt names. The struct cannot be given members from
+// outside, so they are declared here by their linkage names and called through the inline functions below.
+// What HeadIcon needs is:
+//     void Show();                       // 0x02080fc4
+//     void Load(int unused, int iconId); // 0x020810b4: but see below, the first is a pointer
+//     void Reload();                     // 0x020810c8
+//     void Update();                     // 0x020810e4
+//     void SetPos(fx32 x, fx32 y, fx32 z) { mPos.x = x; mPos.y = y; mPos.z = z; }
+extern "C" {
+void _ZN8HeadIcon4ShowEv(HeadIcon *icon);
+void _ZN8HeadIcon4LoadEii(HeadIcon *icon, ParticleSystem *particles, int iconId);
+void _ZN8HeadIcon6ReloadEv(HeadIcon *icon);
+void _ZN8HeadIcon6UpdateEv(HeadIcon *icon);
+}
+inline void HeadIcon_Show(HeadIcon *icon) { _ZN8HeadIcon4ShowEv(icon); }
+inline void HeadIcon_Load(HeadIcon *icon, ParticleSystem *particles, int iconId) {
+    _ZN8HeadIcon4LoadEii(icon, particles, iconId);
+}
+inline void HeadIcon_Reload(HeadIcon *icon) { _ZN8HeadIcon6ReloadEv(icon); }
+inline void HeadIcon_Update(HeadIcon *icon) { _ZN8HeadIcon6UpdateEv(icon); }
+inline void HeadIcon_SetPos(HeadIcon *icon, fx32 x, fx32 y, fx32 z) {
+    icon->mPos.x = x;
+    icon->mPos.y = y;
+    icon->mPos.z = z;
+}
+
+// RoomCharacter.h, RoomCharacter: an inline member that sets the head icon's mode. UpdateEvent's match depends on
+// the character being the helper's object:
+//     void SetHeadIconMode(int mode) { HeadIcon_SetMode(&mHeadIcon, mode); }
+inline void SetHeadIconMode(RoomCharacter *character, int mode) {
+    HeadIcon_SetMode(&character->mHeadIcon, mode);
+}
+
+// RoomCharacter.h, RoomCharacter::LoadHeadIcon(int) and Character.h, HeadIcon::Load(int, int): the scene's Init
+// only matches when the first parameter of both is a POINTER (it passes its ParticleSystem). With an int and a
+// cast at the call, however the cast is written, the address of the particle system is computed in another place
+// (measured: 2 instructions of Init differ). So the names in symbols.txt, _ZN13RoomCharacter12LoadHeadIconEi and
+// _ZN8HeadIcon4LoadEii, are most likely wrong about that parameter, and the shared headers with them:
+//     void RoomCharacter::LoadHeadIcon(ParticleSystem *particles); // ...12LoadHeadIconEP14ParticleSystem
+//     void HeadIcon::Load(ParticleSystem *particles, int iconId);  // _ZN8HeadIcon4LoadEP14ParticleSystemi
+// Until they are changed, the functions are declared here by the linkage names that symbols.txt has now.
+extern "C" {
+void _ZN13RoomCharacter12LoadHeadIconEi(RoomCharacter *character, ParticleSystem *particles);
+}
+inline void LoadHeadIcon(RoomCharacter *character, ParticleSystem *particles) {
+    _ZN13RoomCharacter12LoadHeadIconEi(character, particles);
+}
+
+// Character.h, SavedCharacter: mEventEndLo and mEventEndHi are one s64 (the scene compares it whole).
+inline s64 GetEventEnd(SavedCharacter *character) {
+    return *(s64 *)&character->mEventEndLo;
+}
+
+// Room.h, RoomDoorModel: the first four bytes of mUnknown13C are an int that the scene's Init sets to 2.
+inline void SetDoorUnknown13C(RoomDoorModel *door, int value) {
+    *(int *)door->mUnknown13C = value;
+}
+
+// RoomObjects/TimedMessage.h (or MessageText): how many sprite characters (tiles) the text's canvas takes
+inline int GetCanvasCharCount(MessageText *text) {
+    return ((text->mCanvas.areaWidth * text->mCanvas.areaHeight - 1) >> text->mVramMode) + 1;
+}
+
+// RoomCamera.h, SavedCamera (data_0213ba74, what the scenes remember for each other): it goes on past the camera.
+struct SceneMemory {
+    /* 0x00 */ SavedCamera mCamera;
+    /* 0x20 */ u8 mCharacter; // The saved character whose room was shown last
+};
+#define gSceneMemory (*(SceneMemory *)&data_0213ba74)
 
 // ---------------------------------------------------------------------------------------------------------------
 
@@ -277,9 +232,9 @@ public:
     void UpdateMeeting();                                    // 0x021514f0
     BOOL AreCharactersNear(int first, int second, fx32 reach, fx32 maxReach); // 0x0215206c
     void SetFadeState(int state);                            // 0x02152124
-    void SaveCharacter(SavedCharacter *character);           // 0x0215213c
+    void SaveCharacter(RoomCharacter *character);           // 0x0215213c
     void SaveCharacters();                                   // 0x0215217c
-    void LoadCharacter(SavedCharacter *character);           // 0x021521a0
+    void LoadCharacter(RoomCharacter *character);           // 0x021521a0
     void LoadCharacters();                                   // 0x02152204
 
     /* 0x00010 */ int mInputState;
@@ -290,21 +245,21 @@ public:
     /* 0x05B50 */ RoomCharacter *mActor;      // The two characters of an encounter, the one that acts first
     /* 0x05B54 */ RoomCharacter *mActorOther; // (names are group a1's)
     /* 0x05B58 */ HeldItem mItems[4];     // Two for each character
-    /* 0x05FA8 */ RoomModel mRoom;
+    /* 0x05FA8 */ ApartmentRoom mRoom;
     /* 0x068C8 */ RoomCamera mCamera;
-    /* 0x0692C */ CameraFollower mCameraFollower;
-    /* 0x06948 */ BuildingPanel mPanel;
-    /* 0x06B48 */ WindowView mWindowView;
+    /* 0x0692C */ RoomLight mLight;
+    /* 0x06948 */ ApartmentFront mFront;
+    /* 0x06B48 */ SkyBackground mSky;
     /* 0x06BC0 */ ParticleSystem mParticles;
     /* 0x06BC4 */ HeadIcon mIcon[1];      // A mark shown between the two characters (the class of their head icons)
-    /* 0x06C04 */ NamePlate mNamePlate;
+    /* 0x06C04 */ NamePanel mNamePanel;
     /* 0x07898 */ TouchButton mButtons[2];
     /* 0x07A30 */ MessageText mButtonLabel[1];
-    /* 0x08020 */ RoomClock mClock;
+    /* 0x08020 */ Clock mClock;
     /* 0x08044 */ ClockDisplay mClockDisplay;
     /* 0x087D0 */ MessageFile mEtcMessages;  // "TEM:/tmd_etc_msg_JP.bmg"
     /* 0x087E8 */ MessageFile mRoomMessages; // "TMM:/tmd_mainroom_msg_JP.bmg"
-    /* 0x08800 */ SpeechText mSpeechText;
+    /* 0x08800 */ TimedMessage mMessage;   // What the characters say and what goes on
     /* 0x08DF8 */ EncounterJudge mEncounterJudge;
     /* 0x08DFC */ TtsPlayer mTtsPlayer;
     /* 0x1D740 */ int mPressedButton;     // Which of mButtons the stylus went down on

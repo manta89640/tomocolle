@@ -173,8 +173,8 @@ from:0x0214aa30 kind:arm_call to:0x0204ebd4 module:main
 from:0x0214aa38 kind:arm_call to:0x0214b348 module:overlay(37)
 from:0x0214aa4c kind:arm_call to:0x0214b9ac module:overlay(37)
 from:0x0214aa68 kind:load to:0x02121e58 module:main
-from:0x0214aa6c kind:load to:0x02121e88 module:main
-from:0x0214aa70 kind:load to:0x02121e90 module:main
+from:0x0214aa6c kind:load to:0x02121e58 add:0x30 module:main
+from:0x0214aa70 kind:load to:0x02121e58 add:0x38 module:main
 from:0x0214aa74 kind:load to:0x0213b5cc module:main
 from:0x0214aa80 kind:load to:0x0214c1cc module:overlay(37)
 from:0x0214aa84 kind:load to:0x0214c474 module:overlay(37)

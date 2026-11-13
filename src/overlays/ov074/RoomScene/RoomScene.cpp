@@ -1,7 +1,5 @@
 #include "prelude.h"
 
-#define RES_TYPE_BCA0 0x30414342 // 'BCA0' as the file has it: a character animation
-
 typedef char CheckSavedCharacterSize[sizeof(SavedCharacter) == 0x2C0 ? 1 : -1];
 typedef char CheckRoomSceneSize[sizeof(RoomScene) == 0x1D7C8 ? 1 : -1];
 
@@ -14,7 +12,7 @@ void RoomScene::StartLoading() {
     u8 first;
     u8 second;
 
-    func_ov074_0216ccac(&mClock);
+    mClock.Update();
     gSoundManager.StartSeqIfNotPlaying(0, 11);
     gSoundManager.SetSeqTrackMuteOnly(0, 0x1C1, TRUE);
     gSoundManager.SetSeqTrackModDepth(0, 0xFFFF, 0);
@@ -26,30 +24,30 @@ void RoomScene::StartLoading() {
         if (func_0202c3dc(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
-            mPanel.mRoomResidents[func_0202c414(&gGameData, i)] = i;
+            mFront.mResidents[func_0202c414(&gGameData, i)] = i;
         }
     }
 
-    last = data_0213ba74.mCharacter;
+    last = gSceneMemory.mCharacter;
     if (last < 100 && func_0202c3dc(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
-        data_0213ba74.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacter = mCharacters[0].mIndex;
     }
     LoadCharacters();
     func_02091048(&mCharacters[0], "3HM");
     func_02091048(&mCharacters[1], "BI1");
-    func_ov074_0216a2dc(&mRoom, mCharacters[0].mInterior);
-    mRoom.mRoomNumber = mCharacters[0].mRoom;
+    mRoom.SetStyle(mCharacters[0].mInterior);
+    mRoom.mRoomIndex = mCharacters[0].SavedCharacter::mRoom;
 
     if (mSceneId == 0x11) {
         building = gGameData.mBuilding & 3;
     } else {
         building = mSceneId - 0x12;
     }
-    func_ov074_0216bc08(&mPanel, building);
-    func_ov074_0216c3cc(&mWindowView, &mClock, building);
+    mFront.SetBuildingSize(building);
+    mSky.Init(&mClock, building);
 
     ArchiveManager_MountCompressed(&gArchiveManager, "MNU", "Scn/Scene/ScenePlayRoom2_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "BIC", "Mdl/Ica/ica_mii_room_LZ.bin", 0);
@@ -57,18 +55,18 @@ void RoomScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TMM", "Msg/TmdMainRoomMsgJP_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "TEM", "Msg/TmdEtcMsgJP_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "ASP", "Scn/AFwBG/FwBgSkyPlt_LZ.bin", 0);
-    ArchiveManager_MountCompressed(&gArchiveManager, "APX", mPanel.mArchivePath, 0);
-    ArchiveManager_MountCompressed(&gArchiveManager, "ASX", mWindowView.mArchivePath, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, "APX", mFront.mArchivePath, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, "ASX", mSky.mArchivePath, 0);
     func_020a54c4(&mRoom, "CO0", 0);
     func_020a56bc(&mRoom, "RM?", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[1].mArchiveName, mCharacters[1].mArchivePath, 0);
 
     GetEventItems(&first, &second);
-    func_ov074_02169e4c(&mItems[0], "HI0", first);
-    func_ov074_02169e4c(&mItems[1], "HI1", second);
-    func_ov074_02169e4c(&mItems[2], "HI2", first);
-    func_ov074_02169e4c(&mItems[3], "HI3", second);
+    mItems[0].SetArchive("HI0", first);
+    mItems[1].SetArchive("HI1", second);
+    mItems[2].SetArchive("HI2", first);
+    mItems[3].SetArchive("HI3", second);
     for (int i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
         ArchiveManager_MountCompressed(&gArchiveManager, item->mArchiveName, item->mArchivePath, 0);
@@ -159,7 +157,7 @@ void RoomScene::Init() {
     int charOffset;
 
     func_0202b0e8(&data_02122824);
-    func_0202ae38(&data_021223e4);
+    func_0202ae38(data_021223e4);
     data_0211d604.mUnknown48 = 1;
     data_0211d604.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
@@ -169,16 +167,16 @@ void RoomScene::Init() {
     func_02027534(&data_021213b8, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_up.nce", "MNU:/Obj_up.ncg", 0x10, 1, -1);
     func_02027534(&data_021213b8, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
-    mPanel.mWindowScreen = func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
+    mFront.mScreen = (u16 *)func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
     func_02027534(&data_021213b8, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
     func_02027d7c(&data_02121834, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
     func_02027534(&data_021213b8, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
-    mWindowView.mSkyPalette = func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
-    func_02028f24(&gVramTransferQueue, mWindowView.mCharName, 0x400, 0, 0x1000, 0x3000, 0);
-    mWindowView.mPalette = func_02027534(&data_021213b8, mWindowView.mPaletteName, 0x400, 0x80, 0x80, 0xC0);
+    mSky.mColors = (u16 *)func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
+    func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+    mSky.mPalette = func_02027534(&data_021213b8, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
     func_020278f8(&data_021213b8, 0, 1);
     func_02028280(&data_02121834, 1, 2);
     func_02028280(&data_02121834, 2, 1);
@@ -196,23 +194,23 @@ void RoomScene::Init() {
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
     func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
-    func_020810b4(&mIcon[0], &mParticles, 0);
-    func_ov074_0216a2c4(&mRoom);
+    HeadIcon_Load(&mIcon[0], &mParticles, 0);
+    mRoom.Refresh();
     func_020a5514(&mRoom, 7);
     func_020a5760(&mRoom, 8);
-    func_020a4acc(mRoom.mDoor, 10);
-    mRoom.mUnknownSetTo2ByInit = 2;
+    func_020a4acc(&mRoom.mParts, 10);
+    SetDoorUnknown13C(&mRoom.mParts.mDoor, 2);
     for (i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
-        func_0202ad04(&data_021223e4, i + 2, item->mArchiveName, 0);
-        func_ov074_02169e84(item, i + 2);
+        func_0202ad04(data_021223e4, i + 2, item->mArchiveName, 0);
+        item->Init(i + 2);
     }
     mTtsPlayer.InitEngine();
 
-    func_0202ad04(&data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_0202ad04(&data_021223e4, 1, mCharacters[1].mArchiveName, 0);
-    func_ov074_02152268(&mCharacters[0], 0, 0, 0);
-    func_ov074_02152268(&mCharacters[1], 1, 0, 1);
+    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
+    func_0202ad04(data_021223e4, 1, mCharacters[1].mArchiveName, 0);
+    mCharacters[0].Init(0, 0, 0);
+    mCharacters[1].Init(1, 0, 1);
     mCharacters[0].mPartner = &mCharacters[1];
     mCharacters[1].mPartner = &mCharacters[0];
     mCharacters[0].mHeldItems[0] = &mItems[0];
@@ -223,46 +221,46 @@ void RoomScene::Init() {
     mCharacters[1].mSoundHandle = 5;
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
-    animations = func_0202ad04(&data_021223e4, 6, "BIC", 0);
+    animations = func_0202ad04(data_021223e4, 6, "BIC", 0);
     for (int i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         func_0208fefc(&mCharacters[i]);
         func_02091a24(&mCharacters[i]);
         mCharacters[i].mPersonality = func_02098f2c(&mCharacters[i]);
-        func_ov074_021686dc(&mCharacters[i]);
+        mCharacters[i].ResetBody();
         func_02091a88(&mCharacters[i]);
-        func_ov074_0215243c(&mCharacters[i]);
+        mCharacters[i].CopyName();
         mCharacters[i].mTtsPlayer = &mTtsPlayer;
         func_ov074_02169c6c(&mCharacters[i]);
-        func_02029660(mCharacters[i].mModel.mResource, RES_TYPE_BCA0, animations);
-        func_ov074_02152370(&mCharacters[i], 1);
-        func_ov074_02152308(&mCharacters[i], &mParticles);
-        mCharacters[i].mRoomModel = &mRoom;
+        func_02029660((void *)mCharacters[i].mModel.mUnknown04, RESOURCE_BCA0, animations);
+        mCharacters[i].SetState(1);
+        LoadHeadIcon(&mCharacters[i], &mParticles);
+        mCharacters[i].mRoom = &mRoom;
         mCharacters[i].mCamera = &mCamera;
     }
     PlaceCharacters();
     StartCharacterEvents();
 
-    func_ov074_0216a514(&mCamera);
+    mCamera.Reset();
     mCamera.mCharacters[0] = &mCharacters[0];
     mCamera.mCharacters[1] = &mCharacters[1];
     mCamera.mRoom = &mRoom;
-    func_ov074_0216b55c(&mCameraFollower, &mCamera, &mRoom);
+    mLight.Init(&mCamera, &mRoom);
     AimCamera();
     StartRoomEvent();
 
     mRoomMessages.Open("TMM:/tmd_mainroom_msg_JP.bmg");
     mEtcMessages.Open("TEM:/tmd_etc_msg_JP.bmg");
     charOffset = 0xC0;
-    mSpeechText.InitObjForMessage(&mRoomMessages, 3, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
-    mSpeechText.mSprite.SetPosition(0x10000, 0xA0000);
-    mSpeechText.mVAlign = 1;
-    charOffset += mSpeechText.GetCharCount();
-    if (mPanel.mRoomResidents[mCharacters[0].mRoom] != 0xFF) {
+    mMessage.InitObjForMessage(&mRoomMessages, 3, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
+    mMessage.mSprite.SetPosition(0x10000, 0xA0000);
+    mMessage.mVAlign = 1;
+    charOffset += GetCanvasCharCount(&mMessage);
+    if (mFront.mResidents[mCharacters[0].SavedCharacter::mRoom] != 0xFF) {
         ShowEventMessage();
     }
-    func_ov074_0216c92c(&mNamePlate, mRoom.mUnknown914, mCharacters[0].mNameText);
-    func_ov074_0216c618(&mNamePlate, charOffset, &mRoomMessages, &mRoomMessages);
+    mNamePanel.SetNames(mRoom.mNumberText, mCharacters[0].mNameText);
+    mNamePanel.Init(charOffset, &mRoomMessages, &mRoomMessages);
 
     mButtonLabel[0].InitObjForMessage(&mEtcMessages, 0xB3, &gFonts[0].mFont, 0x1000, 0x300, 0, 1, 0, 0, 15, NULL);
     mButtonLabel[0].mVAlign = 1;
@@ -271,40 +269,40 @@ void RoomScene::Init() {
     mUnknownClearedByInit = 0;
     mButtons[0].mLabel = &mButtonLabel[0];
     for (s16 j = 0; j < 2; j++) {
-        func_ov074_0216ca4c(&mButtons[j], j);
+        mButtons[j].Init(j);
     }
-    func_ov074_0216bc18(&mPanel, mCharacters[0].mRoom);
-    func_ov074_0216c404(&mWindowView);
-    func_ov074_0216cd10(&mClockDisplay, &mClock);
+    mFront.Init(mCharacters[0].SavedCharacter::mRoom);
+    mSky.Refresh();
+    mClockDisplay.Init(&mClock);
 
     // Coming from the character distribution scene with a resident that has just moved in
-    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].mEventEnd == 0x7FFFFFFFFFFFFFFFLL) {
+    if (gSceneManager.mPreviousSceneId == 0x74 && GetEventEnd(&mCharacters[0]) == 0x7FFFFFFFFFFFFFFFLL) {
         SetInputState(INPUT_OFF);
         SetEventState(EVENT_AFTER_DISTRIBUTION, 60);
-        func_ov074_0216a62c(&mCamera, 2, 0);
-        func_ov074_0216d1a8(&mSpeechText, 4);
+        mCamera.SetState(2, 0);
+        mMessage.SetState(4);
     }
     UpdateButtons();
-    func_ov074_0216d070(&mSpeechText);
+    mMessage.Update();
     NNS_GfdDumpLnkTexVramManager();
     func_02060c1c();
     gSoundManager.LoadGroup(0x4C);
 }
 
 void RoomScene::Update() {
-    if ((data_0211f9d4.mHeld & 0x2FFF) != 0 || data_02121e58.mTouching != 0) {
+    if ((data_0211f9d4.mHeld & 0x2FFF) != 0 || gTouchInput.mTouching != 0) {
         mIdleFrames = 0;
-        func_ov074_0216a62c(&mCamera, 4, 0x474);
+        mCamera.SetState(4, 0x474);
     }
     if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
-        mCamera.mTurnSpeedX = 0x10000;
+        mCamera.mInput.y = 0x10000;
     } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
-        mCamera.mTurnSpeedX = -0x10000;
+        mCamera.mInput.y = -0x10000;
     }
     if (data_0211f9d4.mHeld & PAD_KEY_UP) {
-        mCamera.mTurnSpeedY = 0xE000;
+        mCamera.mInput.x = 0xE000;
     } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
-        mCamera.mTurnSpeedY = -0xE000;
+        mCamera.mInput.x = -0xE000;
     }
     UpdateInput();
     UpdateEvent();
@@ -343,22 +341,22 @@ void RoomScene::Draw() {
         break;
     }
 
-    func_020a4a50(mRoom.mDoor);
+    func_020a4a50(&mRoom.mParts);
     for (int i = 0; i < 2; i++) {
-        func_ov074_021686a4(&mCharacters[i]);
+        mCharacters[i].UpdateBodyIfPresent();
     }
     for (int i = 0; i < 4; i++) {
         mItems[i].Draw();
     }
     func_02080f00(&mParticles, 0);
-    mSpeechText.Draw();
+    mMessage.Draw();
     mButtonLabel[0].Draw();
-    func_ov074_0216c8f0(&mNamePlate);
+    mNamePanel.Draw();
     for (int i = 0; i < 2; i++) {
-        func_ov074_0216cc2c(&mButtons[i]);
+        mButtons[i].Draw();
     }
-    func_ov074_0216be1c(&mPanel);
-    func_ov074_0216cfc0(&mClockDisplay);
+    mFront.Draw();
+    mClockDisplay.Draw();
 }
 
 void RoomScene::Exit() {
@@ -366,13 +364,13 @@ void RoomScene::Exit() {
     FinishEncounter();
     SaveCharacters();
     func_0202683c();
-    func_0202aecc(&data_021223e4, 0);
-    func_0202aecc(&data_021223e4, 1);
-    func_0202aecc(&data_021223e4, 2);
-    func_0202aecc(&data_021223e4, 3);
-    func_0202aecc(&data_021223e4, 4);
-    func_0202aecc(&data_021223e4, 5);
-    func_0202aecc(&data_021223e4, 6);
+    func_0202aecc(data_021223e4, 0);
+    func_0202aecc(data_021223e4, 1);
+    func_0202aecc(data_021223e4, 2);
+    func_0202aecc(data_021223e4, 3);
+    func_0202aecc(data_021223e4, 4);
+    func_0202aecc(data_021223e4, 5);
+    func_0202aecc(data_021223e4, 6);
     func_020a5948(&mRoom);
     ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mArchiveName);
     ArchiveManager_Unmount(&gArchiveManager, "MNU");
@@ -392,26 +390,26 @@ void RoomScene::Exit() {
 
 // Reads the clock and updates everything in the room and on the touch screen.
 void RoomScene::UpdateObjects() {
-    func_ov074_0216ccd4(&mClock);
+    mClock.UpdateIfArchiveIdle();
     func_0207b138(mParticles.mManager);
     for (int i = 0; i < 2; i++) {
-        func_ov074_02152500(&mCharacters[i]);
+        mCharacters[i].Update();
     }
     for (int i = 0; i < 4; i++) {
-        func_ov074_02169ebc(&mItems[i]);
+        mItems[i].Update();
     }
-    func_020810e4(&mIcon[0]);
-    func_ov074_0216a638(&mCamera);
-    func_ov074_0216a330(&mRoom);
-    func_ov074_0216b5bc(&mCameraFollower);
-    func_ov074_0216bd60(&mPanel);
-    func_ov074_0216c410(&mWindowView);
-    func_ov074_0216d070(&mSpeechText);
-    func_ov074_0216c7a4(&mNamePlate);
+    HeadIcon_Update(&mIcon[0]);
+    mCamera.Update();
+    mRoom.Update();
+    mLight.Update();
+    mFront.Update();
+    mSky.Update();
+    mMessage.Update();
+    mNamePanel.Update();
     for (int i = 0; i < 2; i++) {
-        func_ov074_0216cb34(&mButtons[i]);
+        mButtons[i].Update();
     }
-    func_ov074_0216cdc8(&mClockDisplay);
+    mClockDisplay.Update();
     mTtsPlayer.Update();
 }
 
@@ -461,18 +459,18 @@ void RoomScene::AimCamera() {
     int count = CountPresent();
 
     if (count == 0) {
-        func_ov074_0216a618(&mCamera, 1);
-        func_ov074_0216b8a8(&mCameraFollower, 3);
+        mCamera.SetMode(1);
+        mLight.SetState(3);
     } else if (count == 1) {
-        func_ov074_0216a618(&mCamera, 2);
+        mCamera.SetMode(2);
         if (mCharacters[0].mEvent == 18) {
-            func_ov074_0216b8a8(&mCameraFollower, 3);
+            mLight.SetState(3);
         } else {
-            func_ov074_0216b8a8(&mCameraFollower, 1);
+            mLight.SetState(1);
         }
     } else {
-        func_ov074_0216a618(&mCamera, 3);
-        func_ov074_0216b8a8(&mCameraFollower, 1);
+        mCamera.SetMode(3);
+        mLight.SetState(1);
     }
 }
 
@@ -491,7 +489,7 @@ void RoomScene::StartRoomEvent() {
 
 // Does what a button is for, when the stylus is let go on it.
 void RoomScene::PressButton(int button) {
-    switch (mButtons[button].mAction) {
+    switch (mButtons[button].mKind) {
     case 0:
         EnterRoom();
         break;
@@ -500,7 +498,7 @@ void RoomScene::PressButton(int button) {
         SetEventState(EVENT_NONE);
         mTtsPlayer.Stop();
         mNextSceneId = 0x5F;
-        data_0213ba74.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacter = mCharacters[0].mIndex;
         break;
     }
 }
@@ -556,23 +554,23 @@ void RoomScene::GoToInformation() {
     SetEventState(EVENT_NONE);
     mTtsPlayer.Stop();
     mNextSceneId = 0xAE;
-    data_0213ba74.mCharacter = mCharacters[0].mIndex;
+    gSceneMemory.mCharacter = mCharacters[0].mIndex;
 }
 
 // Enables the two buttons as the state allows.
 void RoomScene::UpdateButtons() {
     if (!IsTouchEnabled()) {
-        func_ov074_0216ca14(&mButtons[1], FALSE);
+        mButtons[1].SetReleased(FALSE);
     } else {
-        func_ov074_0216ca14(&mButtons[1], TRUE);
+        mButtons[1].SetReleased(TRUE);
     }
     if (!CanEnterRoom() || CountPresent() == 0) {
-        if (func_ov074_0216ca14(&mButtons[0], FALSE)) {
-            mButtons[0].mUnknownSetWithEnabled = 11;
+        if (mButtons[0].SetReleased(FALSE)) {
+            mButtons[0].mOverwritePriority = 11;
         }
     } else {
-        if (func_ov074_0216ca14(&mButtons[0], TRUE)) {
-            mButtons[0].mUnknownSetWithEnabled = -1;
+        if (mButtons[0].SetReleased(TRUE)) {
+            mButtons[0].mOverwritePriority = -1;
         }
     }
 }
@@ -593,29 +591,29 @@ void RoomScene::UpdateInput() {
         break;
 
     case INPUT_IDLE:
-        if (data_02121e58.mTouched) {
-            TouchPoint point = data_02121e58.mPoint;
+        if (gTouchInput.mTouched) {
+            ScreenPoint point = gTouchInput.mPoint;
             BOOL handled = FALSE;
 
             for (int i = 0; i < 2; i++) {
-                if (func_ov074_0216cc38(&mButtons[i], point)) {
+                if (mButtons[i].Contains(point)) {
                     handled = TRUE;
-                    if (mButtons[i].mEnabled) {
+                    if (mButtons[i].mReleased) {
                         SetInputState(INPUT_TOUCH_BUTTON);
                         mPressedButton = i;
-                        mButtons[i].mPressState = 1;
+                        mButtons[i].mState = 1;
                         gSoundManager.StartSeqArc(2, 1, 0);
                     }
                     break;
                 }
             }
             if (!handled) {
-                if (func_ov074_0216b9c8(&mPanel, point)) {
-                    if (mButtons[0].mEnabled) {
+                if (mFront.mCursor.Contains(point)) {
+                    if (mButtons[0].mReleased) {
                         EnterRoom();
                         handled = TRUE;
                     }
-                } else if (func_ov074_0216bb20(&mPanel.mInfoButton, point) && mButtons[1].mEnabled) {
+                } else if (mFront.mButton.Contains(point) && mButtons[1].mReleased) {
                     SetInputState(INPUT_INFO_BUTTON);
                     gSoundManager.StartSeqArc(2, 1, 0);
                     handled = TRUE;
@@ -625,7 +623,7 @@ void RoomScene::UpdateInput() {
                 SetInputState(INPUT_PANEL);
             }
         } else {
-            if (data_02121e58.mTouching != 0) {
+            if (gTouchInput.mTouching != 0) {
                 return;
             }
             // After a minute of nothing, the panel goes to a random resident's room
@@ -633,10 +631,10 @@ void RoomScene::UpdateInput() {
             if (mIdleFrames > 3600 && mResidentCount >= 2) {
                 int count = mResidentCount;
                 int room = func_0202c414(&gGameData, mResidents[MATH_Rand16(&gRandom, count)]);
-                if ((u16)room != mPanel.mSelectedRoom) {
+                if ((u16)room != mFront.mSelectedRoom) {
                     mIdleFrames = 0;
-                    func_ov074_0216a62c(&mCamera, 4, 0x474);
-                    func_ov074_0216be3c(&mPanel, room, -1);
+                    mCamera.SetState(4, 0x474);
+                    mFront.SelectRoom(room, -1);
                 }
             }
             ChangeRoom();
@@ -644,45 +642,45 @@ void RoomScene::UpdateInput() {
         break;
 
     case INPUT_TOUCH_BUTTON:
-        if (data_02121e58.mTouching != 0) {
-            if (func_ov074_0216cc38(&mButtons[mPressedButton], data_02121e58.mPoint)) {
-                mButtons[mPressedButton].mPressState = 1;
+        if (gTouchInput.mTouching != 0) {
+            if (mButtons[mPressedButton].Contains(gTouchInput.mPoint)) {
+                mButtons[mPressedButton].mState = 1;
             } else {
-                mButtons[mPressedButton].mPressState = 2;
+                mButtons[mPressedButton].mState = 2;
             }
         } else {
-            if (func_ov074_0216cc38(&mButtons[mPressedButton], data_02121e58.mLastPoint) &&
+            if (mButtons[mPressedButton].Contains(gTouchInput.mLastPoint) &&
                 data_0211f9d4.mUnknown20) {
-                mButtons[mPressedButton].mPressState = 3;
+                mButtons[mPressedButton].mState = 3;
                 PressButton(mPressedButton);
             } else {
                 SetInputState(INPUT_IDLE);
-                mButtons[mPressedButton].mPressState = 2;
+                mButtons[mPressedButton].mState = 2;
             }
         }
         break;
 
     case INPUT_INFO_BUTTON:
-        if (data_02121e58.mTouching != 0) {
-            if (func_ov074_0216bb20(&mPanel.mInfoButton, data_02121e58.mPoint)) {
-                func_ov074_0216bb18(&mPanel.mInfoButton, 1);
+        if (gTouchInput.mTouching != 0) {
+            if (mFront.mButton.Contains(gTouchInput.mPoint)) {
+                mFront.mButton.SetState(1);
             } else {
-                func_ov074_0216bb18(&mPanel.mInfoButton, 2);
+                mFront.mButton.SetState(2);
             }
         } else {
-            if (func_ov074_0216bb20(&mPanel.mInfoButton, data_02121e58.mLastPoint) && data_0211f9d4.mUnknown20) {
-                func_ov074_0216bb18(&mPanel.mInfoButton, 3);
+            if (mFront.mButton.Contains(gTouchInput.mLastPoint) && data_0211f9d4.mUnknown20) {
+                mFront.mButton.SetState(3);
                 GoToInformation();
             } else {
                 SetInputState(INPUT_IDLE);
-                func_ov074_0216bb18(&mPanel.mInfoButton, 2);
+                mFront.mButton.SetState(2);
             }
         }
         break;
 
     case INPUT_PANEL:
-        if (data_02121e58.mTouching != 0) {
-            func_ov074_0216bd2c(&mPanel, data_02121e58.mPoint);
+        if (gTouchInput.mTouching != 0) {
+            mFront.Touch(gTouchInput.mPoint);
             ChangeRoom();
         } else {
             SetInputState(INPUT_IDLE);
@@ -692,32 +690,32 @@ void RoomScene::UpdateInput() {
     case INPUT_ENTER_ROOM:
         if (mInputStep == 0) {
             mInputStep++;
-            func_ov074_02152370(&mCharacters[0], 0x113);
+            mCharacters[0].SetState(0x113);
             if (mCharacters[1].mPresent) {
-                func_ov074_02152370(&mCharacters[1], 0x113);
+                mCharacters[1].SetState(0x113);
             }
-            func_ov074_0216a62c(&mCamera, 0, 0);
-            mCamera.mLeaving = TRUE;
-            func_ov074_0216b8a8(&mCameraFollower, 2);
+            mCamera.SetState(0, 0);
+            mCamera.mIgnoreInput = TRUE;
+            mLight.SetState(2);
             HeadIcon_SetMode(&mIcon[0], 1);
         } else if (mInputStep == 1) {
             if (mCharacters[0].mState != 0) {
                 return;
             }
             mInputStep++;
-            func_ov074_02152370(&mCharacters[0], 0x114);
+            mCharacters[0].SetState(0x114);
         } else if (mInputStep == 2) {
             if (mCharacters[0].mState != 0) {
                 return;
             }
             mInputStep++;
             if (CountPresent() >= 2) {
-                func_ov074_02152370(&mCharacters[0], 0x116);
+                mCharacters[0].SetState(0x116);
             } else {
-                func_ov074_02152370(&mCharacters[0], 0x115);
+                mCharacters[0].SetState(0x115);
             }
-            // The resident walks half of the way to where the camera looks
-            VecFx32 target = mCamera.mLookAt;
+            // The resident walks half of the way to where the camera is
+            VecFx32 target = mCamera.mPosition;
             VEC_Subtract(&target, &mCharacters[0].mModel.mPos, &target);
             target.x >>= 1;
             target.y >>= 1;
@@ -761,54 +759,54 @@ void RoomScene::ChangeRoom() {
     int i;
     u8 resident;
 
-    if (mPanel.mSelectedRoom == mRoom.mRoomNumber) {
+    if (mFront.mSelectedRoom == mRoom.mRoomIndex) {
         return;
     }
     if (!ArchiveManager_IsIdle(&gArchiveManager)) {
         return;
     }
-    resident = mPanel.mRoomResidents[mPanel.mSelectedRoom & 0xFF];
+    resident = mFront.mResidents[mFront.mSelectedRoom & 0xFF];
     mTtsPlayer.Stop();
     FinishEncounter();
     SaveCharacters();
 
     for (i = 0; i < 2; i++) {
         if (func_0202c3dc(&gGameData, mCharacters[i].mIndex)) {
-            func_ov074_0216c1f0(&mPanel, mCharacters[i].mRoom);
+            mFront.DrawWindow(mCharacters[i].SavedCharacter::mRoom);
             if (func_02099d1c(&mCharacters[i])) {
-                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mCharacters[i].mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mEventPartner));
             }
         }
     }
 
-    mRoom.mRoomNumber = mPanel.mSelectedRoom;
+    mRoom.mRoomIndex = mFront.mSelectedRoom;
     if (resident == 0xFF) {
         ChooseCharacters(0);
         LoadCharacters();
-        func_ov074_0216a2d0(&mRoom, 8);
-        func_ov074_0216c918(&mNamePlate, 2);
+        mRoom.SetNextStyle(8);
+        mNamePanel.SetState(2);
     } else {
         ChooseCharacters(resident);
-        data_0213ba74.mCharacter = resident;
+        gSceneMemory.mCharacter = resident;
         LoadCharacters();
-        func_ov074_0216a2d0(&mRoom, mCharacters[0].mInterior);
-        func_ov074_0216c918(&mNamePlate, 1);
+        mRoom.SetNextStyle(mCharacters[0].mInterior);
+        mNamePanel.SetState(1);
     }
 
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
-    func_ov074_0216a354(&mRoom, 1);
+    mRoom.SetState(1);
     func_ov074_02169890(&mCharacters[0], 1);
     func_ov074_02169890(&mCharacters[1], 1);
     for (int i = 0; i < 4; i++) {
-        func_ov074_02169fc8(&mItems[i], 1);
+        mItems[i].SetLoadState(1);
     }
     SetEventState(EVENT_CHANGE_ROOM, 0);
     mIdleFrames = 0;
-    func_ov074_0216a62c(&mCamera, 0, 0);
-    func_ov074_0216d1a8(&mSpeechText, 4);
+    mCamera.SetState(0, 0);
+    mMessage.SetState(4);
     data_0211d604.Hide(1);
-    func_ov074_0216cfe8(&mClockDisplay, 1);
+    mClockDisplay.SetState(1);
     HeadIcon_SetMode(&mIcon[0], 1);
 }
 
@@ -844,7 +842,7 @@ SavedCharacter *RoomScene::StartDueEvent(s64 now, SavedCharacter *temp) {
         second = NULL;
     } else {
         temp->mIndex = mScanIndex;
-        LoadCharacter(temp);
+        LoadCharacter((RoomCharacter *)temp);
         temp->mPersonality = func_02098f2c(temp);
         first = &mCharacters[0];
         second = &mCharacters[1];
@@ -883,7 +881,7 @@ int RoomScene::EndDueEvent() {
     } else {
         character = &temp;
         temp.mIndex = mScanIndex;
-        LoadCharacter(character);
+        LoadCharacter((RoomCharacter *)character);
         temp.mPersonality = func_02098f2c(character);
     }
 
@@ -924,7 +922,7 @@ void RoomScene::UpdateAbsentCharacter(s64 now) {
     } else {
         character = &temp;
         temp.mIndex = mScanIndex;
-        LoadCharacter(character);
+        LoadCharacter((RoomCharacter *)character);
         temp.mPersonality = func_02098f2c(character);
     }
     func_0209b14c(character, now);
@@ -963,7 +961,7 @@ int RoomScene::StartRandomEvent(s64 now) {
             character = &mCharacters[1];
         } else {
             temp.mIndex = index;
-            LoadCharacter(&temp);
+            LoadCharacter((RoomCharacter *)&temp);
             temp.mPersonality = func_02098f2c(&temp);
             character = &temp;
         }
@@ -976,16 +974,16 @@ int RoomScene::StartRandomEvent(s64 now) {
                 partner = &mCharacters[1];
             } else {
                 partnerTemp.mIndex = partnerIndex;
-                LoadCharacter(&partnerTemp);
+                LoadCharacter((RoomCharacter *)&partnerTemp);
                 partnerTemp.mPersonality = func_02098f2c(&partnerTemp);
                 partner = &partnerTemp;
             }
         }
 
         if (func_0209b208(character, now, force, partner, 0)) {
-            SaveCharacter(character);
+            SaveCharacter((RoomCharacter *)character);
             if (partner != NULL) {
-                SaveCharacter(partner);
+                SaveCharacter((RoomCharacter *)partner);
             }
             result = character->mIndex;
         }
@@ -1001,14 +999,14 @@ int RoomScene::StartRandomEvent(s64 now) {
 // Whether the room, the characters, the window view and the held things have all finished appearing or
 // disappearing.
 BOOL RoomScene::IsTransitionDone() {
-    if (mRoom.mTransition != 0 || mCharacters[0].mOverrideState != 0 || mCharacters[1].mOverrideState != 0) {
+    if (mRoom.mState != 0 || mCharacters[0].mOverrideState != 0 || mCharacters[1].mOverrideState != 0) {
         return FALSE;
     }
-    if (mWindowView.mLoadState == 2) {
+    if (mSky.mState == 2) {
         return FALSE;
     }
     for (int i = 0; i < 4; i++) {
-        if (mItems[i].mTransition != 0) {
+        if (mItems[i].mLoadState != 0) {
             return FALSE;
         }
     }
@@ -1021,7 +1019,7 @@ BOOL RoomScene::StepTransition(int transition) {
     if (mEventTimer == 0) {
         if (IsTransitionDone()) {
             mEventTimer++;
-            func_ov074_0216a354(&mRoom, transition);
+            mRoom.SetState(transition);
         }
     } else if (mEventTimer == 1) {
         if (IsTransitionDone()) {
@@ -1037,7 +1035,7 @@ BOOL RoomScene::StepTransition(int transition) {
         if (IsTransitionDone()) {
             mEventTimer++;
             for (int i = 0; i < 4; i++) {
-                func_ov074_02169fc8(&mItems[i], transition);
+                mItems[i].SetLoadState(transition);
             }
         }
     } else if (mEventTimer == 4) {
@@ -1048,11 +1046,11 @@ BOOL RoomScene::StepTransition(int transition) {
     return FALSE;
 }
 
-// The numbers of the messages for what comes of an encounter, by what func_ov074_021686f4 says of the resident:
-// when it starts (0x0216d570) and when it ends (0x0216d59c).
+// The numbers of the messages for what comes of an encounter, by what RoomCharacter::GetFlagOfPartner says of the
+// resident: when it starts (0x0216d570) and when it ends (0x0216d59c).
 extern "C" {
-extern const int data_ov074_0216d570[];
-extern const int data_ov074_0216d59c[];
+extern const int gEncounterMessages[];
+extern const int gEncounterEndMessages[];
 }
 
 // What goes on in the room, each frame: the switch on mEventState. The states of a room with nobody, one or two
@@ -1067,7 +1065,7 @@ void RoomScene::UpdateEvent() {
         break;
 
     case EVENT_CHANGE_ROOM: {
-        u8 resident = mPanel.mRoomResidents[mRoom.mRoomNumber & 0xFF];
+        u8 resident = mFront.mResidents[mRoom.mRoomIndex & 0xFF];
 
         if (mEventStep == 0) {
             if (StepTransition(2)) {
@@ -1082,7 +1080,7 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             func_02091a14(&mCharacters[0], 1);
             func_02091a14(&mCharacters[1], 1);
-            func_020a4b74(mRoom.mDoor, 1);
+            func_020a4b74(&mRoom.mParts, 1);
             if (resident != 0xFF) {
                 mCharacters[0].SetState(1);
                 mCharacters[0].mWait = 0;
@@ -1095,8 +1093,8 @@ void RoomScene::UpdateEvent() {
         } else if (mEventStep == 3) {
             mEventStep++;
             mEventTimer = 4;
-            func_020a4ab8(mRoom.mDoor, 3);
-            func_ov074_0216a62c(&mCamera, 1, 0);
+            func_020a4ab8(&mRoom.mParts, 3);
+            mCamera.SetState(1, 0);
         } else if (mEventStep == 4) {
             if (!IsTransitionDone()) {
                 break;
@@ -1126,7 +1124,7 @@ void RoomScene::UpdateEvent() {
             mScanIndex = 0;
             int index = StartRandomEvent(now);
             if (index >= 0) {
-                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                mFront.DrawWindow(func_0202c414(&gGameData, index));
             }
         } else {
             if (func_0202c3dc(&gGameData, mScanIndex)) {
@@ -1134,18 +1132,17 @@ void RoomScene::UpdateEvent() {
                     SavedCharacter temp;
                     StartDueEvent(now, &temp);
                     if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
-                        func_ov074_0216c1f0(&mPanel,
-                                            func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                        mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
                     }
                 } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
                     int partner = EndDueEvent();
                     if (partner >= 0) {
-                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                        mFront.DrawWindow(func_0202c414(&gGameData, partner));
                     }
                 } else if (func_020ad348(mScanIndex, now)) {
                     UpdateAbsentCharacter(now);
                 }
-                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
             }
             mScanIndex++;
         }
@@ -1163,7 +1160,7 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(func_0202c414(&gGameData, index));
                 }
             } else {
                 if (func_0202c3dc(&gGameData, mScanIndex)) {
@@ -1175,18 +1172,17 @@ void RoomScene::UpdateEvent() {
                             SetEventState(EVENT_CHOOSE);
                         }
                         if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
-                            func_ov074_0216c1f0(&mPanel,
-                                                func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
                         }
                     } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
                     } else if (func_020ad348(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
-                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                    mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
                 }
                 mScanIndex++;
             }
@@ -1212,7 +1208,7 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(func_0202c414(&gGameData, index));
                 }
             } else {
                 if (func_0202c3dc(&gGameData, mScanIndex)) {
@@ -1227,7 +1223,7 @@ void RoomScene::UpdateEvent() {
                             if (func_02099c84(&mCharacters[0])) {
                                 refresh = FALSE;
                                 if (mCharacters[0].mPrevEvent == 18) {
-                                    func_ov074_0216c214(&mPanel, 0, mCharacters[0].mRoom);
+                                    mFront.DrawWindowOfKind(0, mCharacters[0].SavedCharacter::mRoom);
                                 }
                             } else if (func_02099da8(&mCharacters[0])) {
                                 mCharacters[0].mWait = 0;
@@ -1247,22 +1243,21 @@ void RoomScene::UpdateEvent() {
 
                         if (mScanIndex != mCharacters[0].mIndex) {
                             if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
-                                func_ov074_0216c1f0(
-                                    &mPanel, func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
                             }
                         } else if (!func_02099c84(&mCharacters[0]) && func_02099da8(&mCharacters[0])) {
-                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mCharacters[0].mEventPartner));
+                            mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[0].mEventPartner));
                         }
                     } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
                     } else if (func_020ad348(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1299,7 +1294,7 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(func_0202c414(&gGameData, index));
                 }
             } else {
                 if (func_0202c3dc(&gGameData, mScanIndex)) {
@@ -1325,20 +1320,19 @@ void RoomScene::UpdateEvent() {
 
                         if (mScanIndex != mCharacters[0].mIndex && mScanIndex != mCharacters[1].mIndex) {
                             if (func_02099d2c(func_0202c468(&gGameData, mScanIndex))) {
-                                func_ov074_0216c1f0(
-                                    &mPanel, func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
                             }
                         }
                     } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
                     } else if (func_020ad348(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1366,9 +1360,9 @@ void RoomScene::UpdateEvent() {
         if (AreCharactersNear(0, 1, 0x2333, 0x2666)) {
             SetEventState(EVENT_MEET);
             mCharacters[0].SetState(0xF3);
-            mCharacters[0].SetTargetTo(&mCharacters[1]);
+            mCharacters[0].SetTargetFloorPos(mCharacters[1].GetFloorPos());
             mCharacters[1].SetState(0xF3);
-            mCharacters[1].SetTargetTo(&mCharacters[0]);
+            mCharacters[1].SetTargetFloorPos(mCharacters[0].GetFloorPos());
         }
         break;
 
@@ -1388,8 +1382,8 @@ void RoomScene::UpdateEvent() {
             mCharacters[index].mWait = 0x8E;
             partner->mWait = 0x8C;
             mEncounterPending = TRUE;
-            mCharacters[index].SetHeadIconMode(1);
-            partner->SetHeadIconMode(1);
+            SetHeadIconMode(&mCharacters[index], 1);
+            SetHeadIconMode(partner, 1);
         } else if (mEventStep == 1) {
             UpdateEncounter();
             if (mCharacters[0].mState != 0xF6 || mCharacters[1].mState != 0xF6) {
@@ -1399,8 +1393,8 @@ void RoomScene::UpdateEvent() {
             mEncounterPending = FALSE;
             mCharacters[0].mReaction = 0;
             mCharacters[1].mReaction = 0;
-            func_ov074_021686dc(&mCharacters[0]);
-            func_ov074_021686dc(&mCharacters[1]);
+            mCharacters[0].ResetBody();
+            mCharacters[1].ResetBody();
             SaveCharacters();
         } else {
             if (JudgeEncounterEnd(mActor, mActorOther) != 10) {
@@ -1433,8 +1427,8 @@ void RoomScene::UpdateEvent() {
                 mActorOther = &mCharacters[0];
             }
             mActor->SetState(0xF5);
-            func_ov074_02168a20(mActor, &target);
-            mActor->SetTarget(target);
+            mActor->GetRandomPos(&target);
+            mActor->SetTargetFloorPos(target);
             mActor->mWait = MATH_Rand16(&gRandom, 10) * 2 + 60 + ((200 - func_02098ec4(mActor)) >> 2);
             mActorOther->SetState(4);
             mActorOther->mWait = 30;
@@ -1446,7 +1440,7 @@ void RoomScene::UpdateEvent() {
                 mActorOther->SetState(1);
                 mActorOther->mWait = MATH_Rand16(&gRandom, 15) + 30;
             } else if (AreCharactersNear(0, 1, 0x2333, 0x2666)) {
-                mActor->WalkAwayFrom(mActorOther);
+                func_0209171c(mActor, mActorOther->GetFloorPos());
             }
         }
         break;
@@ -1459,7 +1453,7 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             mEventTimer = 40;
             ApplyEncounterResult(&mCharacters[0], &mCharacters[1],
-                                 func_020adfbc(&mEncounterJudge, &mCharacters[0], &mCharacters[1]), 1);
+                                 mEncounterJudge.Judge(&mCharacters[0], &mCharacters[1]), 1);
             mCharacters[0].SetState(0x104);
             mCharacters[1].SetState(0x104);
             mIcon[0].mIconId = 4;
@@ -1470,18 +1464,18 @@ void RoomScene::UpdateEvent() {
             middle.x >>= 1;
             middle.y >>= 1;
             middle.z >>= 1;
-            mIcon[0].SetPos(middle.x, middle.y, middle.z);
-            func_ov074_0216d1a8(&mSpeechText, 4);
+            HeadIcon_SetPos(&mIcon[0], middle.x, middle.y, middle.z);
+            mMessage.SetState(4);
         } else if (mEventStep == 1) {
             if (--mEventTimer > 0) {
                 break;
             }
             mEventStep++;
-            func_02080fc4(&mIcon[0]);
-            func_020810c8(&mIcon[0]);
+            HeadIcon_Show(&mIcon[0]);
+            HeadIcon_Reload(&mIcon[0]);
             HeadIcon_SetMode(&mIcon[0], 2);
-            int kind = func_ov074_021686f4(&mCharacters[0]);
-            ShowMessage(&mCharacters[0], &mCharacters[1], data_ov074_0216d570[kind], 2);
+            int kind = mCharacters[0].GetFlagOfPartner();
+            ShowMessage(&mCharacters[0], &mCharacters[1], gEncounterMessages[kind], 2);
             if (kind == 4) {
                 gSoundManager.StartSeqArc(1, 0x26, 2);
             } else {
@@ -1506,14 +1500,14 @@ void RoomScene::UpdateEvent() {
             ApplyEncounterResult(&mCharacters[0], &mCharacters[1], JudgeEncounterEnd(mActor, mActorOther), 2);
             mCharacters[0].SetState(0x105);
             mCharacters[1].SetState(0x105);
-            func_ov074_0216d1a8(&mSpeechText, 4);
+            mMessage.SetState(4);
         } else if (mEventStep == 1) {
             if (--mEventTimer > 0) {
                 break;
             }
             mEventStep++;
             ShowMessage(&mCharacters[0], &mCharacters[1],
-                        data_ov074_0216d59c[func_ov074_021686f4(&mCharacters[0])], 2);
+                        gEncounterEndMessages[mCharacters[0].GetFlagOfPartner()], 2);
             gSoundManager.StartSeqArc(1, 0x26, 1);
         } else {
             if (mCharacters[0].mState != 0 || mCharacters[1].mState != 0) {
@@ -1526,17 +1520,17 @@ void RoomScene::UpdateEvent() {
     case EVENT_LAST_LEAVES:
         if (mEventStep == 0) {
             mEventStep++;
-            func_ov074_0216b8a8(&mCameraFollower, 2);
+            mLight.SetState(2);
         } else {
             if (mActor->mPresent) {
                 break;
             }
             SetEventState(EVENT_NOBODY_HOME);
-            func_ov074_0216a618(&mCamera, 1);
-            func_ov074_0216b8a8(&mCameraFollower, 4);
-            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mIndex));
+            mCamera.SetMode(1);
+            mLight.SetState(4);
+            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
             if (func_02099d1c(mActor)) {
-                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mEventPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1560,10 +1554,10 @@ void RoomScene::UpdateEvent() {
                 SetEventState(EVENT_ALONE, 60);
                 StartEvent(mActorOther, 0);
             }
-            func_ov074_0216a618(&mCamera, 2);
-            func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mIndex));
+            mCamera.SetMode(2);
+            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
             if (func_02099d1c(mActor)) {
-                func_ov074_0216c1f0(&mPanel, func_0202c414(&gGameData, mActor->mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mEventPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1574,13 +1568,13 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             mCharacters[0].mPresent = TRUE;
             mCharacters[0].SetState(0x10C);
-            func_ov074_0216a618(&mCamera, 2);
-            func_ov074_0216a62c(&mCamera, 4, 0x474);
-            func_ov074_0216b8a8(&mCameraFollower, 2);
+            mCamera.SetMode(2);
+            mCamera.SetState(4, 0x474);
+            mLight.SetState(2);
             if (mCharacters[0].mEvent == 18) {
-                func_ov074_0216c214(&mPanel, 0, mCharacters[0].mRoom);
+                mFront.DrawWindowOfKind(0, mCharacters[0].SavedCharacter::mRoom);
             } else {
-                func_ov074_0216c1f0(&mPanel, mCharacters[0].mRoom);
+                mFront.DrawWindow(mCharacters[0].SavedCharacter::mRoom);
             }
             ShowMessage(&mCharacters[0], NULL, 9, 2);
         } else {
@@ -1601,7 +1595,7 @@ void RoomScene::UpdateEvent() {
     case EVENT_VISITOR_ARRIVES:
         if (mEventStep == 0) {
             mEventStep++;
-            func_ov074_0216b8a8(&mCameraFollower, 2);
+            mLight.SetState(2);
         } else if (mEventStep == 1) {
             if (mActorOther->mState != 0) {
                 break;
@@ -1634,8 +1628,8 @@ void RoomScene::UpdateEvent() {
             }
             mEventStep++;
             mEventTimer = 0;
-            func_ov074_0216c1f0(&mPanel, mActor->mRoom);
-            func_ov074_0216d1a8(&mSpeechText, 4);
+            mFront.DrawWindow(mActor->SavedCharacter::mRoom);
+            mMessage.SetState(4);
             gSoundManager.StartSeqArc(1, 0x1D, 0x10);
         } else if (mEventStep == 5) {
             if (++mEventTimer <= 40) {
@@ -1647,7 +1641,7 @@ void RoomScene::UpdateEvent() {
             mActor->mPresent = TRUE;
             mActor->SetState(0x10D);
             mActorOther->SetState(0x110);
-            func_ov074_0216a618(&mCamera, 3);
+            mCamera.SetMode(3);
         } else if (mEventStep == 6) {
             if (++mEventTimer <= 60) {
                 break;
@@ -1687,8 +1681,8 @@ void RoomScene::UpdateEvent() {
             func_02099324(&mCharacters[0], mClock.mSeconds);
             func_0209b1d8(&mCharacters[0]);
             SaveCharacter(&mCharacters[0]);
-            func_ov074_0216c1f0(&mPanel, mCharacters[0].mRoom);
-            func_ov074_0216b8a8(&mCameraFollower, 2);
+            mFront.DrawWindow(mCharacters[0].SavedCharacter::mRoom);
+            mLight.SetState(2);
         } else {
             if (--mEventTimer > 0) {
                 break;

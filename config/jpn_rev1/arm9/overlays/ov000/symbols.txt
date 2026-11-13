@@ -1,9 +1,9 @@
-func_ov000_02149a40 kind:function(arm,size=0x4) addr:0x02149a40
-func_ov000_02149a44 kind:function(arm,size=0x1c8) addr:0x02149a44
-func_ov000_02149c0c kind:function(arm,size=0x4) addr:0x02149c0c
-func_ov000_02149c10 kind:function(arm,size=0x24) addr:0x02149c10
-func_ov000_02149c34 kind:function(arm,size=0x4) addr:0x02149c34
-func_ov000_02149c38 kind:function(arm,size=0x4) addr:0x02149c38
-func_ov000_02149c3c kind:function(arm,size=0x14) addr:0x02149c3c
+_ZN13TextTestScene12StartLoadingEv kind:function(arm,size=0x4) addr:0x02149a40
+_ZN13TextTestScene4InitEv kind:function(arm,size=0x1c8) addr:0x02149a44
+_ZN13TextTestScene6UpdateEv kind:function(arm,size=0x4) addr:0x02149c0c
+_ZN13TextTestScene4DrawEv kind:function(arm,size=0x24) addr:0x02149c10
+_ZN13TextTestScene4ExitEv kind:function(arm,size=0x4) addr:0x02149c34
+_ZN13TextTestSceneD1Ev kind:function(arm,size=0x4) addr:0x02149c38
+_ZN13TextTestSceneD0Ev kind:function(arm,size=0x14) addr:0x02149c3c
 data_ov000_02149c68 kind:data(any) addr:0x02149c68 ambiguous
 data_ov000_02149c84 kind:data(any) addr:0x02149c84

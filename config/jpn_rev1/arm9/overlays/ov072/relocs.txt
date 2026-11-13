@@ -344,8 +344,8 @@ from:0x0214c044 kind:load to:0x0214f92c module:overlay(72)
 from:0x0214c048 kind:load to:0x0214f8ac module:overlay(72)
 from:0x0214c050 kind:load to:0x02123440 module:main
 from:0x0214c054 kind:load to:0x0211f9d4 module:main
-from:0x0214c058 kind:load to:0x02121e88 module:main
-from:0x0214c05c kind:load to:0x02121e90 module:main
+from:0x0214c058 kind:load to:0x02121e58 add:0x30 module:main
+from:0x0214c05c kind:load to:0x02121e58 add:0x38 module:main
 from:0x0214c060 kind:load to:0x0214fce0 module:overlay(72)
 from:0x0214c068 kind:load to:0x0214fe40 module:overlay(72)
 from:0x0214c06c kind:load to:0x0214f85c module:overlay(72)

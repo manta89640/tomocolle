@@ -271,8 +271,8 @@ sScrollPerFloor kind:data(any) addr:0x0216d524
 data_ov074_0216d534 kind:data(any) addr:0x0216d534
 gMoodFaces kind:data(any) addr:0x0216d544
 sClockSequences kind:data(any) addr:0x0216d558
-data_ov074_0216d570 kind:data(any) addr:0x0216d570
-gStr__ov074 kind:data(any) addr:0x0216d59c
+gEncounterMessages kind:data(any) addr:0x0216d570
+gEncounterEndMessages kind:data(any) addr:0x0216d59c
 sButtonRectOther kind:data(any) addr:0x0216d5c8
 sButtonRect0 kind:data(any) addr:0x0216d5d8
 sButtonRect1 kind:data(any) addr:0x0216d5e8

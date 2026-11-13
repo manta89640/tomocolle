@@ -61,8 +61,8 @@ from:0x02149f54 kind:arm_call to:0x02090234 module:main
 from:0x02149f68 kind:arm_call to:0x020360f4 module:main
 from:0x02149f90 kind:arm_call to:0x0204ef58 module:main
 from:0x02149f9c kind:load to:0x02121e58 module:main
-from:0x02149fa0 kind:load to:0x02121e88 module:main
-from:0x02149fa4 kind:load to:0x02121e90 module:main
+from:0x02149fa0 kind:load to:0x02121e58 add:0x30 module:main
+from:0x02149fa4 kind:load to:0x02121e58 add:0x38 module:main
 from:0x02149fa8 kind:load to:0x0214a178 module:overlay(14)
 from:0x02149fac kind:load to:0x0214a184 module:overlay(14)
 from:0x02149fb0 kind:load to:0x0214a1e4 module:overlay(14)

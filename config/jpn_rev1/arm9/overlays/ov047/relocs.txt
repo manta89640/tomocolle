@@ -152,8 +152,8 @@ from:0x0214ae64 kind:arm_call to:0x0204ebd4 module:main
 from:0x0214ae74 kind:load to:0x0211d604 module:main
 from:0x0214ae78 kind:load to:0x02121e58 module:main
 from:0x0214ae7c kind:load to:0x0213b5cc module:main
-from:0x0214ae80 kind:load to:0x02121e88 module:main
-from:0x0214ae84 kind:load to:0x02121e90 module:main
+from:0x0214ae80 kind:load to:0x02121e58 add:0x30 module:main
+from:0x0214ae84 kind:load to:0x02121e58 add:0x38 module:main
 from:0x0214ae88 kind:load to:0x0214c000 module:overlay(47)
 from:0x0214ae8c kind:load to:0x0214bf9c module:overlay(47)
 from:0x0214ae90 kind:load to:0x02121eac module:main

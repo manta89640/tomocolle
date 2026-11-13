@@ -5862,8 +5862,8 @@ from:0x02179b1c kind:arm_call to:0x02020df0 module:main
 from:0x02179b30 kind:arm_call to:0x02020df0 module:main
 from:0x02179b98 kind:arm_call to:0x02179cc0 module:overlay(75)
 from:0x02179bb4 kind:load to:0x02121e58 module:main
-from:0x02179bb8 kind:load to:0x02121e88 module:main
-from:0x02179bbc kind:load to:0x02121e90 module:main
+from:0x02179bb8 kind:load to:0x02121e58 add:0x30 module:main
+from:0x02179bbc kind:load to:0x02121e58 add:0x38 module:main
 from:0x02179bc4 kind:load to:0x0211f9d4 module:main
 from:0x02179da0 kind:arm_call to:0x0202a640 module:main
 from:0x02179e1c kind:arm_call to:0x0202a748 module:main

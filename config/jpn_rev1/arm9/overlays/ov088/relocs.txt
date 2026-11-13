@@ -90,7 +90,7 @@ from:0x0214a974 kind:arm_call to:0x0214ab3c module:overlay(88)
 from:0x0214a97c kind:arm_call to:0x0214aa04 module:overlay(88)
 from:0x0214a98c kind:load to:0x0213b5cc module:main
 from:0x0214a990 kind:load to:0x02121e58 module:main
-from:0x0214a994 kind:load to:0x02121e90 module:main
+from:0x0214a994 kind:load to:0x02121e58 add:0x38 module:main
 from:0x0214a9a8 kind:arm_call to:0x02031d7c module:main
 from:0x0214a9b0 kind:arm_call to:0x02031d7c module:main
 from:0x0214a9b8 kind:arm_call to:0x02026c48 module:main
