@@ -101,6 +101,24 @@ the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the gam
 matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
 game's 30007.
 
+## Voice synthesis
+
+The Miis' voices come from Sharp's text-to-speech engine, SHTTS 1.2.0 (the version is in the SDK's list of library
+tags). Measured:
+
+| | Where | |
+| --- | --- | --- |
+| `TtsPlayer`, the game's wrapper | `0x02083DC4` to `0x0208473C`, 28 functions | Decompiled, `src/voice/TtsPlayer.cpp` |
+| The engine | `0x0208473C` to `0x0208EB18`, 149 functions, 44 KB | `lib/SHTTS/`, not decompiled |
+
+The engine's bounds are those of a closed module: nothing in that range is called from outside it but by `TtsPlayer`,
+and it calls nothing but the C library and the OS (threads, mutexes, `OS_Sleep`). It is one unit for now, because
+where its files begin and end is not known.
+
+The engine takes Shift JIS text with control codes in it, such as `<\Spk_male` to pick a speaker and `#B4800`,
+`#S90`, `#X90`, `#I500`, `#J20` for what are probably pitch and speed settings. It hands back 16-bit samples a block
+at a time through a callback, and the game plays them at 22,000 Hz.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
@@ -114,8 +132,9 @@ The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 pa
 as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
 its libraries with, not what the game's own code was built with.
 
-For the game's code, a function with enough arithmetic, branching and register pressure to tell the versions apart
-has yet to be matched.
+For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
+and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
+written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
 The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
 it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
 include (`stdio.h`, `stdarg.h`), which do not come with the compiler.

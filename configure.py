@@ -89,6 +89,8 @@ DECOMP_ME_COMPILER = "mwcc_30_137"
 METROSKREW_VERSION = "0.1.3"
 METROSKREW_URL = "https://github.com/mid-kid/metroskrew/releases/download/{version}/metroskrew-wine.tar.xz"
 METROSKREW_SHA256 = "0bc5663dc647e7834dc61c37e872ef37a4dfbb7384828c6b2212bce35719fa32"
+# metroskrew has no 2.0/sp2p2, the game's compiler. Its headers are taken from the release before it.
+GAME_MSL = "2.0/sp2"
 MSL_INCLUDE_DIRS = [
     "MSL_C/MSL_ARM/Include",
     "MSL_C/MSL_Common/Include",
@@ -284,7 +286,14 @@ def download_msl(tools_dir: Path, versions: list[str]) -> Path:
                     continue
                 target = root / version / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(archive.extractfile(member).read())
+                content = archive.extractfile(member).read()
+                try:
+                    content.decode("utf-8")
+                except UnicodeDecodeError:
+                    # A stray byte in a comment, such as a copyright sign in Latin-1. sjiswrap, which reads the
+                    # game's sources and what they include as UTF-8, refuses the file otherwise.
+                    content = bytes(byte if byte < 0x80 else ord("?") for byte in content)
+                target.write_bytes(content)
     return root
 
 
@@ -487,8 +496,15 @@ def main():
     n.variable("mwld", shlex.quote(str(mwld)))
     n.variable("cc_flags", " ".join(CC_FLAGS + ENCODING_FLAGS))
     n.variable("ld_flags", " ".join(LD_FLAGS))
-    n.variable("includes", " ".join(f"-i {d}" for d in INCLUDE_DIRS))
-    n.variable("defines", " ".join(f"-d {d}" for d in info["defines"]))
+    # The game's code uses the SDK, so it sees the SDK's headers and defines too, and MSL's
+    game_includes, game_defines = list(INCLUDE_DIRS), list(info["defines"])
+    if libraries:
+        game_includes += [d.format(build=build_dir.as_posix()) for d in SDK_INCLUDES]
+        game_includes += ["lib/NitroSystem/include"]
+        game_includes += [(msl_dir / GAME_MSL / d).as_posix() for d in MSL_INCLUDE_DIRS]
+        game_defines += SDK_DEFINES
+    n.variable("includes", " ".join(f"-i {d}" for d in game_includes))
+    n.variable("defines", " ".join(f"-d {d}" for d in game_defines))
     n.variable("config", arm9_config)
     # With the ARM7 BIOS, dsd can encrypt the secure area and so write its checksum, the last four bytes of a match
     n.variable("bios", f"--arm7-bios {bios}" if bios.exists() else "")
@@ -550,7 +566,7 @@ def main():
         obj = build_dir / source.with_suffix(".o")
         library = library_of(name)
         if library is None:
-            n.build([obj], "mwcc", [source], implicit=["tools/fix_depfile.py"],
+            n.build([obj], "mwcc", [source], implicit=["tools/fix_depfile.py"], order_only=generated,
                     variables={"lang": LANG_FLAGS[source.suffix], "dep": obj.with_suffix(".d")})
             n.build([obj.with_suffix(f".ctx{source.suffix}")], "ctx", [source], implicit=["tools/clean_ctx.py"],
                     variables={"lang": LANG_FLAGS[source.suffix]})

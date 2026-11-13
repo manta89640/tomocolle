@@ -16,8 +16,9 @@ however little is decompiled, and a source file takes over a range of addresses 
 
 ## Adding a source file
 
-Overlay 0 is the worked example: `src/overlays/ov000/ov000.cpp`, claimed at the end of
-`config/jpn_rev1/arm9/overlays/ov000/delinks.txt`.
+`src/voice/TtsPlayer.cpp` is the worked example of a finished file: a class, with its functions under their
+mangled names in `symbols.txt`, its static data placed, and marked complete. Overlay 0 is one that is still in
+progress: `src/overlays/ov000/ov000.cpp`, claimed at the end of `config/jpn_rev1/arm9/overlays/ov000/delinks.txt`.
 
 1. Read the code. `ninja dis` writes a listing of every module to `build/jpn_rev1/asm/`.
 2. Find where the file begins and ends. A file's functions are contiguous in `.text`, and its data is contiguous in

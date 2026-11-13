@@ -3258,34 +3258,34 @@ func_02083bcc kind:function(arm,size=0x64) addr:0x02083bcc
 func_02083c30 kind:function(arm,size=0x24) addr:0x02083c30
 func_02083c54 kind:function(arm,size=0x104) addr:0x02083c54
 func_02083d58 kind:function(arm,size=0x6c) addr:0x02083d58
-func_02083dc4 kind:function(arm,size=0x44) addr:0x02083dc4
-func_02083e08 kind:function(arm,size=0x44) addr:0x02083e08
-func_02083e4c kind:function(arm,size=0x8c) addr:0x02083e4c
-func_02083ed8 kind:function(arm,size=0x8c) addr:0x02083ed8
-func_02083f64 kind:function(arm,size=0x28) addr:0x02083f64
-func_02083f8c kind:function(arm,size=0x10) addr:0x02083f8c
-func_02083f9c kind:function(arm,size=0x10) addr:0x02083f9c
-func_02083fac kind:function(arm,size=0x10) addr:0x02083fac
-func_02083fbc kind:function(arm,size=0x10) addr:0x02083fbc
-func_02083fcc kind:function(arm,size=0x1c) addr:0x02083fcc
-func_02083fe8 kind:function(arm,size=0x10) addr:0x02083fe8
-func_02083ff8 kind:function(arm,size=0x140) addr:0x02083ff8
-func_02084138 kind:function(arm,size=0x4c) addr:0x02084138
-func_02084184 kind:function(arm,size=0x4c) addr:0x02084184
-func_020841d0 kind:function(arm,size=0xd0) addr:0x020841d0
-func_020842a0 kind:function(arm,size=0xc8) addr:0x020842a0
-func_02084368 kind:function(arm,size=0x60) addr:0x02084368
-func_020843c8 kind:function(arm,size=0x1c) addr:0x020843c8
-func_020843e4 kind:function(arm,size=0x64) addr:0x020843e4
-func_02084448 kind:function(arm,size=0x18) addr:0x02084448
-func_02084460 kind:function(arm,size=0x24) addr:0x02084460
-func_02084484 kind:function(arm,size=0xac) addr:0x02084484
-func_02084530 kind:function(arm,size=0x3c) addr:0x02084530
-func_0208456c kind:function(arm,size=0x34) addr:0x0208456c
-func_020845a0 kind:function(arm,size=0x54) addr:0x020845a0
-func_020845f4 kind:function(arm,size=0x78) addr:0x020845f4
-func_0208466c kind:function(arm,size=0x6c) addr:0x0208466c
-func_020846d8 kind:function(arm,size=0x64) addr:0x020846d8
+_ZN9TtsPlayerC2Ev kind:function(arm,size=0x44) addr:0x02083dc4
+_ZN9TtsPlayerC1Ev kind:function(arm,size=0x44) addr:0x02083e08
+_ZN9TtsPlayerD1Ev kind:function(arm,size=0x8c) addr:0x02083e4c
+_ZN9TtsPlayerD2Ev kind:function(arm,size=0x8c) addr:0x02083ed8
+_ZN9TtsPlayer10InitEngineEv kind:function(arm,size=0x28) addr:0x02083f64
+_ZN9TtsPlayer13func_02083f8cEv kind:function(arm,size=0x10) addr:0x02083f8c
+_ZN9TtsPlayer10StopEngineEv kind:function(arm,size=0x10) addr:0x02083f9c
+_ZN9TtsPlayer14SetEngineParamEii kind:function(arm,size=0x10) addr:0x02083fac
+_ZN9TtsPlayer13func_02083fbcEv kind:function(arm,size=0x10) addr:0x02083fbc
+_ZN9TtsPlayer12IsEngineIdleEv kind:function(arm,size=0x1c) addr:0x02083fcc
+_ZN9TtsPlayer13func_02083fe8Ev kind:function(arm,size=0x10) addr:0x02083fe8
+_ZN9TtsPlayer10OpenStreamEh kind:function(arm,size=0x140) addr:0x02083ff8
+_ZN9TtsPlayer11CloseStreamEv kind:function(arm,size=0x4c) addr:0x02084138
+_Z14StreamCallback24NNSSndStrmCallbackStatusiPPvm16NNSSndStrmFormatS0_ kind:function(arm,size=0x4c) addr:0x02084184 local
+_Z13StreamSamplesiPsP9TtsPlayer kind:function(arm,size=0xd0) addr:0x020841d0 local
+_ZN9TtsPlayer6UpdateEv kind:function(arm,size=0xc8) addr:0x020842a0
+_ZN9TtsPlayer5SpeakEPKci kind:function(arm,size=0x60) addr:0x02084368
+_ZN9TtsPlayer4StopEv kind:function(arm,size=0x1c) addr:0x020843c8
+_ZN9TtsPlayer5SpeakEPKti kind:function(arm,size=0x64) addr:0x020843e4
+_ZN9TtsPlayer16SetCaptureBufferEPsi kind:function(arm,size=0x18) addr:0x02084448
+_ZN9TtsPlayer18ClearCaptureBufferEv kind:function(arm,size=0x24) addr:0x02084460
+_ZN9TtsPlayer11PlayCaptureEv kind:function(arm,size=0xac) addr:0x02084484
+_ZN9TtsPlayer11StopCaptureEv kind:function(arm,size=0x3c) addr:0x02084530
+_ZN9TtsPlayer16IsCapturePlayingEv kind:function(arm,size=0x34) addr:0x0208456c
+_Z14CaptureSamplesiPsP9TtsPlayer kind:function(arm,size=0x54) addr:0x020845a0 local
+_ZN9TtsPlayer10SynthesizeEPKc kind:function(arm,size=0x78) addr:0x020845f4
+_Z16SynthesizeThreadPv kind:function(arm,size=0x6c) addr:0x0208466c local
+_ZN9TtsPlayer21StartSynthesizeThreadEv kind:function(arm,size=0x64) addr:0x020846d8
 func_0208473c kind:function(arm,size=0x58) addr:0x0208473c
 func_02084794 kind:function(arm,size=0x80) addr:0x02084794
 func_02084814 kind:function(arm,size=0x1c) addr:0x02084814
@@ -6639,6 +6639,6 @@ data_021486b8 kind:bss addr:0x021486b8
 data_021486c4 kind:bss addr:0x021486c4
 data_021486f0 kind:bss addr:0x021486f0
 data_02148710 kind:bss addr:0x02148710
-data_02148740 kind:bss addr:0x02148740
-data_02148760 kind:bss addr:0x02148760
+sInstance kind:bss(size=0x4) addr:0x02148740 local
+sStreamBuffer kind:bss(size=0x12c0) addr:0x02148760 local
 data_02149a20 kind:bss addr:0x02149a20
