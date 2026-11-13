@@ -1,20 +1,6 @@
 #include "sound/SoundManager.h"
 
-// The part of the game's settings (gSettings) that these functions use. The object is not this file's; only
-// these fields of it are known here.
-struct SoundSettings {
-    /* 0x00 */ u8 unknown00[8];
-    /* 0x08 */ int unknownState;  // Init sets the defaults below when this is 3
-    /* 0x0C */ u8 unknown0C[0xBC];
-    /* 0xC8 */ u8 stereo;         // Not zero: stereo output (default 1)
-    /* 0xC9 */ u8 musicVolume;    // 0 to 3, for sequences and streams (default 3)
-    /* 0xCA */ u8 effectVolume;   // 0 to 3, for sequence archive entries (default 3)
-    /* 0xCB */ u8 voiceVolume;    // 0 to 3, for the speech synthesizer (default 3)
-};
-
-extern "C" {
-extern SoundSettings gSettings;
-}
+#include "GameData.h"
 
 // What a volume setting (0 to 3) means. The order is not the ROM's: the first two land the other way round there.
 static const s8 sVolumeBySetting[4] = { 0, 42, 84, 127 };          // A volume, for a sound with none of its own
@@ -23,11 +9,11 @@ static const s16 sStrmVolumeBySetting[4] = { -10000, -180, -60, 0 }; // The voic
 
 void SoundManager::Init(const char *archivePath, u32 heapSize) {
     OS_InitMutex(&mMutex);
-    if (gSettings.unknownState == 3) {
-        gSettings.stereo = 1;
-        gSettings.musicVolume = 3;
-        gSettings.effectVolume = 3;
-        gSettings.voiceVolume = 3;
+    if (gGameData.mUnknownState == 3) {
+        gGameData.mStereo = 1;
+        gGameData.mMusicVolume = 3;
+        gGameData.mEffectVolume = 3;
+        gGameData.mVoiceVolume = 3;
     }
     OS_LockMutex(&mMutex);
     SoundSystem::Init(archivePath, heapSize);
@@ -44,7 +30,7 @@ BOOL SoundManager::LoadGroup(int groupNo) {
 
 // Sets mono or stereo output from the settings
 void SoundManager::ApplyOutputSetting() {
-    SetMono(gSettings.stereo == 0);
+    SetMono(gGameData.mStereo == 0);
 }
 
 void SoundManager::SetMono(BOOL mono) {
@@ -55,12 +41,12 @@ void SoundManager::SetMono(BOOL mono) {
 
 // The voice volume setting as a stream channel's volume (TtsPlayer gives it to NNS_SndStrmSetChannelVolume)
 int SoundManager::GetVoiceStrmVolume() {
-    return sStrmVolumeBySetting[gSettings.voiceVolume];
+    return sStrmVolumeBySetting[gGameData.mVoiceVolume];
 }
 
 // The voice volume setting as a volume from 0 to 127 (TtsPlayer gives it to NNS_SndWaveOutStart)
 int SoundManager::GetVoiceVolume() {
-    return sVolumeBySetting[gSettings.voiceVolume];
+    return sVolumeBySetting[gGameData.mVoiceVolume];
 }
 
 void SoundManager::StopSeqArcEntry(int seqArcNo, int index, int fadeFrames) {
@@ -190,7 +176,7 @@ void SoundManager::ApplySeqInitialVolume(int handle, int seqNo) {
 // The sequence's own volume scaled by the music volume setting
 int SoundManager::GetSeqInitialVolume(int seqNo) {
     const NNSSndSeqParam *param = NNS_SndArcGetSeqParam(seqNo);
-    u8 setting = gSettings.musicVolume;
+    u8 setting = gGameData.mMusicVolume;
     if (param == NULL) {
         return sVolumeBySetting[setting];
     }
@@ -259,7 +245,7 @@ void SoundManager::SetSeqArcVolume(int handle, int volume) {
 // The entry's own volume scaled by the effect volume setting
 int SoundManager::GetSeqArcInitialVolume(int seqArcNo, int index) {
     const NNSSndSeqParam *param = NNS_SndArcGetSeqArcParam(seqArcNo, index);
-    u8 setting = gSettings.effectVolume;
+    u8 setting = gGameData.mEffectVolume;
     if (param == NULL) {
         return sVolumeBySetting[setting];
     }
@@ -290,7 +276,7 @@ u32 SoundManager::GetStrmPlayingPos(int handle) {
 // The stream's own volume scaled by the music volume setting
 int SoundManager::GetStrmVolume(int strmNo) {
     const NNSSndArcStrmInfo *info = NNS_SndArcGetStrmInfo(strmNo);
-    u8 setting = gSettings.musicVolume;
+    u8 setting = gGameData.mMusicVolume;
     if (info == NULL) {
         return sVolumeBySetting[setting];
     }

@@ -83,7 +83,7 @@ from:0x0214a11c kind:load to:0x0214b770 module:overlay(71)
 from:0x0214a120 kind:load to:0x0214b730 module:overlay(71)
 from:0x0214a124 kind:load to:0x0214b424 module:overlay(71)
 from:0x0214a128 kind:load to:0x0214b790 module:overlay(71)
-from:0x0214a130 kind:load to:0x02138e34 module:main
+from:0x0214a130 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a134 kind:load to:0x0213ba74 module:main
 from:0x0214a138 kind:load to:0x0212345c module:main
 from:0x0214a13c kind:load to:0x02121eac module:main
@@ -144,7 +144,7 @@ from:0x0214ab40 kind:arm_call to:0x02014834 module:main
 from:0x0214ab58 kind:load to:0x0214bb98 module:overlay(71)
 from:0x0214ab60 kind:load to:0x0214bb18 module:overlay(71)
 from:0x0214ab64 kind:load to:0x0214bad8 module:overlay(71)
-from:0x0214ab68 kind:load to:0x02138e34 module:main
+from:0x0214ab68 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214ab6c kind:load to:0x02138e1c module:main
 from:0x0214ab70 kind:load to:0x0214bb58 module:overlay(71)
 from:0x0214ab78 kind:load to:0x0214c654 module:overlay(71)

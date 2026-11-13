@@ -221,6 +221,24 @@ Measured, from the decompiled code in `src/sound/`:
 
 Inferred: sequences are music and sequence archive entries are sound effects, from which setting scales which.
 
+## Text
+
+Measured, from the decompiled code in `src/text/`:
+
+| | Where | |
+| --- | --- | --- |
+| `Font` | `0x0202D5A4` to `0x0202D5D0` | `gFonts`: the 10, 8 and 12 pixel fonts (`LD10UTF16.NFTR`, `LD08UTF16.NFTR`, `LD12UTF16.NFTR`), loaded by `main` |
+| `CharCanvas`, `TextCanvas`, `BgTextCanvas`, `ObjTextCanvas`, `ObjCharBox`, `ObjTextBox` | `0x0202D5D0` to `0x0202E3EC`, 32 functions | NitroSystem's character canvas and text canvas, drawn with a one pixel shadow in up to eight directions, shown on a background layer or on sprites arranged over the canvas |
+| `CardPullOutMonitor` | `0x0202E3EC` to `0x0202E44C` | Turns the screens off and stops when the card is pulled out |
+| `MessageFile`, `MessageText` | `0x0202E44C` to `0x0202F408`, 28 functions | A BMG message file (`gMessageFiles[0]` is `BMG:/tmd_msg_JP.bmg`), and a text box that is both kinds of canvas and expands, aligns and draws a message, all at once or a character at a time |
+
+- `BgTextCanvas` and `ObjTextCanvas` have `TextCanvas` as a virtual base, and `MessageText` inherits from both: their
+  tables hold only the offset of that base (4, 0x150, and 0x588 and 0x438 in a `MessageText`).
+- A message's tags start with the character 0x1A, followed by the tag's length in bytes; `MessageText::ExpandTags`
+  replaces them with up to 20 strings and 2 messages set beforehand.
+- The fonts are in a file of their own: `gFonts` comes before `gTextObjResource` in memory, and the compiler puts it
+  after when both are defined in one file.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").

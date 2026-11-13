@@ -1126,7 +1126,7 @@ from:0x02153240 kind:load to:0x02153810 module:overlay(92)
 from:0x02153244 kind:load to:0x021537f8 module:overlay(92)
 from:0x02153248 kind:load to:0x0215397c module:overlay(92)
 from:0x0215324c kind:load to:0x0215368c module:overlay(92)
-from:0x02153250 kind:load to:0x02138e34 module:main
+from:0x02153250 kind:load to:0x02138e1c add:0x18 module:main
 from:0x02153254 kind:load to:0x021539bc module:overlay(92)
 from:0x02153258 kind:load to:0x021539cc module:overlay(92)
 from:0x02153278 kind:arm_call to:0x02022ddc module:main

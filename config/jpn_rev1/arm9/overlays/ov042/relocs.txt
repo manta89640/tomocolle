@@ -93,7 +93,7 @@ from:0x0214a2d8 kind:load to:0x0214b584 module:overlay(42)
 from:0x0214a2dc kind:load to:0x0214b5a8 module:overlay(42)
 from:0x0214a2e0 kind:load to:0x0214b5bc module:overlay(42)
 from:0x0214a2e8 kind:load to:0x0214b3d4 module:overlay(42)
-from:0x0214a2f0 kind:load to:0x02138e34 module:main
+from:0x0214a2f0 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a2f4 kind:load to:0x02138e1c module:main
 from:0x0214a314 kind:arm_call to:0x020842a0 module:main
 from:0x0214a320 kind:arm_call to:0x0204f738 module:main

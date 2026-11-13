@@ -127,7 +127,7 @@ from:0x0214a538 kind:load to:0x0214bb64 module:overlay(70)
 from:0x0214a53c kind:load to:0x0214b9b4 module:overlay(70)
 from:0x0214a540 kind:load to:0x0214b974 module:overlay(70)
 from:0x0214a548 kind:load to:0x0214bad0 module:overlay(70)
-from:0x0214a54c kind:load to:0x02138e34 module:main
+from:0x0214a54c kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a550 kind:load to:0x0213b710 module:main
 from:0x0214a560 kind:arm_call to:0x020842a0 module:main
 from:0x0214a588 kind:arm_call to:0x0214a5d0 module:overlay(70)

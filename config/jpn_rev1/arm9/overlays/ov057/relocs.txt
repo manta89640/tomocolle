@@ -181,7 +181,7 @@ from:0x0214ab34 kind:load to:0x0214c89c module:overlay(57)
 from:0x0214ab38 kind:load to:0x0214ca9c module:overlay(57)
 from:0x0214ab3c kind:load to:0x0214c6ac module:overlay(57)
 from:0x0214ab44 kind:load to:0x02138e1c module:main
-from:0x0214ab48 kind:load to:0x02138e34 module:main
+from:0x0214ab48 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214ab4c kind:load to:0x0214c7cc module:overlay(57)
 from:0x0214ab50 kind:load to:0x0214c7ec module:overlay(57)
 from:0x0214ab68 kind:arm_call to:0x020842a0 module:main

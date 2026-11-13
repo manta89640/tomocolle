@@ -164,7 +164,7 @@ from:0x0214a880 kind:load to:0x0214c4fc module:overlay(56)
 from:0x0214a888 kind:load to:0x0214c150 module:overlay(56)
 from:0x0214a88c kind:load to:0x0214c514 module:overlay(56)
 from:0x0214a890 kind:load to:0x0214c0b8 module:overlay(56)
-from:0x0214a894 kind:load to:0x02138e34 module:main
+from:0x0214a894 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a898 kind:load to:0x0214c130 module:overlay(56)
 from:0x0214a89c kind:load to:0x02138e1c module:main
 from:0x0214a8a0 kind:load to:0x0214c140 module:overlay(56)

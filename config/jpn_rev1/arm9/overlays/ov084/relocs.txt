@@ -144,7 +144,7 @@ from:0x0214a788 kind:load to:0x0214c274 module:overlay(84)
 from:0x0214a78c kind:load to:0x0214c1d8 module:overlay(84)
 from:0x0214a790 kind:load to:0x02138e1c module:main
 from:0x0214a794 kind:load to:0x0214c23c module:overlay(84)
-from:0x0214a798 kind:load to:0x02138e34 module:main
+from:0x0214a798 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a79c kind:load to:0x0214c1fc module:overlay(84)
 from:0x0214a7a8 kind:load to:0x0214c114 module:overlay(84)
 from:0x0214a7b0 kind:load to:0x0214c21c module:overlay(84)

@@ -91,7 +91,7 @@ from:0x0214a184 kind:load to:0x0212345c module:main
 from:0x0214a190 kind:load to:0x02121eac module:main
 from:0x0214a194 kind:load to:0x0214ad74 module:overlay(69)
 from:0x0214a198 kind:load to:0x0214ad44 module:overlay(69)
-from:0x0214a19c kind:load to:0x02138e34 module:main
+from:0x0214a19c kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a1a0 kind:load to:0x0214ad64 module:overlay(69)
 from:0x0214a1a4 kind:load to:0x0214ad54 module:overlay(69)
 from:0x0214a1a8 kind:load to:0x02138e1c module:main

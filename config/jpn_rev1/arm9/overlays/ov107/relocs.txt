@@ -45,7 +45,7 @@ from:0x02149e18 kind:load to:0x0214a148 module:overlay(107)
 from:0x02149e1c kind:load to:0x0214a160 module:overlay(107)
 from:0x02149e20 kind:load to:0x0214a02c module:overlay(107)
 from:0x02149e24 kind:load to:0x02149ffc module:overlay(107)
-from:0x02149e28 kind:load to:0x02138e34 module:main
+from:0x02149e28 kind:load to:0x02138e1c add:0x18 module:main
 from:0x02149e2c kind:load to:0x0214a01c module:overlay(107)
 from:0x02149e30 kind:load to:0x0214a00c module:overlay(107)
 from:0x02149e38 kind:load to:0x02138e1c module:main

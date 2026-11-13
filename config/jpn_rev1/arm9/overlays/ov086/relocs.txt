@@ -108,7 +108,7 @@ from:0x0214a4ac kind:load to:0x0214bc54 module:overlay(86)
 from:0x0214a4b0 kind:load to:0x0211fa10 module:main
 from:0x0214a4b4 kind:load to:0x0214bc68 module:overlay(86)
 from:0x0214a4b8 kind:load to:0x02138e1c module:main
-from:0x0214a4bc kind:load to:0x02138e34 module:main
+from:0x0214a4bc kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a4c4 kind:load to:0x0214b988 module:overlay(86)
 from:0x0214a4c8 kind:load to:0x0214ba68 module:overlay(86)
 from:0x0214a4ec kind:arm_call to:0x0214a508 module:overlay(86)

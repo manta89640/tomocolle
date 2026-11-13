@@ -189,7 +189,7 @@ from:0x0214b4e8 kind:arm_call to:0x0202ab2c module:main
 from:0x0214b4f4 kind:load to:0x020f7300 module:main
 from:0x0214b55c kind:arm_call to:0x02028b98 module:main
 from:0x0214b618 kind:arm_call to:0x0202e04c module:main
-from:0x0214b668 kind:load to:0x02138e28 module:main
+from:0x0214b668 kind:load to:0x02138e1c add:0xc module:main
 from:0x0214b69c kind:arm_call to:0x0202d8bc module:main
 from:0x0214b6cc kind:arm_call to:0x0203673c module:main
 from:0x0214b6f4 kind:arm_call to:0x0214b6a4 module:overlay(66)

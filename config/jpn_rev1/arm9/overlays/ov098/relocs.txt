@@ -274,7 +274,7 @@ from:0x0214bacc kind:load to:0x02138e1c module:main
 from:0x0214bad0 kind:load to:0x0214c2d0 module:overlay(98)
 from:0x0214bad4 kind:load to:0x0214c208 module:overlay(98)
 from:0x0214bad8 kind:load to:0x0214c1b0 module:overlay(98)
-from:0x0214badc kind:load to:0x02138e34 module:main
+from:0x0214badc kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214bae0 kind:load to:0x0214c89c module:overlay(98)
 from:0x0214bae4 kind:load to:0x0214c8a4 module:overlay(98)
 from:0x0214bae8 kind:load to:0x0214c2e0 module:overlay(98)

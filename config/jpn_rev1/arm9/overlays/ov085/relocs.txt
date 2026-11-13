@@ -129,7 +129,7 @@ from:0x0214a638 kind:load to:0x0214d068 module:overlay(85)
 from:0x0214a63c kind:load to:0x0214ccb4 module:overlay(85)
 from:0x0214a640 kind:load to:0x0214d080 module:overlay(85)
 from:0x0214a644 kind:load to:0x0214cc04 module:overlay(85)
-from:0x0214a648 kind:load to:0x02138e34 module:main
+from:0x0214a648 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a64c kind:load to:0x0214cd34 module:overlay(85)
 from:0x0214a650 kind:load to:0x02138e1c module:main
 from:0x0214a654 kind:load to:0x0214cc00 module:overlay(85)

@@ -161,7 +161,7 @@ from:0x0214a760 kind:load to:0x021223e4 module:main
 from:0x0214a764 kind:load to:0x021510d4 module:overlay(73)
 from:0x0214a76c kind:load to:0x02150c60 module:overlay(73)
 from:0x0214a770 kind:load to:0x02150ba4 module:overlay(73)
-from:0x0214a774 kind:load to:0x02138e34 module:main
+from:0x0214a774 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a77c kind:load to:0x02138e1c module:main
 from:0x0214a780 kind:load to:0x0213b5cc module:main
 from:0x0214a800 kind:arm_call to:0x0214ae08 module:overlay(73)

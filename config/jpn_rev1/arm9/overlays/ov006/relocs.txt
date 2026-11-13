@@ -316,7 +316,7 @@ from:0x0214c1d8 kind:arm_call to:0x0214c204 module:overlay(6)
 from:0x0214c214 kind:load to:0x02009810 module:main
 from:0x0214c22c kind:load to:0x02009810 module:main
 from:0x0214c310 kind:arm_call to:0x0202e04c module:main
-from:0x0214c360 kind:load to:0x02138e28 module:main
+from:0x0214c360 kind:load to:0x02138e1c add:0xc module:main
 from:0x0214c394 kind:arm_call to:0x0202d8bc module:main
 from:0x0214c3c4 kind:arm_call to:0x0203673c module:main
 from:0x0214c3ec kind:arm_call to:0x0214c39c module:overlay(6)

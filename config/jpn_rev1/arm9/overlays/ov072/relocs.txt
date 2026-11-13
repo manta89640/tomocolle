@@ -211,7 +211,7 @@ from:0x0214afa4 kind:load to:0x0214f91c module:overlay(72)
 from:0x0214afa8 kind:load to:0x0214fb8c module:overlay(72)
 from:0x0214afac kind:load to:0x0214f8fc module:overlay(72)
 from:0x0214afb0 kind:load to:0x0214fb74 module:overlay(72)
-from:0x0214afb4 kind:load to:0x02138e34 module:main
+from:0x0214afb4 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214afb8 kind:load to:0x0214f8dc module:overlay(72)
 from:0x0214afc0 kind:load to:0x0212345c module:main
 from:0x0214afe0 kind:arm_call to:0x0214efb4 module:overlay(72)

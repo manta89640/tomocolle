@@ -149,7 +149,7 @@ from:0x0214ab54 kind:load to:0x0214e3ba module:overlay(78)
 from:0x0214ab58 kind:load to:0x0214e5d0 module:overlay(78)
 from:0x0214ab5c kind:load to:0x0214e5e8 module:overlay(78)
 from:0x0214ab60 kind:load to:0x0214e4d0 module:overlay(78)
-from:0x0214ab64 kind:load to:0x02138e34 module:main
+from:0x0214ab64 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214ab74 kind:load to:0x0214e560 module:overlay(78)
 from:0x0214ab78 kind:load to:0x0214e570 module:overlay(78)
 from:0x0214ab7c kind:load to:0x0214e520 module:overlay(78)

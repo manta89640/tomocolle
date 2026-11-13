@@ -99,7 +99,7 @@ from:0x0214a290 kind:load to:0x0214b594 module:overlay(81)
 from:0x0214a294 kind:load to:0x0214b2bc module:overlay(81)
 from:0x0214a298 kind:load to:0x0214b2cc module:overlay(81)
 from:0x0214a29c kind:load to:0x0214b220 module:overlay(81)
-from:0x0214a2a4 kind:load to:0x02138e34 module:main
+from:0x0214a2a4 kind:load to:0x02138e1c add:0x18 module:main
 from:0x0214a2a8 kind:load to:0x0214b2ac module:overlay(81)
 from:0x0214a2b0 kind:load to:0x02138e1c module:main
 from:0x0214a2c0 kind:load to:0x0211d604 module:main
