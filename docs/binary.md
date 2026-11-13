@@ -109,7 +109,7 @@ tags). Measured:
 | | Where | |
 | --- | --- | --- |
 | `TtsPlayer`, the game's wrapper | `0x02083DC4` to `0x0208473C`, 28 functions | Decompiled, `src/voice/TtsPlayer.cpp` |
-| The engine | `0x0208473C` to `0x0208EB18`, 149 functions, 44 KB | `lib/SHTTS/`, not decompiled |
+| The engine | `0x0208473C` to `0x0208EB18`, 123 functions, 44 KB | Decompiled, `lib/SHTTS/`: 122 functions match and are linked from source |
 
 The engine's bounds are those of a closed module: nothing in that range is called from outside it but by `TtsPlayer`,
 and it calls nothing but the C library and the OS (threads, mutexes, `OS_Sleep`). It is one unit for now, because
@@ -185,6 +185,21 @@ Open questions from the engine's code, which may be one question:
 
 Four of the engine's functions are assembly in the original too: sums of products with the multiply-accumulate
 instructions for 16-bit fixed point. They are written as assembly functions here.
+
+The engine's source is four files, `shtts_1.c` to `shtts_4.c`, and three of them are linked into the ROM in place of
+the original's bytes. Where the engine's own files began and ended is not known; these are cut where linking needs:
+
+- `shtts_2.c` is one function, `func_02085d80`, which does not match yet (the original's size, 59 instructions
+  different), so the file it belongs to cannot be linked from source while it is in it.
+- The engine's strings in `.data` are interrupted, between those of `func_02089304` and `func_0208c8e0`, by the
+  names of the phonemes. Those belong to `ShttsPhonemeNames`, which is in `.rodata` and yet is read by the engine's
+  code as if it were not `const`: so it is defined in another file, of tables, which is not decompiled.
+
+One thing about the linked files is fragile. The strings of a file have no names, and the compiler numbers them
+(`@8870`). dsd needs a symbol at the start of each range a file owns, and it has to be the compiled object's name
+for it, so `symbols.txt` has four such names, and `relocs.txt` refers to the other strings as one of them plus an
+offset. An edit that adds or removes a literal or a local before them renumbers them, and `ninja` will then say that
+a symbol is not found: read the new name off the object (`arm-none-eabi-nm`) and put it in `symbols.txt`.
 
 ## Compiler
 

@@ -6,10 +6,6 @@
     .data       start:0x020fc500 end:0x02115480 kind:data align:32
     .bss        start:0x02115480 end:0x02149a40 kind:bss align:32
 
-lib/NitroSDK/libraries/os/src/os_cache.c:
-    complete
-    .text       start:0x02007ff4 end:0x02008114
-
 lib/NitroSDK/libraries/init/src/crt0.c:
     .text       start:0x02000800 end:0x02000b9c
 
@@ -111,6 +107,10 @@ lib/NitroSDK/libraries/os/src/os_message.c:
 
 lib/NitroSDK/libraries/os/src/os_mutex.c:
     .text       start:0x02007e04 end:0x02007ff4
+
+lib/NitroSDK/libraries/os/src/os_cache.c:
+    complete
+    .text       start:0x02007ff4 end:0x02008114
 
 lib/NitroSDK/libraries/os/src/os_init.c:
     .text       start:0x02008114 end:0x02008134
@@ -521,5 +521,21 @@ src/voice/TtsPlayer.cpp:
     .text       start:0x02083dc4 end:0x0208473c
     .bss        start:0x02148740 end:0x02149a20
 
-lib/SHTTS/shtts.c:
-    .text       start:0x0208473c end:0x0208eb18
+lib/SHTTS/shtts_1.c:
+    complete
+    .text       start:0x0208473c end:0x02085d80
+    .data       start:0x02113134 end:0x02113158
+
+lib/SHTTS/shtts_2.c:
+    .text       start:0x02085d80 end:0x02086628
+
+lib/SHTTS/shtts_3.c:
+    complete
+    .text       start:0x02086628 end:0x0208c8e0
+    .data       start:0x02113158 end:0x02113360
+
+lib/SHTTS/shtts_4.c:
+    complete
+    .text       start:0x0208c8e0 end:0x0208eb18
+    .rodata     start:0x020f3fe0 end:0x020f3ff0
+    .data       start:0x021133f8 end:0x021135a0
