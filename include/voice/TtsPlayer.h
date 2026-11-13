@@ -23,12 +23,12 @@ public:
     ~TtsPlayer();
 
     void InitEngine();
-    void func_02083f8c();
+    void ResetEngineParams(); // Back to the engine's default voice
     void StopEngine();
     void SetEngineParam(int param, int value);
-    void func_02083fbc();
+    int GetEngineParam(int param);
     BOOL IsEngineIdle();
-    void func_02083fe8();
+    const char *GetPhonemeName(); // The sound being spoken, "X" if none: the characters' lip movement reads it
 
     int OpenStream(u8 channel);
     void CloseStream();

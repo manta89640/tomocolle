@@ -9,9 +9,9 @@ void func_0208d8fc(void *engine);
 void func_0208dab4(void *engine);
 void func_0208d878(void *engine);
 void func_0208db2c(void *engine, int param, int value);
-void func_0208dca4(void *engine);
+int func_0208dca4(void *engine, int param);
 int func_0208dac4(void *engine);
-void func_0208daf8(void *engine);
+const char *func_0208daf8(void *engine);
 typedef void (*EngineCallback)(int samples, s16 *data, TtsPlayer *player);
 void func_0208d500(void *engine, const char *text, int param, int unk, EngineCallback callback, TtsPlayer *player);
 
@@ -60,7 +60,7 @@ void TtsPlayer::InitEngine() {
     func_0208db2c(mEngine, 5, 0x82);
 }
 
-void TtsPlayer::func_02083f8c() {
+void TtsPlayer::ResetEngineParams() {
     func_0208dab4(mEngine);
 }
 
@@ -72,16 +72,16 @@ void TtsPlayer::SetEngineParam(int param, int value) {
     func_0208db2c(mEngine, param, value);
 }
 
-void TtsPlayer::func_02083fbc() {
-    func_0208dca4(mEngine);
+int TtsPlayer::GetEngineParam(int param) {
+    return func_0208dca4(mEngine, param);
 }
 
 BOOL TtsPlayer::IsEngineIdle() {
     return func_0208dac4(mEngine) == 0;
 }
 
-void TtsPlayer::func_02083fe8() {
-    func_0208daf8(mEngine);
+const char *TtsPlayer::GetPhonemeName() {
+    return func_0208daf8(mEngine);
 }
 
 static void StreamCallback(NNSSndStrmCallbackStatus status, int numChannels, void *buffer[], u32 len,
