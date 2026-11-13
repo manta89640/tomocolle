@@ -54,11 +54,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--unit", help="only units whose name contains this")
     parser.add_argument("--verbose", action="store_true", help="list every difference")
+    parser.add_argument("--pair", nargs=2, type=Path, metavar=("ORIGINAL", "COMPILED"),
+                        help="compare these two objects instead of the units of objdiff.json")
     args = parser.parse_args()
 
-    config = json.loads((ROOT / "objdiff.json").read_text())
+    if args.pair:
+        units = [{"name": args.pair[1].name, "target_path": args.pair[0].resolve(),
+                  "base_path": args.pair[1].resolve()}]
+    else:
+        units = json.loads((ROOT / "objdiff.json").read_text())["units"]
     bad_units = 0
-    for unit in config["units"]:
+    for unit in units:
         target, base = unit.get("target_path"), unit.get("base_path")
         if not target or not base or (args.unit and args.unit not in unit["name"]):
             continue
