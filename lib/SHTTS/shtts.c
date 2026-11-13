@@ -718,12 +718,266 @@ void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
                     position = 1;
                 }
                 engine->cur.speed = b->speed;
-                func_02085d80(units, b->count, total, isFirst, isLast, position, &unk, b->unk_16, engine);
+                func_02085d80((void *)units, b->count, total, isFirst, isLast, position, &unk, b->unk_16, engine);
             }
         }
         last = last->next;
         first = last;
     } while (last != NULL);
+}
+
+// Works out three numbers for each sound of a list, unk_06, unk_08 and unk_0A, by adding up what the tables give
+// for the sound, its neighbours and its place in the list. The list is counted from 1, and has one sound more
+// after its last.
+// Not matching yet: 8 bytes short (0x8a0 of 0x8a8). The instructions are the original's but for the registers of
+// the second loop and what that makes of the spills: the original has the place in r2, the counter in r3, the
+// vowel in r4 and the two neighbours in r6 and r7, with r0 for scratch, and this has the counter in r1, the place
+// in r4 and the neighbours in r0 and r2. The first loop keeps the pointer into vowels in a register where the
+// original keeps the one into kinds, and "count + 1" is at sp+0x20 instead of sp+0x10. Tried without effect on
+// that: every order of the declarations, block scope against function scope, int/s16/s8 for each local, separate
+// variables against one reused for the kind and the consonant before (and for the vowel before and the consonant
+// after), a second counter for the later loops, a local for list[i], a copy of unk6, the Q flag as an if, a
+// ternary or inside the index (inside the index gives mla for the table's row where the original has mul, a
+// frame of 456 and registers nearer the original's), the sum split over statements or locals, an inline
+// function for the multiply by 0x599A, one s16 reused for every intermediate, chained assignments of the flags.
+void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8,
+                   Shtts *engine) {
+    char consonants[0x80];
+    char vowels[0x80];
+    char kinds[0x80];
+    const char *name;
+    int v;
+    int group = 0;
+    s16 j;
+    s8 after;
+    int voiced = 0;
+    s16 i;
+    int limit;
+    int place;
+    int index;
+    s16 value;
+    s8 q;
+    int base;
+
+    vowels[0] = *vowel;
+    kinds[0] = *vowel;
+    limit = count + 1;
+    for (i = 1; i <= limit; i++) {
+        name = list[i]->name;
+        if (name[0] == '-') {
+            consonants[i] = 0x1B;
+            kinds[i] = kinds[i - 1];
+            vowels[i] = vowels[i - 1];
+        } else {
+            for (j = 0; j < 0x90; j++) {
+                if (strcmp(name, data_020bbf34[j]) == 0) {
+                    consonants[i] = data_020b9d60[j];
+                    kinds[i] = data_020b9df0[j];
+                    vowels[i] = data_020b9cd0[j];
+                    break;
+                }
+            }
+        }
+    }
+    *vowel = vowels[count];
+    index = func_02086628(unk3);
+    for (i = 1; i <= count; i++) {
+        if (last && i == count) {
+            place = 2;
+        } else if (first && i == 1) {
+            place = 0;
+        } else {
+            place = 1;
+        }
+        if (place == 2 && unk6 == 2) {
+            unk6 = 2;
+        } else if (place == 0 && unk6 == 0) {
+            unk6 = 0;
+        } else {
+            unk6 = 1;
+        }
+        if (consonants[i] < 0x1A) {
+            j = kinds[i];
+            switch (j) {
+            case 6:
+            case 7:
+            case 8:
+                group = 0;
+                voiced = 0;
+                break;
+            case 9:
+            case 10:
+            case 11:
+                group = 1;
+                voiced = 0;
+                break;
+            case 12:
+            case 13:
+                group = 2;
+                voiced = 0;
+                break;
+            case 14:
+            case 15:
+            case 16:
+            case 24:
+                group = 3;
+                voiced = 0;
+                break;
+            case 17:
+            case 18:
+                group = 4;
+                voiced = 0;
+                break;
+            case 19:
+                group = 5;
+                voiced = 0;
+                break;
+            case 20:
+            case 21:
+                group = 6;
+                voiced = 0;
+                break;
+            case 23:
+            case 27:
+                group = 7;
+                voiced = 0;
+                break;
+            case 26:
+            case 28:
+                j = (s8)(j - 20);
+                group = 0;
+                voiced = 1;
+                break;
+            case 29:
+            case 31:
+                j = (s8)(j - 20);
+                group = 1;
+                voiced = 1;
+                break;
+            case 32:
+            case 33:
+                j = (s8)(j - 20);
+                group = 2;
+                voiced = 1;
+                break;
+            case 25:
+                j = (s8)(j - 10);
+                group = 3;
+                voiced = 1;
+                break;
+            case 34:
+                j = (s8)(j - 15);
+                group = 5;
+                voiced = 1;
+                break;
+            case 40:
+                j = (s8)(j - 30);
+                group = 1;
+                voiced = 1;
+                break;
+            }
+            after = vowels[i - 1];
+            if (place == 0) {
+                after = 0x1A;
+            }
+            if (list[i]->unk_04 == 'Q') {
+                q = 1;
+            } else {
+                q = 0;
+            }
+            value = data_020ba288[group].unk_00 + data_020ba288[group].unk_02[j] + data_020ba288[group].unk_3A[after] + data_020ba288[group].unk_70[vowels[i]] +
+                    data_020ba288[group].unk_A6[q] + data_020ba288[group].unk_AA[unk6] + data_020ba288[group].unk_B2[place];
+            if (voiced == 1) {
+                switch (j) {
+                case 9:
+                    value += 0xE40;
+                    break;
+                case 10:
+                    value += 0xA00;
+                    break;
+                case 11:
+                    value += 0x8C6;
+                    break;
+                case 15:
+                    value += 0x6E0;
+                    break;
+                case 8:
+                    value += 0xA0D;
+                    break;
+                case 12:
+                    value += 0x880;
+                    break;
+                case 13:
+                    value += 0xBB3;
+                    break;
+                case 6:
+                    value += 0x673;
+                    break;
+                case 19:
+                    value += 0xA40;
+                    break;
+                }
+            }
+            list[i]->unk_06 = value >> 6;
+            if (list[i]->unk_06 < 25) {
+                list[i]->unk_06 = 25;
+            }
+        } else {
+            list[i]->unk_06 = 0;
+        }
+
+        v = vowels[i];
+        j = consonants[i];
+        if (j == 0x1B) {
+            if (place == 0) {
+                j = 0x1A;
+            } else {
+                j = vowels[i - 1];
+            }
+        }
+        after = consonants[i + 1];
+        if (after == 0x1B) {
+            after = vowels[i + 1];
+        }
+        if (place == 2) {
+            after = 12;
+        }
+        if (v == 5) {
+            list[i]->unk_08 = (data_020b9fb4.unk_02[j] + 0x1E00 + data_020b9fb4.unk_38[after] +
+                               data_020b9fb4.unk_B8[unk6] + data_020b9fb4.unk_C2[place]) >>
+                              6;
+            list[i]->unk_0A = (s16)((data_020b9e80.unk_0C[j] + data_020b9e80.unk_42[after] +
+                                     data_020b9e80.unk_A0[index] + data_020b9e80.unk_D8[unk6] +
+                                     data_020b9e80.unk_EA[place]) >>
+                                    6) +
+                              600;
+            list[i]->unk_06 = 0;
+        } else {
+            base = data_020ba0f4.unk_02[v] + 0x12FC;
+            list[i]->unk_08 = (base + data_020ba0f4.unk_0C[j] + data_020ba0f4.unk_42[after] +
+                               data_020ba0f4.unk_CA[unk6] + data_020ba0f4.unk_D2[place]) >>
+                              6;
+            if (list[i]->unk_08 < 70) {
+                list[i]->unk_08 = 70;
+            }
+            list[i]->unk_0A = (s16)((data_020b9e80.unk_02[v] + data_020b9e80.unk_0C[j] +
+                                     data_020b9e80.unk_42[after] + data_020b9e80.unk_A0[index] +
+                                     data_020b9e80.unk_D8[unk6] + data_020b9e80.unk_EA[place]) >>
+                                    6) +
+                              600;
+            if (list[i]->unk_04 == 'L') {
+                list[i]->unk_08 += (s16)((base + data_020ba0f4.unk_42[v] + data_020ba0f4.unk_0C[v] - 0x5D) >> 6);
+            }
+            if (list[i]->unk_05 == 'U') {
+                list[i]->unk_08 = (list[i]->unk_08 * 0x599A) >> 15;
+                list[i]->unk_0A -= 30;
+            }
+        }
+    }
+    func_020866bc(list, kinds, count, engine);
+    for (i = 1; i <= count; i++) {
+        list[i]->unk_0A = unk8 + list[i]->unk_0A;
+    }
 }
 
 int func_02086628(s16 value) {
@@ -751,10 +1005,71 @@ int func_02086628(s16 value) {
     return -1;
 }
 
+// Scales unk_06 and unk_08 of each sound of a list by the speed, a percentage. For some kinds of sound, unk_06 only
+// if the sound has a 'Q'.
+void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engine) {
+    s16 i;
+
+    for (i = 1; i <= count; i++) {
+        switch (kinds[i]) {
+        case 6:
+        case 7:
+        case 8:
+        case 14:
+        case 23:
+        case 24:
+        case 26:
+        case 27:
+        case 28:
+            if (list[i]->unk_04 == 'Q') {
+                list[i]->unk_06 = (engine->cur.speed * list[i]->unk_06 + 50) / 100;
+            }
+            list[i]->unk_08 = (engine->cur.speed * list[i]->unk_08 + 50) / 100;
+            break;
+        default:
+            list[i]->unk_06 = (engine->cur.speed * list[i]->unk_06 + 50) / 100;
+            list[i]->unk_08 = (engine->cur.speed * list[i]->unk_08 + 50) / 100;
+            break;
+        }
+    }
+}
+
 // Empties the echo's history
 void func_02086814(Shtts *engine) {
     engine->unk_0E624 = 0;
     memset(engine->echoBuffer, 0, sizeof(engine->echoBuffer));
+}
+
+// The echo: adds to each sample the one of a delay ago, from a ring of 3001 that it feeds with the samples
+// filtered and scaled by the gain
+void func_0208683c(int count, s16 *src, s16 *dst, Shtts *engine) {
+    int i;
+    s16 gain = engine->cur.echoGain << 8;
+
+    for (i = 0; i < count; i++) {
+        int sample;
+        int filtered = func_02086a20(engine->unk_0B730, data_020bac28, src[i] << 13) << 1;
+
+        engine->unk_0B730[3] = engine->unk_0B730[2];
+        engine->unk_0B730[2] = src[i] << 13;
+        engine->unk_0B730[1] = engine->unk_0B730[0];
+        engine->unk_0B730[0] = filtered << 1;
+        if (engine->unk_0E624 < engine->cur.echoDelay) {
+            engine->echoBuffer[engine->unk_0E624] = func_0208e81c(filtered, gain);
+            sample = src[i];
+        } else {
+            engine->echoBuffer[engine->unk_0E624 % 3001] =
+                func_0208e81c(filtered + engine->echoBuffer[(engine->unk_0E624 - engine->cur.echoDelay) % 3001], gain);
+            sample = src[i] + (engine->echoBuffer[(engine->unk_0E624 - engine->cur.echoDelay) % 3001] >> 12);
+        }
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
+        } else if (sample < -0x8000) {
+            sample = -0x7FFF;
+        }
+        dst[i] = sample;
+        engine->unk_0E624++;
+    }
 }
 
 asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
@@ -825,6 +1140,293 @@ void func_02086b14(Shtts *engine) {
         strcat(engine->text, line);
         length += sizeof(line);
         strcpy(line, "");
+    }
+}
+
+// Reads lines of the text into words, until one ends a sentence or has a pause. A line is a word and up to six
+// numbers after it, with spaces between. Returns how many words there are.
+int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *engine) {
+    char line[0xC0];
+    char word[0xC1];
+    char *cursor;
+    int accent;
+    int phrase;
+    int pause;
+    int end;
+    char *text = engine->unk_01960;
+    int n; // The word's type, then the speed's factor, then the length of its text
+    s16 count;
+    int textLength;
+    int soundCount;
+    char *token;
+    s16 j;
+    int c;
+    s16 i;
+
+    func_02087d98(sounds, engine);
+    count = 0;
+    words->pause = 0;
+    words->next = words + 1;
+    textLength = 0;
+    soundCount = 0;
+    words = words->next;
+    while (1) {
+        if (func_02086a7c(line, 0xC0, &engine->unk_0E628) < 0) {
+            break;
+        }
+        i = strlen(line);
+        if (line[i - 1] < ' ') {
+            line[i - 1] = 0;
+        }
+        accent = 10;
+        words->unk_0E = words->unk_14 = n = 0;
+        phrase = accent;
+        word[0] = 0;
+        cursor = line;
+        pause = 200;
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            strcpy(word, token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            n = atoi(token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            accent = atoi(token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            phrase = atoi(token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            pause = atoi(token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            words->unk_0E = atoi(token);
+        }
+        token = func_02089da0(&cursor, " ");
+        if (token != NULL) {
+            words->unk_14 = atoi(token);
+        }
+
+        // Drops control characters, and a 'Q' that starts the word or follows another
+        j = 0;
+        for (i = 0; i < 0xC0 && word[i] != 0; i++) {
+            c = word[i];
+            if (c == 'Q' && (i == 0 || word[i - 1] == 'Q')) {
+                continue;
+            }
+            if (c >= ' ') {
+                word[j++] = c;
+            }
+        }
+        word[j] = 0;
+        if (j == 0) {
+            continue;
+        }
+        if (strlen(word) > 0x60) {
+            word[0x60] = 0;
+        }
+        words->unk_05 = n;
+        words->unk_06 = n;
+        words->unk_08 = (accent * engine->cur.accent * 0x28F + 0x8000) >> 16;
+        words->unk_09 = (phrase * engine->cur.phrase * 0x28F + 0x8000) >> 16;
+        n = (engine->cur.speed * 0x28F + 0x80) >> 8;
+        words->pause = func_02087e44((n * pause + 0x80) >> 8, 0, 30000, "pause*speed");
+        words->unk_0C = engine->cur.unk_00;
+        words->speed = engine->cur.speed;
+        words->volume = engine->cur.volume;
+        words->unk_07 = 0;
+        if (words->unk_06 == -1) {
+            words->unk_06 = func_02084794(word, (ShttsWordList *)engine);
+            if (words->unk_06 == -1) {
+                words->unk_06 = func_02084814(word);
+            }
+        }
+        end = func_02087bd4(word, line, engine);
+        if ((int)(textLength + (strlen(line) + 1)) > 0x1C0) {
+            line[0x1BF - textLength] = 0;
+        }
+        strcpy(text, line);
+        words->text = text;
+        n = strlen(text);
+        if (n > 0) {
+            func_020870c8(words, sounds, 0x80 - soundCount, engine);
+            if (words->count == 0) {
+                continue;
+            }
+            sounds += words->count;
+            soundCount += words->count;
+            if (words->unk_07 & 0x70) {
+                words->unk_08 = words->unk_08 * ((((words->unk_07 & 0x70) >> 4) + 2) >> 1);
+            }
+            words->next = words + 1;
+            words = words->next;
+            count++;
+        }
+        text += n + 1;
+        textLength += n + 1;
+        if (end == -1) {
+            break;
+        }
+        if (words[-1].pause > 0) {
+            break;
+        }
+        if (soundCount >= 0x80 || count >= 0x40 || textLength >= 0x1BF) {
+            break;
+        }
+    }
+    if (count > 0 && words[-1].pause == 0) {
+        words[-1].pause = 100;
+    }
+    words[-1].next = NULL;
+    return count;
+}
+
+// Groups a list of words into runs, and the runs into runs of those. A word starts a run if its unk_08 or unk_09
+// is set, if the word before it has a pause, or if it is the first; it starts a run of runs for the same reasons
+// but unk_08.
+void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_02086fd8_B *b) {
+    ShttsUnk_020870c8 *first = word;
+
+    a->count = 0;
+    for (; word != NULL; word = word->next) {
+        if ((word->unk_08 != 0 || word->unk_09 != 0) || a->count == 0 || word[-1].pause != 0 || word == first) {
+            a->next = a + 1;
+            a++;
+            a->first = word;
+            a->last = word;
+            a->count = 1;
+            a->unk_2 = word->unk_08;
+            a->unk_1 = word->unk_06;
+            if (word->unk_09 != 0 || word[-1].pause != 0 || word == first) {
+                b->next = b + 1;
+                b++;
+                b->first = a;
+                b->count = 1;
+                b->unk_1 = word->unk_09;
+            } else {
+                b->count++;
+            }
+        } else {
+            a->count++;
+            a->last = word;
+        }
+    }
+    a->next = NULL;
+    b->next = NULL;
+}
+
+// Splits a word's text into its sounds, each a syllable that ends in a vowel, "N" or "-", and writes the text
+// again from them. A vowel in upper case marks its sound with 'U', a 'Q' marks the sound that follows, and '?' and
+// '!' are counted in the word.
+// Not matching yet: four instructions of the last loop have r0 and r1 the other way round. The original shifts
+// the incremented counter into r1 and loads word->count into r0 ("lsl r1, r0, #16; ldrsb r0, [sl, #4]; asr r4,
+// r1, #16; cmp r0, r1, asr #16"); this shifts in r0 and loads into r1. The loop alone in a function compiles as
+// it does here whatever its form. Tried without effect: for, while, do-while and goto forms with and without a
+// guard, the counter set before the guard, the increment in the body or the header and as ++i, i += 1, i = i + 1,
+// the comparison either way round and with casts, the counter as i, j, length or a new s16, int or s8 variable
+// (int with an (s16) cast at each assignment too), the count read into c, j, max, length or a new variable of
+// each type before the loop and in it, inline functions for the count, the step and the comparison, and char,
+// signed char, const and volatile for the field.
+void func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine) {
+    char *p;
+    s16 length;
+    s16 i;
+    s16 j;
+    int c;
+
+    word->count = 0;
+    word->first = sound;
+    p = sound->name;
+    length = strlen(word->text);
+    for (i = 0; i < length; i++) {
+        if (word->count >= max) {
+            word->text[i] = 0;
+            break;
+        }
+        c = word->text[i];
+        switch (c) {
+        case '?':
+            if ((word->unk_07 & 7) < 3) {
+                word->unk_07++;
+            }
+            break;
+        case '!':
+            if (((word->unk_07 & 0x70) >> 4) < 3) {
+                word->unk_07 += 0x10;
+            }
+            break;
+        case 'Q':
+            sound->unk_04 = 'Q';
+            break;
+        case 'A':
+        case 'I':
+        case 'U':
+        case 'E':
+        case 'O':
+            if (c <= 'Z' && c >= 'A') {
+                c += 0x20;
+            }
+            sound->unk_05 = 'U';
+            c = (char)c;
+            // Fall through
+        case 'a':
+        case 'i':
+        case 'u':
+        case 'e':
+        case 'o':
+        case 'N':
+        case '-':
+            if (c == '-') {
+                if (sound == engine->unk_00010) {
+                    break;
+                }
+                if (sound->name[0] != 0) {
+                    break;
+                }
+                sound[-1].unk_05 = 'L';
+            }
+            p[0] = c;
+            p[1] = 0;
+            if (strcmp(sound->name, "-") != 0) {
+                for (j = 0; j < 0x90; j++) {
+                    if (strcmp(sound->name, data_020bbf34[j]) == 0) {
+                        break;
+                    }
+                }
+                if (j == 0x90) {
+                    func_02087d98(sound, engine);
+                    p = sound->name;
+                    break;
+                }
+            }
+            sound->pitch = engine->cur.pitch;
+            sound->next = sound + 1;
+            sound = sound->next;
+            func_02087d98(sound, engine);
+            p = sound->name;
+            word->count++;
+            break;
+        case '~':
+            break;
+        default:
+            if (p - sound->name < 2) {
+                *p++ = c;
+            }
+            break;
+        }
+    }
+    func_02087d98(sound, engine);
+    word->text[0] = 0;
+    sound = word->first;
+    for (i = 0; i < word->count; i++) {
+        strcat(word->text, sound->name);
+        sound = sound->next;
     }
 }
 
@@ -1030,6 +1632,71 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
         default:
             return -3;
         }
+    }
+    return 0;
+}
+
+// Carries out a word that is a command, and otherwise copies it to out with a '-' for the second of two vowels
+// that are the same. Returns -3 for a command, -1 for the end of a sentence, -2 for a comma, 0 for anything else.
+int func_02087bd4(char *text, char *out, Shtts *engine) {
+    s16 i;
+    s16 pos;
+    int c;
+
+    *out = 0;
+    if (func_020873a4(text, 1, engine) != 0) {
+        return -3;
+    }
+    for (i = 0; i < 5; i++) {
+        pos = 0;
+        do {
+            int found = func_02087dc8(text + pos, data_020bac34[i]);
+
+            if (found < 0) {
+                break;
+            }
+            pos += found + 1;
+            text[pos] = '-';
+            pos++;
+        } while (pos < 0x60);
+    }
+    if (strcmp(text, "S") == 0) {
+        return -1;
+    }
+    if (strcmp(text, "。") == 0) {
+        return -1;
+    }
+    if (strcmp(text, ".") == 0) {
+        return -1;
+    }
+    if (strcmp(text, "!") == 0) {
+        return -1;
+    }
+    if (strcmp(text, "?") == 0) {
+        return -1;
+    }
+    if (strcmp(text, "、") == 0) {
+        return -2;
+    }
+    if (strcmp(text, "，") == 0) {
+        return -2;
+    }
+    if (strcmp(text, ",") == 0) {
+        return -2;
+    }
+    strcpy(out, text);
+    c = text[strlen(text) - 1];
+    if (c == '.') {
+        return -1;
+    }
+    if (c == '!') {
+        return -1;
+    }
+    if (c == '?') {
+        return -1;
+    }
+    if (c == ',') {
+        return -2;
     }
     return 0;
 }
@@ -3326,7 +3993,7 @@ void func_0208c690(void *arg) {
     int added;
 
     func_0208be38(engine);
-    func_02086a74(engine->text, (char **)&engine->unk_0E628);
+    func_02086a74(engine->text, &engine->unk_0E628);
     while (1) {
         if (engine->unk_0EE14 == 1) {
             if (func_0208cc10((void *)&engine->phones[0], engine) == -1) {
@@ -3337,10 +4004,10 @@ void func_0208c690(void *arg) {
             func_0208ad48(engine);
             continue;
         }
-        if (func_02086b90(engine->unk_00A24, engine->unk_00010, engine) == 0) {
+        if (func_02086b90((void *)engine->unk_00A24, engine->unk_00010, engine) == 0) {
             break;
         }
-        func_02086fd8(engine->unk_00A44, engine->unk_01244, engine->unk_01654);
+        func_02086fd8((void *)engine->unk_00A44, (void *)engine->unk_01244, (void *)engine->unk_01654);
         func_02085b30((void *)engine->unk_01254, engine);
         func_0208a038((void *)&engine->unk_01660, engine);
         count = 0;

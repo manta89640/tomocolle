@@ -7,14 +7,16 @@ struct Shtts {
     /* 0x00008 */ u32 unk_00008;
     /* 0x0000C */ u16 unk_0000C;
     /* 0x0000E */ u8 pad_0000E[0x2];
-    /* 0x00010 */ u8 unk_00010[0xA14];
+    /* 0x00010 */ ShttsUnk_02087d98 unk_00010[0x81]; // The sounds of the words, see func_020870c8
     /* 0x00A24 */ u8 unk_00A24[0x20];
     /* 0x00A44 */ u8 unk_00A44[0x800];
     /* 0x01244 */ u8 unk_01244[0x10];
     /* 0x01254 */ u8 unk_01254[0x400];
     /* 0x01654 */ u8 unk_01654[0xC];
     /* 0x01660 */ ShttsUnk_01660 unk_01660;
-    /* 0x0166C */ u8 pad_0166C[0x4B5];
+    /* 0x0166C */ u8 pad_0166C[0x2F4];
+    /* 0x01960 */ char unk_01960[0x1C0]; // The words' text, as func_02086b90 leaves it
+    /* 0x01B20 */ u8 pad_01B20[0x1];
     /* 0x01B21 */ s8 unk_01B21;
     /* 0x01B22 */ u8 pad_01B22[0x2];
     /* 0x01B24 */ ShttsPhone phones[0x101]; // The sounds of a part of the text
@@ -60,10 +62,10 @@ struct Shtts {
     /* 0x0B72C */ s8 unk_0B72C;
     /* 0x0B72D */ s8 unk_0B72D;
     /* 0x0B72E */ u8 pad_0B72E[0x2];
-    /* 0x0B730 */ u8 unk_0B730[16];
-    /* 0x0B740 */ u8 echoBuffer[0x2EE4];
-    /* 0x0E624 */ u32 unk_0E624;
-    /* 0x0E628 */ u32 unk_0E628;
+    /* 0x0B730 */ s32 unk_0B730[4]; // The last two results and the last two inputs of the filter of func_0208683c
+    /* 0x0B740 */ s32 echoBuffer[3001]; // A ring
+    /* 0x0E624 */ s32 unk_0E624; // How many samples have gone through the echo
+    /* 0x0E628 */ char *unk_0E628; // Where in the text func_02086b90 is
     /* 0x0E62C */ s16 firBuffer[1001];
     /* 0x0EDFE */ u8 pad_0EDFE[0x2];
     /* 0x0EE00 */ s32 unk_0EE00; // How many samples have gone into firBuffer

@@ -226,7 +226,7 @@ void func_02085704(ShttsUnk_020856b0 *unk, s16 *in, s16 *out, int count);
 int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine);
 void func_02085a70(Shtts *engine);
 void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine);
-void func_02085d80(ShttsUnk_02085b30_C **units, int count, int total, int isFirst, int isLast, int position, char *unk, int unk_16, Shtts *engine);
+void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8, Shtts *engine);
 
 
 // ---- From the decompilation of group c
@@ -468,10 +468,114 @@ void func_0208c230(ShttsUnk_05D38 **units, s16 *pitches, s16 count, Shtts *engin
 
 void func_0208c690(void *arg);
 
-int func_02086b90(void *a, void *b, Shtts *engine);
 
-void func_02086fd8(void *a, void *b, void *c);
 
 #include "shtts_struct.h"
+
+// ---- From the decompilation of group b
+// One word of the text, with the sounds it is made of
+typedef struct ShttsUnk_020870c8 {
+    /* 0x00 */ char *text;
+    /* 0x04 */ s8 count; // How many sounds it has
+    /* 0x05 */ s8 unk_05;
+    /* 0x06 */ s8 unk_06;
+    /* 0x07 */ s8 unk_07; // How many '?' it has, up to 3, and how many '!' in the next four bits
+    /* 0x08 */ s8 unk_08;
+    /* 0x09 */ s8 unk_09;
+    /* 0x0A */ s16 speed;
+    /* 0x0C */ s8 unk_0C;
+    /* 0x0E */ s16 unk_0E;
+    /* 0x10 */ u8 pad_10[2];
+    /* 0x12 */ s16 pause;
+    /* 0x14 */ s16 unk_14;
+    /* 0x16 */ s16 volume;
+    /* 0x18 */ ShttsUnk_02087d98 *first; // Its first sound
+    /* 0x1C */ struct ShttsUnk_020870c8 *next;
+} ShttsUnk_020870c8; // 0x20
+
+// A run of words that func_02086fd8 makes
+typedef struct ShttsUnk_02086fd8_A {
+    /* 0x0 */ s8 count; // How many words
+    /* 0x1 */ s8 unk_1;
+    /* 0x2 */ s8 unk_2;
+    /* 0x4 */ ShttsUnk_020870c8 *first;
+    /* 0x8 */ ShttsUnk_020870c8 *last;
+    /* 0xC */ struct ShttsUnk_02086fd8_A *next;
+} ShttsUnk_02086fd8_A; // 0x10
+
+// A run of those runs
+typedef struct ShttsUnk_02086fd8_B {
+    /* 0x0 */ s8 count; // How many runs
+    /* 0x1 */ s8 unk_1;
+    /* 0x4 */ ShttsUnk_02086fd8_A *first;
+    /* 0x8 */ struct ShttsUnk_02086fd8_B *next;
+} ShttsUnk_02086fd8_B; // 0xC
+
+// Tables of numbers that func_02085d80 adds up, each a run of smaller tables that one property of a sound indexes
+extern const char data_020b9cd0[0x90];
+
+extern const char data_020b9d60[0x90];
+
+extern const char data_020b9df0[0x90];
+
+typedef struct ShttsUnk_020ba288 {
+    /* 0x00 */ s16 unk_00;
+    /* 0x02 */ s16 unk_02[28];
+    /* 0x3A */ s16 unk_3A[27];
+    /* 0x70 */ s16 unk_70[27];
+    /* 0xA6 */ s16 unk_A6[2];
+    /* 0xAA */ s16 unk_AA[4];
+    /* 0xB2 */ s16 unk_B2[65];
+} ShttsUnk_020ba288; // 0x134
+
+typedef struct ShttsUnk_020b9e80 {
+    /* 0x00 */ s16 unk_00;
+    /* 0x02 */ s16 unk_02[5];
+    /* 0x0C */ s16 unk_0C[27];
+    /* 0x42 */ s16 unk_42[47];
+    /* 0xA0 */ s16 unk_A0[28];
+    /* 0xD8 */ s16 unk_D8[9];
+    /* 0xEA */ s16 unk_EA[37];
+} ShttsUnk_020b9e80; // 0x134
+
+typedef struct ShttsUnk_020b9fb4 {
+    /* 0x00 */ s16 unk_00;
+    /* 0x02 */ s16 unk_02[27];
+    /* 0x38 */ s16 unk_38[64];
+    /* 0xB8 */ s16 unk_B8[5];
+    /* 0xC2 */ s16 unk_C2[63];
+} ShttsUnk_020b9fb4; // 0x140
+
+typedef struct ShttsUnk_020ba0f4 {
+    /* 0x00 */ s16 unk_00;
+    /* 0x02 */ s16 unk_02[5];
+    /* 0x0C */ s16 unk_0C[27];
+    /* 0x42 */ s16 unk_42[68];
+    /* 0xCA */ s16 unk_CA[4];
+    /* 0xD2 */ s16 unk_D2[97];
+} ShttsUnk_020ba0f4; // 0x194
+
+extern const ShttsUnk_020b9e80 data_020b9e80;
+
+extern const ShttsUnk_020b9fb4 data_020b9fb4;
+
+extern const ShttsUnk_020ba0f4 data_020ba0f4;
+
+extern const ShttsUnk_020ba288 data_020ba288[8];
+
+extern const s16 data_020bac28[6];
+
+extern const char data_020bac34[5][3];
+
+extern const char data_020bbf34[0x90][4];
+
+void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engine);
+
+void func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine);
+
+int func_02087bd4(char *text, char *out, Shtts *engine);
+
+int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *engine);
+void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_02086fd8_B *b);
 
 #endif // SHTTS_H
