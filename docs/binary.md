@@ -77,9 +77,29 @@ The main program is not all game code. Measured, from strings:
 | `sound_data.sdat` | NitroSystem's sound library |
 | `tmd_msg_JP.bmg`, ... | BMG message files; `tmd` appears to be the project's own prefix |
 
-The low addresses of the main program are SDK code (the cache functions that write to CP15 are at `0x02008054` and
-after). Where the libraries end and the game begins is not mapped yet, and it matters: library code is identified
-rather than decompiled, and should be counted apart from the game's own.
+### Where they are
+
+`tools/match_objects.py` compares the functions of the game with those of compiled objects of these libraries, as
+another decompilation builds them (Pokémon Platinum's: NitroSDK 4.2.30001, NitroSystem 071126.1 and the compiler's
+MSL). A function is taken as found when its bytes are equal outside the places the linker fills in, and one of three
+further grounds holds, which the tool's header describes. Measured that way:
+
+| Library | Functions found | Where in the main program |
+| --- | --- | --- |
+| NitroSDK | 646 | `0x02000800` to about `0x02014600`, and all six functions of the ITCM |
+| MSL C library | 93 | `0x02014AA4` to `0x0201F4DC` |
+| NitroSystem | 554 | `0x02053C64` to about `0x02069C00` |
+| NitroWiFi, NitroDWC | none | Not linked: the game has no Nintendo Wi-Fi Connection code |
+
+Every object's functions come out in the game in the order they have in the object, with none out of place, which is
+what a correct match looks like and a coincidence does not. The names the matcher gave agree with the ten assigned by
+hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
+
+So 1,293 of the main program's 4,205 functions are library code with known names, and 155 library files are cut
+out as units under `lib/`. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
+matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
+game's 30007.
 
 ## Compiler
 

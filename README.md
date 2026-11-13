@@ -15,11 +15,12 @@ This repository holds none of the game. You bring your own ROM, and the build ta
 
 ## Where it stands
 
-The ROM is taken apart into 114 modules (the main program, its two autoloads and 111 overlays) and linked back
+The ROM is taken apart into its 114 modules (the main program, its two autoloads and 111 overlays) and linked back
 together by the original linker, and every module comes out identical. That is the baseline the rest stands on: any
 piece of it can now be replaced by source, and the build says at once whether the result still matches.
 
-Of the game's 7,356 functions (1.96 MB of code), the first six are decompiled. See
+Of the game's 7,356 functions (1.96 MB of code), 1,293 are identified as code of the SDK, NitroSystem and the
+compiler's library, named, and split into 155 files, and the first six of the game's own are decompiled. See
 [ByteMatch](https://bytematch.dev/manta89640/tomocolle) for the current numbers.
 
 ## Building

@@ -66,6 +66,25 @@ be finished:
   field. A guessed name reads as knowledge, and is worse than none.
 - `dsd sig apply --all` names the functions dsd has signatures for. Run it again when dsd is updated.
 
+### Library code, in bulk
+
+Library functions are not named one at a time. `tools/match_objects.py` finds them by comparing the game with compiled
+objects of the library, which a built checkout of another decompilation provides, and both names them and cuts their
+files out as units:
+
+```sh
+P=~/pokeplatinum
+python3 tools/match_objects.py \
+    NitroSDK=$P/build/subprojects/NitroSDK-4.2.30001/libraries \
+    NitroSystem=$P/build/subprojects/NitroSystem-071126.1/libraries \
+    MSL_C=$P/build/MSL_C_NITRO_Ai_LE.a \
+    --sources NitroSDK=$P/subprojects/NitroSDK-4.2.30001/libraries \
+    --sources NitroSystem=$P/subprojects/NitroSystem-071126.1/libraries
+```
+
+Without `--apply` it reports what it would do. It only reads those objects: nothing of them is copied here but the
+names. Any library that exists as objects with symbols can be matched the same way.
+
 ## Subdividing units
 
 A module starts as one unit, its gap. Cut a file out of it as soon as the file's bounds are known, before any of its
@@ -102,9 +121,10 @@ boundary makes two files that can never match, and costs more than a large gap d
 
 The order that the code itself suggests:
 
-1. **Map the libraries in the main program.** Much of it is NitroSDK, NitroSystem and middleware, for which names and
-   often source are known. Naming those functions makes all the code that calls them readable, and cutting them into
-   units under `lib/` draws the line between library and game. `lib/NitroSDK/os/os_cache.c` is the first.
+1. **Finish mapping the libraries in the main program.** NitroSDK, NitroSystem and part of MSL are named and cut into
+   units under `lib/` (see [binary.md](binary.md)). Still to find: the rest of MSL, WH, NFL and the text-to-speech
+   middleware. Every library function named makes the game code that calls it readable, and what is left when the
+   libraries are out is the game.
 2. **Recover the classes that every scene is built from.** Each overlay holds classes that derive from ones in the
    main program, so little of an overlay can be finished before its base classes are.
 3. **Then the overlays**, smallest first: each is a self-contained piece of the game and a short path to a complete
