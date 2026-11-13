@@ -201,7 +201,8 @@ LIBRARIES = {
 LIBRARIES["lib/SHTTS/"] = {
     "compiler": MWCC_VERSION,
     "msl": GAME_MSL,
-    "flags": [*CC_FLAGS, "-lang=c99"],
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c99"],
+    "sjis": True,  # Its strings are Japanese too, so its sources go through sjiswrap like the game's
     "defines": SDK_DEFINES,
     "includes": ["lib/SHTTS", *SDK_INCLUDES],
 }
@@ -595,7 +596,8 @@ def main():
                 flags.append(f"-prefix {settings['prefix']}")
             n.build([obj], "mwcc_lib", [source], implicit=["tools/fix_depfile.py"], order_only=generated,
                     variables={
-                        "cc": shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),
+                        "cc": ("$sjiswrap " if settings.get("sjis") else "")
+                        + shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),
                         "flags": " ".join(flags),
                         "includes": " ".join(f"-i {shlex.quote(d)}" for d in includes),
                         "dep": obj.with_suffix(".d"),
