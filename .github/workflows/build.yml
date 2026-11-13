@@ -1,0 +1,94 @@
+name: Build
+
+# compile: every decompiled source file compiles. Needs no ROM, so it runs for every push and pull request.
+#
+# build: builds the ROM from the base ROM, checks every module against it, and uploads objdiff's progress report as
+# the artifact <version>_report, which ByteMatch reads from successful runs on main.
+#
+# The base ROM cannot live in this repository, so the build job only runs once the repository has
+#   - the variable BASEROM_REPO: a private repository (owner/name) that holds baserom_<version>.nds.xz
+#   - the secret BASEROM_DEPLOY_KEY: a read-only deploy key of that repository
+# Pull requests from forks get no secrets, so they skip it. See docs/bytematch.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compile:
+    name: Compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Cache tools
+        uses: actions/cache@v6
+        with:
+          path: tools/bin
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('configure.py') }}
+
+      - name: Check the scripts
+        run: python -m py_compile configure.py tools/*.py
+
+      - name: Compile
+        run: |
+          python configure.py
+          ninja compile
+
+  build:
+    name: Build ${{ matrix.version }}
+    if: >-
+      vars.BASEROM_REPO != '' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [jpn_rev1]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check out the base ROM
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ vars.BASEROM_REPO }}
+          ssh-key: ${{ secrets.BASEROM_DEPLOY_KEY }}
+          path: baserom
+
+      - name: Unpack the base ROM
+        run: |
+          xz -dc baserom/baserom_${{ matrix.version }}.nds.xz > orig/baserom_${{ matrix.version }}.nds
+          rm -rf baserom
+
+      - name: Install ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Cache tools
+        uses: actions/cache@v6
+        with:
+          path: tools/bin
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('configure.py') }}
+
+      - name: Build and check
+        run: |
+          python configure.py ${{ matrix.version }}
+          ninja
+          ninja report
+
+      - name: Upload the progress report
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.version }}_report
+          path: build/${{ matrix.version }}/report.json
