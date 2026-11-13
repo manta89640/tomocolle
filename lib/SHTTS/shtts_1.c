@@ -10,20 +10,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-int func_0208e09c(Shtts *engine, int value);
-int func_0208e0cc(Shtts *engine, int value);
-int func_0208e0fc(Shtts *engine, int value);
-int func_0208e12c(Shtts *engine, int value);
-int func_0208e160(Shtts *engine, int value);
-int func_0208e190(Shtts *engine, int value);
-int func_0208e1c0(Shtts *engine, int value);
-int func_0208e1e8(Shtts *engine, int value);
-int func_0208e210(Shtts *engine, int value);
-int func_0208e238(Shtts *engine, int value);
-int func_0208e298(Shtts *engine, int value);
-int func_0208e2c0(Shtts *engine, int value);
-int func_0208e2e8(Shtts *engine, int value);
-int func_0208e310(Shtts *engine, int value);
+int ShttsParam_SetSpeed(Shtts *engine, int value);
+int ShttsParam_SetPitch(Shtts *engine, int value);
+int ShttsParam_SetVolume(Shtts *engine, int value);
+int ShttsParam_SetWarp(Shtts *engine, int value);
+int ShttsParam_SetRing(Shtts *engine, int value);
+int ShttsParam_SetEchoDelay(Shtts *engine, int value);
+int ShttsParam_SetEchoGain(Shtts *engine, int value);
+int ShttsParam_SetFirDelay(Shtts *engine, int value);
+int ShttsParam_SetFirGain(Shtts *engine, int value);
+int ShttsParam_SetMode(Shtts *engine, int value);
+int ShttsParam_SetChorus(Shtts *engine, int value);
+int ShttsParam_SetAccent(Shtts *engine, int value);
+int ShttsParam_SetPhrase(Shtts *engine, int value);
+int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 
 // The next four are written in assembly in the original too: they use the processor's multiply-accumulate
 // instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
@@ -31,26 +31,26 @@ int func_0208e310(Shtts *engine, int value);
 
 // Takes a text and starts the thread that speaks it
 static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->unk_0EE11 = unk;
-    func_0208d4f0(engine, callback, arg);
-    func_02089c50(engine);
-    memset(engine->unk_0B0E6, 0, sizeof(engine->unk_0B0E6));
-    strncpy(engine->unk_0B0E6, text, sizeof(engine->unk_0B0E6));
-    if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] != 0) {
+    engine->runInCaller = unk;
+    ShttsEngine_SetCallback(engine, callback, arg);
+    ShttsEngine_ResetSynthesis(engine);
+    memset(engine->inputText, 0, sizeof(engine->inputText));
+    strncpy(engine->inputText, text, sizeof(engine->inputText));
+    if (engine->inputText[sizeof(engine->inputText) - 1] != 0) {
         // Too long: cut it, and not in the middle of a character of two bytes
-        engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] = 0;
-        if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] & 0x80) {
-            engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] = 0;
+        engine->inputText[sizeof(engine->inputText) - 1] = 0;
+        if (engine->inputText[sizeof(engine->inputText) - 2] & 0x80) {
+            engine->inputText[sizeof(engine->inputText) - 2] = 0;
         }
     }
-    func_0208c5a8(engine);
+    ShttsEngine_Start(engine);
 }
 
 // Fractional multiply of two Q15 values.
 static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
 
 // Compares two strings, taking 'I' and 'U' for 'i' and 'u'
-int func_0208473c(const char *a, const char *b) {
+int ShttsDict_CompareWords(const char *a, const char *b) {
     while (*a != 0 || *b != 0) {
         int ca = *a;
         int cb = *b;
@@ -73,13 +73,13 @@ int func_0208473c(const char *a, const char *b) {
 }
 
 // Looks a word up in a sorted list. If it is there, writes it back as the list spells it and returns its value.
-int func_02084794(char *text, ShttsWordList *list) {
+int ShttsDict_FindWord(char *text, ShttsDict *list) {
     int low = 0;
     int high = list->count - 1;
 
     while (low <= high) {
         int middle = (low + high) >> 1;
-        s16 order = func_0208473c(text, list->words[middle].name);
+        s16 order = ShttsDict_CompareWords(text, list->words[middle].name);
 
         if (order < 0) {
             high = middle - 1;
@@ -93,8 +93,8 @@ int func_02084794(char *text, ShttsWordList *list) {
     return -1;
 }
 
-int func_02084814(void *arg) {
-    s16 count = func_020857e8(arg) - 2;
+int ShttsWord_GetDefaultAccent(void *arg) {
+    s16 count = ShttsWord_CountMorae(arg) - 2;
 
     if (count < 0) {
         return 0;
@@ -104,7 +104,7 @@ int func_02084814(void *arg) {
 
 // Replaces each name of a preset in the text, such as "<\Spk_male>" or "<\Name=value>", by the preset's commands,
 // each on a line of its own, followed by the value if there is one. The result is cut off at 0x400 characters.
-void func_02084830(char *text) {
+void ShttsText_ExpandPresets(char *text) {
     char pending = 0;
     char one[2] = {0};
     char out[0x400];
@@ -157,21 +157,21 @@ void func_02084830(char *text) {
                 }
             }
             for (k = 0; k < SHTTS_PRESET_COUNT; k++) {
-                if (strcmp(name, data_020b7fc8[k].name) == 0) {
+                if (strcmp(name, ShttsTextPresets[k].name) == 0) {
                     int valueLength = strlen(value + 1);
-                    int commandsLength = strlen(data_020b7fc8[k].commands);
+                    int commandsLength = strlen(ShttsTextPresets[k].commands);
 
                     length += commandsLength + valueLength;
                     if (length >= 0x400) {
                         goto done;
                     }
-                    strcat(dst, data_020b7fc8[k].commands);
+                    strcat(dst, ShttsTextPresets[k].commands);
                     if (value[1] == '+') {
                         strcat(dst, value + 2);
                     } else {
                         strcat(dst, value + 1);
                     }
-                    if (strcmp(data_020b7fc8[k].commands, "#p") == 0) {
+                    if (strcmp(ShttsTextPresets[k].commands, "#p") == 0) {
                         length += strlen("\\");
                         if (length >= 0x400) {
                             goto done;
@@ -206,10 +206,10 @@ done:
     strcpy(text, out);
 }
 
-// Gives each entry from first to last its length, and has func_020850e0 fill out with that many pointers to the
+// Gives each entry from first to last its length, and has ShttsSynth_StretchFrames fill out with that many pointers to the
 // entry's frames (entries first to last of the frames). Returns the sum of the lengths.
-s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames,
-                  ShttsUnk_020850e0 **out, Shtts *engine) {
+s16 ShttsSynth_StretchSegments(ShttsStretchSegment *first, ShttsStretchSegment *last, ShttsStretchFrame *frames,
+                  ShttsStretchFrame **out, Shtts *engine) {
     s16 i;
     s16 a = 0;
     s16 b;
@@ -219,12 +219,12 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
     s16 frameCount;
     s16 result;
     s8 next;
-    ShttsUnk_02084c1c *p;
+    ShttsStretchSegment *p;
 
-    if (engine->unk_0EE0E == -1 || engine->unk_0EE0E == 2) {
-        engine->unk_0B72D = -1;
+    if (engine->runKind == -1 || engine->runKind == 2) {
+        engine->stretchSide = -1;
     } else {
-        engine->unk_0B72D = 1;
+        engine->stretchSide = 1;
     }
     count = 0;
     p = first;
@@ -237,7 +237,7 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
     }
     frameCount = last->last - first->first + 1;
     b = 0;
-    engine->unk_08538 = 0;
+    engine->framePointerCount = 0;
     result = 0;
     next = first[1].phoneme;
     for (i = 0; i < count; i++, first++) {
@@ -248,12 +248,12 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
         if (length < 0) {
             continue;
         }
-        if (i + 1 < count && first[1].first == first[1].last && (data_020bc22c[first->phoneme] & 0x80)) {
+        if (i + 1 < count && first[1].first == first[1].last && (ShttsPhonemeFlags[first->phoneme] & 0x80)) {
             i++;
             first++;
             length += first->length;
         }
-        if (engine->unk_0EE0E == 0 && (data_020bc22c[next] & 0x56) == 0x40) {
+        if (engine->runKind == 0 && (ShttsPhonemeFlags[next] & 0x56) == 0x40) {
             s16 x;
 
             x = first[1].first != first[1].last ? first[1].last - first[1].first + 1
@@ -261,7 +261,7 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
                 : first[3].first != first[3].last ? first[3].last - first[3].first + 1 : 0;
             if (frameCount > total) {
                 if (i == 0 && count > 1) {
-                    engine->unk_0B72D = 1;
+                    engine->stretchSide = 1;
                     length = (length + ((length + first[1].length) * (first->last - first->first + 1)) /
                                            (first->last - first->first + 1 + x) + 1) >> 1;
                     a = length;
@@ -270,18 +270,18 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
                     }
                 } else if (i > 0) {
                     if (i > 1 && b != 0) {
-                        engine->unk_0B72D = -1;
+                        engine->stretchSide = -1;
                         length = total - a - b;
                     } else {
-                        engine->unk_0B72D = 0;
+                        engine->stretchSide = 0;
                         b = length + first[-1].length - a;
                         length = b;
                     }
                 }
             } else {
                 if (i == 0 && count > 1) {
-                    engine->unk_0B72D = 1;
-                    if (data_020bc22c[first[1].phoneme] & 0x40) {
+                    engine->stretchSide = 1;
+                    if (ShttsPhonemeFlags[first[1].phoneme] & 0x40) {
                         length = first->length + ((first[1].length - x) >> 1);
                         a = length;
                     } else {
@@ -289,14 +289,14 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
                     }
                 } else if (i > 0) {
                     if (i > 1 && b != 0) {
-                        engine->unk_0B72D = -1;
+                        engine->stretchSide = -1;
                         length = total - b - a;
-                    } else if (data_020bc22c[first->phoneme] & 0x40) {
-                        engine->unk_0B72D = 0;
+                    } else if (ShttsPhonemeFlags[first->phoneme] & 0x40) {
+                        engine->stretchSide = 0;
                         b = first->last - first->first + 1;
                         length = b;
                     } else {
-                        engine->unk_0B72D = -1;
+                        engine->stretchSide = -1;
                         length = total - a;
                     }
                 }
@@ -307,34 +307,34 @@ s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_02
         if (n < 1) {
             length = 0;
         } else {
-            s8 flags = data_020bc22c[phoneme];
+            s8 flags = ShttsPhonemeFlags[phoneme];
 
-            engine->unk_0B72A = (flags & 0x10) == 0;
-            engine->unk_0B728 = flags & 4;
-            engine->unk_0B729 = flags & 8;
-            engine->unk_0B72C = flags & 2;
-            engine->unk_0B72B = flags & 0x80;
-            if (engine->unk_08538 + length >= 0x9FF) {
-                length = 0x9FF - engine->unk_08538;
+            engine->phonemeNoFlag10 = (flags & 0x10) == 0;
+            engine->phonemeFlag04 = flags & 4;
+            engine->phonemeFlag08 = flags & 8;
+            engine->phonemeFlag02 = flags & 2;
+            engine->phonemeFlag80 = flags & 0x80;
+            if (engine->framePointerCount + length >= 0x9FF) {
+                length = 0x9FF - engine->framePointerCount;
             }
             if (length <= 0) {
                 length = 0;
             } else {
-                engine->unk_08538 += length;
-                func_020850e0(frames, n, length, out, engine);
+                engine->framePointerCount += length;
+                ShttsSynth_StretchFrames(frames, n, length, out, engine);
             }
         }
         first->length = length;
         frames += first->last - first->first + 1;
         out += length;
         result += length;
-        engine->unk_0B72D = -1;
+        engine->stretchSide = -1;
     }
     return result;
 }
 
 // Fills dst with dstCount pointers to the srcCount entries at src, repeating or leaving out entries
-void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_020850e0 **dst, Shtts *engine) {
+void ShttsSynth_StretchFrames(ShttsStretchFrame *src, s16 srcCount, s16 dstCount, ShttsStretchFrame **dst, Shtts *engine) {
     s16 i;
     s16 j;
     s16 diff;
@@ -348,10 +348,10 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
         }
         return;
     }
-    if (engine->unk_0B72B != 0 || engine->unk_0B728 != 0 || engine->unk_0B729 != 0) {
+    if (engine->phonemeFlag80 != 0 || engine->phonemeFlag04 != 0 || engine->phonemeFlag08 != 0) {
         diff = dstCount - srcCount;
         if (diff < 0) {
-            if (engine->unk_0B72D == 1 && engine->unk_0B72B != 0 && engine->unk_0EE0E == -1 && -diff <= dstCount) {
+            if (engine->stretchSide == 1 && engine->phonemeFlag80 != 0 && engine->runKind == -1 && -diff <= dstCount) {
                 for (i = 0; i < dstCount; i++) {
                     *dst++ = src;
                     src++;
@@ -366,7 +366,7 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
                 }
                 return;
             }
-            if (engine->unk_0B72D == -1 && engine->unk_0B72B != 0 && engine->unk_0EE0E == -1 && -diff <= dstCount) {
+            if (engine->stretchSide == -1 && engine->phonemeFlag80 != 0 && engine->runKind == -1 && -diff <= dstCount) {
                 dst += dstCount - 1;
                 src += srcCount - 1;
                 for (; dstCount > 0; dstCount--) {
@@ -395,7 +395,7 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
             }
             return;
         }
-        if (engine->unk_0B72D == 1 && engine->unk_0B72B != 0) {
+        if (engine->stretchSide == 1 && engine->phonemeFlag80 != 0) {
             for (i = 0; i < diff; i++) {
                 *dst++ = src;
             }
@@ -405,7 +405,7 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
             }
             return;
         }
-        if (engine->unk_0B72D == -1 && engine->unk_0B72B != 0) {
+        if (engine->stretchSide == -1 && engine->phonemeFlag80 != 0) {
             for (i = 0; i < srcCount; i++) {
                 *dst++ = src;
                 src++;
@@ -455,7 +455,7 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
             src++;
         }
     } else if (diff > 0) {
-        if (engine->unk_0B72A == 0 && engine->unk_0B72C != 0) {
+        if (engine->phonemeNoFlag10 == 0 && engine->phonemeFlag02 != 0) {
             if (n != 0) {
                 for (i = 0; i < first; i++) {
                     *dst++ = src;
@@ -463,7 +463,7 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
                 }
             }
             for (i = 0; i < diff; i++) {
-                *dst++ = data_020bc258;
+                *dst++ = ShttsFillerFrame;
             }
             dstCount -= diff;
             if (n >= 6) {
@@ -508,53 +508,53 @@ void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_
     }
 }
 
-void func_020856b0(ShttsUnk_020856b0 *unk, int rate) {
+void ShttsEffect_InitChorus(ShttsChorus *unk, int rate) {
     if (rate <= 0) {
         rate = 1;
     }
-    unk->unk_200 = ((0x12C00 / rate) << 5) / 256;
-    if (unk->unk_200 == 0) {
-        unk->unk_200 = 1;
+    unk->sweepPeriod = ((0x12C00 / rate) << 5) / 256;
+    if (unk->sweepPeriod == 0) {
+        unk->sweepPeriod = 1;
     }
-    unk->unk_204 = 0;
-    unk->unk_208 = 0;
-    unk->unk_20C = 0;
-    memset(unk->unk_000, 0, sizeof(unk->unk_000));
+    unk->writePos = 0;
+    unk->sweepPos = 0;
+    unk->sweepTimer = 0;
+    memset(unk->ring, 0, sizeof(unk->ring));
 }
 
 // A chorus: gives for each sample the mean of two earlier ones, at delays that sweep up and down and add up to 255
-void func_02085704(ShttsUnk_020856b0 *unk, s16 *in, s16 *out, int count) {
+void ShttsEffect_ApplyChorus(ShttsChorus *unk, s16 *in, s16 *out, int count) {
     int i;
 
     for (i = 0; i < count; i++) {
         int delay;
 
-        unk->unk_000[unk->unk_204] = in[i];
+        unk->ring[unk->writePos] = in[i];
         out[i] = 0;
-        delay = unk->unk_208;
+        delay = unk->sweepPos;
         if (delay >= 0x100) {
             delay = 0x1FF - delay;
         }
-        out[i] += unk->unk_000[(unk->unk_204 - delay) & 0xFFu] >> 1;
+        out[i] += unk->ring[(unk->writePos - delay) & 0xFFu] >> 1;
         delay = 0xFF - delay;
-        out[i] += unk->unk_000[(unk->unk_204 - delay) & 0xFFu] >> 1;
-        unk->unk_204++;
-        if (unk->unk_204 >= 0x100) {
-            unk->unk_204 = 0;
+        out[i] += unk->ring[(unk->writePos - delay) & 0xFFu] >> 1;
+        unk->writePos++;
+        if (unk->writePos >= 0x100) {
+            unk->writePos = 0;
         }
-        unk->unk_20C += 0x20;
-        if (unk->unk_20C >= unk->unk_200) {
-            unk->unk_20C = 0;
-            unk->unk_208++;
-            if (unk->unk_208 >= 0x1FF) {
-                unk->unk_208 = 0;
+        unk->sweepTimer += 0x20;
+        if (unk->sweepTimer >= unk->sweepPeriod) {
+            unk->sweepTimer = 0;
+            unk->sweepPos++;
+            if (unk->sweepPos >= 0x1FF) {
+                unk->sweepPos = 0;
             }
         }
     }
 }
 
 // The number of vowels, 'N's, 'Q's and '-'s in text
-int func_020857e8(const char *text) {
+int ShttsWord_CountMorae(const char *text) {
     s16 count;
 
     if (text == NULL) {
@@ -584,22 +584,22 @@ int func_020857e8(const char *text) {
     return count;
 }
 
-// Has func_020894cc fill unk_0853A from its second entry on, works out unk_0871E (0 to 90) and unk_0871C (0 to 239),
-// scales what was filled in by twice the entry of data_020b9b04 that unk_0871E picks, and keeps the count first
-int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine) {
+// Has ShttsSynth_DecodeFrame fill frameWave from its second entry on, works out gainIndex (0 to 90) and pitchPeriod (0 to 239),
+// scales what was filled in by twice the entry of ShttsGainLevels that gainIndex picks, and keeps the count first
+int ShttsSynth_PrepareFrame(ShttsPreparedFrame *unk, int b, Shtts *engine) {
     s16 count;
     int gain;
 
-    engine->unk_08720 = func_020894cc(unk, engine->unk_0853A, engine);
-    if (unk->unk_3 == (s8)engine->unk_00004 || unk->unk_3 == 0) {
+    engine->frameWaveCount = ShttsSynth_DecodeFrame(unk, engine->frameWave, engine);
+    if (unk->unk_3 == (s8)engine->frameLength || unk->unk_3 == 0) {
         b = 0;
     }
-    engine->unk_0871E = (unk->unk_0 * 0xCCD + 0x4000) >> 15;
-    if (engine->unk_0871E > 90) {
-        engine->unk_0871E = 90;
+    engine->gainIndex = (unk->unk_0 * 0xCCD + 0x4000) >> 15;
+    if (engine->gainIndex > 90) {
+        engine->gainIndex = 90;
     }
-    if (engine->unk_0871E < 0) {
-        engine->unk_0871E = 0;
+    if (engine->gainIndex < 0) {
+        engine->gainIndex = 0;
     }
     if (b > 0) {
         s16 index = (b >> 7) - 28;
@@ -612,63 +612,63 @@ int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine) {
             index = 0;
         }
         fraction = b & 0x7F;
-        engine->unk_0871C = (data_020b9aa0[index] * data_020b9bbc[fraction]) >> 16;
-        engine->unk_0871C = (engine->unk_00000 * engine->unk_0871C) >> 16;
-        engine->unk_0871C = (engine->unk_0871C * 0x3EE2) >> 16;
+        engine->pitchPeriod = (ShttsPitchPeriodCoarse[index] * ShttsPitchPeriodFine[fraction]) >> 16;
+        engine->pitchPeriod = (engine->sampleRate * engine->pitchPeriod) >> 16;
+        engine->pitchPeriod = (engine->pitchPeriod * 0x3EE2) >> 16;
     } else {
-        engine->unk_0871C = b;
+        engine->pitchPeriod = b;
     }
-    if (engine->unk_0871C < 0) {
-        engine->unk_0871C = 0;
-    } else if (engine->unk_0871C >= 240) {
-        engine->unk_0871C = 239;
+    if (engine->pitchPeriod < 0) {
+        engine->pitchPeriod = 0;
+    } else if (engine->pitchPeriod >= 240) {
+        engine->pitchPeriod = 239;
     }
-    count = engine->unk_08720;
+    count = engine->frameWaveCount;
     if (count < 0) {
         count = -count;
     }
-    gain = data_020b9b04[engine->unk_0871E] * 2;
+    gain = ShttsGainLevels[engine->gainIndex] * 2;
     if (count > 0) {
-        func_02089e74(&engine->unk_0853A[1], &engine->unk_0853A[1], count, gain);
+        ShttsMath_ScaleSamples(&engine->frameWave[1], &engine->frameWave[1], count, gain);
     }
-    engine->unk_0853A[0] = count;
+    engine->frameWave[0] = count;
     return 1;
 }
 
-int func_02085a64(Shtts *engine) {
-    return engine->unk_0871C;
+int ShttsSynth_GetPitchPeriod(Shtts *engine) {
+    return engine->pitchPeriod;
 }
 
-// Copies unk_0853A to unk_08724, or sets the first of unk_08724 to 0
-void func_02085a70(Shtts *engine) {
+// Copies frameWave to addWave, or sets the first of addWave to 0
+void ShttsSynth_CopyFrameWave(Shtts *engine) {
     s16 i;
 
-    if (engine->unk_08720 > 0 && engine->unk_0871C > 0) {
-        for (i = 0; i <= engine->unk_08720; i++) {
-            engine->unk_08724[i] = engine->unk_0853A[i];
+    if (engine->frameWaveCount > 0 && engine->pitchPeriod > 0) {
+        for (i = 0; i <= engine->frameWaveCount; i++) {
+            engine->addWave[i] = engine->frameWave[i];
         }
-    } else if (engine->unk_08720 < 0 || engine->unk_0871C == 0) {
-        for (i = 0; i <= engine->unk_0853A[0]; i++) {
-            engine->unk_08724[i] = engine->unk_0853A[i];
+    } else if (engine->frameWaveCount < 0 || engine->pitchPeriod == 0) {
+        for (i = 0; i <= engine->frameWave[0]; i++) {
+            engine->addWave[i] = engine->frameWave[i];
         }
     } else {
-        engine->unk_08724[0] = 0;
+        engine->addWave[0] = 0;
     }
 }
 
 // Walks the list in runs: a run ends at the entry whose count is 0 or whose unk_8->unk_12 is not 0. For each run it
-// adds up func_020857e8 of the texts, and then calls func_02085d80 for each B of each entry with a list of pointers:
-// data_020b9cbc for the entry's first B and otherwise where the walk of the B before ended, then the B's units, then
-// the first unit of the next B, or data_020b9cbc if there is none.
-void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
-    ShttsUnk_02085b30_C *units[98];
+// adds up ShttsWord_CountMorae of the texts, and then calls ShttsDuration_SetWordSyllables for each B of each entry with a list of pointers:
+// ShttsBoundarySyllable for the entry's first B and otherwise where the walk of the B before ended, then the B's units, then
+// the first unit of the next B, or ShttsBoundarySyllable if there is none.
+void ShttsDuration_ProcessGroups(ShttsDurationAccentGroup *list, Shtts *engine) {
+    ShttsDurationSyllable *units[98];
     char unk = 0x1A;
-    ShttsUnk_02085b30_A *last = list;
-    ShttsUnk_02085b30_A *first = list;
-    ShttsUnk_02085b30_A *a;
-    ShttsUnk_02085b30_B *b;
-    ShttsUnk_02085b30_C *c;
-    ShttsUnk_02085b30_C **p;
+    ShttsDurationAccentGroup *last = list;
+    ShttsDurationAccentGroup *first = list;
+    ShttsDurationAccentGroup *a;
+    ShttsDurationWord *b;
+    ShttsDurationSyllable *c;
+    ShttsDurationSyllable **p;
     s16 total;
     s16 i;
     s8 isFirst;
@@ -682,36 +682,36 @@ void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
         total = 0;
         b = first->first;
         for (i = 0; i < first->count; i++) {
-            total += func_020857e8(b->text);
+            total += ShttsWord_CountMorae(b->text);
             b = b->next;
         }
         while (last->count != 0 && last->unk_8->unk_12 == 0) {
             last = last->next;
             for (i = 0; i < last->count; i++) {
-                total += func_020857e8(b->text);
+                total += ShttsWord_CountMorae(b->text);
                 b = b->next;
             }
         }
         for (a = first; a <= last; a++) {
-            c = &data_020b9cbc;
+            c = &ShttsBoundarySyllable;
             b = a->first;
             for (i = 0; i < a->count; i++, b = b->next) {
                 s16 k;
 
                 p = units;
                 *p++ = c;
-                c = b->unk_18;
+                c = b->first;
                 for (k = 0; k < b->count; k++, c = c->next) {
                     *p++ = c;
                 }
                 if (b->next != NULL) {
-                    if (b->next->unk_18 != NULL) {
-                        *p = b->next->unk_18;
+                    if (b->next->first != NULL) {
+                        *p = b->next->first;
                     } else {
-                        *p = &data_020b9cbc;
+                        *p = &ShttsBoundarySyllable;
                     }
                 } else {
-                    *p = &data_020b9cbc;
+                    *p = &ShttsBoundarySyllable;
                 }
                 isFirst = a == first && i == 0;
                 isLast = a == last && i == a->count - 1;
@@ -723,7 +723,7 @@ void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
                     position = 1;
                 }
                 engine->cur.speed = b->speed;
-                func_02085d80((void *)units, b->count, total, isFirst, isLast, position, &unk, b->unk_16, engine);
+                ShttsDuration_SetWordSyllables((void *)units, b->count, total, isFirst, isLast, position, &unk, b->volume, engine);
             }
         }
         last = last->next;

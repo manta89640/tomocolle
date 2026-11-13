@@ -11,20 +11,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-int func_0208e09c(Shtts *engine, int value);
-int func_0208e0cc(Shtts *engine, int value);
-int func_0208e0fc(Shtts *engine, int value);
-int func_0208e12c(Shtts *engine, int value);
-int func_0208e160(Shtts *engine, int value);
-int func_0208e190(Shtts *engine, int value);
-int func_0208e1c0(Shtts *engine, int value);
-int func_0208e1e8(Shtts *engine, int value);
-int func_0208e210(Shtts *engine, int value);
-int func_0208e238(Shtts *engine, int value);
-int func_0208e298(Shtts *engine, int value);
-int func_0208e2c0(Shtts *engine, int value);
-int func_0208e2e8(Shtts *engine, int value);
-int func_0208e310(Shtts *engine, int value);
+int ShttsParam_SetSpeed(Shtts *engine, int value);
+int ShttsParam_SetPitch(Shtts *engine, int value);
+int ShttsParam_SetVolume(Shtts *engine, int value);
+int ShttsParam_SetWarp(Shtts *engine, int value);
+int ShttsParam_SetRing(Shtts *engine, int value);
+int ShttsParam_SetEchoDelay(Shtts *engine, int value);
+int ShttsParam_SetEchoGain(Shtts *engine, int value);
+int ShttsParam_SetFirDelay(Shtts *engine, int value);
+int ShttsParam_SetFirGain(Shtts *engine, int value);
+int ShttsParam_SetMode(Shtts *engine, int value);
+int ShttsParam_SetChorus(Shtts *engine, int value);
+int ShttsParam_SetAccent(Shtts *engine, int value);
+int ShttsParam_SetPhrase(Shtts *engine, int value);
+int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 
 // The next four are written in assembly in the original too: they use the processor's multiply-accumulate
 // instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
@@ -32,25 +32,25 @@ int func_0208e310(Shtts *engine, int value);
 
 // Takes a text and starts the thread that speaks it
 static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->unk_0EE11 = unk;
-    func_0208d4f0(engine, callback, arg);
-    func_02089c50(engine);
-    memset(engine->unk_0B0E6, 0, sizeof(engine->unk_0B0E6));
-    strncpy(engine->unk_0B0E6, text, sizeof(engine->unk_0B0E6));
-    if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] != 0) {
+    engine->runInCaller = unk;
+    ShttsEngine_SetCallback(engine, callback, arg);
+    ShttsEngine_ResetSynthesis(engine);
+    memset(engine->inputText, 0, sizeof(engine->inputText));
+    strncpy(engine->inputText, text, sizeof(engine->inputText));
+    if (engine->inputText[sizeof(engine->inputText) - 1] != 0) {
         // Too long: cut it, and not in the middle of a character of two bytes
-        engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] = 0;
-        if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] & 0x80) {
-            engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] = 0;
+        engine->inputText[sizeof(engine->inputText) - 1] = 0;
+        if (engine->inputText[sizeof(engine->inputText) - 2] & 0x80) {
+            engine->inputText[sizeof(engine->inputText) - 2] = 0;
         }
     }
-    func_0208c5a8(engine);
+    ShttsEngine_Start(engine);
 }
 
 // Fractional multiply of two Q15 values.
 static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
 
-int func_02086628(s16 value) {
+int ShttsDuration_ClassifyMoraCount(s16 value) {
     if (value <= 3) {
         return 0;
     }
@@ -77,7 +77,7 @@ int func_02086628(s16 value) {
 
 // Scales unk_06 and unk_08 of each sound of a list by the speed, a percentage. For some kinds of sound, unk_06 only
 // if the sound has a 'Q'.
-void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engine) {
+void ShttsDuration_ApplySpeed(ShttsSyllable **list, char *kinds, int count, Shtts *engine) {
     s16 i;
 
     for (i = 1; i <= count; i++) {
@@ -91,7 +91,7 @@ void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engi
         case 26:
         case 27:
         case 28:
-            if (list[i]->unk_04 == 'Q') {
+            if (list[i]->qMark == 'Q') {
                 list[i]->unk_06 = (engine->cur.speed * list[i]->unk_06 + 50) / 100;
             }
             list[i]->unk_08 = (engine->cur.speed * list[i]->unk_08 + 50) / 100;
@@ -105,32 +105,32 @@ void func_020866bc(ShttsUnk_02087d98 **list, char *kinds, int count, Shtts *engi
 }
 
 // Empties the echo's history
-void func_02086814(Shtts *engine) {
-    engine->unk_0E624 = 0;
+void ShttsEffect_ResetEcho(Shtts *engine) {
+    engine->echoCount = 0;
     memset(engine->echoBuffer, 0, sizeof(engine->echoBuffer));
 }
 
 // The echo: adds to each sample the one of a delay ago, from a ring of 3001 that it feeds with the samples
 // filtered and scaled by the gain
-void func_0208683c(int count, s16 *src, s16 *dst, Shtts *engine) {
+void ShttsEffect_ApplyEcho(int count, s16 *src, s16 *dst, Shtts *engine) {
     int i;
     s16 gain = engine->cur.echoGain << 8;
 
     for (i = 0; i < count; i++) {
         int sample;
-        int filtered = func_02086a20(engine->unk_0B730, data_020bac28, src[i] << 13) << 1;
+        int filtered = ShttsEffect_SumEchoFilter(engine->echoFilterState, ShttsEchoFilterCoefs, src[i] << 13) << 1;
 
-        engine->unk_0B730[3] = engine->unk_0B730[2];
-        engine->unk_0B730[2] = src[i] << 13;
-        engine->unk_0B730[1] = engine->unk_0B730[0];
-        engine->unk_0B730[0] = filtered << 1;
-        if (engine->unk_0E624 < engine->cur.echoDelay) {
-            engine->echoBuffer[engine->unk_0E624] = func_0208e81c(filtered, gain);
+        engine->echoFilterState[3] = engine->echoFilterState[2];
+        engine->echoFilterState[2] = src[i] << 13;
+        engine->echoFilterState[1] = engine->echoFilterState[0];
+        engine->echoFilterState[0] = filtered << 1;
+        if (engine->echoCount < engine->cur.echoDelay) {
+            engine->echoBuffer[engine->echoCount] = ShttsEffect_MultiplyDoubled(filtered, gain);
             sample = src[i];
         } else {
-            engine->echoBuffer[engine->unk_0E624 % 3001] =
-                func_0208e81c(filtered + engine->echoBuffer[(engine->unk_0E624 - engine->cur.echoDelay) % 3001], gain);
-            sample = src[i] + (engine->echoBuffer[(engine->unk_0E624 - engine->cur.echoDelay) % 3001] >> 12);
+            engine->echoBuffer[engine->echoCount % 3001] =
+                ShttsEffect_MultiplyDoubled(filtered + engine->echoBuffer[(engine->echoCount - engine->cur.echoDelay) % 3001], gain);
+            sample = src[i] + (engine->echoBuffer[(engine->echoCount - engine->cur.echoDelay) % 3001] >> 12);
         }
         if (sample > 0x7FFF) {
             sample = 0x7FFF;
@@ -138,11 +138,11 @@ void func_0208683c(int count, s16 *src, s16 *dst, Shtts *engine) {
             sample = -0x7FFF;
         }
         dst[i] = sample;
-        engine->unk_0E624++;
+        engine->echoCount++;
     }
 }
 
-asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
+asm int ShttsEffect_SumEchoFilter(const int *state, const s16 *coefficients, int input) {
     stmfd sp!, {r3, r4, lr}
     sub sp, sp, #3
     mov lr, #0
@@ -166,12 +166,12 @@ asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
     bx lr
 }
 
-void func_02086a74(char *value, char **out) {
+void ShttsLine_SetCursor(char *value, char **out) {
     *out = value;
 }
 
 // Copies a line of text, up to size, and moves the cursor past it. Returns its length, -1 at the end of the text.
-int func_02086a7c(char *dst, int size, char **cursor) {
+int ShttsLine_ReadNext(char *dst, int size, char **cursor) {
     s16 length;
     int last;
 
@@ -196,7 +196,7 @@ int func_02086a7c(char *dst, int size, char **cursor) {
 }
 
 // Reads the text to speak from standard input, a line at a time
-void func_02086b14(Shtts *engine) {
+void ShttsText_ReadStdin(Shtts *engine) {
     char line[150];
     int length = 0;
 
@@ -215,7 +215,7 @@ void func_02086b14(Shtts *engine) {
 
 // Reads lines of the text into words, until one ends a sentence or has a pause. A line is a word and up to six
 // numbers after it, with spaces between. Returns how many words there are.
-int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *engine) {
+int ShttsWord_ReadWords(ShttsSpokenWord *words, ShttsSyllable *sounds, Shtts *engine) {
     char line[0xC0];
     char word[0xC1];
     char *cursor;
@@ -223,7 +223,7 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
     int phrase;
     int pause;
     int end;
-    char *text = engine->unk_01960;
+    char *text = engine->wordText;
     int n; // The word's type, then the speed's factor, then the length of its text
     s16 count;
     int textLength;
@@ -233,7 +233,7 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
     int c;
     s16 i;
 
-    func_02087d98(sounds, engine);
+    ShttsWord_ClearSyllable(sounds, engine);
     count = 0;
     words->pause = 0;
     words->next = words + 1;
@@ -241,7 +241,7 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
     soundCount = 0;
     words = words->next;
     while (1) {
-        if (func_02086a7c(line, 0xC0, &engine->unk_0E628) < 0) {
+        if (ShttsLine_ReadNext(line, 0xC0, &engine->lineCursor) < 0) {
             break;
         }
         i = strlen(line);
@@ -249,36 +249,36 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
             line[i - 1] = 0;
         }
         accent = 10;
-        words->unk_0E = words->unk_14 = n = 0;
+        words->lineValue6 = words->unk_14 = n = 0;
         phrase = accent;
         word[0] = 0;
         cursor = line;
         pause = 200;
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             strcpy(word, token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             n = atoi(token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             accent = atoi(token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             phrase = atoi(token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             pause = atoi(token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
-            words->unk_0E = atoi(token);
+            words->lineValue6 = atoi(token);
         }
-        token = func_02089da0(&cursor, " ");
+        token = ShttsUtil_NextToken(&cursor, " ");
         if (token != NULL) {
             words->unk_14 = atoi(token);
         }
@@ -304,20 +304,20 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
         words->unk_05 = n;
         words->unk_06 = n;
         words->unk_08 = (accent * engine->cur.accent * 0x28F + 0x8000) >> 16;
-        words->unk_09 = (phrase * engine->cur.phrase * 0x28F + 0x8000) >> 16;
+        words->phraseStrength = (phrase * engine->cur.phrase * 0x28F + 0x8000) >> 16;
         n = (engine->cur.speed * 0x28F + 0x80) >> 8;
-        words->pause = func_02087e44((n * pause + 0x80) >> 8, 0, 30000, "pause*speed");
+        words->pause = ShttsParam_Clamp((n * pause + 0x80) >> 8, 0, 30000, "pause*speed");
         words->unk_0C = engine->cur.unk_00;
         words->speed = engine->cur.speed;
         words->volume = engine->cur.volume;
         words->unk_07 = 0;
         if (words->unk_06 == -1) {
-            words->unk_06 = func_02084794(word, (ShttsWordList *)engine);
+            words->unk_06 = ShttsDict_FindWord(word, (ShttsDict *)engine);
             if (words->unk_06 == -1) {
-                words->unk_06 = func_02084814(word);
+                words->unk_06 = ShttsWord_GetDefaultAccent(word);
             }
         }
-        end = func_02087bd4(word, line, engine);
+        end = ShttsWord_PrepareText(word, line, engine);
         if ((int)(textLength + (strlen(line) + 1)) > 0x1C0) {
             line[0x1BF - textLength] = 0;
         }
@@ -325,7 +325,7 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
         words->text = text;
         n = strlen(text);
         if (n > 0) {
-            func_020870c8(words, sounds, 0x80 - soundCount, engine);
+            ShttsWord_SplitSyllables(words, sounds, 0x80 - soundCount, engine);
             if (words->count == 0) {
                 continue;
             }
@@ -357,15 +357,15 @@ int func_02086b90(ShttsUnk_020870c8 *words, ShttsUnk_02087d98 *sounds, Shtts *en
     return count;
 }
 
-// Groups a list of words into runs, and the runs into runs of those. A word starts a run if its unk_08 or unk_09
+// Groups a list of words into runs, and the runs into runs of those. A word starts a run if its unk_08 or phraseStrength
 // is set, if the word before it has a pause, or if it is the first; it starts a run of runs for the same reasons
 // but unk_08.
-void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_02086fd8_B *b) {
-    ShttsUnk_020870c8 *first = word;
+void ShttsWord_GroupWords(ShttsSpokenWord *word, ShttsAccentGroup *a, ShttsPhraseGroup *b) {
+    ShttsSpokenWord *first = word;
 
     a->count = 0;
     for (; word != NULL; word = word->next) {
-        if ((word->unk_08 != 0 || word->unk_09 != 0) || a->count == 0 || word[-1].pause != 0 || word == first) {
+        if ((word->unk_08 != 0 || word->phraseStrength != 0) || a->count == 0 || word[-1].pause != 0 || word == first) {
             a->next = a + 1;
             a++;
             a->first = word;
@@ -373,12 +373,12 @@ void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_020
             a->count = 1;
             a->unk_2 = word->unk_08;
             a->unk_1 = word->unk_06;
-            if (word->unk_09 != 0 || word[-1].pause != 0 || word == first) {
+            if (word->phraseStrength != 0 || word[-1].pause != 0 || word == first) {
                 b->next = b + 1;
                 b++;
                 b->first = a;
                 b->count = 1;
-                b->unk_1 = word->unk_09;
+                b->unk_1 = word->phraseStrength;
             } else {
                 b->count++;
             }
@@ -395,7 +395,7 @@ void func_02086fd8(ShttsUnk_020870c8 *word, ShttsUnk_02086fd8_A *a, ShttsUnk_020
 // again from them. A vowel in upper case marks its sound with 'U', a 'Q' marks the sound that follows, and '?' and
 // '!' are counted in the word.
 // Returns how many sounds the word has.
-int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Shtts *engine) {
+int ShttsWord_SplitSyllables(ShttsSpokenWord *word, ShttsSyllable *sound, int max, Shtts *engine) {
     char *p;
     s16 length;
     s16 i;
@@ -424,7 +424,7 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
             }
             break;
         case 'Q':
-            sound->unk_04 = 'Q';
+            sound->qMark = 'Q';
             break;
         case 'A':
         case 'I':
@@ -445,7 +445,7 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
         case 'N':
         case '-':
             if (c == '-') {
-                if (sound == engine->unk_00010) {
+                if (sound == engine->syllables) {
                     break;
                 }
                 if (sound->name[0] != 0) {
@@ -457,12 +457,12 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
             p[1] = 0;
             if (strcmp(sound->name, "-") != 0) {
                 for (j = 0; j < 0x90; j++) {
-                    if (strcmp(sound->name, data_020bbf34[j]) == 0) {
+                    if (strcmp(sound->name, ShttsSyllableNames[j]) == 0) {
                         break;
                     }
                 }
                 if (j == 0x90) {
-                    func_02087d98(sound, engine);
+                    ShttsWord_ClearSyllable(sound, engine);
                     p = sound->name;
                     break;
                 }
@@ -470,7 +470,7 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
             sound->pitch = engine->cur.pitch;
             sound->next = sound + 1;
             sound = sound->next;
-            func_02087d98(sound, engine);
+            ShttsWord_ClearSyllable(sound, engine);
             p = sound->name;
             word->count++;
             break;
@@ -483,7 +483,7 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
             break;
         }
     }
-    func_02087d98(sound, engine);
+    ShttsWord_ClearSyllable(sound, engine);
     word->text[0] = 0;
     sound = word->first;
     for (i = 0; i < word->count; i++) {
@@ -496,7 +496,7 @@ int func_020870c8(ShttsUnk_020870c8 *word, ShttsUnk_02087d98 *sound, int max, Sh
 // Carries out one command of the text: '#', a letter, and for most a number, which after a '+' is added to the
 // value in use instead of replacing it. With live set it changes the settings in use, otherwise the caller's.
 // Returns 0 if the text is not a command, and -3 if it is, known or not.
-int func_020873a4(const char *command, int live, Shtts *engine) {
+int ShttsParam_RunCommand(const char *command, int live, Shtts *engine) {
     int value;
 
     if (command[0] == '#') {
@@ -511,18 +511,18 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
         case 'B':
             if (live) {
                 if (command[2] == '+') {
-                    value = engine->cur.pitch + func_02087e64(command + 3);
+                    value = engine->cur.pitch + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->cur.pitch = func_02087e44(value, 3500, 7000, "Pitch");
+                engine->cur.pitch = ShttsParam_Clamp(value, 3500, 7000, "Pitch");
             } else {
                 if (command[2] == '+') {
-                    value = engine->set.pitch + func_02087e64(command + 3);
+                    value = engine->set.pitch + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->set.pitch = func_02087e44(value, 3500, 7000, "Pitch");
+                engine->set.pitch = ShttsParam_Clamp(value, 3500, 7000, "Pitch");
             }
             return -3;
         case 'C':
@@ -552,22 +552,22 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
             return -3;
         case 'E':
             // Emphasis: higher, stronger, slower and louder
-            engine->cur.pitch = func_02087e44(engine->cur.pitch + 100, 3500, 7000, "Pitch");
-            engine->cur.accent = func_02087e44(engine->cur.accent + 5, 0, 400, "Accent");
-            engine->cur.phrase = func_02087e44(engine->cur.phrase + 5, 0, 400, "Phrase");
-            engine->cur.speed = func_02087e44(engine->cur.speed - 10, 20, 2200, "Speed");
-            engine->cur.volume = func_02087e44(engine->cur.volume + 10, -10000, 360, "Volume");
+            engine->cur.pitch = ShttsParam_Clamp(engine->cur.pitch + 100, 3500, 7000, "Pitch");
+            engine->cur.accent = ShttsParam_Clamp(engine->cur.accent + 5, 0, 400, "Accent");
+            engine->cur.phrase = ShttsParam_Clamp(engine->cur.phrase + 5, 0, 400, "Phrase");
+            engine->cur.speed = ShttsParam_Clamp(engine->cur.speed - 10, 20, 2200, "Speed");
+            engine->cur.volume = ShttsParam_Clamp(engine->cur.volume + 10, -10000, 360, "Volume");
             return -3;
         case 'D':
             // The opposite
-            engine->cur.pitch = func_02087e44(engine->cur.pitch - 100, 3500, 7000, "Pitch");
-            engine->cur.accent = func_02087e44(engine->cur.accent - 5, 0, 400, "Accent");
-            engine->cur.phrase = func_02087e44(engine->cur.phrase - 5, 0, 400, "Phrase");
-            engine->cur.speed = func_02087e44(engine->cur.speed + 10, 20, 2200, "Speed");
-            engine->cur.volume = func_02087e44(engine->cur.volume - 10, -10000, 360, "Volume");
+            engine->cur.pitch = ShttsParam_Clamp(engine->cur.pitch - 100, 3500, 7000, "Pitch");
+            engine->cur.accent = ShttsParam_Clamp(engine->cur.accent - 5, 0, 400, "Accent");
+            engine->cur.phrase = ShttsParam_Clamp(engine->cur.phrase - 5, 0, 400, "Phrase");
+            engine->cur.speed = ShttsParam_Clamp(engine->cur.speed + 10, 20, 2200, "Speed");
+            engine->cur.volume = ShttsParam_Clamp(engine->cur.volume - 10, -10000, 360, "Volume");
             return -3;
         case 'A':
-            value = func_02087e44(atoi(command + 2), 0, 400, "Accent");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 400, "Accent");
             if (live) {
                 engine->cur.accent = value;
             } else {
@@ -577,65 +577,65 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
         case 'P':
             if (live) {
                 if (command[2] == '+') {
-                    value = engine->cur.phrase + func_02087e64(command + 3);
+                    value = engine->cur.phrase + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->cur.phrase = func_02087e44(value, 0, 400, "Phrase");
+                engine->cur.phrase = ShttsParam_Clamp(value, 0, 400, "Phrase");
             } else {
                 if (command[2] == '+') {
-                    value = engine->set.phrase + func_02087e64(command + 3);
+                    value = engine->set.phrase + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->set.phrase = func_02087e44(value, 0, 400, "Phrase");
+                engine->set.phrase = ShttsParam_Clamp(value, 0, 400, "Phrase");
             }
             return -3;
         case 'S':
             if (live) {
                 if (command[2] == '+') {
-                    value = engine->cur.speed + func_02087e64(command + 3);
+                    value = engine->cur.speed + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->cur.speed = func_02087e44(value, 20, 2200, "Speed");
+                engine->cur.speed = ShttsParam_Clamp(value, 20, 2200, "Speed");
             } else {
                 if (command[2] == '+') {
-                    value = engine->set.speed + func_02087e64(command + 3);
+                    value = engine->set.speed + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->set.speed = func_02087e44(value, 20, 2200, "Speed");
+                engine->set.speed = ShttsParam_Clamp(value, 20, 2200, "Speed");
             }
             return -3;
         case 'V':
             if (live) {
                 if (command[2] == '+') {
-                    value = engine->cur.volume + func_02087e64(command + 3);
+                    value = engine->cur.volume + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->cur.volume = func_02087e44(value, -10000, 360, "Volume");
+                engine->cur.volume = ShttsParam_Clamp(value, -10000, 360, "Volume");
             } else {
                 if (command[2] == '+') {
-                    value = engine->set.volume + func_02087e64(command + 3);
+                    value = engine->set.volume + ShttsParam_ParseShort(command + 3);
                 } else {
                     value = atoi(command + 2);
                 }
-                engine->set.volume = func_02087e44(value, -10000, 360, "Volume");
+                engine->set.volume = ShttsParam_Clamp(value, -10000, 360, "Volume");
             }
             return -3;
         case 'I':
-            value = func_02087e44(atoi(command + 2), 0, 3000, "Echo Delay");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 3000, "Echo Delay");
             if (!live) {
                 engine->set.echoDelay = value;
             } else {
                 engine->cur.echoDelay = value;
-                func_02086814(engine);
+                ShttsEffect_ResetEcho(engine);
             }
             return -3;
         case 'J':
-            value = func_02087e44(atoi(command + 2), 0, 100, "Echo Gain");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 100, "Echo Gain");
             if (live) {
                 engine->cur.echoGain = value;
             } else {
@@ -643,25 +643,25 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
             }
             return -3;
         case 'R':
-            value = func_02087e44(atoi(command + 2), 0, 1000, "Fir Delay");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 1000, "Fir Delay");
             if (!live) {
                 engine->set.firDelay = value;
             } else {
-                func_0208a010(engine);
+                ShttsEffect_ResetFir(engine);
                 engine->cur.firDelay = value;
             }
             return -3;
         case 'G':
-            value = func_02087e44(atoi(command + 2), 0, 100, "Fir Gain");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 100, "Fir Gain");
             if (!live) {
                 engine->set.firGain = value;
             } else {
-                func_0208a010(engine);
+                ShttsEffect_ResetFir(engine);
                 engine->cur.firGain = value;
             }
             return -3;
         case 'r':
-            value = func_02087e44(atoi(command + 2), 0, 5000, "Ring");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 5000, "Ring");
             if (live) {
                 engine->cur.ring = value;
             } else {
@@ -669,7 +669,7 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
             }
             return -3;
         case 'k':
-            value = func_02087e44(atoi(command + 2), 0, 100, "Chorus");
+            value = ShttsParam_Clamp(atoi(command + 2), 0, 100, "Chorus");
             if (live) {
                 engine->cur.chorus = value;
             } else {
@@ -677,14 +677,14 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
             }
             return -3;
         case 'X':
-            func_0208c4dc(func_02087e44(atoi(command + 2), 80, 130, "Warp"), live, engine);
+            ShttsParam_StoreWarp(ShttsParam_Clamp(atoi(command + 2), 80, 130, "Warp"), live, engine);
             return -3;
         case 'Z':
-            func_0208c404(engine);
+            ShttsParam_UseSetParams(engine);
             return -3;
         case 'T':
             if (isdigit(command[2])) {
-                value = func_02087e44(atoi(command + 2), 0, 1000, "PTrans");
+                value = ShttsParam_Clamp(atoi(command + 2), 0, 1000, "PTrans");
                 if (live) {
                     engine->cur.pitchTrans = value;
                 } else {
@@ -701,19 +701,19 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
 
 // Carries out a word that is a command, and otherwise copies it to out with a '-' for the second of two vowels
 // that are the same. Returns -3 for a command, -1 for the end of a sentence, -2 for a comma, 0 for anything else.
-int func_02087bd4(char *text, char *out, Shtts *engine) {
+int ShttsWord_PrepareText(char *text, char *out, Shtts *engine) {
     s16 i;
     s16 pos;
     int c;
 
     *out = 0;
-    if (func_020873a4(text, 1, engine) != 0) {
+    if (ShttsParam_RunCommand(text, 1, engine) != 0) {
         return -3;
     }
     for (i = 0; i < 5; i++) {
         pos = 0;
         do {
-            int found = func_02087dc8(text + pos, data_020bac34[i]);
+            int found = ShttsUtil_FindString(text + pos, ShttsRepeatedVowels[i]);
 
             if (found < 0) {
                 break;
@@ -764,9 +764,9 @@ int func_02087bd4(char *text, char *out, Shtts *engine) {
     return 0;
 }
 
-void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine) {
+void ShttsWord_ClearSyllable(ShttsSyllable *unk, Shtts *engine) {
     unk->name[0] = '\0';
-    unk->unk_04 = unk->unk_05 = '-';
+    unk->qMark = unk->unk_05 = '-';
     unk->unk_08 = 0;
     unk->unk_06 = 0;
     unk->next = NULL;
@@ -774,7 +774,7 @@ void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine) {
 }
 
 // Where one string first is in another, or -1
-int func_02087dc8(const char *text, const char *find) {
+int ShttsUtil_FindString(const char *text, const char *find) {
     const char *t;
     const char *f = find;
     s16 i = 0;
@@ -801,7 +801,7 @@ int func_02087dc8(const char *text, const char *find) {
 }
 
 // A value kept within a range
-s16 func_02087e44(int value, s16 min, s16 max, const char *name) {
+s16 ShttsParam_Clamp(int value, s16 min, s16 max, const char *name) {
     s16 result = min;
 
     if (value >= min) {
@@ -815,7 +815,7 @@ s16 func_02087e44(int value, s16 min, s16 max, const char *name) {
 }
 
 // The number that text starts with, kept within what 16 bits hold
-int func_02087e64(const char *text) {
+int ShttsParam_ParseShort(const char *text) {
     int value = atoi(text);
     int result = -0x8000;
 
@@ -830,10 +830,10 @@ int func_02087e64(const char *text) {
 }
 
 // Turns text into lines for the synthesizer and appends them to dest. Kana become phonemes, which gather into a
-// phrase until punctuation ends it; a phrase becomes one line of its phonemes and four numbers (see func_02089118).
+// phrase until punctuation ends it; a phrase becomes one line of its phonemes and four numbers (see ShttsText_AppendWordLine).
 // Commands between "#Q" and "#q", and other text that starts with '#', are passed on as lines of their own.
 // Returns 0, or where in text it had got to when dest ran out of room.
-const char *func_02087e94(const char *text, char *dest, u32 size) {
+const char *ShttsText_ConvertToLines(const char *text, char *dest, u32 size) {
     char phonemes[0x60];
     char command[0xC1];
     s16 level;
@@ -880,7 +880,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                         *p = '\0';
                         text++;
                         if (command[0] != '\0') {
-                            result = func_02089094(dest, size, command);
+                            result = ShttsText_AppendLine(dest, size, command);
                             if (result < 0) {
                                 break;
                             }
@@ -900,7 +900,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 }
                 *p = '\0';
                 if (command[0] != '\0') {
-                    result = func_02089094(dest, size, command);
+                    result = ShttsText_AppendLine(dest, size, command);
                 }
                 if (result < 0) {
                     break;
@@ -919,7 +919,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                     }
                 }
                 strncat(number, text + 2, i);
-                pauseSet = func_02087e44(atoi(number), 0, 30000, "pause");
+                pauseSet = ShttsParam_Clamp(atoi(number), 0, 30000, "pause");
                 text = text + 3 + i;
                 done = text;
             } else if (text[1] == 'q') {
@@ -949,7 +949,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 }
                 *p = '\0';
                 if (command[0] != '\0') {
-                    result = func_02089094(dest, size, command);
+                    result = ShttsText_AppendLine(dest, size, command);
                     if (result < 0) {
                         break;
                     }
@@ -963,10 +963,10 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                     pauseSet = 1000;
                 }
                 if (accent == 0 && level == 10) {
-                    func_020893e4(text, &level);
+                    ShttsText_ReadStrengthBefore(text, &level);
                 }
-                result = func_02089118(dest, size, phonemes, accent, level, gap,
-                                       func_02087e44(pauseSet + pause, 0, 30000, "pause sum"));
+                result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap,
+                                       ShttsParam_Clamp(pauseSet + pause, 0, 30000, "pause sum"));
                 pauseSet = 0;
                 if (result < 0) {
                     break;
@@ -991,7 +991,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 int i;
 
                 if (accent == 0 && level == 10) {
-                    func_020893e4(text, &level);
+                    ShttsText_ReadStrengthBefore(text, &level);
                 }
                 for (i = 0; i < 6; i++) {
                     if (strlen(phonemes) + 1 >= 0x60) {
@@ -1016,8 +1016,8 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 if (pauseSet == 0) {
                     pauseSet = 1000;
                 }
-                result = func_02089118(dest, size, phonemes, accent, level, gap,
-                                       func_02087e44(pauseSet + pause, 0, 30000, "pause sum"));
+                result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap,
+                                       ShttsParam_Clamp(pauseSet + pause, 0, 30000, "pause sum"));
                 pauseSet = 0;
                 if (result < 0) {
                     break;
@@ -1040,20 +1040,20 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
             if (phonemes[0] != '\0') {
                 if (pause != 0) {
                     if (accent == 0 && level == 10) {
-                        func_020893e4(text, &level);
+                        ShttsText_ReadStrengthBefore(text, &level);
                     }
                     if (pauseSet != 0) {
-                        result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                        result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pauseSet);
                         pauseSet = 0;
                     } else {
-                        result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                        result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                     }
                     total = 0;
                 } else {
                     if (accent == 0 && level == 10) {
-                        func_020893e4(text, &level);
+                        ShttsText_ReadStrengthBefore(text, &level);
                     }
-                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                 }
                 length = 0;
                 if (result < 0) {
@@ -1075,14 +1075,14 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
         } else if (c == '|' || strncmp(text, "｜", 2) == 0) {
             if (phonemes[0] != '\0') {
                 if (accent == 0 && level == 10) {
-                    func_020893e4(text, &level);
+                    ShttsText_ReadStrengthBefore(text, &level);
                 }
                 if (pause != 0 && pauseSet != 0) {
-                    result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                    result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pauseSet);
                     pauseSet = 0;
                     total = 0;
                 } else {
-                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                     if (pause != 0) {
                         total = 0;
                     }
@@ -1109,22 +1109,22 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 if (pause != 0) {
                     if (pauseSet != 0) {
                         if (accent == 0 && level == 10) {
-                            func_020893e4(text, &level);
+                            ShttsText_ReadStrengthBefore(text, &level);
                         }
-                        result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                        result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pauseSet);
                         pauseSet = 0;
                     } else {
                         if (accent == 0 && level == 10) {
-                            func_020893e4(text, &level);
+                            ShttsText_ReadStrengthBefore(text, &level);
                         }
-                        result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                        result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                     }
                     total = 0;
                 } else {
                     if (accent == 0 && level == 10) {
-                        func_020893e4(text, &level);
+                        ShttsText_ReadStrengthBefore(text, &level);
                     }
-                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                 }
                 if (result < 0) {
                     break;
@@ -1150,7 +1150,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
         } else if (c == '_' || strncmp(text, "＿", 2) == 0) {
             if (phonemes[0] != '\0') {
                 if (pause == 0 && accent == 0 && level == 10) {
-                    func_020893e4(text, &level);
+                    ShttsText_ReadStrengthBefore(text, &level);
                 }
                 if (*text == '_') {
                     text++;
@@ -1197,11 +1197,11 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
             }
             strncpy(digit, text, 1);
             p = digit;
-            value = func_020892a8(p, text);
+            value = ShttsText_ParseStrengthDigit(p, text);
             n = 1;
             if (value == -1) {
                 strncpy(p, text, 2);
-                value = func_02089304(p, text);
+                value = ShttsText_ParseWideStrengthDigit(p, text);
                 n = 2;
             }
             if (value == -1) {
@@ -1233,22 +1233,22 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 text += 2;
             }
         } else {
-            s16 index = func_02089244(text, data_020bac4c[0], data_020bac48);
+            s16 index = ShttsText_FindKana(text, ShttsKanaTable[0], ShttsKanaCount);
 
             if (index >= 0) {
                 if (pause != 0) {
                     if (phonemes[0] != '\0') {
                         if (pauseSet != 0) {
                             if (accent == 0 && level == 10) {
-                                func_020893e4(text, &level);
+                                ShttsText_ReadStrengthBefore(text, &level);
                             }
-                            result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                            result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pauseSet);
                             pauseSet = 0;
                         } else {
                             if (accent == 0 && level == 10) {
-                                func_020893e4(text, &level);
+                                ShttsText_ReadStrengthBefore(text, &level);
                             }
-                            result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                            result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
                         }
                         length = 0;
                         total = 0;
@@ -1266,10 +1266,10 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                 }
                 if (!overflow) {
                     s16 n = strlen(phonemes);
-                    s16 add = strlen(&data_020bac4c[index][8]);
+                    s16 add = strlen(&ShttsKanaTable[index][8]);
 
                     if (!(length + add < 0x40 && total + add < 0x100)) {
-                        result = func_02089118(dest, size, phonemes, accent, level, gap, 100);
+                        result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, 100);
                         length = 0;
                         phonemes[0] = '\0';
                         done = text;
@@ -1283,19 +1283,19 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
                     if (n + add >= 0x60) {
                         overflow = 1;
                     } else {
-                        char first = data_020bac4c[index][8];
+                        char first = ShttsKanaTable[index][8];
 
                         if (n != 0 && phonemes[n - 1] == 'Q' && first == 'Q') {
                         } else if (n == 0 && first == '-') {
                         } else if (n == 0 && first == 'Q') {
                         } else {
-                            strcat(phonemes, &data_020bac4c[index][8]);
+                            strcat(phonemes, &ShttsKanaTable[index][8]);
                         }
                     }
                 }
-                text += strlen(data_020bac4c[index]);
-                total += strlen(data_020bac4c[index]);
-                length += strlen(data_020bac4c[index]);
+                text += strlen(ShttsKanaTable[index]);
+                total += strlen(ShttsKanaTable[index]);
+                length += strlen(ShttsKanaTable[index]);
             } else {
                 text++;
                 c = text[-1];
@@ -1318,14 +1318,14 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
         }
         if (pauseSet != 0) {
             if (accent == 0 && level == 10) {
-                func_020893e4(text, &level);
+                ShttsText_ReadStrengthBefore(text, &level);
             }
-            result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+            result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pauseSet);
         } else {
             if (accent == 0 && level == 10) {
-                func_020893e4(text, &level);
+                ShttsText_ReadStrengthBefore(text, &level);
             }
-            result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+            result = ShttsText_AppendWordLine(dest, size, phonemes, accent, level, gap, pause);
         }
         if (result < 0) {
             return done;
@@ -1335,7 +1335,7 @@ const char *func_02087e94(const char *text, char *dest, u32 size) {
 }
 
 // Writes a number in decimal
-char *func_02088fc8(char *out, s16 value) {
+char *ShttsText_FormatNumber(char *out, s16 value) {
     char *p = out;
     s16 div;
     s16 digit;
@@ -1359,7 +1359,7 @@ char *func_02088fc8(char *out, s16 value) {
 }
 
 // Adds a line to text if there is room for it, and returns the line's length
-s16 func_02089094(char *text, u32 size, const char *line) {
+s16 ShttsText_AppendLine(char *text, u32 size, const char *line) {
     char buffer[196];
     int length;
 
@@ -1378,7 +1378,7 @@ s16 func_02089094(char *text, u32 size, const char *line) {
 
 // Appends a line to dest: text and four numbers with spaces between. Returns the length of the line, 0 if text is
 // empty, or -1 if dest has no room for it.
-s16 func_02089118(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s16 d) {
+s16 ShttsText_AppendWordLine(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s16 d) {
     char line[0xC0];
     char number[16];
     int length;
@@ -1388,13 +1388,13 @@ s16 func_02089118(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s
     }
     strcpy(line, text);
     strcat(line, " ");
-    strcat(line, func_02088fc8(number, a));
+    strcat(line, ShttsText_FormatNumber(number, a));
     strcat(line, " ");
-    strcat(line, func_02088fc8(number, b));
+    strcat(line, ShttsText_FormatNumber(number, b));
     strcat(line, " ");
-    strcat(line, func_02088fc8(number, c));
+    strcat(line, ShttsText_FormatNumber(number, c));
     strcat(line, " ");
-    strcat(line, func_02088fc8(number, d));
+    strcat(line, ShttsText_FormatNumber(number, d));
     strcat(line, "\n");
     length = strlen(line);
     if (length + strlen(dest) >= size) {
@@ -1405,7 +1405,7 @@ s16 func_02089118(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s
 }
 
 // Which of a table's entries, of 12 bytes each, a text starts with, or -1
-s16 func_02089244(const char *text, const char *table, int count) {
+s16 ShttsText_FindKana(const char *text, const char *table, int count) {
     s16 i;
 
     for (i = 0; i < count; i++) {
@@ -1421,7 +1421,7 @@ s16 func_02089244(const char *text, const char *table, int count) {
 }
 
 // 0, 1 or 2 for "0", "1" or "2", and -1 for anything else
-int func_020892a8(const char *text, const char *unused) {
+int ShttsText_ParseStrengthDigit(const char *text, const char *unused) {
     if (strcmp(text, "0") == 0) {
         return 0;
     }
@@ -1435,7 +1435,7 @@ int func_020892a8(const char *text, const char *unused) {
 }
 
 // The same for the full-width digits
-int func_02089304(const char *text, const char *unused) {
+int ShttsText_ParseWideStrengthDigit(const char *text, const char *unused) {
     if (strcmp(text, "０") == 0) {
         return 0;
     }
@@ -1449,16 +1449,16 @@ int func_02089304(const char *text, const char *unused) {
 }
 
 // Reads the digit before a position in text, half-width or full-width, and says in out how many bytes it took
-int func_02089360(const char *end, s16 *out) {
+int ShttsText_ReadDigitBefore(const char *end, s16 *out) {
     char digit[3] = { 0, 0, 0 };
     int value;
 
     strncpy(digit, end - 1, 1);
-    value = func_020892a8(digit, end - 1);
+    value = ShttsText_ParseStrengthDigit(digit, end - 1);
     *out = 1;
     if (value == -1) {
         strncpy(digit, end - 2, 2);
-        value = func_02089304(digit, end - 2);
+        value = ShttsText_ParseWideStrengthDigit(digit, end - 2);
         *out = 2;
     }
     if (value == -1) {
@@ -1467,9 +1467,9 @@ int func_02089360(const char *end, s16 *out) {
     return value;
 }
 
-void func_020893e4(const char *text, s16 *out) {
+void ShttsText_ReadStrengthBefore(const char *text, s16 *out) {
     s16 unused = 0;
-    int level = func_02089360(text, &unused);
+    int level = ShttsText_ReadDigitBefore(text, &unused);
 
     if (level == 0) {
         *out = 5;
@@ -1483,7 +1483,7 @@ void func_020893e4(const char *text, s16 *out) {
 }
 
 // Divides a by b, rounding to nearest, with the quotient in 1.15 fixed point and limited to +-0x7FFF
-s16 func_02089444(int a, int b) {
+s16 ShttsMath_DivideRounded(int a, int b) {
     int i;
     int result;
     int sign = 1;
@@ -1520,7 +1520,7 @@ s16 func_02089444(int a, int b) {
 }
 
 // Decodes a frame into samples, which go to out after their count. Returns the count.
-int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
+int ShttsSynth_DecodeFrame(ShttsFrame *frame, s16 *out, Shtts *engine) {
     s16 buffer[0x100];
     u16 freq[10];
     s16 coef[11];
@@ -1542,18 +1542,18 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
             nibble = (frame->unk_8[n / 2] >> 4) & 0xF;
         }
         if (n == 0) {
-            freq[n] = data_020bb720[n][nibble];
+            freq[n] = ShttsLspCodebook[n][nibble];
         } else {
-            freq[n] = freq[n - 1] + data_020bb720[n][nibble];
+            freq[n] = freq[n - 1] + ShttsLspCodebook[n][nibble];
         }
     }
     i = 0;
     cut = 0;
-    if (engine->cur.unk_28 != 0x400) {
+    if (engine->cur.warpScale != 0x400) {
         if ((int)engine->cur.warp > 100) {
-            cut = 10 - engine->cur.unk_2A;
+            cut = 10 - engine->cur.warpOrder;
             for (; i < 10; i++) {
-                int b = (engine->cur.unk_28 * freq[i]) >> 10;
+                int b = (engine->cur.warpScale * freq[i]) >> 10;
                 int a = (freq[i] >> 1) + 0x8000;
 
                 if (a < b) {
@@ -1566,7 +1566,7 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
             s16 base = freq[0] >> 2;
 
             for (; i < 10; i++) {
-                int v = ((engine->cur.unk_28 * (freq[i] - base)) >> 10) + base;
+                int v = ((engine->cur.warpScale * (freq[i] - base)) >> 10) + base;
                 int low = freq[i] * 2 - 0x10000;
 
                 if (v < low) {
@@ -1578,26 +1578,26 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
             }
         }
     }
-    func_020897c8(10 - cut, freq, &coef[1]);
+    ShttsSynth_ConvertLspToLpc(10 - cut, freq, &coef[1]);
     memset(&coef[11] - cut, 0, cut * 2);
     if (frame->unk_2 != 0) {
         memset(state, 0, sizeof(state));
-        if (data_020bc22c[frame->unk_4] & 0x84) {
-            func_0208e83c(0x100, 10, coef, state, data_020bba60, buffer, engine);
+        if (ShttsPhonemeFlags[frame->unk_4] & 0x84) {
+            ShttsSynth_FilterRecursive(0x100, 10, coef, state, ShttsVoicedExcitationAlt, buffer, engine);
         } else {
-            func_0208e83c(0x100, 10, coef, state, data_020bb860, buffer, engine);
+            ShttsSynth_FilterRecursive(0x100, 10, coef, state, ShttsVoicedExcitation, buffer, engine);
         }
         count = 0xF0;
-        func_02089a3c(0x61C, buffer, out + 1, count);
+        ShttsSynth_NormalizeLevel(0x61C, buffer, out + 1, count);
     } else {
-        count = engine->unk_00004;
+        count = engine->frameLength;
         memset(state, 0, sizeof(state));
-        func_0208e83c(count, 10, coef, state, &data_020bbc60[engine->unk_00004 * engine->unk_08722], buffer, engine);
-        engine->unk_08722++;
-        if (engine->unk_08722 >= 6) {
-            engine->unk_08722 = 0;
+        ShttsSynth_FilterRecursive(count, 10, coef, state, &ShttsUnvoicedExcitation[engine->frameLength * engine->unvoicedBlock], buffer, engine);
+        engine->unvoicedBlock++;
+        if (engine->unvoicedBlock >= 6) {
+            engine->unvoicedBlock = 0;
         }
-        func_02089a3c(0x800, buffer, out + 1, count);
+        ShttsSynth_NormalizeLevel(0x800, buffer, out + 1, count);
     }
     *out = count;
     frame->unk_3 = count;
@@ -1605,13 +1605,13 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
 }
 
 // Turns `order` values into as many filter coefficients. Each value is first looked up, with interpolation, in the
-// cosine table that data_020bbf30 points to, and negated. Then an impulse (0x2000000, then zeros) is put through two
+// cosine table that ShttsCosineTable points to, and negated. Then an impulse (0x2000000, then zeros) is put through two
 // chains of order / 2 second-order sections, whose coefficients are the even and the odd cosines, and half the sum
 // of the two chains' outputs, from the second on, is the result.
 //
 // The first loop only matches with the multiplication as an inline function returning s16 (func_020897c8_mult) and
 // with `frac` reused for the product and then for the sum.
-void func_020897c8(int order, u16 *in, s16 *out) {
+void ShttsSynth_ConvertLspToLpc(int order, u16 *in, s16 *out) {
     s16 cosines[10];
     s16 result[11];
     int p[6];
@@ -1635,8 +1635,8 @@ void func_020897c8(int order, u16 *in, s16 *out) {
         t = (in[i] << 7) >> 1;
         j = t >> 15;
         frac = t & 0x7FFF;
-        frac = func_020897c8_mult(data_020bbf30[j + 1] - data_020bbf30[j], frac);
-        frac += data_020bbf30[j];
+        frac = func_020897c8_mult(ShttsCosineTable[j + 1] - ShttsCosineTable[j], frac);
+        frac += ShttsCosineTable[j];
         cosines[i] = -frac;
     }
     for (j = 0; j < half + 1; j++) {
@@ -1650,13 +1650,13 @@ void func_020897c8(int order, u16 *in, s16 *out) {
         prev = x;
         for (j = 0; j < half; j++) {
             t = d[j];
-            r = func_02089b5c(cosines[j * 2] << 16, t);
+            r = ShttsMath_MultiplyFixed(cosines[j * 2] << 16, t);
             old = c[j];
             c[j] = t;
             p[j + 1] = old + (p[j] + (r << 2));
             t = b[j];
             d[j] = p[j];
-            r = func_02089b5c(cosines[j * 2 + 1] << 16, t);
+            r = ShttsMath_MultiplyFixed(cosines[j * 2 + 1] << 16, t);
             old = a[j];
             a[j] = t;
             q[j + 1] = old + (q[j] + (r << 2));
@@ -1672,7 +1672,7 @@ void func_020897c8(int order, u16 *in, s16 *out) {
 
 // Scales `count` samples so that their root mean square is `level`, and keeps them in 16 bits. The roots of the
 // usual counts (55, 60, 120 and 240) are constants.
-void func_02089a3c(int level, s16 *in, s16 *out, int count) {
+void ShttsSynth_NormalizeLevel(int level, s16 *in, s16 *out, int count) {
     s16 root;
     u32 sum;
     s16 i;
@@ -1688,7 +1688,7 @@ void func_02089a3c(int level, s16 *in, s16 *out, int count) {
     } else if (count == 240) {
         root = 124;
     } else {
-        root = func_02089bb0(count) >> 5;
+        root = ShttsMath_ApproximateSqrt(count) >> 5;
     }
     sum = 0;
     for (i = 0; i < count; i++) {
@@ -1700,8 +1700,8 @@ void func_02089a3c(int level, s16 *in, s16 *out, int count) {
         if (sum > 0x3FFF0001) {
             sum = 0x3FFF0001;
         }
-        sum = (s16)(func_02089bb0(sum) >> 8);
-        gain = func_02089444((s16)level * root, (s16)sum);
+        sum = (s16)(ShttsMath_ApproximateSqrt(sum) >> 8);
+        gain = ShttsMath_DivideRounded((s16)level * root, (s16)sum);
     }
     for (i = 0; i < count; i++) {
         v = (gain * in[i]) >> 6;
@@ -1715,7 +1715,7 @@ void func_02089a3c(int level, s16 *in, s16 *out, int count) {
 }
 
 // The product of two numbers in 16.16 fixed point
-int func_02089b5c(int a, int b) {
+int ShttsMath_MultiplyFixed(int a, int b) {
     int sign = 1;
     int product;
 
@@ -1732,7 +1732,7 @@ int func_02089b5c(int a, int b) {
 }
 
 // The square root of a number, times 256, approximated with a quadratic after scaling to a fixed range
-int func_02089bb0(int x) {
+int ShttsMath_ApproximateSqrt(int x) {
     s16 shift = 15;
     int bit;
     int y;
@@ -1762,36 +1762,36 @@ int func_02089bb0(int x) {
 }
 
 // Sets up the engine's state for a new text
-int func_02089c50(Shtts *engine) {
-    engine->unk_04938[0] = 0;
-    engine->unk_0EE0C = 0;
-    engine->unk_0EE0E = 0;
-    func_0208be38(engine);
-    engine->unk_0B700 = 0;
-    func_02089e48(engine->unk_0B704, 0, sizeof(engine->unk_0B704));
-    engine->unk_08722 = 0;
-    engine->unk_0EE04 = 0;
-    engine->unk_0EE08 = 0;
-    engine->unk_08906 = 0;
-    engine->unk_0B6FC = 0;
-    memset(engine->unk_0B730, 0, sizeof(engine->unk_0B730));
+int ShttsEngine_ResetSynthesis(Shtts *engine) {
+    engine->pitchContour[0] = 0;
+    engine->prevRunWeight = 0;
+    engine->runKind = 0;
+    ShttsOutput_Reset(engine);
+    engine->lastOutputSample = 0;
+    ShttsUtil_FillBytes(engine->outputFilterState, 0, sizeof(engine->outputFilterState));
+    engine->unvoicedBlock = 0;
+    engine->prevPhraseNotFirst = 0;
+    engine->prevPhraseStrength = 0;
+    engine->samplesOwed = 0;
+    engine->ringPhase = 0;
+    memset(engine->echoFilterState, 0, sizeof(engine->echoFilterState));
     return 0;
 }
 
-int func_02089cec(Shtts *engine) {
+int ShttsEngine_EndThread(Shtts *engine) {
     return 0;
 }
 
-void func_02089cf4(Shtts *engine) {
+void ShttsEngine_Lock(Shtts *engine) {
     OS_LockMutex(&engine->mutex);
 }
 
-void func_02089d08(Shtts *engine) {
+void ShttsEngine_Unlock(Shtts *engine) {
     OS_UnlockMutex(&engine->mutex);
 }
 
 // Whether the engine is synthesizing
-int func_02089d1c(Shtts *engine) {
+int ShttsEngine_IsBusy(Shtts *engine) {
     int busy;
 
     OS_LockMutex(&engine->mutex);
@@ -1801,7 +1801,7 @@ int func_02089d1c(Shtts *engine) {
 }
 
 // Whether the engine has been asked to stop
-int func_02089d4c(Shtts *engine) {
+int ShttsEngine_IsStopRequested(Shtts *engine) {
     int stopRequested;
 
     OS_LockMutex(&engine->mutex);
@@ -1811,7 +1811,7 @@ int func_02089d4c(Shtts *engine) {
 }
 
 // Where a character first is in a string, or NULL. Unlike strchr, it does not find the end of the string.
-char *func_02089d7c(char *text, int c) {
+char *ShttsUtil_FindChar(char *text, int c) {
     while (*text != 0 && *text != c) {
         text++;
     }
@@ -1823,17 +1823,17 @@ char *func_02089d7c(char *text, int c) {
 
 // The next word of text that the characters of delimiters separate, as strtok does it but with the cursor in the
 // caller's hands
-char *func_02089da0(char **cursor, char *delimiters) {
+char *ShttsUtil_NextToken(char **cursor, char *delimiters) {
     char *word;
 
-    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) != NULL) {
+    while (**cursor != 0 && ShttsUtil_FindChar(delimiters, **cursor) != NULL) {
         (*cursor)++;
     }
     word = *cursor;
     if (*word == 0) {
         return NULL;
     }
-    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) == NULL) {
+    while (**cursor != 0 && ShttsUtil_FindChar(delimiters, **cursor) == NULL) {
         (*cursor)++;
     }
     if (**cursor != 0) {
@@ -1842,7 +1842,7 @@ char *func_02089da0(char **cursor, char *delimiters) {
     return word;
 }
 
-void func_02089e48(char *dst, int c, int count) {
+void ShttsUtil_FillBytes(char *dst, int c, int count) {
     int i;
 
     for (i = 0; i < count; i++) {
@@ -1851,11 +1851,11 @@ void func_02089e48(char *dst, int c, int count) {
 }
 
 // Called with -1 when something is wrong. Does nothing in this build.
-void func_02089e70(int code) {
+void ShttsUtil_ReportError(int code) {
 }
 
 // Scales samples by a gain in 4.12 fixed point, keeping them within 16 bits
-void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
+void ShttsMath_ScaleSamples(s16 *dst, s16 *src, int count, int gain) {
     s16 i = 0;
 
     if (count > 0) {
@@ -1876,16 +1876,16 @@ void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
 
 // The "Fir" effect: adds to each sample the one cur.firDelay samples before it, times cur.firGain / 100. The
 // history is a ring of 1001 samples.
-void func_02089ed4(int count, s16 *in, s16 *out, Shtts *engine) {
+void ShttsEffect_ApplyFir(int count, s16 *in, s16 *out, Shtts *engine) {
     int gain = (int)(engine->cur.firGain << 8) / 100;
     int i;
     int v;
 
     for (i = 0; i < count; i++) {
-        if (engine->unk_0EE00 < engine->cur.firDelay) {
+        if (engine->firCount < engine->cur.firDelay) {
             out[i] = in[i];
         } else {
-            v = in[i] + ((gain * engine->firBuffer[(engine->unk_0EE00 - engine->cur.firDelay) % 1001]) >> 8);
+            v = in[i] + ((gain * engine->firBuffer[(engine->firCount - engine->cur.firDelay) % 1001]) >> 8);
             if (v > 0x7FFF) {
                 v = 0x7FFF;
             } else if (v < -0x8000) {
@@ -1893,27 +1893,27 @@ void func_02089ed4(int count, s16 *in, s16 *out, Shtts *engine) {
             }
             out[i] = v;
         }
-        engine->firBuffer[engine->unk_0EE00 % 1001] = in[i];
-        engine->unk_0EE00++;
+        engine->firBuffer[engine->firCount % 1001] = in[i];
+        engine->firCount++;
     }
 }
 
 // Empties the FIR filter's history
-void func_0208a010(Shtts *engine) {
-    engine->unk_0EE00 = 0;
+void ShttsEffect_ResetFir(Shtts *engine) {
+    engine->firCount = 0;
     memset(engine->firBuffer, 0, sizeof(engine->firBuffer));
 }
 
-// Shapes the pitch of everything in a list: first func_0208a5b4 for each ShttsUnk_0208a5b4, then, for each stretch
-// that ends at a ShttsUnk_0208a25c with unk_12 set, or at the list's end, func_0208a25c with the sum of unk_06 and
+// Shapes the pitch of everything in a list: first ShttsPitch_AddAccent for each ShttsPitchAccentGroup, then, for each stretch
+// that ends at a ShttsPitchWord with unk_12 set, or at the list's end, ShttsPitch_AddPhraseCurve with the sum of unk_06 and
 // unk_08 of its ShttsUnk_02087d98s.
-void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine) {
-    ShttsUnk_0208a038 *a;
-    ShttsUnk_0208a038 *cur;
-    ShttsUnk_0208a5b4 *b;
-    ShttsUnk_0208a038 *e;
-    ShttsUnk_0208a25c *c;
-    ShttsUnk_02087d98 *d;
+void ShttsPitch_ShapeGroups(ShttsPitchPhraseGroup *list, Shtts *engine) {
+    ShttsPitchPhraseGroup *a;
+    ShttsPitchPhraseGroup *cur;
+    ShttsPitchAccentGroup *b;
+    ShttsPitchPhraseGroup *e;
+    ShttsPitchWord *c;
+    ShttsSyllable *d;
     s16 i;
     s16 j;
     s16 k;
@@ -1923,7 +1923,7 @@ void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine) {
     for (e = list; e != NULL; e = e->next) {
         b = e->first;
         for (i = 0; i < e->count; i++) {
-            func_0208a5b4(b, engine);
+            ShttsPitch_AddAccent(b, engine);
             b = b->next;
         }
     }
@@ -1948,12 +1948,12 @@ void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine) {
                     if (c->unk_12 != 0 || (a->next == NULL && b->next == NULL && b->last == c)) {
                         if (cur->next == NULL) {
                             if (c->unk_07 != 0) {
-                                func_0208a25c(cur, length, d, 2, notFirst, engine);
+                                ShttsPitch_AddPhraseCurve(cur, length, d, 2, notFirst, engine);
                             } else {
-                                func_0208a25c(cur, length, d, 1, notFirst, engine);
+                                ShttsPitch_AddPhraseCurve(cur, length, d, 1, notFirst, engine);
                             }
                         } else {
-                            func_0208a25c(cur, length, d, 0, notFirst, engine);
+                            ShttsPitch_AddPhraseCurve(cur, length, d, 0, notFirst, engine);
                         }
                         if (list != a) {
                             notFirst = 1;
@@ -1972,16 +1972,16 @@ void func_0208a038(ShttsUnk_0208a038 *list, Shtts *engine) {
     }
 }
 
-// Adds a curve (func_0208ab18) to the pitch of each ShttsUnk_02087d98 from the first of `unk` to `last`, at a rate
-// that falls with `length`, and lowers the pitch of the last one when the unk_12 of the last ShttsUnk_0208a25c is
+// Adds a curve (ShttsPitch_EvalPhraseCurve) to the pitch of each ShttsSyllable from the first of `unk` to `last`, at a rate
+// that falls with `length`, and lowers the pitch of the last one when the unk_12 of the last ShttsPitchWord is
 // near certain multiples of cur.speed. `kind` is 0 when more follows, 1 or 2 at the end.
-int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, int kind, s16 notFirst,
+int ShttsPitch_AddPhraseCurve(ShttsPitchPhraseGroup *unk, int length, ShttsSyllable *last, int kind, s16 notFirst,
                   Shtts *engine) {
     s16 offset;
-    ShttsUnk_0208a5b4 *b;
+    ShttsPitchAccentGroup *b;
     s16 depth;
-    ShttsUnk_0208a25c *c;
-    ShttsUnk_02087d98 *d;
+    ShttsPitchWord *c;
+    ShttsSyllable *d;
     int pos;
     int rate;
 
@@ -2001,7 +2001,7 @@ int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, i
     b = unk->first;
     if (notFirst == 1) {
         if (unk->unk_1 == 1) {
-            if (engine->unk_0EE04 == 1 && engine->unk_0EE08 == 1) {
+            if (engine->prevPhraseNotFirst == 1 && engine->prevPhraseStrength == 1) {
                 depth = 60;
             } else {
                 depth = 200;
@@ -2012,22 +2012,22 @@ int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, i
     } else {
         depth = unk->unk_1 * 105;
     }
-    engine->unk_0EE04 = notFirst;
-    engine->unk_0EE08 = unk->unk_1;
+    engine->prevPhraseNotFirst = notFirst;
+    engine->prevPhraseStrength = unk->unk_1;
     if (depth < 0) {
         depth = 0;
     }
     d = b->first->first;
-    offset = func_02089444(0xFA000, rate) + (-83 - (d->unk_06 + ((d->unk_08 + 1) >> 1)));
+    offset = ShttsMath_DivideRounded(0xFA000, rate) + (-83 - (d->unk_06 + ((d->unk_08 + 1) >> 1)));
     pos = 0;
     while (d != last) {
         pos += d->unk_06 + ((d->unk_08 + 1) >> 1);
-        d->pitch += (s16)((func_0208ab18(rate, pos + offset) * (depth * 3) + 0x400) >> 11);
+        d->pitch += (s16)((ShttsPitch_EvalPhraseCurve(rate, pos + offset) * (depth * 3) + 0x400) >> 11);
         pos += d->unk_08 >> 1;
         d = d->next;
     }
     d->pitch +=
-        (s16)((depth * 3 * func_0208ab18(rate, pos + (d->unk_06 + ((d->unk_08 + 1) >> 1)) + offset) + 0x400) >> 11);
+        (s16)((depth * 3 * ShttsPitch_EvalPhraseCurve(rate, pos + (d->unk_06 + ((d->unk_08 + 1) >> 1)) + offset) + 0x400) >> 11);
     c = b[unk->count - 1].last;
     if (kind == 1 && c->unk_12 > (1 - engine->cur.speed) * -10 && c->unk_12 < (engine->cur.speed + 1) * 10) {
         last->pitch -= unk->unk_1 / 10 * 170;
@@ -2039,19 +2039,19 @@ int func_0208a25c(ShttsUnk_0208a038 *unk, int length, ShttsUnk_02087d98 *last, i
     return 0;
 }
 
-// Raises and lowers the pitch of the ShttsUnk_02087d98s of one ShttsUnk_0208a5b4 around the position unk_1, by an
+// Raises and lowers the pitch of the ShttsUnk_02087d98s of one ShttsPitchAccentGroup around the position unk_1, by an
 // amount that unk_2 scales. unk_1 from 30 up carries a direction in its tens, and cur.unk_14 chooses how unk_1 is
-// reworked from the number that func_020857e8 counts.
-void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
-    ShttsUnk_02087d98 *first;
+// reworked from the number that ShttsWord_CountMorae counts.
+void ShttsPitch_AddAccent(ShttsPitchAccentGroup *unk, Shtts *engine) {
+    ShttsSyllable *first;
     int depth;
     int end;
     s16 i;
     int total;
-    ShttsUnk_0208a25c *c;
+    ShttsPitchWord *c;
     s16 n;
-    ShttsUnk_02087d98 *next;
-    ShttsUnk_02087d98 *d;
+    ShttsSyllable *next;
+    ShttsSyllable *d;
     int k;
     int dir;
     s8 accent;
@@ -2061,7 +2061,7 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
     c = unk->first;
     first = c->first;
     end = 0;
-    if ((first->unk_05 == 'L' || first[1].unk_04 == 'Q' || first[1].name[0] == 'N') && unk->unk_1 != 1) {
+    if ((first->unk_05 == 'L' || first[1].qMark == 'Q' || first[1].name[0] == 'N') && unk->unk_1 != 1) {
         depth = unk->unk_2 * 0x84B6;
     } else {
         depth = unk->unk_2 * 0x9375;
@@ -2079,7 +2079,7 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
     }
     total = 0;
     for (i = 0; i < unk->count; i++) {
-        total = (s16)(total + func_020857e8(c->unk_00));
+        total = (s16)(total + ShttsWord_CountMorae(c->unk_00));
         c = c->next;
     }
     if (unk->unk_1 / 30 == 1) {
@@ -2114,7 +2114,7 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
                 }
                 lastB = next->name[(s16)(n - 1)];
             }
-            if (lastA != lastB && next->unk_04 != 'Q') {
+            if (lastA != lastB && next->qMark != 'Q') {
                 unk->unk_1 = 2;
             }
         }
@@ -2172,7 +2172,7 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
         if (d == NULL) {
             return;
         }
-        if (d->unk_04 != 'Q') {
+        if (d->qMark != 'Q') {
             if (total > 1) {
                 if (dir == 0) {
                     d->pitch += (s16)((depth * 3 + 0x800) >> 12);
@@ -2190,7 +2190,7 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
             } else if (k == end || (dir == 1 && k <= end)) {
                 d->pitch += (s16)((depth + 0x200) >> 10);
             }
-            if (d->unk_04 == 'Q' && k >= 2 && unk->unk_1 != 0 && total >= unk->unk_1) {
+            if (d->qMark == 'Q' && k >= 2 && unk->unk_1 != 0 && total >= unk->unk_1) {
                 k = (s16)(k + 1);
             }
             d = d->next;
@@ -2219,24 +2219,24 @@ void func_0208a5b4(ShttsUnk_0208a5b4 *unk, Shtts *engine) {
     }
 }
 
-// The value at a * b / 256 of a curve of five points: data_020bc20c holds where they are, data_020bc216 their
-// values (which the result has divided by 16), and data_020bc220 the distance from each to the one before.
-s16 func_0208ab18(int a, int b) {
+// The value at a * b / 256 of a curve of five points: ShttsPhraseCurveX holds where they are, ShttsPhraseCurveY their
+// values (which the result has divided by 16), and ShttsPhraseCurveDX the distance from each to the one before.
+s16 ShttsPitch_EvalPhraseCurve(int a, int b) {
     int x = (a * b) >> 8;
     s16 i;
 
     for (i = 1; i < 5; i++) {
-        if (x < data_020bc20c[i]) {
-            s16 lo = data_020bc216[i - 1];
+        if (x < ShttsPhraseCurveX[i]) {
+            s16 lo = ShttsPhraseCurveY[i - 1];
 
-            return func_02089444(((x - data_020bc20c[i - 1]) * (data_020bc216[i] - lo)) >> 4, data_020bc220[i]) +
+            return ShttsMath_DivideRounded(((x - ShttsPhraseCurveX[i - 1]) * (ShttsPhraseCurveY[i] - lo)) >> 4, ShttsPhraseCurveDX[i]) +
                    (lo >> 4);
         }
     }
     return 0;
 }
 
-void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
+void ShttsSynth_FitFrameGains(ShttsRunFrame *table, int count, int a, int b) {
     if (a < 0) {
         a = 0;
     } else {
@@ -2247,13 +2247,13 @@ void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
     } else {
         b = (s16)(b - table[count - 1].unk_0);
     }
-    func_0208abf4(table, count, a, b);
+    ShttsSynth_RampFrameGains(table, count, a, b);
 }
 
 // Adds to unk_0 of each entry an amount that goes from `a` at the first to `b` at the last, each kept within 400
 // either way, changing only past entries whose unk_2 is positive, and keeps the results from 0 to the greater of
 // the two ends' new values.
-void func_0208abf4(ShttsUnk_0208aba8 *table, int count, int a, int b) {
+void ShttsSynth_RampFrameGains(ShttsRunFrame *table, int count, int a, int b) {
     s16 max;
     s16 i;
     int step;
@@ -2272,7 +2272,7 @@ void func_0208abf4(ShttsUnk_0208aba8 *table, int count, int a, int b) {
     } else {
         max = (table + count)[-1].unk_0 + b;
     }
-    step = func_02089444((b - a) << 11, (s16)(count - 1)) << 5;
+    step = ShttsMath_DivideRounded((b - a) << 11, (s16)(count - 1)) << 5;
     if (step > 0x640000 || step < -0x640000) {
         step = step > 0 ? 0x640000 : -0x640000;
     }
@@ -2303,10 +2303,10 @@ void func_0208abf4(ShttsUnk_0208aba8 *table, int count, int a, int b) {
     }
 }
 
-// Synthesizes the segments. It takes them in runs that are consecutive entries of one unit, fills unk_04338 with the
-// run's entries of data_020bc26c, has func_02084c1c make frames of it, func_0208b550 a contour for them in unk_04938,
-// and func_0208c230 the samples. A segment of silence then moves the sample buffer on by its length.
-void func_0208ad48(Shtts *engine) {
+// Synthesizes the segments. It takes them in runs that are consecutive entries of one unit, fills runFrames with the
+// run's entries of ShttsUnitFrames, has ShttsSynth_StretchSegments make frames of it, ShttsSynth_WritePitchRamp a contour for them in pitchContour,
+// and ShttsSynth_SynthesizeFrames the samples. A segment of silence then moves the sample buffer on by its length.
+void ShttsSynth_SynthesizeSegments(Shtts *engine) {
     s16 i;
     s16 last;
     s16 split;
@@ -2327,10 +2327,10 @@ void func_0208ad48(Shtts *engine) {
     ShttsSegment *p;
 
     start = NULL; // Needed for the match: without it the zeros below are not shared in one register
-    contour = &engine->unk_04938[1];
+    contour = &engine->pitchContour[1];
     last = engine->segmentCount - 1;
-    engine->unk_0EE0E = 0;
-    engine->unk_05D38[0] = data_020bc254[1];
+    engine->runKind = 0;
+    engine->framePointers[0] = ShttsFixedFrames[1];
     split = 0;
     i = 0;
     for (segment = engine->segments; i <= last; i++, segment++) {
@@ -2344,7 +2344,7 @@ void func_0208ad48(Shtts *engine) {
                 if (segment - start <= 1) {
                     goto next;
                 }
-                if (!(data_020bc22c[segment[-1].kind] & 0x80)) {
+                if (!(ShttsPhonemeFlags[segment[-1].kind] & 0x80)) {
                     goto next;
                 }
             }
@@ -2354,27 +2354,27 @@ void func_0208ad48(Shtts *engine) {
             cur = start;
             kind = start->kind;
             for (j = 0; j < total; j++) {
-                s8 c = data_020bc26c[start->unit + j].unk_0;
+                s8 c = ShttsUnitFrames[start->unit + j].unk_0;
                 s16 v = c & 0x7F;
 
-                engine->unk_04338[j].unk_0 = v * 10;
-                engine->unk_04338[j].unk_2 = (c >> 7) & 1;
+                engine->runFrames[j].unk_0 = v * 10;
+                engine->runFrames[j].unk_2 = (c >> 7) & 1;
                 if (j >= bound) {
                     cur++;
                     kind = cur->kind;
                     bound = cur->last - start->first + 1;
                 }
-                engine->unk_04338[j].kind = kind;
+                engine->runFrames[j].kind = kind;
                 if (cur->unk_6 < 0) {
-                    engine->unk_04338[j].unk_2 = 0;
+                    engine->runFrames[j].unk_2 = 0;
                 }
-                if (engine->unk_04338[j].unk_2 == 0) {
-                    engine->unk_04338[j].unk_3 = engine->unk_00004;
+                if (engine->runFrames[j].unk_2 == 0) {
+                    engine->runFrames[j].unk_3 = engine->frameLength;
                 } else {
-                    engine->unk_04338[j].unk_3 = 120;
+                    engine->runFrames[j].unk_3 = 120;
                 }
                 for (k = 0; k < 5; k++) {
-                    engine->unk_04338[j].unk_8[k] = data_020bc26c[start->unit + j].unk_1[k];
+                    engine->runFrames[j].unk_8[k] = ShttsUnitFrames[start->unit + j].unk_1[k];
                 }
             }
             for (p = start; p <= end; p++) {
@@ -2383,109 +2383,109 @@ void func_0208ad48(Shtts *engine) {
                 }
             }
             if (start == engine->segments) {
-                s16 x = end->unk_8 - engine->unk_04338[total - 1].unk_0;
+                s16 x = end->unk_8 - engine->runFrames[total - 1].unk_0;
 
-                func_0208abf4(engine->unk_04338, total, x, x);
-                engine->unk_0EE0E = -1;
+                ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
+                engine->runKind = -1;
             } else if (i == last) {
-                s16 x = start->unk_8 - engine->unk_04338[0].unk_0;
+                s16 x = start->unk_8 - engine->runFrames[0].unk_0;
 
-                func_0208abf4(engine->unk_04338, total, x, x);
-                engine->unk_0EE0E = -2;
-            } else if ((data_020bc22c[start->kind] & 0x80) && start->kind != 20 && (data_020bc22c[end->kind] & 0x80)
+                ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
+                engine->runKind = -2;
+            } else if ((ShttsPhonemeFlags[start->kind] & 0x80) && start->kind != 20 && (ShttsPhonemeFlags[end->kind] & 0x80)
                        && end->kind != 20 && start != end) {
-                func_0208aba8(engine->unk_04338, total, start->unk_8, end->unk_8);
-                engine->unk_0EE0E = 0;
-            } else if (engine->unk_0EE0E == 1) {
-                s16 x = end->unk_8 - engine->unk_04338[total - 1].unk_0;
+                ShttsSynth_FitFrameGains(engine->runFrames, total, start->unk_8, end->unk_8);
+                engine->runKind = 0;
+            } else if (engine->runKind == 1) {
+                s16 x = end->unk_8 - engine->runFrames[total - 1].unk_0;
 
-                func_0208abf4(engine->unk_04338, total, x, x);
-                engine->unk_0EE0E = 2;
+                ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
+                engine->runKind = 2;
             } else {
-                s16 x = start->unk_8 - engine->unk_04338[0].unk_0;
+                s16 x = start->unk_8 - engine->runFrames[0].unk_0;
 
-                func_0208abf4(engine->unk_04338, total, x, x);
-                engine->unk_0EE0E = 1;
+                ShttsSynth_RampFrameGains(engine->runFrames, total, x, x);
+                engine->runKind = 1;
             }
-            frames = func_02084c1c((void *)start, (void *)end, (void *)engine->unk_04338, (void *)&engine->unk_05D38[1], engine);
-            if (split > 0 && engine->unk_0EE0E == 0) {
-                func_0208b550(contour, (start->length + 1) / 2, start->unk_6, 7000, engine);
-                func_0208b550(contour + (start->length + 1) / 2, frames - (start->length + 1) / 2, end->unk_6, 7000,
+            frames = ShttsSynth_StretchSegments((void *)start, (void *)end, (void *)engine->runFrames, (void *)&engine->framePointers[1], engine);
+            if (split > 0 && engine->runKind == 0) {
+                ShttsSynth_WritePitchRamp(contour, (start->length + 1) / 2, start->unk_6, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour + (start->length + 1) / 2, frames - (start->length + 1) / 2, end->unk_6, 7000,
                               engine);
                 split = 0;
-            } else if (end->unk_6 != end[1].unk_6 && engine->unk_0EE0E != -2 && end->kind == end[1].kind) {
-                if (engine->unk_0EE0E == -1) {
-                    if (engine->unk_0EE0C == 0) {
-                        if (data_020bc22c[start->kind] & 1) {
-                            engine->unk_04938[0] = end->unk_6;
+            } else if (end->unk_6 != end[1].unk_6 && engine->runKind != -2 && end->kind == end[1].kind) {
+                if (engine->runKind == -1) {
+                    if (engine->prevRunWeight == 0) {
+                        if (ShttsPhonemeFlags[start->kind] & 1) {
+                            engine->pitchContour[0] = end->unk_6;
                         } else {
-                            engine->unk_04938[0] = end->unk_6 - (frames - end->length / 2) * 15;
+                            engine->pitchContour[0] = end->unk_6 - (frames - end->length / 2) * 15;
                         }
                     } else {
-                        engine->unk_04938[0] += func_02089444(
-                            engine->unk_0EE0C * (end->unk_6 - engine->unk_04938[0]),
-                            (s16)(engine->unk_0EE0C + frames - end->length / 2));
+                        engine->pitchContour[0] += ShttsMath_DivideRounded(
+                            engine->prevRunWeight * (end->unk_6 - engine->pitchContour[0]),
+                            (s16)(engine->prevRunWeight + frames - end->length / 2));
                     }
                 }
                 // The original reads end->unk_6 once and keeps it across the call, which this form gives
                 sum = end->unk_6
-                      + func_02089444(end->length * (s16)(end[1].unk_6 - end->unk_6),
+                      + ShttsMath_DivideRounded(end->length * (s16)(end[1].unk_6 - end->unk_6),
                                       (s16)(end->length + end[1].length));
                 target = sum < -0x8000 ? -0x8000 : sum > 0x7FFF ? 0x7FFF : sum;
-                func_0208b550(contour, frames - end->length / 2, end->unk_6, 7000, engine);
-                func_0208b550(contour + frames - end->length / 2, end->length / 2, target, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour, frames - end->length / 2, end->unk_6, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour + frames - end->length / 2, end->length / 2, target, 7000, engine);
                 split = 1;
             } else {
-                if (engine->unk_0EE0E == -1) {
-                    if (engine->unk_0EE0C == 0 || engine->cur.pitchTrans != 0) {
-                        if ((data_020bc22c[start->kind] & 1) || engine->cur.phrase == 0) {
-                            engine->unk_04938[0] = end->unk_6;
+                if (engine->runKind == -1) {
+                    if (engine->prevRunWeight == 0 || engine->cur.pitchTrans != 0) {
+                        if ((ShttsPhonemeFlags[start->kind] & 1) || engine->cur.phrase == 0) {
+                            engine->pitchContour[0] = end->unk_6;
                         } else {
-                            engine->unk_04938[0] = end->unk_6 - frames * 15;
+                            engine->pitchContour[0] = end->unk_6 - frames * 15;
                         }
                     } else {
-                        engine->unk_04938[0] += func_02089444(
-                            engine->unk_0EE0C * (end->unk_6 - engine->unk_04938[0]), (s16)(engine->unk_0EE0C + frames));
+                        engine->pitchContour[0] += ShttsMath_DivideRounded(
+                            engine->prevRunWeight * (end->unk_6 - engine->pitchContour[0]), (s16)(engine->prevRunWeight + frames));
                     }
-                } else if (engine->unk_0EE0E == -2) {
+                } else if (engine->runKind == -2) {
                     if (engine->cur.phrase == 0) {
-                        end->unk_6 = engine->unk_04938[0];
+                        end->unk_6 = engine->pitchContour[0];
                     } else {
-                        end->unk_6 = engine->unk_04938[0] - (s16)frames * 10;
+                        end->unk_6 = engine->pitchContour[0] - (s16)frames * 10;
                     }
-                } else if (engine->unk_04938[0] <= 0) {
-                    engine->unk_04938[0] = start->unk_6;
+                } else if (engine->pitchContour[0] <= 0) {
+                    engine->pitchContour[0] = start->unk_6;
                 }
-                func_0208b550(contour, frames, end->unk_6, 7000, engine);
+                ShttsSynth_WritePitchRamp(contour, frames, end->unk_6, 7000, engine);
             }
-            func_0208c230(&engine->unk_05D38[1], contour, frames, engine);
-            if (func_02089d4c(engine) == 1) {
+            ShttsSynth_SynthesizeFrames(&engine->framePointers[1], contour, frames, engine);
+            if (ShttsEngine_IsStopRequested(engine) == 1) {
                 return;
             }
-            engine->unk_04938[0] = engine->unk_04938[frames];
-            engine->unk_0EE0C = engine->unk_05D38[frames]->unk_3;
+            engine->pitchContour[0] = engine->pitchContour[frames];
+            engine->prevRunWeight = engine->framePointers[frames]->unk_3;
             start = segment;
         }
     next:
         if (segment->kind == 0) {
             engine->phoneme = 0;
             for (m = 0; m < segment->length; m++) {
-                func_0208bf28(engine->unk_00004, engine);
-                if (func_02089d4c(engine) == 1) {
+                ShttsOutput_Advance(engine->frameLength, engine);
+                if (ShttsEngine_IsStopRequested(engine) == 1) {
                     return;
                 }
             }
-            if (func_02089d4c(engine) == 1) {
+            if (ShttsEngine_IsStopRequested(engine) == 1) {
                 return;
             }
-            engine->unk_0EE0C = segment->length;
+            engine->prevRunWeight = segment->length;
         }
     }
 }
 
 // Writes count values that go from the one before out to target, neither above max. With the pitchTrans setting,
 // only that many values make the move, after four tenths of the rest hold the first value; the others hold target.
-void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
+void ShttsSynth_WritePitchRamp(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
     s16 from = out[-1];
     s16 trans = engine->cur.pitchTrans;
     int hold;
@@ -2503,7 +2503,7 @@ void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
         if (count <= 0) {
             step = 0;
         } else {
-            step = func_02089444((target - from) << 6, count);
+            step = ShttsMath_DivideRounded((target - from) << 6, count);
         }
         i = 1;
         if (count >= 1) {
@@ -2529,7 +2529,7 @@ void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
     if (count <= 0) {
         step = 0;
     } else {
-        step = func_02089444((target - from) << 6, count);
+        step = ShttsMath_DivideRounded((target - from) << 6, count);
     }
     i = 0;
     if (hold > 0) {
@@ -2552,19 +2552,19 @@ void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
 }
 
 // The ring effect: multiplies samples by a sine wave of a frequency
-void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
+void ShttsEffect_ApplyRing(int *phase, int count, int frequency, s16 *src, s16 *dst) {
     int i;
     int step = (frequency << 16) / 11000;
 
     for (i = 0; i < count; i++) {
         (*phase)++;
-        dst[i] = (src[i] * data_020e8d08[((step * *phase) >> 8) & 0xFF]) >> 15;
+        dst[i] = (src[i] * ShttsSineTable[((step * *phase) >> 8) & 0xFF]) >> 15;
     }
 }
 
 // Makes segments of a list of phones: takes them in groups that end at a phone of kind 6 or less, and has
-// func_0208ba64 look each group up as a unit, in parts if there is no unit for the whole.
-void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
+// ShttsUnit_AddSegments look each group up as a unit, in parts if there is no unit for the whole.
+void ShttsUnit_SelectUnits(ShttsPhone *phones, void *unused, Shtts *engine) {
     ShttsPhone *start;
     s16 groups;
     s16 count;
@@ -2613,16 +2613,16 @@ void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
                 || end[-1].kind == 18 || end[-1].kind == 15 || end[-1].kind == 20 || end[-1].kind == 23
                 || end[-1].kind == 24)) {
             result = -1;
-        } else if (engine->unk_01B21 == 1 && mode == 0 && end - start == 2
+        } else if (engine->splitUnitAtConsonant == 1 && mode == 0 && end - start == 2
                    && (start[1].kind == 27 || start[1].kind == 12 || start[1].kind == 8 || start[1].kind == 36
                        || start[1].kind == 28 || start[1].kind == 11 || start[1].kind == 13 || start[1].kind == 37)) {
             saved = *(int *)&start[1]; // Read this way, the compiler does not merge it with the reads above
             start[1].kind = 0;
-            func_0208ba64(1, start, start + 1, unused, groups, engine);
+            ShttsUnit_AddSegments(1, start, start + 1, unused, groups, engine);
             start[1].kind = saved;
-            result = func_0208ba64(-1, start + 1, end, unused, groups, engine);
+            result = ShttsUnit_AddSegments(-1, start + 1, end, unused, groups, engine);
         } else {
-            result = func_0208ba64(mode, start, end, unused, groups, engine);
+            result = ShttsUnit_AddSegments(mode, start, end, unused, groups, engine);
         }
         if (result < 0 && mode >= 0) {
             if (start->kind == end->kind && start + 1 == end) {
@@ -2632,10 +2632,10 @@ void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
                     length = 0x7FFF;
                 }
                 end->length = length;
-                func_0208ba64(mode, start + 1, end, unused, groups, engine);
+                ShttsUnit_AddSegments(mode, start + 1, end, unused, groups, engine);
             } else {
                 mode = 1;
-                if (func_0208ba64(mode, start, end - 1, unused, groups, engine) < 0) {
+                if (ShttsUnit_AddSegments(mode, start, end - 1, unused, groups, engine) < 0) {
                     saved2 = end[-1].kind;
                     if (saved2 == 18) {
                         end[-1].kind = 2;
@@ -2644,12 +2644,12 @@ void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
                     } else if (saved2 == 16) {
                         end[-1].kind = 15;
                     }
-                    if (func_0208ba64(1, start, end - 1, unused, groups, engine) < 0) {
-                        func_0208ba64(-2, start, start, unused, groups, engine);
+                    if (ShttsUnit_AddSegments(1, start, end - 1, unused, groups, engine) < 0) {
+                        ShttsUnit_AddSegments(-2, start, start, unused, groups, engine);
                     }
                     end[-1].kind = saved2;
                 }
-                func_0208ba64(-1, end - 1, end, unused, groups, engine);
+                ShttsUnit_AddSegments(-1, end - 1, end, unused, groups, engine);
             }
         }
         if (mode == -2) {
@@ -2663,12 +2663,12 @@ void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
     if (end->kind == 7) {
         return;
     }
-    func_0208ba64(-2, end, end, unused, groups, engine);
+    ShttsUnit_AddSegments(-2, end, end, unused, groups, engine);
 }
 
 // Looks the phones from first to last up as a unit, with silence before them if mode is -1 and after them if it is
 // -2, and adds a segment for each to the engine's. Returns -1 if there is no such unit.
-int func_0208ba64(int mode, ShttsPhone *first, ShttsPhone *last, void *unused, s16 unused2, Shtts *engine) {
+int ShttsUnit_AddSegments(int mode, ShttsPhone *first, ShttsPhone *last, void *unused, s16 unused2, Shtts *engine) {
     int index[3];
     s16 lengths[10];
     s16 head;
@@ -2721,7 +2721,7 @@ int func_0208ba64(int mode, ShttsPhone *first, ShttsPhone *last, void *unused, s
         }
     }
     lengths[0] = i;
-    unit = func_0208bdf4(index, engine);
+    unit = ShttsUnit_Find(index, engine);
     if (unit == NULL) {
         return -1;
     }
@@ -2775,8 +2775,8 @@ done:
     return 0;
 }
 
-ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
-    ShttsUnit *unit = &data_020e8f08[engine->cur.unk_00][index[0]][index[1]][index[2]];
+ShttsUnit *ShttsUnit_Find(int *index, Shtts *engine) {
+    ShttsUnit *unit = &ShttsUnits[engine->cur.unk_00][index[0]][index[1]][index[2]];
 
     if (unit->unk_2 == 0) {
         return NULL;
@@ -2784,31 +2784,31 @@ ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
     return unit;
 }
 
-void func_0208be38(Shtts *engine) {
-    engine->unk_08CD4 = engine->unk_08908;
-    engine->unk_08CD8 = engine->unk_08908 + 0x1E0;
-    engine->unk_08CDC = 0x1E0;
-    engine->unk_08CDE = 0xF0;
-    engine->unk_08CD0 = engine->unk_08CD4;
-    engine->unk_08CCC = engine->unk_08CC8 = engine->unk_08CD4;
-    engine->unk_08CE0 = 0;
-    func_0208be9c(engine->unk_08CDC, engine->unk_08CD4, engine);
+void ShttsOutput_Reset(Shtts *engine) {
+    engine->mixStart = engine->mixBuffer;
+    engine->mixEnd = engine->mixBuffer + 0x1E0;
+    engine->mixSize = 0x1E0;
+    engine->mixHalfSize = 0xF0;
+    engine->mixHalf = engine->mixStart;
+    engine->mixWaveEnd = engine->mixPos = engine->mixStart;
+    engine->mixedCount = 0;
+    ShttsOutput_ClearSamples(engine->mixSize, engine->mixStart, engine);
 }
 
 // Fills count samples with silence from a place in the sample buffer, going round to its start at its end
-void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
+void ShttsOutput_ClearSamples(int count, s16 *buffer, Shtts *engine) {
     s16 i;
 
     if (count < 0) {
-        func_02089e70(-1);
+        ShttsUtil_ReportError(-1);
     }
     i = 0;
-    if (buffer + count >= engine->unk_08CD8) {
-        while (buffer < engine->unk_08CD8) {
+    if (buffer + count >= engine->mixEnd) {
+        while (buffer < engine->mixEnd) {
             *buffer++ = 0;
             i++;
         }
-        buffer = engine->unk_08CD4;
+        buffer = engine->mixStart;
     }
     for (; i < count; i++) {
         *buffer++ = 0;
@@ -2817,66 +2817,66 @@ void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
 
 // Moves the place in the sample buffer on by count samples. When that leaves a half of the buffer, plays the half
 // out and fills it with silence.
-void func_0208bf28(int count, Shtts *engine) {
+void ShttsOutput_Advance(int count, Shtts *engine) {
     if (count < 0) {
         return;
     }
-    engine->unk_08CC8 += count;
-    engine->unk_08CE0 += count;
-    if (engine->unk_08CD0 == &engine->unk_08908[0] && engine->unk_08CC8 >= &engine->unk_08908[0xF0]) {
-        func_0208e4e4(engine->unk_08CDE, &engine->unk_08908[0], engine);
-        func_0208be9c(engine->unk_08CDE, &engine->unk_08908[0], engine);
-        engine->unk_08CD0 = &engine->unk_08908[0xF0];
-    } else if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
-        if ((engine->unk_08CC8 >= &engine->unk_08908[0] && engine->unk_08CC8 < &engine->unk_08908[0xF0])
-            || engine->unk_08CC8 > &engine->unk_08908[0x1E0]) {
-            func_0208e4e4(engine->unk_08CDE, &engine->unk_08908[0xF0], engine);
-            func_0208be9c(engine->unk_08CDE, &engine->unk_08908[0xF0], engine);
-            engine->unk_08CD0 = &engine->unk_08908[0];
+    engine->mixPos += count;
+    engine->mixedCount += count;
+    if (engine->mixHalf == &engine->mixBuffer[0] && engine->mixPos >= &engine->mixBuffer[0xF0]) {
+        ShttsOutput_SendBlock(engine->mixHalfSize, &engine->mixBuffer[0], engine);
+        ShttsOutput_ClearSamples(engine->mixHalfSize, &engine->mixBuffer[0], engine);
+        engine->mixHalf = &engine->mixBuffer[0xF0];
+    } else if (engine->mixHalf == &engine->mixBuffer[0xF0]) {
+        if ((engine->mixPos >= &engine->mixBuffer[0] && engine->mixPos < &engine->mixBuffer[0xF0])
+            || engine->mixPos > &engine->mixBuffer[0x1E0]) {
+            ShttsOutput_SendBlock(engine->mixHalfSize, &engine->mixBuffer[0xF0], engine);
+            ShttsOutput_ClearSamples(engine->mixHalfSize, &engine->mixBuffer[0xF0], engine);
+            engine->mixHalf = &engine->mixBuffer[0];
         }
     }
-    if (engine->unk_08CC8 >= engine->unk_08CD8) {
-        engine->unk_08CC8 -= 0x1E0;
+    if (engine->mixPos >= engine->mixEnd) {
+        engine->mixPos -= 0x1E0;
     }
 }
 
 // Plays out the half of the sample buffer that has been filled, and moves on to the other half
-void func_0208c054(Shtts *engine) {
-    if (engine->unk_08CD0 >= engine->unk_08CC8) {
+void ShttsOutput_Flush(Shtts *engine) {
+    if (engine->mixHalf >= engine->mixPos) {
         return;
     }
-    func_0208e4e4(engine->unk_08CDE, engine->unk_08CD0, engine);
-    func_0208be9c(engine->unk_08CDE, engine->unk_08CD0, engine);
-    if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
-        engine->unk_08CD0 = &engine->unk_08908[0];
+    ShttsOutput_SendBlock(engine->mixHalfSize, engine->mixHalf, engine);
+    ShttsOutput_ClearSamples(engine->mixHalfSize, engine->mixHalf, engine);
+    if (engine->mixHalf == &engine->mixBuffer[0xF0]) {
+        engine->mixHalf = &engine->mixBuffer[0];
     } else {
-        engine->unk_08CD0 = &engine->unk_08908[0xF0];
+        engine->mixHalf = &engine->mixBuffer[0xF0];
     }
-    engine->unk_08CC8 = engine->unk_08CD0;
+    engine->mixPos = engine->mixHalf;
 }
 
 // Adds the samples of unk_08726 to the sample buffer, going round to its start at its end and keeping the sums
 // within 16 bits. They go at the buffer's place, or half their count before it if both a and b are above 0.
-void func_0208c0c8(int a, int b, Shtts *engine) {
+void ShttsOutput_AddWave(int a, int b, Shtts *engine) {
     s16 *dst;
     s16 i;
-    s16 count = engine->unk_08724[0];
+    s16 count = engine->addWave[0];
     s16 *src;
 
     if (a > 0 && b > 0) {
         s16 half = count >> 1;
 
-        dst = engine->unk_08CC8 - half;
+        dst = engine->mixPos - half;
     } else {
-        dst = engine->unk_08CC8;
+        dst = engine->mixPos;
     }
-    src = &engine->unk_08724[1];
-    if (dst < engine->unk_08CD4) {
-        dst = engine->unk_08CD8 - (engine->unk_08CD4 - dst);
+    src = &engine->addWave[1];
+    if (dst < engine->mixStart) {
+        dst = engine->mixEnd - (engine->mixStart - dst);
     }
     i = 0;
-    if (dst + count >= engine->unk_08CD8) {
-        while (dst < engine->unk_08CD8) {
+    if (dst + count >= engine->mixEnd) {
+        while (dst < engine->mixEnd) {
             int sample = *dst + *src;
             if (sample > 0x7FFF) {
                 sample = 0x7FFF;
@@ -2887,7 +2887,7 @@ void func_0208c0c8(int a, int b, Shtts *engine) {
             i++;
             src++;
         }
-        dst = engine->unk_08CD4;
+        dst = engine->mixStart;
     }
     for (; i < count; i++, src++) {
         int sample = *dst + *src;
@@ -2899,18 +2899,18 @@ void func_0208c0c8(int a, int b, Shtts *engine) {
         *dst++ = sample;
     }
     if (a == 0) {
-        engine->unk_08CCC = engine->unk_08CC8 + b;
+        engine->mixWaveEnd = engine->mixPos + b;
     } else {
-        engine->unk_08CCC = dst;
+        engine->mixWaveEnd = dst;
     }
-    if (engine->unk_08CCC >= engine->unk_08CD8) {
-        engine->unk_08CCC = engine->unk_08CD4 + (engine->unk_08CCC - engine->unk_08CD8);
+    if (engine->mixWaveEnd >= engine->mixEnd) {
+        engine->mixWaveEnd = engine->mixStart + (engine->mixWaveEnd - engine->mixEnd);
     }
 }
 
 // Makes the samples of count frames, each with its value of the contour, and puts them in the sample buffer.
 // Stops early if the engine has been asked to stop.
-void func_0208c230(ShttsUnk_05D38 **units, s16 *pitches, s16 count, Shtts *engine) {
+void ShttsSynth_SynthesizeFrames(ShttsFrameRef **units, s16 *pitches, s16 count, Shtts *engine) {
     s16 i;
     int length;
     int step;
@@ -2919,33 +2919,33 @@ void func_0208c230(ShttsUnk_05D38 **units, s16 *pitches, s16 count, Shtts *engin
         if ((*units)->phoneme != engine->phoneme && (*units)->phoneme != 0) {
             engine->phoneme = (*units)->phoneme;
         }
-        func_020858c8((void *)*units++, *pitches++, engine);
-        engine->unk_08906 += engine->unk_00004;
-        length = func_02085a64(engine);
+        ShttsSynth_PrepareFrame((void *)*units++, *pitches++, engine);
+        engine->samplesOwed += engine->frameLength;
+        length = ShttsSynth_GetPitchPeriod(engine);
         step = length;
         if (length == 0) {
-            step = engine->unk_00004;
+            step = engine->frameLength;
         }
-        while (engine->unk_08906 > 0) {
-            func_02085a70(engine);
+        while (engine->samplesOwed > 0) {
+            ShttsSynth_CopyFrameWave(engine);
             if (length == 0) {
-                func_0208e3b4(0, engine);
-                func_0208c0c8(0, step, engine);
+                ShttsSynth_FadeWave(0, engine);
+                ShttsOutput_AddWave(0, step, engine);
             } else {
-                func_0208e3b4(length, engine);
-                func_0208c0c8(0, length, engine);
+                ShttsSynth_FadeWave(length, engine);
+                ShttsOutput_AddWave(0, length, engine);
             }
-            engine->unk_08906 -= step;
-            func_0208bf28(step, engine);
+            engine->samplesOwed -= step;
+            ShttsOutput_Advance(step, engine);
         }
-        if (func_02089d4c(engine) == 1) {
+        if (ShttsEngine_IsStopRequested(engine) == 1) {
             return;
         }
     }
 }
 
 // Sets the caller's voice settings back to their defaults
-void func_0208c398(Shtts *engine) {
+void ShttsParam_SetDefaults(Shtts *engine) {
     engine->set.unk_00 = 0;
     engine->set.pitch = 0x13C2;
     engine->set.accent = 100;
@@ -2953,8 +2953,8 @@ void func_0208c398(Shtts *engine) {
     engine->set.speed = 100;
     engine->set.volume = 0;
     engine->set.warp = 100;
-    engine->set.unk_28 = 0x400;
-    engine->set.unk_2A = 10;
+    engine->set.warpScale = 0x400;
+    engine->set.warpOrder = 10;
     engine->set.unk_14 = 0;
     engine->set.mode = 0;
     engine->set.echoDelay = 0;
@@ -2967,7 +2967,7 @@ void func_0208c398(Shtts *engine) {
 }
 
 // Puts the caller's settings in use
-void func_0208c404(Shtts *engine) {
+void ShttsParam_UseSetParams(Shtts *engine) {
     engine->cur.unk_00 = engine->set.unk_00;
     engine->cur.pitch = engine->set.pitch;
     engine->cur.accent = engine->set.accent;
@@ -2975,19 +2975,19 @@ void func_0208c404(Shtts *engine) {
     engine->cur.speed = engine->set.speed;
     engine->cur.volume = engine->set.volume;
     engine->cur.warp = engine->set.warp;
-    engine->cur.unk_28 = engine->set.unk_28;
-    engine->cur.unk_2A = engine->set.unk_2A;
+    engine->cur.warpScale = engine->set.warpScale;
+    engine->cur.warpOrder = engine->set.warpOrder;
     engine->cur.unk_14 = engine->set.unk_14;
     engine->cur.mode = engine->set.mode;
     engine->cur.echoDelay = engine->set.echoDelay;
     if (engine->cur.echoDelay != 0) {
-        func_02086814(engine);
+        ShttsEffect_ResetEcho(engine);
     }
     engine->cur.echoGain = engine->set.echoGain;
     engine->cur.firGain = engine->set.firGain;
     engine->cur.firDelay = engine->set.firDelay;
     if (engine->cur.firDelay != 0 || engine->cur.firGain != 0) {
-        func_0208a010(engine);
+        ShttsEffect_ResetFir(engine);
     }
     engine->cur.ring = engine->set.ring;
     engine->cur.chorus = engine->set.chorus;
@@ -2995,7 +2995,7 @@ void func_0208c404(Shtts *engine) {
 }
 
 // Sets the warp, 80 to 200, and the two values worked out from it.
-void func_0208c4dc(int warp, int live, Shtts *engine) {
+void ShttsParam_StoreWarp(int warp, int live, Shtts *engine) {
     if (warp < 80) {
         warp = 80;
     }
@@ -3004,44 +3004,44 @@ void func_0208c4dc(int warp, int live, Shtts *engine) {
     }
     if (live) {
         engine->cur.warp = warp;
-        engine->cur.unk_28 = ((int)engine->cur.warp * 0x28F) >> 6;
-        engine->cur.unk_2A = func_02089444(1000, (s16)warp);
+        engine->cur.warpScale = ((int)engine->cur.warp * 0x28F) >> 6;
+        engine->cur.warpOrder = ShttsMath_DivideRounded(1000, (s16)warp);
     } else {
         engine->set.warp = warp;
-        engine->set.unk_28 = ((int)engine->set.warp * 0x28F) >> 6;
-        engine->set.unk_2A = func_02089444(1000, (s16)warp);
+        engine->set.warpScale = ((int)engine->set.warp * 0x28F) >> 6;
+        engine->set.warpOrder = ShttsMath_DivideRounded(1000, (s16)warp);
     }
 }
 
-int func_0208c568(Shtts *engine) {
-    engine->unk_00000 = 11000;
-    engine->unk_01B21 = 0;
-    engine->unk_00004 = engine->unk_00000 / 200;
+int ShttsEngine_SetSampleRate(Shtts *engine) {
+    engine->sampleRate = 11000;
+    engine->splitUnitAtConsonant = 0;
+    engine->frameLength = engine->sampleRate / 200;
     return 0;
 }
 
 // Starts speaking the text: sets the state up, prepares the text, and synthesizes in a thread of its own, or in
-// the caller's if unk_0EE11 is set.
-void func_0208c5a8(Shtts *engine) {
-    func_0208c568(engine);
-    func_02089c50(engine);
+// the caller's if runInCaller is set.
+void ShttsEngine_Start(Shtts *engine) {
+    ShttsEngine_SetSampleRate(engine);
+    ShttsEngine_ResetSynthesis(engine);
     if (engine->cur.unk_00 == 1) {
-        func_0208c404(engine);
+        ShttsParam_UseSetParams(engine);
         engine->cur.unk_00 = 1;
     } else {
-        func_0208c404(engine);
+        ShttsParam_UseSetParams(engine);
     }
-    if ((engine->unk_08CE4 = 1) != 0) {
-        func_02084830(engine->unk_0B0E6);
-        func_02087e94(engine->unk_0B0E6, engine->text, sizeof(engine->text));
+    if ((engine->useInputText = 1) != 0) {
+        ShttsText_ExpandPresets(engine->inputText);
+        ShttsText_ConvertToLines(engine->inputText, engine->text, sizeof(engine->text));
     } else {
-        func_02086b14(engine);
+        ShttsText_ReadStdin(engine);
     }
-    if (engine->unk_0EE11 != 0) {
-        func_0208c690(engine);
+    if (engine->runInCaller != 0) {
+        ShttsEngine_RunThread(engine);
         return;
     }
-    OS_CreateThread(&engine->thread, func_0208c690, engine, engine->stack + sizeof(engine->stack),
+    OS_CreateThread(&engine->thread, ShttsEngine_RunThread, engine, engine->stack + sizeof(engine->stack),
                     sizeof(engine->stack), engine->threadPriority);
     OS_WakeupThreadDirect(&engine->thread);
 }
@@ -3049,62 +3049,62 @@ void func_0208c5a8(Shtts *engine) {
 // The thread that synthesizes: takes the text a part at a time, makes phones and then segments of each and
 // synthesizes them, until the text ends or the engine is asked to stop. Then tells the callback, with -1 if it was
 // stopped and 0 if not.
-void func_0208c690(void *arg) {
+void ShttsEngine_RunThread(void *arg) {
     Shtts *engine = arg;
     int count;
-    ShttsUnk_01660 *list;
+    ShttsThreadPhraseGroup *list;
     int added;
 
-    func_0208be38(engine);
-    func_02086a74(engine->text, &engine->unk_0E628);
+    ShttsOutput_Reset(engine);
+    ShttsLine_SetCursor(engine->text, &engine->lineCursor);
     while (1) {
-        if (engine->unk_0EE14 == 1) {
-            if (func_0208cc10((void *)&engine->phones[0], engine) == -1) {
+        if (engine->phonesFromStdin == 1) {
+            if (ShttsPhone_ReadStdin((void *)&engine->phones[0], engine) == -1) {
                 break;
             }
             engine->segmentCount = 0;
-            func_0208b738(&engine->phones[1], engine->unk_01654, engine);
-            func_0208ad48(engine);
+            ShttsUnit_SelectUnits(&engine->phones[1], engine->phraseGroupHead, engine);
+            ShttsSynth_SynthesizeSegments(engine);
             continue;
         }
-        if (func_02086b90((void *)engine->unk_00A24, engine->unk_00010, engine) == 0) {
+        if (ShttsWord_ReadWords((void *)engine->wordHead, engine->syllables, engine) == 0) {
             break;
         }
-        func_02086fd8((void *)engine->unk_00A44, (void *)engine->unk_01244, (void *)engine->unk_01654);
-        func_02085b30((void *)engine->unk_01254, engine);
-        func_0208a038((void *)&engine->unk_01660, engine);
+        ShttsWord_GroupWords((void *)engine->words, (void *)engine->accentGroupHead, (void *)engine->phraseGroupHead);
+        ShttsDuration_ProcessGroups((void *)engine->accentGroups, engine);
+        ShttsPitch_ShapeGroups((void *)&engine->phraseGroups, engine);
         count = 0;
-        for (list = &engine->unk_01660; list != NULL; list = list->next) {
-            added = func_0208c8e0((void *)list, (void *)&engine->phones[count], 0x100 - count);
+        for (list = &engine->phraseGroups; list != NULL; list = list->next) {
+            added = ShttsPhone_BuildFromSyllables((void *)list, (void *)&engine->phones[count], 0x100 - count);
             count += added;
             if (list->next == NULL || (added != 0 && engine->phones[count].kind == 0)) {
-                func_0208cf40((void *)engine->phones, count, list->items[list->count - 1].unk_8[7], engine);
+                ShttsPhone_ShapeEnding((void *)engine->phones, count, list->items[list->count - 1].unk_8[7], engine);
                 engine->segmentCount = 0;
                 count = 0;
-                func_0208b738(&engine->phones[1], list, engine);
-                func_020856b0(&engine->unk_0B4E8, engine->cur.chorus);
-                func_0208ad48(engine);
-                if (func_02089d4c(engine) == 1) {
+                ShttsUnit_SelectUnits(&engine->phones[1], list, engine);
+                ShttsEffect_InitChorus(&engine->chorusState, engine->cur.chorus);
+                ShttsSynth_SynthesizeSegments(engine);
+                if (ShttsEngine_IsStopRequested(engine) == 1) {
                     break;
                 }
             }
         }
-        if (func_02089d4c(engine) == 1) {
+        if (ShttsEngine_IsStopRequested(engine) == 1) {
             break;
         }
-        func_0208c054(engine);
-        func_0208be38(engine);
+        ShttsOutput_Flush(engine);
+        ShttsOutput_Reset(engine);
     }
     if (engine->callback != NULL) {
-        if (func_02089d4c(engine) == 1) {
+        if (ShttsEngine_IsStopRequested(engine) == 1) {
             engine->callback(-1, NULL, engine->callbackArg);
         } else {
             engine->callback(0, NULL, engine->callbackArg);
         }
     }
     engine->phoneme = 0;
-    func_02089cf4(engine);
+    ShttsEngine_Lock(engine);
     engine->busy = 0;
-    func_02089d08(engine);
-    func_02089cec(engine);
+    ShttsEngine_Unlock(engine);
+    ShttsEngine_EndThread(engine);
 }

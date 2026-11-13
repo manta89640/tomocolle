@@ -124,7 +124,7 @@ most likely compiled from Sharp's source as part of the game's build.
 
 Its state is one struct of `0x14000` bytes that the caller provides (`Shtts` in `lib/SHTTS/shtts.h`), with a thread
 of its own that synthesizes, and two copies of the voice settings: those a caller sets, at `0xEF20`, and those in
-use, at `0xEF50`. `func_0208db2c` sets a setting by number, and refuses while the engine is synthesizing. Measured
+use, at `0xEF50`. `Shtts_SetParam` sets a setting by number, and refuses while the engine is synthesizing. Measured
 from the setters, the settings and the values each accepts:
 
 | Setting | Command | Name | Values | Field of `ShttsParams` |
@@ -146,7 +146,7 @@ from the setters, the settings and the values each accepts:
 | 15 | `#P` | Phrase | 0 to 400 | `phrase`, 100 by default |
 | 16 | `#T` | PTrans | 0 to 1000 | `pitchTrans` |
 
-The names are the engine's own: `func_020873a4`, which carries out a command, passes each to the function that keeps
+The names are the engine's own: `ShttsParam_RunCommand`, which carries out a command, passes each to the function that keeps
 a value in range, though that function does nothing with it (most likely it named the setting in a message that the
 retail build leaves out). The same function shows what the commands in text do. A number after `+` is added to the
 value in use, for `#B`, `#P`, `#S` and `#V`. Besides the settings there are:
@@ -173,12 +173,12 @@ written in text, and a string of `#` commands that the preset stands for. Measur
 
 `ShttsPhonemeNames`, at `0x020BC174`, lists the 38 sounds the engine speaks in, as it writes them: `S` for silence,
 the vowels `a i u e o`, `N`, `X`, then the consonants from `k` to `kw`. The engine keeps the number of the sound it
-is speaking, and `func_0208daf8` returns its name, which is what a game needs to move a mouth in time with speech.
+is speaking, and `Shtts_GetPhonemeName` returns its name, which is what a game needs to move a mouth in time with speech.
 
 Open questions from the engine's code, which may be one question:
 
-- A few loops in the original are unrolled four times (a 16-byte clear in `func_0208d8fc` and `func_02089c50`), and
-  some loops over a count test the count twice before they start (`func_02089e74`, `func_0208e464`). The compiler
+- A few loops in the original are unrolled four times (a 16-byte clear in `Shtts_Init` and `ShttsEngine_ResetSynthesis`), and
+  some loops over a count test the count twice before they start (`ShttsMath_ScaleSamples`, `ShttsSynth_FadeSamples`). The compiler
   does neither for the source as written here, and has no option for unrolling that its help lists.
 - The array those two functions clear is reached as the engine's address plus `0x730`, then plus `0xB000`, where
   everything near it is reached from plus `0xB000`. That suggests it belongs to a structure that starts at `0x730`.
@@ -189,9 +189,9 @@ instructions for 16-bit fixed point. They are written as assembly functions here
 The engine's source is four files, `shtts_1.c` to `shtts_4.c`, and three of them are linked into the ROM in place of
 the original's bytes. Where the engine's own files began and ended is not known; these are cut where linking needs:
 
-- `shtts_2.c` is one function, `func_02085d80`, which does not match yet (the original's size, 59 instructions
+- `shtts_2.c` is one function, `ShttsDuration_SetWordSyllables`, which does not match yet (the original's size, 59 instructions
   different), so the file it belongs to cannot be linked from source while it is in it.
-- The engine's strings in `.data` are interrupted, between those of `func_02089304` and `func_0208c8e0`, by the
+- The engine's strings in `.data` are interrupted, between those of `ShttsText_ParseWideStrengthDigit` and `ShttsPhone_BuildFromSyllables`, by the
   names of the phonemes. Those belong to `ShttsPhonemeNames`, which is in `.rodata` and yet is read by the engine's
   code as if it were not `const`: so it is defined in another file, of tables, which is not decompiled.
 

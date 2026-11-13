@@ -5,15 +5,15 @@
 extern "C" {
 
 // The engine, which is not decompiled yet
-void func_0208d8fc(void *engine);
-void func_0208dab4(void *engine);
-void func_0208d878(void *engine);
-void func_0208db2c(void *engine, int param, int value);
-int func_0208dca4(void *engine, int param);
-int func_0208dac4(void *engine);
-const char *func_0208daf8(void *engine);
+void Shtts_Init(void *engine);
+void Shtts_ResetParams(void *engine);
+void Shtts_Stop(void *engine);
+void Shtts_SetParam(void *engine, int param, int value);
+int Shtts_GetParam(void *engine, int param);
+int Shtts_GetState(void *engine);
+const char *Shtts_GetPhonemeName(void *engine);
 typedef void (*EngineCallback)(int samples, s16 *data, TtsPlayer *player);
-void func_0208d500(void *engine, const char *text, int param, int unk, EngineCallback callback, TtsPlayer *player);
+void Shtts_Speak(void *engine, const char *text, int param, int unk, EngineCallback callback, TtsPlayer *player);
 
 } // extern "C"
 
@@ -56,32 +56,32 @@ TtsPlayer::~TtsPlayer() {
 
 void TtsPlayer::InitEngine() {
     mEngine = mEngineWork;
-    func_0208d8fc(mEngine);
-    func_0208db2c(mEngine, 5, 0x82);
+    Shtts_Init(mEngine);
+    Shtts_SetParam(mEngine, 5, 0x82);
 }
 
 void TtsPlayer::ResetEngineParams() {
-    func_0208dab4(mEngine);
+    Shtts_ResetParams(mEngine);
 }
 
 void TtsPlayer::StopEngine() {
-    func_0208d878(mEngine);
+    Shtts_Stop(mEngine);
 }
 
 void TtsPlayer::SetEngineParam(int param, int value) {
-    func_0208db2c(mEngine, param, value);
+    Shtts_SetParam(mEngine, param, value);
 }
 
 int TtsPlayer::GetEngineParam(int param) {
-    return func_0208dca4(mEngine, param);
+    return Shtts_GetParam(mEngine, param);
 }
 
 BOOL TtsPlayer::IsEngineIdle() {
-    return func_0208dac4(mEngine) == 0;
+    return Shtts_GetState(mEngine) == 0;
 }
 
 const char *TtsPlayer::GetPhonemeName() {
-    return func_0208daf8(mEngine);
+    return Shtts_GetPhonemeName(mEngine);
 }
 
 static void StreamCallback(NNSSndStrmCallbackStatus status, int numChannels, void *buffer[], u32 len,
@@ -162,7 +162,7 @@ static void StreamSamples(int samples, s16 *data, TtsPlayer *player) {
         return;
     }
     while (player->mBufferedCount >= 5) {
-        if (func_0208dac4(player->mEngine) != 1) {
+        if (Shtts_GetState(player->mEngine) != 1) {
             return;
         }
         OS_Sleep(10);
@@ -206,12 +206,12 @@ int TtsPlayer::Speak(const char *text, int param) {
     if (OpenStream(4) != 0) {
         return -1;
     }
-    func_0208d500(mEngine, text, (u8)param, 1, StreamSamples, this);
+    Shtts_Speak(mEngine, text, (u8)param, 1, StreamSamples, this);
     return 0;
 }
 
 void TtsPlayer::Stop() {
-    func_0208d878(mEngine);
+    Shtts_Stop(mEngine);
     CloseStream();
 }
 
@@ -284,8 +284,8 @@ void TtsPlayer::Synthesize(const char *text) {
     if (text == NULL) {
         text = mCaptureText;
     }
-    func_0208d500(mEngine, text, 0, 1, CaptureSamples, this);
-    while (func_0208dac4(mEngine) == 1) {
+    Shtts_Speak(mEngine, text, 0, 1, CaptureSamples, this);
+    while (Shtts_GetState(mEngine) == 1) {
         OS_Sleep(20);
     }
 }
@@ -294,8 +294,8 @@ static void SynthesizeThread(void *arg) {
     TtsPlayer *player = (TtsPlayer *)arg;
 
     player->ClearCaptureBuffer();
-    func_0208d500(player->mEngine, player->mCaptureText, 0, 1, CaptureSamples, player);
-    while (func_0208dac4(player->mEngine) == 1) {
+    Shtts_Speak(player->mEngine, player->mCaptureText, 0, 1, CaptureSamples, player);
+    while (Shtts_GetState(player->mEngine) == 1) {
         OS_Sleep(5);
     }
 }

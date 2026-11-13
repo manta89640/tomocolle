@@ -11,20 +11,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-int func_0208e09c(Shtts *engine, int value);
-int func_0208e0cc(Shtts *engine, int value);
-int func_0208e0fc(Shtts *engine, int value);
-int func_0208e12c(Shtts *engine, int value);
-int func_0208e160(Shtts *engine, int value);
-int func_0208e190(Shtts *engine, int value);
-int func_0208e1c0(Shtts *engine, int value);
-int func_0208e1e8(Shtts *engine, int value);
-int func_0208e210(Shtts *engine, int value);
-int func_0208e238(Shtts *engine, int value);
-int func_0208e298(Shtts *engine, int value);
-int func_0208e2c0(Shtts *engine, int value);
-int func_0208e2e8(Shtts *engine, int value);
-int func_0208e310(Shtts *engine, int value);
+int ShttsParam_SetSpeed(Shtts *engine, int value);
+int ShttsParam_SetPitch(Shtts *engine, int value);
+int ShttsParam_SetVolume(Shtts *engine, int value);
+int ShttsParam_SetWarp(Shtts *engine, int value);
+int ShttsParam_SetRing(Shtts *engine, int value);
+int ShttsParam_SetEchoDelay(Shtts *engine, int value);
+int ShttsParam_SetEchoGain(Shtts *engine, int value);
+int ShttsParam_SetFirDelay(Shtts *engine, int value);
+int ShttsParam_SetFirGain(Shtts *engine, int value);
+int ShttsParam_SetMode(Shtts *engine, int value);
+int ShttsParam_SetChorus(Shtts *engine, int value);
+int ShttsParam_SetAccent(Shtts *engine, int value);
+int ShttsParam_SetPhrase(Shtts *engine, int value);
+int ShttsParam_SetPitchTrans(Shtts *engine, int value);
 
 // The next four are written in assembly in the original too: they use the processor's multiply-accumulate
 // instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
@@ -32,19 +32,19 @@ int func_0208e310(Shtts *engine, int value);
 
 // Takes a text and starts the thread that speaks it
 static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
-    engine->unk_0EE11 = unk;
-    func_0208d4f0(engine, callback, arg);
-    func_02089c50(engine);
-    memset(engine->unk_0B0E6, 0, sizeof(engine->unk_0B0E6));
-    strncpy(engine->unk_0B0E6, text, sizeof(engine->unk_0B0E6));
-    if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] != 0) {
+    engine->runInCaller = unk;
+    ShttsEngine_SetCallback(engine, callback, arg);
+    ShttsEngine_ResetSynthesis(engine);
+    memset(engine->inputText, 0, sizeof(engine->inputText));
+    strncpy(engine->inputText, text, sizeof(engine->inputText));
+    if (engine->inputText[sizeof(engine->inputText) - 1] != 0) {
         // Too long: cut it, and not in the middle of a character of two bytes
-        engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] = 0;
-        if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] & 0x80) {
-            engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] = 0;
+        engine->inputText[sizeof(engine->inputText) - 1] = 0;
+        if (engine->inputText[sizeof(engine->inputText) - 2] & 0x80) {
+            engine->inputText[sizeof(engine->inputText) - 2] = 0;
         }
     }
-    func_0208c5a8(engine);
+    ShttsEngine_Start(engine);
 }
 
 // Fractional multiply of two Q15 values.
@@ -55,7 +55,7 @@ static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
 // Not matching yet: the same size as the original (0x8a8), with 59 instructions different. What is left is which
 // registers and stack slots some values of the two loops get. Work on it was stopped part-way; the closest
 // earlier attempts and what was tried are in the history of this file.
-void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8,
+void ShttsDuration_SetWordSyllables(ShttsSyllable **list, int count, s16 unk3, int first, int last, int unk6, char *vowel, s16 unk8,
                    Shtts *engine) {
     char consonants[0x80];
     char vowels[0x80];
@@ -81,17 +81,17 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
             kinds[m] = kinds[m - 1];
         } else {
             for (j = 0; j < 0x90; j++) {
-                if (strcmp(name, data_020bbf34[j]) == 0) {
-                    consonants[m] = data_020b9d60[j];
-                    vowels[m] = data_020b9cd0[j];
-                    kinds[m] = data_020b9df0[j];
+                if (strcmp(name, ShttsSyllableNames[j]) == 0) {
+                    consonants[m] = ShttsSyllableConsonantClass[j];
+                    vowels[m] = ShttsSyllableVowelClass[j];
+                    kinds[m] = ShttsSyllableLengthKind[j];
                     break;
                 }
             }
         }
     }
     *vowel = vowels[count];
-    index = func_02086628(unk3);
+    index = ShttsDuration_ClassifyMoraCount(unk3);
     for (i = 1; i <= count; i++) {
         char b;
         s16 v;
@@ -198,13 +198,13 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
                 b = 0x1A;
             }
             v = vowels[i];
-            if (list[i]->unk_04 == 'Q') {
+            if (list[i]->qMark == 'Q') {
                 q = 1;
             } else {
                 q = 0;
             }
-            value = data_020ba288[group].unk_00 + data_020ba288[group].unk_02[k] + data_020ba288[group].unk_3A[b] + data_020ba288[group].unk_70[v] +
-                    data_020ba288[group].unk_A6[q] + data_020ba288[group].unk_AA[unk6] + data_020ba288[group].unk_B2[place];
+            value = ShttsConsonantLengths[group].unk_00 + ShttsConsonantLengths[group].unk_02[k] + ShttsConsonantLengths[group].byPrevVowel[b] + ShttsConsonantLengths[group].byVowel[v] +
+                    ShttsConsonantLengths[group].byQMark[q] + ShttsConsonantLengths[group].byTextPlace[unk6] + ShttsConsonantLengths[group].byRunPlace[place];
             if (voiced == 1) {
                 switch (k) {
                 case 9:
@@ -264,39 +264,39 @@ void func_02085d80(ShttsUnk_02087d98 **list, int count, s16 unk3, int first, int
             }
             v = vowels[i];
             if (v == 5) {
-                list[i]->unk_08 = (data_020b9fb4.unk_02[k] + 0x1E00 + data_020b9fb4.unk_38[b] +
-                                   data_020b9fb4.unk_B8[unk6] + data_020b9fb4.unk_C2[place]) >>
+                list[i]->unk_08 = (ShttsVowel5Lengths.unk_02[k] + 0x1E00 + ShttsVowel5Lengths.byNext[b] +
+                                   ShttsVowel5Lengths.byTextPlace[unk6] + ShttsVowel5Lengths.byRunPlace[place]) >>
                                   6;
-                list[i]->unk_0A = (s16)((data_020b9e80.unk_0C[k] + data_020b9e80.unk_42[b] +
-                                         data_020b9e80.unk_A0[index] + data_020b9e80.unk_D8[unk6] +
-                                         data_020b9e80.unk_EA[place]) >>
+                list[i]->gain = (s16)((ShttsSyllableGains.unk_0C[k] + ShttsSyllableGains.unk_42[b] +
+                                         ShttsSyllableGains.byMoraCount[index] + ShttsSyllableGains.byTextPlace[unk6] +
+                                         ShttsSyllableGains.byRunPlace[place]) >>
                                         6) +
                                   600;
                 list[i]->unk_06 = 0;
             } else {
-                list[i]->unk_08 = ((base = data_020ba0f4.unk_02[v] + 0x12FC) + data_020ba0f4.unk_0C[k] + data_020ba0f4.unk_42[b] +
-                                   data_020ba0f4.unk_CA[unk6] + data_020ba0f4.unk_D2[place]) >>
+                list[i]->unk_08 = ((base = ShttsVowelLengths.unk_02[v] + 0x12FC) + ShttsVowelLengths.unk_0C[k] + ShttsVowelLengths.unk_42[b] +
+                                   ShttsVowelLengths.byTextPlace[unk6] + ShttsVowelLengths.byRunPlace[place]) >>
                                   6;
                 if (list[i]->unk_08 < 70) {
                     list[i]->unk_08 = 70;
                 }
-                list[i]->unk_0A = (s16)((data_020b9e80.unk_02[v] + data_020b9e80.unk_0C[k] +
-                                         data_020b9e80.unk_42[b] + data_020b9e80.unk_A0[index] +
-                                         data_020b9e80.unk_D8[unk6] + data_020b9e80.unk_EA[place]) >>
+                list[i]->gain = (s16)((ShttsSyllableGains.unk_02[v] + ShttsSyllableGains.unk_0C[k] +
+                                         ShttsSyllableGains.unk_42[b] + ShttsSyllableGains.byMoraCount[index] +
+                                         ShttsSyllableGains.byTextPlace[unk6] + ShttsSyllableGains.byRunPlace[place]) >>
                                         6) +
                                   600;
-                if (list[i]->unk_04 == 'L') {
-                    list[i]->unk_08 += (s16)((base + data_020ba0f4.unk_42[v] + data_020ba0f4.unk_0C[v] - 0x5D) >> 6);
+                if (list[i]->qMark == 'L') {
+                    list[i]->unk_08 += (s16)((base + ShttsVowelLengths.unk_42[v] + ShttsVowelLengths.unk_0C[v] - 0x5D) >> 6);
                 }
                 if (list[i]->unk_05 == 'U') {
                     list[i]->unk_08 = (list[i]->unk_08 * 0x599A) >> 15;
-                    list[i]->unk_0A -= 30;
+                    list[i]->gain -= 30;
                 }
             }
         }
     }
-    func_020866bc(list, kinds, count, engine);
+    ShttsDuration_ApplySpeed(list, kinds, count, engine);
     for (i = 1; i <= count; i++) {
-        list[i]->unk_0A = unk8 + list[i]->unk_0A;
+        list[i]->gain = unk8 + list[i]->gain;
     }
 }
