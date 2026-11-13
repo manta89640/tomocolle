@@ -1,6 +1,7 @@
 #include "shtts.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -404,7 +405,7 @@ int func_0208d8fc(Shtts *engine) {
     engine->cur.firGain = 0;
     engine->cur.ring = 0;
     engine->unk_0B6FC = 0;
-    p = engine->unk_0B730;
+    p = (u8 *)engine + 0x730;
     engine->unk_0B720 = 0;
     engine->unk_08722 = 0;
     engine->unk_0B728 = 0;
@@ -412,6 +413,7 @@ int func_0208d8fc(Shtts *engine) {
     engine->unk_0B72A = 1;
     engine->unk_0B72B = 1;
     engine->unk_0B72C = 0;
+    p += 0xB000;
     for (i = 0; i < 4; i++) {
         p[0] = 0;
         p[1] = 0;
@@ -849,4 +851,618 @@ int func_0208e354(const char *name) {
         return 0;
     }
     return 7;
+}
+
+// The functions from here on are not yet in the order they have in the ROM
+
+// Compares two strings, taking 'I' and 'U' for 'i' and 'u'
+int func_0208473c(const char *a, const char *b) {
+    while (*a != 0 || *b != 0) {
+        int ca = *a;
+        int cb = *b;
+
+        if (ca != cb) {
+            if (ca == 'I' || ca == 'U') {
+                ca += 0x20;
+            }
+            if (cb == 'I' || cb == 'U') {
+                cb += 0x20;
+            }
+            if (ca != cb) {
+                return ca - cb;
+            }
+        }
+        a++;
+        b++;
+    }
+    return 0;
+}
+
+int func_02084814(void *arg) {
+    s16 count = func_020857e8(arg) - 2;
+
+    if (count < 0) {
+        return 0;
+    }
+    return count;
+}
+
+void func_020856b0(ShttsUnk_020856b0 *unk, int rate) {
+    if (rate <= 0) {
+        rate = 1;
+    }
+    unk->unk_200 = ((0x12C00 / rate) << 5) / 256;
+    if (unk->unk_200 == 0) {
+        unk->unk_200 = 1;
+    }
+    unk->unk_204 = 0;
+    unk->unk_208 = 0;
+    unk->unk_20C = 0;
+    memset(unk->unk_000, 0, sizeof(unk->unk_000));
+}
+
+int func_02085a64(Shtts *engine) {
+    return engine->unk_0871C;
+}
+
+void func_02086a74(int value, int *out) {
+    *out = value;
+}
+
+void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine) {
+    char dash = '-';
+
+    unk->unk_00 = 0;
+    unk->unk_05 = dash;
+    unk->unk_04 = dash;
+    unk->unk_08 = 0;
+    unk->unk_06 = 0;
+    unk->unk_10 = 0;
+    unk->pitch = engine->cur.pitch;
+}
+
+// 0, 1 or 2 for "0", "1" or "2", and -1 for anything else
+int func_020892a8(const char *text, const char *unused) {
+    if (strcmp(text, "0") == 0) {
+        return 0;
+    }
+    if (strcmp(text, "1") == 0) {
+        return 1;
+    }
+    if (strcmp(text, "2") == 0) {
+        return 2;
+    }
+    return -1;
+}
+
+// The same for the full-width digits
+int func_02089304(const char *text, const char *unused) {
+    if (strcmp(text, "０") == 0) {
+        return 0;
+    }
+    if (strcmp(text, "１") == 0) {
+        return 1;
+    }
+    if (strcmp(text, "２") == 0) {
+        return 2;
+    }
+    return -1;
+}
+
+void func_020893e4(const char *text, s16 *out) {
+    s16 unused = 0;
+    int level = func_02089360(text, &unused);
+
+    if (level == 0) {
+        *out = 5;
+    } else if (level == 1) {
+        *out = 10;
+    } else if (level == 2) {
+        *out = 15;
+    } else {
+        *out = 10;
+    }
+}
+
+// The product of two numbers in 16.16 fixed point
+int func_02089b5c(int a, int b) {
+    int sign = 1;
+    int product;
+
+    if (a < 0) {
+        a = -a;
+        sign = -1;
+    }
+    if (b < 0) {
+        b = -b;
+        sign = -sign;
+    }
+    product = (a >> 16) * (b >> 16) + (((a >> 16) * (u16)b + (u16)a * (b >> 16) + 0x8000) >> 16);
+    return product * sign;
+}
+
+int func_02089cec(void) {
+    return 0;
+}
+
+// Whether the engine has been asked to stop
+int func_02089d4c(Shtts *engine) {
+    int stopRequested;
+
+    OS_LockMutex(&engine->mutex);
+    stopRequested = engine->stopRequested;
+    OS_UnlockMutex(&engine->mutex);
+    return stopRequested;
+}
+
+// Where a character first is in a string, or NULL. Unlike strchr, it does not find the end of the string.
+char *func_02089d7c(char *text, int c) {
+    while (*text != 0 && *text != c) {
+        text++;
+    }
+    if (*text == 0) {
+        return NULL;
+    }
+    return text;
+}
+
+void func_02089e48(char *dst, int c, int count) {
+    int i;
+
+    for (i = 0; i < count; i++) {
+        *dst++ = (char)c;
+    }
+}
+
+// Called with -1 when something is wrong. Does nothing in this build.
+void func_02089e70(int code) {
+}
+
+void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
+    if (a < 0) {
+        a = 0;
+    } else {
+        a = (s16)(a - table[0].unk_0);
+    }
+    if (b < 0) {
+        b = a;
+    } else {
+        b = (s16)(b - table[count - 1].unk_0);
+    }
+    func_0208abf4(table, count, a, b);
+}
+
+ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
+    ShttsUnit *unit = &data_020e8f08[engine->cur.unk_00][index[0]][index[1]][index[2]];
+
+    if (unit->unk_2 == 0) {
+        return NULL;
+    }
+    return unit;
+}
+
+void func_0208be38(Shtts *engine) {
+    engine->unk_08CD4 = engine->unk_08908;
+    engine->unk_08CD8 = engine->unk_08908 + 0x1E0;
+    engine->unk_08CDC = 0x1E0;
+    engine->unk_08CDE = 0xF0;
+    engine->unk_08CD0 = engine->unk_08CD4;
+    engine->unk_08CCC = engine->unk_08CC8 = engine->unk_08CD4;
+    engine->unk_08CE0 = 0;
+    func_0208be9c(engine->unk_08CDC, engine->unk_08CD4, engine);
+}
+
+int func_0208c568(Shtts *engine) {
+    engine->unk_00000 = 11000;
+    engine->unk_01B21 = 0;
+    engine->unk_00004 = engine->unk_00000 / 200;
+    return 0;
+}
+
+// Looks a word up in a sorted list. If it is there, writes it back as the list spells it and returns its value.
+int func_02084794(char *text, ShttsWordList *list) {
+    int low = 0;
+    int high = list->count - 1;
+
+    while (low <= high) {
+        int middle = (low + high) >> 1;
+        s16 order = func_0208473c(text, list->words[middle].name);
+
+        if (order < 0) {
+            high = middle - 1;
+        } else if (order > 0) {
+            low = middle + 1;
+        } else {
+            strcpy(text, list->words[middle].name);
+            return list->words[middle].value;
+        }
+    }
+    return -1;
+}
+
+// Reads the text to speak from standard input, a line at a time
+void func_02086b14(Shtts *engine) {
+    char line[150];
+    int length = 0;
+
+    while (1) {
+        if (fgets(line, sizeof(line), stdin) == NULL) {
+            return;
+        }
+        if (length > 3000) {
+            return;
+        }
+        strcat(engine->text, line);
+        length += sizeof(line);
+        strcpy(line, "");
+    }
+}
+
+// Where one string first is in another, or -1
+int func_02087dc8(const char *text, const char *find) {
+    const char *f = find;
+    s16 i = 0;
+
+    while (*text != 0) {
+        if (*text == *f) {
+            const char *t = text;
+
+            while (*f != 0 && *t == *f) {
+                f++;
+                t++;
+            }
+            if (*f == 0) {
+                return i;
+            }
+            f = find;
+        }
+        text++;
+        i++;
+    }
+    return -1;
+}
+
+// Adds a line to text if there is room for it, and returns the line's length
+int func_02089094(char *text, u32 size, const char *line) {
+    char buffer[196];
+    int length;
+
+    if (*line == 0) {
+        return 0;
+    }
+    strcpy(buffer, line);
+    strcat(buffer, "\n");
+    length = strlen(buffer);
+    if (length + strlen(text) >= size) {
+        return -1;
+    }
+    strcat(text, buffer);
+    return (s16)length;
+}
+
+// Which of a table's entries, of 12 bytes each, a text starts with, or -1
+int func_02089244(const char *text, const char *table, int count) {
+    s16 i;
+
+    for (i = 0; i < count; i++) {
+        if (strncmp(text, table, strlen(table)) == 0) {
+            break;
+        }
+        table += 12;
+    }
+    if (i >= count) {
+        i = -1;
+    }
+    return i;
+}
+
+// Reads the digit before a position in text, half-width or full-width, and says in out how many bytes it took
+int func_02089360(const char *end, s16 *out) {
+    char digit[3] = { 0, 0, 0 };
+    int value;
+
+    strncpy(digit, end - 1, 1);
+    value = func_020892a8(digit, end - 1);
+    *out = 1;
+    if (value == -1) {
+        strncpy(digit, end - 2, 2);
+        value = func_02089304(digit, end - 2);
+        *out = 2;
+    }
+    if (value == -1) {
+        *out = 0;
+    }
+    return value;
+}
+
+// Sets up the engine's state for a new text
+int func_02089c50(Shtts *engine) {
+    int i;
+    u8 *p;
+
+    engine->unk_04938 = 0;
+    engine->unk_0EE0C = 0;
+    engine->unk_0EE0E = 0;
+    func_0208be38(engine);
+    engine->unk_0B700 = 0;
+    func_02089e48(engine->unk_0B704, 0, sizeof(engine->unk_0B704));
+    p = (u8 *)engine + 0x730;
+    engine->unk_08722 = 0;
+    engine->unk_0EE04 = 0;
+    engine->unk_0EE08 = 0;
+    engine->unk_08906 = 0;
+    engine->unk_0B6FC = 0;
+    p += 0xB000;
+    for (i = 0; i < 4; i++) {
+        p[0] = 0;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = 0;
+        p += 4;
+    }
+    return 0;
+}
+
+// Scales samples by a gain in 4.12 fixed point, keeping them within 16 bits
+void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
+    s16 i;
+
+    for (i = 0; i < count; i++) {
+        int sample = (*src * gain) >> 12;
+
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
+        } else if (sample < -0x7FFF) {
+            sample = -0x7FFF;
+        }
+        *dst++ = sample;
+        src++;
+    }
+}
+
+// The ring effect: multiplies samples by a sine wave of a frequency
+void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
+    int i;
+    int step = (frequency << 16) / 11000;
+
+    for (i = 0; i < count; i++) {
+        (*phase)++;
+        dst[i] = (src[i] * data_020e8d08[((u32)((step * *phase) >> 8) << 24) >> 24]) >> 15;
+    }
+}
+
+// Plays out the half of the sample buffer that has been filled, and moves on to the other half
+void func_0208c054(Shtts *engine) {
+    if (engine->unk_08CD0 >= engine->unk_08CC8) {
+        return;
+    }
+    func_0208e4e4(engine->unk_08CDE, engine->unk_08CD0, engine);
+    func_0208be9c(engine->unk_08CDE, engine->unk_08CD0, engine);
+    if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
+        engine->unk_08CD0 = &engine->unk_08908[0];
+    } else {
+        engine->unk_08CD0 = &engine->unk_08908[0xF0];
+    }
+    engine->unk_08CC8 = engine->unk_08CD0;
+}
+
+// Fades samples in from silence, or out to it
+void func_0208e464(int from, int to, int count, s16 *data) {
+    int gain;
+    int step;
+    s16 i;
+
+    if (count <= 0) {
+        return;
+    }
+    step = func_02089444(to - from, count);
+    if (from == 0) {
+        gain = from;
+    } else if (to == 0) {
+        gain = -(step * (count - 1));
+    }
+    for (i = 0; i < count; i++) {
+        *data = (*data * gain) >> 16;
+        data++;
+        gain += step;
+    }
+}
+
+// The next four are written in assembly in the original too: they use the processor's multiply-accumulate
+// instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
+// not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
+
+asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
+    stmfd sp!, {r3, r4, lr}
+    sub sp, sp, #3
+    mov lr, #0
+    ldr r3, [r0, #0]
+    ldrsh r4, [r1, #0]
+    smlawb lr, r3, r4, lr
+    ldr r3, [r0, #4]
+    ldrsh r4, [r1, #2]
+    smlawb lr, r3, r4, lr
+    ldrsh r4, [r1, #4]
+    smlawb lr, r2, r4, lr
+    ldr r3, [r0, #8]
+    ldrsh r4, [r1, #6]
+    smlawb lr, r3, r4, lr
+    ldr r3, [r0, #12]
+    ldrsh r4, [r1, #8]
+    smlawb lr, r3, r4, lr
+    mov r0, lr
+    add sp, sp, #3
+    ldmfd sp!, {r3, r4, lr}
+    bx lr
+}
+
+asm int func_0208ea20(const int *state, const s16 *coefficients) {
+    stmfd sp!, {r2, r3, r4, lr}
+    sub sp, sp, #4
+    mov lr, #0
+    ldr r2, [r0, #0]
+    ldrsh r3, [r1, #2]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #4]
+    ldrsh r3, [r1, #4]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #8]
+    ldrsh r3, [r1, #6]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #12]
+    ldrsh r3, [r1, #8]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #16]
+    ldrsh r3, [r1, #10]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #20]
+    ldrsh r3, [r1, #12]
+    smlawb lr, r2, r3, lr
+    mov r0, lr
+    add sp, sp, #4
+    ldmfd sp!, {r2, r3, r4, lr}
+    bx lr
+}
+
+asm int func_0208ea84(const int *state, const s16 *coefficients) {
+    stmfd sp!, {r2, r3, r4, lr}
+    sub sp, sp, #4
+    mov lr, #0
+    ldr r2, [r0, #0]
+    ldrsh r3, [r1, #2]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #4]
+    ldrsh r3, [r1, #4]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #8]
+    ldrsh r3, [r1, #6]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #12]
+    ldrsh r3, [r1, #8]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #16]
+    ldrsh r3, [r1, #10]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #20]
+    ldrsh r3, [r1, #12]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #24]
+    ldrsh r3, [r1, #14]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #28]
+    ldrsh r3, [r1, #16]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #32]
+    ldrsh r3, [r1, #18]
+    smlawb lr, r2, r3, lr
+    ldr r2, [r0, #36]
+    ldrsh r3, [r1, #20]
+    smlawb lr, r2, r3, lr
+    mov r0, lr
+    add sp, sp, #4
+    ldmfd sp!, {r2, r3, r4, lr}
+    bx lr
+}
+
+// A product in fixed point, doubled
+asm int func_0208e81c(int a, int b) {
+    stmfd sp!, {r2, lr}
+    sub sp, sp, #2
+    mov lr, #0
+    smulwb r0, r0, r1
+    mov r0, r0, lsl #1
+    add sp, sp, #2
+    ldmfd sp!, {r2, lr}
+    bx lr
+}
+
+int func_02086628(s16 value) {
+    if (value <= 3) {
+        return 0;
+    }
+    if (value > 3 && value < 9) {
+        return (s16)(value - 3);
+    }
+    if (value == 9 || value == 10) {
+        return 6;
+    }
+    if (value >= 11 && value <= 13) {
+        return 7;
+    }
+    if (value >= 14 && value <= 16) {
+        return 8;
+    }
+    if (value >= 17 && value <= 25) {
+        return 9;
+    }
+    if (value > 25) {
+        return 10;
+    }
+    return -1;
+}
+
+// Copies a line of text, up to size, and moves the cursor past it. Returns its length, -1 at the end of the text.
+int func_02086a7c(char *dst, int size, char **cursor) {
+    s16 length;
+    int last;
+
+    if (cursor == NULL || *cursor == NULL) {
+        return -2;
+    }
+    if (**cursor == 0) {
+        return -1;
+    }
+    last = size - 1;
+    length = 0;
+    while (**cursor != 0 && length < last) {
+        if (**cursor == '\n' || **cursor == '\r') {
+            (*cursor)++;
+            break;
+        }
+        *dst++ = *(*cursor)++;
+        length++;
+    }
+    *dst = 0;
+    return length;
+}
+
+// The next word of text that the characters of delimiters separate, as strtok does it but with the cursor in the
+// caller's hands
+char *func_02089da0(char **cursor, char *delimiters) {
+    char *word;
+
+    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) != NULL) {
+        (*cursor)++;
+    }
+    word = *cursor;
+    if (*word == 0) {
+        return NULL;
+    }
+    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) == NULL) {
+        (*cursor)++;
+    }
+    if (**cursor != 0) {
+        *(*cursor)++ = 0;
+    }
+    return word;
+}
+
+// Fills count samples with silence from a place in the sample buffer, going round to its start at its end
+void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
+    s16 i;
+
+    if (count < 0) {
+        func_02089e70(-1);
+    }
+    i = 0;
+    if (buffer + count >= engine->unk_08CD8) {
+        while (buffer < engine->unk_08CD8) {
+            *buffer++ = 0;
+            i++;
+        }
+        buffer = engine->unk_08CD4;
+    }
+    for (; i < count; i++) {
+        *buffer++ = 0;
+    }
 }

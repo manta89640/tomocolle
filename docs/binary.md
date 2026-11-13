@@ -175,6 +175,17 @@ written in text, and a string of `#` commands that the preset stands for. Measur
 the vowels `a i u e o`, `N`, `X`, then the consonants from `k` to `kw`. The engine keeps the number of the sound it
 is speaking, and `func_0208daf8` returns its name, which is what a game needs to move a mouth in time with speech.
 
+Open questions from the engine's code, which may be one question:
+
+- A few loops in the original are unrolled four times (a 16-byte clear in `func_0208d8fc` and `func_02089c50`), and
+  some loops over a count test the count twice before they start (`func_02089e74`, `func_0208e464`). The compiler
+  does neither for the source as written here, and has no option for unrolling that its help lists.
+- The array those two functions clear is reached as the engine's address plus `0x730`, then plus `0xB000`, where
+  everything near it is reached from plus `0xB000`. That suggests it belongs to a structure that starts at `0x730`.
+
+Four of the engine's functions are assembly in the original too: sums of products with the multiply-accumulate
+instructions for 16-bit fixed point. They are written as assembly functions here.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").

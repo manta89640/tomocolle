@@ -870,7 +870,7 @@ func_02020be8 kind:function(arm,size=0x1c0) addr:0x02020be8
 .L_02020bf8 kind:label(arm) addr:0x02020bf8
 func_02020da8 kind:function(arm,size=0x48) addr:0x02020da8
 .L_02020db4 kind:label(arm) addr:0x02020db4
-func_02020df0 kind:function(arm,size=0x20c) addr:0x02020df0
+_s32_div_f kind:function(arm,size=0x20c) addr:0x02020df0
 func_02020ffc kind:function(arm,size=0x1e4) addr:0x02020ffc
 .L_02021004 kind:label(arm) addr:0x02021004
 func_020211f8 kind:function(arm,size=0x544) addr:0x020211f8
@@ -4871,7 +4871,7 @@ data_020fc7c8 kind:data(any) addr:0x020fc7c8
 data_020fc7cc kind:data(any) addr:0x020fc7cc
 data_020fc7d0 kind:data(any) addr:0x020fc7d0
 data_021021d0 kind:data(any) addr:0x021021d0
-data_0210f09c kind:data(any) addr:0x0210f09c
+__files kind:data(any) addr:0x0210f09c
 data_0210f0e8 kind:data(any) addr:0x0210f0e8
 data_0210f134 kind:data(any) addr:0x0210f134
 data_0210f180 kind:data(any) addr:0x0210f180
