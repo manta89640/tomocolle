@@ -115,9 +115,9 @@ The engine's bounds are those of a closed module: nothing in that range is calle
 and it calls nothing but the C library and the OS (threads, mutexes, `OS_Sleep`). It is one unit for now, because
 where its files begin and end is not known.
 
-The engine takes Shift JIS text with control codes in it, such as `<\Spk_male` to pick a speaker and `#B4800`,
-`#S90`, `#X90`, `#I500`, `#J20` for what are probably pitch and speed settings. It hands back 16-bit samples a block
-at a time through a callback, and the game plays them at 22,000 Hz.
+The engine takes Shift JIS text with control codes in it, such as `<\Spk_male` to pick a speaker and `#B4800` to
+set the pitch. It hands back 16-bit samples a block at a time through a callback, and the game plays them at
+22,000 Hz.
 
 The engine is built with the game's compiler and flags, as C: its decompiled functions match with them. So it was
 most likely compiled from Sharp's source as part of the game's build.
