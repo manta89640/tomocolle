@@ -195,6 +195,16 @@ LIBRARIES = {
         "includes": ["{dir}", "lib/NitroSystem/include", "{dir}/include", *SDK_INCLUDES],
     },
 }
+# Sharp's text-to-speech engine. Unlike the SDK's, its source is this project's own decompilation, in lib/SHTTS. Which
+# compiler Sharp built it with is not known: the game's is the first guess.
+LIBRARIES["lib/SHTTS/"] = {
+    "compiler": MWCC_VERSION,
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, "-lang=c99"],
+    "defines": SDK_DEFINES,
+    "includes": ["lib/SHTTS", *SDK_INCLUDES],
+}
+
 # A header that the SDK's build generates from a table of constants. tools/gen_fx_const.py does the same, so that
 # nothing fetched is run here: the fetched sources are only ever input to the compiler.
 FX_CONST = ("tools/gen_fx_const.py", "lib/NitroSDK/gen/nitro/fx/fx_const.csv",
@@ -444,7 +454,8 @@ def main():
     mwcc = compilers_dir / MWCC_VERSION / "mwccarm.exe"
     mwld = compilers_dir / MWCC_VERSION / "mwldarm.exe"
     if libraries:
-        msl_dir = download_msl(tools_dir, compilers[1:]).relative_to(ROOT)
+        msl_versions = sorted({library.get("msl", library["compiler"]) for library in libraries.values()})
+        msl_dir = download_msl(tools_dir, msl_versions).relative_to(ROOT)
         for directory, (url, commit) in FETCHED.items():
             fetch_repository(ROOT / directory, url, commit)
     wrapper = find_wrapper(args.wrapper, system, machine, tools_dir)
@@ -575,7 +586,8 @@ def main():
             # lib/<library>/libraries/<name> is the directory of one of the SDK's own libraries
             own = Path(*source.parts[:4]).as_posix()
             includes = [d.format(dir=own, build=build_dir.as_posix()) for d in settings["includes"]]
-            includes += [(msl_dir / settings["compiler"] / d).as_posix() for d in MSL_INCLUDE_DIRS]
+            includes += [(msl_dir / settings.get("msl", settings["compiler"]) / d).as_posix()
+                         for d in MSL_INCLUDE_DIRS]
             # The prefix file sees only the defines that come before it on the command line
             flags = [*settings["flags"], *(f"-d {define}" for define in settings["defines"])]
             if "prefix" in settings:
