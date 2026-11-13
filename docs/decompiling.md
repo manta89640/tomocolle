@@ -71,10 +71,18 @@ be finished:
 
 `tools/strings.py` writes a table of every string the game's code refers to, `build/jpn_rev1/strings.tsv` (game data,
 so it is generated and not committed), and `tools/name_strings.py --apply` names each of them in `symbols.txt` from
-its text: `gStr_M00_sky_imd` for `"M00:/sky.imd"`, `gText_Watashi` for `ワタシ`, and `gText_<address>` for text with
-kanji, which has no spelling as an identifier. Equal strings in different places get their address after the name.
-It leaves alone what already has a name, the strings a source file owns, and any symbol the sources still refer to
-by its placeholder name. Run both again after dsd's analysis finds more references.
+its text:
+
+- `gStr_M00_sky_imd` for `"M00:/sky.imd"`
+- `gText_Watashi` for `ワタシ`, and `gText_NenreiFushou` for `年齢不詳`: Japanese text is named by how it is read. The
+  readings of kanji come from the system's Japanese tokenizer (`tools/romaji.swift`), so this step runs on macOS.
+- A sign with no reading is named by what it is: `gText_Question` for `？`.
+
+No name is an address. Equal strings in several places are told apart by their overlay and then by number
+(`gStr_appear_ov075`, `gStr_appear_ov075_2`). An entry whose kanji the tokenizer cannot read is taken to be data
+that decodes as text, not a string, and is left unnamed. The tool also leaves alone what already has a name, the
+strings a source file owns, and any symbol the sources still refer to by its placeholder name. Run both again after
+dsd's analysis finds more references.
 
 ### Library code, in bulk
 

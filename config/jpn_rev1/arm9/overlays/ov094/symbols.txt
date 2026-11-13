@@ -18,38 +18,38 @@ data_ov094_0214af24 kind:data(any) addr:0x0214af24
 data_ov094_0214af30 kind:data(any) addr:0x0214af30
 data_ov094_0214af40 kind:data(any) addr:0x0214af40
 data_ov094_0214af50 kind:data(any) addr:0x0214af50
-gStr_c_ov094_0214af60 kind:data(any) addr:0x0214af60
+gStr_c_ov094 kind:data(any) addr:0x0214af60
 data_ov094_0214af68 kind:data(any) addr:0x0214af68 ambiguous
 data_ov094_0214af70 kind:data(any) addr:0x0214af70
-gText_ov094_0214af80 kind:data(any) addr:0x0214af80
+gStr__ov094 kind:data(any) addr:0x0214af80
 data_ov094_0214af98 kind:data(any) addr:0x0214af98 ambiguous
-gStr_e_ov094_0214afc0 kind:data(any) addr:0x0214afc0
+gStr_e_ov094 kind:data(any) addr:0x0214afc0
 data_ov094_0214b028 kind:data(any) addr:0x0214b028 ambiguous
-gStr_SCD_ov094_0214b044 kind:data(any) addr:0x0214b044
-gStr_Scn_Scene_SceneCharDistribution_LZ_bin_ov094_0214b048 kind:data(any) addr:0x0214b048
-gStr_TBM_ov094_0214b070 kind:data(any) addr:0x0214b070
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov094_0214b074 kind:data(any) addr:0x0214b074
-gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov094_0214b08c kind:data(any) addr:0x0214b08c
-gStr_T02_ov094_0214b0ac kind:data(any) addr:0x0214b0ac
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov094_0214b0b0 kind:data(any) addr:0x0214b0b0
-gStr_T03_ov094_0214b0cc kind:data(any) addr:0x0214b0cc
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov094_0214b0d0 kind:data(any) addr:0x0214b0d0
+gStr_SCD_ov094 kind:data(any) addr:0x0214b044
+gStr_Scn_Scene_SceneCharDistribution_LZ_bin_ov094 kind:data(any) addr:0x0214b048
+gStr_TBM_ov094 kind:data(any) addr:0x0214b070
+gStr_Msg_TmdEtcMsgJP_LZ_bin_ov094 kind:data(any) addr:0x0214b074
+gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov094 kind:data(any) addr:0x0214b08c
+gStr_T02_ov094 kind:data(any) addr:0x0214b0ac
+gStr_Msg_TmdCommonMsgJP_LZ_bin_ov094 kind:data(any) addr:0x0214b0b0
+gStr_T03_ov094 kind:data(any) addr:0x0214b0cc
+gStr_Msg_TmdEtcMsgJP_LZ_bin_ov094_2 kind:data(any) addr:0x0214b0d0
 data_ov094_0214b0e4 kind:data(any) addr:0x0214b0e4 ambiguous
 gStr_SCD_BG_up_textframe_nsc kind:data(any) addr:0x0214b0e8
-gStr_SCD_BG_up_nsc_ov094_0214b104 kind:data(any) addr:0x0214b104
-gStr_SCD_BG_up_ncg_ov094_0214b114 kind:data(any) addr:0x0214b114
-gStr_SCD_BG_up_ncl_ov094_0214b124 kind:data(any) addr:0x0214b124
-gStr_SCD_Obj_up_nce_ov094_0214b134 kind:data(any) addr:0x0214b134
+gStr_SCD_BG_up_nsc_ov094 kind:data(any) addr:0x0214b104
+gStr_SCD_BG_up_ncg_ov094 kind:data(any) addr:0x0214b114
+gStr_SCD_BG_up_ncl_ov094 kind:data(any) addr:0x0214b124
+gStr_SCD_Obj_up_nce_ov094 kind:data(any) addr:0x0214b134
 data_ov094_0214b144 kind:data(any) addr:0x0214b144
 data_ov094_0214b148 kind:data(any) addr:0x0214b148 ambiguous
-gStr_SCD_Obj_up_ncl_ov094_0214b154 kind:data(any) addr:0x0214b154
-gStr_SCD_Fw_Obj_up_ncl_ov094_0214b164 kind:data(any) addr:0x0214b164
-gStr_T02_tmd_common_msg_JP_bmg_ov094_0214b178 kind:data(any) addr:0x0214b178
+gStr_SCD_Obj_up_ncl_ov094 kind:data(any) addr:0x0214b154
+gStr_SCD_Fw_Obj_up_ncl_ov094 kind:data(any) addr:0x0214b164
+gStr_T02_tmd_common_msg_JP_bmg_ov094 kind:data(any) addr:0x0214b178
 gStr_T03_tmd_etc_msg_JP_bmg kind:data(any) addr:0x0214b194
-gStr_SCD_ov094_0214b1ac kind:data(any) addr:0x0214b1ac
-gStr_TBM_ov094_0214b1b0 kind:data(any) addr:0x0214b1b0
-gStr_T02_ov094_0214b1b4 kind:data(any) addr:0x0214b1b4
-gStr_T03_ov094_0214b1b8 kind:data(any) addr:0x0214b1b8
-gStr_TBM_tmd_etc_msg_JP_bmg_ov094_0214b1bc kind:data(any) addr:0x0214b1bc
-gStr_SCD_Fw_Obj_up_ncl_ov094_0214b1d4 kind:data(any) addr:0x0214b1d4
-gStr_SCD_Fw_Obj_up_ncl_ov094_0214b1e8 kind:data(any) addr:0x0214b1e8
+gStr_SCD_ov094_2 kind:data(any) addr:0x0214b1ac
+gStr_TBM_ov094_2 kind:data(any) addr:0x0214b1b0
+gStr_T02_ov094_2 kind:data(any) addr:0x0214b1b4
+gStr_T03_ov094_2 kind:data(any) addr:0x0214b1b8
+gStr_TBM_tmd_etc_msg_JP_bmg_ov094 kind:data(any) addr:0x0214b1bc
+gStr_SCD_Fw_Obj_up_ncl_ov094_2 kind:data(any) addr:0x0214b1d4
+gStr_SCD_Fw_Obj_up_ncl_ov094_3 kind:data(any) addr:0x0214b1e8

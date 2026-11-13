@@ -34,27 +34,27 @@ data_ov027_0214a790 kind:data(any) addr:0x0214a790
 data_ov027_0214a7a4 kind:data(any) addr:0x0214a7a4
 data_ov027_0214a7a8 kind:data(any) addr:0x0214a7a8 ambiguous
 gStr_M01_bg kind:data(any) addr:0x0214a7ac
-gStr_M01_body_imd_ov027_0214a7b4 kind:data(any) addr:0x0214a7b4
+gStr_M01_body_imd_ov027 kind:data(any) addr:0x0214a7b4
 gStr_M00_body_imd kind:data(any) addr:0x0214a7c4
-gText_Matabagudesuka kind:data(any) addr:0x0214a7d4
+gText_MataBaguDeSuka kind:data(any) addr:0x0214a7d4
 gStr_M00_anim00_itp kind:data(any) addr:0x0214a7e4
 gStr_M01_anim00_itp kind:data(any) addr:0x0214a7f4
 data_ov027_0214a80c kind:data(any) addr:0x0214a80c ambiguous
 data_ov027_0214a828 kind:data(any) addr:0x0214a828
 data_ov027_0214a838 kind:data(any) addr:0x0214a838 ambiguous
 data_ov027_0214a848 kind:data(any) addr:0x0214a848 ambiguous
-gStr_M00_ov027_0214a850 kind:data(any) addr:0x0214a850
+gStr_M00_ov027 kind:data(any) addr:0x0214a850
 gStr_Scn_Scene_nagashisoumen_LZ_bin kind:data(any) addr:0x0214a854
-gStr_M01_ov027_0214a874 kind:data(any) addr:0x0214a874
+gStr_M01_ov027 kind:data(any) addr:0x0214a874
 gStr_job_job010_LZ_bin kind:data(any) addr:0x0214a878
-gStr_TBM_ov027_0214a88c kind:data(any) addr:0x0214a88c
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov027_0214a890 kind:data(any) addr:0x0214a890
-gStr_SFL_ov027_0214a8b0 kind:data(any) addr:0x0214a8b0
+gStr_TBM_ov027 kind:data(any) addr:0x0214a88c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov027 kind:data(any) addr:0x0214a890
+gStr_SFL_ov027 kind:data(any) addr:0x0214a8b0
 data_ov027_0214a8b4 kind:data(any) addr:0x0214a8b4
 data_ov027_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov027_0214a8d0 kind:data(any) addr:0x0214a8d0
-gStr_M00_ov027_0214a8f4 kind:data(any) addr:0x0214a8f4
-gStr_M01_ov027_0214a8f8 kind:data(any) addr:0x0214a8f8
-gStr_TBM_ov027_0214a8fc kind:data(any) addr:0x0214a8fc
-gStr_SFL_ov027_0214a900 kind:data(any) addr:0x0214a900
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov027 kind:data(any) addr:0x0214a8d0
+gStr_M00_ov027_2 kind:data(any) addr:0x0214a8f4
+gStr_M01_ov027_2 kind:data(any) addr:0x0214a8f8
+gStr_TBM_ov027_2 kind:data(any) addr:0x0214a8fc
+gStr_SFL_ov027_2 kind:data(any) addr:0x0214a900
 data_ov027_0214a90c kind:data(any) addr:0x0214a90c ambiguous

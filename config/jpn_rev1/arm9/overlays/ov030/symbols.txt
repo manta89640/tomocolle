@@ -7,20 +7,20 @@ func_ov030_0214a280 kind:function(arm,size=0x134) addr:0x0214a280
 func_ov030_0214a3b4 kind:function(arm,size=0x80) addr:0x0214a3b4
 func_ov030_0214a434 kind:function(arm,size=0xa8) addr:0x0214a434
 func_ov030_0214a4dc kind:function(arm,size=0xb0) addr:0x0214a4dc
-gText_ov030_0214a58c kind:data(any) addr:0x0214a58c
+gStr_Equals kind:data(any) addr:0x0214a58c
 data_ov030_0214a598 kind:data(any) addr:0x0214a598
 data_ov030_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
 data_ov030_0214a5bc kind:data(any) addr:0x0214a5bc
 data_ov030_0214a5e8 kind:data(any) addr:0x0214a5e8 ambiguous
-gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov030_0214a604 kind:data(any) addr:0x0214a604
-gStr_RM0_ov030_0214a620 kind:data(any) addr:0x0214a620
+gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov030 kind:data(any) addr:0x0214a604
+gStr_RM0_ov030 kind:data(any) addr:0x0214a620
 gStr_Mdl_Misc_cosmos_3D_LZ_bin kind:data(any) addr:0x0214a624
-gStr_N94_ov030_0214a640 kind:data(any) addr:0x0214a640
+gStr_N94_ov030 kind:data(any) addr:0x0214a640
 data_ov030_0214a644 kind:data(any) addr:0x0214a644
 data_ov030_0214a648 kind:data(any) addr:0x0214a648 ambiguous
 gStr_RM0_cosmos_imd kind:data(any) addr:0x0214a664
 gStr_N94_Obj_down_ncl kind:data(any) addr:0x0214a674
 gStr_N94_Obj_down_nce kind:data(any) addr:0x0214a688
 gStr_N94_Obj_down_ncg kind:data(any) addr:0x0214a69c
-gStr_RM0_ov030_0214a6b0 kind:data(any) addr:0x0214a6b0
-gStr_N94_ov030_0214a6b4 kind:data(any) addr:0x0214a6b4
+gStr_RM0_ov030_2 kind:data(any) addr:0x0214a6b0
+gStr_N94_ov030_2 kind:data(any) addr:0x0214a6b4

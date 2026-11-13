@@ -19,22 +19,22 @@ data_ov026_0214a54c kind:data(any) addr:0x0214a54c
 data_ov026_0214a568 kind:data(any) addr:0x0214a568 ambiguous
 data_ov026_0214a584 kind:data(any) addr:0x0214a584
 data_ov026_0214a588 kind:data(any) addr:0x0214a588 ambiguous
-gStr_N87_ov026_0214a5a0 kind:data(any) addr:0x0214a5a0
+gStr_N87_ov026 kind:data(any) addr:0x0214a5a0
 data_ov026_0214a5a4 kind:data(any) addr:0x0214a5a4
 data_ov026_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
-gStr_TBM_ov026_0214a5c4 kind:data(any) addr:0x0214a5c4
+gStr_TBM_ov026 kind:data(any) addr:0x0214a5c4
 data_ov026_0214a5c8 kind:data(any) addr:0x0214a5c8
 data_ov026_0214a5d4 kind:data(any) addr:0x0214a5d4 ambiguous
-gStr_SFL_ov026_0214a5e8 kind:data(any) addr:0x0214a5e8
-gStr_Scn_Scene_NgCaption_LZ_bin_ov026_0214a5ec kind:data(any) addr:0x0214a5ec
+gStr_SFL_ov026 kind:data(any) addr:0x0214a5e8
+gStr_Scn_Scene_NgCaption_LZ_bin_ov026 kind:data(any) addr:0x0214a5ec
 gStr_N87_Obj_up_nce kind:data(any) addr:0x0214a608
 gStr_N87_Obj_up_ncg kind:data(any) addr:0x0214a618
 gStr_N87_Obj_up_ncl kind:data(any) addr:0x0214a628
 gStr_N87_BG_up_nsc kind:data(any) addr:0x0214a638
 gStr_N87_BG_up_ncg kind:data(any) addr:0x0214a648
 gStr_N87_BG_up_ncl kind:data(any) addr:0x0214a658
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov026_0214a668 kind:data(any) addr:0x0214a668
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov026 kind:data(any) addr:0x0214a668
 data_ov026_0214a688 kind:data(any) addr:0x0214a688 ambiguous
-gStr_N87_ov026_0214a68c kind:data(any) addr:0x0214a68c
-gStr_TBM_ov026_0214a690 kind:data(any) addr:0x0214a690
-gStr_SFL_ov026_0214a694 kind:data(any) addr:0x0214a694
+gStr_N87_ov026_2 kind:data(any) addr:0x0214a68c
+gStr_TBM_ov026_2 kind:data(any) addr:0x0214a690
+gStr_SFL_ov026_2 kind:data(any) addr:0x0214a694

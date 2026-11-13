@@ -10,4 +10,4 @@ func_ov001_02149ed8 kind:function(arm,size=0x4) addr:0x02149ed8
 func_ov001_02149edc kind:function(arm,size=0x14) addr:0x02149edc
 data_ov001_02149f08 kind:data(any) addr:0x02149f08 ambiguous
 data_ov001_02149f10 kind:data(any) addr:0x02149f10 ambiguous
-gText_ov001_02149f24 kind:data(any) addr:0x02149f24
+gText_KaTildeVuKeE kind:data(any) addr:0x02149f24

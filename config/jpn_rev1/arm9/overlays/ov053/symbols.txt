@@ -23,24 +23,24 @@ data_ov053_0214ae68 kind:data(any) addr:0x0214ae68
 data_ov053_0214ae74 kind:data(any) addr:0x0214ae74
 data_ov053_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov053_0214aea0 kind:data(any) addr:0x0214aea0
-gStr_P00_ov053_0214aea8 kind:data(any) addr:0x0214aea8
-gStr_P00_item_imd_ov053_0214aeac kind:data(any) addr:0x0214aeac
+gStr_P00_ov053 kind:data(any) addr:0x0214aea8
+gStr_P00_item_imd_ov053 kind:data(any) addr:0x0214aeac
 data_ov053_0214aec4 kind:data(any) addr:0x0214aec4 ambiguous
 data_ov053_0214aee0 kind:data(any) addr:0x0214aee0 ambiguous
-gStr_Mdl_Ica_ica_mii_mini_contents2_LZ_bin_ov053_0214aefc kind:data(any) addr:0x0214aefc
-gStr_TBM_ov053_0214af24 kind:data(any) addr:0x0214af24
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov053_0214af28 kind:data(any) addr:0x0214af28
-gStr_SFL_ov053_0214af48 kind:data(any) addr:0x0214af48
-gStr_Scn_Scene_NgCaption_LZ_bin_ov053_0214af4c kind:data(any) addr:0x0214af4c
-gStr_RM0_ov053_0214af68 kind:data(any) addr:0x0214af68
+gStr_Mdl_Ica_ica_mii_mini_contents2_LZ_bin_ov053 kind:data(any) addr:0x0214aefc
+gStr_TBM_ov053 kind:data(any) addr:0x0214af24
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov053 kind:data(any) addr:0x0214af28
+gStr_SFL_ov053 kind:data(any) addr:0x0214af48
+gStr_Scn_Scene_NgCaption_LZ_bin_ov053 kind:data(any) addr:0x0214af4c
+gStr_RM0_ov053 kind:data(any) addr:0x0214af68
 gStr_Mdl_Misc_zazen_3D_LZ_bin kind:data(any) addr:0x0214af6c
 gStr_RM0_balloon_imd kind:data(any) addr:0x0214af88
 data_ov053_0214af98 kind:data(any) addr:0x0214af98 ambiguous
 gStr_RM0_wait_itp kind:data(any) addr:0x0214af9c
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov053_0214afac kind:data(any) addr:0x0214afac
-gStr_SFL_caption_ncg_ov053_0214afd0 kind:data(any) addr:0x0214afd0
-gStr_SFL_caption_nsc_ov053_0214afe4 kind:data(any) addr:0x0214afe4
-gStr_TBM_ov053_0214aff8 kind:data(any) addr:0x0214aff8
-gStr_SFL_ov053_0214affc kind:data(any) addr:0x0214affc
-gStr_RM0_ov053_0214b000 kind:data(any) addr:0x0214b000
-gText_Katsu kind:data(any) addr:0x0214b004
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov053 kind:data(any) addr:0x0214afac
+gStr_SFL_caption_ncg_ov053 kind:data(any) addr:0x0214afd0
+gStr_SFL_caption_nsc_ov053 kind:data(any) addr:0x0214afe4
+gStr_TBM_ov053_2 kind:data(any) addr:0x0214aff8
+gStr_SFL_ov053_2 kind:data(any) addr:0x0214affc
+gStr_RM0_ov053_2 kind:data(any) addr:0x0214b000
+gText_KaSignSignTsuExclamation kind:data(any) addr:0x0214b004

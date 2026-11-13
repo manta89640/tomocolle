@@ -10,24 +10,24 @@ func_ov009_0214a550 kind:function(arm,size=0x54) addr:0x0214a550
 func_ov009_0214a5a4 kind:function(arm,size=0x5c) addr:0x0214a5a4
 data_ov009_0214a600 kind:data(any) addr:0x0214a600
 data_ov009_0214a648 kind:data(any) addr:0x0214a648 ambiguous
-gStr_M00_ov009_0214a664 kind:data(any) addr:0x0214a664
+gStr_M00_ov009 kind:data(any) addr:0x0214a664
 gStr_Scn_Scene_SceneTestNg20_LZ_bin kind:data(any) addr:0x0214a668
-gStr_TBM_ov009_0214a688 kind:data(any) addr:0x0214a688
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov009_0214a68c kind:data(any) addr:0x0214a68c
-gStr_SFL_ov009_0214a6ac kind:data(any) addr:0x0214a6ac
-gStr_Scn_Scene_NgCaption_LZ_bin_ov009_0214a6b0 kind:data(any) addr:0x0214a6b0
+gStr_TBM_ov009 kind:data(any) addr:0x0214a688
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov009 kind:data(any) addr:0x0214a68c
+gStr_SFL_ov009 kind:data(any) addr:0x0214a6ac
+gStr_Scn_Scene_NgCaption_LZ_bin_ov009 kind:data(any) addr:0x0214a6b0
 data_ov009_0214a6cc kind:data(any) addr:0x0214a6cc
 data_ov009_0214a6ec kind:data(any) addr:0x0214a6ec ambiguous
-gStr_M00_BG_down_ncg_ov009_0214a6f4 kind:data(any) addr:0x0214a6f4
-gStr_M00_BG_down_ncl_ov009_0214a708 kind:data(any) addr:0x0214a708
+gStr_M00_BG_down_ncg_ov009 kind:data(any) addr:0x0214a6f4
+gStr_M00_BG_down_ncl_ov009 kind:data(any) addr:0x0214a708
 data_ov009_0214a718 kind:data(any) addr:0x0214a718 ambiguous
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov009_0214a71c kind:data(any) addr:0x0214a71c
-gStr_SFL_caption_ncg_ov009_0214a740 kind:data(any) addr:0x0214a740
-gStr_SFL_caption_nsc_ov009_0214a754 kind:data(any) addr:0x0214a754
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov009 kind:data(any) addr:0x0214a71c
+gStr_SFL_caption_ncg_ov009 kind:data(any) addr:0x0214a740
+gStr_SFL_caption_nsc_ov009 kind:data(any) addr:0x0214a754
 gStr_M00_BG_down1_nsc kind:data(any) addr:0x0214a768
-gStr_wait00_ov009_0214a77c kind:data(any) addr:0x0214a77c
-gStr_M00_ov009_0214a784 kind:data(any) addr:0x0214a784
-gStr_TBM_ov009_0214a788 kind:data(any) addr:0x0214a788
-gStr_SFL_ov009_0214a78c kind:data(any) addr:0x0214a78c
+gStr_wait00_ov009 kind:data(any) addr:0x0214a77c
+gStr_M00_ov009_2 kind:data(any) addr:0x0214a784
+gStr_TBM_ov009_2 kind:data(any) addr:0x0214a788
+gStr_SFL_ov009_2 kind:data(any) addr:0x0214a78c
 gStr_M00_BG_down0_nsc kind:data(any) addr:0x0214a790
 data_ov009_0214a7a8 kind:data(any) addr:0x0214a7a8 ambiguous

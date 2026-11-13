@@ -14,56 +14,56 @@ data_ov008_0214acf8 kind:data(any) addr:0x0214acf8
 data_ov008_0214ad18 kind:data(any) addr:0x0214ad18 ambiguous
 data_ov008_0214ad60 kind:data(any) addr:0x0214ad60
 data_ov008_0214ada8 kind:data(any) addr:0x0214ada8 ambiguous
-gText_monotone_hapi_RPit_120_basu_RPit_120_de kind:data(any) addr:0x0214add4
+gText_LessThanReverseSolidusMonotone kind:data(any) addr:0x0214add4
 data_ov008_0214ae48 kind:data(any) addr:0x0214ae48
 data_ov008_0214ae58 kind:data(any) addr:0x0214ae58 ambiguous
 data_ov008_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov008_0214aec4 kind:data(any) addr:0x0214aec4 ambiguous
 data_ov008_0214aedc kind:data(any) addr:0x0214aedc
 data_ov008_0214aee0 kind:data(any) addr:0x0214aee0 ambiguous
-gStr_RM0_ov008_0214af04 kind:data(any) addr:0x0214af04
+gStr_RM0_ov008 kind:data(any) addr:0x0214af04
 gStr_Mdl_Misc_birthday_3D_LZ_bin kind:data(any) addr:0x0214af08
-gStr_TBM_ov008_0214af24 kind:data(any) addr:0x0214af24
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov008_0214af28 kind:data(any) addr:0x0214af28
-gStr_SFL_ov008_0214af48 kind:data(any) addr:0x0214af48
-gStr_Scn_Scene_NgCaption_LZ_bin_ov008_0214af4c kind:data(any) addr:0x0214af4c
+gStr_TBM_ov008 kind:data(any) addr:0x0214af24
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov008 kind:data(any) addr:0x0214af28
+gStr_SFL_ov008 kind:data(any) addr:0x0214af48
+gStr_Scn_Scene_NgCaption_LZ_bin_ov008 kind:data(any) addr:0x0214af4c
 gStr_RM0_birthday_imd kind:data(any) addr:0x0214af68
 data_ov008_0214af7c kind:data(any) addr:0x0214af7c
 data_ov008_0214af98 kind:data(any) addr:0x0214af98 ambiguous
-gStr_SFL_caption_ncg_ov008_0214afa0 kind:data(any) addr:0x0214afa0
-gStr_SFL_caption_nsc_ov008_0214afb4 kind:data(any) addr:0x0214afb4
-gStr_RM0_ov008_0214afc8 kind:data(any) addr:0x0214afc8
-gStr_TBM_ov008_0214afcc kind:data(any) addr:0x0214afcc
-gStr_SFL_ov008_0214afd0 kind:data(any) addr:0x0214afd0
-gText_nn_RPit_120_n kind:data(any) addr:0x0214afd4
-gText_ov008_0214affc kind:data(any) addr:0x0214affc
-gText_RPit_120_ov008_0214b014 kind:data(any) addr:0x0214b014
+gStr_SFL_caption_ncg_ov008 kind:data(any) addr:0x0214afa0
+gStr_SFL_caption_nsc_ov008 kind:data(any) addr:0x0214afb4
+gStr_RM0_ov008_2 kind:data(any) addr:0x0214afc8
+gStr_TBM_ov008_2 kind:data(any) addr:0x0214afcc
+gStr_SFL_ov008_2 kind:data(any) addr:0x0214afd0
+gText_NnLessThanReverseSolidusRPitEquals kind:data(any) addr:0x0214afd4
+data_ov008_0214affc kind:data(any) addr:0x0214affc
+gText_SignSignSignSignLessThanReverseSolidus kind:data(any) addr:0x0214b014
 data_ov008_0214b028 kind:data(any) addr:0x0214b028 ambiguous
-gText_ov008_0214b02c kind:data(any) addr:0x0214b02c
-gText_ov008_0214b03c kind:data(any) addr:0x0214b03c
-gStr_RPit_120_ov008_0214b044 kind:data(any) addr:0x0214b044
-gText_ov008_0214b054 kind:data(any) addr:0x0214b054
-gText_ov008_0214b064 kind:data(any) addr:0x0214b064
-gStr_RPit_120_ov008_0214b06c kind:data(any) addr:0x0214b06c
-gText_ov008_0214b07c kind:data(any) addr:0x0214b07c
-gText_ov008_0214b088 kind:data(any) addr:0x0214b088
-gText_RPit_120_ov008_0214b090 kind:data(any) addr:0x0214b090
-gText_ov008_0214b0a4 kind:data(any) addr:0x0214b0a4
-gText_ov008_0214b0b0 kind:data(any) addr:0x0214b0b0
-gText_RPit_120_ov008_0214b0b8 kind:data(any) addr:0x0214b0b8
-gText_ov008_0214b0cc kind:data(any) addr:0x0214b0cc
-gText_ov008_0214b0d8 kind:data(any) addr:0x0214b0d8
+data_ov008_0214b02c kind:data(any) addr:0x0214b02c
+data_ov008_0214b03c kind:data(any) addr:0x0214b03c
+gStr_RPit_120_ov008 kind:data(any) addr:0x0214b044
+data_ov008_0214b054 kind:data(any) addr:0x0214b054
+data_ov008_0214b064 kind:data(any) addr:0x0214b064
+gStr_RPit_120_ov008_2 kind:data(any) addr:0x0214b06c
+data_ov008_0214b07c kind:data(any) addr:0x0214b07c
+data_ov008_0214b088 kind:data(any) addr:0x0214b088
+gText_SignSignSignLessThanReverseSolidusRPit_ov008 kind:data(any) addr:0x0214b090
+data_ov008_0214b0a4 kind:data(any) addr:0x0214b0a4
+data_ov008_0214b0b0 kind:data(any) addr:0x0214b0b0
+gText_SignSignSignLessThanReverseSolidusRPit_ov008_2 kind:data(any) addr:0x0214b0b8
+data_ov008_0214b0cc kind:data(any) addr:0x0214b0cc
+data_ov008_0214b0d8 kind:data(any) addr:0x0214b0d8
 data_ov008_0214b0e0 kind:data(any) addr:0x0214b0e0
 data_ov008_0214b0e4 kind:data(any) addr:0x0214b0e4 ambiguous
-gText_ov008_0214b0f4 kind:data(any) addr:0x0214b0f4
-gText_ov008_0214b100 kind:data(any) addr:0x0214b100
-gText_RPit_120_ov008_0214b108 kind:data(any) addr:0x0214b108
-gText_ov008_0214b11c kind:data(any) addr:0x0214b11c
-gText_ov008_0214b128 kind:data(any) addr:0x0214b128
-gText_RPit_120_ov008_0214b130 kind:data(any) addr:0x0214b130
+data_ov008_0214b0f4 kind:data(any) addr:0x0214b0f4
+data_ov008_0214b100 kind:data(any) addr:0x0214b100
+gText_SignSignSignLessThanReverseSolidusRPit_ov008_3 kind:data(any) addr:0x0214b108
+data_ov008_0214b11c kind:data(any) addr:0x0214b11c
+data_ov008_0214b128 kind:data(any) addr:0x0214b128
+gText_SignSignSignLessThanReverseSolidusRPit_ov008_4 kind:data(any) addr:0x0214b130
 data_ov008_0214b144 kind:data(any) addr:0x0214b144
 data_ov008_0214b148 kind:data(any) addr:0x0214b148 ambiguous
-gText_ov008_0214b150 kind:data(any) addr:0x0214b150
-gText_RPit_120_ov008_0214b158 kind:data(any) addr:0x0214b158
-gText_ov008_0214b16c kind:data(any) addr:0x0214b16c
-gText_ov008_0214b178 kind:data(any) addr:0x0214b178
+data_ov008_0214b150 kind:data(any) addr:0x0214b150
+gText_SignSignSignLessThanReverseSolidusRPit_ov008_5 kind:data(any) addr:0x0214b158
+data_ov008_0214b16c kind:data(any) addr:0x0214b16c
+data_ov008_0214b178 kind:data(any) addr:0x0214b178

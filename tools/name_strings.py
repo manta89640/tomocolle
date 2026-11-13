@@ -2,9 +2,11 @@
 """Gives every string of the table from tools/strings.py a name in symbols.txt, made from its text.
 
 A string's text is the best evidence there is of what it is, so the name is the text: "M00:/sky.imd" becomes
-gStr_M00_sky_imd. Text in kana is written in Latin letters (ワタシ becomes gText_Watashi). Text with kanji cannot be
-spelled as an identifier, so it is named by where it is, gText_<address>, which still says that it is text.
-Where two strings would get one name, as equal literals in different files do, each gets its address after it.
+gStr_M00_sky_imd. Japanese text is named by how it is read: ワタシ becomes gText_Watashi, and 今日はいい天気 becomes
+gText_KyouHaIiTenki. The readings of kanji come from the system's Japanese tokenizer (tools/romaji.swift, so this
+runs on macOS), and a sign that has no reading is named by what it is ("！" is Exclamation). No name is an address.
+Where equal strings are in several places, an overlay's has the overlay after it, and the second and later of a
+kind are numbered.
 
 Only symbols that have no name yet (data_<address>) are renamed. Strings that a source file owns are left alone,
 since their names are the compiler's, and so is a symbol that the sources refer to as data_<address>. Run
@@ -14,6 +16,8 @@ import argparse
 import collections
 import csv
 import re
+import shutil
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -22,35 +26,46 @@ ROOT = Path(__file__).parent.parent.resolve()
 SYMBOL = re.compile(r"^(\S+) (kind:\w+.*) addr:0x([0-9a-f]+)(.*)$")
 MAX = 40
 
-KANA = {
-    "ア": "a", "イ": "i", "ウ": "u", "エ": "e", "オ": "o", "カ": "ka", "キ": "ki", "ク": "ku", "ケ": "ke", "コ": "ko",
-    "サ": "sa", "シ": "shi", "ス": "su", "セ": "se", "ソ": "so", "タ": "ta", "チ": "chi", "ツ": "tsu", "テ": "te",
-    "ト": "to", "ナ": "na", "ニ": "ni", "ヌ": "nu", "ネ": "ne", "ノ": "no", "ハ": "ha", "ヒ": "hi", "フ": "fu",
-    "ヘ": "he", "ホ": "ho", "マ": "ma", "ミ": "mi", "ム": "mu", "メ": "me", "モ": "mo", "ヤ": "ya", "ユ": "yu",
-    "ヨ": "yo", "ラ": "ra", "リ": "ri", "ル": "ru", "レ": "re", "ロ": "ro", "ワ": "wa", "ヲ": "wo", "ン": "n",
-    "ガ": "ga", "ギ": "gi", "グ": "gu", "ゲ": "ge", "ゴ": "go", "ザ": "za", "ジ": "ji", "ズ": "zu", "ゼ": "ze",
-    "ゾ": "zo", "ダ": "da", "ヂ": "ji", "ヅ": "zu", "デ": "de", "ド": "do", "バ": "ba", "ビ": "bi", "ブ": "bu",
-    "ベ": "be", "ボ": "bo", "パ": "pa", "ピ": "pi", "プ": "pu", "ペ": "pe", "ポ": "po", "ァ": "a", "ィ": "i",
-    "ゥ": "u", "ェ": "e", "ォ": "o", "ャ": "ya", "ュ": "yu", "ョ": "yo", "ッ": "", "ー": "", "ヴ": "vu",
-}
+DROP = {"FULLWIDTH", "HALFWIDTH", "IDEOGRAPHIC", "KATAKANA", "HIRAGANA", "LETTER", "DIGIT", "SIGN", "MARK", "CJK",
+        "SMALL", "CAPITAL", "LATIN", "LEFT", "RIGHT", "WHITE", "BLACK", "PROLONGED", "SOUND", "AND", "WITH"}
 
 
-def romanize(text: str) -> str | None:
-    """Returns kana text in Latin letters, or None if it has anything else that cannot be spelled."""
-    text = unicodedata.normalize("NFKC", text)  # Half-width kana and full-width letters to their plain forms
-    out = []
-    for c in text:
-        if "ぁ" <= c <= "ゖ":
-            c = chr(ord(c) + 0x60)  # Hiragana to katakana
-        if c in KANA:
-            out.append(KANA[c])
-        elif ord(c) < 0x80:
-            out.append(c)
-        elif c in "　、。・「」！？":
-            out.append("_")
+def sign_name(c: str) -> str:
+    """A word for a character that has no reading: what Unicode calls it, without the words that say its width."""
+    words = [w for w in unicodedata.name(c, "Sign").replace("-", " ").split() if w not in DROP]
+    return "".join(w.capitalize() for w in words) or "Sign"
+
+
+def readings(texts: list[str]) -> list[str]:
+    """Returns how each Japanese text is read, in Latin letters, a word at a time."""
+    if not texts:
+        return []
+    if shutil.which("swift") is None:
+        sys.exit("Naming Japanese text needs the system's tokenizer, through swift (macOS)")
+    lines = "\n".join(re.sub(r"\s+", " ", unicodedata.normalize("NFKC", t)) for t in texts) + "\n"
+    result = subprocess.run(["swift", str(ROOT / "tools" / "romaji.swift")], input=lines, capture_output=True,
+                            text=True)
+    if result.returncode != 0:
+        sys.exit(result.stderr)
+    out = result.stdout.split("\n")[:len(texts)]
+    return out + [""] * (len(texts) - len(out))
+
+
+def spell(reading: str) -> str:
+    """Makes an identifier's body of a reading: its words capitalised and joined, its signs named."""
+    parts = []
+    for word in reading.split():
+        clean = "".join(c for c in unicodedata.normalize("NFD", word) if c.isascii() and c.isalnum())
+        if clean:
+            parts.append(clean[0].upper() + clean[1:])
         else:
-            return None
-    return "".join(out)
+            parts.extend(sign_name(c) for c in word if not c.isspace())
+    body = ""
+    for part in parts:
+        if body and len(body) + len(part) > MAX:
+            break
+        body += part
+    return body[:MAX + 16]
 
 
 def identifier(text: str) -> str:
@@ -71,20 +86,28 @@ def main() -> int:
     config = ROOT / "config" / args.version / "arm9"
 
     wanted = {}  # (module, address) -> name without a suffix
+    japanese = []
     with table.open(encoding="utf-8", newline="") as file:
         for row in csv.DictReader(file, delimiter="\t", quoting=csv.QUOTE_NONE):
             if row["unit"]:
                 continue
             text = row["text"].replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t").replace("\\\\", "\\")
-            address = int(row["address"], 16)
+            key = (row["module"], int(row["address"], 16))
             if row["encoding"] == "ascii":
-                body = identifier(text)
-                name = f"gStr_{body}" if body else None
+                body = identifier(text) or spell(" ".join(text))
+                wanted[key] = f"gStr_{body}"
             else:
-                spelled = romanize(text)
-                body = identifier(spelled.title() if spelled and spelled.islower() else spelled) if spelled else ""
-                name = f"gText_{body}" if body else None
-            wanted[(row["module"], address)] = name or f"gText_{address:08x}"
+                japanese.append((key, text))
+    unread = 0
+    for (key, text), reading in zip(japanese, readings([text for _, text in japanese])):
+        # Kanji that the tokenizer cannot read are not words: this is data that decodes as text, not a string
+        kanji = any(0x4E00 <= ord(c) <= 0x9FFF for c in text)
+        if kanji and (not reading.strip() or any(0x4E00 <= ord(c) <= 0x9FFF for c in reading)):
+            unread += 1
+            continue
+        wanted[key] = f"gText_{spell(reading) or spell(' '.join(text))}"
+    if unread:
+        print(f"{unread} entries of the table are left unnamed: their kanji have no reading, so they are not text")
 
     # Names already in use anywhere: one name, one place
     files = {}
@@ -106,6 +129,19 @@ def main() -> int:
             if path.suffix in (".c", ".cpp", ".h"):
                 in_source.update(re.findall(r"\bdata_(?:ov\d+_)?[0-9a-f]{8}\b", path.read_text(encoding="utf-8")))
 
+    # Equal names are told apart by the overlay they are in, and then by number in order of address
+    final, used = {}, set(taken)
+    for name in sorted(counts):
+        keys = sorted(key for key, value in wanted.items() if value == name)
+        for module, address in keys:
+            candidate = f"{name}_{module}" if len(keys) > 1 and module.startswith("ov") else name
+            number, unique = 1, candidate
+            while unique in used:
+                number += 1
+                unique = f"{candidate}_{number}"
+            used.add(unique)
+            final[(module, address)] = unique
+
     renamed = added = 0
     for module, (path, lines) in files.items():
         by_address = {}
@@ -113,14 +149,9 @@ def main() -> int:
             match = SYMBOL.match(line)
             if match:
                 by_address[int(match[3], 16)] = (number, match)
-        for (owner, address), name in sorted(wanted.items()):
+        for (owner, address), name in sorted(final.items()):
             if owner != module:
                 continue
-            if counts[name] > 1 or taken[name] or name.startswith("gText_0"):
-                # Told apart by where they are; an overlay's by the overlay too, as dsd's own names are
-                name = re.sub(r"_[0-9a-f]{8}$", "", name) if name.startswith("gText_0") else name
-                where = f"{module}_{address:08x}" if module.startswith("ov") else f"{address:08x}"
-                name = f"{name}_{where}" if name != "gText" else f"gText_{where}"
             if address in by_address:
                 number, match = by_address[address]
                 if not match[1].startswith("data_") or match[1] in in_source:

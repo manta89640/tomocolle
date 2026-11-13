@@ -26,13 +26,13 @@ data_ov044_0214bb14 kind:data(any) addr:0x0214bb14
 data_ov044_0214bb2c kind:data(any) addr:0x0214bb2c
 gText_Ho kind:data(any) addr:0x0214bb30
 data_ov044_0214bb5c kind:data(any) addr:0x0214bb5c
-gStr_M02_Obj_down_ncl_ov044_0214bb80 kind:data(any) addr:0x0214bb80
-gStr_M02_Obj_down_ncl_ov044_0214bb94 kind:data(any) addr:0x0214bb94
+gStr_M02_Obj_down_ncl_ov044 kind:data(any) addr:0x0214bb80
+gStr_M02_Obj_down_ncl_ov044_2 kind:data(any) addr:0x0214bb94
 data_ov044_0214bba4 kind:data(any) addr:0x0214bba4 ambiguous
-gStr_M02_Obj_down_ncl_ov044_0214bba8 kind:data(any) addr:0x0214bba8
-gStr_M02_Obj_down_ncl_ov044_0214bbbc kind:data(any) addr:0x0214bbbc
-gStr_M02_Obj_down_ncl_ov044_0214bbd0 kind:data(any) addr:0x0214bbd0
-gStr_M02_Obj_down_ncl_ov044_0214bbe4 kind:data(any) addr:0x0214bbe4
+gStr_M02_Obj_down_ncl_ov044_3 kind:data(any) addr:0x0214bba8
+gStr_M02_Obj_down_ncl_ov044_4 kind:data(any) addr:0x0214bbbc
+gStr_M02_Obj_down_ncl_ov044_5 kind:data(any) addr:0x0214bbd0
+gStr_M02_Obj_down_ncl_ov044_6 kind:data(any) addr:0x0214bbe4
 gStr_M02_Obj_down_tag_ncg kind:data(any) addr:0x0214bbf8
 gStr_M02_Obj_down_tag_nce kind:data(any) addr:0x0214bc10
 gStr_M02_Obj_down_rice_nce kind:data(any) addr:0x0214bc28
@@ -52,22 +52,22 @@ data_ov044_0214bd70 kind:data(any) addr:0x0214bd70 ambiguous
 data_ov044_0214bd8c kind:data(any) addr:0x0214bd8c
 data_ov044_0214bda0 kind:data(any) addr:0x0214bda0 ambiguous
 data_ov044_0214bda8 kind:data(any) addr:0x0214bda8 ambiguous
-gStr_TBM_ov044_0214bdb4 kind:data(any) addr:0x0214bdb4
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov044_0214bdb8 kind:data(any) addr:0x0214bdb8
-gStr_SFL_ov044_0214bdd8 kind:data(any) addr:0x0214bdd8
+gStr_TBM_ov044 kind:data(any) addr:0x0214bdb4
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov044 kind:data(any) addr:0x0214bdb8
+gStr_SFL_ov044 kind:data(any) addr:0x0214bdd8
 data_ov044_0214bddc kind:data(any) addr:0x0214bddc
 data_ov044_0214bdf0 kind:data(any) addr:0x0214bdf0 ambiguous
-gStr_M02_ov044_0214bdf8 kind:data(any) addr:0x0214bdf8
+gStr_M02_ov044 kind:data(any) addr:0x0214bdf8
 gStr_Scn_Scene_SceneTestNg121_LZ_bin kind:data(any) addr:0x0214bdfc
-gStr_SBG_ov044_0214be1c kind:data(any) addr:0x0214be1c
-gStr_Scn_Scene_SceneBG_LZ_bin_ov044_0214be20 kind:data(any) addr:0x0214be20
-gStr_SBG_BG_up_ncl_ov044_0214be3c kind:data(any) addr:0x0214be3c
-gStr_SBG_BG_up_nsc_ov044_0214be4c kind:data(any) addr:0x0214be4c
-gStr_SBG_BG_up_ncg_ov044_0214be5c kind:data(any) addr:0x0214be5c
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov044_0214be6c kind:data(any) addr:0x0214be6c
-gStr_SFL_caption_ncg_ov044_0214be90 kind:data(any) addr:0x0214be90
-gStr_SFL_caption_nsc_ov044_0214bea4 kind:data(any) addr:0x0214bea4
-gStr_TBM_ov044_0214beb8 kind:data(any) addr:0x0214beb8
-gStr_SFL_ov044_0214bebc kind:data(any) addr:0x0214bebc
-gStr_M02_ov044_0214bec0 kind:data(any) addr:0x0214bec0
-gStr_SBG_ov044_0214bec4 kind:data(any) addr:0x0214bec4
+gStr_SBG_ov044 kind:data(any) addr:0x0214be1c
+gStr_Scn_Scene_SceneBG_LZ_bin_ov044 kind:data(any) addr:0x0214be20
+gStr_SBG_BG_up_ncl_ov044 kind:data(any) addr:0x0214be3c
+gStr_SBG_BG_up_nsc_ov044 kind:data(any) addr:0x0214be4c
+gStr_SBG_BG_up_ncg_ov044 kind:data(any) addr:0x0214be5c
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov044 kind:data(any) addr:0x0214be6c
+gStr_SFL_caption_ncg_ov044 kind:data(any) addr:0x0214be90
+gStr_SFL_caption_nsc_ov044 kind:data(any) addr:0x0214bea4
+gStr_TBM_ov044_2 kind:data(any) addr:0x0214beb8
+gStr_SFL_ov044_2 kind:data(any) addr:0x0214bebc
+gStr_M02_ov044_2 kind:data(any) addr:0x0214bec0
+gStr_SBG_ov044_2 kind:data(any) addr:0x0214bec4

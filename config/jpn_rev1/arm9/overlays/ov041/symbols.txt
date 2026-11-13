@@ -21,8 +21,8 @@ data_ov041_0214a7e4 kind:data(any) addr:0x0214a7e4
 data_ov041_0214a808 kind:data(any) addr:0x0214a808
 data_ov041_0214a80c kind:data(any) addr:0x0214a80c ambiguous
 data_ov041_0214a848 kind:data(any) addr:0x0214a848 ambiguous
-gStr_M00_ov041_0214a864 kind:data(any) addr:0x0214a864
+gStr_M00_ov041 kind:data(any) addr:0x0214a864
 gStr_Mdl_Misc_mame_3D_LZ_bin kind:data(any) addr:0x0214a868
 gStr_M00_mame_imd kind:data(any) addr:0x0214a880
 gStr_M00_mame001_itp kind:data(any) addr:0x0214a890
-gStr_M00_ov041_0214a8a4 kind:data(any) addr:0x0214a8a4
+gStr_M00_ov041_2 kind:data(any) addr:0x0214a8a4

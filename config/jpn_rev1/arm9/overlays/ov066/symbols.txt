@@ -38,19 +38,19 @@ func_ov066_0214b7a4 kind:function(arm,size=0x44) addr:0x0214b7a4
 func_ov066_0214b7e8 kind:function(arm,size=0x60) addr:0x0214b7e8
 func_ov066_0214b848 kind:function(arm,size=0x68) addr:0x0214b848
 data_ov066_0214b8b0 kind:data(any) addr:0x0214b8b0
-gStr_D_ov066_0214b8e0 kind:data(any) addr:0x0214b8e0
+gStr_D_ov066 kind:data(any) addr:0x0214b8e0
 data_ov066_0214b8ea kind:data(any) addr:0x0214b8ea
 data_ov066_0214b8f6 kind:data(any) addr:0x0214b8f6
 data_ov066_0214b908 kind:data(any) addr:0x0214b908
-gStr_N_ov066_0214b918 kind:data(any) addr:0x0214b918
+gStr_N_ov066 kind:data(any) addr:0x0214b918
 data_ov066_0214b934 kind:data(any) addr:0x0214b934 ambiguous
 data_ov066_0214b958 kind:data(any) addr:0x0214b958
-gStr_CO0_ov066_0214b974 kind:data(any) addr:0x0214b974
-gStr_RM_ov066_0214b978 kind:data(any) addr:0x0214b978
-gStr_P_ov066_0214b97c kind:data(any) addr:0x0214b97c
+gStr_CO0_ov066 kind:data(any) addr:0x0214b974
+gStr_RM_ov066 kind:data(any) addr:0x0214b978
+gStr_P_ov066 kind:data(any) addr:0x0214b97c
 gStr_V kind:data(any) addr:0x0214b988
-gStr_T_ov066_0214b994 kind:data(any) addr:0x0214b994
-gStr_P_ov066_0214b9a4 kind:data(any) addr:0x0214b9a4
+gStr_T_ov066 kind:data(any) addr:0x0214b994
+gStr_P_ov066_2 kind:data(any) addr:0x0214b9a4
 data_ov066_0214b9b4 kind:data(any) addr:0x0214b9b4
 data_ov066_0214b9b8 kind:data(any) addr:0x0214b9b8
 data_ov066_0214ba18 kind:data(any) addr:0x0214ba18 ambiguous

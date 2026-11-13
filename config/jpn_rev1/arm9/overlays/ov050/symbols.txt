@@ -15,21 +15,21 @@ data_ov050_0214a45c kind:data(any) addr:0x0214a45c
 data_ov050_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
 data_ov050_0214a4c4 kind:data(any) addr:0x0214a4c4
 data_ov050_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
-gStr_TBM_ov050_0214a4ec kind:data(any) addr:0x0214a4ec
+gStr_TBM_ov050 kind:data(any) addr:0x0214a4ec
 data_ov050_0214a4f0 kind:data(any) addr:0x0214a4f0
 data_ov050_0214a504 kind:data(any) addr:0x0214a504 ambiguous
 data_ov050_0214a508 kind:data(any) addr:0x0214a508 ambiguous
-gStr_SFL_ov050_0214a510 kind:data(any) addr:0x0214a510
-gStr_Scn_Scene_NgCaption_LZ_bin_ov050_0214a514 kind:data(any) addr:0x0214a514
-gStr_ROA_ov050_0214a530 kind:data(any) addr:0x0214a530
+gStr_SFL_ov050 kind:data(any) addr:0x0214a510
+gStr_Scn_Scene_NgCaption_LZ_bin_ov050 kind:data(any) addr:0x0214a514
+gStr_ROA_ov050 kind:data(any) addr:0x0214a530
 data_ov050_0214a534 kind:data(any) addr:0x0214a534
 data_ov050_0214a548 kind:data(any) addr:0x0214a548 ambiguous
 gStr_ROA_road_imd kind:data(any) addr:0x0214a54c
 gStr_ROA_road_ita kind:data(any) addr:0x0214a55c
 data_ov050_0214a568 kind:data(any) addr:0x0214a568 ambiguous
-gStr_SFL_caption_ncg_ov050_0214a56c kind:data(any) addr:0x0214a56c
+gStr_SFL_caption_ncg_ov050 kind:data(any) addr:0x0214a56c
 data_ov050_0214a580 kind:data(any) addr:0x0214a580
 data_ov050_0214a588 kind:data(any) addr:0x0214a588 ambiguous
-gStr_TBM_ov050_0214a594 kind:data(any) addr:0x0214a594
-gStr_SFL_ov050_0214a598 kind:data(any) addr:0x0214a598
-gStr_ROA_ov050_0214a59c kind:data(any) addr:0x0214a59c
+gStr_TBM_ov050_2 kind:data(any) addr:0x0214a594
+gStr_SFL_ov050_2 kind:data(any) addr:0x0214a598
+gStr_ROA_ov050_2 kind:data(any) addr:0x0214a59c

@@ -10,18 +10,18 @@ func_ov016_0214a384 kind:function(arm,size=0xf4) addr:0x0214a384
 data_ov016_0214a478 kind:data(any) addr:0x0214a478
 data_ov016_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
 data_ov016_0214a4c0 kind:data(any) addr:0x0214a4c0
-gStr_P01_ov016_0214a4cc kind:data(any) addr:0x0214a4cc
+gStr_P01_ov016 kind:data(any) addr:0x0214a4cc
 gStr_P01_stomach_imd kind:data(any) addr:0x0214a4d0
 gStr_Mdl_Misc_stomach_3D_LZ_bin kind:data(any) addr:0x0214a4e4
 data_ov016_0214a504 kind:data(any) addr:0x0214a504 ambiguous
 data_ov016_0214a508 kind:data(any) addr:0x0214a508 ambiguous
-gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov016_0214a524 kind:data(any) addr:0x0214a524
-gStr_3IM_ov016_0214a540 kind:data(any) addr:0x0214a540
-gStr_SBG_ov016_0214a544 kind:data(any) addr:0x0214a544
-gStr_Scn_Scene_SceneBG_LZ_bin_ov016_0214a548 kind:data(any) addr:0x0214a548
+gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov016 kind:data(any) addr:0x0214a524
+gStr_3IM_ov016 kind:data(any) addr:0x0214a540
+gStr_SBG_ov016 kind:data(any) addr:0x0214a544
+gStr_Scn_Scene_SceneBG_LZ_bin_ov016 kind:data(any) addr:0x0214a548
 data_ov016_0214a564 kind:data(any) addr:0x0214a564
 data_ov016_0214a568 kind:data(any) addr:0x0214a568 ambiguous
-gStr_SBG_BG_up_nsc_ov016_0214a574 kind:data(any) addr:0x0214a574
+gStr_SBG_BG_up_nsc_ov016 kind:data(any) addr:0x0214a574
 data_ov016_0214a584 kind:data(any) addr:0x0214a584
 data_ov016_0214a588 kind:data(any) addr:0x0214a588 ambiguous
-gStr_SBG_ov016_0214a594 kind:data(any) addr:0x0214a594
+gStr_SBG_ov016_2 kind:data(any) addr:0x0214a594

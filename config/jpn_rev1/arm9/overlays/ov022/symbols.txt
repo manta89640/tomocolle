@@ -6,13 +6,13 @@ func_ov022_02149d08 kind:function(arm,size=0x14) addr:0x02149d08
 func_ov022_02149d1c kind:function(arm,size=0x224) addr:0x02149d1c
 func_ov022_02149f40 kind:function(arm,size=0x38) addr:0x02149f40
 func_ov022_02149f78 kind:function(arm,size=0x40) addr:0x02149f78
-gText_ov022_02149fb8 kind:data(any) addr:0x02149fb8
+data_ov022_02149fb8 kind:data(any) addr:0x02149fb8
 data_ov022_02149fd4 kind:data(any) addr:0x02149fd4
 data_ov022_0214a008 kind:data(any) addr:0x0214a008 ambiguous
-gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov022_0214a024 kind:data(any) addr:0x0214a024
-gText_ov022_0214a040 kind:data(any) addr:0x0214a040
+gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov022 kind:data(any) addr:0x0214a024
+gText_Comma_ov022 kind:data(any) addr:0x0214a040
 gText_Tomoushimasu kind:data(any) addr:0x0214a050
-gText_Eto kind:data(any) addr:0x0214a060
-gText_San_ov022_0214a068 kind:data(any) addr:0x0214a068
-gText_Chigaimasu kind:data(any) addr:0x0214a070
-gText_ov022_0214a07c kind:data(any) addr:0x0214a07c
+gText_EtoFullStop kind:data(any) addr:0x0214a060
+gText_SanQuestion kind:data(any) addr:0x0214a068
+gText_ChiGaiMasuComma kind:data(any) addr:0x0214a070
+data_ov022_0214a07c kind:data(any) addr:0x0214a07c

@@ -7,10 +7,10 @@ func_ov105_02149ba8 kind:function(arm,size=0x14) addr:0x02149ba8
 func_ov105_02149bbc kind:function(arm,size=0x4) addr:0x02149bbc
 func_ov105_02149bc0 kind:function(arm,size=0x14) addr:0x02149bc0
 data_ov105_02149be8 kind:data(any) addr:0x02149be8
-gStr_MNU_ov105_02149c04 kind:data(any) addr:0x02149c04
+gStr_MNU_ov105 kind:data(any) addr:0x02149c04
 gStr_Cmn_Nin_NintendoLogo_LZ_bin kind:data(any) addr:0x02149c08
 gStr_MNU_Gray_White_nsc kind:data(any) addr:0x02149c24
 gStr_MNU_Gray_White_ncg kind:data(any) addr:0x02149c38
 gStr_MNU_Gray_White_ncl kind:data(any) addr:0x02149c4c
-gStr_MNU_ov105_02149c60 kind:data(any) addr:0x02149c60
+gStr_MNU_ov105_2 kind:data(any) addr:0x02149c60
 data_ov105_02149c68 kind:data(any) addr:0x02149c68 ambiguous

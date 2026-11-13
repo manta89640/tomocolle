@@ -9,25 +9,25 @@ func_ov062_0214a290 kind:function(arm,size=0xb8) addr:0x0214a290
 func_ov062_0214a348 kind:function(arm,size=0xc0) addr:0x0214a348
 data_ov062_0214a408 kind:data(any) addr:0x0214a408
 data_ov062_0214a448 kind:data(any) addr:0x0214a448 ambiguous
-gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov062_0214a464 kind:data(any) addr:0x0214a464
-gStr_TBM_ov062_0214a48c kind:data(any) addr:0x0214a48c
+gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov062 kind:data(any) addr:0x0214a464
+gStr_TBM_ov062 kind:data(any) addr:0x0214a48c
 data_ov062_0214a490 kind:data(any) addr:0x0214a490
 data_ov062_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
-gStr_SFL_ov062_0214a4b0 kind:data(any) addr:0x0214a4b0
-gStr_Scn_Scene_NgCaption_LZ_bin_ov062_0214a4b4 kind:data(any) addr:0x0214a4b4
+gStr_SFL_ov062 kind:data(any) addr:0x0214a4b0
+gStr_Scn_Scene_NgCaption_LZ_bin_ov062 kind:data(any) addr:0x0214a4b4
 data_ov062_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
-gStr_SBG_ov062_0214a4d0 kind:data(any) addr:0x0214a4d0
-gStr_Scn_Scene_SceneBG_LZ_bin_ov062_0214a4d4 kind:data(any) addr:0x0214a4d4
+gStr_SBG_ov062 kind:data(any) addr:0x0214a4d0
+gStr_Scn_Scene_SceneBG_LZ_bin_ov062 kind:data(any) addr:0x0214a4d4
 data_ov062_0214a4f0 kind:data(any) addr:0x0214a4f0
 data_ov062_0214a504 kind:data(any) addr:0x0214a504 ambiguous
 data_ov062_0214a508 kind:data(any) addr:0x0214a508 ambiguous
-gStr_SFL_caption_ncg_ov062_0214a514 kind:data(any) addr:0x0214a514
-gStr_SFL_caption_nsc_ov062_0214a528 kind:data(any) addr:0x0214a528
-gStr_SBG_BG_up_ncl_ov062_0214a53c kind:data(any) addr:0x0214a53c
+gStr_SFL_caption_ncg_ov062 kind:data(any) addr:0x0214a514
+gStr_SFL_caption_nsc_ov062 kind:data(any) addr:0x0214a528
+gStr_SBG_BG_up_ncl_ov062 kind:data(any) addr:0x0214a53c
 data_ov062_0214a548 kind:data(any) addr:0x0214a548 ambiguous
-gStr_SBG_BG_up_nsc_ov062_0214a54c kind:data(any) addr:0x0214a54c
-gStr_SBG_BG_up_ncg_ov062_0214a55c kind:data(any) addr:0x0214a55c
+gStr_SBG_BG_up_nsc_ov062 kind:data(any) addr:0x0214a54c
+gStr_SBG_BG_up_ncg_ov062 kind:data(any) addr:0x0214a55c
 data_ov062_0214a568 kind:data(any) addr:0x0214a568 ambiguous
-gStr_TBM_ov062_0214a56c kind:data(any) addr:0x0214a56c
-gStr_SFL_ov062_0214a570 kind:data(any) addr:0x0214a570
-gStr_SBG_ov062_0214a574 kind:data(any) addr:0x0214a574
+gStr_TBM_ov062_2 kind:data(any) addr:0x0214a56c
+gStr_SFL_ov062_2 kind:data(any) addr:0x0214a570
+gStr_SBG_ov062_2 kind:data(any) addr:0x0214a574

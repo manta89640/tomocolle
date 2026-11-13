@@ -12,7 +12,7 @@ data_ov046_0214b7bc kind:data(any) addr:0x0214b7bc
 data_ov046_0214b7e4 kind:data(any) addr:0x0214b7e4
 data_ov046_0214b7f4 kind:data(any) addr:0x0214b7f4
 data_ov046_0214b844 kind:data(any) addr:0x0214b844
-gText_ov046_0214b854 kind:data(any) addr:0x0214b854
+gStr__ov046 kind:data(any) addr:0x0214b854
 data_ov046_0214b864 kind:data(any) addr:0x0214b864
 data_ov046_0214b878 kind:data(any) addr:0x0214b878
 gStr_M00_BG_frame2_nsc kind:data(any) addr:0x0214b89c
@@ -20,36 +20,36 @@ data_ov046_0214b8b0 kind:data(any) addr:0x0214b8b0
 data_ov046_0214b908 kind:data(any) addr:0x0214b908 ambiguous
 data_ov046_0214b924 kind:data(any) addr:0x0214b924
 data_ov046_0214b934 kind:data(any) addr:0x0214b934 ambiguous
-gStr_M00_ov046_0214b94c kind:data(any) addr:0x0214b94c
+gStr_M00_ov046 kind:data(any) addr:0x0214b94c
 gStr_Scn_Scene_SceneTestNg117_LZ_bin kind:data(any) addr:0x0214b950
-gStr_M01_ov046_0214b970 kind:data(any) addr:0x0214b970
+gStr_M01_ov046 kind:data(any) addr:0x0214b970
 gStr_Mdl_Misc_acchi_3D_LZ_bin kind:data(any) addr:0x0214b974
-gStr_TBM_ov046_0214b990 kind:data(any) addr:0x0214b990
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov046_0214b994 kind:data(any) addr:0x0214b994
-gStr_SFL_ov046_0214b9b4 kind:data(any) addr:0x0214b9b4
-gStr_Scn_Scene_NgCaption_LZ_bin_ov046_0214b9b8 kind:data(any) addr:0x0214b9b8
+gStr_TBM_ov046 kind:data(any) addr:0x0214b990
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov046 kind:data(any) addr:0x0214b994
+gStr_SFL_ov046 kind:data(any) addr:0x0214b9b4
+gStr_Scn_Scene_NgCaption_LZ_bin_ov046 kind:data(any) addr:0x0214b9b8
 gStr_M01_front_imd kind:data(any) addr:0x0214b9d4
-gStr_M00_Obj_up_nce_ov046_0214b9e4 kind:data(any) addr:0x0214b9e4
-gStr_M00_Obj_up_ncg_ov046_0214b9f4 kind:data(any) addr:0x0214b9f4
-gStr_M00_Obj_up_ncl_ov046_0214ba04 kind:data(any) addr:0x0214ba04
+gStr_M00_Obj_up_nce_ov046 kind:data(any) addr:0x0214b9e4
+gStr_M00_Obj_up_ncg_ov046 kind:data(any) addr:0x0214b9f4
+gStr_M00_Obj_up_ncl_ov046 kind:data(any) addr:0x0214ba04
 data_ov046_0214ba14 kind:data(any) addr:0x0214ba14
 data_ov046_0214ba18 kind:data(any) addr:0x0214ba18 ambiguous
-gStr_M00_Obj_down_ncg_ov046_0214ba28 kind:data(any) addr:0x0214ba28
-gStr_M00_Obj_down_ncl_ov046_0214ba3c kind:data(any) addr:0x0214ba3c
-gStr_M00_BG_up_ncl_ov046_0214ba50 kind:data(any) addr:0x0214ba50
+gStr_M00_Obj_down_ncg_ov046 kind:data(any) addr:0x0214ba28
+gStr_M00_Obj_down_ncl_ov046 kind:data(any) addr:0x0214ba3c
+gStr_M00_BG_up_ncl_ov046 kind:data(any) addr:0x0214ba50
 data_ov046_0214ba60 kind:data(any) addr:0x0214ba60
 data_ov046_0214ba68 kind:data(any) addr:0x0214ba68 ambiguous
 data_ov046_0214ba70 kind:data(any) addr:0x0214ba70
 data_ov046_0214ba78 kind:data(any) addr:0x0214ba78 ambiguous
 data_ov046_0214ba80 kind:data(any) addr:0x0214ba80
 data_ov046_0214ba8c kind:data(any) addr:0x0214ba8c ambiguous
-gStr_M00_BG_down_nsc_ov046_0214ba94 kind:data(any) addr:0x0214ba94
-gStr_M00_BG_down_ncg_ov046_0214baa8 kind:data(any) addr:0x0214baa8
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov046_0214babc kind:data(any) addr:0x0214babc
-gStr_M00_BG_frame_nsc_ov046_0214bae0 kind:data(any) addr:0x0214bae0
-gStr_SFL_caption_ncg_ov046_0214baf4 kind:data(any) addr:0x0214baf4
-gStr_SFL_caption_nsc_ov046_0214bb08 kind:data(any) addr:0x0214bb08
-gStr_M00_ov046_0214bb1c kind:data(any) addr:0x0214bb1c
-gStr_M01_ov046_0214bb20 kind:data(any) addr:0x0214bb20
-gStr_TBM_ov046_0214bb24 kind:data(any) addr:0x0214bb24
-gStr_SFL_ov046_0214bb28 kind:data(any) addr:0x0214bb28
+gStr_M00_BG_down_nsc_ov046 kind:data(any) addr:0x0214ba94
+gStr_M00_BG_down_ncg_ov046 kind:data(any) addr:0x0214baa8
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov046 kind:data(any) addr:0x0214babc
+gStr_M00_BG_frame_nsc_ov046 kind:data(any) addr:0x0214bae0
+gStr_SFL_caption_ncg_ov046 kind:data(any) addr:0x0214baf4
+gStr_SFL_caption_nsc_ov046 kind:data(any) addr:0x0214bb08
+gStr_M00_ov046_2 kind:data(any) addr:0x0214bb1c
+gStr_M01_ov046_2 kind:data(any) addr:0x0214bb20
+gStr_TBM_ov046_2 kind:data(any) addr:0x0214bb24
+gStr_SFL_ov046_2 kind:data(any) addr:0x0214bb28

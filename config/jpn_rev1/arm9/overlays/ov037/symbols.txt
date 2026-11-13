@@ -24,66 +24,66 @@ data_ov037_0214c098 kind:data(any) addr:0x0214c098
 data_ov037_0214c0a0 kind:data(any) addr:0x0214c0a0
 data_ov037_0214c0a8 kind:data(any) addr:0x0214c0a8
 data_ov037_0214c0b8 kind:data(any) addr:0x0214c0b8
-gText_ov037_0214c0e8 kind:data(any) addr:0x0214c0e8
+gStr_CircumflexAccent_ov037 kind:data(any) addr:0x0214c0e8
 data_ov037_0214c108 kind:data(any) addr:0x0214c108
 data_ov037_0214c118 kind:data(any) addr:0x0214c118
-gText_ov037_0214c128 kind:data(any) addr:0x0214c128
+gStr__ov037 kind:data(any) addr:0x0214c128
 data_ov037_0214c148 kind:data(any) addr:0x0214c148
-gText_ov037_0214c168 kind:data(any) addr:0x0214c168
+gStr_Dollar_ov037 kind:data(any) addr:0x0214c168
 data_ov037_0214c188 kind:data(any) addr:0x0214c188
 data_ov037_0214c18c kind:data(any) addr:0x0214c18c
 data_ov037_0214c190 kind:data(any) addr:0x0214c190
 data_ov037_0214c1ac kind:data(any) addr:0x0214c1ac ambiguous
-gStr_M02_BG_frame_nsc_ov037_0214c1b8 kind:data(any) addr:0x0214c1b8
+gStr_M02_BG_frame_nsc_ov037 kind:data(any) addr:0x0214c1b8
 data_ov037_0214c1cc kind:data(any) addr:0x0214c1cc
 data_ov037_0214c1d0 kind:data(any) addr:0x0214c1d0
 data_ov037_0214c230 kind:data(any) addr:0x0214c230 ambiguous
 data_ov037_0214c288 kind:data(any) addr:0x0214c288 ambiguous
 data_ov037_0214c2d0 kind:data(any) addr:0x0214c2d0 ambiguous
 data_ov037_0214c2ec kind:data(any) addr:0x0214c2ec ambiguous
-gText_ov037_0214c474 kind:data(any) addr:0x0214c474
+gStr__ov037_2 kind:data(any) addr:0x0214c474
 data_ov037_0214c4cc kind:data(any) addr:0x0214c4cc ambiguous
 data_ov037_0214c520 kind:data(any) addr:0x0214c520 ambiguous
 data_ov037_0214c58c kind:data(any) addr:0x0214c58c ambiguous
 data_ov037_0214c708 kind:data(any) addr:0x0214c708 ambiguous
-gStr_P01_ov037_0214c7a0 kind:data(any) addr:0x0214c7a0
-gStr_P03_ov037_0214c7a4 kind:data(any) addr:0x0214c7a4
-gStr_P02_ov037_0214c7a8 kind:data(any) addr:0x0214c7a8
-gStr_P00_ov037_0214c7ac kind:data(any) addr:0x0214c7ac
+gStr_P01_ov037 kind:data(any) addr:0x0214c7a0
+gStr_P03_ov037 kind:data(any) addr:0x0214c7a4
+gStr_P02_ov037 kind:data(any) addr:0x0214c7a8
+gStr_P00_ov037 kind:data(any) addr:0x0214c7ac
 data_ov037_0214c7b0 kind:data(any) addr:0x0214c7b0
 data_ov037_0214c7c8 kind:data(any) addr:0x0214c7c8 ambiguous
 data_ov037_0214c7e4 kind:data(any) addr:0x0214c7e4 ambiguous
 gStr_Mdl_Ica_ica_mii_mini_contents_siri_LZ_bi kind:data(any) addr:0x0214c800
-gStr_TBM_ov037_0214c82c kind:data(any) addr:0x0214c82c
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov037_0214c830 kind:data(any) addr:0x0214c830
-gStr_TBI_ov037_0214c850 kind:data(any) addr:0x0214c850
+gStr_TBM_ov037 kind:data(any) addr:0x0214c82c
+gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov037 kind:data(any) addr:0x0214c830
+gStr_TBI_ov037 kind:data(any) addr:0x0214c850
 data_ov037_0214c854 kind:data(any) addr:0x0214c854
 data_ov037_0214c868 kind:data(any) addr:0x0214c868 ambiguous
-gStr_SFL_ov037_0214c86c kind:data(any) addr:0x0214c86c
-gStr_Scn_Scene_NgCaption_LZ_bin_ov037_0214c870 kind:data(any) addr:0x0214c870
-gStr_M01_ov037_0214c88c kind:data(any) addr:0x0214c88c
-gStr_Mdl_Spl_SplNgEffect_LZ_bin_ov037_0214c890 kind:data(any) addr:0x0214c890
-gStr_M03_ov037_0214c8ac kind:data(any) addr:0x0214c8ac
+gStr_SFL_ov037 kind:data(any) addr:0x0214c86c
+gStr_Scn_Scene_NgCaption_LZ_bin_ov037 kind:data(any) addr:0x0214c870
+gStr_M01_ov037 kind:data(any) addr:0x0214c88c
+gStr_Mdl_Spl_SplNgEffect_LZ_bin_ov037 kind:data(any) addr:0x0214c890
+gStr_M03_ov037 kind:data(any) addr:0x0214c8ac
 gStr_Mdl_Misc_sirimoji_3D_LZ_bin kind:data(any) addr:0x0214c8b0
-gStr_M02_ov037_0214c8cc kind:data(any) addr:0x0214c8cc
+gStr_M02_ov037 kind:data(any) addr:0x0214c8cc
 gStr_Scn_Scene_SceneTestNg110_LZ_bin kind:data(any) addr:0x0214c8d0
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov037_0214c8f0 kind:data(any) addr:0x0214c8f0
-gStr_TBI_tmd_item_msg_JP_bmg_ov037_0214c914 kind:data(any) addr:0x0214c914
-gStr_M01_SplNgEffect_spa_ov037_0214c930 kind:data(any) addr:0x0214c930
+gStr_TBM_tmd_minicontents_msg_JP_bmg_ov037 kind:data(any) addr:0x0214c8f0
+gStr_TBI_tmd_item_msg_JP_bmg_ov037 kind:data(any) addr:0x0214c914
+gStr_M01_SplNgEffect_spa_ov037 kind:data(any) addr:0x0214c930
 gStr_M02_BG_up_ncl kind:data(any) addr:0x0214c948
 data_ov037_0214c954 kind:data(any) addr:0x0214c954 ambiguous
 gStr_M02_BG_up_ncg kind:data(any) addr:0x0214c958
-gStr_M02_BG_frame_nsc_ov037_0214c968 kind:data(any) addr:0x0214c968
-gStr_M02_Obj_down_ncl_ov037_0214c97c kind:data(any) addr:0x0214c97c
-gStr_M02_Obj_down_nce_ov037_0214c990 kind:data(any) addr:0x0214c990
-gStr_M02_Obj_down_ncg_ov037_0214c9a4 kind:data(any) addr:0x0214c9a4
+gStr_M02_BG_frame_nsc_ov037_2 kind:data(any) addr:0x0214c968
+gStr_M02_Obj_down_ncl_ov037 kind:data(any) addr:0x0214c97c
+gStr_M02_Obj_down_nce_ov037 kind:data(any) addr:0x0214c990
+gStr_M02_Obj_down_ncg_ov037 kind:data(any) addr:0x0214c9a4
 gStr_M03_button_imd kind:data(any) addr:0x0214c9b8
 gStr_M03_button_itp kind:data(any) addr:0x0214c9c8
-gStr_SFL_caption_ncg_ov037_0214c9d8 kind:data(any) addr:0x0214c9d8
-gStr_SFL_caption_nsc_ov037_0214c9ec kind:data(any) addr:0x0214c9ec
-gStr_TBM_ov037_0214ca00 kind:data(any) addr:0x0214ca00
-gStr_TBI_ov037_0214ca04 kind:data(any) addr:0x0214ca04
-gStr_SFL_ov037_0214ca08 kind:data(any) addr:0x0214ca08
-gStr_M01_ov037_0214ca0c kind:data(any) addr:0x0214ca0c
-gStr_M03_ov037_0214ca10 kind:data(any) addr:0x0214ca10
-gStr_M02_ov037_0214ca14 kind:data(any) addr:0x0214ca14
+gStr_SFL_caption_ncg_ov037 kind:data(any) addr:0x0214c9d8
+gStr_SFL_caption_nsc_ov037 kind:data(any) addr:0x0214c9ec
+gStr_TBM_ov037_2 kind:data(any) addr:0x0214ca00
+gStr_TBI_ov037_2 kind:data(any) addr:0x0214ca04
+gStr_SFL_ov037_2 kind:data(any) addr:0x0214ca08
+gStr_M01_ov037_2 kind:data(any) addr:0x0214ca0c
+gStr_M03_ov037_2 kind:data(any) addr:0x0214ca10
+gStr_M02_ov037_2 kind:data(any) addr:0x0214ca14
