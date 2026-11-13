@@ -1,5 +1,7 @@
 #include "voice/TtsPlayer.h"
 
+#include "sound/SoundManager.h"
+
 extern "C" {
 
 // The engine, which is not decompiled yet
@@ -12,12 +14,6 @@ int func_0208dac4(void *engine);
 void func_0208daf8(void *engine);
 typedef void (*EngineCallback)(int samples, s16 *data, TtsPlayer *player);
 void func_0208d500(void *engine, const char *text, int param, int unk, EngineCallback callback, TtsPlayer *player);
-
-// The sound manager's volumes, and the mutex around its use of the sound library
-int func_02035bf4(void *);
-int func_02035c14(void *);
-extern u8 data_0213b5cc[];
-extern OSMutex data_0213b698;
 
 } // extern "C"
 
@@ -104,23 +100,23 @@ int TtsPlayer::OpenStream(u8 channel) {
     mEngineDone = 0;
     MIi_CpuClearFast(0, sStreamBuffer, STREAM_BUFFER_SIZE);
 
-    OS_LockMutex(&data_0213b698);
+    OS_LockMutex(&gSoundManager.mMutex);
     NNS_SndStrmInit(&mStream);
     channels[0] = channel;
     if (!NNS_SndStrmAllocChannel(&mStream, 1, channels)) {
-        OS_UnlockMutex(&data_0213b698);
+        OS_UnlockMutex(&gSoundManager.mMutex);
         mState = STATE_CLOSED;
         return -1;
     }
     if (!NNS_SndStrmSetup(&mStream, NNS_SND_STRM_FORMAT_PCM16, sStreamBuffer, STREAM_BUFFER_SIZE, 0x17, 5,
                           StreamCallback, this)) {
         NNS_SndStrmFreeChannel(&mStream);
-        OS_UnlockMutex(&data_0213b698);
+        OS_UnlockMutex(&gSoundManager.mMutex);
         mState = STATE_CLOSED;
         return -1;
     }
-    NNS_SndStrmSetChannelVolume(&mStream, 0, func_02035bf4(data_0213b5cc));
-    OS_UnlockMutex(&data_0213b698);
+    NNS_SndStrmSetChannelVolume(&mStream, 0, gSoundManager.GetVoiceStrmVolume());
+    OS_UnlockMutex(&gSoundManager.mMutex);
     return 0;
 }
 
@@ -128,10 +124,10 @@ void TtsPlayer::CloseStream() {
     if (mState == STATE_CLOSED) {
         return;
     }
-    OS_LockMutex(&data_0213b698);
+    OS_LockMutex(&gSoundManager.mMutex);
     NNS_SndStrmStop(&mStream);
     NNS_SndStrmFreeChannel(&mStream);
-    OS_UnlockMutex(&data_0213b698);
+    OS_UnlockMutex(&gSoundManager.mMutex);
     mState = STATE_CLOSED;
 }
 
@@ -187,14 +183,14 @@ void TtsPlayer::Update() {
     if (mState == STATE_FILLING) {
         if (mEngineDone != 0) {
             mState = STATE_DRAINING;
-            OS_LockMutex(&data_0213b698);
+            OS_LockMutex(&gSoundManager.mMutex);
             NNS_SndStrmStart(&mStream);
-            OS_UnlockMutex(&data_0213b698);
+            OS_UnlockMutex(&gSoundManager.mMutex);
         } else if (mBufferedCount >= 5) {
             mState = STATE_PLAYING;
-            OS_LockMutex(&data_0213b698);
+            OS_LockMutex(&gSoundManager.mMutex);
             NNS_SndStrmStart(&mStream);
-            OS_UnlockMutex(&data_0213b698);
+            OS_UnlockMutex(&gSoundManager.mMutex);
         }
     } else if (mState == STATE_PLAYING) {
         if (mEngineDone != 0) {
@@ -241,32 +237,32 @@ void TtsPlayer::ClearCaptureBuffer() {
 }
 
 void TtsPlayer::PlayCapture() {
-    OS_LockMutex(&data_0213b698);
+    OS_LockMutex(&gSoundManager.mMutex);
     NNSSndWaveOutHandle handle = NNS_SndWaveOutAllocChannel(4);
     if (handle == NULL) {
-        OS_UnlockMutex(&data_0213b698);
+        OS_UnlockMutex(&gSoundManager.mMutex);
         return;
     }
     mWaveOut = handle;
     NNS_SndWaveOutStart(mWaveOut, NNS_SND_WAVE_FORMAT_PCM16, mCaptureBuffer, FALSE, 0, mCaptureSamples, 22000,
-                        func_02035c14(data_0213b5cc), 0x8000, 0x40);
+                        gSoundManager.GetVoiceVolume(), 0x8000, 0x40);
     NNS_SndWaveOutFreeChannel(mWaveOut);
-    OS_UnlockMutex(&data_0213b698);
+    OS_UnlockMutex(&gSoundManager.mMutex);
 }
 
 void TtsPlayer::StopCapture() {
     if (mWaveOut == NULL) {
         return;
     }
-    OS_LockMutex(&data_0213b698);
+    OS_LockMutex(&gSoundManager.mMutex);
     NNS_SndWaveOutStop(mWaveOut);
-    OS_UnlockMutex(&data_0213b698);
+    OS_UnlockMutex(&gSoundManager.mMutex);
 }
 
 BOOL TtsPlayer::IsCapturePlaying() {
-    OS_LockMutex(&data_0213b698);
+    OS_LockMutex(&gSoundManager.mMutex);
     BOOL playing = NNS_SndWaveOutIsPlaying(mWaveOut);
-    OS_UnlockMutex(&data_0213b698);
+    OS_UnlockMutex(&gSoundManager.mMutex);
     return playing;
 }
 

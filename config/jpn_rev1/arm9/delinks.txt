@@ -103,9 +103,11 @@ lib/NitroSDK/libraries/os/src/os_emulator.c:
     .text       start:0x02007be8 end:0x02007c08
 
 lib/NitroSDK/libraries/os/src/os_message.c:
+    complete
     .text       start:0x02007c08 end:0x02007e04
 
 lib/NitroSDK/libraries/os/src/os_mutex.c:
+    complete
     .text       start:0x02007e04 end:0x02007ff4
 
 lib/NitroSDK/libraries/os/src/os_cache.c:
@@ -303,6 +305,19 @@ lib/NitroSDK/libraries/std/src/std_string.c:
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
 
+src/sound/SoundSystem.cpp:
+    complete
+    .text       start:0x02028630 end:0x020287f8
+
+src/sound/SoundManager.cpp:
+    complete
+    .text       start:0x02035b04 end:0x02036558
+    .rodata     start:0x020b5c44 end:0x020b5c54
+
+src/sound/ValueRamp.cpp:
+    complete
+    .text       start:0x02036558 end:0x0203671c
+
 lib/NitroSystem/libraries/snd/src/main.c:
     .text       start:0x02053c64 end:0x02053d80
 
@@ -328,7 +343,7 @@ lib/NitroSystem/libraries/snd/src/heap.c:
     .text       start:0x02055ba4 end:0x02055f1c
 
 lib/NitroSystem/libraries/snd/src/sndarc_loader.c:
-    .text       start:0x02055f34 end:0x02056910
+    .text       start:0x02055f1c end:0x02056910
 
 lib/NitroSystem/libraries/snd/src/sndarc_player.c:
     .text       start:0x02056910 end:0x02056c34
@@ -341,6 +356,7 @@ lib/NitroSystem/libraries/snd/src/seqdata.c:
     .text       start:0x020583d0 end:0x02058410
 
 lib/NitroSystem/libraries/snd/src/fader.c:
+    complete
     .text       start:0x02058410 end:0x020584b4
 
 lib/NitroSystem/libraries/fnd/src/list.c:

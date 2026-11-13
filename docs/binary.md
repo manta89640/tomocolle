@@ -201,6 +201,26 @@ for it, so `symbols.txt` has four such names, and `relocs.txt` refers to the oth
 offset. An edit that adds or removes a literal or a local before them renumbers them, and `ninja` will then say that
 a symbol is not found: read the new name off the object (`arm-none-eabi-nm`) and put it in `symbols.txt`.
 
+## Sound
+
+The game plays everything but the voices through NitroSystem's sound archive player, from `sound_data.sdat`.
+Measured, from the decompiled code in `src/sound/`:
+
+| | Where | |
+| --- | --- | --- |
+| `SoundSystem` | `0x02028630` to `0x020287F8`, 6 functions | Sets the library up: a sound heap from the main heap, the archive, 2 sequence handles, 6 sequence archive handles, 1 stream handle, 3 saved heap levels. 0xCC bytes |
+| `SoundManager` | `0x02035B04` to `0x02036558`, 43 functions | `SoundSystem` with a mutex (at 0xCC) around every call into the library. The one instance is `gSoundManager`; `main` initialises it and 411 places in the overlays use it |
+| `ValueRamp`, `SoundParamRamps` | `0x02036558` to `0x0203671C`, 6 functions | A value that steps each frame, freely or to a target; four of them (volume, pitch, tempo ratio, pan, as 20.12 fixed point) drive a playing sound |
+
+- The player's volume settings are three bytes of `gSettings` (at 0xC9: music, effects, voice; each 0 to 3) after a
+  stereo flag at 0xC8. Three tables in `SoundManager.cpp` turn a setting into a volume: a scale in 32nds
+  (0, 11, 21, 32) for a sound that has a volume of its own in the archive, a volume (0, 42, 84, 127) for one that
+  has none, and the voice stream's channel volume (-10000, -180, -60, 0).
+- `TtsPlayer` takes the same mutex (`gSoundManager.mMutex`) around its own stream and wave output calls, and asks
+  the manager for the voice volume.
+
+Inferred: sequences are music and sequence archive entries are sound effects, from which setting scales which.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
