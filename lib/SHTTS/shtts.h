@@ -41,8 +41,9 @@ typedef struct ShttsUnk_020856b0 {
     /* 0x20C */ s32 unk_20C;
 } ShttsUnk_020856b0;
 
-// The engine's whole state, 0x14000 bytes that the caller provides. Its fields are in fields.txt.
-#include "shtts_struct.h"
+// The engine's whole state, 0x14000 bytes that the caller provides. Its fields are in fields.txt, and the struct
+// itself is included at the end of this header, after the types of its fields.
+typedef struct Shtts Shtts;
 
 void func_02089cf4(Shtts *engine);
 void func_02089d08(Shtts *engine);
@@ -79,9 +80,9 @@ typedef struct ShttsPreset {
 
 // One entry of the table at 0x020e8f08, which is indexed by four numbers
 typedef struct ShttsUnit {
-    /* 0x0 */ s16 unk_0;
-    /* 0x2 */ s16 unk_2;
-    /* 0x4 */ u8 pad_4[4];
+    /* 0x0 */ u16 unk_0;   // The index of its first record in data_020bc26c
+    /* 0x2 */ s16 unk_2;   // 0 if there is no such unit
+    /* 0x4 */ u8 unk_4[4]; // unk_4[k] and unk_4[k + 1] bound the records of its k-th sound
 } ShttsUnit; // 0x8
 
 extern ShttsUnit data_020e8f08[][8][38][8];
@@ -102,7 +103,10 @@ typedef struct ShttsUnk_02087d98 {
 typedef struct ShttsUnk_0208aba8 {
     /* 0x0 */ s16 unk_0;
     /* 0x2 */ s8 unk_2;
-    /* 0x3 */ u8 pad_3[13];
+    /* 0x3 */ s8 unk_3;
+    /* 0x4 */ int kind;
+    /* 0x8 */ s8 unk_8[5];
+    /* 0xD */ u8 pad_D[3];
 } ShttsUnk_0208aba8; // 0x10
 
 // A sorted list of words that func_02084794 searches
@@ -216,7 +220,7 @@ extern ShttsUnk_02085b30_C data_020b9cbc;
 extern ShttsUnk_020850e0 *const data_020bc258;
 
 void func_02084830(char *text);
-int func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames, ShttsUnk_020850e0 **out, Shtts *engine);
+s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames, ShttsUnk_020850e0 **out, Shtts *engine);
 void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_020850e0 **dst, Shtts *engine);
 void func_02085704(ShttsUnk_020856b0 *unk, s16 *in, s16 *out, int count);
 int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine);
@@ -309,13 +313,13 @@ void func_020856b0(ShttsUnk_020856b0 *unk, int rate);
 int func_02085a64(Shtts *engine);
 int func_02086628(s16 value);
 int func_02086a20(const int *state, const s16 *coefficients, int input);
-void func_02086a74(int value, int *out);
+void func_02086a74(char *value, char **out);
 int func_02086a7c(char *dst, int size, char **cursor);
 void func_02086b14(Shtts *engine);
 void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine);
 int func_02087dc8(const char *text, const char *find);
 int func_02089b5c(int a, int b);
-int func_02089cec(void);
+int func_02089cec(Shtts *engine);
 int func_02089d4c(Shtts *engine);
 char *func_02089da0(char **cursor, char *delimiters);
 void func_02089e48(char *dst, int c, int count);
@@ -392,5 +396,82 @@ extern s16 data_020bc20c[5];
 extern s16 data_020bc216[5];
 
 extern s16 data_020bc220[5];
+
+// ---- From the decompilation of group e
+// One sound of the text with its length and pitch, as func_0208b738 reads them. The list ends with one of kind 7.
+typedef struct ShttsPhone {
+    /* 0x0 */ int kind; // An index in ShttsPhonemeNames (0 is silence), or 7 at the end of the list
+    /* 0x4 */ s16 length;
+    /* 0x6 */ s16 unk_6;
+    /* 0x8 */ s16 unk_8;
+    /* 0xA */ s16 unk_A;
+    /* 0xC */ s16 unk_C;
+    /* 0xE */ s8 unk_E;
+    /* 0xF */ s8 unk_F;
+} ShttsPhone; // 0x10
+
+// One sound to synthesize, which func_0208ba64 makes from a ShttsPhone and a ShttsUnit
+typedef struct ShttsSegment {
+    /* 0x0 */ int kind;
+    /* 0x4 */ s16 length;
+    /* 0x6 */ s16 unk_6;
+    /* 0x8 */ s16 unk_8;
+    /* 0xA */ s16 unk_A;
+    /* 0xC */ u16 unit;  // The unit's unk_0, an index in data_020bc26c
+    /* 0xE */ u8 first;  // The first and the last of the unit's entries in data_020bc26c that are this sound's
+    /* 0xF */ u8 last;
+} ShttsSegment; // 0x10
+
+// What the pointers at 0x5D38 point to
+typedef struct ShttsUnk_05D38 {
+    /* 0x0 */ u8 pad_0[3];
+    /* 0x3 */ u8 unk_3;
+    /* 0x4 */ int phoneme;
+} ShttsUnk_05D38;
+
+// One entry of the table at 0x020bc26c
+typedef struct ShttsUnk_020bc26c {
+    /* 0x0 */ s8 unk_0;
+    /* 0x1 */ s8 unk_1[5];
+} ShttsUnk_020bc26c; // 0x6
+
+// A list that func_0208c690 walks
+typedef struct ShttsUnk_01660Item {
+    /* 0x0 */ u8 pad_0[8];
+    /* 0x8 */ s8 *unk_8;
+    /* 0xC */ u8 pad_C[4];
+} ShttsUnk_01660Item; // 0x10
+
+typedef struct ShttsUnk_01660 {
+    /* 0x0 */ s8 count;
+    /* 0x4 */ ShttsUnk_01660Item *items;
+    /* 0x8 */ struct ShttsUnk_01660 *next;
+} ShttsUnk_01660;
+
+extern void *const data_020bc254[];
+
+extern ShttsUnk_020bc26c data_020bc26c[];
+
+void func_0208ad48(Shtts *engine);
+
+void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine);
+
+void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine);
+
+int func_0208ba64(int mode, ShttsPhone *first, ShttsPhone *last, void *unused, s16 unused2, Shtts *engine);
+
+void func_0208bf28(int count, Shtts *engine);
+
+void func_0208c0c8(int a, int b, Shtts *engine);
+
+void func_0208c230(ShttsUnk_05D38 **units, s16 *pitches, s16 count, Shtts *engine);
+
+void func_0208c690(void *arg);
+
+int func_02086b90(void *a, void *b, Shtts *engine);
+
+void func_02086fd8(void *a, void *b, void *c);
+
+#include "shtts_struct.h"
 
 #endif // SHTTS_H

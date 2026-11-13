@@ -200,7 +200,7 @@ done:
 
 // Gives each entry from first to last its length, and has func_020850e0 fill out with that many pointers to the
 // entry's frames (entries first to last of the frames). Returns the sum of the lengths.
-int func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames,
+s16 func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames,
                   ShttsUnk_020850e0 **out, Shtts *engine) {
     s16 i;
     s16 a = 0;
@@ -778,7 +778,7 @@ asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
     bx lr
 }
 
-void func_02086a74(int value, int *out) {
+void func_02086a74(char *value, char **out) {
     *out = value;
 }
 
@@ -2040,7 +2040,7 @@ int func_02089bb0(int x) {
 
 // Sets up the engine's state for a new text
 int func_02089c50(Shtts *engine) {
-    engine->unk_04938 = 0;
+    engine->unk_04938[0] = 0;
     engine->unk_0EE0C = 0;
     engine->unk_0EE0E = 0;
     func_0208be38(engine);
@@ -2055,7 +2055,7 @@ int func_02089c50(Shtts *engine) {
     return 0;
 }
 
-int func_02089cec(void) {
+int func_02089cec(Shtts *engine) {
     return 0;
 }
 
@@ -2580,6 +2580,254 @@ void func_0208abf4(ShttsUnk_0208aba8 *table, int count, int a, int b) {
     }
 }
 
+// Synthesizes the segments. It takes them in runs that are consecutive entries of one unit, fills unk_04338 with the
+// run's entries of data_020bc26c, has func_02084c1c make frames of it, func_0208b550 a contour for them in unk_04938,
+// and func_0208c230 the samples. A segment of silence then moves the sample buffer on by its length.
+void func_0208ad48(Shtts *engine) {
+    s16 i;
+    s16 last;
+    s16 split;
+    s16 *contour;
+    s16 bound;
+    int kind;
+    s16 j;
+    s16 k;
+    s16 m;
+    s16 total;
+    s16 frames;
+    int target;
+    int sum;
+    ShttsSegment *start;
+    ShttsSegment *end;
+    ShttsSegment *segment;
+    ShttsSegment *cur;
+    ShttsSegment *p;
+
+    start = NULL; // Needed for the match: without it the zeros below are not shared in one register
+    contour = &engine->unk_04938[1];
+    last = engine->segmentCount - 1;
+    engine->unk_0EE0E = 0;
+    engine->unk_05D38[0] = data_020bc254[1];
+    split = 0;
+    i = 0;
+    for (segment = engine->segments; i <= last; i++, segment++) {
+        if (i == 0) {
+            start = engine->segments;
+        } else {
+            if (segment->unit == segment[-1].unit && segment[-1].last + 1 == segment->first) {
+                if (segment[-1].kind == 20) {
+                    goto next;
+                }
+                if (segment - start <= 1) {
+                    goto next;
+                }
+                if (!(data_020bc22c[segment[-1].kind] & 0x80)) {
+                    goto next;
+                }
+            }
+            end = segment - 1;
+            total = end->last - start->first + 1;
+            bound = start->last - start->first + 1;
+            cur = start;
+            kind = start->kind;
+            for (j = 0; j < total; j++) {
+                s8 c = data_020bc26c[start->unit + j].unk_0;
+                s16 v = c & 0x7F;
+
+                engine->unk_04338[j].unk_0 = v * 10;
+                engine->unk_04338[j].unk_2 = (c >> 7) & 1;
+                if (j >= bound) {
+                    cur++;
+                    kind = cur->kind;
+                    bound = cur->last - start->first + 1;
+                }
+                engine->unk_04338[j].kind = kind;
+                if (cur->unk_6 < 0) {
+                    engine->unk_04338[j].unk_2 = 0;
+                }
+                if (engine->unk_04338[j].unk_2 == 0) {
+                    engine->unk_04338[j].unk_3 = engine->unk_00004;
+                } else {
+                    engine->unk_04338[j].unk_3 = 120;
+                }
+                for (k = 0; k < 5; k++) {
+                    engine->unk_04338[j].unk_8[k] = data_020bc26c[start->unit + j].unk_1[k];
+                }
+            }
+            for (p = start; p <= end; p++) {
+                if (p->unk_6 < 0) {
+                    p->unk_6 = -p->unk_6;
+                }
+            }
+            if (start == engine->segments) {
+                s16 x = end->unk_8 - engine->unk_04338[total - 1].unk_0;
+
+                func_0208abf4(engine->unk_04338, total, x, x);
+                engine->unk_0EE0E = -1;
+            } else if (i == last) {
+                s16 x = start->unk_8 - engine->unk_04338[0].unk_0;
+
+                func_0208abf4(engine->unk_04338, total, x, x);
+                engine->unk_0EE0E = -2;
+            } else if ((data_020bc22c[start->kind] & 0x80) && start->kind != 20 && (data_020bc22c[end->kind] & 0x80)
+                       && end->kind != 20 && start != end) {
+                func_0208aba8(engine->unk_04338, total, start->unk_8, end->unk_8);
+                engine->unk_0EE0E = 0;
+            } else if (engine->unk_0EE0E == 1) {
+                s16 x = end->unk_8 - engine->unk_04338[total - 1].unk_0;
+
+                func_0208abf4(engine->unk_04338, total, x, x);
+                engine->unk_0EE0E = 2;
+            } else {
+                s16 x = start->unk_8 - engine->unk_04338[0].unk_0;
+
+                func_0208abf4(engine->unk_04338, total, x, x);
+                engine->unk_0EE0E = 1;
+            }
+            frames = func_02084c1c((void *)start, (void *)end, (void *)engine->unk_04338, (void *)&engine->unk_05D38[1], engine);
+            if (split > 0 && engine->unk_0EE0E == 0) {
+                func_0208b550(contour, (start->length + 1) / 2, start->unk_6, 7000, engine);
+                func_0208b550(contour + (start->length + 1) / 2, frames - (start->length + 1) / 2, end->unk_6, 7000,
+                              engine);
+                split = 0;
+            } else if (end->unk_6 != end[1].unk_6 && engine->unk_0EE0E != -2 && end->kind == end[1].kind) {
+                if (engine->unk_0EE0E == -1) {
+                    if (engine->unk_0EE0C == 0) {
+                        if (data_020bc22c[start->kind] & 1) {
+                            engine->unk_04938[0] = end->unk_6;
+                        } else {
+                            engine->unk_04938[0] = end->unk_6 - (frames - end->length / 2) * 15;
+                        }
+                    } else {
+                        engine->unk_04938[0] += func_02089444(
+                            engine->unk_0EE0C * (end->unk_6 - engine->unk_04938[0]),
+                            (s16)(engine->unk_0EE0C + frames - end->length / 2));
+                    }
+                }
+                // The original reads end->unk_6 once and keeps it across the call, which this form gives
+                sum = end->unk_6
+                      + func_02089444(end->length * (s16)(end[1].unk_6 - end->unk_6),
+                                      (s16)(end->length + end[1].length));
+                target = sum < -0x8000 ? -0x8000 : sum > 0x7FFF ? 0x7FFF : sum;
+                func_0208b550(contour, frames - end->length / 2, end->unk_6, 7000, engine);
+                func_0208b550(contour + frames - end->length / 2, end->length / 2, target, 7000, engine);
+                split = 1;
+            } else {
+                if (engine->unk_0EE0E == -1) {
+                    if (engine->unk_0EE0C == 0 || engine->cur.pitchTrans != 0) {
+                        if ((data_020bc22c[start->kind] & 1) || engine->cur.phrase == 0) {
+                            engine->unk_04938[0] = end->unk_6;
+                        } else {
+                            engine->unk_04938[0] = end->unk_6 - frames * 15;
+                        }
+                    } else {
+                        engine->unk_04938[0] += func_02089444(
+                            engine->unk_0EE0C * (end->unk_6 - engine->unk_04938[0]), (s16)(engine->unk_0EE0C + frames));
+                    }
+                } else if (engine->unk_0EE0E == -2) {
+                    if (engine->cur.phrase == 0) {
+                        end->unk_6 = engine->unk_04938[0];
+                    } else {
+                        end->unk_6 = engine->unk_04938[0] - (s16)frames * 10;
+                    }
+                } else if (engine->unk_04938[0] <= 0) {
+                    engine->unk_04938[0] = start->unk_6;
+                }
+                func_0208b550(contour, frames, end->unk_6, 7000, engine);
+            }
+            func_0208c230(&engine->unk_05D38[1], contour, frames, engine);
+            if (func_02089d4c(engine) == 1) {
+                return;
+            }
+            engine->unk_04938[0] = engine->unk_04938[frames];
+            engine->unk_0EE0C = engine->unk_05D38[frames]->unk_3;
+            start = segment;
+        }
+    next:
+        if (segment->kind == 0) {
+            engine->phoneme = 0;
+            for (m = 0; m < segment->length; m++) {
+                func_0208bf28(engine->unk_00004, engine);
+                if (func_02089d4c(engine) == 1) {
+                    return;
+                }
+            }
+            if (func_02089d4c(engine) == 1) {
+                return;
+            }
+            engine->unk_0EE0C = segment->length;
+        }
+    }
+}
+
+// Writes count values that go from the one before out to target, neither above max. With the pitchTrans setting,
+// only that many values make the move, after four tenths of the rest hold the first value; the others hold target.
+void func_0208b550(s16 *out, s16 count, s16 target, s16 max, Shtts *engine) {
+    s16 from = out[-1];
+    s16 trans = engine->cur.pitchTrans;
+    int hold;
+    int tail;
+    s16 i;
+    int step;
+
+    if (from > max) {
+        from = max;
+    }
+    if (target > max) {
+        target = max;
+    }
+    if (trans == 0) {
+        if (count <= 0) {
+            step = 0;
+        } else {
+            step = func_02089444((target - from) << 6, count);
+        }
+        i = 1;
+        if (count >= 1) {
+            for (; i <= count; i++) {
+                *out++ = from + (s16)((i * step) >> 6);
+            }
+        }
+        return;
+    }
+    if (trans < 0) {
+        trans = 1;
+    }
+    if (count <= trans) {
+        tail = 0;
+        hold = tail;
+    } else {
+        int rest = count - trans;
+
+        hold = rest * 4 / 10;
+        count = trans;
+        tail = rest - hold;
+    }
+    if (count <= 0) {
+        step = 0;
+    } else {
+        step = func_02089444((target - from) << 6, count);
+    }
+    i = 0;
+    if (hold > 0) {
+        for (; i < hold; i++) {
+            *out++ = from;
+        }
+    }
+    i = 0;
+    if (count > 0) {
+        for (; i < count; i++) {
+            *out++ = from + (s16)((i * step) >> 6);
+        }
+    }
+    i = 0;
+    if (tail > 0) {
+        for (; i < tail; i++) {
+            *out++ = target;
+        }
+    }
+}
+
 // The ring effect: multiplies samples by a sine wave of a frequency
 void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
     int i;
@@ -2589,6 +2837,219 @@ void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
         (*phase)++;
         dst[i] = (src[i] * data_020e8d08[((step * *phase) >> 8) & 0xFF]) >> 15;
     }
+}
+
+// Makes segments of a list of phones: takes them in groups that end at a phone of kind 6 or less, and has
+// func_0208ba64 look each group up as a unit, in parts if there is no unit for the whole.
+void func_0208b738(ShttsPhone *phones, void *unused, Shtts *engine) {
+    ShttsPhone *start;
+    s16 groups;
+    s16 count;
+    ShttsPhone *end;
+    ShttsPhone *p;
+    int mode;
+    int result;
+    int saved2;
+    int saved;
+
+    count = 0;
+    p = phones;
+    end = p;
+    groups = 0;
+    mode = -1;
+    while (p->kind != 7) {
+        start = end;
+        while (p->kind > 6) {
+            if (p->kind == 7) {
+                return;
+            }
+            if (count >= 0x100) {
+                return;
+            }
+            p++;
+            count++;
+        }
+        if (p->kind == 7) {
+            return;
+        }
+        if (count >= 0x100) {
+            return;
+        }
+        if (p->kind == 0) {
+            end = p - 1;
+            p++;
+            count++;
+            mode = -2;
+        } else {
+            end = p;
+            p++;
+            count++;
+        }
+        if (end->unk_E == 'Q' && start != end
+            && (end[-1].kind == 26 || end[-1].kind == 25 || end[-1].kind == 21 || end[-1].kind == 19
+                || end[-1].kind == 18 || end[-1].kind == 15 || end[-1].kind == 20 || end[-1].kind == 23
+                || end[-1].kind == 24)) {
+            result = -1;
+        } else if (engine->unk_01B21 == 1 && mode == 0 && end - start == 2
+                   && (start[1].kind == 27 || start[1].kind == 12 || start[1].kind == 8 || start[1].kind == 36
+                       || start[1].kind == 28 || start[1].kind == 11 || start[1].kind == 13 || start[1].kind == 37)) {
+            saved = *(int *)&start[1]; // Read this way, the compiler does not merge it with the reads above
+            start[1].kind = 0;
+            func_0208ba64(1, start, start + 1, unused, groups, engine);
+            start[1].kind = saved;
+            result = func_0208ba64(-1, start + 1, end, unused, groups, engine);
+        } else {
+            result = func_0208ba64(mode, start, end, unused, groups, engine);
+        }
+        if (result < 0 && mode >= 0) {
+            if (start->kind == end->kind && start + 1 == end) {
+                int length = end->length + start->length;
+
+                if (length > 0x7FFF) {
+                    length = 0x7FFF;
+                }
+                end->length = length;
+                func_0208ba64(mode, start + 1, end, unused, groups, engine);
+            } else {
+                mode = 1;
+                if (func_0208ba64(mode, start, end - 1, unused, groups, engine) < 0) {
+                    saved2 = end[-1].kind;
+                    if (saved2 == 18) {
+                        end[-1].kind = 2;
+                    } else if (saved2 == 20) {
+                        end[-1].kind = 3;
+                    } else if (saved2 == 16) {
+                        end[-1].kind = 15;
+                    }
+                    if (func_0208ba64(1, start, end - 1, unused, groups, engine) < 0) {
+                        func_0208ba64(-2, start, start, unused, groups, engine);
+                    }
+                    end[-1].kind = saved2;
+                }
+                func_0208ba64(-1, end - 1, end, unused, groups, engine);
+            }
+        }
+        if (mode == -2) {
+            mode = -1;
+            end = p;
+        } else {
+            mode = 0;
+        }
+        groups++;
+    }
+    if (end->kind == 7) {
+        return;
+    }
+    func_0208ba64(-2, end, end, unused, groups, engine);
+}
+
+// Looks the phones from first to last up as a unit, with silence before them if mode is -1 and after them if it is
+// -2, and adds a segment for each to the engine's. Returns -1 if there is no such unit.
+int func_0208ba64(int mode, ShttsPhone *first, ShttsPhone *last, void *unused, s16 unused2, Shtts *engine) {
+    int index[3];
+    s16 lengths[10];
+    s16 head;
+    s16 i;
+    s16 n;
+    s16 tail;
+    ShttsPhone *p;
+    ShttsUnit *unit;
+    ShttsSegment *out;
+    s16 value;
+
+    switch (mode) {
+        case -2:
+        case 1:
+            head = 2;
+            tail = 3;
+            break;
+        case -1:
+        case 2:
+            head = 1;
+            tail = 2;
+            break;
+        default:
+            head = 2;
+            tail = 2;
+            break;
+    }
+    index[2] = 7;
+    index[1] = 7;
+    index[0] = 7;
+    n = 0;
+    if (mode == -1) {
+        index[n] = 0;
+        n++;
+    }
+    for (p = first; p <= last; p++) {
+        index[n] = p->kind;
+        n++;
+    }
+    if (mode == -2) {
+        index[n] = 0;
+    }
+    for (p = first, i = 0; i < 9 && p <= last; p++, i++) {
+        if (p == first && head == 2) {
+            lengths[i + 1] = ((p->length + 7) * 0xCCD) >> 15;
+        } else if (p == last && tail == 2) {
+            lengths[i + 1] = ((p->length + 3) * 0xCCD) >> 15;
+        } else {
+            lengths[i + 1] = ((p->length + 2) * 0x199A) >> 15;
+        }
+    }
+    lengths[0] = i;
+    unit = func_0208bdf4(index, engine);
+    if (unit == NULL) {
+        return -1;
+    }
+    p = first;
+    i = 0;
+    out = &engine->segments[engine->segmentCount];
+    if (mode == 1) {
+        last--;
+    }
+    for (; p <= last; p++) {
+        if (engine->segmentCount >= 0x180) {
+            goto done;
+        }
+        if (unit->unk_4[i] == unit->unk_4[i + 1]) {
+            i++;
+        }
+        if (p->unk_A != 0 && p == first && mode != -1) {
+            value = p->unk_A;
+        } else {
+            value = p->unk_8;
+        }
+        if (value == 0 && p[-1].kind != 0) {
+            s16 after = p[1].unk_8;
+
+            value = after
+                    + (p[-1].length + p->length) * (p[-1].unk_8 - after)
+                          / (p[1].length + (p[-1].length + p->length * 2));
+        }
+        out->kind = p->kind;
+        out->length = lengths[i + 1];
+        if (p->kind >= 1 && p->kind <= 6 && p->unk_F == 'U') {
+            out->unk_6 = -value;
+        } else {
+            out->unk_6 = value;
+        }
+        out->unk_8 = p->unk_6;
+        out->first = unit->unk_4[i];
+        out->last = unit->unk_4[i + 1] - 1;
+        i++;
+        out->unit = unit->unk_0;
+        out->unk_A = p->unk_C;
+        out++;
+        engine->segmentCount++;
+    }
+    if (p->kind == 0 && mode == -2 && engine->segmentCount < 0x180) {
+        out->kind = p->kind;
+        out->length = ((p->length + 2) * 0x199A) >> 15;
+        engine->segmentCount++;
+    }
+done:
+    return 0;
 }
 
 ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
@@ -2631,6 +3092,31 @@ void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
     }
 }
 
+// Moves the place in the sample buffer on by count samples. When that leaves a half of the buffer, plays the half
+// out and fills it with silence.
+void func_0208bf28(int count, Shtts *engine) {
+    if (count < 0) {
+        return;
+    }
+    engine->unk_08CC8 += count;
+    engine->unk_08CE0 += count;
+    if (engine->unk_08CD0 == &engine->unk_08908[0] && engine->unk_08CC8 >= &engine->unk_08908[0xF0]) {
+        func_0208e4e4(engine->unk_08CDE, &engine->unk_08908[0], engine);
+        func_0208be9c(engine->unk_08CDE, &engine->unk_08908[0], engine);
+        engine->unk_08CD0 = &engine->unk_08908[0xF0];
+    } else if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
+        if ((engine->unk_08CC8 >= &engine->unk_08908[0] && engine->unk_08CC8 < &engine->unk_08908[0xF0])
+            || engine->unk_08CC8 > &engine->unk_08908[0x1E0]) {
+            func_0208e4e4(engine->unk_08CDE, &engine->unk_08908[0xF0], engine);
+            func_0208be9c(engine->unk_08CDE, &engine->unk_08908[0xF0], engine);
+            engine->unk_08CD0 = &engine->unk_08908[0];
+        }
+    }
+    if (engine->unk_08CC8 >= engine->unk_08CD8) {
+        engine->unk_08CC8 -= 0x1E0;
+    }
+}
+
 // Plays out the half of the sample buffer that has been filled, and moves on to the other half
 void func_0208c054(Shtts *engine) {
     if (engine->unk_08CD0 >= engine->unk_08CC8) {
@@ -2644,6 +3130,95 @@ void func_0208c054(Shtts *engine) {
         engine->unk_08CD0 = &engine->unk_08908[0xF0];
     }
     engine->unk_08CC8 = engine->unk_08CD0;
+}
+
+// Adds the samples of unk_08726 to the sample buffer, going round to its start at its end and keeping the sums
+// within 16 bits. They go at the buffer's place, or half their count before it if both a and b are above 0.
+void func_0208c0c8(int a, int b, Shtts *engine) {
+    s16 *dst;
+    s16 i;
+    s16 count = engine->unk_08724[0];
+    s16 *src;
+
+    if (a > 0 && b > 0) {
+        s16 half = count >> 1;
+
+        dst = engine->unk_08CC8 - half;
+    } else {
+        dst = engine->unk_08CC8;
+    }
+    src = &engine->unk_08724[1];
+    if (dst < engine->unk_08CD4) {
+        dst = engine->unk_08CD8 - (engine->unk_08CD4 - dst);
+    }
+    i = 0;
+    if (dst + count >= engine->unk_08CD8) {
+        while (dst < engine->unk_08CD8) {
+            int sample = *dst + *src;
+            if (sample > 0x7FFF) {
+                sample = 0x7FFF;
+            } else if (sample < -0x7FFF) {
+                sample = -0x7FFF;
+            }
+            *dst++ = sample;
+            i++;
+            src++;
+        }
+        dst = engine->unk_08CD4;
+    }
+    for (; i < count; i++, src++) {
+        int sample = *dst + *src;
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
+        } else if (sample < -0x7FFF) {
+            sample = -0x7FFF;
+        }
+        *dst++ = sample;
+    }
+    if (a == 0) {
+        engine->unk_08CCC = engine->unk_08CC8 + b;
+    } else {
+        engine->unk_08CCC = dst;
+    }
+    if (engine->unk_08CCC >= engine->unk_08CD8) {
+        engine->unk_08CCC = engine->unk_08CD4 + (engine->unk_08CCC - engine->unk_08CD8);
+    }
+}
+
+// Makes the samples of count frames, each with its value of the contour, and puts them in the sample buffer.
+// Stops early if the engine has been asked to stop.
+void func_0208c230(ShttsUnk_05D38 **units, s16 *pitches, s16 count, Shtts *engine) {
+    s16 i;
+    int length;
+    int step;
+
+    for (i = 0; i < count; i++) {
+        if ((*units)->phoneme != engine->phoneme && (*units)->phoneme != 0) {
+            engine->phoneme = (*units)->phoneme;
+        }
+        func_020858c8((void *)*units++, *pitches++, engine);
+        engine->unk_08906 += engine->unk_00004;
+        length = func_02085a64(engine);
+        step = length;
+        if (length == 0) {
+            step = engine->unk_00004;
+        }
+        while (engine->unk_08906 > 0) {
+            func_02085a70(engine);
+            if (length == 0) {
+                func_0208e3b4(0, engine);
+                func_0208c0c8(0, step, engine);
+            } else {
+                func_0208e3b4(length, engine);
+                func_0208c0c8(0, length, engine);
+            }
+            engine->unk_08906 -= step;
+            func_0208bf28(step, engine);
+        }
+        if (func_02089d4c(engine) == 1) {
+            return;
+        }
+    }
 }
 
 // Sets the caller's voice settings back to their defaults
@@ -2720,6 +3295,95 @@ int func_0208c568(Shtts *engine) {
     engine->unk_01B21 = 0;
     engine->unk_00004 = engine->unk_00000 / 200;
     return 0;
+}
+
+// Starts speaking the text: sets the state up, prepares the text, and synthesizes in a thread of its own, or in
+// the caller's if unk_0EE11 is set.
+void func_0208c5a8(Shtts *engine) {
+    func_0208c568(engine);
+    func_02089c50(engine);
+    if (engine->cur.unk_00 == 1) {
+        func_0208c404(engine);
+        engine->cur.unk_00 = 1;
+    } else {
+        func_0208c404(engine);
+    }
+    if ((engine->unk_08CE4 = 1) != 0) {
+        func_02084830(engine->unk_0B0E6);
+        func_02087e94(engine->unk_0B0E6, engine->text, sizeof(engine->text));
+    } else {
+        func_02086b14(engine);
+    }
+    if (engine->unk_0EE11 != 0) {
+        func_0208c690(engine);
+        return;
+    }
+    OS_CreateThread(&engine->thread, func_0208c690, engine, engine->stack + sizeof(engine->stack),
+                    sizeof(engine->stack), engine->threadPriority);
+    OS_WakeupThreadDirect(&engine->thread);
+}
+
+// The thread that synthesizes: takes the text a part at a time, makes phones and then segments of each and
+// synthesizes them, until the text ends or the engine is asked to stop. Then tells the callback, with -1 if it was
+// stopped and 0 if not.
+void func_0208c690(void *arg) {
+    Shtts *engine = arg;
+    int count;
+    ShttsUnk_01660 *list;
+    int added;
+
+    func_0208be38(engine);
+    func_02086a74(engine->text, (char **)&engine->unk_0E628);
+    while (1) {
+        if (engine->unk_0EE14 == 1) {
+            if (func_0208cc10((void *)&engine->phones[0], engine) == -1) {
+                break;
+            }
+            engine->segmentCount = 0;
+            func_0208b738(&engine->phones[1], engine->unk_01654, engine);
+            func_0208ad48(engine);
+            continue;
+        }
+        if (func_02086b90(engine->unk_00A24, engine->unk_00010, engine) == 0) {
+            break;
+        }
+        func_02086fd8(engine->unk_00A44, engine->unk_01244, engine->unk_01654);
+        func_02085b30((void *)engine->unk_01254, engine);
+        func_0208a038((void *)&engine->unk_01660, engine);
+        count = 0;
+        for (list = &engine->unk_01660; list != NULL; list = list->next) {
+            added = func_0208c8e0((void *)list, (void *)&engine->phones[count], 0x100 - count);
+            count += added;
+            if (list->next == NULL || (added != 0 && engine->phones[count].kind == 0)) {
+                func_0208cf40((void *)engine->phones, count, list->items[list->count - 1].unk_8[7], engine);
+                engine->segmentCount = 0;
+                count = 0;
+                func_0208b738(&engine->phones[1], list, engine);
+                func_020856b0(&engine->unk_0B4E8, engine->cur.chorus);
+                func_0208ad48(engine);
+                if (func_02089d4c(engine) == 1) {
+                    break;
+                }
+            }
+        }
+        if (func_02089d4c(engine) == 1) {
+            break;
+        }
+        func_0208c054(engine);
+        func_0208be38(engine);
+    }
+    if (engine->callback != NULL) {
+        if (func_02089d4c(engine) == 1) {
+            engine->callback(-1, NULL, engine->callbackArg);
+        } else {
+            engine->callback(0, NULL, engine->callbackArg);
+        }
+    }
+    engine->phoneme = 0;
+    func_02089cf4(engine);
+    engine->busy = 0;
+    func_02089d08(engine);
+    func_02089cec(engine);
 }
 
 // Writes the sounds of lists of syllables to an array, max at most, and returns how many. A syllable named "-"
@@ -3174,7 +3838,7 @@ int func_0208d500(Shtts *engine, const char *text, u32 mode, u32 unk, ShttsCallb
     if (unk > 31) {
         return -1;
     }
-    engine->unk_0EEDC = unk;
+    engine->threadPriority = unk;
     OS_LockMutex(&engine->unk_0EF08);
     if (mode == 2) {
         func_02089cf4(engine);
