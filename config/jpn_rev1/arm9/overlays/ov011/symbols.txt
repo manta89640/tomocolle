@@ -1,0 +1,43 @@
+func_ov011_02149a40 kind:function(arm,size=0xec) addr:0x02149a40
+func_ov011_02149b2c kind:function(arm,size=0x698) addr:0x02149b2c
+func_ov011_0214a1c4 kind:function(arm,size=0x244) addr:0x0214a1c4
+func_ov011_0214a408 kind:function(arm,size=0x48) addr:0x0214a408
+func_ov011_0214a450 kind:function(arm,size=0x74) addr:0x0214a450
+func_ov011_0214a4c4 kind:function(arm,size=0x8d8) addr:0x0214a4c4
+func_ov011_0214ad9c kind:function(arm,size=0x88) addr:0x0214ad9c
+func_ov011_0214ae24 kind:function(arm,size=0xd0) addr:0x0214ae24
+func_ov011_0214aef4 kind:function(arm,size=0xec) addr:0x0214aef4
+func_ov011_0214afe0 kind:function(arm,size=0x100) addr:0x0214afe0
+func_ov011_0214b0e0 kind:function(arm,size=0xb4) addr:0x0214b0e0
+func_ov011_0214b194 kind:function(arm,size=0xbc) addr:0x0214b194
+data_ov011_0214b250 kind:data(any) addr:0x0214b250
+data_ov011_0214b254 kind:data(any) addr:0x0214b254
+data_ov011_0214b270 kind:data(any) addr:0x0214b270
+data_ov011_0214b280 kind:data(any) addr:0x0214b280
+data_ov011_0214b298 kind:data(any) addr:0x0214b298
+data_ov011_0214b2c8 kind:data(any) addr:0x0214b2c8 ambiguous
+data_ov011_0214b2e4 kind:data(any) addr:0x0214b2e4
+data_ov011_0214b308 kind:data(any) addr:0x0214b308 ambiguous
+data_ov011_0214b30c kind:data(any) addr:0x0214b30c
+data_ov011_0214b310 kind:data(any) addr:0x0214b310
+data_ov011_0214b330 kind:data(any) addr:0x0214b330
+data_ov011_0214b334 kind:data(any) addr:0x0214b334
+data_ov011_0214b354 kind:data(any) addr:0x0214b354
+data_ov011_0214b358 kind:data(any) addr:0x0214b358
+data_ov011_0214b370 kind:data(any) addr:0x0214b370
+data_ov011_0214b374 kind:data(any) addr:0x0214b374
+data_ov011_0214b390 kind:data(any) addr:0x0214b390
+data_ov011_0214b3b4 kind:data(any) addr:0x0214b3b4
+data_ov011_0214b3d0 kind:data(any) addr:0x0214b3d0
+data_ov011_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
+data_ov011_0214b3e4 kind:data(any) addr:0x0214b3e4
+data_ov011_0214b3f8 kind:data(any) addr:0x0214b3f8
+data_ov011_0214b408 kind:data(any) addr:0x0214b408
+data_ov011_0214b418 kind:data(any) addr:0x0214b418
+data_ov011_0214b428 kind:data(any) addr:0x0214b428
+data_ov011_0214b43c kind:data(any) addr:0x0214b43c
+data_ov011_0214b450 kind:data(any) addr:0x0214b450
+data_ov011_0214b464 kind:data(any) addr:0x0214b464
+data_ov011_0214b468 kind:data(any) addr:0x0214b468
+data_ov011_0214b46c kind:data(any) addr:0x0214b46c
+data_ov011_0214b470 kind:data(any) addr:0x0214b470

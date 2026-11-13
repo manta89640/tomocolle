@@ -1,0 +1,35 @@
+func_ov050_02149a40 kind:function(arm,size=0x100) addr:0x02149a40
+func_ov050_02149b40 kind:function(arm,size=0x3fc) addr:0x02149b40
+func_ov050_02149f3c kind:function(arm,size=0xa8) addr:0x02149f3c
+func_ov050_02149fe4 kind:function(arm,size=0x50) addr:0x02149fe4
+func_ov050_0214a034 kind:function(arm,size=0x68) addr:0x0214a034
+func_ov050_0214a09c kind:function(arm,size=0x68) addr:0x0214a09c
+func_ov050_0214a104 kind:function(arm,size=0x68) addr:0x0214a104
+func_ov050_0214a16c kind:function(arm,size=0x130) addr:0x0214a16c
+func_ov050_0214a29c kind:function(arm,size=0x28) addr:0x0214a29c
+func_ov050_0214a2c4 kind:function(arm,size=0x24) addr:0x0214a2c4
+func_ov050_0214a2e8 kind:function(arm,size=0xb0) addr:0x0214a2e8
+func_ov050_0214a398 kind:function(arm,size=0xb8) addr:0x0214a398
+data_ov050_0214a450 kind:data(any) addr:0x0214a450
+data_ov050_0214a45c kind:data(any) addr:0x0214a45c
+data_ov050_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
+data_ov050_0214a4c4 kind:data(any) addr:0x0214a4c4
+data_ov050_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
+data_ov050_0214a4ec kind:data(any) addr:0x0214a4ec
+data_ov050_0214a4f0 kind:data(any) addr:0x0214a4f0
+data_ov050_0214a504 kind:data(any) addr:0x0214a504 ambiguous
+data_ov050_0214a508 kind:data(any) addr:0x0214a508 ambiguous
+data_ov050_0214a510 kind:data(any) addr:0x0214a510
+data_ov050_0214a514 kind:data(any) addr:0x0214a514
+data_ov050_0214a530 kind:data(any) addr:0x0214a530
+data_ov050_0214a534 kind:data(any) addr:0x0214a534
+data_ov050_0214a548 kind:data(any) addr:0x0214a548 ambiguous
+data_ov050_0214a54c kind:data(any) addr:0x0214a54c
+data_ov050_0214a55c kind:data(any) addr:0x0214a55c
+data_ov050_0214a568 kind:data(any) addr:0x0214a568 ambiguous
+data_ov050_0214a56c kind:data(any) addr:0x0214a56c
+data_ov050_0214a580 kind:data(any) addr:0x0214a580
+data_ov050_0214a588 kind:data(any) addr:0x0214a588 ambiguous
+data_ov050_0214a594 kind:data(any) addr:0x0214a594
+data_ov050_0214a598 kind:data(any) addr:0x0214a598
+data_ov050_0214a59c kind:data(any) addr:0x0214a59c

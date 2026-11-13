@@ -1,0 +1,23 @@
+# Base ROMs and everything taken from them are never committed
+*.nds
+*.sav
+/orig/*
+!/orig/README.md
+/extract/
+/build/
+arm7_bios.bin
+
+# Tools that configure.py downloads
+/tools/bin/
+
+# Written by configure.py and ninja
+/build.ninja
+/.ninja_deps
+/.ninja_log
+/.ninja_lock
+/objdiff.json
+
+__pycache__/
+.venv/
+.vscode/
+.DS_Store
