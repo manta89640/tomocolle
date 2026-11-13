@@ -6,470 +6,470 @@
     .data       start:0x020fc500 end:0x02115480 kind:data align:32
     .bss        start:0x02115480 end:0x02149a40 kind:bss align:32
 
-lib/NitroSDK/os/os_cache.c:
+lib/NitroSDK/libraries/os/src/os_cache.c:
     .text       start:0x02007ff4 end:0x02008114
 
-lib/NitroSDK/init/crt0.c:
+lib/NitroSDK/libraries/init/src/crt0.c:
     .text       start:0x02000800 end:0x02000b9c
 
-lib/NitroSDK/fx/fx_mtx22.c:
+lib/NitroSDK/libraries/fx/src/fx_mtx22.c:
     .text       start:0x020011c0 end:0x0200134c
 
-lib/NitroSDK/fx/fx_mtx33.c:
+lib/NitroSDK/libraries/fx/src/fx_mtx33.c:
     .text       start:0x0200134c end:0x02001874
 
-lib/NitroSDK/fx/fx_mtx43.c:
+lib/NitroSDK/libraries/fx/src/fx_mtx43.c:
     .text       start:0x02001874 end:0x0200222c
 
-lib/NitroSDK/fx/fx_mtx44.c:
+lib/NitroSDK/libraries/fx/src/fx_mtx44.c:
     .text       start:0x0200222c end:0x02002c44
 
-lib/NitroSDK/fx/fx_cp.c:
+lib/NitroSDK/libraries/fx/src/fx_cp.c:
     .text       start:0x02002c44 end:0x02002da4
 
-lib/NitroSDK/fx/fx_vec.c:
+lib/NitroSDK/libraries/fx/src/fx_vec.c:
     .text       start:0x02002da4 end:0x020032f4
 
-lib/NitroSDK/fx/fx_atanidx.c:
+lib/NitroSDK/libraries/fx/src/fx_atanidx.c:
     .text       start:0x020032f4 end:0x0200349c
 
-lib/NitroSDK/gx/gx.c:
+lib/NitroSDK/libraries/gx/src/gx.c:
     .text       start:0x020034a0 end:0x02003750
 
-lib/NitroSDK/gx/gxstate.c:
+lib/NitroSDK/libraries/gx/src/gxstate.c:
     .text       start:0x02003750 end:0x020037b0
 
-lib/NitroSDK/gx/gx_vramcnt.c:
+lib/NitroSDK/libraries/gx/src/gx_vramcnt.c:
     .text       start:0x020037b0 end:0x0200473c
 
-lib/NitroSDK/gx/gx_bgcnt.c:
+lib/NitroSDK/libraries/gx/src/gx_bgcnt.c:
     .text       start:0x0200475c end:0x02004bcc
 
-lib/NitroSDK/gx/g2.c:
+lib/NitroSDK/libraries/gx/src/g2.c:
     .text       start:0x02004bcc end:0x02004cc0
 
-lib/NitroSDK/gx/g3c.c:
+lib/NitroSDK/libraries/gx/src/g3c.c:
     .text       start:0x02004d08 end:0x02005124
 
-lib/NitroSDK/gx/g3imm.c:
+lib/NitroSDK/libraries/gx/src/g3imm.c:
     .text       start:0x02005168 end:0x020051bc
 
-lib/NitroSDK/gx/g3x.c:
+lib/NitroSDK/libraries/gx/src/g3x.c:
     .text       start:0x020051bc end:0x020056b8
 
-lib/NitroSDK/gx/g3_util.c:
+lib/NitroSDK/libraries/gx/src/g3_util.c:
     .text       start:0x020056b8 end:0x020056f4
 
-lib/NitroSDK/gx/gx_load2d.c:
+lib/NitroSDK/libraries/gx/src/gx_load2d.c:
     .text       start:0x020056f4 end:0x02006374
 
-lib/NitroSDK/gx/gx_load3d.c:
+lib/NitroSDK/libraries/gx/src/gx_load3d.c:
     .text       start:0x02006374 end:0x020067e8
 
-lib/NitroSDK/gx/g3.c:
+lib/NitroSDK/libraries/gx/src/g3.c:
     .text       start:0x020067e8 end:0x020068b4
 
-lib/NitroSDK/gx/gxasm.c:
+lib/NitroSDK/libraries/gx/src/gxasm.c:
     .text       start:0x020068b4 end:0x020068d8
 
-lib/NitroSDK/os/os_irqHandler.c:
+lib/NitroSDK/libraries/os/src/os_irqHandler.c:
     .text       start:0x020068d8 end:0x0200694c
 
-lib/NitroSDK/os/os_irqTable.c:
+lib/NitroSDK/libraries/os/src/os_irqTable.c:
     .text       start:0x02006950 end:0x020069d8
 
-lib/NitroSDK/os/os_interrupt.c:
+lib/NitroSDK/libraries/os/src/os_interrupt.c:
     .text       start:0x02006a70 end:0x02006d00
 
-lib/NitroSDK/os/os_spinLock.c:
+lib/NitroSDK/libraries/os/src/os_spinLock.c:
     .text       start:0x02006d00 end:0x020070b4
 
-lib/NitroSDK/os/os_thread.c:
+lib/NitroSDK/libraries/os/src/os_thread.c:
     .text       start:0x020070b4 end:0x02007ad4
 
-lib/NitroSDK/os/os_context.c:
+lib/NitroSDK/libraries/os/src/os_context.c:
     .text       start:0x02007ad4 end:0x02007be8
 
-lib/NitroSDK/os/os_emulator.c:
+lib/NitroSDK/libraries/os/src/os_emulator.c:
     .text       start:0x02007be8 end:0x02007c08
 
-lib/NitroSDK/os/os_message.c:
+lib/NitroSDK/libraries/os/src/os_message.c:
     .text       start:0x02007c08 end:0x02007e04
 
-lib/NitroSDK/os/os_mutex.c:
+lib/NitroSDK/libraries/os/src/os_mutex.c:
     .text       start:0x02007e04 end:0x02007ff4
 
-lib/NitroSDK/os/os_init.c:
+lib/NitroSDK/libraries/os/src/os_init.c:
     .text       start:0x02008114 end:0x02008134
 
-lib/NitroSDK/os/os_arena.c:
+lib/NitroSDK/libraries/os/src/os_arena.c:
     .text       start:0x0200817c end:0x02008534
 
-lib/NitroSDK/os/os_tcm.c:
+lib/NitroSDK/libraries/os/src/os_tcm.c:
     .text       start:0x02008534 end:0x02008548
 
-lib/NitroSDK/os/os_protectionUnit.c:
+lib/NitroSDK/libraries/os/src/os_protectionUnit.c:
     .text       start:0x02008548 end:0x02008568
 
-lib/NitroSDK/os/os_protectionRegion.c:
+lib/NitroSDK/libraries/os/src/os_protectionRegion.c:
     .text       start:0x02008568 end:0x0200858c
 
-lib/NitroSDK/os/os_exception.c:
+lib/NitroSDK/libraries/os/src/os_exception.c:
     .text       start:0x0200858c end:0x020087a0
 
-lib/NitroSDK/os/os_timer.c:
+lib/NitroSDK/libraries/os/src/os_timer.c:
     .text       start:0x020087a0 end:0x020087bc
 
-lib/NitroSDK/os/os_tick.c:
+lib/NitroSDK/libraries/os/src/os_tick.c:
     .text       start:0x020087bc end:0x0200893c
 
-lib/NitroSDK/os/os_alarm.c:
+lib/NitroSDK/libraries/os/src/os_alarm.c:
     .text       start:0x0200893c end:0x02008d38
 
-lib/NitroSDK/os/os_valarm.c:
+lib/NitroSDK/libraries/os/src/os_valarm.c:
     .text       start:0x02008d38 end:0x02008d80
 
-lib/NitroSDK/os/os_system.c:
+lib/NitroSDK/libraries/os/src/os_system.c:
     .text       start:0x02008d80 end:0x02008e10
 
-lib/NitroSDK/os/os_reset.c:
+lib/NitroSDK/libraries/os/src/os_reset.c:
     .text       start:0x02008e2c end:0x02008eb4
 
-lib/NitroSDK/os/os_ownerInfo.c:
+lib/NitroSDK/libraries/os/src/os_ownerInfo.c:
     .text       start:0x02008eb4 end:0x02008f54
 
-lib/NitroSDK/os/os_vramExclusive.c:
+lib/NitroSDK/libraries/os/src/os_vramExclusive.c:
     .text       start:0x02008f74 end:0x02009038
 
-lib/NitroSDK/os/os_terminate_proc.c:
+lib/NitroSDK/libraries/os/src/os_terminate_proc.c:
     .text       start:0x02009038 end:0x02009054
 
-lib/NitroSDK/mi/mi_dma.c:
+lib/NitroSDK/libraries/mi/src/mi_dma.c:
     .text       start:0x02009064 end:0x02009500
 
-lib/NitroSDK/mi/mi_dma_gxcommand.c:
+lib/NitroSDK/libraries/mi/src/mi_dma_gxcommand.c:
     .text       start:0x02009500 end:0x020097e8
 
-lib/NitroSDK/mi/mi_memory.c:
+lib/NitroSDK/libraries/mi/src/mi_memory.c:
     .text       start:0x020097e8 end:0x02009c30
 
-lib/NitroSDK/mi/mi_swap.c:
+lib/NitroSDK/libraries/mi/src/mi_swap.c:
     .text       start:0x02009c30 end:0x02009c38
 
-lib/NitroSDK/mi/mi_uncompress.c:
+lib/NitroSDK/libraries/mi/src/mi_uncompress.c:
     .text       start:0x02009c38 end:0x02009efc
 
-lib/NitroSDK/mi/mi_dma_card.c:
+lib/NitroSDK/libraries/mi/src/mi_dma_card.c:
     .text       start:0x02009efc end:0x02009f70
 
-lib/NitroSDK/snd/snd_interface.c:
+lib/NitroSDK/libraries/snd/src/snd_interface.c:
     .text       start:0x02009f88 end:0x0200a424
 
-lib/NitroSDK/snd/snd_main.c:
+lib/NitroSDK/libraries/snd/src/snd_main.c:
     .text       start:0x0200a424 end:0x0200a484
 
-lib/NitroSDK/snd/snd_command.c:
+lib/NitroSDK/libraries/snd/src/snd_command.c:
     .text       start:0x0200a484 end:0x0200ab94
 
-lib/NitroSDK/snd/snd_alarm.c:
+lib/NitroSDK/libraries/snd/src/snd_alarm.c:
     .text       start:0x0200ab94 end:0x0200ac58
 
-lib/NitroSDK/snd/snd_work.c:
+lib/NitroSDK/libraries/snd/src/snd_work.c:
     .text       start:0x0200ac58 end:0x0200add8
 
-lib/NitroSDK/snd/snd_util.c:
+lib/NitroSDK/libraries/snd/src/snd_util.c:
     .text       start:0x0200add8 end:0x0200ae48
 
-lib/NitroSDK/snd/snd_bank.c:
+lib/NitroSDK/libraries/snd/src/snd_bank.c:
     .text       start:0x0200ae48 end:0x0200b23c
 
-lib/NitroSDK/pxi/pxi_init.c:
+lib/NitroSDK/libraries/pxi/src/pxi_init.c:
     .text       start:0x0200b23c end:0x0200b248
 
-lib/NitroSDK/pxi/pxi_fifo.c:
+lib/NitroSDK/libraries/pxi/src/pxi_fifo.c:
     .text       start:0x0200b248 end:0x0200b558
 
-lib/NitroSDK/fs/fs_command.c:
+lib/NitroSDK/libraries/fs/src/fs_command.c:
     .text       start:0x0200b558 end:0x0200b744
 
-lib/NitroSDK/fs/fs_command_default.c:
+lib/NitroSDK/libraries/fs/src/fs_command_default.c:
     .text       start:0x0200b744 end:0x0200c0dc
 
-lib/NitroSDK/fs/fs_archive.c:
+lib/NitroSDK/libraries/fs/src/fs_archive.c:
     .text       start:0x0200c0e4 end:0x0200cbc8
 
-lib/NitroSDK/fs/fs_file.c:
+lib/NitroSDK/libraries/fs/src/fs_file.c:
     .text       start:0x0200cbc8 end:0x0200d0d8
 
-lib/NitroSDK/fs/fs_rom.c:
+lib/NitroSDK/libraries/fs/src/fs_rom.c:
     .text       start:0x0200d0d8 end:0x0200d310
 
-lib/NitroSDK/fs/fs_overlay.c:
+lib/NitroSDK/libraries/fs/src/fs_overlay.c:
     .text       start:0x0200d330 end:0x0200d95c
 
-lib/NitroSDK/cp/cp_context.c:
+lib/NitroSDK/libraries/cp/src/cp_context.c:
     .text       start:0x0200e1dc end:0x0200e258
 
-lib/NitroSDK/spi/tp.c:
+lib/NitroSDK/libraries/spi/src/tp.c:
     .text       start:0x0200e258 end:0x0200ec7c
 
-lib/NitroSDK/spi/pm.c:
+lib/NitroSDK/libraries/spi/src/pm.c:
     .text       start:0x0200eca8 end:0x0200f5dc
 
-lib/NitroSDK/rtc/external.c:
+lib/NitroSDK/libraries/rtc/src/external.c:
     .text       start:0x0200f668 end:0x0200fe1c
 
-lib/NitroSDK/rtc/internal.c:
+lib/NitroSDK/libraries/rtc/src/internal.c:
     .text       start:0x0200fe1c end:0x0200fe74
 
-lib/NitroSDK/rtc/convert.c:
+lib/NitroSDK/libraries/rtc/src/convert.c:
     .text       start:0x0200fe74 end:0x0201024c
 
-lib/NitroSDK/card/card_common.c:
+lib/NitroSDK/libraries/card/src/card_common.c:
     .text       start:0x0201024c end:0x02010594
 
-lib/NitroSDK/card/card_backup.c:
+lib/NitroSDK/libraries/card/src/card_backup.c:
     .text       start:0x02010950 end:0x02010d74
 
-lib/NitroSDK/card/card_rom.c:
+lib/NitroSDK/libraries/card/src/card_rom.c:
     .text       start:0x02010d8c end:0x02011480
 
-lib/NitroSDK/card/card_request.c:
+lib/NitroSDK/libraries/card/src/card_request.c:
     .text       start:0x02011480 end:0x02011658
 
-lib/NitroSDK/card/card_pullOut.c:
+lib/NitroSDK/libraries/card/src/card_pullOut.c:
     .text       start:0x02011658 end:0x02011834
 
-lib/NitroSDK/wm/wm_system.c:
+lib/NitroSDK/libraries/wm/src/wm_system.c:
     .text       start:0x02011834 end:0x02012170
 
-lib/NitroSDK/wm/wm_sync.c:
+lib/NitroSDK/libraries/wm/src/wm_sync.c:
     .text       start:0x02012170 end:0x02012604
 
-lib/NitroSDK/wm/wm_standard.c:
+lib/NitroSDK/libraries/wm/src/wm_standard.c:
     .text       start:0x02012614 end:0x02012cf4
 
-lib/NitroSDK/wm/wm_mp.c:
+lib/NitroSDK/libraries/wm/src/wm_mp.c:
     .text       start:0x02012cf4 end:0x0201306c
 
-lib/NitroSDK/wm/wm_ds.c:
+lib/NitroSDK/libraries/wm/src/wm_ds.c:
     .text       start:0x0201306c end:0x02013850
 
-lib/NitroSDK/wm/wm_etc.c:
+lib/NitroSDK/libraries/wm/src/wm_etc.c:
     .text       start:0x02013878 end:0x020139b0
 
-lib/NitroSDK/ctrdg/ctrdg.c:
+lib/NitroSDK/libraries/ctrdg/src/ctrdg.c:
     .text       start:0x020139b0 end:0x02013cc8
 
-lib/NitroSDK/ctrdg/ctrdg_proc.c:
+lib/NitroSDK/libraries/ctrdg/src/ctrdg_proc.c:
     .text       start:0x02013cc8 end:0x02014020
 
-lib/NitroSDK/ctrdg/ctrdg_task.c:
+lib/NitroSDK/libraries/ctrdg/src/ctrdg_task.c:
     .text       start:0x02014020 end:0x020141b0
 
-lib/NitroSDK/math/math.c:
+lib/NitroSDK/libraries/math/src/math.c:
     .text       start:0x020141b0 end:0x020141f4
 
-lib/NitroSDK/std/std_string.c:
+lib/NitroSDK/libraries/std/src/std_string.c:
     .text       start:0x0201457c end:0x020145d8
 
-lib/NitroSDK/std/std_unicode.c:
+lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
 
-lib/NitroSystem/snd/main.c:
+lib/NitroSystem/libraries/snd/src/main.c:
     .text       start:0x02053c64 end:0x02053d80
 
-lib/NitroSystem/snd/resource_mgr.c:
+lib/NitroSystem/libraries/snd/src/resource_mgr.c:
     .text       start:0x02053d80 end:0x02053e98
 
-lib/NitroSystem/snd/waveout.c:
+lib/NitroSystem/libraries/snd/src/waveout.c:
     .text       start:0x02053e98 end:0x020540ac
 
-lib/NitroSystem/snd/player.c:
+lib/NitroSystem/libraries/snd/src/player.c:
     .text       start:0x020540ac end:0x02054b74
 
-lib/NitroSystem/snd/stream.c:
+lib/NitroSystem/libraries/snd/src/stream.c:
     .text       start:0x02054b74 end:0x02055194
 
-lib/NitroSystem/snd/capture.c:
+lib/NitroSystem/libraries/snd/src/capture.c:
     .text       start:0x02055194 end:0x02055408
 
-lib/NitroSystem/snd/sndarc.c:
+lib/NitroSystem/libraries/snd/src/sndarc.c:
     .text       start:0x02055408 end:0x02055ba4
 
-lib/NitroSystem/snd/heap.c:
+lib/NitroSystem/libraries/snd/src/heap.c:
     .text       start:0x02055ba4 end:0x02055f1c
 
-lib/NitroSystem/snd/sndarc_loader.c:
+lib/NitroSystem/libraries/snd/src/sndarc_loader.c:
     .text       start:0x02055f34 end:0x02056910
 
-lib/NitroSystem/snd/sndarc_player.c:
+lib/NitroSystem/libraries/snd/src/sndarc_player.c:
     .text       start:0x02056910 end:0x02056c34
 
-lib/NitroSystem/snd/sndarc_stream.c:
+lib/NitroSystem/libraries/snd/src/sndarc_stream.c:
     .text       start:0x02056c34 end:0x020583d0
 
-lib/NitroSystem/snd/seqdata.c:
+lib/NitroSystem/libraries/snd/src/seqdata.c:
     .text       start:0x020583d0 end:0x02058410
 
-lib/NitroSystem/snd/fader.c:
+lib/NitroSystem/libraries/snd/src/fader.c:
     .text       start:0x02058410 end:0x020584b4
 
-lib/NitroSystem/fnd/list.c:
+lib/NitroSystem/libraries/fnd/src/list.c:
     .text       start:0x020584b4 end:0x0205868c
 
-lib/NitroSystem/fnd/heapcommon.c:
+lib/NitroSystem/libraries/fnd/src/heapcommon.c:
     .text       start:0x0205868c end:0x020587b0
 
-lib/NitroSystem/fnd/expheap.c:
+lib/NitroSystem/libraries/fnd/src/expheap.c:
     .text       start:0x020587b0 end:0x02058d4c
 
-lib/NitroSystem/fnd/frameheap.c:
+lib/NitroSystem/libraries/fnd/src/frameheap.c:
     .text       start:0x02058d4c end:0x02058fcc
 
-lib/NitroSystem/fnd/archive.c:
+lib/NitroSystem/libraries/fnd/src/archive.c:
     .text       start:0x02058fcc end:0x020591fc
 
-lib/NitroSystem/g2d/load/g2d_NAN_load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_NAN_load.c:
     .text       start:0x020591fc end:0x02059394
 
-lib/NitroSystem/g2d/load/g2d_NOB_load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_NOB_load.c:
     .text       start:0x020593ac end:0x020594dc
 
-lib/NitroSystem/g2d/load/g2d_NCL_load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_NCL_load.c:
     .text       start:0x02059528 end:0x02059574
 
-lib/NitroSystem/g2d/load/g2d_NSC_load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_NSC_load.c:
     .text       start:0x02059574 end:0x020595a8
 
-lib/NitroSystem/g2d/load/g2d_Load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_Load.c:
     .text       start:0x020595a8 end:0x02059638
 
-lib/NitroSystem/g2d/g2d_Animation.c:
+lib/NitroSystem/libraries/g2d/src/g2d_Animation.c:
     .text       start:0x02059638 end:0x02059a50
 
-lib/NitroSystem/g2d/g2d_OAM.c:
+lib/NitroSystem/libraries/g2d/src/g2d_OAM.c:
     .text       start:0x02059a74 end:0x0205a150
 
-lib/NitroSystem/g2d/g2d_OAMEx.c:
+lib/NitroSystem/libraries/g2d/src/g2d_OAMEx.c:
     .text       start:0x0205a150 end:0x0205a7e8
 
-lib/NitroSystem/g2d/g2d_PaletteTable.c:
+lib/NitroSystem/libraries/g2d/src/g2d_PaletteTable.c:
     .text       start:0x0205a7e8 end:0x0205a7f4
 
-lib/NitroSystem/g2d/g2d_Image.c:
+lib/NitroSystem/libraries/g2d/src/g2d_Image.c:
     .text       start:0x0205a810 end:0x0205a9c0
 
-lib/NitroSystem/g2d/g2d_SRTControl.c:
+lib/NitroSystem/libraries/g2d/src/g2d_SRTControl.c:
     .text       start:0x0205a9c0 end:0x0205aa5c
 
-lib/NitroSystem/g2d/g2d_CellAnimation.c:
+lib/NitroSystem/libraries/g2d/src/g2d_CellAnimation.c:
     .text       start:0x0205aa5c end:0x0205aba0
 
-lib/NitroSystem/g2d/g2d_Renderer.c:
+lib/NitroSystem/libraries/g2d/src/g2d_Renderer.c:
     .text       start:0x0205abe0 end:0x0205c024
 
-lib/NitroSystem/g2d/internal/g2di_Mtx32.c:
+lib/NitroSystem/libraries/g2d/src/internal/g2di_Mtx32.c:
     .text       start:0x0205c030 end:0x0205c154
 
-lib/NitroSystem/g2d/g2d_CellTransferManager.c:
+lib/NitroSystem/libraries/g2d/src/g2d_CellTransferManager.c:
     .text       start:0x0205c154 end:0x0205c190
 
-lib/NitroSystem/g2d/g2d_OamSoftwareSpriteDraw.c:
+lib/NitroSystem/libraries/g2d/src/g2d_OamSoftwareSpriteDraw.c:
     .text       start:0x0205c190 end:0x0205c68c
 
-lib/NitroSystem/g2d/g2d_Screen.c:
+lib/NitroSystem/libraries/g2d/src/g2d_Screen.c:
     .text       start:0x0205c68c end:0x0205d3f4
 
-lib/NitroSystem/g2d/g2d_RendererCore.c:
+lib/NitroSystem/libraries/g2d/src/g2d_RendererCore.c:
     .text       start:0x0205d3f4 end:0x0205e224
 
-lib/NitroSystem/g2d/g2d_Font.c:
+lib/NitroSystem/libraries/g2d/src/g2d_Font.c:
     .text       start:0x0205e224 end:0x0205e53c
 
-lib/NitroSystem/g2d/g2d_CharCanvas.c:
+lib/NitroSystem/libraries/g2d/src/g2d_CharCanvas.c:
     .text       start:0x0205e53c end:0x0205f7d4
 
-lib/NitroSystem/g2d/g2d_TextCanvas.c:
+lib/NitroSystem/libraries/g2d/src/g2d_TextCanvas.c:
     .text       start:0x0205f7d4 end:0x0205fb14
 
-lib/NitroSystem/g2d/load/g2d_NFT_load.c:
+lib/NitroSystem/libraries/g2d/src/load/g2d_NFT_load.c:
     .text       start:0x0205fb14 end:0x0205fd44
 
-lib/NitroSystem/g2d/internal/g2di_BitReader.c:
+lib/NitroSystem/libraries/g2d/src/internal/g2di_BitReader.c:
     .text       start:0x0205fd44 end:0x0205fda4
 
-lib/NitroSystem/g2d/internal/g2di_BGManipulator.c:
+lib/NitroSystem/libraries/g2d/src/internal/g2di_BGManipulator.c:
     .text       start:0x0205fdb8 end:0x0205fe50
 
-lib/NitroSystem/gfd/VramManager/gfd_FrameTexVramMan.c:
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_FrameTexVramMan.c:
     .text       start:0x0205fe70 end:0x0205ff3c
 
-lib/NitroSystem/gfd/VramTransferMan/gfd_VramTransferManager.c:
+lib/NitroSystem/libraries/gfd/src/VramTransferMan/gfd_VramTransferManager.c:
     .text       start:0x0205ff74 end:0x0206042c
 
-lib/NitroSystem/gfd/VramManager/gfdi_LinkedListVramMan_Common.c:
+lib/NitroSystem/libraries/gfd/src/VramManager/gfdi_LinkedListVramMan_Common.c:
     .text       start:0x0206042c end:0x02060890
 
-lib/NitroSystem/gfd/VramManager/gfd_LinkedListTexVramMan.c:
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_LinkedListTexVramMan.c:
     .text       start:0x02060890 end:0x02060c1c
 
-lib/NitroSystem/gfd/VramManager/gfd_LinkedListPlttVramMan.c:
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_LinkedListPlttVramMan.c:
     .text       start:0x02060c38 end:0x02060df8
 
-lib/NitroSystem/g3d/kernel.c:
+lib/NitroSystem/libraries/g3d/src/kernel.c:
     .text       start:0x02060df8 end:0x02061ae4
 
-lib/NitroSystem/g3d/glbstate.c:
+lib/NitroSystem/libraries/g3d/src/glbstate.c:
     .text       start:0x02061ae4 end:0x020621d0
 
-lib/NitroSystem/g3d/anm.c:
+lib/NitroSystem/libraries/g3d/src/anm.c:
     .text       start:0x020621d0 end:0x02062720
 
-lib/NitroSystem/g3d/sbc.c:
+lib/NitroSystem/libraries/g3d/src/sbc.c:
     .text       start:0x02062720 end:0x02064df4
 
-lib/NitroSystem/g3d/gecom.c:
+lib/NitroSystem/libraries/g3d/src/gecom.c:
     .text       start:0x02064df4 end:0x0206500c
 
-lib/NitroSystem/g3d/util.c:
+lib/NitroSystem/libraries/g3d/src/util.c:
     .text       start:0x0206500c end:0x02065614
 
-lib/NitroSystem/g3d/model.c:
+lib/NitroSystem/libraries/g3d/src/model.c:
     .text       start:0x02065614 end:0x0206597c
 
-lib/NitroSystem/g3d/binres/res_struct_accessor.c:
+lib/NitroSystem/libraries/g3d/src/binres/res_struct_accessor.c:
     .text       start:0x02065b3c end:0x02065eb4
 
-lib/NitroSystem/g3d/binres/res_struct_accessor_anm.c:
+lib/NitroSystem/libraries/g3d/src/binres/res_struct_accessor_anm.c:
     .text       start:0x02065eb4 end:0x02066010
 
-lib/NitroSystem/g3d/anm/nsbca.c:
+lib/NitroSystem/libraries/g3d/src/anm/nsbca.c:
     .text       start:0x02066010 end:0x02067630
 
-lib/NitroSystem/g3d/anm/nsbma.c:
+lib/NitroSystem/libraries/g3d/src/anm/nsbma.c:
     .text       start:0x02067630 end:0x02067a48
 
-lib/NitroSystem/g3d/anm/nsbta.c:
+lib/NitroSystem/libraries/g3d/src/anm/nsbta.c:
     .text       start:0x02067a48 end:0x02067e6c
 
-lib/NitroSystem/g3d/anm/nsbtp.c:
+lib/NitroSystem/libraries/g3d/src/anm/nsbtp.c:
     .text       start:0x02067e6c end:0x020680fc
 
-lib/NitroSystem/g3d/anm/nsbva.c:
+lib/NitroSystem/libraries/g3d/src/anm/nsbva.c:
     .text       start:0x020680fc end:0x02068180
 
-lib/NitroSystem/g3d/cgtool/basic.c:
+lib/NitroSystem/libraries/g3d/src/cgtool/basic.c:
     .text       start:0x02068180 end:0x0206823c
 
-lib/NitroSystem/g3d/cgtool/maya.c:
+lib/NitroSystem/libraries/g3d/src/cgtool/maya.c:
     .text       start:0x0206823c end:0x020688c8
 
-lib/NitroSystem/g3d/cgtool/si3d.c:
+lib/NitroSystem/libraries/g3d/src/cgtool/si3d.c:
     .text       start:0x02068a34 end:0x02068f48
 
-lib/NitroSystem/g3d/cgtool/3dsmax.c:
+lib/NitroSystem/libraries/g3d/src/cgtool/3dsmax.c:
     .text       start:0x02068f48 end:0x02069420
 
-lib/NitroSystem/g3d/cgtool/xsi.c:
+lib/NitroSystem/libraries/g3d/src/cgtool/xsi.c:
     .text       start:0x0206958c end:0x02069bf4

@@ -103,6 +103,9 @@ def main() -> int:
             origin = ORIGINS.get(Path(source).parts[0])
             if origin:
                 categories.append(origin)
+            if origin == "libs":
+                # A scratch is for writing code, and it would be set up with the game's compiler, not the library's
+                unit.pop("scratch", None)
             if not Path(source).exists():
                 for key in ("base_path", "scratch"):
                     unit.pop(key, None)

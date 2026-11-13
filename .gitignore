@@ -10,6 +10,10 @@ arm7_bios.bin
 # Tools that configure.py downloads
 /tools/bin/
 
+# Sources of the SDK that configure.py fetches
+/lib/NitroSDK/
+/lib/NitroSystem/
+
 # Written by configure.py and ninja
 /build.ninja
 /.ninja_deps

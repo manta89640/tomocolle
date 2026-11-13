@@ -20,8 +20,11 @@ Give each library as NAME=PATH, where PATH is a directory of .o files (searched 
 
 Without --apply it only reports. With it, it renames the symbols in symbols.txt that have no name yet, and with
 --units it also cuts each object's range of functions out of the main program as a unit, under lib/NAME/. A unit is
-named after its source file. Meson names an object after its source with the slashes replaced ("src_load_a.c.o"),
-so give the library's sources as well, with --sources NAME=PATH, for the path to be told from the name.
+named after its source file, so that the build compiles that file once it is there. Meson names an object after its
+source with the slashes replaced ("src_load_a.c.o"), so give the library's sources as well, with --sources NAME=PATH,
+laid out as the objects are, for the path to be told from the name:
+
+  tools/match_objects.py NitroSDK=~/pokeplatinum/build/subprojects/NitroSDK-4.2.30001 --sources NitroSDK=lib/NitroSDK
 """
 import argparse
 import collections
@@ -222,7 +225,7 @@ def source_of(library: str, path: str, source_roots: dict[str, str]) -> str | No
         for candidate in base.rglob(f"*{Path(mangled).suffix}"):
             relative = candidate.relative_to(base).as_posix()
             if relative.replace("/", "_") == mangled:
-                return (directory / relative.removeprefix("src/")).as_posix()
+                return (directory / relative).as_posix()
     return (directory / mangled.removeprefix("src_")).as_posix()
 
 

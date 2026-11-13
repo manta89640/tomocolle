@@ -20,17 +20,19 @@ together by the original linker, and every module comes out identical. That is t
 piece of it can now be replaced by source, and the build says at once whether the result still matches.
 
 Of the game's 7,356 functions (1.96 MB of code), 1,293 are identified as code of the SDK, NitroSystem and the
-compiler's library, named, and split into 155 files, and the first six of the game's own are decompiled. See
+compiler's library, and named. The SDK and NitroSystem ones are split into 155 files and built from source, and
+1,148 of them match. Of the game's own code, the first six functions are decompiled. See
 [ByteMatch](https://bytematch.dev/manta89640/tomocolle) for the current numbers.
 
 ## Building
 
-You need Python 3.11 or later, [ninja](https://ninja-build.org), and on macOS [wine](https://www.winehq.org)
+You need Python 3.11 or later, git, [ninja](https://ninja-build.org), and on macOS [wine](https://www.winehq.org)
 (`brew install --cask wine-stable`), which runs the compiler. Linux needs nothing more: the build downloads
 [wibo](https://github.com/decompals/wibo) for that.
 
 1. Put your ROM at `orig/baserom_jpn_rev1.nds`, see [orig/README.md](orig/README.md).
-2. Configure, which downloads the tools into `tools/bin/` and checks each against its pinned SHA-256:
+2. Configure, which downloads the tools into `tools/bin/`, checking each against its pinned SHA-256, and fetches
+   the sources of the SDK into `lib/` at pinned commits (see below):
    ```sh
    python3 configure.py
    ```
@@ -54,6 +56,14 @@ the original.
 Without the DS's ARM7 BIOS the built ROM differs from the original in four bytes of its header, a checksum of the
 encrypted secure area, and the build says so. With your own dump of the BIOS as `arm7_bios.bin` in this directory, the
 ROM is identical.
+
+## Library code
+
+Part of the game is Nintendo's SDK (NitroSDK and NitroSystem), which other projects have already decompiled. Those
+sources are not copied here. `configure.py` fetches [ntrtwl/NitroSDK](https://github.com/ntrtwl/NitroSDK) and
+[ntrtwl/NitroSystem](https://github.com/ntrtwl/NitroSystem) at pinned commits, and the build compiles the files of
+theirs that the game links, each with the compiler and flags its library was built with. Their code counts as matched
+where it comes out identical to the game's. `python3 configure.py --no-libraries` leaves them out.
 
 ## Decompiling
 

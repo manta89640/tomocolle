@@ -15,6 +15,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tarfile
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -70,14 +71,33 @@ SJISWRAP_SHA256 = "01d50fa1148cfc3c3b16658c6c9b1c0d9f5324cde79ed6c09ef8353af9d63
 
 # The archive holds every mwccarm version and is updated in place, so the executables are what is pinned.
 MWCCARM_URL = "https://decomp.aetias.com/files/mwccarm.zip"
-# CodeWarrior for NDS 2.0 SP2 patch 2, which reports itself as "Version 3.0 build 137". See docs/binary.md for why.
+# The game's compiler: CodeWarrior for NDS 2.0 SP2 patch 2, which reports itself as "Version 3.0 build 137". See
+# docs/binary.md for why.
 MWCC_VERSION = "2.0/sp2p2"
+# SHA-256 of mwccarm.exe of each version in use: the game's, and those the libraries were built with
 MWCC_SHA256 = {
-    "mwccarm.exe": "b1da5a2f191d1cdea3fd078cedc9c504de46609642ae8e44c015014cef5419a7",
-    "mwldarm.exe": "a41aea5f282041e16dcd6c3570328009cb1eefb32b0cd05f60a8fdb365aec47c",
+    "2.0/sp2p2": "b1da5a2f191d1cdea3fd078cedc9c504de46609642ae8e44c015014cef5419a7",
+    "2.0/sp1p2": "e66b7495f596d18f8fcc82cdfc3a4af77f15790d96f1aace93e4502ff439a87a",
+    "2.0/sp2": "3d97f6ed0a43d131173fc3b15cd3442f38d85fc6059b3fa709139be70fe8532e",
 }
+MWLD_SHA256 = "a41aea5f282041e16dcd6c3570328009cb1eefb32b0cd05f60a8fdb365aec47c"
 # The same compiler's name on decomp.me, for objdiff's "create scratch" button
 DECOMP_ME_COMPILER = "mwcc_30_137"
+
+# The headers of MSL, the C library that came with each CodeWarrior, which the SDK's headers include. They are taken
+# from metroskrew's package of the toolchain, the only part of it used here.
+METROSKREW_VERSION = "0.1.3"
+METROSKREW_URL = "https://github.com/mid-kid/metroskrew/releases/download/{version}/metroskrew-wine.tar.xz"
+METROSKREW_SHA256 = "0bc5663dc647e7834dc61c37e872ef37a4dfbb7384828c6b2212bce35719fa32"
+MSL_INCLUDE_DIRS = [
+    "MSL_C/MSL_ARM/Include",
+    "MSL_C/MSL_Common/Include",
+    "MSL_C/MSL_Common_Embedded/Math/Include",
+    "MSL_C++/MSL_ARM/Include",
+    "MSL_C++/MSL_Common/Include",
+    "MSL_Extras/MSL_Common/Include",
+    "MSL_Extras/MSL_ARM/Include",
+]
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Compiler and linker flags
@@ -120,6 +140,64 @@ LD_FLAGS = [
 
 INCLUDE_DIRS = ["include"]
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Libraries
+# ---------------------------------------------------------------------------------------------------------------------
+# The game links Nintendo's SDK, whose code is not the game's own and is decompiled elsewhere. Those sources are not
+# kept here: configure.py fetches each repository at a pinned commit into its directory, which git ignores. A file of
+# theirs is built once a delinks.txt names it, like any other, with the compiler and flags of its library below.
+FETCHED = {
+    "lib/NitroSDK": ("https://github.com/ntrtwl/NitroSDK.git", "e6fbeba60332e660639ad664eda2dc85c0e14649"),
+    "lib/NitroSystem": ("https://github.com/ntrtwl/NitroSystem.git", "21c8fd078fdda34f3c2622ef0751d00adaacf890"),
+}
+
+# These are the flags that the Pokemon Platinum decompilation builds the same sources with, and matches its ROM
+SDK_FLAGS = [
+    "-O4,p",
+    "-proc arm946e",
+    "-enum int",
+    "-lang c99",
+    "-Cpp_exceptions off",
+    "-gccext,on",
+    "-msgstyle gcc",
+    "-ipa file",
+    "-interworking",
+    "-inline on,noauto",
+    "-char signed",
+    "-nosyspath",
+    "-stdinc",
+    "-sym on",
+    "-gccinc",
+    "-warnings off",
+    "-nolink",
+]
+SDK_DEFINES = ["SDK_CW_FORCE_EXPORT_SUPPORT", "SDK_TS", "SDK_4M", "SDK_ARM9", "SDK_CW", "SDK_FINALROM",
+               "SDK_CODE_ARM", "NNS_FINALROM", "_MSL_RESTRICT="]
+# In an include directory, {dir} is the directory of the source file's own library, such as lib/NitroSDK/libraries/os,
+# and {build} is the build directory
+SDK_INCLUDES = ["{build}/lib/NitroSDK/gen", "lib/NitroSDK/gen", "lib/NitroSDK/include",
+                "{build}/lib/NitroSDK/gen/nitro/fx"]
+LIBRARIES = {
+    "lib/NitroSDK/": {
+        "compiler": "2.0/sp1p2",
+        "flags": SDK_FLAGS,
+        "defines": ["SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS", *SDK_DEFINES],
+        # A header included before each file, as the SDK's build does with a precompiled one
+        "prefix": "pch/nitro_pch.h",
+        "includes": ["{dir}", "{dir}/include", *SDK_INCLUDES],
+    },
+    "lib/NitroSystem/": {
+        "compiler": "2.0/sp2",
+        "flags": SDK_FLAGS,
+        "defines": SDK_DEFINES,
+        "includes": ["{dir}", "lib/NitroSystem/include", "{dir}/include", *SDK_INCLUDES],
+    },
+}
+# A header that the SDK's build generates from a table of constants. tools/gen_fx_const.py does the same, so that
+# nothing fetched is run here: the fetched sources are only ever input to the compiler.
+FX_CONST = ("tools/gen_fx_const.py", "lib/NitroSDK/gen/nitro/fx/fx_const.csv",
+            "lib/NitroSDK/gen/nitro/fx/fx_const.h")
+
 
 def host() -> tuple[str, str]:
     system = {"Linux": "linux", "Darwin": "darwin", "Windows": "windows"}.get(platform.system())
@@ -156,31 +234,80 @@ def download_binary(path: Path, url: str, expected: str):
     path.chmod(path.stat().st_mode | stat.S_IEXEC)
 
 
-def check_compiler(directory: Path) -> list[str]:
-    """Returns what is wrong with the compiler in a directory, as a list of problems."""
+def check_compiler(directory: Path, version: str) -> list[str]:
+    """Returns what is wrong with the compiler of a version in a directory, as a list of problems."""
+    expected = {"mwccarm.exe": MWCC_SHA256[version]}
+    if version == MWCC_VERSION:
+        expected["mwldarm.exe"] = MWLD_SHA256
     problems = []
-    for name, expected in MWCC_SHA256.items():
+    for name, digest in expected.items():
         exe = directory / name
         if not exe.exists():
             problems.append(f"{exe} is missing")
-        elif sha256(exe) != expected:
-            problems.append(f"{exe} is not the {MWCC_VERSION} one (SHA-256 {sha256(exe)})")
+        elif sha256(exe) != digest:
+            problems.append(f"{exe} is not the {version} one (SHA-256 {sha256(exe)})")
     return problems
 
 
-def download_compiler(tools_dir: Path) -> Path:
-    directory = tools_dir / "mwccarm" / MWCC_VERSION
-    if check_compiler(directory):
+def download_compilers(tools_dir: Path, versions: list[str]) -> Path:
+    """Downloads the compilers of the given versions that are not there yet, and returns the directory of them all."""
+    root = tools_dir / "mwccarm"
+    if any(check_compiler(root / version, version) for version in versions):
         archive = zipfile.ZipFile(io.BytesIO(fetch(MWCCARM_URL)))
-        prefix = f"mwccarm/{MWCC_VERSION}/"
-        members = [m for m in archive.namelist() if m.startswith(prefix) or m == "mwccarm/license.dat"]
-        if not members:
-            sys.exit(f"{MWCCARM_URL} has no {prefix}")
-        archive.extractall(tools_dir, members)
-        problems = check_compiler(directory)
-        if problems:
-            sys.exit("\n".join(problems))
-    return directory
+        for version in versions:
+            prefix = f"mwccarm/{version}/"
+            members = [m for m in archive.namelist() if m.startswith(prefix) or m == "mwccarm/license.dat"]
+            if not members:
+                sys.exit(f"{MWCCARM_URL} has no {prefix}")
+            archive.extractall(tools_dir, members)
+            problems = check_compiler(root / version, version)
+            if problems:
+                sys.exit("\n".join(problems))
+    return root
+
+
+def download_msl(tools_dir: Path, versions: list[str]) -> Path:
+    """Downloads the MSL headers of the given CodeWarrior versions, and returns the directory of them all."""
+    root = tools_dir / "msl"
+    if all((root / version / MSL_INCLUDE_DIRS[0]).is_dir() for version in versions):
+        return root
+    data = fetch(METROSKREW_URL.format(version=METROSKREW_VERSION))
+    actual = hashlib.sha256(data).hexdigest()
+    if actual != METROSKREW_SHA256:
+        sys.exit(f"metroskrew {METROSKREW_VERSION} has SHA-256 {actual}\n  expected {METROSKREW_SHA256}")
+    with tarfile.open(fileobj=io.BytesIO(data), mode="r:xz") as archive:
+        for version in versions:
+            prefix = f"metroskrew/lib/metroskrew/sdk/ds/{version}/msl/"
+            for member in archive.getmembers():
+                relative = Path(member.name[len(prefix):])
+                if not member.name.startswith(prefix) or not member.isfile() or ".." in relative.parts:
+                    continue
+                target = root / version / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(archive.extractfile(member).read())
+    return root
+
+
+def fetch_repository(directory: Path, url: str, commit: str):
+    """Checks out one commit of a git repository into a directory, unless it is there already."""
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["git", "-C", str(directory), *args], capture_output=True, text=True)
+
+    if (directory / ".git").exists() and git("rev-parse", "HEAD").stdout.strip() == commit:
+        return
+    print(f"Fetching {url} at {commit[:7]}")
+    directory.mkdir(parents=True, exist_ok=True)
+    steps = [("init", "--quiet"), ("fetch", "--quiet", "--depth", "1", url, commit),
+             ("checkout", "--quiet", "--force", "FETCH_HEAD")]
+    for step in steps:
+        result = git(*step)
+        if result.returncode != 0:
+            sys.exit(f"git {' '.join(step)} failed in {directory}:\n{result.stderr.strip()}")
+
+
+def library_of(source: str) -> tuple[str, dict] | None:
+    """Returns the prefix and settings of the library a source file belongs to, or None for the game's own code."""
+    return next(((prefix, library) for prefix, library in LIBRARIES.items() if source.startswith(prefix)), None)
 
 
 def find_wrapper(choice: str | None, system: str, machine: str, tools_dir: Path) -> str:
@@ -262,7 +389,9 @@ def main():
     parser.add_argument("--dsd", type=Path, help="use this dsd instead of downloading one")
     parser.add_argument("--objdiff", type=Path, help="use this objdiff-cli instead of downloading one")
     parser.add_argument("--sjiswrap", type=Path, help="use this sjiswrap.exe instead of downloading one")
-    parser.add_argument("--compiler", type=Path, help=f"use the mwccarm in this directory, which holds {MWCC_VERSION}/")
+    parser.add_argument("--compiler", type=Path, help="use the mwccarm versions in this directory, which holds "
+                        f"{', '.join(MWCC_SHA256)}")
+    parser.add_argument("--no-libraries", action="store_true", help="do not fetch or build the SDK's sources")
     args = parser.parse_args()
 
     os.chdir(ROOT)
@@ -294,15 +423,21 @@ def main():
     else:
         sjiswrap = (tools_dir / "sjiswrap.exe").relative_to(ROOT)
         download_binary(ROOT / sjiswrap, SJISWRAP_URL.format(version=SJISWRAP_VERSION), SJISWRAP_SHA256)
+    libraries = {} if args.no_libraries else LIBRARIES
+    compilers = [MWCC_VERSION, *sorted({library["compiler"] for library in libraries.values()})]
     if args.compiler:
-        compiler_dir = args.compiler / MWCC_VERSION
-        problems = check_compiler(compiler_dir)
+        compilers_dir = args.compiler
+        problems = [p for version in compilers for p in check_compiler(compilers_dir / version, version)]
         if problems:
             sys.exit("\n".join(problems))
     else:
-        compiler_dir = download_compiler(tools_dir).relative_to(ROOT)
-    mwcc = compiler_dir / "mwccarm.exe"
-    mwld = compiler_dir / "mwldarm.exe"
+        compilers_dir = download_compilers(tools_dir, compilers).relative_to(ROOT)
+    mwcc = compilers_dir / MWCC_VERSION / "mwccarm.exe"
+    mwld = compilers_dir / MWCC_VERSION / "mwldarm.exe"
+    if libraries:
+        msl_dir = download_msl(tools_dir, compilers[1:]).relative_to(ROOT)
+        for directory, (url, commit) in FETCHED.items():
+            fetch_repository(ROOT / directory, url, commit)
     wrapper = find_wrapper(args.wrapper, system, machine, tools_dir)
 
     # Paths
@@ -333,11 +468,11 @@ def main():
     # A delinks.txt names the source files of a module. One that exists takes part in the build. One that does not is
     # a file whose bounds are known and whose code is not written yet: it is delinked as a unit of its own.
     named = {f["name"] for f in files if f["name"].endswith(SOURCE_SUFFIXES)}
-    listed = {name for name in named if Path(name).exists()}
-    for directory in ("src", "lib"):
-        for path in sorted(Path(directory).rglob("*")):
-            if path.suffix in SOURCE_SUFFIXES and path.as_posix() not in listed:
-                print(f"warning: {path} is in no delinks.txt, so it is not built")
+    listed = {name for name in named if Path(name).exists()
+              and (library_of(name) is None or library_of(name)[0] in libraries)}
+    for path in sorted(Path("src").rglob("*")):
+        if path.suffix in SOURCE_SUFFIXES and path.as_posix() not in listed:
+            print(f"warning: {path} is in no delinks.txt, so it is not built")
 
     n = Writer()
     n.comment("Generated by configure.py, do not edit")
@@ -371,6 +506,10 @@ def main():
     # The includes and code of a source file as one file, which objdiff sends along to a decomp.me scratch
     n.rule("ctx", "$wrapper $mwcc $lang -gccinc $defines $includes -EP $in | $python tools/clean_ctx.py > $out",
            "Preprocessing $in")
+    # A library's file, with the compiler, flags and include directories of its library
+    n.rule("mwcc_lib", "$wrapper $cc $flags $includes -gccdep -MD -c $in -o $out "
+           "&& $python tools/fix_depfile.py $dep", "Compiling $in", depfile="$dep", deps="gcc")
+    n.rule("fx_const", "$python $script $in $out", "Generating $out")
     n.rule("mwld", "$wrapper $mwld $ld_flags @$objects $lcf -o $out", "Linking $out")
     n.rule("rom_config", "$dsd rom config --elf $in --config $config", "Configuring the ROM")
     n.rule("rom_build", "$dsd rom build --config $in --rom $out $bios", "Building $out")
@@ -396,17 +535,41 @@ def main():
     n.build(delink_outputs, "delink", configs, implicit=[extract_config])
     n.build([lcf_file, objects_file], "lcf", configs, implicit=[extract_config])
 
-    # Decompiled sources. Each is compiled whether or not its delinks.txt entry is marked complete: a complete file's
-    # object is linked into the ROM, and an incomplete one's is only compared with the original by objdiff.
+    # Sources. Each is compiled whether or not its delinks.txt entry is marked complete: a complete file's object is
+    # linked into the ROM, and an incomplete one's is only compared with the original by objdiff.
+    generated = []
+    if libraries:
+        script, table, header = FX_CONST
+        generated.append(build_dir / header)
+        n.build(generated, "fx_const", [table], implicit=[script], variables={"script": script})
     compiled = []
     for name in sorted(listed):
         source = Path(name)
         obj = build_dir / source.with_suffix(".o")
-        n.build([obj], "mwcc", [source], implicit=["tools/fix_depfile.py"],
-                variables={"lang": LANG_FLAGS[source.suffix], "dep": obj.with_suffix(".d")})
+        library = library_of(name)
+        if library is None:
+            n.build([obj], "mwcc", [source], implicit=["tools/fix_depfile.py"],
+                    variables={"lang": LANG_FLAGS[source.suffix], "dep": obj.with_suffix(".d")})
+            n.build([obj.with_suffix(f".ctx{source.suffix}")], "ctx", [source], implicit=["tools/clean_ctx.py"],
+                    variables={"lang": LANG_FLAGS[source.suffix]})
+        else:
+            _, settings = library
+            # lib/<library>/libraries/<name> is the directory of one of the SDK's own libraries
+            own = Path(*source.parts[:4]).as_posix()
+            includes = [d.format(dir=own, build=build_dir.as_posix()) for d in settings["includes"]]
+            includes += [(msl_dir / settings["compiler"] / d).as_posix() for d in MSL_INCLUDE_DIRS]
+            # The prefix file sees only the defines that come before it on the command line
+            flags = [*settings["flags"], *(f"-d {define}" for define in settings["defines"])]
+            if "prefix" in settings:
+                flags.append(f"-prefix {settings['prefix']}")
+            n.build([obj], "mwcc_lib", [source], implicit=["tools/fix_depfile.py"], order_only=generated,
+                    variables={
+                        "cc": shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),
+                        "flags": " ".join(flags),
+                        "includes": " ".join(f"-i {shlex.quote(d)}" for d in includes),
+                        "dep": obj.with_suffix(".d"),
+                    })
         compiled.append(obj)
-        n.build([obj.with_suffix(f".ctx{source.suffix}")], "ctx", [source], implicit=["tools/clean_ctx.py"],
-                variables={"lang": LANG_FLAGS[source.suffix]})
 
     n.build(["compile"], "phony", compiled)
 
