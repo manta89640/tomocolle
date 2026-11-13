@@ -196,6 +196,7 @@ void BgTextCanvas::Transfer() {
 }
 
 ObjTextCanvas::ObjTextCanvas() {
+    mSprite.ResetPosition();
     mVramMode = NNS_G2D_OBJVRAMMODE_128K;
 }
 
@@ -246,9 +247,9 @@ void ObjTextCanvas::Arrange(int x, int y, int palette, int vramMode) {
         to++;
     }
     mCell.numOAMAttrs = count;
-    mCell.cellAttr = mSprite.mCell->cellAttr;
+    mCell.cellAttr = mSprite.mAnim.pCurrentCell->cellAttr;
     mCell.pOamAttrArray = mOam;
-    mSprite.mCell = &mCell;
+    mSprite.mAnim.pCurrentCell = &mCell;
     mSprite.mPaletteOffset = palette;
 }
 
@@ -260,7 +261,7 @@ void ObjTextCanvas::InitText(const NNSG2dFont *font, int plane, int width, int h
 }
 
 void ObjTextCanvas::Draw() {
-    mSprite.mCell = &mCell;
+    mSprite.mAnim.pCurrentCell = &mCell;
     Sprite_Draw(&mSprite);
 }
 

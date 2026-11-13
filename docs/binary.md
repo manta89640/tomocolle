@@ -239,6 +239,45 @@ Measured, from the decompiled code in `src/text/`:
 - The fonts are in a file of their own: `gFonts` comes before `gTextObjResource` in memory, and the compiler puts it
   after when both are defined in one file.
 
+## The apartment scene
+
+Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
+254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Overlay 73 is its tutorial variant
+(`ScenePlayRoomTut`, 133 functions, 78 of them byte-identical to overlay 74's) and is not decompiled.
+
+Decompiled in `src/overlays/ov074/`, 202 functions matching:
+
+| Unit | Range | Holds | Matching |
+| --- | --- | --- | --- |
+| `RoomScene` | `0x02149A40` to `0x0214E5F8` | `RoomScene` (0x1D7C8 bytes, scene ids 0x11 to 0x13): loading, input, the building front's buttons, room changes, timed events | 28 of 30 |
+| `RoomEncounter` | to `0x02152690` | What two characters in a room do to each other (`RoomScene`), and `RoomCharacter`'s constructor, state setter and `Update` | 26 of 36 |
+| `RoomCharacterTalkStates` | to `0x02154608` | `RoomCharacter` states 0x01 to 0x1C: talking | 1 of 1 |
+| `RoomCharacterSoloStates1D`, `...SoloStates40` | to `0x0215B45C` | States 0x1D to 0x6F: what a character does alone | 3 of 3 |
+| `RoomCharacterPairStates70` | to `0x0215F610` | States 0x70 to 0xB2: what the two do together | 2 of 2 |
+| `RoomCharacterStatesB3` | to `0x0216420C` | States 0xB3 to 0xF1 | 3 of 3 |
+| `RoomCharacterStatesF2` | to `0x02168D24` | States 0xF2 to 0x117 (leaving and entering by the door among them), and the walking, animation and floor-area helpers | 39 of 40 |
+| `RoomObjects` | to `0x0216D400` | `HeldItem`, `ApartmentRoom`, `RoomCamera`, `RoomLight`, `ApartmentFront` with its cursor and buttons, `SkyBackground`, `NamePanel`, `TouchButton`, `Clock`, `ClockDisplay`, `TimedMessage` | 100 of 138 |
+
+- A `RoomCharacter` (0x2D98 bytes, two per scene) is a state machine of 0x118 states; `RoomCharacter::Update`
+  dispatches on the state to the functions above, each a `switch` over a range of states. In the states for two
+  characters, the one in slot 0 decides for both.
+- The state functions are named by their range of states where the code does not show what the activity is.
+
+Inferred: the units are one group of functions each as they were handed out for decompiling, not the original
+files. `RoomCharacter`'s functions are probably one file, and the classes of `RoomObjects` several.
+
+Not done:
+
+- 51 functions: `RoomScene::UpdateEvent` (8 KB) and six of `RoomEncounter` are not written, 31 small `RoomCharacter`
+  functions at `0x02168D24` to `0x02169D90`, the scene's two destructors and the static initialiser neither; ten
+  are written and differ by a few instructions, each with a comment saying how.
+- Each unit has its own header with its own view of `RoomCharacter` and the classes around it. They agree on
+  offsets and mostly on names, but they are not one header yet, and they disagree in places (the joint matrices
+  are members of the character in some and of its model in others).
+- The sources still call about 300 functions by their address names: the main program's that nobody has named
+  with evidence yet, and functions of other units of this overlay that are now named in `symbols.txt`.
+- `docs/notes/ov074.md` keeps the working notes of the decompilation, with the evidence for names and layouts.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").

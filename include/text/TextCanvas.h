@@ -4,6 +4,8 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+#include "Sprite.h"
+
 // The game's text drawing: a font, a canvas of characters that text is drawn on, the two places such a canvas can
 // be shown (a background layer, a group of sprites), and boxes that redraw their content when it changes.
 //
@@ -101,38 +103,6 @@ public:
     void Transfer();
 };
 
-// The sprite class of the main program (Sprite_Init sets one up, Sprite_Draw draws it). It is not decompiled
-// yet: only what the text canvas uses of it is declared here, under a stand-in name.
-// A point in 20.12 fixed point. It has a constructor and is passed by value, which is what the compiled code
-// shows: every caller of a setter builds one on the stack and copies it to a second before the values are stored.
-struct FxVec2 {
-    FxVec2() {}
-    FxVec2(fx32 x_, fx32 y_) {
-        x = x_;
-        y = y_;
-    }
-
-    fx32 x;
-    fx32 y;
-};
-
-struct Sprite {
-    Sprite() { SetPosition(FxVec2(0, 0)); }
-
-    void SetPosition(FxVec2 position) { mPosition = position; }
-    void SetPosition(fx32 x, fx32 y) { SetPosition(FxVec2(x, y)); }
-
-    /* 0x00 */ u8 mUnknown00[0x30];
-    /* 0x30 */ const NNSG2dCellData *mCell;
-    /* 0x34 */ u8 mUnknown34[0x40];
-    /* 0x74 */ int mOverwritePalette;       // -1, or the palette the renderer is told to use
-    /* 0x78 */ int mOverwritePriority;
-    /* 0x7C */ int mPaletteOffset;
-    /* 0x80 */ u8 mUnknown80[0x24];
-    /* 0xA4 */ FxVec2 mPosition;
-    /* 0xAC */ u8 mUnknownAC[4];
-};
-
 // A text canvas on sprites: the library arranges sprites over the canvas, and they are drawn as one cell.
 class ObjTextCanvas : public virtual TextCanvas {
 public:
@@ -146,8 +116,14 @@ public:
                   int x, int y, int palette, void *buffer, int vramMode, NNSG2dCharaColorMode colorMode);
     void Draw();
     void Transfer();
+    // Where the canvas is on the screen
+    void SetPosition(fx32 x, fx32 y) { mSprite.SetPosition(x, y); }
+    void SetPositionFromVec(fx32 x, fx32 y) { mSprite.SetPosition(Sprite::MakeVec(x, y)); }
+    // How many characters (tiles) of VRAM the canvas takes
+    int GetCharCount() { return ((mCanvas.areaWidth * mCanvas.areaHeight - 1) >> mVramMode) + 1; }
 
     /* 0x004 */ Sprite mSprite;
+    /* 0x0B0 */ u8 mUnknownB0[4];
     /* 0x0B4 */ NNSG2dCellOAMAttrData mOam[24];
     /* 0x144 */ NNSG2dCellData mCell;
     /* 0x14C */ int mVramMode; // NNSG2dOBJVramMode: also how far a character number is shifted
