@@ -81,6 +81,8 @@ def main() -> int:
         "Authorization": f"Bearer {read_token()}",
         "Content-Type": "application/json",
         "Content-Encoding": "gzip",
+        # The site's firewall turns away urllib's default User-Agent (error 1010)
+        "User-Agent": "report-upload/1.0",
     })
     try:
         with urllib.request.urlopen(request) as response:
