@@ -41,6 +41,9 @@ static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback cal
     func_0208c5a8(engine);
 }
 
+// Fractional multiply of two Q15 values.
+static inline s16 func_020897c8_mult(s16 a, s16 b) { return (a * b) >> 15; }
+
 // Compares two strings, taking 'I' and 'U' for 'i' and 'u'
 int func_0208473c(const char *a, const char *b) {
     while (*a != 0 || *b != 0) {
@@ -1876,20 +1879,8 @@ int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
 // chains of order / 2 second-order sections, whose coefficients are the even and the odd cosines, and half the sum
 // of the two chains' outputs, from the second on, is the result.
 //
-// Not matching yet: 30 instructions differ, all of them register choices in the first loop, and the order of the
-// two stores of `order` and `out` to the stack at the start; every instruction is otherwise the original's. The
-// original keeps the address of `cosines` in r0, the counter in r2 (and its shifted next value in r7), the read
-// value in r4, the table in r5 and the mask in r6; this has them in r7, r6, r3, r4 and r5. The other three loops
-// match, and only do with exactly this sharing of variables (`t` for all three read values, `j` for the table index,
-// the counter of the second loop and of the inner one) and the chained assignment in the second loop.
-// Tried for the first loop without any change to it: every other sharing of its counter and temporaries with the
-// other loops' variables (three exhaustive searches, about 1,400 builds); the order of declarations; int, s16 and
-// u16 counters and `i++`, `++i`, `i += 1`, `i = (s16)(i + 1)`; while and do-while forms, with and without a guard
-// and with the counter set before it; the body as one expression, with variables for the low entry, the difference
-// and the sum, and with `*=`; an inline function for the lookup, for the loop, and for the whole body; a pointer
-// to the element taken first; `order` as s16 or copied to a local; a const extern; 2D arrays. A local pointer to
-// `cosines` or to the table does move the registers (so what is live across the loop decides them), but each takes
-// a register the original gives to something else.
+// The first loop only matches with the multiplication as an inline function returning s16 (func_020897c8_mult) and
+// with `frac` reused for the product and then for the sum.
 void func_020897c8(int order, u16 *in, s16 *out) {
     s16 cosines[10];
     s16 result[11];
@@ -1914,7 +1905,9 @@ void func_020897c8(int order, u16 *in, s16 *out) {
         t = (in[i] << 7) >> 1;
         j = t >> 15;
         frac = t & 0x7FFF;
-        cosines[i] = -(s16)(data_020bbf30[j] + ((((s16)(data_020bbf30[j + 1] - data_020bbf30[j]) * frac) << 1) >> 16));
+        frac = func_020897c8_mult(data_020bbf30[j + 1] - data_020bbf30[j], frac);
+        frac += data_020bbf30[j];
+        cosines[i] = -frac;
     }
     for (j = 0; j < half + 1; j++) {
         d[j] = c[j] = b[j] = a[j] = 0;
