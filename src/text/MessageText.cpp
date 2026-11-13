@@ -172,6 +172,26 @@ int MessageText::GetMessageHeight(int vSpace) {
     return (lines * (vSpace + cellHeight) + 7) >> 3;
 }
 
+// The text layout of MessageText (0x0202ea24 to 0x0202f408): measuring, expanding tags, and drawing.
+//
+// A message is UTF-16 text with tags in it (the BMG format's escape sequences). A tag is, in bytes:
+//   +0 the character 0x1A, +2 the tag's size in bytes, +3 its group, +4 (16 bits) its type, +6 its arguments.
+// Group 1 tags stand for an argument, +6 being which one: types 1 to 3, 10, 30 and 31 a string of mStringArgs,
+// types 20 and 21 the same cut to 12 characters, type 40 cut to 20, and type 250 a message of mMessageArgs,
+// expanded in turn. The tag of group 0xFF and type 0 sets the colour to its 16-bit argument: it is kept when a
+// message is expanded, and obeyed when the text is drawn.
+
+// What is left of a character's width to the right of its glyph, and how far a glyph moves the drawing position
+// once its left margin is added. (That these are functions, one unsigned, is what makes the sum compile as it
+// does in DrawNextChar.)
+static inline u32 GlyphRight(const NNSG2dCharWidths *widths) {
+    return widths->charWidth - (widths->left + widths->glyphWidth);
+}
+static inline int GlyphAdvance(const NNSG2dCharWidths *widths) {
+    return widths->glyphWidth + GlyphRight(widths);
+}
+
+// The width in pixels of the text's first line
 int MessageText::MeasureLineWidth(const wchar_t *text, const NNSG2dFont *font) {
     int width = 0;
     while (*text != 0) {
@@ -191,6 +211,7 @@ int MessageText::MeasureLineWidth(const wchar_t *text, const NNSG2dFont *font) {
     return width;
 }
 
+// The height in pixels of all the text's lines
 int MessageText::MeasureHeight(const wchar_t *text, const NNSG2dFont *font) {
     int fontHeight = NNS_G2dFontGetHeight(font);
     int lineHeight = fontHeight + mTextCanvas.vSpace;
@@ -212,6 +233,8 @@ int MessageText::MeasureHeight(const wchar_t *text, const NNSG2dFont *font) {
     return height;
 }
 
+// Copies a string without its terminator, at most max characters of it if max is positive, all of it if
+// negative. Returns how many characters it copied.
 int CopyText(const wchar_t *src, wchar_t *dst, int max) {
     int count = 0;
     if (src == NULL) {
@@ -249,6 +272,7 @@ void MessageText::SetStringArg(const wchar_t *text, int index) {
     mStringArgs[index] = text;
 }
 
+// Copies text to *out, which it moves along, putting the arguments in place of their tags
 void MessageText::ExpandTags(const wchar_t *src, wchar_t **dst) {
     if (src == NULL) {
         return;
@@ -299,6 +323,7 @@ void MessageText::ExpandTags(const wchar_t *src, wchar_t **dst) {
     **dst = 0;
 }
 
+// Expands the message into mText, and starts over at its first character
 void MessageText::ExpandMessage() {
     wchar_t *dst;
     const wchar_t *src = mMessageFile->GetText(mMessage);
@@ -307,6 +332,8 @@ void MessageText::ExpandMessage() {
     mCursor = mText;
 }
 
+// How far from the canvas's left edge a line starts: align is 0 for left, 1 for centre, 2 for right. The canvas's
+// size is in 8-pixel cells.
 int MessageText::GetHAlignOffset(const wchar_t *text, int align) {
     if (align == 1) {
         int size = MeasureLineWidth(text, mFont);
@@ -331,6 +358,7 @@ int MessageText::GetVAlignOffset(const wchar_t *text, int align) {
     return 0;
 }
 
+// Draws the whole message at once
 void MessageText::DrawAll() {
     BeginDraw();
     while (*mCursor != 0) {
@@ -338,6 +366,8 @@ void MessageText::DrawAll() {
     }
 }
 
+// Draws the next visible character at *cursor, obeying the tags and line breaks before it, and moves the cursor
+// past it. It stops without drawing at the end of the text.
 void MessageText::DrawNextChar(wchar_t **cursor) {
     BOOL more = TRUE;
     do {
@@ -366,9 +396,7 @@ void MessageText::DrawNextChar(wchar_t **cursor) {
             NNS_G2dFontGetGlyph(&glyph, font, c);
             mCharX += glyph.pWidths->left;
             DrawGlyph(&glyph);
-            u32 right = glyph.pWidths->charWidth - (glyph.pWidths->left + glyph.pWidths->glyphWidth);
-            u32 width = right + glyph.pWidths->glyphWidth;
-            AddCharX(mTextCanvas.hSpace + width);
+            mCharX += mTextCanvas.hSpace + GlyphAdvance(glyph.pWidths);
             more = FALSE;
             (*cursor)++;
         } else {
@@ -377,6 +405,7 @@ void MessageText::DrawNextChar(wchar_t **cursor) {
     } while (more);
 }
 
+// Each frame: draws as much of the message as mDrawMode says
 void MessageText::UpdateDraw() {
     switch (mDrawMode) {
     case 0:
@@ -396,7 +425,7 @@ void MessageText::UpdateDraw() {
                 mDrawMode = 0;
                 mColor = 1;
             } else {
-                mCharWait += 2;
+                mCharWait += 2; // Two frames between characters
             }
         } else {
             mCharWait--;
