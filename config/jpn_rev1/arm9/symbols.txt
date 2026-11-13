@@ -4443,7 +4443,7 @@ data_020bba60 kind:data(any) addr:0x020bba60
 data_020bbc60 kind:data(any) addr:0x020bbc60
 data_020bbf30 kind:data(any) addr:0x020bbf30
 data_020bbf34 kind:data(any) addr:0x020bbf34
-data_020bc174 kind:data(any) addr:0x020bc174
+ShttsPhonemeNames kind:data(any) addr:0x020bc174
 data_020bc20c kind:data(any) addr:0x020bc20c
 data_020bc216 kind:data(any) addr:0x020bc216
 data_020bc220 kind:data(any) addr:0x020bc220
@@ -4456,7 +4456,7 @@ data_020e0fde kind:data(any) addr:0x020e0fde
 data_020e8d08 kind:data(any) addr:0x020e8d08
 data_020e8f08 kind:data(any) addr:0x020e8f08
 data_020ef022 kind:data(any) addr:0x020ef022
-data_020f2708 kind:data(any) addr:0x020f2708
+ShttsPresets kind:data(any) addr:0x020f2708
 data_020f3fe0 kind:data(any) addr:0x020f3fe0
 data_020f3ff0 kind:data(any) addr:0x020f3ff0
 data_020f3ff4 kind:data(any) addr:0x020f3ff4

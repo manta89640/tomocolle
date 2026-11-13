@@ -1,7 +1,6 @@
 #include "shtts.h"
 
-// Messages for each value of Shtts.error
-extern const char *data_020bc174[];
+#include <string.h>
 
 void func_02089cf4(Shtts *engine) {
     OS_LockMutex(&engine->mutex);
@@ -138,7 +137,7 @@ int func_0208d8fc(Shtts *engine) {
     engine->unk_0EE18 = 1;
     OS_InitMutex(&engine->mutex);
     OS_InitMutex(&engine->unk_0EF08);
-    engine->error = 0;
+    engine->phoneme = 0;
     engine->unk_0B72D = 0;
     func_0208dab4(engine);
     return 0;
@@ -162,12 +161,12 @@ int func_0208dac4(Shtts *engine) {
     return state;
 }
 
-// The message for the engine's last error
+// The name of the sound being spoken, "X" if there is none
 const char *func_0208daf8(Shtts *engine) {
-    if (engine->error < 0 || engine->error > 38) {
-        return data_020bc174[7];
+    if (engine->phoneme < 0 || engine->phoneme > 38) {
+        return ShttsPhonemeNames[7];
     }
-    return data_020bc174[engine->error];
+    return ShttsPhonemeNames[engine->phoneme];
 }
 
 int func_0208e09c(Shtts *engine, int value);
@@ -350,10 +349,207 @@ int func_0208e310(Shtts *engine, int value) {
     return 0;
 }
 
+// Reads one of the caller's voice settings, by the numbers of func_0208db2c. The speaker and the way of speaking,
+// settings 1 and 2, cannot be read back.
+int func_0208dca4(Shtts *engine, int param) {
+    switch (param) {
+    case 3:
+        return engine->unk_0EF20.unk_0A;
+    case 4:
+        return engine->unk_0EF20.unk_02;
+    case 5:
+        return engine->unk_0EF20.unk_08;
+    case 6:
+        return engine->unk_0EF20.unk_24;
+    case 7:
+        return engine->unk_0EF20.unk_20;
+    case 8:
+        return engine->unk_0EF20.unk_0E;
+    case 9:
+        return engine->unk_0EF20.unk_0C;
+    case 10:
+        return engine->unk_0EF20.unk_16;
+    case 11:
+        return engine->unk_0EF20.unk_1C;
+    case 12:
+        return func_0208e338(engine);
+    case 13:
+        return engine->unk_0EF20.unk_18;
+    case 14:
+        return engine->unk_0EF20.unk_04;
+    case 15:
+        return engine->unk_0EF20.unk_06;
+    case 16:
+        return engine->unk_0EF20.unk_2C;
+    default:
+        return 0x80000000;
+    }
+}
+
+// Setting 1: the speaker, 0x101 to 0x10C
+int func_0208dda4(Shtts *engine, int value) {
+    const char *name;
+
+    switch (value) {
+    case 0x101:
+        name = "<\\Spk_male";
+        break;
+    case 0x102:
+        name = "<\\Spk_female";
+        break;
+    case 0x103:
+        name = "<\\Spk_admale";
+        break;
+    case 0x104:
+        name = "<\\Spk_adfemale";
+        break;
+    case 0x105:
+        name = "<\\Spk_emale";
+        break;
+    case 0x106:
+        name = "<\\Spk_efemale";
+        break;
+    case 0x107:
+        name = "<\\Spk_chmale";
+        break;
+    case 0x108:
+        name = "<\\Spk_chfemale";
+        break;
+    case 0x109:
+        name = "<\\Spk_sisters";
+        break;
+    case 0x10A:
+        name = "<\\Spk_meimu";
+        break;
+    case 0x10B:
+        name = "<\\Spk_space";
+        break;
+    case 0x10C:
+        name = "<\\Spk_giant";
+        break;
+    default:
+        return -1;
+    }
+    func_0208dfcc(engine, name);
+    return 0;
+}
+
+// Setting 2: the way of speaking, 0x201 to 0x211
+int func_0208de90(Shtts *engine, int value) {
+    const char *name;
+
+    switch (value) {
+    case 0x201:
+        name = "<\\angry";
+        break;
+    case 0x202:
+        name = "<\\business";
+        break;
+    case 0x203:
+        name = "<\\calm";
+        break;
+    case 0x204:
+        name = "<\\depressed";
+        break;
+    case 0x205:
+        name = "<\\excited";
+        break;
+    case 0x206:
+        name = "<\\falsetto";
+        break;
+    case 0x207:
+        name = "<\\happy";
+        break;
+    case 0x208:
+        name = "<\\loud";
+        break;
+    case 0x209:
+        name = "<\\monotone";
+        break;
+    case 0x20A:
+        name = "<\\perky";
+        break;
+    case 0x20B:
+        name = "<\\quiet";
+        break;
+    case 0x20C:
+        name = "<\\sarcastic";
+        break;
+    case 0x20D:
+        name = "<\\scared";
+        break;
+    case 0x20E:
+        name = "<\\shout";
+        break;
+    case 0x20F:
+        name = "<\\tence";
+        break;
+    case 0x210:
+        name = "<\\whisper";
+        break;
+    case 0x211:
+        name = "<\\sing";
+        break;
+    default:
+        return -1;
+    }
+    func_0208dfcc(engine, name);
+    return 0;
+}
+
+// Applies the preset of a name to the caller's settings
+int func_0208dfcc(Shtts *engine, const char *name) {
+    const char *commands = func_0208dff8(name);
+
+    if (commands == NULL) {
+        return -1;
+    }
+    func_0208e04c(engine, commands);
+    return 0;
+}
+
+// The commands of the preset of a name, or NULL
+const char *func_0208dff8(const char *name) {
+    int i;
+
+    for (i = 0; i < SHTTS_PRESET_COUNT; i++) {
+        if (strcmp(name, ShttsPresets[i].name) == 0) {
+            return ShttsPresets[i].commands;
+        }
+    }
+    return NULL;
+}
+
+// Applies each command of a string of them
+int func_0208e04c(Shtts *engine, const char *commands) {
+    const char *command = strchr(commands, '#');
+
+    while (command != NULL) {
+        func_020873a4(command, 0, engine);
+        command = strchr(command + 1, '#');
+    }
+    return 0;
+}
+
 // The value that func_0208e238 was given
 int func_0208e338(Shtts *engine) {
     if (engine->unk_0EF20.unk_14 == 0) {
         return engine->unk_0EF20.unk_10;
     }
     return 3;
+}
+
+// The number of a sound by its name, with "pau", a pause, for silence. A name that is not one is "X", 7.
+int func_0208e354(const char *name) {
+    s16 i;
+
+    for (i = 0; i < SHTTS_PHONEME_COUNT; i++) {
+        if (strcmp(name, ShttsPhonemeNames[i]) == 0) {
+            return i;
+        }
+    }
+    if (strcmp(name, "pau") == 0) {
+        return 0;
+    }
+    return 7;
 }

@@ -129,7 +129,8 @@ from the setters, the settings and the values each accepts:
 
 | Setting | Values | Field of `ShttsParams` |
 | --- | --- | --- |
-| 1, 2 | Set by name, not decompiled yet | |
+| 1 | `0x101` to `0x10C`: the speaker | A preset, see below |
+| 2 | `0x201` to `0x211`: the way of speaking | A preset |
 | 3 | 20 to 2200 | `unk_0A` |
 | 4 | 3500 to 7000 | `unk_02`, 5058 by default |
 | 5 | -10000 to 360 | `unk_08` |
@@ -144,8 +145,20 @@ from the setters, the settings and the values each accepts:
 | 14, 15 | 0 to 400 | `unk_04`, `unk_06`, 100 by default |
 | 16 | 0 to 1000 | `unk_2C` |
 
-What each setting means is not established. The `#B4800` in the game's control strings fits setting 4's range, which
-is a lead, not a finding.
+What settings 3 to 16 mean is not established. The `#B4800` in the game's control strings fits setting 4's range,
+which is a lead, not a finding.
+
+Settings 1 and 2 pick a preset by name. `ShttsPresets`, at `0x020F2708`, is a table of 53 of them: a name as it is
+written in text, and a string of `#` commands that the preset stands for. Measured from the two setters:
+
+- Speakers: `Spk_male`, `Spk_female`, `Spk_admale`, `Spk_adfemale`, `Spk_emale`, `Spk_efemale`, `Spk_chmale`,
+  `Spk_chfemale`, `Spk_sisters`, `Spk_meimu`, `Spk_space`, `Spk_giant`.
+- Ways of speaking: `angry`, `business`, `calm`, `depressed`, `excited`, `falsetto`, `happy`, `loud`, `monotone`,
+  `perky`, `quiet`, `sarcastic`, `scared`, `shout`, `tence`, `whisper`, `sing`.
+
+`ShttsPhonemeNames`, at `0x020BC174`, lists the 38 sounds the engine speaks in, as it writes them: `S` for silence,
+the vowels `a i u e o`, `N`, `X`, then the consonants from `k` to `kw`. The engine keeps the number of the sound it
+is speaking, and `func_0208daf8` returns its name, which is what a game needs to move a mouth in time with speech.
 
 ## Compiler
 

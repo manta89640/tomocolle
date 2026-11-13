@@ -11,23 +11,23 @@ typedef void (*ShttsCallback)(int samples, s16 *data, void *arg);
 // Settings of a voice. The engine has two of these: the ones in use, and the ones a caller has set.
 typedef struct ShttsParams {
     /* 0x00 */ u8 unk_00;
-    /* 0x02 */ u16 unk_02;
-    /* 0x04 */ u16 unk_04;
-    /* 0x06 */ u16 unk_06;
-    /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
-    /* 0x0C */ u16 unk_0C;
-    /* 0x0E */ u16 unk_0E;
+    /* 0x02 */ s16 unk_02;
+    /* 0x04 */ s16 unk_04;
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;
+    /* 0x0A */ s16 unk_0A;
+    /* 0x0C */ s16 unk_0C;
+    /* 0x0E */ s16 unk_0E;
     /* 0x10 */ u32 unk_10;
     /* 0x14 */ s16 unk_14;
-    /* 0x16 */ u16 unk_16;
+    /* 0x16 */ s16 unk_16;
     /* 0x18 */ u32 unk_18;
     /* 0x1C */ u32 unk_1C;
     /* 0x20 */ u32 unk_20;
     /* 0x24 */ u32 unk_24;
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
-    /* 0x2C */ u16 unk_2C;
+    /* 0x2C */ s16 unk_2C;
 } ShttsParams; // 0x30
 
 // The engine's whole state, 0x14000 bytes that the caller provides
@@ -80,7 +80,7 @@ typedef struct Shtts {
     /* 0x0EF08 */ OSMutex unk_0EF08;
     /* 0x0EF20 */ ShttsParams unk_0EF20;
     /* 0x0EF50 */ ShttsParams unk_0EF50;
-    /* 0x0EF80 */ s32 error;        // Index of a message, see func_0208daf8
+    /* 0x0EF80 */ s32 phoneme;      // Index in ShttsPhonemeNames of the sound being spoken
     /* 0x0EF84 */ u8 pad_0EF84[0x14000 - 0xEF84];
 } Shtts; // 0x14000
 
@@ -98,5 +98,25 @@ int func_0208db2c(Shtts *engine, int param, int value);
 int func_0208dda4(Shtts *engine, int value);
 int func_0208de90(Shtts *engine, int value);
 void func_0208c4dc(int value, int unk, Shtts *engine);
+int func_0208dca4(Shtts *engine, int param);
+int func_0208dfcc(Shtts *engine, const char *name);
+const char *func_0208dff8(const char *name);
+int func_0208e04c(Shtts *engine, const char *commands);
+int func_0208e338(Shtts *engine);
+int func_0208e354(const char *name);
+void func_020873a4(const char *command, int unk, Shtts *engine);
+
+// A named set of commands, such as a speaker or a way of speaking
+typedef struct ShttsPreset {
+    /* 0x00 */ char name[20];      // As written in text, such as "<\\Spk_male"
+    /* 0x14 */ char commands[100]; // Commands that each start with '#', such as "#Q\n#B4800\n#S90"
+} ShttsPreset; // 0x78
+
+#define SHTTS_PRESET_COUNT 53
+#define SHTTS_PHONEME_COUNT 38
+
+extern ShttsPreset ShttsPresets[SHTTS_PRESET_COUNT];
+// The sounds of speech as the engine writes them: "S" for silence, the vowels, "N", "X", then the consonants
+extern const char *ShttsPhonemeNames[SHTTS_PHONEME_COUNT];
 
 #endif // SHTTS_H
