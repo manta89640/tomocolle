@@ -20,8 +20,9 @@ together by the original linker, and every module comes out identical. That is t
 piece of it can now be replaced by source, and the build says at once whether the result still matches.
 
 Of the game's 7,356 functions (1.96 MB of code), 1,293 are identified as code of the SDK, NitroSystem and the
-compiler's library, and named. The SDK and NitroSystem ones are split into 155 files and built from source, and
-1,148 of them match. Of the game's own code, the first six functions are decompiled. See
+compiler's library, and named. The SDK and NitroSystem ones are split into 155 files and built from source:
+1,148 of their functions match, and 42 of the files are linked into the ROM from their compiled objects in place
+of the original's bytes. Of the game's own code, the first six functions are decompiled. See
 [ByteMatch](https://bytematch.dev/manta89640/tomocolle) for the current numbers.
 
 ## Building

@@ -118,6 +118,10 @@ its library's compiler and flags, from the `LIBRARIES` table in `configure.py`.
 each only if the ROM still matches when it is linked from the compiled object. It leaves a unit alone whose object
 has data that its entry in `delinks.txt` does not place yet.
 
+Placing that data is the next step for the library files, and is not done. `tools/place_data.py` works out where a
+file's data is from the addresses in its matched functions, and reports it, but what it writes is not usable yet:
+see its header.
+
 Linking strips what nothing refers to, as the original link did: a compiled file of a library holds many functions
 the game never calls. The objects that dsd delinks are exempt, since only as much of them is known to be referred to
 as `relocs.txt` knows: `tools/force_active.py` lists every symbol of theirs in the linker script as one to keep.

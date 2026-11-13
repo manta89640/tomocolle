@@ -8,8 +8,11 @@ unit that match say where the data sections of its object went. A section is pla
 and a unit only when its placed sections of each kind lie end to end. The symbols that symbols.txt has in those
 ranges are renamed to the object's names for them, and marked local where the object's are.
 
-It only edits the configs. Whether a unit can then be linked from its object is for tools/complete_units.py and the
-build to say.
+NOT READY TO APPLY. Without --apply it reports what it would place, which is sound: the ranges of neighbouring files
+come out end to end. With --apply the ROM no longer matches, for a reason that is understood but not handled yet: a
+file's data can start on a 32-byte boundary, with padding before it that the compiled object asks for and a delinked
+one does not. So a file's data can only be placed in the same step that marks the file complete, one file at a time,
+with both taken back if the ROM does not match. Until this does that, do not commit what it writes.
 """
 import argparse
 import collections
@@ -100,6 +103,7 @@ def main() -> int:
     # Where the game put things, read off the matched functions
     global_address = {}
     section_address = collections.defaultdict(dict)  # Unit -> section -> address
+    references = []  # (address of the word in the game, unit, section, offset in the section) of each reference
     for source, (obj, _) in units.items():
         for name, value, _, kind, _, shndx in obj.symbols:
             if kind != STT_FUNC or name not in by_name or name.startswith("$"):
@@ -118,11 +122,15 @@ def main() -> int:
                 if reloc_kind != R_ARM_ABS32:
                     continue
                 target_name, target_value, _, target_kind, _, target_section = obj.symbols[symbol]
-                target = (struct.unpack_from("<I", game, where - start)[0] - addend) & 0xFFFFFFFF
+                # The compiler leaves part of the offset from the symbol in the word itself
+                in_place, = struct.unpack_from("<i", code, where - start)
+                offset = addend + in_place
+                target = (struct.unpack_from("<I", game, where - start)[0] - offset) & 0xFFFFFFFF
                 if target_section == 0:
                     global_address[target_name] = target
                 elif target_section < len(obj.sections):
                     section_address[source][target_section] = target - target_value
+                    references.append((address + where - start, source, target_section, target_value + offset))
     for source, (obj, _) in units.items():
         for name, value, _, kind, is_global, shndx in obj.symbols:
             if is_global and name in global_address and 0 < shndx < len(obj.sections) \
@@ -164,37 +172,105 @@ def main() -> int:
             start, end = sections[0][0], (sections[-1][1] + 3) & ~3
             entry.append((kind, start, end))
             for address, _, index in sections:
-                for name, value, _, symbol_kind, is_global, shndx in obj.symbols:
+                for name, value, size, symbol_kind, is_global, shndx in obj.symbols:
                     if shndx == index and name and symbol_kind != STT_SECTION and not name.startswith(("$", ".")):
-                        names[address + value] = (name, is_global)
+                        names[address + value] = (name, is_global, size, "bss" if kind == ".bss" else "data(any)")
             # Every symbol the config has in the range needs a name that the object has there
-            if any(a not in names for a in by_address if start <= a < end):
+            if any(a not in names for a in by_address if start <= a < sections[-1][1]):
                 ok = False
                 break
         if ok:
             placed_units[source] = entry
             renames.update(names)
 
+    # dsd takes a data symbol to reach as far as the next one, and wants all of it in its file. So a range takes the
+    # padding up to the next symbol with it, unless that is another placed file's, and two ranges never overlap.
+    known = sorted(set(by_address) | set(renames))
+    taken = sorted((start, source) for source, entry in placed_units.items() for _, start, _ in entry)
+    for source in sorted(placed_units):
+        entry = []
+        for kind, start, end in placed_units[source]:
+            if kind != ".bss":
+                inside = [a for a in known if start <= a < end]
+                following = min((a for a in known if inside and a > max(inside)), default=end)
+                if end < following < end + 32:
+                    end = following
+            limit = min((other for other, owner in taken if other > start and owner != source), default=end)
+            entry.append((kind, start, min(end, limit)))
+        placed_units[source] = entry
+
+    # A reference to the middle of a symbol, or to the end of one, is to that symbol plus an offset. dsd took the
+    # address at face value: the end of an array is where the next file's data starts, which is not what is meant.
+    offsets, anchors = {}, {}
+    for site, source, index, offset in references:
+        if index not in section_address[source]:
+            continue
+        obj = units[source][0]
+        inside = [(value, name, is_global) for name, value, _, kind, is_global, shndx in obj.symbols
+                  if shndx == index and name and kind != STT_SECTION and not name.startswith(("$", "."))
+                  and value <= offset]
+        if inside and offset != max(inside)[0]:
+            value, name, is_global = max(inside)
+            to = section_address[source][index] + value
+            offsets[site] = (to, offset - value)
+            # The symbol referred to has to be in symbols.txt, which it is not if only its end was ever used
+            # A static of a file whose data is not placed cannot be local: dsd would not know whose it is
+            if source not in placed_units and not is_global:
+                name, is_global = f"data_{to:08x}", True
+            anchors[to] = (name, is_global, "bss" if obj.sections[index][1] == SHT_NOBITS else "data(any)")
+
     # A name can only be global once
-    counts = collections.Counter(name for name, is_global in renames.values() if is_global)
+    counts = collections.Counter(name for name, is_global, _, _ in renames.values() if is_global)
     existing = {m[1] for line in lines if (m := SYMBOL.match(line))}
+    clashes = sorted(name for name, count in counts.items() if count > 1)
+    if clashes:
+        print(f"Global names found at more than one address, not applied: {', '.join(clashes)}")
     print(f"{len(placed_units)} units can have their data placed, of {len(units)} with an object")
     for source, entry in sorted(placed_units.items()):
         print(f"  {source}: " + ", ".join(f"{kind} {start:#010x}-{end:#010x}" for kind, start, end in entry))
     if not args.apply:
         return 0
 
-    for address, (name, is_global) in renames.items():
+    used = set(existing)
+    known = sorted(set(by_address) | set(renames) | set(anchors))
+
+    def room(address: int) -> int:
+        """Returns how far it is from an address to the next symbol."""
+        return next((a for a in known if a > address), address + 0x10000) - address
+
+    for address, (name, is_global, size, symbol_kind) in sorted(renames.items()):
         number = by_address.get(address)
+        current = SYMBOL.match(lines[number])[1] if number is not None else None
+        # A name goes to one address only, whether it is global or not: two symbols of one name in a delinked
+        # object are one too many for the linker
+        if current != name and name in used:
+            continue
+        used.add(name)
+        sized = f"bss(size={size:#x})" if symbol_kind == "bss" and 0 < size <= room(address) else None
         if number is None:
+            # A symbol of the object that nothing in the game refers to directly, so dsd did not know of it
+            lines.append(f"{name} kind:{sized or symbol_kind} addr:{address:#010x}{'' if is_global else ' local'}")
             continue
         match = SYMBOL.match(lines[number])
-        if match[1] == name:
-            continue
-        local = not is_global or counts[name] > 1 or name in existing
-        attributes = match[5].replace(" local", "") + (" local" if local else "")
-        lines[number] = f"{name} {match[2]} addr:0x{match[4]}{attributes}"
+        kind = f"kind:{sized}" if sized and match[2] == "kind:bss" else match[2]
+        attributes = match[5].replace(" local", "") + ("" if is_global else " local")
+        lines[number] = f"{name} {kind} addr:0x{match[4]}{attributes}"
+    for address, (name, is_global, kind) in anchors.items():
+        if address not in by_address and address not in renames and name not in used:
+            used.add(name)
+            lines.append(f"{name} kind:{kind} addr:{address:#010x}{'' if is_global else ' local'}")
     symbols_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    relocs_path = config / "relocs.txt"
+    relocs = relocs_path.read_text(encoding="utf-8").splitlines()
+    fixed = 0
+    for number, line in enumerate(relocs):
+        match = re.match(r"^from:0x([0-9a-f]+) (kind:\w+) to:0x[0-9a-f]+(?: add:0x[0-9a-f]+)? (module:main)$", line)
+        if match and int(match[1], 16) in offsets:
+            to, add = offsets[int(match[1], 16)]
+            relocs[number] = f"from:0x{match[1]} {match[2]} to:{to:#010x} add:{add:#x} {match[3]}"
+            fixed += 1
+    relocs_path.write_text("\n".join(relocs) + "\n", encoding="utf-8")
+    print(f"Rewrote {fixed} references as a symbol plus an offset")
     for source, entry in placed_units.items():
         match = re.search(rf"^{re.escape(source)}:\n((?:[ \t]+.*\n?)*)", delinks, re.M)
         added = "".join(f"    {kind:<11} start:{start:#010x} end:{end:#010x}\n" for kind, start, end in entry)

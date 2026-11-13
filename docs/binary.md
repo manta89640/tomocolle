@@ -110,7 +110,12 @@ game's 30007.
 - The six functions decompiled so far match with it. They are too simple to tell compiler versions apart, so this
   shows that the pipeline works, not that the version is right.
 
-A function with enough arithmetic, branching and register pressure to tell the versions apart has yet to be matched.
+The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 patch 2 and NitroSystem with 2.0 SP2,
+as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
+its libraries with, not what the game's own code was built with.
+
+For the game's code, a function with enough arithmetic, branching and register pressure to tell the versions apart
+has yet to be matched.
 The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
 it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
 include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
