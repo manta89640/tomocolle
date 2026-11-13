@@ -2,7 +2,7 @@
 
 typedef struct Shtts {
     /* 0x00000 */ s32 unk_00000;
-    /* 0x00004 */ u16 unk_00004;
+    /* 0x00004 */ s16 unk_00004; // Read as signed by func_0208e3b4
     /* 0x00006 */ u8 pad_00006[0x2];
     /* 0x00008 */ u32 unk_00008;
     /* 0x0000C */ u16 unk_0000C;
@@ -10,11 +10,14 @@ typedef struct Shtts {
     /* 0x01B21 */ u8 unk_01B21;
     /* 0x01B22 */ u8 pad_01B22[0x2E16];
     /* 0x04938 */ u16 unk_04938;
-    /* 0x0493A */ u8 pad_0493A[0x3DE2];
+    /* 0x0493A */ u8 pad_0493A[0x3BFE];
+    /* 0x08538 */ s16 unk_08538;
+    /* 0x0853A */ s16 unk_0853A[241];
     /* 0x0871C */ s16 unk_0871C;
-    /* 0x0871E */ u8 pad_0871E[0x4];
-    /* 0x08722 */ u16 unk_08722;
-    /* 0x08724 */ u8 pad_08724[0x1E2];
+    /* 0x0871E */ s16 unk_0871E;
+    /* 0x08720 */ s16 unk_08720;
+    /* 0x08722 */ s16 unk_08722;
+    /* 0x08724 */ s16 unk_08724[0xF1]; // A count, then that many samples
     /* 0x08906 */ u16 unk_08906;
     /* 0x08908 */ s16 unk_08908[0x1E0]; // A buffer of samples, with the pointers into it below
     /* 0x08CC8 */ s16 *unk_08CC8;
@@ -26,19 +29,23 @@ typedef struct Shtts {
     /* 0x08CDE */ s16 unk_08CDE;
     /* 0x08CE0 */ u32 unk_08CE0;
     /* 0x08CE4 */ u16 unk_08CE4;
-    /* 0x08CE6 */ char text[0xB6FC - 0x8CE6]; // What is to be spoken
+    /* 0x08CE6 */ char text[0x2400]; // Text that func_02086b14 reads from standard input
+    /* 0x0B0E6 */ char unk_0B0E6[0x400]; // The text to speak, as func_0208d500 was given it
+    /* 0x0B4E6 */ u8 pad_0B4E6[0x2];
+    /* 0x0B4E8 */ ShttsUnk_020856b0 unk_0B4E8; // What func_02085704 works with, when the chorus setting is not 0
+    /* 0x0B6F8 */ u8 pad_0B6F8[0x4];
     /* 0x0B6FC */ u32 unk_0B6FC;
-    /* 0x0B700 */ u32 unk_0B700;
+    /* 0x0B700 */ s32 unk_0B700; // The last sample of the block before, for func_0208e4e4
     /* 0x0B704 */ char unk_0B704[0x18];
     /* 0x0B71C */ ShttsCallback callback; // Receives the samples
     /* 0x0B720 */ u32 unk_0B720;
     /* 0x0B724 */ void *callbackArg;
-    /* 0x0B728 */ u8 unk_0B728;
-    /* 0x0B729 */ u8 unk_0B729;
-    /* 0x0B72A */ u8 unk_0B72A;
-    /* 0x0B72B */ u8 unk_0B72B;
-    /* 0x0B72C */ u8 unk_0B72C;
-    /* 0x0B72D */ u8 unk_0B72D;
+    /* 0x0B728 */ s8 unk_0B728;
+    /* 0x0B729 */ s8 unk_0B729;
+    /* 0x0B72A */ s8 unk_0B72A;
+    /* 0x0B72B */ s8 unk_0B72B;
+    /* 0x0B72C */ s8 unk_0B72C;
+    /* 0x0B72D */ s8 unk_0B72D;
     /* 0x0B72E */ u8 pad_0B72E[0x2];
     /* 0x0B730 */ u8 unk_0B730[16];
     /* 0x0B740 */ u8 echoBuffer[0x2EE4];
@@ -50,7 +57,7 @@ typedef struct Shtts {
     /* 0x0EE04 */ u32 unk_0EE04;
     /* 0x0EE08 */ u32 unk_0EE08;
     /* 0x0EE0C */ u16 unk_0EE0C;
-    /* 0x0EE0E */ u8 unk_0EE0E;
+    /* 0x0EE0E */ s8 unk_0EE0E;
     /* 0x0EE0F */ u8 busy; // 1 while text is being synthesized
     /* 0x0EE10 */ u8 stopRequested; // 1 once a caller has asked for that to stop
     /* 0x0EE11 */ u8 unk_0EE11;
@@ -58,7 +65,8 @@ typedef struct Shtts {
     /* 0x0EE14 */ u32 unk_0EE14;
     /* 0x0EE18 */ u32 unk_0EE18;
     /* 0x0EE1C */ OSThread thread; // Synthesizes
-    /* 0x0EEDC */ u8 pad_0EEDC[0x14];
+    /* 0x0EEDC */ u32 unk_0EEDC; // The fourth argument of func_0208d500, 0 to 31
+    /* 0x0EEE0 */ u8 pad_0EEE0[0x10];
     /* 0x0EEF0 */ OSMutex mutex; // Guards busy and stopRequested
     /* 0x0EF08 */ OSMutex unk_0EF08;
     /* 0x0EF20 */ ShttsParams set; // What the caller has set

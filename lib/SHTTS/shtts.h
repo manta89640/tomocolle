@@ -32,6 +32,15 @@ typedef struct ShttsParams {
     /* 0x2C */ s16 pitchTrans;
 } ShttsParams; // 0x30
 
+// What the chorus effect works with: a ring of samples, and where it is in it
+typedef struct ShttsUnk_020856b0 {
+    /* 0x000 */ s16 unk_000[0x100];
+    /* 0x200 */ s32 unk_200;
+    /* 0x204 */ s32 unk_204;
+    /* 0x208 */ s32 unk_208;
+    /* 0x20C */ s32 unk_20C;
+} ShttsUnk_020856b0;
+
 // The engine's whole state, 0x14000 bytes that the caller provides. Its fields are in fields.txt.
 #include "shtts_struct.h"
 
@@ -57,7 +66,7 @@ int func_0208e338(Shtts *engine);
 int func_0208e354(const char *name);
 int func_020873a4(const char *command, int live, Shtts *engine);
 void func_02086814(Shtts *engine);
-int func_02087e44(int value, int min, int max, const char *name);
+s16 func_02087e44(int value, s16 min, s16 max, const char *name);
 int func_02087e64(const char *text);
 void func_0208a010(Shtts *engine);
 void func_0208c404(Shtts *engine);
@@ -78,24 +87,16 @@ typedef struct ShttsUnit {
 extern ShttsUnit data_020e8f08[][8][38][8];
 
 typedef struct ShttsUnk_02087d98 {
-    /* 0x00 */ s8 unk_00;
-    /* 0x01 */ u8 pad_01[3];
+    /* 0x00 */ char name[4];
     /* 0x04 */ s8 unk_04;
     /* 0x05 */ s8 unk_05;
     /* 0x06 */ s16 unk_06;
     /* 0x08 */ s16 unk_08;
-    /* 0x0A */ u8 pad_0A[2];
+    /* 0x0A */ s16 unk_0A;
     /* 0x0C */ s16 pitch;
-    /* 0x10 */ u32 unk_10;
+    /* 0x10 */ struct ShttsUnk_02087d98 *next;
 } ShttsUnk_02087d98;
 
-typedef struct ShttsUnk_020856b0 {
-    /* 0x000 */ u8 unk_000[0x200];
-    /* 0x200 */ s32 unk_200;
-    /* 0x204 */ s32 unk_204;
-    /* 0x208 */ s32 unk_208;
-    /* 0x20C */ s32 unk_20C;
-} ShttsUnk_020856b0;
 
 // The first field of each 16-byte entry of a table that func_0208aba8 is given
 typedef struct ShttsUnk_0208aba8 {
@@ -116,9 +117,9 @@ typedef struct ShttsWordList {
 } ShttsWordList;
 
 // A sine wave, 256 values to the cycle
-extern s16 data_020e8d08[256];
+extern const s16 data_020e8d08[256];
 
-int func_020857e8();
+int func_020857e8(const char *text);
 void func_02089e70(int code);
 char *func_02089d7c(char *text, int c);
 s16 func_02089444(int a, int b);
@@ -133,5 +134,209 @@ void func_0208be9c(int count, s16 *buffer, Shtts *engine);
 extern ShttsPreset ShttsPresets[SHTTS_PRESET_COUNT];
 // The sounds of speech as the engine writes them: "S" for silence, the vowels, "N", "X", then the consonants
 extern const char *ShttsPhonemeNames[SHTTS_PHONEME_COUNT];
+
+
+extern s8 data_020bc22c[]; // Flags of each phoneme
+s16 func_02089244(const char *text, const char *table, int count);
+s16 func_02089094(char *text, u32 size, const char *line);
+int func_020892a8(const char *text, const char *unused);
+int func_02089304(const char *text, const char *unused);
+void func_020893e4(const char *text, s16 *out);
+void func_02089e74(s16 *dst, s16 *src, int count, int gain);
+void func_0208e464(int from, int to, int count, s16 *data);
+void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst);
+int func_02089c50(Shtts *engine);
+int func_0208ea20(const int *state, const s16 *coefficients);
+int func_0208ea84(const int *state, const s16 *coefficients);
+
+// One frame of speech as it is stored: func_020894cc decodes it into samples
+typedef struct ShttsFrame {
+    /* 0x0 */ s16 unk_0;
+    /* 0x2 */ s8 unk_2;
+    /* 0x3 */ u8 unk_3;
+    /* 0x4 */ s32 unk_4; // Index in data_020bc22c
+    /* 0x8 */ s8 unk_8[5]; // Ten indices of four bits each
+} ShttsFrame;
+
+// ---- From the decompilation of group a
+
+// One entry of the array that func_02084c1c walks, 16 bytes
+typedef struct ShttsUnk_02084c1c {
+    /* 0x0 */ s32 phoneme; // Index in data_020bc22c
+    /* 0x4 */ s16 length;
+    /* 0x6 */ u8 pad_6[8];
+    /* 0xE */ u8 first;
+    /* 0xF */ u8 last;
+} ShttsUnk_02084c1c; // 0x10
+
+// One entry of the array that func_020850e0 spreads over a number of pointers, 16 bytes
+typedef struct ShttsUnk_020850e0 {
+    /* 0x0 */ s16 unk_0;
+    /* 0x2 */ s8 unk_2;
+    /* 0x3 */ u8 pad_3[13];
+} ShttsUnk_020850e0; // 0x10
+
+typedef struct ShttsFrame ShttsUnk_020858c8;
+
+// The structures that func_02085b30 walks
+typedef struct ShttsUnk_02085b30_C {
+    /* 0x00 */ u8 pad_00[0x10];
+    /* 0x10 */ struct ShttsUnk_02085b30_C *next;
+} ShttsUnk_02085b30_C;
+
+typedef struct ShttsUnk_02085b30_B {
+    /* 0x00 */ const char *text;
+    /* 0x04 */ s8 count; // Of the list at unk_18
+    /* 0x05 */ u8 pad_05[5];
+    /* 0x0A */ s16 speed;
+    /* 0x0C */ u8 pad_0C[10];
+    /* 0x16 */ s16 unk_16;
+    /* 0x18 */ ShttsUnk_02085b30_C *unk_18;
+    /* 0x1C */ struct ShttsUnk_02085b30_B *next;
+} ShttsUnk_02085b30_B;
+
+typedef struct ShttsUnk_02085b30_D {
+    /* 0x00 */ u8 pad_00[0x12];
+    /* 0x12 */ s16 unk_12;
+} ShttsUnk_02085b30_D;
+
+typedef struct ShttsUnk_02085b30_A {
+    /* 0x0 */ s8 count; // Of the list at first
+    /* 0x4 */ ShttsUnk_02085b30_B *first;
+    /* 0x8 */ ShttsUnk_02085b30_D *unk_8;
+    /* 0xC */ struct ShttsUnk_02085b30_A *next;
+} ShttsUnk_02085b30_A; // 0x10
+
+extern ShttsPreset data_020b7fc8[SHTTS_PRESET_COUNT];
+extern s16 data_020b9aa0[];
+extern s16 data_020b9b04[];
+extern s16 data_020b9bbc[];
+extern ShttsUnk_02085b30_C data_020b9cbc;
+extern ShttsUnk_020850e0 *const data_020bc258;
+
+void func_02084830(char *text);
+int func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames, ShttsUnk_020850e0 **out, Shtts *engine);
+void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_020850e0 **dst, Shtts *engine);
+void func_02085704(ShttsUnk_020856b0 *unk, s16 *in, s16 *out, int count);
+int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine);
+void func_02085a70(Shtts *engine);
+void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine);
+void func_02085d80(ShttsUnk_02085b30_C **units, int count, int total, int isFirst, int isLast, int position, char *unk, int unk_16, Shtts *engine);
+
+
+// ---- From the decompilation of group c
+// One frame of speech as it is stored: func_020894cc decodes it into samples
+
+
+extern u16 data_020bb720[10][16];
+extern s16 data_020bb860[];
+extern s16 data_020bba60[];
+extern s16 data_020bbc60[];
+
+char *func_02088fc8(char *out, s16 value);
+s16 func_02089118(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s16 d);
+int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine);
+const char *func_02087e94(const char *text, char *dest, u32 size);
+
+// How a piece of Japanese text is written in the engine's phonemes
+typedef struct ShttsKana {
+    /* 0x0 */ char kana[8];
+    /* 0x8 */ char phonemes[4];
+} ShttsKana; // 0xC
+
+extern const s16 data_020bac48; // The number of entries of data_020bac4c
+extern const char data_020bac4c[][12];
+
+
+// ---- From the decompilation of group f
+
+// The lists that func_0208c8e0 walks: a list of lists of lists of ShttsUnk_02087d98
+typedef struct ShttsUnk_0208c8e0_2 {
+    /* 0x00 */ u8 pad_00[4];
+    /* 0x04 */ s8 count;
+    /* 0x05 */ u8 pad_05[0xD];
+    /* 0x12 */ s16 unk_12; // If not 0, the length of a silence after this
+    /* 0x14 */ u8 pad_14[4];
+    /* 0x18 */ ShttsUnk_02087d98 *first;
+    /* 0x1C */ struct ShttsUnk_0208c8e0_2 *next;
+} ShttsUnk_0208c8e0_2;
+typedef struct ShttsUnk_0208c8e0_1 {
+    /* 0x00 */ s8 count;
+    /* 0x04 */ ShttsUnk_0208c8e0_2 *first;
+    /* 0x08 */ u8 pad_08[4];
+    /* 0x0C */ struct ShttsUnk_0208c8e0_1 *next;
+} ShttsUnk_0208c8e0_1;
+
+typedef struct ShttsUnk_0208c8e0 {
+    /* 0x00 */ s8 count;
+    /* 0x04 */ ShttsUnk_0208c8e0_1 *first;
+} ShttsUnk_0208c8e0;
+
+// One sound to speak. func_0208c8e0 and func_0208cc10 fill an array of these from its second entry on, and end it
+// with one whose phoneme is 7.
+typedef struct ShttsSound {
+    /* 0x0 */ s32 phoneme; // Index in ShttsPhonemeNames
+    /* 0x4 */ s16 unk_4;
+    /* 0x6 */ s16 unk_6;
+    /* 0x8 */ s16 unk_8;
+    /* 0xA */ s16 unk_A;
+    /* 0xC */ s16 unk_C;
+    /* 0xE */ s8 unk_E;
+    /* 0xF */ s8 unk_F;
+} ShttsSound; // 0x10
+
+int func_0208c8e0(ShttsUnk_0208c8e0 *lists, ShttsSound *sounds, int max);
+int func_0208cc10(ShttsSound *sounds, Shtts *engine);
+void func_0208cf40(ShttsSound *sounds, int count, int flags, Shtts *engine);
+int func_0208d500(Shtts *engine, const char *text, u32 mode, u32 unk, ShttsCallback callback, void *arg);
+void func_0208e3b4(int unk, Shtts *engine);
+int func_0208e83c(int count, int order, const s16 *coefficients, int *state, s16 *src, s16 *dst, Shtts *engine);
+void func_0208c5a8(Shtts *engine);
+void func_02089ed4(int count, s16 *src, s16 *dst, Shtts *engine);
+void func_0208683c(int count, s16 *src, s16 *dst, Shtts *engine);
+// sscanf
+int func_020188f4(const char *text, const char *format, ...);
+
+// "[SDK+SHARP:SHTTS-1_2_0]", the engine's tag in the SDK's list of libraries. It has no symbol in symbols.txt.
+extern char data_02000bd8[];
+
+
+int func_0208473c(const char *a, const char *b);
+int func_02084794(char *text, ShttsWordList *list);
+int func_02084814(void *arg);
+void func_020856b0(ShttsUnk_020856b0 *unk, int rate);
+int func_02085a64(Shtts *engine);
+int func_02086628(s16 value);
+int func_02086a20(const int *state, const s16 *coefficients, int input);
+void func_02086a74(int value, int *out);
+int func_02086a7c(char *dst, int size, char **cursor);
+void func_02086b14(Shtts *engine);
+void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine);
+int func_02087dc8(const char *text, const char *find);
+int func_02089b5c(int a, int b);
+int func_02089cec(void);
+int func_02089d4c(Shtts *engine);
+char *func_02089da0(char **cursor, char *delimiters);
+void func_02089e48(char *dst, int c, int count);
+void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b);
+ShttsUnit *func_0208bdf4(int *index, Shtts *engine);
+void func_0208be38(Shtts *engine);
+void func_0208c054(Shtts *engine);
+int func_0208c568(Shtts *engine);
+int func_0208e09c(Shtts *engine, int value);
+int func_0208e0cc(Shtts *engine, int value);
+int func_0208e0fc(Shtts *engine, int value);
+int func_0208e12c(Shtts *engine, int value);
+int func_0208e160(Shtts *engine, int value);
+int func_0208e190(Shtts *engine, int value);
+int func_0208e1c0(Shtts *engine, int value);
+int func_0208e1e8(Shtts *engine, int value);
+int func_0208e210(Shtts *engine, int value);
+int func_0208e238(Shtts *engine, int value);
+int func_0208e298(Shtts *engine, int value);
+int func_0208e2c0(Shtts *engine, int value);
+int func_0208e2e8(Shtts *engine, int value);
+int func_0208e310(Shtts *engine, int value);
+int func_0208e81c(int a, int b);
 
 #endif // SHTTS_H

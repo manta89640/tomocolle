@@ -5,28 +5,824 @@
 #include <stdlib.h>
 #include <string.h>
 
-void func_02089cf4(Shtts *engine) {
-    OS_LockMutex(&engine->mutex);
+int func_0208e09c(Shtts *engine, int value);
+int func_0208e0cc(Shtts *engine, int value);
+int func_0208e0fc(Shtts *engine, int value);
+int func_0208e12c(Shtts *engine, int value);
+int func_0208e160(Shtts *engine, int value);
+int func_0208e190(Shtts *engine, int value);
+int func_0208e1c0(Shtts *engine, int value);
+int func_0208e1e8(Shtts *engine, int value);
+int func_0208e210(Shtts *engine, int value);
+int func_0208e238(Shtts *engine, int value);
+int func_0208e298(Shtts *engine, int value);
+int func_0208e2c0(Shtts *engine, int value);
+int func_0208e2e8(Shtts *engine, int value);
+int func_0208e310(Shtts *engine, int value);
+
+// The next four are written in assembly in the original too: they use the processor's multiply-accumulate
+// instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
+// not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
+
+// Takes a text and starts the thread that speaks it
+static inline void ShttsStart(Shtts *engine, const char *text, ShttsCallback callback, void *arg, int unk) {
+    engine->unk_0EE11 = unk;
+    func_0208d4f0(engine, callback, arg);
+    func_02089c50(engine);
+    memset(engine->unk_0B0E6, 0, sizeof(engine->unk_0B0E6));
+    strncpy(engine->unk_0B0E6, text, sizeof(engine->unk_0B0E6));
+    if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] != 0) {
+        // Too long: cut it, and not in the middle of a character of two bytes
+        engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 1] = 0;
+        if (engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] & 0x80) {
+            engine->unk_0B0E6[sizeof(engine->unk_0B0E6) - 2] = 0;
+        }
+    }
+    func_0208c5a8(engine);
 }
 
-void func_02089d08(Shtts *engine) {
-    OS_UnlockMutex(&engine->mutex);
+// Compares two strings, taking 'I' and 'U' for 'i' and 'u'
+int func_0208473c(const char *a, const char *b) {
+    while (*a != 0 || *b != 0) {
+        int ca = *a;
+        int cb = *b;
+
+        if (ca != cb) {
+            if (ca == 'I' || ca == 'U') {
+                ca += 0x20;
+            }
+            if (cb == 'I' || cb == 'U') {
+                cb += 0x20;
+            }
+            if (ca != cb) {
+                return ca - cb;
+            }
+        }
+        a++;
+        b++;
+    }
+    return 0;
 }
 
-// Whether the engine is synthesizing
-int func_02089d1c(Shtts *engine) {
-    int busy;
+// Looks a word up in a sorted list. If it is there, writes it back as the list spells it and returns its value.
+int func_02084794(char *text, ShttsWordList *list) {
+    int low = 0;
+    int high = list->count - 1;
 
-    OS_LockMutex(&engine->mutex);
-    busy = engine->busy;
-    OS_UnlockMutex(&engine->mutex);
-    return busy;
+    while (low <= high) {
+        int middle = (low + high) >> 1;
+        s16 order = func_0208473c(text, list->words[middle].name);
+
+        if (order < 0) {
+            high = middle - 1;
+        } else if (order > 0) {
+            low = middle + 1;
+        } else {
+            strcpy(text, list->words[middle].name);
+            return list->words[middle].value;
+        }
+    }
+    return -1;
+}
+
+int func_02084814(void *arg) {
+    s16 count = func_020857e8(arg) - 2;
+
+    if (count < 0) {
+        return 0;
+    }
+    return count;
+}
+
+// Replaces each name of a preset in the text, such as "<\Spk_male>" or "<\Name=value>", by the preset's commands,
+// each on a line of its own, followed by the value if there is one. The result is cut off at 0x400 characters.
+void func_02084830(char *text) {
+    char pending = 0;
+    char one[2] = {0};
+    char out[0x400];
+    int n;
+    char *dst = out;
+    int length = 0;
+    int textLength;
+    int i;
+
+    memset(dst, 0, sizeof(out));
+    textLength = strlen(text);
+    for (i = 0; i < textLength; i++) {
+        char name[30] = {0};
+        char value[10] = {0};
+        n = 0;
+
+        if (text[i] == '<' && text[i + 1] == '\\') {
+            int start = i + 1;
+            int k;
+
+            if (pending == 1) {
+                length += strlen("\n");
+                if (length >= 0x400) {
+                    break;
+                }
+                strcat(dst, "\n");
+                pending = 0;
+            }
+            while (text[i] != '>' && text[i] != '=') {
+                name[n] = text[i];
+                if (n > 20 || i == strlen(text) - 1 || (text[i] == '<' && text[i + 1] == '\\' && n != 0)) {
+                    i = start;
+                    memset(name, 0, sizeof(name));
+                    break;
+                }
+                n++;
+                i++;
+            }
+            n = 0;
+            if (text[i] == '=') {
+                while (text[i] != '>') {
+                    value[n] = text[i];
+                    if (n > 7 || i == strlen(text) - 1 || (text[i] == '<' && text[i + 1] == '\\')) {
+                        i = start;
+                        memset(name, 0, sizeof(name));
+                        break;
+                    }
+                    i++;
+                    n++;
+                }
+            }
+            for (k = 0; k < SHTTS_PRESET_COUNT; k++) {
+                if (strcmp(name, data_020b7fc8[k].name) == 0) {
+                    int valueLength = strlen(value + 1);
+                    int commandsLength = strlen(data_020b7fc8[k].commands);
+
+                    length += commandsLength + valueLength;
+                    if (length >= 0x400) {
+                        goto done;
+                    }
+                    strcat(dst, data_020b7fc8[k].commands);
+                    if (value[1] == '+') {
+                        strcat(dst, value + 2);
+                    } else {
+                        strcat(dst, value + 1);
+                    }
+                    if (strcmp(data_020b7fc8[k].commands, "#p") == 0) {
+                        length += strlen("\\");
+                        if (length >= 0x400) {
+                            goto done;
+                        }
+                        strcat(dst, "\\");
+                    } else {
+                        length += strlen("\n#q");
+                        if (length >= 0x400) {
+                            goto done;
+                        }
+                        strcat(dst, "\n#q");
+                    }
+                    length += strlen("\n");
+                    if (length >= 0x400) {
+                        goto done;
+                    }
+                    strcat(dst, "\n");
+                    break;
+                }
+            }
+        } else {
+            strncpy(one, text + i, 1);
+            length += strlen(one);
+            if (length >= 0x400) {
+                break;
+            }
+            strcat(dst, one);
+            pending = 1;
+        }
+    }
+done:
+    strcpy(text, out);
+}
+
+// Gives each entry from first to last its length, and has func_020850e0 fill out with that many pointers to the
+// entry's frames (entries first to last of the frames). Returns the sum of the lengths.
+int func_02084c1c(ShttsUnk_02084c1c *first, ShttsUnk_02084c1c *last, ShttsUnk_020850e0 *frames,
+                  ShttsUnk_020850e0 **out, Shtts *engine) {
+    s16 i;
+    s16 a = 0;
+    s16 b;
+    s16 count;
+    s16 total;
+    s16 length;
+    s16 frameCount;
+    s16 result;
+    s8 next;
+    ShttsUnk_02084c1c *p;
+
+    if (engine->unk_0EE0E == -1 || engine->unk_0EE0E == 2) {
+        engine->unk_0B72D = -1;
+    } else {
+        engine->unk_0B72D = 1;
+    }
+    count = 0;
+    p = first;
+    total = 0;
+    for (; p <= last; p++, count++) {
+        total += p->length;
+    }
+    if (count == 0) {
+        return 0;
+    }
+    frameCount = last->last - first->first + 1;
+    b = 0;
+    engine->unk_08538 = 0;
+    result = 0;
+    next = first[1].phoneme;
+    for (i = 0; i < count; i++, first++) {
+        s16 n;
+        int phoneme;
+
+        length = first->length;
+        if (length < 0) {
+            continue;
+        }
+        if (i + 1 < count && first[1].first == first[1].last && (data_020bc22c[first->phoneme] & 0x80)) {
+            i++;
+            first++;
+            length += first->length;
+        }
+        if (engine->unk_0EE0E == 0 && (data_020bc22c[next] & 0x56) == 0x40) {
+            s16 x;
+
+            x = first[1].first != first[1].last ? first[1].last - first[1].first + 1
+                : first[2].first != first[2].last ? first[2].last - first[2].first + 1
+                : first[3].first != first[3].last ? first[3].last - first[3].first + 1 : 0;
+            if (frameCount > total) {
+                if (i == 0 && count > 1) {
+                    engine->unk_0B72D = 1;
+                    length = (length + ((length + first[1].length) * (first->last - first->first + 1)) /
+                                           (first->last - first->first + 1 + x) + 1) >> 1;
+                    a = length;
+                    if (length < 0) {
+                        length = first->length;
+                    }
+                } else if (i > 0) {
+                    if (i > 1 && b != 0) {
+                        engine->unk_0B72D = -1;
+                        length = total - a - b;
+                    } else {
+                        engine->unk_0B72D = 0;
+                        b = length + first[-1].length - a;
+                        length = b;
+                    }
+                }
+            } else {
+                if (i == 0 && count > 1) {
+                    engine->unk_0B72D = 1;
+                    if (data_020bc22c[first[1].phoneme] & 0x40) {
+                        length = first->length + ((first[1].length - x) >> 1);
+                        a = length;
+                    } else {
+                        a = length;
+                    }
+                } else if (i > 0) {
+                    if (i > 1 && b != 0) {
+                        engine->unk_0B72D = -1;
+                        length = total - b - a;
+                    } else if (data_020bc22c[first->phoneme] & 0x40) {
+                        engine->unk_0B72D = 0;
+                        b = first->last - first->first + 1;
+                        length = b;
+                    } else {
+                        engine->unk_0B72D = -1;
+                        length = total - a;
+                    }
+                }
+            }
+        }
+        n = first->last - first->first + 1;
+        phoneme = first->phoneme;
+        if (n < 1) {
+            length = 0;
+        } else {
+            s8 flags = data_020bc22c[phoneme];
+
+            engine->unk_0B72A = (flags & 0x10) == 0;
+            engine->unk_0B728 = flags & 4;
+            engine->unk_0B729 = flags & 8;
+            engine->unk_0B72C = flags & 2;
+            engine->unk_0B72B = flags & 0x80;
+            if (engine->unk_08538 + length >= 0x9FF) {
+                length = 0x9FF - engine->unk_08538;
+            }
+            if (length <= 0) {
+                length = 0;
+            } else {
+                engine->unk_08538 += length;
+                func_020850e0(frames, n, length, out, engine);
+            }
+        }
+        first->length = length;
+        frames += first->last - first->first + 1;
+        out += length;
+        result += length;
+        engine->unk_0B72D = -1;
+    }
+    return result;
+}
+
+// Fills dst with dstCount pointers to the srcCount entries at src, repeating or leaving out entries
+void func_020850e0(ShttsUnk_020850e0 *src, s16 srcCount, s16 dstCount, ShttsUnk_020850e0 **dst, Shtts *engine) {
+    s16 i;
+    s16 j;
+    s16 diff;
+    s16 n;
+    s16 first;
+
+    if (dstCount == srcCount) {
+        for (i = 0; i < dstCount; i++) {
+            *dst++ = src;
+            src++;
+        }
+        return;
+    }
+    if (engine->unk_0B72B != 0 || engine->unk_0B728 != 0 || engine->unk_0B729 != 0) {
+        diff = dstCount - srcCount;
+        if (diff < 0) {
+            if (engine->unk_0B72D == 1 && engine->unk_0B72B != 0 && engine->unk_0EE0E == -1 && -diff <= dstCount) {
+                for (i = 0; i < dstCount; i++) {
+                    *dst++ = src;
+                    src++;
+                    if (diff < 0) {
+                        src++;
+                        diff++;
+                        if (diff < 0) {
+                            src++;
+                            diff++;
+                        }
+                    }
+                }
+                return;
+            }
+            if (engine->unk_0B72D == -1 && engine->unk_0B72B != 0 && engine->unk_0EE0E == -1 && -diff <= dstCount) {
+                dst += dstCount - 1;
+                src += srcCount - 1;
+                for (; dstCount > 0; dstCount--) {
+                    *dst-- = src;
+                    src--;
+                    if (diff < 0) {
+                        src--;
+                        diff++;
+                        if (diff < 0) {
+                            src--;
+                            diff++;
+                        }
+                    }
+                }
+                return;
+            }
+            i = 0;
+            j = 1;
+            while (i < dstCount) {
+                while (j * dstCount <= i * srcCount && j < srcCount) {
+                    src++;
+                    j++;
+                }
+                *dst++ = src;
+                i++;
+            }
+            return;
+        }
+        if (engine->unk_0B72D == 1 && engine->unk_0B72B != 0) {
+            for (i = 0; i < diff; i++) {
+                *dst++ = src;
+            }
+            for (i = 0; i < srcCount; i++) {
+                *dst++ = src;
+                src++;
+            }
+            return;
+        }
+        if (engine->unk_0B72D == -1 && engine->unk_0B72B != 0) {
+            for (i = 0; i < srcCount; i++) {
+                *dst++ = src;
+                src++;
+            }
+            for (i = 0; i < diff; i++) {
+                *dst++ = src - 1;
+            }
+            return;
+        }
+        j = 1;
+        for (i = 0; i < dstCount; i++) {
+            if (j * dstCount <= i * srcCount) {
+                src++;
+                j++;
+            }
+            *dst++ = src;
+        }
+        return;
+    }
+    n = 0;
+    first = -1;
+    for (i = 0; i < srcCount; i++) {
+        if (src[i].unk_2 == 0) {
+            first = i;
+            break;
+        }
+    }
+    if (first != -1) {
+        int limit = srcCount - first;
+
+        for (i = first; i < limit; i++) {
+            if (src[i].unk_2 > 0) {
+                break;
+            }
+        }
+        n = i - first;
+    }
+    diff = dstCount - srcCount;
+    if (diff < 0) {
+        if (n != 0) {
+            for (i = 0; i < first; i++) {
+                *dst++ = src;
+                src++;
+            }
+        }
+        for (; diff < 0; diff++) {
+            src++;
+        }
+    } else if (diff > 0) {
+        if (engine->unk_0B72A == 0 && engine->unk_0B72C != 0) {
+            if (n != 0) {
+                for (i = 0; i < first; i++) {
+                    *dst++ = src;
+                    src++;
+                }
+            }
+            for (i = 0; i < diff; i++) {
+                *dst++ = data_020bc258;
+            }
+            dstCount -= diff;
+            if (n >= 6) {
+                for (i = 0; i < 6; i++) {
+                    int v = (6 - i) * 40;
+
+                    if (src[i].unk_0 > (s16)v) {
+                        src[i].unk_0 -= v;
+                    } else {
+                        src[i].unk_0 = 0;
+                    }
+                }
+            }
+        } else {
+            if (n != 0) {
+                for (i = 0; i < n; i++) {
+                    *dst++ = src;
+                    src++;
+                }
+                srcCount -= i;
+                dstCount -= i;
+            }
+            diff = dstCount - srcCount;
+            if (diff > srcCount) {
+                for (i = 0; i < diff - srcCount; i++) {
+                    *dst++ = src;
+                }
+                dstCount = srcCount * 2;
+            }
+            diff = dstCount - srcCount;
+            for (i = 0; i < diff; i++) {
+                *dst++ = src;
+                *dst++ = src;
+                src++;
+            }
+            dstCount = srcCount * 2 - dstCount;
+        }
+    }
+    for (i = 0; i < dstCount; i++) {
+        *dst++ = src;
+        src++;
+    }
+}
+
+void func_020856b0(ShttsUnk_020856b0 *unk, int rate) {
+    if (rate <= 0) {
+        rate = 1;
+    }
+    unk->unk_200 = ((0x12C00 / rate) << 5) / 256;
+    if (unk->unk_200 == 0) {
+        unk->unk_200 = 1;
+    }
+    unk->unk_204 = 0;
+    unk->unk_208 = 0;
+    unk->unk_20C = 0;
+    memset(unk->unk_000, 0, sizeof(unk->unk_000));
+}
+
+// A chorus: gives for each sample the mean of two earlier ones, at delays that sweep up and down and add up to 255
+void func_02085704(ShttsUnk_020856b0 *unk, s16 *in, s16 *out, int count) {
+    int i;
+
+    for (i = 0; i < count; i++) {
+        int delay;
+
+        unk->unk_000[unk->unk_204] = in[i];
+        out[i] = 0;
+        delay = unk->unk_208;
+        if (delay >= 0x100) {
+            delay = 0x1FF - delay;
+        }
+        out[i] += unk->unk_000[(unk->unk_204 - delay) & 0xFFu] >> 1;
+        delay = 0xFF - delay;
+        out[i] += unk->unk_000[(unk->unk_204 - delay) & 0xFFu] >> 1;
+        unk->unk_204++;
+        if (unk->unk_204 >= 0x100) {
+            unk->unk_204 = 0;
+        }
+        unk->unk_20C += 0x20;
+        if (unk->unk_20C >= unk->unk_200) {
+            unk->unk_20C = 0;
+            unk->unk_208++;
+            if (unk->unk_208 >= 0x1FF) {
+                unk->unk_208 = 0;
+            }
+        }
+    }
+}
+
+// The number of vowels, 'N's, 'Q's and '-'s in text
+int func_020857e8(const char *text) {
+    s16 count;
+
+    if (text == NULL) {
+        return 0;
+    }
+    count = 0;
+    while (*text != 0) {
+        switch (*text) {
+        case '-':
+        case 'A':
+        case 'E':
+        case 'I':
+        case 'N':
+        case 'O':
+        case 'Q':
+        case 'U':
+        case 'a':
+        case 'e':
+        case 'i':
+        case 'o':
+        case 'u':
+            count++;
+            break;
+        }
+        text++;
+    }
+    return count;
+}
+
+// Has func_020894cc fill unk_0853A from its second entry on, works out unk_0871E (0 to 90) and unk_0871C (0 to 239),
+// scales what was filled in by twice the entry of data_020b9b04 that unk_0871E picks, and keeps the count first
+int func_020858c8(ShttsUnk_020858c8 *unk, int b, Shtts *engine) {
+    s16 count;
+    int gain;
+
+    engine->unk_08720 = func_020894cc(unk, engine->unk_0853A, engine);
+    if (unk->unk_3 == (s8)engine->unk_00004 || unk->unk_3 == 0) {
+        b = 0;
+    }
+    engine->unk_0871E = (unk->unk_0 * 0xCCD + 0x4000) >> 15;
+    if (engine->unk_0871E > 90) {
+        engine->unk_0871E = 90;
+    }
+    if (engine->unk_0871E < 0) {
+        engine->unk_0871E = 0;
+    }
+    if (b > 0) {
+        s16 index = (b >> 7) - 28;
+        s16 fraction;
+
+        if (index >= 50) {
+            index = 49;
+        }
+        if (index < 0) {
+            index = 0;
+        }
+        fraction = b & 0x7F;
+        engine->unk_0871C = (data_020b9aa0[index] * data_020b9bbc[fraction]) >> 16;
+        engine->unk_0871C = (engine->unk_00000 * engine->unk_0871C) >> 16;
+        engine->unk_0871C = (engine->unk_0871C * 0x3EE2) >> 16;
+    } else {
+        engine->unk_0871C = b;
+    }
+    if (engine->unk_0871C < 0) {
+        engine->unk_0871C = 0;
+    } else if (engine->unk_0871C >= 240) {
+        engine->unk_0871C = 239;
+    }
+    count = engine->unk_08720;
+    if (count < 0) {
+        count = -count;
+    }
+    gain = data_020b9b04[engine->unk_0871E] * 2;
+    if (count > 0) {
+        func_02089e74(&engine->unk_0853A[1], &engine->unk_0853A[1], count, gain);
+    }
+    engine->unk_0853A[0] = count;
+    return 1;
+}
+
+int func_02085a64(Shtts *engine) {
+    return engine->unk_0871C;
+}
+
+// Copies unk_0853A to unk_08724, or sets the first of unk_08724 to 0
+void func_02085a70(Shtts *engine) {
+    s16 i;
+
+    if (engine->unk_08720 > 0 && engine->unk_0871C > 0) {
+        for (i = 0; i <= engine->unk_08720; i++) {
+            engine->unk_08724[i] = engine->unk_0853A[i];
+        }
+    } else if (engine->unk_08720 < 0 || engine->unk_0871C == 0) {
+        for (i = 0; i <= engine->unk_0853A[0]; i++) {
+            engine->unk_08724[i] = engine->unk_0853A[i];
+        }
+    } else {
+        engine->unk_08724[0] = 0;
+    }
+}
+
+// Walks the list in runs: a run ends at the entry whose count is 0 or whose unk_8->unk_12 is not 0. For each run it
+// adds up func_020857e8 of the texts, and then calls func_02085d80 for each B of each entry with a list of pointers:
+// data_020b9cbc for the entry's first B and otherwise where the walk of the B before ended, then the B's units, then
+// the first unit of the next B, or data_020b9cbc if there is none.
+void func_02085b30(ShttsUnk_02085b30_A *list, Shtts *engine) {
+    ShttsUnk_02085b30_C *units[98];
+    char unk = 0x1A;
+    ShttsUnk_02085b30_A *last = list;
+    ShttsUnk_02085b30_A *first = list;
+    ShttsUnk_02085b30_A *a;
+    ShttsUnk_02085b30_B *b;
+    ShttsUnk_02085b30_C *c;
+    ShttsUnk_02085b30_C **p;
+    s16 total;
+    s16 i;
+    s8 isFirst;
+    s8 isLast;
+    int position;
+
+    if (list == NULL) {
+        return;
+    }
+    do {
+        total = 0;
+        b = first->first;
+        for (i = 0; i < first->count; i++) {
+            total += func_020857e8(b->text);
+            b = b->next;
+        }
+        while (last->count != 0 && last->unk_8->unk_12 == 0) {
+            last = last->next;
+            for (i = 0; i < last->count; i++) {
+                total += func_020857e8(b->text);
+                b = b->next;
+            }
+        }
+        for (a = first; a <= last; a++) {
+            c = &data_020b9cbc;
+            b = a->first;
+            for (i = 0; i < a->count; i++, b = b->next) {
+                s16 k;
+
+                p = units;
+                *p++ = c;
+                c = b->unk_18;
+                for (k = 0; k < b->count; k++, c = c->next) {
+                    *p++ = c;
+                }
+                if (b->next != NULL) {
+                    if (b->next->unk_18 != NULL) {
+                        *p = b->next->unk_18;
+                    } else {
+                        *p = &data_020b9cbc;
+                    }
+                } else {
+                    *p = &data_020b9cbc;
+                }
+                isFirst = a == first && i == 0;
+                isLast = a == last && i == a->count - 1;
+                if (a == list) {
+                    position = 0;
+                } else if (last->next == NULL) {
+                    position = 2;
+                } else {
+                    position = 1;
+                }
+                engine->cur.speed = b->speed;
+                func_02085d80(units, b->count, total, isFirst, isLast, position, &unk, b->unk_16, engine);
+            }
+        }
+        last = last->next;
+        first = last;
+    } while (last != NULL);
+}
+
+int func_02086628(s16 value) {
+    if (value <= 3) {
+        return 0;
+    }
+    if (value > 3 && value < 9) {
+        return (s16)(value - 3);
+    }
+    if (value == 9 || value == 10) {
+        return 6;
+    }
+    if (value >= 11 && value <= 13) {
+        return 7;
+    }
+    if (value >= 14 && value <= 16) {
+        return 8;
+    }
+    if (value >= 17 && value <= 25) {
+        return 9;
+    }
+    if (value > 25) {
+        return 10;
+    }
+    return -1;
 }
 
 // Empties the echo's history
 void func_02086814(Shtts *engine) {
     engine->unk_0E624 = 0;
     memset(engine->echoBuffer, 0, sizeof(engine->echoBuffer));
+}
+
+asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
+    stmfd sp!, {r3, r4, lr}
+    sub sp, sp, #3
+    mov lr, #0
+    ldr r3, [r0, #0]
+    ldrsh r4, [r1, #0]
+    smlawb lr, r3, r4, lr
+    ldr r3, [r0, #4]
+    ldrsh r4, [r1, #2]
+    smlawb lr, r3, r4, lr
+    ldrsh r4, [r1, #4]
+    smlawb lr, r2, r4, lr
+    ldr r3, [r0, #8]
+    ldrsh r4, [r1, #6]
+    smlawb lr, r3, r4, lr
+    ldr r3, [r0, #12]
+    ldrsh r4, [r1, #8]
+    smlawb lr, r3, r4, lr
+    mov r0, lr
+    add sp, sp, #3
+    ldmfd sp!, {r3, r4, lr}
+    bx lr
+}
+
+void func_02086a74(int value, int *out) {
+    *out = value;
+}
+
+// Copies a line of text, up to size, and moves the cursor past it. Returns its length, -1 at the end of the text.
+int func_02086a7c(char *dst, int size, char **cursor) {
+    s16 length;
+    int last;
+
+    if (cursor == NULL || *cursor == NULL) {
+        return -2;
+    }
+    if (**cursor == 0) {
+        return -1;
+    }
+    last = size - 1;
+    length = 0;
+    while (**cursor != 0 && length < last) {
+        if (**cursor == '\n' || **cursor == '\r') {
+            (*cursor)++;
+            break;
+        }
+        *dst++ = *(*cursor)++;
+        length++;
+    }
+    *dst = 0;
+    return length;
+}
+
+// Reads the text to speak from standard input, a line at a time
+void func_02086b14(Shtts *engine) {
+    char line[150];
+    int length = 0;
+
+    while (1) {
+        if (fgets(line, sizeof(line), stdin) == NULL) {
+            return;
+        }
+        if (length > 3000) {
+            return;
+        }
+        strcat(engine->text, line);
+        length += sizeof(line);
+        strcpy(line, "");
+    }
 }
 
 // Carries out one command of the text: '#', a letter, and for most a number, which after a '+' is added to the
@@ -235,15 +1031,51 @@ int func_020873a4(const char *command, int live, Shtts *engine) {
     return 0;
 }
 
+void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine) {
+    unk->name[0] = '\0';
+    unk->unk_04 = unk->unk_05 = '-';
+    unk->unk_08 = 0;
+    unk->unk_06 = 0;
+    unk->next = NULL;
+    unk->pitch = engine->cur.pitch;
+}
+
+// Where one string first is in another, or -1
+int func_02087dc8(const char *text, const char *find) {
+    const char *t;
+    const char *f = find;
+    s16 i = 0;
+
+    while (*text != 0) {
+        if (*text == *f) {
+            t = text;
+            while (*f != 0) {
+                if (*t != *f) {
+                    break;
+                }
+                f++;
+                t++;
+            }
+            if (*f == 0) {
+                return i;
+            }
+            f = find;
+        }
+        text++;
+        i++;
+    }
+    return -1;
+}
+
 // A value kept within a range
-int func_02087e44(int value, int min, int max, const char *name) {
-    int result = min;
+s16 func_02087e44(int value, s16 min, s16 max, const char *name) {
+    s16 result = min;
 
     if (value >= min) {
         if (value > max) {
             result = max;
         } else {
-            result = (s16)value;
+            result = value;
         }
     }
     return result;
@@ -264,10 +1096,995 @@ int func_02087e64(const char *text) {
     return result;
 }
 
+// Turns text into lines for the synthesizer and appends them to dest. Kana become phonemes, which gather into a
+// phrase until punctuation ends it; a phrase becomes one line of its phonemes and four numbers (see func_02089118).
+// Commands between "#Q" and "#q", and other text that starts with '#', are passed on as lines of their own.
+// Returns 0, or where in text it had got to when dest ran out of room.
+const char *func_02087e94(const char *text, char *dest, u32 size) {
+    char phonemes[0x60];
+    char command[0xC1];
+    s16 level;
+    s16 accent;
+    s16 pause;
+    s16 pauseSet;
+    s16 gap;
+    const char *done;
+    s16 result;
+    s16 overflow;
+    s16 total;
+    s16 length;
+    char *p;
+    s16 n;
+
+    pauseSet = 0;
+    *dest = '\0';
+    gap = 10;
+    phonemes[0] = '\0';
+    level = 10;
+    accent = 0;
+    pause = 0;
+    overflow = 0;
+    length = 0;
+    total = 0;
+    result = 0;
+    done = text;
+    while (*text != '\0') {
+        // The cast is what makes the compiler read the character again after the loop's test, as the original does
+        char c = *(s8 *)text;
+
+        if (c == '#') {
+            if (text[1] == 'Q') {
+                text += 2;
+                p = command;
+                result = 0;
+                n = 0;
+                while (*text != '\0') {
+                    if (*text == '#' && text[1] == 'q') {
+                        text += 2;
+                        break;
+                    }
+                    if (*text == '/' || *text == '\r' || *text == '\n') {
+                        *p = '\0';
+                        text++;
+                        if (command[0] != '\0') {
+                            result = func_02089094(dest, size, command);
+                            if (result < 0) {
+                                break;
+                            }
+                            done = text;
+                        }
+                        p = command;
+                        n = 0;
+                    } else if (n >= 0xBE) {
+                        text++;
+                    } else {
+                        *p++ = *text++;
+                        n++;
+                    }
+                }
+                if (result < 0) {
+                    break;
+                }
+                *p = '\0';
+                if (command[0] != '\0') {
+                    result = func_02089094(dest, size, command);
+                }
+                if (result < 0) {
+                    break;
+                }
+                done = text;
+            } else if (text[1] == 'p') {
+                char number[7] = { 0, 0, 0, 0, 0, 0, 0 };
+                s16 i;
+
+                i = 0;
+                while (text[i + 2] != '\0' && text[i + 2] != '\\') {
+                    i++;
+                    if (i > 5) {
+                        i = 0;
+                        break;
+                    }
+                }
+                strncat(number, text + 2, i);
+                pauseSet = func_02087e44(atoi(number), 0, 30000, "pause");
+                text = text + 3 + i;
+                done = text;
+            } else if (text[1] == 'q') {
+                text += 2;
+                done = text;
+            } else {
+                p = command;
+                n = 0;
+                while (c != '\0') {
+                    if (strncmp(text, "／", 2) == 0 || strncmp(text, "｜", 2) == 0 || strncmp(text, "！", 2) == 0 ||
+                        strncmp(text, "？", 2) == 0 || strncmp(text, "．", 2) == 0 || strncmp(text, "＿", 2) == 0) {
+                        text += 2;
+                        break;
+                    }
+                    if (c == '/' || c == '\r' || c == '\n' || c == '/' || c == '|' || c == '!' || c == '?' ||
+                        c == '.' || c == '_') {
+                        text++;
+                        break;
+                    }
+                    if (n >= 0xBE) {
+                        text++;
+                    } else {
+                        *p++ = *text++;
+                        n++;
+                    }
+                    c = *text;
+                }
+                *p = '\0';
+                if (command[0] != '\0') {
+                    result = func_02089094(dest, size, command);
+                    if (result < 0) {
+                        break;
+                    }
+                }
+                done = text;
+            }
+        } else if (c == '.' || strncmp(text, "．", 2) == 0) {
+            if (phonemes[0] != '\0') {
+                strcat(phonemes, ".");
+                if (pauseSet == 0) {
+                    pauseSet = 1000;
+                }
+                if (accent == 0 && level == 10) {
+                    func_020893e4(text, &level);
+                }
+                result = func_02089118(dest, size, phonemes, accent, level, gap,
+                                       func_02087e44(pauseSet + pause, 0, 30000, "pause sum"));
+                pauseSet = 0;
+                if (result < 0) {
+                    break;
+                }
+                gap = 10;
+                overflow = 0;
+                length = 0;
+                total = 0;
+                phonemes[0] = '\0';
+                accent = 0;
+                pause = 0;
+                level = 10;
+            }
+            if (*text == '.') {
+                text++;
+            } else {
+                text += 2;
+            }
+            done = text;
+        } else if (c == '?' || strncmp(text, "？", 2) == 0 || c == '!' || strncmp(text, "！", 2) == 0) {
+            if (phonemes[0] != '\0') {
+                int i;
+
+                if (accent == 0 && level == 10) {
+                    func_020893e4(text, &level);
+                }
+                for (i = 0; i < 6; i++) {
+                    if (strlen(phonemes) + 1 >= 0x60) {
+                        break;
+                    }
+                    if (*text == '?') {
+                        strcat(phonemes, "?");
+                        text++;
+                    } else if (*text == '!') {
+                        strcat(phonemes, "!");
+                        text++;
+                    } else if (strncmp(text, "？", 2) == 0) {
+                        strcat(phonemes, "?");
+                        text += 2;
+                    } else if (strncmp(text, "！", 2) == 0) {
+                        strcat(phonemes, "!");
+                        text += 2;
+                    } else {
+                        break;
+                    }
+                }
+                if (pauseSet == 0) {
+                    pauseSet = 1000;
+                }
+                result = func_02089118(dest, size, phonemes, accent, level, gap,
+                                       func_02087e44(pauseSet + pause, 0, 30000, "pause sum"));
+                pauseSet = 0;
+                if (result < 0) {
+                    break;
+                }
+                gap = 10;
+                overflow = 0;
+                length = 0;
+                total = 0;
+                phonemes[0] = '\0';
+                accent = 0;
+                pause = 0;
+                level = 10;
+            } else if (c == '?' || c == '!') {
+                text++;
+            } else {
+                text += 2;
+            }
+            done = text;
+        } else if (c == '\n' || c == '\r') {
+            if (phonemes[0] != '\0') {
+                if (pause != 0) {
+                    if (accent == 0 && level == 10) {
+                        func_020893e4(text, &level);
+                    }
+                    if (pauseSet != 0) {
+                        result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                        pauseSet = 0;
+                    } else {
+                        result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    }
+                    total = 0;
+                } else {
+                    if (accent == 0 && level == 10) {
+                        func_020893e4(text, &level);
+                    }
+                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                }
+                length = 0;
+                if (result < 0) {
+                    break;
+                }
+                accent = 0;
+                phonemes[0] = '\0';
+                if (pause != 0) {
+                    gap = 10;
+                } else {
+                    gap = 0;
+                }
+                pause = 0;
+                overflow = 0;
+                level = 10;
+            }
+            text++;
+            done = text;
+        } else if (c == '|' || strncmp(text, "｜", 2) == 0) {
+            if (phonemes[0] != '\0') {
+                if (accent == 0 && level == 10) {
+                    func_020893e4(text, &level);
+                }
+                if (pause != 0 && pauseSet != 0) {
+                    result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                    pauseSet = 0;
+                    total = 0;
+                } else {
+                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    if (pause != 0) {
+                        total = 0;
+                    }
+                }
+                length = 0;
+                if (result < 0) {
+                    break;
+                }
+                accent = 0;
+                pause = 0;
+                overflow = 0;
+                phonemes[0] = '\0';
+                level = 10;
+                gap = 5;
+            }
+            if (*text == '|') {
+                text++;
+            } else {
+                text += 2;
+            }
+            done = text;
+        } else if (c == '/' || strncmp(text, "／", 2) == 0) {
+            if (phonemes[0] != '\0') {
+                if (pause != 0) {
+                    if (pauseSet != 0) {
+                        if (accent == 0 && level == 10) {
+                            func_020893e4(text, &level);
+                        }
+                        result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                        pauseSet = 0;
+                    } else {
+                        if (accent == 0 && level == 10) {
+                            func_020893e4(text, &level);
+                        }
+                        result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                    }
+                    total = 0;
+                } else {
+                    if (accent == 0 && level == 10) {
+                        func_020893e4(text, &level);
+                    }
+                    result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                }
+                if (result < 0) {
+                    break;
+                }
+                accent = 0;
+                phonemes[0] = '\0';
+                if (pause != 0) {
+                    gap = 10;
+                } else {
+                    gap = 0;
+                }
+                pause = 0;
+                overflow = 0;
+                length = 0;
+                level = 10;
+            }
+            if (*text == '/') {
+                text++;
+            } else {
+                text += 2;
+            }
+            done = text;
+        } else if (c == '_' || strncmp(text, "＿", 2) == 0) {
+            if (phonemes[0] != '\0') {
+                if (pause == 0 && accent == 0 && level == 10) {
+                    func_020893e4(text, &level);
+                }
+                if (*text == '_') {
+                    text++;
+                } else {
+                    text += 2;
+                }
+                c = *text;
+                if (c == '0') {
+                    pause += 100;
+                    text++;
+                } else if (strncmp(text, "０", 2) == 0) {
+                    pause += 100;
+                    text += 2;
+                } else if (c == '1') {
+                    pause += 200;
+                    text++;
+                } else {
+                    pause += 200;
+                }
+            } else if (c == '_') {
+                text++;
+            } else {
+                text += 2;
+            }
+            if (pause > 30000) {
+                pause = 30000;
+            }
+        } else if (c == '\'' || strncmp(text, "’", 2) == 0) {
+            char digit[3] = { 0, 0, 0 };
+            char *p;
+            s16 value;
+            int n;
+
+            accent = 0;
+            for (p = phonemes; *p != '\0'; p++) {
+                if (strchr("AIUEOaiueoN-Q", *p) != NULL) {
+                    accent++;
+                }
+            }
+            if (*text == '\'') {
+                text++;
+            } else {
+                text += 2;
+            }
+            strncpy(digit, text, 1);
+            p = digit;
+            value = func_020892a8(p, text);
+            n = 1;
+            if (value == -1) {
+                strncpy(p, text, 2);
+                value = func_02089304(p, text);
+                n = 2;
+            }
+            if (value == -1) {
+                n = 0;
+            }
+            if (value == 0) {
+                level = 5;
+            } else if (value == 1) {
+                level = 10;
+            } else if (value == 2) {
+                level = 15;
+            } else {
+                level = 10;
+            }
+            text += n;
+        } else if (c == '%' || strncmp(text, "％", 2) == 0) {
+            s16 n = strlen(phonemes);
+
+            if (n >= 2) {
+                char *p = phonemes + n;
+
+                if (strchr("aiueo", p[-1]) != NULL && strchr("AIUEOaiueoN-Q", p[-2]) == NULL) {
+                    p[-1] -= 0x20;
+                }
+            }
+            if (*text == '%') {
+                text++;
+            } else {
+                text += 2;
+            }
+        } else {
+            s16 index = func_02089244(text, data_020bac4c[0], data_020bac48);
+
+            if (index >= 0) {
+                if (pause != 0) {
+                    if (phonemes[0] != '\0') {
+                        if (pauseSet != 0) {
+                            if (accent == 0 && level == 10) {
+                                func_020893e4(text, &level);
+                            }
+                            result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+                            pauseSet = 0;
+                        } else {
+                            if (accent == 0 && level == 10) {
+                                func_020893e4(text, &level);
+                            }
+                            result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+                        }
+                        length = 0;
+                        total = 0;
+                        if (result < 0) {
+                            break;
+                        }
+                        gap = 10;
+                        accent = 0;
+                        pause = 0;
+                        overflow = 0;
+                        phonemes[0] = '\0';
+                        level = 10;
+                    }
+                    done = text;
+                }
+                if (!overflow) {
+                    s16 n = strlen(phonemes);
+                    s16 add = strlen(&data_020bac4c[index][8]);
+
+                    if (!(length + add < 0x40 && total + add < 0x100)) {
+                        result = func_02089118(dest, size, phonemes, accent, level, gap, 100);
+                        length = 0;
+                        phonemes[0] = '\0';
+                        done = text;
+                        total = 0;
+                        n = 0;
+                        if (result < 0) {
+                            break;
+                        }
+                        accent = 0;
+                    }
+                    if (n + add >= 0x60) {
+                        overflow = 1;
+                    } else {
+                        char first = data_020bac4c[index][8];
+
+                        if (n != 0 && phonemes[n - 1] == 'Q' && first == 'Q') {
+                        } else if (n == 0 && first == '-') {
+                        } else if (n == 0 && first == 'Q') {
+                        } else {
+                            strcat(phonemes, &data_020bac4c[index][8]);
+                        }
+                    }
+                }
+                text += strlen(data_020bac4c[index]);
+                total += strlen(data_020bac4c[index]);
+                length += strlen(data_020bac4c[index]);
+            } else {
+                text++;
+                c = text[-1];
+                if ((c >= (char)0x81 && c <= (char)0x9F) || (c >= (char)0xE0 && c <= (char)0xFC)) {
+                    c = *text;
+                    if ((c >= 0x40 && c <= 0x7E) || c <= (char)0xFC) {
+                        text++;
+                    }
+                }
+                done = text;
+            }
+        }
+    }
+    if (result < 0) {
+        return done;
+    }
+    if (phonemes[0] != '\0') {
+        if (pause == 0) {
+            pause = 1000;
+        }
+        if (pauseSet != 0) {
+            if (accent == 0 && level == 10) {
+                func_020893e4(text, &level);
+            }
+            result = func_02089118(dest, size, phonemes, accent, level, gap, pauseSet);
+        } else {
+            if (accent == 0 && level == 10) {
+                func_020893e4(text, &level);
+            }
+            result = func_02089118(dest, size, phonemes, accent, level, gap, pause);
+        }
+        if (result < 0) {
+            return done;
+        }
+    }
+    return 0;
+}
+
+// Writes a number in decimal
+char *func_02088fc8(char *out, s16 value) {
+    char *p = out;
+    s16 div;
+    s16 digit;
+
+    if (value < 0) {
+        *out = '-';
+        value = -value;
+        p = out + 1;
+    }
+    div = 1;
+    while (div * 10 <= value && div < 0xCCC) {
+        div *= 10;
+    }
+    for (; div >= 1; div /= 10) {
+        digit = value / div;
+        *p++ = digit + '0';
+        value -= digit * div;
+    }
+    *p = 0;
+    return out;
+}
+
+// Adds a line to text if there is room for it, and returns the line's length
+s16 func_02089094(char *text, u32 size, const char *line) {
+    char buffer[196];
+    int length;
+
+    if (*line == 0) {
+        return 0;
+    }
+    strcpy(buffer, line);
+    strcat(buffer, "\n");
+    length = strlen(buffer);
+    if (length + strlen(text) >= size) {
+        return -1;
+    }
+    strcat(text, buffer);
+    return (s16)length;
+}
+
+// Appends a line to dest: text and four numbers with spaces between. Returns the length of the line, 0 if text is
+// empty, or -1 if dest has no room for it.
+s16 func_02089118(char *dest, u32 size, const char *text, s16 a, s16 b, s16 c, s16 d) {
+    char line[0xC0];
+    char number[16];
+    int length;
+
+    if (text[0] == '\0') {
+        return 0;
+    }
+    strcpy(line, text);
+    strcat(line, " ");
+    strcat(line, func_02088fc8(number, a));
+    strcat(line, " ");
+    strcat(line, func_02088fc8(number, b));
+    strcat(line, " ");
+    strcat(line, func_02088fc8(number, c));
+    strcat(line, " ");
+    strcat(line, func_02088fc8(number, d));
+    strcat(line, "\n");
+    length = strlen(line);
+    if (length + strlen(dest) >= size) {
+        return -1;
+    }
+    strcat(dest, line);
+    return (s16)length;
+}
+
+// Which of a table's entries, of 12 bytes each, a text starts with, or -1
+s16 func_02089244(const char *text, const char *table, int count) {
+    s16 i;
+
+    for (i = 0; i < count; i++) {
+        if (strncmp(text, table, strlen(table)) == 0) {
+            break;
+        }
+        table += 12;
+    }
+    if (i >= count) {
+        i = -1;
+    }
+    return i;
+}
+
+// 0, 1 or 2 for "0", "1" or "2", and -1 for anything else
+int func_020892a8(const char *text, const char *unused) {
+    if (strcmp(text, "0") == 0) {
+        return 0;
+    }
+    if (strcmp(text, "1") == 0) {
+        return 1;
+    }
+    if (strcmp(text, "2") == 0) {
+        return 2;
+    }
+    return -1;
+}
+
+// The same for the full-width digits
+int func_02089304(const char *text, const char *unused) {
+    if (strcmp(text, "０") == 0) {
+        return 0;
+    }
+    if (strcmp(text, "１") == 0) {
+        return 1;
+    }
+    if (strcmp(text, "２") == 0) {
+        return 2;
+    }
+    return -1;
+}
+
+// Reads the digit before a position in text, half-width or full-width, and says in out how many bytes it took
+int func_02089360(const char *end, s16 *out) {
+    char digit[3] = { 0, 0, 0 };
+    int value;
+
+    strncpy(digit, end - 1, 1);
+    value = func_020892a8(digit, end - 1);
+    *out = 1;
+    if (value == -1) {
+        strncpy(digit, end - 2, 2);
+        value = func_02089304(digit, end - 2);
+        *out = 2;
+    }
+    if (value == -1) {
+        *out = 0;
+    }
+    return value;
+}
+
+void func_020893e4(const char *text, s16 *out) {
+    s16 unused = 0;
+    int level = func_02089360(text, &unused);
+
+    if (level == 0) {
+        *out = 5;
+    } else if (level == 1) {
+        *out = 10;
+    } else if (level == 2) {
+        *out = 15;
+    } else {
+        *out = 10;
+    }
+}
+
+// Divides a by b, rounding to nearest, with the quotient in 1.15 fixed point and limited to +-0x7FFF
+s16 func_02089444(int a, int b) {
+    int i;
+    int result;
+    int sign = 1;
+
+    if (b == -0x8000) {
+        b = -0x7FFF;
+    }
+    if (a < 0) {
+        a = -a;
+        sign = -1;
+    }
+    if (b < 0) {
+        b = (s16)-b;
+        sign = -sign;
+    }
+    if (sign > 0) {
+        a += b / 2;
+    } else {
+        a += (b - 1) / 2;
+    }
+    for (i = 15; i >= 0; i--) {
+        if (a - (b << 15) >= 0) {
+            a = ((a - (b << 15)) << 1) + 1;
+        } else {
+            a <<= 1;
+        }
+    }
+    if (a & 0x8000) {
+        result = sign * 0x7FFF;
+    } else {
+        result = (u16)a * sign;
+    }
+    return result;
+}
+
+// Decodes a frame into samples, which go to out after their count. Returns the count.
+int func_020894cc(ShttsFrame *frame, s16 *out, Shtts *engine) {
+    s16 buffer[0x100];
+    u16 freq[10];
+    s16 coef[11];
+    s32 state[10];
+    int count;
+    int cut;
+    int i;
+    s16 n;
+    int nibble;
+
+    if (frame->unk_3 == 0) {
+        *out = 0;
+        return 0;
+    }
+    for (n = 0; n < 10; n++) {
+        if (n % 2 == 1) {
+            nibble = frame->unk_8[n / 2] & 0xF;
+        } else {
+            nibble = (frame->unk_8[n / 2] >> 4) & 0xF;
+        }
+        if (n == 0) {
+            freq[n] = data_020bb720[n][nibble];
+        } else {
+            freq[n] = freq[n - 1] + data_020bb720[n][nibble];
+        }
+    }
+    i = 0;
+    cut = 0;
+    if (engine->cur.unk_28 != 0x400) {
+        if ((int)engine->cur.warp > 100) {
+            cut = 10 - engine->cur.unk_2A;
+            for (; i < 10; i++) {
+                int b = (engine->cur.unk_28 * freq[i]) >> 10;
+                int a = (freq[i] >> 1) + 0x8000;
+
+                if (a < b) {
+                    freq[i] = a;
+                } else {
+                    freq[i] = b;
+                }
+            }
+        } else if ((int)engine->cur.warp < 100) {
+            s16 base = freq[0] >> 2;
+
+            for (; i < 10; i++) {
+                int v = ((engine->cur.unk_28 * (freq[i] - base)) >> 10) + base;
+                int low = freq[i] * 2 - 0x10000;
+
+                if (v < low) {
+                    v = low;
+                }
+                if (freq[i] < 0x7000) {
+                    freq[i] = v;
+                }
+            }
+        }
+    }
+    func_020897c8(10 - cut, freq, &coef[1]);
+    memset(&coef[11] - cut, 0, cut * 2);
+    if (frame->unk_2 != 0) {
+        memset(state, 0, sizeof(state));
+        if (data_020bc22c[frame->unk_4] & 0x84) {
+            func_0208e83c(0x100, 10, coef, state, data_020bba60, buffer, engine);
+        } else {
+            func_0208e83c(0x100, 10, coef, state, data_020bb860, buffer, engine);
+        }
+        count = 0xF0;
+        func_02089a3c(0x61C, buffer, out + 1, count);
+    } else {
+        count = engine->unk_00004;
+        memset(state, 0, sizeof(state));
+        func_0208e83c(count, 10, coef, state, &data_020bbc60[engine->unk_00004 * engine->unk_08722], buffer, engine);
+        engine->unk_08722++;
+        if (engine->unk_08722 >= 6) {
+            engine->unk_08722 = 0;
+        }
+        func_02089a3c(0x800, buffer, out + 1, count);
+    }
+    *out = count;
+    frame->unk_3 = count;
+    return count;
+}
+
+// The product of two numbers in 16.16 fixed point
+int func_02089b5c(int a, int b) {
+    int sign = 1;
+    int product;
+
+    if (a < 0) {
+        a = -a;
+        sign = -1;
+    }
+    if (b < 0) {
+        b = -b;
+        sign = -sign;
+    }
+    product = (a >> 16) * (b >> 16) + (((a >> 16) * (u16)b + (u16)a * (b >> 16) + 0x8000) >> 16);
+    return product * sign;
+}
+
+// Sets up the engine's state for a new text
+int func_02089c50(Shtts *engine) {
+    engine->unk_04938 = 0;
+    engine->unk_0EE0C = 0;
+    engine->unk_0EE0E = 0;
+    func_0208be38(engine);
+    engine->unk_0B700 = 0;
+    func_02089e48(engine->unk_0B704, 0, sizeof(engine->unk_0B704));
+    engine->unk_08722 = 0;
+    engine->unk_0EE04 = 0;
+    engine->unk_0EE08 = 0;
+    engine->unk_08906 = 0;
+    engine->unk_0B6FC = 0;
+    memset(engine->unk_0B730, 0, sizeof(engine->unk_0B730));
+    return 0;
+}
+
+int func_02089cec(void) {
+    return 0;
+}
+
+void func_02089cf4(Shtts *engine) {
+    OS_LockMutex(&engine->mutex);
+}
+
+void func_02089d08(Shtts *engine) {
+    OS_UnlockMutex(&engine->mutex);
+}
+
+// Whether the engine is synthesizing
+int func_02089d1c(Shtts *engine) {
+    int busy;
+
+    OS_LockMutex(&engine->mutex);
+    busy = engine->busy;
+    OS_UnlockMutex(&engine->mutex);
+    return busy;
+}
+
+// Whether the engine has been asked to stop
+int func_02089d4c(Shtts *engine) {
+    int stopRequested;
+
+    OS_LockMutex(&engine->mutex);
+    stopRequested = engine->stopRequested;
+    OS_UnlockMutex(&engine->mutex);
+    return stopRequested;
+}
+
+// Where a character first is in a string, or NULL. Unlike strchr, it does not find the end of the string.
+char *func_02089d7c(char *text, int c) {
+    while (*text != 0 && *text != c) {
+        text++;
+    }
+    if (*text == 0) {
+        return NULL;
+    }
+    return text;
+}
+
+// The next word of text that the characters of delimiters separate, as strtok does it but with the cursor in the
+// caller's hands
+char *func_02089da0(char **cursor, char *delimiters) {
+    char *word;
+
+    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) != NULL) {
+        (*cursor)++;
+    }
+    word = *cursor;
+    if (*word == 0) {
+        return NULL;
+    }
+    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) == NULL) {
+        (*cursor)++;
+    }
+    if (**cursor != 0) {
+        *(*cursor)++ = 0;
+    }
+    return word;
+}
+
+void func_02089e48(char *dst, int c, int count) {
+    int i;
+
+    for (i = 0; i < count; i++) {
+        *dst++ = (char)c;
+    }
+}
+
+// Called with -1 when something is wrong. Does nothing in this build.
+void func_02089e70(int code) {
+}
+
+// Scales samples by a gain in 4.12 fixed point, keeping them within 16 bits
+void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
+    s16 i = 0;
+
+    if (count > 0) {
+        while (i < count) {
+            int sample = (*src * gain) >> 12;
+
+            if (sample > 0x7FFF) {
+                sample = 0x7FFF;
+            } else if (sample < -0x7FFF) {
+                sample = -0x7FFF;
+            }
+            *dst++ = sample;
+            i++;
+            src++;
+        }
+    }
+}
+
 // Empties the FIR filter's history
 void func_0208a010(Shtts *engine) {
     engine->unk_0EE00 = 0;
     memset(engine->firBuffer, 0, sizeof(engine->firBuffer));
+}
+
+void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
+    if (a < 0) {
+        a = 0;
+    } else {
+        a = (s16)(a - table[0].unk_0);
+    }
+    if (b < 0) {
+        b = a;
+    } else {
+        b = (s16)(b - table[count - 1].unk_0);
+    }
+    func_0208abf4(table, count, a, b);
+}
+
+// The ring effect: multiplies samples by a sine wave of a frequency
+void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
+    int i;
+    int step = (frequency << 16) / 11000;
+
+    for (i = 0; i < count; i++) {
+        (*phase)++;
+        dst[i] = (src[i] * data_020e8d08[((step * *phase) >> 8) & 0xFF]) >> 15;
+    }
+}
+
+ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
+    ShttsUnit *unit = &data_020e8f08[engine->cur.unk_00][index[0]][index[1]][index[2]];
+
+    if (unit->unk_2 == 0) {
+        return NULL;
+    }
+    return unit;
+}
+
+void func_0208be38(Shtts *engine) {
+    engine->unk_08CD4 = engine->unk_08908;
+    engine->unk_08CD8 = engine->unk_08908 + 0x1E0;
+    engine->unk_08CDC = 0x1E0;
+    engine->unk_08CDE = 0xF0;
+    engine->unk_08CD0 = engine->unk_08CD4;
+    engine->unk_08CCC = engine->unk_08CC8 = engine->unk_08CD4;
+    engine->unk_08CE0 = 0;
+    func_0208be9c(engine->unk_08CDC, engine->unk_08CD4, engine);
+}
+
+// Fills count samples with silence from a place in the sample buffer, going round to its start at its end
+void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
+    s16 i;
+
+    if (count < 0) {
+        func_02089e70(-1);
+    }
+    i = 0;
+    if (buffer + count >= engine->unk_08CD8) {
+        while (buffer < engine->unk_08CD8) {
+            *buffer++ = 0;
+            i++;
+        }
+        buffer = engine->unk_08CD4;
+    }
+    for (; i < count; i++) {
+        *buffer++ = 0;
+    }
+}
+
+// Plays out the half of the sample buffer that has been filled, and moves on to the other half
+void func_0208c054(Shtts *engine) {
+    if (engine->unk_08CD0 >= engine->unk_08CC8) {
+        return;
+    }
+    func_0208e4e4(engine->unk_08CDE, engine->unk_08CD0, engine);
+    func_0208be9c(engine->unk_08CDE, engine->unk_08CD0, engine);
+    if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
+        engine->unk_08CD0 = &engine->unk_08908[0];
+    } else {
+        engine->unk_08CD0 = &engine->unk_08908[0xF0];
+    }
+    engine->unk_08CC8 = engine->unk_08CD0;
 }
 
 // Sets the caller's voice settings back to their defaults
@@ -321,7 +2138,6 @@ void func_0208c404(Shtts *engine) {
 }
 
 // Sets the warp, 80 to 200, and the two values worked out from it.
-// Not matching yet: the original multiplies once, before it tests live, and this does in each branch.
 void func_0208c4dc(int warp, int live, Shtts *engine) {
     if (warp < 80) {
         warp = 80;
@@ -331,18 +2147,519 @@ void func_0208c4dc(int warp, int live, Shtts *engine) {
     }
     if (live) {
         engine->cur.warp = warp;
-        engine->cur.unk_28 = (warp * 0x28F) >> 6;
+        engine->cur.unk_28 = ((int)engine->cur.warp * 0x28F) >> 6;
         engine->cur.unk_2A = func_02089444(1000, (s16)warp);
     } else {
         engine->set.warp = warp;
-        engine->set.unk_28 = (warp * 0x28F) >> 6;
+        engine->set.unk_28 = ((int)engine->set.warp * 0x28F) >> 6;
         engine->set.unk_2A = func_02089444(1000, (s16)warp);
+    }
+}
+
+int func_0208c568(Shtts *engine) {
+    engine->unk_00000 = 11000;
+    engine->unk_01B21 = 0;
+    engine->unk_00004 = engine->unk_00000 / 200;
+    return 0;
+}
+
+// Writes the sounds of lists of syllables to an array, max at most, and returns how many. A syllable named "-"
+// lengthens the sound before it, or repeats it if that would be too long or would change unk_A.
+int func_0208c8e0(ShttsUnk_0208c8e0 *lists, ShttsSound *sounds, int max) {
+    char name[12];
+    ShttsUnk_0208c8e0_1 *list1;
+    ShttsUnk_0208c8e0_2 *list2;
+    ShttsUnk_02087d98 *syllable;
+    s16 i;
+    s16 j;
+    s16 k;
+    s16 length;
+    int last;
+    ShttsSound *sound;
+    int count = 0;
+
+    sound = sounds + 1;
+    for (i = lists->count, list1 = lists->first; i > 0; i--, list1 = list1->next) {
+        for (j = list1->count, list2 = list1->first; j > 0; j--, list2 = list2->next) {
+            for (k = list2->count, syllable = list2->first; k > 0; k--, syllable = syllable->next) {
+                if (syllable->unk_05 == 'U' && syllable->unk_08 > 20) {
+                    syllable->unk_06 += syllable->unk_08 - 20;
+                    syllable->unk_08 = 20;
+                }
+                if (syllable->unk_06 != 0) {
+                    // The consonant, which is all of the name but its last letter
+                    length = strlen(syllable->name);
+                    strncpy(name, syllable->name, length - 1);
+                    name[length - 1] = 0;
+                    sound->phoneme = func_0208e354(name);
+                    sound->unk_4 = syllable->unk_06;
+                    sound->unk_8 = 0;
+                    sound->unk_6 = 0;
+                    sound->unk_C = 0;
+                    sound->unk_A = 0;
+                    sound->unk_E = syllable->unk_04;
+                    sound->unk_F = syllable->unk_05;
+                    sound++;
+                    count++;
+                    if (count < max - 1) {
+                    } else {
+                        goto end;
+                    }
+                } else {
+                    length = 1;
+                }
+                last = length - 1;
+                if (syllable->name[last] == '-') {
+                    if (sound[-1].unk_4 + syllable->unk_08 > 0x7FFF
+                        || (sound[-1].unk_A != 0 && sound[-1].unk_A != syllable->pitch)) {
+                        sound->phoneme = sound[-1].phoneme;
+                        sound->unk_4 = syllable->unk_08;
+                        sound->unk_8 = syllable->pitch;
+                        sound->unk_6 = syllable->unk_0A;
+                        sound->unk_C = 0;
+                        sound->unk_A = 0;
+                        sound->unk_E = syllable->unk_04;
+                        sound->unk_F = syllable->unk_05;
+                        if (sound->unk_8 <= 0) {
+                            sound->unk_8 = 0;
+                        }
+                        if (sound->unk_6 <= 0) {
+                            sound->unk_6 = 0;
+                        }
+                        sound++;
+                        count++;
+                        if (count < max - 1) {
+                        } else {
+                            goto end;
+                        }
+                    } else {
+                        sound[-1].unk_4 = sound[-1].unk_4 + syllable->unk_08;
+                        sound[-1].unk_A = syllable->pitch;
+                    }
+                } else {
+                    // The vowel
+                    sound->phoneme = func_0208e354(&syllable->name[last]);
+                    sound->unk_4 = syllable->unk_08;
+                    sound->unk_8 = syllable->pitch;
+                    sound->unk_6 = syllable->unk_0A;
+                    sound->unk_C = 0;
+                    sound->unk_A = 0;
+                    sound->unk_E = syllable->unk_04;
+                    sound->unk_F = syllable->unk_05;
+                    if (sound->unk_8 <= 0) {
+                        sound->unk_8 = 0;
+                    }
+                    if (sound->unk_6 <= 0) {
+                        sound->unk_6 = 0;
+                    }
+                    sound++;
+                    count++;
+                    if (count < max - 1) {
+                    } else {
+                        goto end;
+                    }
+                }
+            }
+            if (list2->unk_12 != 0) {
+                sound->phoneme = func_0208e354("S");
+                sound->unk_4 = list2->unk_12;
+                sound->unk_8 = 0;
+                sound->unk_6 = 0;
+                sound->unk_C = 0;
+                sound->unk_A = 0;
+                sound->unk_E = syllable->unk_04;
+                sound++;
+                count++;
+                if (count < max - 1) {
+                } else {
+                    goto end;
+                }
+            }
+        }
+    }
+end:
+    sound->phoneme = 7;
+    return count;
+}
+
+// Reads sounds from standard input, a line each: a name, three numbers and two characters. A line that starts with
+// '-' lengthens the sound before, one with '*' is skipped, and one with '#' is a command. Returns how many sounds
+// it read, or -1 if there was nothing to read.
+int func_0208cc10(ShttsSound *sounds, Shtts *engine) {
+    char line[128];
+    char name[32];
+    int a;
+    int b;
+    int c;
+    s16 bOffset = 0;
+    s16 aScale = 100;
+    s16 cOffset = 0;
+    s16 unk_C = 0;
+    char *read;
+    ShttsSound *sound;
+    int count = 0;
+
+    sound = sounds + 1;
+
+    while ((read = fgets(line, sizeof(line), stdin)) != NULL) {
+        if (line[0] == '#') {
+            switch (line[1]) {
+            case 'F':
+            case 'f':
+                engine->cur.unk_00 = 0;
+                break;
+            case 'M':
+            case 'm':
+                engine->cur.unk_00 = 1;
+                break;
+            case 'B':
+            case 'b':
+                if (line[2] == '+') {
+                    func_020188f4(line + 3, "%hd", &bOffset);
+                } else if (line[2] == '-') {
+                    func_020188f4(line + 2, "%hd", &bOffset);
+                }
+                break;
+            case 'S':
+            case 's':
+                func_020188f4(line + 2, "%hd", &aScale);
+                break;
+            case 'V':
+            case 'v':
+                func_020188f4(line + 2, "%hd", &cOffset);
+                break;
+            case 'L':
+            case 'l':
+                func_020188f4(line + 2, "%hd", &unk_C);
+                break;
+            }
+        } else if (line[0] == '*') {
+        } else if (line[0] == '-') {
+            func_020188f4(line + 1, "%d %d", &a, &b);
+            sound[-1].unk_4 += (s16)((aScale * a + 50) / 100);
+            sound[-1].unk_A = bOffset + b;
+        } else {
+            c = 0;
+            b = 0;
+            a = 0;
+            func_020188f4(line, "%s %d %d %d %c %c", name, &a, &b, &c, &sound->unk_E, &sound->unk_F);
+            sound->phoneme = func_0208e354(name);
+            sound->unk_4 = (aScale * a + 50) / 100;
+            count++;
+            sound->unk_8 = bOffset + b;
+            sound->unk_6 = cOffset + c;
+            sound->unk_C = unk_C;
+            sound->unk_A = 0;
+            if (sound->unk_8 <= 0) {
+                sound->unk_8 = 0;
+            }
+            if (sound->unk_6 <= 0) {
+                sound->unk_6 = 0;
+            }
+            sound++;
+            if (sound[-1].phoneme == 0) {
+                break;
+            }
+        }
+    }
+    sound->phoneme = 7;
+    if (count == 0 && read == NULL) {
+        return -1;
+    }
+    return count;
+}
+
+// Changes the end of an array of sounds. First by the mode setting: 1 repeats the last sound, 2 changes every
+// second sound that has unk_8, and 10 adds "n a" or "n e N" after a last sound of "N". Then by flags: bits 4 to 6
+// change the last sound, and bits 0 to 2 repeat it, with unk_8 set from the highest in the array.
+void func_0208cf40(ShttsSound *sounds, int count, int flags, Shtts *engine) {
+    int length;
+    int pitch;
+    ShttsSound *last;
+    ShttsSound *end;
+    int before;
+    int high;
+    int low;
+    int i;
+    int n;
+    s16 *p;
+    ShttsSound *sound;
+
+    end = sounds + count;
+    last = end;
+    if (engine->cur.mode == 1) {
+        if (count <= 4) {
+            return;
+        }
+        if (count >= 253) {
+            return;
+        }
+        if (end->phoneme != 0) {
+            return;
+        }
+        if (end[-2].unk_8 != 0) {
+            end[-2].unk_8 += 50;
+            end[-2].unk_4 += 50;
+        } else if (end[-3].unk_8 != 0) {
+            end[-3].unk_8 += 50;
+            end[-3].unk_4 += 50;
+        }
+        end[-1].unk_8 += 450;
+        end[-1].unk_4 += 200;
+        last++;
+        count++;
+        end[1].phoneme = end[0].phoneme;
+        end[1].unk_4 = end[0].unk_4;
+        end[0].phoneme = end[-1].phoneme;
+        end[0].unk_8 = end[-1].unk_8 - 40;
+        if (end[0].unk_8 < 0) {
+            end[0].unk_8 = 0;
+        }
+        end[0].unk_4 = 10;
+        end[0].unk_6 = end[-1].unk_6 - 200;
+        if (end[0].unk_6 < 0) {
+            end[0].unk_6 = 0;
+        }
+        end[-1].unk_A = 0;
+        end[0].unk_A = 0;
+        end[0].unk_F = '-';
+    } else if (engine->cur.mode == 2) {
+        int second;
+
+        if (count <= 4) {
+            return;
+        }
+        second = 0;
+        for (last = sounds + 1; last < end; last++) {
+            if (last->unk_8 != 0) {
+                if (second == 1) {
+                    last->unk_A = 0;
+                    second = 0;
+                    last->unk_8 += 300;
+                    last->unk_4 += 150;
+                } else {
+                    second = 1;
+                }
+            }
+        }
+    } else if (engine->cur.mode == 10) {
+        if (count <= 4 || count >= 251 || end->phoneme != 0) {
+            return;
+        }
+        before = end[-1].phoneme;
+        if (before != 6) {
+            return;
+        }
+        length = end[-1].unk_4;
+        if (length <= 120) {
+            pitch = end[-1].unk_8;
+            length = 120;
+        } else if (end[-1].unk_A == 0) {
+            pitch = end[-1].unk_8 - 50;
+        } else {
+            length /= 2;
+            pitch = end[-1].unk_A - 50;
+        }
+        if ((end->unk_4 < 800 || count < 8) && !(end[-2].phoneme == 14 && before == 1)
+            && !(before == 3 && end[-2].phoneme != 8 && end[-2].phoneme != 19)) {
+            end[2].unk_4 = end[0].unk_4;
+            end[2].phoneme = func_0208e354("S");
+            end[0].phoneme = func_0208e354("n");
+            end[0].unk_4 = length / 2;
+            end[0].unk_6 = 0;
+            end[0].unk_8 = 0;
+            end[1].phoneme = func_0208e354("a");
+            end[1].unk_4 = length;
+            end[1].unk_8 = pitch + 50;
+            end[1].unk_A = 0;
+            end[1].unk_6 = end[-1].unk_6;
+            last += 2;
+            count += 2;
+        } else if (end->unk_4 >= 800 && before != 5 && before != 4
+                   && !(before == 1 && end[-2].phoneme != 25 && end[-2].phoneme != 12)) {
+            end[3].unk_4 = end[0].unk_4;
+            end[3].phoneme = func_0208e354("S");
+            end[0].phoneme = func_0208e354("n");
+            end[0].unk_4 = length / 2;
+            end[0].unk_6 = 0;
+            end[0].unk_8 = 0;
+            end[1].phoneme = func_0208e354("e");
+            end[1].unk_4 = length;
+            end[1].unk_8 = pitch;
+            if (end[1].unk_8 < 0) {
+                end[1].unk_8 = 0;
+            }
+            end[1].unk_A = 0;
+            end[1].unk_6 = end[-1].unk_6;
+            end[2].phoneme = func_0208e354("N");
+            end[2].unk_4 = 1.4 * length;
+            end[2].unk_8 = pitch;
+            last += 3;
+            count += 3;
+            if (end[2].unk_8 < 0) {
+                end[2].unk_8 = 0;
+            }
+            end[2].unk_A = 0;
+            end[2].unk_6 = end[-1].unk_6;
+        }
+    }
+    last[1].phoneme = 7;
+
+    if (count <= 0) {
+        return;
+    }
+    if (flags == 0) {
+        return;
+    }
+    if (count >= 253) {
+        return;
+    }
+    // The lowest is found too, and not used
+    high = sounds[1].unk_8;
+    low = high;
+    for (i = 1; i < count; i++) {
+        sound = &sounds[i];
+        if (sounds[i].unk_8 != 0) {
+            if (sounds[i].unk_8 > high) {
+                high = sound->unk_8;
+            }
+            if (sounds[i].unk_8 < low) {
+                low = sound->unk_8;
+            }
+            if (sounds[i].unk_A != 0) {
+                if (sounds[i].unk_A > high) {
+                    high = sound->unk_A;
+                }
+                if (sounds[i].unk_A < low) {
+                    low = sound->unk_A;
+                }
+            }
+        }
+    }
+    sounds += count;
+    sound = sounds - 1;
+    if (sound->unk_A != 0) {
+        p = &sound->unk_A;
+    } else {
+        p = &sound->unk_8;
+    }
+    n = flags & 0x70;
+    if (n != 0) {
+        sound = sounds - 1;
+        n >>= 4;
+        sound->unk_6 += n * 30;
+        sound->unk_4 *= 0.8;
+        if (sound->unk_4 < 10) {
+            sound->unk_4 = 10;
+        }
+        *p += n * 100;
+    }
+    n = flags & 7;
+    if (n != 0) {
+        s16 step;
+        s16 top;
+        s16 bottom;
+
+        sounds[1].phoneme = sounds[0].phoneme;
+        sounds[1].unk_4 = sounds[0].unk_4;
+        sounds[2].phoneme = 7;
+        pitch = sounds[-1].unk_8 + n * (high - sounds[-1].unk_8) / 3;
+        if (pitch < 0) {
+            pitch = 0;
+        } else if (pitch > 0x7FFF) {
+            pitch = 0x7FFF;
+        }
+        step = n * 220;
+        pitch = (s16)pitch;
+        top = pitch + (step >> 1);
+        bottom = top - step;
+        if (bottom < 0) {
+            bottom = 0;
+        }
+        sounds[0].phoneme = sounds[-1].phoneme;
+        sounds[0].unk_8 = top;
+        sounds[0].unk_A = 0;
+        sounds[0].unk_4 = sounds[-1].unk_4 >> 1;
+        if (sounds[0].unk_4 < 10) {
+            sounds[0].unk_4 = 10;
+        }
+        sounds[0].unk_6 = sounds[-1].unk_6 - 90;
+        if (sounds[0].unk_6 < 0) {
+            sounds[0].unk_6 = 0;
+        }
+        if (sounds[-1].unk_A != 0) {
+            sounds[-1].unk_A = bottom;
+        }
+        sounds[-1].unk_8 = bottom;
+        sounds[-1].unk_4 *= 0.8;
+        if (sounds[-1].unk_4 < 10) {
+            sounds[-1].unk_4 = 10;
+        }
     }
 }
 
 void func_0208d4f0(Shtts *engine, ShttsCallback callback, void *arg) {
     engine->callback = callback;
     engine->callbackArg = arg;
+}
+
+// Speaks a text, of 1023 bytes at most. If the engine is speaking already, mode says what to do: 0 stops that,
+// 1 waits for it to end, and 2 does not speak the new text.
+int func_0208d500(Shtts *engine, const char *text, u32 mode, u32 unk, ShttsCallback callback, void *arg) {
+    int start = 0;
+
+    SDK_USING_MIDDLEWARE(data_02000bd8);
+    if (mode > 2) {
+        return -1;
+    }
+    if (unk > 31) {
+        return -1;
+    }
+    engine->unk_0EEDC = unk;
+    OS_LockMutex(&engine->unk_0EF08);
+    if (mode == 2) {
+        func_02089cf4(engine);
+        if (engine->busy == 0) {
+            start = 1;
+            engine->busy = 1;
+            engine->stopRequested = 0;
+        }
+        func_02089d08(engine);
+        if (start) {
+            ShttsStart(engine, text, callback, arg, 0);
+        }
+    } else if (mode == 1) {
+        while (func_02089d1c(engine) != 0) {
+            OS_Sleep(100);
+        }
+        func_02089cf4(engine);
+        engine->busy = 1;
+        engine->stopRequested = 0;
+        func_02089d08(engine);
+        ShttsStart(engine, text, callback, arg, 0);
+    } else if (mode == 0) {
+        if (func_02089d1c(engine) == 1) {
+            func_0208d878(engine);
+        }
+        func_02089cf4(engine);
+        engine->busy = 1;
+        engine->stopRequested = 0;
+        func_02089d08(engine);
+        ShttsStart(engine, text, callback, arg, 0);
+    } else {
+        func_02089cf4(engine);
+        if (engine->busy == 0) {
+            start = 1;
+            engine->busy = 1;
+            engine->stopRequested = 0;
+        }
+        func_02089d08(engine);
+        if (start) {
+            ShttsStart(engine, text, callback, arg, 1);
+        }
+    }
+    OS_UnlockMutex(&engine->unk_0EF08);
+    return 0;
 }
 
 // Asks the engine to stop synthesizing, and waits until it has, unless called from the engine's own thread
@@ -367,12 +2684,7 @@ int func_0208d878(Shtts *engine) {
 }
 
 // Sets up an engine in memory the caller provides.
-// Not matching yet: the same instructions, but the original keeps the pointer of the loop below in r5 and the
-// engine's address plus 0xB000 in lr, and this has them the other way round.
 int func_0208d8fc(Shtts *engine) {
-    int i;
-    u8 *p;
-
     MIi_CpuClear32(0, engine, sizeof(Shtts));
     engine->unk_00000 = 11000;
     engine->unk_00004 = 0x37;
@@ -405,7 +2717,6 @@ int func_0208d8fc(Shtts *engine) {
     engine->cur.firGain = 0;
     engine->cur.ring = 0;
     engine->unk_0B6FC = 0;
-    p = (u8 *)engine + 0x730;
     engine->unk_0B720 = 0;
     engine->unk_08722 = 0;
     engine->unk_0B728 = 0;
@@ -413,14 +2724,7 @@ int func_0208d8fc(Shtts *engine) {
     engine->unk_0B72A = 1;
     engine->unk_0B72B = 1;
     engine->unk_0B72C = 0;
-    p += 0xB000;
-    for (i = 0; i < 4; i++) {
-        p[0] = 0;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = 0;
-        p += 4;
-    }
+    memset(engine->unk_0B730, 0, sizeof(engine->unk_0B730));
     engine->unk_0E624 = 0;
     engine->unk_0EE00 = 0;
     engine->unk_0EE04 = 0;
@@ -468,21 +2772,6 @@ const char *func_0208daf8(Shtts *engine) {
     return ShttsPhonemeNames[engine->phoneme];
 }
 
-int func_0208e09c(Shtts *engine, int value);
-int func_0208e0cc(Shtts *engine, int value);
-int func_0208e0fc(Shtts *engine, int value);
-int func_0208e12c(Shtts *engine, int value);
-int func_0208e160(Shtts *engine, int value);
-int func_0208e190(Shtts *engine, int value);
-int func_0208e1c0(Shtts *engine, int value);
-int func_0208e1e8(Shtts *engine, int value);
-int func_0208e210(Shtts *engine, int value);
-int func_0208e238(Shtts *engine, int value);
-int func_0208e298(Shtts *engine, int value);
-int func_0208e2c0(Shtts *engine, int value);
-int func_0208e2e8(Shtts *engine, int value);
-int func_0208e310(Shtts *engine, int value);
-
 // Sets one of the caller's voice settings, which only works while the engine is idle. Each setting has its own
 // range of values, see the functions below.
 // objdiff scores this 99.95%, though its instructions and relocations are those of the original.
@@ -526,126 +2815,6 @@ int func_0208db2c(Shtts *engine, int param, int value) {
     default:
         return -1;
     }
-}
-
-int func_0208e09c(Shtts *engine, int value) {
-    if (value < 20 || value > 2200) {
-        return -1;
-    }
-    engine->set.speed = value;
-    return 0;
-}
-
-int func_0208e0cc(Shtts *engine, int value) {
-    if (value < 3500 || value > 7000) {
-        return -1;
-    }
-    engine->set.pitch = value;
-    return 0;
-}
-
-int func_0208e0fc(Shtts *engine, int value) {
-    if (value < -10000 || value > 360) {
-        return -1;
-    }
-    engine->set.volume = value;
-    return 0;
-}
-
-int func_0208e12c(Shtts *engine, int value) {
-    if (value < 80 || value > 130) {
-        return -1;
-    }
-    func_0208c4dc(value, 0, engine);
-    return 0;
-}
-
-int func_0208e160(Shtts *engine, int value) {
-    if (value < 0 || value > 5000) {
-        return -1;
-    }
-    engine->set.ring = value;
-    return 0;
-}
-
-int func_0208e190(Shtts *engine, int value) {
-    if (value < 0 || value > 3000) {
-        return -1;
-    }
-    engine->set.echoDelay = value;
-    return 0;
-}
-
-int func_0208e1c0(Shtts *engine, int value) {
-    if (value < 0 || value > 100) {
-        return -1;
-    }
-    engine->set.echoGain = value;
-    return 0;
-}
-
-int func_0208e1e8(Shtts *engine, int value) {
-    if (value < 0 || value > 1000) {
-        return -1;
-    }
-    engine->set.firDelay = value;
-    return 0;
-}
-
-int func_0208e210(Shtts *engine, int value) {
-    if (value < 0 || value > 100) {
-        return -1;
-    }
-    engine->set.firGain = value;
-    return 0;
-}
-
-int func_0208e238(Shtts *engine, int value) {
-    if (value < 0 || value > 3) {
-        return -1;
-    }
-    engine->set.unk_14 = 0;
-    engine->set.mode = 0;
-    if (value == 1) {
-        engine->set.mode = 1;
-    } else if (value == 2) {
-        engine->set.mode = 2;
-    } else if (value == 3) {
-        engine->set.unk_14 = 1;
-    }
-    return 0;
-}
-
-int func_0208e298(Shtts *engine, int value) {
-    if (value < 0 || value > 100) {
-        return -1;
-    }
-    engine->set.chorus = value;
-    return 0;
-}
-
-int func_0208e2c0(Shtts *engine, int value) {
-    if (value < 0 || value > 400) {
-        return -1;
-    }
-    engine->set.accent = value;
-    return 0;
-}
-
-int func_0208e2e8(Shtts *engine, int value) {
-    if (value < 0 || value > 400) {
-        return -1;
-    }
-    engine->set.phrase = value;
-    return 0;
-}
-
-int func_0208e310(Shtts *engine, int value) {
-    if (value < 0 || value > 1000) {
-        return -1;
-    }
-    engine->set.pitchTrans = value;
-    return 0;
 }
 
 // Reads one of the caller's voice settings, by the numbers of func_0208db2c. The speaker and the way of speaking,
@@ -830,6 +2999,126 @@ int func_0208e04c(Shtts *engine, const char *commands) {
     return 0;
 }
 
+int func_0208e09c(Shtts *engine, int value) {
+    if (value < 20 || value > 2200) {
+        return -1;
+    }
+    engine->set.speed = value;
+    return 0;
+}
+
+int func_0208e0cc(Shtts *engine, int value) {
+    if (value < 3500 || value > 7000) {
+        return -1;
+    }
+    engine->set.pitch = value;
+    return 0;
+}
+
+int func_0208e0fc(Shtts *engine, int value) {
+    if (value < -10000 || value > 360) {
+        return -1;
+    }
+    engine->set.volume = value;
+    return 0;
+}
+
+int func_0208e12c(Shtts *engine, int value) {
+    if (value < 80 || value > 130) {
+        return -1;
+    }
+    func_0208c4dc(value, 0, engine);
+    return 0;
+}
+
+int func_0208e160(Shtts *engine, int value) {
+    if (value < 0 || value > 5000) {
+        return -1;
+    }
+    engine->set.ring = value;
+    return 0;
+}
+
+int func_0208e190(Shtts *engine, int value) {
+    if (value < 0 || value > 3000) {
+        return -1;
+    }
+    engine->set.echoDelay = value;
+    return 0;
+}
+
+int func_0208e1c0(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->set.echoGain = value;
+    return 0;
+}
+
+int func_0208e1e8(Shtts *engine, int value) {
+    if (value < 0 || value > 1000) {
+        return -1;
+    }
+    engine->set.firDelay = value;
+    return 0;
+}
+
+int func_0208e210(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->set.firGain = value;
+    return 0;
+}
+
+int func_0208e238(Shtts *engine, int value) {
+    if (value < 0 || value > 3) {
+        return -1;
+    }
+    engine->set.unk_14 = 0;
+    engine->set.mode = 0;
+    if (value == 1) {
+        engine->set.mode = 1;
+    } else if (value == 2) {
+        engine->set.mode = 2;
+    } else if (value == 3) {
+        engine->set.unk_14 = 1;
+    }
+    return 0;
+}
+
+int func_0208e298(Shtts *engine, int value) {
+    if (value < 0 || value > 100) {
+        return -1;
+    }
+    engine->set.chorus = value;
+    return 0;
+}
+
+int func_0208e2c0(Shtts *engine, int value) {
+    if (value < 0 || value > 400) {
+        return -1;
+    }
+    engine->set.accent = value;
+    return 0;
+}
+
+int func_0208e2e8(Shtts *engine, int value) {
+    if (value < 0 || value > 400) {
+        return -1;
+    }
+    engine->set.phrase = value;
+    return 0;
+}
+
+int func_0208e310(Shtts *engine, int value) {
+    if (value < 0 || value > 1000) {
+        return -1;
+    }
+    engine->set.pitchTrans = value;
+    return 0;
+}
+
 // The value that func_0208e238 was given
 int func_0208e338(Shtts *engine) {
     if (engine->set.unk_14 == 0) {
@@ -853,397 +3142,21 @@ int func_0208e354(const char *name) {
     return 7;
 }
 
-// The functions from here on are not yet in the order they have in the ROM
+// Fades samples of unk_08724 out, or in and out, with func_0208e464
+void func_0208e3b4(int unk, Shtts *engine) {
+    s16 count = engine->unk_08724[0] - unk;
 
-// Compares two strings, taking 'I' and 'U' for 'i' and 'u'
-int func_0208473c(const char *a, const char *b) {
-    while (*a != 0 || *b != 0) {
-        int ca = *a;
-        int cb = *b;
+    if (unk > 0 && count > 0) {
+        s16 half = engine->unk_08724[0] >> 1;
 
-        if (ca != cb) {
-            if (ca == 'I' || ca == 'U') {
-                ca += 0x20;
-            }
-            if (cb == 'I' || cb == 'U') {
-                cb += 0x20;
-            }
-            if (ca != cb) {
-                return ca - cb;
-            }
-        }
-        a++;
-        b++;
-    }
-    return 0;
-}
-
-int func_02084814(void *arg) {
-    s16 count = func_020857e8(arg) - 2;
-
-    if (count < 0) {
-        return 0;
-    }
-    return count;
-}
-
-void func_020856b0(ShttsUnk_020856b0 *unk, int rate) {
-    if (rate <= 0) {
-        rate = 1;
-    }
-    unk->unk_200 = ((0x12C00 / rate) << 5) / 256;
-    if (unk->unk_200 == 0) {
-        unk->unk_200 = 1;
-    }
-    unk->unk_204 = 0;
-    unk->unk_208 = 0;
-    unk->unk_20C = 0;
-    memset(unk->unk_000, 0, sizeof(unk->unk_000));
-}
-
-int func_02085a64(Shtts *engine) {
-    return engine->unk_0871C;
-}
-
-void func_02086a74(int value, int *out) {
-    *out = value;
-}
-
-void func_02087d98(ShttsUnk_02087d98 *unk, Shtts *engine) {
-    char dash = '-';
-
-    unk->unk_00 = 0;
-    unk->unk_05 = dash;
-    unk->unk_04 = dash;
-    unk->unk_08 = 0;
-    unk->unk_06 = 0;
-    unk->unk_10 = 0;
-    unk->pitch = engine->cur.pitch;
-}
-
-// 0, 1 or 2 for "0", "1" or "2", and -1 for anything else
-int func_020892a8(const char *text, const char *unused) {
-    if (strcmp(text, "0") == 0) {
-        return 0;
-    }
-    if (strcmp(text, "1") == 0) {
-        return 1;
-    }
-    if (strcmp(text, "2") == 0) {
-        return 2;
-    }
-    return -1;
-}
-
-// The same for the full-width digits
-int func_02089304(const char *text, const char *unused) {
-    if (strcmp(text, "０") == 0) {
-        return 0;
-    }
-    if (strcmp(text, "１") == 0) {
-        return 1;
-    }
-    if (strcmp(text, "２") == 0) {
-        return 2;
-    }
-    return -1;
-}
-
-void func_020893e4(const char *text, s16 *out) {
-    s16 unused = 0;
-    int level = func_02089360(text, &unused);
-
-    if (level == 0) {
-        *out = 5;
-    } else if (level == 1) {
-        *out = 10;
-    } else if (level == 2) {
-        *out = 15;
-    } else {
-        *out = 10;
-    }
-}
-
-// The product of two numbers in 16.16 fixed point
-int func_02089b5c(int a, int b) {
-    int sign = 1;
-    int product;
-
-    if (a < 0) {
-        a = -a;
-        sign = -1;
-    }
-    if (b < 0) {
-        b = -b;
-        sign = -sign;
-    }
-    product = (a >> 16) * (b >> 16) + (((a >> 16) * (u16)b + (u16)a * (b >> 16) + 0x8000) >> 16);
-    return product * sign;
-}
-
-int func_02089cec(void) {
-    return 0;
-}
-
-// Whether the engine has been asked to stop
-int func_02089d4c(Shtts *engine) {
-    int stopRequested;
-
-    OS_LockMutex(&engine->mutex);
-    stopRequested = engine->stopRequested;
-    OS_UnlockMutex(&engine->mutex);
-    return stopRequested;
-}
-
-// Where a character first is in a string, or NULL. Unlike strchr, it does not find the end of the string.
-char *func_02089d7c(char *text, int c) {
-    while (*text != 0 && *text != c) {
-        text++;
-    }
-    if (*text == 0) {
-        return NULL;
-    }
-    return text;
-}
-
-void func_02089e48(char *dst, int c, int count) {
-    int i;
-
-    for (i = 0; i < count; i++) {
-        *dst++ = (char)c;
-    }
-}
-
-// Called with -1 when something is wrong. Does nothing in this build.
-void func_02089e70(int code) {
-}
-
-void func_0208aba8(ShttsUnk_0208aba8 *table, int count, int a, int b) {
-    if (a < 0) {
-        a = 0;
-    } else {
-        a = (s16)(a - table[0].unk_0);
-    }
-    if (b < 0) {
-        b = a;
-    } else {
-        b = (s16)(b - table[count - 1].unk_0);
-    }
-    func_0208abf4(table, count, a, b);
-}
-
-ShttsUnit *func_0208bdf4(int *index, Shtts *engine) {
-    ShttsUnit *unit = &data_020e8f08[engine->cur.unk_00][index[0]][index[1]][index[2]];
-
-    if (unit->unk_2 == 0) {
-        return NULL;
-    }
-    return unit;
-}
-
-void func_0208be38(Shtts *engine) {
-    engine->unk_08CD4 = engine->unk_08908;
-    engine->unk_08CD8 = engine->unk_08908 + 0x1E0;
-    engine->unk_08CDC = 0x1E0;
-    engine->unk_08CDE = 0xF0;
-    engine->unk_08CD0 = engine->unk_08CD4;
-    engine->unk_08CCC = engine->unk_08CC8 = engine->unk_08CD4;
-    engine->unk_08CE0 = 0;
-    func_0208be9c(engine->unk_08CDC, engine->unk_08CD4, engine);
-}
-
-int func_0208c568(Shtts *engine) {
-    engine->unk_00000 = 11000;
-    engine->unk_01B21 = 0;
-    engine->unk_00004 = engine->unk_00000 / 200;
-    return 0;
-}
-
-// Looks a word up in a sorted list. If it is there, writes it back as the list spells it and returns its value.
-int func_02084794(char *text, ShttsWordList *list) {
-    int low = 0;
-    int high = list->count - 1;
-
-    while (low <= high) {
-        int middle = (low + high) >> 1;
-        s16 order = func_0208473c(text, list->words[middle].name);
-
-        if (order < 0) {
-            high = middle - 1;
-        } else if (order > 0) {
-            low = middle + 1;
-        } else {
-            strcpy(text, list->words[middle].name);
-            return list->words[middle].value;
+        func_0208e464(0x10000, 0, half, &engine->unk_08724[engine->unk_08724[0] + 1 - half]);
+    } else if (unk == 0) {
+        count = engine->unk_08724[0] - engine->unk_00004;
+        if (count > 0) {
+            func_0208e464(0, 0x10000, count, &engine->unk_08724[1]);
+            func_0208e464(0x10000, 0, count, &engine->unk_08724[engine->unk_00004]);
         }
     }
-    return -1;
-}
-
-// Reads the text to speak from standard input, a line at a time
-void func_02086b14(Shtts *engine) {
-    char line[150];
-    int length = 0;
-
-    while (1) {
-        if (fgets(line, sizeof(line), stdin) == NULL) {
-            return;
-        }
-        if (length > 3000) {
-            return;
-        }
-        strcat(engine->text, line);
-        length += sizeof(line);
-        strcpy(line, "");
-    }
-}
-
-// Where one string first is in another, or -1
-int func_02087dc8(const char *text, const char *find) {
-    const char *f = find;
-    s16 i = 0;
-
-    while (*text != 0) {
-        if (*text == *f) {
-            const char *t = text;
-
-            while (*f != 0 && *t == *f) {
-                f++;
-                t++;
-            }
-            if (*f == 0) {
-                return i;
-            }
-            f = find;
-        }
-        text++;
-        i++;
-    }
-    return -1;
-}
-
-// Adds a line to text if there is room for it, and returns the line's length
-int func_02089094(char *text, u32 size, const char *line) {
-    char buffer[196];
-    int length;
-
-    if (*line == 0) {
-        return 0;
-    }
-    strcpy(buffer, line);
-    strcat(buffer, "\n");
-    length = strlen(buffer);
-    if (length + strlen(text) >= size) {
-        return -1;
-    }
-    strcat(text, buffer);
-    return (s16)length;
-}
-
-// Which of a table's entries, of 12 bytes each, a text starts with, or -1
-int func_02089244(const char *text, const char *table, int count) {
-    s16 i;
-
-    for (i = 0; i < count; i++) {
-        if (strncmp(text, table, strlen(table)) == 0) {
-            break;
-        }
-        table += 12;
-    }
-    if (i >= count) {
-        i = -1;
-    }
-    return i;
-}
-
-// Reads the digit before a position in text, half-width or full-width, and says in out how many bytes it took
-int func_02089360(const char *end, s16 *out) {
-    char digit[3] = { 0, 0, 0 };
-    int value;
-
-    strncpy(digit, end - 1, 1);
-    value = func_020892a8(digit, end - 1);
-    *out = 1;
-    if (value == -1) {
-        strncpy(digit, end - 2, 2);
-        value = func_02089304(digit, end - 2);
-        *out = 2;
-    }
-    if (value == -1) {
-        *out = 0;
-    }
-    return value;
-}
-
-// Sets up the engine's state for a new text
-int func_02089c50(Shtts *engine) {
-    int i;
-    u8 *p;
-
-    engine->unk_04938 = 0;
-    engine->unk_0EE0C = 0;
-    engine->unk_0EE0E = 0;
-    func_0208be38(engine);
-    engine->unk_0B700 = 0;
-    func_02089e48(engine->unk_0B704, 0, sizeof(engine->unk_0B704));
-    p = (u8 *)engine + 0x730;
-    engine->unk_08722 = 0;
-    engine->unk_0EE04 = 0;
-    engine->unk_0EE08 = 0;
-    engine->unk_08906 = 0;
-    engine->unk_0B6FC = 0;
-    p += 0xB000;
-    for (i = 0; i < 4; i++) {
-        p[0] = 0;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = 0;
-        p += 4;
-    }
-    return 0;
-}
-
-// Scales samples by a gain in 4.12 fixed point, keeping them within 16 bits
-void func_02089e74(s16 *dst, s16 *src, int count, int gain) {
-    s16 i;
-
-    for (i = 0; i < count; i++) {
-        int sample = (*src * gain) >> 12;
-
-        if (sample > 0x7FFF) {
-            sample = 0x7FFF;
-        } else if (sample < -0x7FFF) {
-            sample = -0x7FFF;
-        }
-        *dst++ = sample;
-        src++;
-    }
-}
-
-// The ring effect: multiplies samples by a sine wave of a frequency
-void func_0208b6c0(int *phase, int count, int frequency, s16 *src, s16 *dst) {
-    int i;
-    int step = (frequency << 16) / 11000;
-
-    for (i = 0; i < count; i++) {
-        (*phase)++;
-        dst[i] = (src[i] * data_020e8d08[((u32)((step * *phase) >> 8) << 24) >> 24]) >> 15;
-    }
-}
-
-// Plays out the half of the sample buffer that has been filled, and moves on to the other half
-void func_0208c054(Shtts *engine) {
-    if (engine->unk_08CD0 >= engine->unk_08CC8) {
-        return;
-    }
-    func_0208e4e4(engine->unk_08CDE, engine->unk_08CD0, engine);
-    func_0208be9c(engine->unk_08CDE, engine->unk_08CD0, engine);
-    if (engine->unk_08CD0 == &engine->unk_08908[0xF0]) {
-        engine->unk_08CD0 = &engine->unk_08908[0];
-    } else {
-        engine->unk_08CD0 = &engine->unk_08908[0xF0];
-    }
-    engine->unk_08CC8 = engine->unk_08CD0;
 }
 
 // Fades samples in from silence, or out to it
@@ -1261,39 +3174,162 @@ void func_0208e464(int from, int to, int count, s16 *data) {
     } else if (to == 0) {
         gain = -(step * (count - 1));
     }
-    for (i = 0; i < count; i++) {
-        *data = (*data * gain) >> 16;
-        data++;
-        gain += step;
+    i = 0;
+    if (count > 0) {
+        for (; i < count; i++) {
+            *data = (*data * gain) >> 16;
+            data++;
+            gain += step;
+        }
     }
 }
 
-// The next four are written in assembly in the original too: they use the processor's multiply-accumulate
-// instructions for 32-bit by 16-bit fixed point, which the compiler does not emit, and their stack adjustments are
-// not ones it would make. Each returns the sum of products of a filter's state and its coefficients.
+// Takes a block of samples the engine has made: doubles them, softening what is over 0x6978, applies the effects
+// that are set, and hands the block to the caller's function at twice the rate, with a sample halfway between each
+// two.
+void func_0208e4e4(int count, s16 *buffer, Shtts *engine) {
+    s16 block[0x1E1];
+    s16 *out = &block[1];
+    s16 coefficients[7] = { 0x0800, 0xFD83, 0x0800, 0xFF0D, 0x0612, 0xFF6A, 0x02DA };
+    int i;
+    int j;
 
-asm int func_02086a20(const int *state, const s16 *coefficients, int input) {
-    stmfd sp!, {r3, r4, lr}
-    sub sp, sp, #3
+    engine->unk_0EE18 = 0;
+    for (i = 0; i < count; i++) {
+        int sample = buffer[i] * 2;
+
+        if (sample > 0x6978) {
+            sample = ((sample - 0x6978) >> 1) + 0x6978;
+            if (sample > 0x7FFF) {
+                sample = 0x7FFF;
+            }
+        } else if (sample < -0x6978) {
+            sample = -0x6978 + ((sample + 0x6978) >> 1);
+            if (sample < -0x8000) {
+                sample = -0x8000;
+            }
+        }
+        buffer[i] = sample;
+    }
+    if (engine->unk_0EE18 == 1) {
+        func_0208e83c(count, 6, coefficients, (int *)engine->unk_0B704, buffer, out, engine);
+        for (i = 0; i < count; i++) {
+            buffer[i] = out[i];
+        }
+    }
+    if ((s32)engine->cur.firGain > 0) {
+        memset(out, 0, 0x200);
+        func_02089ed4(count, buffer, out, engine);
+        for (i = 0; i < count; i++) {
+            buffer[i] = out[i];
+        }
+    }
+    if (engine->cur.ring != 0) {
+        memset(out, 0, 0x200);
+        func_0208b6c0((int *)&engine->unk_0B6FC, count, engine->cur.ring, buffer, out);
+        for (i = 0; i < count; i++) {
+            buffer[i] = out[i];
+        }
+    }
+    if (engine->cur.chorus != 0) {
+        func_02085704(&engine->unk_0B4E8, buffer, out, count);
+        for (i = 0; i < count; i++) {
+            buffer[i] = out[i];
+        }
+    }
+    if (engine->cur.echoDelay > 0) {
+        func_0208683c(count, buffer, out, engine);
+        for (i = 0; i < count; i++) {
+            buffer[i] = out[i];
+        }
+    }
+    out[0] = (engine->unk_0B700 + buffer[0]) / 2;
+    out[1] = buffer[0];
+    for (i = 1, j = 2; i < count; i++) {
+        out[j++] = (buffer[i - 1] + buffer[i]) / 2;
+        out[j++] = buffer[i];
+    }
+    engine->unk_0B700 = buffer[count - 1];
+    j = count * 2;
+    if (engine->callback != NULL) {
+        engine->callback((s16)j, out, engine->callbackArg);
+    }
+}
+
+// A product in fixed point, doubled
+asm int func_0208e81c(int a, int b) {
+    stmfd sp!, {r2, lr}
+    sub sp, sp, #2
     mov lr, #0
-    ldr r3, [r0, #0]
-    ldrsh r4, [r1, #0]
-    smlawb lr, r3, r4, lr
-    ldr r3, [r0, #4]
-    ldrsh r4, [r1, #2]
-    smlawb lr, r3, r4, lr
-    ldrsh r4, [r1, #4]
-    smlawb lr, r2, r4, lr
-    ldr r3, [r0, #8]
-    ldrsh r4, [r1, #6]
-    smlawb lr, r3, r4, lr
-    ldr r3, [r0, #12]
-    ldrsh r4, [r1, #8]
-    smlawb lr, r3, r4, lr
-    mov r0, lr
-    add sp, sp, #3
-    ldmfd sp!, {r3, r4, lr}
+    smulwb r0, r0, r1
+    mov r0, r0, lsl #1
+    add sp, sp, #2
+    ldmfd sp!, {r2, lr}
     bx lr
+}
+
+// A recursive filter over a block of samples, of 6 or 10 coefficients, with its history in state. Returns the
+// largest magnitude that did not fit in 16 bits, 0 if all did.
+int func_0208e83c(int count, int order, const s16 *coefficients, int *state, s16 *src, s16 *dst, Shtts *engine) {
+    int peak = 0;
+    int i;
+    int j;
+    int sum;
+    int value;
+    int sample;
+
+    if (order == 6) {
+        for (i = 0; i < count; i++) {
+            sum = func_0208ea20(state, coefficients);
+            for (j = order - 1; j > 0; j--) {
+                state[j] = state[j - 1];
+            }
+            value = (src[i] << 7) - sum;
+            state[0] = value << 5;
+            sample = (value >> 7) + (value >> 8);
+            if (sample > 0x6978) {
+                sample = ((sample - 0x6978) >> 1) + 0x6978;
+                if (sample > 0x7FFF) {
+                    if (peak < sample) {
+                        peak = sample;
+                    }
+                    sample = 0x7FFF;
+                }
+            } else if (sample < -0x6978) {
+                sample = -0x6978 + ((sample + 0x6978) >> 1);
+                if (sample < -0x8000) {
+                    if (peak < -sample) {
+                        peak = -sample;
+                    }
+                    sample = -0x8000;
+                }
+            }
+            dst[i] = sample;
+        }
+    } else {
+        for (i = 0; i < count; i++) {
+            sum = func_0208ea84(state, coefficients);
+            for (j = order - 1; j > 0; j--) {
+                state[j] = state[j - 1];
+            }
+            value = (src[i] << 7) - sum;
+            state[0] = value << 5;
+            sample = value >> 7;
+            if (sample > 0x7FFF) {
+                if (peak < sample) {
+                    peak = sample;
+                }
+                sample = 0x7FFF;
+            } else if (sample < -0x8000) {
+                if (peak < -sample) {
+                    peak = -sample;
+                }
+                sample = -0x8000;
+            }
+            dst[i] = sample;
+        }
+    }
+    return peak;
 }
 
 asm int func_0208ea20(const int *state, const s16 *coefficients) {
@@ -1362,107 +3398,4 @@ asm int func_0208ea84(const int *state, const s16 *coefficients) {
     add sp, sp, #4
     ldmfd sp!, {r2, r3, r4, lr}
     bx lr
-}
-
-// A product in fixed point, doubled
-asm int func_0208e81c(int a, int b) {
-    stmfd sp!, {r2, lr}
-    sub sp, sp, #2
-    mov lr, #0
-    smulwb r0, r0, r1
-    mov r0, r0, lsl #1
-    add sp, sp, #2
-    ldmfd sp!, {r2, lr}
-    bx lr
-}
-
-int func_02086628(s16 value) {
-    if (value <= 3) {
-        return 0;
-    }
-    if (value > 3 && value < 9) {
-        return (s16)(value - 3);
-    }
-    if (value == 9 || value == 10) {
-        return 6;
-    }
-    if (value >= 11 && value <= 13) {
-        return 7;
-    }
-    if (value >= 14 && value <= 16) {
-        return 8;
-    }
-    if (value >= 17 && value <= 25) {
-        return 9;
-    }
-    if (value > 25) {
-        return 10;
-    }
-    return -1;
-}
-
-// Copies a line of text, up to size, and moves the cursor past it. Returns its length, -1 at the end of the text.
-int func_02086a7c(char *dst, int size, char **cursor) {
-    s16 length;
-    int last;
-
-    if (cursor == NULL || *cursor == NULL) {
-        return -2;
-    }
-    if (**cursor == 0) {
-        return -1;
-    }
-    last = size - 1;
-    length = 0;
-    while (**cursor != 0 && length < last) {
-        if (**cursor == '\n' || **cursor == '\r') {
-            (*cursor)++;
-            break;
-        }
-        *dst++ = *(*cursor)++;
-        length++;
-    }
-    *dst = 0;
-    return length;
-}
-
-// The next word of text that the characters of delimiters separate, as strtok does it but with the cursor in the
-// caller's hands
-char *func_02089da0(char **cursor, char *delimiters) {
-    char *word;
-
-    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) != NULL) {
-        (*cursor)++;
-    }
-    word = *cursor;
-    if (*word == 0) {
-        return NULL;
-    }
-    while (**cursor != 0 && func_02089d7c(delimiters, **cursor) == NULL) {
-        (*cursor)++;
-    }
-    if (**cursor != 0) {
-        *(*cursor)++ = 0;
-    }
-    return word;
-}
-
-// Fills count samples with silence from a place in the sample buffer, going round to its start at its end
-void func_0208be9c(int count, s16 *buffer, Shtts *engine) {
-    s16 i;
-
-    if (count < 0) {
-        func_02089e70(-1);
-    }
-    i = 0;
-    if (buffer + count >= engine->unk_08CD8) {
-        while (buffer < engine->unk_08CD8) {
-            *buffer++ = 0;
-            i++;
-        }
-        buffer = engine->unk_08CD4;
-    }
-    for (; i < count; i++) {
-        *buffer++ = 0;
-    }
 }
