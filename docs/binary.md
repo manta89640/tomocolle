@@ -92,7 +92,8 @@ rather than decompiled, and should be counted apart from the game's own.
 
 A function with enough arithmetic, branching and register pressure to tell the versions apart has yet to be matched.
 The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
-it must come out as it is in the ROM.
+it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
+include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches.
