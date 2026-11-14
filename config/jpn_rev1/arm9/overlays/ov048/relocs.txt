@@ -48,7 +48,7 @@ from:0x02149f90 kind:arm_call to:0x02035d28 module:main
 from:0x02149fa8 kind:load to:0x02122824 module:main
 from:0x02149fac kind:load to:0x0211d604 module:main
 from:0x02149fb4 kind:load to:0x0213ba74 module:main
-from:0x02149fb8 kind:load to:0x0213ba80 module:main
+from:0x02149fb8 kind:load to:0x0213ba74 add:0xc module:main
 from:0x02149fbc kind:load to:0x021223e4 module:main
 from:0x02149fc0 kind:load to:0x0214a5d0 module:overlay(48)
 from:0x02149fc4 kind:load to:0x0214a5e0 module:overlay(48)
