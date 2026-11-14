@@ -130,34 +130,31 @@ _ZN20TutorialTimedMessage8SetStateEi kind:function(arm,size=0x14) addr:0x021509c
 _ZN20TutorialTimedMessage10SetVisibleEi kind:function(arm,size=0x40) addr:0x021509dc
 _ZN17TutorialRoomSceneD1Ev kind:function(arm,size=0xc0) addr:0x02150a1c
 _ZN17TutorialRoomSceneD0Ev kind:function(arm,size=0xc8) addr:0x02150adc
-data_ov073_02150ba4 kind:data(any) addr:0x02150ba4
-data_ov073_02150ba6 kind:data(any) addr:0x02150ba6
-data_ov073_02150bc0 kind:data(any) addr:0x02150bc0
-gText_A_ov073 kind:data(any) addr:0x02150bc4
-data_ov073_02150be8 kind:data(any) addr:0x02150be8
+sButtonSequences kind:data(any) addr:0x02150ba4 local
+sButtonPositions kind:data(any) addr:0x02150bc0 local
+sMoodHeadIcons kind:data(any) addr:0x02150be8 local
 data_ov073_02150bf4 kind:data(any) addr:0x02150bf4
 data_ov073_02150c00 kind:data(any) addr:0x02150c00
 data_ov073_02150c0c kind:data(any) addr:0x02150c0c
-data_ov073_02150c30 kind:data(any) addr:0x02150c30
-data_ov073_02150c40 kind:data(any) addr:0x02150c40
-data_ov073_02150c60 kind:data(any) addr:0x02150c60
-data_ov073_02150c70 kind:data(any) addr:0x02150c70
-data_ov073_02150c88 kind:data(any) addr:0x02150c88
-data_ov073_02150c98 kind:data(any) addr:0x02150c98
-data_ov073_02150cb8 kind:data(any) addr:0x02150cb8
-gStr_MLT_Window_down2_nsc kind:data(any) addr:0x02150cbc
-data_ov073_02150cd4 kind:data(any) addr:0x02150cd4
-data_ov073_02150cf4 kind:data(any) addr:0x02150cf4
+sScrollPerFloor kind:data(any) addr:0x02150c30 local
+sCursorTouchRect kind:data(any) addr:0x02150c40 local
+sWindowRect kind:data(any) addr:0x02150c60 local
+sClockSequences kind:data(any) addr:0x02150c70 local
+sButtonRectOther kind:data(any) addr:0x02150c88 local
+sButtonRect0 kind:data(any) addr:0x02150c98 local
+sRoomCounts kind:data(any) addr:0x02150cb8 local
+sWindowScreenName kind:data(any) addr:0x02150cbc local
+sSkyPictures kind:data(any) addr:0x02150cd4 local
+sClockPositions kind:data(any) addr:0x02150cf4 local
 __sinit_ov073_02150d4c kind:function(arm,size=0x2c) addr:0x02150d4c
 .p__sinit_ov073_02150d4c kind:data(word) addr:0x02150d78
-data_ov073_02150d8c kind:data(any) addr:0x02150d8c
-data_ov073_02150d98 kind:data(any) addr:0x02150d98
-data_ov073_02150db4 kind:data(any) addr:0x02150db4
-data_ov073_02150dc0 kind:data(any) addr:0x02150dc0
-data_ov073_02150dc4 kind:data(any) addr:0x02150dc4
-data_ov073_02150de4 kind:data(any) addr:0x02150de4
-data_ov073_02150df0 kind:data(any) addr:0x02150df0
-data_ov073_02150df8 kind:data(any) addr:0x02150df8
+_ZTV11MessageText__10TextCanvas_at_1424 kind:data(any) addr:0x02150d80
+gWalkArea kind:data(any) addr:0x02150d98 local
+_ZTV20TutorialTimedMessage kind:data(any) addr:0x02150da8
+_ZTT20TutorialTimedMessage kind:data(any) addr:0x02150dc0
+_ZTV13ObjTextCanvas__10TextCanvas_at_1424 kind:data(any) addr:0x02150dd8
+_ZTV12BgTextCanvas__10TextCanvas_at_1088 kind:data(any) addr:0x02150de4
+_ZTV21TutorialApartmentRoom kind:data(any) addr:0x02150df0
 data_ov073_02150e1c kind:data(any) addr:0x02150e1c ambiguous
 gStr_MT0_ov073 kind:data(any) addr:0x02150e38
 gStr_MT1 kind:data(any) addr:0x02150e3c
