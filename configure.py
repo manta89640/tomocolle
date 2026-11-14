@@ -210,6 +210,29 @@ LIBRARIES["lib/SHTTS/"] = {
     "includes": ["lib/SHTTS", *SDK_INCLUDES],
 }
 
+# MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
+# "Metrowerks C/C++ for ARM 3.0.0.136", the compiler of 2.0/sp2. Its source here is this project's own decompilation,
+# written against the headers of that MSL (internal ones such as ansi_files.h included).
+LIBRARIES["lib/MSL_C/"] = {
+    "compiler": "2.0/sp2",
+    "flags": [
+        "-O4,p",
+        "-proc arm946e",
+        "-interworking",
+        "-enum int",
+        "-char signed",
+        "-lang c99",
+        "-gccext,on",
+        "-gccinc",  # MSL's headers include each other with <...>
+        "-sym on",
+        "-w off",
+        "-nolink",
+        "-msgstyle gcc",
+    ],
+    "defines": [],
+    "includes": ["lib/MSL_C"],
+}
+
 # A header that the SDK's build generates from a table of constants. tools/gen_fx_const.py does the same, so that
 # nothing fetched is run here: the fetched sources are only ever input to the compiler.
 FX_CONST = ("tools/gen_fx_const.py", "lib/NitroSDK/gen/nitro/fx/fx_const.csv",

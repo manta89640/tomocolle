@@ -97,7 +97,11 @@ hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
 
 So 1,293 of the main program's 4,205 functions are library code with known names, and 181 library files are cut
 out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`; `math_api.c`
-and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have). What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have).
+
+MSL's own files are compiled with 2.0/sp2 (measured: its objects say "Metrowerks C/C++ for ARM 3.0.0.136", which is
+what that compiler writes) and the headers of that MSL, internal ones included. `lib/MSL_C/wstring.c` is the first:
+its seven functions match and it is linked from source. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
 matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
 game's 30007.
