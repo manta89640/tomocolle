@@ -10,11 +10,14 @@ repository's CI.
 | --- | --- |
 | A report per game version, as a CI artifact named `<version>_report` | `jpn_rev1_report`, uploaded by `.github/workflows/build.yml` from successful pushes to `main` |
 | Units, drawn as a map by the directories in their names | `src/...` and `lib/...` for the files named in a `delinks.txt`, written or not, and `main/gap_<n>`, `overlays/ov<nnn>/gap_<n>` for what is left of each module |
-| Progress categories | By module: `main`, `itcm`, `overlays`. By origin: `game` for `src/`, `libs` for `lib/` |
+| Progress categories | By module: `main`, `itcm`, `overlays`. By origin: `game` for `src/`, `libs` for `lib/`. By library: `nitrosdk`, `nitrosystem`, `shtts`. By the game's subsystem: `sound`, `text`, `voice` (the directories under `src/`) |
 | A unit's source file, for "View source" | `metadata.source_path`, set by dsd |
 | Complete units | Files marked `complete` in `delinks.txt` |
 
-`tools/objdiff_config.py` writes `objdiff.json` in that shape, from what dsd generates.
+`tools/objdiff_config.py` writes `objdiff.json` in that shape, from what dsd generates. The library and subsystem
+categories come from its `LIBRARIES` and `SUBSYSTEMS` tables: a new directory under `lib/` or `src/` gets a category
+of its own by adding it there. The origin and finer categories count only the files that `delinks.txt` names, so they
+say how much of what has been identified matches, not how much of the game.
 
 ## Setting it up
 

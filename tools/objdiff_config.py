@@ -4,7 +4,8 @@
 dsd writes the units. This adds what a progress tracker reads from them:
   - short paths, relative to the repository's root
   - a path-like name for each unit, since the tracker draws a name's directories as nested boxes
-  - progress categories: each unit's kind of module, and whether it is the game's own code or a library's
+  - progress categories: each unit's kind of module, whether it is the game's own code or a library's, and which
+    library or which of the game's subsystems
   - the source file of a decompiled unit, for links to the code
 
 A delinks.txt may name a source file that is not written yet, to give a known file a unit of its own. Such a unit has
@@ -22,6 +23,7 @@ from pathlib import Path
 GAP = re.compile(r"^_dsd_gap@(?P<module>.+)_(?P<index>\d+)$")
 
 CATEGORIES = [
+    # By module
     {"id": "main", "name": "Main program"},
     {"id": "itcm", "name": "ITCM"},
     {"id": "overlays", "name": "Overlays"},
@@ -30,6 +32,20 @@ CATEGORIES = [
     {"id": "libs", "name": "Libraries"},
 ]
 ORIGINS = {"src": "game", "lib": "libs"}
+
+# Finer categories, by the directory under lib/ or src/ that a file is in. A file of a directory that is not listed
+# counts only toward its origin and module (src/overlays/ is not listed: the module category already covers it).
+LIBRARIES = {
+    "NitroSDK": ("nitrosdk", "NitroSDK"),
+    "NitroSystem": ("nitrosystem", "NitroSystem"),
+    "SHTTS": ("shtts", "Speech synthesis (SHTTS)"),
+}
+SUBSYSTEMS = {
+    "sound": ("sound", "Sound"),
+    "text": ("text", "Text"),
+    "voice": ("voice", "Speech player"),
+}
+CATEGORIES += [{"id": id, "name": name} for id, name in [*LIBRARIES.values(), *SUBSYSTEMS.values()]]
 
 
 def clean(path: str) -> str:
@@ -54,6 +70,16 @@ def category(module: str) -> str:
     if module.startswith("ov"):
         return "overlays"
     return module if module in ("main", "itcm") else "main"
+
+
+def finer_category(source: str) -> str | None:
+    """The library or subsystem category of a source file, from the directory under lib/ or src/ it is in."""
+    parts = Path(source).parts
+    if len(parts) < 3:
+        return None
+    table = {"lib": LIBRARIES, "src": SUBSYSTEMS}.get(parts[0], {})
+    entry = table.get(parts[1])
+    return entry[0] if entry else None
 
 
 def main() -> int:
@@ -103,6 +129,9 @@ def main() -> int:
             origin = ORIGINS.get(Path(source).parts[0])
             if origin:
                 categories.append(origin)
+            finer = finer_category(source)
+            if finer:
+                categories.append(finer)
             if origin == "libs":
                 # A scratch is for writing code, and it would be set up with the game's compiler, not the library's
                 unit.pop("scratch", None)

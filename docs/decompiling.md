@@ -119,8 +119,8 @@ of the game is understood as well as how much is matched. Which directory a file
 
 | Directory | For | Category |
 | --- | --- | --- |
-| `src/` | The game's own code, by overlay or by subsystem | Game |
-| `lib/<library>/` | Code of the SDK and of middleware, under the library's own file names where known | Libraries |
+| `src/` | The game's own code, by overlay or by subsystem | Game, and the subsystem's (`sound`, `text`, `voice`) |
+| `lib/<library>/` | Code of the SDK and of middleware, under the library's own file names where known | Libraries, and the library's (`nitrosdk`, `nitrosystem`, `shtts`) |
 
 Cut where the evidence is: a library's known file, a run of functions that only refer to each other and to their own
 data, a static initializer (each belongs to one file), a table of virtual functions. Do not cut on a guess: a wrong
