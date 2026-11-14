@@ -95,8 +95,6 @@ extern const s16 data_020fb898[4][5]; // The same: walking
 
 // The overlay's data that the character's functions read. The four descriptive names are not in symbols.txt yet,
 // where each still has the address name given beside it.
-extern FloorRect gWalkArea;          // data_ov074_0216d724: where a character may walk
-extern FloorPos gWalkAreaCorners[4]; // data_ov074_0216d734
 extern FloorPos gRoomPoints[];       // data_ov074_0216d404: places in the room. Not const: only then is it loaded
                                      // as late as the original does
 extern const int gMoodFaces[5];      // data_ov074_0216d544: the face of each mood
@@ -269,6 +267,7 @@ public:
         pos.z = mModel.mPos.z;
         return pos;
     }
+    VecFx32 GetPos() const { return mModel.mPos; }
     void SetPos(VecFx32 pos) { mModel.mPos = pos; }
     // The angle of the way from where the character stands to a point
     u16 AngleTo(FloorPos target) {

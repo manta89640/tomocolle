@@ -12,14 +12,18 @@
 // sizes, the fields the apartment scene's code touches, and their destructors as the scene's destructor has them
 // inlined. The names are descriptive placeholders.
 
-// A model whose destructor takes its render callback away (the room's door, "XXX:/close.ica").
-class RoomDoorModel : public AnimModel {
+// The room's door ("XXX:/close.ica"): a model, and a destructor that takes the model's render callback away. The
+// model is a member, not a base: the scene's destructor has the callback reset first and then AnimModel's
+// destructor, without a virtual table of the door's own being stored in between.
+class RoomDoorModel {
 public:
-    ~RoomDoorModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
+    ~RoomDoorModel() { NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj); }
 
+    /* 0x000 */ AnimModel mModel;
     /* 0x0E0 */ u8 mUnknownE0[0x58];
     /* 0x138 */ int mMotion; // func_020a4144 sets it (1 and 2 as a character leaves or enters); 0 again when the door is done
-    /* 0x13C */ u8 mUnknown13C[0x1C];
+    /* 0x13C */ int mUnknown13C; // The scene's Init sets it to 2
+    /* 0x140 */ u8 mUnknown140[0x18];
 }; // 0x158
 
 // One of the room's six parts; func_020a4718 hides those between the camera and the room.

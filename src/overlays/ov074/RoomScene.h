@@ -82,11 +82,6 @@ inline s64 GetEventEnd(SavedCharacter *character) {
     return *(s64 *)&character->mEventEndLo;
 }
 
-// Room.h, RoomDoorModel: the first four bytes of mUnknown13C are an int that the scene's Init sets to 2.
-inline void SetDoorUnknown13C(RoomDoorModel *door, int value) {
-    *(int *)door->mUnknown13C = value;
-}
-
 // RoomObjects/TimedMessage.h (or MessageText): how many sprite characters (tiles) the text's canvas takes
 inline int GetCanvasCharCount(MessageText *text) {
     return ((text->mCanvas.areaWidth * text->mCanvas.areaHeight - 1) >> text->mVramMode) + 1;

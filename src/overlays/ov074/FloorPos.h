@@ -32,6 +32,29 @@ inline FloorPos operator-(FloorPos a, FloorPos b) {
     return result;
 }
 
+// The same as functions, as RoomObjects' code has them
+inline FloorPos Add(FloorPos a, FloorPos b) {
+    FloorPos sum;
+    sum.x = a.x + b.x;
+    sum.z = a.z + b.z;
+    return sum;
+}
+
+inline FloorPos Sub(FloorPos a, FloorPos b) {
+    FloorPos difference;
+    difference.x = a.x - b.x;
+    difference.z = a.z - b.z;
+    return difference;
+}
+
+// The point turned around the origin by an angle
+inline FloorPos Rotate(const FloorPos &a, int angle) {
+    FloorPos turned;
+    turned.x = FX_Mul(a.x, FX_CosIdx(angle)) - FX_Mul(a.z, FX_SinIdx(angle));
+    turned.z = FX_Mul(a.x, FX_SinIdx(angle)) + FX_Mul(a.z, FX_CosIdx(angle));
+    return turned;
+}
+
 inline FloorPos Half(FloorPos pos) {
     FloorPos result;
     result.x = pos.x >> 1;

@@ -5,29 +5,9 @@
     .data       start:0x0216d6e0 end:0x0216db20 kind:data align:32
     .bss        start:0x0216db20 end:0x0216db20 kind:bss align:32
 
-src/overlays/ov074/RoomScene/RoomScene.cpp:
-    .text       start:0x02149a40 end:0x0214e5f8
-
-src/overlays/ov074/RoomEncounter/RoomEncounter.cpp:
-    .text       start:0x0214e5f8 end:0x02152690
-
-src/overlays/ov074/RoomCharacterTalkStates/RoomCharacterTalkStates.cpp:
-    .text       start:0x02152690 end:0x02154608
-
-src/overlays/ov074/RoomCharacterSoloStates1D/RoomCharacterSoloStates1D.cpp:
-    .text       start:0x02154608 end:0x021578a8
-
-src/overlays/ov074/RoomCharacterSoloStates40/RoomCharacterSoloStates40.cpp:
-    .text       start:0x021578a8 end:0x0215b45c
-
-src/overlays/ov074/RoomCharacterPairStates70/RoomCharacterPairStates70.cpp:
-    .text       start:0x0215b45c end:0x0215f610
-
-src/overlays/ov074/RoomCharacterStatesB3/RoomCharacterStatesB3.cpp:
-    .text       start:0x0215f610 end:0x0216420c
-
-src/overlays/ov074/RoomCharacterStatesF2/RoomCharacterStatesF2.cpp:
-    .text       start:0x0216420c end:0x02168d24
-
-src/overlays/ov074/RoomObjects/RoomObjects.cpp:
-    .text       start:0x02168d24 end:0x0216d400
+src/overlays/ov074/RoomScene.cpp:
+    .text       start:0x02149a40 end:0x0216d400
+    .rodata     start:0x0216d400 end:0x0216d67c
+    .init       start:0x0216d67c end:0x0216d6cc
+    .ctor       start:0x0216d6cc end:0x0216d6d0
+    .data       start:0x0216d6e0 end:0x0216db20
