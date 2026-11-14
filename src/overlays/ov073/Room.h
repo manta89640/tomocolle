@@ -6,16 +6,20 @@
 
 #include "Model.h"
 
-// Shared by the units of overlay 74 (it began as RoomObjects' Room.h).
+// Overlay 74's Room.h, with the tutorial's own TutorialApartmentRoom.
 //
 // STAND-INS for the main program's room classes (0x020a3c68 to 0x020a5ca0), which are not decompiled yet: their
 // sizes, the fields the apartment scene's code touches, and their destructors as the scene's destructor has them
 // inlined. The names are descriptive placeholders.
 
-// A model whose destructor takes its render callback away (the room's door, "XXX:/close.ica").
-class RoomDoorModel : public AnimModel {
+// The room's door ("XXX:/close.ica"): a model, and a destructor that takes the model's render callback away. The
+// model is a member, not a base: the scene's destructor has the callback reset first and then AnimModel's
+// destructor, without a virtual table of the door's own being stored in between (as overlay 74 found).
+class RoomDoorModel {
 public:
-    ~RoomDoorModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
+    ~RoomDoorModel() { NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj); }
+
+    /* 0x000 */ AnimModel mModel;
 
     /* 0x0E0 */ u8 mUnknownE0[0x58];
     /* 0x138 */ int mMotion; // func_020a4144 sets it (1 and 2 as a character leaves or enters); 0 again when the door is done
@@ -84,6 +88,12 @@ extern const RoomStyle data_020f72f8[];
 void func_020a4ab8(RoomParts *parts, int state); // Sets the state of the parts
 void func_020a4144(RoomParts *parts, int motion); // Starts a motion of the door (RoomDoorModel::mMotion)
 void func_020a4b74(RoomParts *parts, int unk);
+void func_020a4acc(RoomParts *parts, int slot);
+void func_020a4a50(RoomParts *parts); // Draws
+void func_020a54c4(Room *room, const char *archiveName, int unknown);
+void func_020a56bc(Room *room, const char *archiveName, int unknown);
+void func_020a5514(Room *room, int slot);
+void func_020a5760(Room *room, int slot);
 void func_020a5948(Room *room);
 void func_020a5960(Room *room); // Updates the parts (func_020a4718)
 void func_020a54e4(Room *room, int unk); // The steps of changing to the style in mStyle
@@ -97,11 +107,13 @@ void func_020a4dcc(Room *room, int *r, int *g, int *b);
 wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);
 }
 
-// The room of the apartment scene: a Room that can change its style in the background, and that knows its
-// number in the building.
+// The room of the tutorial's apartment scene: a Room that can change its style in the background, and that knows
+// its number in the building. Overlay 74's ApartmentRoom in the tutorial's cut: the same layout, but its fourth
+// state gives func_020a5530 and func_020a5854 other values and it has no SetNextStyle.
 //
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-class ApartmentRoom : public Room {
+// The name is descriptive, not the original: no name of this class survives in the ROM. The prefix tells it from
+// overlay 74's: the program is linked as one, so the two cannot have one name.
+class TutorialApartmentRoom : public Room {
 public:
     enum State {
         STATE_IDLE,
@@ -110,7 +122,7 @@ public:
         STATE_UNKNOWN3,     // func_020a5530(3), then func_020a5854(4) (overlay 74 gives them 7 and 8)
     };
 
-    ApartmentRoom();
+    TutorialApartmentRoom();
     void Refresh();
     void SetStyle(u16 style);
     void UpdateNumberText();

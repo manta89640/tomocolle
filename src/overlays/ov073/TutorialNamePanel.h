@@ -1,5 +1,5 @@
-#ifndef SPEECHBALLOON_H
-#define SPEECHBALLOON_H
+#ifndef OV073_TUTORIALNAMEPANEL_H
+#define OV073_TUTORIALNAMEPANEL_H
 
 #include <nitro.h>
 #include <nnsys.h>
@@ -10,8 +10,9 @@
 // A panel sprite (sequence 4 of the scene's sprite bank 1, in the middle of the screen) with two lines of
 // message text on it, each of which takes a name as its first argument. It shows itself for three seconds.
 //
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-class NamePanel : public Sprite {
+// The name is descriptive, not the original: no name of this class survives in the ROM. Overlay 74 has the same
+// class without the prefix, which tells the two apart: the program is linked as one, so they cannot have one name.
+class TutorialNamePanel : public Sprite {
 public:
     enum State {
         STATE_IDLE,
@@ -21,7 +22,7 @@ public:
         STATE_HIDE,
     };
 
-    NamePanel();
+    TutorialNamePanel();
     int Init(int charOffset, MessageFile *file1, MessageFile *file2);
     void Update();
     void Draw();
@@ -38,4 +39,4 @@ public:
     /* 0xC92 */ s16 mFrames;
 }; // 0xC94
 
-#endif // SPEECHBALLOON_H
+#endif // OV073_TUTORIALNAMEPANEL_H

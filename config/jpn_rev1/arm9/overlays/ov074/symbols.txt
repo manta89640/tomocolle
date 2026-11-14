@@ -290,7 +290,7 @@ gStr_03 kind:data(any) addr:0x0216d6fc
 gStr_07 kind:data(any) addr:0x0216d700
 gStr_05 kind:data(any) addr:0x0216d704
 gStr_00 kind:data(any) addr:0x0216d708
-_ZTV12BgTextCanvas__10TextCanvas_at_1088 kind:data(any) addr:0x0216d718
+_ZTV12BgTextCanvas__10TextCanvas_at_1088 kind:data(any) addr:0x0216d718 local
 gWalkArea kind:data(any) addr:0x0216d724
 gWalkAreaCorners kind:data(any) addr:0x0216d734
 sHeldItemDigits kind:data(any) addr:0x0216d754
@@ -353,6 +353,6 @@ gStr_ASX_Fw_BG0_ncg_ov074 kind:data(any) addr:0x0216dae4
 gStr_ASX_Fw_BG0_ncl_ov074 kind:data(any) addr:0x0216daf4
 gStr_ASX_ov074_3 kind:data(any) addr:0x0216db04
 gStr_ASX_ov074_4 kind:data(any) addr:0x0216db08
-_ZTV13ObjTextCanvas__10TextCanvas_at_1424 kind:data(any) addr:0x0216d70c
-_ZTV11MessageText__10TextCanvas_at_1424 kind:data(any) addr:0x0216d780
+_ZTV13ObjTextCanvas__10TextCanvas_at_1424 kind:data(any) addr:0x0216d70c local
+_ZTV11MessageText__10TextCanvas_at_1424 kind:data(any) addr:0x0216d780 local
 _ZTV12TimedMessage kind:data(any) addr:0x0216d7b0

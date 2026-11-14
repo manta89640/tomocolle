@@ -1,5 +1,5 @@
-#ifndef TOUCHBUTTON_H
-#define TOUCHBUTTON_H
+#ifndef OV073_TUTORIALTOUCHBUTTON_H
+#define OV073_TUTORIALTOUCHBUTTON_H
 
 #include <nitro.h>
 #include <nnsys.h>
@@ -7,16 +7,18 @@
 #include "Sprite.h"
 #include "text/MessageText.h"
 
-// The button of the tutorial's touch screen (overlay 73): overlay 74's classes in the tutorial's cut. TouchSprite
-// has no mReleased here (and no SetReleased), so it is 0xBC bytes and TouchButton 0xC8, with mKind, mState and
+// The button of the tutorial's touch screen: overlay 74's classes in the tutorial's cut. TutorialTouchSprite has no
+// mReleased here (and no SetReleased), so it is 0xBC bytes and TutorialTouchButton 0xC8, with mKind, mState and
 // mLabel four bytes earlier than overlay 74's; mKind is an int here.
 //
-// The names are descriptive, not the original: no name of these classes survives in the ROM.
+// The names are descriptive, not the original: no name of these classes survives in the ROM. Overlay 74 has the
+// same classes without the prefix, which tells the two apart: the program is linked as one, so they cannot have
+// one name.
 
 // A sprite with a rectangle around its position that can be touched.
-class TouchSprite : public Sprite {
+class TutorialTouchSprite : public Sprite {
 public:
-    TouchSprite();
+    TutorialTouchSprite();
     BOOL Contains(ScreenPoint point);
 
     /* 0xAC */ int mX; // In pixels
@@ -27,7 +29,7 @@ public:
 
 // The button (the tutorial has one, of kind 0: it has a text label that moves down two pixels with the button
 // when it is held).
-class TouchButton : public TouchSprite {
+class TutorialTouchButton : public TutorialTouchSprite {
 public:
     enum State {
         STATE_IDLE,
@@ -36,7 +38,7 @@ public:
         STATE_PLAY,
     };
 
-    TouchButton();
+    TutorialTouchButton();
     void Init(int kind);
     void Update();
     void Draw();
@@ -47,4 +49,4 @@ public:
     /* 0xC4 */ MessageText *mLabel;
 }; // 0xC8
 
-#endif // TOUCHBUTTON_H
+#endif // OV073_TUTORIALTOUCHBUTTON_H

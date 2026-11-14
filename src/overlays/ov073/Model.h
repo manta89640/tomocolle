@@ -4,7 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-// Shared by the units of overlay 74 (it began as RoomObjects' Model.h).
+// The same as overlay 74's Model.h.
 //
 // STAND-INS for the main program's 3D model classes (0x02029b04 to 0x0202b008), which are not decompiled yet.
 // Only what the apartment scene's code shows is here: the virtual functions in the order of their tables
@@ -42,7 +42,7 @@ struct ModelAnimation {
 class Model {
 public:
     Model() {
-        mUnknown04 = 0;
+        mUnknown04 = NULL;
         mResMdl = NULL;
         mUnknown10 = 0;
         mResource = NULL;
@@ -80,7 +80,7 @@ public:
         mRotZ = z;
     }
 
-    /* 0x04 */ int mUnknown04;
+    /* 0x04 */ void *mUnknown04; // What func_02029660 looks a joint animation (RESOURCE_BCA0) up in
     /* 0x08 */ int mUnknown08;
     /* 0x0C */ NNSG3dResMdl *mResMdl; // The model's resource: the entering states give it to NNS_G3dMdlSetMdlDiff
     /* 0x10 */ int mUnknown10;

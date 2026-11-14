@@ -287,14 +287,19 @@ Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tm
   `HeldItem`'s deleting destructor is in the overlay.
 
 Overlay 73 is the tutorial's apartment (`ScenePlayRoomTut`, scene id 0x6B): 133 functions, 29 KB. Decompiled in
-`src/overlays/ov073/`, 126 matching: `TutorialRoomScene` (0x134E8 bytes; 12 of 13), `TutorialRoomCharacter` (the
-scene's remaining functions and the character's 18 states; 19 of 19), `TutorialRoomObjects` (95 of 100).
+`src/overlays/ov073/` as one file, `TutorialRoomScene.cpp`, which `delinks.txt` gives every section: 131 of 133
+match.
 
-- 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its `RoomCharacter` is
-  0x2B94 bytes with 18 states and no held items, its `RoomCamera` 0x5C bytes without the close-up mode, its
-  `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
-- The program is linked as one, so two classes cannot share a name: `TutorialNames.h` gives overlay 73's versions the
-  prefix `Tutorial`.
+- 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its character
+  (`TutorialRoomCharacter`) is 0x2B94 bytes with 18 states and no held items, its camera 0x5C bytes without the
+  close-up mode, its `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
+- The program is linked as one, so two classes cannot share a name: overlay 73's are named with the prefix
+  `Tutorial` in the source.
+- Measured: the compiler heap-sorts a file's data objects by size and pools the four-byte-aligned constants of
+  `.rodata` in that order (details in `docs/notes/ov073.md`). Overlay 73's file gives the constants that the code reads
+  off the pool's start (its 8-byte points) the ROM's offsets, but the rest of its `.rodata` and its `.data` are in
+  the ROM in an order that is not by size, which our compiler does not give: the data does not match, and the unit
+  is not complete.
 
 Inferred, from several measurements that agree: each of the two overlays is ONE source file. Overlay 73's small
 constants are in one pool that functions throughout it address by offset; overlay 74 has one static initialiser,
@@ -319,17 +324,46 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 14 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
+- 9 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
   `StartMeeting` (the callee-saved registers named differently), `StartPairEvent` (the offset of a pooled
   constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`, `ClockDisplay::Refresh`; in
-  overlay 73 the same last three, `TutorialRoomScene::Init` (six pool offsets that only a single file can give) and
-  the scene's destructor (emitted only where the scene's first virtual function is).
-- Overlay 74's data, above: written in part (the walk area, the tables of the scene's objects); the small constants
-  and the order of the digit strings are what keeps the file from being complete.
+  overlay 73 `TutorialApartmentFront::UpdateCursorTarget` and `TutorialClockDisplay::Refresh`. Overlay 73's
+  `NamePanel::Init` matches, and its fix (the character counts read through a pointer to the canvas, and both text
+  positions set with `SetPositionFromVec`) is still to be carried over to overlay 74's byte-identical copy.
+- The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
+  `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
+  order the compiler does give, by which its pool is reproduced.
 - `tools/check_relocs.py` lists, for overlay 74, only string literals and `data_020f7300`, which is
-  `data_020f72f8[0].mLightColor` (other overlays refer to it by that name too).
-- Overlay 73's three units have headers of their own and are not joined into the one file it evidently was.
+  `data_020f72f8[0].mLightColor` (other overlays refer to it by that name too); for overlay 73, string literals and
+  three anonymous vectors.
 - `docs/notes/ov074.md` and `docs/notes/ov073.md` keep the working notes, with the evidence for names and layouts.
+
+## The wedding announcement
+
+Overlay 96, `src/overlays/ov096/WeddingScene.cpp`: 35 of its 37 functions match.
+
+Measured: the scene `WeddingScene` (0x1CEE0 bytes, constructed in the main program at `0x02048600` after
+`FS_LoadOverlay(0x60)`; its virtual table at `0x0214C860`) shows two characters in front of the camera. Its messages
+are trouble messages 0x24F to 0x259: the first says they are getting married, the second thanks the player, the first
+promises a happy life, a window says that the two got married (0x256), and the second hands the player "the wedding
+album" (item 0xAA of the item messages) as a keepsake. The album's model grows in the character's hands over the
+second half of the `i_give01` animation; then `InventoryItem::Add(1)` puts it in the inventory and the scene asks for
+scene 0xC0. Coming back from scene 0xC0 (the characters' indices are kept at `data_0213ba74 + 0x20`), the first says
+they are off on their honeymoon; each character's `0x230` gets the time the honeymoon ends (now plus minutes from an
+event table, `data_02114d78`) and its `0x23A` is set to 3, and the scene asks for scene 0x77.
+
+The overlay's classes are its own versions of what the Mii-touch scenes (overlays 75 and 101 to 104) share: several
+of its functions are byte for byte the same there. The main program's classes it uses are named from it:
+`SpeechWindow` (a message window that hides itself when the speech engine is done, or after a number of frames),
+`Inventory` and `InventoryItem` (236 item counts read from and written back to the save data, at most 99 of each) and
+`ItemModel` (the model `Mdl/Item/item%03d_3D_LZ.bin` of an item, scaled by the item table's size).
+
+Not done:
+
+- `WeddingCamera::Reset` (the stack slots of three vector copies) and `WeddingCamera::Approach` (two loads in the
+  other order), each with a comment.
+- The data: `.rodata` starts with an 8-byte object `{25, 128}` that nothing refers to, which the source does not
+  give; the strings of `.data` are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 
 ## Compiler
 

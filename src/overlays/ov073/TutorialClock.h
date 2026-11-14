@@ -1,5 +1,5 @@
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef OV073_TUTORIALCLOCK_H
+#define OV073_TUTORIALCLOCK_H
 
 #include <nitro.h>
 #include <nnsys.h>
@@ -9,10 +9,12 @@
 // The apartment scene's clock: the current date and time, read through the main program's func_02035870 (which
 // applies the game's own offset to the real-time clock), and the sprites that show them.
 //
-// The names are descriptive, not the original: no name of these classes survives in the ROM.
-class Clock {
+// The names are descriptive, not the original: no name of these classes survives in the ROM. Overlay 74 has the
+// same classes without the prefix, which tells the two apart: the program is linked as one, so they cannot have
+// one name.
+class TutorialClock {
 public:
-    Clock();
+    TutorialClock();
     void Update();
     void UpdateIfArchiveIdle();
 
@@ -21,7 +23,7 @@ public:
     /* 0x14 */ RTCDate mDate;
 }; // 0x24
 
-class ClockDisplay {
+class TutorialClockDisplay {
 public:
     enum State {
         STATE_SHOWN,
@@ -44,14 +46,14 @@ public:
         SPRITE_COUNT
     };
 
-    void Init(Clock *clock);
+    void Init(TutorialClock *clock);
     void Update();
     void Refresh(BOOL all);
     void Draw();
     void SetState(int state);
     void SetVisible(BOOL visible);
 
-    /* 0x000 */ Clock *mClock;
+    /* 0x000 */ TutorialClock *mClock;
     /* 0x004 */ int mState;
     /* 0x008 */ Sprite mSprites[SPRITE_COUNT];
     // What the sprites show now
@@ -66,4 +68,4 @@ public:
     /* 0x78A */ s16 mHiddenFrames;
 }; // 0x78C
 
-#endif // CLOCK_H
+#endif // OV073_TUTORIALCLOCK_H

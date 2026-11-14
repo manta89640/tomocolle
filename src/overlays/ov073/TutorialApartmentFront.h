@@ -1,5 +1,5 @@
-#ifndef APARTMENTFRONT_H
-#define APARTMENTFRONT_H
+#ifndef OV073_TUTORIALAPARTMENTFRONT_H
+#define OV073_TUTORIALAPARTMENTFRONT_H
 
 #include <nitro.h>
 #include <nnsys.h>
@@ -9,17 +9,19 @@
 // The front of the apartment building on the touch screen, where a room is picked: a background of windows that
 // scrolls floor by floor, a cursor on the picked room and a button that scrolls with the building.
 //
-// The names are descriptive, not the original: no name of these classes survives in the ROM.
+// The names are descriptive, not the original: no name of these classes survives in the ROM. Overlay 74 has the
+// same classes without the prefix, which tells the two apart: the program is linked as one, so they cannot have
+// one name.
 
-// The cursor on the picked window: a sprite that is put where ApartmentFront wants it.
-class RoomCursor : public Sprite {
+// The cursor on the picked window: a sprite that is put where TutorialApartmentFront wants it.
+class TutorialRoomCursor : public Sprite {
 public:
     enum State {
         STATE_IDLE,
         STATE_MOVE, // Go to mTarget
     };
 
-    RoomCursor();
+    TutorialRoomCursor();
     void Update();
     void SetState(int state);
     BOOL Contains(ScreenPoint point);
@@ -41,7 +43,7 @@ public:
 }; // 0xB8
 
 // The button beside the building (sequence 9 of the scene's sprites, 10 while it is held).
-class BuildingButton : public Sprite {
+class TutorialBuildingButton : public Sprite {
 public:
     enum State {
         STATE_IDLE,
@@ -50,7 +52,7 @@ public:
         STATE_PLAY,
     };
 
-    BuildingButton();
+    TutorialBuildingButton();
     void Init();
     void Update();
     void SetState(int state);
@@ -59,7 +61,7 @@ public:
     /* 0xAC */ int mState;
 }; // 0xB0
 
-class ApartmentFront {
+class TutorialApartmentFront {
 public:
     enum State {
         STATE_IDLE,
@@ -78,7 +80,7 @@ public:
         WINDOW_7,
     };
 
-    ApartmentFront();
+    TutorialApartmentFront();
     void SetBuildingSize(int size);
     void Init(int room);
     void Touch(ScreenPoint point);
@@ -101,8 +103,8 @@ public:
     void DrawWindowOfKind(int kind, int room);
     void DrawWindowTiles(int kind, u8 column, u8 floor);
 
-    /* 0x000 */ RoomCursor mCursor;
-    /* 0x0B8 */ BuildingButton mButton;
+    /* 0x000 */ TutorialRoomCursor mCursor;
+    /* 0x0B8 */ TutorialBuildingButton mButton;
     /* 0x168 */ int mState;
     /* 0x16C */ fx32 mScroll;        // How far up the building the view is, in pixels
     /* 0x170 */ fx32 mScrollTarget;
@@ -115,4 +117,4 @@ public:
     /* 0x19C */ u8 mResidents[100];  // By room: which character lives there, 0xFF if nobody
 }; // 0x200
 
-#endif // APARTMENTFRONT_H
+#endif // OV073_TUTORIALAPARTMENTFRONT_H
