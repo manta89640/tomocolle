@@ -5,11 +5,9 @@
     .data       start:0x02150d80 end:0x02151160 kind:data align:32
     .bss        start:0x02151160 end:0x02151160 kind:bss align:32
 
-src/overlays/ov073/TutorialRoomScene/TutorialRoomScene.cpp:
-    .text       start:0x02149a40 end:0x0214bbe0
-
-src/overlays/ov073/TutorialRoomCharacter/TutorialRoomCharacter.cpp:
-    .text       start:0x0214bbe0 end:0x0214daec
-
-src/overlays/ov073/TutorialRoomObjects/TutorialRoomObjects.cpp:
-    .text       start:0x0214daec end:0x02150ba4
+src/overlays/ov073/TutorialRoomScene.cpp:
+    .text       start:0x02149a40 end:0x02150ba4
+    .rodata     start:0x02150ba4 end:0x02150d4c
+    .init       start:0x02150d4c end:0x02150d78
+    .ctor       start:0x02150d78 end:0x02150d7c
+    .data       start:0x02150d80 end:0x02151160

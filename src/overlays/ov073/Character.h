@@ -7,8 +7,9 @@
 #include "Model.h"
 
 // STAND-INS for the main program's character classes, which are not decompiled yet: the saved character, the
-// character as it is drawn, its model and the icon over its head. The same file as overlay 74's Character.h, with HeadIcon's functions
-// under the names symbols.txt has for them; only what the overlays' code shows is named. The names are descriptive, not the original.
+// character as it is drawn, its model and the icon over its head. Overlay 74's Character.h, with HeadIcon's
+// functions under the names symbols.txt has for them; only what the overlays' code shows is named. The names are
+// descriptive, not the original.
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each (func_0202c264 copies one
 // out by index, func_0202c28c back in). func_020979c0 is its constructor. The scene makes temporary ones on the
@@ -105,6 +106,11 @@ public:
     /* 0x27C */ MtxFx43 mJointMatrices[12];  // By joint: 0 is the head, 1 and 2 are the hands
 }; // 0x4BC
 
+// The main program's particle system for one effect file (func_02080e80 constructs it, func_02080e98 loads it).
+struct ParticleSystem {
+    /* 0x0 */ void *mManager; // func_0207b138 updates it
+}; // 0x4
+
 // What func_02081024 reads of the icon that is shown.
 struct HeadIconFrame {
     /* 0x00 */ u8 mUnknown00[0x26];
@@ -120,7 +126,7 @@ struct HeadIcon {
     HeadIcon();                       // func_02081034
     void Show();                      // func_02080fc4: removes the icon that is shown (frees mShown, clears it)
     void Restart();                   // func_02080ff0: clears three flags of the icon that is shown: plays it again
-    void Load(int param, int iconId); // func_020810b4: keeps the id and calls func_02080f64 with mPos
+    void Load(ParticleSystem *particles, int iconId); // func_020810b4: keeps the id and calls func_02080f64 with mPos
     void Reload();                    // func_020810c8: creates the icon of mIconId
     void Update();                    // func_020810e4
 
@@ -144,7 +150,32 @@ VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
 // Three scale factors from the model's 0xEC and 0xF0: the states 0x69 to 0x6D give them to a held item
 VecFx32 func_0208fc34(CharacterModel *model);
 
-// --- The head icon (0x02080f64 to 0x020810e4) ---
+// --- The saved character and the character (0x0208fcf8 to 0x0209d898) ---
+// Resets the character to nothing, and sets its appearance (the scene does both when the saved game has no such one)
+void func_020979e0(SavedCharacter *character);
+void func_02098c40(SavedCharacter *character, int kind, int value);
+s8 func_02098f2c(SavedCharacter *character);   // Computes its personality (0..15) from two pairs of its values
+void func_02099088(SavedCharacter *character, int index, int change); // Adds to its affinity for another
+void func_020990b0(SavedCharacter *character, int index, u8 relation, int affinity); // Sets its relation to another
+// Copies the saved character's name out as a string
+void func_0207a80c(SavedCharacter *character, wchar_t *name);
+// For each kind of relation, how much each reaction changes the affinity by, halved
+extern const s8 *data_021135c8[];
+void func_02091048(CharacterBase *character, const char *archiveName); // Names its archive
+void func_02090fdc(CharacterBase *character, int slot, int unknown2, int unknown3); // Sets it up
+void func_0208fefc(CharacterBase *character);
+void func_02091a24(CharacterBase *character);
+void func_02091a6c(CharacterBase *character);
+void func_020910d4(CharacterBase *character);
+void func_02091a88(CharacterBase *character);
+// Binds the joint animations of an archive to a model's resource
+void func_02029660(void *resource, u32 resType, void *archive);
+
+// --- The particle system and the head icon (0x02080e80 to 0x020810e4) ---
+void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void func_02080ee4(ParticleSystem *particles);
+void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void func_0207b138(void *manager);                          // Updates
 int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon
 void HeadIcon_SetMode(HeadIcon *icon, int mode); // Sets mMode
 

@@ -39,7 +39,7 @@ _ZN21TutorialRoomCharacter15StepWalkLookingEmilii kind:function(arm,size=0xb4) a
 _ZN21TutorialRoomCharacter15StepTurnLookingEiim kind:function(arm,size=0xac) addr:0x0214dd7c
 _ZN21TutorialRoomCharacter12SetAnimationEmi kind:function(arm,size=0x24) addr:0x0214de28
 _ZN21TutorialRoomCharacter18GetRandomPosInAreaEP8FloorPos kind:function(arm,size=0x84) addr:0x0214de4c
-_ZN21TutorialRoomCharacter12LoadHeadIconEi kind:function(arm,size=0x28) addr:0x0214ded0
+_ZN21TutorialRoomCharacter12LoadHeadIconEP14ParticleSystem kind:function(arm,size=0x28) addr:0x0214ded0
 _ZN21TutorialRoomCharacter13PlaceHeadIconEv kind:function(arm,size=0x44) addr:0x0214def8
 _ZN21TutorialRoomCharacter12ShowHeadIconEv kind:function(arm,size=0xb0) addr:0x0214df3c
 _ZN21TutorialRoomCharacter10IsWalkAnimEv kind:function(arm,size=0x58) addr:0x0214dfec
@@ -108,7 +108,7 @@ _ZN17TutorialNamePanel8SetStateEi kind:function(arm,size=0x14) addr:0x0215016c
 _ZN17TutorialNamePanel8SetNamesEPKwS1_ kind:function(arm,size=0x30) addr:0x02150180
 _ZN17TutorialNamePanel14SetTextVisibleEi kind:function(arm,size=0xc) addr:0x021501b0
 _ZN17TutorialNamePanel10SetVisibleEi kind:function(arm,size=0x18) addr:0x021501bc
-_ZN19TutorialTouchSpriteC1Ev kind:function(arm,size=0xc) addr:0x021501d4
+_ZN19TutorialTouchSpriteC2Ev kind:function(arm,size=0xc) addr:0x021501d4
 _ZN19TutorialTouchSprite8ContainsE11ScreenPoint kind:function(arm,size=0x84) addr:0x021501e0
 _ZN19TutorialTouchButtonC1Ev kind:function(arm,size=0x1c) addr:0x02150264
 _ZN19TutorialTouchButton4InitEi kind:function(arm,size=0xd4) addr:0x02150280
@@ -128,8 +128,8 @@ _ZN20TutorialTimedMessageC1Ev kind:function(arm,size=0x58) addr:0x02150838
 _ZN20TutorialTimedMessage6UpdateEv kind:function(arm,size=0x138) addr:0x02150890
 _ZN20TutorialTimedMessage8SetStateEi kind:function(arm,size=0x14) addr:0x021509c8
 _ZN20TutorialTimedMessage10SetVisibleEi kind:function(arm,size=0x40) addr:0x021509dc
-func_ov073_02150a1c kind:function(arm,size=0xc0) addr:0x02150a1c
-func_ov073_02150adc kind:function(arm,size=0xc8) addr:0x02150adc
+_ZN17TutorialRoomSceneD1Ev kind:function(arm,size=0xc0) addr:0x02150a1c
+_ZN17TutorialRoomSceneD0Ev kind:function(arm,size=0xc8) addr:0x02150adc
 data_ov073_02150ba4 kind:data(any) addr:0x02150ba4
 data_ov073_02150ba6 kind:data(any) addr:0x02150ba6
 data_ov073_02150bc0 kind:data(any) addr:0x02150bc0
