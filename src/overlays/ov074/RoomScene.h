@@ -94,6 +94,12 @@ struct SceneMemory {
 };
 #define gSceneMemory (*(SceneMemory *)&data_0213ba74)
 
+// The scene's speech player: a class of its own derived from TtsPlayer, with nothing added. Measured: the scene's
+// constructor (main program, 0x0203ed10) constructs the member with TtsPlayer's base-object constructor (C2) where
+// every other scene calls the complete one, and the scene's destructor destroys it with the base-object destructor.
+// The name is descriptive.
+class RoomTtsPlayer : public TtsPlayer {};
+
 // ---------------------------------------------------------------------------------------------------------------
 
 class RoomScene : public Scene {
@@ -215,7 +221,7 @@ public:
     /* 0x087E8 */ MessageFile mRoomMessages; // "TMM:/tmd_mainroom_msg_JP.bmg"
     /* 0x08800 */ TimedMessage mMessage;   // What the characters say and what goes on
     /* 0x08DF8 */ EncounterJudge mEncounterJudge;
-    /* 0x08DFC */ TtsPlayer mTtsPlayer;
+    /* 0x08DFC */ RoomTtsPlayer mTtsPlayer;
     /* 0x1D740 */ int mPressedButton;     // Which of mButtons the stylus went down on
     /* 0x1D744 */ int mUnknown1D744;
     /* 0x1D748 */ int mNextSceneId;
