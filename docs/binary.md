@@ -264,33 +264,39 @@ Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tm
   `HeldItem.h`, `Room.h`, `RoomCamera.h`, `FloorPos.h`), and `RoomScene` uses them too.
 
 Overlay 73 is the tutorial's apartment (`ScenePlayRoomTut`, scene id 0x6B): 133 functions, 29 KB. Decompiled in
-`src/overlays/ov073/`, 126 matching: `TutorialRoomScene` (0x134E8 bytes; 12 of 13), `TutorialRoomCharacter` (the
-scene's remaining functions and the character's 18 states; 19 of 19), `TutorialRoomObjects` (95 of 100).
+`src/overlays/ov073/` as one file, `TutorialRoomScene.cpp`, which `delinks.txt` gives every section: 131 of 133
+match.
 
-- 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its `RoomCharacter` is
-  0x2B94 bytes with 18 states and no held items, its `RoomCamera` 0x5C bytes without the close-up mode, its
-  `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
-- The program is linked as one, so two classes cannot share a name: `TutorialNames.h` gives overlay 73's versions the
-  prefix `Tutorial`.
+- 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its character
+  (`TutorialRoomCharacter`) is 0x2B94 bytes with 18 states and no held items, its camera 0x5C bytes without the
+  close-up mode, its `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
+- The program is linked as one, so two classes cannot share a name: overlay 73's are named with the prefix
+  `Tutorial` in the source.
+- Measured: the compiler heap-sorts a file's data objects by size and pools the four-byte-aligned constants of
+  `.rodata` in that order (details in `docs/notes/ov073.md`). Overlay 73's file gives the constants that the code reads
+  off the pool's start (its 8-byte points) the ROM's offsets, but the rest of its `.rodata` and its `.data` are in
+  the ROM in an order that is not by size, which our compiler does not give: the data does not match, and the unit
+  is not complete.
 
 Inferred, from several measurements that agree: each of the two overlays is ONE source file. Overlay 73's small
 constants are in one pool that functions throughout it address by offset; overlay 74 has one static initialiser,
-whose objects sort into one `.data` pool with `HeldItem`'s table; and each scene's implicit destructor is at the
-very end. The units here are the groups of functions as they were handed out for decompiling.
+whose objects sort into one `.data` pool with `HeldItem`'s table; and each scene's destructor is at the
+very end. Overlay 74's units are the groups of functions as they were handed out for decompiling; overlay 73's are
+joined into its one file.
 
 Not done:
 
-- 17 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions`,
+- Functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions`,
   `StartPairEvent`, `StartMeeting` (registers and one load's place), `GetRandomEdgePos`, `GetAngleAround`,
   `RoomCamera::Update` (16 instructions of 792), `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`,
-  `ClockDisplay::Refresh`; in overlay 73 the same last three, `TutorialRoomScene::Init` (six pool offsets that
-  only a single file can give) and the scene's destructor (emitted only where the scene's first virtual function is).
+  `ClockDisplay::Refresh`; in overlay 73 `TutorialApartmentFront::UpdateCursorTarget` and
+  `TutorialClockDisplay::Refresh` (overlay 73's NamePanel::Init matches: see its notes).
+- Overlay 73's data: the order of the objects after its pool, and of its `.data`, is not one our compiler gives.
 - `tools/check_relocs.py` still lists references by other names than the symbols': string literals (expected), and
   calls that some units still make by address names to functions that were named after those units were finished,
   mostly the `RoomCharacter` helpers of `RoomObjects`.
-- `RoomEncounter`, `RoomObjects` and the three units of overlay 73 have headers of their own; they are not yet on
-  the shared ones.
-- Joining each overlay's units into the one file it evidently was.
+- `RoomEncounter` and `RoomObjects` have headers of their own; they are not yet on the shared ones.
+- Joining overlay 74's units into the one file it evidently was (overlay 73's are joined).
 - `docs/notes/ov074.md` and `docs/notes/ov073.md` keep the working notes, with the evidence for names and layouts.
 
 ## Compiler

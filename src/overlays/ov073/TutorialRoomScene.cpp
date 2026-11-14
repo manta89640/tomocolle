@@ -160,9 +160,9 @@ void TutorialRoomScene::StartLoading() {
 // Sets up the screens, the room, the two characters, the message window and the touch screen, when the archives
 // are loaded, and starts the part of the tutorial that is due.
 //
-// Not matching yet: 6 instructions, all of them the offsets of the three small constants in the file's pool
-// (see sWindowButtonPosition above): "ldr [r1, #0x3c]/[r1, #0x40]", "[r1, #0x14]/[r1, #0x18]" and
-// "[r0, #0xc]/[r0, #0x10]" in the original are #8/#12, #16/#20 and #0/#4 here. Everything else is identical.
+// The window's button position, size and text position are read from the pool of constants at the start of
+// .rodata (see the constants at the top). Two things matter besides: func_02027290 is declared returning a value,
+// and the character counts read the canvas through a pointer (GetCharCount above).
 // @0x02149d8c
 void TutorialRoomScene::Init() {
     int i;
@@ -2214,7 +2214,10 @@ void TutorialApartmentFront::ClampScrollTarget() {
 // Not matching yet: same instructions, another order (11 of 25 differ): the original loads mScroll before the
 // column, and stores each of the two locals as soon as it is computed. Tried: plain statements, the scroll in a
 // local, compound assignments, the arithmetic in an inline function taking pointers (CellToPosition, kept), by
-// references, split into two inline functions, the cell as a ScreenPoint or an array. Byte-identical to overlay 74's.
+// references, split into two inline functions, the cell as a ScreenPoint or an array; also (overlay 73) local
+// pointers to x and y, a free inline helper with the scroll first or last and by value or as fx32, the scroll
+// read into a local first. With local pointers and mScroll read inside the y expression the column is stored at
+// once as in the original (12 of 25 differ), but mScroll is then loaded after it. Byte-identical to overlay 74's.
 // @0x0214f8e0
 void TutorialApartmentFront::UpdateCursorTarget() {
     int x;
@@ -2638,8 +2641,9 @@ void TutorialClockDisplay::Update() {
 }
 
 // Not matching yet: 2 instructions are swapped in the hour's part ("add r0, r0, #0x400" for &mSprites[7] comes
-// after the subtraction in the original, before it here). Everything else is identical. Byte-identical to
-// overlay 74's.
+// after the subtraction in the original, before it here). Everything else is identical. Tried: hour % 10, the
+// ones in a local, a pointer to the sprite, mSprites + 7, 10 * tens, an int hour, hour % 12, 12 * half, an inline
+// helper for the two digits (that gives add #0x410 + #0xAC). Byte-identical to overlay 74's.
 // @0x02150668
 void TutorialClockDisplay::Refresh(BOOL all) {
     TutorialClock *clock = mClock;
@@ -2764,4 +2768,4 @@ void TutorialTimedMessage::SetVisible(BOOL visible) {
 TutorialRoomScene::~TutorialRoomScene() {
 }
 
-// @0x02150d4c: the static initialiser, gWalkArea's.
+// @0x02150d4c: __sinit_TutorialRoomScene.cpp, the static initialiser: gWalkArea's size.
