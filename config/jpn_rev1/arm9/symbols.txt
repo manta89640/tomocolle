@@ -849,23 +849,23 @@ __fpclassifyd kind:function(arm,size=0x70) addr:0x0201f46c
 scalbn kind:function(arm,size=0x2c) addr:0x0201f4dc
 func_0201f508 kind:function(arm,size=0x3c) addr:0x0201f508
 func_0201f544 kind:function(arm,size=0x4c) addr:0x0201f544
-func_0201f590 kind:function(arm,size=0x318) addr:0x0201f590
+_dadd kind:function(arm,size=0x318) addr:0x0201f590
 func_0201f8a8 kind:function(arm,size=0x104) addr:0x0201f8a8
 _dfix kind:function(arm,size=0x4c) addr:0x0201f9ac
 func_0201f9f8 kind:function(arm,size=0x8c) addr:0x0201f9f8
 _dflt kind:function(arm,size=0x40) addr:0x0201fa84
 func_0201fac4 kind:function(arm,size=0x3c) addr:0x0201fac4
 _dmul kind:function(arm,size=0x364) addr:0x0201fb00
-func_0201fe64 kind:function(arm,size=0x19c) addr:0x0201fe64
-func_02020018 kind:function(arm,size=0x3b4) addr:0x02020018
+_dsqrt kind:function(arm,size=0x19c) addr:0x0201fe64
+_dsub kind:function(arm,size=0x3b4) addr:0x02020018
 func_020203cc kind:function(arm,size=0x21c) addr:0x020203cc
 func_020205e8 kind:function(arm,size=0x8) addr:0x020205e8
-func_020205f0 kind:function(arm,size=0x98) addr:0x020205f0
-func_02020688 kind:function(arm,size=0xa4) addr:0x02020688
+_dgr kind:function(arm,size=0x98) addr:0x020205f0
+_dleq kind:function(arm,size=0xa4) addr:0x02020688
 func_0202072c kind:function(arm,size=0x9c) addr:0x0202072c
 func_020207c8 kind:function(arm,size=0x8c) addr:0x020207c8
 func_02020854 kind:function(arm,size=0x8c) addr:0x02020854
-func_020208e0 kind:function(arm,size=0x84) addr:0x020208e0
+_f2d kind:function(arm,size=0x84) addr:0x020208e0
 func_02020970 kind:function(arm,size=0x278) addr:0x02020970
 _ll_mod kind:function(arm,size=0x1c0) addr:0x02020be8
 .L_02020bf8 kind:label(arm) addr:0x02020bf8
@@ -874,7 +874,7 @@ _ll_udiv kind:function(arm,size=0x48) addr:0x02020da8
 _s32_div_f kind:function(arm,size=0x20c) addr:0x02020df0
 _u32_div_f kind:function(arm,size=0x1e4) addr:0x02020ffc
 .L_02021004 kind:label(arm) addr:0x02021004
-func_020211f8 kind:function(arm,size=0x544) addr:0x020211f8
+_ddiv kind:function(arm,size=0x544) addr:0x020211f8
 func_0202173c kind:function(arm,size=0x4) addr:0x0202173c
 func_02021740 kind:function(arm,size=0x14) addr:0x02021740
 func_02021754 kind:function(arm,size=0x14) addr:0x02021754
@@ -4230,9 +4230,9 @@ gStr_NAN kind:data(any) addr:0x020b5704
 data_020b5709 kind:data(any) addr:0x020b5709
 data_020b5714 kind:data(any) addr:0x020b5714
 data_020b5814 kind:data(any) addr:0x020b5814
-data_020b5914 kind:data(any) addr:0x020b5914
-data_020b5924 kind:data(any) addr:0x020b5924
-data_020b5934 kind:data(any) addr:0x020b5934
+dp_h kind:data(any) addr:0x020b5914 local
+bp kind:data(any) addr:0x020b5924 local
+dp_l kind:data(any) addr:0x020b5934 local
 data_020b5944 kind:data(any) addr:0x020b5944
 gStr_G kind:data(any) addr:0x020b594c
 data_020b596c kind:data(any) addr:0x020b596c
@@ -4876,7 +4876,7 @@ __files kind:data(any) addr:0x0210f09c
 data_0210f0e8 kind:data(any) addr:0x0210f0e8
 data_0210f134 kind:data(any) addr:0x0210f134
 data_0210f180 kind:data(any) addr:0x0210f180
-data_0210f184 kind:data(any) addr:0x0210f184
+__float_nan kind:data(any) addr:0x0210f184
 data_0210f188 kind:data(any) addr:0x0210f188
 data_0210f190 kind:data(any) addr:0x0210f190
 gStr_T kind:data(any) addr:0x0210f194
@@ -6280,7 +6280,7 @@ data_0211d2b0 kind:bss addr:0x0211d2b0
 data_0211d2e0 kind:bss addr:0x0211d2e0
 data_0211d3e0 kind:bss addr:0x0211d3e0
 data_0211d4e0 kind:bss addr:0x0211d4e0
-data_0211d5e0 kind:bss addr:0x0211d5e0
+errno kind:bss addr:0x0211d5e0
 data_0211d5e4 kind:bss addr:0x0211d5e4
 __global_destructor_chain kind:bss addr:0x0211d600
 data_0211d604 kind:bss addr:0x0211d604

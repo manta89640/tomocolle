@@ -101,7 +101,11 @@ and `ansi_fp.c` are left in the gap, as their ranges would hold more functions t
 
 MSL's own files are compiled with 2.0/sp2 (measured: its objects say "Metrowerks C/C++ for ARM 3.0.0.136", which is
 what that compiler writes) and the headers of that MSL, internal ones included. `lib/MSL_C/wstring.c` is the first:
-its seven functions match and it is linked from source. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+its seven functions match and it is linked from source. `lib/MSL_C/e_pow.c`, fdlibm's `pow` as MSL changed it (see its
+header), has its data matching and its one function at 99.88%: three values are given registers in another order.
+Measured from the original objects (in the compiler's MSL archive): MSL was compiled with exception tables, which the
+game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
+`_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
 matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
 game's 30007.
