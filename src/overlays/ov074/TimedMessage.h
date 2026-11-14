@@ -30,4 +30,10 @@ public:
     /* 0x58E */ s16 mFrames;
 }; // 0x590 without the canvas, 0x5F8 with it
 
+// How many sprite characters (tiles) a text's canvas takes, as the scene's Init has it: through a pointer to the
+// text (TextCanvas::GetCharCount, on the object, gives other code there)
+inline int GetCanvasCharCount(MessageText *text) {
+    return ((text->mCanvas.areaWidth * text->mCanvas.areaHeight - 1) >> text->mVramMode) + 1;
+}
+
 #endif // TIMEDMESSAGE_H
