@@ -14,14 +14,71 @@
 
 #define BCA0 RESOURCE_BCA0
 
-// The screen (tile map) of the message window's background. A constant of its own: the two uses share one address
+// --- The file's constants and its one variable ---
+//
+// All in one place, and in this order, because their order decides where the compiler puts them. It keeps a list
+// of the file's data objects (newest first) and heap-sorts it by size; constants of four-byte alignment are pooled
+// into one object at the start of .rodata, which the code reads by offset from its start. So the declaration order
+// fixes the offsets in the pool: in particular those of the eight 8-byte points, which the scene's Init and the
+// character's entering states read relative to the pool. Swapping two objects of the same size swaps their places.
+// This order gives the pool's 8-byte points in the ROM's order (see docs/notes/ov073.md).
+
+struct ButtonPosition {
+    int x;
+    int y;
+};
+
+struct ButtonSequences {
+    u16 mNormal;
+    u16 mPressed;
+};
+
+// The rectangle of the floor the characters walk on. The static initialiser computes its size from its origin.
+static FloorRect gWalkArea = { -FX32_CONST(2.5), -FX32_CONST(2.5), -gWalkArea.x * 2, -gWalkArea.z * 2 };
+// The message window's button: where it is and how large
+static const WindowPoint sWindowButtonPosition = { 128, 149 };
+// Where a character coming in by the door walks to (the door is at z -9.0): state 10 inside the door and then to
+// the front of the room, state 12 to the doorstep and then past the door
+static const FloorPos sInsideDoor = { 0, -0x4800 };
+static const FloorPos sRoomFront = { 0, -0x1000 };
+// Where each kind of touch button is (the tutorial has kind 0 only)
+static const ButtonPosition sButtonPositions[1] = { { 128, 177 } };
+static const WindowPoint sWindowButtonSize = { 94, 30 };
+static const FloorPos sDoorstep = { 0, -0x6000 };
+// The screen (tile map) of the message window's background: the two uses share one address
 static const char sWindowScreenName[] = "MLT:/Window_down2.nsc";
+static const FloorPos sPastDoor = { 0, -0x3666 };
 // The rectangle of the message window, in pixels
 static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-// The window's button: where it is and how large; and where the window's text is
-static const WindowPoint sWindowButtonPosition = { 128, 149 };
-static const WindowPoint sWindowButtonSize = { 94, 30 };
+// How fast the camera's orbit slows down, and its fastest, in elevation (x) and direction (y). The values are
+// folded into TutorialRoomCamera::UpdateOrbit; the objects stay in .rodata, as in the ROM
+static const VecFx32 sOrbitFriction = { 0x4000, 0x7000, 0 };
+// The rectangle around the cursor on the building front that takes a touch
+static const ScreenRect sCursorTouchRect = { -16, -12, 34, 26 };
+// How far the building front scrolls per floor, by building size
+static const fx32 sScrollPerFloor[4] = { 0x16000, 0x16000, 0x19000, 0x1C000 };
+// The id of the head icon of each mood (mood 0 shows none)
+static const s16 sMoodHeadIcons[5] = { 4, 5, 0, 1, 7 };
+// Which of the seven pictures of the sky each time of day shows
+static const s8 sSkyPictures[32] = {
+    0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 0,
+};
+// The animation sequences of each kind of touch button: normal and pressed
+static const ButtonSequences sButtonSequences[1] = { { 2, 3 } };
+// Where the message window's text is
 static const WindowPoint sWindowTextPosition = { 38, 33 };
+static const VecFx32 sOrbitMaxSpeed = { 0x40000, 0x100000, 0 };
+// The rectangles of the touch button that take a touch: of kind 0, and of the others
+static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
+static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
+// The animation sequence and the position of each sprite of the clock
+static const u16 sClockSequences[TutorialClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
+static const ButtonPosition sClockPositions[TutorialClockDisplay::SPRITE_COUNT] = {
+    { 160, 8 }, { 167, 8 }, { 174, 8 }, { 181, 8 }, { 188, 8 }, { 205, 8 },
+    { 222, 8 }, { 229, 8 }, { 236, 8 }, { 243, 8 }, { 250, 8 },
+};
+// How many rooms a building of each size has
+static const u8 sRoomCounts[4] = { 24, 48, 72, 100 };
 
 static inline int Random(int max) {
     return MATH_Rand16(&gRandom, max);
@@ -1147,7 +1204,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         } else if (mStep == 1) {
             mStep++;
             func_020a4144(&mApartmentRoom->mParts, 1);
-            FloorPos target = { 0, -0x4800 }; // Inside the door
+            FloorPos target = sInsideDoor;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x28, 6)) {
@@ -1157,7 +1214,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             mStep++;
             func_020a4144(&mApartmentRoom->mParts, 2);
             func_02091fbc(this, 1, 0, 0x1A);
-            FloorPos target = { 0, -0x1000 }; // The front of the room
+            FloorPos target = sRoomFront;
             SetWalkTargetOnFloor(target);
         } else {
             if (StepWalkLooking(0x2000, 0, 0x23D, 0x25, 6)) {
@@ -1200,12 +1257,12 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         } else if (mStep == 1) {
             mStep++;
             func_020a4144(&mApartmentRoom->mParts, 1);
-            FloorPos target = { 0, -0x6000 }; // The doorstep
+            FloorPos target = sDoorstep;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
-                FloorPos target = { 0, -0x3666 }; // Past the door
+                FloorPos target = sPastDoor;
                 SetWalkTargetOnFloor(target);
                 mHeadTurnFrames = 4;
             }
@@ -1412,13 +1469,6 @@ void TutorialRoomCharacter::CopyName() {
 }
 
 // --- TutorialRoomCharacter: head turns, walking steps, the head icon, animations and sounds ---
-
-// The rectangle of the floor the characters walk on. The static initialiser 0x02150d4c computes its size from
-// its origin.
-static FloorRect gWalkArea = { -FX32_CONST(2.5), -FX32_CONST(2.5), -gWalkArea.x * 2, -gWalkArea.z * 2 };
-
-// The id of the head icon of each mood (mood 0 shows none)
-static const s16 sMoodHeadIcons[5] = { 4, 5, 0, 1, 7 };
 
 // @0x0214daec
 u16 TutorialRoomCharacter::GetHeadYaw(u16 angle, int limit) {
@@ -1835,10 +1885,8 @@ void TutorialRoomCamera::UpdateOrbit() {
         mInput.y = 0;
         mInput.z = 0;
     }
-    static const VecFx32 maxSpeed = { 0x40000, 0x100000, 0 };
-    static const VecFx32 friction = { 0x4000, 0x7000, 0 };
-    ApplyInput(&mOrbitSpeed.x, mInput.x, friction.x, maxSpeed.x);
-    ApplyInput(&mOrbitSpeed.y, mInput.y, friction.y, maxSpeed.y);
+    ApplyInput(&mOrbitSpeed.x, mInput.x, sOrbitFriction.x, sOrbitMaxSpeed.x);
+    ApplyInput(&mOrbitSpeed.y, mInput.y, sOrbitFriction.y, sOrbitMaxSpeed.y);
     VEC_Add(&mOrbit, &mOrbitSpeed, &mOrbit);
     mInput.x = 0;
     mInput.y = 0;
@@ -1991,10 +2039,6 @@ void TutorialRoomLight::BlendColor(int *targetR, int *targetG, int *targetB, int
 
 // --- TutorialRoomCursor ---
 
-// The rectangles around the cursor and the button that take a touch
-static const ScreenRect sCursorTouchRect = { -16, -12, 34, 26 };
-static const ScreenRect sButtonTouchRect = { -22, -18, 46, 38 };
-
 // @0x0214f454
 TutorialRoomCursor::TutorialRoomCursor() {
     SetState(STATE_IDLE);
@@ -2067,10 +2111,6 @@ void TutorialBuildingButton::SetState(int state) {
 }
 
 // --- TutorialApartmentFront ---
-
-// How many rooms a building of each size has, and how far the view scrolls per floor
-static const u8 sRoomCounts[4] = { 24, 48, 72, 100 };
-static const fx32 sScrollPerFloor[4] = { 0x16000, 0x16000, 0x19000, 0x1C000 };
 
 // @0x0214f604
 TutorialApartmentFront::TutorialApartmentFront() {
@@ -2284,11 +2324,6 @@ void TutorialApartmentFront::DrawWindowTiles(int kind, u8 column, u8 floor) {
 
 // --- TutorialSkyBackground ---
 
-// Which of the seven pictures of the sky each time of day shows
-static const s8 sSkyPictures[32] = {
-    0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 0,
-};
-
 // @0x0214fbc8
 TutorialSkyBackground::TutorialSkyBackground() {
     STD_CopyString(mArchivePath, "Scn/AFwBG/A0FwFBG0_LZ.bin");
@@ -2467,23 +2502,6 @@ void TutorialNamePanel::SetVisible(BOOL visible) {
 
 // --- TutorialTouchSprite, TutorialTouchButton ---
 
-struct ButtonPosition {
-    int x;
-    int y;
-};
-
-struct ButtonSequences {
-    u16 mNormal;
-    u16 mPressed;
-};
-
-// By kind of button
-static const ButtonSequences sButtonSequences[1] = { { 2, 3 } };
-static const ButtonPosition sButtonPositions[1] = { { 128, 177 } };
-static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
-static const ScreenRect sButtonRect1 = { -16, -16, 34, 34 };
-static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
-
 // @0x021501d4
 TutorialTouchSprite::TutorialTouchSprite() {
     mEnabled = TRUE;
@@ -2585,13 +2603,6 @@ void TutorialClock::UpdateIfArchiveIdle() {
 }
 
 // --- TutorialClockDisplay ---
-
-// The animation sequence and the position of each sprite
-static const u16 sClockSequences[TutorialClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
-static const ButtonPosition sClockPositions[TutorialClockDisplay::SPRITE_COUNT] = {
-    { 160, 8 }, { 167, 8 }, { 174, 8 }, { 181, 8 }, { 188, 8 }, { 205, 8 },
-    { 222, 8 }, { 229, 8 }, { 236, 8 }, { 243, 8 }, { 250, 8 },
-};
 
 // @0x02150530
 void TutorialClockDisplay::Init(TutorialClock *clock) {

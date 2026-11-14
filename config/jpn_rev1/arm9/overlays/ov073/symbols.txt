@@ -146,8 +146,8 @@ sRoomCounts kind:data(any) addr:0x02150cb8 local
 sWindowScreenName kind:data(any) addr:0x02150cbc local
 sSkyPictures kind:data(any) addr:0x02150cd4 local
 sClockPositions kind:data(any) addr:0x02150cf4 local
-__sinit_ov073_02150d4c kind:function(arm,size=0x2c) addr:0x02150d4c
-.p__sinit_ov073_02150d4c kind:data(word) addr:0x02150d78
+__sinit_TutorialRoomScene.cpp kind:function(arm,size=0x2c) addr:0x02150d4c local
+.p__sinit_TutorialRoomScene.cpp kind:data(word) addr:0x02150d78 local
 _ZTV11MessageText__10TextCanvas_at_1424 kind:data(any) addr:0x02150d80
 gWalkArea kind:data(any) addr:0x02150d98 local
 _ZTV20TutorialTimedMessage kind:data(any) addr:0x02150da8
