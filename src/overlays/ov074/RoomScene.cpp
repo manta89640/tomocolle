@@ -10886,19 +10886,21 @@ void RoomCharacter::GetRandomCorner(FloorPos *out) {
     *out = gWalkAreaCorners[MATH_Rand16(&gRandom, 0) % 4u];
 }
 
-// Not matching yet: 0xf8 bytes against 0xfc; the instructions are the same but for register allocation in the
-// two tails. The original loads the area's w/h into r2 and the generator's x/mul/add into r4/ip/lr (which in the
-// second tail splits the `ldm` into `ldr` + `ldm`, the extra instruction); this loads w/h into lr/r4 and x into r2.
-// Tried: the area as a direct global, a local pointer, a reference, an fx32 array, {min, size}; u32/int fields;
-// if/else instead of the ternary; x read before the second random number; locals for the range and the result;
-// int and u16 wrappers around MATH_Rand16; inline helpers for the two halves; the arms swapped; a switch.
 void RoomCharacter::GetRandomEdgePos(FloorPos *out) {
     FloorRect *area = &gWalkArea;
     if (MATH_Rand16(&gRandom, 0) & 1) {
-        out->x = (MATH_Rand16(&gRandom, 0) & 1) ? area->x : -area->x;
+        if (MATH_Rand16(&gRandom, 0) & 1) {
+            out->x = area->x;
+        } else {
+            out->x = -area->x;
+        }
         out->z = MATH_Rand16(&gRandom, area->h) - (area->h >> 1);
     } else {
-        out->z = (MATH_Rand16(&gRandom, 0) & 1) ? area->z : -area->z;
+        if (MATH_Rand16(&gRandom, 0) & 1) {
+            out->z = area->z;
+        } else {
+            out->z = -area->z;
+        }
         out->x = MATH_Rand16(&gRandom, area->w) - (area->w >> 1);
     }
 }
@@ -11680,11 +11682,8 @@ void RoomCamera::SetState(int state, s16 waitFrames) {
     mTarget = target;                                              \
     ApplyToCamera();
 
-// Not matching yet: 16 instructions of 792 differ, all in the two modes that follow one character (MODE_CHARACTER,
-// MODE_CHARACTER_CLOSE): the copy of the character's position is on the stack where the original has it only as
-// far as "center = GetPos()" goes; the original then reads it in the order x, z, y and stores radius and target in
-// another order. Everything else (both switches, the four MOVE_TO blocks, the stack frame) is identical. Tried:
-// center as an initialized local, as a reference to the temporary, as the result of an inline function.
+// In the two modes that follow one character, the target and the radius are both made from the character's
+// position, one from the other: that is the order the original reads and stores them in.
 // @0x0216a638
 void RoomCamera::Update() {
     switch (mState) {
@@ -11748,8 +11747,8 @@ void RoomCamera::Update() {
         radius.x = center.x;
         radius.y = center.y;
         radius.z = center.z;
-        target.x = center.x >> 1;
-        target.z = center.z >> 1;
+        target.x = radius.x >> 1;
+        target.z = radius.z >> 1;
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
@@ -11797,11 +11796,10 @@ void RoomCamera::Update() {
         center = GetPresentCharacter()->GetPos();
         VecFx32 target;
         VecFx32 radius;
-        target.x = center.x;
-        target.z = center.z;
-        radius.x = center.x;
-        radius.y = center.y;
-        radius.z = center.z;
+        target = center;
+        radius.x = target.x;
+        radius.y = target.y;
+        radius.z = target.z;
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
