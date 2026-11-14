@@ -1835,8 +1835,10 @@ void TutorialRoomCamera::UpdateOrbit() {
         mInput.y = 0;
         mInput.z = 0;
     }
-    ApplyInput(&mOrbitSpeed.x, mInput.x, 0x4000, 0x40000);
-    ApplyInput(&mOrbitSpeed.y, mInput.y, 0x7000, 0x100000);
+    static const VecFx32 maxSpeed = { 0x40000, 0x100000, 0 };
+    static const VecFx32 friction = { 0x4000, 0x7000, 0 };
+    ApplyInput(&mOrbitSpeed.x, mInput.x, friction.x, maxSpeed.x);
+    ApplyInput(&mOrbitSpeed.y, mInput.y, friction.y, maxSpeed.y);
     VEC_Add(&mOrbit, &mOrbitSpeed, &mOrbit);
     mInput.x = 0;
     mInput.y = 0;
