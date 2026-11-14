@@ -178,9 +178,29 @@ The order that the code itself suggests:
   defining both does not produce, so the fonts are a file of their own.
 - **Static initialisers** are `__sinit_<file>.cpp` in `.init`, with a pointer in `.ctor`; both are local symbols and
   both sections have to be in the unit's `delinks.txt` entry before it can be complete. An array of objects is
-  constructed through `__cxa_vec_ctor`, a single one registered with `__register_global_object`.
-- **Virtual tables are not placed yet.** They are emitted in every file that uses the class, and the linker keeps
-  one: which file's is not known, so `TextCanvas.cpp` and `MessageText.cpp` are not linked from source.
+  constructed through `__cxa_vec_ctor`, a single one registered with `__register_global_object`. An array of ONE is
+  compiled as a single object (by 2.0 SP1p2, SP2 and SP2p2, and DSi 1.1 and 1.6 SP2); `__cxa_vec_ctor` with a count
+  of 1, and a registered destructor that calls `__cxa_vec_cleanup`, come from a class whose member is the array: its
+  implicit destructor is that function, emitted after the file's last function (`gMessageFiles`,
+  `MessageFileList`). A global of an empty class with an empty inline constructor gives an initialiser that is a
+  lone `bx lr` (`gCardPullOutMonitor`).
+- **Virtual tables of classes without a virtual function of their own** (measured on `TextCanvas.cpp` and
+  `MessageText.cpp`, classes with a virtual base and nothing virtual) are emitted in every file that needs them, as
+  symbols of MW's binding 13 (shown as "processor specific"). The ROM has one copy of each, at its place in the
+  `.data` of the first file in link order that has it (that the linker keeps the first is inferred; another class
+  in the main program also uses `_ZTV13ObjTextCanvas`, from `0x02110880`): `TextCanvas.cpp` has `_ZTV12BgTextCanvas` and
+  `_ZTV13ObjTextCanvas` (its complete-object constructors store them), `MessageText.cpp` the two construction tables
+  `_ZTV12BgTextCanvas__10TextCanvas_at_1080` and `_ZTV13ObjTextCanvas__10TextCanvas_at_1416`, the VTT
+  `_ZTT11MessageText` and `_ZTV11MessageText`, in that order, then its string literals. Such a table is three
+  words (the offset of the virtual base, the offset to the top, a null type) and an object points at its END, so
+  `relocs.txt` refers to it as `to:<table> add:0xc` (the VTT's entries too); a symbol at the address the code loads
+  names the wrong thing.
+- **Declaration order is emission order, reversed.** The compiler emits those tables in the reverse order of the
+  classes' declarations (`ObjTextCanvas` is declared first so that `BgTextCanvas`'s table comes first, as in the
+  ROM), and a file's `static const` arrays in the reverse order of their definitions.
+- **A complete unit's anonymous objects are named by their compiler names** in `symbols.txt` (`@13766`, local):
+  `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
+  change when the file's code does; the check names the new one.
 
 ## A match is instructions and references
 

@@ -317,15 +317,26 @@ src/text/Font.cpp:
     .bss        start:0x02138e1c end:0x02138e40
 
 src/text/TextCanvas.cpp:
+    complete
     .text       start:0x0202d5d0 end:0x0202e3ec
+    .data       start:0x0210f6ec end:0x0210f704
     .bss        start:0x02138e40 end:0x02138f0c
 
 src/CardPullOutMonitor.cpp:
     complete
     .text       start:0x0202e3ec end:0x0202e44c
+    .init       start:0x020b0604 end:0x020b0608
+    .ctor       start:0x020fc4d4 end:0x020fc4d8
+    .bss        start:0x02138f0c end:0x02138f10
 
 src/text/MessageText.cpp:
-    .text       start:0x0202e44c end:0x0202f408
+    complete
+    .text       start:0x0202e44c end:0x0202f42c
+    .init       start:0x020b0608 end:0x020b0650
+    .rodata     start:0x020b5adc end:0x020b5aec
+    .ctor       start:0x020fc4d8 end:0x020fc4dc
+    .data       start:0x0210f704 end:0x0210f79c
+    .bss        start:0x02138f10 end:0x02138f34
 
 src/sound/SoundManager.cpp:
     complete

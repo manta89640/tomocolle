@@ -89,19 +89,9 @@ public:
     /* 0x64 */ int mUnknownClearedByConstructor64;
 };
 
-// A text canvas on a background layer.
-class BgTextCanvas : public virtual TextCanvas {
-public:
-    BgTextCanvas();
-    void InitCanvas(int plane, int width, int height, int charOffset, void *buffer, NNSG2dCharaColorMode colorMode);
-    void Init(const NNSG2dFont *font, int plane, int width, int height, int left, int top, int charOffset,
-              int palette, void *buffer, NNSG2dTextBGWidth screenWidth, NNSG2dCharaColorMode colorMode);
-    void MapScreen(int left, int top, int palette, NNSG2dTextBGWidth screenWidth);
-    void InitText(const NNSG2dFont *font, int plane, int width, int height, int left, int top, int charOffset,
-                  int hSpace, int vSpace, int palette, void *buffer, NNSG2dTextBGWidth screenWidth,
-                  NNSG2dCharaColorMode colorMode);
-    void Transfer();
-};
+// The two canvases with TextCanvas as a virtual base are declared in this order, ObjTextCanvas first, because the
+// compiler emits their virtual tables in the reverse order of the classes' declarations, and BgTextCanvas's comes first
+// in the ROM.
 
 // A text canvas on sprites: the library arranges sprites over the canvas, and they are drawn as one cell.
 class ObjTextCanvas : public virtual TextCanvas {
@@ -127,6 +117,20 @@ public:
     /* 0x0B4 */ NNSG2dCellOAMAttrData mOam[24];
     /* 0x144 */ NNSG2dCellData mCell;
     /* 0x14C */ int mVramMode; // NNSG2dOBJVramMode: also how far a character number is shifted
+};
+
+// A text canvas on a background layer.
+class BgTextCanvas : public virtual TextCanvas {
+public:
+    BgTextCanvas();
+    void InitCanvas(int plane, int width, int height, int charOffset, void *buffer, NNSG2dCharaColorMode colorMode);
+    void Init(const NNSG2dFont *font, int plane, int width, int height, int left, int top, int charOffset,
+              int palette, void *buffer, NNSG2dTextBGWidth screenWidth, NNSG2dCharaColorMode colorMode);
+    void MapScreen(int left, int top, int palette, NNSG2dTextBGWidth screenWidth);
+    void InitText(const NNSG2dFont *font, int plane, int width, int height, int left, int top, int charOffset,
+                  int hSpace, int vSpace, int palette, void *buffer, NNSG2dTextBGWidth screenWidth,
+                  NNSG2dCharaColorMode colorMode);
+    void Transfer();
 };
 
 // A sprite canvas showing one character.

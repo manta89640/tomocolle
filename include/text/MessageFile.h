@@ -65,6 +65,17 @@ public:
     /* 0x14 */ IdBlock *mIds;       // MID1
 }; // 0x18
 
-extern MessageFile gMessageFiles[1];
+// The game's message files, of which there is one ("BMG:/tmd_msg_JP.bmg"). They are a member of a class, not an
+// array of their own: the static initialiser constructs them through __cxa_vec_ctor and registers the class's
+// implicit destructor (0x0202F408, the last function of MessageText.cpp), which destroys them through
+// __destroy_arr. An array of one is constructed as a single object instead.
+//
+// The name is descriptive, not the original.
+class MessageFileList {
+public:
+    /* 0x00 */ MessageFile mFiles[1];
+}; // 0x18
+
+extern MessageFileList gMessageFiles;
 
 #endif // TEXT_MESSAGEFILE_H

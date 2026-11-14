@@ -14,8 +14,7 @@ extern u8 gArchiveManager[];
 
 } // extern "C"
 
-// The common message file ("BMG:/..."), an array of one
-MessageFile gMessageFiles[1];
+MessageFileList gMessageFiles;
 
 MessageFile::MessageFile() {
     mFile = NULL;
@@ -30,8 +29,9 @@ MessageFile::~MessageFile() {
 }
 
 // Shown in place of a message that is missing or empty, and of the "no message" number
-static const wchar_t sMissingText[] = L"???";
+// (the compiler emits a file's constants in the reverse order of their definitions)
 static const wchar_t sNoMessageText[] = L"XXX";
+static const wchar_t sMissingText[] = L"???";
 
 static inline u32 SwapBytes(u32 v) {
     return ((v & 0xFF000000) >> 24) | ((v & 0xFF0000) >> 8) | ((v & 0xFF00) << 8) | (v << 24);

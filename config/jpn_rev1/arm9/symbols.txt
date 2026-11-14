@@ -902,7 +902,7 @@ func_02022c8c kind:function(arm,size=0x44) addr:0x02022c8c
 func_02022cd0 kind:function(arm,size=0x48) addr:0x02022cd0
 func_02022d18 kind:function(arm,size=0x14) addr:0x02022d18
 __cxa_vec_ctor kind:function(arm,size=0xb0) addr:0x02022d2c
-func_02022ddc kind:function(arm,size=0x48) addr:0x02022ddc
+__cxa_vec_cleanup kind:function(arm,size=0x48) addr:0x02022ddc
 func_02022e24 kind:function(arm,size=0x14) addr:0x02022e24
 func_02022e38 kind:function(arm,size=0xc) addr:0x02022e38
 func_02022e44 kind:function(arm,size=0xc) addr:0x02022e44
@@ -1371,7 +1371,7 @@ _ZN11MessageText15GetVAlignOffsetEPKwi kind:function(arm,size=0x78) addr:0x0202e
 _ZN11MessageText7DrawAllEv kind:function(arm,size=0x98) addr:0x0202ef48
 _ZN11MessageText12DrawNextCharEPPw kind:function(arm,size=0x1ec) addr:0x0202efe0
 _ZN11MessageText10UpdateDrawEv kind:function(arm,size=0x23c) addr:0x0202f1cc
-func_0202f408 kind:function(arm,size=0x24) addr:0x0202f408
+_ZN15MessageFileListD1Ev kind:function(arm,size=0x24) addr:0x0202f408
 func_0202f42c kind:function(arm,size=0x28) addr:0x0202f42c
 func_0202f454 kind:function(arm,size=0x1c) addr:0x0202f454
 func_0202f470 kind:function(arm,size=0x64) addr:0x0202f470
@@ -4197,8 +4197,8 @@ __sinit_020b05cc kind:function(arm,size=0x4) addr:0x020b05cc
 __sinit_020b05d0 kind:function(arm,size=0x4) addr:0x020b05d0
 __sinit_020b05d4 kind:function(arm,size=0x4) addr:0x020b05d4
 __sinit_Font.cpp kind:function(arm,size=0x2c) addr:0x020b05d8 local
-__sinit_020b0604 kind:function(arm,size=0x4) addr:0x020b0604
-__sinit_020b0608 kind:function(arm,size=0x48) addr:0x020b0608
+__sinit_CardPullOutMonitor.cpp kind:function(arm,size=0x4) addr:0x020b0604 local
+__sinit_MessageText.cpp kind:function(arm,size=0x48) addr:0x020b0608 local
 __sinit_020b0650 kind:function(arm,size=0x24) addr:0x020b0650
 __sinit_020b0674 kind:function(arm,size=0x2c) addr:0x020b0674
 __sinit_020b06a0 kind:function(arm,size=0x2c) addr:0x020b06a0
@@ -4246,8 +4246,8 @@ data_020b5a6c kind:data(any) addr:0x020b5a6c
 data_020b5a74 kind:data(any) addr:0x020b5a74
 gText_YaReverseSolidus kind:data(any) addr:0x020b5a94
 data_020b5abc kind:data(any) addr:0x020b5abc
-gStr_Question kind:data(any) addr:0x020b5adc
-gStr_X kind:data(any) addr:0x020b5ae4
+sMissingText kind:data(any) addr:0x020b5adc local
+sNoMessageText kind:data(any) addr:0x020b5ae4 local
 gStr_ww kind:data(any) addr:0x020b5aec
 gStr_vv kind:data(any) addr:0x020b5af0
 gText_O kind:data(any) addr:0x020b5af4
@@ -4819,8 +4819,8 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b05d0 kind:data(word) addr:0x020fc4c8
 .p__sinit_020b05d4 kind:data(word) addr:0x020fc4cc
 .p__sinit_Font.cpp kind:data(word) addr:0x020fc4d0 local
-.p__sinit_020b0604 kind:data(word) addr:0x020fc4d4
-.p__sinit_020b0608 kind:data(word) addr:0x020fc4d8
+.p__sinit_CardPullOutMonitor.cpp kind:data(word) addr:0x020fc4d4 local
+.p__sinit_MessageText.cpp kind:data(word) addr:0x020fc4d8 local
 .p__sinit_020b0650 kind:data(word) addr:0x020fc4dc
 .p__sinit_020b0674 kind:data(word) addr:0x020fc4e0
 .p__sinit_020b06a0 kind:data(word) addr:0x020fc4e4
@@ -4964,19 +4964,18 @@ gStr_nsbta kind:data(any) addr:0x0210f6c4
 data_0210f6d4 kind:data(any) addr:0x0210f6d4
 gStr_ntft kind:data(any) addr:0x0210f6dc
 gStr_ntfp kind:data(any) addr:0x0210f6e4
-_ZTV12BgTextCanvas kind:data(any) addr:0x0210f6f8
-_ZTV13ObjTextCanvas kind:data(any) addr:0x0210f704
-data_0210f710 kind:data(any) addr:0x0210f710
-data_0210f71c kind:data(any) addr:0x0210f71c
-data_0210f720 kind:data(any) addr:0x0210f720
-data_0210f724 kind:data(any) addr:0x0210f724
-_ZTV11MessageText kind:data(any) addr:0x0210f738
-gStr_BMG kind:data(any) addr:0x0210f744
-gStr_Msg_TmdMsgJP_LZ_bin kind:data(any) addr:0x0210f748
-gStr_BMG_tmd_msg_JP_bmg kind:data(any) addr:0x0210f75c
-gStr_BMG_2 kind:data(any) addr:0x0210f770
-gStr_Msg_TmdMsgJP_LZ_bin_2 kind:data(any) addr:0x0210f774
-gStr_BMG_tmd_msg_JP_bmg_2 kind:data(any) addr:0x0210f788
+_ZTV12BgTextCanvas kind:data(any) addr:0x0210f6ec
+_ZTV13ObjTextCanvas kind:data(any) addr:0x0210f6f8
+_ZTV12BgTextCanvas__10TextCanvas_at_1080 kind:data(any) addr:0x0210f704
+_ZTV13ObjTextCanvas__10TextCanvas_at_1416 kind:data(any) addr:0x0210f710
+_ZTT11MessageText kind:data(any) addr:0x0210f71c
+_ZTV11MessageText kind:data(any) addr:0x0210f72c
+@13766 kind:data(any) addr:0x0210f744 local
+@13767 kind:data(any) addr:0x0210f748 local
+@13768 kind:data(any) addr:0x0210f75c local
+@13769 kind:data(any) addr:0x0210f770 local
+@13770 kind:data(any) addr:0x0210f774 local
+@13771 kind:data(any) addr:0x0210f788 local
 gStr_N_A kind:data(any) addr:0x0210f79c
 gStr_WH_SYSSTATE_IDLE kind:data(any) addr:0x0210f7a0
 gStr_WH_SYSSTATE_STOP kind:data(any) addr:0x0210f7b4
@@ -6342,9 +6341,9 @@ data_02123570 kind:bss addr:0x02123570
 gFonts kind:bss addr:0x02138e1c
 gTextObjResource kind:bss addr:0x02138e40
 sOamBuffer kind:bss addr:0x02138e4c local
-data_02138f0c kind:bss addr:0x02138f0c
-data_02138f10 kind:bss addr:0x02138f10
-gMessageFiles kind:bss addr:0x02138f1c
+gCardPullOutMonitor kind:bss addr:0x02138f0c
+@12989 kind:bss addr:0x02138f10 local
+gMessageFiles kind:bss(size=0x18) addr:0x02138f1c
 data_02138f40 kind:bss addr:0x02138f40
 data_02138fa0 kind:bss addr:0x02138fa0
 data_02138fb4 kind:bss addr:0x02138fb4

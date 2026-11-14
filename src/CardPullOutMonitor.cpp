@@ -1,5 +1,7 @@
 #include "CardPullOutMonitor.h"
 
+CardPullOutMonitor gCardPullOutMonitor;
+
 void CardPullOutMonitor::Init() {
     CARD_SetPulledOutCallback(OnPulledOut);
 }

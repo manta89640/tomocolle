@@ -46,18 +46,18 @@ public:
     }
 
     /* 0x154 */ MessageFile *mMessageFile;
-    /* 0x158 */ MessageFile *mArgMessageFile;   // Where func_0202ebc8 looks up the messages it puts in mMessageArgs
+    /* 0x158 */ MessageFile *mArgMessageFile;   // Where SetMessageArg(u32, int) finds messages for mMessageArgs
     /* 0x15C */ u32 mMessage;
-    /* 0x160 */ const wchar_t *mStringArgs[20]; // Strings put in place of the message's tags (func_0202ebe8 sets)
-    /* 0x1B0 */ const wchar_t *mMessageArgs[2]; // Messages expanded in place of its tags (func_0202ebbc sets)
+    /* 0x160 */ const wchar_t *mStringArgs[20]; // Strings put in place of the message's tags (SetStringArg sets)
+    /* 0x1B0 */ const wchar_t *mMessageArgs[2]; // Messages expanded in place of its tags (SetMessageArg sets)
     /* 0x1B8 */ wchar_t *mCursor;               // The next character of mText to draw
-    /* 0x1BC */ wchar_t mText[480];             // The message with its tags expanded (func_0202ee18 fills it)
-    // The next three are the state of func_0202f1cc, which draws the text frame by frame
+    /* 0x1BC */ wchar_t mText[480];             // The message with its tags expanded (ExpandMessage fills it)
+    // The next three are the state of UpdateDraw, which draws the text frame by frame
     /* 0x57C */ int mDrawMode;  // 0: nothing to do, 1: all at once, 2: a character at a time, 3: a line, 4: the rest
     /* 0x580 */ s16 mCharWait;  // Frames left before the next character
     /* 0x582 */ u8 mStarted;    // The text has been expanded and positioned
-    /* 0x583 */ u8 mHAlign;     // 0: left, 1: centre, 2: right (func_0202ee58); set from the message's attributes
-    /* 0x584 */ u8 mVAlign;     // The same vertically (func_0202eed0)
+    /* 0x583 */ u8 mHAlign;     // 0: left, 1: centre, 2: right (GetHAlignOffset); set from the message's attributes
+    /* 0x584 */ u8 mVAlign;     // The same vertically (GetVAlignOffset)
 }; // 0x588 without the canvas, 0x5F0 with it
 
 #endif // TEXT_MESSAGETEXT_H

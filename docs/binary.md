@@ -229,11 +229,31 @@ Measured, from the decompiled code in `src/text/`:
 | --- | --- | --- |
 | `Font` | `0x0202D5A4` to `0x0202D5D0` | `gFonts`: the 10, 8 and 12 pixel fonts (`LD10UTF16.NFTR`, `LD08UTF16.NFTR`, `LD12UTF16.NFTR`), loaded by `main` |
 | `CharCanvas`, `TextCanvas`, `BgTextCanvas`, `ObjTextCanvas`, `ObjCharBox`, `ObjTextBox` | `0x0202D5D0` to `0x0202E3EC`, 32 functions | NitroSystem's character canvas and text canvas, drawn with a one pixel shadow in up to eight directions, shown on a background layer or on sprites arranged over the canvas |
-| `CardPullOutMonitor` | `0x0202E3EC` to `0x0202E44C` | Turns the screens off and stops when the card is pulled out |
-| `MessageFile`, `MessageText` | `0x0202E44C` to `0x0202F408`, 28 functions | A BMG message file (`gMessageFiles[0]` is `BMG:/tmd_msg_JP.bmg`), and a text box that is both kinds of canvas and expands, aligns and draws a message, all at once or a character at a time |
+| `CardPullOutMonitor` | `0x0202E3EC` to `0x0202E44C` | Turns the screens off and stops when the card is pulled out (`gCardPullOutMonitor`, which `main` initialises and updates) |
+| `MessageFile`, `MessageText` | `0x0202E44C` to `0x0202F42C`, 30 functions | A BMG message file (`gMessageFiles.mFiles[0]` is `BMG:/tmd_msg_JP.bmg`), and a text box that is both kinds of canvas and expands, aligns and draws a message, all at once or a character at a time |
+
+All five files are linked from source, with all their sections: `.text`, `.init` and `.ctor` (static
+initialisers), `.rodata`, `.data` and `.bss`.
 
 - `BgTextCanvas` and `ObjTextCanvas` have `TextCanvas` as a virtual base, and `MessageText` inherits from both: their
-  tables hold only the offset of that base (4, 0x150, and 0x588 and 0x438 in a `MessageText`).
+  tables hold only the offset of that base (4, 0x150, and 0x588 and 0x438 in a `MessageText`). Measured, in `.data`:
+
+  | Address | Table | Base offset | File |
+  | --- | --- | --- | --- |
+  | `0x0210F6EC` | `_ZTV12BgTextCanvas` | 4 | `TextCanvas.cpp` |
+  | `0x0210F6F8` | `_ZTV13ObjTextCanvas` | 0x150 | `TextCanvas.cpp` |
+  | `0x0210F704` | `_ZTV12BgTextCanvas__10TextCanvas_at_1080`, `BgTextCanvas` in a `MessageText` | 0x438 | `MessageText.cpp` |
+  | `0x0210F710` | `_ZTV13ObjTextCanvas__10TextCanvas_at_1416`, `ObjTextCanvas` in a `MessageText` | 0x588 | `MessageText.cpp` |
+  | `0x0210F71C` | `_ZTT11MessageText`, the VTT: where the constructors point the object and its two bases, first through the construction tables | | `MessageText.cpp` |
+  | `0x0210F72C` | `_ZTV11MessageText`, two tables of three words: 0x588 for the object, 0x438 for its `BgTextCanvas` | | `MessageText.cpp` |
+
+  A table is three words per object it serves, and an object points at the end of its three. A VTT of another
+  class of the main program (`0x02110860`) points at `_ZTV13ObjTextCanvas` too.
+- `gMessageFiles` (`0x02138F1C`): measured, the static initialiser constructs one `MessageFile` there with
+  `__cxa_vec_ctor` and a count of 1, and registers `0x0202F408`, which destroys it with `__cxa_vec_cleanup` and is
+  the last function of `MessageText.cpp`. Inferred: it is an object of a class whose only member is an array of one
+  `MessageFile` and `0x0202F408` that class's implicit destructor; an array of one compiles to a single object, and
+  this is the shape found that compiles to the ROM's code. The class name (`MessageFileList`) is ours.
 - A message's tags start with the character 0x1A, followed by the tag's length in bytes; `MessageText::ExpandTags`
   replaces them with up to 20 strings and 2 messages set beforehand.
 - The fonts are in a file of their own: `gFonts` comes before `gTextObjResource` in memory, and the compiler puts it
