@@ -10,14 +10,23 @@ repository's CI.
 | --- | --- |
 | A report per game version, as a CI artifact named `<version>_report` | `jpn_rev1_report`, uploaded by `.github/workflows/build.yml` from successful pushes to `main` |
 | Units, drawn as a map by the directories in their names | `src/...` and `lib/...` for the files named in a `delinks.txt`, written or not, and `main/gap_<n>`, `overlays/ov<nnn>/gap_<n>` for what is left of each module |
-| Progress categories | By module: `main`, `itcm`, `overlays`. By origin: `game` for `src/`, `libs` for `lib/`. By library: `nitrosdk`, `nitrosystem`, `shtts`. By the game's subsystem: `sound`, `text`, `voice` (the directories under `src/`) |
+| Progress categories | By module: `main`, `itcm`, `overlays`. By origin: `game` and `libs`, which between them hold all the code (below). By library: `nitrosdk`, `nitrosystem`, `shtts`, `msl`. By the game's subsystem: `sound`, `text`, `voice` (the directories under `src/`) |
 | A unit's source file, for "View source" | `metadata.source_path`, set by dsd |
 | Complete units | Files marked `complete` in `delinks.txt` |
 
-`tools/objdiff_config.py` writes `objdiff.json` in that shape, from what dsd generates. The library and subsystem
-categories come from its `LIBRARIES` and `SUBSYSTEMS` tables: a new directory under `lib/` or `src/` gets a category
-of its own by adding it there. The origin and finer categories count only the files that `delinks.txt` names, so they
-say how much of what has been identified matches, not how much of the game.
+`tools/objdiff_config.py` writes `objdiff.json` in that shape, from what dsd generates.
+
+`game` is all of the game's own code and `libs` all of the libraries', so that "Game" on ByteMatch is how much of the
+game itself matches. A file counts by its directory (`src/` or `lib/`). A gap, which no file claims yet, counts by the
+address of its first function: the main program's library ranges (NitroSDK and MSL from `0x02000000` to
+`0x0201F4DC`, NitroSystem from `0x02053C64` to `0x02069BF4`, measured in [binary.md](binary.md)) and the ITCM are
+`libs`; the rest of the main program and every overlay are `game`. That is right but for the libraries not found yet
+(WH, NFL, a few files of the SDK), which are in the main program's game ranges and count as `game` until they are
+found and cut out. A gap without code (data alone) counts toward neither.
+
+The library and subsystem categories come from the `LIBRARIES` and `SUBSYSTEMS` tables of the same script: a new
+directory under `lib/` or `src/` gets a category of its own by adding it there. They count only files, so they say
+how much of what has been cut out matches.
 
 ## Setting it up
 

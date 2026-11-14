@@ -585,3 +585,81 @@ lib/SHTTS/shtts_4.c:
     .text       start:0x0208c8e0 end:0x0208eb18
     .rodata     start:0x020f3fe0 end:0x020f3ff0
     .data       start:0x021133f8 end:0x021135a0
+
+lib/MSL_C/abort_exit_arm.c:
+    .text       start:0x02014aa4 end:0x02014c18
+
+lib/MSL_C/math_arm.c:
+    .text       start:0x02014c18 end:0x02014c30
+
+lib/MSL_C/ansi_files.c:
+    .text       start:0x02014c30 end:0x02014c98
+
+lib/MSL_C/buffer_io.c:
+    .text       start:0x02014ca4 end:0x02014df0
+
+lib/MSL_C/char_io.c:
+    .text       start:0x02014df0 end:0x020150e0
+
+lib/MSL_C/file_io.c:
+    .text       start:0x020150e0 end:0x020151c8
+
+lib/MSL_C/mbstring.c:
+    .text       start:0x020151c8 end:0x0201534c
+
+lib/MSL_C/mem.c:
+    .text       start:0x0201534c end:0x020153ec
+
+lib/MSL_C/mem_funcs.c:
+    .text       start:0x020153ec end:0x0201549c
+
+lib/MSL_C/printf.c:
+    .text       start:0x0201549c end:0x020175a8
+
+lib/MSL_C/scanf.c:
+    .text       start:0x020175d0 end:0x020188f4
+
+lib/MSL_C/signal.c:
+    .text       start:0x0201891c end:0x02018a4c
+
+lib/MSL_C/string.c:
+    .text       start:0x02018a4c end:0x02018d84
+
+lib/MSL_C/strtold.c:
+    .text       start:0x02018d84 end:0x02019fd0
+
+lib/MSL_C/strtoul.c:
+    .text       start:0x02019fd0 end:0x0201a8ec
+
+lib/MSL_C/wchar_io.c:
+    .text       start:0x0201a900 end:0x0201a980
+
+lib/MSL_C/wmem.c:
+    .text       start:0x0201a980 end:0x0201a9b8
+
+lib/MSL_C/wprintf.c:
+    .text       start:0x0201a9b8 end:0x0201c950
+
+lib/MSL_C/wstring.c:
+    .text       start:0x0201c950 end:0x0201cac4
+
+lib/MSL_C/e_pow.c:
+    .text       start:0x0201cac4 end:0x0201dc4c
+
+lib/MSL_C/s_copysign.c:
+    .text       start:0x0201dc4c end:0x0201dc74
+
+lib/MSL_C/s_fabs.c:
+    .text       start:0x0201dc74 end:0x0201dc94
+
+lib/MSL_C/s_frexp.c:
+    .text       start:0x0201dc94 end:0x0201dd50
+
+lib/MSL_C/s_ldexp.c:
+    .text       start:0x0201dd50 end:0x0201df9c
+
+lib/MSL_C/w_pow.c:
+    .text       start:0x0201df9c end:0x0201dfa8
+
+lib/MSL_C/math_sun.c:
+    .text       start:0x0201f4dc end:0x0201f508

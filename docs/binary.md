@@ -95,8 +95,9 @@ Every object's functions come out in the game in the order they have in the obje
 what a correct match looks like and a coincidence does not. The names the matcher gave agree with the ten assigned by
 hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
 
-So 1,293 of the main program's 4,205 functions are library code with known names, and 155 library files are cut
-out as units under `lib/`. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+So 1,293 of the main program's 4,205 functions are library code with known names, and 181 library files are cut
+out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`; `math_api.c`
+and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have). What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
 matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
 game's 30007.

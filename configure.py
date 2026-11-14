@@ -632,7 +632,9 @@ def main():
     n.build(["rom"], "phony", [rom])
 
     # objdiff: the config for the GUI, and the progress report that ByteMatch reads
-    n.build(["objdiff.json"], "objdiff_config", configs, implicit=["tools/objdiff_config.py", *compiled])
+    # The delinked gaps are read too: where each is says whether it is the game's code or a library's
+    n.build(["objdiff.json"], "objdiff_config", configs,
+            implicit=["tools/objdiff_config.py", "tools/place_data.py", *compiled, *delink_outputs])
     n.build([report], "report", ["objdiff.json"], implicit=[*delink_outputs, *compiled])
     n.build(["report"], "phony", [report])
     n.build(["upload"], "upload_report", [report], implicit=["tools/upload_report.py"])

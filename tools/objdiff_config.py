@@ -4,8 +4,8 @@
 dsd writes the units. This adds what a progress tracker reads from them:
   - short paths, relative to the repository's root
   - a path-like name for each unit, since the tracker draws a name's directories as nested boxes
-  - progress categories: each unit's kind of module, whether it is the game's own code or a library's, and which
-    library or which of the game's subsystems
+  - progress categories: each unit's kind of module, whether it is the game's own code or a library's (for a gap,
+    by where it is), and which library or which of the game's subsystems
   - the source file of a decompiled unit, for links to the code
 
 A delinks.txt may name a source file that is not written yet, to give a known file a unit of its own. Such a unit has
@@ -19,6 +19,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from place_data import Object, STT_FUNC  # noqa: E402
+
 # What is left of a module once its decompiled files are taken out, which dsd delinks as "_dsd_gap@<module>_<n>"
 GAP = re.compile(r"^_dsd_gap@(?P<module>.+)_(?P<index>\d+)$")
 
@@ -27,11 +30,20 @@ CATEGORIES = [
     {"id": "main", "name": "Main program"},
     {"id": "itcm", "name": "ITCM"},
     {"id": "overlays", "name": "Overlays"},
-    # By directory. What no source file claims yet is in neither, since nobody has said which it is.
+    # By origin: all of the game's own code, and all of the libraries', whether or not it is in files yet
     {"id": "game", "name": "Game"},
     {"id": "libs", "name": "Libraries"},
 ]
 ORIGINS = {"src": "game", "lib": "libs"}
+
+# What no file claims yet is the gaps. Measured (docs/binary.md, "Libraries"): the main program's code holds the
+# libraries in these ranges, and the game's own code everywhere else, along with the libraries not found yet (WH, NFL
+# and a few files of the SDK). The ITCM's six functions are all NitroSDK's, and the overlays are the game's scenes.
+# So a gap's code counts toward "game" or "libs" by the address of its first function.
+LIBRARY_RANGES = [
+    (0x02000000, 0x0201F4DC),  # NitroSDK, then MSL's C library
+    (0x02053C64, 0x02069BF4),  # NitroSystem
+]
 
 # Finer categories, by the directory under lib/ or src/ that a file is in. A file of a directory that is not listed
 # counts only toward its origin and module (src/overlays/ is not listed: the module category already covers it).
@@ -39,6 +51,7 @@ LIBRARIES = {
     "NitroSDK": ("nitrosdk", "NitroSDK"),
     "NitroSystem": ("nitrosystem", "NitroSystem"),
     "SHTTS": ("shtts", "Speech synthesis (SHTTS)"),
+    "MSL_C": ("msl", "C library (MSL)"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
@@ -64,6 +77,38 @@ def source_modules(config: Path) -> dict[str, str]:
             if line and not line[0].isspace() and line.rstrip().endswith(":"):
                 modules[line.rstrip()[:-1].split()[0]] = module
     return modules
+
+
+def symbol_addresses(config: Path) -> dict[str, dict[str, int]]:
+    """Maps each module ("main", "itcm", "ov075", ...) to its symbols.txt's names and addresses."""
+    found = {}
+    for symbols in config.parent.rglob("symbols.txt"):
+        relative = symbols.parent.relative_to(config.parent).parts
+        module = "main" if not relative else relative[-1]
+        table = found.setdefault(module, {})
+        for line in symbols.read_text(encoding="utf-8").splitlines():
+            match = re.match(r"(\S+) kind:function\S* addr:(0x[0-9a-fA-F]+)", line)
+            if match:
+                table.setdefault(match[1], int(match[2], 16))
+    return found
+
+
+def first_function(path: Path, addresses: dict[str, int]) -> int | None:
+    """The address of the lowest function of a delinked object, or None if it has none (or is not delinked yet)."""
+    if not path.exists():
+        return None
+    found = [addresses[name] for name, _, _, kind, _, _ in Object(path).symbols if kind == STT_FUNC and name in addresses]
+    return min(found) if found else None
+
+
+def gap_origin(module: str, address: int | None) -> str | None:
+    if module.startswith("ov"):
+        return "game"
+    if module == "itcm":
+        return "libs"
+    if module == "main" and address is not None:
+        return "libs" if any(start <= address < end for start, end in LIBRARY_RANGES) else "game"
+    return None  # No code, so no telling
 
 
 def category(module: str) -> str:
@@ -106,6 +151,7 @@ def main() -> int:
     objdiff["progress_categories"] = CATEGORIES
 
     modules = source_modules(args.config)
+    addresses = symbol_addresses(args.config)
     for unit in objdiff["units"]:
         for key in ("target_path", "base_path"):
             if unit.get(key):
@@ -121,6 +167,10 @@ def main() -> int:
             folder = f"overlays/{module}" if module.startswith("ov") else module
             unit["name"] = f"{folder}/gap_{gap['index']}"
             categories = [category(module)]
+            target = unit.get("target_path")
+            origin = gap_origin(module, first_function(Path(target), addresses.get(module, {})) if target else None)
+            if origin:
+                categories.append(origin)
         else:
             # dsd names a unit after its source file, less the extension, and gives the file's path
             source = metadata.get("source_path", name)

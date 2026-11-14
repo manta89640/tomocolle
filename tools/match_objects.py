@@ -212,11 +212,13 @@ def game_functions(modules: list[Module]) -> list[GameFunction]:
     return functions
 
 
-def source_of(library: str, path: str, source_roots: dict[str, str]) -> str | None:
+def source_of(library: str, path: str, source_roots: dict[str, str], member_sources: set[str] = frozenset()) -> str | None:
     """Returns the source file of an object, relative to its library, or None when the object does not say."""
     parts = Path(path).parts
     mangled = parts[-1].removesuffix(".o")
     if not mangled.endswith((".c", ".cpp")):
+        if library in member_sources and len(parts) == 1:
+            return mangled + ".c"  # The archive's members are named after their C sources (MSL's are)
         return None  # A member of an archive is named after its object, not its source
     directory = Path(*parts[:-2]) if len(parts) > 2 else Path()
     root = source_roots.get(library)
@@ -256,6 +258,8 @@ def main() -> int:
     parser.add_argument("libraries", nargs="+", metavar="NAME=PATH")
     parser.add_argument("--sources", action="append", default=[], metavar="NAME=PATH",
                         help="directory of a library's sources, laid out as its objects are")
+    parser.add_argument("--member-sources", action="append", default=[], metavar="NAME",
+                        help="the archive of library NAME names each member after its C source (foo.o is foo.c)")
     parser.add_argument("--version", default="jpn_rev1")
     parser.add_argument("--apply", action="store_true", help="rename the matched symbols that have no name yet")
     parser.add_argument("--units", action="store_true", help="with --apply, also cut each object out as a unit")
@@ -401,7 +405,7 @@ def main() -> int:
         ranges[(function.library, function.object)].append(by_address[key])
     units, doubtful = [], []
     for (library, path), placed in ranges.items():
-        source = source_of(library, path, source_roots)
+        source = source_of(library, path, source_roots, set(args.member_sources))
         if source is None:
             continue
         # A Thumb function can end between words. The padding up to the next word belongs to its file.

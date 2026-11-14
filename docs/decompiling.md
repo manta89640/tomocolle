@@ -101,7 +101,13 @@ python3 tools/match_objects.py \
 ```
 
 Without `--apply` it reports what it would do. It only reads those objects: nothing of them is copied here but the
-names. Any library that exists as objects with symbols can be matched the same way.
+names. Any library that exists as objects with symbols can be matched the same way. An archive's members are named
+after their objects, not their sources, so their files are only cut with `--member-sources NAME`, for an archive whose
+members are named after C sources of the same name, as MSL's are (`alloc.o` is `alloc.c`):
+
+```sh
+python3 tools/match_objects.py MSL_C=$P/build/MSL_C_NITRO_Ai_LE.a --member-sources MSL_C --apply --units
+```
 
 ## Subdividing units
 
@@ -120,7 +126,7 @@ of the game is understood as well as how much is matched. Which directory a file
 | Directory | For | Category |
 | --- | --- | --- |
 | `src/` | The game's own code, by overlay or by subsystem | Game, and the subsystem's (`sound`, `text`, `voice`) |
-| `lib/<library>/` | Code of the SDK and of middleware, under the library's own file names where known | Libraries, and the library's (`nitrosdk`, `nitrosystem`, `shtts`) |
+| `lib/<library>/` | Code of the SDK and of middleware, under the library's own file names where known | Libraries, and the library's (`nitrosdk`, `nitrosystem`, `shtts`, `msl`) |
 
 Cut where the evidence is: a library's known file, a run of functions that only refer to each other and to their own
 data, a static initializer (each belongs to one file), a table of virtual functions. Do not cut on a guess: a wrong
