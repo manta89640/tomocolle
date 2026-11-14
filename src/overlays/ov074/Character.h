@@ -16,6 +16,9 @@
 struct SavedCharacter {
     SavedCharacter(); // func_020979c0
 
+    // mEventEndLo and mEventEndHi are one s64, which the scene compares whole (it is not 8-aligned)
+    s64 GetEventEnd() { return *(s64 *)&mEventEndLo; }
+
     /* 0x0000 */ u16 mUnknown0000;
     /* 0x0002 */ wchar_t mName[10];      // func_0207a80c copies it out as a string
     /* 0x0016 */ u8 mUnknown0016[0x34];

@@ -10,8 +10,8 @@
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
 
-// The overlay's shared headers: the character (with Character.h, FloorPos.h, HeldItem.h, Model.h, Room.h and
-// RoomCamera.h), and the scene's other objects, which are the unit RoomObjects'
+// The character (with Character.h, FloorPos.h, HeldItem.h, Model.h, Room.h and RoomCamera.h), and the scene's
+// other objects
 #include "RoomCharacter.h"
 #include "ApartmentFront.h"
 #include "Clock.h"
@@ -63,8 +63,7 @@ struct ParticleSystem {
     /* 0x0 */ void *mManager; // func_0207b138 updates it
 }; // 0x4
 
-// What the main program's functions that decide what comes of two characters meeting work on (RoomEncounter's
-// header has the others of them). It has no data.
+// What the main program's functions that decide what comes of two characters meeting work on. It has no data.
 struct EncounterJudge {
     int Judge(RoomCharacter *first, RoomCharacter *second);                // 0x020adfbc: 10 when nothing comes of it
     int JudgeEnd(RoomCharacter *first, RoomCharacter *second, BOOL param); // 0x020ae1f8
@@ -73,26 +72,6 @@ struct EncounterJudge {
 
     u8 mUnknown[4];
 };
-
-// ---------------------------------------------------------------------------------------------------------------
-// ADDITIONS that the shared headers need (they are read-only for this unit). Each is here only until it is there.
-
-// Character.h, SavedCharacter: mEventEndLo and mEventEndHi are one s64 (the scene compares it whole).
-inline s64 GetEventEnd(SavedCharacter *character) {
-    return *(s64 *)&character->mEventEndLo;
-}
-
-// RoomObjects/TimedMessage.h (or MessageText): how many sprite characters (tiles) the text's canvas takes
-inline int GetCanvasCharCount(MessageText *text) {
-    return ((text->mCanvas.areaWidth * text->mCanvas.areaHeight - 1) >> text->mVramMode) + 1;
-}
-
-// RoomCamera.h, SavedCamera (data_0213ba74, what the scenes remember for each other): it goes on past the camera.
-struct SceneMemory {
-    /* 0x00 */ SavedCamera mCamera;
-    /* 0x20 */ u8 mCharacter; // The saved character whose room was shown last
-};
-#define gSceneMemory (*(SceneMemory *)&data_0213ba74)
 
 // The scene's speech player: a class of its own derived from TtsPlayer, with nothing added. Measured: the scene's
 // constructor (main program, 0x0203ed10) constructs the member with TtsPlayer's base-object constructor (C2) where

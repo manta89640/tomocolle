@@ -1,3 +1,9 @@
+// Overlay 74, the apartment scene, as the one source file it was. Measured: one static initialiser, whose objects
+// share one .data section with HeldItem's table; the scene's implicit destructors come out after every other
+// function only when the whole overlay is one file; a function's small constants are read through the address
+// of one pool of the file's .rodata. The parts below are in address order; the section comments name the groups
+// of functions as they were decompiled.
+
 #include <nitro.h>
 #include <nnsys.h>
 
@@ -271,12 +277,12 @@ void RoomScene::StartLoading() {
         }
     }
 
-    last = gSceneMemory.mCharacter;
+    last = data_0213ba74.mCharacter;
     if (last < 100 && func_0202c3dc(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
-        gSceneMemory.mCharacter = mCharacters[0].mIndex;
+        data_0213ba74.mCharacter = mCharacters[0].mIndex;
     }
     LoadCharacters();
     func_02091048(&mCharacters[0], "3HM");
@@ -519,7 +525,7 @@ void RoomScene::Init() {
     mClockDisplay.Init(&mClock);
 
     // Coming from the character distribution scene with a resident that has just moved in
-    if (gSceneManager.mPreviousSceneId == 0x74 && GetEventEnd(&mCharacters[0]) == 0x7FFFFFFFFFFFFFFFLL) {
+    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].GetEventEnd() == 0x7FFFFFFFFFFFFFFFLL) {
         SetInputState(INPUT_OFF);
         SetEventState(EVENT_AFTER_DISTRIBUTION, 60);
         mCamera.SetState(2, 0);
@@ -741,7 +747,7 @@ void RoomScene::PressButton(int button) {
         SetEventState(EVENT_NONE);
         mTtsPlayer.Stop();
         mNextSceneId = 0x5F;
-        gSceneMemory.mCharacter = mCharacters[0].mIndex;
+        data_0213ba74.mCharacter = mCharacters[0].mIndex;
         break;
     }
 }
@@ -797,7 +803,7 @@ void RoomScene::GoToInformation() {
     SetEventState(EVENT_NONE);
     mTtsPlayer.Stop();
     mNextSceneId = 0xAE;
-    gSceneMemory.mCharacter = mCharacters[0].mIndex;
+    data_0213ba74.mCharacter = mCharacters[0].mIndex;
 }
 
 // Enables the two buttons as the state allows.
@@ -1030,7 +1036,7 @@ void RoomScene::ChangeRoom() {
         mNamePanel.SetState(2);
     } else {
         ChooseCharacters(resident);
-        gSceneMemory.mCharacter = resident;
+        data_0213ba74.mCharacter = resident;
         LoadCharacters();
         mRoom.SetNextStyle(mCharacters[0].mInterior);
         mNamePanel.SetState(1);
@@ -2652,14 +2658,13 @@ void RoomScene::StartEvent(RoomCharacter *character, int phase) {
     }
 }
 
-// Not matching yet: same size (0xee8) and stack frame, 15 instructions differ, all in case 0x2a: the original loads
-// gRoomPoints[1] after the four stores of the two places (interleaved with reading the first character's
-// place back: pos.x, point.x, pos.z, point.z, in r6, r3, r5, r2), mine loads it between those stores, which also
-// moves the place constants from r2/r3 to r5/r6. The original keeps the point's x and z across the first
-// FX_Atan2Idx in a slot at sp+8, as this form does. Tried: the table not const (it is read again after the call,
-// frame 8 bytes smaller), a named FloorPos copy in the case or at the top of the function (the copy lands at the top
-// of the frame, not at sp+8), a const copy, a copy filled field by field, a by-value inline wrapper, a pointer and a
-// reference to the entry, GetOffsetTo taking the point by value.
+// Not matching yet: 2 instructions, the offsets of the two loads of the point in case 0x2a (#0 and #4 here, #8 and
+// #12 in the original). The point is a local initialiser, an anonymous constant of the file's pool of small
+// constants (0x0216d404 is the pool's address, not a table: see gRoomPoints in RoomCharacter.h), which the
+// original copies once to a stack slot and reads from there after the first FX_Atan2Idx, as this does. Its offset
+// is its place in the pool, which only the whole file's small constants, written as the original had them, give.
+// Before (gRoomPoints[1] of an extern table): not const, 4 bytes short; const, 15 instructions in the order of the
+// loads.
 // @0x02150538
 void RoomScene::StartPairEvent(int phase) {
     RoomCharacter *pair[2];
@@ -2857,8 +2862,9 @@ void RoomScene::StartPairEvent(int phase) {
         } else {
             pair[0]->SetFloorPos(0x1666, -0x800);
             second->SetFloorPos(-0x1666, -0x8cc);
-            Character_SetAngle(pair[0], Angle(pair[0]->GetOffsetTo(gRoomPoints[1])));
-            Character_SetAngle(second, Angle(second->GetOffsetTo(gRoomPoints[1])));
+            FloorPos point = { 0, 0x3000 };
+            Character_SetAngle(pair[0], Angle(pair[0]->GetOffsetTo(point)));
+            Character_SetAngle(second, Angle(second->GetOffsetTo(point)));
             int state = Rand(3) + 0xcb;
             pair[0]->SetState(state);
             second->SetState(state);
@@ -10998,7 +11004,8 @@ u16 RoomCharacter::SnapAngle(u16 angle) {
 // spills the high words of the four sines and cosines to five more stack words), this reloads them from the
 // stack. Tried: Rotate taking a reference, a pointer, the value, two scalars, or the sine and cosine; the sines and
 // cosines as locals; offset.x/z as locals before the call (keeps z in a register, not x); the angle through an
-// inline; the two distances right after each point (this) or after both (0x340 bytes) or in the conditions.
+// inline; the two distances right after each point (this) or after both (0x340 bytes) or in the conditions. In the
+// single file, again: Rotate by value, by pointer, as two scalars, with the sine and cosine as locals.
 // @0x02168dfc
 BOOL RoomCharacter::GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin) {
     FloorPos middle;
@@ -11623,9 +11630,9 @@ RoomCamera::RoomCamera() {
 
 // @0x0216a4b4
 RoomCamera::~RoomCamera() {
-    VEC_Set(&data_0213ba74.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
-    VEC_Set(&data_0213ba74.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
-    data_0213ba74.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
+    VEC_Set(&data_0213ba74.mCamera.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
+    VEC_Set(&data_0213ba74.mCamera.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
+    data_0213ba74.mCamera.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
 }
 
 // @0x0216a514

@@ -32,7 +32,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// What the camera's destructor leaves for the next scene (data_0213ba74)
+// What the camera's destructor leaves for the next scene (SceneMemory::mCamera)
 struct SavedCamera {
     void SetOrbit(s16 x, s16 y, s16 z) {
         mOrbitX = x;
@@ -49,7 +49,13 @@ struct SavedCamera {
 
 extern "C" {
 extern Camera data_02122764;
-extern SavedCamera data_0213ba74;
+// What the scenes remember for each other (data_0213ba74): the camera, and the saved character whose room was
+// shown last
+struct SceneMemory {
+    /* 0x00 */ SavedCamera mCamera;
+    /* 0x20 */ u8 mCharacter;
+};
+extern SceneMemory data_0213ba74;
 void func_0202a640(Camera *camera);
 void func_0202a748(Camera *camera);
 // The absolute value of each component

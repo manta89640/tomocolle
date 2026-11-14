@@ -93,10 +93,13 @@ extern const s16 data_020fb898[4][5]; // The same: walking
 
 } // extern "C"
 
-// The overlay's data that the character's functions read. The four descriptive names are not in symbols.txt yet,
-// where each still has the address name given beside it.
-extern FloorPos gRoomPoints[];       // data_ov074_0216d404: places in the room. Not const: only then is it loaded
-                                     // as late as the original does
+// The overlay's data that the character's functions read, declared and not yet defined here. Measured: the
+// compiler puts a file's 4-aligned constants into one section sorted by size and addresses them by the section's
+// address plus an offset. In the ROM, 0x0216d404 to 0x0216d484 is sixteen 8-byte objects (gRoomPoints' 13
+// places, sButtonSequences, {0, -0x3666} at 0x0216d474 and data_ov074_0216d47c), the start of such a section; so
+// "gRoomPoints" is most likely separate constants of that pool, which is why no one declaration suits every user:
+// the state functions match only with it not const, StartPairEvent only with it const.
+extern FloorPos gRoomPoints[];       // 0x0216d404: places in the room
 extern const int gMoodFaces[5];      // data_ov074_0216d544: the face of each mood
 extern const s16 gMoodHeadIcons[5];  // data_ov074_0216d484: the head icon of each mood
 extern const FloorPos data_ov074_0216d47c;
