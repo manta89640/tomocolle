@@ -1,7 +1,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "RoomScene.h"
+#include "../RoomScene.h"
 #pragma once
 
 extern "C" {
@@ -183,11 +183,6 @@ struct SceneManager {
 extern SceneManager gSceneManager;
 void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 
-
-// --- The overlay's other units: RoomCharacter's members that have no name in symbols.txt yet ----------------------
-
-void func_ov074_02169890(RoomCharacter *character, int state); // Sets mOverrideState (and clears its step)
-void func_ov074_02169c6c(RoomCharacter *character);
 
 } // extern "C"
 

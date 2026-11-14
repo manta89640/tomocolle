@@ -34,6 +34,10 @@ extern "C" {
 void Character_SetFace(RoomCharacter *self, int face);
 // Lip sync: opens the mouth (face 7) while the phoneme is a vowel or 'w'
 void func_02090a58(RoomCharacter *self, const char *phoneme, int face);
+// Tests of where a point (x, z) is, seen from the character: in front of it, within that width
+BOOL func_02091d44(RoomCharacter *self, fx32 x, fx32 z, fx32 width);
+// The point is nearer to the character than the square root of that
+BOOL func_02091edc(RoomCharacter *self, FloorPos pos, fx32 distanceSq);
 // Clamps an angle to +-limit
 BOOL func_02090c78(RoomCharacter *self, u16 *angle, int limit);
 void func_020910d4(RoomCharacter *self);
@@ -81,59 +85,6 @@ int func_0207a6c0(RoomCharacter *self);
 GXRgb func_02073514(int color);
 BOOL func_02099e34(u8 value);
 
-// --- Overlay 74: RoomCharacter's members 0x02168d24 to 0x02169d90, which are not decompiled and have no name in
-// symbols.txt yet. The name after each address is the one RoomObjects' header proposes for it. ---
-
-// GetWalkAreaCorner: the corner of the walk area on the side of it that the point is on
-void func_ov074_02168d24(RoomCharacter *self, FloorPos pos, FloorPos *corner);
-// SnapAngle: the nearest multiple of 0x4000
-u16 func_ov074_02168dc4(RoomCharacter *self, u16 angle);
-// GetAngleAroundPartner: an angle to go around the partner by; FALSE (and mAngle) when there is no need
-BOOL func_ov074_02169144(RoomCharacter *self, u16 *angle, fx32 margin);
-// GetHeadYaw: angle + mAngle, limited by func_02090c78
-u16 func_ov074_021691b0(RoomCharacter *self, u16 angle, int limit);
-// SetHeadTurn: sets mHeadPitch, mHeadYaw, mHeadRoll, mHeadTurnFrames and mHeadTurnActive
-void func_ov074_021691d4(RoomCharacter *self, u16 pitch, u16 yaw, u16 roll, u8 frames);
-// GetHeadYawTo: the head's yaw towards a point, limited
-u16 func_ov074_021691fc(RoomCharacter *self, FloorPos pos, int limit);
-// GetHeadPitch: the head's pitch from a point to a point, limited
-u16 func_ov074_02169280(RoomCharacter *self, VecFx32 from, VecFx32 to, u16 limit);
-// GetHeadPitchToPartner: from the head (joint 0) to one of the partner's joints, limited
-u16 func_ov074_02169318(RoomCharacter *self, int joint, int limit);
-// StepWalkLooking: one step of walking to mTarget, with the step sound (func_02091fbc(1, 0, 0x1a)); TRUE when
-// there. Turns the head by lookAngle less the walking direction when lookLimit is below 0x4000
-BOOL func_ov074_02169388(RoomCharacter *self, u32 lookLimit, int lookAngle, fx32 reach, int speed, int turnShift);
-// StepTurnLooking: the same with Character_TurnToWalkTarget
-BOOL func_ov074_0216943c(RoomCharacter *self, int speed, int accel, u32 lookLimit);
-// RestartStepSound: Character_ResetSoundPhase(this, 0) unless IsMovingAnim()
-void func_ov074_021694e8(RoomCharacter *self);
-// SetHeldItemsShowState: HeldItem::SetShowState for both held items
-void func_ov074_0216950c(RoomCharacter *self, int state);
-// AreHeldItemsLoaded
-BOOL func_ov074_02169564(RoomCharacter *self);
-// PlaceHeldItemBetweenHands: held item 0 at the midpoint of joints 2 and 1, raised by height times the scale
-void func_ov074_02169598(RoomCharacter *self, fx32 height);
-// PlaceHeldItemsInHands: held item 1 in the hand (joint 2) and item 0 at joint 1
-void func_ov074_02169634(RoomCharacter *self);
-// PlaceHeldItemAtHead: held item 0 at joint 0, turned by the head's yaw
-void func_ov074_021696b8(RoomCharacter *self);
-// PlaceHeldItemsAtStart: held item 1 at (0, 0, 0x3000), both turned by 0x8000
-void func_ov074_02169708(RoomCharacter *self);
-// StepPutHeldItemsDown: by mSubStep: ShowHeadIcon, StepChangeHeldItems, the animation
-BOOL func_ov074_0216973c(RoomCharacter *self, int anim);
-// UpdateVoiceOfSound: sets volume and pitch of mSoundHandle's sound by the character (func_02098ec4)
-void func_ov074_02169a98(RoomCharacter *self);
-// StartSound3IfAnimOfGroup: sound 3 of archive 0x1e when the animation is of group A or B
-void func_ov074_02169b00(RoomCharacter *self);
-// StartSound0UnlessGroupA: sound 0 of archive 0x1e unless the animation is of group A
-void func_ov074_02169b68(RoomCharacter *self);
-// StartSoundUnlessGroupB: sound `index` of archive 0x1e unless the animation is of group B
-void func_ov074_02169bb4(RoomCharacter *self, int index);
-// StartSound0UnlessGroup
-void func_ov074_02169c04(RoomCharacter *self);
-// Save: func_0202c28c(gGameData, mIndex, this) if func_0202c3dc
-void func_ov074_02169d90(RoomCharacter *self);
-
 // --- Data ---
 extern MATHRandContext16 gRandom; // The game's random number generator
 extern const int data_020fba28[16];   // By mPersonality: the row of the two tables below
@@ -149,6 +100,7 @@ extern FloorPos gWalkAreaCorners[4]; // data_ov074_0216d734
 extern FloorPos gRoomPoints[];       // data_ov074_0216d404: places in the room. Not const: only then is it loaded
                                      // as late as the original does
 extern const int gMoodFaces[5];      // data_ov074_0216d544: the face of each mood
+extern const s16 gMoodHeadIcons[5];  // data_ov074_0216d484: the head icon of each mood
 extern const FloorPos data_ov074_0216d47c;
 extern const VecFx32 data_ov074_0216d490;
 extern const VecFx32 data_ov074_0216d4a8;
@@ -182,7 +134,9 @@ public:
     // --- 0x02152228 to 0x02152690 (unit RoomEncounter) ---
     RoomCharacter();
     void Init(int slot, int param2, int param3);
-    void LoadHeadIcon(int param);
+    // Loads the head icon of the mood into the scene's particle system. The parameter is a pointer: the scene's
+    // Init only matches when it is (with an int and a cast, the particle system's address is computed elsewhere)
+    void LoadHeadIcon(ParticleSystem *particles);
     void PlaceHeadIcon();
     void SetState(int state);
     void SetStateWithPartner(int state, int partnerState);
@@ -245,12 +199,71 @@ public:
     void GetRandomCorner(FloorPos *out);
     void GetRandomEdgePos(FloorPos *out);
 
+    // --- 0x02168d24 to 0x02169dcc (unit RoomObjects): the floor area, head turns, walking steps, held items,
+    // loading, sounds and speech texts ---
+    // The corner of the walk area on the side of it that the point is on
+    void GetWalkAreaCorner(FloorPos pos, FloorPos *corner);
+    int GetWalkAreaSide(fx32 x, fx32 z);
+    // The nearest multiple of 0x4000
+    u16 SnapAngle(u16 angle);
+    // An angle to go around a point by; FALSE (and the direction) when there is no need
+    BOOL GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin);
+    BOOL GetAngleAroundPartner(u16 *angle, int margin);
+    // angle + mAngle, limited by func_02090c78
+    u16 GetHeadYaw(u16 angle, int limit);
+    // Sets mHeadPitch, mHeadYaw, mHeadRoll, mHeadTurnFrames and mHeadTurnActive
+    void SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames);
+    // The head's yaw towards a point, limited
+    u16 GetHeadYawTo(FloorPos pos, int limit);
+    // The head's pitch from a point to a point, limited
+    u16 GetHeadPitch(VecFx32 from, VecFx32 to, u16 limit);
+    // From the head (joint 0) to one of the partner's joints, limited
+    u16 GetHeadPitchToPartner(int joint, u16 limit);
+    // One step of walking to mTarget, with the step sound (func_02091fbc(1, 0, 0x1a)); TRUE when there. Turns the
+    // head by lookAngle less the walking direction when lookLimit is below 0x4000
+    BOOL StepWalkLooking(u32 lookLimit, int lookAngle, fx32 reach, int speed, int turnShift);
+    // The same with Character_TurnToWalkTarget
+    BOOL StepTurnLooking(int speed, int accel, u32 lookLimit);
+    // Character_ResetSoundPhase(this, 0) unless IsMovingAnim()
+    void RestartStepSound();
+    // HeldItem::SetShowState for both held items
+    void SetHeldItemsShowState(int state);
+    void SetHeldItemsVisible(BOOL visible);
+    BOOL AreHeldItemsLoaded();
+    // Held item 0 at the midpoint of joints 2 and 1, raised by height times the scale
+    void PlaceHeldItemBetweenHands(fx32 height);
+    // Held item 1 in the hand (joint 2) and item 0 at joint 1
+    void PlaceHeldItemsInHands();
+    // Held item 0 at joint 0, turned by the head's yaw
+    void PlaceHeldItemAtHead();
+    // Held item 1 at (0, 0, 0x3000), both turned by 0x8000
+    void PlaceHeldItemsAtStart();
+    // By mSubStep: ShowHeadIcon, StepChangeHeldItems, the animation
+    BOOL StepPutHeldItemsDown(int anim);
+    // Sets mOverrideState and clears its step
+    void SetOverrideState(int state);
+    void UpdateOverrideState();
+    // Sets volume and pitch of mSoundHandle's sound by the character (func_02098ec4)
+    void UpdateVoiceOfSound();
+    // Sound 3 of archive 0x1e when the animation is of group A or B
+    void StartSound3IfAnimOfGroup();
+    // Sound 0 of archive 0x1e unless the animation is of group A
+    void StartSound0UnlessGroupA();
+    // Sound `index` of archive 0x1e unless the animation is of group B
+    void StartSoundUnlessGroupB(int index);
+    void StartSound0UnlessGroup();
+    void RefreshSpeechTexts();
+    void ConvertSpeechTexts();
+    void ClearSpeechTexts();
+    // func_0202c28c(gGameData, mIndex, this) if func_0202c3dc
+    void Save();
+
     // --- Inline helpers. Each is here because the match of some state function depends on its shape: do not
     // "simplify" one without checking the functions that use it. ---
 
     // Where the character stands, on the floor. Filling a local and returning it is what leaves the dead copies of
     // the point on the callers' stacks.
-    FloorPos GetFloorPos() {
+    FloorPos GetFloorPos() const {
         FloorPos pos;
         pos.x = mModel.mPos.x;
         pos.z = mModel.mPos.z;
@@ -263,6 +276,41 @@ public:
         return FX_Atan2Idx(delta.z, delta.x);
     }
     BOOL IsWithinReach(FloorPos pos, fx32 reach, fx32 maxReach) {
+        return Character_IsPointWithinReach(this, pos.x, pos.z, reach, maxReach);
+    }
+    void SetFloorPos(fx32 x, fx32 z) {
+        mModel.mPos.x = x;
+        mModel.mPos.z = z;
+    }
+    // From where the character stands to a point
+    FloorPos GetOffsetTo(const FloorPos &to) { return to - GetFloorPos(); }
+    BOOL ClampOwnPosToRect4E4() {
+        FloorPos pos = GetFloorPos();
+        return ClampToRect4E4(&pos);
+    }
+
+    // The main program's tests of where another character is, seen from this one. Each takes the other's place
+    // into a local first: the scene's encounter functions match only so
+    BOOL IsBeside(const RoomCharacter *other, fx32 width) {
+        FloorPos pos = other->GetFloorPos();
+        return func_02091b80(this, pos.x, pos.z, width);
+    }
+    BOOL IsFacing(const RoomCharacter *other) {
+        FloorPos pos = other->GetFloorPos();
+        return func_02091c80(this, pos.x, pos.z);
+    }
+    BOOL IsAhead(const RoomCharacter *other, fx32 width) {
+        FloorPos pos = other->GetFloorPos();
+        return func_02091d44(this, pos.x, pos.z, width);
+    }
+    BOOL IsNearerThan(const RoomCharacter *other, fx32 distanceSq) {
+        FloorPos pos;
+        pos.x = other->mModel.mPos.x;
+        pos.z = other->mModel.mPos.z;
+        return func_02091edc(this, pos, distanceSq);
+    }
+    BOOL IsWithinReach(const RoomCharacter *other, fx32 reach, fx32 maxReach) {
+        FloorPos pos = other->GetFloorPos();
         return Character_IsPointWithinReach(this, pos.x, pos.z, reach, maxReach);
     }
 
@@ -294,6 +342,11 @@ public:
         mTarget.x = pos.x;
         mTarget.z = pos.z;
     }
+    void SetSavedTarget(VecFx32 target) {
+        mSavedTarget.x = target.x;
+        mSavedTarget.y = target.y;
+        mSavedTarget.z = target.z;
+    }
 
     // The standing and the walking animation of the character's personality and mood
     s16 GetIdleAnim() { return data_020fb870[data_020fba28[mPersonality]][mMood]; }
@@ -306,21 +359,23 @@ public:
     // GetFlagOfPartner (0x021686f4) as the states have it inline
     u8 GetFlagOfPartnerInline() { return mRelation[mPartner->mIndex]; }
 
+    // UpdateEvent's match depends on the character being the object of this one
+    void SetHeadIconMode(int mode) { mHeadIcon.SetMode(mode); }
     // Shows the head icon of an id and sets its mode to 3
     void SetHeadIcon(s16 id) {
-        func_02080fc4(&mHeadIcon);
+        mHeadIcon.Show();
         mHeadIcon.mIconId = id;
-        func_020810c8(&mHeadIcon);
-        HeadIcon_SetMode(&mHeadIcon, 3);
+        mHeadIcon.Reload();
+        mHeadIcon.SetMode(3);
     }
     // Shows the head icon of an id, from its start when that one is already there
     void ShowHeadIconOfId(int id) {
         if (mHeadIcon.mIconId != id) {
-            func_02080fc4(&mHeadIcon);
+            mHeadIcon.Show();
             mHeadIcon.mIconId = id;
-            func_020810c8(&mHeadIcon);
+            mHeadIcon.Reload();
         } else {
-            func_02080ff0(&mHeadIcon);
+            mHeadIcon.Restart();
         }
     }
     // Icon 9, or icon 3 for the characters whose record has mUnknown0246 set
@@ -366,7 +421,7 @@ public:
     /* 0x2B14 */ fx32 mAnimSpeed;          // func_020919e8 gives it to the model when an animation starts
     /* 0x2B18 */ int mState;
     /* 0x2B1C */ int mPrevState;           // SetState keeps the state before
-    /* 0x2B20 */ int mOverrideState;       // A second state (func_ov074_02169890 sets it); mState does not run while it is set
+    /* 0x2B20 */ int mOverrideState;       // A second state (SetOverrideState sets it); mState does not run while it is set
     /* 0x2B24 */ int mSlot;                // 0 or 1: which of the scene's two characters this is; also its resource id.
                                            // In the states for two, slot 0 decides for both
     /* 0x2B28 */ int mWait;                // Frames, counted down by Update: the scene chooses again at 0
@@ -409,7 +464,7 @@ inline void RoomCharacter::LookAtCamera(u8 frames) {
     pos.x = mCamera->mPosition.x;
     pos.z = mCamera->mPosition.z;
     u16 angle = mCamera->mOrbit.x >> 12;
-    func_ov074_021691d4(this, -(angle >> 2), func_ov074_021691fc(this, pos, 0x3800), 0, frames);
+    SetHeadTurn(-(angle >> 2), GetHeadYawTo(pos, 0x3800), 0, frames);
 }
 
 #endif // OV074_ROOMCHARACTER_H

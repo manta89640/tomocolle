@@ -22,7 +22,7 @@ struct SavedCharacter {
     /* 0x004A */ u8 mUnknown004A;        // func_02098ec4 computes a value up to 200 from these two
     /* 0x004B */ u8 mUnknown004B;
     /* 0x004C */ u8 mUnknown004C[3];
-    /* 0x004F */ u8 mRoom;               // Number of its room in the building (index of the room list's windows)
+    /* 0x004F */ u8 mRoomNumber;         // Number of its room in the building (index of the room list's windows)
     /* 0x0050 */ u8 mUnknown0050[4];
     /* 0x0054 */ u32 mUnknown0054Bits0 : 4;
     /*        */ u32 mInterior : 7;      // Which interior its room has (the room model is told this)
@@ -115,17 +115,30 @@ struct HeadIconShown {
     /* 0x08 */ HeadIconFrame *mFrame;
 };
 
+struct ParticleSystem;
+
 // The icon shown over a character's head (func_02081034 constructs it, func_020810e4 updates it).
 struct HeadIcon {
-    HeadIcon(); // func_02081034
+    HeadIcon();                                    // func_02081034
+    void Show();                                   // func_02080fc4: removes the icon that is shown (frees mShown)
+    void Restart();                                // func_02080ff0: clears three flags of the shown icon: plays it again
+    void Load(ParticleSystem *particles, int iconId); // func_020810b4: keeps the id, and creates the icon
+    void Reload();                                 // func_020810c8: creates the icon of mIconId
+    void SetMode(int mode);                        // func_020810dc: sets mMode
+    void Update();                                 // func_020810e4
+    void SetPos(fx32 x, fx32 y, fx32 z) {
+        mPos.x = x;
+        mPos.y = y;
+        mPos.z = z;
+    }
 
     /* 0x00 */ void *mUnknown00;
     /* 0x04 */ HeadIconShown *mShown; // The icon that is shown, NULL when none
-    /* 0x08 */ int mMode;             // HeadIcon_SetMode sets it
+    /* 0x08 */ int mMode;             // SetMode sets it
     /* 0x0C */ VecFx32 mPos;
     /* 0x18 */ MtxFx33 mRotation;
     /* 0x3C */ u16 mAngle;
-    /* 0x3E */ s16 mIconId;           // Which icon: func_020810c8 creates the one of this id
+    /* 0x3E */ s16 mIconId;           // Which icon: Reload creates the one of this id
 }; // 0x40
 
 extern "C" {
@@ -140,11 +153,7 @@ VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
 VecFx32 func_0208fc34(CharacterModel *model);
 
 // --- The head icon (0x02080f64 to 0x020810e4) ---
-void func_02080fc4(HeadIcon *icon); // Removes the icon that is shown (frees mShown, clears it)
-void func_02080ff0(HeadIcon *icon); // Clears three flags of the icon that is shown: plays it again
 int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon
-void func_020810c8(HeadIcon *icon); // Creates the icon of mIconId
-void HeadIcon_SetMode(HeadIcon *icon, int mode); // Sets mMode
 
 } // extern "C"
 

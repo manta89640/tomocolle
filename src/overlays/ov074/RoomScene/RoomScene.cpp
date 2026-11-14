@@ -39,7 +39,7 @@ void RoomScene::StartLoading() {
     func_02091048(&mCharacters[0], "3HM");
     func_02091048(&mCharacters[1], "BI1");
     mRoom.SetStyle(mCharacters[0].mInterior);
-    mRoom.mRoomIndex = mCharacters[0].SavedCharacter::mRoom;
+    mRoom.mRoomIndex = mCharacters[0].mRoomNumber;
 
     if (mSceneId == 0x11) {
         building = gGameData.mBuilding & 3;
@@ -194,7 +194,7 @@ void RoomScene::Init() {
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
     func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
-    HeadIcon_Load(&mIcon[0], &mParticles, 0);
+    mIcon[0].Load(&mParticles, 0);
     mRoom.Refresh();
     func_020a5514(&mRoom, 7);
     func_020a5760(&mRoom, 8);
@@ -231,10 +231,10 @@ void RoomScene::Init() {
         func_02091a88(&mCharacters[i]);
         mCharacters[i].CopyName();
         mCharacters[i].mTtsPlayer = &mTtsPlayer;
-        func_ov074_02169c6c(&mCharacters[i]);
+        mCharacters[i].RefreshSpeechTexts();
         func_02029660((void *)mCharacters[i].mModel.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].SetState(1);
-        LoadHeadIcon(&mCharacters[i], &mParticles);
+        mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mRoom = &mRoom;
         mCharacters[i].mCamera = &mCamera;
     }
@@ -256,7 +256,7 @@ void RoomScene::Init() {
     mMessage.mSprite.SetPosition(0x10000, 0xA0000);
     mMessage.mVAlign = 1;
     charOffset += GetCanvasCharCount(&mMessage);
-    if (mFront.mResidents[mCharacters[0].SavedCharacter::mRoom] != 0xFF) {
+    if (mFront.mResidents[mCharacters[0].mRoomNumber] != 0xFF) {
         ShowEventMessage();
     }
     mNamePanel.SetNames(mRoom.mNumberText, mCharacters[0].mNameText);
@@ -271,7 +271,7 @@ void RoomScene::Init() {
     for (s16 j = 0; j < 2; j++) {
         mButtons[j].Init(j);
     }
-    mFront.Init(mCharacters[0].SavedCharacter::mRoom);
+    mFront.Init(mCharacters[0].mRoomNumber);
     mSky.Refresh();
     mClockDisplay.Init(&mClock);
 
@@ -398,7 +398,7 @@ void RoomScene::UpdateObjects() {
     for (int i = 0; i < 4; i++) {
         mItems[i].Update();
     }
-    HeadIcon_Update(&mIcon[0]);
+    mIcon[0].Update();
     mCamera.Update();
     mRoom.Update();
     mLight.Update();
@@ -697,7 +697,7 @@ void RoomScene::UpdateInput() {
             mCamera.SetState(0, 0);
             mCamera.mIgnoreInput = TRUE;
             mLight.SetState(2);
-            HeadIcon_SetMode(&mIcon[0], 1);
+            mIcon[0].SetMode(1);
         } else if (mInputStep == 1) {
             if (mCharacters[0].mState != 0) {
                 return;
@@ -772,7 +772,7 @@ void RoomScene::ChangeRoom() {
 
     for (i = 0; i < 2; i++) {
         if (func_0202c3dc(&gGameData, mCharacters[i].mIndex)) {
-            mFront.DrawWindow(mCharacters[i].SavedCharacter::mRoom);
+            mFront.DrawWindow(mCharacters[i].mRoomNumber);
             if (func_02099d1c(&mCharacters[i])) {
                 mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mEventPartner));
             }
@@ -796,8 +796,8 @@ void RoomScene::ChangeRoom() {
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
     mRoom.SetState(1);
-    func_ov074_02169890(&mCharacters[0], 1);
-    func_ov074_02169890(&mCharacters[1], 1);
+    mCharacters[0].SetOverrideState(1);
+    mCharacters[1].SetOverrideState(1);
     for (int i = 0; i < 4; i++) {
         mItems[i].SetLoadState(1);
     }
@@ -807,7 +807,7 @@ void RoomScene::ChangeRoom() {
     mMessage.SetState(4);
     data_0211d604.Hide(1);
     mClockDisplay.SetState(1);
-    HeadIcon_SetMode(&mIcon[0], 1);
+    mIcon[0].SetMode(1);
 }
 
 void RoomScene::SetEventState(int state) {
@@ -1024,12 +1024,12 @@ BOOL RoomScene::StepTransition(int transition) {
     } else if (mEventTimer == 1) {
         if (IsTransitionDone()) {
             mEventTimer++;
-            func_ov074_02169890(&mCharacters[0], transition);
+            mCharacters[0].SetOverrideState(transition);
         }
     } else if (mEventTimer == 2) {
         if (IsTransitionDone()) {
             mEventTimer++;
-            func_ov074_02169890(&mCharacters[1], transition);
+            mCharacters[1].SetOverrideState(transition);
         }
     } else if (mEventTimer == 3) {
         if (IsTransitionDone()) {
@@ -1223,7 +1223,7 @@ void RoomScene::UpdateEvent() {
                             if (func_02099c84(&mCharacters[0])) {
                                 refresh = FALSE;
                                 if (mCharacters[0].mPrevEvent == 18) {
-                                    mFront.DrawWindowOfKind(0, mCharacters[0].SavedCharacter::mRoom);
+                                    mFront.DrawWindowOfKind(0, mCharacters[0].mRoomNumber);
                                 }
                             } else if (func_02099da8(&mCharacters[0])) {
                                 mCharacters[0].mWait = 0;
@@ -1382,8 +1382,8 @@ void RoomScene::UpdateEvent() {
             mCharacters[index].mWait = 0x8E;
             partner->mWait = 0x8C;
             mEncounterPending = TRUE;
-            SetHeadIconMode(&mCharacters[index], 1);
-            SetHeadIconMode(partner, 1);
+            mCharacters[index].SetHeadIconMode(1);
+            partner->SetHeadIconMode(1);
         } else if (mEventStep == 1) {
             UpdateEncounter();
             if (mCharacters[0].mState != 0xF6 || mCharacters[1].mState != 0xF6) {
@@ -1464,16 +1464,16 @@ void RoomScene::UpdateEvent() {
             middle.x >>= 1;
             middle.y >>= 1;
             middle.z >>= 1;
-            HeadIcon_SetPos(&mIcon[0], middle.x, middle.y, middle.z);
+            mIcon[0].SetPos(middle.x, middle.y, middle.z);
             mMessage.SetState(4);
         } else if (mEventStep == 1) {
             if (--mEventTimer > 0) {
                 break;
             }
             mEventStep++;
-            HeadIcon_Show(&mIcon[0]);
-            HeadIcon_Reload(&mIcon[0]);
-            HeadIcon_SetMode(&mIcon[0], 2);
+            mIcon[0].Show();
+            mIcon[0].Reload();
+            mIcon[0].SetMode(2);
             int kind = mCharacters[0].GetFlagOfPartner();
             ShowMessage(&mCharacters[0], &mCharacters[1], gEncounterMessages[kind], 2);
             if (kind == 4) {
@@ -1486,7 +1486,7 @@ void RoomScene::UpdateEvent() {
                 break;
             }
             SetEventState(EVENT_MEET);
-            HeadIcon_SetMode(&mIcon[0], 1);
+            mIcon[0].SetMode(1);
         }
         break;
 
@@ -1572,9 +1572,9 @@ void RoomScene::UpdateEvent() {
             mCamera.SetState(4, 0x474);
             mLight.SetState(2);
             if (mCharacters[0].mEvent == 18) {
-                mFront.DrawWindowOfKind(0, mCharacters[0].SavedCharacter::mRoom);
+                mFront.DrawWindowOfKind(0, mCharacters[0].mRoomNumber);
             } else {
-                mFront.DrawWindow(mCharacters[0].SavedCharacter::mRoom);
+                mFront.DrawWindow(mCharacters[0].mRoomNumber);
             }
             ShowMessage(&mCharacters[0], NULL, 9, 2);
         } else {
@@ -1609,26 +1609,26 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             mActor->mIndex = GetCharacterCountForDisplay();
             LoadCharacter(mActor);
-            func_ov074_02169890(mActor, 1);
+            mActor->SetOverrideState(1);
         } else if (mEventStep == 2) {
             if (!IsTransitionDone()) {
                 break;
             }
             mEventStep++;
-            func_ov074_02169890(mActor, 2);
+            mActor->SetOverrideState(2);
         } else if (mEventStep == 3) {
             if (!IsTransitionDone()) {
                 break;
             }
             mEventStep++;
-            func_ov074_02169890(mActor, 3);
+            mActor->SetOverrideState(3);
         } else if (mEventStep == 4) {
             if (!IsTransitionDone()) {
                 break;
             }
             mEventStep++;
             mEventTimer = 0;
-            mFront.DrawWindow(mActor->SavedCharacter::mRoom);
+            mFront.DrawWindow(mActor->mRoomNumber);
             mMessage.SetState(4);
             gSoundManager.StartSeqArc(1, 0x1D, 0x10);
         } else if (mEventStep == 5) {
@@ -1681,7 +1681,7 @@ void RoomScene::UpdateEvent() {
             func_02099324(&mCharacters[0], mClock.mSeconds);
             func_0209b1d8(&mCharacters[0]);
             SaveCharacter(&mCharacters[0]);
-            mFront.DrawWindow(mCharacters[0].SavedCharacter::mRoom);
+            mFront.DrawWindow(mCharacters[0].mRoomNumber);
             mLight.SetState(2);
         } else {
             if (--mEventTimer > 0) {

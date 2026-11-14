@@ -12,14 +12,14 @@
 
 // The overlay's shared headers: the character (with Character.h, FloorPos.h, HeldItem.h, Model.h, Room.h and
 // RoomCamera.h), and the scene's other objects, which are the unit RoomObjects'
-#include "../RoomCharacter.h"
-#include "../RoomObjects/ApartmentFront.h"
-#include "../RoomObjects/Clock.h"
-#include "../RoomObjects/RoomLight.h"
-#include "../RoomObjects/SkyBackground.h"
-#include "../RoomObjects/SpeechBalloon.h"
-#include "../RoomObjects/TimedMessage.h"
-#include "../RoomObjects/TouchButton.h"
+#include "RoomCharacter.h"
+#include "ApartmentFront.h"
+#include "Clock.h"
+#include "RoomLight.h"
+#include "SkyBackground.h"
+#include "SpeechBalloon.h"
+#include "TimedMessage.h"
+#include "TouchButton.h"
 
 // The apartment scene (overlay 74): one room of the building with its resident and a visitor in it, and on the
 // touch screen the building with a window for each room.
@@ -66,61 +66,16 @@ struct ParticleSystem {
 // What the main program's functions that decide what comes of two characters meeting work on (RoomEncounter's
 // header has the others of them). It has no data.
 struct EncounterJudge {
-    int Judge(RoomCharacter *first, RoomCharacter *second); // 0x020adfbc: 10 when nothing comes of it
+    int Judge(RoomCharacter *first, RoomCharacter *second);                // 0x020adfbc: 10 when nothing comes of it
+    int JudgeEnd(RoomCharacter *first, RoomCharacter *second, BOOL param); // 0x020ae1f8
+    void Apply(RoomCharacter *first, RoomCharacter *second, int relation, s64 time);            // 0x020ae75c
+    void ApplyEnd(RoomCharacter *first, RoomCharacter *second, int relation, s64 time, int param); // 0x020ae80c
 
     u8 mUnknown[4];
 };
 
 // ---------------------------------------------------------------------------------------------------------------
 // ADDITIONS that the shared headers need (they are read-only for this unit). Each is here only until it is there.
-
-// Character.h, HeadIcon: the member functions that symbols.txt names. The struct cannot be given members from
-// outside, so they are declared here by their linkage names and called through the inline functions below.
-// What HeadIcon needs is:
-//     void Show();                       // 0x02080fc4
-//     void Load(int unused, int iconId); // 0x020810b4: but see below, the first is a pointer
-//     void Reload();                     // 0x020810c8
-//     void Update();                     // 0x020810e4
-//     void SetPos(fx32 x, fx32 y, fx32 z) { mPos.x = x; mPos.y = y; mPos.z = z; }
-extern "C" {
-void _ZN8HeadIcon4ShowEv(HeadIcon *icon);
-void _ZN8HeadIcon4LoadEii(HeadIcon *icon, ParticleSystem *particles, int iconId);
-void _ZN8HeadIcon6ReloadEv(HeadIcon *icon);
-void _ZN8HeadIcon6UpdateEv(HeadIcon *icon);
-}
-inline void HeadIcon_Show(HeadIcon *icon) { _ZN8HeadIcon4ShowEv(icon); }
-inline void HeadIcon_Load(HeadIcon *icon, ParticleSystem *particles, int iconId) {
-    _ZN8HeadIcon4LoadEii(icon, particles, iconId);
-}
-inline void HeadIcon_Reload(HeadIcon *icon) { _ZN8HeadIcon6ReloadEv(icon); }
-inline void HeadIcon_Update(HeadIcon *icon) { _ZN8HeadIcon6UpdateEv(icon); }
-inline void HeadIcon_SetPos(HeadIcon *icon, fx32 x, fx32 y, fx32 z) {
-    icon->mPos.x = x;
-    icon->mPos.y = y;
-    icon->mPos.z = z;
-}
-
-// RoomCharacter.h, RoomCharacter: an inline member that sets the head icon's mode. UpdateEvent's match depends on
-// the character being the helper's object:
-//     void SetHeadIconMode(int mode) { HeadIcon_SetMode(&mHeadIcon, mode); }
-inline void SetHeadIconMode(RoomCharacter *character, int mode) {
-    HeadIcon_SetMode(&character->mHeadIcon, mode);
-}
-
-// RoomCharacter.h, RoomCharacter::LoadHeadIcon(int) and Character.h, HeadIcon::Load(int, int): the scene's Init
-// only matches when the first parameter of both is a POINTER (it passes its ParticleSystem). With an int and a
-// cast at the call, however the cast is written, the address of the particle system is computed in another place
-// (measured: 2 instructions of Init differ). So the names in symbols.txt, _ZN13RoomCharacter12LoadHeadIconEi and
-// _ZN8HeadIcon4LoadEii, are most likely wrong about that parameter, and the shared headers with them:
-//     void RoomCharacter::LoadHeadIcon(ParticleSystem *particles); // ...12LoadHeadIconEP14ParticleSystem
-//     void HeadIcon::Load(ParticleSystem *particles, int iconId);  // _ZN8HeadIcon4LoadEP14ParticleSystemi
-// Until they are changed, the functions are declared here by the linkage names that symbols.txt has now.
-extern "C" {
-void _ZN13RoomCharacter12LoadHeadIconEi(RoomCharacter *character, ParticleSystem *particles);
-}
-inline void LoadHeadIcon(RoomCharacter *character, ParticleSystem *particles) {
-    _ZN13RoomCharacter12LoadHeadIconEi(character, particles);
-}
 
 // Character.h, SavedCharacter: mEventEndLo and mEventEndHi are one s64 (the scene compares it whole).
 inline s64 GetEventEnd(SavedCharacter *character) {
@@ -224,12 +179,16 @@ public:
     void StartEncounter(int nearer, int farther);            // 0x0214f7cc
     void UpdateEncounter();                                  // 0x0214f950
     void FinishEncounter();                                  // 0x0214f9d0
+    void ChooseTalkReaction(int index);                      // 0x0214fad4
     void StartTalkReaction(int index, int reaction);         // 0x0214fbb0
     void StartEvent(RoomCharacter *character, int phase);    // 0x0214fd84
     void StartPairEvent(int phase);                          // 0x02150538
     int CountPresent();                                      // 0x02151420
     int GetCharacterCountForDisplay();                       // 0x02151454
     void UpdateMeeting();                                    // 0x021514f0
+    void StartMeeting(int first, int second);                // 0x02151554
+    void ApproachWaiting(int index, int other, int distanceDifference); // 0x02151bf4
+    void AnswerWalker(int index, int walker);                // 0x02151d78
     BOOL AreCharactersNear(int first, int second, fx32 reach, fx32 maxReach); // 0x0215206c
     void SetFadeState(int state);                            // 0x02152124
     void SaveCharacter(RoomCharacter *character);           // 0x0215213c

@@ -18,11 +18,34 @@ struct FloorPos {
     fx32 Dot(const FloorPos &other) const { return FX_Mul(x, other.x) + FX_Mul(z, other.z); }
 };
 
+inline FloorPos operator+(FloorPos a, FloorPos b) {
+    FloorPos result;
+    result.x = a.x + b.x;
+    result.z = a.z + b.z;
+    return result;
+}
+
 inline FloorPos operator-(FloorPos a, FloorPos b) {
     FloorPos result;
     result.x = a.x - b.x;
     result.z = a.z - b.z;
     return result;
+}
+
+inline FloorPos Half(FloorPos pos) {
+    FloorPos result;
+    result.x = pos.x >> 1;
+    result.z = pos.z >> 1;
+    return result;
+}
+
+// The direction of an offset on the floor, as an angle index
+inline u16 Angle(FloorPos offset) {
+    return FX_Atan2Idx(offset.z, offset.x);
+}
+
+inline fx32 LengthSq(const FloorPos &pos) {
+    return FX_Mul(pos.x, pos.x) + FX_Mul(pos.z, pos.z);
 }
 
 // A rectangle on the floor.

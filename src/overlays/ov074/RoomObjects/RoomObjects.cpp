@@ -3,18 +3,18 @@
 
 #include "sound/SoundManager.h"
 
-#include "ApartmentFront.h"
+#include "../ApartmentFront.h"
 #include "HeldItem.h"
-#include "Clock.h"
+#include "../Clock.h"
 #include "Room.h"
 #include "RoomCamera.h"
 #include "RoomCharacter.h"
-#include "RoomLight.h"
+#include "../RoomLight.h"
 #include "RoomScene.h"
-#include "SkyBackground.h"
-#include "SpeechBalloon.h"
-#include "TimedMessage.h"
-#include "TouchButton.h"
+#include "../SkyBackground.h"
+#include "../SpeechBalloon.h"
+#include "../TimedMessage.h"
+#include "../TouchButton.h"
 
 extern "C" {
 
@@ -161,7 +161,7 @@ int RoomCharacter::GetWalkAreaSide(fx32 x, fx32 z) {
 }
 
 // @0x02168dc4
-int RoomCharacter::SnapAngle(u16 angle) {
+u16 RoomCharacter::SnapAngle(u16 angle) {
     if (angle < 0x2000) {
         angle = 0;
     } else if (angle < 0x6000) {

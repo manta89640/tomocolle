@@ -56,7 +56,7 @@ _ZN9RoomScene13LoadCharacterEP13RoomCharacter kind:function(arm,size=0x64) addr:
 _ZN9RoomScene14LoadCharactersEv kind:function(arm,size=0x24) addr:0x02152204
 _ZN13RoomCharacterC1Ev kind:function(arm,size=0x40) addr:0x02152228
 _ZN13RoomCharacter4InitEiii kind:function(arm,size=0xa0) addr:0x02152268
-_ZN13RoomCharacter12LoadHeadIconEi kind:function(arm,size=0x24) addr:0x02152308
+_ZN13RoomCharacter12LoadHeadIconEP14ParticleSystem kind:function(arm,size=0x24) addr:0x02152308
 _ZN13RoomCharacter13PlaceHeadIconEv kind:function(arm,size=0x44) addr:0x0215232c
 _ZN13RoomCharacter8SetStateEi kind:function(arm,size=0xa8) addr:0x02152370
 _ZN13RoomCharacter19SetStateWithPartnerEii kind:function(arm,size=0x24) addr:0x02152418
@@ -256,7 +256,7 @@ gRoomPoints kind:data(any) addr:0x0216d404
 data_ov074_0216d46c kind:data(any) addr:0x0216d46c
 data_ov074_0216d46e kind:data(any) addr:0x0216d46e
 data_ov074_0216d47c kind:data(any) addr:0x0216d47c
-data_ov074_0216d484 kind:data(any) addr:0x0216d484
+gMoodHeadIcons kind:data(any) addr:0x0216d484
 data_ov074_0216d490 kind:data(any) addr:0x0216d490
 data_ov074_0216d4a8 kind:data(any) addr:0x0216d4a8
 data_ov074_0216d4c0 kind:data(any) addr:0x0216d4c0

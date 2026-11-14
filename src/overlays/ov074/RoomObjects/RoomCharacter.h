@@ -192,7 +192,7 @@ public:
     // --- 0x02168d24 to 0x02169d90 ---
     void GetWalkAreaCorner(FloorPos pos, FloorPos *corner);
     int GetWalkAreaSide(fx32 x, fx32 z);
-    int SnapAngle(u16 angle);
+    u16 SnapAngle(u16 angle);
     BOOL GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin);
     BOOL GetAngleAroundPartner(u16 *angle, int margin);
     u16 GetHeadYaw(u16 angle, int limit);
