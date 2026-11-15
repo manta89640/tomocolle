@@ -19,8 +19,18 @@ struct WindowPoint {
 // One of the message window's buttons. A stand-in: it starts with a sprite, which the scenes hide by its mVisible.
 struct WindowButton {
     /* 0x000 */ Sprite mSprite;
-    /* 0x0AC */ u8 mUnknown0AC[0x644];
+    /* 0x0AC */ u8 mUnknown0AC[0x30];
+    /* 0x0DC */ int mUnknown0DC;
+    /* 0x0E0 */ u8 mUnknown0E0[0x78];
+    /* 0x158 */ int mUnknown158;
+    /* 0x15C */ u8 mUnknown15C[0x594];
 }; // 0x6F0
+
+// One of the message window's sprites (func_0203117c constructs it). A stand-in: it starts with a sprite.
+struct WindowSprite {
+    /* 0x000 */ Sprite mSprite;
+    /* 0x0AC */ u8 mUnknown0AC[0x48];
+}; // 0xF4
 
 // The main program's message window (virtual table data_021102e8, functions func_02032fb8 to func_02034f94): a
 // window on a background that slides in and out, with sprites, buttons and up to eight message texts. Not
@@ -47,11 +57,11 @@ struct MessageWindow {
     };
 
     /* 0x0000 */ void *mVtable;
-    /* 0x0004 */ u8 mSprites[12][0xF4];     // Constructed by func_0203117c
+    /* 0x0004 */ WindowSprite mSprites[12];
     /* 0x0B74 */ WindowButton mButtons[16]; // Constructed by func_02031f1c
     /* 0x7A74 */ MessageText mTexts[8];
     /* 0xA9F4 */ u8 mUnknownA9F4[0x35C];
-    /* 0xAD50 */ u32 mUnknownAD50;          // Overlay 110 waits for its bit 0 before it acts on the window
+    /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
     /* 0xAD54 */ u8 mUnknownAD54[0x22C];
     /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the button pressed, when one is
     /* 0xAF84 */ int mUnknownAF84;

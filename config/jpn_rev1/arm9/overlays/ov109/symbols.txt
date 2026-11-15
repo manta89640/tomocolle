@@ -1,124 +1,140 @@
-func_ov109_02149a40 kind:function(arm,size=0xc8) addr:0x02149a40
-func_ov109_02149b08 kind:function(arm,size=0x1ac) addr:0x02149b08
-func_ov109_02149cb4 kind:function(arm,size=0x48c) addr:0x02149cb4
-func_ov109_0214a140 kind:function(arm,size=0x54c) addr:0x0214a140
-func_ov109_0214a68c kind:function(arm,size=0x6f4) addr:0x0214a68c
-func_ov109_0214ad80 kind:function(arm,size=0x158) addr:0x0214ad80
-func_ov109_0214aed8 kind:function(arm,size=0x94) addr:0x0214aed8
-func_ov109_0214af6c kind:function(arm,size=0x46c) addr:0x0214af6c
-func_ov109_0214b3d8 kind:function(arm,size=0x8c) addr:0x0214b3d8
-func_ov109_0214b464 kind:function(arm,size=0x84) addr:0x0214b464
-func_ov109_0214b4e8 kind:function(arm,size=0xa8) addr:0x0214b4e8
-func_ov109_0214b590 kind:function(arm,size=0x28) addr:0x0214b590
-func_ov109_0214b5b8 kind:function(arm,size=0x4e0) addr:0x0214b5b8
-func_ov109_0214ba98 kind:function(arm,size=0x5c) addr:0x0214ba98
-func_ov109_0214baf4 kind:function(arm,size=0x468) addr:0x0214baf4
-func_ov109_0214bf5c kind:function(arm,size=0x474) addr:0x0214bf5c
-func_ov109_0214c3d0 kind:function(arm,size=0x47c) addr:0x0214c3d0
-func_ov109_0214c84c kind:function(arm,size=0xbc) addr:0x0214c84c
-func_ov109_0214c908 kind:function(arm,size=0x558) addr:0x0214c908
-func_ov109_0214ce60 kind:function(arm,size=0x204) addr:0x0214ce60
-func_ov109_0214d064 kind:function(arm,size=0x4c) addr:0x0214d064
-func_ov109_0214d0b0 kind:function(arm,size=0x68) addr:0x0214d0b0
-func_ov109_0214d118 kind:function(arm,size=0x74) addr:0x0214d118
-func_ov109_0214d18c kind:function(arm,size=0x7ec) addr:0x0214d18c
-func_ov109_0214d978 kind:function(arm,size=0x594) addr:0x0214d978
-func_ov109_0214df0c kind:function(arm,size=0x238) addr:0x0214df0c
-func_ov109_0214e144 kind:function(arm,size=0x204) addr:0x0214e144
-func_ov109_0214e348 kind:function(arm,size=0x2d8) addr:0x0214e348
-func_ov109_0214e620 kind:function(arm,size=0x3c8) addr:0x0214e620
-func_ov109_0214e9e8 kind:function(arm,size=0x520) addr:0x0214e9e8
-func_ov109_0214ef08 kind:function(arm,size=0x180) addr:0x0214ef08
-func_ov109_0214f088 kind:function(arm,size=0x10) addr:0x0214f088
-func_ov109_0214f098 kind:function(arm,size=0x4c) addr:0x0214f098
-func_ov109_0214f0e4 kind:function(arm,size=0x1c) addr:0x0214f0e4
-func_ov109_0214f100 kind:function(arm,size=0xec) addr:0x0214f100
-func_ov109_0214f1ec kind:function(arm,size=0x94) addr:0x0214f1ec
-func_ov109_0214f280 kind:function(arm,size=0xf4) addr:0x0214f280
-func_ov109_0214f374 kind:function(arm,size=0x28) addr:0x0214f374
-func_ov109_0214f39c kind:function(arm,size=0xc0) addr:0x0214f39c
-func_ov109_0214f45c kind:function(arm,size=0x20) addr:0x0214f45c
-func_ov109_0214f47c kind:function(arm,size=0xac) addr:0x0214f47c
-func_ov109_0214f528 kind:function(arm,size=0x14) addr:0x0214f528
-func_ov109_0214f53c kind:function(arm,size=0x4c) addr:0x0214f53c
-func_ov109_0214f588 kind:function(arm,size=0x178) addr:0x0214f588
-func_ov109_0214f700 kind:function(arm,size=0x88) addr:0x0214f700
-func_ov109_0214f788 kind:function(arm,size=0x64) addr:0x0214f788
-func_ov109_0214f7ec kind:function(arm,size=0x1da4) addr:0x0214f7ec
-func_ov109_02151590 kind:function(arm,size=0x90) addr:0x02151590
-func_ov109_02151620 kind:function(arm,size=0x1a8) addr:0x02151620
-func_ov109_021517c8 kind:function(arm,size=0x134) addr:0x021517c8
-func_ov109_021518fc kind:function(arm,size=0x110) addr:0x021518fc
-func_ov109_02151a0c kind:function(arm,size=0x84) addr:0x02151a0c
-func_ov109_02151a90 kind:function(arm,size=0x108) addr:0x02151a90
-func_ov109_02151b98 kind:function(arm,size=0x44) addr:0x02151b98
-func_ov109_02151bdc kind:function(arm,size=0x8c) addr:0x02151bdc
-func_ov109_02151c68 kind:function(arm,size=0x24) addr:0x02151c68
-func_ov109_02151c8c kind:function(arm,size=0x4c) addr:0x02151c8c
-func_ov109_02151cd8 kind:function(arm,size=0x4c) addr:0x02151cd8
-func_ov109_02151d24 kind:function(arm,size=0x50) addr:0x02151d24
-func_ov109_02151d74 kind:function(arm,size=0x38) addr:0x02151d74
-func_ov109_02151dac kind:function(arm,size=0x78) addr:0x02151dac
-func_ov109_02151e24 kind:function(arm,size=0x14) addr:0x02151e24
-func_ov109_02151e38 kind:function(arm,size=0x10) addr:0x02151e38
-func_ov109_02151e48 kind:function(arm,size=0x14) addr:0x02151e48
-func_ov109_02151e5c kind:function(arm,size=0x1c) addr:0x02151e5c
-func_ov109_02151e78 kind:function(arm,size=0x2c) addr:0x02151e78
-func_ov109_02151ea4 kind:function(arm,size=0x10) addr:0x02151ea4
+_ZN11TushinScene12StartLoadingEv kind:function(arm,size=0xc8) addr:0x02149a40
+_ZN11TushinScene16SetUpYesNoWindowEPiP11MessageFilem kind:function(arm,size=0x1ac) addr:0x02149b08
+_ZN11TushinScene11SetUpWindowEi kind:function(arm,size=0x48c) addr:0x02149cb4
+_ZN11TushinScene9SetUpListEPi kind:function(arm,size=0x54c) addr:0x0214a140
+_ZN11TushinScene14InitCharactersEv kind:function(arm,size=0x6f4) addr:0x0214a68c
+_ZN11TushinScene13InitParticlesEv kind:function(arm,size=0x158) addr:0x0214ad80
+_ZN11TushinScene13UpdateMiiDataEv kind:function(arm,size=0x94) addr:0x0214aed8
+_ZN11TushinScene4InitEv kind:function(arm,size=0x46c) addr:0x0214af6c
+_ZN11TushinScene13ResetExchangeEv kind:function(arm,size=0x8c) addr:0x0214b3d8
+_ZN11TushinScene14SetUpCharacterEi kind:function(arm,size=0x84) addr:0x0214b464
+_ZN11TushinScene15ReloadCharacterEi kind:function(arm,size=0xa8) addr:0x0214b4e8
+_ZN11TushinScene14LoadCharactersEv kind:function(arm,size=0x28) addr:0x0214b590
+_ZN11TushinScene17ShowNextCharacterEv kind:function(arm,size=0x4e0) addr:0x0214b5b8
+_ZN11TushinScene18LoadSavedCharacterEii kind:function(arm,size=0x5c) addr:0x0214ba98
+_ZN11TushinScene13LoadCharacterEi kind:function(arm,size=0x468) addr:0x0214baf4
+_ZN11TushinScene27ReloadCharacterFromResidentEi kind:function(arm,size=0x474) addr:0x0214bf5c
+_ZN11TushinScene27ReloadCharacterFromReceivedEi kind:function(arm,size=0x47c) addr:0x0214c3d0
+_ZN11TushinScene9SendSongsEv kind:function(arm,size=0xbc) addr:0x0214c84c
+_ZN11TushinScene4SendEi kind:function(arm,size=0x558) addr:0x0214c908
+_ZN11TushinScene13UpdateSendingEv kind:function(arm,size=0x204) addr:0x0214ce60
+_ZN11TushinScene14SendFoundIndexEv kind:function(arm,size=0x4c) addr:0x0214d064
+_ZN11TushinScene12UpdateSavingEv kind:function(arm,size=0x68) addr:0x0214d0b0
+_ZN11TushinScene12FindResidentEP15CharacterRecord kind:function(arm,size=0x74) addr:0x0214d118
+_ZN11TushinScene13RefreshRecordEP15CharacterRecord kind:function(arm,size=0x7ec) addr:0x0214d18c
+_ZN11TushinScene16ReceiveCharacterEv kind:function(arm,size=0x594) addr:0x0214d978
+_ZN11TushinScene17UpdateListButtonsEv kind:function(arm,size=0x238) addr:0x0214df0c
+_ZN11TushinScene16UpdateListWindowEv kind:function(arm,size=0x204) addr:0x0214e144
+_ZN11TushinScene16UpdateConnectionEv kind:function(arm,size=0x2d8) addr:0x0214e348
+_ZN11TushinScene19UpdateWiiConnectionEv kind:function(arm,size=0x3c8) addr:0x0214e620
+_ZN11TushinScene16UpdateCharactersEv kind:function(arm,size=0x520) addr:0x0214e9e8
+_ZN11TushinScene14DrawCharactersEv kind:function(arm,size=0x180) addr:0x0214ef08
+_ZN11TushinScene17GetStandAnimationEi kind:function(arm,size=0x10) addr:0x0214f088
+_ZN11TushinScene17SetStandAnimationEh kind:function(arm,size=0x4c) addr:0x0214f098
+_ZN11TushinScene22SetOtherStandAnimationEv kind:function(arm,size=0x1c) addr:0x0214f0e4
+_ZN11TushinScene18StartSendAnimationEv kind:function(arm,size=0xec) addr:0x0214f100
+_ZN11TushinScene21StartReceiveAnimationEv kind:function(arm,size=0x94) addr:0x0214f1ec
+_ZN11TushinScene11UpdateMusicEv kind:function(arm,size=0xf4) addr:0x0214f280
+_ZN11TushinScene9ResetListEv kind:function(arm,size=0x28) addr:0x0214f374
+_ZN11TushinScene12ShowReceivedEv kind:function(arm,size=0xc0) addr:0x0214f39c
+_ZN11TushinScene11CloseWindowEv kind:function(arm,size=0x20) addr:0x0214f45c
+_ZN11TushinScene12StartEmitterEi kind:function(arm,size=0xac) addr:0x0214f47c
+_ZN11TushinScene10CountFrameEv kind:function(arm,size=0x14) addr:0x0214f528
+_ZN11TushinScene13DrawParticlesEv kind:function(arm,size=0x4c) addr:0x0214f53c
+_ZN11TushinScene12UpdateSignalEv kind:function(arm,size=0x178) addr:0x0214f588
+_ZN11TushinScene10DisconnectEi kind:function(arm,size=0x88) addr:0x0214f700
+_ZN11TushinScene5LeaveEv kind:function(arm,size=0x64) addr:0x0214f788
+_ZN11TushinScene6UpdateEv kind:function(arm,size=0x1da4) addr:0x0214f7ec
+_ZN11TushinScene4DrawEv kind:function(arm,size=0x90) addr:0x02151590
+_ZN11TushinScene4ExitEv kind:function(arm,size=0x1a8) addr:0x02151620
+_ZN11TushinScene7GetModeEv kind:function(arm,size=0x134) addr:0x021517c8
+_ZN11TushinScene8IsNgWordEPKw kind:function(arm,size=0x110) addr:0x021518fc
+_ZN11TushinScene7IsBlankEPKw kind:function(arm,size=0x84) addr:0x02151a0c
+_ZN11TushinScene9HasNgWordEP15CharacterRecord kind:function(arm,size=0x108) addr:0x02151a90
+_ZN11TushinScene17HasNgSongReceivedEv kind:function(arm,size=0x44) addr:0x02151b98
+_ZN11TushinScene9HasNgSongEP15CharacterRecord kind:function(arm,size=0x8c) addr:0x02151bdc
+_ZN11TushinScene11IsMiiBrokenEP15CharacterRecord kind:function(arm,size=0x24) addr:0x02151c68
+_ZN11TushinScene11IsNameBlankEP15CharacterRecord kind:function(arm,size=0x4c) addr:0x02151c8c
+_ZN11TushinScene15IsNicknameBlankEP15CharacterRecord kind:function(arm,size=0x4c) addr:0x02151cd8
+_ZN11TushinScene9IsInvalidEP15CharacterRecord kind:function(arm,size=0x50) addr:0x02151d24
+_ZN11TushinScene19func_ov109_02151d74EP15CharacterRecord kind:function(arm,size=0x38) addr:0x02151d74
+_ZN11TushinScene8GiveItemEi kind:function(arm,size=0x78) addr:0x02151dac
+_ZN11TushinScene9GiveShirtEv kind:function(arm,size=0x14) addr:0x02151e24
+_ZN11TushinScene12GiveWiiShirtEv kind:function(arm,size=0x10) addr:0x02151e38
+_ZN11TushinScene8SetEntryEi kind:function(arm,size=0x14) addr:0x02151e48
+_ZN11TushinScene16ClearParentNamesEv kind:function(arm,size=0x1c) addr:0x02151e5c
+_ZN11TushinScene4SaveEv kind:function(arm,size=0x2c) addr:0x02151e78
+_ZN11TushinScene15SetUnknown3F098Ev kind:function(arm,size=0x10) addr:0x02151ea4
 func_ov109_02151eb4 kind:function(arm,size=0x2c) addr:0x02151eb4
 func_ov109_02151ee0 kind:function(arm,size=0xec) addr:0x02151ee0
 func_ov109_02151fcc kind:function(arm,size=0x18) addr:0x02151fcc
-func_ov109_02151fe4 kind:function(arm,size=0x30) addr:0x02151fe4
-func_ov109_02152014 kind:function(arm,size=0x390) addr:0x02152014
+_ZN11TushinScene20NextPageAfterReceiveEv kind:function(arm,size=0x30) addr:0x02151fe4
+_ZN11TushinScene13ReceiveWiiMiiEv kind:function(arm,size=0x390) addr:0x02152014
 func_ov109_021523a4 kind:function(arm,size=0xb8) addr:0x021523a4
 func_ov109_0215245c kind:function(arm,size=0x4) addr:0x0215245c
 func_ov109_02152460 kind:function(arm,size=0x48) addr:0x02152460
 func_ov109_021524a8 kind:function(arm,size=0x50) addr:0x021524a8
-gStr_tt_ov109 kind:data(any) addr:0x021524f8
-gStr_uu_ov109 kind:data(any) addr:0x021524fc
-data_ov109_02152500 kind:data(any) addr:0x02152500
-gStr_CurlyBracket_ov109 kind:data(any) addr:0x02152504
-data_ov109_02152508 kind:data(any) addr:0x02152508
-data_ov109_0215250c kind:data(any) addr:0x0215250c
-data_ov109_0215251c kind:data(any) addr:0x0215251c
-data_ov109_0215256c kind:data(any) addr:0x0215256c
-data_ov109_0215258c kind:data(any) addr:0x0215258c
-data_ov109_02152598 kind:data(any) addr:0x02152598
-data_ov109_021525a4 kind:data(any) addr:0x021525a4
-data_ov109_021525b0 kind:data(any) addr:0x021525b0
-data_ov109_021525d4 kind:data(any) addr:0x021525d4
-data_ov109_021525e0 kind:data(any) addr:0x021525e0
-gStr_K_ov109 kind:data(any) addr:0x021525f0
-gStr_CircumflexAccent_ov109 kind:data(any) addr:0x02152600
-data_ov109_02152610 kind:data(any) addr:0x02152610
-data_ov109_02152620 kind:data(any) addr:0x02152620
-data_ov109_02152630 kind:data(any) addr:0x02152630
-gStr__ov109 kind:data(any) addr:0x02152640
-gText_Fu kind:data(any) addr:0x02152650
-gText_Yu_ov109 kind:data(any) addr:0x02152660
-data_ov109_02152678 kind:data(any) addr:0x02152678
-gStr_Ampersand_ov109 kind:data(any) addr:0x02152690
-gStr_Ampersand_ov109_2 kind:data(any) addr:0x021526c0
-data_ov109_021526d8 kind:data(any) addr:0x021526d8
-data_ov109_021526f4 kind:data(any) addr:0x021526f4
-data_ov109_02152710 kind:data(any) addr:0x02152710
-data_ov109_02152730 kind:data(any) addr:0x02152730
-gStr__ov109_2 kind:data(any) addr:0x02152750
-gStr__ov109_3 kind:data(any) addr:0x02152770
-data_ov109_021527a0 kind:data(any) addr:0x021527a0
-data_ov109_021527d8 kind:data(any) addr:0x021527d8
-gStr_MLT_Window_down_nsc_ov109 kind:data(any) addr:0x02152810
-gStr_MLT_Window_common_nsc_ov109 kind:data(any) addr:0x02152828
-data_ov109_02152840 kind:data(any) addr:0x02152840
+sYesNoSequences kind:data(any) addr:0x021524f8 local
+sYesNoSequences2 kind:data(any) addr:0x021524fc local
+sListButtonSequences2 kind:data(any) addr:0x02152500 local
+sListButtonSequences kind:data(any) addr:0x02152504 local
+sLinkLevelSequences kind:data(any) addr:0x02152508 local
+sTextPosition kind:data(any) addr:0x0215250c local
+sListTitleSize kind:data(any) addr:0x02152514 local
+sListTitleTextPos kind:data(any) addr:0x0215251c local
+sListScrollBarSize kind:data(any) addr:0x02152524 local
+sListScrollUpPos kind:data(any) addr:0x0215252c local
+sListScrollDownSize kind:data(any) addr:0x02152534 local
+sListTextPosition kind:data(any) addr:0x0215253c local
+sListScrollDownPos kind:data(any) addr:0x02152544 local
+sButtonSize2 kind:data(any) addr:0x0215254c local
+sListCursorPos kind:data(any) addr:0x02152554 local
+sBackButtonSize kind:data(any) addr:0x0215255c local
+sSignalPosition kind:data(any) addr:0x02152564 local
+sYesNoMessages kind:data(any) addr:0x0215256c local
+sListTitlePos kind:data(any) addr:0x02152574 local
+sListBarPos kind:data(any) addr:0x0215257c local
+sButtonSize3 kind:data(any) addr:0x02152584 local
+sEmitterPosition0 kind:data(any) addr:0x0215258c local
+sListButtonMessages kind:data(any) addr:0x02152598 local
+sListButtonFonts kind:data(any) addr:0x021525a4 local
+sListButtonFiles kind:data(any) addr:0x021525b0 local
+sCameraPosition kind:data(any) addr:0x021525bc local
+sCameraTarget kind:data(any) addr:0x021525c8 local
+sEmitterPosition1 kind:data(any) addr:0x021525d4 local
+sListWindowRect kind:data(any) addr:0x021525e0 local
+sYesNoPositions kind:data(any) addr:0x021525f0 local
+sYesNoSizes kind:data(any) addr:0x02152600 local
+sYesNoWindowRect kind:data(any) addr:0x02152610 local
+sListBarRect kind:data(any) addr:0x02152620 local
+sWindowRect kind:data(any) addr:0x02152630 local
+sButtonStyle kind:data(any) addr:0x02152640 local
+sFirstPageIconPositions kind:data(any) addr:0x02152650 local
+sListButtonPositions kind:data(any) addr:0x02152660 local
+sListButtonTextPositions kind:data(any) addr:0x02152678 local
+sButtonTextPositions2 kind:data(any) addr:0x02152690 local
+sTextMargins kind:data(any) addr:0x021526a8 local
+sButtonTextPositions3 kind:data(any) addr:0x021526c0 local
+sListOrders kind:data(any) addr:0x021526d8 local
+sListMessages kind:data(any) addr:0x021526f4 local
+sButtonPositions2 kind:data(any) addr:0x02152710 local
+sButtonPositions3 kind:data(any) addr:0x02152730 local
+sYesNoStyles kind:data(any) addr:0x02152750 local
+sListButtonStyles kind:data(any) addr:0x02152770 local
+sListItemPositions kind:data(any) addr:0x021527a0 local
+sListItemSizes kind:data(any) addr:0x021527d8 local
+sListWindowScreenName kind:data(any) addr:0x02152810 local
+sWindowScreenName kind:data(any) addr:0x02152828 local
+sLayouts kind:data(any) addr:0x02152840 local
 data_ov109_02152848 kind:data(any) addr:0x02152848
 data_ov109_0215284c kind:data(any) addr:0x0215284c
-data_ov109_021528d0 kind:data(any) addr:0x021528d0
-data_ov109_02152960 kind:data(any) addr:0x02152960
+sBackButtonStyles kind:data(any) addr:0x021528d0 local
+sLayoutMessages kind:data(any) addr:0x02152960 local
 gStr__ov109_4 kind:data(any) addr:0x0215296c
-data_ov109_021529f0 kind:data(any) addr:0x021529f0
-data_ov109_02152b00 kind:data(any) addr:0x02152b00
-__sinit_ov109_02152c10 kind:function(arm,size=0xcc) addr:0x02152c10
-.p__sinit_ov109_02152c10 kind:data(word) addr:0x02152cdc
+sPageMessages kind:data(any) addr:0x021529f0 local
+sPageLayouts kind:data(any) addr:0x02152b00 local
+__sinit_TushinScene.cpp kind:function(arm,size=0xcc) addr:0x02152c10 local
+.p__sinit_TushinScene.cpp kind:data(word) addr:0x02152cdc local
 gStr_3HM_ov109 kind:data(any) addr:0x02152d00
 gStr_BI1_ov109 kind:data(any) addr:0x02152d04
 gStr_SRM kind:data(any) addr:0x02152d08
@@ -161,12 +177,12 @@ gStr_f_ov109 kind:data(any) addr:0x02152e40
 data_ov109_02152e4a kind:data(any) addr:0x02152e4a
 data_ov109_02152e56 kind:data(any) addr:0x02152e56
 data_ov109_02152e62 kind:data(any) addr:0x02152e62
-data_ov109_02152e70 kind:data(any) addr:0x02152e70
+sCharacterArchives kind:data(any) addr:0x02152e70 local
 gText_SangoKujiN kind:data(any) addr:0x02152e7c
 data_ov109_02152e8a kind:data(any) addr:0x02152e8a
-data_ov109_02152e98 kind:data(any) addr:0x02152e98
-data_ov109_02152ed8 kind:data(any) addr:0x02152ed8 ambiguous
-data_ov109_02152ef4 kind:data(any) addr:0x02152ef4
+sListTextOrigins kind:data(any) addr:0x02152e98 local
+_ZTV11TushinScene kind:data(any) addr:0x02152ed0
+sNgWords kind:data(any) addr:0x02152ef4 local
 gStr_STS_ov109 kind:data(any) addr:0x02152f98
 gStr_Scn_Scene_SceneTushin_LZ_bin_ov109 kind:data(any) addr:0x02152f9c
 gStr_MLT_ov109 kind:data(any) addr:0x02152fbc
@@ -207,11 +223,11 @@ gStr_BIC_ov109_3 kind:data(any) addr:0x021531cc
 data_ov109_021531e0 kind:bss addr:0x021531e0
 data_ov109_02153200 kind:bss addr:0x02153200
 data_ov109_02153201 kind:bss addr:0x02153201 ambiguous
-data_ov109_02153234 kind:bss addr:0x02153234
-data_ov109_02153240 kind:bss addr:0x02153240
-data_ov109_02153280 kind:bss addr:0x02153280
-data_ov109_02153400 kind:bss addr:0x02153400
-data_ov109_02153640 kind:bss addr:0x02153640
+sParentTimers kind:bss addr:0x02153234 local
+sReceivedName kind:bss addr:0x02153240 local
+sSongs kind:bss addr:0x02153280 local
+sParents kind:bss addr:0x02153400 local
+sTransfer kind:bss addr:0x02153640 local
 data_ov109_0215368a kind:bss addr:0x0215368a
 data_ov109_02153698 kind:bss addr:0x02153698
 data_ov109_021536ae kind:bss addr:0x021536ae
@@ -229,6 +245,6 @@ data_ov109_02153868 kind:bss addr:0x02153868
 data_ov109_02153870 kind:bss addr:0x02153870
 data_ov109_0215387c kind:bss addr:0x0215387c
 data_ov109_02153890 kind:bss addr:0x02153890
-data_ov109_02153980 kind:bss addr:0x02153980
+sMiiData kind:bss addr:0x02153980 local
 data_ov109_02154e6c kind:bss addr:0x02154e6c ambiguous
 data_ov109_02154f5c kind:bss addr:0x02154f5c ambiguous

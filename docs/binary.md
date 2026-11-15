@@ -746,6 +746,78 @@ Not done:
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and
   value (0x30, 0x34 of `ItemTradeSelection`) are for: nothing in the overlay reads them.
 
+## Wireless play: the Mii exchange
+
+Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 60 of its 77 functions match, and every section of the
+overlay is claimed by the one file. The unit is not complete. `docs/notes/ov109.md` has the working notes.
+
+Measured:
+
+- The scene factory (`CreateScene`, case 41: scene 0x29) loads overlay 109 (0x6D) and allocates 0x3F0B4 bytes; the
+  constructor is the main program's (`_ZN11TushinSceneC1Ei`, `0x02040644`), which stores the overlay's virtual table
+  (`0x02152ED0`, referred to with `add:0x8`). The save screen (overlay 69) asks for scene 0x29 after saving before
+  wireless play. The scene mounts `Scn/Scene/SceneTushin_LZ.bin`, `Scn/List/List_TushinList_LZ.bin`, the etc and
+  common messages, `Mdl/Ica/ica_mii_contents_LZ.bin` and `Mdl/Spl/SplTushinEffect_LZ.bin`.
+- Its pages are etc messages 0xF7 to 0x125. The first asks what to exchange: Miis, or "food, clothes, treasure",
+  which asks for scene 0xB1 (overlay 110, the goods exchange, which loads the same archive). Then with what:
+  another Tomodachi Collection, through WH, or the Wii's Mii Channel ("look for a Wii to talk to... press A, B, 1, 2
+  in the Mii Channel"), through the main program's Mii transfer code (`0x02077000` to `0x0207A000`, which only this
+  overlay calls). Then, on a DS, whether to recruit a partner (the parent, `WH_ParentConnect` on the channel
+  `WH_GetMeasureChannel` measured) or to find one (a child; the parents found are shown with their names for 600
+  frames, `sParents` and `sParentTimers`).
+- A resident is chosen in the list on the lower screen (the main program's resident list, whose sort order is
+  `GameData::mMiiListSortKey`) and sent with `WH_SendData`: the 0x2C0-byte character (`sTransfer`) in six 0x80-byte
+  chunks, then the songs of its six slots, 0x40 bytes each (`sSongs`). The receiver collects the chunks in its
+  `WH_SetReceiver` callback, checks the character (`IsInvalid`: a broken Mii or a blank name or nickname; `HasNgWord`:
+  any of its texts, nickname and name equal to one of the 41 words of `sNgWords` once trailing spaces and
+  exclamation marks are taken off; a song with such a word), and stores it as a new resident or updates the one with
+  the same Mii, then answers with a 2-byte code that the sender shows: 5 received, 6 and 7 the receiver's list is
+  full (7: sent back), 8 it has the same special Mii, 9 it has the same Mii with another sex, 10 it could not be
+  received (messages 0x10A, 0x11C, 0x11B, 0x118, 0x120, 0x123; the receiver's own are 0x10E to 0x122).
+- The Wii only sends Miis: the scene gives the transfer code the Mii data (0x4A bytes) of all 100 residents
+  (`sMiiData`), and `ReceiveWiiMii` adds or updates a resident from the one received.
+- The first exchange of each kind gives a T-shirt: item 0x113 (DS) or 0x114 (Wii) of the clothes (`GiveItem`,
+  messages 0x124 and 0x125). `ClothesItem` (`0x0209E168`) is named from it; that these 300 items are the clothes is
+  inferred from those two messages only.
+- `gWHChildSsid` (WH's copy of the connecting child's SSID) is shown as the partner's name when a DS connects
+  (message 0x104).
+- The scene's characters are three of the main program's 0x2B18-byte class that several scenes hold
+  (`SceneCharacter`, constructor `0x0203E168`, destructor `0x0203E188`); a resident's first 0x2A4 bytes
+  (`CharacterRecord`, the record `func_0202c264` reads) are copied into them by the record's implicit assignment,
+  whose member-by-member copy shows the record's members (arrays of 5 and 6 bytes, s64 at 0x21C, 0x228, 0x230,
+  0x23C, 32- and 40-byte structures).
+
+Measured, about the compiler:
+
+- **Some functions were compiled at a lower optimisation level.** Their loops are neither rotated nor strength
+  reduced (a branch to the test first, indexed addressing), and `#pragma optimization_level 2` around the function
+  gives them exactly: `SendSongs` and `HasNgSongReceived` match that way. None of the -O4 forms tried gives them
+  (a volatile counter or buffer, `u8`/`s16`/unsigned counters, `while (1) { if (!cond) break; }`, `goto`,
+  `opt_rotateloops off`, `opt_strength_reduction off`, `opt_loop_invariants off`), in any compiler version from 2.0
+  SP1p2 to SP2p3. They are interleaved with -O4 functions (`HasNgSongReceived` is between two), so they are not a
+  file of their own. `ReceiveCharacter`, `UpdateCharacters` and `Update` are compiled the same way here.
+- **A `const` object initialised from another constant** is filled in by the static initialiser and stays in
+  `.data` as zeros (the list's text origins, from the item positions). The original's initialiser loads the item
+  positions from the `.rodata` pool; ours folds them into immediates, and every compiler version tried does, so
+  `__sinit_TushinScene.cpp` does not match.
+- **`.rodata`**: the objects under 64 bytes are one pool sorted by size (8 to 56 bytes), the arrays of `u8` and the
+  strings before and after it, and the 0x90- and 0x110-byte tables on their own after it. The compiled `.rodata` is
+  in the ROM's order: same-size declarations were permuted until it was. Two of the pool's constants are folded
+  wherever they are used and kept anyway (`sCameraPosition`, `sCameraTarget`, and the signal sprite's
+  `sSignalPosition`).
+
+Not done:
+
+- 17 functions differ, each with a comment saying how: mostly register choice or scheduling of one or two
+  instructions; `Update`, `UpdateSending` and `UpdateCharacters` also read the selected resident's `mIndex` and a
+  model's `mVisible` with folded offsets, where the original goes through the element's or the model's address.
+- `.data`: the three 4-byte strings of `sCharacterArchives` and the 12-byte group of its pool come out in another
+  order than the ROM's.
+- `.bss`: the state of the exchange is a structure (`sWireless`) in the source. In the ROM it is a pool of separate
+  statics sorted by size (a `u8`, 20 `u16`, ten `int`, then `sParentTimers` and `sReceivedName`), which the code
+  reaches from the pool's start. 13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the
+  overlay. Inferred: functions that used them were stripped by the link, which keeps the pooled statics they used.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:

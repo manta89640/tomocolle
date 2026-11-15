@@ -1268,7 +1268,7 @@ static const WindowButtons sWindowButtonMessages[6] = {
     { { 0xFE, 0xFF, 0xF9 }, 4 },        { { 0xFE, 0xFF, 0xF9 }, 4 }, { { 0xFE, 0xFF, 0xF9 }, 4 },
 };
 
-#define GetWindowButton(window, i) ((SpriteButton *)(window)->mSprites[i])
+#define GetWindowButton(window, i) ((SpriteButton *)&(window)->mSprites[i])
 
 static inline void SetPixelPosition(Sprite *sprite, WindowPoint position) {
     sprite->SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
