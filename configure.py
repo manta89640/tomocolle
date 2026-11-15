@@ -242,6 +242,19 @@ LIBRARIES["lib/MiiTransfer/"] = {
     "includes": ["lib/MiiTransfer", *SDK_INCLUDES],
 }
 
+# A Mii's data and its accessors (0x02079FA0 to 0x0207A9C0), linked right after the Mii transfer. Its .rodata, the
+# days of each month and two Mii records that nothing refers to, survives as one pool: an object of 64 bytes and more
+# that nothing refers to is left out by the game's compiler, so it is taken for a library of the same build as the
+# Mii transfer (see docs/binary.md, "The Mii data"). Not proven with the compiler yet.
+LIBRARIES["lib/MiiData/"] = {
+    "compiler": "2.0/sp2p2",
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c++", "-ipa file"],
+    "sjis": True,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/MiiData", *SDK_INCLUDES],
+}
+
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
 # "Metrowerks C/C++ for ARM 3.0.0.136", the compiler of 2.0/sp2. Its source here is this project's own decompilation,
 # written against the headers of that MSL (internal ones such as ansi_files.h included).
