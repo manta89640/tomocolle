@@ -652,6 +652,7 @@ void TushinScene::Send(int kind) {
 // NOT MATCHING: for messages 7 and 8, the original reads the selected resident's mIndex off the element's address
 // (base + selected * 0x2C0, then +0x2A4); here the offsets 0xB004 and 0x2A4 are folded into one (two instructions
 // fewer).
+#pragma optimization_level 2
 // @0x0214ce60
 void TushinScene::UpdateSending() {
     if (sWireless.m3C != 1) {
@@ -683,7 +684,7 @@ void TushinScene::UpdateSending() {
             case 7:
             case 8: {
                 sWireless.m24 = 0;
-                func_0202c328(&gGameData, mResidents.mResidents[mResidents.mSelected].GetIndex(), 1);
+                func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                 SetOtherStandAnimation();
                 break;
             }
@@ -710,6 +711,7 @@ void TushinScene::UpdateSending() {
     }
 }
 
+#pragma optimization_level reset
 // @0x0214d064
 void TushinScene::SendFoundIndex() {
     sWireless.m48 = 0;
