@@ -27,7 +27,7 @@
 // follows from the order of all of them here, not from what they are: this order puts each where the ROM has it
 // (measured by compiling). The data_* statics are used by none of the functions in the ROM, only, presumably, by
 // WH's functions that the link left out: their names and types are not known (data_02145de0 is 0x200 bytes, the size
-// of WH's data set for data-sharing, WMDataSet). wh_cpp_StrippedStatics, at the end, keeps them in the file.
+// of WH's data set for data-sharing, WMDataSet). MiiTransferWH_StrippedStatics, at the end, keeps them in the file.
 static u16 sConnectBitmap;
 static u16 data_02145c00;
 static u16 sAutoConnectFlag;
@@ -738,7 +738,7 @@ BOOL WH_End(void) {
 
 // Not in the ROM: a stand-in for the functions of WH that used these statics, which the link left out. It keeps them
 // in the file, so that the others are where the ROM has them, and the link strips it as it stripped those.
-extern "C" void wh_cpp_StrippedStatics(void) {
+extern "C" void MiiTransferWH_StrippedStatics(void) {
     data_02145c00 = 0;
     data_02145c02 = 0;
     data_02145c0c = 0;
