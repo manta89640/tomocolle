@@ -1018,8 +1018,6 @@ void TushinScene::UpdateListWindow() {
     }
 }
 
-// NOT MATCHING: in state 4, `go = FALSE` and `next = 0x44` are set in the other order around the test of mPage
-// (two instructions).
 // @0x0214e348
 void TushinScene::UpdateConnection() {
     if (mWait > 0) {
@@ -1073,8 +1071,10 @@ void TushinScene::UpdateConnection() {
         }
         return;
     case 4: {
-        int next = 0x44;
-        BOOL go = FALSE;
+        int next;
+        BOOL go;
+        go = FALSE;
+        next = 0x44;
         switch (mPage) {
         case 3:
             next = 7;
