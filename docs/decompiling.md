@@ -164,9 +164,10 @@ as `relocs.txt` knows: `tools/force_active.py` lists every symbol of theirs in t
 The order that the code itself suggests:
 
 1. **Finish mapping the libraries in the main program.** NitroSDK, NitroSystem and part of MSL are named and cut into
-   units under `lib/` (see [binary.md](binary.md)). Still to find: the rest of MSL and NFL (WH and the
-   text-to-speech middleware are found and decompiled). Every library function named makes the game code that calls it readable, and what is left when the
-   libraries are out is the game.
+   units under `lib/` (see [binary.md](binary.md)). Still to find: the rest of MSL. WH, the text-to-speech
+   middleware, the Mii transfer and the Mii data are found and decompiled; NFL is cut as one unit (`lib/NFL`) but not
+   yet divided into its files. Every library function named makes the game code that calls it readable, and what is
+   left when the libraries are out is the game.
 2. **Recover the classes that every scene is built from.** Each overlay holds classes that derive from ones in the
    main program, so little of an overlay can be finished before its base classes are.
 3. **Then the overlays**, smallest first: each is a self-contained piece of the game and a short path to a complete
@@ -209,6 +210,166 @@ The order that the code itself suggests:
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
   into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it).
+
+## Which compiler, which flags
+
+Not all of the game was built alike. Measured (details in [binary.md](binary.md), "Compiler", and the sections of
+each library):
+
+| Code | Compiler | Flags | How it was told |
+| --- | --- | --- | --- |
+| The game's own code (`src/`), WH | 2.0 SP2 patch 3 (build 138) | C++, `-ipa file` | Statics of 64 bytes and more are kept out of the file's pool; only 138 and 139 do that |
+| The Mii transfer | 2.0 SP2 patch 2 (build 137) or earlier | C++, `-ipa file` | Its code reads statics of 64 bytes and more off the pool's start |
+| The Mii data | 2.0 SP2 patch 2 or earlier | C++, `-ipa file` | Its 0x94 bytes of unreferenced records sit in one `.rodata` pool with the days table; 138 would give them a section of their own |
+| The speech engine (SHTTS) | the game's | C, without `-ipa file` | Matches only that way |
+| NitroSDK / NitroSystem / MSL | 2.0 SP1p2 / SP2 / SP2 | their own | As in other decompilations of the SDK |
+| NFL | not measured | C, `-ipa file`, as a hypothesis | Its code compiles alike under every 2.0 build tried |
+
+So when a file will not match, try the other build before the source (CLAUDE.md says as much). Every mwccarm build
+is at `~/Projects/pokesxf/subprojects/metroskrew/bin/mwccarm-<version>.exe` (2.0 builds 72 to 87, 3.0 builds 114 to
+139, 4.0 builds 1018 to 1051) for testing; they run under `~/Projects/pokesxf/tools/wibo/wibo`, without `-enc SJIS`.
+The project itself fetches its compilers from the archive in `configure.py`.
+
+Within a file, the original also set the optimisation per function: overlay 109's and the Mii transfer's functions
+with loops that are neither rotated nor strength-reduced sit between ordinary ones, and match under
+`#pragma optimization_level 2` around the function (then `#pragma optimization_level reset`). Nothing at the
+default level gives that shape: not `volatile`, narrower or unsigned counters, other loop forms, or the `opt_*`
+pragmas.
+
+## How a file's data is laid out
+
+Measured by compiling test files and checked against whole compiled files (overlays 72, 98 and 99, WH); the
+notes ([ov072](notes/ov072.md), [ov098](notes/ov098.md), [wh](notes/wh.md)) have the details:
+
+1. The compiler keeps one list of the file's data objects, `.rodata`, `.data` and `.bss` alike, newest first. A
+   static goes on it where it is declared, and the anonymous strings of its initialiser just before it (so in the
+   list the object precedes its strings). In C, a static without an initialiser is a tentative definition and is
+   only created at the end of the file; with `= 0` it is created where it is declared. In C++ every static is created
+   where it is declared.
+2. After the file's statics come the virtual table of the class whose key function is in the file, then the local
+   `const` objects of its functions. A local `const` scalar is emitted as an object even when every use of it is
+   folded; so is a file-scope `static const` read only with constant indices. The initialiser of an unused local
+   `const` array stays too, packed after the other local initialisers in one byte-aligned section (the Mii
+   transfer's state names).
+3. An unreferenced static is dropped before the sort. So an object in the ROM that nothing refers to was referred to
+   by something the link stripped: a function nothing calls. A small uncalled function in the source that uses it
+   keeps it, and the link strips the function again (`MiiData_UnusedCopyDefault`, `MiiTransferWH.cpp`).
+4. The list is heap-sorted by size: a plain max-heap sort, ascending, swapping a parent with a child only when the
+   child is strictly larger, the left one first. The permutation depends only on the sequence of sizes, so objects
+   of one size can be put in any order: compile once, read which slot each declaration lands in, and reassign the
+   declarations of that size. Swapping two same-size declarations swaps their places and nothing else.
+5. The four-byte-aligned objects of `.rodata` are pooled into one section at the place of the first of them, and so
+   are those of `.data` and of `.bss` (with `-ipa file` only: without it each static is a symbol of its own). Arrays
+   of `u8`, `s8` and `char` are never pooled. Build 138 keeps objects of 64 bytes and more out of the pool, each in
+   a section of its own at its sorted place; build 137 pools them.
+6. The strings of the code (literals in function bodies) are not on the list: they follow it in `.data`, in the
+   order the code uses them.
+
+Not settled: overlay 109's agent found that this model does not reproduce its compiled `.data`/`.bss`, and the
+best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 60) short. Test files on overlay
+109's shape are the next step. Two other things the data showed:
+
+- A `const` aggregate whose initialiser reads another constant (`{sPos[0].x - 0x20, sPos[0].y - 6}`) is filled in by
+  the static initialiser at run time but stays in `.data`, as zeros in the ROM; a non-`const` one goes to `.bss`
+  (the main program's list scenes, overlays 76 and 109).
+- Comparing a compiled object's data with the ROM's before completing a unit finds wrong table values in the source,
+  which no function shows (overlay 109's `sLayouts`).
+
+## Matching techniques
+
+What made near-misses match, by symptom, with where each was found. Most are about the order in which the compiler
+sees things: declarations, statements, and how an address is formed. Work by script: compile one object with source
+variants and compare one function (`tools/compare_object.py --diff`), then confirm with `ninja report`:
+`compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
+
+**An address reloaded at each use, where the original keeps it in a register**
+- Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)data_0213bab0;`. A plain local pointer to the
+  global is dropped and the address reloaded (`MapScene::Exit`).
+- `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
+  calls (overlay 110's camera setters, the Mii transfer's `func_02077858`).
+- In a one-iteration loop a large member offset (`this + 0x268`) is computed once and kept (`MapScene::Init`, the
+  back button in two one-iteration loops around its `SetPosition`). A one-element static array read in a
+  one-iteration loop is loaded, not folded.
+
+**An address kept in a register, where the original reloads it**
+- Reach the member through a local pointer in the loop body (`MapCamera *camera = &mCamera;`): it stopped the
+  compiler holding a table's address for the whole loop and spilling (`MapScene::Update`).
+
+**Two operands loaded in the other order**
+- How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
+  `MessageFile *files = &mEtcMessages; files[1].Open(...); files[0].Open(...);` (`MiiListMenuScene::Init`).
+- Do arithmetic in a statement of its own before the call: `hour -= tens * 10; f(hour);` rather than
+  `f(hour - tens * 10)` (`ClockDisplay::Refresh`, in overlays 72, 73 and 74).
+- Pass the value just stored in a member (`f(mLights[0])`) rather than recomputing it (`MapScene::Init`).
+- Declare a value before the call that might clobber it: `u8 t = others[i];` before `Rand` (`MakeDailyNews`).
+- `int next; BOOL go; go = FALSE; next = 0x44;` gives another order than the initialised declarations
+  (`UpdateConnection`).
+- `hour * 3600 + minute * 60` computes the minutes first.
+
+**Stack slots in the wrong order, or a frame too large**
+- Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
+  in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
+- A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
+  `SetUpWindow`, `SetUpList`). Where the original has the slot, make the local and pass its address, point first
+  (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); func_02028d88(&rect, &point);`,
+  `OptionScene::Update`).
+- Two dead copies of a vector are the by-value `FxVec2` of `SetPosition(FxVec2(x, y))`; which of
+  `SetPosition`/`SetPositionFromVec` is called decides their order.
+- A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
+  another (the main program's list scenes).
+
+**Registers allocated differently**
+- A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
+  original spills them.
+- Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
+  109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
+- Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+
+**Fields read off an element's address, where ours folds the offsets**
+- At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
+  GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
+
+**Branches and switches laid out differently**
+- An if/else the original compiles as "then predicated, branch over else" is written the other way round
+  (`if (i != n) x++; else ...`).
+- An if/else assigning a member stores at once; a ternary lets the store be scheduled later.
+- A switch with the cases in the order of the original's code: `default` first puts its code after the compare
+  chain; a jump table's values that only go to the default must be written out as cases; the tutorial's cases
+  first gave `MapScene::Init`'s compare chain. `case 0: case 9: case 10:` gives `cmp; cmpne; cmpne` where `||`
+  gives a range test.
+- `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
+  that is rotated at level 2 is a `do { } while`.
+- Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
+
+**Constants and arithmetic**
+- `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
+  original's registers.
+- `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
+- `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
+
+**Classes, copies and tables**
+- A class whose constructor stores only another class's tables holds that class as a member rather than deriving
+  from it: deriving makes the compiler emit its own table and destructors (`RoomDoorModel` in overlay 74, the
+  character models).
+- Record copies: `(CharacterRecord &)dst = src` (overlay 109). A copy of a `WMBssDesc` is field by field; a struct
+  wrapping one is copied with `ldm`/`stm`.
+- Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is
+  declared in reverse (`lib/MiiData`).
+- `NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(...))` rather than writing the field directly.
+- Pitfall: a zero-length padding array in a class (a `sizeof` that came out 0) made mwcc drop a member array's
+  `__cxa_vec_cleanup` from the implicit destructor without a word (overlay 76).
+
+**Scenes**
+- A scene's virtual table symbol goes at the table's start, and the main program's constructor's reference to it is
+  `to:<table> add:0x8 module:overlay(<n>)`.
+- A constructor of an overlay's class called from the main program's scene constructor is emitted as C1 and C2; the
+  link keeps the one called, so the unit can still be complete.
+
+**Tools to mind**
+- `tools/name_unit_data.py` reads only what `readelf` lists as OBJECT or NOTYPE: run it after any change to a
+  complete unit or to a header it includes, since the compiler's `@` numbers move.
+- `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
+  data; rename it when the code shows what it is.
 
 ## A match is instructions and references
 
