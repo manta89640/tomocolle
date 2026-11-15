@@ -399,11 +399,9 @@ void MapScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplMapEffect_LZ.bin", 0);
 }
 
-// Not matching yet (0xF18 bytes against 0xF0C). The differences: the register of the island stage's index for the
-// apartment's "new" mark (r2 against r1); the back button's base address, which the original keeps in a register
-// (this + 0x268) across its calls; the scheduling of the camera's reset (the target's y is computed before the
-// camera pointer is loaded again) and of the lights' direction (the vector is loaded into r2/r3 last). Everything
-// else is the original's.
+// Not matching yet (same length; 19 instructions differ): the scheduling of the camera's reset (the target's y is
+// computed before the camera pointer is loaded again), the two light-direction calls (the vector is loaded into
+// r2/r3 last), and where this + 0x268 is computed for the back button. Everything else is the original's.
 void MapScene::Init() {
     const int unknownE = 0xE;
     const u16 backButtonKind = 4;
@@ -1505,9 +1503,9 @@ BOOL MapScene::IsNewsDue() {
     return FALSE;
 }
 
-// Not matching yet: the second shuffle (of the other residents) inlines MATH_Rand16 with the shift of x done in
-// each arm of the max test and the store of x between them; here it is the same as the first shuffle's, which
-// matches. Same registers and stack otherwise.
+// Not matching yet: the loop that picks a kind of news of the month allocates its registers differently (the
+// original materialises the 1 of 1 << monthBit in the loop and keeps x of the inlined MATH_Rand16 apart), and the
+// two stores of the other residents are scheduled differently. The rest, both shuffles included, is the original's.
 // Makes the day's news: a birthday of a resident when there is one that the last birthday news was not about,
 // otherwise a random kind of news of the month
 void MapScene::MakeDailyNews() {
