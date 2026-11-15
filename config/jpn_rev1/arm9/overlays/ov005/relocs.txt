@@ -34,8 +34,8 @@ from:0x02149e04 kind:load to:0x021223e4 module:main
 from:0x02149e08 kind:load to:0x0211d718 module:main
 from:0x02149e0c kind:load to:0x0214a558 module:overlay(5)
 from:0x02149f40 kind:arm_call to:0x0202a618 module:main
-from:0x02149f64 kind:load to:0x0210f648 module:main
-from:0x02149f68 kind:load to:0x0210f664 module:main
+from:0x02149f64 kind:load to:0x0210f640 add:0x8 module:main
+from:0x02149f68 kind:load to:0x0210f65c add:0x8 module:main
 from:0x02149f6c kind:load to:0x0214a4e8 module:overlay(5)
 from:0x02149fbc kind:arm_call to:0x02029f50 module:main
 from:0x02149fe8 kind:arm_call to:0x02029f50 module:main
@@ -49,22 +49,22 @@ from:0x0214a36c kind:load to:0x02121eac module:main
 from:0x0214a384 kind:arm_call to:0x0202a464 module:main
 from:0x0214a39c kind:arm_call to:0x020267f4 module:main
 from:0x0214a3a4 kind:arm_call to:0x020267bc module:main
-from:0x0214a3b0 kind:load to:0x0210f664 module:main
-from:0x0214a3b4 kind:load to:0x0210f648 module:main
+from:0x0214a3b0 kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214a3b4 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214a3d4 kind:arm_call to:0x0202a464 module:main
 from:0x0214a3f0 kind:arm_call to:0x020267f4 module:main
 from:0x0214a408 kind:arm_call to:0x02022ddc module:main
 from:0x0214a410 kind:arm_call to:0x0208fd38 module:main
-from:0x0214a41c kind:load to:0x0210f664 module:main
-from:0x0214a420 kind:load to:0x0210f648 module:main
+from:0x0214a41c kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214a420 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214a424 kind:load to:0x0203e2a8 module:main
 from:0x0214a444 kind:arm_call to:0x0202a464 module:main
 from:0x0214a460 kind:arm_call to:0x020267f4 module:main
 from:0x0214a478 kind:arm_call to:0x02022ddc module:main
 from:0x0214a480 kind:arm_call to:0x0208fd38 module:main
 from:0x0214a488 kind:arm_call to:0x020267bc module:main
-from:0x0214a494 kind:load to:0x0210f664 module:main
-from:0x0214a498 kind:load to:0x0210f648 module:main
+from:0x0214a494 kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214a498 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214a49c kind:load to:0x0203e2a8 module:main
 from:0x0214a4e8 kind:load to:0x0203e2a8 module:main
 from:0x0214a4ec kind:load to:0x0214a374 module:overlay(5)
