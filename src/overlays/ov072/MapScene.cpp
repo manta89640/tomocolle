@@ -604,8 +604,8 @@ void MapScene::Init() {
 
 // Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
 // rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
-// differs: the stack slots of UpdateCharacterTimes' date and time (below the touch loop's rectangles here, above
-// them in the original), the order of the rectangle arithmetic, and the registers of the camera's reset.
+// differs: the registers of &mCamera and of the division's constant in the touch loop, with the order of the
+// rectangle arithmetic, the registers of the camera's reset, and one pair of dead stores.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
@@ -901,7 +901,14 @@ void MapScene::Update() {
                     }
                 }
             } else if (mIdleFrames == 40) {
-                UpdateCharacterTimes();
+                // UpdateCharacterTimes written out: the date and time are Update's own locals here (their stack
+                // slots are above the touch loop's, which an inline's locals are not), the date first
+                RTCDate date;
+                RTCTime time;
+                s64 now = func_02035870(data_02123440[0], &date, &time);
+                func_020ad568(now);
+                func_020ad514(now, &time);
+                func_020ad294(now, &time);
             } else if (mIdleFrames >= 60) {
                 UpdateWindows();
                 mIdleFrames = 0;
