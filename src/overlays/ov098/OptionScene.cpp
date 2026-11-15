@@ -9,27 +9,66 @@
 // Overlay 98: the settings (OptionScene). One source file: its constants are the .rodata, its strings the .data
 // after the scene's virtual table.
 
-// The file's constants. Their order decides where the compiler puts them (see docs/notes/ov073.md).
-static const ScreenRect sWindowRect = {20, 20, 216, 152};
+// The file's constants, all in one place and in this order, because the order decides where the compiler puts
+// them: it keeps a list of the file's data objects (the virtual table last), newest first, and heap-sorts it by size;
+// the four-byte-aligned ones are one pool at the start of .rodata, read by offset from its start (see
+// docs/notes/ov073.md and docs/notes/ov098.md). This order gives the ROM's order of the objects.
+//
+// The ROM's pool starts with 36 bytes that no code refers to, here sUnknown0 to sUnknown4 with the ROM's values.
+// What they are is not known (see docs/notes/ov098.md): they stand in for them so that the constants after them
+// are at the ROM's offsets, which OpenWindow reads. Exit refers to them to keep them, which makes no code.
+static const int sUnknown0[1] = {0};
+static const WindowPoint sClockTextPosition = {38, 33};
+static const WindowPoint sUnknown3 = {2, 2};
+static const WindowPoint sUnknown1 = {2, 0};
+static const int sWindowButtonMessages[2] = {2, 3}; // "はい" and "いいえ" of the common messages
+static const WindowPoint sMessageTextPosition = {38, 33};
+static const WindowPoint sOkButtonPosition = {128, 149};
+static const WindowPoint sQuestionTextPosition = {38, 33};
+static const WindowPoint sSetClockTextPosition = {38, 33};
+static const WindowPoint sUnknown2 = {0, 4};
+static const WindowPoint sWindowButtonSize = {94, 30};
+static const WindowPoint sUnknown4 = {2, 2};
+static const u16 sTextButtonSequences[OptionScene::TEXT_BUTTON_COUNT] = {3, 3, 3, 10, 8, 8, 10};
+static const u32 sTextMessages[OptionScene::TEXT_COUNT] = {0xDB, 0xDE, 0xDF, 0xE0};
+static const int sTextFonts[OptionScene::TEXT_COUNT] = {0, 0, 0, 0};
 static const ScreenRect sScreenRect = {0, 0, 256, 192};
 static const ScreenRect sAmPmRect = {0, 0, 32, 32};
-static const WindowPoint sWindowButtonSize = {94, 30};
 static const WindowPoint sWindowButtonPositions[2] = {{75, 149}, {181, 149}};
-static const int sWindowButtonMessages[2] = {2, 3};
-static const ButtonSounds sWindowButtonSounds[2] = {{{10, 1, 0, -1}}, {{12, 1, 0, -1}}};
+static const ScreenRect sWindowRect = {20, 20, 216, 152};
 static const u16 sWindowMessages[10] = {0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF, 0xF0, 0x150, 0x151};
-
+static const char sWindowScreenName[] = "N83:/Window_down.nsc";
+static const u32 sTextButtonMessages[OptionScene::TEXT_BUTTON_COUNT] = {0xD7, 0xD8, 0xDA, 0xE8, 0xDC, 0xDD, 0xD9};
+static const int sTextButtonKinds[OptionScene::TEXT_BUTTON_COUNT] = {4, 4, 4, 4, 3, 3, 4};
+static const int sTextButtonFonts[OptionScene::TEXT_BUTTON_COUNT] = {2, 2, 2, 2, 0, 0, 2};
+static const ScreenPoint sTextPositions[OptionScene::TEXT_COUNT] = {{20, 40}, {20, 80}, {20, 120}, {20, 160}};
+static const u16 sSpriteSequences[OptionScene::SPRITE_COUNT] = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 5, 5};
+static const ButtonSounds sWindowButtonSounds[2] = {{{10, 1, 0, -1}}, {{12, 1, 0, -1}}};
 static const u16 sButtonSequences[OptionScene::BUTTON_COUNT] = {
     1, 12, 14, 12, 14, 12, 14, 12, 14, 12, 14, 18, 16, 18, 16, 18, 16,
 };
+static const ScreenPoint sTextButtonPositions[OptionScene::TEXT_BUTTON_COUNT] = {
+    {128, 54}, {128, 96}, {128, 138}, {128, 173}, {140, 46}, {208, 46}, {128, 173},
+};
+static const ScreenPoint sTextButtonSizes[OptionScene::TEXT_BUTTON_COUNT] = {
+    {210, 36}, {210, 36}, {210, 36}, {94, 30}, {64, 22}, {64, 22}, {94, 30},
+};
 static const int sButtonKinds[OptionScene::BUTTON_COUNT] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0};
-static const ScreenPoint sButtonPositions[OptionScene::BUTTON_COUNT] = {
-    {242, 13}, {56, 23},  {56, 75},  {144, 23}, {144, 75}, {208, 23}, {208, 75}, {92, 93},  {92, 145},
-    {164, 93}, {164, 145}, {126, 86}, {222, 86}, {126, 126}, {222, 126}, {126, 166}, {222, 166},
+static const ButtonSounds sTextButtonSounds[OptionScene::TEXT_BUTTON_COUNT] = {
+    {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}},
+    {{0, -1, -1, -1}}, {{0, -1, -1, -1}}, {{10, -1, 0, -1}},
+};
+static const ScreenPoint sSpritePositions[OptionScene::SPRITE_COUNT] = {
+    {26, 49},  {46, 49},  {66, 49},  {86, 49},   {134, 49}, {154, 49}, {198, 49}, {218, 49},
+    {82, 119}, {102, 119}, {154, 119}, {174, 119}, {52, 120}, {170, 86}, {170, 126}, {170, 166},
 };
 static const ScreenPoint sButtonSizes[OptionScene::BUTTON_COUNT] = {
     {24, 22}, {18, 13}, {18, 13}, {18, 13}, {18, 13}, {18, 13}, {18, 13}, {18, 13}, {18, 13},
     {18, 13}, {18, 13}, {20, 20}, {20, 20}, {20, 20}, {20, 20}, {20, 20}, {20, 20},
+};
+static const ScreenPoint sButtonPositions[OptionScene::BUTTON_COUNT] = {
+    {242, 13}, {56, 23},  {56, 75},  {144, 23}, {144, 75}, {208, 23}, {208, 75}, {92, 93},  {92, 145},
+    {164, 93}, {164, 145}, {126, 86}, {222, 86}, {126, 126}, {222, 126}, {126, 166}, {222, 166},
 };
 static const ButtonSounds sButtonSounds[OptionScene::BUTTON_COUNT] = {
     {{12, 1, 0, -1}}, {{8, -1, -1, -1}}, {{9, -1, -1, -1}}, {{8, -1, -1, -1}}, {{9, -1, -1, -1}},
@@ -37,33 +76,6 @@ static const ButtonSounds sButtonSounds[OptionScene::BUTTON_COUNT] = {
     {{9, -1, -1, -1}}, {{-1, -1, -1, -1}}, {{-1, -1, -1, -1}}, {{-1, -1, -1, -1}}, {{-1, -1, -1, -1}},
     {{-1, -1, -1, -1}}, {{-1, -1, -1, -1}},
 };
-
-static const u16 sTextButtonSequences[OptionScene::TEXT_BUTTON_COUNT] = {3, 3, 3, 10, 8, 8, 10};
-static const int sTextButtonKinds[OptionScene::TEXT_BUTTON_COUNT] = {4, 4, 4, 4, 3, 3, 4};
-static const int sTextButtonFonts[OptionScene::TEXT_BUTTON_COUNT] = {2, 2, 2, 2, 0, 0, 2};
-static const u32 sTextButtonMessages[OptionScene::TEXT_BUTTON_COUNT] = {0xD7, 0xD8, 0xDA, 0xE8, 0xDC, 0xDD, 0xD9};
-static const ScreenPoint sTextButtonPositions[OptionScene::TEXT_BUTTON_COUNT] = {
-    {128, 54}, {128, 96}, {128, 138}, {128, 173}, {140, 46}, {208, 46}, {128, 173},
-};
-static const ScreenPoint sTextButtonSizes[OptionScene::TEXT_BUTTON_COUNT] = {
-    {210, 36}, {210, 36}, {210, 36}, {94, 30}, {64, 22}, {64, 22}, {94, 30},
-};
-static const ButtonSounds sTextButtonSounds[OptionScene::TEXT_BUTTON_COUNT] = {
-    {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}},
-    {{0, -1, -1, -1}}, {{0, -1, -1, -1}}, {{10, -1, 0, -1}},
-};
-
-static const u32 sTextMessages[OptionScene::TEXT_COUNT] = {0xDB, 0xDE, 0xDF, 0xE0};
-static const int sTextFonts[OptionScene::TEXT_COUNT] = {0, 0, 0, 0};
-static const ScreenPoint sTextPositions[OptionScene::TEXT_COUNT] = {{20, 40}, {20, 80}, {20, 120}, {20, 160}};
-
-static const u16 sSpriteSequences[OptionScene::SPRITE_COUNT] = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 5, 5};
-static const ScreenPoint sSpritePositions[OptionScene::SPRITE_COUNT] = {
-    {26, 49},  {46, 49},  {66, 49},  {86, 49},   {134, 49}, {154, 49}, {198, 49}, {218, 49},
-    {82, 119}, {102, 119}, {154, 119}, {174, 119}, {52, 120}, {170, 86}, {170, 126}, {170, 166},
-};
-
-static const char sWindowScreenName[] = "N83:/Window_down.nsc";
 
 // Puts a text at a position in pixels
 static inline void SetTextPosition(MessageText *text, ScreenPoint position) {
@@ -547,6 +559,11 @@ void OptionScene::Draw() {
 }
 
 void OptionScene::Exit() {
+    (void)sUnknown0;
+    (void)sUnknown1;
+    (void)sUnknown2;
+    (void)sUnknown3;
+    (void)sUnknown4;
     func_02028108(&data_02121834, 1, 0);
     func_020346cc(&mWindow);
     ArchiveManager_Unmount(&gArchiveManager, "N83");
@@ -692,6 +709,15 @@ void OptionScene::SetState(int state) {
     mStep = 0;
 }
 
+// Adds the buttons "yes" and "no" to the message window
+static inline void AddYesNoButtons(OptionScene *scene, int *charOffset) {
+    WindowPoint size = sWindowButtonSize;
+    for (int i = 0; i < 2; i++) {
+        func_020337b8(&scene->mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &scene->mMessageFiles[1],
+                      sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sWindowButtonSounds[i]);
+    }
+}
+
 // Opens the message window with one of its messages, and its buttons
 void OptionScene::OpenWindow(int window, int charOffset) {
     ScreenRect rect = sWindowRect;
@@ -705,51 +731,45 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ASK_ERASE_AGAIN:
     case WINDOW_ASK_ERASE_LAST:
     {
-        WindowPoint position = {38, 33};
         charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
-                                   position, &charOffset);
-        WindowPoint size = sWindowButtonSize;
-        for (i = 0; i < 2; i++) {
-            func_020337b8(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
-                          sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[i]);
-        }
+                                   sQuestionTextPosition, &charOffset);
+        AddYesNoButtons(this, &charOffset);
         break;
     }
     case WINDOW_ASK_CLOCK: {
         int hour = mTime.hour;
-        for (i = 0; i < DATE_TEXT_COUNT; i++) {
-            wchar_t *text = mDateTexts[i];
-            MI_CpuClear16(text, sizeof(mDateTexts[i]));
-            switch (i) {
+        for (int j = 0; j < DATE_TEXT_COUNT; j++) {
+            wchar_t *text = mDateTexts[j];
+            MI_CpuClear16(text, sizeof(mDateTexts[j]));
+            switch (j) {
             case 0:
-                func_0203673c(mDate.year + 2000, text, sizeof(mDateTexts[i]), 0, FALSE);
+                func_0203673c(mDate.year + 2000, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 1:
-                func_0203673c(mDate.month, text, sizeof(mDateTexts[i]), 0, FALSE);
+                func_0203673c(mDate.month, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 2:
-                func_0203673c(mDate.day, text, sizeof(mDateTexts[i]), 0, FALSE);
+                func_0203673c(mDate.day, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 3:
                 if (hour >= 12) {
-                    wcscpy(text, L"午後");
                     hour -= 12;
+                    wcscpy(text, L"午後");
                 } else {
                     wcscpy(text, L"午前");
                 }
                 break;
             case 4:
-                func_0203673c(hour, text, sizeof(mDateTexts[i]), 0, FALSE);
+                func_0203673c(hour, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 5:
-                func_0203673c(mTime.minute, text, sizeof(mDateTexts[i]), 0, FALSE);
+                func_0203673c(mTime.minute, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             }
-            func_02034a3c(&mWindow, 0, i, text);
+            func_02034a3c(&mWindow, 0, j, text);
         }
-        WindowPoint position = {38, 33};
         charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
-                                   position, &charOffset);
+                                   sClockTextPosition, &charOffset);
         WindowPoint size = sWindowButtonSize;
         for (i = 0; i < 2; i++) {
             func_020337b8(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
@@ -758,11 +778,9 @@ void OptionScene::OpenWindow(int window, int charOffset) {
         break;
     }
     case WINDOW_SET_CLOCK: {
-        WindowPoint position = {38, 33};
         charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
-                                   position, &charOffset);
-        WindowPoint buttonPosition = {128, 149};
-        func_020337b8(&mWindow, 0, 1, 10, 0xB, buttonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
+                                   sSetClockTextPosition, &charOffset);
+        func_020337b8(&mWindow, 0, 1, 10, 0xB, sOkButtonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
                       &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[1]);
         break;
     }
@@ -771,9 +789,8 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ERASING:
     case WINDOW_ERASED:
     {
-        WindowPoint position = {38, 33};
         charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
-                                   position, &charOffset);
+                                   sMessageTextPosition, &charOffset);
         break;
     }
     }
