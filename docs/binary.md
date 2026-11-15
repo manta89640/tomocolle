@@ -374,6 +374,49 @@ Not done:
 - The data: `.rodata` starts with an 8-byte object `{25, 128}` that nothing refers to, which the source does not
   give; the strings of `.data` are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 
+## The save screens
+
+Three small overlays put a message window (the main program's, 0xAFA4 bytes, the same stand-in as overlay 73's, now
+`include/MessageWindow.h`) on the lower screen to say something about the save data. Each is one source file under
+`src/overlays/ovNNN/`, every function matches, and each unit is complete: every section is placed and linked from
+source.
+
+| Overlay | Scene | Class | Functions | What it shows (etc messages) |
+| --- | --- | --- | --- | --- |
+| 69 | 0x2C, 0x2D | `SavePlayScene` (0x6DB84 bytes) | 20 | 0x17C to 0x180: save what has happened so far? / saving / saved, go on playing? / save again when you stop / turn the power off now. Scene 0x2D comes before wireless play: 0x181, 0x182 |
+| 106 | 0x39 | `PreStartScene` (0xB13C bytes) | 17 | 0x1A4 the data could not be read; 0x1A7, 0x17D, 0x1A8 the data is broken and is initialised; 0x1A2, 0x1A3 this is another console than last time |
+| 107 | 0xC2 | `SaveErrorScene` (0xAFEC bytes) | 10 | 0x1A6 the data could not be written: turn the power off and put the card back in |
+
+Measured:
+
+- The scene factory (`CreateScene`) loads each overlay and calls a constructor in the main program
+  (`_ZN13SavePlaySceneC1Ei`, `_ZN13PreStartSceneC1Ei`, `_ZN14SaveErrorSceneC1Ei`), which stores the overlay's virtual
+  table. Two of them call a constructor that is the overlay's own: overlay 69's camera (0x0214AB6C) and overlay 106's
+  clock (0x0214A624). The compiler emits such a constructor as C1 and C2; the link keeps the one the main program
+  calls, so the ROM has one copy.
+- Overlays 69 and 106 ask for scene 0xC2 when the main program's write (`func_0202cd48`) fails.
+- `PreStartScene` reads `gGameData+8` as the outcome of loading the save data (0: it goes on; 1: it goes on as on
+  a first start, clearing the flag below; 2: the data is broken and initialised; 3 and 4: it stops), and
+  `gGameData+0xB1` as a flag: when it is set, it lists the residents and runs the main program's functions around
+  `EncounterJudge`'s (0x020ad294 to 0x020aef80) on them with the clock's time, then asks for scene 0x6A; when it is
+  not, it sets it and asks for scene 0x69. The warning about another console comes when the game clock's +0x34
+  (`data_02123440`) is set.
+- `SavePlayScene` shows one resident, picked at random, with a random animation of `Mdl/Ica/ica_mii_save_LZ.bin`.
+  The character is an array of one: the scene's destructor calls `__cxa_vec_cleanup` with a count of 1 and the main
+  program's `_ZN17SavePlayCharacterD1Ev`. 0x60000 bytes of the scene, from 0xDB14, are touched by nothing in the
+  overlay or the constructor.
+- The three files' six constants (window rectangle, button positions and size, text position, the yes and no
+  messages) are the same objects, and come out in two orders in the ROM: overlays 69 and 107 have one, overlay 106
+  another. Our compiler gives both, from two declaration orders (the size sort permutes objects of one size by
+  their place in the list, `docs/notes/ov073.md`).
+
+Inferred: the three are one family, written from the same code. Their `Init`s set the window up alike, their window
+helpers are byte for byte the same (`ShowMessage` in all three, `ShowOk` and `Ask` in 69 and 106), and overlay
+107's `Init` gives the window overlay 106's first message, 0x1A2, which it replaces before the window is shown.
+
+objdiff reports the data of all three a little under 100% although the ROM is identical: it counts the
+padding at the end of `.rodata` and `.data` that the delinked original has and the compiled object does not.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
