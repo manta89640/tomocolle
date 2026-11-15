@@ -680,6 +680,48 @@ names start two bytes past a four-byte boundary, right after the address, which 
 link's ALIGNALL(4). Measured with the compiler: which statics of one size go where follows from the order of all of the
 file's data objects, that one included.
 
+## The Mii data
+
+Right after the Mii transfer, `0x02079FA0` to `0x0207A9C0`, are the accessors of a Mii's data: `lib/MiiData/MiiData.cpp`,
+97 functions, all matching, and its `.rodata` (`0x020B7E1C` to `0x020B7EE4`) placed: complete. The file name and the
+struct name `MiiData` are the project's own.
+
+Measured:
+
+- **The bounds.** The code before it is the Mii transfer's last file; the code after it, from `0x0207A9C0`, is a
+  linked list that the particle code (`0x0207AB20` on) and three other users call, and none of this file's functions
+  do. Its `.rodata` follows the Mii transfer's, and the next object (`0x020B7EE4`) is read by code at `0x0207F7D4`.
+- **A get and a set function for each bit field**, 88 in all, in pairs. The character code calls them through two
+  tables of 44 (`data_020FBB7C` the setters, `data_020FBC2C` the getters) by a parameter number:
+  `func_02098c40`, `func_02098cb4`, `func_02098dac` and `func_02098e50`. Parameters 0x26 and 0x27 are the birth
+  month and day, which `func_02098dac` takes from the character's own record when the Mii has none.
+- **The layout is the Wii's Mii data (`RFLCharData`)**: the record is 0x4A bytes with the create ID at 0x18 (as the
+  Mii transfer measured), and each of the 44 fields has the place and width that the Wii's field of the same name
+  has in its 16-bit word. Hence the names: sex, birth month and day, favourite colour (0x00), the name (0x02), height
+  and build (0x16, 0x17, both read capped at 127), face, hair, eyebrows, eyes, nose, mouth, glasses, beard and
+  mustache, mole (0x20 to 0x34), the creator's name (0x36). mwccarm allocates bit fields from the low bit, the
+  reverse of the Wii's compiler, so they are declared in the reverse order of the Wii's.
+- **0x36 is the creator's name here too**: the Mii maker (`func_ov076_0214c2e4`) gives a new Mii the 0x36 of saved
+  character 0, or that character's name when `func_ov076_0214bf20` rejects it. (Overlay 109's source calls it a
+  nickname.)
+- `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
+  passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`func_020743a0`):
+  byte 0 is `0xC0`, the random number times 4 and bits 12-13 of the counter.
+- Two setters, of bit 2 of 0x20 (`func_0207a6f0`) and bit 0 of 0x00 (`func_0207a7bc`), are called through
+  `func_02098cdc` and `func_02098ce8`; what those bits are is not known.
+- **Its `.rodata`** is the days of each month (`sDaysInMonth`, 13 words from month 0, February 29), which
+  `MiiData_GetDaysInBirthMonth` reads, and right after it two Mii records that nothing in the ROM refers to: a male
+  and a female one (sex 0 and 1), blank but for the Wii's defaults (height and build 64, hair 33 for him, 12 for her).
+
+Inferred:
+
+- **It is built with 2.0 SP2 patch 2, as the Mii transfer is, not with the game's compiler.** The two records survive
+  only as part of one pool with the days table: so compiled with patch 2, the 0x94 bytes go at 0x34 in the file's
+  one `.rodata` section. With the game's patch 3 they get a section of their own (they are 64 bytes or more, see
+  "Compiler"), which nothing would refer to and the link would leave out. Some function of the file read them and was
+  left out by the link, as nothing called it; the source has a stand-in for it (`MiiData_UnusedCopyDefault`), which
+  the link leaves out too. Hence `lib/MiiData/`, beside the Mii transfer, with its compiler.
+
 ## Wireless play with items
 
 Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 70 of
