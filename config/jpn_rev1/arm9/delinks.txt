@@ -665,3 +665,17 @@ lib/MSL_C/w_pow.c:
 
 lib/MSL_C/math_sun.c:
     .text       start:0x0201f4dc end:0x0201f508
+
+src/wireless/MiiTransfer.cpp:
+    .text       start:0x020776e4 end:0x02078f58
+    .rodata     start:0x020b7be4 end:0x020b7e1c
+    .bss        start:0x02145380 end:0x02145c00
+
+src/wireless/wh.cpp:
+    complete
+    .text       start:0x02078f58 end:0x02079dfc
+    .bss        start:0x02145c00 end:0x02148680
+
+src/wireless/MiiTransferList.cpp:
+    .text       start:0x02079dfc end:0x02079fa0
+    .bss        start:0x02148680 end:0x02148688
