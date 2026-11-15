@@ -1112,8 +1112,6 @@ void TushinScene::UpdateConnection() {
     }
 }
 
-// NOT MATCHING: the loop variables get other registers (the original has i in r6, the found partner in r7), and
-// 599 is loaded from the literal pool where here it is computed from the TRUE in fp (one instruction fewer).
 // @0x0214e620
 void TushinScene::UpdateWiiConnection() {
     int state = func_02078f04();
@@ -1123,19 +1121,19 @@ void TushinScene::UpdateWiiConnection() {
     switch (state) {
     case 1:
         sWireless.m4C = func_0207808c();
-        for (u16 i = 0; i < sWireless.m4C; i++) {
+        for (int i = 0; i < sWireless.m4C; i = (u16)(i + 1)) {
             if (!func_0207800c(i)) {
                 continue;
             }
             if (func_02078040(i) > 0) {
                 continue;
             }
-            WMBssDesc *parent = func_02078064(i);
             BOOL known = FALSE;
+            WMBssDesc *parent = func_02078064(i);
             for (int j = 0; j < 3; j++) {
                 if (sParentTimers[j] != 0 && memcmp(parent->bssid, sParents[j].bssid, 12) == 0) {
-                    known = TRUE;
                     sParentTimers[j] = 599;
+                    known = TRUE;
                     break;
                 }
             }
@@ -1148,11 +1146,10 @@ void TushinScene::UpdateWiiConnection() {
                     sParents[k] = *parent;
                     u16 size = func_0207809c(i);
                     const u16 *name = func_020780b4(i);
-                    int length = size / 2;
-                    for (int j = 0; j < length; j++) {
+                                        for (int j = 0; j < size / 2; j++) {
                         mParentNames[k][j] = name[j];
                     }
-                    mParentNames[k][length] = 0;
+                    mParentNames[k][size / 2] = 0;
                     mParentIds[k] = i;
                     break;
                 }
