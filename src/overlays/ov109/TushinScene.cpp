@@ -266,7 +266,7 @@ void TushinScene::SetUpList(int *charOffset) {
     func_020a03e8(&mResidents, &mList, &mPages);
     func_020a05dc(&mResidents);
     mUnknown35924 = mList.mUnknown9464;
-    mUnknown35920 = gGameData.mUnknown4D;
+    mUnknown35920 = gGameData.mMiiListSortKey;
     func_020a123c(&mResidents, mUnknown35920, 1);
     mResidents.mUnknown1139C = 1;
 
@@ -1612,7 +1612,7 @@ void TushinScene::Exit() {
         func_0203b8b4(data_0213b700, 1);
     }
     if (mUnknown35920 != mResidents.mUnknown11306) {
-        gGameData.mUnknown4D = mResidents.mUnknown11306;
+        gGameData.mMiiListSortKey = mResidents.mUnknown11306;
     }
     for (int i = 0; i < 3; i++) {
         CharacterModel *model = &mCharacters[i].mModel;
