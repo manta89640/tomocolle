@@ -821,8 +821,10 @@ Not done:
 ## The Mii maker
 
 Overlay 76, `SceneMiiEdit2`: 83 functions, `.text` `0x02149A40` to `0x02158748` (60 KB). It is cut as one unit,
-`src/overlays/ov076/MiiEditScene.cpp`, which claims every section. Nothing in it is decompiled yet; the header holds
-the scene's layout.
+`src/overlays/ov076/MiiEditScene.cpp`, which claims every section. 24 of its 83 functions are written and match
+(the scene's StartLoading, Draw, Exit, camera functions and destructors, and the pages' Draw and Exit); the header
+holds the scene's layout and its seven pages (`mPage`, +0x150: 0 the sex choice, etc message 0x1A; 1 the face, 0x1C;
+2 the profile, 0x1D; 3 the voice, 0x21; 4 the personality, 0x22; 5 and 6 window pages not yet identified).
 
 Measured:
 
@@ -851,7 +853,8 @@ Measured:
 - `.data` holds a 0x120-byte `const` table at `0x0215A13C` that is zero in the ROM. The static initialiser fills it
   from two pairs of words of the `.rodata` pool (offsets 0xBC and 0x74), as overlay 109's text origins are filled.
 
-Not done: every function, and the data.
+Not done: the other 59 functions (the scene's Init and Update, the pages' Init and Update, and the large edit
+functions), and the data.
 
 ## Compiler
 
