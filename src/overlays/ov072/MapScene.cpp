@@ -423,8 +423,8 @@ void MapScene::Init() {
     for (int i = 0; i < MODEL_COUNT; i++) {
         Sprite_Init(&mNewMarks[i], 1, 0x19, 128, 96, TRUE);
         if (i == MODEL_APARTMENT) {
-            mNewMarks[i].SetPositionFromVec(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                            sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
+            const Point &mark = sApartmentMarkPositions[mIslandStage];
+            mNewMarks[i].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
         } else {
             mNewMarks[i].SetPositionFromVec(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT);
         }
@@ -526,20 +526,22 @@ void MapScene::Init() {
     mLights[0]->mColor = func_020a6574(phase);
     mLights[1]->mColor = func_020a659c(phase);
 
-    Sprite_Init(&mBackButtons[0], 1, 0, 128, 96, TRUE);
-    func_02031eb0(&mBackButtons[0], sBackButtonSize.x, sBackButtonSize.y);
-    mBackButtons[0].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-    func_02031260(&mBackButtons[0], backButtonKind);
     for (int i = 0; i < 1; i++) {
-        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
+        Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
+        func_02031eb0(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
     }
-    func_02032158(&mBackButtons[0], &sBackButtonSounds);
-    func_0203119c(&mBackButtons[0]);
-    mBackButtons[0].mVisible = FALSE;
+    mBackButtons[0].SetPositionFromVec(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
+    for (int i = 0; i < 1; i++) {
+        func_02031260(&mBackButtons[i], backButtonKind);
+        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
+        func_02032158(&mBackButtons[i], &sBackButtonSounds);
+        func_0203119c(&mBackButtons[i]);
+        mBackButtons[i].mVisible = FALSE;
+    }
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
         func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
-        mButtons[i].SetPosition(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
+        mButtons[i].SetPositionFromVec(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
         func_02031260(&mButtons[i], sButtonKinds[i]);
         func_02032158(&mButtons[i], &sButtonSounds[i]);
         func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
@@ -548,8 +550,8 @@ void MapScene::Init() {
     }
     mMessageFiles[0].Open("TCO:tmd_common_msg_JP.bmg");
     mMessageFiles[1].Open("TET:tmd_etc_msg_JP.bmg");
-    int titleCharOffset = 400;
     int charOffset = 200;
+    int titleCharOffset = 400;
     for (u16 i = 0; i < 3; i++) {
         charOffset += func_02031f58(&mButtons[i], &mMessageFiles[1], sButtonMessages[i], &gFonts[sButtonFonts[i]].mFont,
                                     0x10, charOffset);
@@ -557,8 +559,9 @@ void MapScene::Init() {
     func_02032fb8(&mMessageWindows[0], sTitleWindowRect);
     func_02033174(&mMessageWindows[0], sWindowTitleScreen, 0x100);
     mMessageWindows[0].mUnknownAF9C = 0;
+    MessageFile *files = mMessageFiles;
     for (int i = 0; i < titleTextCount; i++) {
-        func_02033a58(&mMessageWindows[0], &mMessageFiles[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
+        func_02033a58(&mMessageWindows[0], &files[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
                       sTitleTextPosition, &titleCharOffset);
     }
     func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
@@ -577,13 +580,17 @@ void MapScene::Init() {
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x200, 3);
     data_0211d604.Set(0x1211);
-    if (mSceneId == 0x6A) {
-        mSound.Init(&mClock, MapSound::MODE_RESTART);
-        SetState(STATE_TITLE);
-    } else if (mSceneId == 0x6D || mSceneId == 0x6E) {
+    switch (mSceneId) {
+    case 0x6D:
+    case 0x6E:
         mSound.Init(&mClock, MapSound::MODE_UNKNOWN3);
         SetState(STATE_TUTORIAL);
-    } else {
+        break;
+    case 0x6A:
+        mSound.Init(&mClock, MapSound::MODE_RESTART);
+        SetState(STATE_TITLE);
+        break;
+    default:
         mSound.Init(&mClock, MapSound::MODE_START);
         Deselect(FALSE, 1);
         if (mNewBuilding == -1) {
@@ -591,6 +598,7 @@ void MapScene::Init() {
         } else {
             SetState(STATE_NEW_BUILDING);
         }
+        break;
     }
     NNS_GfdDumpLnkTexVramManager();
     func_02060c1c();
@@ -1566,8 +1574,8 @@ void MapScene::MakeDailyNews() {
     if (found) {
         gSceneMemory.mCharacters[0] = chosen;
         for (int i = 0; i < otherCount; i++) {
-            int j = Rand(otherCount);
             u8 t = others[i];
+            int j = Rand(otherCount);
             others[i] = others[j];
             others[j] = t;
         }
