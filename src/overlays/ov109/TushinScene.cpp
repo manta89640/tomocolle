@@ -761,8 +761,9 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2, as the original's loops are): the copy of bits 0..3 of the record's 0x54
-// and the `|=` of 0x299 load their operands into other registers (10 instructions).
+// NOT MATCHING (optimization level 2, as the original's loops are): one instruction, the `orr` of 0x299, whose
+// operands are the other way round (`orr r0, r0, r1`: the record's byte first, the received one loaded first);
+// `record | received`, `|=`, a local, casts and a pointer all load the record's byte first.
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -800,7 +801,8 @@ int TushinScene::ReceiveCharacter() {
             if (bits != 4) {
                 record.mUnknown050Bits29 = bits;
             }
-            record.mUnknown054Bits0 = sTransfer.mUnknown054Bits0;
+            bits = sTransfer.mUnknown054Bits0;
+            record.mUnknown054Bits0 = bits;
             bits = sTransfer.mUnknown054Bits21;
             if (bits != 0) {
                 record.mUnknown054Bits21 = bits;
@@ -822,8 +824,7 @@ int TushinScene::ReceiveCharacter() {
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
             }
-            u8 flags = sTransfer.mUnknown299;
-            record.mUnknown299 |= flags;
+            record.mUnknown299 = sTransfer.mUnknown299 | record.mUnknown299;
             int n = 0;
             for (int i = 0; i < 6; i++) {
                 if (func_0209c718(&sTransfer, i) == 0xFF) {
