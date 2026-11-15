@@ -25,7 +25,9 @@ public:
     virtual void Draw();         // 0x0214ADE8
     virtual void Exit();         // 0x0214B060
 
-    /* 0x00010 */ u8 mUnknown00010[0x148];      // Init gives +0x10 to func_02024b10
+    /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to func_02024b10
+    /* 0x00150 */ int mPage;                    // Which page Draw and Exit pass on to (0 to 6); Init sets -1
+    /* 0x00154 */ u8 mUnknown00154[4];
     /* 0x00158 */ u8 mButtons00158[6][0xF4];    // SpriteButton[6]
     /* 0x00710 */ u8 mCharacter[0x2B18];        // CharacterBase (C2) and its CharacterModel at +0x25E4: the Mii shown
     /* 0x03228 */ u8 mEditedCharacter[0x26F8];  // CharacterBase (C1, func_0208fd18), destroyed with its D1
