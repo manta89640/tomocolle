@@ -355,6 +355,7 @@ src/scene/MiiListMenuScene.cpp:
     .data       start:0x02111868 end:0x021119ec
 
 src/scene/G3SpriteTestScene.cpp:
+    complete
     .text       start:0x02050884 end:0x02050d70
     .rodata     start:0x020b5f70 end:0x020b5f80
     .data       start:0x021119ec end:0x02111a80

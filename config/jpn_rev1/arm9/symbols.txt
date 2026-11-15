@@ -1207,7 +1207,7 @@ func_0202b0e8 kind:function(arm,size=0x10) addr:0x0202b0e8
 func_0202b0f8 kind:function(arm,size=0x10) addr:0x0202b0f8
 func_0202b108 kind:function(arm,size=0x1c) addr:0x0202b108
 func_0202b124 kind:function(arm,size=0xc) addr:0x0202b124
-func_0202b130 kind:function(arm,size=0xc0) addr:0x0202b130
+_ZN8G3SpriteC1Ev kind:function(arm,size=0xc0) addr:0x0202b130
 func_0202b1f0 kind:function(arm,size=0x28) addr:0x0202b1f0
 func_0202b218 kind:function(arm,size=0xd0) addr:0x0202b218
 func_0202b2e8 kind:function(arm,size=0x1bc) addr:0x0202b2e8
@@ -1215,8 +1215,8 @@ func_0202b4a4 kind:function(arm,size=0x20) addr:0x0202b4a4
 func_0202b4c4 kind:function(arm,size=0x14) addr:0x0202b4c4
 func_0202b4d8 kind:function(arm,size=0x4) addr:0x0202b4d8
 func_0202b4dc kind:function(arm,size=0x1dc) addr:0x0202b4dc
-func_0202b6b8 kind:function(arm,size=0x14) addr:0x0202b6b8
-func_0202b6cc kind:function(arm,size=0x4) addr:0x0202b6cc
+_ZN8G3SpriteD0Ev kind:function(arm,size=0x14) addr:0x0202b6b8
+_ZN8G3SpriteD1Ev kind:function(arm,size=0x4) addr:0x0202b6cc
 func_0202b6d0 kind:function(arm,size=0x1c) addr:0x0202b6d0
 func_0202b6ec kind:function(arm,size=0xc8) addr:0x0202b6ec
 func_0202b7b4 kind:function(arm,size=0x10) addr:0x0202b7b4
@@ -3442,8 +3442,8 @@ func_0208fbb4 kind:function(arm,size=0x80) addr:0x0208fbb4
 func_0208fc34 kind:function(arm,size=0xc4) addr:0x0208fc34
 _ZN13CharacterBaseC2Ev kind:function(arm,size=0x20) addr:0x0208fcf8
 func_0208fd18 kind:function(arm,size=0x20) addr:0x0208fd18
-func_0208fd38 kind:function(arm,size=0x2c) addr:0x0208fd38
-func_0208fd64 kind:function(arm,size=0x2c) addr:0x0208fd64
+_ZN13CharacterBaseD1Ev kind:function(arm,size=0x2c) addr:0x0208fd38
+_ZN13CharacterBaseD2Ev kind:function(arm,size=0x2c) addr:0x0208fd64
 func_0208fd90 kind:function(arm,size=0x40) addr:0x0208fd90
 func_0208fdd0 kind:function(arm,size=0xe4) addr:0x0208fdd0
 func_0208feb4 kind:function(arm,size=0x24) addr:0x0208feb4
@@ -4304,7 +4304,7 @@ data_020b5ed0 kind:data(any) addr:0x020b5ed0
 data_020b5f08 kind:data(any) addr:0x020b5f08
 gStr_MLT_Window_down_nsc kind:data(any) addr:0x020b5f40
 gStr_MLT_Window_common_nsc_3 kind:data(any) addr:0x020b5f58
-data_020b5f70 kind:data(any) addr:0x020b5f70
+sSpriteRect kind:data(any) addr:0x020b5f70 local
 gStr_Z kind:data(any) addr:0x020b5f80
 gStr_SquareBracketSquareBracket kind:data(any) addr:0x020b5f84
 gStr_bdf kind:data(any) addr:0x020b5f88
@@ -4945,8 +4945,8 @@ gStr_NANR kind:data(any) addr:0x0210f620
 gStr_NCLR kind:data(any) addr:0x0210f628
 gStr_NSCR kind:data(any) addr:0x0210f630
 gStr_NCGR kind:data(any) addr:0x0210f638
-_ZTV5Model kind:data(any) addr:0x0210f648
-_ZTV9AnimModel kind:data(any) addr:0x0210f664
+_ZTV5Model kind:data(any) addr:0x0210f640
+_ZTV9AnimModel kind:data(any) addr:0x0210f65c
 gStr_imd kind:data(any) addr:0x0210f678
 gStr_nsbmd kind:data(any) addr:0x0210f67c
 gStr_itx kind:data(any) addr:0x0210f684
@@ -4961,7 +4961,7 @@ gStr_itp kind:data(any) addr:0x0210f6b4
 gStr_nsbtp kind:data(any) addr:0x0210f6b8
 gStr_ita kind:data(any) addr:0x0210f6c0
 gStr_nsbta kind:data(any) addr:0x0210f6c4
-data_0210f6d4 kind:data(any) addr:0x0210f6d4
+_ZTV8G3Sprite kind:data(any) addr:0x0210f6cc
 gStr_ntft kind:data(any) addr:0x0210f6dc
 gStr_ntfp kind:data(any) addr:0x0210f6e4
 _ZTV12BgTextCanvas kind:data(any) addr:0x0210f6ec
@@ -5371,14 +5371,14 @@ gStr_TEM_tmd_etc_msg_JP_bmg kind:data(any) addr:0x021119cc
 gStr_MLT_2 kind:data(any) addr:0x021119e4
 gStr_TEM_2 kind:data(any) addr:0x021119e8
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-gStr_M01 kind:data(any) addr:0x02111a10
-gStr_Mdl_Body_body000_3D_LZ_bin_3 kind:data(any) addr:0x02111a14
-gStr_M00 kind:data(any) addr:0x02111a30
-gStr_Scn_Scene_SceneTestG3Sprite_LZ_bin kind:data(any) addr:0x02111a34
-gStr_M01_body_imd kind:data(any) addr:0x02111a58
-gStr_M00_Face_tga kind:data(any) addr:0x02111a68
-gStr_M00_2 kind:data(any) addr:0x02111a78
-gStr_M01_2 kind:data(any) addr:0x02111a7c
+@13178 kind:data(any) addr:0x02111a10 local
+@13179 kind:data(any) addr:0x02111a14 local
+@13180 kind:data(any) addr:0x02111a30 local
+@13181 kind:data(any) addr:0x02111a34 local
+@13193 kind:data(any) addr:0x02111a58 local
+@13194 kind:data(any) addr:0x02111a68 local
+@13207 kind:data(any) addr:0x02111a78 local
+@13208 kind:data(any) addr:0x02111a7c local
 data_02111a80 kind:data(any) addr:0x02111a80
 data_02111a94 kind:data(any) addr:0x02111a94
 data_02111aa8 kind:data(any) addr:0x02111aa8
