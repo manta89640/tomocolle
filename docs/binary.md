@@ -568,8 +568,8 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Three functions differ, each with a comment saying how: `Init` (scheduling around the camera's reset and the
-  lights; the same length now), `Update` (one register too many in the touch loop: our compiler keeps
+- Three functions differ, each with a comment saying how: `Init` (one instruction placed differently: the back
+  button's base address; the same length), `Update` (one register too many in the touch loop: our compiler keeps
   `sModelTouchRects`' address in a register, the original loads it in each branch, so `&mCamera` is spilled and
   the frame is 8 bytes larger), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
   buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
