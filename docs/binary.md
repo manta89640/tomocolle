@@ -680,6 +680,72 @@ names start two bytes past a four-byte boundary, right after the address, which 
 link's ALIGNALL(4). Measured with the compiler: which statics of one size go where follows from the order of all of the
 file's data objects, that one included.
 
+## Wireless play with items
+
+Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 70 of
+its 75 functions match; not complete.
+
+Measured:
+
+- `ItemTradeScene` (scene 0xB1; `CreateScene`, case 177, loads overlay 110 and allocates 0x28E0C bytes; the
+  constructor is the main program's, `0x02048B78`; virtual table at `0x0214F724`) is the other branch of wireless
+  play from overlay 109's: the two DS exchange things the player owns, not Miis. Etc message 0xF9, "たべもの・服・
+  お宝など" (food, clothes, treasure and so on), names it on the first window, beside "相手を募集する" (look for
+  a partner, 0xFE) and "相手を見つける" (find one, 0xFF). It mounts the same scene archive as overlay 109
+  (`STS`, "Scn/Scene/SceneTushin_LZ.bin") and its own list, "Scn/List/List_TushinItemList_LZ.bin". Leaving, or
+  a lost connection once acknowledged, asks for scene 0x29 (overlay 109); a failed write of the save data for
+  scene 0xC2 (overlay 107).
+- The scene is a state machine of 20 states, each with a window kind (`sWindowKinds`) and an etc message
+  (`sStateMessages`, 0xFD to 0x127): choose a role, recruit or search, choose a partner among up to three found,
+  connect, then the list (no window), ask, send, receive, save, and the messages for sent, received, too many (99
+  of a thing at most), disconnected and error. The window is the main program's message window (`MessageWindow.h`)
+  with up to three buttons and OK, or yes and no.
+- What is sent: WH (`WH_SetReceiver`, `WH_SendData`) carries four bytes for a thing, its id, with 0x800 added for a
+  costume and 0x1000 for a room interior; and two bytes for a command: 2 a thing is coming, 3 ready for it, 4
+  received, 5 not received (too many). A receive without data means the partner has gone. When both send at once,
+  the child gives way and receives. The sender takes the thing out of its inventory and saves before it sends, and
+  puts it back if the partner had too many. The partner's name shown on connection is `gWHChildSsid` (the parent)
+  or the name of the parent found (the child); the parents found are kept by the main program's session layer over
+  WH (`data_0213B700`, functions `0x0203B748` to `0x0203BCD4`), in the overlay's `sPartners` (3 × 0xC0 bytes).
+- `ItemTradeList` (0x15A3C bytes at 0x10 of the scene) is the list of the player's things on the lower screen: the
+  main program's scrolling list (`ItemListView` here, virtual table `0x021153BC`, functions `0x020A80F0` to
+  `0x020A9E94`), five tabs (items, costumes, room interiors and two more item lists, each fed by an inventory
+  function of the main program: `0x0209F0F0`, `0x0209E4AC`, `0x020A5174`, `0x0209F208`, `0x0209F28C`), a row of
+  four filters under the items tab and five under the costumes tab, OK and back. On the upper screen it shows what
+  is chosen: an item's model, a costume on a mannequin ("Mdl/Misc/headManikin_3D_LZ.bin" for the head), or a room
+  interior, each sliding in and bouncing, and its name (explain messages).
+- The list is not overlay 110's alone: its filter rows (`0x0214A1C8` to `0x0214A4CC`) are byte for byte functions of
+  overlays 75, 85 and 100, and several of its own functions are overlay 100's (`0x0214AE10` to `0x0214B144`,
+  `0x0214BB48`, `0x0214C9CC` there); the item model's `ChangeItem` is overlay 75's and 96's. Only four small
+  functions are byte for byte overlay 109's (`SetEntry`, `WriteSave` and two empty callbacks): the two scenes do not
+  share their code otherwise.
+- The data, all at the ROM's addresses in our object (`tools/name_unit_data.py` lays `.rodata`, `.data` and `.bss`
+  out where the ROM has them, and names them): `.rodata` is two 1-aligned arrays, the pool of the constants under
+  64 bytes (0x2D0 bytes, in the ROM's order), an array, the window's screen name, and the five tables of 80 and 96
+  bytes each on its own; `.data` the lights' colours, the virtual table and the strings in the order of the code;
+  `.bss` the communication variables, sorted by size with WH's 32-byte aligned send buffers among them, then the
+  partners' timers and the 0x240-byte list of parents found.
+- Reads of a file-scope `static const` object with a constant index are folded into the code: the tabs' and
+  filters' touch sizes, the buttons' positions and the cameras' vectors are in the pool though no instruction loads
+  them. Local `const` scalars that nothing uses are in it too (0x3000 and 0x4000 here), and so is the initialiser
+  of a local `char` array ("IM0"). In the pool's size sort, the `.bss` statics' declaration places count as well:
+  adding a constant moves `.bss` objects of equal size.
+
+Inferred: overlays 109 and 110 are the two halves of wireless play, written from common pieces (the session layer,
+WH, the save-and-send sequence), but each from its own source; overlay 110's list is the code of the scenes that
+list the player's things (75, 85, 100), copied in.
+
+Not done:
+
+- Five functions differ, each with a comment saying how: `SetItemCamera` and `SetRoomCamera` (the original keeps the
+  camera's address in a register, or loads it after the constants), `SetupWindow` (the original keeps the button
+  positions' table in r11 and so spills `this`), `UpdateWireless` (the partner loop's registers assigned otherwise)
+  and `Update` (one instruction's place). The unit cannot be complete until they match.
+- `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
+  `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
+- What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and
+  value (0x30, 0x34 of `ItemTradeSelection`) are for: nothing in the overlay reads them.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
