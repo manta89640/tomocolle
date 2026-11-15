@@ -234,7 +234,7 @@ gStr_Mdl_Map_map2_shop_food_3D_LZ_bin kind:data(any) addr:0x02150a44
 gStr_Mdl_Map_map2_shop_item_3D_LZ_bin kind:data(any) addr:0x02150a68
 gStr_Scn_Map_SceneMap2WndMachine_LZ_bin kind:data(any) addr:0x02150a8c
 gStr_Scn_Map_SceneMap2WndRanking_LZ_bin kind:data(any) addr:0x02150ab0
-data_ov072_02150adc kind:data(any) addr:0x02150adc ambiguous
+_ZTV8MapScene kind:data(any) addr:0x02150ad4
 gStr_Scn_Map_SceneMap2WndQuestion_LZ_bin kind:data(any) addr:0x02150af8
 gStr_Scn_Map_SceneMap2WndFountain_LZ_bin kind:data(any) addr:0x02150b1c
 gStr_Scn_Map_SceneMap2WndCityhall_LZ_bin kind:data(any) addr:0x02150b40

@@ -521,15 +521,15 @@ void MapScene::Init() {
     mLights[0]->mColor = func_020a6574(phase);
     mLights[1]->mColor = func_020a659c(phase);
 
+    Sprite_Init(&mBackButtons[0], 1, 0, 128, 96, TRUE);
+    func_02031eb0(&mBackButtons[0], sBackButtonSize.x, sBackButtonSize.y);
+    mBackButtons[0].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
+    func_02031260(&mBackButtons[0], backButtonSequence);
     for (int i = 0; i < 1; i++) {
-        Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
-        func_02031eb0(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
-        mBackButtons[i].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-        func_02031260(&mBackButtons[i], backButtonSequence);
         func_02031278(&mBackButtons[i], sBackButtonPalettes[i] + 1);
-        func_02032158(&mBackButtons[i], &sBackButtonRect);
-        func_0203119c(&mBackButtons[i]);
     }
+    func_02032158(&mBackButtons[0], &sBackButtonRect);
+    func_0203119c(&mBackButtons[0]);
     mBackButtons[0].mVisible = FALSE;
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
@@ -1586,7 +1586,7 @@ void MapScene::AddNews(int kind) {
     }
     NewsItem item;
     int index = 0;
-    func_020522ac(&item, kind);
+    NewsItem_Make(&item, kind);
     func_0202c8bc(&gGameData, index, &item);
     index++;
     for (int i = 0; i < 11; i++) {

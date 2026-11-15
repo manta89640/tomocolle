@@ -485,7 +485,7 @@ void func_02036874(int value, wchar_t *buffer, int size, int a, int b);
 u8 func_02039c00(IslandState *island, int building);
 void func_02039c0c(IslandState *island, int building, int state);
 void func_0203c02c(SceneManager *manager, int sceneId);
-void func_020522ac(NewsItem *item, int kind);
+void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
 void func_02060c1c();
 
 // --- Particles ---
