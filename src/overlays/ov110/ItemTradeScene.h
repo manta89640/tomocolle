@@ -88,15 +88,20 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
-// The model of a character with its animations and joints (func_0208eb18 constructs it). Its destructor is as the
-// scene's destructor has it inlined.
-class CharacterModel : public AnimModel {
+// The model of a character with its animations and joints (func_0208eb18 constructs it). The model is a member,
+// not a base: the scene's destructor resets the render callback and then runs AnimModel's destructor, without a
+// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel).
+class CharacterModel {
 public:
-    CharacterModel(); // func_0208eb18
-    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
+    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
 
+    /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ u8 mUnknown0EC[0x3D0];
+    /* 0x0EC */ VecFx32 mScale;    // The scene's Init gives the mannequin's data_020fbe0c * 4 / 10
+    /* 0x0F8 */ VecFx32 mInvScale; // and its inverses
+    /* 0x104 */ u8 mUnknown104[0x3A0];
+    /* 0x4A4 */ BOOL mUnknown4A4;
+    /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
 extern "C" {
@@ -150,8 +155,12 @@ int func_02073514(int unk);
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class Mannequin {
 public:
+    void SetAnimation(const char *name);
+
     /* 0x000 */ AnimModel mHead;
-    /* 0x0E0 */ u8 mUnknown0E0[0xC8];
+    /* 0x0E0 */ u8 mUnknown0E0[0x60];
+    /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
+    /* 0x14C */ u8 mUnknown14C[0x5C];
     /* 0x1A8 */ CharacterModel mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
     /* 0x674 */ char mArchivePath[0x1C]; // What func_0208ee18 sets for the costume
@@ -164,6 +173,10 @@ void func_020a034c(Mannequin *mannequin);            // Draws it
 void func_020a037c(Mannequin *mannequin, u32 resType, int animation);
 void func_020a03bc(Mannequin *mannequin, BOOL visible);
 void func_020a03c8(Mannequin *mannequin, int alpha); // Sets its alpha (0 to 31)
+}
+
+inline void Mannequin::SetAnimation(const char *name) {
+    func_020a037c(this, RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mAnim.mResourceSet, RESOURCE_BCA0, name));
 }
 
 // --- Items (main program 0x0209e140 to 0x0209f84c, 0x020a4d34 to 0x020a5ca0) ---------------------------------
@@ -290,9 +303,9 @@ public:
 
 class RoomParts {
 public:
-    /* 0x000 */ u8 mUnknown000[8];
-    /* 0x008 */ fx32 mUnknown008; // This scene moves the room up and down by it
-    /* 0x00C */ u8 mUnknown00C[0x40];
+    /* 0x000 */ u8 mUnknown000[4];
+    /* 0x004 */ VecFx32 mPosition; // This scene moves the room up and down by its y
+    /* 0x010 */ u8 mUnknown010[0x3C];
     /* 0x04C */ RoomDoorModel mDoor;
     /* 0x1A4 */ RoomPart mParts[6];
     /* 0x8DC */ u8 mUnknown8DC[0x18];
@@ -449,6 +462,11 @@ struct Lighting {
 };
 
 struct ScreenControl {
+    void Set(u32 planes) {
+        mPlanes = planes;
+        mPlanesChanged = TRUE;
+    }
+
     /* 0x00 */ u32 mPlanes;
     /* 0x04 */ u8 mUnknown04[0x44];
     /* 0x48 */ int mUnknown48;
@@ -511,6 +529,21 @@ void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
 BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
 BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+}
+
+// --- The message window's functions this scene calls besides MessageWindow.h's ---
+extern "C" {
+// Adds a button: (window, number, unknown, sequence, sequence when on, position, size, its sounds, unknown)
+void func_02033448(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+                   WindowPoint size, const int *sounds, int unk2);
+// Adds a button with a text: as func_02033448, with the text's message file and message, font, plane, and
+// character offset
+void func_02033844(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+                   WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const int *sounds, int unk2);
+// Adds the window's message text: (window, file, message, font, plane, area, position, character offset)
+void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   WindowPoint area, WindowPoint position, int *charOffset);
 }
 
 // --- Wireless (main program) ------------------------------------------------------------------------------------
@@ -802,6 +835,40 @@ class ItemTradePlayer : public Character {
 // list archive, "Scn/List/List_TushinItemList_LZ.bin".
 class ItemTradeScene : public Scene {
 public:
+    // mState, by the etc message each shows
+    enum State {
+        STATE_CHOOSE,           // "Which one?": look for a partner, or be found
+        STATE_RECRUITING,       // "Looking for a partner to come..." (the parent)
+        STATE_SEARCHING,        // "Searching for a partner..." (the child)
+        STATE_CHOOSE_PARTNER,   // "Partners found. Choose one"
+        STATE_CONNECTING,       // "Connecting..."
+        STATE_CONNECTED_PARENT, // "Connected with ..."
+        STATE_CONNECTED_CHILD,
+        STATE_LIST,             // The list: choose what to send (no window)
+        STATE_ASK_SEND,         // "Send ...? All right?"
+        STATE_SENDING,          // "Sending and saving..."
+        STATE_RECEIVING,        // "Receiving..."
+        STATE_SAVING,           // "Saving..."
+        STATE_SENT,             // "Sent"
+        STATE_PARTNER_FULL,     // "The partner has too many of it: it could not be sent"
+        STATE_RECEIVED,         // "... has come"
+        STATE_FULL,             // "There are too many of it: it could not be received"
+        STATE_DISCONNECTED,     // "The connection was cut"
+        STATE_ASK_DISCONNECT,   // "Disconnect?"
+        STATE_WAIT,             // "Please wait..."
+        STATE_ERROR,            // "An error occurred"
+    };
+
+    // What one DS sends the other besides an item (ItemTradeComm::mCommand)
+    enum Command {
+        COMMAND_ITEM,     // The item, four bytes
+        COMMAND_1,
+        COMMAND_SENDING,  // An item is about to come
+        COMMAND_READY,    // Ready to receive it
+        COMMAND_RECEIVED, // It came
+        COMMAND_FULL,     // It came, but there are too many of it already
+    };
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();
@@ -814,8 +881,8 @@ public:
     void UpdateWireless();
     void UpdateMusic();
     void UpdateLinkIcon();
-    void UpdateSave();
-    void func_ov110_0214dc04();
+    void UpdateSend();
+    void InitWirelessWhenIdle();
     void Send(int command);
     void SetEntry(BOOL entry);
     void ClearNames();
@@ -844,11 +911,11 @@ public:
     /* 0x28DA8 */ int mWait;
     /* 0x28DAC */ wchar_t mNames[3][11]; // Of the partners found
     /* 0x28DF0 */ BOOL mMusicPlaying;
-    /* 0x28DF4 */ int mSaveStep;
-    /* 0x28DF8 */ BOOL mUnknown28DF8;
-    /* 0x28DFC */ BOOL mDisconnect;
-    /* 0x28E00 */ BOOL mUnknown28E00;
-    /* 0x28E04 */ BOOL mSaveAfterReceive;
+    /* 0x28DF4 */ int mSendStep;      // 2: take the item away and save; 3: wait for the save; 1: send when ready
+    /* 0x28DF8 */ BOOL mPartnerReady;  // COMMAND_READY came
+    /* 0x28DFC */ BOOL mPartnerSending; // COMMAND_SENDING came
+    /* 0x28E00 */ BOOL mIsParent;
+    /* 0x28E04 */ BOOL mSaveAfterReturn; // The partner sent the item back: save once it is added again
     /* 0x28E08 */ BOOL mWindowDone;
 }; // 0x28E0C
 
