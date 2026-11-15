@@ -1465,7 +1465,7 @@ void TutorialRoomCharacter::Draw() {
 
 // @0x0214dad8
 void TutorialRoomCharacter::CopyName() {
-    func_0207a80c(this, mNameText);
+    MiiData_GetName(this, mNameText);
 }
 
 // --- TutorialRoomCharacter: head turns, walking steps, the head icon, animations and sounds ---

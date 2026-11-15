@@ -225,7 +225,7 @@ void func_0202c264(SavedGame *savedGame, int index, SavedCharacter *character); 
 void func_0202c28c(SavedGame *savedGame, int index, SavedCharacter *character); // Writes one
 
 // Copies the character's name out as a string
-void func_0207a80c(SavedCharacter *character, wchar_t *name);
+void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // The speech engine's state: 1 while it speaks
 int Shtts_GetState(void *engine);
 }
@@ -3234,7 +3234,7 @@ void RoomCharacter::SetStateWithPartner(int state, int partnerState) {
 
 // 0x0215243c
 void RoomCharacter::CopyName() {
-    func_0207a80c(this, mNameText);
+    MiiData_GetName(this, mNameText);
 }
 
 // 0x02152450
@@ -10672,7 +10672,7 @@ int RoomCharacter::StepChangeHeldItems(int itemA, int itemB) {
             int ready = 0;
             mSubSubStep++;
             for (int i = 0; i < 2; i++) {
-                GXRgb color = func_02073514(func_0207a6c0(this));
+                GXRgb color = func_02073514(MiiData_GetFavoriteColor(this));
                 NNS_G3dMdlSetMdlDiff(mHeldItems[i]->mResMdl, 0, color);
                 mHeldItems[i]->SetRotation(0, 0, 0);
                 MTX_Identity33(&mHeldItems[i]->mRotation);

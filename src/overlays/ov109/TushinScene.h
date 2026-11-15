@@ -278,7 +278,7 @@ void func_02023eac(ScreenControl *screens, int planes);
 void func_0202683c(void);
 void func_0201f508(wchar_t *text);
 void func_02036bb4(wchar_t *text);
-void func_0207a8c4(CharacterRecord *character, wchar_t *nickname);
+void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
 int func_020733a4(void *buffer);
 void func_02097c64(SavedCharacter *character);
 void Character_ResetSoundPhase(SceneCharacter *character, int slot);
@@ -468,8 +468,8 @@ BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when 
 int func_02073520(CharacterRecord *character);
 int func_02073560(CharacterRecord *a, CharacterRecord *b);
 int func_02098584(CharacterRecord *character);
-int func_0207a710(CharacterRecord *character);
-void func_0207a80c(CharacterRecord *character, wchar_t *name); // Its name, as a string
+int MiiData_GetSex(CharacterRecord *character);
+void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
 void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
 void func_020a0664(ResidentList *list);

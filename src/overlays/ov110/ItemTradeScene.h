@@ -146,8 +146,8 @@ extern "C" {
 s8 func_02098f2c(SavedCharacter *character); // Its personality
 // The personalities' kinds (0 to 3), by personality
 extern const int data_020fba28[];
-int func_0207a6c0(SavedCharacter *character);
-int func_0207a710(SavedCharacter *character);
+int MiiData_GetFavoriteColor(SavedCharacter *character);
+int MiiData_GetSex(SavedCharacter *character);
 int func_02073514(int unk);
 }
 

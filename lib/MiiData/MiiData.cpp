@@ -69,315 +69,315 @@ struct MiiData {
     /* 0x36 */ u16 mCreatorName[10];
 }; // 0x4A
 
-extern "C" int func_02079fa0(MiiData *mii) {
+extern "C" int MiiData_GetEyeType(MiiData *mii) {
     return mii->mEyeType;
 }
 
-extern "C" void func_02079fb0(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeType(MiiData *mii, int value) {
     mii->mEyeType = value;
 }
 
-extern "C" int func_02079fd0(MiiData *mii) {
+extern "C" int MiiData_GetEyeColor(MiiData *mii) {
     return mii->mEyeColor;
 }
 
-extern "C" void func_02079fe0(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeColor(MiiData *mii, int value) {
     mii->mEyeColor = value;
 }
 
-extern "C" int func_0207a000(MiiData *mii) {
+extern "C" int MiiData_GetEyeScale(MiiData *mii) {
     return mii->mEyeScale;
 }
 
-extern "C" void func_0207a010(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeScale(MiiData *mii, int value) {
     mii->mEyeScale = value;
 }
 
-extern "C" int func_0207a030(MiiData *mii) {
+extern "C" int MiiData_GetEyeRotation(MiiData *mii) {
     return mii->mEyeRotation;
 }
 
-extern "C" void func_0207a040(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeRotation(MiiData *mii, int value) {
     mii->mEyeRotation = value;
 }
 
-extern "C" int func_0207a060(MiiData *mii) {
+extern "C" int MiiData_GetEyeX(MiiData *mii) {
     return mii->mEyeX;
 }
 
-extern "C" void func_0207a070(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeX(MiiData *mii, int value) {
     mii->mEyeX = value;
 }
 
-extern "C" int func_0207a090(MiiData *mii) {
+extern "C" int MiiData_GetEyeY(MiiData *mii) {
     return mii->mEyeY;
 }
 
-extern "C" void func_0207a0a0(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyeY(MiiData *mii, int value) {
     mii->mEyeY = value;
 }
 
-extern "C" int func_0207a0c0(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowType(MiiData *mii) {
     return mii->mEyebrowType;
 }
 
-extern "C" void func_0207a0d0(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowType(MiiData *mii, int value) {
     mii->mEyebrowType = value;
 }
 
-extern "C" int func_0207a0f0(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowColor(MiiData *mii) {
     return mii->mEyebrowColor;
 }
 
-extern "C" void func_0207a100(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowColor(MiiData *mii, int value) {
     mii->mEyebrowColor = value;
 }
 
-extern "C" int func_0207a120(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowScale(MiiData *mii) {
     return mii->mEyebrowScale;
 }
 
-extern "C" void func_0207a130(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowScale(MiiData *mii, int value) {
     mii->mEyebrowScale = value;
 }
 
-extern "C" int func_0207a150(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowRotation(MiiData *mii) {
     return mii->mEyebrowRotation;
 }
 
-extern "C" void func_0207a160(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowRotation(MiiData *mii, int value) {
     mii->mEyebrowRotation = value;
 }
 
-extern "C" int func_0207a180(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowX(MiiData *mii) {
     return mii->mEyebrowX;
 }
 
-extern "C" void func_0207a190(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowX(MiiData *mii, int value) {
     mii->mEyebrowX = value;
 }
 
-extern "C" int func_0207a1b0(MiiData *mii) {
+extern "C" int MiiData_GetEyebrowY(MiiData *mii) {
     return mii->mEyebrowY;
 }
 
-extern "C" void func_0207a1c0(MiiData *mii, int value) {
+extern "C" void MiiData_SetEyebrowY(MiiData *mii, int value) {
     mii->mEyebrowY = value;
 }
 
-extern "C" int func_0207a1e0(MiiData *mii) {
+extern "C" int MiiData_GetMouthType(MiiData *mii) {
     return mii->mMouthType;
 }
 
-extern "C" void func_0207a1f0(MiiData *mii, int value) {
+extern "C" void MiiData_SetMouthType(MiiData *mii, int value) {
     mii->mMouthType = value;
 }
 
-extern "C" int func_0207a210(MiiData *mii) {
+extern "C" int MiiData_GetMouthColor(MiiData *mii) {
     return mii->mMouthColor;
 }
 
-extern "C" void func_0207a220(MiiData *mii, int value) {
+extern "C" void MiiData_SetMouthColor(MiiData *mii, int value) {
     mii->mMouthColor = value;
 }
 
-extern "C" int func_0207a240(MiiData *mii) {
+extern "C" int MiiData_GetMouthScale(MiiData *mii) {
     return mii->mMouthScale;
 }
 
-extern "C" void func_0207a250(MiiData *mii, int value) {
+extern "C" void MiiData_SetMouthScale(MiiData *mii, int value) {
     mii->mMouthScale = value;
 }
 
-extern "C" int func_0207a270(MiiData *mii) {
+extern "C" int MiiData_GetMouthY(MiiData *mii) {
     return mii->mMouthY;
 }
 
-extern "C" void func_0207a280(MiiData *mii, int value) {
+extern "C" void MiiData_SetMouthY(MiiData *mii, int value) {
     mii->mMouthY = value;
 }
 
-extern "C" int func_0207a2a0(MiiData *mii) {
+extern "C" int MiiData_GetBeardType(MiiData *mii) {
     return mii->mBeardType;
 }
 
-extern "C" void func_0207a2b0(MiiData *mii, int value) {
+extern "C" void MiiData_SetBeardType(MiiData *mii, int value) {
     mii->mBeardType = value;
 }
 
-extern "C" int func_0207a2d0(MiiData *mii) {
+extern "C" int MiiData_GetMustacheType(MiiData *mii) {
     return mii->mMustacheType;
 }
 
-extern "C" void func_0207a2e0(MiiData *mii, int value) {
+extern "C" void MiiData_SetMustacheType(MiiData *mii, int value) {
     mii->mMustacheType = value;
 }
 
-extern "C" int func_0207a300(MiiData *mii) {
+extern "C" int MiiData_GetBeardColor(MiiData *mii) {
     return mii->mBeardColor;
 }
 
-extern "C" void func_0207a310(MiiData *mii, int value) {
+extern "C" void MiiData_SetBeardColor(MiiData *mii, int value) {
     mii->mBeardColor = value;
 }
 
-extern "C" int func_0207a330(MiiData *mii) {
+extern "C" int MiiData_GetBeardScale(MiiData *mii) {
     return mii->mBeardScale;
 }
 
-extern "C" void func_0207a340(MiiData *mii, int value) {
+extern "C" void MiiData_SetBeardScale(MiiData *mii, int value) {
     mii->mBeardScale = value;
 }
 
-extern "C" int func_0207a360(MiiData *mii) {
+extern "C" int MiiData_GetBeardY(MiiData *mii) {
     return mii->mBeardY;
 }
 
-extern "C" void func_0207a370(MiiData *mii, int value) {
+extern "C" void MiiData_SetBeardY(MiiData *mii, int value) {
     mii->mBeardY = value;
 }
 
-extern "C" int func_0207a390(MiiData *mii) {
+extern "C" int MiiData_GetMoleType(MiiData *mii) {
     return mii->mMoleType;
 }
 
-extern "C" void func_0207a3a0(MiiData *mii, int value) {
+extern "C" void MiiData_SetMoleType(MiiData *mii, int value) {
     mii->mMoleType = value;
 }
 
-extern "C" int func_0207a3c0(MiiData *mii) {
+extern "C" int MiiData_GetMoleScale(MiiData *mii) {
     return mii->mMoleScale;
 }
 
-extern "C" void func_0207a3d0(MiiData *mii, int value) {
+extern "C" void MiiData_SetMoleScale(MiiData *mii, int value) {
     mii->mMoleScale = value;
 }
 
-extern "C" int func_0207a3f0(MiiData *mii) {
+extern "C" int MiiData_GetMoleX(MiiData *mii) {
     return mii->mMoleX;
 }
 
-extern "C" void func_0207a400(MiiData *mii, int value) {
+extern "C" void MiiData_SetMoleX(MiiData *mii, int value) {
     mii->mMoleX = value;
 }
 
-extern "C" int func_0207a420(MiiData *mii) {
+extern "C" int MiiData_GetMoleY(MiiData *mii) {
     return mii->mMoleY;
 }
 
-extern "C" void func_0207a430(MiiData *mii, int value) {
+extern "C" void MiiData_SetMoleY(MiiData *mii, int value) {
     mii->mMoleY = value;
 }
 
-extern "C" int func_0207a450(MiiData *mii) {
+extern "C" int MiiData_GetHairType(MiiData *mii) {
     return mii->mHairType;
 }
 
-extern "C" void func_0207a460(MiiData *mii, int value) {
+extern "C" void MiiData_SetHairType(MiiData *mii, int value) {
     mii->mHairType = value;
 }
 
-extern "C" int func_0207a480(MiiData *mii) {
+extern "C" int MiiData_GetHairColor(MiiData *mii) {
     return mii->mHairColor;
 }
 
-extern "C" void func_0207a490(MiiData *mii, int value) {
+extern "C" void MiiData_SetHairColor(MiiData *mii, int value) {
     mii->mHairColor = value;
 }
 
-extern "C" int func_0207a4b0(MiiData *mii) {
+extern "C" int MiiData_GetHairFlip(MiiData *mii) {
     return mii->mHairFlip;
 }
 
-extern "C" void func_0207a4c0(MiiData *mii, int value) {
+extern "C" void MiiData_SetHairFlip(MiiData *mii, int value) {
     mii->mHairFlip = value;
 }
 
-extern "C" int func_0207a4e0(MiiData *mii) {
+extern "C" int MiiData_GetNoseType(MiiData *mii) {
     return mii->mNoseType;
 }
 
-extern "C" void func_0207a4f0(MiiData *mii, int value) {
+extern "C" void MiiData_SetNoseType(MiiData *mii, int value) {
     mii->mNoseType = value;
 }
 
-extern "C" int func_0207a510(MiiData *mii) {
+extern "C" int MiiData_GetNoseScale(MiiData *mii) {
     return mii->mNoseScale;
 }
 
-extern "C" void func_0207a520(MiiData *mii, int value) {
+extern "C" void MiiData_SetNoseScale(MiiData *mii, int value) {
     mii->mNoseScale = value;
 }
 
-extern "C" int func_0207a540(MiiData *mii) {
+extern "C" int MiiData_GetNoseY(MiiData *mii) {
     return mii->mNoseY;
 }
 
-extern "C" void func_0207a550(MiiData *mii, int value) {
+extern "C" void MiiData_SetNoseY(MiiData *mii, int value) {
     mii->mNoseY = value;
 }
 
-extern "C" int func_0207a570(MiiData *mii) {
+extern "C" int MiiData_GetGlassesType(MiiData *mii) {
     return mii->mGlassesType;
 }
 
-extern "C" void func_0207a580(MiiData *mii, int value) {
+extern "C" void MiiData_SetGlassesType(MiiData *mii, int value) {
     mii->mGlassesType = value;
 }
 
-extern "C" int func_0207a5a0(MiiData *mii) {
+extern "C" int MiiData_GetGlassesColor(MiiData *mii) {
     return mii->mGlassesColor;
 }
 
-extern "C" void func_0207a5b0(MiiData *mii, int value) {
+extern "C" void MiiData_SetGlassesColor(MiiData *mii, int value) {
     mii->mGlassesColor = value;
 }
 
-extern "C" int func_0207a5d0(MiiData *mii) {
+extern "C" int MiiData_GetGlassesScale(MiiData *mii) {
     return mii->mGlassesScale;
 }
 
-extern "C" void func_0207a5e0(MiiData *mii, int value) {
+extern "C" void MiiData_SetGlassesScale(MiiData *mii, int value) {
     mii->mGlassesScale = value;
 }
 
-extern "C" int func_0207a600(MiiData *mii) {
+extern "C" int MiiData_GetGlassesY(MiiData *mii) {
     return mii->mGlassesY;
 }
 
-extern "C" void func_0207a610(MiiData *mii, int value) {
+extern "C" void MiiData_SetGlassesY(MiiData *mii, int value) {
     mii->mGlassesY = value;
 }
 
-extern "C" int func_0207a630(MiiData *mii) {
+extern "C" int MiiData_GetFaceType(MiiData *mii) {
     return mii->mFaceType;
 }
 
-extern "C" void func_0207a640(MiiData *mii, int value) {
+extern "C" void MiiData_SetFaceType(MiiData *mii, int value) {
     mii->mFaceType = value;
 }
 
-extern "C" int func_0207a660(MiiData *mii) {
+extern "C" int MiiData_GetFaceColor(MiiData *mii) {
     return mii->mFaceColor;
 }
 
-extern "C" void func_0207a670(MiiData *mii, int value) {
+extern "C" void MiiData_SetFaceColor(MiiData *mii, int value) {
     mii->mFaceColor = value;
 }
 
-extern "C" int func_0207a690(MiiData *mii) {
+extern "C" int MiiData_GetFaceTexture(MiiData *mii) {
     return mii->mFaceTexture;
 }
 
-extern "C" void func_0207a6a0(MiiData *mii, int value) {
+extern "C" void MiiData_SetFaceTexture(MiiData *mii, int value) {
     mii->mFaceTexture = value;
 }
 
-extern "C" int func_0207a6c0(MiiData *mii) {
+extern "C" int MiiData_GetFavoriteColor(MiiData *mii) {
     return mii->mFavoriteColor;
 }
 
-extern "C" void func_0207a6d0(MiiData *mii, int value) {
+extern "C" void MiiData_SetFavoriteColor(MiiData *mii, int value) {
     mii->mFavoriteColor = value;
 }
 
@@ -385,27 +385,27 @@ extern "C" void func_0207a6f0(MiiData *mii, int value) {
     mii->mUnknown20Bit2 = value;
 }
 
-extern "C" int func_0207a710(MiiData *mii) {
+extern "C" int MiiData_GetSex(MiiData *mii) {
     return mii->mSex;
 }
 
-extern "C" void func_0207a720(MiiData *mii, int value) {
+extern "C" void MiiData_SetSex(MiiData *mii, int value) {
     mii->mSex = value;
 }
 
-extern "C" int func_0207a740(MiiData *mii) {
+extern "C" int MiiData_GetBirthMonth(MiiData *mii) {
     return mii->mBirthMonth;
 }
 
-extern "C" void func_0207a750(MiiData *mii, int value) {
+extern "C" void MiiData_SetBirthMonth(MiiData *mii, int value) {
     mii->mBirthMonth = value;
 }
 
-extern "C" int func_0207a770(MiiData *mii) {
+extern "C" int MiiData_GetBirthDay(MiiData *mii) {
     return mii->mBirthDay;
 }
 
-extern "C" void func_0207a780(MiiData *mii, int value) {
+extern "C" void MiiData_SetBirthDay(MiiData *mii, int value) {
     mii->mBirthDay = value;
 }
 
@@ -420,7 +420,7 @@ static const MiiData sDefaultMiis[2] = {
 static const int sDaysInMonth[13] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // The number of days of the birth month
-extern "C" int func_0207a7a0(MiiData *mii) {
+extern "C" int MiiData_GetDaysInBirthMonth(MiiData *mii) {
     return sDaysInMonth[mii->mBirthMonth];
 }
 
@@ -428,7 +428,7 @@ extern "C" void func_0207a7bc(MiiData *mii, int value) {
     mii->mUnknown00Bit0 = value;
 }
 
-extern "C" int func_0207a7dc(MiiData *mii) {
+extern "C" int MiiData_GetBuild(MiiData *mii) {
     u32 build = mii->mBuild;
     if (build > 0x7F) {
         build = 0x7F;
@@ -436,11 +436,11 @@ extern "C" int func_0207a7dc(MiiData *mii) {
     return build;
 }
 
-extern "C" void func_0207a7ec(MiiData *mii, u8 value) {
+extern "C" void MiiData_SetBuild(MiiData *mii, u8 value) {
     mii->mBuild = value;
 }
 
-extern "C" int func_0207a7f4(MiiData *mii) {
+extern "C" int MiiData_GetHeight(MiiData *mii) {
     u32 height = mii->mHeight;
     if (height > 0x7F) {
         height = 0x7F;
@@ -448,18 +448,18 @@ extern "C" int func_0207a7f4(MiiData *mii) {
     return height;
 }
 
-extern "C" void func_0207a804(MiiData *mii, u8 value) {
+extern "C" void MiiData_SetHeight(MiiData *mii, u8 value) {
     mii->mHeight = value;
 }
 
 // Copies the name out as a string of 11 characters
-extern "C" void func_0207a80c(MiiData *mii, u16 *name) {
+extern "C" void MiiData_GetName(MiiData *mii, u16 *name) {
     MI_CpuClear16(name, 22);
     MI_CpuCopy16(mii->mName, name, 20);
 }
 
 // Sets the name from a string, and clears what follows its end
-extern "C" void func_0207a838(MiiData *mii, const u16 *name) {
+extern "C" void MiiData_SetName(MiiData *mii, const u16 *name) {
     MI_CpuCopy16(name, mii->mName, 20);
     int i;
     for (i = 0; i < 10; i++) {
@@ -473,7 +473,7 @@ extern "C" void func_0207a838(MiiData *mii, const u16 *name) {
 }
 
 // Whether the name is empty (all ten characters zero)
-extern "C" BOOL func_0207a898(MiiData *mii) {
+extern "C" BOOL MiiData_IsNameEmpty(MiiData *mii) {
     for (int i = 0; i < 10; i++) {
         if (mii->mName[i] != 0) {
             return FALSE;
@@ -483,12 +483,12 @@ extern "C" BOOL func_0207a898(MiiData *mii) {
 }
 
 // Copies the creator's name out as a string of 11 characters
-extern "C" void func_0207a8c4(MiiData *mii, u16 *name) {
+extern "C" void MiiData_GetCreatorName(MiiData *mii, u16 *name) {
     MI_CpuClear16(name, 22);
     MI_CpuCopy16(mii->mCreatorName, name, 20);
 }
 
-extern "C" void func_0207a8f0(MiiData *mii, const u16 *name) {
+extern "C" void MiiData_SetCreatorName(MiiData *mii, const u16 *name) {
     MI_CpuCopy16(name, mii->mCreatorName, 20);
 }
 
@@ -501,8 +501,8 @@ extern "C" BOOL func_02073550(MiiData *mii);
 extern "C" u16 func_020743a0(int max);
 
 // Gives the Mii a new create ID, from a counter (which it advances) and six bytes of source
-extern "C" BOOL func_0207a90c(MiiIdSource *source, MiiData *mii) {
-    if (!func_02073550(mii) || func_0207a898(mii)) {
+extern "C" BOOL MiiData_AssignCreateId(MiiIdSource *source, MiiData *mii) {
+    if (!func_02073550(mii) || MiiData_IsNameEmpty(mii)) {
         return FALSE;
     }
     mii->mCreateId[0] = (func_020743a0(4) << 2) | 0xC0 | ((source->mCounter & 0x3000) >> 12);
