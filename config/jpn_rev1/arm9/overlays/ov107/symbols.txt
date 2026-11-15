@@ -1,35 +1,34 @@
-func_ov107_02149a40 kind:function(arm,size=0x60) addr:0x02149a40
-func_ov107_02149aa0 kind:function(arm,size=0x39c) addr:0x02149aa0
-func_ov107_02149e3c kind:function(arm,size=0x60) addr:0x02149e3c
-func_ov107_02149e9c kind:function(arm,size=0x10) addr:0x02149e9c
-func_ov107_02149eac kind:function(arm,size=0x3c) addr:0x02149eac
-func_ov107_02149ee8 kind:function(arm,size=0x18) addr:0x02149ee8
-func_ov107_02149f00 kind:function(arm,size=0x10) addr:0x02149f00
-func_ov107_02149f10 kind:function(arm,size=0x94) addr:0x02149f10
-func_ov107_02149fa4 kind:function(arm,size=0x28) addr:0x02149fa4
-func_ov107_02149fcc kind:function(arm,size=0x30) addr:0x02149fcc
-gStr_Ampersand_ov107 kind:data(any) addr:0x02149ffc
-data_ov107_0214a008 kind:data(any) addr:0x0214a008 ambiguous
-data_ov107_0214a00c kind:data(any) addr:0x0214a00c
-gStr_K_ov107 kind:data(any) addr:0x0214a01c
-data_ov107_0214a02c kind:data(any) addr:0x0214a02c
-gStr_MLT_BG_down_nsc_ov107 kind:data(any) addr:0x0214a03c
-data_ov107_0214a068 kind:data(any) addr:0x0214a068 ambiguous
-gStr_MLT_ov107 kind:data(any) addr:0x0214a084
-gStr_Scn_Scene_SceneSavePlay_LZ_bin_ov107 kind:data(any) addr:0x0214a088
-gStr_TCM_ov107 kind:data(any) addr:0x0214a0a8
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov107 kind:data(any) addr:0x0214a0ac
-gStr_TEM_ov107 kind:data(any) addr:0x0214a0c8
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov107 kind:data(any) addr:0x0214a0cc
-gStr_MLT_BG_down_ncg_ov107 kind:data(any) addr:0x0214a0e4
-gStr_MLT_BG_down_ncl_ov107 kind:data(any) addr:0x0214a0f8
-gStr_MLT_Obj_down_nce_ov107 kind:data(any) addr:0x0214a10c
-data_ov107_0214a120 kind:data(any) addr:0x0214a120
-data_ov107_0214a128 kind:data(any) addr:0x0214a128 ambiguous
-gStr_MLT_Obj_down_ncl_ov107 kind:data(any) addr:0x0214a134
-gStr_TEM_tmd_etc_msg_JP_bmg_ov107 kind:data(any) addr:0x0214a148
-gStr_TCM_tmd_common_msg_JP_bmg_ov107 kind:data(any) addr:0x0214a160
-gStr_TEM_ov107_2 kind:data(any) addr:0x0214a17c
-gStr_TCM_ov107_2 kind:data(any) addr:0x0214a180
-gStr_MLT_ov107_2 kind:data(any) addr:0x0214a184
-data_ov107_0214a194 kind:data(any) addr:0x0214a194 ambiguous
+_ZN14SaveErrorScene12StartLoadingEv kind:function(arm,size=0x60) addr:0x02149a40
+_ZN14SaveErrorScene4InitEv kind:function(arm,size=0x39c) addr:0x02149aa0
+_ZN14SaveErrorScene6UpdateEv kind:function(arm,size=0x60) addr:0x02149e3c
+_ZN14SaveErrorScene4DrawEv kind:function(arm,size=0x10) addr:0x02149e9c
+_ZN14SaveErrorScene4ExitEv kind:function(arm,size=0x3c) addr:0x02149eac
+_ZN14SaveErrorScene8SetStateEi kind:function(arm,size=0x18) addr:0x02149ee8
+_ZN14SaveErrorScene12UpdateWindowEv kind:function(arm,size=0x10) addr:0x02149f00
+_ZN14SaveErrorScene11ShowMessageEm kind:function(arm,size=0x94) addr:0x02149f10
+_ZN14SaveErrorSceneD1Ev kind:function(arm,size=0x28) addr:0x02149fa4
+_ZN14SaveErrorSceneD0Ev kind:function(arm,size=0x30) addr:0x02149fcc
+sTextPosition kind:data(any) addr:0x02149ffc local
+sButtonPosition kind:data(any) addr:0x0214a004 local
+sChoiceMessages kind:data(any) addr:0x0214a00c local
+sButtonSize kind:data(any) addr:0x0214a014 local
+sChoicePositions kind:data(any) addr:0x0214a01c local
+sWindowRect kind:data(any) addr:0x0214a02c local
+sScreenName kind:data(any) addr:0x0214a03c local
+_ZTV14SaveErrorScene kind:data(any) addr:0x0214a060
+@13102 kind:data(any) addr:0x0214a084 local
+@13103 kind:data(any) addr:0x0214a088 local
+@13104 kind:data(any) addr:0x0214a0a8 local
+@13105 kind:data(any) addr:0x0214a0ac local
+@13106 kind:data(any) addr:0x0214a0c8 local
+@13107 kind:data(any) addr:0x0214a0cc local
+@13123 kind:data(any) addr:0x0214a0e4 local
+@13124 kind:data(any) addr:0x0214a0f8 local
+@13125 kind:data(any) addr:0x0214a10c local
+@13126 kind:data(any) addr:0x0214a120 local
+@13127 kind:data(any) addr:0x0214a134 local
+@13128 kind:data(any) addr:0x0214a148 local
+@13129 kind:data(any) addr:0x0214a160 local
+@13143 kind:data(any) addr:0x0214a17c local
+@13144 kind:data(any) addr:0x0214a180 local
+@13145 kind:data(any) addr:0x0214a184 local
