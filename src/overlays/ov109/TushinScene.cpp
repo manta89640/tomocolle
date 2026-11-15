@@ -37,6 +37,8 @@ static const WindowPoint sListScrollDownPos = { 244, 44 };
 static const WindowPoint sListCursorPos = { 12, 47 };
 static const WindowPoint sListTitlePos = { 119, 47 };
 static const WindowPoint sListBarPos = { 244, 97 };
+// Where the signal strength sprite is
+static const WindowPoint sSignalPosition = { 244, 182 };
 static const u32 sListButtonMessages[3] = { (u32)-1, (u32)-1, 0x105 };
 static const int sListButtonFonts[3] = { 0, -1, 2 };
 static const int sListButtonFiles[3] = { 1, 1, 0 };
@@ -153,6 +155,21 @@ static wchar_t sReceivedName[21];
 static u8 sSongs[6][0x40]; // The songs sent with a character
 static WMBssDesc sParents[3]; // The partners found
 
+static inline void ClearText(MessageText *text) {
+    NNS_G2dCharCanvasClear(&text->mCanvas, 0);
+}
+
+static inline void PlayResultSound(int index) {
+    gSoundManager.StartSeqArc(1, 0x19, index);
+}
+
+static inline BOOL IsWindowOpen(MessageWindow *window) {
+    return (window->mUnknownAD50 & 1) ? TRUE : FALSE;
+}
+
+static inline void PlaySound(int index) {
+    gSoundManager.StartSeqArc(1, 0x19, index);
+}
 
 // @0x02149a40
 void TushinScene::StartLoading() {
@@ -385,6 +402,107 @@ void TushinScene::UpdateMiiData() {
     }
 }
 
+// @0x0214af6c
+void TushinScene::Init() {
+    mMessageFiles[0].Open("TBM:tmd_etc_msg_JP.bmg");
+    mMessageFiles[1].Open("TBC:tmd_common_msg_JP.bmg");
+    func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
+    func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "STS:/BG_up.ncl", 2, -1, -1, -1);
+    func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    func_02028280(&data_02121834, 0x100, 3);
+    func_02027d7c(&data_02121834, "MLT:/BG_Tushin_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+    func_02028280(&data_02121834, 0x200, 2);
+    func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    func_02028280(&data_02121834, 2, 3);
+    ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_Mii_list.nce", "MLT:/Obj_list.ncg", 0x1000, 0, -1);
+    mPalette = func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    ObjResourceManager_Load(&gObjResourceManager, "STS:/Obj_up.nce", "STS:/Obj_up.ncg", 0x10, 1, -1);
+    func_02027534(&data_021213b8, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
+    data_0211d604.mPlanes = 0x1713;
+    data_0211d604.mPlanesChanged = TRUE;
+    func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
+
+    mPage = 0;
+    mNextPage = 0;
+    mUnknown18 = 0;
+    mUnknown1C = 0;
+    mWait = 0;
+    mUnknown24 = 0;
+    mUnknown28 = 0;
+    int charOffset = 0x200;
+    SetUpList(&charOffset);
+    mCharOffset = charOffset;
+    SetUpWindow(mPage);
+    func_02034f38(&mWindow, 0, sPageMessages[mPage]);
+    func_02034720(&mWindow, 0x12, 1);
+    InitCharacters();
+    InitParticles();
+
+    Sprite_Init(&mSprite, 1, 0, 0x80, 0x60, TRUE);
+    mSprite.SetPosition(sSignalPosition.x << FX32_SHIFT, sSignalPosition.y << FX32_SHIFT);
+    mSprite.mVisible = FALSE;
+
+    sWireless.m22 = 0;
+    sWireless.m24 = 0;
+    sWireless.m26 = 0;
+    sWireless.m04 = 0;
+    sWireless.m44 = 0;
+    sWireless.m00 = 0;
+    sWireless.m02 = 0;
+    sWireless.m28 = 0;
+    sWireless.m40 = 0;
+    sWireless.m48 = 0;
+    sWireless.m34 = 0;
+    MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
+    func_0203b7d4(data_0213b700, sParents, 3);
+    func_0203b7e0(data_0213b700, sParentTimers);
+    func_0203b76c(data_0213b700, 0);
+    MI_CpuFill8(sParents, 0, sizeof(sParents));
+    MI_CpuFill8(sParentTimers, 0, sizeof(sParentTimers));
+    mUnknown3F080 = 0;
+    mUnknown3F09C = 0;
+    mUnknown3F0A0 = 0;
+    mUnknown3F0A4 = 0;
+    mUnknown3F0A8 = 0;
+    mUnknown3F084 = 0;
+    mUnknown3F088 = 0;
+    mUnknown3F08C = 0;
+    mUnknown3F090 = 0;
+    mUnknown3F094 = 0;
+    mUnknown3F098 = 0;
+    mUnknown3F0AC = 0;
+    mUnknown3F0B0 = 0;
+    sWireless.m50 = 0;
+    func_0207777c(&data_0212349c, sMiiData, 100);
+    func_02077720(func_ov109_02151fcc);
+    func_02077710(func_ov109_021523a4);
+    func_02077804(1);
+    UpdateMiiData();
+    gSoundManager.LoadGroup(0x5D);
+    ResetExchange();
+}
+
+// @0x0214b3d8
+void TushinScene::ResetExchange() {
+    mUnknown3F08C = 0;
+    sWireless.m22 = 0;
+    sWireless.m24 = 0;
+    sWireless.m26 = 0;
+    sWireless.m04 = 0;
+    sWireless.m02 = 0;
+    sWireless.m28 = 0;
+    UpdateMiiData();
+    MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
+    ClearParentNames();
+    mUnknown3F0B0 = 0;
+    for (int i = 0; i < 12; i++) {
+        gWHChildSsid[i] = 0;
+    }
+    mUnknown3F084 = 0;
+}
+
 // @0x0214b464
 void TushinScene::SetUpCharacter(int i) {
     func_0208fefc(&mCharacters[i]);
@@ -459,112 +577,6 @@ void TushinScene::ReloadCharacterFromReceived(int i) {
     *record = sTransfer;
     ReloadCharacter(i);
     SetUpCharacter(i);
-}
-
-// @0x0214af6c
-void TushinScene::Init() {
-    mMessageFiles[0].Open("TBM:tmd_etc_msg_JP.bmg");
-    mMessageFiles[1].Open("TBC:tmd_common_msg_JP.bmg");
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "STS:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02027d7c(&data_02121834, "MLT:/BG_Tushin_frame.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 2, 3);
-    ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_Mii_list.nce", "MLT:/Obj_list.ncg", 0x1000, 0, -1);
-    mPalette = func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
-    ObjResourceManager_Load(&gObjResourceManager, "STS:/Obj_up.nce", "STS:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
-    data_0211d604.mPlanes = 0x1713;
-    data_0211d604.mPlanesChanged = TRUE;
-    func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
-
-    mPage = 0;
-    mNextPage = 0;
-    mUnknown18 = 0;
-    mUnknown1C = 0;
-    mWait = 0;
-    mUnknown24 = 0;
-    mUnknown28 = 0;
-    int charOffset = 0x200;
-    SetUpList(&charOffset);
-    mCharOffset = charOffset;
-    SetUpWindow(mPage);
-    func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-    func_02034720(&mWindow, 0x12, 1);
-    InitCharacters();
-    InitParticles();
-
-    Sprite_Init(&mSprite, 1, 0, 0x80, 0x60, TRUE);
-    mSprite.SetPosition(0xF4000, 0xB6000);
-    mSprite.mVisible = FALSE;
-
-    sWireless.m22 = 0;
-    sWireless.m24 = 0;
-    sWireless.m26 = 0;
-    sWireless.m04 = 0;
-    sWireless.m44 = 0;
-    sWireless.m00 = 0;
-    sWireless.m02 = 0;
-    sWireless.m28 = 0;
-    sWireless.m40 = 0;
-    sWireless.m48 = 0;
-    sWireless.m34 = 0;
-    MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
-    func_0203b7d4(data_0213b700, sParents, 3);
-    func_0203b7e0(data_0213b700, sParentTimers);
-    func_0203b76c(data_0213b700, 0);
-    MI_CpuFill8(sParents, 0, sizeof(sParents));
-    MI_CpuFill8(sParentTimers, 0, sizeof(sParentTimers));
-    mUnknown3F080 = 0;
-    mUnknown3F09C = 0;
-    mUnknown3F0A0 = 0;
-    mUnknown3F0A4 = 0;
-    mUnknown3F0A8 = 0;
-    mUnknown3F084 = 0;
-    mUnknown3F088 = 0;
-    mUnknown3F08C = 0;
-    mUnknown3F090 = 0;
-    mUnknown3F094 = 0;
-    mUnknown3F098 = 0;
-    mUnknown3F0AC = 0;
-    mUnknown3F0B0 = 0;
-    sWireless.m50 = 0;
-    func_0207777c(&data_0212349c, sMiiData, 100);
-    func_02077720(func_ov109_02151fcc);
-    func_02077710(func_ov109_021523a4);
-    func_02077804(1);
-    UpdateMiiData();
-    gSoundManager.LoadGroup(0x5D);
-    ResetExchange();
-}
-
-// @0x0214b3d8
-void TushinScene::ResetExchange() {
-    mUnknown3F08C = 0;
-    sWireless.m22 = 0;
-    sWireless.m24 = 0;
-    sWireless.m26 = 0;
-    sWireless.m04 = 0;
-    sWireless.m02 = 0;
-    sWireless.m28 = 0;
-    UpdateMiiData();
-    MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
-    ClearParentNames();
-    mUnknown3F0B0 = 0;
-    for (int i = 0; i < 12; i++) {
-        gWHChildSsid[i] = 0;
-    }
-    mUnknown3F084 = 0;
-}
-
-// @0x0214f088
-int TushinScene::GetStandAnimation(int i) {
-    return data_020fb870[3][0];
 }
 
 #pragma optimization_level 2
@@ -873,10 +885,6 @@ received:
 }
 #pragma optimization_level reset
 
-static inline void ClearText(MessageText *text) {
-    NNS_G2dCharCanvasClear(&text->mCanvas, 0);
-}
-
 // @0x0214df0c
 void TushinScene::UpdateListButtons() {
     func_020a3658(&mList, TRUE);
@@ -1148,6 +1156,141 @@ void TushinScene::UpdateWiiConnection() {
     }
 }
 
+#pragma optimization_level 2
+// @0x0214e9e8
+void TushinScene::UpdateCharacters() {
+    BOOL sent = FALSE;
+    int i;
+    for (i = 0; i < 3; i++) {
+        if (i == 2 && mCharacters[i].mModel.IsVisible() == TRUE) {
+            int animation = mCharacters[i].mModel.mAnimId;
+            if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
+                switch (mPage) {
+                case 14: case 15: case 16:
+                case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32: case 33:
+                case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61:
+                case 63:
+                    break;
+                default:
+                    func_02091a14(&mCharacters[i], FALSE);
+                    StartEmitter(0);
+                    sent = TRUE;
+                    ReloadCharacterFromResident(i);
+                    break;
+                }
+            }
+        }
+        if (AnimModel_FindAnimation(&mCharacters[i].mModel, RESOURCE_BCA0, mCharacters[i].mModel.mAnimId)->mFinished) {
+            mCharacters[i].mModel.mPos.x = -0x1000;
+            int next = GetStandAnimation(i);
+            switch (mCharacters[i].mModel.mAnimId) {
+            case 0x26:
+                next = 0x24;
+                break;
+            case 0x27:
+                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, 0x25);
+                func_0208ef00(&mCharacters[i].mModel, 1, 0);
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                return;
+            case 0x25:
+                next = 0x29;
+                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, next);
+                func_0208ef00(&mCharacters[i].mModel, 1, 0);
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                break;
+            case 0x29:
+                mUnknown3F084 = 1;
+                func_02091a14(&mCharacters[i], FALSE);
+                break;
+            case 0x23:
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                break;
+            case 0x28:
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                next = 0x23;
+                break;
+            }
+            func_020919a0(&mCharacters[i], 0x1000);
+            func_020919e8(&mCharacters[i], RESOURCE_BCA0, next);
+            if (next != GetStandAnimation(i)) {
+                func_0208ef00(&mCharacters[i].mModel, 1, 0);
+            }
+            Character_ResetSoundPhase(&mCharacters[i], 0);
+            Character_ResetSoundPhase(&mCharacters[i], 1);
+        } else {
+            switch (mCharacters[i].mModel.mAnimId) {
+            case 0x26:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 0, 1);
+                break;
+            case 0x27:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 1, 1);
+                break;
+            case 0x24:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 2, 1);
+                break;
+            case 0x25:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 3, 1);
+                break;
+            case 0x29:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 4, 1);
+                break;
+            case 0x23:
+                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 6, 1);
+                break;
+            }
+        }
+    }
+    if (sent != TRUE) {
+        return;
+    }
+    if (FindResident(&sTransfer) != FindResident(&mResidents.mResidents[mResidents.mSelected])) {
+        return;
+    }
+    BOOL show = FALSE;
+    if (GetMode() == 1 && mUnknown3F0A8 == 4) {
+        show = TRUE;
+    }
+    if (GetMode() == 2 && mUnknown3F0A8 == 0x37) {
+        show = TRUE;
+    }
+    if (show != TRUE) {
+        return;
+    }
+    ShowNextCharacter();
+    StartEmitter(1);
+}
+#pragma optimization_level reset
+
+// @0x0214ef08
+void TushinScene::DrawCharacters() {
+    switch (mPage) {
+    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+    case 38: case 39: case 40: case 41:
+        mUnknown3F000 = FALSE;
+        return;
+    case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
+    case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32:
+    case 33: case 35: case 36: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
+    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
+    case 63: case 65: case 66:
+        mUnknown3F000 = TRUE;
+        break;
+    case 34: case 37: case 64: case 67:
+        if (mUnknown3F000 == FALSE) {
+            return;
+        }
+        break;
+    }
+    for (int i = 0; i < 3; i++) {
+        func_02091968(&mCharacters[i]);
+    }
+}
+
+// @0x0214f088
+int TushinScene::GetStandAnimation(int i) {
+    return data_020fb870[3][0];
+}
+
 // @0x0214f098
 void TushinScene::SetStandAnimation(u8 i) {
     func_020919e8(&mCharacters[i], RESOURCE_BCA0, GetStandAnimation(i));
@@ -1283,270 +1426,6 @@ void TushinScene::DrawParticles() {
     func_0207b138(mParticles);
 }
 
-// @0x021517c8
-int TushinScene::GetMode() {
-    switch (mPage) {
-    case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
-    case 28: case 29: case 30: case 31: case 32: case 33: case 35: case 36:
-        return 1;
-    case 38: case 39: case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 49: case 50:
-    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
-    case 63: case 65: case 66:
-        return 2;
-    default:
-        return 0;
-    }
-}
-
-// @0x02151d74
-BOOL TushinScene::func_ov109_02151d74(CharacterRecord *record) {
-    if (HasNgSong(record) == TRUE) {
-        return TRUE;
-    }
-    return IsInvalid(record) ? TRUE : FALSE;
-}
-
-// @0x02151dac
-BOOL TushinScene::GiveItem(int item) {
-    ClothesInventory inventory;
-    BOOL given = FALSE;
-    func_0209e248(&inventory);
-    ClothesItem *clothes = &inventory.mItems[item];
-    if (clothes->mOwned == FALSE) {
-        clothes->Add(1);
-        given = TRUE;
-    }
-    func_0209e310(&inventory);
-    return given;
-}
-
-// @0x02151e24
-BOOL TushinScene::GiveShirt() {
-    return GiveItem(0x113);
-}
-
-// @0x02151e38
-BOOL TushinScene::GiveWiiShirt() {
-    return GiveItem(0x114);
-}
-
-// @0x02151e48
-void TushinScene::SetEntry(BOOL enabled) {
-    WM_SetEntry(func_ov109_0215245c, enabled);
-}
-
-// @0x02151e5c
-void TushinScene::ClearParentNames() {
-    MI_CpuFill8(mParentNames, 0, sizeof(mParentNames));
-}
-
-// @0x02151e78
-void TushinScene::Save() {
-    if (!func_0202cd48(&gGameData)) {
-        func_0203c02c(&gSceneManager, 0xC2);
-    }
-}
-
-// @0x02151ea4
-void TushinScene::SetUnknown3F098() {
-    mUnknown3F098 = 1;
-}
-
-// @0x02151eb4
-extern "C" void func_ov109_02151eb4(BOOL result) {
-    int state = WH_GetSystemState();
-    if (state == 0 || state == 9 || state == 10) {
-        return;
-    }
-    sWireless.m3C = 1;
-}
-
-// @0x02151ee0
-extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
-    switch (size) {
-    case 0:
-        sWireless.m00 = 1;
-        return;
-    case 2:
-        if (sWireless.m02 == 0) {
-            sWireless.m02 = *data;
-        } else {
-            sWireless.m28 = *data;
-        }
-        return;
-    }
-    if (sWireless.m26 == 0) {
-        func_020979e0(&sTransfer);
-    }
-    if (sWireless.m26 >= 6) {
-        MI_CpuCopy8(data, (u8 *)sSongs + sWireless.m04 * 0x80, 0x80);
-        if (sWireless.m04 < 2) {
-            sWireless.m04++;
-        } else {
-            sWireless.m04++;
-            sWireless.m30 = 1;
-        }
-    } else {
-        MI_CpuCopy8(data, (u8 *)&sTransfer + sWireless.m26 * 0x80, 0x80);
-        if (sWireless.m26 < 5) {
-            sWireless.m26++;
-        } else {
-            sWireless.m26++;
-        }
-    }
-}
-
-// @0x02151fcc
-extern "C" void func_ov109_02151fcc(int a, int b) {
-    sWireless.m48 = a;
-    sWireless.m40 = 1;
-}
-
-// @0x02151fe4
-int TushinScene::NextPageAfterReceive() {
-    int page = ReceiveWiiMii();
-    mUnknown3F0A8 = page;
-    if (page != 0x35) {
-        return page;
-    }
-    if (mUnknown3F098 == 1) {
-        mUnknown18 = page;
-        page = 0x30;
-    }
-    return page;
-}
-
-#pragma optimization_level 2
-// @0x0214e9e8
-void TushinScene::UpdateCharacters() {
-    BOOL sent = FALSE;
-    int i;
-    for (i = 0; i < 3; i++) {
-        if (i == 2 && mCharacters[i].mModel.IsVisible() == TRUE) {
-            int animation = mCharacters[i].mModel.mAnimId;
-            if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
-                switch (mPage) {
-                case 14: case 15: case 16:
-                case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32: case 33:
-                case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61:
-                case 63:
-                    break;
-                default:
-                    func_02091a14(&mCharacters[i], FALSE);
-                    StartEmitter(0);
-                    sent = TRUE;
-                    ReloadCharacterFromResident(i);
-                    break;
-                }
-            }
-        }
-        if (AnimModel_FindAnimation(&mCharacters[i].mModel, RESOURCE_BCA0, mCharacters[i].mModel.mAnimId)->mFinished) {
-            mCharacters[i].mModel.mPos.x = -0x1000;
-            int next = GetStandAnimation(i);
-            switch (mCharacters[i].mModel.mAnimId) {
-            case 0x26:
-                next = 0x24;
-                break;
-            case 0x27:
-                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, 0x25);
-                func_0208ef00(&mCharacters[i].mModel, 1, 0);
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                return;
-            case 0x25:
-                next = 0x29;
-                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, next);
-                func_0208ef00(&mCharacters[i].mModel, 1, 0);
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                break;
-            case 0x29:
-                mUnknown3F084 = 1;
-                func_02091a14(&mCharacters[i], FALSE);
-                break;
-            case 0x23:
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                break;
-            case 0x28:
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                next = 0x23;
-                break;
-            }
-            func_020919a0(&mCharacters[i], 0x1000);
-            func_020919e8(&mCharacters[i], RESOURCE_BCA0, next);
-            if (next != GetStandAnimation(i)) {
-                func_0208ef00(&mCharacters[i].mModel, 1, 0);
-            }
-            Character_ResetSoundPhase(&mCharacters[i], 0);
-            Character_ResetSoundPhase(&mCharacters[i], 1);
-        } else {
-            switch (mCharacters[i].mModel.mAnimId) {
-            case 0x26:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 0, 1);
-                break;
-            case 0x27:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 1, 1);
-                break;
-            case 0x24:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 2, 1);
-                break;
-            case 0x25:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 3, 1);
-                break;
-            case 0x29:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 4, 1);
-                break;
-            case 0x23:
-                Character_PlaySoundAtAnimPhase(&mCharacters[i], 0, 1, 0x19, 6, 1);
-                break;
-            }
-        }
-    }
-    if (sent != TRUE) {
-        return;
-    }
-    if (FindResident(&sTransfer) != FindResident(&mResidents.mResidents[mResidents.mSelected])) {
-        return;
-    }
-    BOOL show = FALSE;
-    if (GetMode() == 1 && mUnknown3F0A8 == 4) {
-        show = TRUE;
-    }
-    if (GetMode() == 2 && mUnknown3F0A8 == 0x37) {
-        show = TRUE;
-    }
-    if (show != TRUE) {
-        return;
-    }
-    ShowNextCharacter();
-    StartEmitter(1);
-}
-#pragma optimization_level reset
-
-// @0x0214ef08
-void TushinScene::DrawCharacters() {
-    switch (mPage) {
-    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
-    case 38: case 39: case 40: case 41:
-        mUnknown3F000 = FALSE;
-        return;
-    case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
-    case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32:
-    case 33: case 35: case 36: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
-    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
-    case 63: case 65: case 66:
-        mUnknown3F000 = TRUE;
-        break;
-    case 34: case 37: case 64: case 67:
-        if (mUnknown3F000 == FALSE) {
-            return;
-        }
-        break;
-    }
-    for (int i = 0; i < 3; i++) {
-        func_02091968(&mCharacters[i]);
-    }
-}
-
 // @0x0214f588
 void TushinScene::UpdateSignal() {
     switch (mPage) {
@@ -1603,317 +1482,6 @@ void TushinScene::Leave() {
     } else {
         func_0203c02c(&gSceneManager, 0x5E);
     }
-}
-
-// @0x02151590
-void TushinScene::Draw() {
-    Sprite_Draw(&mSprite);
-    func_020345d8(&mWindow);
-    for (int i = 0; i < 3; i++) {
-        func_0203206c(&mButtons[i]);
-    }
-    func_020345d8(&mListWindow);
-    func_020a05b8(&mResidents);
-    DrawParticles();
-    DrawCharacters();
-    mUnknown1C += 0x4CC;
-    func_02028108(&data_02121834, 2, mUnknown1C >> FX32_SHIFT);
-}
-
-// @0x02151620
-void TushinScene::Exit() {
-    if (GetMode() == 1 && WH_GetSystemState() != 0 && data_0213b700->mUnknown00 == 0) {
-        WH_Finalize();
-        func_0203b8b4(data_0213b700, 1);
-    }
-    if (mUnknown35920 != mResidents.mUnknown11306) {
-        gGameData.mMiiListSortKey = mResidents.mUnknown11306;
-    }
-    for (int i = 0; i < 3; i++) {
-        CharacterModel *model = &mCharacters[i].mModel;
-        ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
-        func_0202aecc(data_021223e4, i);
-    }
-    func_02024234(&data_0211d604, 0x3F00, 0);
-    func_02023f4c(&data_0211d604, 0x3F00, 0);
-    func_02023eac(&data_0211d604, 0x3F00);
-    func_0202683c();
-    ArchiveManager_Unmount(&gArchiveManager, "STE");
-    ArchiveManager_Unmount(&gArchiveManager, "TBC");
-    ArchiveManager_Unmount(&gArchiveManager, "TBM");
-    ArchiveManager_Unmount(&gArchiveManager, "MLT");
-    ArchiveManager_Unmount(&gArchiveManager, "STS");
-    ArchiveManager_Unmount(&gArchiveManager, "BIC");
-    if (GetMode() == 1) {
-        func_0203b8b4(data_0213b700, 1);
-        while (func_0203b800(data_0213b700) == 1) {
-        }
-        return;
-    }
-    if (func_02078f04() == 0) {
-        return;
-    }
-    do {
-        func_020777f4();
-    } while (func_02078f04() != 0);
-}
-
-// @0x021518fc
-BOOL TushinScene::IsNgWord(const wchar_t *text) {
-    wchar_t buffer[20];
-    MI_CpuClear16(buffer, sizeof(buffer));
-    wcscpy(buffer, text);
-    func_0201f508(buffer);
-    func_02036bb4(buffer);
-    u32 length = wcslen(buffer);
-    if (length >= 1) {
-        wchar_t last = buffer[length - 1];
-        switch (last) {
-        case 0x20:
-        case 0x21:
-        case 0x3000:
-        case 0xFF01:
-            for (; length >= 1; length--) {
-                if (last != buffer[length - 1]) {
-                    break;
-                }
-                buffer[length - 1] = buffer[length];
-            }
-            break;
-        }
-    }
-    for (int i = 0; i < 41; i++) {
-        if (wcscmp(buffer, sNgWords[i]) == 0) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-// @0x02151a0c
-BOOL TushinScene::IsBlank(const wchar_t *text) {
-    wchar_t buffer[20];
-    MI_CpuClear16(buffer, sizeof(buffer));
-    wcscpy(buffer, text);
-    u32 length = wcslen(buffer);
-    if (length == 0) {
-        return FALSE;
-    }
-    for (u32 i = 0; i < length; i++) {
-        if (buffer[i] != 0x20 && buffer[i] != 0x3000) {
-            return FALSE;
-        }
-    }
-    return TRUE;
-}
-
-// @0x02151a90
-BOOL TushinScene::HasNgWord(CharacterRecord *record) {
-    if (IsNgWord(record->mName) == TRUE) {
-        return TRUE;
-    }
-    if (IsNgWord(record->mUnknown06E) == TRUE) {
-        return TRUE;
-    }
-    if (IsNgWord(record->mSpeechDefault) == TRUE) {
-        return TRUE;
-    }
-    for (int i = 0; i < 4; i++) {
-        if (IsNgWord(record->mSpeechByMood[i]) == TRUE) {
-            return TRUE;
-        }
-    }
-    wchar_t nickname[11];
-    MI_CpuClear16(nickname, sizeof(nickname));
-    func_0207a8c4(record, nickname);
-    if (IsNgWord(nickname) == TRUE) {
-        return TRUE;
-    }
-    wchar_t name[11];
-    MI_CpuClear16(name, sizeof(name));
-    func_0207a80c(record, name);
-    return IsNgWord(name) == TRUE ? TRUE : FALSE;
-}
-
-// @0x02151b98
-#pragma optimization_level 2
-BOOL TushinScene::HasNgSongReceived() {
-    for (int i = 0; i < 6; i++) {
-        if (IsNgWord((wchar_t *)sSongs[i]) == TRUE) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-#pragma optimization_level reset
-
-// @0x02151bdc
-BOOL TushinScene::HasNgSong(CharacterRecord *record) {
-    if (HasNgWord(record) == TRUE) {
-        return TRUE;
-    }
-    wchar_t lyrics[32];
-    for (int i = 0; i < 6; i++) {
-        int song = func_0209c718(record, i);
-        if (song != 0xFF) {
-            func_0202c920(&gGameData, song, lyrics);
-            if (IsNgWord(lyrics) == TRUE) {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
-// @0x02151c68
-BOOL TushinScene::IsMiiBroken(CharacterRecord *record) {
-    u8 buffer[0x3C];
-    return func_020733a4(buffer) ? TRUE : FALSE;
-}
-
-// @0x02151c8c
-BOOL TushinScene::IsNameBlank(CharacterRecord *record) {
-    wchar_t name[11];
-    MI_CpuClear16(name, sizeof(name));
-    func_0207a80c(record, name);
-    return IsBlank(name) == TRUE ? TRUE : FALSE;
-}
-
-// @0x02151cd8
-BOOL TushinScene::IsNicknameBlank(CharacterRecord *record) {
-    wchar_t nickname[11];
-    MI_CpuClear16(nickname, sizeof(nickname));
-    func_0207a8c4(record, nickname);
-    return IsBlank(nickname) == TRUE ? TRUE : FALSE;
-}
-
-// @0x02151d24
-BOOL TushinScene::IsInvalid(CharacterRecord *record) {
-    if (IsMiiBroken(record) == TRUE) {
-        return TRUE;
-    }
-    if (IsNameBlank(record) == TRUE) {
-        return TRUE;
-    }
-    return IsNicknameBlank(record) == TRUE ? TRUE : FALSE;
-}
-
-static inline void PlayResultSound(int index) {
-    gSoundManager.StartSeqArc(1, 0x19, index);
-}
-
-// @0x02152014
-int TushinScene::ReceiveWiiMii() {
-    SavedCharacter character;
-    sWireless.m44 = -1;
-    int result = sWireless.m34;
-    sWireless.m34 = 0;
-    switch (result) {
-    case -5:
-        PlayResultSound(0xD);
-        return 0x3A;
-    case -4:
-        PlayResultSound(0xC);
-        return 0x3B;
-    case -3:
-    case -2:
-        PlayResultSound(0xD);
-        return 0x3E;
-    }
-    MI_CpuCopy8(&sMiiData[sWireless.m38], &sTransfer, sizeof(MiiData));
-    if (IsInvalid((CharacterRecord *)&sMiiData[sWireless.m38])) {
-        UpdateMiiData();
-        PlayResultSound(0xD);
-        return 0x3C;
-    }
-    func_020979e0(&character);
-    MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
-    if (HasNgWord(&character) == TRUE) {
-        UpdateMiiData();
-        PlayResultSound(0xD);
-        return 0x3F;
-    }
-    sWireless.m44 = FindResident((CharacterRecord *)&sMiiData[sWireless.m38]);
-    if (sWireless.m44 != -1) {
-        func_020979e0(&character);
-        func_0202c264(&gGameData, sWireless.m44, &character);
-        if (func_02073520(&character)) {
-            PlayResultSound(0xD);
-            return 0x38;
-        }
-        if (func_02098584(&character)) {
-            PlayResultSound(0xD);
-            return 0x36;
-        }
-        MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
-        if (func_0207a710(&character) != func_0202c604(&gGameData, sWireless.m44)) {
-            PlayResultSound(0xC);
-            return 0x39;
-        }
-        func_0202c28c(&gGameData, sWireless.m44, &character);
-        func_0207a80c(&character, sReceivedName);
-        UpdateMiiData();
-        PlayResultSound(0xC);
-        return 0x37;
-    }
-    for (int i = 0; i < 100; i++) {
-        if (!func_0202c354(&gGameData, i)) {
-            sWireless.m44 = i;
-            func_020979e0(&character);
-            MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
-            func_02097c64(&character);
-            func_0202c28c(&gGameData, i, &character);
-            func_0207a80c(&character, sReceivedName);
-            if (func_02073520(&character)) {
-                SetUnknown3F098();
-            }
-            UpdateMiiData();
-            return 0x35;
-        }
-    }
-    return 0x3A;
-}
-
-// @0x021523a4
-extern "C" void func_ov109_021523a4(int index, int result) {
-    sWireless.m34 = result;
-    switch (result) {
-    case 1:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
-        break;
-    case 2:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
-        break;
-    case 3:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
-        break;
-    case -5:
-    case -4:
-        sWireless.m26++;
-        break;
-    case -2:
-        sWireless.m26++;
-        break;
-    case -3:
-        sWireless.m26++;
-        break;
-    }
-}
-
-// @0x0215245c
-extern "C" void func_ov109_0215245c(void *arg) {
-}
-
-static inline BOOL IsWindowOpen(MessageWindow *window) {
-    return (window->mUnknownAD50 & 1) ? TRUE : FALSE;
-}
-
-static inline void PlaySound(int index) {
-    gSoundManager.StartSeqArc(1, 0x19, index);
 }
 
 #pragma optimization_level 2
@@ -2799,3 +2367,435 @@ void TushinScene::Update() {
     UpdateSaving();
 }
 #pragma optimization_level reset
+
+// @0x02151590
+void TushinScene::Draw() {
+    Sprite_Draw(&mSprite);
+    func_020345d8(&mWindow);
+    for (int i = 0; i < 3; i++) {
+        func_0203206c(&mButtons[i]);
+    }
+    func_020345d8(&mListWindow);
+    func_020a05b8(&mResidents);
+    DrawParticles();
+    DrawCharacters();
+    mUnknown1C += 0x4CC;
+    func_02028108(&data_02121834, 2, mUnknown1C >> FX32_SHIFT);
+}
+
+// @0x02151620
+void TushinScene::Exit() {
+    if (GetMode() == 1 && WH_GetSystemState() != 0 && data_0213b700->mUnknown00 == 0) {
+        WH_Finalize();
+        func_0203b8b4(data_0213b700, 1);
+    }
+    if (mUnknown35920 != mResidents.mUnknown11306) {
+        gGameData.mMiiListSortKey = mResidents.mUnknown11306;
+    }
+    for (int i = 0; i < 3; i++) {
+        CharacterModel *model = &mCharacters[i].mModel;
+        ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
+        func_0202aecc(data_021223e4, i);
+    }
+    func_02024234(&data_0211d604, 0x3F00, 0);
+    func_02023f4c(&data_0211d604, 0x3F00, 0);
+    func_02023eac(&data_0211d604, 0x3F00);
+    func_0202683c();
+    ArchiveManager_Unmount(&gArchiveManager, "STE");
+    ArchiveManager_Unmount(&gArchiveManager, "TBC");
+    ArchiveManager_Unmount(&gArchiveManager, "TBM");
+    ArchiveManager_Unmount(&gArchiveManager, "MLT");
+    ArchiveManager_Unmount(&gArchiveManager, "STS");
+    ArchiveManager_Unmount(&gArchiveManager, "BIC");
+    if (GetMode() == 1) {
+        func_0203b8b4(data_0213b700, 1);
+        while (func_0203b800(data_0213b700) == 1) {
+        }
+        return;
+    }
+    if (func_02078f04() == 0) {
+        return;
+    }
+    do {
+        func_020777f4();
+    } while (func_02078f04() != 0);
+}
+
+// @0x021517c8
+int TushinScene::GetMode() {
+    switch (mPage) {
+    case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
+    case 28: case 29: case 30: case 31: case 32: case 33: case 35: case 36:
+        return 1;
+    case 38: case 39: case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 49: case 50:
+    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
+    case 63: case 65: case 66:
+        return 2;
+    default:
+        return 0;
+    }
+}
+
+// @0x021518fc
+BOOL TushinScene::IsNgWord(const wchar_t *text) {
+    wchar_t buffer[20];
+    MI_CpuClear16(buffer, sizeof(buffer));
+    wcscpy(buffer, text);
+    func_0201f508(buffer);
+    func_02036bb4(buffer);
+    u32 length = wcslen(buffer);
+    if (length >= 1) {
+        wchar_t last = buffer[length - 1];
+        switch (last) {
+        case 0x20:
+        case 0x21:
+        case 0x3000:
+        case 0xFF01:
+            for (; length >= 1; length--) {
+                if (last != buffer[length - 1]) {
+                    break;
+                }
+                buffer[length - 1] = buffer[length];
+            }
+            break;
+        }
+    }
+    for (int i = 0; i < 41; i++) {
+        if (wcscmp(buffer, sNgWords[i]) == 0) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// @0x02151a0c
+BOOL TushinScene::IsBlank(const wchar_t *text) {
+    wchar_t buffer[20];
+    MI_CpuClear16(buffer, sizeof(buffer));
+    wcscpy(buffer, text);
+    u32 length = wcslen(buffer);
+    if (length == 0) {
+        return FALSE;
+    }
+    for (u32 i = 0; i < length; i++) {
+        if (buffer[i] != 0x20 && buffer[i] != 0x3000) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+// @0x02151a90
+BOOL TushinScene::HasNgWord(CharacterRecord *record) {
+    if (IsNgWord(record->mName) == TRUE) {
+        return TRUE;
+    }
+    if (IsNgWord(record->mUnknown06E) == TRUE) {
+        return TRUE;
+    }
+    if (IsNgWord(record->mSpeechDefault) == TRUE) {
+        return TRUE;
+    }
+    for (int i = 0; i < 4; i++) {
+        if (IsNgWord(record->mSpeechByMood[i]) == TRUE) {
+            return TRUE;
+        }
+    }
+    wchar_t nickname[11];
+    MI_CpuClear16(nickname, sizeof(nickname));
+    func_0207a8c4(record, nickname);
+    if (IsNgWord(nickname) == TRUE) {
+        return TRUE;
+    }
+    wchar_t name[11];
+    MI_CpuClear16(name, sizeof(name));
+    func_0207a80c(record, name);
+    return IsNgWord(name) == TRUE ? TRUE : FALSE;
+}
+
+// @0x02151b98
+#pragma optimization_level 2
+BOOL TushinScene::HasNgSongReceived() {
+    for (int i = 0; i < 6; i++) {
+        if (IsNgWord((wchar_t *)sSongs[i]) == TRUE) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+#pragma optimization_level reset
+
+// @0x02151bdc
+BOOL TushinScene::HasNgSong(CharacterRecord *record) {
+    if (HasNgWord(record) == TRUE) {
+        return TRUE;
+    }
+    wchar_t lyrics[32];
+    for (int i = 0; i < 6; i++) {
+        int song = func_0209c718(record, i);
+        if (song != 0xFF) {
+            func_0202c920(&gGameData, song, lyrics);
+            if (IsNgWord(lyrics) == TRUE) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+// @0x02151c68
+BOOL TushinScene::IsMiiBroken(CharacterRecord *record) {
+    u8 buffer[0x3C];
+    return func_020733a4(buffer) ? TRUE : FALSE;
+}
+
+// @0x02151c8c
+BOOL TushinScene::IsNameBlank(CharacterRecord *record) {
+    wchar_t name[11];
+    MI_CpuClear16(name, sizeof(name));
+    func_0207a80c(record, name);
+    return IsBlank(name) == TRUE ? TRUE : FALSE;
+}
+
+// @0x02151cd8
+BOOL TushinScene::IsNicknameBlank(CharacterRecord *record) {
+    wchar_t nickname[11];
+    MI_CpuClear16(nickname, sizeof(nickname));
+    func_0207a8c4(record, nickname);
+    return IsBlank(nickname) == TRUE ? TRUE : FALSE;
+}
+
+// @0x02151d24
+BOOL TushinScene::IsInvalid(CharacterRecord *record) {
+    if (IsMiiBroken(record) == TRUE) {
+        return TRUE;
+    }
+    if (IsNameBlank(record) == TRUE) {
+        return TRUE;
+    }
+    return IsNicknameBlank(record) == TRUE ? TRUE : FALSE;
+}
+
+// @0x02151d74
+BOOL TushinScene::func_ov109_02151d74(CharacterRecord *record) {
+    if (HasNgSong(record) == TRUE) {
+        return TRUE;
+    }
+    return IsInvalid(record) ? TRUE : FALSE;
+}
+
+// @0x02151dac
+BOOL TushinScene::GiveItem(int item) {
+    ClothesInventory inventory;
+    BOOL given = FALSE;
+    func_0209e248(&inventory);
+    ClothesItem *clothes = &inventory.mItems[item];
+    if (clothes->mOwned == FALSE) {
+        clothes->Add(1);
+        given = TRUE;
+    }
+    func_0209e310(&inventory);
+    return given;
+}
+
+// @0x02151e24
+BOOL TushinScene::GiveShirt() {
+    return GiveItem(0x113);
+}
+
+// @0x02151e38
+BOOL TushinScene::GiveWiiShirt() {
+    return GiveItem(0x114);
+}
+
+// @0x02151e48
+void TushinScene::SetEntry(BOOL enabled) {
+    WM_SetEntry(func_ov109_0215245c, enabled);
+}
+
+// @0x02151e5c
+void TushinScene::ClearParentNames() {
+    MI_CpuFill8(mParentNames, 0, sizeof(mParentNames));
+}
+
+// @0x02151e78
+void TushinScene::Save() {
+    if (!func_0202cd48(&gGameData)) {
+        func_0203c02c(&gSceneManager, 0xC2);
+    }
+}
+
+// @0x02151ea4
+void TushinScene::SetUnknown3F098() {
+    mUnknown3F098 = 1;
+}
+
+// @0x02151eb4
+extern "C" void func_ov109_02151eb4(BOOL result) {
+    int state = WH_GetSystemState();
+    if (state == 0 || state == 9 || state == 10) {
+        return;
+    }
+    sWireless.m3C = 1;
+}
+
+// @0x02151ee0
+extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
+    switch (size) {
+    case 0:
+        sWireless.m00 = 1;
+        return;
+    case 2:
+        if (sWireless.m02 == 0) {
+            sWireless.m02 = *data;
+        } else {
+            sWireless.m28 = *data;
+        }
+        return;
+    }
+    if (sWireless.m26 == 0) {
+        func_020979e0(&sTransfer);
+    }
+    if (sWireless.m26 >= 6) {
+        MI_CpuCopy8(data, (u8 *)sSongs + sWireless.m04 * 0x80, 0x80);
+        if (sWireless.m04 < 2) {
+            sWireless.m04++;
+        } else {
+            sWireless.m04++;
+            sWireless.m30 = 1;
+        }
+    } else {
+        MI_CpuCopy8(data, (u8 *)&sTransfer + sWireless.m26 * 0x80, 0x80);
+        if (sWireless.m26 < 5) {
+            sWireless.m26++;
+        } else {
+            sWireless.m26++;
+        }
+    }
+}
+
+// @0x02151fcc
+extern "C" void func_ov109_02151fcc(int a, int b) {
+    sWireless.m48 = a;
+    sWireless.m40 = 1;
+}
+
+// @0x02151fe4
+int TushinScene::NextPageAfterReceive() {
+    int page = ReceiveWiiMii();
+    mUnknown3F0A8 = page;
+    if (page != 0x35) {
+        return page;
+    }
+    if (mUnknown3F098 == 1) {
+        mUnknown18 = page;
+        page = 0x30;
+    }
+    return page;
+}
+
+// @0x02152014
+int TushinScene::ReceiveWiiMii() {
+    SavedCharacter character;
+    sWireless.m44 = -1;
+    int result = sWireless.m34;
+    sWireless.m34 = 0;
+    switch (result) {
+    case -5:
+        PlayResultSound(0xD);
+        return 0x3A;
+    case -4:
+        PlayResultSound(0xC);
+        return 0x3B;
+    case -3:
+    case -2:
+        PlayResultSound(0xD);
+        return 0x3E;
+    }
+    MI_CpuCopy8(&sMiiData[sWireless.m38], &sTransfer, sizeof(MiiData));
+    if (IsInvalid((CharacterRecord *)&sMiiData[sWireless.m38])) {
+        UpdateMiiData();
+        PlayResultSound(0xD);
+        return 0x3C;
+    }
+    func_020979e0(&character);
+    MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
+    if (HasNgWord(&character) == TRUE) {
+        UpdateMiiData();
+        PlayResultSound(0xD);
+        return 0x3F;
+    }
+    sWireless.m44 = FindResident((CharacterRecord *)&sMiiData[sWireless.m38]);
+    if (sWireless.m44 != -1) {
+        func_020979e0(&character);
+        func_0202c264(&gGameData, sWireless.m44, &character);
+        if (func_02073520(&character)) {
+            PlayResultSound(0xD);
+            return 0x38;
+        }
+        if (func_02098584(&character)) {
+            PlayResultSound(0xD);
+            return 0x36;
+        }
+        MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
+        if (func_0207a710(&character) != func_0202c604(&gGameData, sWireless.m44)) {
+            PlayResultSound(0xC);
+            return 0x39;
+        }
+        func_0202c28c(&gGameData, sWireless.m44, &character);
+        func_0207a80c(&character, sReceivedName);
+        UpdateMiiData();
+        PlayResultSound(0xC);
+        return 0x37;
+    }
+    for (int i = 0; i < 100; i++) {
+        if (!func_0202c354(&gGameData, i)) {
+            sWireless.m44 = i;
+            func_020979e0(&character);
+            MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
+            func_02097c64(&character);
+            func_0202c28c(&gGameData, i, &character);
+            func_0207a80c(&character, sReceivedName);
+            if (func_02073520(&character)) {
+                SetUnknown3F098();
+            }
+            UpdateMiiData();
+            return 0x35;
+        }
+    }
+    return 0x3A;
+}
+
+// @0x021523a4
+extern "C" void func_ov109_021523a4(int index, int result) {
+    sWireless.m34 = result;
+    switch (result) {
+    case 1:
+        sWireless.m38 = (u8)index;
+        sWireless.m26++;
+        break;
+    case 2:
+        sWireless.m38 = (u8)index;
+        sWireless.m26++;
+        break;
+    case 3:
+        sWireless.m38 = (u8)index;
+        sWireless.m26++;
+        break;
+    case -5:
+    case -4:
+        sWireless.m26++;
+        break;
+    case -2:
+        sWireless.m26++;
+        break;
+    case -3:
+        sWireless.m26++;
+        break;
+    }
+}
+
+// @0x0215245c
+extern "C" void func_ov109_0215245c(void *arg) {
+}
