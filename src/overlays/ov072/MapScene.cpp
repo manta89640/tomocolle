@@ -13,10 +13,6 @@
 
 // --- The file's constants ---
 
-struct Point {
-    int x;
-    int y;
-};
 
 // A view of the title mode's camera
 struct TitleView {
@@ -238,6 +234,15 @@ static inline void ClearSceneCharacters() {
     }
 }
 
+static inline ScreenRect MoveRect(const ScreenRect &rect, int x, int y) {
+    ScreenRect result;
+    result.x = rect.x + x;
+    result.y = rect.y + y;
+    result.width = rect.width;
+    result.height = rect.height;
+    return result;
+}
+
 static inline ScreenRect MakeRect(int x, int y, int width, int height) {
     ScreenRect rect;
     rect.x = x;
@@ -303,8 +308,8 @@ BOOL MapCamera::IsAtHome() {
 inline void MapScene::ResetCamera() {
     mCamera.mCamera = &data_02122764;
     func_0202a640(&data_02122764);
-    mCamera.mCamera->SetPosition(sCameraHome);
-    mCamera.mCamera->SetTarget(sCameraHomeTarget);
+    mCamera.mCamera->mPosition = sCameraHome;
+    mCamera.mCamera->mTarget = sCameraHomeTarget;
     mCamera.mCamera->mAngleX = 0;
     mCamera.mCamera->mAngleY = 0;
     mCamera.mCamera->mAngleZ = 0;
@@ -339,11 +344,11 @@ void MapScene::StartLoading() {
     default: {
         SavedCharacter character;
         for (int i = 0; i < RESIDENT_COUNT; i++) {
-            if (!func_0202c3dc(&gGameData, i)) {
-                mResidentRooms[i] = -1;
-            } else {
+            if (func_0202c3dc(&gGameData, i)) {
                 func_0202c264(&gGameData, (u16)i, &character);
                 mResidentRooms[i] = character.mRoom;
+            } else {
+                mResidentRooms[i] = -1;
             }
         }
         for (int i = 0; i < RESIDENT_COUNT; i++) {
@@ -413,10 +418,10 @@ void MapScene::Init() {
     for (int i = 0; i < MODEL_COUNT; i++) {
         Sprite_Init(&mNewMarks[i], 1, 0x19, 128, 96, TRUE);
         if (i == MODEL_APARTMENT) {
-            mNewMarks[i].SetPosition(FxVec2(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                            sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT));
+            mNewMarks[i].SetPositionFromVec(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
+                                            sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
         } else {
-            mNewMarks[i].SetPosition(FxVec2(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT));
+            mNewMarks[i].SetPositionFromVec(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT);
         }
         mNewMarks[i].mVisible = FALSE;
     }
@@ -472,14 +477,13 @@ void MapScene::Init() {
     mModels[0].SetAnimation(RESOURCE_BTA0, 0);
     mModels[0].SetAnimation(RESOURCE_BMA0, 0);
     for (int i = 1; i < MODEL_COUNT; i++) {
-        int building = sModelBuildings[i];
-        switch (func_02039c00(&gIsland, building)) {
+        switch (func_02039c00(&gIsland, sModelBuildings[i])) {
         case 0:
         case 3:
             mModels[i].Load(1, 0);
             break;
         case 2:
-            if (mNewBuilding == building) {
+            if (mNewBuilding == sModelBuildings[i]) {
                 if (i == MODEL_APARTMENT) {
                     if (mFacilities.mApartmentSize == 1) {
                         mModels[i].Load(1, 0);
@@ -500,7 +504,7 @@ void MapScene::Init() {
             ShowBuilding(i);
             break;
         }
-        mModels[i].SetPosition(sModelPositions[i]);
+        mModels[i].SetPosition(sModelPositions[i].x, sModelPositions[i].y, sModelPositions[i].z);
     }
     ResetCamera();
     mSelected = -1;
@@ -508,25 +512,25 @@ void MapScene::Init() {
     mLights[0] = &data_021227cc;
     func_0202a96c(&data_021227cc);
     mLights[0]->mColor = sLightColors[1];
-    func_0202aa28(mLights[0], mCamera.mCamera, sLightDirection0);
+    mLights[0]->SetDirection(mCamera.mCamera, sLightDirection0);
     mLights[1] = &data_021227d8;
     func_0202a96c(&data_021227d8);
     mLights[1]->mColor = sLightColors[0];
-    func_0202aa28(mLights[1], mCamera.mCamera, sLightDirection1);
+    mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
     int phase = func_020a6214(&mSky);
     mLights[0]->mColor = func_020a6574(phase);
     mLights[1]->mColor = func_020a659c(phase);
 
-    Sprite_Init(&mBackButton, 1, 0, 128, 96, TRUE);
-    func_02031eb0(&mBackButton, sBackButtonSize.x, sBackButtonSize.y);
-    mBackButton.SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-    func_02031260(&mBackButton, backButtonSequence);
     for (int i = 0; i < 1; i++) {
-        func_02031278(&mBackButton, sBackButtonPalettes[i] + 1);
+        Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
+        func_02031eb0(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
+        mBackButtons[i].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
+        func_02031260(&mBackButtons[i], backButtonSequence);
+        func_02031278(&mBackButtons[i], sBackButtonPalettes[i] + 1);
+        func_02032158(&mBackButtons[i], &sBackButtonRect);
+        func_0203119c(&mBackButtons[i]);
     }
-    func_02032158(&mBackButton, &sBackButtonRect);
-    func_0203119c(&mBackButton);
-    mBackButton.mVisible = FALSE;
+    mBackButtons[0].mVisible = FALSE;
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
         func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
@@ -622,11 +626,6 @@ void MapScene::Update() {
     case STATE_TUTORIAL:
         mCamera.Update();
         switch (mTutorialStep) {
-        case 0:
-            if (mTutorialFrames++ > 120) {
-                SetTutorialStep(mTutorialStep + 1);
-            }
-            break;
         case 1:
         case 3:
         case 4:
@@ -655,6 +654,11 @@ void MapScene::Update() {
             }
             if (mMessageWindows[1].mTransitionDone) {
                 func_0203c02c(&gSceneManager, 0x69);
+            }
+            break;
+        case 0:
+            if (mTutorialFrames++ > 120) {
+                SetTutorialStep(mTutorialStep + 1);
             }
             break;
         case 9:
@@ -760,12 +764,16 @@ void MapScene::Update() {
                     news = 0x51;
                     break;
                 case 7:
-                    if (mIslandStage == 1) {
-                        news = 0x70;
-                    } else if (mIslandStage == 2) {
-                        news = 0x91;
-                    } else if (mIslandStage == 3) {
+                    switch (mIslandStage) {
+                    case 3:
                         news = 0x92;
+                        break;
+                    case 1:
+                        news = 0x70;
+                        break;
+                    case 2:
+                        news = 0x91;
+                        break;
                     }
                     break;
                 case 8:
@@ -839,13 +847,13 @@ void MapScene::Update() {
                     news = sFeatureMessages[mNewBuilding - 25];
                     break;
                 case 32:
-                    if (gGameData.mUnknown54[0xB8] < 4) {
+                    if (*(int *)&gGameData.mUnknown54[0xB8] < 4) {
                         news = 0x9F;
                     } else {
                         news = 0xA0;
-                        SavedCharacter character;
                         for (int i = 0; i < RESIDENT_COUNT; i++) {
                             if (func_0202c3dc(&gGameData, i)) {
+                                SavedCharacter character;
                                 func_0202c264(&gGameData, i, &character);
                                 func_0209c44c(&character, -30);
                                 func_0202c28c(&gGameData, i, &character);
@@ -912,19 +920,21 @@ void MapScene::Update() {
             }
         }
         if (!held) {
-            if (func_0203133c(&mBackButton)) {
-                if (mCamera.IsAtHome()) {
-                    gSceneMemory.mCharacters[0] = 0;
-                    func_0203c02c(&gSceneManager, 0x11);
-                } else {
-                    Deselect(TRUE, 1);
+            for (int i = 0; i < 1; i++) {
+                if (func_0203133c(&mBackButtons[i])) {
+                    if (mCamera.IsAtHome()) {
+                        gSceneMemory.mCharacters[0] = 0;
+                        func_0203c02c(&gSceneManager, 0x11);
+                    } else {
+                        Deselect(TRUE, 1);
+                    }
+                }
+                if (mBackButtons[i].mVisible && func_02031294(&mBackButtons[i])) {
+                    held = TRUE;
                 }
             }
-            if (mBackButton.mVisible && func_02031294(&mBackButton)) {
-                held = TRUE;
-            }
         }
-        ScreenPoint point = gTouchInput.mUnknown4C ? gTouchInput.mLastPoint : gTouchInput.mPoint;
+        ScreenPoint point = *(gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint);
         if (!gTouchInput.mTouched || held) {
             break;
         }
@@ -932,15 +942,17 @@ void MapScene::Update() {
             if (!mModels[i].mVisible) {
                 continue;
             }
-            VecFx32 position = sModelPositions[i];
+            VecFx32 position;
+            position.x = sModelPositions[i].x;
+            position.y = sModelPositions[i].y;
+            position.z = sModelPositions[i].z;
             int x, y;
             NNS_G3dWorldPosToScrPos(&position, &x, &y);
             ScreenRect rect;
             if (mCamera.mMoving || mCamera.IsAtHome()) {
-                rect = MakeRect(sModelTouchRects[i].x + x, sModelTouchRects[i].y + y + 8, sModelTouchRects[i].width,
-                                sModelTouchRects[i].height);
+                rect = MoveRect(sModelTouchRects[i], x, y + 8);
             } else {
-                rect = MakeRect(sModelTouchRects[i].x * 27 / 10 + x, sModelTouchRects[i].y * 27 / 10 + y + 20,
+                rect = MakeRect(sModelTouchRects[i].x * 27 / 10 + x, sModelTouchRects[i].y * 27 / 10 + (y + 20),
                                 sModelTouchRects[i].width * 27 / 10, sModelTouchRects[i].height * 27 / 10);
             }
             if (!func_02028d88(&rect, &point)) {
@@ -1007,7 +1019,7 @@ void MapScene::Draw() {
     }
     mClockDisplay.Draw();
     mMoneyDisplay.Draw();
-    func_02031d7c(&mBackButton);
+    func_02031d7c(&mBackButtons[0]);
     for (int i = 0; i < 3; i++) {
         func_0203206c(&mButtons[i]);
     }
@@ -1215,8 +1227,8 @@ void MapScene::SelectBuilding(int model) {
             break;
         }
     }
-    func_0203119c(&mBackButton);
-    mBackButton.mVisible = TRUE;
+    func_0203119c(&mBackButtons[0]);
+    mBackButtons[0].mVisible = TRUE;
     mButtons[0].mVisible = FALSE;
     mButtons[1].mVisible = FALSE;
     mButtons[2].mVisible = FALSE;
@@ -1237,10 +1249,7 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBoardScreen, 0x100);
-        {
-            WindowPoint position = sBoardTextPosition;
-            mMessageWindows[0].SetTextPosition(0, position);
-        }
+        mMessageWindows[0].SetTextPosition(0, sBoardTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         return;
     }
@@ -1248,10 +1257,7 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
-        {
-            WindowPoint position = sTitleTextPosition;
-            mMessageWindows[0].SetTextPosition(0, position);
-        }
+        mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         switch (mSelected) {
         case 7:
@@ -1278,10 +1284,7 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sQuestionScreen, 0x100);
-        {
-            WindowPoint position = sTitleTextPosition;
-            mMessageWindows[0].SetTextPosition(0, position);
-        }
+        mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         mButtons[0].mVisible = TRUE;
         return;
@@ -1289,10 +1292,7 @@ void MapScene::OpenWindow() {
     func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
     func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
     func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
-    {
-        WindowPoint position = sTitleTextPosition;
-        mMessageWindows[0].SetTextPosition(0, position);
-    }
+    mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
     func_02034720(&mMessageWindows[0], 0x1A, 1);
     mButtons[0].mVisible = FALSE;
 }
@@ -1303,7 +1303,7 @@ void MapScene::Deselect(BOOL sound, int unknown) {
     mCamera.MoveTo(sCameraHome);
     mSelected = -1;
     mUnknown384C = -1;
-    mBackButton.mVisible = FALSE;
+    mBackButtons[0].mVisible = FALSE;
     mButtons[0].mVisible = FALSE;
     mButtons[1].mVisible = FALSE;
     mButtons[2].mVisible = FALSE;
@@ -1652,7 +1652,9 @@ void MapSound::Init(MapClock *clock, int mode) {
     gSoundManager.StartSeqArcIfNotPlaying(0, 3, 4);
     for (int i = 0; i < 4; i++) {
         mRamps.mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
-        mRamps.mRamps[i].mTarget = mRamps.mRamps[i].mValue = sModelMusic[0][i] << FX32_SHIFT;
+        int value = sModelMusic[0][i] << FX32_SHIFT;
+        mRamps.mRamps[i].mValue = value;
+        mRamps.mRamps[i].mTarget = value;
         mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
     gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
@@ -2234,15 +2236,14 @@ void MoneyDisplay::Init(int *money, int *charOffset) {
     mMoney = money;
     mShown = *mMoney;
     Sprite_Init(&mSprite, 1, 0x1B, 128, 96, TRUE);
-    mSprite.SetPosition(sMoneySpritePosition.x << FX32_SHIFT, sMoneySpritePosition.y << FX32_SHIFT);
+    mSprite.SetPosition(FxVec2(sMoneySpritePosition.x << FX32_SHIFT, sMoneySpritePosition.y << FX32_SHIFT));
     mSprite.mOverwritePalette = 1;
     mText.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
     mText.mTextX = 0x40;
     mText.InitText(&gFonts[0].mFont, 0x10, 8, 2, *charOffset, -2, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
     mText.mColor = 1;
     NNS_G2dCharCanvasClear(&mText.mCanvas, 0);
-    Point position = sMoneyTextPosition;
-    mText.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    SetTextPosition(sMoneyTextPosition);
     mText.mSprite.mOverwritePalette = 1;
     *charOffset += mText.GetCharCount();
     Refresh();

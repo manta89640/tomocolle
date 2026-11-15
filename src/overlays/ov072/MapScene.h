@@ -117,7 +117,12 @@ struct Camera {
 };
 
 // One of the main program's 3D lights
+struct Light;
+extern "C" void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
 struct Light {
+    // Points the light, relative to the camera
+    void SetDirection(Camera *camera, VecFx32 direction) { func_0202aa28(this, camera, direction); }
+
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ GXRgb mColor;
     /* 0x8 */ BOOL mEnabled;
@@ -343,10 +348,10 @@ struct WindowPoint {
 };
 
 struct MessageWindow;
-extern "C" void func_02034fc8(MessageWindow *window, int text, WindowPoint position);
+extern "C" void func_02034fc8(MessageWindow *window, int text, int x, int y);
 struct MessageWindow {
     // Where a text of the window is
-    void SetTextPosition(int text, WindowPoint position) { func_02034fc8(this, text, position); }
+    void SetTextPosition(int text, WindowPoint position) { func_02034fc8(this, text, position.x, position.y); }
 
     /* 0x0000 */ void *mVtable;
     /* 0x0004 */ u8 mSprites[12][0xF4];
@@ -542,6 +547,12 @@ BOOL func_020af9dc(IslandFacilities *island);
 
 class MapClock;
 
+// A point in pixels
+struct Point {
+    int x;
+    int y;
+};
+
 // The 3D camera: it flies to a point and a direction over 40 frames, slowing down at the end.
 class MapCamera {
 public:
@@ -668,6 +679,7 @@ public:
     void Draw();
     void SetVisible(BOOL visible);
     void Refresh();
+    void SetTextPosition(Point position) { mText.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT); }
 
     /* 0x000 */ int mState;
     /* 0x004 */ int *mMoney;
@@ -743,7 +755,7 @@ public:
     /* 0x03854 */ Sprite mNewMarks[MODEL_COUNT];  // Over the buildings that are new
     /* 0x04110 */ Sprite mTitleSprite;
     /* 0x041BC */ Sprite mSprite41BC;
-    /* 0x04268 */ SpriteButton mBackButton;
+    /* 0x04268 */ SpriteButton mBackButtons[1];
     /* 0x0435C */ LabelButton mButtons[3];
     /* 0x0582C */ MapSky mSky;
     /* 0x06724 */ MessageFile mMessageFiles[2];   // "TCO:tmd_common_msg_JP.bmg", "TET:tmd_etc_msg_JP.bmg"
