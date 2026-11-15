@@ -365,7 +365,9 @@ extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
 extern SceneManager gSceneManager;
 extern SceneMemory data_0213ba74;
-extern GXRgb data_0213bab0[3]; // The sky's clear colour and light colours, as the map leaves them
+// 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
+// types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
+extern u8 data_0213bab0[100];
 extern IslandState data_0212348c;
 extern Camera data_02122764;
 extern Light data_021227cc;

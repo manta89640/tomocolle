@@ -333,10 +333,11 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 9 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
+- 7 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
   `StartMeeting` (the callee-saved registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`, `ClockDisplay::Refresh`; in
-  overlay 73 `TutorialApartmentFront::UpdateCursorTarget` and `TutorialClockDisplay::Refresh`. Overlay 73's
+  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`; in overlay 73
+  `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
+  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Overlay 73's
   `NamePanel::Init` matches, and its fix (the character counts read through a pointer to the canvas, and both text
   positions set with `SetPositionFromVec`) is still to be carried over to overlay 74's byte-identical copy.
 - The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
@@ -539,7 +540,8 @@ What it showed about the compiler, measured (see "Compiler"):
 ## The settings and the mansion information
 
 Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
-complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: 14 of its 15 functions match; not complete.
+complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: all 15 of its functions and its data match, and the
+unit is complete.
 
 Measured:
 
@@ -573,16 +575,17 @@ data come out the same with either.
 
 Not done:
 
-- `OptionScene::Update`: the two stack slots of the AM/PM rectangle and its by-value copy are swapped (comment
-  above it).
-- Overlay 98's data, above; and the pool's first 36 bytes (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing
-  refers to, are not identified: the source keeps them as `sUnknown0` to `sUnknown4`. Function-local `const`
+- The pool's first 36 bytes of overlay 98 (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing refers to, are
+  not identified: the source keeps them as `sUnknown0` to `sUnknown4` with the ROM's values, and the unit is
+  complete with them. The placement model (`docs/notes/ov072.md`) admits the five Show functions' digit counts
+  (4, 2, 2, 2, 2) as local constants for the last five words, but nothing in the code shows them, and the other
+  four words (0, 0, 0, 2) have no candidate. Function-local `const`
   scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
   established. `docs/notes/ov098.md` has the details.
 
 ## The island map
 
-Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 56 of its 59 functions
 match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
 complete.
 
@@ -622,10 +625,13 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Five functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
-  camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
-  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
-  register), `MapClockDisplay::Refresh` (overlays 73 and 74's near-miss).
+- Three functions differ, each with a comment saying how: `Init` (one instruction placed differently: the back
+  button's base address; the same length), `Update` (the frame is the original's since the touch loop reaches the camera
+  through a pointer; the stack slots of the clock's date and time and the order of the rectangle arithmetic
+  differ), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
+  buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
+  90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
+  kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.

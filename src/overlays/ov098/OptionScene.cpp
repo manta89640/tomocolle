@@ -87,10 +87,6 @@ static inline int GetDigit(int value, int unit) {
     return value % (unit * 10) / unit;
 }
 
-static inline BOOL IsInRect(ScreenRect rect, ScreenPoint point) {
-    return func_02028d88(&rect, &point);
-}
-
 // The rectangle around the AM/PM sprite that takes a touch: 32 pixels square around its position (52, 120)
 static inline ScreenRect GetAmPmRect() {
     ScreenRect rect = sAmPmRect;
@@ -193,10 +189,6 @@ void OptionScene::Init() {
     }
 }
 
-// Does not match: the instructions are the ROM's, but the copy of the AM/PM rectangle that GetAmPmRect makes is at
-// sp+0x68 and the copy passed to IsInRect at sp+0x58, where the ROM has them the other way round. Tried: the
-// rectangle as a local of Update (with and without the inline), passed by value, by pointer and by reference, the
-// point by value, by pointer and through a local, and the inlines defined in the other order.
 void OptionScene::Update() {
     mTtsPlayer.Update();
     mScroll += 0x4CC;
@@ -466,7 +458,10 @@ void OptionScene::Update() {
         // Touching the morning or afternoon changes it
         if (mState == STATE_CLOCK && gTouchInput.mTouched) {
             const ScreenPoint *touch = gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint;
-            if (IsInRect(GetAmPmRect(), *touch)) {
+            // The point and the rectangle as locals in this order, the inline's own rectangle below them
+            ScreenPoint point = *touch;
+            ScreenRect rect = GetAmPmRect();
+            if (func_02028d88(&rect, &point)) {
                 mTime.hour += 12;
                 if (mTime.hour >= 24) {
                     mTime.hour -= 24;

@@ -399,11 +399,8 @@ void MapScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplMapEffect_LZ.bin", 0);
 }
 
-// Not matching yet (0xF18 bytes against 0xF0C). The differences: the register of the island stage's index for the
-// apartment's "new" mark (r2 against r1); the back button's base address, which the original keeps in a register
-// (this + 0x268) across its calls; the scheduling of the camera's reset (the target's y is computed before the
-// camera pointer is loaded again) and of the lights' direction (the vector is loaded into r2/r3 last). Everything
-// else is the original's.
+// Not matching yet (same length; one instruction placed differently): the back button's base, this + 0x268, is
+// computed one instruction earlier than in the original, before the store of the second light's colour.
 void MapScene::Init() {
     const int unknownE = 0xE;
     const u16 backButtonKind = 4;
@@ -423,8 +420,8 @@ void MapScene::Init() {
     for (int i = 0; i < MODEL_COUNT; i++) {
         Sprite_Init(&mNewMarks[i], 1, 0x19, 128, 96, TRUE);
         if (i == MODEL_APARTMENT) {
-            mNewMarks[i].SetPositionFromVec(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                            sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
+            const Point &mark = sApartmentMarkPositions[mIslandStage];
+            mNewMarks[i].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
         } else {
             mNewMarks[i].SetPositionFromVec(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT);
         }
@@ -515,31 +512,33 @@ void MapScene::Init() {
     mSelected = -1;
     mUnknown384C = -1;
     mLights[0] = &data_021227cc;
-    func_0202a96c(&data_021227cc);
+    func_0202a96c(mLights[0]);
     mLights[0]->mColor = sLightColors[1];
     mLights[0]->SetDirection(mCamera.mCamera, sLightDirection0);
     mLights[1] = &data_021227d8;
-    func_0202a96c(&data_021227d8);
+    func_0202a96c(mLights[1]);
     mLights[1]->mColor = sLightColors[0];
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
     int phase = func_020a6214(&mSky);
     mLights[0]->mColor = func_020a6574(phase);
     mLights[1]->mColor = func_020a659c(phase);
 
-    Sprite_Init(&mBackButtons[0], 1, 0, 128, 96, TRUE);
-    func_02031eb0(&mBackButtons[0], sBackButtonSize.x, sBackButtonSize.y);
-    mBackButtons[0].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-    func_02031260(&mBackButtons[0], backButtonKind);
     for (int i = 0; i < 1; i++) {
-        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
+        Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
+        func_02031eb0(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
     }
-    func_02032158(&mBackButtons[0], &sBackButtonSounds);
-    func_0203119c(&mBackButtons[0]);
-    mBackButtons[0].mVisible = FALSE;
+    mBackButtons[0].SetPositionFromVec(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
+    for (int i = 0; i < 1; i++) {
+        func_02031260(&mBackButtons[i], backButtonKind);
+        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
+        func_02032158(&mBackButtons[i], &sBackButtonSounds);
+        func_0203119c(&mBackButtons[i]);
+        mBackButtons[i].mVisible = FALSE;
+    }
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
         func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
-        mButtons[i].SetPosition(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
+        mButtons[i].SetPositionFromVec(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
         func_02031260(&mButtons[i], sButtonKinds[i]);
         func_02032158(&mButtons[i], &sButtonSounds[i]);
         func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
@@ -548,8 +547,8 @@ void MapScene::Init() {
     }
     mMessageFiles[0].Open("TCO:tmd_common_msg_JP.bmg");
     mMessageFiles[1].Open("TET:tmd_etc_msg_JP.bmg");
-    int titleCharOffset = 400;
     int charOffset = 200;
+    int titleCharOffset = 400;
     for (u16 i = 0; i < 3; i++) {
         charOffset += func_02031f58(&mButtons[i], &mMessageFiles[1], sButtonMessages[i], &gFonts[sButtonFonts[i]].mFont,
                                     0x10, charOffset);
@@ -557,8 +556,9 @@ void MapScene::Init() {
     func_02032fb8(&mMessageWindows[0], sTitleWindowRect);
     func_02033174(&mMessageWindows[0], sWindowTitleScreen, 0x100);
     mMessageWindows[0].mUnknownAF9C = 0;
+    MessageFile *files = mMessageFiles;
     for (int i = 0; i < titleTextCount; i++) {
-        func_02033a58(&mMessageWindows[0], &mMessageFiles[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
+        func_02033a58(&mMessageWindows[0], &files[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
                       sTitleTextPosition, &titleCharOffset);
     }
     func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
@@ -577,13 +577,17 @@ void MapScene::Init() {
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x200, 3);
     data_0211d604.Set(0x1211);
-    if (mSceneId == 0x6A) {
-        mSound.Init(&mClock, MapSound::MODE_RESTART);
-        SetState(STATE_TITLE);
-    } else if (mSceneId == 0x6D || mSceneId == 0x6E) {
+    switch (mSceneId) {
+    case 0x6D:
+    case 0x6E:
         mSound.Init(&mClock, MapSound::MODE_UNKNOWN3);
         SetState(STATE_TUTORIAL);
-    } else {
+        break;
+    case 0x6A:
+        mSound.Init(&mClock, MapSound::MODE_RESTART);
+        SetState(STATE_TITLE);
+        break;
+    default:
         mSound.Init(&mClock, MapSound::MODE_START);
         Deselect(FALSE, 1);
         if (mNewBuilding == -1) {
@@ -591,15 +595,17 @@ void MapScene::Init() {
         } else {
             SetState(STATE_NEW_BUILDING);
         }
+        break;
     }
     NNS_GfdDumpLnkTexVramManager();
     func_02060c1c();
     mIdleFrames = 0;
 }
 
-// Not matching yet (0x1148 bytes against 0x1144): one register more is live in the touch loop of STATE_MAP (the
-// rectangle table's address, which the original loads again in each branch), so &mCamera is spilled to the stack
-// and the frame is 8 bytes larger; and the camera's reset is scheduled as in Init. The rest is the original's.
+// Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
+// rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
+// differs: the registers of &mCamera and of the division's constant in the touch loop, with the order of the
+// rectangle arithmetic, the registers of the camera's reset, and one pair of dead stores.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
@@ -730,9 +736,8 @@ void MapScene::Update() {
                             }
                             gGameData.mUnknown0C[0x40] = mIslandStage;
                             mWindowCount = func_020a60b8(mIslandStage);
-                            mNewMarks[MODEL_APARTMENT].SetPosition(
-                                sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
+                            const Point &mark = sApartmentMarkPositions[mIslandStage];
+                            mNewMarks[MODEL_APARTMENT].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
                             ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[9]);
                             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[9],
@@ -855,7 +860,7 @@ void MapScene::Update() {
                     news = sFeatureMessages[mNewBuilding - 25];
                     break;
                 case 32:
-                    if (*(int *)&gGameData.mUnknown54[0xB8] < 4) {
+                    if (*(u32 *)&gGameData.mUnknown54[0xB8] < 4) {
                         news = 0x9F;
                     } else {
                         news = 0xA0;
@@ -896,7 +901,14 @@ void MapScene::Update() {
                     }
                 }
             } else if (mIdleFrames == 40) {
-                UpdateCharacterTimes();
+                // UpdateCharacterTimes written out: the date and time are Update's own locals here (their stack
+                // slots are above the touch loop's, which an inline's locals are not), the date first
+                RTCDate date;
+                RTCTime time;
+                s64 now = func_02035870(data_02123440[0], &date, &time);
+                func_020ad568(now);
+                func_020ad514(now, &time);
+                func_020ad294(now, &time);
             } else if (mIdleFrames >= 60) {
                 UpdateWindows();
                 mIdleFrames = 0;
@@ -957,7 +969,8 @@ void MapScene::Update() {
             int x, y;
             NNS_G3dWorldPosToScrPos(&position, &x, &y);
             ScreenRect rect;
-            if (mCamera.mMoving || mCamera.IsAtHome()) {
+            MapCamera *camera = &mCamera;
+            if (camera->mMoving || camera->IsAtHome()) {
                 rect = MoveRect(sModelTouchRects[i], x, y + 8);
             } else {
                 rect = MakeRect(sModelTouchRects[i].x * 27 / 10 + x, sModelTouchRects[i].y * 27 / 10 + (y + 20),
@@ -1049,14 +1062,14 @@ void MapScene::Draw() {
     func_0207b138(mParticles);
 }
 
-// Not matching yet: the original keeps data_0213bab0's address in r7 across the three calls; this loads it again
-// before each store. Same instructions otherwise.
 void MapScene::Exit() {
     GXRgb clearColor = mSky.mColors[1];
+    // A pointer cast from the byte buffer is kept in a register across the calls; the buffer's address is not.
+    GXRgb *colors = (GXRgb *)data_0213bab0;
     int phase = func_020a6214(&mSky);
-    data_0213bab0[0] = clearColor;
-    data_0213bab0[1] = func_020a6574(phase);
-    data_0213bab0[2] = func_020a659c(phase);
+    colors[0] = clearColor;
+    colors[1] = func_020a6574(phase);
+    colors[2] = func_020a659c(phase);
     for (int i = 0; i < 14; i++) {
         func_0202aecc(data_021223e4, i);
         ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[i]);
@@ -1497,9 +1510,9 @@ BOOL MapScene::IsNewsDue() {
     return FALSE;
 }
 
-// Not matching yet: the second shuffle (of the other residents) inlines MATH_Rand16 with the shift of x done in
-// each arm of the max test and the store of x between them; here it is the same as the first shuffle's, which
-// matches. Same registers and stack otherwise.
+// Not matching yet: the loop that picks a kind of news of the month allocates its registers differently (the
+// original materialises the 1 of 1 << monthBit in the loop and keeps x of the inlined MATH_Rand16 apart), and the
+// two stores of the other residents are scheduled differently. The rest, both shuffles included, is the original's.
 // Makes the day's news: a birthday of a resident when there is one that the last birthday news was not about,
 // otherwise a random kind of news of the month
 void MapScene::MakeDailyNews() {
@@ -1566,8 +1579,8 @@ void MapScene::MakeDailyNews() {
     if (found) {
         gSceneMemory.mCharacters[0] = chosen;
         for (int i = 0; i < otherCount; i++) {
-            int j = Rand(otherCount);
             u8 t = others[i];
+            int j = Rand(otherCount);
             others[i] = others[j];
             others[j] = t;
         }
@@ -2173,8 +2186,6 @@ void MapClockDisplay::Update() {
     Refresh(FALSE);
 }
 
-// Not matching yet, as overlays 73 and 74's copies: "add r0, r0, #0x400" for &mSprites[7] comes after the
-// subtraction in the original, before it here.
 void MapClockDisplay::Refresh(BOOL all) {
     MapClock *clock = mClock;
     if (mMonth != clock->mDate.month || all) {
@@ -2195,7 +2206,9 @@ void MapClockDisplay::Refresh(BOOL all) {
         u32 hour = clock->mTime.hour - half * 12;
         u32 tens = hour / 10;
         Sprite_SetFrame(&mSprites[6], tens);
-        Sprite_SetFrame(&mSprites[7], hour - tens * 10);
+        // Subtracted in place: as an argument, the sprite's address is computed before it.
+        hour -= tens * 10;
+        Sprite_SetFrame(&mSprites[7], hour);
         mHour = clock->mTime.hour;
     }
     if (mMinute != clock->mTime.minute || all) {

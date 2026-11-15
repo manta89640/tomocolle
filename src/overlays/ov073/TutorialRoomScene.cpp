@@ -2640,10 +2640,6 @@ void TutorialClockDisplay::Update() {
     Refresh(FALSE);
 }
 
-// Not matching yet: 2 instructions are swapped in the hour's part ("add r0, r0, #0x400" for &mSprites[7] comes
-// after the subtraction in the original, before it here). Everything else is identical. Tried: hour % 10, the
-// ones in a local, a pointer to the sprite, mSprites + 7, 10 * tens, an int hour, hour % 12, 12 * half, an inline
-// helper for the two digits (that gives add #0x410 + #0xAC). Byte-identical to overlay 74's.
 // @0x02150668
 void TutorialClockDisplay::Refresh(BOOL all) {
     TutorialClock *clock = mClock;
@@ -2665,7 +2661,9 @@ void TutorialClockDisplay::Refresh(BOOL all) {
         u32 hour = clock->mTime.hour - half * 12;
         u32 tens = hour / 10;
         Sprite_SetFrame(&mSprites[SPRITE_HOUR_TENS], tens);
-        Sprite_SetFrame(&mSprites[SPRITE_HOUR_ONES], hour - tens * 10);
+        // Subtracted in place: as an argument, the sprite's address is computed before it.
+        hour -= tens * 10;
+        Sprite_SetFrame(&mSprites[SPRITE_HOUR_ONES], hour);
         mHour = clock->mTime.hour;
     }
     if (mMinute != clock->mTime.minute || all) {
