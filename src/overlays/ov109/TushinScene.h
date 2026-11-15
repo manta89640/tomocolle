@@ -185,7 +185,10 @@ struct SavedCharacter : public CharacterRecord {
 }; // 0x2C0
 
 // The model of a character (func_0208eb18 constructs it).
-struct CharacterModel {
+// The main program's model (its base classes Model and AnimModel, as overlay 96's header has them).
+struct ModelBase {
+    BOOL IsVisible() { return mVisible; }
+
     /* 0x000 */ void *mVtable;
     /* 0x004 */ void *mResourceSet;
     /* 0x008 */ int mUnknown008;
@@ -193,6 +196,9 @@ struct CharacterModel {
     /* 0x010 */ u8 mUnknown010[0xA0];
     /* 0x0B0 */ BOOL mVisible;
     /* 0x0B4 */ u8 mUnknown0B4[0x2C];
+}; // 0xE0
+
+struct CharacterModel : public ModelBase {
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x18];
     /* 0x104 */ int mAnimId; // The current 'BCA0' animation

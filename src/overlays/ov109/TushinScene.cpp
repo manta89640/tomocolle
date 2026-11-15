@@ -307,19 +307,20 @@ void TushinScene::SetUpList(int *charOffset) {
 
 // @0x0214a68c
 void TushinScene::InitCharacters() {
+    int i;
     func_0202b0e8(&data_02122824);
-    for (int i = 2; i >= 0; i--) {
+    for (i = 2; i >= 0; i--) {
         SavedCharacter *resident = &mResidents.mResidents[mResidents.mSelected];
         CharacterRecord *record = &mCharacters[i];
         *record = *resident;
         func_02091048(&mCharacters[i], sCharacterArchives[i]);
-        ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[i].mModel.mArchiveName, mCharacters[i].mModel.mArchivePath,
-                                       1);
-        func_0202ad04(data_021223e4, i, mCharacters[i].mModel.mArchiveName, 0);
+        CharacterModel *model = &mCharacters[i].mModel;
+        ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
+        func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
     }
     void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         func_02090fdc(&mCharacters[i], i, 0, 0);
         func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
         Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, GetStandAnimation(i));
@@ -335,8 +336,8 @@ void TushinScene::InitCharacters() {
     mUnknown3F000 = 0;
     mCamera = &data_02122764;
     func_0202a640(&data_02122764);
-    mCamera->mPosition = sCameraPosition;
-    mCamera->mTarget = sCameraTarget;
+    VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
+    VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
     func_0202a96c(&data_021227cc[0]);
     func_0202a96c(&data_021227cc[1]);
     func_0202ab2c(&data_021227cc[0], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, 0x3E8 - 0x640,
@@ -416,9 +417,7 @@ void TushinScene::LoadCharacters() {
 
 // @0x0214b5b8
 void TushinScene::ShowNextCharacter() {
-    CharacterRecord *record = &mCharacters[mCurrent];
-    SavedCharacter *resident = &mResidents.mResidents[mResidents.mSelected];
-    *record = *resident;
+    (CharacterRecord &)mCharacters[mCurrent] = mResidents.mResidents[mResidents.mSelected];
     ReloadCharacter(mCurrent);
     SetUpCharacter(mCurrent);
     func_02091a14(&mCharacters[mCurrent], TRUE);
@@ -611,14 +610,22 @@ void TushinScene::Send(int kind) {
         }
         sWireless.m22 = 1;
         func_020979e0(&sTransfer);
-        CharacterRecord *record = &sTransfer;
-        *record = *GetSelectedResident();
+        (CharacterRecord &)sTransfer = mResidents.mResidents[mResidents.mSelected];
         WH_SendData(&sTransfer, 0x80, func_ov109_02151eb4);
         sWireless.m3C = 0;
         return;
     case 1:
         SendSongs();
         return;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
     default:
         WH_SendData(&sWireless.m20, 2, func_ov109_02151eb4);
         return;
@@ -726,8 +733,7 @@ int TushinScene::FindResident(CharacterRecord *record) {
 // @0x0214d18c
 void TushinScene::RefreshRecord(CharacterRecord *record) {
     SavedCharacter character;
-    CharacterRecord *copy = &character;
-    *copy = *record;
+    (CharacterRecord &)character = *record;
     func_02097cc0(&character);
     func_0209e01c(&character);
     *record = character;
@@ -1417,7 +1423,7 @@ void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
     int i;
     for (i = 0; i < 3; i++) {
-        if (i == 2 && mCharacters[i].mModel.mVisible == TRUE) {
+        if (i == 2 && mCharacters[i].mModel.IsVisible() == TRUE) {
             int animation = mCharacters[i].mModel.mAnimId;
             if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
                 switch (mPage) {
@@ -1439,15 +1445,6 @@ void TushinScene::UpdateCharacters() {
             mCharacters[i].mModel.mPos.x = -0x1000;
             int next = GetStandAnimation(i);
             switch (mCharacters[i].mModel.mAnimId) {
-            case 0x23:
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                break;
-            case 0x25:
-                next = 0x29;
-                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, next);
-                func_0208ef00(&mCharacters[i].mModel, 1, 0);
-                mCharacters[i].mModel.mPos.x = 0x1000;
-                break;
             case 0x26:
                 next = 0x24;
                 break;
@@ -1456,13 +1453,22 @@ void TushinScene::UpdateCharacters() {
                 func_0208ef00(&mCharacters[i].mModel, 1, 0);
                 mCharacters[i].mModel.mPos.x = 0x1000;
                 return;
-            case 0x28:
+            case 0x25:
+                next = 0x29;
+                Character_SetAnimation(&mCharacters[i], RESOURCE_BCA0, next);
+                func_0208ef00(&mCharacters[i].mModel, 1, 0);
                 mCharacters[i].mModel.mPos.x = 0x1000;
-                next = 0x23;
                 break;
             case 0x29:
                 mUnknown3F084 = 1;
                 func_02091a14(&mCharacters[i], FALSE);
+                break;
+            case 0x23:
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                break;
+            case 0x28:
+                mCharacters[i].mModel.mPos.x = 0x1000;
+                next = 0x23;
                 break;
             }
             func_020919a0(&mCharacters[i], 0x1000);
