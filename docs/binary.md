@@ -523,6 +523,56 @@ Not done:
   scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
   established. `docs/notes/ov098.md` has the details.
 
+## The island map
+
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
+match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
+complete.
+
+Measured:
+
+- `MapScene` (0x1D4FC bytes; `CreateScene` makes it for scene ids 0x5F to 0x66, 0x6A, 0x6D and 0x6E after
+  `FS_LoadOverlay(0x48)`; constructor `0x0204534C`, virtual table at `0x02150AD4`) is the island: 13 models (the
+  ground, by season, and twelve buildings, each a "board" model until it is built), the apartment building's lit
+  windows (up to 150 `G3Sprite`s, one per room, textured by what the resident is doing: "w_live.tga" to
+  "w_game.tga"), "new" marks over buildings, and two message windows. Touching a building flies the camera to it
+  (`MapCamera`: 40 frames, eased by t^4) and opens its window ("Scn/Map/SceneMap2Wnd<Name>_LZ.bin") on the lower
+  screen; touching it again, or the window's button, enters it (`EnterBuilding`: the scene of each building, the
+  fountain's by the time of day from a table of 14 times). The back button goes back to the apartment (scene 0x11)
+  from the island's view, and to that view from a building.
+- Scene 0x6A starts in a title mode (`TitleCamera`: ten moving views of the island, chosen at random, until a
+  touch); scenes 0x6D and 0x6E play the tutorial's visits (steps 2, 4, 7, 15, 18, 20 and 23 of `data_0213ba74`
+  +0x1E, the messages 0x152 to 0x17A); scenes 0x62 to 0x66 show the island at sizes 0 to 4. When a building or a
+  feature has just been built (func_020af4d8), the scene shows it appearing with effects and goes to the news
+  (scene 0x46, overlay 87), after adding a news item of it (`AddNews`, `NewsItem_Make` of the main program).
+- `MapSound` plays the music of the day or the night (sequences 0x1A and 0x1B, switching at the month's times
+  from func_020a6390/func_020a6480) and three sounds of the surroundings by season and time of day; each building
+  has its own volume, pitch, tempo and pan for the music, ramped to when it is selected.
+- The news stand's texture animation shows whether a new issue is due (`IsNewsDue`: the newest item is from before
+  the last 7:00 or 19:00 edition by half a day); entering it then makes the day's news (`MakeDailyNews`: a
+  resident's birthday, else a random kind of news of the month, `data_020fa1d0`).
+- `MapClock` and `MapClockDisplay` are overlay 74's `Clock` and `ClockDisplay` but for the sprite bank;
+  `MoneyDisplay` counts the shown money up to `gGameData`'s.
+
+The data, measured with the compiler: the unit's `.rodata` (0x89C bytes) comes out byte for byte as the ROM's with
+SP2p3 (see "Compiler"). How the compiler orders a file's data, which reproduces every object's
+place in our object: it keeps a list, newest first, of the file's statics in declaration order, each preceded by the
+strings of its initializer; then the class's virtual table; then the functions' local `const` objects. It heap-sorts
+the list by size; the four-byte-aligned objects of `.rodata` and of `.data` are each pooled, at the place of the
+first. Unreferenced statics are not on it; local `const` scalars are, even when their uses are folded, which is
+what the first 0x14 bytes of the pool are (four constants of `Init` and two one-element arrays). The declaration
+order of the source was solved with this model (`docs/notes/ov072.md`).
+
+Not done:
+
+- Five functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
+  camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
+  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
+  register), `MapClockDisplay::Refresh` (overlays 73 and 74's near-miss).
+- `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
+  ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
+- What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
@@ -540,6 +590,10 @@ Not done:
   with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
   identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
   So the evidence for the version is the data, and the matched functions are no evidence against it.
+- **Overlay 72's `.rodata` comes out byte for byte with 138** (0x89C bytes: the pool of 0x3B0, then the 13-, 21- and
+  22-byte arrays and the seven tables of 88 to 320 bytes, each in a section of its own), and its functions compile
+  as with 137. Of the DSi compilers, 1.1 to 1.3p1 pool objects of up to 60 bytes in C++ (and everything in C);
+  1.6 SP1 and SP2 also leave a 4-byte object out of the pool.
 - **138 and 139 are not told apart.** They give identical output on every game file and on WH. 138 is used, as the
   first build that fits.
 - **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
