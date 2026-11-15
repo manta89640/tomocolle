@@ -479,6 +479,50 @@ Not done:
 - The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
   their addresses.
 
+## The settings and the mansion information
+
+Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
+complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: 14 of its 15 functions match; not complete.
+
+Measured:
+
+- `InformationScene` (0x51BC bytes, scene 0xAE; constructed in the main program at `0x02048918` after
+  `FS_LoadOverlay(0x63)`, virtual table at `0x0214AA20`) shows statistics over the 100 saved characters with the
+  etc messages 0x185 to 0x1A1: the number of residents, their average age to a tenth (the birth year is 12 bits at
+  0x50 of a saved character, 0xFFF when not given; month and day are func_02098dac's properties 0x26 and 0x27; the
+  age is taken against `Clock_GetDate`), the ratio of men to women (func_0202c604 is set for women, by the
+  numbers' order in "男女比"), reduced by their greatest common divisor, zero to five stars of comfort from the byte
+  at 0xFB of each character, the troubles solved (`gGameData` 0xC2, "悩み事解決数"), and one of 17 types of
+  mansion (0x18F + type): the summed personalities (0 to 15) give a point on two axes, its direction one of eight
+  types, its length against the number of residents one of two strengths, and the origin "完全平均". Its one button
+  goes back to scene 0x11.
+- `OptionScene` (0x26394 bytes, scene ids 0xAC and 0xAD; constructed in the main program at `0x020487E4` after
+  `FS_LoadOverlay(0x62)`, virtual table at `0x0214C700`) is the settings, with the etc messages 0xD7 to 0xF4 and
+  0x150/0x151: the sound settings (stereo or mono, and the volumes of music, effects and voice, 0 to 3, in
+  `gGameData` 0xC8 to 0xCB; the voice's volume is spoken, "ボリュームゼロ" to "ボリュームサン"), the clock (date
+  and time on sprite digits, written to the game's clock by func_02035460 and saved), and erasing all the data after
+  three questions. Scene 0xAD is the first start ("時刻を設定してください"), which goes on to scene 0x69.
+- Both scenes are built from two main-program classes, now stand-ins in `include/SpriteButton.h`: a sprite button
+  of 0xF4 bytes (constructor `0x0203117C`, update `0x0203133C`, draw `0x02031D7C`) and a button with a message
+  text of 0x6F0 bytes (constructor `0x02031F1C`), the same that the message window holds 12 and 16 of.
+
+Inferred, and measured with the compiler: overlay 98's `.rodata` is one file's constants, heap-sorted by size,
+with the four-byte-aligned ones in one pool read by offset from its start. Up to `0x0214C384` our compiler gives
+the ROM's layout from the declaration order in the source. After it the ROM has the string
+"N83:/Window_down.nsc" and then the six tables of 64 bytes and more, which our compiler (2.0 SP2p2) puts in the
+pool, before the string; mwccarm 3.0 build 138 (2.0 SP2p3) keeps objects of 64 bytes and more out of the pool and
+gives the ROM's layout from the same file, and compiles all of both overlays' functions as ours does. Overlay 99's
+data come out the same with either.
+
+Not done:
+
+- `OptionScene::Update`: the two stack slots of the AM/PM rectangle and its by-value copy are swapped (comment
+  above it).
+- Overlay 98's data, above; and the pool's first 36 bytes (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing
+  refers to, are not identified: the source keeps them as `sUnknown0` to `sUnknown4`. Function-local `const`
+  scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
+  established. `docs/notes/ov098.md` has the details.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").

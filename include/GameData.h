@@ -27,7 +27,9 @@ public:
     // Overlay 106 (PreStartScene) sets it when it is 0 and then asks for scene 0x69; while it is set, it brings the
     // residents up to date and asks for scene 0x6A. It clears it when the save data was broken.
     /* 0xB1 */ u8 mUnknownB1;
-    /* 0xB2 */ u8 mUnknownB2[0x16];
+    /* 0xB2 */ u8 mUnknownB2[0x10];
+    /* 0xC2 */ u16 mTroublesSolved; // Overlay 99 shows it as the number of troubles solved ("悩み事解決数")
+    /* 0xC4 */ u8 mUnknownC4[4];
     /* 0xC8 */ u8 mStereo;       // Not zero: stereo output (default 1)
     /* 0xC9 */ u8 mMusicVolume;  // 0 to 3, for sequences and streams (default 3)
     /* 0xCA */ u8 mEffectVolume; // 0 to 3, for sequence archive entries (default 3)
