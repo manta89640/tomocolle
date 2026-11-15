@@ -50,13 +50,6 @@ void MiiListMenuScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TEM", "Msg/TmdEtcMsgJP_LZ.bin", 0);
 }
 
-// NOT MATCHING: two instructions are in the other order. Before the second MessageFile::Open the original loads the
-// path into r1 and then computes the file's address into r0; this gives the address first, as before the first
-// Open (which matches). Tried without effect: the files as an array (which also changes the destructor), pointers
-// or references to them, the path in a variable, the screen setup after or before the Opens, the loops' variables
-// in every scope, the button loop with a pointer or as do-while, an accessor or a cast for the file. An inline
-// helper that takes the path before the file gives the second Open the original's order, but then reorders the
-// first Open and the palette call before it (the order seems to follow which operand the compiler made first).
 void MiiListMenuScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
@@ -67,8 +60,11 @@ void MiiListMenuScene::Init() {
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
     func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     data_0211d604.Set(0x1400);
-    mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
-    mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
+    // The two files opened through one pointer, as two consecutive files: written as two members, the second Open
+    // computes the file's address before loading the path, where the original does the reverse.
+    MessageFile *files = &mEtcMessages;
+    files[1].Open("TCM:tmd_common_msg_JP.bmg");
+    files[0].Open("TEM:tmd_etc_msg_JP.bmg");
 
     for (int i = 0; i < 2; i++) {
         Sprite_Init(&mButtons[i], 0, sButtonSequences[i], 0x80, 0x60, TRUE);

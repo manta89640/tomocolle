@@ -348,6 +348,7 @@ src/sound/ValueRamp.cpp:
     .text       start:0x02036558 end:0x0203671c
 
 src/scene/MiiListMenuScene.cpp:
+    complete
     .text       start:0x0204fc74 end:0x02050884
     .init       start:0x020b06f4 end:0x020b077c
     .rodata     start:0x020b5dac end:0x020b5f70

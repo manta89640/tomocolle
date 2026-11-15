@@ -427,7 +427,7 @@ constructors, which stores it. No overlay is loaded for them.
 
 | Scene | Class | Size | Constructor | File | Functions |
 | --- | --- | --- | --- | --- | --- |
-| 0x24 | `MiiListMenuScene` | 0x2C0C0 | `func_02040288` | `MiiListMenuScene.cpp`, `0x0204FC74` to `0x02050884` | 12 of 13 match |
+| 0x24 | `MiiListMenuScene` | 0x2C0C0 | `func_02040288` | `MiiListMenuScene.cpp`, `0x0204FC74` to `0x02050884` | 13 of 13, complete |
 | 0x25 | `G3SpriteTestScene` | 0x48B4 | `func_0204036c` | `G3SpriteTestScene.cpp`, to `0x02050D70` | 9 of 9, complete |
 | 0x26 | `MiiListScene` | 0x2AA44 | `func_020403e8` | `MiiListScene.cpp`, to `0x02051640` | 10 of 10, complete |
 
@@ -464,16 +464,18 @@ Two things the compiler does that these files needed:
   positions moved by a fixed amount (`{sPos[0].x - 0x20, sPos[0].y - 6}`): an initialiser that reads another
   constant object is not a constant expression, so the compiler initialises it at run time, and as `const` it goes
   in `.data` (a non-`const` one goes in `.bss`). That this is how the source had it is inferred: it gives the bytes.
+- **Two files opened through one pointer.** `MiiListMenuScene::Init` opens its two message files (members at
+  +0x200 and +0x218) through one pointer to the first, as `files[1]` and then `files[0]`. Written as two members,
+  the second `Open` computes the file's address before it loads the path, where the ROM does the reverse; an inline
+  helper that takes the path first fixes that call but reschedules the code before it. That the source had a
+  pointer or an array here is inferred: it is the form found that gives the bytes (an array member changes the
+  destructor).
 - **A local copied inside a loop is hoisted.** Scene 0x26's sort texts take an offset by value; written as a local
   initialised inside the loop, the compiler loads it once before the loop and gives its stack slot the place the
   ROM has. Declared before the loop it gets another slot.
 
 Not done:
 
-- `MiiListMenuScene::Init` differs in the order of two instructions: before the second `MessageFile::Open` the
-  original loads the path before it computes the file's address, and the source gives the other order (comment
-  above the function). So that unit is not complete, though its data is placed and named and the compiled data
-  comes out in the ROM's order.
 - The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
   their addresses.
 
