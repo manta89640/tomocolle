@@ -527,7 +527,7 @@ Not done:
 
 Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
 match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
-complete. Built with mwccarm 2.0 SP2p3 (`UNIT_COMPILERS` in `configure.py`).
+complete.
 
 Measured:
 
@@ -555,7 +555,7 @@ Measured:
   `MoneyDisplay` counts the shown money up to `gGameData`'s.
 
 The data, measured with the compiler: the unit's `.rodata` (0x89C bytes) comes out byte for byte as the ROM's with
-SP2p3 (see "Where a file's constants go"). How the compiler orders a file's data, which reproduces every object's
+SP2p3 (see "Compiler"). How the compiler orders a file's data, which reproduces every object's
 place in our object: it keeps a list, newest first, of the file's statics in declaration order, each preceded by the
 strings of its initializer; then the class's virtual table; then the functions' local `const` objects. It heap-sorts
 the list by size; the four-byte-aligned objects of `.rodata` and of `.data` are each pooled, at the place of the
@@ -575,49 +575,41 @@ Not done:
 
 ## Compiler
 
-**Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
+**The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
 
-- NitroSDK 4.2 is from 2008, and the game came out in June 2009. Pokémon Platinum (2008), also on NitroSDK 4.2, is
-  matched by this version.
-- The six functions decompiled so far match with it. They are too simple to tell compiler versions apart, so this
-  shows that the pipeline works, not that the version is right.
+- **What tells the builds apart is where a file's statics go.** Every 2.0 release up to SP2 patch 2 (build 137) puts
+  all of a file's 4-aligned statics into one pool, read at the pool's address plus an offset. The ROM keeps those of
+  64 bytes and more out of the pool, each in a section of its own: overlay 72's tables of 88 to 320 bytes follow its
+  pool one by one, overlay 98's six button and sprite tables come after its last string, and WH's 64-byte parent
+  parameters are addressed on their own while its 32-byte scan parameters are pooled. Of the 3.0 builds (114 to 139,
+  compiled with test files under the game's flags), the threshold first appears in 138; no flag of the earlier ones
+  (`-[no]constpool`, `-sdatathreshold`, other `-O` and `-opt` settings, without `-ipa file`) gives it. The DSi
+  compilers (4.0, builds 1018 to 1051) have it too, but compile the game's code differently: `TtsPlayer` drops from
+  28 matching functions to 10, overlay 74 from 247 to 107, WH from 66 to 38.
+- **Nothing else changes.** Every game source of `src/`, and the speech engine's four, compiles to byte-identical code
+  with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
+  identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
+  So the evidence for the version is the data, and the matched functions are no evidence against it.
+- **Overlay 72's `.rodata` comes out byte for byte with 138** (0x89C bytes: the pool of 0x3B0, then the 13-, 21- and
+  22-byte arrays and the seven tables of 88 to 320 bytes, each in a section of its own), and its functions compile
+  as with 137. Of the DSi compilers, 1.1 to 1.3p1 pool objects of up to 60 bytes in C++ (and everything in C);
+  1.6 SP1 and SP2 also leave a 4-byte object out of the pool.
+- **138 and 139 are not told apart.** They give identical output on every game file and on WH. 138 is used, as the
+  first build that fits.
+- **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
+  (`MWLD_VERSION`).
+
+The earlier evidence still holds: NitroSDK 4.2 is from 2008 and the game came out in June 2009, and
+`src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams and threads and pass up to ten arguments, matched
+in full with build 137 and does with 138.
 
 The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 patch 2 and NitroSystem with 2.0 SP2,
 as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
 its libraries with, not what the game's own code was built with.
 
-For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
-and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
-written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
-The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
-it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
-include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
-
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's
 command function has "Pitch" three times, and the original holds three separate strings for them.
-
-### Where a file's constants go, by compiler
-
-Measured, with a test file of 4-aligned `static const` arrays of 8 to 104 bytes, each referred to by a function, built with the game's flags (`-O4,p ... -lang=c++ -ipa file`):
-
-- mwccarm 2.0 SP1p2, SP2 and SP2p2 put every one of them into the one pooled `.rodata` section, whatever the size. No flag
-  changes this: `-[no]constpool`, `-sdatathreshold` (0, 60, 64), `-O3,p`, `-O4,s` and `-opt nopeephole` give the
-  same section, and so does C++ without `-ipa file`.
-- The DSi compilers 1.1, 1.1p1, 1.2, 1.2p1, 1.2p2, 1.3 and 1.3p1 pool the objects of up to 60 bytes and give each of
-  64 bytes or more a section of its own (1.6 SP1 and SP2 also leave a 4-byte one out). In C they pool everything, as
-  2.0 does. 1.2 base (pokebw2's `1.2/base`) does not compile the C++ test.
-- The ROM has that split: overlay 72's pool ends with its 52-byte tables, and its 88- to 320-byte tables follow it
-  one by one; overlays 73 and 74 are the same. But the DSi compilers change the code too much to be the game's:
-  rebuilt with DSi 1.2, 1.3p1 or 1.1, `TtsPlayer.cpp` matches in 10 of 28 functions (28 with 2.0 SP2p2),
-  `SoundManager.cpp` 40 of 43 (43), `SoundSystem.cpp` 4 of 6 (6), `ValueRamp.cpp` 2 of 7 (6), `MessageText.cpp` 17 of
-  32 (30), `TextCanvas.cpp` 18 of 34 (32), and overlays 96, 73, 74 and 72 a third or less of what they match now.
-- mwccarm 2.0 SP2 patch 3 and patch 4 (in the compiler archive that `configure.py` downloads, not unpacked here
-  before) have the size limit. Overlay 72's `MapScene.cpp` built with either: `.rodata` comes out as the ROM's layout,
-  a pool of 0x3B0 bytes (the ROM's 0x374 and the 60-byte `u8` table that ends it), then the 13-, 21- and 22-byte
-  arrays and the 88-, 104-, 112-, 156-, 208-, 208- and 320-byte tables each in a section of its own, in the ROM's
-  order; and the 61 functions compare exactly as with SP2p2 (47 match, the same 47, and the others differ in the same
-  places).
 
 ## Linking
 
