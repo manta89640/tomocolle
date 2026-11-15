@@ -352,6 +352,28 @@ src/sound/ValueRamp.cpp:
     complete
     .text       start:0x02036558 end:0x0203671c
 
+src/scene/MiiListMenuScene.cpp:
+    complete
+    .text       start:0x0204fc74 end:0x02050884
+    .init       start:0x020b06f4 end:0x020b077c
+    .rodata     start:0x020b5dac end:0x020b5f70
+    .ctor       start:0x020fc4f0 end:0x020fc4f4
+    .data       start:0x02111868 end:0x021119ec
+
+src/scene/G3SpriteTestScene.cpp:
+    complete
+    .text       start:0x02050884 end:0x02050d70
+    .rodata     start:0x020b5f70 end:0x020b5f80
+    .data       start:0x021119ec end:0x02111a80
+
+src/scene/MiiListScene.cpp:
+    complete
+    .text       start:0x02050d70 end:0x02051640
+    .init       start:0x020b077c end:0x020b07e0
+    .rodata     start:0x020b5f80 end:0x020b60fc
+    .ctor       start:0x020fc4f4 end:0x020fc4f8
+    .data       start:0x02111a80 end:0x02111c00
+
 lib/NitroSystem/libraries/snd/src/main.c:
     .text       start:0x02053c64 end:0x02053d80
 
