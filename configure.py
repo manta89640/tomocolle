@@ -215,6 +215,19 @@ LIBRARIES["lib/SHTTS/"] = {
     "includes": ["lib/SHTTS", *SDK_INCLUDES],
 }
 
+# WH, the wireless wrapper of the SDK's sample code, which the game compiles in. Its source is this project's own
+# decompilation. Measured (docs/binary.md, "WH"): it is built like the game's own code, with -ipa file (the ROM
+# addresses its small statics as one pool) and as C++ (the order of its data needs every static to be defined where
+# it is declared).
+LIBRARIES["lib/WH/"] = {
+    "compiler": MWCC_VERSION,
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c++", "-ipa file"],
+    "sjis": True,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/WH", *SDK_INCLUDES],
+}
+
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
 # "Metrowerks C/C++ for ARM 3.0.0.136", the compiler of 2.0/sp2. Its source here is this project's own decompilation,
 # written against the headers of that MSL (internal ones such as ansi_files.h included).
