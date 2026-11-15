@@ -1369,7 +1369,7 @@ void MapScene::SetTutorialStep(int step) {
         SavedCharacter character;
         func_0202c264(&gGameData, 0, &character);
         wchar_t name[11];
-        func_0207a80c(&character, name);
+        MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034f38(&mMessageWindows[1], 0, 0x157);
         func_02034720(&mMessageWindows[1], 0x12, 1);
@@ -1382,7 +1382,7 @@ void MapScene::SetTutorialStep(int step) {
         SavedCharacter character;
         func_0202c264(&gGameData, 0, &character);
         wchar_t name[11];
-        func_0207a80c(&character, name);
+        MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034f38(&mMessageWindows[1], 0, 0x158);
         func_02034720(&mMessageWindows[1], 0x12, 1);
@@ -1410,7 +1410,7 @@ void MapScene::SetTutorialStep(int step) {
         SavedCharacter character;
         func_0202c264(&gGameData, 1, &character);
         wchar_t name[11];
-        func_0207a80c(&character, name);
+        MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034f38(&mMessageWindows[1], 0, 0x16E);
         func_02034720(&mMessageWindows[1], 0x12, 1);
@@ -1437,7 +1437,7 @@ void MapScene::SetTutorialStep(int step) {
         SavedCharacter character;
         func_0202c264(&gGameData, 1, &character);
         wchar_t name[11];
-        func_0207a80c(&character, name);
+        MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034f38(&mMessageWindows[1], 0, 0x16F);
         func_02034720(&mMessageWindows[1], 0x12, 1);

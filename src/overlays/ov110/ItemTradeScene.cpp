@@ -739,11 +739,11 @@ void ItemTradeList::Draw() {
 void ItemTradeList::ShowCostume(int costume) {
     func_0202aecc(data_021223e4, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
-    func_0208ee18(&mMannequin->mModel, "3MM", costume, func_0207a710(mContext->mPlayer));
+    func_0208ee18(&mMannequin->mModel, "3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
     ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
     func_0208ef5c(&mMannequin->mModel, 0, 0);
-    func_0208f19c(&mMannequin->mModel, func_02073514(func_0207a6c0(mContext->mPlayer)), 0x5FBE);
+    func_0208f19c(&mMannequin->mModel, func_02073514(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
     func_0208ef00(&mMannequin->mModel, TRUE, TRUE);
 }
 

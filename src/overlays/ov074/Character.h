@@ -20,7 +20,7 @@ struct SavedCharacter {
     s64 GetEventEnd() { return *(s64 *)&mEventEndLo; }
 
     /* 0x0000 */ u16 mUnknown0000;
-    /* 0x0002 */ wchar_t mName[10];      // func_0207a80c copies it out as a string
+    /* 0x0002 */ wchar_t mName[10];      // MiiData_GetName copies it out as a string
     /* 0x0016 */ u8 mUnknown0016[0x34];
     /* 0x004A */ u8 mUnknown004A;        // func_02098ec4 computes a value up to 200 from these two
     /* 0x004B */ u8 mUnknown004B;

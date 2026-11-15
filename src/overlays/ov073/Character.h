@@ -18,7 +18,7 @@ struct SavedCharacter {
     SavedCharacter(); // func_020979c0
 
     /* 0x0000 */ u16 mUnknown0000;
-    /* 0x0002 */ wchar_t mName[10];      // func_0207a80c copies it out as a string
+    /* 0x0002 */ wchar_t mName[10];      // MiiData_GetName copies it out as a string
     /* 0x0016 */ u8 mUnknown0016[0x34];
     /* 0x004A */ u8 mUnknown004A;        // func_02098ec4 computes a value up to 200 from these two
     /* 0x004B */ u8 mUnknown004B;
@@ -159,7 +159,7 @@ s8 func_02098f2c(SavedCharacter *character);   // Computes its personality (0..1
 void func_02099088(SavedCharacter *character, int index, int change); // Adds to its affinity for another
 void func_020990b0(SavedCharacter *character, int index, u8 relation, int affinity); // Sets its relation to another
 // Copies the saved character's name out as a string
-void func_0207a80c(SavedCharacter *character, wchar_t *name);
+void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // For each kind of relation, how much each reaction changes the affinity by, halved
 extern const s8 *data_021135c8[];
 void func_02091048(CharacterBase *character, const char *archiveName); // Names its archive

@@ -479,7 +479,7 @@ void func_0207b258(ParticleManager *manager, void *camera);
 void *func_0207b2fc(ParticleManager *manager, int resource, const VecFx32 *position);
 void func_0207b364(ParticleManager *manager, void *emitter);
 
-void func_0207a80c(SavedCharacter *character, wchar_t *name);
+void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 int func_02098dac(SavedCharacter *character, int which);
 BOOL func_02099c94(int event);
 void func_0209c44c(SavedCharacter *character, int change);

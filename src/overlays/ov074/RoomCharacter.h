@@ -79,7 +79,7 @@ int func_02098ec4(RoomCharacter *self);
 int func_0209d804(RoomCharacter *self, s8 value);
 // Applies the character's voice to the speech engine
 void func_0209d898(RoomCharacter *self, TtsPlayer *player);
-int func_0207a6c0(RoomCharacter *self);
+int MiiData_GetFavoriteColor(RoomCharacter *self);
 
 // --- Main program, not named yet: others ---
 GXRgb func_02073514(int color);

@@ -197,8 +197,8 @@ void WeddingScene::Update() {
             wchar_t first[11];
             MI_CpuClear16(first, sizeof(first));
             MI_CpuClear16(second, sizeof(second));
-            func_0207a80c(&mCharacters[0], first);
-            func_0207a80c(&mCharacters[1], second);
+            MiiData_GetName(&mCharacters[0], first);
+            MiiData_GetName(&mCharacters[1], second);
             mWindow.mText.mHAlign = 1;
             mWindow.SetStringArg(first, 0);
             mWindow.SetStringArg(second, 1);
@@ -615,7 +615,7 @@ void WeddingCharacter::Speak(int file, u32 message, int count, int *types, int *
                 break;
             case ARG_CHARACTER:
                 func_0202c264(&gGameData, values[i], &character);
-                func_0207a80c(&character, names[i]);
+                MiiData_GetName(&character, names[i]);
                 func_020372d0(pronunciations[i], names[i], sizeof(names[i]));
                 break;
             case ARG_ITEM:

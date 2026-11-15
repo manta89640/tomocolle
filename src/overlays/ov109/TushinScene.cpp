@@ -792,7 +792,7 @@ int TushinScene::ReceiveCharacter() {
         if (func_02098584(&sTransfer)) {
             return 3;
         }
-        if (func_0207a710(&sTransfer) != func_0202c604(&gGameData, sWireless.m44)) {
+        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, sWireless.m44)) {
             return 6;
         }
         CharacterRecord record;
@@ -895,7 +895,7 @@ int TushinScene::ReceiveCharacter() {
                 func_0202c28c(&gGameData, i, &sTransfer);
             }
             func_0202c28c(&gGameData, i, &sTransfer);
-            func_0207a80c(&sTransfer, sReceivedName);
+            MiiData_GetName(&sTransfer, sReceivedName);
             goto received;
         }
         i++;
@@ -935,7 +935,7 @@ void TushinScene::UpdateListButtons() {
         break;
     case 2:
         mPage = GetMode() == 1 ? 0xB : 0x2C;
-        func_0207a80c(GetSelectedResident(), sReceivedName);
+        MiiData_GetName(GetSelectedResident(), sReceivedName);
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
         func_02034720(&mWindow, 0x12, 1);
@@ -2557,13 +2557,13 @@ BOOL TushinScene::HasNgWord(CharacterRecord *record) {
     }
     wchar_t nickname[11];
     MI_CpuClear16(nickname, sizeof(nickname));
-    func_0207a8c4(record, nickname);
+    MiiData_GetCreatorName(record, nickname);
     if (IsNgWord(nickname) == TRUE) {
         return TRUE;
     }
     wchar_t name[11];
     MI_CpuClear16(name, sizeof(name));
-    func_0207a80c(record, name);
+    MiiData_GetName(record, name);
     return IsNgWord(name) == TRUE ? TRUE : FALSE;
 }
 
@@ -2607,7 +2607,7 @@ BOOL TushinScene::IsMiiBroken(CharacterRecord *record) {
 BOOL TushinScene::IsNameBlank(CharacterRecord *record) {
     wchar_t name[11];
     MI_CpuClear16(name, sizeof(name));
-    func_0207a80c(record, name);
+    MiiData_GetName(record, name);
     return IsBlank(name) == TRUE ? TRUE : FALSE;
 }
 
@@ -2615,7 +2615,7 @@ BOOL TushinScene::IsNameBlank(CharacterRecord *record) {
 BOOL TushinScene::IsNicknameBlank(CharacterRecord *record) {
     wchar_t nickname[11];
     MI_CpuClear16(nickname, sizeof(nickname));
-    func_0207a8c4(record, nickname);
+    MiiData_GetCreatorName(record, nickname);
     return IsBlank(nickname) == TRUE ? TRUE : FALSE;
 }
 
@@ -2798,12 +2798,12 @@ int TushinScene::ReceiveWiiMii() {
             return 0x36;
         }
         MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
-        if (func_0207a710(&character) != func_0202c604(&gGameData, sWireless.m44)) {
+        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, sWireless.m44)) {
             PlayResultSound(0xC);
             return 0x39;
         }
         func_0202c28c(&gGameData, sWireless.m44, &character);
-        func_0207a80c(&character, sReceivedName);
+        MiiData_GetName(&character, sReceivedName);
         UpdateMiiData();
         PlayResultSound(0xC);
         return 0x37;
@@ -2815,7 +2815,7 @@ int TushinScene::ReceiveWiiMii() {
             MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
             func_02097c64(&character);
             func_0202c28c(&gGameData, i, &character);
-            func_0207a80c(&character, sReceivedName);
+            MiiData_GetName(&character, sReceivedName);
             if (func_02073520(&character)) {
                 SetUnknown3F098();
             }
