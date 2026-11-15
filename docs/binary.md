@@ -696,7 +696,9 @@ file's data objects, that one included.
 - **Nothing else changes.** Every game source of `src/`, and the speech engine's four, compiles to byte-identical code
   with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
   identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
-  So the evidence for the version is the data, and the matched functions are no evidence against it.
+  So the evidence for the version is the data, and the matched functions are no evidence against it. That was
+  measured on the files of `src/` as they were at the switch; the Mii transfer, below, is code the same build does
+  not give.
 - **Overlay 72's `.rodata` comes out byte for byte with 138** (0x89C bytes: the pool of 0x3B0, then the 13-, 21- and
   22-byte arrays and the seven tables of 88 to 320 bytes, each in a section of its own), and its functions compile
   as with 137. Of the DSi compilers, 1.1 to 1.3p1 pool objects of up to 60 bytes in C++ (and everything in C);
