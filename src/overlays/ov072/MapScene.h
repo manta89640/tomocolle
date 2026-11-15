@@ -304,7 +304,6 @@ class G3Sprite {
 public:
     virtual ~G3Sprite(); // func_0202b6cc, which does nothing
 
-    void SetTexture(int texture, ScreenRect rect) { func_0202b1f0(this, texture, &rect); }
     void SetPosition(VecFx32 position) {
         mX = position.x;
         mY = position.y;

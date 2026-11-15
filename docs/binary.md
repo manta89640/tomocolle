@@ -525,7 +525,7 @@ Not done:
 
 ## The island map
 
-Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 53 of its 59 functions
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
 match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
 complete. Built with mwccarm 2.0 SP2p3 (`UNIT_COMPILERS` in `configure.py`).
 
@@ -565,9 +565,9 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Six functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
+- Five functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
   camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
-  `UpdateWindows` (three stack slots), `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
+  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
   register), `MapClockDisplay::Refresh` (overlays 73 and 74's near-miss).
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.

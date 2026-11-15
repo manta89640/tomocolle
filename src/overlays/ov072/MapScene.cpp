@@ -1641,13 +1641,11 @@ int MapScene::GetWindowTexture(int resident) {
     return 0;
 }
 
-// Not matching yet: three stack slots are in another order. The original has the call's copy of the rectangle at
-// sp+0x28, GetWindowPosition's result at sp+0x10 and the position at sp+0x1C; here they are at 0x10, 0x20 and
-// 0x2C. The compiler's hoisted copy of the rectangle (sp+0) and every instruction are the original's.
 void MapScene::UpdateWindows() {
     for (int i = 0; i < mWindowCount; i++) {
         int texture = GetWindowTexture(mRoomResidents[i]);
-        mWindows[i].SetTexture(texture, sWindowTextureRect);
+        ScreenRect rect = sWindowTextureRect;
+        func_0202b1f0(&mWindows[i], texture, &rect);
         mWindows[i].mScaleY = 0xD5;
         mWindows[i].mScaleX = 0xD5;
         func_0202b4c4(&mWindows[i]);
