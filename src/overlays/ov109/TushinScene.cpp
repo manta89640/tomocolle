@@ -568,27 +568,27 @@ int TushinScene::GetStandAnimation(int i) {
     return data_020fb870[3][0];
 }
 
+#pragma optimization_level 2
 // @0x0214c84c
 void TushinScene::SendSongs() {
-    int i;
-    int n;
     if (sWireless.m24 != 0) {
         return;
     }
     sWireless.m24 = 1;
     int offset = mResidents.mSelected * sizeof(SavedCharacter);
-    n = 0;
+    u8 *residents = (u8 *)mResidents.mResidents;
+    int n = 0;
     MI_CpuClear16(sSongs, sizeof(sSongs));
-    for (i = 0; i < 6; i++) {
-        int song = func_0209c718((SavedCharacter *)((u8 *)mResidents.mResidents + offset), i);
+    for (int i = 0; i < 6; i++) {
+        int song = func_0209c718((SavedCharacter *)(residents + offset), i);
         if (song != 0xFF) {
-            func_0202c920(&gGameData, song, sSongs[n]);
-            n++;
+            func_0202c920(&gGameData, song, sSongs[n++]);
         }
     }
     WH_SendData(sSongs, 0x80, func_ov109_02151eb4);
     sWireless.m3C = 0;
 }
+#pragma optimization_level reset
 
 // @0x0214c908
 void TushinScene::Send(int kind) {
@@ -733,6 +733,7 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
     *record = character;
 }
 
+#pragma optimization_level 2
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -792,7 +793,8 @@ int TushinScene::ReceiveCharacter() {
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
             }
-            record.mUnknown299 |= sTransfer.mUnknown299;
+            u8 flags = sTransfer.mUnknown299;
+            record.mUnknown299 |= flags;
             int n = 0;
             for (int i = 0; i < 6; i++) {
                 if (func_0209c718(&sTransfer, i) == 0xFF) {
@@ -810,10 +812,10 @@ int TushinScene::ReceiveCharacter() {
                     func_0202c934(&gGameData, func_0209c718(&sTransfer, i), sSongs[n]);
                     SongEntry entry;
                     func_020af058(&entry);
-                    u8 saved = func_0209c718(&sTransfer, i);
-                    func_020af084(&entry, saved);
+                    entry.mSong = func_0209c718(&sTransfer, i);
+                    func_020af084(&entry, entry.mSong);
                     func_020af0b8(&entry, -1, i);
-                    func_020af06c(&entry, saved);
+                    func_020af06c(&entry, entry.mSong);
                 }
                 n++;
                 record.mSongSlots[i] = func_0209c718(&sTransfer, i);
@@ -826,7 +828,8 @@ int TushinScene::ReceiveCharacter() {
 
     sWireless.m26++;
     sWireless.m44 = -1;
-    for (int i = 0; i < 100; i++) {
+    int i = 0;
+    do {
         if (!func_0202c354(&gGameData, i)) {
             sWireless.m44 = i;
             func_02097cc0(&sTransfer);
@@ -844,21 +847,25 @@ int TushinScene::ReceiveCharacter() {
                     func_0202c934(&gGameData, func_0209c718(&sTransfer, j), sSongs[n]);
                     SongEntry entry;
                     func_020af058(&entry);
-                    u8 saved = func_0209c718(&sTransfer, j);
-                    func_020af084(&entry, saved);
+                    entry.mSong = func_0209c718(&sTransfer, j);
+                    func_020af084(&entry, entry.mSong);
                     func_020af0b8(&entry, -1, j);
-                    func_020af06c(&entry, saved);
+                    func_020af06c(&entry, entry.mSong);
                 }
                 n++;
                 func_0202c28c(&gGameData, i, &sTransfer);
             }
             func_0202c28c(&gGameData, i, &sTransfer);
             func_0207a80c(&sTransfer, sReceivedName);
-            return 0;
+            goto received;
         }
-    }
+        i++;
+    } while (i < 100);
     return func_02073520(&sTransfer) ? 2 : 1;
+received:
+    return 0;
 }
+#pragma optimization_level reset
 
 static inline void ClearText(MessageText *text) {
     NNS_G2dCharCanvasClear(&text->mCanvas, 0);
@@ -1404,6 +1411,7 @@ int TushinScene::NextPageAfterReceive() {
     return page;
 }
 
+#pragma optimization_level 2
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
@@ -1506,6 +1514,7 @@ void TushinScene::UpdateCharacters() {
     ShowNextCharacter();
     StartEmitter(1);
 }
+#pragma optimization_level reset
 
 // @0x0214ef08
 void TushinScene::DrawCharacters() {
@@ -1721,6 +1730,7 @@ BOOL TushinScene::HasNgWord(CharacterRecord *record) {
 }
 
 // @0x02151b98
+#pragma optimization_level 2
 BOOL TushinScene::HasNgSongReceived() {
     for (int i = 0; i < 6; i++) {
         if (IsNgWord((wchar_t *)sSongs[i]) == TRUE) {
@@ -1729,6 +1739,8 @@ BOOL TushinScene::HasNgSongReceived() {
     }
     return FALSE;
 }
+
+#pragma optimization_level reset
 
 // @0x02151bdc
 BOOL TushinScene::HasNgSong(CharacterRecord *record) {
@@ -1898,6 +1910,7 @@ static inline void PlaySound(int index) {
     gSoundManager.StartSeqArc(1, 0x19, index);
 }
 
+#pragma optimization_level 2
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -2779,3 +2792,4 @@ void TushinScene::Update() {
     UpdateSending();
     UpdateSaving();
 }
+#pragma optimization_level reset

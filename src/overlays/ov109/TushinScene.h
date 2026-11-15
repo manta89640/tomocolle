@@ -431,15 +431,16 @@ void func_0209e310(ClothesInventory *inventory); // Saves it
 
 // --- Songs (main program) ---
 
-// A song's object of the main program (0x40 bytes; func_020af058 sets it up)
+// A song's object of the main program (func_020af058 sets it up)
 struct SongEntry {
-    /* 0x00 */ u8 mUnknown00[0x40];
-};
+    /* 0x00 */ u32 mUnknown00[0x10];
+    /* 0x40 */ u8 mSong;
+}; // 0x44
 
 extern "C" {
 int func_0209c718(CharacterRecord *character, int slot);          // The saved song of a slot, 0xFF for none
 void func_0209c73c(CharacterRecord *character, int slot, int song);
-int func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
+u8 func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
 void func_0202c920(GameData *game, int song, void *buffer);
 void func_0202c934(GameData *game, int song, void *buffer);
 void func_020af058(SongEntry *entry);
