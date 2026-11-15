@@ -8,6 +8,7 @@
 #include "MessageWindow.h"
 #include "Scene.h"
 #include "Sprite.h"
+#include "SpriteButton.h"
 #include "sound/SoundManager.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
@@ -345,51 +346,11 @@ void func_020a5960(Room *room);
 void func_020a5970(Room *room, int unk);
 }
 
-// --- The main program's touch buttons (0x0203115c to 0x02032134) ---------------------------------------------
-
-// A sprite that can be touched, with a sequence for each of its two looks and four sounds (func_0203117c
-// constructs it). Not decompiled: the fields this overlay sets.
-//
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-class Button : public Sprite {
-public:
-    /* 0x0AC */ BOOL mUnknownAC;
-    /* 0x0B0 */ BOOL mOn;        // func_02031e28 sets it, and the look with it
-    /* 0x0B4 */ BOOL mUnknownB4;
-    /* 0x0B8 */ BOOL mDisabled;  // func_02031e88 sets it, and draws the button darkened while it is set
-    /* 0x0BC */ ScreenRect mTouchRect; // Around the position (func_02031eb0)
-    /* 0x0CC */ int mSounds[4];  // Sound archive entries: -1 is none
-    /* 0x0DC */ int mSoundArc;
-    /* 0x0E0 */ int mUnknownE0;
-    /* 0x0E4 */ int mUnknownE4;
-    /* 0x0E8 */ int mKind;       // How it reacts to a touch (0 to 5), func_02031260 sets it
-    /* 0x0EC */ u16 mSequence;   // func_02031278 sets both
-    /* 0x0EE */ u16 mOnSequence;
-    /* 0x0F0 */ int mUnknownF0;
-}; // 0xF4
-
-// A button with a text on it (func_02031f1c constructs it)
-class TextButton : public Button {
-public:
-    /* 0x0F4 */ MessageText mText;
-    /* 0x6E4 */ u8 mUnknown6E4[0xC];
-}; // 0x6F0
+// --- The main program's touch buttons (include/SpriteButton.h) ------------------------------------------------
 
 extern "C" {
-void func_0203119c(Button *button);                       // Back to its first look
-void func_02031260(Button *button, int kind);             // Sets mKind
-void func_02031278(Button *button, u16 sequence, u16 onSequence);
-BOOL func_0203133c(Button *button);                       // Updates it: TRUE when it is pressed
-void func_02031d7c(Button *button);                       // Draws it
-void func_02031e28(Button *button, BOOL on);              // Sets mOn
-void func_02031e88(Button *button, BOOL disabled);        // Sets mDisabled
-void func_02031eb0(Button *button, int width, int height); // The size of the touch rectangle
-// Puts a message on the button's text: (button, file, message, font, plane, character offset); returns the
-// number of characters it took
-int func_02031f58(TextButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                  int charOffset);
-void func_0203206c(TextButton *button); // Draws it
-void func_02032134(TextButton *button, int palette); // Sets the overwrite palette of the button and its text
+void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
+void func_02032134(TextButton *button, int palette);     // Sets the overwrite palette of the button and its text
 }
 
 // --- The list (main program, 0x020a80f0 to 0x020a9e94) --------------------------------------------------------
@@ -504,7 +465,6 @@ extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 extern const VecFx32 data_020fbe00;
 extern const VecFx32 data_020fbe0c;
-extern const wchar_t data_02138fb4[];
 
 void func_0202a640(Camera *camera);
 void func_0202a748(Camera *camera);
@@ -548,8 +508,13 @@ void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const 
 
 // --- Wireless (main program) ------------------------------------------------------------------------------------
 
-// WH, the SDK's wireless sample code, compiled into the main program (0x0202f42c to 0x0203115c)
+// WH, the SDK's wireless sample code, compiled into the main program (lib/WH; its header is not on the game's
+// include path, so what this scene uses is declared again here)
 extern "C" {
+// The SSID of the child that connected (WH_StateOutStartParent copies it in); this scene shows it as the
+// partner's name
+extern u16 gWHChildSsid[WM_SIZE_CHILD_SSID / sizeof(u16)];
+
 // WH's states (WH_SYSSTATE_*)
 enum {
     WH_SYSSTATE_STOP,
@@ -569,17 +534,6 @@ enum {
 typedef void (*WHReceiverFunc)(u16 aid, u16 *data, u16 size);
 typedef void (*WHSendCallbackFunc)(BOOL result);
 
-// Named by their WH names here; symbols.txt still has the func_ names, which the WH work replaces
-#define WH_GetLinkLevel func_020307f0
-#define WH_GetBitmap func_020307fc
-#define WH_GetSystemState func_0203080c
-#define WH_GetMeasureChannel func_02030a68
-#define WH_Initialize func_02030ba4
-#define WH_ParentConnect func_02030cf8
-#define WH_SetReceiver func_02030f14
-#define WH_SendData func_02030f68
-#define WH_Reset func_02030f74
-#define WH_Finalize func_02030fbc
 int WH_GetLinkLevel(void);
 u16 WH_GetBitmap(void);
 int WH_GetSystemState(void);
@@ -690,7 +644,7 @@ public:
 
     /* 0x000 */ int mPressed;  // The tab pressed this frame, as TAB_*, or 0
     /* 0x004 */ int mSelected; // Its button
-    /* 0x008 */ Button mButtons[5];
+    /* 0x008 */ SpriteButton mButtons[5];
     /* 0x4CC */ int mMasks[5];
 }; // 0x4E0
 
@@ -706,7 +660,7 @@ public:
 
     /* 0x000 */ int mPressed; // The button pressed this frame, or -1
     /* 0x004 */ int mSelected;
-    /* 0x008 */ Button mButtons[4];
+    /* 0x008 */ SpriteButton mButtons[4];
 }; // 0x3D8
 
 // The five buttons under the costumes tab, which choose the costumes it lists.
@@ -721,7 +675,7 @@ public:
 
     /* 0x000 */ int mPressed; // The button pressed this frame, or -1
     /* 0x004 */ int mSelected;
-    /* 0x008 */ Button mButtons[5];
+    /* 0x008 */ SpriteButton mButtons[5];
 }; // 0x4CC
 
 // The item model of the scene, which shows the item chosen.
@@ -804,7 +758,7 @@ public:
     /* 0x14954 */ ItemTradeItemFilter mItemFilter;
     /* 0x14D2C */ ItemTradeCostumeFilter mCostumeFilter;
     /* 0x151F8 */ TextButton mOkButton;
-    /* 0x158E8 */ Button mBackButton;
+    /* 0x158E8 */ SpriteButton mBackButton;
     /* 0x159DC */ Mannequin *mMannequin;
     /* 0x159E0 */ ItemTradeItemModel *mItemModel;
     /* 0x159E4 */ Room *mRoom;

@@ -44,8 +44,8 @@ static const ScreenPoint sItemFilterPositions[4] = { { 28, 41 }, { 88, 41 }, { 1
 static const WindowPoint sNameTextPosition = { 8, 8 };
 static const ScreenPoint sPreviewStarts[3] = { { 128, 0 }, { 190, 0 }, { 128, 0 } };
 static const WindowPoint sCostumeFilterTouchSize = { 42, 24 };
-static const u8 sAnswerSequences[2] = { 10, 10 };
 static const u8 sAnswerOnSequences[2] = { 11, 11 };
+static const u8 sAnswerSequences[2] = { 10, 10 };
 static const int sItemFilters[4] = { 1, 2, 8, 0x10 };
 static const WindowPoint sAnswerPositions[2] = { { 75, 149 }, { 181, 149 } };
 static const WindowPoint sThreeButtonSize = { 190, 20 };
@@ -160,8 +160,8 @@ void ItemTradeTabs::Init(int plane, MessageFile *file, int *charOffset) {
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
-        mButtons[i].mSoundArc = 1;
-        mButtons[i].mSounds[0] = 3;
+        mButtons[i].mUnknownDC = 1;
+        mButtons[i].mSounds.mSounds[0] = 3;
     }
     SetVisible(FALSE);
 }
@@ -300,8 +300,8 @@ void ItemTradeItemFilter::Init(int plane) {
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
-        mButtons[i].mSoundArc = 1;
-        mButtons[i].mSounds[0] = 3;
+        mButtons[i].mUnknownDC = 1;
+        mButtons[i].mSounds.mSounds[0] = 3;
     }
     SetVisible(FALSE);
     Select(0);
@@ -360,8 +360,8 @@ void ItemTradeCostumeFilter::Init(int plane) {
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
-        mButtons[i].mSoundArc = 1;
-        mButtons[i].mSounds[0] = 3;
+        mButtons[i].mUnknownDC = 1;
+        mButtons[i].mSounds.mSounds[0] = 3;
     }
     SetVisible(FALSE);
     Select(0);
@@ -448,9 +448,9 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     *charOffset += func_02031f58(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
     func_0203119c(&mOkButton);
     func_02031260(&mOkButton, 4);
-    mOkButton.mSoundArc = 1;
-    mOkButton.mSounds[0] = 10;
-    mOkButton.mSounds[2] = 0;
+    mOkButton.mUnknownDC = 1;
+    mOkButton.mSounds.mSounds[0] = 10;
+    mOkButton.mSounds.mSounds[2] = 0;
     func_02032134(&mOkButton, 1);
     mOkButton.mVisible = FALSE;
 
@@ -460,9 +460,9 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     func_02031eb0(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
     func_0203119c(&mBackButton);
     func_02031260(&mBackButton, 4);
-    mBackButton.mSoundArc = 1;
-    mBackButton.mSounds[0] = 12;
-    mBackButton.mSounds[2] = 0;
+    mBackButton.mUnknownDC = 1;
+    mBackButton.mSounds.mSounds[0] = 12;
+    mBackButton.mSounds.mSounds[2] = 0;
     mBackButton.mOverwritePalette = 1;
     mBackButton.mVisible = FALSE;
 
@@ -1244,6 +1244,10 @@ static const int sWindowKinds[20] = { 0, 1, 1, 2, 4, 5, 5, -1, 3, 4, 4, 4, 5, 5,
 static const u32 sStateMessages[20] = { 0xFD,  0x100, 0x101, 0x103, 0x113, 0x104, 0x104, 0x108, 0x107, 0x109,
                                         0x10B, 0x10D, 0x10A, 0x127, 0x110, 0x126, 0x111, 0x11E, 0x11D, 0x112 };
 
+// The OK button's sounds, by window kind
+static const int sOkSounds[6][4] = {
+    { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 },
+};
 // By window kind: which of the three buttons there are, and whether there is an OK button
 struct WindowButtons {
     /* 0x0 */ int mButtons[3];
@@ -1258,10 +1262,6 @@ static const WindowButtons sWindowButtonMessages[6] = {
     { { 0xFE, 0xFF, 0xF9 }, 9 },        { { 0xFE, 0xFF, 0xF9 }, 5 }, { { 0x102, 0x102, 0x102 }, 5 },
     { { 0xFE, 0xFF, 0xF9 }, 4 },        { { 0xFE, 0xFF, 0xF9 }, 4 }, { { 0xFE, 0xFF, 0xF9 }, 4 },
 };
-// The OK button's sounds, by window kind
-static const int sOkSounds[6][4] = {
-    { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 },
-};
 // Where the window's text is: with buttons, with OK alone, and with neither
 // The screen (tile map) of the window's background
 // The three buttons, when there are three, and when there are two; the fourth is OK's
@@ -1269,7 +1269,7 @@ static const int sOkSounds[6][4] = {
 // The link icon's sequence by link level
 
 
-#define GetWindowButton(window, i) ((Button *)(window)->mSprites[i])
+#define GetWindowButton(window, i) ((SpriteButton *)(window)->mSprites[i])
 
 static inline void SetPixelPosition(Sprite *sprite, WindowPoint position) {
     sprite->SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
@@ -2012,7 +2012,7 @@ void ItemTradeScene::Update() {
                     mWait = 60;
                     break;
                 case STATE_CONNECTED_PARENT:
-                    mWindow.mTexts[0].SetStringArg(data_02138fb4, 0);
+                    mWindow.mTexts[0].SetStringArg((const wchar_t *)gWHChildSsid, 0);
                     PlaySound(11);
                     mIsParent = TRUE;
                     break;
