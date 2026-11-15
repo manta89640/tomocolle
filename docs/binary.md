@@ -333,10 +333,11 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 9 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
+- 7 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
   `StartMeeting` (the callee-saved registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`, `ClockDisplay::Refresh`; in
-  overlay 73 `TutorialApartmentFront::UpdateCursorTarget` and `TutorialClockDisplay::Refresh`. Overlay 73's
+  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`; in overlay 73
+  `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
+  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Overlay 73's
   `NamePanel::Init` matches, and its fix (the character counts read through a pointer to the canvas, and both text
   positions set with `SetPositionFromVec`) is still to be carried over to overlay 74's byte-identical copy.
 - The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
@@ -525,7 +526,7 @@ Not done:
 
 ## The island map
 
-Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 55 of its 59 functions
 match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
 complete.
 
@@ -565,10 +566,10 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Five functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
+- Four functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
   camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
   `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
-  register), `MapClockDisplay::Refresh` (overlays 73 and 74's near-miss).
+  register).
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.

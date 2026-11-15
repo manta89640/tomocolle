@@ -2173,8 +2173,6 @@ void MapClockDisplay::Update() {
     Refresh(FALSE);
 }
 
-// Not matching yet, as overlays 73 and 74's copies: "add r0, r0, #0x400" for &mSprites[7] comes after the
-// subtraction in the original, before it here.
 void MapClockDisplay::Refresh(BOOL all) {
     MapClock *clock = mClock;
     if (mMonth != clock->mDate.month || all) {
@@ -2195,7 +2193,9 @@ void MapClockDisplay::Refresh(BOOL all) {
         u32 hour = clock->mTime.hour - half * 12;
         u32 tens = hour / 10;
         Sprite_SetFrame(&mSprites[6], tens);
-        Sprite_SetFrame(&mSprites[7], hour - tens * 10);
+        // Subtracted in place: as an argument, the sprite's address is computed before it.
+        hour -= tens * 10;
+        Sprite_SetFrame(&mSprites[7], hour);
         mHour = clock->mTime.hour;
     }
     if (mMinute != clock->mTime.minute || all) {
