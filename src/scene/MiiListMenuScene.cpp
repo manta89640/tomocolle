@@ -1,16 +1,18 @@
 #include "MiiListMenuScene.h"
 
-// The two buttons at the top: their animation sequences, released and pressed, and where they are
+// The file's constants. In this order, the compiler (which sorts a file's constants by size, and objects of one
+// size by their place in the list) puts them in the ROM's order: so they are not grouped by what they are for.
+// The two buttons at the top are sButton*; the Mii menu (window 0: three buttons with texts, edit, change clothes
+// and erase, then a cancel button) is sMiiMenu* and sCancel*; the sort menu (window 1: a button for each of the
+// seven orders) is sSort*.
 static const u8 sButtonSequences[2] = {0x76, 0x76};
 static const u8 sButtonPressedSequences[2] = {0x77, 0x77};
-static const ScreenPoint sButtonPositions[2] = {{0x16, 0x0D}, {0xD0, 0x0D}};
-static const ScreenPoint sButtonSizes[2] = {{0x28, 0x16}, {0x28, 0x16}};
-
-// The Mii menu (window 0): three buttons and their texts (edit, change clothes, move out), then a cancel button
 static const ScreenRect sMiiMenuRect = {0x14, 0x13, 0xD8, 0x99};
+static const ScreenPoint sButtonSizes[2] = {{0x28, 0x16}, {0x28, 0x16}};
+static const ScreenRect sSortMenuRect = {0x14, 0x0B, 0xD8, 0xA9};
 static const char sMiiMenuScreenName[] = "MLT:/Window_common.nsc";
-static const u8 sMiiMenuSequencesB[3] = {0x6B, 0x6B, 0x6B};
 static const u8 sMiiMenuSequencesA[3] = {0x6A, 0x6A, 0x6A};
+static const u8 sMiiMenuSequencesB[3] = {0x6B, 0x6B, 0x6B};
 static const WindowPoint sMiiMenuButtonPositions[3] = {{0x80, 0x2E}, {0x80, 0x4E}, {0x80, 0x6E}};
 static const WindowPoint sMiiMenuButtonSizes[3] = {{0xBE, 0x1A}, {0xBE, 0x1A}, {0xBE, 0x1A}};
 static const int sMiiMenuMessages[3] = {0x75, 0x77, 0x79};
@@ -20,16 +22,14 @@ static const WindowPoint sMiiMenuTextPositions[3] = {
     {sMiiMenuButtonPositions[1].x - 0x5C, sMiiMenuButtonPositions[1].y - 6},
     {sMiiMenuButtonPositions[2].x - 0x5C, sMiiMenuButtonPositions[2].y - 6},
 };
-
-// The sort menu (window 1): a button for each of the seven orders
-static const ScreenRect sSortMenuRect = {0x14, 0x0B, 0xD8, 0xA9};
+static const ScreenPoint sButtonPositions[2] = {{0x16, 0x0D}, {0xD0, 0x0D}};
 static const char sSortMenuScreenName[] = "MLT:/Window_down.nsc";
+static const WindowPoint sSortTextOffsets[7] = {{8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}};
 static const WindowPoint sSortButtonPositions[7] = {{0x80, 0x1E}, {0x80, 0x34}, {0x80, 0x4A}, {0x80, 0x60},
                                                     {0x80, 0x76}, {0x80, 0x8C}, {0x80, 0xA2}};
+static const int sSortMessages[7] = {0x7F, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85};
 static const WindowPoint sSortButtonSizes[7] = {{0x80, 0x14}, {0x80, 0x14}, {0x80, 0x14}, {0x80, 0x14},
                                                 {0x80, 0x14}, {0x80, 0x14}, {0x80, 0x14}};
-static const int sSortMessages[7] = {0x7F, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85};
-static const WindowPoint sSortTextOffsets[7] = {{8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}, {8, 2}};
 static const WindowPoint sSortTextPositions[7] = {
     {sSortButtonPositions[0].x - 0x20, sSortButtonPositions[0].y - 6},
     {sSortButtonPositions[1].x - 0x20, sSortButtonPositions[1].y - 6},
@@ -40,7 +40,7 @@ static const WindowPoint sSortTextPositions[7] = {
     {sSortButtonPositions[6].x - 0x20, sSortButtonPositions[6].y - 6},
 };
 
-static const WindowPoint sCountPosition = {0xB5, 0x95};
+static const WindowPoint sMiiMenuSpritePosition = {0xB5, 0x95}; // func_02033bb4's: a sprite, sequence 0x76
 static const WindowPoint sCancelPosition = {0x4B, 0x95};
 static const WindowPoint sCancelSize = {0x5E, 0x1E};
 
@@ -50,6 +50,11 @@ void MiiListMenuScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TEM", "Msg/TmdEtcMsgJP_LZ.bin", 0);
 }
 
+// NOT MATCHING: two instructions are in the other order. Before the second MessageFile::Open the original loads the
+// path into r1 and then computes the file's address into r0; this gives the address first, as before the first
+// Open (which matches). Tried without effect: the files as an array (which also changes the destructor), pointers
+// or references to them, the path in a variable, the screen setup after or before the Opens, the loops' variables
+// in every scope, the button loop with a pointer or as do-while.
 void MiiListMenuScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
@@ -93,7 +98,7 @@ void MiiListMenuScene::Init() {
                       sMiiMenuTextPositions[i], &charOffset);
     }
     func_02034f4c(&mWindows[0], 1);
-    func_02033bb4(&mWindows[0], 0, 0x76, sCountPosition);
+    func_02033bb4(&mWindows[0], 0, 0x76, sMiiMenuSpritePosition);
     if (charOffset > maxCharOffset) {
         maxCharOffset = charOffset;
     }

@@ -417,6 +417,66 @@ helpers are byte for byte the same (`ShowMessage` in all three, `ShowOk` and `As
 objdiff reports the data of all three a little under 100% although the ROM is identical: it counts the
 padding at the end of `.rodata` and `.data` that the delinked original has and the compiled object does not.
 
+## Three scenes of the main program
+
+Not every scene is an overlay. Three are in the main program, `0x0204FC74` to `0x02051640`, between a family of
+helpers that many overlays call and a fourth scene of the main program (`0x02051640`, which mounts the sky, vote and
+apartment models; not done). Each is one source file under `src/scene/`, and each is reached only through its
+virtual table: the scene factory (`CreateScene`) calls a constructor in the main program's file of scene
+constructors, which stores it. No overlay is loaded for them.
+
+| Scene | Class | Size | Constructor | File | Functions |
+| --- | --- | --- | --- | --- | --- |
+| 0x24 | `MiiListMenuScene` | 0x2C0C0 | `func_02040288` | `MiiListMenuScene.cpp`, `0x0204FC74` to `0x02050884` | 12 of 13 match |
+| 0x25 | `G3SpriteTestScene` | 0x48B4 | `func_0204036c` | `G3SpriteTestScene.cpp`, to `0x02050D70` | 9 of 9, complete |
+| 0x26 | `MiiListScene` | 0x2AA44 | `func_020403e8` | `MiiListScene.cpp`, to `0x02051640` | 10 of 10, complete |
+
+Measured:
+
+- They are three files, not one. Each file's `.data` is its data objects, then its virtual table, then the strings
+  its code uses, in the order it uses them; scene 0x24's strings come before scene 0x25's table, and scene 0x25's
+  before scene 0x26's data, which one file does not give. Scenes 0x24 and 0x26 have a static initialiser each
+  (`0x020B06F4`, `0x020B077C`), and a file has at most one. Their `.rodata` follows the same order.
+- Scene 0x24 shows two buttons at the top of the touch screen. The left one opens a menu of what to do with a Mii
+  (etc messages 0x75 edit, 0x77 change its clothes, 0x79 erase, and a cancel button); "erase" asks whether the Mii
+  is to move off the island (0x7A, with the placeholder name "「削除したいMii」") and then says that it has gone
+  (0x7E, "「削除したMii」"). The right one opens a menu of the seven orders the list can be sorted in (0x7F to
+  0x85: name, nickname, sex, year of birth, birthday, blood type, personality). Nothing is done with any choice:
+  inferred, a mock-up of the Mii list's two menus.
+- Scene 0x26 is the list of Miis (the main program's list, panel and five tabs at `0x020A03E8` on, which this scene
+  only calls) with the sort menu of scene 0x24. It sorts the list by `gGameData+0x4D` (`mMiiListSortKey`) and writes
+  the order chosen back there on leaving when it changed.
+- Scene 0x25 mounts `Scn/Scene/SceneTestG3Sprite_LZ.bin` and a body model, puts a hundred 3D sprites
+  (`G3Sprite`, 0x4C bytes, functions `0x0202B0E8` to `0x0202B6D0`) of `M00:/Face.tga` at random places and sizes in
+  front of it, and moves one of them each frame: a test.
+- No call of `func_0203c02c` (which asks for the next scene) has 0x24 to 0x27 put in its argument by an
+  instruction just before it. Whether anything reaches these scenes, by a table or a computed id, is not known.
+- The message window's result is at +0xAF84 in these scenes (measured on all four of scene 0x24's windows, which
+  start at +0x230 where the constructor stores the window's table), and what the scenes keep for after a window
+  closes at +0xAF98.
+- `_ZTV5Model` and `_ZTV9AnimModel` were named 8 bytes into their tables; they are at `0x0210F640` and `0x0210F65C`
+  now, and every reference to them is `add:0x8`. Linking scene 0x25's destructor from source showed it.
+
+Two things the compiler does that these files needed:
+
+- **Text positions that are not constants.** `.data` of scenes 0x24 and 0x26 holds arrays of points that are zero
+  in the ROM and filled by the static initialiser, in one run of stores from one base. They are the menu buttons'
+  positions moved by a fixed amount (`{sPos[0].x - 0x20, sPos[0].y - 6}`): an initialiser that reads another
+  constant object is not a constant expression, so the compiler initialises it at run time, and as `const` it goes
+  in `.data` (a non-`const` one goes in `.bss`). That this is how the source had it is inferred: it gives the bytes.
+- **A local copied inside a loop is hoisted.** Scene 0x26's sort texts take an offset by value; written as a local
+  initialised inside the loop, the compiler loads it once before the loop and gives its stack slot the place the
+  ROM has. Declared before the loop it gets another slot.
+
+Not done:
+
+- `MiiListMenuScene::Init` differs in the order of two instructions: before the second `MessageFile::Open` the
+  original loads the path before it computes the file's address, and the source gives the other order (comment
+  above the function). So that unit is not complete, though its data is placed and named and the compiled data
+  comes out in the ROM's order.
+- The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
+  their addresses.
+
 ## Compiler
 
 **Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
