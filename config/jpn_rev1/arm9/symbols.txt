@@ -4422,6 +4422,7 @@ data_020b7be4 kind:data(any) addr:0x020b7be4 local
 sDaysInMonth kind:data(any) addr:0x020b7e1c local
 sDefaultMiis kind:data(any) addr:0x020b7e50 local
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
+data_020b7eec kind:data(any) addr:0x020b7eec
 data_020b7efc kind:data(any) addr:0x020b7efc
 data_020b7f08 kind:data(any) addr:0x020b7f08
 data_020b7f44 kind:data(any) addr:0x020b7f44
