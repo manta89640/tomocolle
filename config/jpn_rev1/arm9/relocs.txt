@@ -6009,7 +6009,7 @@ from:0x0204081c kind:arm_call to:0x0202e770 module:main
 from:0x02040840 kind:arm_call to:0x02031f1c module:main
 from:0x0204086c kind:arm_call to:0x02022d2c module:main
 from:0x0204087c kind:load to:0x02110978 module:main
-from:0x02040880 kind:load to:0x02152ed8 module:overlays(90,109)
+from:0x02040880 kind:load to:0x02152ed0 add:0x8 module:overlay(109)
 from:0x02040884 kind:load to:0x0202e46c module:main
 from:0x02040888 kind:load to:0x0202e44c module:main
 from:0x0204088c kind:load to:0x021102e8 module:main
