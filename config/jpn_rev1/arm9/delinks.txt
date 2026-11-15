@@ -338,6 +338,12 @@ src/text/MessageText.cpp:
     .data       start:0x0210f704 end:0x0210f79c
     .bss        start:0x02138f10 end:0x02138f34
 
+lib/WH/wh.cpp:
+    complete
+    .text       start:0x0202f42c end:0x0203115c
+    .data       start:0x0210f79c end:0x021102d8
+    .bss        start:0x02138f34 end:0x0213b5c0
+
 src/sound/SoundManager.cpp:
     complete
     .text       start:0x02035b04 end:0x02036558
@@ -693,7 +699,7 @@ lib/MiiTransfer/MiiTransfer.cpp:
     .rodata     start:0x020b7be4 end:0x020b7e1c
     .bss        start:0x02145380 end:0x02145c00
 
-lib/MiiTransfer/wh.cpp:
+lib/MiiTransfer/MiiTransferWH.cpp:
     complete
     .text       start:0x02078f58 end:0x02079dfc
     .bss        start:0x02145c00 end:0x02148680

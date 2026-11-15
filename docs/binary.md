@@ -107,8 +107,8 @@ Measured from the original objects (in the compiler's MSL archive): MSL was comp
 game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
 `_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
-matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
-game's 30007.
+matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
+middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.
 
 ## Voice synthesis
 
@@ -479,6 +479,63 @@ Not done:
 - The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
   their addresses.
 
+## WH, the wireless wrapper
+
+WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the
+WM driver's asynchronous calls, which games copied into their own source. The game has it in the main program, in
+`lib/WH/wh.cpp` here: all 66 functions and all its data match, and the unit is complete and linked from source.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x0202F42C` to `0x0203115C` | `WH_GetWMErrCodeName` to `WH_End`, after `MessageText.cpp`'s last function; `0x0203115C` on is the game's sprite code (`0x0203119C` is the one that some 40 overlays call) |
+| `.data` | `0x0210F79C` to `0x021102D8` | The three name tables' strings and the tables, sorted by size, then the strings of the code in the order it uses them |
+| `.bss` | `0x02138F34` to `0x0213B5C0` | A pool of the statics under 64 bytes (`0x02138F40` to `0x02138FE0`), then each larger one on its own, the WM buffer last |
+
+Measured:
+
+- The names are WH's own: its debug strings name its states (`WH_StateInStartParentKeyShare failed`,
+  `WH_StateOutStartScan : MAC=...`, `WH_Finalize, state = %d`), and each state is the WM call it makes and the
+  callback it passes. Its tables name the WH states (`WH_SYSSTATE_STOP` to `WH_SYSSTATE_ERROR`, 10), WM's error
+  codes with WH's three after them (23) and WM's state codes (27).
+- This revision has key-sharing and data-sharing (it calls `WM_StartKeySharing`, `WM_StartDataSharing`), scans with
+  `WM_StartScan` and connects with `WM_StartConnectEx`; a parent takes one child (`maxEntry` 1, the data-sharing
+  AID bitmap 3), data-sharing is on port 13 with 200 bytes a device, and `WH_SendData` sends on port 14.
+- The game's build is a final one: the trace hook `wh_trace` is a null pointer in `.bss` that nothing sets, so
+  none of the strings is ever printed, and a failed check calls `OS_Terminate`.
+- 66 functions are in the ROM; the sample's others (`WH_GetConnectMode`, `WH_GetLastError`, the WEP key
+  generator setters, ...) were stripped by the link, as nothing called them. Their statics are still in the pool:
+  `sParentWEPKeyGenerator`, `sJudgeAcceptFunc` and the others are read and never written.
+- One variable is the game's, not the sample's: when a child connects, the parent's callback copies the child's
+  24-byte SSID (the user data of its connection) into `gWHChildSsid` (`0x02138FB4`), which overlays 109 and 110 read.
+- Callers: overlays 109 and 110 (wireless play) call 11 of the functions, and the main program at `0x0203B7EC` to
+  `0x0203BB8C` and `0x0204D890` to `0x0204E38C`. A second, child-only copy of WH with no debug strings is at
+  `0x02078F58` to `0x02079DFC` (another unit).
+- Named from WH's calls, by comparison with the SDK's sources: `WM_Initialize` (`0x02012604`),
+  `WM_StartKeySharing` (`0x02013850`), `WM_EndKeySharing` (`0x0201386C`), `CHT_IsPictochatParent` (`0x020144E4`).
+
+What it showed about the compiler, measured (see "Compiler"):
+
+- **`-ipa file`.** The small statics are one pool, addressed from its start: `sSysState` is the pool's address
+  plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file`, so WH was compiled with it.
+- **Objects of 64 bytes and more are not pooled.** The 32-byte `WMScanParam` is in the pool and reached from its
+  start; the 64-byte `WMParentParam`, the scan's `WMBssDesc` and the buffers are addressed each on its own (by test
+  files: 60 bytes is still pooled, 64 is not). This is what told the compiler's version; with build 138 and
+  `-ipa file` all 66 functions match, with build 137 58 (the others reach the parent parameters).
+- **Arrays of `char` are not pooled either**, whatever their size: `gWHChildSsid`, in the pool, is an array of
+  `u16`, and `sConnectionSsid`, apart, an array of `u8`.
+- **A file's `.bss` objects are sorted with its `.data`**, in the compiler's size sort (`docs/notes/ov073.md`), so
+  the statics' declarations decide the order of the tables' strings of equal length in `.data`. In C a static
+  without an initialiser is a tentative definition, created at the end of the file; in C++ every static is created
+  where it is declared. The ROM's order of the 60 strings comes out of C++ (every static created in turn, then the
+  error names, the state code names and the WH state names, each a static of the function that uses it), and of no
+  arrangement of WH's statics in C that a search found (56 at best). So WH was compiled as C++, like the game's
+  own code (inferred: the order needs every static to be created where it is declared, which C gives only to the
+  ones with an initialiser, and the sample declares most without). `-lang=c++` and `-lang=c99` give the same code
+  for it; its functions are kept under their C names (`extern "C"`), since nothing outside refers to them by name
+  but the game's code, by address. `docs/notes/wh.md` has the details.
+- **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool and
+  strings, which says nothing of the original's order but sizes.
+
 ## The settings and the mansion information
 
 Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
@@ -523,6 +580,56 @@ Not done:
   scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
   established. `docs/notes/ov098.md` has the details.
 
+## The island map
+
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 54 of its 59 functions
+match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
+complete.
+
+Measured:
+
+- `MapScene` (0x1D4FC bytes; `CreateScene` makes it for scene ids 0x5F to 0x66, 0x6A, 0x6D and 0x6E after
+  `FS_LoadOverlay(0x48)`; constructor `0x0204534C`, virtual table at `0x02150AD4`) is the island: 13 models (the
+  ground, by season, and twelve buildings, each a "board" model until it is built), the apartment building's lit
+  windows (up to 150 `G3Sprite`s, one per room, textured by what the resident is doing: "w_live.tga" to
+  "w_game.tga"), "new" marks over buildings, and two message windows. Touching a building flies the camera to it
+  (`MapCamera`: 40 frames, eased by t^4) and opens its window ("Scn/Map/SceneMap2Wnd<Name>_LZ.bin") on the lower
+  screen; touching it again, or the window's button, enters it (`EnterBuilding`: the scene of each building, the
+  fountain's by the time of day from a table of 14 times). The back button goes back to the apartment (scene 0x11)
+  from the island's view, and to that view from a building.
+- Scene 0x6A starts in a title mode (`TitleCamera`: ten moving views of the island, chosen at random, until a
+  touch); scenes 0x6D and 0x6E play the tutorial's visits (steps 2, 4, 7, 15, 18, 20 and 23 of `data_0213ba74`
+  +0x1E, the messages 0x152 to 0x17A); scenes 0x62 to 0x66 show the island at sizes 0 to 4. When a building or a
+  feature has just been built (func_020af4d8), the scene shows it appearing with effects and goes to the news
+  (scene 0x46, overlay 87), after adding a news item of it (`AddNews`, `NewsItem_Make` of the main program).
+- `MapSound` plays the music of the day or the night (sequences 0x1A and 0x1B, switching at the month's times
+  from func_020a6390/func_020a6480) and three sounds of the surroundings by season and time of day; each building
+  has its own volume, pitch, tempo and pan for the music, ramped to when it is selected.
+- The news stand's texture animation shows whether a new issue is due (`IsNewsDue`: the newest item is from before
+  the last 7:00 or 19:00 edition by half a day); entering it then makes the day's news (`MakeDailyNews`: a
+  resident's birthday, else a random kind of news of the month, `data_020fa1d0`).
+- `MapClock` and `MapClockDisplay` are overlay 74's `Clock` and `ClockDisplay` but for the sprite bank;
+  `MoneyDisplay` counts the shown money up to `gGameData`'s.
+
+The data, measured with the compiler: the unit's `.rodata` (0x89C bytes) comes out byte for byte as the ROM's with
+SP2p3 (see "Compiler"). How the compiler orders a file's data, which reproduces every object's
+place in our object: it keeps a list, newest first, of the file's statics in declaration order, each preceded by the
+strings of its initializer; then the class's virtual table; then the functions' local `const` objects. It heap-sorts
+the list by size; the four-byte-aligned objects of `.rodata` and of `.data` are each pooled, at the place of the
+first. Unreferenced statics are not on it; local `const` scalars are, even when their uses are folded, which is
+what the first 0x14 bytes of the pool are (four constants of `Init` and two one-element arrays). The declaration
+order of the source was solved with this model (`docs/notes/ov072.md`).
+
+Not done:
+
+- Five functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
+  camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
+  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
+  register), `MapClockDisplay::Refresh` (overlays 73 and 74's near-miss).
+- `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
+  ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
+- What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
+
 ## The Mii transfer
 
 Wireless play (overlay 109, scene 0x29) takes Miis from another machine through code of the main program,
@@ -532,7 +639,7 @@ names are the project's own: none survives), all built with 2.0 SP2 patch 2 (see
 | File | Code | Data | Functions |
 | --- | --- | --- | --- |
 | `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 52 of 54 match |
-| `wh.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
+| `MiiTransferWH.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
 | `MiiTransferList.cpp`, the Mii records | `0x02079DFC`-`0x02079FA0` | .bss `0x02148680`-`0x02148688` | 7 of 7, complete |
 
 Measured:
@@ -541,7 +648,7 @@ Measured:
   from one pointer at 0x02145360; the functions after 0x02079FA0 are accessors of a Mii's bit fields, called through a
   table at 0x020FBC2C. Each of the three files reads its statics from its own block of .bss, and the blocks follow one
   another in the order of the code.
-- **`wh.cpp` is WH again**, function for function in WH's order (`WH_ChangeSysState`, `WH_SetError`, ...,
+- **`MiiTransferWH.cpp` is WH again**, function for function in WH's order (`WH_ChangeSysState`, `WH_SetError`, ...,
   `WH_Finalize`, `WH_End`), with WH's system states, connect modes and error codes (`WH_ERRCODE_DISCONNECTED` 0x14,
   `WH_ERRCODE_NO_RADIO` 0x16). It differs from the main copy (`lib/WH`): it scans with `WM_StartScanEx` and connects
   with `WM_StartConnectEx`, a later revision; it has no strings; and it has only the child's side: of the parent's
@@ -590,14 +697,21 @@ file's data objects, that one included.
   with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
   identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
   So the evidence for the version is the data, and the matched functions are no evidence against it.
-- **138 and 139 are not told apart.** They give identical output on every game file and on WH. 138 is used, as the
-  first build that fits.
+- **Overlay 72's `.rodata` comes out byte for byte with 138** (0x89C bytes: the pool of 0x3B0, then the 13-, 21- and
+  22-byte arrays and the seven tables of 88 to 320 bytes, each in a section of its own), and its functions compile
+  as with 137. Of the DSi compilers, 1.1 to 1.3p1 pool objects of up to 60 bytes in C++ (and everything in C);
+  1.6 SP1 and SP2 also leave a 4-byte object out of the pool.
+- **138 and 139 are not told apart.** They give identical output on every game file and on WH, and on all 163 C
+  files of NitroSDK and NitroSystem that the build compiles, each with its own flags. 138 is used, as the first
+  build that fits; 139 is the last 3.0 build there is.
+- **WH is compiled like the game's C++**: `-ipa file` (its pooled statics need it), and as C++ (the order of its
+  data needs it), see "WH". The speech engine, C, matches only without `-ipa file`: it was built apart.
 - **The Mii transfer (`lib/MiiTransfer`) is built with an earlier build than the game's.** Its files read statics of
   64 bytes and more at the pool's address plus an offset: `WH_SetGgid` stores at +0x88 (the GGID of the 0x40 bytes of
   parent parameters at +0x80, whose first two members `WH_Initialize` clears at +0x80 and +0x84), and the protocol
   reads the valid flags of its three 0x60-byte packets at +0x1B0, +0x210 and +0x270. With build 137 (2.0 SP2 patch 2)
-  `wh.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54; with 138 they drop to 40 and 43, the functions growing
-  by the loads of the statics' own addresses. So any build up to 137 fits, and patch 2 is the latest that does, not
+  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54; with 138 they drop to 40 and 43, the functions growing
+  by the loads of the statics' own addresses. The main WH (`lib/WH`), the same source, has its parent parameters on their own, as 138 does. So any build up to 137 fits, and patch 2 is the latest that does, not
   proven to be the one. `-ipa file` is part of it: without it (C++ alone) statics are not pooled at all and they drop
   to 40 and 9.
 - **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own

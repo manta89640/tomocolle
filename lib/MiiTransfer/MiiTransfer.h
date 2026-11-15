@@ -1,7 +1,7 @@
 #ifndef WIRELESS_MIITRANSFER_H
 #define WIRELESS_MIITRANSFER_H
 
-// The Mii transfer of wireless play (overlay 109): MiiTransfer.cpp, the protocol, on the second copy of WH (wh.cpp),
+// The Mii transfer of wireless play (overlay 109): MiiTransfer.cpp, the protocol, on the second copy of WH (MiiTransferWH.cpp),
 // and MiiTransferList.cpp, the Miis it sends from and receives into. Taken for a library that Nintendo built apart
 // from the game (docs/binary.md, "The Mii transfer"). The names of the library, its files and its types are
 // descriptive, the project's own: no name of this code survives in the ROM. A Mii record is 0x4A bytes with its create

@@ -164,8 +164,8 @@ as `relocs.txt` knows: `tools/force_active.py` lists every symbol of theirs in t
 The order that the code itself suggests:
 
 1. **Finish mapping the libraries in the main program.** NitroSDK, NitroSystem and part of MSL are named and cut into
-   units under `lib/` (see [binary.md](binary.md)). Still to find: the rest of MSL, WH, NFL and the text-to-speech
-   middleware. Every library function named makes the game code that calls it readable, and what is left when the
+   units under `lib/` (see [binary.md](binary.md)). Still to find: the rest of MSL and NFL (WH and the
+   text-to-speech middleware are found and decompiled). Every library function named makes the game code that calls it readable, and what is left when the
    libraries are out is the game.
 2. **Recover the classes that every scene is built from.** Each overlay holds classes that derive from ones in the
    main program, so little of an overlay can be finished before its base classes are.

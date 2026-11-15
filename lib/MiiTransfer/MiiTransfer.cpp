@@ -1,5 +1,5 @@
 // The Mii transfer of wireless play (overlay 109): the protocol by which this DS, as a child, finds parents, connects
-// to one and sends Miis to it or takes them from it, on the second copy of WH (wh.cpp) and the Mii records of
+// to one and sends Miis to it or takes them from it, on the second copy of WH (MiiTransferWH.cpp) and the Mii records of
 // MiiTransferList.cpp. Overlay 109 calls it.
 //
 // Two layers, both updated once a frame: a session (sSessionState: start WH, scan, connect, exchange packets, end),
@@ -11,7 +11,7 @@
 // survives in the ROM.
 
 #include "MiiTransfer.h"
-#include "wh.h"
+#include "MiiTransferWH.h"
 
 #define PARENT_MAX 8
 #define PARENT_TIMER 20

@@ -8,7 +8,8 @@
 // are WH's, mangled, which is how they do not clash with the main copy's. Whether they were in a namespace or a class
 // is not known.
 
-#include "wh.h"
+#include "MiiTransferWH.h"
+#include <nitro/cht.h>
 
 // Measured from the code
 #define WH_CHILD_RECV_BUFFER_SIZE   0x280
@@ -20,8 +21,6 @@
 #define WH_DATA_PORT                4
 #define WH_DATA_PRIO                WM_PRIORITY_NORMAL
 #define WH_DMA_NO                   2
-
-extern "C" BOOL func_020144e4(const WMBssDesc *bssDesc);
 
 // The file's statics. The compiler lays a file's statics out from the start of its .bss, by size (the u16s, the
 // words, then the aggregates; arrays of u8 go in sections of their own after them), and where each of one size goes
@@ -218,7 +217,7 @@ static BOOL WH_StateInStartScan(void) {
 extern "C" BOOL func_020791c4(WMStartScanExCallback *cb) {
     DC_InvalidateRange(sScanExParam.scanBuf, WH_SCAN_BUF_SIZE);
     for (s16 i = 0; i < cb->bssDescCount; i++) {
-        if (sPictoCatchFlag && func_020144e4(cb->bssDesc[i])) {
+        if (sPictoCatchFlag && CHT_IsPictochatParent(cb->bssDesc[i])) {
             MI_CpuCopy8(cb->bssDesc[i], &sBssDesc, sizeof(WMBssDesc));
             if (sScanCallback != NULL) {
                 sScanCallback(cb->bssDesc[i]);

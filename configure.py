@@ -215,6 +215,19 @@ LIBRARIES["lib/SHTTS/"] = {
     "includes": ["lib/SHTTS", *SDK_INCLUDES],
 }
 
+# WH, the wireless wrapper of the SDK's sample code, which the game compiles in. Its source is this project's own
+# decompilation. Measured (docs/binary.md, "WH"): it is built like the game's own code, with -ipa file (the ROM
+# addresses its small statics as one pool) and as C++ (the order of its data needs every static to be defined where
+# it is declared).
+LIBRARIES["lib/WH/"] = {
+    "compiler": MWCC_VERSION,
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c++", "-ipa file"],
+    "sjis": True,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/WH", *SDK_INCLUDES],
+}
+
 # The Mii transfer that wireless play (overlay 109) uses to take Miis from a parent: a protocol, a child-only copy of
 # WH and a list of Mii records, which the project takes for a library that Nintendo built separately and the game
 # links (see docs/binary.md, "The Mii transfer"). Its name is the project's own. It is C++ built as the game's code is,
