@@ -1,12 +1,12 @@
-// WH, the SDK's wireless sample code, a second time: the copy that the Mii transfer of wireless play
-// (MiiTransfer.cpp) is built on, beside the game's main WH (lib/WH). This is the project's own decompilation.
+// WH, the SDK's wireless sample code, a second time: the copy that the Mii transfer (MiiTransfer.cpp, the library
+// this directory holds) is built on, beside the game's main WH (lib/WH). This is the project's own decompilation.
 //
 // It is a later revision than the main copy (it scans with WM_StartScanEx and connects with WM_StartConnectEx), built
 // without any of WH's messages, and only the child's side of it is in the ROM: the parent's functions are not, which
 // the linker's dead-stripping explains, since nothing calls them. Its statics are reached from the start of its .bss,
-// as the compiler does for a file compiled with -ipa file: so it is a C++ file of the game's, and its functions'
-// names are WH's, mangled, which is how they do not clash with the main copy's. Whether they were in a namespace or a
-// class is not known.
+// as the compiler does for C++ compiled with -ipa file (and not for C): so it is a C++ file, and its functions' names
+// are WH's, mangled, which is how they do not clash with the main copy's. Whether they were in a namespace or a class
+// is not known.
 
 #include "wh.h"
 

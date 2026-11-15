@@ -1,8 +1,8 @@
 #ifndef WIRELESS_WH_H
 #define WIRELESS_WH_H
 
-// The game's second copy of WH, the SDK's wireless sample code, which the Mii transfer of wireless play
-// (src/wireless/MiiTransfer.cpp) is built on. See wh.cpp. The declarations are this project's own, written from what
+// The second copy of WH, the SDK's wireless sample code, which the Mii transfer of wireless play (MiiTransfer.cpp)
+// is built on. See wh.cpp. The declarations are this project's own, written from what
 // the code does, under WH's names.
 
 #include <nitro.h>

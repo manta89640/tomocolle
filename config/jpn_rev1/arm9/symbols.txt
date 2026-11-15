@@ -6471,16 +6471,39 @@ data_02143a94 kind:bss addr:0x02143a94
 NNS_G3dGeBuffer kind:bss addr:0x02145354
 NNS_G3dFlagGXDmaAsync kind:bss addr:0x02145358
 data_02145360 kind:bss addr:0x02145360
-data_02145380 kind:bss addr:0x02145380
-data_021453e0 kind:bss addr:0x021453e0
-data_021453f8 kind:bss addr:0x021453f8
-data_02145418 kind:bss addr:0x02145418
-data_02145438 kind:bss addr:0x02145438
-data_02145484 kind:bss addr:0x02145484
-data_021454e0 kind:bss addr:0x021454e0
-data_02145540 kind:bss addr:0x02145540
-data_021455a0 kind:bss addr:0x021455a0
-data_02145600 kind:bss addr:0x02145600
+sSeq kind:bss(size=0x1) addr:0x02145380 local
+data_02145384 kind:bss(size=0x4) addr:0x02145384 local
+sMiiIndex kind:bss(size=0x4) addr:0x02145388 local
+sResultCallback kind:bss(size=0x4) addr:0x0214538c local
+sMsgState kind:bss(size=0x4) addr:0x02145390 local
+sSendCallback kind:bss(size=0x4) addr:0x02145394 local
+sParentCount kind:bss(size=0x4) addr:0x02145398 local
+sSending kind:bss(size=0x4) addr:0x0214539c local
+data_021453a0 kind:bss(size=0x4) addr:0x021453a0 local
+data_021453a4 kind:bss(size=0x4) addr:0x021453a4 local
+sParentIndex kind:bss(size=0x4) addr:0x021453a8 local
+data_021453ac kind:bss(size=0x4) addr:0x021453ac local
+sSendPending kind:bss(size=0x4) addr:0x021453b0 local
+data_021453b4 kind:bss(size=0x4) addr:0x021453b4 local
+sSessionState kind:bss(size=0x4) addr:0x021453b8 local
+data_021453bc kind:bss(size=0x4) addr:0x021453bc local
+data_021453c0 kind:bss(size=0x4) addr:0x021453c0 local
+sState kind:bss(size=0x4) addr:0x021453c4 local
+data_021453c8 kind:bss(size=0x4) addr:0x021453c8 local
+data_021453cc kind:bss(size=0x4) addr:0x021453cc local
+sStateFrames kind:bss(size=0x4) addr:0x021453d0 local
+data_021453d4 kind:bss(size=0x4) addr:0x021453d4 local
+data_021453d8 kind:bss(size=0x4) addr:0x021453d8 local
+data_021453dc kind:bss(size=0x4) addr:0x021453dc local
+sMutex kind:bss(size=0x18) addr:0x021453e0 local
+sParentAges kind:bss(size=0x20) addr:0x021453f8 local
+sParentTimers kind:bss(size=0x20) addr:0x02145418 local
+sRecvMsg kind:bss(size=0x4c) addr:0x02145438 local
+sSendMsg kind:bss(size=0x4c) addr:0x02145484 local
+sRecvPacket kind:bss(size=0x60) addr:0x021454e0 local
+sSendPacket kind:bss(size=0x60) addr:0x02145540 local
+sRecvBuffer kind:bss(size=0x60) addr:0x021455a0 local
+sParents kind:bss(size=0x600) addr:0x02145600 local
 data_02145c00 kind:bss(size=0x2) addr:0x02145c00 local
 data_02145c02 kind:bss(size=0x2) addr:0x02145c02 local
 sChannelIndex kind:bss(size=0x2) addr:0x02145c04 local

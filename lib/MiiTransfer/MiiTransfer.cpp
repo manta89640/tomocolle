@@ -102,7 +102,9 @@ void func_02078f14(int state);
 
 } // extern "C"
 
-// The 28 states of something that is not in this file, by name, which nothing refers to
+// 28 names of states (of a screen that shows the transfer, by the names), which nothing in the ROM refers to. In the
+// ROM they follow the six bytes of WH_StartScan's address in func_02077858 with no padding, at 0x020B7BEA: as two
+// objects of their own here, the link aligns them to four bytes, so this file's .rodata is not placed yet.
 extern const char data_020b7bea[28][20] = {
     "Off",
     "Scanning",
@@ -238,6 +240,13 @@ extern "C" void func_02077814(void) {
     sRecvPacket.unk1 = 0;
 }
 
+// The session's update. DOES NOT MATCH (0x2B0 bytes against 0x2B4): in the ROM its two loops are not rotated (a
+// branch to the test at the bottom, as -O2 compiles them, where -O4 tests first and loops at the bottom, or drops the
+// test for the constant bound), the loop counter, the 0 passed to WH_StartScan and the length of the parent's user
+// game info share r4, and the copy of the user game info into the stack buffer is kept although nothing reads the
+// buffer, where this compiler removes it. Not reproduced with volatile, register, other loop forms, inline helpers, a
+// local structure holding both arrays, or #pragma optimization_level (2 gives the loops but not the rest). The buffer
+// is volatile here only so that the copy is kept, which brings it closest (without it, 0x288 bytes).
 extern "C" void func_02077858(void) {
     volatile u8 userGameInfo[0x16];
 
@@ -452,6 +461,9 @@ extern "C" void func_02077e10(WMBssDesc *bssDesc) {
     sParentCount++;
 }
 
+// WH's receiver: takes a packet from the parent. DOES NOT MATCH: the original loads sSeq into r0 and its low bit into
+// r1, this gives the other way round (two instructions); the rest is the same. Not reproduced with other forms of the
+// test (!= 0, % 2, a local copy, an inline helper, the packet's own type).
 extern "C" void func_02077f48(u16 aid, u16 *data, u16 size) {
     if (data == NULL) {
         sSessionState = 5;

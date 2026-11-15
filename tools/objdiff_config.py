@@ -52,6 +52,7 @@ LIBRARIES = {
     "NitroSystem": ("nitrosystem", "NitroSystem"),
     "SHTTS": ("shtts", "Speech synthesis (SHTTS)"),
     "MSL_C": ("msl", "C library (MSL)"),
+    "MiiTransfer": ("miitransfer", "Mii transfer"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
