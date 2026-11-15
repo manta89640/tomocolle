@@ -75,8 +75,8 @@ static const WindowLayout sLayouts[9] = {
     { { TRUE, TRUE, TRUE }, TRUE },
     { { FALSE, FALSE, FALSE }, TRUE },
     { { FALSE, FALSE, FALSE }, FALSE },
-    { { FALSE, FALSE, FALSE }, FALSE },
-    { { FALSE, TRUE, FALSE }, FALSE },
+    { { FALSE, FALSE, FALSE }, TRUE },
+    { { FALSE, FALSE, FALSE }, TRUE },
 };
 static const WindowButtonStyle sBackButtonStyles[9] = {
     { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 },
@@ -122,7 +122,7 @@ static const WindowPoint sListTextOrigins[7] = {
 
 static const int sPageLayouts[68] = {
     0, 1, 2, 3, 3, 4, 6, 7, 7, -1, -1, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    5, 6, 7, 3, 4, 6, 7, -1, -1, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 6, 7,
+    7, 5, 6, 7, 3, 4, 6, 7, -1, -1, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 6, 7,
 };
 
 // The Mii data of the residents, as they are sent (all 100 saved characters, empty ones cleared)
