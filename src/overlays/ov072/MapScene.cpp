@@ -34,113 +34,86 @@ struct FountainTime {
     u16 mTime;
 };
 
-static const u16 sBackButtonSequence = 4;
-static const u16 sBackButtonPalette = 0;
-static const int sUnknown1 = 1;
-static const int sTitleMessage = 0x96;
-static const int sUnknownE = 0xE;
-static const int sTitleFont = 0;
-static const u16 sButtonPalettes[3] = { 0x12, 0x12, 0x12 };
-static const u16 sButtonMessages[3] = { 0x93, 0x94, 0x95 };
-static const u16 sButtonSequences[3] = { 4, 4, 4 };
-static const WindowPoint sTitleTextPosition = { 48, 75 };
+// What features 20 to 24 give the player, and the news each makes
+static const int sFeatureItems[5] = { 0xA4, 0xA5, 0xA6, 0xA7, 0xA8 };
 // The features of the city hall and of the ranking board: their "new" marks show on the building
 static const int sCityHallFeatures[2] = { 5, 12 };
-static const Point sMoneySpritePosition = { 193, 180 };
-static const WindowPoint sTutorialTextPosition = { 38, 33 };
-static const Point sMoneyTextPosition = { 172, 174 };
-static const Point sBackButtonPosition = { 242, 13 };
-static const Point sBackButtonSize = { 24, 22 };
-static const WindowPoint sTutorialButtonSize = { 94, 30 };
-static const WindowPoint sBoardTextPosition = { 48, 54 };
-static const WindowPoint sTutorialButtonPosition = { 128, 149 };
-static const int sButtonFonts[3] = { 2, 2, 2 };
-static const VecFx32 sLightDirection0 = { 800, -600, -4000 };
-static const VecFx32 sCameraHomeTarget = { 0, -327, 0 };
+static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
+static const int sFeatureNews[5] = { 0xDE, 0xDF, 0xE0, 0xE1, 0xE2 };
 // From the camera to what it looks at
 static const VecFx32 sCameraLookOffset = { 409, -5037, -25395 };
+static const FountainTime sFountainTimes[14] = {
+    { 4, 120 }, { 3, 390 }, { 0, 690 }, { 3, 720 }, { 2, 780 }, { 3, 840 }, { 4, 900 },
+    { 1, 960 }, { 3, 990 }, { 4, 1140 }, { 1, 1200 }, { 3, 1260 }, { 2, 1380 }, { 3, 1440 },
+};
+static const Point sMoneySpritePosition = { 193, 180 };
+// The sounds of the surroundings that are the same in every season
+static const int sCommonSounds[4] = { 12, 13, 14, 15 };
+static const ScreenRect sTitleWindowRect = { 20, 20, 216, 152 };
+static const WindowPoint sTutorialButtonPosition = { 128, 149 };
+static const Point sBackButtonSize = { 24, 22 };
+static const VecFx32 sCameraHomeTarget = { 0, -327, 0 };
+static const Point sButtonSizes[3] = { { 80, 22 }, { 80, 22 }, { 80, 22 } };
+static const char sWindowDownScreen[] = "S00:/Window_down.nsc";
 // From a building to where the camera looks at it from
 static const VecFx32 sCameraZoomOffset = { -136, 1979, 8465 };
 static const VecFx32 sCameraHome = { -409, 4710, 25395 };
-static const int sEffectResources[3] = { 1, 2, 0 };
-static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
+static const int sFeatureMessages[4] = { 0x71, 0xA9, 0xAA, 0xAB };
+static const Point sMoneyTextPosition = { 172, 174 };
+static const u16 sButtonSequences[3] = { 4, 4, 4 };
 // The steps of the music's ramps: volume, pitch, tempo ratio, pan
 static const int sMusicRampSteps[4] = { 1, 1, 2, 1 };
-// The sounds of the surroundings that play long
-static const int sLongSounds[4] = { 0, 2, 3, 0 };
-static const int sFeatureMessages[4] = { 0x71, 0xA9, 0xAA, 0xAB };
-// The sounds of the surroundings that are the same in every season
-static const int sCommonSounds[4] = { 12, 13, 14, 15 };
+static const u16 sButtonMessages[3] = { 0x93, 0x94, 0x95 };
+static const ScreenRect sTutorialWindowRect = { 20, 20, 216, 152 };
+static const u16 sBackButtonPalettes[1] = { 0 };
+static const u16 sButtonPalettes[3] = { 0x12, 0x12, 0x12 };
+// The ground's model by month
+static const u8 sMonthGrounds[13] = { 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 2, 2, 3 };
+static const Point sBackButtonPosition = { 242, 13 };
+static const int sButtonFonts[3] = { 2, 2, 2 };
 static const ScreenRect sWindowTextureRect6 = { 0, 0, 32, 32 };
 static const int sTutorialButtonUnknown[4] = { 10, 1, 0, -1 };
+static const WindowPoint sTitleTextPosition = { 48, 75 };
+static const u16 sClockSequences[MapClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
+static const VecFx32 sLightDirection0 = { 800, -600, -4000 };
 static const ScreenRect sBackButtonRect = { -1, -1, 0, -1 };
-static const ScreenRect sTutorialWindowRect = { 20, 20, 216, 152 };
 static const ScreenRect sWindowTextureRect = { 0, 0, 32, 32 };
-static const ScreenRect sTitleWindowRect = { 20, 20, 216, 152 };
-// What features 20 to 24 give the player, and the news each makes
-static const int sFeatureItems[5] = { 0xA4, 0xA5, 0xA6, 0xA7, 0xA8 };
-static const int sFeatureNews[5] = { 0xDE, 0xDF, 0xE0, 0xE1, 0xE2 };
+static const int sEffectResources[3] = { 1, 2, 0 };
 // The sequence archive of the surroundings of each season
 static const int sSeasonSoundArchives[5] = { 4, 5, 5, 6, 7 };
 static const int sSeasonSoundGroups[5] = { 0x47, 0x48, 0x48, 0x49, 0x4A };
-static const u16 sClockSequences[MapClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
+static const char sWindowTitleScreen[] = "S00:/Window_title.nsc";
+// The building of each model, and the resource each model is drawn with
+static const int sModelBuildings[MapScene::MODEL_COUNT] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 static const Point sButtonPositions[3] = { { 128, 153 }, { 64, 153 }, { 192, 153 } };
-static const Point sButtonSizes[3] = { { 80, 22 }, { 80, 22 }, { 80, 22 } };
 static const int sRankingFeatures[7] = { 6, 13, 14, 15, 16, 17, 18 };
 // Where the apartment building's mark is, by the island's size
 static const Point sApartmentMarkPositions[4] = { { 128, 40 }, { 128, 40 }, { 128, 26 }, { 128, 10 } };
 static const ScreenRect sButtonRects[3] = { { 11, -1, 0, -1 }, { 11, -1, 0, -1 }, { 11, -1, 0, -1 } };
 // The model of each building
 static const int sBuildingModels[12] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-// The message of each building's window, when it is built and when it is not
-static const int sBuildingMessages[12] = { 0xA5, 0x9C, 0x99, 0xA1, 0xA3, 0xA0, 0x9B, 0xA2, 0x97, 0x9E, 0x96, 0x98 };
-static const int sBoardMessages[12] = { 0xAF, 0xAC, 0xAA, 0x96, 0xAE, 0x96, 0xAB, 0x96, 0xA8, 0xAD, 0xA7, 0xA9 };
-// The building of each model, and the resource each model is drawn with
-static const int sModelBuildings[MapScene::MODEL_COUNT] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-static const int sModelResources[MapScene::MODEL_COUNT] = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-// The sounds of the surroundings by season and time of day, three each (0xFF: none)
-static const u8 sSurroundingSounds[5][12] = {
-    { 12, 13, 255, 0, 255, 255, 14, 255, 255, 15, 1, 255 },
-    { 12, 13, 255, 0, 255, 255, 14, 0, 1, 15, 2, 3 },
-    { 12, 13, 255, 0, 255, 255, 14, 0, 1, 15, 3, 255 },
-    { 12, 13, 255, 255, 255, 255, 14, 0, 255, 15, 0, 255 },
-    { 12, 13, 0, 255, 255, 255, 14, 1, 255, 15, 255, 255 },
-};
-// The ground's model by month
-static const u8 sMonthGrounds[13] = { 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 2, 2, 3 };
-static const char sWindowDownScreen[] = "S00:/Window_down.nsc";
-static const char sWindowTitleScreen[] = "S00:/Window_title.nsc";
-static const Point sClockPositions[MapClockDisplay::SPRITE_COUNT] = {
-    { 160, 8 }, { 167, 8 }, { 174, 8 }, { 181, 8 }, { 188, 8 }, { 205, 8 },
-    { 222, 8 }, { 229, 8 }, { 236, 8 }, { 243, 8 }, { 250, 8 },
-};
-// Where the "new" mark of each building is
-static const Point sNewMarkPositions[MapScene::MODEL_COUNT] = {
-    { 0, 0 }, { 109, 133 }, { 68, 113 }, { 134, 116 }, { 44, 90 }, { 104, 89 }, { 181, 72 },
-    { 217, 81 }, { 128, 40 }, { 56, 57 }, { 206, 34 }, { 71, 12 }, { 172, 9 },
-};
-static const FountainTime sFountainTimes[14] = {
-    { 4, 120 }, { 3, 390 }, { 0, 690 }, { 3, 720 }, { 2, 780 }, { 3, 840 }, { 4, 900 },
-    { 1, 960 }, { 3, 990 }, { 4, 1140 }, { 1, 1200 }, { 3, 1260 }, { 2, 1380 }, { 3, 1440 },
-};
 static const VecFx32 sModelPositions[MapScene::MODEL_COUNT] = {
     { 0, 0, 0 },          { -696, -1146, 6553 }, { -2129, -1146, 4915 }, { 122, -1146, 4505 },
     { -3235, -491, 2580 }, { -983, -368, 2416 },  { 2048, -327, 2048 },   { 3481, -327, 1966 },
     { 0, 0, 0 },          { -2990, 368, 655 },   { 3194, 204, 204 },     { -2498, 1146, -1433 },
     { 2048, 1146, -1761 },
 };
-// The music's volume, pitch, tempo ratio and pan by model (0: none selected)
-static const int sModelMusic[MapScene::MODEL_COUNT][4] = {
-    { 70, -96, 192, 0 },  { 127, 64, 256, 0 },  { 120, 48, 240, -8 },  { 120, 48, 240, 8 },  { 120, 16, 224, -16 },
-    { 85, -32, 216, -10 }, { 115, 16, 224, 4 }, { 115, 32, 224, 32 },  { 80, -32, 216, 0 },  { 110, 0, 224, -24 },
-    { 110, 0, 224, 24 },  { 100, -24, 216, -16 }, { 100, -24, 216, 16 },
+// The message of each building's window, when it is built and when it is not
+static const int sBuildingMessages[12] = { 0xA5, 0x9C, 0x99, 0xA1, 0xA3, 0xA0, 0x9B, 0xA2, 0x97, 0x9E, 0x96, 0x98 };
+static const int sBoardMessages[12] = { 0xAF, 0xAC, 0xAA, 0x96, 0xAE, 0x96, 0xAB, 0x96, 0xA8, 0xAD, 0xA7, 0xA9 };
+// The light colours, and the window pictures of the title, of a building that is not built and of the fountain
+// before it can be used
+static GXRgb sLightColors[2] = { GX_RGB(31, 31, 31), GX_RGB(31, 31, 31) };
+static const Point sClockPositions[MapClockDisplay::SPRITE_COUNT] = {
+    { 160, 8 }, { 167, 8 }, { 174, 8 }, { 181, 8 }, { 188, 8 }, { 205, 8 },
+    { 222, 8 }, { 229, 8 }, { 236, 8 }, { 243, 8 }, { 250, 8 },
 };
-// Where each building takes a touch, around its position on the screen
-static const ScreenRect sModelTouchRects[MapScene::MODEL_COUNT] = {
-    { 0, 0, 0, 0 },       { -12, -24, 20, 24 },  { -28, -36, 56, 36 }, { -16, -32, 32, 32 }, { -16, -32, 32, 32 },
-    { -16, -32, 32, 32 }, { -24, -32, 44, 32 },  { -12, -32, 24, 28 }, { -38, -64, 70, 64 }, { -16, -32, 32, 32 },
-    { -12, -56, 26, 56 }, { -18, -32, 36, 32 },  { -16, -36, 32, 36 },
-};
+static const int sModelResources[MapScene::MODEL_COUNT] = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+// The sounds of the surroundings that play long
+static const int sLongSounds[4] = { 0, 2, 3, 0 };
+static const WindowPoint sTutorialTextPosition = { 38, 33 };
+static const WindowPoint sTutorialButtonSize = { 94, 30 };
+static const WindowPoint sBoardTextPosition = { 48, 54 };
 static const TitleView sTitleViews[10] = {
     { { -23756, 6553, 27033 }, { 0, 0, 0 }, 30, 0, 20, 900 },
     { { 18841, 31948, 10240 }, { -819, -2457, 819 }, -10, 0, 20, 1080 },
@@ -153,45 +126,60 @@ static const TitleView sTitleViews[10] = {
     { { 12288, 819, 20480 }, { 0, 0, 1228 }, -20, 0, 10, 1080 },
     { { 4096, 1228, 9011 }, { 0, 0, 1228 }, -10, 0, -10, 1080 },
 };
-
-// The light colours, and the window pictures of the title, of a building that is not built and of the fountain
-// before it can be used
-static const GXRgb sLightColors[2] = { GX_RGB(31, 31, 31), GX_RGB(31, 31, 31) };
-static const char *const sBoardPalette = "S01:/Fw_board.ncl";
-static const char *const sTitleWindowArchive = "Scn/Map/SceneMap2WndTitle_LZ.bin";
-static const char *const sTitleScreen = "S01:/Fw_title.nsc";
-static const char *const sBoardWindowArchive = "Scn/Map/SceneMap2WndBoard_LZ.bin";
-static const char *const sBoardChars = "S01:/Fw_board.ncg";
-static const char *const sTitlePalette = "S01:/Fw_title.ncl";
-static const char *const sBoardScreen = "S01:/Fw_board.nsc";
-static const char *const sQuestionPalette = "S01:/Fw_question.ncl";
-static const char *const sTitleChars = "S01:/Fw_title.ncg";
-static const char *const sQuestionScreen = "S01:/Fw_question.nsc";
-static const char *const sQuestionChars = "S01:/Fw_question.ncg";
-static const char *const sQuestionWindowArchive = "Scn/Map/SceneMap2WndQuestion_LZ.bin";
+// Where each building takes a touch, around its position on the screen
+static const ScreenRect sModelTouchRects[MapScene::MODEL_COUNT] = {
+    { 0, 0, 0, 0 },       { -12, -24, 20, 24 },  { -28, -36, 56, 36 }, { -16, -32, 32, 32 }, { -16, -32, 32, 32 },
+    { -16, -32, 32, 32 }, { -24, -32, 44, 32 },  { -12, -32, 24, 28 }, { -38, -64, 70, 64 }, { -16, -32, 32, 32 },
+    { -12, -56, 26, 56 }, { -18, -32, 36, 32 },  { -16, -36, 32, 36 },
+};
+// The sounds of the surroundings by season and time of day, three each (0xFF: none)
+static const u8 sSurroundingSounds[5][12] = {
+    { 12, 13, 255, 0, 255, 255, 14, 255, 255, 15, 1, 255 },
+    { 12, 13, 255, 0, 255, 255, 14, 0, 1, 15, 2, 3 },
+    { 12, 13, 255, 0, 255, 255, 14, 0, 1, 15, 3, 255 },
+    { 12, 13, 255, 255, 255, 255, 14, 0, 255, 15, 0, 255 },
+    { 12, 13, 0, 255, 255, 255, 14, 1, 255, 15, 255, 255 },
+};
+// The music's volume, pitch, tempo ratio and pan by model (0: none selected)
+static const int sModelMusic[MapScene::MODEL_COUNT][4] = {
+    { 70, -96, 192, 0 },  { 127, 64, 256, 0 },  { 120, 48, 240, -8 },  { 120, 48, 240, 8 },  { 120, 16, 224, -16 },
+    { 85, -32, 216, -10 }, { 115, 16, 224, 4 }, { 115, 32, 224, 32 },  { 80, -32, 216, 0 },  { 110, 0, 224, -24 },
+    { 110, 0, 224, 24 },  { 100, -24, 216, -16 }, { 100, -24, 216, 16 },
+};
+static const char *sQuestionWindowArchive = "Scn/Map/SceneMap2WndQuestion_LZ.bin";
+static const char *sQuestionScreen = "S01:/Fw_question.nsc";
+static const char *sBoardPalette = "S01:/Fw_board.ncl";
+static const char *sQuestionChars = "S01:/Fw_question.ncg";
+static const char *sQuestionPalette = "S01:/Fw_question.ncl";
+static const char *sBoardChars = "S01:/Fw_board.ncg";
+static const char *sTitlePalette = "S01:/Fw_title.ncl";
+static const char *sTitleWindowArchive = "Scn/Map/SceneMap2WndTitle_LZ.bin";
+static const char *sBoardWindowArchive = "Scn/Map/SceneMap2WndBoard_LZ.bin";
+static const char *sTitleChars = "S01:/Fw_title.ncg";
+static const char *sBoardScreen = "S01:/Fw_board.nsc";
+// Where the "new" mark of each building is
+static const Point sNewMarkPositions[MapScene::MODEL_COUNT] = {
+    { 0, 0 }, { 109, 133 }, { 68, 113 }, { 134, 116 }, { 44, 90 }, { 104, 89 }, { 181, 72 },
+    { 217, 81 }, { 128, 40 }, { 56, 57 }, { 206, 34 }, { 71, 12 }, { 172, 9 },
+};
+static const char *sTitleScreen = "S01:/Fw_title.nsc";
 // The ground's model by season, and the apartment building's by the island's size
-static const char *const sGroundModels[4] = {
+static const char *sGroundModels[4] = {
     "Mdl/Map/map2_ground0_3D_LZ.bin",
     "Mdl/Map/map2_ground1_3D_LZ.bin",
     "Mdl/Map/map2_ground2_3D_LZ.bin",
     "Mdl/Map/map2_ground3_3D_LZ.bin",
 };
-static const char *const sApartmentModels[5] = {
+static const char *sApartmentModels[5] = {
     "Mdl/Map/map2_apart0_3D_LZ.bin", "Mdl/Map/map2_apart1_3D_LZ.bin", "Mdl/Map/map2_apart2_3D_LZ.bin",
     "Mdl/Map/map2_apart3_3D_LZ.bin", "Mdl/Map/map2_apart4_3D_LZ.bin",
 };
-// The pictures and archives of each building's window
-static const char *const sBuildingChars[12] = {
-    "S01:/Fw_machine.ncg",   "S01:/Fw_dome.ncg",      "S01:/Fw_diagnosis.ncg", "S01:/Fw_shop_food.ncg",
-    "S01:/Fw_fountain.ncg",  "S01:/Fw_cityhall.ncg",  "S01:/Fw_ranking.ncg",   "S01:/Fw_entrance.ncg",
-    "S01:/Fw_shop_item.ncg", "S01:/Fw_news.ncg",      "S01:/Fw_shop_costume.ncg", "S01:/Fw_shop_reform.ncg",
-};
-static const char *const sBuildingScreens[12] = {
+static const char *sBuildingScreens[12] = {
     "S01:/Fw_machine.nsc",   "S01:/Fw_dome.nsc",      "S01:/Fw_diagnosis.nsc", "S01:/Fw_shop_food.nsc",
     "S01:/Fw_fountain.nsc",  "S01:/Fw_cityhall.nsc",  "S01:/Fw_ranking.nsc",   "S01:/Fw_entrance.nsc",
     "S01:/Fw_shop_item.nsc", "S01:/Fw_news.nsc",      "S01:/Fw_shop_costume.nsc", "S01:/Fw_shop_reform.nsc",
 };
-static const char *const sBuildingWindowArchives[12] = {
+static const char *sBuildingWindowArchives[12] = {
     "Scn/Map/SceneMap2WndMachine_LZ.bin",   "Scn/Map/SceneMap2WndDome_LZ.bin",
     "Scn/Map/SceneMap2WndDiagnosis_LZ.bin", "Scn/Map/SceneMap2WndShop_food_LZ.bin",
     "Scn/Map/SceneMap2WndFountain_LZ.bin",  "Scn/Map/SceneMap2WndCityhall_LZ.bin",
@@ -199,16 +187,23 @@ static const char *const sBuildingWindowArchives[12] = {
     "Scn/Map/SceneMap2WndShop_item_LZ.bin", "Scn/Map/SceneMap2WndNews_LZ.bin",
     "Scn/Map/SceneMap2WndShop_costume_LZ.bin", "Scn/Map/SceneMap2WndShop_reform_LZ.bin",
 };
-static const char *const sBuildingPalettes[12] = {
+static const char *sBuildingPalettes[12] = {
     "S01:/Fw_machine.ncl",   "S01:/Fw_dome.ncl",      "S01:/Fw_diagnosis.ncl", "S01:/Fw_shop_food.ncl",
     "S01:/Fw_fountain.ncl",  "S01:/Fw_cityhall.ncl",  "S01:/Fw_ranking.ncl",   "S01:/Fw_entrance.ncl",
     "S01:/Fw_shop_item.ncl", "S01:/Fw_news.ncl",      "S01:/Fw_shop_costume.ncl", "S01:/Fw_shop_reform.ncl",
 };
-// The archive of each model resource: its name, its path and the model in it
-static const char *const sResourceArchives[14] = {
-    "M00", "M13", "M01", "M02", "M03", "M04", "M05", "M06", "M07", "M08", "M09", "M10", "M11", "M12",
+// The pictures and archives of each building's window
+static const char *sBuildingChars[12] = {
+    "S01:/Fw_machine.ncg",   "S01:/Fw_dome.ncg",      "S01:/Fw_diagnosis.ncg", "S01:/Fw_shop_food.ncg",
+    "S01:/Fw_fountain.ncg",  "S01:/Fw_cityhall.ncg",  "S01:/Fw_ranking.ncg",   "S01:/Fw_entrance.ncg",
+    "S01:/Fw_shop_item.ncg", "S01:/Fw_news.ncg",      "S01:/Fw_shop_costume.ncg", "S01:/Fw_shop_reform.ncg",
 };
-static const char *const sResourcePaths[14] = {
+static const char *sResourceModels[14] = {
+    "M00:/ground.imd",   "M13:/board.imd",     "M01:/machine.imd",   "M02:/dome.imd",    "M03:/diagnosis.imd",
+    "M04:/shop_food.imd", "M05:/fountain.imd", "M06:/cityhall.imd", "M07:/ranking.imd", "M08:/apart.imd",
+    "M09:/shop_item.imd", "M10:/news.imd",     "M11:/shop_costume.imd", "M12:/shop_interior.imd",
+};
+static const char *sResourcePaths[14] = {
     "Mdl/Map/map2_ground0_3D_LZ.bin",   "Mdl/Map/map2_board_3D_LZ.bin",
     "Mdl/Map/map2_machine_3D_LZ.bin",   "Mdl/Map/map2_dome_3D_LZ.bin",
     "Mdl/Map/map2_diagnosis_3D_LZ.bin", "Mdl/Map/map2_shop_food_3D_LZ.bin",
@@ -217,10 +212,10 @@ static const char *const sResourcePaths[14] = {
     "Mdl/Map/map2_shop_item_3D_LZ.bin", "Mdl/Map/map2_news_3D_LZ.bin",
     "Mdl/Map/map2_shop_costume_3D_LZ.bin", "Mdl/Map/map2_shop_interior_3D_LZ.bin",
 };
-static const char *const sResourceModels[14] = {
-    "M00:/ground.imd",   "M13:/board.imd",     "M01:/machine.imd",   "M02:/dome.imd",    "M03:/diagnosis.imd",
-    "M04:/shop_food.imd", "M05:/fountain.imd", "M06:/cityhall.imd", "M07:/ranking.imd", "M08:/apart.imd",
-    "M09:/shop_item.imd", "M10:/news.imd",     "M11:/shop_costume.imd", "M12:/shop_interior.imd",
+static const int sTitleFonts[1] = { 0 };
+// The archive of each model resource: its name, its path and the model in it
+static const char *sResourceArchives[14] = {
+    "M00", "M13", "M01", "M02", "M03", "M04", "M05", "M06", "M07", "M08", "M09", "M10", "M11", "M12",
 };
 
 static inline int Rand(int max) {
@@ -229,8 +224,8 @@ static inline int Rand(int max) {
 
 // What the clock means for the saved characters
 static inline void UpdateCharacterTimes() {
-    RTCDate date;
     RTCTime time;
+    RTCDate date;
     s64 now = func_02035870(data_02123440[0], &date, &time);
     func_020ad568(now);
     func_020ad514(now, &time);
@@ -255,9 +250,7 @@ static inline ScreenRect MakeRect(int x, int y, int width, int height) {
 // --- MapCamera ---
 
 void MapCamera::Reset() {
-    mGoal.x = mCamera->mPosition.x;
-    mGoal.y = mCamera->mPosition.y;
-    mGoal.z = mCamera->mPosition.z;
+    mGoal = mCamera->mPosition;
     mOffset.x = mGoalOffset.x = mCamera->mTarget.x - mCamera->mPosition.x;
     mOffset.y = mGoalOffset.y = mCamera->mTarget.y - mCamera->mPosition.y;
     mOffset.z = mGoalOffset.z = mCamera->mTarget.z - mCamera->mPosition.z;
@@ -307,6 +300,18 @@ BOOL MapCamera::IsAtHome() {
 
 // --- MapScene ---
 
+inline void MapScene::ResetCamera() {
+    mCamera.mCamera = &data_02122764;
+    func_0202a640(&data_02122764);
+    mCamera.mCamera->SetPosition(sCameraHome);
+    mCamera.mCamera->SetTarget(sCameraHomeTarget);
+    mCamera.mCamera->mAngleX = 0;
+    mCamera.mCamera->mAngleY = 0;
+    mCamera.mCamera->mAngleZ = 0;
+    mCamera.mCamera->mUnknown0C = 4;
+    mCamera.Reset();
+}
+
 void MapScene::StartLoading() {
     mClock.Update();
     UpdateCharacterTimes();
@@ -336,10 +341,10 @@ void MapScene::StartLoading() {
         for (int i = 0; i < RESIDENT_COUNT; i++) {
             if (!func_0202c3dc(&gGameData, i)) {
                 mResidentRooms[i] = -1;
-                continue;
+            } else {
+                func_0202c264(&gGameData, (u16)i, &character);
+                mResidentRooms[i] = character.mRoom;
             }
-            func_0202c264(&gGameData, i, &character);
-            mResidentRooms[i] = character.mRoom;
         }
         for (int i = 0; i < RESIDENT_COUNT; i++) {
             mRoomResidents[i] = -1;
@@ -390,6 +395,10 @@ void MapScene::StartLoading() {
 }
 
 void MapScene::Init() {
+    const int unknownE = 0xE;
+    const u16 backButtonSequence = 4;
+    const int titleTextCount = 1;
+    const int titleMessage = 0x96;
     mNewsDue = FALSE;
     func_0202b0e8(&data_02122824);
     data_0211d604.SetUnknown44(0);
@@ -404,10 +413,10 @@ void MapScene::Init() {
     for (int i = 0; i < MODEL_COUNT; i++) {
         Sprite_Init(&mNewMarks[i], 1, 0x19, 128, 96, TRUE);
         if (i == MODEL_APARTMENT) {
-            mNewMarks[i].SetPosition(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                     sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
+            mNewMarks[i].SetPosition(FxVec2(sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
+                                            sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT));
         } else {
-            mNewMarks[i].SetPosition(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT);
+            mNewMarks[i].SetPosition(FxVec2(sNewMarkPositions[i].x << FX32_SHIFT, sNewMarkPositions[i].y << FX32_SHIFT));
         }
         mNewMarks[i].mVisible = FALSE;
     }
@@ -493,19 +502,7 @@ void MapScene::Init() {
         }
         mModels[i].SetPosition(sModelPositions[i]);
     }
-    mCamera.mCamera = &data_02122764;
-    func_0202a640(&data_02122764);
-    mCamera.mCamera->mPosition.x = sCameraHome.x;
-    mCamera.mCamera->mPosition.y = sCameraHome.y;
-    mCamera.mCamera->mPosition.z = sCameraHome.z;
-    mCamera.mCamera->mTarget.x = sCameraHomeTarget.x;
-    mCamera.mCamera->mTarget.y = sCameraHomeTarget.y;
-    mCamera.mCamera->mTarget.z = sCameraHomeTarget.z;
-    mCamera.mCamera->mAngleX = 0;
-    mCamera.mCamera->mAngleY = 0;
-    mCamera.mCamera->mAngleZ = 0;
-    mCamera.mCamera->mUnknown0C = 4;
-    mCamera.Reset();
+    ResetCamera();
     mSelected = -1;
     mUnknown384C = -1;
     mLights[0] = &data_021227cc;
@@ -523,8 +520,10 @@ void MapScene::Init() {
     Sprite_Init(&mBackButton, 1, 0, 128, 96, TRUE);
     func_02031eb0(&mBackButton, sBackButtonSize.x, sBackButtonSize.y);
     mBackButton.SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-    func_02031260(&mBackButton, sBackButtonSequence);
-    func_02031278(&mBackButton, sBackButtonPalette + 1);
+    func_02031260(&mBackButton, backButtonSequence);
+    for (int i = 0; i < 1; i++) {
+        func_02031278(&mBackButton, sBackButtonPalettes[i] + 1);
+    }
     func_02032158(&mBackButton, &sBackButtonRect);
     func_0203119c(&mBackButton);
     mBackButton.mVisible = FALSE;
@@ -549,8 +548,10 @@ void MapScene::Init() {
     func_02032fb8(&mMessageWindows[0], sTitleWindowRect);
     func_02033174(&mMessageWindows[0], sWindowTitleScreen, 0x100);
     mMessageWindows[0].mUnknownAF9C = 0;
-    func_02033a58(&mMessageWindows[0], &mMessageFiles[1], sTitleMessage, &gFonts[sTitleFont].mFont, 0x1000,
-                  sTitleTextPosition, &titleCharOffset);
+    for (int i = 0; i < titleTextCount; i++) {
+        func_02033a58(&mMessageWindows[0], &mMessageFiles[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
+                      sTitleTextPosition, &titleCharOffset);
+    }
     func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
     func_02033174(&mMessageWindows[1], sWindowDownScreen, 2);
     func_020337b8(&mMessageWindows[1], 0, 1, 0x14, 0x15, sTutorialButtonPosition, sTutorialButtonSize,
@@ -609,19 +610,7 @@ void MapScene::Update() {
     case STATE_LEAVE_TITLE:
         if (func_02024118(&data_0211d604, 0x3F3F, 1)) {
             mSound.SetMode(&mClock, MapSound::MODE_CONTINUE);
-            mCamera.mCamera = &data_02122764;
-            func_0202a640(&data_02122764);
-            mCamera.mCamera->mPosition.x = sCameraHome.x;
-            mCamera.mCamera->mPosition.y = sCameraHome.y;
-            mCamera.mCamera->mPosition.z = sCameraHome.z;
-            mCamera.mCamera->mTarget.x = sCameraHomeTarget.x;
-            mCamera.mCamera->mTarget.y = sCameraHomeTarget.y;
-            mCamera.mCamera->mTarget.z = sCameraHomeTarget.z;
-            mCamera.mCamera->mAngleX = 0;
-            mCamera.mCamera->mAngleY = 0;
-            mCamera.mCamera->mAngleZ = 0;
-            mCamera.mCamera->mUnknown0C = 4;
-            mCamera.Reset();
+            ResetCamera();
             Deselect(FALSE, 0);
             if (mNewBuilding == -1) {
                 SetState(STATE_MAP);
@@ -958,7 +947,8 @@ void MapScene::Update() {
                 continue;
             }
             if (i == mSelected) {
-                if ((u8)(func_02039c00(&gIsland, sModelBuildings[mSelected]) - 1) > 1) {
+                u8 state = func_02039c00(&gIsland, sModelBuildings[mSelected]);
+                if (!(state == 1 || state == 2)) {
                     continue;
                 }
                 if (mSelected == 3 && !func_020af9c0(&mFacilities)) {
@@ -1151,8 +1141,8 @@ VecFx32 MapScene::GetWindowPosition(int window) {
         cell.mColumn += 2;
     }
     VecFx32 position;
-    position.x = (cell.mColumn - 4) * 5 * 41 + 102;
-    position.y = cell.mFloor * 5 * 41 + 430;
+    position.x = (cell.mColumn - 4) * 5 * FX32_CONST(0.01) + 102;
+    position.y = cell.mFloor * 5 * FX32_CONST(0.01) + 430;
     position.z = 758;
     return position;
 }
@@ -1247,7 +1237,10 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBoardScreen, 0x100);
-        func_02034fc8(&mMessageWindows[0], 0, sBoardTextPosition);
+        {
+            WindowPoint position = sBoardTextPosition;
+            mMessageWindows[0].SetTextPosition(0, position);
+        }
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         return;
     }
@@ -1255,21 +1248,29 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
-        func_02034fc8(&mMessageWindows[0], 0, sTitleTextPosition);
+        {
+            WindowPoint position = sTitleTextPosition;
+            mMessageWindows[0].SetTextPosition(0, position);
+        }
         func_02034720(&mMessageWindows[0], 0x1A, 1);
-        if (mSelected == 2) {
-            mButtons[1].mVisible = TRUE;
-            mButtons[2].mVisible = TRUE;
-        } else if (mSelected == 7 || mSelected == 10) {
+        switch (mSelected) {
+        case 7:
+        case 10:
             mButtons[0].mVisible = TRUE;
             NNS_G2dCharCanvasClear(&mButtons[0].mText.mCanvas, 0);
             mButtons[0].mText.mMessage = 0xB4;
             mButtons[0].mText.DrawAll();
-        } else {
+            break;
+        case 2:
+            mButtons[1].mVisible = TRUE;
+            mButtons[2].mVisible = TRUE;
+            break;
+        default:
             mButtons[0].mVisible = TRUE;
             NNS_G2dCharCanvasClear(&mButtons[0].mText.mCanvas, 0);
             mButtons[0].mText.mMessage = 0xB3;
             mButtons[0].mText.DrawAll();
+            break;
         }
         return;
     }
@@ -1277,7 +1278,10 @@ void MapScene::OpenWindow() {
         func_02028f24(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sQuestionScreen, 0x100);
-        func_02034fc8(&mMessageWindows[0], 0, sTitleTextPosition);
+        {
+            WindowPoint position = sTitleTextPosition;
+            mMessageWindows[0].SetTextPosition(0, position);
+        }
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         mButtons[0].mVisible = TRUE;
         return;
@@ -1285,7 +1289,10 @@ void MapScene::OpenWindow() {
     func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
     func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
     func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
-    func_02034fc8(&mMessageWindows[0], 0, sTitleTextPosition);
+    {
+        WindowPoint position = sTitleTextPosition;
+        mMessageWindows[0].SetTextPosition(0, position);
+    }
     func_02034720(&mMessageWindows[0], 0x1A, 1);
     mButtons[0].mVisible = FALSE;
 }
@@ -1321,7 +1328,7 @@ void MapScene::SetTutorialStep(int step) {
         break;
     case 3: {
         func_02034f38(&mMessageWindows[1], 0, 0x154);
-        wchar_t name[10];
+        wchar_t name[8];
         wcscpy(name, data_02123510);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034720(&mMessageWindows[1], 0x12, 1);
@@ -1343,7 +1350,9 @@ void MapScene::SetTutorialStep(int step) {
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034f38(&mMessageWindows[1], 0, 0x157);
         func_02034720(&mMessageWindows[1], 0x12, 1);
-        mWindows[mResidentRooms[0]].SetTexture(3, sWindowTextureRect6);
+        int room = mResidentRooms[0];
+        ScreenRect rect = sWindowTextureRect6;
+        func_0202b1f0(&mWindows[room], 3, &rect);
         break;
     }
     case 8: {
@@ -1417,7 +1426,7 @@ void MapScene::SetTutorialStep(int step) {
         break;
     case 21: {
         func_02034f38(&mMessageWindows[1], 0, 0x177);
-        wchar_t name[10];
+        wchar_t name[8];
         wcscpy(name, data_02123510);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
         func_02034720(&mMessageWindows[1], 0x12, 1);
@@ -1452,15 +1461,14 @@ BOOL MapScene::IsNewsDue() {
     func_0202c8a8(&gGameData, 0, &item);
     RTCDate itemDate;
     itemDate.year = item.mYear;
-    itemDate.month = item.mMonth;
-    itemDate.day = item.mDay;
+    itemDate.month = item.GetMonth();
+    itemDate.day = item.GetDay();
     itemDate.week = RTC_WEEK_SUNDAY;
-    u8 hour = item.mHour;
     BOOL dayBefore = FALSE;
     RTCTime itemTime;
-    if (hour >= 7 && hour < 19) {
+    if (item.GetHour() >= 7 && item.GetHour() < 19) {
         itemTime.hour = 7;
-    } else if (hour < 7) {
+    } else if (item.GetHour() < 7) {
         itemTime.hour = 19;
         dayBefore = TRUE;
     } else {
@@ -1509,10 +1517,10 @@ void MapScene::MakeDailyNews() {
         }
     }
     for (int i = 0; i < birthdayCount; i++) {
-        u16 j = MATH_Rand16(&gRandom, birthdayCount);
-        u8 t = birthdays[j];
-        birthdays[j] = birthdays[i];
-        birthdays[i] = t;
+        int j = Rand(birthdayCount);
+        u8 t = birthdays[i];
+        birthdays[i] = birthdays[j];
+        birthdays[j] = t;
     }
     BOOL found = FALSE;
     u8 chosen;
@@ -1521,7 +1529,8 @@ void MapScene::MakeDailyNews() {
         for (int i = 0; i < 11; i++) {
             NewsItem item;
             func_0202c8a8(&gGameData, i, &item);
-            if (item.mKind == 0x1D && item.mYear + 2000 == date.year) {
+            u32 year = item.mYear + 2000;
+            if (item.mKind == 0x1D && year == date.year) {
                 last = item.mCharacter;
                 break;
             }
@@ -1544,18 +1553,21 @@ void MapScene::MakeDailyNews() {
     if (found) {
         gSceneMemory.mCharacters[0] = chosen;
         for (int i = 0; i < otherCount; i++) {
-            u16 j = MATH_Rand16(&gRandom, otherCount);
-            u8 t = others[j];
-            others[j] = others[i];
-            others[i] = t;
+            int j = Rand(otherCount);
+            u8 t = others[i];
+            others[i] = others[j];
+            others[j] = t;
         }
         gSceneMemory.mCharacters[1] = others[0];
         gSceneMemory.mCharacters[2] = others[1];
         kind = 0x1D;
     } else {
-        do {
-            kind = MATH_Rand16(&gRandom, 0xAC);
-        } while (!(data_020fa1d0[kind].mMonths & (1 << monthBit)));
+        for (;;) {
+            kind = Rand(0xAC);
+            if (data_020fa1d0[kind].mMonths & (1 << monthBit)) {
+                break;
+            }
+        }
     }
     AddNews(kind);
 }
@@ -1594,7 +1606,7 @@ int MapScene::GetWindowTexture(int resident) {
     u8 unknown = func_0202c53c(&gGameData, resident);
     int row = func_0202c5b4(&gGameData, resident);
     int column = func_0202c58c(&gGameData, resident);
-    u8 kind = data_02114d78[row][column].mUnknown0;
+    int kind = data_02114d78[row][column].mUnknown0;
     if (func_02099c94(event)) {
         return 3;
     }
@@ -1604,8 +1616,8 @@ int MapScene::GetWindowTexture(int resident) {
     if (event == 0x11) {
         return 6;
     }
-    if ((u8)(unknown - 1) <= 1) {
-        if (row == 3 && (u32)(kind - 5) <= 1) {
+    if (unknown == 1 || unknown == 2) {
+        if (row == 3 && (kind == 5 || kind == 6)) {
             return 5;
         }
         if (row == 4 && kind == 11) {
@@ -1617,9 +1629,9 @@ int MapScene::GetWindowTexture(int resident) {
 }
 
 void MapScene::UpdateWindows() {
-    ScreenRect rect = sWindowTextureRect;
     for (int i = 0; i < mWindowCount; i++) {
-        mWindows[i].SetTexture(GetWindowTexture(mRoomResidents[i]), rect);
+        int texture = GetWindowTexture(mRoomResidents[i]);
+        mWindows[i].SetTexture(texture, sWindowTextureRect);
         mWindows[i].mScaleY = 0xD5;
         mWindows[i].mScaleX = 0xD5;
         func_0202b4c4(&mWindows[i]);
@@ -1640,7 +1652,7 @@ void MapSound::Init(MapClock *clock, int mode) {
     gSoundManager.StartSeqArcIfNotPlaying(0, 3, 4);
     for (int i = 0; i < 4; i++) {
         mRamps.mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
-        mRamps.mRamps[i].mValue = mRamps.mRamps[i].mTarget = sModelMusic[0][i] << FX32_SHIFT;
+        mRamps.mRamps[i].mTarget = mRamps.mRamps[i].mValue = sModelMusic[0][i] << FX32_SHIFT;
         mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
     gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
@@ -1707,13 +1719,14 @@ void MapSound::Update(MapClock *clock) {
     gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps.mRamps[1].mValue >> FX32_SHIFT);
     gSoundManager.SetSeqArcTempoRatio(0, mRamps.mRamps[2].mValue >> FX32_SHIFT);
     gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps.mRamps[3].mValue >> FX32_SHIFT);
-    if (mMode == MODE_START || mMode == MODE_RESTART || mMode == MODE_CONTINUE) {
+    if (!(mMode != MODE_START && mMode != MODE_RESTART && mMode != MODE_CONTINUE)) {
         mSurroundingRamps.Update();
         int volume = mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT;
         switch (mSurroundingState) {
         case 0:
             gSoundManager.SetSeqArcVolume(5, volume);
-            if (GetTimeOfDay(&clock->mTime) != mTimeOfDay) {
+            int timeOfDay = GetTimeOfDay(&clock->mTime);
+            if (mTimeOfDay != timeOfDay) {
                 StartSurroundings(1, mSeason, mTimeOfDay);
             }
             break;
@@ -1868,22 +1881,27 @@ int MapSound::GetSeason(int month) {
 }
 
 int MapSound::GetTimeOfDay(RTCTime *time) {
-    u32 minutes = time->hour * 60 * 60 + time->minute * 60;
-    if (minutes >= mDayStart - 60 * 60 && minutes < mDayStart + 2 * 60 * 60) {
+    u32 seconds = time->hour * 3600 + time->minute * 60;
+    u32 dayStart = mDayStart;
+    u32 nightStart = mNightStart;
+    u32 morningEnd = dayStart + 2 * 60 * 60;
+    u32 eveningEnd = nightStart + 2 * 60 * 60;
+    if (seconds >= dayStart - 60 * 60 && seconds < morningEnd) {
         return 0;
     }
-    if (minutes >= mDayStart + 2 * 60 * 60 && minutes < mNightStart) {
+    if (seconds >= morningEnd && seconds < nightStart) {
         return 1;
     }
-    if (minutes >= mNightStart && minutes < mNightStart + 2 * 60 * 60) {
+    if (seconds >= nightStart && seconds < eveningEnd) {
         return 2;
     }
     return 3;
 }
 
 int MapSound::GetDayOrNight(RTCTime *time) {
-    u32 minutes = time->hour * 60 * 60 + time->minute * 60;
-    if (minutes >= mDayStart && minutes < mNightStart + 60 * 60) {
+    u32 seconds = time->hour * 3600 + time->minute * 60;
+    u32 nightEnd = mNightStart + 60 * 60;
+    if (seconds >= mDayStart && seconds < nightEnd) {
         return 0;
     }
     return 1;
@@ -1893,22 +1911,22 @@ int MapSound::GetDayOrNight(RTCTime *time) {
 
 void MapScene::StartEffects(const VecFx32 *position) {
     for (int i = 0; i < 2; i++) {
-        void **emitter = &mEmitters[i];
         if (mEmitters[i] != NULL) {
             func_0207b364(mParticles, mEmitters[i]);
-            *emitter = NULL;
+            mEmitters[i] = NULL;
         }
-        *emitter = func_0207b2fc(mParticles, sEffectResources[i], position);
+        mEmitters[i] = func_0207b2fc(mParticles, sEffectResources[i], position);
     }
 }
 
 void MapScene::StartEffect2(const VecFx32 *position) {
-    void **emitter = &mEmitters[2];
-    if (mEmitters[2] != NULL) {
-        func_0207b364(mParticles, mEmitters[2]);
-        *emitter = NULL;
+    for (int i = 2; i < 3; i++) {
+        if (mEmitters[i] != NULL) {
+            func_0207b364(mParticles, mEmitters[i]);
+            mEmitters[i] = NULL;
+        }
+        mEmitters[i] = func_0207b2fc(mParticles, sEffectResources[i], position);
     }
-    *emitter = func_0207b2fc(mParticles, sEffectResources[2], position);
 }
 
 // --- TitleCamera ---
@@ -1937,12 +1955,10 @@ void TitleCamera::Update() {
 void TitleCamera::SetView(int view) {
     mCamera->mAngleY = 0;
     mCamera->mAngleX = 0;
-    mCamera->mPosition.x = sTitleViews[view].mPosition.x;
-    mCamera->mPosition.y = sTitleViews[view].mPosition.y;
-    mCamera->mPosition.z = sTitleViews[view].mPosition.z;
-    mCamera->mTarget.x = sTitleViews[view].mTarget.x;
-    mCamera->mTarget.y = sTitleViews[view].mTarget.y;
-    mCamera->mTarget.z = sTitleViews[view].mTarget.z;
+    VEC_Set(&mCamera->mPosition, sTitleViews[view].mPosition.x, sTitleViews[view].mPosition.y,
+            sTitleViews[view].mPosition.z);
+    VEC_Set(&mCamera->mTarget, sTitleViews[view].mTarget.x, sTitleViews[view].mTarget.y,
+            sTitleViews[view].mTarget.z);
     mView = view;
     mFrame = 0;
 }
@@ -1971,14 +1987,20 @@ void MapScene::ShowBuilding(int model) {
 void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
     switch (model) {
     case 2:
-        if (button == 1) {
+        switch (button) {
+        default:
+            if (Rand(2) == 0) {
+                func_0203c02c(&gSceneManager, 0x23);
+            } else {
+                func_0203c02c(&gSceneManager, 0x81);
+            }
+            break;
+        case 1:
             func_0203c02c(&gSceneManager, 0x23);
-        } else if (button == 2) {
+            break;
+        case 2:
             func_0203c02c(&gSceneManager, 0x81);
-        } else if (Rand(2) == 0) {
-            func_0203c02c(&gSceneManager, 0x23);
-        } else {
-            func_0203c02c(&gSceneManager, 0x81);
+            break;
         }
         break;
     case 9:
@@ -2009,7 +2031,7 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
                 func_0203c02c(&gSceneManager, 0x57);
                 break;
             }
-            int minutes = mClock.mTime.hour * 60 + mClock.mTime.minute;
+            u32 minutes = mClock.mTime.hour * 60 + mClock.mTime.minute;
             int kind = 3;
             for (int i = 0; i < 14; i++) {
                 if (minutes < sFountainTimes[i].mTime) {
@@ -2110,7 +2132,7 @@ void MapClockDisplay::Init(MapClock *clock) {
     for (int i = 0; i < SPRITE_COUNT; i++) {
         Sprite *sprite = &mSprites[i];
         Sprite_Init(sprite, 0, sClockSequences[i], 128, 96, TRUE);
-        mSprites[i].SetPosition(sClockPositions[i].x << FX32_SHIFT, sClockPositions[i].y << FX32_SHIFT);
+        mSprites[i].SetPosition(FxVec2(sClockPositions[i].x << FX32_SHIFT, sClockPositions[i].y << FX32_SHIFT));
         sprite->mAnim.animCtrl.bActive = FALSE;
     }
     Refresh(TRUE);
@@ -2210,11 +2232,11 @@ void MapScene::UpdateNewMarks() {
 void MoneyDisplay::Init(int *money, int *charOffset) {
     mState = STATE_NONE;
     mMoney = money;
-    mShown = *money;
+    mShown = *mMoney;
     Sprite_Init(&mSprite, 1, 0x1B, 128, 96, TRUE);
     mSprite.SetPosition(sMoneySpritePosition.x << FX32_SHIFT, sMoneySpritePosition.y << FX32_SHIFT);
     mSprite.mOverwritePalette = 1;
-    mText.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mText.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
     mText.mTextX = 0x40;
     mText.InitText(&gFonts[0].mFont, 0x10, 8, 2, *charOffset, -2, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
     mText.mColor = 1;

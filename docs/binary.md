@@ -398,6 +398,28 @@ The flags in `configure.py` are the usual ones of games of this SDK, adjusted to
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's
 command function has "Pitch" three times, and the original holds three separate strings for them.
 
+### Where a file's constants go, by compiler
+
+Measured, with a test file of 4-aligned `static const` arrays of 8 to 104 bytes, each referred to by a function, built with the game's flags (`-O4,p ... -lang=c++ -ipa file`):
+
+- mwccarm 2.0 SP1p2, SP2 and SP2p2 put every one of them into the one pooled `.rodata` section, whatever the size. No flag
+  changes this: `-[no]constpool`, `-sdatathreshold` (0, 60, 64), `-O3,p`, `-O4,s` and `-opt nopeephole` give the
+  same section, and so does C++ without `-ipa file`.
+- The DSi compilers 1.1, 1.1p1, 1.2, 1.2p1, 1.2p2, 1.3 and 1.3p1 pool the objects of up to 60 bytes and give each of
+  64 bytes or more a section of its own (1.6 SP1 and SP2 also leave a 4-byte one out). In C they pool everything, as
+  2.0 does. 1.2 base (pokebw2's `1.2/base`) does not compile the C++ test.
+- The ROM has that split: overlay 72's pool ends with its 52-byte tables, and its 88- to 320-byte tables follow it
+  one by one; overlays 73 and 74 are the same. But the DSi compilers change the code too much to be the game's:
+  rebuilt with DSi 1.2, 1.3p1 or 1.1, `TtsPlayer.cpp` matches in 10 of 28 functions (28 with 2.0 SP2p2),
+  `SoundManager.cpp` 40 of 43 (43), `SoundSystem.cpp` 4 of 6 (6), `ValueRamp.cpp` 2 of 7 (6), `MessageText.cpp` 17 of
+  32 (30), `TextCanvas.cpp` 18 of 34 (32), and overlays 96, 73, 74 and 72 a third or less of what they match now.
+- mwccarm 2.0 SP2 patch 3 and patch 4 (in the compiler archive that `configure.py` downloads, not unpacked here
+  before) have the size limit. Overlay 72's `MapScene.cpp` built with either: `.rodata` comes out as the ROM's layout,
+  a pool of 0x3B0 bytes (the ROM's 0x374 and the 60-byte `u8` table that ends it), then the 13-, 21- and 22-byte
+  arrays and the 88-, 104-, 112-, 156-, 208-, 208- and 320-byte tables each in a section of its own, in the ROM's
+  order; and the 61 functions compare exactly as with SP2p2 (47 match, the same 47, and the others differ in the same
+  places).
+
 ## Linking
 
 The original was linked with dead-stripping, as a game built on libraries is: an object of the SDK holds functions

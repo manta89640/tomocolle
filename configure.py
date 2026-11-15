@@ -79,6 +79,13 @@ MWCC_SHA256 = {
     "2.0/sp2p2": "b1da5a2f191d1cdea3fd078cedc9c504de46609642ae8e44c015014cef5419a7",
     "2.0/sp1p2": "e66b7495f596d18f8fcc82cdfc3a4af77f15790d96f1aace93e4502ff439a87a",
     "2.0/sp2": "3d97f6ed0a43d131173fc3b15cd3442f38d85fc6059b3fa709139be70fe8532e",
+    "2.0/sp2p3": "900e6b2ce072b5c178e98d47468f83caa8156eda7fb2e1efa786535b73cf86f2",
+}
+# Units built with another version than MWCC_VERSION. 2.0 SP2 patch 3 ("Version 3.0 build 138") leaves a file's
+# constants of 64 bytes and more out of the constant pool, as the ROM does (docs/binary.md, "Where a file's constants
+# go"), and gives the same code as SP2p2 for overlay 72.
+UNIT_COMPILERS = {
+    "src/overlays/ov072/MapScene.cpp": "2.0/sp2p3",
 }
 MWLD_SHA256 = "a41aea5f282041e16dcd6c3570328009cb1eefb32b0cd05f60a8fdb365aec47c"
 # The same compiler's name on decomp.me, for objdiff's "create scratch" button
@@ -471,7 +478,8 @@ def main():
         sjiswrap = (tools_dir / "sjiswrap.exe").relative_to(ROOT)
         download_binary(ROOT / sjiswrap, SJISWRAP_URL.format(version=SJISWRAP_VERSION), SJISWRAP_SHA256)
     libraries = {} if args.no_libraries else LIBRARIES
-    compilers = [MWCC_VERSION, *sorted({library["compiler"] for library in libraries.values()})]
+    compilers = [MWCC_VERSION, *sorted({library["compiler"] for library in libraries.values()}
+                                       | set(UNIT_COMPILERS.values()))]
     if args.compiler:
         compilers_dir = args.compiler
         problems = [p for version in compilers for p in check_compiler(compilers_dir / version, version)]
@@ -605,8 +613,11 @@ def main():
         obj = build_dir / source.with_suffix(".o")
         library = library_of(name)
         if library is None:
+            variables = {"lang": LANG_FLAGS[source.suffix], "dep": obj.with_suffix(".d")}
+            if name in UNIT_COMPILERS:
+                variables["mwcc"] = shlex.quote(str(compilers_dir / UNIT_COMPILERS[name] / "mwccarm.exe"))
             n.build([obj], "mwcc", [source], implicit=["tools/fix_depfile.py"], order_only=generated,
-                    variables={"lang": LANG_FLAGS[source.suffix], "dep": obj.with_suffix(".d")})
+                    variables=variables)
             n.build([obj.with_suffix(f".ctx{source.suffix}")], "ctx", [source], implicit=["tools/clean_ctx.py"],
                     variables={"lang": LANG_FLAGS[source.suffix]})
         else:

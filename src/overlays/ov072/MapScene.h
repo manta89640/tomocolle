@@ -93,6 +93,17 @@ struct SceneMemory {
 
 // The main program's camera (data_02122764)
 struct Camera {
+    void SetPosition(VecFx32 position) {
+        mPosition.x = position.x;
+        mPosition.y = position.y;
+        mPosition.z = position.z;
+    }
+    void SetTarget(VecFx32 target) {
+        mTarget.x = target.x;
+        mTarget.y = target.y;
+        mTarget.z = target.z;
+    }
+
     /* 0x00 */ u8 mUnknown00[0xC];
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ u8 mUnknown10[4];
@@ -144,6 +155,9 @@ struct NewsItem {
     /*      */ u32 mDay : 5;
     /*      */ u32 mHour : 5;
     /*      */ u32 mUnknown0CBits21 : 11;
+    u8 GetMonth() { return mMonth; }
+    u8 GetDay() { return mDay; }
+    u8 GetHour() { return mHour; }
     /* 0x10 */ u16 mYear;     // Since 2000
     /* 0x12 */ u8 mUnknown12[2];
 }; // 0x14
@@ -163,7 +177,9 @@ struct SavedCharacter {
 
     /* 0x000 */ u8 mUnknown000[0x4F];
     /* 0x04F */ u8 mRoom;  // Its room's number in the apartment building
-    /* 0x050 */ u8 mUnknown050[0x1D4];
+    /* 0x050 */ u8 mUnknown050[4];
+    /* 0x054 */ u32 mUnknown054;
+    /* 0x058 */ u8 mUnknown058[0x1CC];
     /* 0x224 */ u8 mEvent; // What the character is doing in its room
     /* 0x225 */ u8 mUnknown225[0x9B];
 }; // 0x2C0
@@ -283,6 +299,11 @@ public:
     ~TexturedQuad(); // func_0202b6cc
 
     void SetTexture(int texture, ScreenRect rect) { func_0202b1f0(this, texture, &rect); }
+    void SetPosition(VecFx32 position) {
+        mX = position.x;
+        mY = position.y;
+        mDepth = -position.z / 16;
+    }
 
     /* 0x00 */ void *mVtable;
     /* 0x04 */ int mUnknown04;
@@ -321,7 +342,12 @@ struct WindowPoint {
     /* 0x4 */ int y;
 };
 
+struct MessageWindow;
+extern "C" void func_02034fc8(MessageWindow *window, int text, WindowPoint position);
 struct MessageWindow {
+    // Where a text of the window is
+    void SetTextPosition(int text, WindowPoint position) { func_02034fc8(this, text, position); }
+
     /* 0x0000 */ void *mVtable;
     /* 0x0004 */ u8 mSprites[12][0xF4];
     /* 0x0B74 */ u8 mButtons[16][0x6F0];
@@ -346,7 +372,7 @@ extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
 extern SceneManager gSceneManager;
 extern SceneMemory data_0213ba74;
-extern u16 data_0213bab0[3]; // The sky's colours, for the next scene
+extern GXRgb data_0213bab0[3]; // The sky's clear colour and light colours, as the map leaves them
 extern IslandState data_0212348c;
 extern Camera data_02122764;
 extern Light data_021227cc;
@@ -405,7 +431,7 @@ void func_0202b4d8(QuadTextures *textures);
 void func_0202b4dc(QuadTextures *textures, int index, const char *path, int a, int width, int height);
 
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202c264(GameData *game, u16 index, SavedCharacter *character);
+void func_0202c264(GameData *game, int index, SavedCharacter *character);
 void func_0202c28c(GameData *game, int index, SavedCharacter *character);
 u8 func_0202c468(GameData *game, int character);
 u8 func_0202c53c(GameData *game, int character);
@@ -444,7 +470,6 @@ void func_020349cc(MessageWindow *window, int flags);
 void func_02034a3c(MessageWindow *window, int text, int argIndex, const wchar_t *string);
 void func_02034f38(MessageWindow *window, int text, u32 message);
 void func_02034f94(MessageWindow *window, u8 vAlign);
-void func_02034fc8(MessageWindow *window, int text, WindowPoint position);
 
 // --- The clock ---
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
@@ -474,7 +499,8 @@ BOOL func_02099c94(int event);
 void func_0209c44c(SavedCharacter *character, int change);
 
 struct Unknown02114d78Entry {
-    u32 mUnknown0;
+    u32 mUnknown0 : 8;
+    u32 mUnknown0Bits8 : 24;
     int mUnknown4;
     int mUnknown8;
 };
@@ -692,6 +718,10 @@ public:
     void UpdateWindows();
     void StartEffects(const VecFx32 *position);
     void StartEffect2(const VecFx32 *position);
+    // Starts the effect of an emitter slot at a place, stopping what the slot had
+    void StartEmitter(int slot, const VecFx32 *position);
+    // Puts the 3D camera where the island is seen whole
+    void ResetCamera();
     void ShowBuilding(int model);
     void EnterBuilding(int model, BOOL newsDue, int button);
     BOOL func_ov072_0214ef3c();
