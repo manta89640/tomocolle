@@ -379,8 +379,10 @@ static void WH_StateOutStartParentMP(void *arg)
                 return;
             }
         } else if (sConnectMode == WH_CONNECTMODE_DS_PARENT) {
-            WMErrCode result = WM_StartDataSharing(&sDSInfo, WH_DS_PORT, (1 << (WH_CHILD_MAX + 1)) - 1,
-                                                   WH_DS_DATA_SIZE, TRUE);
+            WMErrCode result;
+            u16 aidBitmap = (u16)((1 << (WH_CHILD_MAX + 1)) - 1);
+
+            result = WM_StartDataSharing(&sDSInfo, WH_DS_PORT, aidBitmap, WH_DS_DATA_SIZE, TRUE);
             if (result != WM_ERRCODE_SUCCESS) {
                 WH_REPORT_FAILURE(result);
                 WH_ChangeSysState(WH_SYSSTATE_ERROR);
@@ -818,8 +820,10 @@ static void WH_StateOutStartChildMP(void *arg)
                 return;
             }
         } else if (sConnectMode == WH_CONNECTMODE_DS_CHILD) {
-            WMErrCode result = WM_StartDataSharing(&sDSInfo, WH_DS_PORT, (1 << (WH_CHILD_MAX + 1)) - 1,
-                                                   WH_DS_DATA_SIZE, TRUE);
+            WMErrCode result;
+            u16 aidBitmap = (u16)((1 << (WH_CHILD_MAX + 1)) - 1);
+
+            result = WM_StartDataSharing(&sDSInfo, WH_DS_PORT, aidBitmap, WH_DS_DATA_SIZE, TRUE);
             if (result != WM_ERRCODE_SUCCESS) {
                 WH_REPORT_FAILURE(result);
                 WH_Finalize();
