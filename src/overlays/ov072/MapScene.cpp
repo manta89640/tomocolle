@@ -399,6 +399,11 @@ void MapScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplMapEffect_LZ.bin", 0);
 }
 
+// Not matching yet (0xF18 bytes against 0xF0C). The differences: the register of the island stage's index for the
+// apartment's "new" mark (r2 against r1); the back button's base address, which the original keeps in a register
+// (this + 0x268) across its calls; the scheduling of the camera's reset (the target's y is computed before the
+// camera pointer is loaded again) and of the lights' direction (the vector is loaded into r2/r3 last). Everything
+// else is the original's.
 void MapScene::Init() {
     const int unknownE = 0xE;
     const u16 backButtonKind = 4;
@@ -592,6 +597,9 @@ void MapScene::Init() {
     mIdleFrames = 0;
 }
 
+// Not matching yet (0x1148 bytes against 0x1144): one register more is live in the touch loop of STATE_MAP (the
+// rectangle table's address, which the original loads again in each branch), so &mCamera is spilled to the stack
+// and the frame is 8 bytes larger; and the camera's reset is scheduled as in Init. The rest is the original's.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
@@ -1041,6 +1049,8 @@ void MapScene::Draw() {
     func_0207b138(mParticles);
 }
 
+// Not matching yet: the original keeps data_0213bab0's address in r7 across the three calls; this loads it again
+// before each store. Same instructions otherwise.
 void MapScene::Exit() {
     GXRgb clearColor = mSky.mColors[1];
     int phase = func_020a6214(&mSky);
@@ -1487,6 +1497,9 @@ BOOL MapScene::IsNewsDue() {
     return FALSE;
 }
 
+// Not matching yet: the second shuffle (of the other residents) inlines MATH_Rand16 with the shift of x done in
+// each arm of the max test and the store of x between them; here it is the same as the first shuffle's, which
+// matches. Same registers and stack otherwise.
 // Makes the day's news: a birthday of a resident when there is one that the last birthday news was not about,
 // otherwise a random kind of news of the month
 void MapScene::MakeDailyNews() {
@@ -1628,6 +1641,9 @@ int MapScene::GetWindowTexture(int resident) {
     return 0;
 }
 
+// Not matching yet: three stack slots are in another order. The original has the call's copy of the rectangle at
+// sp+0x28, GetWindowPosition's result at sp+0x10 and the position at sp+0x1C; here they are at 0x10, 0x20 and
+// 0x2C. The compiler's hoisted copy of the rectangle (sp+0) and every instruction are the original's.
 void MapScene::UpdateWindows() {
     for (int i = 0; i < mWindowCount; i++) {
         int texture = GetWindowTexture(mRoomResidents[i]);
@@ -2159,6 +2175,8 @@ void MapClockDisplay::Update() {
     Refresh(FALSE);
 }
 
+// Not matching yet, as overlays 73 and 74's copies: "add r0, r0, #0x400" for &mSprites[7] comes after the
+// subtraction in the original, before it here.
 void MapClockDisplay::Refresh(BOOL all) {
     MapClock *clock = mClock;
     if (mMonth != clock->mDate.month || all) {
