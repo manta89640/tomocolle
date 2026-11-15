@@ -57,15 +57,15 @@ _ZN12MoneyDisplay10SetVisibleEi kind:function(arm,size=0xc) addr:0x0214f674
 _ZN12MoneyDisplay7RefreshEv kind:function(arm,size=0x74) addr:0x0214f680
 _ZN8MapSceneD1Ev kind:function(arm,size=0x5c) addr:0x0214f6f4
 _ZN8MapSceneD0Ev kind:function(arm,size=0x64) addr:0x0214f750
-backButtonSequence$13755 kind:data(any) addr:0x0214f7b4 local
-sBackButtonPalettes kind:data(any) addr:0x0214f7b6 local
-titleTextCount$13757 kind:data(any) addr:0x0214f7b8 local
-titleMessage$13759 kind:data(any) addr:0x0214f7bc local
-unknownE$13753 kind:data(any) addr:0x0214f7c0 local
+backButtonKind$13758 kind:data(any) addr:0x0214f7b4 local
+sBackButtonSequences kind:data(any) addr:0x0214f7b6 local
+titleTextCount$13760 kind:data(any) addr:0x0214f7b8 local
+titleMessage$13762 kind:data(any) addr:0x0214f7bc local
+unknownE$13756 kind:data(any) addr:0x0214f7c0 local
 sTitleFonts kind:data(any) addr:0x0214f7c4 local
-sButtonPalettes kind:data(any) addr:0x0214f7c8 local
+sButtonSequences kind:data(any) addr:0x0214f7c8 local
 sButtonMessages kind:data(any) addr:0x0214f7ce local
-sButtonSequences kind:data(any) addr:0x0214f7d4 local
+sButtonKinds kind:data(any) addr:0x0214f7d4 local
 sTitleTextPosition kind:data(any) addr:0x0214f7dc local
 sCityHallFeatures kind:data(any) addr:0x0214f7e4 local
 sMoneySpritePosition kind:data(any) addr:0x0214f7ec local
@@ -90,7 +90,7 @@ sFeatureMessages kind:data(any) addr:0x0214f8ac local
 sCommonSounds kind:data(any) addr:0x0214f8bc local
 sWindowTextureRect6 kind:data(any) addr:0x0214f8cc local
 sTutorialButtonUnknown kind:data(any) addr:0x0214f8dc local
-sBackButtonRect kind:data(any) addr:0x0214f8ec local
+sBackButtonSounds kind:data(any) addr:0x0214f8ec local
 sTutorialWindowRect kind:data(any) addr:0x0214f8fc local
 sWindowTextureRect kind:data(any) addr:0x0214f90c local
 sTitleWindowRect kind:data(any) addr:0x0214f91c local
@@ -103,7 +103,7 @@ sButtonPositions kind:data(any) addr:0x0214f994 local
 sButtonSizes kind:data(any) addr:0x0214f9ac local
 sRankingFeatures kind:data(any) addr:0x0214f9c4 local
 sApartmentMarkPositions kind:data(any) addr:0x0214f9e0 local
-sButtonRects kind:data(any) addr:0x0214fa00 local
+sButtonSounds kind:data(any) addr:0x0214fa00 local
 sBuildingModels kind:data(any) addr:0x0214fa30 local
 sBuildingMessages kind:data(any) addr:0x0214fa60 local
 sBoardMessages kind:data(any) addr:0x0214fa90 local

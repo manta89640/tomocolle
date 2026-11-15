@@ -56,13 +56,13 @@ static const VecFx32 sCameraZoomOffset = { -136, 1979, 8465 };
 static const VecFx32 sCameraHome = { -409, 4710, 25395 };
 static const int sFeatureMessages[4] = { 0x71, 0xA9, 0xAA, 0xAB };
 static const Point sMoneyTextPosition = { 172, 174 };
-static const u16 sButtonSequences[3] = { 4, 4, 4 };
+static const u16 sButtonKinds[3] = { 4, 4, 4 };
 // The steps of the music's ramps: volume, pitch, tempo ratio, pan
 static const int sMusicRampSteps[4] = { 1, 1, 2, 1 };
 static const u16 sButtonMessages[3] = { 0x93, 0x94, 0x95 };
 static const ScreenRect sTutorialWindowRect = { 20, 20, 216, 152 };
-static const u16 sBackButtonPalettes[1] = { 0 };
-static const u16 sButtonPalettes[3] = { 0x12, 0x12, 0x12 };
+static const u16 sBackButtonSequences[1] = { 0 };
+static const u16 sButtonSequences[3] = { 0x12, 0x12, 0x12 };
 // The ground's model by month
 static const u8 sMonthGrounds[13] = { 0, 3, 3, 0, 1, 0, 0, 0, 0, 0, 2, 2, 3 };
 static const Point sBackButtonPosition = { 242, 13 };
@@ -72,7 +72,7 @@ static const int sTutorialButtonUnknown[4] = { 10, 1, 0, -1 };
 static const WindowPoint sTitleTextPosition = { 48, 75 };
 static const u16 sClockSequences[MapClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
 static const VecFx32 sLightDirection0 = { 800, -600, -4000 };
-static const ScreenRect sBackButtonRect = { -1, -1, 0, -1 };
+static const ButtonSounds sBackButtonSounds = { { -1, -1, 0, -1 } };
 static const ScreenRect sWindowTextureRect = { 0, 0, 32, 32 };
 static const int sEffectResources[3] = { 1, 2, 0 };
 // The sequence archive of the surroundings of each season
@@ -85,7 +85,7 @@ static const Point sButtonPositions[3] = { { 128, 153 }, { 64, 153 }, { 192, 153
 static const int sRankingFeatures[7] = { 6, 13, 14, 15, 16, 17, 18 };
 // Where the apartment building's mark is, by the island's size
 static const Point sApartmentMarkPositions[4] = { { 128, 40 }, { 128, 40 }, { 128, 26 }, { 128, 10 } };
-static const ScreenRect sButtonRects[3] = { { 11, -1, 0, -1 }, { 11, -1, 0, -1 }, { 11, -1, 0, -1 } };
+static const ButtonSounds sButtonSounds[3] = { { { 11, -1, 0, -1 } }, { { 11, -1, 0, -1 } }, { { 11, -1, 0, -1 } } };
 // The model of each building
 static const int sBuildingModels[12] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 static const VecFx32 sModelPositions[MapScene::MODEL_COUNT] = {
@@ -401,7 +401,7 @@ void MapScene::StartLoading() {
 
 void MapScene::Init() {
     const int unknownE = 0xE;
-    const u16 backButtonSequence = 4;
+    const u16 backButtonKind = 4;
     const int titleTextCount = 1;
     const int titleMessage = 0x96;
     mNewsDue = FALSE;
@@ -524,20 +524,20 @@ void MapScene::Init() {
     Sprite_Init(&mBackButtons[0], 1, 0, 128, 96, TRUE);
     func_02031eb0(&mBackButtons[0], sBackButtonSize.x, sBackButtonSize.y);
     mBackButtons[0].SetPosition(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
-    func_02031260(&mBackButtons[0], backButtonSequence);
+    func_02031260(&mBackButtons[0], backButtonKind);
     for (int i = 0; i < 1; i++) {
-        func_02031278(&mBackButtons[i], sBackButtonPalettes[i] + 1);
+        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
     }
-    func_02032158(&mBackButtons[0], &sBackButtonRect);
+    func_02032158(&mBackButtons[0], &sBackButtonSounds);
     func_0203119c(&mBackButtons[0]);
     mBackButtons[0].mVisible = FALSE;
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
         func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
         mButtons[i].SetPosition(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
-        func_02031260(&mButtons[i], sButtonSequences[i]);
-        func_02032158(&mButtons[i], &sButtonRects[i]);
-        func_02031278(&mButtons[i], sButtonPalettes[i] + 1);
+        func_02031260(&mButtons[i], sButtonKinds[i]);
+        func_02032158(&mButtons[i], &sButtonSounds[i]);
+        func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
         func_0203119c(&mButtons[i]);
         mButtons[i].mVisible = FALSE;
     }

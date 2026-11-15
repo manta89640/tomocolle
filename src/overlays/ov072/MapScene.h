@@ -7,6 +7,7 @@
 #include "GameData.h"
 #include "Scene.h"
 #include "Sprite.h"
+#include "SpriteButton.h"
 #include "sound/SoundManager.h"
 #include "sound/ValueRamp.h"
 #include "text/MessageFile.h"
@@ -327,17 +328,6 @@ public:
     /* 0x48 */ u8 mUnknown48[4];
 }; // 0x4C
 
-// A sprite that takes a touch (main program, constructor func_0203117c)
-struct SpriteButton : public Sprite {
-    /* 0x0AC */ u8 mUnknownAC[0x48];
-}; // 0xF4
-
-// A sprite button with a text on it (main program, constructor func_02031f1c)
-struct LabelButton : public SpriteButton {
-    /* 0x0F4 */ MessageText mText;
-    /* 0x6E4 */ u8 mUnknown6E4[0xC];
-}; // 0x6F0
-
 // The main program's message window (virtual table data_021102e8, functions func_02032fb8 to func_02034f94): a
 // window on a background that slides in and out, with sprites, buttons and up to eight message texts. As overlay
 // 73 has it.
@@ -446,18 +436,9 @@ void func_0202c8bc(GameData *game, int index, NewsItem *item);
 BOOL func_0202cb08(GameData *game);
 BOOL func_0202cd54(GameData *game);
 
-// --- The sprite buttons ---
-void func_0203119c(SpriteButton *button);
-void func_02031260(SpriteButton *button, int sequence);
-void func_02031278(SpriteButton *button, u16 palette);
+// --- The sprite buttons (the rest are in SpriteButton.h) ---
+// Whether the stylus is on the button (the scene ignores touches elsewhere while one is)
 BOOL func_02031294(SpriteButton *button);
-BOOL func_0203133c(SpriteButton *button); // Pressed
-void func_02031d7c(SpriteButton *button);
-void func_02031eb0(SpriteButton *button, int width, int height);
-int func_02031f58(LabelButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                  int charOffset);
-void func_0203206c(LabelButton *button);
-void func_02032158(SpriteButton *button, const ScreenRect *rect);
 
 // --- The message window ---
 void func_02032fb8(MessageWindow *window, ScreenRect rect);
@@ -755,7 +736,7 @@ public:
     /* 0x04110 */ Sprite mTitleSprite;
     /* 0x041BC */ Sprite mSprite41BC;
     /* 0x04268 */ SpriteButton mBackButtons[1];
-    /* 0x0435C */ LabelButton mButtons[3];
+    /* 0x0435C */ TextButton mButtons[3];
     /* 0x0582C */ MapSky mSky;
     /* 0x06724 */ MessageFile mMessageFiles[2];   // "TCO:tmd_common_msg_JP.bmg", "TET:tmd_etc_msg_JP.bmg"
     /* 0x06754 */ int mResidentRooms[RESIDENT_COUNT]; // The room of each saved character, or -1
