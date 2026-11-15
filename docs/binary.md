@@ -483,7 +483,7 @@ Not done:
 ## The settings and the mansion information
 
 Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
-complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: 14 of its 15 functions match; not complete.
+complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: all 15 of its functions match; not complete.
 
 Measured:
 
@@ -517,8 +517,6 @@ data come out the same with either.
 
 Not done:
 
-- `OptionScene::Update`: the two stack slots of the AM/PM rectangle and its by-value copy are swapped (comment
-  above it).
 - Overlay 98's data, above; and the pool's first 36 bytes (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing
   refers to, are not identified: the source keeps them as `sUnknown0` to `sUnknown4`. Function-local `const`
   scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
