@@ -736,9 +736,8 @@ void MapScene::Update() {
                             }
                             gGameData.mUnknown0C[0x40] = mIslandStage;
                             mWindowCount = func_020a60b8(mIslandStage);
-                            mNewMarks[MODEL_APARTMENT].SetPosition(
-                                sApartmentMarkPositions[mIslandStage].x << FX32_SHIFT,
-                                sApartmentMarkPositions[mIslandStage].y << FX32_SHIFT);
+                            const Point &mark = sApartmentMarkPositions[mIslandStage];
+                            mNewMarks[MODEL_APARTMENT].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
                             ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[9]);
                             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[9],
@@ -861,7 +860,7 @@ void MapScene::Update() {
                     news = sFeatureMessages[mNewBuilding - 25];
                     break;
                 case 32:
-                    if (*(int *)&gGameData.mUnknown54[0xB8] < 4) {
+                    if (*(u32 *)&gGameData.mUnknown54[0xB8] < 4) {
                         news = 0x9F;
                     } else {
                         news = 0xA0;
