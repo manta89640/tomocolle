@@ -1565,13 +1565,8 @@ static void EmptyCallback(void *arg);
 static void SendCallback(BOOL result);
 static void Receive(u16 aid, u16 *data, u16 size);
 
-// NOT MATCHING: the same instructions, but the loop over the partners found has its registers assigned
-// otherwise (the original: i r4, the texts r6, the timers r7, the names r8, the buttons r9; this: the names r4,
-// the buttons r5, i r6, the timers r8, the texts r9). The local for the texts brings `this` to the original's
-// r5; i at the top, in the loop, a while loop, pointers for the names and the timers change nothing.
 // @0x0214d7a8
 void ItemTradeScene::UpdateWireless() {
-    int i;
     if (mWait > 0) {
         return;
     }
@@ -1623,23 +1618,21 @@ void ItemTradeScene::UpdateWireless() {
             func_0203ba20(session, mNames[func_0203ba10(session)]);
         }
         if (mState == STATE_CHOOSE_PARTNER) {
-            MessageText *texts = mWindow.mTexts;
-            for (i = 0; i < 3; i++) {
-                if (sPartnerTimers[i] > 0) {
-                    if (sPartnerTimers[i] == 600) {
-                        MessageText *text = &texts[i + 1];
-                        text->SetStringArg(mNames[i], 0);
-                        ClearText(text);
-                        text->DrawAll();
-                        func_02031e88(GetWindowButton(&mWindow, i), FALSE);
-                    }
-                    if (--sPartnerTimers[i] == 0) {
-                        MessageText *text = &texts[i + 1];
-                        text->SetStringArg(L"", 0);
-                        ClearText(text);
-                        text->DrawAll();
-                        func_02031e88(GetWindowButton(&mWindow, i), TRUE);
-                    }
+            for (int i = 0; i < 3; i++) {
+                if (sPartnerTimers[i] <= 0) {
+                    continue;
+                }
+                if (sPartnerTimers[i] == 600) {
+                    mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
+                    ClearText(&mWindow.mTexts[i + 1]);
+                    mWindow.mTexts[i + 1].DrawAll();
+                    func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                }
+                if (--sPartnerTimers[i] == 0) {
+                    mWindow.mTexts[i + 1].SetStringArg(L"", 0);
+                    ClearText(&mWindow.mTexts[i + 1]);
+                    mWindow.mTexts[i + 1].DrawAll();
+                    func_02031e88(GetWindowButton(&mWindow, i), TRUE);
                 }
             }
         }
