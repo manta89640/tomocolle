@@ -513,52 +513,107 @@ Measured:
 
 What it showed about the compiler, measured (see "Compiler"):
 
-- **`-ipa file`.** The small statics are one pool, addressed from its start: `sSysState` is the pool's address
-  plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file`.
-- **Objects of more than 32 bytes are not pooled.** The 32-byte `WMScanParam` is in the pool and reached from its
-  start; the 64-byte `WMParentParam`, the scan's `WMBssDesc` and the buffers are addressed each on its own. Every
-  CodeWarrior for DS 2.0 up to SP2 patch 2 (3.0 build 137) pools them all; 2.0 SP2 patch 3 and patch 4 (builds 138
-  and 139) and the DSi compilers (4.0) keep objects of more than 32 bytes apart. The DSi compilers' code differs
-  (38 of the 66 functions match with them); with build 138 or 139 and `-ipa file`, all 66 match.
-- **Arrays of `char` are not pooled either**, whatever their size: the SSID copies are `u16` arrays, the one that is
-  apart (`sConnectionSsid`, `u8[24]`) is a `char` array.
-- **The pool's order** is the order of the size sort described for overlay 73 (`docs/notes/ov073.md`): the statics
-  were declared in the order that gives it, which says nothing of the original's order but sizes.
+- **`-ipa file`, for C too.** The small statics are one pool, addressed from its start: `sSysState` is the pool's
+  address plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file` (in C as in C++), so WH
+  was compiled with it, unlike the speech engine, which matches only without it. `-lang=c99` and `-lang=c++` give
+  the same code here; WH is kept as C, whose names (`WH_Initialize`, not mangled) are the SDK's.
+- **Objects of 64 bytes and more are not pooled.** The 32-byte `WMScanParam` is in the pool and reached from its
+  start; the 64-byte `WMParentParam`, the scan's `WMBssDesc` and the buffers are addressed each on its own (by test
+  files: 60 bytes is still pooled, 64 is not). This is what told the compiler's version, see "Compiler"; with
+  build 138 and `-ipa file` all 66 functions match, with build 137 58 (the others reach the parent parameters).
+- **Arrays of `char` are not pooled either**, whatever their size: the SSID copy that is in the pool is a `u16`
+  array, the one that is apart (`sConnectionSsid`, `u8[24]`) a `char` array.
+- **A file's `.bss` objects are sorted with its `.data`.** The compiler's size sort (`docs/notes/ov073.md`) takes
+  the file's `.bss` objects into the same list as its `.data` ones: the order of the statics' declarations changes
+  the order of the tables' strings in `.data`. A static without an initialiser (a tentative definition) is created
+  at the end of the file, a static `= 0` where it is declared, and the list is the objects newest first.
+  `docs/notes/wh.md` has the model, which reproduces the compiler's output for this file.
+- **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool,
+  which says nothing of the original's order but sizes.
 
 Not done:
 
-- `.data`: its sections are in the right places but for the order of the table strings of equal length, see below.
+- `.data`: its sections are in place but for the order of the tables' strings of equal length, which comes from the
+  sort above and depends on the sizes and kinds (tentative or `= 0`) of every static and the places of the three
+  tables. No arrangement found gives all 60 (the best found gives 56; `docs/notes/wh.md`). So the unit is not
+  `complete`, and the ROM is linked from the original's bytes.
+
+## The settings and the mansion information
+
+Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
+complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: 14 of its 15 functions match; not complete.
+
+Measured:
+
+- `InformationScene` (0x51BC bytes, scene 0xAE; constructed in the main program at `0x02048918` after
+  `FS_LoadOverlay(0x63)`, virtual table at `0x0214AA20`) shows statistics over the 100 saved characters with the
+  etc messages 0x185 to 0x1A1: the number of residents, their average age to a tenth (the birth year is 12 bits at
+  0x50 of a saved character, 0xFFF when not given; month and day are func_02098dac's properties 0x26 and 0x27; the
+  age is taken against `Clock_GetDate`), the ratio of men to women (func_0202c604 is set for women, by the
+  numbers' order in "男女比"), reduced by their greatest common divisor, zero to five stars of comfort from the byte
+  at 0xFB of each character, the troubles solved (`gGameData` 0xC2, "悩み事解決数"), and one of 17 types of
+  mansion (0x18F + type): the summed personalities (0 to 15) give a point on two axes, its direction one of eight
+  types, its length against the number of residents one of two strengths, and the origin "完全平均". Its one button
+  goes back to scene 0x11.
+- `OptionScene` (0x26394 bytes, scene ids 0xAC and 0xAD; constructed in the main program at `0x020487E4` after
+  `FS_LoadOverlay(0x62)`, virtual table at `0x0214C700`) is the settings, with the etc messages 0xD7 to 0xF4 and
+  0x150/0x151: the sound settings (stereo or mono, and the volumes of music, effects and voice, 0 to 3, in
+  `gGameData` 0xC8 to 0xCB; the voice's volume is spoken, "ボリュームゼロ" to "ボリュームサン"), the clock (date
+  and time on sprite digits, written to the game's clock by func_02035460 and saved), and erasing all the data after
+  three questions. Scene 0xAD is the first start ("時刻を設定してください"), which goes on to scene 0x69.
+- Both scenes are built from two main-program classes, now stand-ins in `include/SpriteButton.h`: a sprite button
+  of 0xF4 bytes (constructor `0x0203117C`, update `0x0203133C`, draw `0x02031D7C`) and a button with a message
+  text of 0x6F0 bytes (constructor `0x02031F1C`), the same that the message window holds 12 and 16 of.
+
+Inferred, and measured with the compiler: overlay 98's `.rodata` is one file's constants, heap-sorted by size,
+with the four-byte-aligned ones in one pool read by offset from its start. Up to `0x0214C384` our compiler gives
+the ROM's layout from the declaration order in the source. After it the ROM has the string
+"N83:/Window_down.nsc" and then the six tables of 64 bytes and more, which our compiler (2.0 SP2p2) puts in the
+pool, before the string; mwccarm 3.0 build 138 (2.0 SP2p3) keeps objects of 64 bytes and more out of the pool and
+gives the ROM's layout from the same file, and compiles all of both overlays' functions as ours does. Overlay 99's
+data come out the same with either.
+
+Not done:
+
+- `OptionScene::Update`: the two stack slots of the AM/PM rectangle and its by-value copy are swapped (comment
+  above it).
+- Overlay 98's data, above; and the pool's first 36 bytes (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing
+  refers to, are not identified: the source keeps them as `sUnknown0` to `sUnknown4`. Function-local `const`
+  scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
+  established. `docs/notes/ov098.md` has the details.
 
 ## Compiler
 
-**Measured, from WH (above):** the game's own code is compiled with CodeWarrior for DS 2.0 SP2 patch 3 or patch 4
-("Version 3.0 build 138" or 139). WH is built with 138 here (`configure.py`, per library); the rest of the game's
-code is still built with 2.0 SP2 patch 2, which gives the same code for every file decompiled so far (below).
+**The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
 
-Previously inferred: mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
+- **What tells the builds apart is where a file's statics go.** Every 2.0 release up to SP2 patch 2 (build 137) puts
+  all of a file's 4-aligned statics into one pool, read at the pool's address plus an offset. The ROM keeps those of
+  64 bytes and more out of the pool, each in a section of its own: overlay 72's tables of 88 to 320 bytes follow its
+  pool one by one, overlay 98's six button and sprite tables come after its last string, and WH's 64-byte parent
+  parameters are addressed on their own while its 32-byte scan parameters are pooled. Of the 3.0 builds (114 to 139,
+  compiled with test files under the game's flags), the threshold first appears in 138; no flag of the earlier ones
+  (`-[no]constpool`, `-sdatathreshold`, other `-O` and `-opt` settings, without `-ipa file`) gives it. The DSi
+  compilers (4.0, builds 1018 to 1051) have it too, but compile the game's code differently: `TtsPlayer` drops from
+  28 matching functions to 10, overlay 74 from 247 to 107, WH from 66 to 38.
+- **Nothing else changes.** Every game source of `src/`, and the speech engine's four, compiles to byte-identical code
+  with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
+  identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
+  So the evidence for the version is the data, and the matched functions are no evidence against it.
+- **138 and 139 are not told apart.** They give identical output on every game file and on WH, and on all 163 C
+  files of NitroSDK and NitroSystem that the build compiles, each with its own flags. 138 is used, as the first
+  build that fits; 139 is the last 3.0 build there is.
+- **`-ipa file` is a setting of the C code too**: WH's pooled statics need it (see "WH"), where the speech engine's
+  code matches only without it. So the game's build did not use one setting for all its C.
+- **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
+  (`MWLD_VERSION`).
 
-- NitroSDK 4.2 is from 2008, and the game came out in June 2009. Pokémon Platinum (2008), also on NitroSDK 4.2, is
-  matched by this version.
-- The six functions decompiled so far match with it. They are too simple to tell compiler versions apart, so this
-  shows that the pipeline works, not that the version is right.
+The earlier evidence still holds: NitroSDK 4.2 is from 2008 and the game came out in June 2009, and
+`src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams and threads and pass up to ten arguments, matched
+in full with build 137 and does with 138.
 
 The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 patch 2 and NitroSystem with 2.0 SP2,
 as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
 its libraries with, not what the game's own code was built with.
-
-For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
-and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
-written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
-WH settled it, as above: build 137 cannot give its `.bss` addressing, builds 138 and 139 give all 66 functions.
-
-Measured, building every game source file (the 18 files under `src/` as of overlay 107's and the main-program
-scenes' merge, and the speech engine's four) with builds 137, 138 and 139 and the same flags: the code of every
-file is byte for byte the same with all three, so the functions that match are the same, and with 138 or 139 in
-place of 137 every complete unit still links to an identical ROM. The data differs in two files, overlays 73 and
-74: with 138 and 139 an 88-byte table of their `.rodata` leaves the pool for a section of its own (the 32-byte
-limit above). Nothing found so far tells 138 from 139: the game's files, WH and the speech engine give identical
-objects with both. Among the CodeWarrior 3.0 builds 114 to 139, 138 is the first that keeps objects of more than
-32 bytes out of the pool, and 139 is the last 3.0 build.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's

@@ -79,11 +79,14 @@ def main() -> int:
 
     if args.apply:
         lines = open(args.symbols).read().rstrip("\n").split("\n")
+        # Only a symbol at an address the object names is replaced. One the object has but readelf does not list
+        # as OBJECT or NOTYPE, such as the virtual tables MW emits with binding 13, is kept as it is.
+        named = {address for address, _, _ in placed}
         kept = []
         for line in lines:
             match = re.search(r"addr:(0x[0-9a-fA-F]+)", line)
             address = int(match[1], 16) if match else None
-            if address is not None and "kind:data" in line and any(s <= address < e for s, e in ranges.values()):
+            if address in named and "kind:data" in line and any(s <= address < e for s, e in ranges.values()):
                 continue
             kept.append(line)
         for address, symbol, binding in placed:

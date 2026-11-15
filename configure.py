@@ -71,9 +71,13 @@ SJISWRAP_SHA256 = "01d50fa1148cfc3c3b16658c6c9b1c0d9f5324cde79ed6c09ef8353af9d63
 
 # The archive holds every mwccarm version and is updated in place, so the executables are what is pinned.
 MWCCARM_URL = "https://decomp.aetias.com/files/mwccarm.zip"
-# The game's compiler: CodeWarrior for NDS 2.0 SP2 patch 2, which reports itself as "Version 3.0 build 137". See
-# docs/binary.md for why.
-MWCC_VERSION = "2.0/sp2p2"
+# The game's compiler: CodeWarrior for NDS 2.0 SP2 patch 3, which reports itself as "Version 3.0 build 138". See
+# docs/binary.md, "Compiler", for why: it is the first build that keeps statics of 64 bytes and more out of a file's
+# pool, as the ROM does, and every game source compiles to the same code with it as with patch 2. Patch 4 (build 139)
+# gives the same output on everything measured so far.
+MWCC_VERSION = "2.0/sp2p3"
+# The linker is patch 2's, with which the ROM was first rebuilt identical; nothing has asked for another.
+MWLD_VERSION = "2.0/sp2p2"
 # SHA-256 of mwccarm.exe of each version in use: the game's, and those the libraries were built with
 MWCC_SHA256 = {
     "2.0/sp2p2": "b1da5a2f191d1cdea3fd078cedc9c504de46609642ae8e44c015014cef5419a7",
@@ -83,14 +87,14 @@ MWCC_SHA256 = {
 }
 MWLD_SHA256 = "a41aea5f282041e16dcd6c3570328009cb1eefb32b0cd05f60a8fdb365aec47c"
 # The same compiler's name on decomp.me, for objdiff's "create scratch" button
-DECOMP_ME_COMPILER = "mwcc_30_137"
+DECOMP_ME_COMPILER = "mwcc_30_138"
 
 # The headers of MSL, the C library that came with each CodeWarrior, which the SDK's headers include. They are taken
 # from metroskrew's package of the toolchain, the only part of it used here.
 METROSKREW_VERSION = "0.1.3"
 METROSKREW_URL = "https://github.com/mid-kid/metroskrew/releases/download/{version}/metroskrew-wine.tar.xz"
 METROSKREW_SHA256 = "0bc5663dc647e7834dc61c37e872ef37a4dfbb7384828c6b2212bce35719fa32"
-# metroskrew has no 2.0/sp2p2, the game's compiler. Its headers are taken from the release before it.
+# metroskrew has no 2.0/sp2p2 or sp2p3, the game's compiler. Its headers are taken from the release before it.
 GAME_MSL = "2.0/sp2"
 MSL_INCLUDE_DIRS = [
     "MSL_C/MSL_ARM/Include",
@@ -212,11 +216,10 @@ LIBRARIES["lib/SHTTS/"] = {
 }
 
 # WH, the wireless wrapper of the SDK's sample code, which the game compiles in. Its source is this project's own
-# decompilation, in C. Measured (docs/binary.md, "WH"): the ROM addresses its statics of up to 32 bytes as one pool,
-# which the compiler does only with -ipa file, and its larger ones on their own, which only 2.0/sp2p3 and sp2p4
-# ("Version 3.0 build 138" and 139) do; every 2.0 release before pools them all.
+# decompilation, in C. It is built with the game's compiler and, unlike the speech engine, with -ipa file: the ROM
+# addresses its small statics as one pool, which the compiler does only with -ipa file (docs/binary.md, "WH").
 LIBRARIES["lib/WH/"] = {
-    "compiler": "2.0/sp2p3",
+    "compiler": MWCC_VERSION,
     "msl": GAME_MSL,
     "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c99", "-ipa file"],
     "sjis": True,
@@ -291,7 +294,7 @@ def download_binary(path: Path, url: str, expected: str):
 def check_compiler(directory: Path, version: str) -> list[str]:
     """Returns what is wrong with the compiler of a version in a directory, as a list of problems."""
     expected = {"mwccarm.exe": MWCC_SHA256[version]}
-    if version == MWCC_VERSION:
+    if version == MWLD_VERSION:
         expected["mwldarm.exe"] = MWLD_SHA256
     problems = []
     for name, digest in expected.items():
@@ -485,7 +488,7 @@ def main():
         sjiswrap = (tools_dir / "sjiswrap.exe").relative_to(ROOT)
         download_binary(ROOT / sjiswrap, SJISWRAP_URL.format(version=SJISWRAP_VERSION), SJISWRAP_SHA256)
     libraries = {} if args.no_libraries else LIBRARIES
-    compilers = [MWCC_VERSION, *sorted({library["compiler"] for library in libraries.values()})]
+    compilers = sorted({MWCC_VERSION, MWLD_VERSION, *(library["compiler"] for library in libraries.values())})
     if args.compiler:
         compilers_dir = args.compiler
         problems = [p for version in compilers for p in check_compiler(compilers_dir / version, version)]
@@ -494,7 +497,7 @@ def main():
     else:
         compilers_dir = download_compilers(tools_dir, compilers).relative_to(ROOT)
     mwcc = compilers_dir / MWCC_VERSION / "mwccarm.exe"
-    mwld = compilers_dir / MWCC_VERSION / "mwldarm.exe"
+    mwld = compilers_dir / MWLD_VERSION / "mwldarm.exe"
     if libraries:
         msl_versions = sorted({library.get("msl", library["compiler"]) for library in libraries.values()})
         msl_dir = download_msl(tools_dir, msl_versions).relative_to(ROOT)
