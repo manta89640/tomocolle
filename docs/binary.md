@@ -841,6 +841,11 @@ functions; started, not decompiled, no unit cut yet. Measured:
 - **Callers.** `main`, the main program's character code (`CharacterBase`'s destructors call `func_02072dc0` and
   `func_02072f34`), overlays 70, 76, 78 and 79 (`func_0206dc84`), and 48, 51, 68, 75, 78 and 100
   (`func_02073514` to `func_02073550`).
+- **One static.** The library's only .bss is the pointer `data_02145360`: every one of its 38 references loads
+  the address and reads or writes at offset 0, and nothing in `0x02069BF4..0x0206CF6C` touches .bss. The 0x1C bytes
+  after it, to the Mii transfer's .bss at `0x02145380`, are not referred to. So .bss cannot show where its files
+  begin and end, and the compiler's pooling threshold (137 against 138) cannot be read from its statics; its .rodata
+  is the place left to look (`data_020b676c`, `...6770`, `...6774`, `...6778` are each loaded by their own address).
 - **No identity string.** The main program holds only two middleware strings, `[SDK+NINTENDO:BACKUP]` and
   `[SDK+SHARP:SHTTS-1_2_0]`; nothing names NFL's version. No objects or sources of NFL (or the Wii's RFL) were found
   on the machine to match against.
