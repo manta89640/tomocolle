@@ -6508,7 +6508,8 @@ sDSInfo kind:bss(size=0x820) addr:0x02146bc0 local
 sSendBuffer kind:bss(size=0x120) addr:0x021473e0 local
 sRecvBuffer kind:bss(size=0x280) addr:0x02147500 local
 sWmBuffer kind:bss(size=0xf00) addr:0x02147780 local
-data_02148680 kind:bss addr:0x02148680
+sCount kind:bss(size=0x4) addr:0x02148680 local
+sRecords kind:bss(size=0x4) addr:0x02148684 local
 data_02148688 kind:bss addr:0x02148688
 data_0214868c kind:bss addr:0x0214868c
 data_02148690 kind:bss addr:0x02148690

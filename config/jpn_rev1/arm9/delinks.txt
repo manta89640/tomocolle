@@ -677,5 +677,6 @@ src/wireless/wh.cpp:
     .bss        start:0x02145c00 end:0x02148680
 
 src/wireless/MiiTransferList.cpp:
+    complete
     .text       start:0x02079dfc end:0x02079fa0
     .bss        start:0x02148680 end:0x02148688
