@@ -409,6 +409,14 @@ extern "C" void func_0207a780(MiiData *mii, int value) {
     mii->mBirthDay = value;
 }
 
+// A male and a female Mii (mSex 0 and 1), with the Wii's defaults: height and build 64, hair 33 for him and 12 for
+// her. No function of the ROM refers to them: they are kept by being in one pool with sDaysInMonth, which a function
+// that the link left out read them from (see sDefaultMiis' only use, below).
+static const MiiData sDefaultMiis[2] = {
+    {0, 0, 0, 0, 0, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 64, 64, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 1, 0, 0, 0, 0, 0, 0, 1, 33, 44, 6, 6, 2, 10, 4, 1, 12, 4, 2, 0, 2, 4, 0, 3, 9, 4, 1, 13, 4, 0, 23, 10, 4, 0, 0, 10, 4, 0, 0, 0, 0, 2, 20, 4, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {0, 0, 0, 0, 1, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 64, 64, {0, 0, 0, 0, 0, 0, 0, 0}, 0, 1, 0, 0, 0, 0, 0, 0, 1, 12, 44, 6, 0, 2, 10, 4, 1, 12, 3, 4, 0, 2, 4, 0, 3, 9, 4, 1, 13, 4, 0, 23, 10, 4, 0, 0, 10, 4, 0, 0, 0, 0, 2, 20, 4, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+};
+
 static const int sDaysInMonth[13] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // The number of days of the birth month
@@ -507,4 +515,10 @@ extern "C" BOOL func_0207a90c(MiiIdSource *source, MiiData *mii) {
     mii->mCreateId[7] = source->mBytes[5];
     source->mCounter++;
     return TRUE;
+}
+
+// Not in the ROM: the link left it out, as nothing calls it. Something of this file read sDefaultMiis, or they would
+// not be in the ROM; what it did with them is not known, and this stands in for it.
+extern "C" void MiiData_UnusedCopyDefault(MiiData *mii, int sex) {
+    *mii = sDefaultMiis[sex];
 }
