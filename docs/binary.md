@@ -417,25 +417,141 @@ helpers are byte for byte the same (`ShowMessage` in all three, `ShowOk` and `As
 objdiff reports the data of all three a little under 100% although the ROM is identical: it counts the
 padding at the end of `.rodata` and `.data` that the delinked original has and the compiled object does not.
 
+## Three scenes of the main program
+
+Not every scene is an overlay. Three are in the main program, `0x0204FC74` to `0x02051640`, between a family of
+helpers that many overlays call and a fourth scene of the main program (`0x02051640`, which mounts the sky, vote and
+apartment models; not done). Each is one source file under `src/scene/`, and each is reached only through its
+virtual table: the scene factory (`CreateScene`) calls a constructor in the main program's file of scene
+constructors, which stores it. No overlay is loaded for them.
+
+| Scene | Class | Size | Constructor | File | Functions |
+| --- | --- | --- | --- | --- | --- |
+| 0x24 | `MiiListMenuScene` | 0x2C0C0 | `func_02040288` | `MiiListMenuScene.cpp`, `0x0204FC74` to `0x02050884` | 13 of 13, complete |
+| 0x25 | `G3SpriteTestScene` | 0x48B4 | `func_0204036c` | `G3SpriteTestScene.cpp`, to `0x02050D70` | 9 of 9, complete |
+| 0x26 | `MiiListScene` | 0x2AA44 | `func_020403e8` | `MiiListScene.cpp`, to `0x02051640` | 10 of 10, complete |
+
+Measured:
+
+- They are three files, not one. Each file's `.data` is its data objects, then its virtual table, then the strings
+  its code uses, in the order it uses them; scene 0x24's strings come before scene 0x25's table, and scene 0x25's
+  before scene 0x26's data, which one file does not give. Scenes 0x24 and 0x26 have a static initialiser each
+  (`0x020B06F4`, `0x020B077C`), and a file has at most one. Their `.rodata` follows the same order.
+- Scene 0x24 shows two buttons at the top of the touch screen. The left one opens a menu of what to do with a Mii
+  (etc messages 0x75 edit, 0x77 change its clothes, 0x79 erase, and a cancel button); "erase" asks whether the Mii
+  is to move off the island (0x7A, with the placeholder name "「削除したいMii」") and then says that it has gone
+  (0x7E, "「削除したMii」"). The right one opens a menu of the seven orders the list can be sorted in (0x7F to
+  0x85: name, nickname, sex, year of birth, birthday, blood type, personality). Nothing is done with any choice:
+  inferred, a mock-up of the Mii list's two menus.
+- Scene 0x26 is the list of Miis (the main program's list, panel and five tabs at `0x020A03E8` on, which this scene
+  only calls) with the sort menu of scene 0x24. It sorts the list by `gGameData+0x4D` (`mMiiListSortKey`) and writes
+  the order chosen back there on leaving when it changed.
+- Scene 0x25 mounts `Scn/Scene/SceneTestG3Sprite_LZ.bin` and a body model, puts a hundred 3D sprites
+  (`G3Sprite`, 0x4C bytes, functions `0x0202B0E8` to `0x0202B6D0`) of `M00:/Face.tga` at random places and sizes in
+  front of it, and moves one of them each frame: a test.
+- No call of `func_0203c02c` (which asks for the next scene) has 0x24 to 0x27 put in its argument by an
+  instruction just before it. Whether anything reaches these scenes, by a table or a computed id, is not known.
+- The message window's result is at +0xAF84 in these scenes (measured on all four of scene 0x24's windows, which
+  start at +0x230 where the constructor stores the window's table), and what the scenes keep for after a window
+  closes at +0xAF98.
+- `_ZTV5Model` and `_ZTV9AnimModel` were named 8 bytes into their tables; they are at `0x0210F640` and `0x0210F65C`
+  now, and every reference to them is `add:0x8`. Linking scene 0x25's destructor from source showed it.
+
+Two things the compiler does that these files needed:
+
+- **Text positions that are not constants.** `.data` of scenes 0x24 and 0x26 holds arrays of points that are zero
+  in the ROM and filled by the static initialiser, in one run of stores from one base. They are the menu buttons'
+  positions moved by a fixed amount (`{sPos[0].x - 0x20, sPos[0].y - 6}`): an initialiser that reads another
+  constant object is not a constant expression, so the compiler initialises it at run time, and as `const` it goes
+  in `.data` (a non-`const` one goes in `.bss`). That this is how the source had it is inferred: it gives the bytes.
+- **Two files opened through one pointer.** `MiiListMenuScene::Init` opens its two message files (members at
+  +0x200 and +0x218) through one pointer to the first, as `files[1]` and then `files[0]`. Written as two members,
+  the second `Open` computes the file's address before it loads the path, where the ROM does the reverse; an inline
+  helper that takes the path first fixes that call but reschedules the code before it. That the source had a
+  pointer or an array here is inferred: it is the form found that gives the bytes (an array member changes the
+  destructor).
+- **A local copied inside a loop is hoisted.** Scene 0x26's sort texts take an offset by value; written as a local
+  initialised inside the loop, the compiler loads it once before the loop and gives its stack slot the place the
+  ROM has. Declared before the loop it gets another slot.
+
+Not done:
+
+- The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
+  their addresses.
+
+## The settings and the mansion information
+
+Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
+complete. Overlay 98, `src/overlays/ov098/OptionScene.cpp`: 14 of its 15 functions match; not complete.
+
+Measured:
+
+- `InformationScene` (0x51BC bytes, scene 0xAE; constructed in the main program at `0x02048918` after
+  `FS_LoadOverlay(0x63)`, virtual table at `0x0214AA20`) shows statistics over the 100 saved characters with the
+  etc messages 0x185 to 0x1A1: the number of residents, their average age to a tenth (the birth year is 12 bits at
+  0x50 of a saved character, 0xFFF when not given; month and day are func_02098dac's properties 0x26 and 0x27; the
+  age is taken against `Clock_GetDate`), the ratio of men to women (func_0202c604 is set for women, by the
+  numbers' order in "男女比"), reduced by their greatest common divisor, zero to five stars of comfort from the byte
+  at 0xFB of each character, the troubles solved (`gGameData` 0xC2, "悩み事解決数"), and one of 17 types of
+  mansion (0x18F + type): the summed personalities (0 to 15) give a point on two axes, its direction one of eight
+  types, its length against the number of residents one of two strengths, and the origin "完全平均". Its one button
+  goes back to scene 0x11.
+- `OptionScene` (0x26394 bytes, scene ids 0xAC and 0xAD; constructed in the main program at `0x020487E4` after
+  `FS_LoadOverlay(0x62)`, virtual table at `0x0214C700`) is the settings, with the etc messages 0xD7 to 0xF4 and
+  0x150/0x151: the sound settings (stereo or mono, and the volumes of music, effects and voice, 0 to 3, in
+  `gGameData` 0xC8 to 0xCB; the voice's volume is spoken, "ボリュームゼロ" to "ボリュームサン"), the clock (date
+  and time on sprite digits, written to the game's clock by func_02035460 and saved), and erasing all the data after
+  three questions. Scene 0xAD is the first start ("時刻を設定してください"), which goes on to scene 0x69.
+- Both scenes are built from two main-program classes, now stand-ins in `include/SpriteButton.h`: a sprite button
+  of 0xF4 bytes (constructor `0x0203117C`, update `0x0203133C`, draw `0x02031D7C`) and a button with a message
+  text of 0x6F0 bytes (constructor `0x02031F1C`), the same that the message window holds 12 and 16 of.
+
+Inferred, and measured with the compiler: overlay 98's `.rodata` is one file's constants, heap-sorted by size,
+with the four-byte-aligned ones in one pool read by offset from its start. Up to `0x0214C384` our compiler gives
+the ROM's layout from the declaration order in the source. After it the ROM has the string
+"N83:/Window_down.nsc" and then the six tables of 64 bytes and more, which our compiler (2.0 SP2p2) puts in the
+pool, before the string; mwccarm 3.0 build 138 (2.0 SP2p3) keeps objects of 64 bytes and more out of the pool and
+gives the ROM's layout from the same file, and compiles all of both overlays' functions as ours does. Overlay 99's
+data come out the same with either.
+
+Not done:
+
+- `OptionScene::Update`: the two stack slots of the AM/PM rectangle and its by-value copy are swapped (comment
+  above it).
+- Overlay 98's data, above; and the pool's first 36 bytes (0, {2,0}, {0,4}, {2,2}, {2,2} as words), which nothing
+  refers to, are not identified: the source keeps them as `sUnknown0` to `sUnknown4`. Function-local `const`
+  scalars give such entries, and nine 4-byte objects would fit (three zeros, one 4, five 2s), which is not
+  established. `docs/notes/ov098.md` has the details.
+
 ## Compiler
 
-**Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
+**The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
 
-- NitroSDK 4.2 is from 2008, and the game came out in June 2009. Pokémon Platinum (2008), also on NitroSDK 4.2, is
-  matched by this version.
-- The six functions decompiled so far match with it. They are too simple to tell compiler versions apart, so this
-  shows that the pipeline works, not that the version is right.
+- **What tells the builds apart is where a file's statics go.** Every 2.0 release up to SP2 patch 2 (build 137) puts
+  all of a file's 4-aligned statics into one pool, read at the pool's address plus an offset. The ROM keeps those of
+  64 bytes and more out of the pool, each in a section of its own: overlay 72's tables of 88 to 320 bytes follow its
+  pool one by one, overlay 98's six button and sprite tables come after its last string, and WH's 64-byte parent
+  parameters are addressed on their own while its 32-byte scan parameters are pooled. Of the 3.0 builds (114 to 139,
+  compiled with test files under the game's flags), the threshold first appears in 138; no flag of the earlier ones
+  (`-[no]constpool`, `-sdatathreshold`, other `-O` and `-opt` settings, without `-ipa file`) gives it. The DSi
+  compilers (4.0, builds 1018 to 1051) have it too, but compile the game's code differently: `TtsPlayer` drops from
+  28 matching functions to 10, overlay 74 from 247 to 107, WH from 66 to 38.
+- **Nothing else changes.** Every game source of `src/`, and the speech engine's four, compiles to byte-identical code
+  with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
+  identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
+  So the evidence for the version is the data, and the matched functions are no evidence against it.
+- **138 and 139 are not told apart.** They give identical output on every game file and on WH. 138 is used, as the
+  first build that fits.
+- **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
+  (`MWLD_VERSION`).
+
+The earlier evidence still holds: NitroSDK 4.2 is from 2008 and the game came out in June 2009, and
+`src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams and threads and pass up to ten arguments, matched
+in full with build 137 and does with 138.
 
 The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 patch 2 and NitroSystem with 2.0 SP2,
 as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
 its libraries with, not what the game's own code was built with.
-
-For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
-and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
-written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
-The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
-it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
-include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's

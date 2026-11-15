@@ -110,8 +110,8 @@ from:0x0214a340 kind:arm_call to:0x02022ddc module:main
 from:0x0214a34c kind:arm_call to:0x02083e4c module:main
 from:0x0214a360 kind:arm_call to:0x02022ddc module:main
 from:0x0214a36c kind:load to:0x0203ef80 module:main
-from:0x0214a370 kind:load to:0x0210f664 module:main
-from:0x0214a374 kind:load to:0x0210f648 module:main
+from:0x0214a370 kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214a374 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214a378 kind:load to:0x0202af98 module:main
 from:0x0214a380 kind:load to:0x0203e188 module:main
 from:0x0214a3a0 kind:arm_call to:0x02022ddc module:main
@@ -125,8 +125,8 @@ from:0x0214a438 kind:arm_call to:0x02083e4c module:main
 from:0x0214a44c kind:arm_call to:0x02022ddc module:main
 from:0x0214a454 kind:arm_call to:0x020267bc module:main
 from:0x0214a460 kind:load to:0x0203ef80 module:main
-from:0x0214a464 kind:load to:0x0210f664 module:main
-from:0x0214a468 kind:load to:0x0210f648 module:main
+from:0x0214a464 kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214a468 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214a46c kind:load to:0x0202af98 module:main
 from:0x0214a474 kind:load to:0x0203e188 module:main
 from:0x0214a4c0 kind:load to:0x0214a4e4 module:overlay(16)
