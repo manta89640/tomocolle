@@ -54,6 +54,7 @@ LIBRARIES = {
     "MSL_C": ("msl", "C library (MSL)"),
     "WH": ("wh", "Wireless wrapper (WH)"),
     "MiiTransfer": ("miitransfer", "Mii transfer"),
+    "NFL": ("nfl", "Mii face library (NFL)"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
