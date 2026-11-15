@@ -55,11 +55,14 @@ LIBRARIES = {
     "WH": ("wh", "Wireless wrapper (WH)"),
     "MiiTransfer": ("miitransfer", "Mii transfer"),
     "NFL": ("nfl", "Mii face library (NFL)"),
+    "MiiData": ("miidata", "Mii data"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
     "text": ("text", "Text"),
     "voice": ("voice", "Speech player"),
+    "scene": ("scene", "Scenes of the main program"),
+    "keyboard": ("keyboard", "Keyboard"),
 }
 CATEGORIES += [{"id": id, "name": name} for id, name in [*LIBRARIES.values(), *SUBSYSTEMS.values()]]
 
