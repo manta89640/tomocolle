@@ -707,6 +707,12 @@ lib/MSL_C/w_pow.c:
 lib/MSL_C/math_sun.c:
     .text       start:0x0201f4dc end:0x0201f508
 
+lib/NFL/NFL.c:
+    .text       start:0x02069bf4 end:0x020776e4
+    .rodata     start:0x020b6524 end:0x020b7be4
+    .data       start:0x02112140 end:0x0211220c
+    .bss        start:0x02145360 end:0x02145380
+
 lib/MiiTransfer/MiiTransfer.cpp:
     .text       start:0x020776e4 end:0x02078f58
     .rodata     start:0x020b7be4 end:0x020b7e1c

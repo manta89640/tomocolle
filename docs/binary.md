@@ -907,6 +907,51 @@ Measured:
 Not done: the other 59 functions (the scene's Init and Update, the pages' Init and Update, and the large edit
 functions), and the data.
 
+## The Mii library (NFL), not cut yet
+
+Code of the main program from `0x02069BF4` (right after NitroSystem) to `0x020776E4` (the Mii transfer), 144
+functions; started, not decompiled, no unit cut yet. Measured:
+
+- **Its entry points.** `main` mounts `Cmn/Nfl/NFL_Res_LZ.bin` as `NFL`, gets `NFL:/NFL_Res.dat` and passes it to
+  `func_02072a58` with a work area (`data_02115480`), `data_02115574`, `0x4000` and `data_020fc504`. That function
+  returns 8 when a pointer is null or the size is not a multiple of 4, stores the RTC time in seconds at +0x58 of the
+  work area and the constants of an LCG (`0x5D588B65`, `0x269EC3`) at +0x5C/+0x60, and publishes the work area in
+  `data_02145360` with interrupts disabled. Every frame `main` calls `func_020749e4`, and after `OS_WaitIrq`
+  `func_02076448(0x4000)`: both are state machines on +0x8C and +0x90 of the work area that return small codes
+  (0, 2, 3, 4, 8, 0x13, 0x14).
+- **What it does.** `0x0206CF6C` to `0x020776E4` reads its state through `data_02145360` (38 references), builds
+  display lists (`G3_BeginMakeDL`, `G3C_Vtx`, `G3C_TexCoord`, ...), loads textures and palettes (`GX_BeginLoadTex`),
+  and reads `OS_GetMacAddress` and `RTC_GetDateTime` (as a Mii's create ID is made of). `0x02069BF4` to `0x0206CF6C`
+  is a byte-stream reader and display-list drawing code that calls back into `0x0206CF6C`, `0x020743E4` and
+  `0x02074444`, and is called from the other part.
+- **One library, by its table.** The function table `data_02112140` (.data) holds `func_02071578` and six functions of
+  `0x0206AAEC` to `0x0206B024`, so the two parts are linked together. Its .data is inferred to run from `0x02112140`
+  to `0x0211220C`, where the keyboard's tables start; its .rodata from `0x020B6524`, read by both parts.
+- **Callers.** `main`, the main program's character code (`CharacterBase`'s destructors call `func_02072dc0` and
+  `func_02072f34`), overlays 70, 76, 78 and 79 (`func_0206dc84`), and 48, 51, 68, 75, 78 and 100
+  (`func_02073514` to `func_02073550`).
+- **One static.** The library's only .bss is the pointer `data_02145360`: every one of its 38 references loads
+  the address and reads or writes at offset 0, and nothing in `0x02069BF4..0x0206CF6C` touches .bss. The 0x1C bytes
+  after it, to the Mii transfer's .bss at `0x02145380`, are not referred to. So .bss cannot show where its files
+  begin and end, and the compiler's pooling threshold (137 against 138) cannot be read from its statics; its .rodata
+  is the place left to look (`data_020b676c`, `...6770`, `...6774`, `...6778` are each loaded by their own address).
+- **No identity string.** The main program holds only two middleware strings, `[SDK+NINTENDO:BACKUP]` and
+  `[SDK+SHARP:SHTTS-1_2_0]`; nothing names NFL's version. No objects or sources of NFL (or the Wii's RFL) were found
+  on the machine to match against.
+
+Started in `lib/NFL/NFL.c`, one unit for the library's whole range (.text `0x02069BF4`-`0x020776E4`, .rodata
+`0x020B6524`-`0x020B7BE4`, .data `0x02112140`-`0x0211220C`, .bss `0x02145360`-`0x02145380`), not yet divided into
+files. 29 of 144 functions match: the byte-stream reader, the palette makers (16-colour ramps from tables of 8-bit
+colours, `GX_RGB` of each component shifted down 3) and the create-ID and work-area helpers. Measured with them: the
+code compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, as C and as C++, so the compiler is not settled. The Mii
+records it reads have the Wii's layout: the birthday check `func_020731e0` reads the month from bits 10-13 and the day
+from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
+bits 1-4 against 11, as `RFLCharData` places them.
+
+Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
+and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
+it is 2.0 SP2p2, the game SP2p3), and its function names.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
