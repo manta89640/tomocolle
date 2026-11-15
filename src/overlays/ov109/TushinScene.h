@@ -13,6 +13,8 @@
 #include "text/MessageText.h"
 #include "text/TextCanvas.h"
 
+#include <wchar.h>
+
 // Resource types, as the files have them (the four letters in memory order)
 #define RESOURCE_BCA0 0x30414342 // Joint animation
 
@@ -53,7 +55,7 @@ void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, i
 void func_020278f8(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader);
+void func_02028108(ScreenLoader *loader, int plane, int offset);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
@@ -188,9 +190,13 @@ struct CharacterModel {
     /* 0x004 */ void *mResourceSet;
     /* 0x008 */ int mUnknown008;
     /* 0x00C */ NNSG3dResMdl *mResMdl;
-    /* 0x010 */ u8 mUnknown010[0xD0];
+    /* 0x010 */ u8 mUnknown010[0xA0];
+    /* 0x0B0 */ BOOL mVisible;
+    /* 0x0B4 */ u8 mUnknown0B4[0x2C];
     /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ u8 mUnknown0EC[0x3DC];
+    /* 0x0EC */ u8 mUnknown0EC[0x18];
+    /* 0x104 */ int mAnimId; // The current 'BCA0' animation
+    /* 0x108 */ u8 mUnknown108[0x3C0];
     /* 0x4C8 */ char mArchiveName[4];    // Name its archive is mounted under (func_02091048 sets both)
     /* 0x4CC */ char mArchivePath[0x1C]; // and the archive's path
     /* 0x4E8 */ u8 mUnknown4E8[0x4C];
@@ -217,6 +223,11 @@ public:
 
 extern "C" {
 extern const s16 data_020fb870[4][5]; // Animation ids, by a row and by mood: standing
+struct ModelAnimation {
+    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x14 */ BOOL mFinished;
+};
+ModelAnimation *AnimModel_FindAnimation(CharacterModel *model, u32 resType, int id);
 void func_02090fdc(SceneCharacter *character, int slot, int param2, int param3);
 void func_02091048(SceneCharacter *character, const char *archiveName);
 void func_02091968(SceneCharacter *character); // Draws it
@@ -235,12 +246,37 @@ void func_02065abc(NNSG3dResMdl *model, int a);
 void func_020979e0(SavedCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
-void func_02073574(u8 *mii);
+struct MiiData;
+void func_02073574(MiiData *mii);
 // The models' resource table (0x1C bytes per resource id)
 extern u8 data_021223e4[];
 void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
 void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
+}
+
+// The main program's object that decides the scene to go back to (0x2C bytes)
+struct SceneCheck {
+    /* 0x00 */ u8 mUnknown00[0x2C];
+};
+
+extern "C" {
+void func_020af224(SceneCheck *check, int a, int b);
+void func_020af260(SceneCheck *check);
+int func_020af4d8(SceneCheck *check, int a);
+void func_0203206c(void *button);
+void func_02024234(ScreenControl *screens, int planes, int a);
+void func_02023f4c(ScreenControl *screens, int planes, int a);
+void func_02023eac(ScreenControl *screens, int planes);
+void func_0202683c(void);
+void func_0201f508(wchar_t *text);
+void func_02036bb4(wchar_t *text);
+void func_0207a8c4(CharacterRecord *character, wchar_t *nickname);
+int func_020733a4(void *buffer);
+void func_02097c64(SavedCharacter *character);
+void Character_ResetSoundPhase(SceneCharacter *character, int slot);
+void Character_PlaySoundAtAnimPhase(SceneCharacter *character, int slot, int player, int seqArcNo, int index,
+                                    int phaseMask);
 }
 
 // --- 3D ---
@@ -288,6 +324,11 @@ void func_0207ac78(ParticleSystem *system, void *file);
 void func_0207b110(ParticleSystem *system);
 void func_0207b124(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
+void func_0207b364(ParticleSystem *system, ParticleEmitter *emitter);
+void func_0207b258(ParticleSystem *system, void *a);
+void func_0207b138(ParticleSystem *system);
+void func_0202ad84(void *resources);
+extern u8 data_02142438[];
 }
 
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---
@@ -298,6 +339,11 @@ struct ListView {
     /* 0x9468 */ u8 mUnknown9468[0x10];
 }; // 0x9478
 
+extern "C" {
+void func_020a3634(ListView *view);
+void func_020a3658(ListView *view, BOOL a);
+}
+
 struct ListPages {
     /* 0x0000 */ u8 mUnknown0000[0x5158];
 }; // 0x5158
@@ -306,7 +352,9 @@ struct ResidentList {
     SavedCharacter *GetSelected() { return &mResidents[mSelected]; }
 
     /* 0x00000 */ SavedCharacter mResidents[100];
-    /* 0x11300 */ u8 mUnknown11300[0x90];
+    /* 0x11300 */ u8 mUnknown11300[6];
+    /* 0x11306 */ u16 mUnknown11306;
+    /* 0x11308 */ u8 mUnknown11308[0x88];
     /* 0x11390 */ int mSelected; // The resident chosen, an index of mResidents
     /* 0x11394 */ u8 mUnknown11394[8];
     /* 0x1139C */ int mUnknown1139C;
@@ -316,6 +364,8 @@ struct ResidentList {
 extern "C" {
 void func_020a03e8(ResidentList *list, ListView *view, ListPages *pages);
 void func_020a05dc(ResidentList *list);
+void func_020a0454(ResidentList *list);
+void func_020a05b8(ResidentList *list); // Draws it
 void func_020a123c(ResidentList *list, int a, int b);
 void func_020a1fe0(ListView *view, int a);
 void func_020a2104(ListView *view, int a, int b);
@@ -339,7 +389,44 @@ void func_02032158(WindowButton *button, const WindowButtonStyle *style);
 void func_0203119c(WindowButton *button);
 int func_02031f58(WindowButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                   int charOffset);
-void func_02031e88(WindowButton *button, int a);
+void func_02031e88(void *button, int a);
+void func_02031228(void *sprite);
+BOOL func_0203133c(void *button);
+}
+
+// --- Items (main program) ---
+
+class InventoryItem {
+public:
+    BOOL Add(int count); // func_0209ed84
+
+    /* 0x00 */ void *mVtable;
+    /* 0x04 */ u16 mId;
+    /* 0x08 */ BOOL mOwned;
+    /* 0x0C */ int mUnknown0C;
+    /* 0x10 */ int mCount;
+}; // 0x14
+
+// One kind of clothes the player owns or not (func_0209e168 constructs it). That these are the clothes is
+// inferred: the wireless scene gives item 0x113 or 0x114 with the messages "got a DS T-shirt" and "got a Wii
+// T-shirt" (etc messages 0x124 and 0x125).
+class ClothesItem : public InventoryItem {
+public:
+    ClothesItem(); // func_0209e168
+
+    /* 0x14 */ int mUnknown14;
+}; // 0x18
+
+// The clothes, loaded from and saved to the save data together (func_0209e248 and func_0209e310).
+struct ClothesInventory {
+    /* 0x0000 */ int mCount;
+    /* 0x0004 */ ClothesItem mItems[300];
+    /* 0x1C24 */ ClothesItem *mList[300];
+}; // 0x20D4
+
+extern "C" {
+void func_0209e248(ClothesInventory *inventory); // Loads it
+void func_0209e310(ClothesInventory *inventory); // Saves it
 }
 
 // --- Songs (main program) ---
@@ -368,6 +455,7 @@ void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Write
 void func_0202c328(GameData *game, int index, int a);
 int func_0202c604(GameData *game, int index);
 BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
 int func_02073520(CharacterRecord *character);
 int func_02073560(CharacterRecord *a, CharacterRecord *b);
 int func_02098584(CharacterRecord *character);
@@ -387,15 +475,52 @@ int WH_GetSystemState(void);
 BOOL WH_SendData(const void *data, u16 size, WHSendCallbackFunc callback);
 }
 
+// --- WH (continued) ---
+
+extern "C" {
+void WH_Reset(void);
+void WH_Finalize(void);
+u16 WH_GetBitmap(void);
+u16 func_02030a68(void);                                  // The channel measured
+int WH_GetLinkLevel(void);
+void func_02030ba4(void);
+BOOL func_02030cf8(int mode, u16 tgid, u16 channel);      // Connects as a parent
+}
+
+// --- The Wii's Mii Channel connection (main program 0x02077000 to 0x0207a000) ---
+
+extern "C" {
+int func_02078f04(void);
+int func_0207808c(void);
+BOOL func_0207800c(int i);
+int func_02078040(int i);
+WMBssDesc *func_02078064(int i);
+u16 func_0207809c(int i);
+const u16 *func_020780b4(int i);
+}
+
 // --- Wireless (main program) ---
 
-struct WirelessManager;
+struct WirelessManager {
+    /* 0x00 */ int mUnknown00;
+};
 
 extern "C" {
 extern WirelessManager *data_0213b700;
 void func_0203b76c(WirelessManager *manager, int a);
+int func_0203b800(WirelessManager *manager);
+void func_0203b8b4(WirelessManager *manager, int a);
+void func_020777f4(void);
 void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
 void func_0203b7e0(WirelessManager *manager, void *buffer);
+void func_0203b898(WirelessManager *manager);
+void func_0203b908(WirelessManager *manager);
+void func_0203b948(WirelessManager *manager);
+BOOL func_0203b970(WirelessManager *manager);
+BOOL func_0203b9b4(WirelessManager *manager);
+void func_0203b9fc(WirelessManager *manager);
+int func_0203ba10(WirelessManager *manager);
+void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
 void func_0207777c(void *a, void *miiData, int count);
 void func_02077710(void (*callback)(int, int));
@@ -409,6 +534,7 @@ extern "C" {
 void func_ov109_02151fcc(int, int);
 void func_ov109_021523a4(int, int);
 void func_ov109_02151eb4(BOOL result);
+void func_ov109_0215245c(void *arg);
 }
 
 // --- The scene ----------------------------------------------------------------------------------------------------
@@ -458,12 +584,45 @@ public:
     void RefreshRecord(CharacterRecord *record);
     int ReceiveCharacter();
     int GetMode();
-    BOOL func_ov109_02151d24(CharacterRecord *record);
-    BOOL func_ov109_02151a90(CharacterRecord *record);
-    BOOL func_ov109_02151b98();
-    void func_ov109_0214f0e4();
-    void func_ov109_02151ea4();
-    void func_ov109_02151e5c();
+    BOOL IsNgWord(const wchar_t *text);
+    BOOL IsBlank(const wchar_t *text);
+    BOOL HasNgWord(CharacterRecord *record);
+    BOOL HasNgSongReceived();
+    BOOL HasNgSong(CharacterRecord *record);
+    BOOL IsMiiBroken(CharacterRecord *record);
+    BOOL IsNameBlank(CharacterRecord *record);
+    BOOL IsNicknameBlank(CharacterRecord *record);
+    BOOL IsInvalid(CharacterRecord *record);
+    int ReceiveWiiMii();
+    void UpdateCharacters();
+    void DrawCharacters();
+    void UpdateSignal();
+    void Disconnect(int kind);
+    void Leave();
+    void UpdateListButtons();
+    void UpdateListWindow();
+    void UpdateConnection();
+    void UpdateWiiConnection();
+    void SetStandAnimation(u8 i);
+    void SetOtherStandAnimation();
+    void StartSendAnimation();
+    void StartReceiveAnimation();
+    void UpdateMusic();
+    void ResetList();
+    void ShowReceived();
+    void CloseWindow();
+    void StartEmitter(int i);
+    void CountFrame();
+    void DrawParticles();
+    BOOL func_ov109_02151d74(CharacterRecord *record);
+    BOOL GiveItem(int item);
+    BOOL GiveShirt();
+    BOOL GiveWiiShirt();
+    void SetEntry(BOOL enabled);
+    void ClearParentNames();
+    void Save();
+    void SetUnknown3F098();
+    int NextPageAfterReceive();
 
     /* 0x00010 */ int mPage;     // What the window shows: an index of sPageMessages and sPageLayouts
     /* 0x00014 */ int mNextPage;
@@ -497,7 +656,8 @@ public:
     /* 0x3F02C */ int mParticleResource;
     /* 0x3F030 */ int mUnknown3F030;
     /* 0x3F034 */ int mUnknown3F034;
-    /* 0x3F038 */ u8 mUnknown3F038[0x48];
+    /* 0x3F038 */ wchar_t mParentNames[3][11]; // Of the Wiis (or DSs) found
+    /* 0x3F07A */ u16 mParentIds[3];
     /* 0x3F080 */ int mUnknown3F080;
     /* 0x3F084 */ int mUnknown3F084;
     /* 0x3F088 */ int mUnknown3F088;
