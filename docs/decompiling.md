@@ -206,7 +206,9 @@ The order that the code itself suggests:
   ROM), and a file's `static const` arrays in the reverse order of their definitions.
 - **A complete unit's anonymous objects are named by their compiler names** in `symbols.txt` (`@13766`, local):
   `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
-  change when the file's code does; the check names the new one.
+  change when the file's code does, or a header it includes; the check names the new one.
+  `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
+  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it).
 
 ## A match is instructions and references
 

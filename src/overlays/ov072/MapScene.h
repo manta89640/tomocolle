@@ -292,16 +292,16 @@ public:
 
 // --- The main program's 2D classes ----------------------------------------------------------------------------
 
-// A textured rectangle drawn with the 3D engine (main program, constructor func_0202b130): the scene shows the
-// apartment building's windows with them, each with one of seven textures ("w_live.tga" ... "w_game.tga").
-class TexturedQuad;
+// A textured square drawn by the 3D engine (main program 0x0202b0e8 to 0x0202b6d0; as src/scene/G3SpriteTestScene.h
+// has it): the scene shows the apartment building's windows with them, each with one of seven textures
+// ("w_live.tga" ... "w_game.tga").
+class G3Sprite;
 extern "C" {
-void func_0202b1f0(TexturedQuad *quad, int texture, ScreenRect *rect);
+void func_0202b1f0(G3Sprite *quad, int texture, ScreenRect *rect);
 }
-class TexturedQuad {
+class G3Sprite {
 public:
-    TexturedQuad();  // func_0202b130
-    ~TexturedQuad(); // func_0202b6cc
+    virtual ~G3Sprite(); // func_0202b6cc, which does nothing
 
     void SetTexture(int texture, ScreenRect rect) { func_0202b1f0(this, texture, &rect); }
     void SetPosition(VecFx32 position) {
@@ -310,8 +310,7 @@ public:
         mDepth = -position.z / 16;
     }
 
-    /* 0x00 */ void *mVtable;
-    /* 0x04 */ int mUnknown04;
+    /* 0x04 */ int mTexture;
     /* 0x08 */ BOOL mVisible;
     /* 0x0C */ int mDepth;
     /* 0x10 */ u8 mUnknown10[0xC];
@@ -392,7 +391,7 @@ struct PaletteLoader;
 struct ScreenLoader;
 struct CharLoader;
 struct Renderer3d;
-struct QuadTextures;
+struct G3SpriteTextures;
 struct ParticleManager;
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
@@ -401,7 +400,7 @@ extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 extern u8 data_021223e4[];
-extern QuadTextures data_021232e4;
+extern G3SpriteTextures data_021232e4;
 extern u8 data_02142438[];
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
@@ -430,10 +429,10 @@ void func_0202ad84(void *resources);
 void func_0202ae38(void *resources);
 void func_0202aecc(void *resources, int resourceId);
 void func_0202b0e8(Renderer3d *renderer);
-void func_0202b4a4(TexturedQuad *quad);
-void func_0202b4c4(TexturedQuad *quad);
-void func_0202b4d8(QuadTextures *textures);
-void func_0202b4dc(QuadTextures *textures, int index, const char *path, int a, int width, int height);
+void func_0202b4a4(G3Sprite *quad);
+void func_0202b4c4(G3Sprite *quad);
+void func_0202b4d8(G3SpriteTextures *textures);
+void func_0202b4dc(G3SpriteTextures *textures, int index, const char *path, int a, int width, int height);
 
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
 void func_0202c264(GameData *game, int index, SavedCharacter *character);
@@ -744,7 +743,7 @@ public:
     /* 0x00B74 */ MapCamera mCamera;
     /* 0x00BA4 */ Light *mLights[2];
     /* 0x00BAC */ int mWindowCount;
-    /* 0x00BB0 */ TexturedQuad mWindows[150];     // Of the apartment building, one per room
+    /* 0x00BB0 */ G3Sprite mWindows[150];     // Of the apartment building, one per room
     /* 0x03838 */ int mWindowState;
     /* 0x0383C */ int mWindowFrames;
     /* 0x03840 */ BOOL mHasInfo;                  // The window of the selected building has its own picture

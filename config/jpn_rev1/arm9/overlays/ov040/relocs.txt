@@ -178,8 +178,8 @@ from:0x0214aa8c kind:arm_call to:0x02022ddc module:main
 from:0x0214aa98 kind:arm_call to:0x02083e4c module:main
 from:0x0214aaac kind:arm_call to:0x02022ddc module:main
 from:0x0214aab8 kind:load to:0x0203ef80 module:main
-from:0x0214aabc kind:load to:0x0210f664 module:main
-from:0x0214aac0 kind:load to:0x0210f648 module:main
+from:0x0214aabc kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214aac0 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214aac4 kind:load to:0x0202e46c module:main
 from:0x0214aacc kind:load to:0x0203e188 module:main
 from:0x0214aaec kind:arm_call to:0x02022ddc module:main
@@ -191,8 +191,8 @@ from:0x0214ab50 kind:arm_call to:0x02083e4c module:main
 from:0x0214ab64 kind:arm_call to:0x02022ddc module:main
 from:0x0214ab6c kind:arm_call to:0x020267bc module:main
 from:0x0214ab78 kind:load to:0x0203ef80 module:main
-from:0x0214ab7c kind:load to:0x0210f664 module:main
-from:0x0214ab80 kind:load to:0x0210f648 module:main
+from:0x0214ab7c kind:load to:0x0210f65c add:0x8 module:main
+from:0x0214ab80 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0214ab84 kind:load to:0x0202e46c module:main
 from:0x0214ab8c kind:load to:0x0203e188 module:main
 from:0x0214ac88 kind:load to:0x02149a40 module:overlay(40)

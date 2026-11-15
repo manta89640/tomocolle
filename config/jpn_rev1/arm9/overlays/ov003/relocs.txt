@@ -47,11 +47,11 @@ from:0x02149e18 kind:load to:0x02149f8c module:overlay(3)
 from:0x02149e1c kind:load to:0x02149f90 module:overlay(3)
 from:0x02149e3c kind:arm_call to:0x020267f4 module:main
 from:0x02149e54 kind:arm_call to:0x020267f4 module:main
-from:0x02149e60 kind:load to:0x0210f648 module:main
+from:0x02149e60 kind:load to:0x0210f640 add:0x8 module:main
 from:0x02149e80 kind:arm_call to:0x020267f4 module:main
 from:0x02149e98 kind:arm_call to:0x020267f4 module:main
 from:0x02149ea0 kind:arm_call to:0x020267bc module:main
-from:0x02149eac kind:load to:0x0210f648 module:main
+from:0x02149eac kind:load to:0x0210f640 add:0x8 module:main
 from:0x02149ec8 kind:load to:0x02149a40 module:overlay(3)
 from:0x02149ecc kind:load to:0x02149a84 module:overlay(3)
 from:0x02149ed0 kind:load to:0x02149b98 module:overlay(3)
