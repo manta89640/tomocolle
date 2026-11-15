@@ -850,6 +850,15 @@ functions; started, not decompiled, no unit cut yet. Measured:
   `[SDK+SHARP:SHTTS-1_2_0]`; nothing names NFL's version. No objects or sources of NFL (or the Wii's RFL) were found
   on the machine to match against.
 
+Started in `lib/NFL/NFL.c`, one unit for the library's whole range (.text `0x02069BF4`-`0x020776E4`, .rodata
+`0x020B6524`-`0x020B7BE4`, .data `0x02112140`-`0x0211220C`, .bss `0x02145360`-`0x02145380`), not yet divided into
+files. 29 of 144 functions match: the byte-stream reader, the palette makers (16-colour ramps from tables of 8-bit
+colours, `GX_RGB` of each component shifted down 3) and the create-ID and work-area helpers. Measured with them: the
+code compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, as C and as C++, so the compiler is not settled. The Mii
+records it reads have the Wii's layout: the birthday check `func_020731e0` reads the month from bits 10-13 and the day
+from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
+bits 1-4 against 11, as `RFLCharData` places them.
+
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
 it is 2.0 SP2p2, the game SP2p3), and its function names.
