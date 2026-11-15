@@ -6466,17 +6466,11 @@ data_021453e0 kind:bss addr:0x021453e0
 data_021453f8 kind:bss addr:0x021453f8
 data_02145418 kind:bss addr:0x02145418
 data_02145438 kind:bss addr:0x02145438
-data_0214543a kind:bss addr:0x0214543a
-data_02145452 kind:bss addr:0x02145452
 data_02145484 kind:bss addr:0x02145484
-data_02145486 kind:bss addr:0x02145486
 data_021454e0 kind:bss addr:0x021454e0
-data_021454e2 kind:bss addr:0x021454e2
 data_02145540 kind:bss addr:0x02145540
-data_02145542 kind:bss addr:0x02145542
 data_021455a0 kind:bss addr:0x021455a0
 data_02145600 kind:bss addr:0x02145600
-data_02145648 kind:bss addr:0x02145648
 data_02145c00 kind:bss(size=0x2) addr:0x02145c00 local
 data_02145c02 kind:bss(size=0x2) addr:0x02145c02 local
 sChannelIndex kind:bss(size=0x2) addr:0x02145c04 local
