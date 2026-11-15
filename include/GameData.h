@@ -11,12 +11,19 @@ public:
     void SetCappedCounter(int value);
 
     /* 0x00 */ u8 mUnknown00[8];
-    /* 0x08 */ int mUnknownState; // SoundManager::Init sets the sound settings to their defaults when this is 3
+    // SoundManager::Init sets the sound settings to their defaults when this is 3. Overlay 106 (PreStartScene) reads
+    // it as the outcome of loading the save data: 0 loaded, 1 loaded (the scene goes on as for a first start), 2
+    // broken (it initialises the data), 3 and 4 not readable.
+    /* 0x08 */ int mUnknownState;
     /* 0x0C */ u8 mUnknown0C[0x44];
     // Kept between 0 and 9,999,999 by SetCappedCounter, which eight shop-like overlays call (56, 68, 75, 78, 82
     // to 85). Probably the player's money, but nothing in that function says so.
     /* 0x50 */ int mCappedCounter;
-    /* 0x54 */ u8 mUnknown54[0x74];
+    /* 0x54 */ u8 mUnknown54[0x5D];
+    // Overlay 106 (PreStartScene) sets it when it is 0 and then asks for scene 0x69; while it is set, it brings the
+    // residents up to date and asks for scene 0x6A. It clears it when the save data was broken.
+    /* 0xB1 */ u8 mUnknownB1;
+    /* 0xB2 */ u8 mUnknownB2[0x16];
     /* 0xC8 */ u8 mStereo;       // Not zero: stereo output (default 1)
     /* 0xC9 */ u8 mMusicVolume;  // 0 to 3, for sequences and streams (default 3)
     /* 0xCA */ u8 mEffectVolume; // 0 to 3, for sequence archive entries (default 3)

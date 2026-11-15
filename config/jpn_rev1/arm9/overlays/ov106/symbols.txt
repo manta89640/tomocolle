@@ -1,47 +1,47 @@
-func_ov106_02149a40 kind:function(arm,size=0x7c) addr:0x02149a40
-func_ov106_02149abc kind:function(arm,size=0x504) addr:0x02149abc
-func_ov106_02149fc0 kind:function(arm,size=0x270) addr:0x02149fc0
-func_ov106_0214a230 kind:function(arm,size=0x1c) addr:0x0214a230
-func_ov106_0214a24c kind:function(arm,size=0x4c) addr:0x0214a24c
-func_ov106_0214a298 kind:function(arm,size=0x18) addr:0x0214a298
-func_ov106_0214a2b0 kind:function(arm,size=0x10) addr:0x0214a2b0
-func_ov106_0214a2c0 kind:function(arm,size=0x134) addr:0x0214a2c0
-func_ov106_0214a3f4 kind:function(arm,size=0x8c) addr:0x0214a3f4
-func_ov106_0214a480 kind:function(arm,size=0xb0) addr:0x0214a480
-func_ov106_0214a530 kind:function(arm,size=0xf4) addr:0x0214a530
-func_ov106_0214a624 kind:function(arm,size=0x38) addr:0x0214a624
-func_ov106_0214a65c kind:function(arm,size=0x50) addr:0x0214a65c
-func_ov106_0214a6ac kind:function(arm,size=0x38) addr:0x0214a6ac
-func_ov106_0214a6e4 kind:function(arm,size=0xc) addr:0x0214a6e4
-func_ov106_0214a6f0 kind:function(arm,size=0x28) addr:0x0214a6f0
-func_ov106_0214a718 kind:function(arm,size=0x30) addr:0x0214a718
-data_ov106_0214a748 kind:data(any) addr:0x0214a748
-data_ov106_0214a768 kind:data(any) addr:0x0214a768
-gStr_K_ov106 kind:data(any) addr:0x0214a778
-gStr_MLT_BG_down_nsc_ov106 kind:data(any) addr:0x0214a788
+_ZN13PreStartScene12StartLoadingEv kind:function(arm,size=0x7c) addr:0x02149a40
+_ZN13PreStartScene4InitEv kind:function(arm,size=0x504) addr:0x02149abc
+_ZN13PreStartScene6UpdateEv kind:function(arm,size=0x270) addr:0x02149fc0
+_ZN13PreStartScene4DrawEv kind:function(arm,size=0x1c) addr:0x0214a230
+_ZN13PreStartScene4ExitEv kind:function(arm,size=0x4c) addr:0x0214a24c
+_ZN13PreStartScene8SetStateEi kind:function(arm,size=0x18) addr:0x0214a298
+_ZN13PreStartScene12UpdateWindowEv kind:function(arm,size=0x10) addr:0x0214a2b0
+_ZN13PreStartScene15UpdateResidentsEv kind:function(arm,size=0x134) addr:0x0214a2c0
+_ZN13PreStartScene11ShowMessageEm kind:function(arm,size=0x8c) addr:0x0214a3f4
+_ZN13PreStartScene6ShowOkEm kind:function(arm,size=0xb0) addr:0x0214a480
+_ZN13PreStartScene3AskEmi kind:function(arm,size=0xf4) addr:0x0214a530
+_ZN13PreStartClockC1Ev kind:function(arm,size=0x38) addr:0x0214a624
+_ZN13PreStartClock6UpdateEv kind:function(arm,size=0x50) addr:0x0214a65c
+_ZN10SavingIcon4InitEv kind:function(arm,size=0x38) addr:0x0214a6ac
+_ZN10SavingIcon4DrawEv kind:function(arm,size=0xc) addr:0x0214a6e4
+_ZN13PreStartSceneD1Ev kind:function(arm,size=0x28) addr:0x0214a6f0
+_ZN13PreStartSceneD0Ev kind:function(arm,size=0x30) addr:0x0214a718
+sChoiceMessages kind:data(any) addr:0x0214a748 local
+sButtonPosition kind:data(any) addr:0x0214a750 local
+sTextPosition kind:data(any) addr:0x0214a758 local
+sButtonSize kind:data(any) addr:0x0214a760 local
+sWindowRect kind:data(any) addr:0x0214a768 local
+sChoicePositions kind:data(any) addr:0x0214a778 local
+sScreenName kind:data(any) addr:0x0214a788 local
 _ZTV13PreStartScene kind:data(any) addr:0x0214a7a0
-gStr_MLT_ov106 kind:data(any) addr:0x0214a7c4
-gStr_Scn_Scene_SceneSavePlay_LZ_bin_ov106 kind:data(any) addr:0x0214a7c8
-gStr_MNU_ov106 kind:data(any) addr:0x0214a7e8
-gStr_Scn_Scene_ScenePreStart_LZ_bin kind:data(any) addr:0x0214a7ec
-gStr_TCM_ov106 kind:data(any) addr:0x0214a80c
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov106 kind:data(any) addr:0x0214a810
-gStr_TEM_ov106 kind:data(any) addr:0x0214a82c
-data_ov106_0214a830 kind:data(any) addr:0x0214a830
-data_ov106_0214a838 kind:data(any) addr:0x0214a838 ambiguous
-gStr_MLT_BG_down_ncg_ov106 kind:data(any) addr:0x0214a848
-gStr_MLT_BG_down_ncl_ov106 kind:data(any) addr:0x0214a85c
-gStr_MLT_Obj_down_nce_ov106 kind:data(any) addr:0x0214a870
-gStr_MLT_Obj_down_ncg_ov106 kind:data(any) addr:0x0214a884
-gStr_MLT_Obj_down_ncl_ov106 kind:data(any) addr:0x0214a898
-gStr_MNU_Obj_up_nce_ov106 kind:data(any) addr:0x0214a8ac
-data_ov106_0214a8bc kind:data(any) addr:0x0214a8bc
-data_ov106_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
-gStr_MNU_Obj_up_ncl_ov106 kind:data(any) addr:0x0214a8cc
-gStr_TEM_tmd_etc_msg_JP_bmg_ov106 kind:data(any) addr:0x0214a8dc
-gStr_TCM_tmd_common_msg_JP_bmg_ov106 kind:data(any) addr:0x0214a8f4
-data_ov106_0214a90c kind:data(any) addr:0x0214a90c ambiguous
-gStr_TEM_ov106_2 kind:data(any) addr:0x0214a910
-gStr_TCM_ov106_2 kind:data(any) addr:0x0214a914
-gStr_MNU_ov106_2 kind:data(any) addr:0x0214a918
-gStr_MLT_ov106_2 kind:data(any) addr:0x0214a91c
+@13409 kind:data(any) addr:0x0214a7c4 local
+@13410 kind:data(any) addr:0x0214a7c8 local
+@13411 kind:data(any) addr:0x0214a7e8 local
+@13412 kind:data(any) addr:0x0214a7ec local
+@13413 kind:data(any) addr:0x0214a80c local
+@13414 kind:data(any) addr:0x0214a810 local
+@13415 kind:data(any) addr:0x0214a82c local
+@13416 kind:data(any) addr:0x0214a830 local
+@13440 kind:data(any) addr:0x0214a848 local
+@13441 kind:data(any) addr:0x0214a85c local
+@13442 kind:data(any) addr:0x0214a870 local
+@13443 kind:data(any) addr:0x0214a884 local
+@13444 kind:data(any) addr:0x0214a898 local
+@13445 kind:data(any) addr:0x0214a8ac local
+@13446 kind:data(any) addr:0x0214a8bc local
+@13447 kind:data(any) addr:0x0214a8cc local
+@13448 kind:data(any) addr:0x0214a8dc local
+@13449 kind:data(any) addr:0x0214a8f4 local
+@13485 kind:data(any) addr:0x0214a910 local
+@13486 kind:data(any) addr:0x0214a914 local
+@13487 kind:data(any) addr:0x0214a918 local
+@13488 kind:data(any) addr:0x0214a91c local
