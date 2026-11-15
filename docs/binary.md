@@ -557,8 +557,8 @@ Measured:
   (`OS_GetOwnerInfo`). A Mii received is stored in a free slot of the list, or over the Mii with the same create ID.
 - **The Mii records** are 0x4A bytes with the create ID at 0x18, copied by halfwords. That is the size and layout of
   the Wii's Mii data (`RFLCharData`). The list is the caller's (overlay 109 passes 100 slots).
-- Its .rodata: the six bytes FF FF FF FF FF FF of the address `WH_StartScan` is given (a local initialiser), then,
-  with no padding, 28 names of 20 characters that nothing refers to ("Off", "Scanning", "Connecting", ... "DispRecv",
+- Its .rodata: the six bytes FF FF FF FF FF FF of the address `WH_StartScan` is given, copied byte by byte to the
+  stack, then, with no padding, 28 names of 20 characters that nothing refers to ("Off", "Scanning", "Connecting", ... "DispRecv",
   ... "DispSend", ... "CuttingForSaveErr", "DispSaveErr").
 
 Inferred: this is not the game's own code but a library built apart from it and linked in, as the Mii transfer that
@@ -567,9 +567,11 @@ carries its own WH of another revision, has no debug strings, uses the Wii's Mii
 
 Not done: `func_02077858` (the session's update: in the ROM its two loops are not rotated, three values share r4, and
 a copy into a stack buffer that nothing reads is kept, none of which -O4 gives here) and `func_02077F48` (two
-registers the other way round) do not match, with comments above them. So `MiiTransfer.cpp` is not complete, and
-its .rodata is not placed: the 28 names start two bytes after a four-byte boundary, which two objects of their own
-cannot give under the link's ALIGNALL(4). Its .bss is placed and named.
+registers the other way round) do not match, with comments above them, so `MiiTransfer.cpp` is not complete. Its data
+is placed: the .bss named, and the .rodata as one object (`data_020B7BE4`, the address and the names together): the
+names start two bytes past a four-byte boundary, right after the address, which two objects cannot give under the
+link's ALIGNALL(4). Measured with the compiler: which statics of one size go where follows from the order of all of the
+file's data objects, that one included.
 
 ## Compiler
 

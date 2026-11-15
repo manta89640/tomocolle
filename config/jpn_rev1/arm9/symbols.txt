@@ -4418,7 +4418,7 @@ data_020b7b06 kind:data(any) addr:0x020b7b06
 data_020b7b08 kind:data(any) addr:0x020b7b08
 data_020b7b64 kind:data(any) addr:0x020b7b64
 data_020b7b8c kind:data(any) addr:0x020b7b8c
-data_020b7be4 kind:data(any) addr:0x020b7be4
+data_020b7be4 kind:data(any) addr:0x020b7be4 local
 data_020b7e1c kind:data(any) addr:0x020b7e1c
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
 data_020b7efc kind:data(any) addr:0x020b7efc

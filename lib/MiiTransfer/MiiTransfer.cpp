@@ -102,48 +102,58 @@ void func_02078f14(int state);
 
 } // extern "C"
 
-// 28 names of states (of a screen that shows the transfer, by the names), which nothing in the ROM refers to. In the
-// ROM they follow the six bytes of WH_StartScan's address in func_02077858 with no padding, at 0x020B7BEA: as two
-// objects of their own here, the link aligns them to four bytes, so this file's .rodata is not placed yet.
-extern const char data_020b7bea[28][20] = {
-    "Off",
-    "Scanning",
-    "Connecting",
-    "Cutting",
-    "WaitCut",
-    "DispConnect",
-    "DispCut",
-    "CuttingForCommErr",
-    "DispCommErr",
-    "Idle",
-    "Recv",
-    "DispRecv",
-    "DispRecvComb",
-    "DispRecvDBFull",
-    "DispRecvErr",
-    "WaitAftRecv",
-    "StbSend",
-    "DispSend",
-    "Send",
-    "DispSendRtn",
-    "DispSendDBFull",
-    "DispSendDBFullSp",
-    "DispSendErr",
-    "DispSendErrSp",
-    "DispSendErrTmp",
-    "WaitAftSend",
-    "CuttingForSaveErr",
-    "DispSaveErr",
+// A network address, as WH_StartScan takes it
+typedef struct MacAddress {
+    u8 addr[6];
+} MacAddress;
+
+// The file's constants, in one object: the address that matches any parent, and 28 names of states (of a screen
+// that shows the transfer, by the names) that nothing in the ROM refers to. They are one object because the names
+// follow the address with no padding, at 0x020B7BEA, which two objects cannot give under the link's ALIGNALL(4).
+static const struct {
+    MacAddress anyBssid;
+    char stateNames[28][20];
+} data_020b7be4 = {
+    {{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}},
+    {
+        "Off",
+        "Scanning",
+        "Connecting",
+        "Cutting",
+        "WaitCut",
+        "DispConnect",
+        "DispCut",
+        "CuttingForCommErr",
+        "DispCommErr",
+        "Idle",
+        "Recv",
+        "DispRecv",
+        "DispRecvComb",
+        "DispRecvDBFull",
+        "DispRecvErr",
+        "WaitAftRecv",
+        "StbSend",
+        "DispSend",
+        "Send",
+        "DispSendRtn",
+        "DispSendDBFull",
+        "DispSendDBFullSp",
+        "DispSendErr",
+        "DispSendErrSp",
+        "DispSendErrTmp",
+        "WaitAftSend",
+        "CuttingForSaveErr",
+        "DispSaveErr",
+    },
 };
 
 static u8 sSeq;
-static BOOL sSending;
+static int sMiiIndex;
 static int sMsgState;
+static BOOL sSending;
 static SendCallback sSendCallback;
-static BOOL data_02145384;
-static int sParentCount;
-static ResultCallback sResultCallback;
 static int sSessionState;
+static BOOL data_02145384;
 static int data_021453c8;
 static BOOL data_021453dc;
 static BOOL data_021453d8;
@@ -154,20 +164,21 @@ static int data_021453a0;
 static int sState;
 static BOOL data_021453c0;
 static BOOL data_021453bc;
-static int sMiiIndex;
+static int sParentCount;
 static void *data_021453b4;
 static BOOL sSendPending;
 static BOOL data_021453ac;
 static int sParentIndex;
 static int data_021453a4;
+static ResultCallback sResultCallback;
 static OSMutex sMutex;
-static u32 sParentAges[PARENT_MAX];
 static u32 sParentTimers[PARENT_MAX];
+static u32 sParentAges[PARENT_MAX];
 static Message sRecvMsg;
 static Message sSendMsg;
 static Packet sSendPacket;
-static Packet sRecvBuffer;
 static Packet sRecvPacket;
+static Packet sRecvBuffer;
 static Parent sParents[PARENT_MAX];
 
 extern "C" BOOL func_020776e4(void) {
@@ -256,9 +267,9 @@ extern "C" void func_02077858(void) {
     case 1:
         switch (WH_GetSystemState()) {
         case WH_SYSSTATE_IDLE: {
-            u8 macAddr[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            MacAddress macAddr = data_020b7be4.anyBssid;
             WH_TurnOffPictoCatch();
-            WH_StartScan(func_02077e10, macAddr, 0);
+            WH_StartScan(func_02077e10, macAddr.addr, 0);
             sSessionState = 2;
             break;
         }
