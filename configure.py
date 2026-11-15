@@ -216,12 +216,13 @@ LIBRARIES["lib/SHTTS/"] = {
 }
 
 # WH, the wireless wrapper of the SDK's sample code, which the game compiles in. Its source is this project's own
-# decompilation, in C. It is built with the game's compiler and, unlike the speech engine, with -ipa file: the ROM
-# addresses its small statics as one pool, which the compiler does only with -ipa file (docs/binary.md, "WH").
+# decompilation. Measured (docs/binary.md, "WH"): it is built like the game's own code, with -ipa file (the ROM
+# addresses its small statics as one pool) and as C++ (the order of its data needs every static to be defined where
+# it is declared).
 LIBRARIES["lib/WH/"] = {
     "compiler": MWCC_VERSION,
     "msl": GAME_MSL,
-    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c99", "-ipa file"],
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c++", "-ipa file"],
     "sjis": True,
     "defines": SDK_DEFINES,
     "includes": ["lib/WH", *SDK_INCLUDES],

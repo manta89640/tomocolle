@@ -57,12 +57,19 @@ enum {
     WH_ERRCODE_MAX
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*WHStartScanCallbackFunc)(WMBssDesc *bssDesc);
 typedef void (*WHSendCallbackFunc)(BOOL result);
 typedef BOOL (*WHJudgeAcceptFunc)(WMStartParentCallback *cb);
 typedef void (*WHReceiverFunc)(u16 aid, u16 *data, u16 size);
 typedef u16 (*WHParentWEPKeyGeneratorFunc)(u16 *wepkey, const WMParentParam *parentParam);
 typedef u16 (*WHChildWEPKeyGeneratorFunc)(u16 *wepkey, const WMBssDesc *bssDesc);
+
+// The SSID (the user data of the connection) of the child that connected last, copied by the parent's callback
+extern u16 gWHChildSsid[WM_SIZE_CHILD_SSID / sizeof(u16)];
 
 BOOL WH_Initialize(void);
 BOOL WH_End(void);
@@ -89,5 +96,9 @@ BOOL WH_ChildConnect(int mode, WMBssDesc *bssDesc);
 
 void WH_SetReceiver(WHReceiverFunc proc);
 BOOL WH_SendData(const void *data, u16 datasize, WHSendCallbackFunc callback);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

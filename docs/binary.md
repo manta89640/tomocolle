@@ -483,13 +483,13 @@ Not done:
 
 WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the
 WM driver's asynchronous calls, which games copied into their own source. The game has it in the main program, in
-`lib/WH/wh.c` here: 66 functions, all of which match.
+`lib/WH/wh.cpp` here: all 66 functions and all its data match, and the unit is complete and linked from source.
 
 | | Where | |
 | --- | --- | --- |
 | `.text` | `0x0202F42C` to `0x0203115C` | `WH_GetWMErrCodeName` to `WH_End`, after `MessageText.cpp`'s last function; `0x0203115C` on is the game's sprite code (`0x0203119C` is the one that some 40 overlays call) |
-| `.data` | `0x0210F79C` to `0x021102D8` | The three name tables, their strings, then the strings of the code in the order it uses them |
-| `.bss` | `0x02138F40` to `0x0213B5C0` | A pool of the small statics (to `0x02138FE0`), then each larger one on its own, the WM buffer last |
+| `.data` | `0x0210F79C` to `0x021102D8` | The three name tables' strings and the tables, sorted by size, then the strings of the code in the order it uses them |
+| `.bss` | `0x02138F34` to `0x0213B5C0` | A pool of the statics under 64 bytes (`0x02138F40` to `0x02138FE0`), then each larger one on its own, the WM buffer last |
 
 Measured:
 
@@ -505,6 +505,8 @@ Measured:
 - 66 functions are in the ROM; the sample's others (`WH_GetConnectMode`, `WH_GetLastError`, the WEP key
   generator setters, ...) were stripped by the link, as nothing called them. Their statics are still in the pool:
   `sParentWEPKeyGenerator`, `sJudgeAcceptFunc` and the others are read and never written.
+- One variable is the game's, not the sample's: when a child connects, the parent's callback copies the child's
+  24-byte SSID (the user data of its connection) into `gWHChildSsid` (`0x02138FB4`), which overlays 109 and 110 read.
 - Callers: overlays 109 and 110 (wireless play) call 11 of the functions, and the main program at `0x0203B7EC` to
   `0x0203BB8C` and `0x0204D890` to `0x0204E38C`. A second, child-only copy of WH with no debug strings is at
   `0x02078F58` to `0x02079DFC` (another unit).
@@ -513,30 +515,26 @@ Measured:
 
 What it showed about the compiler, measured (see "Compiler"):
 
-- **`-ipa file`, for C too.** The small statics are one pool, addressed from its start: `sSysState` is the pool's
-  address plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file` (in C as in C++), so WH
-  was compiled with it, unlike the speech engine, which matches only without it. `-lang=c99` and `-lang=c++` give
-  the same code here; WH is kept as C, whose names (`WH_Initialize`, not mangled) are the SDK's.
+- **`-ipa file`.** The small statics are one pool, addressed from its start: `sSysState` is the pool's address
+  plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file`, so WH was compiled with it.
 - **Objects of 64 bytes and more are not pooled.** The 32-byte `WMScanParam` is in the pool and reached from its
   start; the 64-byte `WMParentParam`, the scan's `WMBssDesc` and the buffers are addressed each on its own (by test
-  files: 60 bytes is still pooled, 64 is not). This is what told the compiler's version, see "Compiler"; with
-  build 138 and `-ipa file` all 66 functions match, with build 137 58 (the others reach the parent parameters).
-- **Arrays of `char` are not pooled either**, whatever their size: the SSID copy that is in the pool is a `u16`
-  array, the one that is apart (`sConnectionSsid`, `u8[24]`) a `char` array.
-- **A file's `.bss` objects are sorted with its `.data`.** The compiler's size sort (`docs/notes/ov073.md`) takes
-  the file's `.bss` objects into the same list as its `.data` ones: the order of the statics' declarations changes
-  the order of the tables' strings in `.data`. A static without an initialiser (a tentative definition) is created
-  at the end of the file, a static `= 0` where it is declared, and the list is the objects newest first.
-  `docs/notes/wh.md` has the model, which reproduces the compiler's output for this file.
-- **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool,
-  which says nothing of the original's order but sizes.
-
-Not done:
-
-- `.data`: its sections are in place but for the order of the tables' strings of equal length, which comes from the
-  sort above and depends on the sizes and kinds (tentative or `= 0`) of every static and the places of the three
-  tables. No arrangement found gives all 60 (the best found gives 56; `docs/notes/wh.md`). So the unit is not
-  `complete`, and the ROM is linked from the original's bytes.
+  files: 60 bytes is still pooled, 64 is not). This is what told the compiler's version; with build 138 and
+  `-ipa file` all 66 functions match, with build 137 58 (the others reach the parent parameters).
+- **Arrays of `char` are not pooled either**, whatever their size: `gWHChildSsid`, in the pool, is an array of
+  `u16`, and `sConnectionSsid`, apart, an array of `u8`.
+- **A file's `.bss` objects are sorted with its `.data`**, in the compiler's size sort (`docs/notes/ov073.md`), so
+  the statics' declarations decide the order of the tables' strings of equal length in `.data`. In C a static
+  without an initialiser is a tentative definition, created at the end of the file; in C++ every static is created
+  where it is declared. The ROM's order of the 60 strings comes out of C++ (every static created in turn, then the
+  error names, the state code names and the WH state names, each a static of the function that uses it), and of no
+  arrangement of WH's statics in C that a search found (56 at best). So WH was compiled as C++, like the game's
+  own code (inferred: the order needs every static to be created where it is declared, which C gives only to the
+  ones with an initialiser, and the sample declares most without). `-lang=c++` and `-lang=c99` give the same code
+  for it; its functions are kept under their C names (`extern "C"`), since nothing outside refers to them by name
+  but the game's code, by address. `docs/notes/wh.md` has the details.
+- **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool and
+  strings, which says nothing of the original's order but sizes.
 
 ## The settings and the mansion information
 
@@ -602,8 +600,8 @@ Not done:
 - **138 and 139 are not told apart.** They give identical output on every game file and on WH, and on all 163 C
   files of NitroSDK and NitroSystem that the build compiles, each with its own flags. 138 is used, as the first
   build that fits; 139 is the last 3.0 build there is.
-- **`-ipa file` is a setting of the C code too**: WH's pooled statics need it (see "WH"), where the speech engine's
-  code matches only without it. So the game's build did not use one setting for all its C.
+- **WH is compiled like the game's C++**: `-ipa file` (its pooled statics need it), and as C++ (the order of its
+  data needs it), see "WH". The speech engine, C, matches only without `-ipa file`: it was built apart.
 - **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
   (`MWLD_VERSION`).
 

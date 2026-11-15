@@ -5,50 +5,52 @@
 #include "wh.h"
 #include <nitro/cht.h>
 
+// C++, but the SDK's C names: nothing outside refers to WH by name but the game's code, whose calls are by address
+extern "C" {
+
 // The game's build is a final one: no messages, and a failed check stops the program.
 #define WH_TRACE            if (wh_trace) wh_trace
 #define WH_REPORT_FAILURE(result)   WH_SetError(result)
 #define WH_ASSERT(exp)      (void)((exp) || (OS_Terminate(), 0))
 
-static WHStartScanCallbackFunc sScanCallback;
-static s32 sRecvBufferSize;
-static BOOL sPictoCatchFlag;
-static WMCallbackFunc sIndicationCallback;
-static u16 sMyAid;
-static u16 sChannelIndex;
-static s32 sSendBufferSize;
-static int sSysState;
-static u16 sAutoConnectFlag;
-static u16 sChannelBitmap;
-static u16 sConnectBitmap;
-
-static WMParentParam sParentParam ATTRIBUTE_ALIGN(32);
-static u32 sWmBuffer[WM_SYSTEM_BUF_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
-static u32 sSendBuffer[WH_PARENT_SEND_BUFFER_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
-static u32 sRecvBuffer[WH_CHILD_RECV_BUFFER_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
-static int sConnectMode;
-static WHJudgeAcceptFunc sJudgeAcceptFunc;
-
-static WMKeySetBuf sWMKeySetBuf ATTRIBUTE_ALIGN(32);
-static WMDataSharingInfo sDSInfo ATTRIBUTE_ALIGN(32);
-
-static WMBssDesc sBssDesc ATTRIBUTE_ALIGN(32);
-static WMScanParam sScanParam ATTRIBUTE_ALIGN(32);
-static u32 sRand;
-static u16 sChannelBusyRatio;
-static u16 sChannel;
-static int sErrCode;
-
-static u8 sConnectionSsid[WM_SIZE_CHILD_SSID] ATTRIBUTE_ALIGN(32);
-static u16 sChildSsid[WM_SIZE_CHILD_SSID / sizeof(u16)];
+// The statics are in an order that the compiler's size sort turns into the ROM's: the pool of those under 64 bytes
+// (sChannelBitmap at its start, sSysState at 0x2C, sScanParam at 0xA0), the others each on its own, and the order of
+// the name tables' strings in .data, which the same sort decides. Only their sizes say anything of the original's
+// order. The buffers are arrays of u32, as an array of char would be kept out of the pool; sConnectionSsid is one.
 
 static void (*wh_trace)(const char *, ...);
+static u32 sRand;
+static u16 sChannelIndex;
+static int sErrCode;
+static WMBssDesc sBssDesc ATTRIBUTE_ALIGN(32);
 static WHReceiverFunc sReceiverFunc;
+static WMScanParam sScanParam ATTRIBUTE_ALIGN(32);
+static BOOL sPictoCatchFlag;
+static u16 sConnectBitmap;
+static WHStartScanCallbackFunc sScanCallback;
 static u16 sWEPKey[20 / sizeof(u16)] ATTRIBUTE_ALIGN(32);
-
-static u16 whInitialized;
-static WHChildWEPKeyGeneratorFunc sChildWEPKeyGenerator;
+static s32 sRecvBufferSize;
+static u32 sRecvBuffer[WH_CHILD_RECV_BUFFER_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
+static WMParentParam sParentParam ATTRIBUTE_ALIGN(32);
+static u16 sChannelBusyRatio;
+static int sConnectMode;
+static u16 sMyAid;
+static u32 sWmBuffer[WM_SYSTEM_BUF_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
 static WHParentWEPKeyGeneratorFunc sParentWEPKeyGenerator;
+static u8 sConnectionSsid[WM_SIZE_CHILD_SSID] ATTRIBUTE_ALIGN(32);
+static u16 sAutoConnectFlag;
+static u32 sSendBuffer[WH_PARENT_SEND_BUFFER_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(32);
+static WMDataSharingInfo sDSInfo ATTRIBUTE_ALIGN(32);
+static WMKeySetBuf sWMKeySetBuf ATTRIBUTE_ALIGN(32);
+static WHChildWEPKeyGeneratorFunc sChildWEPKeyGenerator;
+static u16 sChannel;
+static WHJudgeAcceptFunc sJudgeAcceptFunc;
+u16 gWHChildSsid[WM_SIZE_CHILD_SSID / sizeof(u16)];
+static u16 sChannelBitmap;
+static WMCallbackFunc sIndicationCallback;
+static int sSysState;
+static u16 whInitialized;
+static s32 sSendBufferSize;
 
 #define RAND()          (sRand = sRand * 69069UL + 12345)
 #define RAND_INIT(x)    (sRand = (u32)(x))
@@ -96,19 +98,6 @@ static void WH_StateOutEndChild(void *arg);
 static void WH_StateOutEnd(void *arg);
 static BOOL WH_StateInReset(void);
 static void WH_StateOutReset(void *arg);
-
-static const char *sStateNames[] = {
-    "WH_SYSSTATE_STOP",
-    "WH_SYSSTATE_IDLE",
-    "WH_SYSSTATE_SCANNING",
-    "WH_SYSSTATE_BUSY",
-    "WH_SYSSTATE_CONNECTED",
-    "WH_SYSSTATE_DATASHARING",
-    "WH_SYSSTATE_KEYSHARING",
-    "WH_SYSSTATE_MEASURECHANNEL",
-    "WH_SYSSTATE_CONNECT_FAIL",
-    "WH_SYSSTATE_ERROR",
-};
 
 static const char *WH_GetWMErrCodeName(int result)
 {
@@ -186,9 +175,22 @@ static const char *WH_GetWMStateCodeName(u16 code)
 
 static void WH_ChangeSysState(int state)
 {
-    WH_TRACE("%s -> ", sStateNames[sSysState]);
+    static const char *sysstates[] = {
+        "WH_SYSSTATE_STOP",
+        "WH_SYSSTATE_IDLE",
+        "WH_SYSSTATE_SCANNING",
+        "WH_SYSSTATE_BUSY",
+        "WH_SYSSTATE_CONNECTED",
+        "WH_SYSSTATE_DATASHARING",
+        "WH_SYSSTATE_KEYSHARING",
+        "WH_SYSSTATE_MEASURECHANNEL",
+        "WH_SYSSTATE_CONNECT_FAIL",
+        "WH_SYSSTATE_ERROR",
+    };
+
+    WH_TRACE("%s -> ", sysstates[sSysState]);
     sSysState = state;
-    WH_TRACE("%s\n", sStateNames[sSysState]);
+    WH_TRACE("%s\n", sysstates[sSysState]);
 }
 
 static void WH_SetError(int code)
@@ -302,7 +304,7 @@ static void WH_StateOutStartParent(void *arg)
         break;
 
     case WM_STATECODE_CHILD_CONNECTED:
-        MI_CpuCopy8(cb->ssid, sChildSsid, WM_SIZE_CHILD_SSID);
+        MI_CpuCopy8(cb->ssid, gWHChildSsid, WM_SIZE_CHILD_SSID);
         WH_TRACE("StartParent - new child (aid 0x%x) connected\n", cb->aid);
         if (sJudgeAcceptFunc != NULL) {
             if (!sJudgeAcceptFunc(cb)) {
@@ -973,7 +975,7 @@ static BOOL WH_StateInSetMPData(const void *data, u16 datasize, WHSendCallbackFu
     WMErrCode result;
 
     DC_FlushRange(sSendBuffer, (u32)sSendBufferSize);
-    result = WM_SetMPDataToPortEx(WH_StateOutSetMPData, (void *)callback, data, datasize, 0xffff, WH_DATA_PORT,
+    result = WM_SetMPDataToPortEx(WH_StateOutSetMPData, (void *)callback, (const u16 *)data, datasize, 0xffff, WH_DATA_PORT,
                                   WH_DATA_PRIO);
     if (result != WM_ERRCODE_OPERATING) {
         WH_TRACE("WH_StateInSetMPData failed - %s\n", WH_GetWMErrCodeName(result));
@@ -1455,4 +1457,6 @@ BOOL WH_End(void)
 
     whInitialized = 0;
     return TRUE;
+}
+
 }
