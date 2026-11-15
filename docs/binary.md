@@ -569,9 +569,9 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 Not done:
 
 - Three functions differ, each with a comment saying how: `Init` (one instruction placed differently: the back
-  button's base address; the same length), `Update` (one register too many in the touch loop: our compiler keeps
-  `sModelTouchRects`' address in a register, the original loads it in each branch, so `&mCamera` is spilled and
-  the frame is 8 bytes larger), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
+  button's base address; the same length), `Update` (the frame is the original's since the touch loop reaches the camera
+  through a pointer; the stack slots of the clock's date and time and the order of the rectangle arithmetic
+  differ), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
   buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
   90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
   kept in a register, the array's own address is loaded again before each store.

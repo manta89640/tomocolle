@@ -602,9 +602,10 @@ void MapScene::Init() {
     mIdleFrames = 0;
 }
 
-// Not matching yet (0x1148 bytes against 0x1144): one register more is live in the touch loop of STATE_MAP (the
-// rectangle table's address, which the original loads again in each branch), so &mCamera is spilled to the stack
-// and the frame is 8 bytes larger; and the camera's reset is scheduled as in Init. The rest is the original's.
+// Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
+// rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
+// differs: the stack slots of UpdateCharacterTimes' date and time (below the touch loop's rectangles here, above
+// them in the original), the order of the rectangle arithmetic, and the registers of the camera's reset.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
@@ -961,7 +962,8 @@ void MapScene::Update() {
             int x, y;
             NNS_G3dWorldPosToScrPos(&position, &x, &y);
             ScreenRect rect;
-            if (mCamera.mMoving || mCamera.IsAtHome()) {
+            MapCamera *camera = &mCamera;
+            if (camera->mMoving || camera->IsAtHome()) {
                 rect = MoveRect(sModelTouchRects[i], x, y + 8);
             } else {
                 rect = MakeRect(sModelTouchRects[i].x * 27 / 10 + x, sModelTouchRects[i].y * 27 / 10 + (y + 20),
