@@ -6,50 +6,50 @@
 
 // --- The file's constants ---
 
-static const u8 sYesNoSequences[2] = { 0x74, 0x74 };
 static const u8 sYesNoSequences2[2] = { 0x75, 0x75 };
+static const u8 sYesNoSequences[2] = { 0x74, 0x74 };
 
-static const WindowPoint sTextPosition = { 24, 12 };
-static const WindowPoint sButtonSize2 = { 190, 26 };
+static const WindowPoint sListCursorPos = { 12, 47 };
+static const WindowPoint sListTextPosition = { 8, 2 };
+static const WindowPoint sListTitleTextPos = { 19, 41 };
+static const WindowPoint sListScrollDownSize = { 14, 12 };
 static const WindowPoint sBackButtonSize = { 94, 30 };
-static const u32 sYesNoMessages[2] = { 2, 3 };
-static const WindowPoint sButtonSize3 = { 190, 20 };
+static const ScreenRect sListWindowRect = { 20, 12, 216, 168 };
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
 static const WindowPoint sYesNoPositions[2] = { { 75, 149 }, { 181, 149 } };
 static const WindowPoint sYesNoSizes[2] = { { 94, 30 }, { 94, 30 } };
 static const ScreenRect sYesNoWindowRect = { 20, 20, 216, 152 };
-static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
-static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
+static const ScreenRect sListBarRect = { -8, -8, 16, 16 };
+static const WindowPoint sListButtonPositions[3] = { { 213, 19 }, { 242, 13 }, { 128, 173 } };
+static const WindowPoint sListButtonTextPositions[3] = { { 26, 34 }, { 24, 22 }, { 116, 30 } };
 static const WindowPoint sButtonTextPositions2[3] = { { 38, 68 }, { 38, 100 }, { 38, 118 } };
-static const WindowPoint sTextMargins[3] = { { 32, 33 }, { 32, 50 }, { 32, 33 } };
-static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const WindowPoint sButtonPositions2[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
 static const WindowPoint sButtonPositions3[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
 static const WindowButtonStyle sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
 
-static const WindowPoint sListTitleSize = { 228, 18 };
-static const WindowPoint sListTitleTextPos = { 19, 41 };
-static const WindowPoint sListScrollBarSize = { 14, 12 };
-static const WindowPoint sListScrollUpPos = { 244, 150 };
-static const WindowPoint sListScrollDownSize = { 14, 12 };
-static const WindowPoint sListTextPosition = { 8, 2 };
-static const WindowPoint sListScrollDownPos = { 244, 44 };
-static const WindowPoint sListCursorPos = { 12, 47 };
+static const WindowPoint sSignalPosition = { 244, 182 };
 static const WindowPoint sListTitlePos = { 119, 47 };
+static const WindowPoint sButtonSize2 = { 190, 26 };
+static const WindowPoint sListScrollUpPos = { 244, 150 };
+static const WindowPoint sButtonSize3 = { 190, 20 };
+static const WindowPoint sListTitleSize = { 228, 18 };
+static const WindowPoint sListScrollBarSize = { 14, 12 };
+static const WindowPoint sTextPosition = { 24, 12 };
+static const WindowPoint sListScrollDownPos = { 244, 44 };
 static const WindowPoint sListBarPos = { 244, 97 };
 // Where the signal strength sprite is
-static const WindowPoint sSignalPosition = { 244, 182 };
+static const u32 sYesNoMessages[2] = { 2, 3 };
 static const u32 sListButtonMessages[3] = { (u32)-1, (u32)-1, 0x105 };
 static const int sListButtonFonts[3] = { 0, -1, 2 };
-static const int sListButtonFiles[3] = { 1, 1, 0 };
 static const VecFx32 sEmitterPosition0 = { 0x1000, 0, 0 };
+static const int sListButtonFiles[3] = { 1, 1, 0 };
 static const VecFx32 sCameraPosition = { 0, 0x24CC, 0xC000 };
 static const VecFx32 sCameraTarget = { 0, 0x1CCC, 0 };
 static const VecFx32 sEmitterPosition1 = { -0x1000, 0, 0 };
-static const ScreenRect sListWindowRect = { 20, 12, 216, 168 };
-static const ScreenRect sListBarRect = { -8, -8, 16, 16 };
-static const WindowPoint sListButtonPositions[3] = { { 213, 19 }, { 242, 13 }, { 128, 173 } };
-static const WindowPoint sListButtonTextPositions[3] = { { 26, 34 }, { 24, 22 }, { 116, 30 } };
+static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
+static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
+static const WindowPoint sTextMargins[3] = { { 32, 33 }, { 32, 50 }, { 32, 33 } };
+static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const int sListOrders[7] = { 0, 1, 2, 3, 4, 5, 6 }; // What the list is sorted by, by the button chosen
 static const u32 sListMessages[7] = { 127, 128, 129, 130, 131, 132, 133 };
 static const WindowButtonStyle sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
@@ -60,8 +60,8 @@ static const WindowPoint sListItemSizes[7] = {
     { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 },
 };
 
-static const u8 sListButtonSequences2[3] = { 0x7C, 0x01, 0x77 };
 static const u8 sListButtonSequences[3] = { 0x7B, 0x00, 0x76 };
+static const u8 sListButtonSequences2[3] = { 0x7C, 0x01, 0x77 };
 // How strong the wireless signal is: the sequence of the signal sprite by link level
 static const u8 sLinkLevelSequences[4] = { 0, 1, 2, 3 };
 static const char sListWindowScreenName[] = "MLT:/Window_down.nsc";
