@@ -1885,3 +1885,877 @@ extern "C" void func_ov109_021523a4(int index, int result) {
 // @0x0215245c
 extern "C" void func_ov109_0215245c(void *arg) {
 }
+
+static inline BOOL IsWindowOpen(MessageWindow *window) {
+    return (window->mUnknownAD50 & 1) ? TRUE : FALSE;
+}
+
+static inline void PlaySound(int index) {
+    gSoundManager.StartSeqArc(1, 0x19, index);
+}
+
+// @0x0214f7ec
+void TushinScene::Update() {
+    UpdateSignal();
+    CountFrame();
+    func_0203b800(data_0213b700);
+    UpdateMusic();
+    UpdateCharacters();
+    switch (mPage) {
+    case 0x29:
+    case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37: case 0x38: case 0x39:
+    case 0x3A: case 0x3B: case 0x3C: case 0x3D: case 0x3E: case 0x3F:
+        if (func_02078f04() == 6) {
+            break;
+        }
+        func_020777f4();
+        break;
+    default:
+        func_020777f4();
+        break;
+    }
+    func_020341d4(&mWindow);
+    if (mWindow.mTransitionDone) {
+        mUnknown3F0AC = 1;
+    }
+    if (mWait > 0) {
+        mWait--;
+        return;
+    }
+
+    int layout = sPageLayouts[mPage];
+    if (sWireless.m28 != 0 && sWireless.m02 == 0) {
+        sWireless.m02 = sWireless.m28;
+        sWireless.m28 = 0;
+    }
+    if (sWireless.m02 != 0) {
+        switch (sWireless.m02) {
+        case 2:
+        case 3:
+            mUnknown3F08C = 2;
+            sWireless.m02 = 0;
+            if (mPage != 10) {
+                return;
+            }
+            mUnknown24 = 1;
+            break;
+        case 4:
+            sWireless.m02 = 0;
+            mUnknown3F088 = 1;
+            break;
+        }
+    }
+    if (mUnknown3F08C != 0 && mPage == 9) {
+        mPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+        ResetList();
+        func_020a3634(&mList);
+        func_02031228(&mButtons[0]);
+        mUnknown3F08C = 0;
+        Send(4);
+        sWireless.m30 = 0;
+        SetUpWindow(mPage);
+        mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
+        func_02034f38(&mWindow, 0, sPageMessages[mPage]);
+        func_02034720(&mWindow, 0x12, 1);
+    }
+
+    BOOL lost = FALSE;
+    int next = 0x22;
+    switch (GetMode()) {
+    case 1:
+        if (sWireless.m00 == 0) {
+            if (WH_GetSystemState() != 9 && WH_GetSystemState() != 10) {
+                break;
+            }
+            if (mNextPage == 0x22) {
+                break;
+            }
+        }
+        if (mPage == 10) {
+            mUnknown28 = 1;
+            break;
+        }
+        if (WH_GetSystemState() != 0) {
+            WH_Finalize();
+            func_0203b8b4(data_0213b700, 1);
+        }
+        sWireless.m00 = 0;
+        lost = TRUE;
+        next = 0x22;
+        break;
+    case 2:
+        if (func_02078f04() == 0 && mPage != 0x26 && mPage != 0x27 && mPage != 0x42 && mPage != 0x30 &&
+            mNextPage != 0x40 && mNextPage != 0x43 && mNextPage != 0x30) {
+            if (mUnknown3F098 == 1) {
+                mUnknown18 = 0x40;
+                mNextPage = 0x30;
+                CloseWindow();
+                if (!func_0202c37c(&gGameData)) {
+                    return;
+                }
+                if (!func_02073520(GetSelectedResident())) {
+                    return;
+                }
+                func_020a0664(&mResidents);
+                return;
+            }
+            if (mPage == 0x2B) {
+                mUnknown28 = 1;
+                break;
+            }
+            lost = TRUE;
+            next = mPage == 0x28 ? 0x43 : 0x40;
+            break;
+        }
+        if (mUnknown28 == 1) {
+            mUnknown28 = 0;
+            lost = TRUE;
+            next = 0x40;
+        }
+        break;
+    }
+    if (lost) {
+        mNextPage = next;
+        if (layout != -1) {
+            CloseWindow();
+            PlaySound(0xD);
+        } else {
+            mPage = next;
+            SetUpWindow(mPage);
+            func_02034f38(&mWindow, 0, sPageMessages[mPage]);
+            func_02034720(&mWindow, 0x12, 1);
+            PlaySound(0xC);
+        }
+        ResetList();
+        func_020a3634(&mList);
+        func_02031228(&mButtons[0]);
+        mUnknown28 = 0;
+        return;
+    }
+
+    if (layout != -1) {
+        if (mWindow.mResult != -1) {
+            mWindow.mUnknownSetBeforeClose = 15;
+            int close = 0x1C;
+            int result = mWindow.mResult;
+            switch (mPage) {
+            case 0:
+                switch (result) {
+                case 0:
+                    mNextPage = 1;
+                    break;
+                case 1:
+                    func_0203c02c(&gSceneManager, 0xB1);
+                    mNextPage = 1;
+                    close = 0x2C;
+                    break;
+                case 3:
+                    Leave();
+                    mNextPage = 1;
+                    close = 0x2C;
+                    break;
+                }
+                break;
+            case 1:
+                switch (result) {
+                case 0:
+                    mNextPage = 2;
+                    break;
+                case 1:
+                    mNextPage = 0x26;
+                    WH_Finalize();
+                    func_0203b8b4(data_0213b700, 1);
+                    sWireless.m4C = 0;
+                    sWireless.m2C = 0;
+                    break;
+                case 3:
+                    mNextPage = 0;
+                    close = 0x2C;
+                    break;
+                }
+                break;
+            case 2:
+                switch (result) {
+                case 0:
+                    mNextPage = 3;
+                    func_0203b7e8(data_0213b700);
+                    WH_SetReceiver(func_ov109_02151ee0);
+                    break;
+                case 1:
+                    mNextPage = 4;
+                    func_0203b7e8(data_0213b700);
+                    func_0203b87c(data_0213b700);
+                    WH_SetReceiver(func_ov109_02151ee0);
+                    break;
+                case 3:
+                    mNextPage = 1;
+                    close = 0x2C;
+                    break;
+                }
+                break;
+            case 3:
+                if (result == 3) {
+                    mNextPage = 2;
+                    close = 0x2C;
+                    WH_Finalize();
+                    func_0203b8b4(data_0213b700, 1);
+                }
+                break;
+            case 4:
+                if (result == 3) {
+                    mNextPage = 2;
+                    close = 0x2C;
+                    WH_Finalize();
+                    func_0203b8b4(data_0213b700, 1);
+                }
+                break;
+            case 5:
+                if (result == 3) {
+                    mNextPage = 2;
+                    close = 0x2C;
+                    WH_Finalize();
+                    func_0203b8b4(data_0213b700, 1);
+                } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
+                    func_0203bac4(data_0213b700, result);
+                    mNextPage = 6;
+                }
+                break;
+            case 7:
+            case 8:
+                mNextPage = 9;
+                close = 0x14;
+                break;
+            case 11:
+                if (result == 0) {
+                    if (func_02073520(GetSelectedResident()) == TRUE) {
+                        mNextPage = 0xC;
+                    } else if (func_ov109_02151d74(GetSelectedResident())) {
+                        mNextPage = 0x21;
+                    } else {
+                        mNextPage = 0xD;
+                        Send(2);
+                    }
+                } else {
+                    mNextPage = 9;
+                    close = 0x14;
+                }
+                break;
+            case 12:
+                if (result == 0) {
+                    if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                        mNextPage = 0x21;
+                    } else {
+                        mNextPage = 0xD;
+                        Send(3);
+                    }
+                } else {
+                    mNextPage = 9;
+                    close = 0x14;
+                }
+                break;
+            case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
+            case 28: case 29: case 30: case 31: case 32: case 33:
+                if (mUnknown3F09C == 1) {
+                    mUnknown3F09C = 0;
+                    mNextPage = 0x1F;
+                    break;
+                }
+                if (mUnknown3F0A0 == 1) {
+                    mUnknown3F0A0 = 0;
+                    if (GiveShirt() == TRUE) {
+                        mNextPage = 0x20;
+                        break;
+                    }
+                }
+                mNextPage = 9;
+                close = 0x14;
+                if (mPage == 0x11 && mUnknown3F094 == 1) {
+                    ShowNextCharacter();
+                }
+                break;
+            case 34:
+                mNextPage = 0;
+                ResetExchange();
+                break;
+            case 35:
+                if (result == 0) {
+                    mNextPage = 0x24;
+                } else {
+                    mNextPage = 9;
+                    close = 0x14;
+                }
+                break;
+            case 37:
+            case 67:
+                mNextPage = 0;
+                ResetExchange();
+                break;
+            case 38:
+                mNextPage = 1;
+                close = 0x2C;
+                func_02078d48();
+                break;
+            case 39:
+                if (result == 3) {
+                    mNextPage = 1;
+                    close = 0x2C;
+                    func_02078d48();
+                } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
+                    data_0213b700->mParent = result;
+                    mUnknown3F0B0 = 1;
+                    mNextPage = 0x28;
+                }
+                break;
+            case 41:
+                mNextPage = 0x2A;
+                close = 0x14;
+                break;
+            case 44:
+                if (result == 0) {
+                    if (sWireless.m26 != 0) {
+                        break;
+                    }
+                    if (func_02073520(GetSelectedResident()) == TRUE) {
+                        mNextPage = 0x2D;
+                    } else if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                        mNextPage = 0x3F;
+                    } else {
+                        mNextPage = 0x2E;
+                        StartSendAnimation();
+                        UpdateMiiData();
+                    }
+                } else {
+                    mNextPage = 0x2A;
+                    close = 0x14;
+                }
+                break;
+            case 45:
+                if (result == 0) {
+                    if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                        mNextPage = 0x3F;
+                    } else {
+                        mNextPage = 0x2E;
+                        func_0202c328(&gGameData, GetSelectedResident()->mIndex, 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->mIndex);
+                        StartReceiveAnimation();
+                        SetUnknown3F098();
+                    }
+                } else {
+                    mNextPage = 0x2A;
+                    close = 0x14;
+                }
+                break;
+            case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59:
+            case 60: case 61: case 62: case 63:
+                if (mUnknown3F0A4 == 1) {
+                    mUnknown3F0A4 = 0;
+                    if (GiveWiiShirt() == TRUE) {
+                        mNextPage = 0x3D;
+                        break;
+                    }
+                }
+                mNextPage = 0x2A;
+                close = 0x14;
+                if (mPage == 0x31 && mUnknown3F094 == 1) {
+                    ShowNextCharacter();
+                }
+                break;
+            case 64:
+                mNextPage = 0;
+                SetOtherStandAnimation();
+                SetStandAnimation(2);
+                func_02091a14(&mCharacters[2], FALSE);
+                ResetExchange();
+                break;
+            case 65:
+                if (result == 0) {
+                    mNextPage = 0x42;
+                } else {
+                    mNextPage = 0x2A;
+                    close = 0x14;
+                }
+                break;
+            }
+            func_020349cc(&mWindow, close);
+        } else {
+            switch (mPage) {
+            case 4:
+                if (WH_GetSystemState() != 2) {
+                    break;
+                }
+                if (!IsWindowOpen(&mWindow) || mNextPage == 5) {
+                    break;
+                }
+                if (func_0203b9c4(data_0213b700) <= 0) {
+                    break;
+                }
+                mNextPage = 5;
+                CloseWindow();
+                break;
+            case 11:
+            case 12:
+            case 35:
+                if (mUnknown3F08C == 0 || mNextPage == 0xD) {
+                    break;
+                }
+                mNextPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+                CloseWindow();
+                break;
+            case 13:
+                if (mUnknown3F084 != 0) {
+                    break;
+                }
+                if (!IsWindowOpen(&mWindow)) {
+                    break;
+                }
+                if (sWireless.m22 != 0 || sWireless.m24 != 0) {
+                    break;
+                }
+                if (mCharacters[2].mModel.mVisible) {
+                    break;
+                }
+                switch (sWireless.m02) {
+                case 5:
+                    mNextPage = 0x11;
+                    break;
+                case 6:
+                    mNextPage = 0x13;
+                    break;
+                case 7:
+                    mNextPage = 0x14;
+                    func_02091a14(&mCharacters[mCurrent ^ 1], TRUE);
+                    break;
+                case 8:
+                    mNextPage = 0x12;
+                    func_02091a14(&mCharacters[mCurrent ^ 1], TRUE);
+                    break;
+                case 9:
+                    mNextPage = 0x15;
+                    break;
+                case 10:
+                    mNextPage = 0x16;
+                    break;
+                }
+                if (mUnknown3F098 == 1) {
+                    mUnknown18 = mNextPage;
+                    mNextPage = 0x10;
+                }
+                sWireless.m02 = 0;
+                CloseWindow();
+                func_020a05dc(&mResidents);
+                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                break;
+            case 14:
+            case 15: {
+                if (!IsWindowOpen(&mWindow)) {
+                    break;
+                }
+                if (sWireless.m26 <= 5 || sWireless.m04 <= 2) {
+                    break;
+                }
+                BOOL done = FALSE;
+                if (sWireless.m30 == 1) {
+                    sWireless.m30 = 0;
+                    mUnknown3F0A8 = ReceiveCharacter();
+                    func_020a05dc(&mResidents);
+                    func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                    mNextPage = 0x17;
+                    if (mUnknown3F0A8 != 0) {
+                        sWireless.m26 = 0;
+                        sWireless.m04 = 0;
+                        switch (mUnknown3F0A8) {
+                        case 3:
+                            mNextPage = 0x18;
+                            Send(5);
+                            mUnknown3F0A0 = 1;
+                            ShowReceived();
+                            break;
+                        case 4:
+                            mNextPage = 0x19;
+                            Send(5);
+                            mUnknown3F0A0 = 1;
+                            ShowReceived();
+                            done = TRUE;
+                            break;
+                        case 1:
+                            mNextPage = 0x1C;
+                            Send(6);
+                            break;
+                        case 2:
+                            mNextPage = 0x1D;
+                            Send(7);
+                            break;
+                        case 5:
+                            mNextPage = 0x1A;
+                            Send(8);
+                            break;
+                        case 6:
+                            mNextPage = 0x1B;
+                            Send(9);
+                            break;
+                        case 7:
+                            mNextPage = 0x1E;
+                            Send(10);
+                            break;
+                        }
+                        CloseWindow();
+                        if (done != TRUE) {
+                            break;
+                        }
+                        if (func_02073520(&sTransfer) != TRUE) {
+                            break;
+                        }
+                    }
+                    mUnknown3F0A0 = 1;
+                    ShowReceived();
+                    if (func_02073520(&sTransfer) == TRUE) {
+                        mUnknown18 = mNextPage;
+                        mNextPage = 0x10;
+                        CloseWindow();
+                        SetUnknown3F098();
+                        done = TRUE;
+                    }
+                    Send(5);
+                    if (done == TRUE) {
+                        break;
+                    }
+                }
+                sWireless.m26 = 0;
+                sWireless.m04 = 0;
+                CloseWindow();
+                break;
+            }
+            case 16:
+                if (!IsWindowOpen(&mWindow)) {
+                    break;
+                }
+                if (mUnknown3F098 == 1) {
+                    mWait = 60;
+                    Save();
+                    mUnknown3F098 = 0;
+                    break;
+                }
+                if (func_0202cd38(&gGameData)) {
+                    break;
+                }
+                sWireless.m26 = 0;
+                sWireless.m04 = 0;
+                mNextPage = mUnknown18;
+                CloseWindow();
+                break;
+            case 36:
+                if (WH_GetSystemState() == 0 || WH_GetSystemState() == 1) {
+                    mNextPage = 0;
+                    CloseWindow();
+                    ResetExchange();
+                }
+                break;
+            case 38:
+                if (func_02078f04() != 1) {
+                    break;
+                }
+                if (!IsWindowOpen(&mWindow) || mNextPage == 0x27) {
+                    break;
+                }
+                if (sParentTimers[0] + sParentTimers[1] + sParentTimers[2] <= 0) {
+                    break;
+                }
+                mNextPage = 0x27;
+                CloseWindow();
+                break;
+            case 40:
+                if (mUnknown3F0B0 != 1) {
+                    break;
+                }
+                func_02078da4(mParentIds[data_0213b700->mParent]);
+                mUnknown3F0B0 = 0;
+                break;
+            case 66:
+                if (func_02078f04() == 0) {
+                    mNextPage = 0;
+                    CloseWindow();
+                    ResetExchange();
+                }
+                // fall through
+            case 44:
+            case 45:
+            case 65:
+                if (sWireless.m26 == 0) {
+                    break;
+                }
+                if (!IsWindowOpen(&mWindow) || mNextPage == 0x2E || mNextPage == 0x2F) {
+                    break;
+                }
+                mNextPage = NextPageAfterReceive();
+                CloseWindow();
+                mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
+                func_02034f38(&mWindow, 0, sPageMessages[mPage]);
+                break;
+            case 46:
+            case 47: {
+                if (!IsWindowOpen(&mWindow)) {
+                    break;
+                }
+                if (sWireless.m40 != 1) {
+                    break;
+                }
+                if (sWireless.m48 == 0) {
+                    break;
+                }
+                int sent = func_02073520(GetSelectedResident());
+                mNextPage = 0x31;
+                switch (sWireless.m48) {
+                case 1:
+                    if (sent) {
+                        func_020a0664(&mResidents);
+                    }
+                    break;
+                case 2:
+                    mNextPage = 0x32;
+                    CloseWindow();
+                    sWireless.m40 = 0;
+                    func_0202c328(&gGameData, GetSelectedResident()->mIndex, 1);
+                    SetOtherStandAnimation();
+                    break;
+                case -5:
+                    mNextPage = 0x33;
+                    CloseWindow();
+                    sWireless.m40 = 0;
+                    return;
+                case -4:
+                    mNextPage = 0x34;
+                    CloseWindow();
+                    sWireless.m40 = 0;
+                    func_0202c328(&gGameData, GetSelectedResident()->mIndex, 1);
+                    SetOtherStandAnimation();
+                    break;
+                }
+                if (sent) {
+                    SetUnknown3F098();
+                    mUnknown18 = mNextPage;
+                    mNextPage = 0x30;
+                }
+                CloseWindow();
+                sWireless.m48 = 0;
+                break;
+            }
+            case 48:
+                if (!IsWindowOpen(&mWindow)) {
+                    break;
+                }
+                if (mUnknown3F098 == 1) {
+                    mWait = 60;
+                    Save();
+                    mUnknown3F098 = 0;
+                    break;
+                }
+                if (func_0202cd38(&gGameData)) {
+                    break;
+                }
+                mNextPage = mUnknown18;
+                CloseWindow();
+                sWireless.m40 = 0;
+                func_020a05dc(&mResidents);
+                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                break;
+            case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
+                if (!IsWindowOpen(&mWindow) || sWireless.m26 == 0) {
+                    break;
+                }
+                sWireless.m26 = 0;
+                func_020a05dc(&mResidents);
+                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
+                    ShowReceived();
+                    mUnknown3F0A4 = 1;
+                }
+                break;
+            }
+        }
+
+        if (mUnknown3F0AC == 1) {
+            int nextLayout = sPageLayouts[mNextPage];
+            if (nextLayout >= 0) {
+                SetUpWindow(mNextPage);
+                if (nextLayout == 4) {
+                    for (int i = 0; i < 3; i++) {
+                        if (sParentTimers[i] > 0) {
+                            func_02031e88(&mWindow.mSprites[i], 0);
+                            mWindow.mTexts[i + 1].SetStringArg(mParentNames[i], 0);
+                        } else {
+                            func_02031e88(&mWindow.mSprites[i], 1);
+                        }
+                    }
+                }
+                switch (mNextPage) {
+                case 3:
+                    func_0203b940(data_0213b700, 1);
+                    break;
+                case 4:
+                    func_0203b900(data_0213b700, 1);
+                    for (int i = 0; i < 3; i++) {
+                        sParentTimers[i] = 0;
+                        mParentIds[i] = 0;
+                    }
+                    ClearParentNames();
+                    break;
+                case 5:
+                case 39:
+                    PlaySound(0xA);
+                    break;
+                case 7:
+                    mWindow.mTexts[0].SetStringArg((wchar_t *)data_02138fb4, 0);
+                    PlaySound(0xB);
+                    mUnknown3F090 = 1;
+                    break;
+                case 13:
+                    if (mUnknown3F08C != 0) {
+                        if (mUnknown3F090 == 0) {
+                            mNextPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+                            mUnknown3F08C = 0;
+                            Send(4);
+                            sWireless.m30 = 0;
+                            break;
+                        }
+                        mUnknown3F08C = 0;
+                    }
+                    switch (mPage) {
+                    case 0xB:
+                        StartSendAnimation();
+                        break;
+                    case 0xC:
+                        func_0202c328(&gGameData, GetSelectedResident()->mIndex, 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->mIndex);
+                        StartReceiveAnimation();
+                        break;
+                    }
+                    break;
+                case 14:
+                case 15:
+                    sWireless.m30 = 0;
+                    mUnknown24 = 0;
+                    if (mPage != 0xB && mPage != 0xC && mPage != 0x23) {
+                        break;
+                    }
+                    if (mUnknown3F08C == 0) {
+                        break;
+                    }
+                    mUnknown3F08C = 0;
+                    Send(4);
+                    break;
+                case 16:
+                    mWait = 60;
+                    PlaySound(0xC);
+                    break;
+                case 8:
+                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    PlaySound(0xB);
+                    mUnknown3F090 = 0;
+                    break;
+                case 17:
+                case 49:
+                    PlaySound(0xB);
+                    break;
+                case 18: case 19: case 20: case 21: case 25: case 26: case 27: case 29: case 31:
+                    PlaySound(0xC);
+                    break;
+                case 22: case 24: case 28: case 30: case 33:
+                    PlaySound(0xD);
+                    break;
+                case 23:
+                    mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
+                    PlaySound(0xB);
+                    break;
+                case 32:
+                case 61:
+                    PlaySound(0xC);
+                    break;
+                case 6:
+                    func_0203b968(data_0213b700, 1);
+                    mWait = 60;
+                    break;
+                case 36:
+                    WH_Finalize();
+                    func_0203b8b4(data_0213b700, 1);
+                    mWait = 60;
+                    break;
+                case 37:
+                    func_0203b8b4(data_0213b700, 1);
+                    PlaySound(0xD);
+                    break;
+                case 40:
+                    mWait = 60;
+                    break;
+                case 41:
+                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    PlaySound(0xB);
+                    break;
+                case 46:
+                case 47:
+                    sWireless.m40 = 0;
+                    break;
+                case 53:
+                    PlaySound(0xB);
+                    break;
+                case 66: {
+                    int state = func_02078f04();
+                    if (state != 7 && state != 10) {
+                        func_02078d48();
+                    }
+                    mWait = 60;
+                    break;
+                }
+                case 34:
+                    PlaySound(0xD);
+                    // fall through
+                case 64:
+                    mUnknown28 = 0;
+                    break;
+                case 38:
+                    for (int i = 0; i < 3; i++) {
+                        sParentTimers[i] = 0;
+                        mParentIds[i] = 0;
+                    }
+                    ClearParentNames();
+                    func_02078d04();
+                    break;
+                case 67:
+                    PlaySound(0xD);
+                    break;
+                }
+                func_02034f38(&mWindow, 0, sPageMessages[mNextPage]);
+                if (mPage > mNextPage) {
+                    func_02034720(&mWindow, 0x2A, 1);
+                } else {
+                    func_02034720(&mWindow, 0x1A, 1);
+                }
+                if (nextLayout == 4) {
+                    for (int i = 0; i < 3; i++) {
+                        if (sParentTimers[i] > 0) {
+                            func_02031e88(&mWindow.mSprites[i], 0);
+                        } else {
+                            func_02031e88(&mWindow.mSprites[i], 1);
+                        }
+                    }
+                }
+            }
+            Disconnect(mNextPage);
+            mPage = mNextPage;
+        }
+        mUnknown3F0AC = 0;
+    } else {
+        switch (mPage) {
+        case 9:
+        case 0x2A:
+            UpdateListButtons();
+            break;
+        case 10:
+        case 0x2B:
+            UpdateListWindow();
+            break;
+        }
+    }
+    UpdateConnection();
+    UpdateSending();
+    UpdateSaving();
+}

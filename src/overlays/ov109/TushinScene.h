@@ -481,6 +481,8 @@ extern "C" {
 void WH_Reset(void);
 void WH_Finalize(void);
 u16 WH_GetBitmap(void);
+typedef void (*WHReceiverFunc)(u16 aid, u16 *data, u16 size);
+void WH_SetReceiver(WHReceiverFunc proc);
 u16 func_02030a68(void);                                  // The channel measured
 int WH_GetLinkLevel(void);
 void func_02030ba4(void);
@@ -503,12 +505,31 @@ const u16 *func_020780b4(int i);
 
 struct WirelessManager {
     /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ int mUnknown08;
+    /* 0x0C */ int mUnknown0C;
+    /* 0x10 */ int mUnknown10;
+    /* 0x14 */ int mUnknown14;
+    /* 0x18 */ int mUnknown18;
+    /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
 };
 
 extern "C" {
 extern WirelessManager *data_0213b700;
 void func_0203b76c(WirelessManager *manager, int a);
 int func_0203b800(WirelessManager *manager);
+void func_0203b7e8(WirelessManager *manager);
+void func_0203b87c(WirelessManager *manager);
+void func_0203b900(WirelessManager *manager, int a);
+void func_0203b940(WirelessManager *manager, int a);
+void func_0203b968(WirelessManager *manager, int a);
+int func_0203b9c4(WirelessManager *manager);
+void func_0203bac4(WirelessManager *manager, int parent);
+void func_02078d04(void);
+void func_02078d48(void);
+void func_02078da4(u16 id);
+BOOL func_0202c37c(GameData *game);
+void func_0202d110(GameData *game, int index);
 void func_0203b8b4(WirelessManager *manager, int a);
 void func_020777f4(void);
 void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
@@ -535,6 +556,7 @@ void func_ov109_02151fcc(int, int);
 void func_ov109_021523a4(int, int);
 void func_ov109_02151eb4(BOOL result);
 void func_ov109_0215245c(void *arg);
+void func_ov109_02151ee0(u16 aid, u16 *data, u16 size);
 }
 
 // --- The scene ----------------------------------------------------------------------------------------------------
