@@ -12,8 +12,8 @@ public:
 
     /* 0x00 */ u8 mUnknown00[8];
     // SoundManager::Init sets the sound settings to their defaults when this is 3. Overlay 106 (PreStartScene) reads
-    // it as the outcome of loading the save data: 0 loaded, 1 loaded (the scene goes on as for a first start), 2
-    // broken (it initialises the data), 3 and 4 not readable.
+    // it as the outcome of loading the save data: on 0 it goes on, on 1 it goes on as on a first start, on 2 it says
+    // the data is broken and initialises it, on 3 and 4 it says the data could not be read.
     /* 0x08 */ int mUnknownState;
     /* 0x0C */ u8 mUnknown0C[0x44];
     // Kept between 0 and 9,999,999 by SetCappedCounter, which eight shop-like overlays call (56, 68, 75, 78, 82
