@@ -1207,7 +1207,7 @@ func_0202b0e8 kind:function(arm,size=0x10) addr:0x0202b0e8
 func_0202b0f8 kind:function(arm,size=0x10) addr:0x0202b0f8
 func_0202b108 kind:function(arm,size=0x1c) addr:0x0202b108
 func_0202b124 kind:function(arm,size=0xc) addr:0x0202b124
-func_0202b130 kind:function(arm,size=0xc0) addr:0x0202b130
+_ZN8G3SpriteC1Ev kind:function(arm,size=0xc0) addr:0x0202b130
 func_0202b1f0 kind:function(arm,size=0x28) addr:0x0202b1f0
 func_0202b218 kind:function(arm,size=0xd0) addr:0x0202b218
 func_0202b2e8 kind:function(arm,size=0x1bc) addr:0x0202b2e8
@@ -1215,8 +1215,8 @@ func_0202b4a4 kind:function(arm,size=0x20) addr:0x0202b4a4
 func_0202b4c4 kind:function(arm,size=0x14) addr:0x0202b4c4
 func_0202b4d8 kind:function(arm,size=0x4) addr:0x0202b4d8
 func_0202b4dc kind:function(arm,size=0x1dc) addr:0x0202b4dc
-func_0202b6b8 kind:function(arm,size=0x14) addr:0x0202b6b8
-func_0202b6cc kind:function(arm,size=0x4) addr:0x0202b6cc
+_ZN8G3SpriteD0Ev kind:function(arm,size=0x14) addr:0x0202b6b8
+_ZN8G3SpriteD1Ev kind:function(arm,size=0x4) addr:0x0202b6cc
 func_0202b6d0 kind:function(arm,size=0x1c) addr:0x0202b6d0
 func_0202b6ec kind:function(arm,size=0xc8) addr:0x0202b6ec
 func_0202b7b4 kind:function(arm,size=0x10) addr:0x0202b7b4
@@ -1528,8 +1528,8 @@ func_02035460 kind:function(arm,size=0x208) addr:0x02035460
 func_02035668 kind:function(arm,size=0x10) addr:0x02035668
 func_02035678 kind:function(arm,size=0x98) addr:0x02035678
 func_02035710 kind:function(arm,size=0x78) addr:0x02035710
-func_02035788 kind:function(arm,size=0x78) addr:0x02035788
-func_02035800 kind:function(arm,size=0x70) addr:0x02035800
+Clock_GetDate kind:function(arm,size=0x78) addr:0x02035788
+Clock_GetTime kind:function(arm,size=0x70) addr:0x02035800
 func_02035870 kind:function(arm,size=0xa4) addr:0x02035870
 Clock_GetSeconds kind:function(arm,size=0x40) addr:0x02035914
 func_02035954 kind:function(arm,size=0x48) addr:0x02035954
@@ -2059,36 +2059,36 @@ func_0204fa78 kind:function(arm,size=0x14c) addr:0x0204fa78
 func_0204fbc4 kind:function(arm,size=0x70) addr:0x0204fbc4
 func_0204fc34 kind:function(arm,size=0xc) addr:0x0204fc34
 func_0204fc40 kind:function(arm,size=0x34) addr:0x0204fc40
-func_0204fc74 kind:function(arm,size=0x60) addr:0x0204fc74
-func_0204fcd4 kind:function(arm,size=0x640) addr:0x0204fcd4
-func_02050314 kind:function(arm,size=0x50) addr:0x02050314
-func_02050364 kind:function(arm,size=0xa0) addr:0x02050364
-func_02050404 kind:function(arm,size=0x130) addr:0x02050404
-func_02050534 kind:function(arm,size=0x11c) addr:0x02050534
-func_02050650 kind:function(arm,size=0x118) addr:0x02050650
-func_02050768 kind:function(arm,size=0x58) addr:0x02050768
-func_020507c0 kind:function(arm,size=0x50) addr:0x020507c0
-func_02050810 kind:function(arm,size=0x2c) addr:0x02050810
-func_0205083c kind:function(arm,size=0x20) addr:0x0205083c
-func_0205085c kind:function(arm,size=0x28) addr:0x0205085c
-func_02050884 kind:function(arm,size=0x44) addr:0x02050884
-func_020508c8 kind:function(arm,size=0x1f8) addr:0x020508c8
-func_02050ac0 kind:function(arm,size=0xc) addr:0x02050ac0
-func_02050acc kind:function(arm,size=0x44) addr:0x02050acc
-func_02050b10 kind:function(arm,size=0x44) addr:0x02050b10
-func_02050b54 kind:function(arm,size=0x78) addr:0x02050b54
-func_02050bcc kind:function(arm,size=0xa4) addr:0x02050bcc
-func_02050c70 kind:function(arm,size=0x7c) addr:0x02050c70
-func_02050cec kind:function(arm,size=0x84) addr:0x02050cec
-func_02050d70 kind:function(arm,size=0x44) addr:0x02050d70
-func_02050db4 kind:function(arm,size=0x56c) addr:0x02050db4
-func_02051320 kind:function(arm,size=0x2c) addr:0x02051320
-func_0205134c kind:function(arm,size=0x44) addr:0x0205134c
-func_02051390 kind:function(arm,size=0x1fc) addr:0x02051390
-func_0205158c kind:function(arm,size=0x28) addr:0x0205158c
-func_020515b4 kind:function(arm,size=0x54) addr:0x020515b4
-func_02051608 kind:function(arm,size=0x18) addr:0x02051608
-func_02051620 kind:function(arm,size=0x20) addr:0x02051620
+_ZN16MiiListMenuScene12StartLoadingEv kind:function(arm,size=0x60) addr:0x0204fc74
+_ZN16MiiListMenuScene4InitEv kind:function(arm,size=0x640) addr:0x0204fcd4
+_ZN16MiiListMenuScene6UpdateEv kind:function(arm,size=0x50) addr:0x02050314
+_ZN16MiiListMenuScene10UpdateIdleEv kind:function(arm,size=0xa0) addr:0x02050364
+_ZN16MiiListMenuScene13UpdateMiiMenuEv kind:function(arm,size=0x130) addr:0x02050404
+_ZN16MiiListMenuScene14UpdateSortMenuEv kind:function(arm,size=0x11c) addr:0x02050534
+_ZN16MiiListMenuScene13UpdateConfirmEv kind:function(arm,size=0x118) addr:0x02050650
+_ZN16MiiListMenuScene14UpdateMovedOutEv kind:function(arm,size=0x58) addr:0x02050768
+_ZN16MiiListMenuScene4DrawEv kind:function(arm,size=0x50) addr:0x020507c0
+_ZN16MiiListMenuScene4ExitEv kind:function(arm,size=0x2c) addr:0x02050810
+_ZN16MiiListMenuSceneD1Ev kind:function(arm,size=0x20) addr:0x0205083c
+_ZN16MiiListMenuSceneD0Ev kind:function(arm,size=0x28) addr:0x0205085c
+_ZN17G3SpriteTestScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x02050884
+_ZN17G3SpriteTestScene4InitEv kind:function(arm,size=0x1f8) addr:0x020508c8
+_ZN17G3SpriteTestScene6UpdateEv kind:function(arm,size=0xc) addr:0x02050ac0
+_ZN17G3SpriteTestScene4DrawEv kind:function(arm,size=0x44) addr:0x02050acc
+_ZN17G3SpriteTestScene4ExitEv kind:function(arm,size=0x44) addr:0x02050b10
+_ZN17G3SpriteTestScene17SetRandomPositionEi kind:function(arm,size=0x78) addr:0x02050b54
+_ZN17G3SpriteTestScene13UpdateSpritesEv kind:function(arm,size=0xa4) addr:0x02050bcc
+_ZN17G3SpriteTestSceneD1Ev kind:function(arm,size=0x7c) addr:0x02050c70
+_ZN17G3SpriteTestSceneD0Ev kind:function(arm,size=0x84) addr:0x02050cec
+_ZN12MiiListScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x02050d70
+_ZN12MiiListScene4InitEv kind:function(arm,size=0x56c) addr:0x02050db4
+_ZN12MiiListScene6UpdateEv kind:function(arm,size=0x2c) addr:0x02051320
+_ZN12MiiListScene10UpdateIdleEv kind:function(arm,size=0x44) addr:0x0205134c
+_ZN12MiiListScene14UpdateSortMenuEv kind:function(arm,size=0x1fc) addr:0x02051390
+_ZN12MiiListScene4DrawEv kind:function(arm,size=0x28) addr:0x0205158c
+_ZN12MiiListScene4ExitEv kind:function(arm,size=0x54) addr:0x020515b4
+_ZN12MiiListSceneD1Ev kind:function(arm,size=0x18) addr:0x02051608
+_ZN12MiiListSceneD0Ev kind:function(arm,size=0x20) addr:0x02051620
 func_02051640 kind:function(arm,size=0x60) addr:0x02051640
 func_020516a0 kind:function(arm,size=0x198) addr:0x020516a0
 func_02051838 kind:function(arm,size=0x4) addr:0x02051838
@@ -3442,7 +3442,7 @@ func_0208fbb4 kind:function(arm,size=0x80) addr:0x0208fbb4
 func_0208fc34 kind:function(arm,size=0xc4) addr:0x0208fc34
 _ZN13CharacterBaseC2Ev kind:function(arm,size=0x20) addr:0x0208fcf8
 func_0208fd18 kind:function(arm,size=0x20) addr:0x0208fd18
-func_0208fd38 kind:function(arm,size=0x2c) addr:0x0208fd38
+_ZN13CharacterBaseD1Ev kind:function(arm,size=0x2c) addr:0x0208fd38
 _ZN13CharacterBaseD2Ev kind:function(arm,size=0x2c) addr:0x0208fd64
 func_0208fd90 kind:function(arm,size=0x40) addr:0x0208fd90
 func_0208fdd0 kind:function(arm,size=0xe4) addr:0x0208fdd0
@@ -4204,8 +4204,8 @@ __sinit_020b0674 kind:function(arm,size=0x2c) addr:0x020b0674
 __sinit_020b06a0 kind:function(arm,size=0x2c) addr:0x020b06a0
 __sinit_020b06cc kind:function(arm,size=0x14) addr:0x020b06cc
 __sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
-__sinit_020b06f4 kind:function(arm,size=0x88) addr:0x020b06f4
-__sinit_020b077c kind:function(arm,size=0x64) addr:0x020b077c
+__sinit_MiiListMenuScene.cpp kind:function(arm,size=0x88) addr:0x020b06f4 local
+__sinit_MiiListScene.cpp kind:function(arm,size=0x64) addr:0x020b077c local
 __sinit_020b07e0 kind:function(arm,size=0x30) addr:0x020b07e0
 FX_SinCosTable_ kind:data(any) addr:0x020b0810
 data_020b1410 kind:data(any) addr:0x020b1410
@@ -4284,45 +4284,54 @@ data_020b5d74 kind:data(any) addr:0x020b5d74
 data_020b5d80 kind:data(any) addr:0x020b5d80
 data_020b5d8c kind:data(any) addr:0x020b5d8c
 gStr_ kind:data(any) addr:0x020b5d9c
-gStr_vv_2 kind:data(any) addr:0x020b5dac
-gStr_ww_2 kind:data(any) addr:0x020b5db0
-gStr_kkk kind:data(any) addr:0x020b5db4
-gStr_jjj kind:data(any) addr:0x020b5db8
-gStr_K_2 kind:data(any) addr:0x020b5dbc
-gStr_u kind:data(any) addr:0x020b5dd4
-data_020b5de0 kind:data(any) addr:0x020b5de0
-data_020b5df0 kind:data(any) addr:0x020b5df0
-gStr_Parenthesis kind:data(any) addr:0x020b5e00
-data_020b5e10 kind:data(any) addr:0x020b5e10
-gText_CornerBracketSakujoShiTaMiiCornerBracket kind:data(any) addr:0x020b5e20
-gText_CornerBracketSakujoShiTaiMii kind:data(any) addr:0x020b5e34
-data_020b5e4c kind:data(any) addr:0x020b5e4c
-gText_Se kind:data(any) addr:0x020b5e64
-data_020b5e7c kind:data(any) addr:0x020b5e7c
-data_020b5e98 kind:data(any) addr:0x020b5e98
-data_020b5ed0 kind:data(any) addr:0x020b5ed0
-data_020b5f08 kind:data(any) addr:0x020b5f08
-gStr_MLT_Window_down_nsc kind:data(any) addr:0x020b5f40
-gStr_MLT_Window_common_nsc_3 kind:data(any) addr:0x020b5f58
-data_020b5f70 kind:data(any) addr:0x020b5f70
-gStr_Z kind:data(any) addr:0x020b5f80
-gStr_SquareBracketSquareBracket kind:data(any) addr:0x020b5f84
-gStr_bdf kind:data(any) addr:0x020b5f88
-gStr_aceg kind:data(any) addr:0x020b5f90
-data_020b5f98 kind:data(any) addr:0x020b5f98
-gStr__2 kind:data(any) addr:0x020b5fb0
-data_020b5fe0 kind:data(any) addr:0x020b5fe0
-data_020b5ff0 kind:data(any) addr:0x020b5ff0
-data_020b6000 kind:data(any) addr:0x020b6000
-data_020b601c kind:data(any) addr:0x020b601c
-data_020b6054 kind:data(any) addr:0x020b6054
-data_020b608c kind:data(any) addr:0x020b608c
-data_020b6098 kind:data(any) addr:0x020b6098
-gStr_BDFHJLNPRTVX kind:data(any) addr:0x020b60a4
-gStr_ACEGIKMOQSUWY kind:data(any) addr:0x020b60b4
-data_020b60c4 kind:data(any) addr:0x020b60c4
-data_020b60d4 kind:data(any) addr:0x020b60d4
-gStr_MLT_Window_down_nsc_2 kind:data(any) addr:0x020b60e4
+sButtonSequences kind:data(any) addr:0x020b5dac local
+sButtonPressedSequences kind:data(any) addr:0x020b5db0 local
+sMiiMenuSequencesB kind:data(any) addr:0x020b5db4 local
+sMiiMenuSequencesA kind:data(any) addr:0x020b5db8 local
+sCancelPosition kind:data(any) addr:0x020b5dbc local
+sCancelSize kind:data(any) addr:0x020b5dc4 local
+sMiiMenuSpritePosition kind:data(any) addr:0x020b5dcc local
+sMiiMenuMessages kind:data(any) addr:0x020b5dd4 local
+sMiiMenuRect kind:data(any) addr:0x020b5de0 local
+sButtonPositions kind:data(any) addr:0x020b5df0 local
+sButtonSizes kind:data(any) addr:0x020b5e00 local
+sSortMenuRect kind:data(any) addr:0x020b5e10 local
+@13132 kind:data(any) addr:0x020b5e20 local
+@13104 kind:data(any) addr:0x020b5e34 local
+sMiiMenuButtonPositions kind:data(any) addr:0x020b5e4c local
+sMiiMenuButtonSizes kind:data(any) addr:0x020b5e64 local
+sSortMessages kind:data(any) addr:0x020b5e7c local
+sSortTextOffsets kind:data(any) addr:0x020b5e98 local
+sSortButtonPositions kind:data(any) addr:0x020b5ed0 local
+sSortButtonSizes kind:data(any) addr:0x020b5f08 local
+sSortMenuScreenName kind:data(any) addr:0x020b5f40 local
+sMiiMenuScreenName kind:data(any) addr:0x020b5f58 local
+sSpriteRect kind:data(any) addr:0x020b5f70 local
+sTab3Sequences kind:data(any) addr:0x020b5f80 local
+sTab3PressedSequences kind:data(any) addr:0x020b5f84 local
+sTab4Sequences kind:data(any) addr:0x020b5f88 local
+sTab4PressedSequences kind:data(any) addr:0x020b5f90 local
+sPanelPosition0 kind:data(any) addr:0x020b5f98 local
+sPanelPosition1 kind:data(any) addr:0x020b5fa0 local
+sSortTextOffset kind:data(any) addr:0x020b5fa8 local
+sPanelTextPosition kind:data(any) addr:0x020b5fb0 local
+sPanelSize kind:data(any) addr:0x020b5fb8 local
+sPanelPosition kind:data(any) addr:0x020b5fc0 local
+sPanelSize0 kind:data(any) addr:0x020b5fc8 local
+sPanelPosition2 kind:data(any) addr:0x020b5fd0 local
+sPanelSize2 kind:data(any) addr:0x020b5fd8 local
+sPanelRect kind:data(any) addr:0x020b5fe0 local
+sSortMenuRect kind:data(any) addr:0x020b5ff0 local
+sSortMessages kind:data(any) addr:0x020b6000 local
+sSortButtonPositions kind:data(any) addr:0x020b601c local
+sSortButtonSizes kind:data(any) addr:0x020b6054 local
+sTab0Sequences kind:data(any) addr:0x020b608c local
+sTab0PressedSequences kind:data(any) addr:0x020b6098 local
+sTab2Sequences kind:data(any) addr:0x020b60a4 local
+sTab2PressedSequences kind:data(any) addr:0x020b60b4 local
+sTab1Sequences kind:data(any) addr:0x020b60c4 local
+sTab1PressedSequences kind:data(any) addr:0x020b60d4 local
+sSortMenuScreenName kind:data(any) addr:0x020b60e4 local
 data_020b60fc kind:data(any) addr:0x020b60fc
 cAdpcmIndexTable kind:data(any) addr:0x020b610c
 cAdpcmStepSizeTable kind:data(any) addr:0x020b611c
@@ -4826,8 +4835,8 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b06a0 kind:data(word) addr:0x020fc4e4
 .p__sinit_020b06cc kind:data(word) addr:0x020fc4e8
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
-.p__sinit_020b06f4 kind:data(word) addr:0x020fc4f0
-.p__sinit_020b077c kind:data(word) addr:0x020fc4f4
+.p__sinit_MiiListMenuScene.cpp kind:data(word) addr:0x020fc4f0 local
+.p__sinit_MiiListScene.cpp kind:data(word) addr:0x020fc4f4 local
 .p__sinit_020b07e0 kind:data(word) addr:0x020fc4f8
 data_020fc500 kind:data(any) addr:0x020fc500
 data_020fc504 kind:data(any) addr:0x020fc504
@@ -4945,8 +4954,8 @@ gStr_NANR kind:data(any) addr:0x0210f620
 gStr_NCLR kind:data(any) addr:0x0210f628
 gStr_NSCR kind:data(any) addr:0x0210f630
 gStr_NCGR kind:data(any) addr:0x0210f638
-_ZTV5Model kind:data(any) addr:0x0210f648
-_ZTV9AnimModel kind:data(any) addr:0x0210f664
+_ZTV5Model kind:data(any) addr:0x0210f640
+_ZTV9AnimModel kind:data(any) addr:0x0210f65c
 gStr_imd kind:data(any) addr:0x0210f678
 gStr_nsbmd kind:data(any) addr:0x0210f67c
 gStr_itx kind:data(any) addr:0x0210f684
@@ -4961,7 +4970,7 @@ gStr_itp kind:data(any) addr:0x0210f6b4
 gStr_nsbtp kind:data(any) addr:0x0210f6b8
 gStr_ita kind:data(any) addr:0x0210f6c0
 gStr_nsbta kind:data(any) addr:0x0210f6c4
-data_0210f6d4 kind:data(any) addr:0x0210f6d4
+_ZTV8G3Sprite kind:data(any) addr:0x0210f6cc
 gStr_ntft kind:data(any) addr:0x0210f6dc
 gStr_ntfp kind:data(any) addr:0x0210f6e4
 _ZTV12BgTextCanvas kind:data(any) addr:0x0210f6ec
@@ -5351,53 +5360,54 @@ gStr_NEW_Obj_down_nce kind:data(any) addr:0x02111828
 gStr_NEW_Obj_down_ncg kind:data(any) addr:0x0211183c
 gStr_NEW_Obj_down_ncl kind:data(any) addr:0x02111850
 gStr_NEW_2 kind:data(any) addr:0x02111864
-data_02111868 kind:data(any) addr:0x02111868
-data_02111880 kind:data(any) addr:0x02111880
-data_021118c0 kind:data(any) addr:0x021118c0
-gStr_MLT kind:data(any) addr:0x021118dc
-gStr_Scn_List_MiiList_LZ_bin kind:data(any) addr:0x021118e0
-gStr_TCM kind:data(any) addr:0x021118f8
-gStr_Msg_TmdCommonMsgJP_LZ_bin_2 kind:data(any) addr:0x021118fc
-gStr_TEM kind:data(any) addr:0x02111918
-gStr_Msg_TmdEtcMsgJP_LZ_bin_2 kind:data(any) addr:0x0211191c
-gStr_MLT_BG_list_ncg kind:data(any) addr:0x02111934
-gStr_MLT_BG_list_ncl kind:data(any) addr:0x02111948
-gStr_MLT_Window_down_nsc_3 kind:data(any) addr:0x0211195c
-gStr_MLT_Obj_list_nce kind:data(any) addr:0x02111974
-gStr_MLT_Obj_list_ncg kind:data(any) addr:0x02111988
-gStr_MLT_Obj_list_ncl kind:data(any) addr:0x0211199c
-gStr_TCM_tmd_common_msg_JP_bmg kind:data(any) addr:0x021119b0
-gStr_TEM_tmd_etc_msg_JP_bmg kind:data(any) addr:0x021119cc
-gStr_MLT_2 kind:data(any) addr:0x021119e4
-gStr_TEM_2 kind:data(any) addr:0x021119e8
-data_021119f4 kind:data(any) addr:0x021119f4
-gStr_M01 kind:data(any) addr:0x02111a10
-gStr_Mdl_Body_body000_3D_LZ_bin_3 kind:data(any) addr:0x02111a14
-gStr_M00 kind:data(any) addr:0x02111a30
-gStr_Scn_Scene_SceneTestG3Sprite_LZ_bin kind:data(any) addr:0x02111a34
-gStr_M01_body_imd kind:data(any) addr:0x02111a58
-gStr_M00_Face_tga kind:data(any) addr:0x02111a68
-gStr_M00_2 kind:data(any) addr:0x02111a78
-gStr_M01_2 kind:data(any) addr:0x02111a7c
-data_02111a80 kind:data(any) addr:0x02111a80
-data_02111a94 kind:data(any) addr:0x02111a94
-data_02111aa8 kind:data(any) addr:0x02111aa8
-data_02111ae8 kind:data(any) addr:0x02111ae8
-gStr_MLT_3 kind:data(any) addr:0x02111b04
-gStr_Scn_List_MiiList_LZ_bin_2 kind:data(any) addr:0x02111b08
-gStr_TEM_3 kind:data(any) addr:0x02111b20
-gStr_Msg_TmdEtcMsgJP_LZ_bin_3 kind:data(any) addr:0x02111b24
-gStr_MLT_BG_list_ncg_2 kind:data(any) addr:0x02111b3c
-gStr_MLT_BG_list_ncl_2 kind:data(any) addr:0x02111b50
-gStr_MLT_BG_list_nsc kind:data(any) addr:0x02111b64
-gStr_MLT_BG_frame_L_nsc kind:data(any) addr:0x02111b78
-gStr_MLT_Window_down_nsc_4 kind:data(any) addr:0x02111b8c
-gStr_MLT_Obj_list_nce_2 kind:data(any) addr:0x02111ba4
-gStr_MLT_Obj_list_ncg_2 kind:data(any) addr:0x02111bb8
-gStr_MLT_Obj_list_ncl_2 kind:data(any) addr:0x02111bcc
-gStr_TEM_tmd_etc_msg_JP_bmg_2 kind:data(any) addr:0x02111be0
-gStr_MLT_4 kind:data(any) addr:0x02111bf8
-gStr_TEM_4 kind:data(any) addr:0x02111bfc
+sMiiMenuTextPositions kind:data(any) addr:0x02111868 local
+sSortTextPositions kind:data(any) addr:0x02111880 local
+_ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
+@13299 kind:data(any) addr:0x021118dc local
+@13300 kind:data(any) addr:0x021118e0 local
+@13301 kind:data(any) addr:0x021118f8 local
+@13302 kind:data(any) addr:0x021118fc local
+@13303 kind:data(any) addr:0x02111918 local
+@13304 kind:data(any) addr:0x0211191c local
+@13380 kind:data(any) addr:0x02111934 local
+@13381 kind:data(any) addr:0x02111948 local
+@13382 kind:data(any) addr:0x0211195c local
+@13383 kind:data(any) addr:0x02111974 local
+@13384 kind:data(any) addr:0x02111988 local
+@13385 kind:data(any) addr:0x0211199c local
+@13386 kind:data(any) addr:0x021119b0 local
+@13387 kind:data(any) addr:0x021119cc local
+@13464 kind:data(any) addr:0x021119e4 local
+@13465 kind:data(any) addr:0x021119e8 local
+_ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
+@13178 kind:data(any) addr:0x02111a10 local
+@13179 kind:data(any) addr:0x02111a14 local
+@13180 kind:data(any) addr:0x02111a30 local
+@13181 kind:data(any) addr:0x02111a34 local
+@13193 kind:data(any) addr:0x02111a58 local
+@13194 kind:data(any) addr:0x02111a68 local
+@13207 kind:data(any) addr:0x02111a78 local
+@13208 kind:data(any) addr:0x02111a7c local
+sTabSequences kind:data(any) addr:0x02111a80 local
+sTabPressedSequences kind:data(any) addr:0x02111a94 local
+sSortTextPositions kind:data(any) addr:0x02111aa8 local
+_ZTV12MiiListScene kind:data(any) addr:0x02111ae0
+@13190 kind:data(any) addr:0x02111b04 local
+@13191 kind:data(any) addr:0x02111b08 local
+@13192 kind:data(any) addr:0x02111b20 local
+@13193 kind:data(any) addr:0x02111b24 local
+@13223 kind:data(any) addr:0x02111b3c local
+@13224 kind:data(any) addr:0x02111b50 local
+@13225 kind:data(any) addr:0x02111b64 local
+@13226 kind:data(any) addr:0x02111b78 local
+@13227 kind:data(any) addr:0x02111b8c local
+@13228 kind:data(any) addr:0x02111ba4 local
+@13229 kind:data(any) addr:0x02111bb8 local
+@13230 kind:data(any) addr:0x02111bcc local
+@13231 kind:data(any) addr:0x02111be0 local
+@13259 kind:data(any) addr:0x02111bf8 local
+@13260 kind:data(any) addr:0x02111bfc local
+data_02111c00 kind:data(any) addr:0x02111c00
 data_02111c08 kind:data(any) addr:0x02111c08
 gStr_M00_3 kind:data(any) addr:0x02111c24
 gStr_Mdl_Misc_map_sky_3D_LZ_bin kind:data(any) addr:0x02111c28
