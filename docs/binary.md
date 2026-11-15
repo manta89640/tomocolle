@@ -525,23 +525,33 @@ Not done:
 
 ## Compiler
 
-**Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
+**The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
 
-- NitroSDK 4.2 is from 2008, and the game came out in June 2009. Pokémon Platinum (2008), also on NitroSDK 4.2, is
-  matched by this version.
-- The six functions decompiled so far match with it. They are too simple to tell compiler versions apart, so this
-  shows that the pipeline works, not that the version is right.
+- **What tells the builds apart is where a file's statics go.** Every 2.0 release up to SP2 patch 2 (build 137) puts
+  all of a file's 4-aligned statics into one pool, read at the pool's address plus an offset. The ROM keeps those of
+  64 bytes and more out of the pool, each in a section of its own: overlay 72's tables of 88 to 320 bytes follow its
+  pool one by one, overlay 98's six button and sprite tables come after its last string, and WH's 64-byte parent
+  parameters are addressed on their own while its 32-byte scan parameters are pooled. Of the 3.0 builds (114 to 139,
+  compiled with test files under the game's flags), the threshold first appears in 138; no flag of the earlier ones
+  (`-[no]constpool`, `-sdatathreshold`, other `-O` and `-opt` settings, without `-ipa file`) gives it. The DSi
+  compilers (4.0, builds 1018 to 1051) have it too, but compile the game's code differently: `TtsPlayer` drops from
+  28 matching functions to 10, overlay 74 from 247 to 107, WH from 66 to 38.
+- **Nothing else changes.** Every game source of `src/`, and the speech engine's four, compiles to byte-identical code
+  with builds 137, 138 and 139, and with 138 as the game's compiler every complete unit links and the ROM is
+  identical; the per-function report of the whole program is the same with 137 and 138 (1,959 of 7,357 matching).
+  So the evidence for the version is the data, and the matched functions are no evidence against it.
+- **138 and 139 are not told apart.** They give identical output on every game file and on WH. 138 is used, as the
+  first build that fits.
+- **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
+  (`MWLD_VERSION`).
+
+The earlier evidence still holds: NitroSDK 4.2 is from 2008 and the game came out in June 2009, and
+`src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams and threads and pass up to ten arguments, matched
+in full with build 137 and does with 138.
 
 The libraries are another matter, and settled: NitroSDK is built with 2.0 SP1 patch 2 and NitroSystem with 2.0 SP2,
 as in Pokémon Platinum, and 1,148 of their functions come out identical to the game's. That says what Nintendo built
 its libraries with, not what the game's own code was built with.
-
-For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
-and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
-written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
-The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
-it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
-include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's
