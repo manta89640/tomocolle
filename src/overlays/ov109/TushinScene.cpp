@@ -107,7 +107,7 @@ static const wchar_t *sNgWords[41] = {
     L"ヤラセロ", L"ヤリマン", L"リョウジョク", L"レイプ", L"ロリコン",
 };
 
-static WindowPoint sListTextOrigins[7] = {
+static const WindowPoint sListTextOrigins[7] = {
     { sListItemPositions[0].x - 32, sListItemPositions[0].y - 6 },
     { sListItemPositions[1].x - 32, sListItemPositions[1].y - 6 },
     { sListItemPositions[2].x - 32, sListItemPositions[2].y - 6 },
@@ -291,8 +291,8 @@ void TushinScene::SetUpList(int *charOffset) {
         Sprite_Init(&mButtons[i].mSprite, 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
         func_02031260(&mButtons[i], 4);
         func_02031278(&mButtons[i], sListButtonSequences[i], sListButtonSequences2[i]);
-        mButtons[i].mSprite.SetPosition(sListButtonPositions[i].x << FX32_SHIFT,
-                                        sListButtonPositions[i].y << FX32_SHIFT);
+        mButtons[i].mSprite.SetPosition(
+            FxVec2(sListButtonPositions[i].x << FX32_SHIFT, sListButtonPositions[i].y << FX32_SHIFT));
         func_02031eb0(&mButtons[i], sListButtonTextPositions[i].x, sListButtonTextPositions[i].y);
         mButtons[i].mUnknown0DC = 1;
         func_02032158(&mButtons[i], &sListButtonStyles[i]);
@@ -314,10 +314,12 @@ void TushinScene::SetUpList(int *charOffset) {
     for (int i = 0; i < 7; i++) {
         func_02033448(&mListWindow, i, 0, 0x6A, 0x6B, sListItemPositions[i], sListItemSizes[i], &sButtonStyle, 1);
     }
-    WindowPoint position = sListTextPosition;
-    for (int i = 0; i < 7; i++) {
-        func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, position,
-                      sListTextOrigins[i], charOffset);
+    {
+        WindowPoint position = sListTextPosition;
+        for (int i = 0; i < 7; i++) {
+            func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, position,
+                          sListTextOrigins[i], charOffset);
+        }
     }
     func_02034f4c(&mListWindow, 1);
 }
@@ -441,7 +443,7 @@ void TushinScene::Init() {
     InitParticles();
 
     Sprite_Init(&mSprite, 1, 0, 0x80, 0x60, TRUE);
-    mSprite.SetPosition(sSignalPosition.x << FX32_SHIFT, sSignalPosition.y << FX32_SHIFT);
+    mSprite.SetPosition(FxVec2(sSignalPosition.x << FX32_SHIFT, sSignalPosition.y << FX32_SHIFT));
     mSprite.mVisible = FALSE;
 
     sWireless.m22 = 0;
