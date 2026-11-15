@@ -54,7 +54,9 @@ void MiiListMenuScene::StartLoading() {
 // path into r1 and then computes the file's address into r0; this gives the address first, as before the first
 // Open (which matches). Tried without effect: the files as an array (which also changes the destructor), pointers
 // or references to them, the path in a variable, the screen setup after or before the Opens, the loops' variables
-// in every scope, the button loop with a pointer or as do-while.
+// in every scope, the button loop with a pointer or as do-while, an accessor or a cast for the file. An inline
+// helper that takes the path before the file gives the second Open the original's order, but then reorders the
+// first Open and the palette call before it (the order seems to follow which operand the compiler made first).
 void MiiListMenuScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
