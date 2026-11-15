@@ -675,11 +675,12 @@ void TushinScene::UpdateSending() {
                 sWireless.m24 = 0;
                 break;
             case 7:
-            case 8:
+            case 8: {
                 sWireless.m24 = 0;
-                func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
+                func_0202c328(&gGameData, mResidents.mResidents[mResidents.mSelected].GetIndex(), 1);
                 SetOtherStandAnimation();
                 break;
+            }
             default:
                 return;
             }
@@ -898,11 +899,19 @@ void TushinScene::UpdateListButtons() {
     }
     switch (pressed) {
     case 0:
-        mPage = GetMode() == 1 ? 10 : 0x2B;
+        if (GetMode() == 1) {
+            mPage = 10;
+        } else {
+            mPage = 0x2B;
+        }
         func_02034720(&mListWindow, 0x12, 1);
         break;
     case 1:
-        mPage = GetMode() == 1 ? 0x23 : 0x41;
+        if (GetMode() == 1) {
+            mPage = 0x23;
+        } else {
+            mPage = 0x41;
+        }
         SetUpWindow(mPage);
         func_02034720(&mWindow, 0x12, 1);
         break;
@@ -933,7 +942,7 @@ void TushinScene::UpdateListButtons() {
         break;
     }
     func_020a0454(&mResidents);
-    if (mResidents.mUnknown1139C == 0) {
+    if (mResidents.mUnknown11398 == 0) {
         return;
     }
     ShowNextCharacter();
@@ -946,7 +955,11 @@ void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
     if (mListWindow.mTransitionDone) {
         if (sWireless.m26 != 0 || mUnknown24 == 1) {
-            mPage = GetMode() == 1 ? 9 : NextPageAfterReceive();
+            if (GetMode() == 1) {
+                mPage = 9;
+            } else {
+                mPage = NextPageAfterReceive();
+            }
             mUnknown24 = 0;
             sWireless.m30 = 0;
             if (mPage == 9) {
@@ -967,7 +980,11 @@ void TushinScene::UpdateListWindow() {
                 mNextPage = 0x40;
             }
         } else {
-            mPage = GetMode() == 1 ? 9 : 0x2A;
+            if (GetMode() == 1) {
+                mPage = 9;
+            } else {
+                mPage = 0x2A;
+            }
             return;
         }
     }
@@ -979,8 +996,8 @@ void TushinScene::UpdateListWindow() {
         }
         return;
     }
-    int result;
-    if ((result = mListWindow.mResult) == -1) {
+    int result = mListWindow.mResult;
+    if (result == -1) {
         return;
     }
     mListWindow.mUnknownSetBeforeClose = 15;
@@ -1089,7 +1106,8 @@ void TushinScene::UpdateWiiConnection() {
     if (state == 0) {
         return;
     }
-    if (state == 1) {
+    switch (state) {
+    case 1:
         sWireless.m4C = func_0207808c();
         for (u16 i = 0; i < sWireless.m4C; i++) {
             if (!func_0207800c(i)) {
@@ -1146,7 +1164,8 @@ void TushinScene::UpdateWiiConnection() {
                 func_02031e88(&mWindow.mSprites[i], 1);
             }
         }
-    } else if (state == 6) {
+        break;
+    case 6:
         if (mPage != 0x28) {
             return;
         }
@@ -1155,6 +1174,7 @@ void TushinScene::UpdateWiiConnection() {
         }
         mNextPage = 0x29;
         CloseWindow();
+        break;
     }
 }
 
@@ -2635,8 +2655,10 @@ void TushinScene::SetUnknown3F098() {
 
 // @0x02151eb4
 extern "C" void func_ov109_02151eb4(BOOL result) {
-    int state = WH_GetSystemState();
-    if (state == 0 || state == 9 || state == 10) {
+    switch (WH_GetSystemState()) {
+    case 0:
+    case 9:
+    case 10:
         return;
     }
     sWireless.m3C = 1;

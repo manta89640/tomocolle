@@ -177,6 +177,7 @@ struct CharacterRecord {
 // One saved character (a resident): the record and what the game keeps beside it.
 struct SavedCharacter : public CharacterRecord {
     SavedCharacter(); // func_020979c0
+    u16 GetIndex() { return mIndex; }
 
     /* 0x2A4 */ u16 mIndex;        // Which of the saved characters this is
     /* 0x2A6 */ u8 mUnknown2A6[0x16];
@@ -362,7 +363,8 @@ struct ResidentList {
     /* 0x11306 */ u16 mUnknown11306;
     /* 0x11308 */ u8 mUnknown11308[0x88];
     /* 0x11390 */ int mSelected; // The resident chosen, an index of mResidents
-    /* 0x11394 */ u8 mUnknown11394[8];
+    /* 0x11394 */ u8 mUnknown11394[4];
+    /* 0x11398 */ int mUnknown11398;
     /* 0x1139C */ int mUnknown1139C;
     /* 0x113A0 */ u8 mUnknown113A0[8];
 }; // 0x113A8
