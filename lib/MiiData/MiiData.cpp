@@ -499,7 +499,7 @@ extern "C" BOOL func_0207a90c(MiiIdSource *source, MiiData *mii) {
     }
     mii->mCreateId[0] = (func_020743a0(4) << 2) | 0xC0 | ((source->mCounter & 0x3000) >> 12);
     mii->mCreateId[1] = (source->mCounter & 0xFF0) >> 4;
-    mii->mCreateId[2] = source->mBytes[0] | ((source->mCounter << 28) >> 24);
+    mii->mCreateId[2] = (((u32)source->mCounter << 28) >> 24) | source->mBytes[0];
     mii->mCreateId[3] = source->mBytes[1];
     mii->mCreateId[4] = source->mBytes[2];
     mii->mCreateId[5] = source->mBytes[3];
