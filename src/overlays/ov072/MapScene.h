@@ -477,8 +477,8 @@ void func_02034f94(MessageWindow *window, u8 vAlign);
 
 // --- The clock ---
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
-void func_02035788(int offset, RTCDate *date);
-void func_02035800(int offset, RTCTime *time);
+void Clock_GetDate(int offset, RTCDate *date);
+void Clock_GetTime(int offset, RTCTime *time);
 void func_02036874(int value, wchar_t *buffer, int size, int a, int b);
 
 u8 func_02039c00(IslandState *island, int building);

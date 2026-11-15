@@ -57,80 +57,91 @@ _ZN12MoneyDisplay10SetVisibleEi kind:function(arm,size=0xc) addr:0x0214f674
 _ZN12MoneyDisplay7RefreshEv kind:function(arm,size=0x74) addr:0x0214f680
 _ZN8MapSceneD1Ev kind:function(arm,size=0x5c) addr:0x0214f6f4
 _ZN8MapSceneD0Ev kind:function(arm,size=0x64) addr:0x0214f750
-data_ov072_0214f7b4 kind:data(any) addr:0x0214f7b4
-data_ov072_0214f7c8 kind:data(any) addr:0x0214f7c8
-data_ov072_0214f7ce kind:data(any) addr:0x0214f7ce
-data_ov072_0214f7d4 kind:data(any) addr:0x0214f7d4
-data_ov072_0214f7e4 kind:data(any) addr:0x0214f7e4
-data_ov072_0214f82c kind:data(any) addr:0x0214f82c
-data_ov072_0214f838 kind:data(any) addr:0x0214f838
-data_ov072_0214f850 kind:data(any) addr:0x0214f850
-data_ov072_0214f85c kind:data(any) addr:0x0214f85c
-data_ov072_0214f868 kind:data(any) addr:0x0214f868
-data_ov072_0214f874 kind:data(any) addr:0x0214f874
-data_ov072_0214f880 kind:data(any) addr:0x0214f880
-data_ov072_0214f88c kind:data(any) addr:0x0214f88c
-data_ov072_0214f89c kind:data(any) addr:0x0214f89c
-gStr_q kind:data(any) addr:0x0214f8ac
-data_ov072_0214f8bc kind:data(any) addr:0x0214f8bc
-data_ov072_0214f8cc kind:data(any) addr:0x0214f8cc
-gStr__ov072 kind:data(any) addr:0x0214f8dc
-data_ov072_0214f8ec kind:data(any) addr:0x0214f8ec
-data_ov072_0214f8fc kind:data(any) addr:0x0214f8fc
-data_ov072_0214f900 kind:data(any) addr:0x0214f900 ambiguous
-data_ov072_0214f90c kind:data(any) addr:0x0214f90c
-data_ov072_0214f91c kind:data(any) addr:0x0214f91c
-gText_Comma_ov072 kind:data(any) addr:0x0214f92c
-gText_CombiningVoiced_ov072 kind:data(any) addr:0x0214f940
-data_ov072_0214f954 kind:data(any) addr:0x0214f954
-gStr_G_ov072 kind:data(any) addr:0x0214f968
-data_ov072_0214f97c kind:data(any) addr:0x0214f97c
-data_ov072_0214f994 kind:data(any) addr:0x0214f994
-gStr_P_ov072 kind:data(any) addr:0x0214f9ac
-data_ov072_0214f9c4 kind:data(any) addr:0x0214f9c4
-data_ov072_0214f9e0 kind:data(any) addr:0x0214f9e0
-data_ov072_0214fa00 kind:data(any) addr:0x0214fa00
-data_ov072_0214fa30 kind:data(any) addr:0x0214fa30
-gText_MiddleDot kind:data(any) addr:0x0214fa60
-gText_Tsu_ov072 kind:data(any) addr:0x0214fa90
-data_ov072_0214fac0 kind:data(any) addr:0x0214fac0
-data_ov072_0214faf4 kind:data(any) addr:0x0214faf4
-data_ov072_0214fb28 kind:data(any) addr:0x0214fb28
-data_ov072_0214fb64 kind:data(any) addr:0x0214fb64
-gStr_S00_Window_down_nsc_ov072 kind:data(any) addr:0x0214fb74
-gStr_S00_Window_title_nsc kind:data(any) addr:0x0214fb8c
-data_ov072_0214fba4 kind:data(any) addr:0x0214fba4
-data_ov072_0214fbfc kind:data(any) addr:0x0214fbfc
-data_ov072_0214fc64 kind:data(any) addr:0x0214fc64
-data_ov072_0214fcd4 kind:data(any) addr:0x0214fcd4
-data_ov072_0214fcd8 kind:data(any) addr:0x0214fcd8
-data_ov072_0214fcdc kind:data(any) addr:0x0214fcdc
-data_ov072_0214fce0 kind:data(any) addr:0x0214fce0
-data_ov072_0214fd04 kind:data(any) addr:0x0214fd04
-data_ov072_0214fd34 kind:data(any) addr:0x0214fd34
-data_ov072_0214fd4c kind:data(any) addr:0x0214fd4c
-gStr_F_ov072 kind:data(any) addr:0x0214fd70
-data_ov072_0214fe40 kind:data(any) addr:0x0214fe40
-data_ov072_0214ff10 kind:data(any) addr:0x0214ff10
-data_ov072_0214ff14 kind:data(any) addr:0x0214ff14
-data_ov072_0214ff18 kind:data(any) addr:0x0214ff18
-data_ov072_0214ff1c kind:data(any) addr:0x0214ff1c
-data_ov072_0214ff20 kind:data(any) addr:0x0214ff20
-data_ov072_0214ff24 kind:data(any) addr:0x0214ff24
-data_ov072_0214ff28 kind:data(any) addr:0x0214ff28
-data_ov072_0214ff29 kind:data(any) addr:0x0214ff29
-data_ov072_0214ff2a kind:data(any) addr:0x0214ff2a
-data_ov072_0214ff2c kind:data(any) addr:0x0214ff2c
-data_ov072_02150060 kind:data(any) addr:0x02150060
-data_ov072_02150094 kind:data(any) addr:0x02150094
-data_ov072_021500a4 kind:data(any) addr:0x021500a4
-data_ov072_021500b8 kind:data(any) addr:0x021500b8
-data_ov072_021500e8 kind:data(any) addr:0x021500e8
-data_ov072_02150118 kind:data(any) addr:0x02150118
-data_ov072_02150148 kind:data(any) addr:0x02150148
-data_ov072_02150178 kind:data(any) addr:0x02150178
-data_ov072_021501b0 kind:data(any) addr:0x021501b0
-data_ov072_021501e8 kind:data(any) addr:0x021501e8
+backButtonSequence$13755 kind:data(any) addr:0x0214f7b4 local
+sBackButtonPalettes kind:data(any) addr:0x0214f7b6 local
+titleTextCount$13757 kind:data(any) addr:0x0214f7b8 local
+titleMessage$13759 kind:data(any) addr:0x0214f7bc local
+unknownE$13753 kind:data(any) addr:0x0214f7c0 local
+sTitleFonts kind:data(any) addr:0x0214f7c4 local
+sButtonPalettes kind:data(any) addr:0x0214f7c8 local
+sButtonMessages kind:data(any) addr:0x0214f7ce local
+sButtonSequences kind:data(any) addr:0x0214f7d4 local
+sTitleTextPosition kind:data(any) addr:0x0214f7dc local
+sCityHallFeatures kind:data(any) addr:0x0214f7e4 local
+sMoneySpritePosition kind:data(any) addr:0x0214f7ec local
+sTutorialTextPosition kind:data(any) addr:0x0214f7f4 local
+sMoneyTextPosition kind:data(any) addr:0x0214f7fc local
+sBackButtonPosition kind:data(any) addr:0x0214f804 local
+sBackButtonSize kind:data(any) addr:0x0214f80c local
+sTutorialButtonSize kind:data(any) addr:0x0214f814 local
+sBoardTextPosition kind:data(any) addr:0x0214f81c local
+sTutorialButtonPosition kind:data(any) addr:0x0214f824 local
+sButtonFonts kind:data(any) addr:0x0214f82c local
+sLightDirection0 kind:data(any) addr:0x0214f838 local
+sCameraHomeTarget kind:data(any) addr:0x0214f844 local
+sCameraLookOffset kind:data(any) addr:0x0214f850 local
+sCameraZoomOffset kind:data(any) addr:0x0214f85c local
+sCameraHome kind:data(any) addr:0x0214f868 local
+sEffectResources kind:data(any) addr:0x0214f874 local
+sLightDirection1 kind:data(any) addr:0x0214f880 local
+sMusicRampSteps kind:data(any) addr:0x0214f88c local
+sLongSounds kind:data(any) addr:0x0214f89c local
+sFeatureMessages kind:data(any) addr:0x0214f8ac local
+sCommonSounds kind:data(any) addr:0x0214f8bc local
+sWindowTextureRect6 kind:data(any) addr:0x0214f8cc local
+sTutorialButtonUnknown kind:data(any) addr:0x0214f8dc local
+sBackButtonRect kind:data(any) addr:0x0214f8ec local
+sTutorialWindowRect kind:data(any) addr:0x0214f8fc local
+sWindowTextureRect kind:data(any) addr:0x0214f90c local
+sTitleWindowRect kind:data(any) addr:0x0214f91c local
+sFeatureItems kind:data(any) addr:0x0214f92c local
+sFeatureNews kind:data(any) addr:0x0214f940 local
+sSeasonSoundArchives kind:data(any) addr:0x0214f954 local
+sSeasonSoundGroups kind:data(any) addr:0x0214f968 local
+sClockSequences kind:data(any) addr:0x0214f97c local
+sButtonPositions kind:data(any) addr:0x0214f994 local
+sButtonSizes kind:data(any) addr:0x0214f9ac local
+sRankingFeatures kind:data(any) addr:0x0214f9c4 local
+sApartmentMarkPositions kind:data(any) addr:0x0214f9e0 local
+sButtonRects kind:data(any) addr:0x0214fa00 local
+sBuildingModels kind:data(any) addr:0x0214fa30 local
+sBuildingMessages kind:data(any) addr:0x0214fa60 local
+sBoardMessages kind:data(any) addr:0x0214fa90 local
+sModelBuildings kind:data(any) addr:0x0214fac0 local
+sModelResources kind:data(any) addr:0x0214faf4 local
+sSurroundingSounds kind:data(any) addr:0x0214fb28 local
+sMonthGrounds kind:data(any) addr:0x0214fb64 local
+sWindowDownScreen kind:data(any) addr:0x0214fb74 local
+sWindowTitleScreen kind:data(any) addr:0x0214fb8c local
+sClockPositions kind:data(any) addr:0x0214fba4 local
+sNewMarkPositions kind:data(any) addr:0x0214fbfc local
+sFountainTimes kind:data(any) addr:0x0214fc64 local
+sModelPositions kind:data(any) addr:0x0214fcd4 local
+sModelMusic kind:data(any) addr:0x0214fd70 local
+sModelTouchRects kind:data(any) addr:0x0214fe40 local
+sTitleViews kind:data(any) addr:0x0214ff10 local
+sLightColors kind:data(any) addr:0x02150060 local
+sBoardPalette kind:data(any) addr:0x02150064 local
+sTitleWindowArchive kind:data(any) addr:0x02150068 local
+sTitleScreen kind:data(any) addr:0x0215006c local
+sBoardWindowArchive kind:data(any) addr:0x02150070 local
+sBoardChars kind:data(any) addr:0x02150074 local
+sTitlePalette kind:data(any) addr:0x02150078 local
+sBoardScreen kind:data(any) addr:0x0215007c local
+sQuestionPalette kind:data(any) addr:0x02150080 local
+sTitleChars kind:data(any) addr:0x02150084 local
+sQuestionScreen kind:data(any) addr:0x02150088 local
+sQuestionChars kind:data(any) addr:0x0215008c local
+sQuestionWindowArchive kind:data(any) addr:0x02150090 local
+sGroundModels kind:data(any) addr:0x02150094 local
+sApartmentModels kind:data(any) addr:0x021500a4 local
+sBuildingChars kind:data(any) addr:0x021500b8 local
+sBuildingScreens kind:data(any) addr:0x021500e8 local
+sBuildingWindowArchives kind:data(any) addr:0x02150118 local
+sBuildingPalettes kind:data(any) addr:0x02150148 local
+sResourceArchives kind:data(any) addr:0x02150178 local
+sResourcePaths kind:data(any) addr:0x021501b0 local
+sResourceModels kind:data(any) addr:0x021501e8 local
 gStr_M07 kind:data(any) addr:0x02150220
 gStr_M09 kind:data(any) addr:0x02150224
 gStr_M12 kind:data(any) addr:0x02150228

@@ -122,11 +122,11 @@ static const TitleView sTitleViews[10] = {
     { { 12288, 819, 20480 }, { 0, 0, 1228 }, -20, 0, 10, 1080 },
     { { 4096, 1228, 9011 }, { 0, 0, 1228 }, -10, 0, -10, 1080 },
 };
-// Where each building takes a touch, around its position on the screen
-static const ScreenRect sModelTouchRects[MapScene::MODEL_COUNT] = {
-    { 0, 0, 0, 0 },       { -12, -24, 20, 24 },  { -28, -36, 56, 36 }, { -16, -32, 32, 32 }, { -16, -32, 32, 32 },
-    { -16, -32, 32, 32 }, { -24, -32, 44, 32 },  { -12, -32, 24, 28 }, { -38, -64, 70, 64 }, { -16, -32, 32, 32 },
-    { -12, -56, 26, 56 }, { -18, -32, 36, 32 },  { -16, -36, 32, 36 },
+// The music's volume, pitch, tempo ratio and pan by model (0: none selected)
+static const int sModelMusic[MapScene::MODEL_COUNT][4] = {
+    { 70, -96, 192, 0 },  { 127, 64, 256, 0 },  { 120, 48, 240, -8 },  { 120, 48, 240, 8 },  { 120, 16, 224, -16 },
+    { 85, -32, 216, -10 }, { 115, 16, 224, 4 }, { 115, 32, 224, 32 },  { 80, -32, 216, 0 },  { 110, 0, 224, -24 },
+    { 110, 0, 224, 24 },  { 100, -24, 216, -16 }, { 100, -24, 216, 16 },
 };
 // The sounds of the surroundings by season and time of day, three each (0xFF: none)
 static const u8 sSurroundingSounds[5][12] = {
@@ -136,11 +136,11 @@ static const u8 sSurroundingSounds[5][12] = {
     { 12, 13, 255, 255, 255, 255, 14, 0, 255, 15, 0, 255 },
     { 12, 13, 0, 255, 255, 255, 14, 1, 255, 15, 255, 255 },
 };
-// The music's volume, pitch, tempo ratio and pan by model (0: none selected)
-static const int sModelMusic[MapScene::MODEL_COUNT][4] = {
-    { 70, -96, 192, 0 },  { 127, 64, 256, 0 },  { 120, 48, 240, -8 },  { 120, 48, 240, 8 },  { 120, 16, 224, -16 },
-    { 85, -32, 216, -10 }, { 115, 16, 224, 4 }, { 115, 32, 224, 32 },  { 80, -32, 216, 0 },  { 110, 0, 224, -24 },
-    { 110, 0, 224, 24 },  { 100, -24, 216, -16 }, { 100, -24, 216, 16 },
+// Where each building takes a touch, around its position on the screen
+static const ScreenRect sModelTouchRects[MapScene::MODEL_COUNT] = {
+    { 0, 0, 0, 0 },       { -12, -24, 20, 24 },  { -28, -36, 56, 36 }, { -16, -32, 32, 32 }, { -16, -32, 32, 32 },
+    { -16, -32, 32, 32 }, { -24, -32, 44, 32 },  { -12, -32, 24, 28 }, { -38, -64, 70, 64 }, { -16, -32, 32, 32 },
+    { -12, -56, 26, 56 }, { -18, -32, 36, 32 },  { -16, -36, 32, 36 },
 };
 static const char *sQuestionWindowArchive = "Scn/Map/SceneMap2WndQuestion_LZ.bin";
 static const char *sQuestionScreen = "S01:/Fw_question.nsc";
@@ -1455,8 +1455,8 @@ void MapScene::SetTutorialStep(int step) {
 BOOL MapScene::IsNewsDue() {
     RTCDate date;
     RTCTime time;
-    func_02035788(data_02123440[0], &date);
-    func_02035800(data_02123440[0], &time);
+    Clock_GetDate(data_02123440[0], &date);
+    Clock_GetTime(data_02123440[0], &time);
     NewsItem item;
     func_0202c8a8(&gGameData, 0, &item);
     RTCDate itemDate;
