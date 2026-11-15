@@ -107,6 +107,9 @@ static const wchar_t *sNgWords[41] = {
     L"ヤラセロ", L"ヤリマン", L"リョウジョク", L"レイプ", L"ロリコン",
 };
 
+// NOT MATCHING (the static initialiser, __sinit_TushinScene.cpp): the compiler folds sListItemPositions into
+// immediates here, where the original loads them from the .rodata pool (pool+0x294) and subtracts; a const source
+// is folded by every compiler version tried (2.0 SP1p2 to SP2p3), and only a non-const one is loaded.
 static const WindowPoint sListTextOrigins[7] = {
     { sListItemPositions[0].x - 32, sListItemPositions[0].y - 6 },
     { sListItemPositions[1].x - 32, sListItemPositions[1].y - 6 },
@@ -199,6 +202,8 @@ void TushinScene::SetUpYesNoWindow(int *charOffset, MessageFile *file, u32 messa
     mWindow.mTexts[2].mVAlign = 0;
 }
 
+// NOT MATCHING: the store of the text's vertical alignment is scheduled after the loads of sLayouts that
+// decide the button layout (the original stores it first; four instructions in a different order and four bytes more).
 // @0x02149cb4
 void TushinScene::SetUpWindow(int page) {
     int charOffset = mCharOffset;
@@ -267,6 +272,8 @@ void TushinScene::SetUpWindow(int page) {
     mWindow.mButtons[0].mSprite.mUnknown5E = 8;
 }
 
+// NOT MATCHING: the local copy of sListTextPosition is at sp+0x3C where the original has it at sp+0x2C, below
+// the two copies of each button's position (six stores to the stack at other offsets).
 // @0x0214a140
 void TushinScene::SetUpList(int *charOffset) {
     func_020a1fe0(&mList, 6);
@@ -324,6 +331,8 @@ void TushinScene::SetUpList(int *charOffset) {
     func_02034f4c(&mListWindow, 1);
 }
 
+// NOT MATCHING: the camera's address, and the constant 0x24CC, are loaded after the stores before them; the
+// original loads them first (scheduling only, 12 instructions).
 // @0x0214a68c
 void TushinScene::InitCharacters() {
     int i;
@@ -365,6 +374,8 @@ void TushinScene::InitCharacters() {
     LoadCharacters();
 }
 
+// NOT MATCHING: the two `|= 2` of the emitters' flags use r2/r3 where the original uses r0/r2 and sets
+// mUnknown3F034's 0 after them (register choice, 9 instructions).
 // @0x0214ad80
 void TushinScene::InitParticles() {
     func_0202680c(0x4000);
@@ -516,6 +527,8 @@ void TushinScene::SetUpCharacter(int i) {
     func_020919a0(&mCharacters[i], 0x1000);
 }
 
+// NOT MATCHING: the offset of the character (index * 0x2B18) and the model pointer are in r5/r4, swapped
+// against the original (register choice only, 8 instructions).
 // @0x0214b4e8
 void TushinScene::ReloadCharacter(int i) {
     CharacterModel *model;
@@ -646,6 +659,9 @@ void TushinScene::Send(int kind) {
     }
 }
 
+// NOT MATCHING: for messages 7 and 8, the original reads the selected resident's mIndex off the element's address
+// (base + selected * 0x2C0, then +0x2A4); here the offsets 0xB004 and 0x2A4 are folded into one (two instructions
+// fewer).
 // @0x0214ce60
 void TushinScene::UpdateSending() {
     if (sWireless.m3C != 1) {
@@ -755,6 +771,8 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 }
 
 #pragma optimization_level 2
+// NOT MATCHING (optimization level 2, as the original's loops are): the copy of bits 0..3 of the record's 0x54
+// and the `|=` of 0x299 load their operands into other registers (10 instructions).
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -950,6 +968,8 @@ void TushinScene::UpdateListButtons() {
     mUnknown35924 = mList.mUnknown9464;
 }
 
+// NOT MATCHING: the original keeps the list window's result in r1 for the test against -1 and copies it to r4
+// for the table; here it is loaded into r4 directly (one instruction fewer).
 // @0x0214e144
 void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
@@ -1008,6 +1028,8 @@ void TushinScene::UpdateListWindow() {
     }
 }
 
+// NOT MATCHING: in state 4, `go = FALSE` and `next = 0x44` are set in the other order around the test of mPage
+// (two instructions).
 // @0x0214e348
 void TushinScene::UpdateConnection() {
     if (mWait > 0) {
@@ -1100,6 +1122,8 @@ void TushinScene::UpdateConnection() {
     }
 }
 
+// NOT MATCHING: the loop variables get other registers (the original has i in r6, the found partner in r7), and
+// 599 is loaded from the literal pool where here it is computed from the TRUE in fp (one instruction fewer).
 // @0x0214e620
 void TushinScene::UpdateWiiConnection() {
     int state = func_02078f04();
@@ -1179,6 +1203,9 @@ void TushinScene::UpdateWiiConnection() {
 }
 
 #pragma optimization_level 2
+// NOT MATCHING (optimization level 2): the original reads mVisible of character 2's model off the model's
+// address and hoists only &mCharacters[0] and &mCharacters[0].mModel out of the loop; here more addresses are
+// hoisted and the registers differ (four bytes fewer).
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
@@ -1507,6 +1534,10 @@ void TushinScene::Leave() {
 }
 
 #pragma optimization_level 2
+// NOT MATCHING (optimization level 2): the selected resident's mIndex is read with folded offsets (see
+// UpdateSending), mVisible of character 2's model is not read off the model's address, the parent timers are
+// read through their own symbol instead of the .bss pool's base (the .bss is not in the ROM's order yet), and a
+// few moves are scheduled otherwise (0x40 bytes fewer in all).
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -2664,6 +2695,8 @@ extern "C" void func_ov109_02151eb4(BOOL result) {
     sWireless.m3C = 1;
 }
 
+// NOT MATCHING: the original compares the chunk count with 5 and stores the increment with strhcc/strhcs, two
+// stores of the same value; `if (m26 < 5) m26++; else m26++;` is folded into one here (eight bytes fewer).
 // @0x02151ee0
 extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     switch (size) {
@@ -2719,6 +2752,8 @@ int TushinScene::NextPageAfterReceive() {
     return page;
 }
 
+// NOT MATCHING: the original derives the -1 for sWireless.m44 from a register holding 0 (mov r2, #0; sub r1, r2,
+// #1), and sets that 0 earlier (five instructions).
 // @0x02152014
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;

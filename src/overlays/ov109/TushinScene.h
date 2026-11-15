@@ -576,7 +576,17 @@ struct WindowLayout {
     /* 0xC */ BOOL mHasBackButton;
 };
 
-// Overlay 109, scene 0x29: wireless play (通信).
+// Overlay 109, scene 0x29: wireless play (通信), the Mii exchange. The scene save screen (overlay 69, scene 0x2D)
+// comes here after saving. Its pages (mPage, an index of sPageMessages and sPageLayouts) show etc messages 0xF7 to
+// 0x125: what to exchange (Miis, or food, clothes and treasure, which is scene 0xB1, overlay 110), with what (another
+// Tomodachi Collection, through WH, or the Wii's Mii Channel, through the main program's Mii transfer code), and on
+// a DS whether to recruit a partner (the parent) or to find one (a child). A resident is chosen in the list on the
+// lower screen and sent: the 0x2C0-byte character (sTransfer) in 0x80-byte chunks, then the songs of its six slots
+// (sSongs); the receiver checks it (IsInvalid, the NG words of HasNgWord, a resident with the same Mii), stores it
+// as a new resident or updates the one it has, and answers with a 2-byte code (sWireless.m20). The Wii sends Miis
+// only: ReceiveWiiMii adds one from sMiiData. A DS or Wii T-shirt is given the first time (GiveShirt,
+// GiveWiiShirt). The scene factory (main CreateScene, case 41) loads overlay 109 and allocates 0x3F0B4 bytes; the
+// constructor is the main program's (func_02040644).
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. It is after the scene's
 // archive, "Scn/Scene/SceneTushin_LZ.bin".
