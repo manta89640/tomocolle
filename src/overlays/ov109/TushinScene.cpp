@@ -956,14 +956,15 @@ void TushinScene::UpdateListWindow() {
         }
         return;
     }
-    int result = mListWindow.mResult;
-    if (result == -1) {
+    int result;
+    if ((result = mListWindow.mResult) == -1) {
         return;
     }
     mListWindow.mUnknownSetBeforeClose = 15;
     func_020349cc(&mListWindow, 0x24);
-    if (sListOrders[result] != mResidents.mUnknown11306) {
-        func_020a123c(&mResidents, sListOrders[result], 0);
+    int order = sListOrders[result];
+    if (order != mResidents.mUnknown11306) {
+        func_020a123c(&mResidents, order, 0);
     }
 }
 
@@ -1020,18 +1021,21 @@ void TushinScene::UpdateConnection() {
         }
         return;
     case 4: {
-        BOOL go = FALSE;
         int next = 0x44;
-        if (mPage == 3) {
+        BOOL go = FALSE;
+        switch (mPage) {
+        case 3:
             next = 7;
             if (WH_GetBitmap() != 1) {
                 go = TRUE;
             }
-        } else if (mPage == 6) {
+            break;
+        case 6:
             next = 8;
             if (mWindow.mUnknownAD50 & 1) {
                 go = TRUE;
             }
+            break;
         }
         if (!go || mNextPage == next) {
             return;
@@ -1510,17 +1514,17 @@ void TushinScene::DrawCharacters() {
     case 38: case 39: case 40: case 41:
         mUnknown3F000 = FALSE;
         return;
-    case 34: case 37: case 64: case 67:
-        if (mUnknown3F000 == FALSE) {
-            return;
-        }
-        break;
     case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
     case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32:
     case 33: case 35: case 36: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
     case 63: case 65: case 66:
         mUnknown3F000 = TRUE;
+        break;
+    case 34: case 37: case 64: case 67:
+        if (mUnknown3F000 == FALSE) {
+            return;
+        }
         break;
     }
     for (int i = 0; i < 3; i++) {
@@ -1531,10 +1535,6 @@ void TushinScene::DrawCharacters() {
 // @0x0214f588
 void TushinScene::UpdateSignal() {
     switch (mPage) {
-    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 34: case 37: case 38: case 39: case 40: case 64:
-    default:
-        mSprite.mVisible = FALSE;
-        return;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18:
     case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30:
     case 31: case 32: case 33: case 35: case 36: case 41: case 42: case 43: case 44: case 45: case 46: case 47:
@@ -1548,6 +1548,9 @@ void TushinScene::UpdateSignal() {
             level = 0;
         }
         Sprite_SetSequence(&mSprite, sLinkLevelSequences[level], TRUE);
+        return;
+    default:
+        mSprite.mVisible = FALSE;
         return;
     }
 }
@@ -1612,7 +1615,8 @@ void TushinScene::Exit() {
         gGameData.mUnknown4D = mResidents.mUnknown11306;
     }
     for (int i = 0; i < 3; i++) {
-        ArchiveManager_Unmount(&gArchiveManager, mCharacters[i].mModel.mArchiveName);
+        CharacterModel *model = &mCharacters[i].mModel;
+        ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
         func_0202aecc(data_021223e4, i);
     }
     func_02024234(&data_0211d604, 0x3F00, 0);
@@ -1934,19 +1938,31 @@ void TushinScene::Update() {
         case 3:
             mUnknown3F08C = 2;
             sWireless.m02 = 0;
-            if (mPage != 10) {
+            if (mPage == 10) {
+                mUnknown24 = 1;
+            } else {
                 return;
             }
-            mUnknown24 = 1;
             break;
         case 4:
             sWireless.m02 = 0;
             mUnknown3F088 = 1;
             break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            break;
         }
     }
     if (mUnknown3F08C != 0 && mPage == 9) {
-        mPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+        if (mUnknown3F08C == 2) {
+            mPage = 0xE;
+        } else {
+            mPage = 0xF;
+        }
         ResetList();
         func_020a3634(&mList);
         func_02031228(&mButtons[0]);
@@ -2003,8 +2019,8 @@ void TushinScene::Update() {
                 mUnknown28 = 1;
                 break;
             }
+            next = mPage != 0x28 ? 0x40 : 0x43;
             lost = TRUE;
-            next = mPage == 0x28 ? 0x43 : 0x40;
             break;
         }
         if (mUnknown28 == 1) {
@@ -2034,10 +2050,10 @@ void TushinScene::Update() {
     }
 
     if (layout != -1) {
-        if (mWindow.mResult != -1) {
+        int result = mWindow.mResult;
+        if (result != -1) {
             mWindow.mUnknownSetBeforeClose = 15;
             int close = 0x1C;
-            int result = mWindow.mResult;
             switch (mPage) {
             case 0:
                 switch (result) {
@@ -2235,8 +2251,8 @@ void TushinScene::Update() {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
-                        func_0202c328(&gGameData, GetSelectedResident()->mIndex, 2);
-                        func_0202d110(&gGameData, GetSelectedResident()->mIndex);
+                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
+                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
                         StartReceiveAnimation();
                         SetUnknown3F098();
                     }
@@ -2298,7 +2314,11 @@ void TushinScene::Update() {
                 if (mUnknown3F08C == 0 || mNextPage == 0xD) {
                     break;
                 }
-                mNextPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+                if (mUnknown3F08C == 2) {
+                    mNextPage = 0xE;
+                } else {
+                    mNextPage = 0xF;
+                }
                 CloseWindow();
                 break;
             case 13:
@@ -2514,7 +2534,7 @@ void TushinScene::Update() {
                     mNextPage = 0x32;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, GetSelectedResident()->mIndex, 1);
+                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
@@ -2526,7 +2546,7 @@ void TushinScene::Update() {
                     mNextPage = 0x34;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, GetSelectedResident()->mIndex, 1);
+                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
                     SetOtherStandAnimation();
                     break;
                 }
@@ -2624,8 +2644,8 @@ void TushinScene::Update() {
                         StartSendAnimation();
                         break;
                     case 0xC:
-                        func_0202c328(&gGameData, GetSelectedResident()->mIndex, 2);
-                        func_0202d110(&gGameData, GetSelectedResident()->mIndex);
+                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
+                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
                         StartReceiveAnimation();
                         break;
                     }
