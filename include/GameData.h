@@ -15,7 +15,11 @@ public:
     // it as the outcome of loading the save data: on 0 it goes on, on 1 it goes on as on a first start, on 2 it says
     // the data is broken and initialises it, on 3 and 4 it says the data could not be read.
     /* 0x08 */ int mUnknownState;
-    /* 0x0C */ u8 mUnknown0C[0x44];
+    /* 0x0C */ u8 mUnknown0C[0x41];
+    // The order the list of Miis is sorted in, 0 to 6 (name, nickname, sex, year of birth, birthday, blood type,
+    // personality): the main program's MiiListScene sorts its list by it and keeps the order chosen there
+    /* 0x4D */ u8 mMiiListSortKey;
+    /* 0x4E */ u8 mUnknown4E[2];
     // Kept between 0 and 9,999,999 by SetCappedCounter, which eight shop-like overlays call (56, 68, 75, 78, 82
     // to 85). Probably the player's money, but nothing in that function says so.
     /* 0x50 */ int mCappedCounter;

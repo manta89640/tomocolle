@@ -4305,24 +4305,31 @@ data_020b5f08 kind:data(any) addr:0x020b5f08
 gStr_MLT_Window_down_nsc kind:data(any) addr:0x020b5f40
 gStr_MLT_Window_common_nsc_3 kind:data(any) addr:0x020b5f58
 sSpriteRect kind:data(any) addr:0x020b5f70 local
-gStr_Z kind:data(any) addr:0x020b5f80
-gStr_SquareBracketSquareBracket kind:data(any) addr:0x020b5f84
-gStr_bdf kind:data(any) addr:0x020b5f88
-gStr_aceg kind:data(any) addr:0x020b5f90
-data_020b5f98 kind:data(any) addr:0x020b5f98
-gStr__2 kind:data(any) addr:0x020b5fb0
-data_020b5fe0 kind:data(any) addr:0x020b5fe0
-data_020b5ff0 kind:data(any) addr:0x020b5ff0
-data_020b6000 kind:data(any) addr:0x020b6000
-data_020b601c kind:data(any) addr:0x020b601c
-data_020b6054 kind:data(any) addr:0x020b6054
-data_020b608c kind:data(any) addr:0x020b608c
-data_020b6098 kind:data(any) addr:0x020b6098
-gStr_BDFHJLNPRTVX kind:data(any) addr:0x020b60a4
-gStr_ACEGIKMOQSUWY kind:data(any) addr:0x020b60b4
-data_020b60c4 kind:data(any) addr:0x020b60c4
-data_020b60d4 kind:data(any) addr:0x020b60d4
-gStr_MLT_Window_down_nsc_2 kind:data(any) addr:0x020b60e4
+sTab3Sequences kind:data(any) addr:0x020b5f80 local
+sTab3PressedSequences kind:data(any) addr:0x020b5f84 local
+sTab4Sequences kind:data(any) addr:0x020b5f88 local
+sTab4PressedSequences kind:data(any) addr:0x020b5f90 local
+sPanelPosition0 kind:data(any) addr:0x020b5f98 local
+sPanelPosition1 kind:data(any) addr:0x020b5fa0 local
+sSortTextOffset kind:data(any) addr:0x020b5fa8 local
+sPanelTextPosition kind:data(any) addr:0x020b5fb0 local
+sPanelSize kind:data(any) addr:0x020b5fb8 local
+sPanelPosition kind:data(any) addr:0x020b5fc0 local
+sPanelSize0 kind:data(any) addr:0x020b5fc8 local
+sPanelPosition2 kind:data(any) addr:0x020b5fd0 local
+sPanelSize2 kind:data(any) addr:0x020b5fd8 local
+sPanelRect kind:data(any) addr:0x020b5fe0 local
+sSortMenuRect kind:data(any) addr:0x020b5ff0 local
+sSortMessages kind:data(any) addr:0x020b6000 local
+sSortButtonPositions kind:data(any) addr:0x020b601c local
+sSortButtonSizes kind:data(any) addr:0x020b6054 local
+sTab0Sequences kind:data(any) addr:0x020b608c local
+sTab0PressedSequences kind:data(any) addr:0x020b6098 local
+sTab2Sequences kind:data(any) addr:0x020b60a4 local
+sTab2PressedSequences kind:data(any) addr:0x020b60b4 local
+sTab1Sequences kind:data(any) addr:0x020b60c4 local
+sTab1PressedSequences kind:data(any) addr:0x020b60d4 local
+sSortMenuScreenName kind:data(any) addr:0x020b60e4 local
 data_020b60fc kind:data(any) addr:0x020b60fc
 cAdpcmIndexTable kind:data(any) addr:0x020b610c
 cAdpcmStepSizeTable kind:data(any) addr:0x020b611c
@@ -5379,25 +5386,25 @@ _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
 @13194 kind:data(any) addr:0x02111a68 local
 @13207 kind:data(any) addr:0x02111a78 local
 @13208 kind:data(any) addr:0x02111a7c local
-data_02111a80 kind:data(any) addr:0x02111a80
-data_02111a94 kind:data(any) addr:0x02111a94
-data_02111aa8 kind:data(any) addr:0x02111aa8
+sTabSequences kind:data(any) addr:0x02111a80 local
+sTabPressedSequences kind:data(any) addr:0x02111a94 local
+sSortTextPositions kind:data(any) addr:0x02111aa8 local
 _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
-gStr_MLT_3 kind:data(any) addr:0x02111b04
-gStr_Scn_List_MiiList_LZ_bin_2 kind:data(any) addr:0x02111b08
-gStr_TEM_3 kind:data(any) addr:0x02111b20
-gStr_Msg_TmdEtcMsgJP_LZ_bin_3 kind:data(any) addr:0x02111b24
-gStr_MLT_BG_list_ncg_2 kind:data(any) addr:0x02111b3c
-gStr_MLT_BG_list_ncl_2 kind:data(any) addr:0x02111b50
-gStr_MLT_BG_list_nsc kind:data(any) addr:0x02111b64
-gStr_MLT_BG_frame_L_nsc kind:data(any) addr:0x02111b78
-gStr_MLT_Window_down_nsc_4 kind:data(any) addr:0x02111b8c
-gStr_MLT_Obj_list_nce_2 kind:data(any) addr:0x02111ba4
-gStr_MLT_Obj_list_ncg_2 kind:data(any) addr:0x02111bb8
-gStr_MLT_Obj_list_ncl_2 kind:data(any) addr:0x02111bcc
-gStr_TEM_tmd_etc_msg_JP_bmg_2 kind:data(any) addr:0x02111be0
-gStr_MLT_4 kind:data(any) addr:0x02111bf8
-gStr_TEM_4 kind:data(any) addr:0x02111bfc
+@13190 kind:data(any) addr:0x02111b04 local
+@13191 kind:data(any) addr:0x02111b08 local
+@13192 kind:data(any) addr:0x02111b20 local
+@13193 kind:data(any) addr:0x02111b24 local
+@13223 kind:data(any) addr:0x02111b3c local
+@13224 kind:data(any) addr:0x02111b50 local
+@13225 kind:data(any) addr:0x02111b64 local
+@13226 kind:data(any) addr:0x02111b78 local
+@13227 kind:data(any) addr:0x02111b8c local
+@13228 kind:data(any) addr:0x02111ba4 local
+@13229 kind:data(any) addr:0x02111bb8 local
+@13230 kind:data(any) addr:0x02111bcc local
+@13231 kind:data(any) addr:0x02111be0 local
+@13259 kind:data(any) addr:0x02111bf8 local
+@13260 kind:data(any) addr:0x02111bfc local
 data_02111c00 kind:data(any) addr:0x02111c00
 data_02111c08 kind:data(any) addr:0x02111c08
 gStr_M00_3 kind:data(any) addr:0x02111c24
