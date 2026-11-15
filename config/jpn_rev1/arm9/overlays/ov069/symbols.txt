@@ -23,7 +23,7 @@ data_ov069_0214ad54 kind:data(any) addr:0x0214ad54
 gStr_K_ov069 kind:data(any) addr:0x0214ad64
 data_ov069_0214ad74 kind:data(any) addr:0x0214ad74
 gStr_MLT_BG_down_nsc_ov069 kind:data(any) addr:0x0214ad84
-data_ov069_0214ada8 kind:data(any) addr:0x0214ada8 ambiguous
+_ZTV13SavePlayScene kind:data(any) addr:0x0214ada0
 gStr_BIC_ov069 kind:data(any) addr:0x0214adc4
 gStr_Mdl_Ica_ica_mii_save_LZ_bin_ov069 kind:data(any) addr:0x0214adc8
 gStr_MLT_ov069 kind:data(any) addr:0x0214ade4

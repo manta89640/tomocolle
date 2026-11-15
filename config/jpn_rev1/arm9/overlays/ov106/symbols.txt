@@ -19,7 +19,7 @@ data_ov106_0214a748 kind:data(any) addr:0x0214a748
 data_ov106_0214a768 kind:data(any) addr:0x0214a768
 gStr_K_ov106 kind:data(any) addr:0x0214a778
 gStr_MLT_BG_down_nsc_ov106 kind:data(any) addr:0x0214a788
-data_ov106_0214a7a8 kind:data(any) addr:0x0214a7a8 ambiguous
+_ZTV13PreStartScene kind:data(any) addr:0x0214a7a0
 gStr_MLT_ov106 kind:data(any) addr:0x0214a7c4
 gStr_Scn_Scene_SceneSavePlay_LZ_bin_ov106 kind:data(any) addr:0x0214a7c8
 gStr_MNU_ov106 kind:data(any) addr:0x0214a7e8
