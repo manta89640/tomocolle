@@ -925,26 +925,26 @@ void ItemTradeList::UpdateRoom() {
     }
 }
 
-// NOT MATCHING: the original keeps the camera's address in r4 across func_0202a640 and passes it from there;
-// this reloads it from the literal pool after the call (same stores, the function 4 bytes shorter). Written as
-// a local pointer, through VEC_Set, as struct copies and as an inline member of Camera: all compile the same.
+// The two camera setters are compiled without propagation (`#pragma opt_propagation off`): with it, the camera's
+// address is reloaded from the literal pool after func_0202a640 instead of kept in r4, and loaded before the
+// constants instead of after them.
+#pragma opt_propagation off
 // @0x0214ba40
 void ItemTradeList::SetItemCamera() {
     Camera *camera = &data_02122764;
     func_0202a640(camera);
-    VEC_Set(&camera->mPosition, sItemCameraPosition.x, sItemCameraPosition.y, sItemCameraPosition.z);
-    VEC_Set(&camera->mTarget, sItemCameraTarget.x, sItemCameraTarget.y, sItemCameraTarget.z);
+    camera->mPosition = sItemCameraPosition;
+    camera->mTarget = sItemCameraTarget;
     func_0202a748(camera);
 }
 
-// NOT MATCHING: the original loads the constants first and the camera's address last (into ip, after them in
-// the literal pool); this loads the address first. The same stores otherwise.
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
     Camera *camera = &data_02122764;
-    VEC_Set(&camera->mPosition, sRoomCameraPosition.x, sRoomCameraPosition.y, sRoomCameraPosition.z);
-    VEC_Set(&camera->mTarget, sRoomCameraTarget.x, sRoomCameraTarget.y, sRoomCameraTarget.z);
+    camera->mPosition = sRoomCameraPosition;
+    camera->mTarget = sRoomCameraTarget;
 }
+#pragma opt_propagation reset
 
 // @0x0214bac4
 void ItemTradeList::ResetLights() {

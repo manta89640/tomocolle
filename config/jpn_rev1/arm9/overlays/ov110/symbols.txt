@@ -136,13 +136,13 @@ sWindowButtonMessages kind:data(any) addr:0x0214f6ac local
 gStr__ov110_4 kind:data(any) addr:0x0214f6b8
 sLightColors kind:data(any) addr:0x0214f720 local
 _ZTV14ItemTradeScene kind:data(any) addr:0x0214f724
-@15715 kind:data(any) addr:0x0214f748 local
-@15716 kind:data(any) addr:0x0214f74c local
-@15717 kind:data(any) addr:0x0214f750 local
-@15720 kind:data(any) addr:0x0214f754 local
-@15721 kind:data(any) addr:0x0214f758 local
-@15722 kind:data(any) addr:0x0214f75c local
-@15723 kind:data(any) addr:0x0214f77c local
+@15707 kind:data(any) addr:0x0214f748 local
+@15708 kind:data(any) addr:0x0214f74c local
+@15709 kind:data(any) addr:0x0214f750 local
+@15712 kind:data(any) addr:0x0214f754 local
+@15713 kind:data(any) addr:0x0214f758 local
+@15714 kind:data(any) addr:0x0214f75c local
+@15715 kind:data(any) addr:0x0214f77c local
 @15964 kind:data(any) addr:0x0214f78c local
 @15965 kind:data(any) addr:0x0214f790 local
 @15966 kind:data(any) addr:0x0214f7ac local
