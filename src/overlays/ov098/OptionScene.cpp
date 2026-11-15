@@ -6,8 +6,8 @@
 
 #include "OptionScene.h"
 
-// Overlay 98: the settings (OptionScene). One source file: its constants are the .rodata, its strings the .data
-// after the scene's virtual table.
+// Overlay 98: the settings (OptionScene). One source file: its constants are the .rodata (see the comment on
+// them), its strings the .data after the scene's virtual table.
 
 // The file's constants, all in one place and in this order, because the order decides where the compiler puts
 // them: it keeps a list of the file's data objects (the virtual table last), newest first, and heap-sorts it by size;
@@ -91,6 +91,7 @@ static inline BOOL IsInRect(ScreenRect rect, ScreenPoint point) {
     return func_02028d88(&rect, &point);
 }
 
+// The rectangle around the AM/PM sprite that takes a touch: 32 pixels square around its position (52, 120)
 static inline ScreenRect GetAmPmRect() {
     ScreenRect rect = sAmPmRect;
     rect.x = 36;
@@ -192,6 +193,10 @@ void OptionScene::Init() {
     }
 }
 
+// Does not match: the instructions are the ROM's, but the copy of the AM/PM rectangle that GetAmPmRect makes is at
+// sp+0x68 and the copy passed to IsInRect at sp+0x58, where the ROM has them the other way round. Tried: the
+// rectangle as a local of Update (with and without the inline), passed by value, by pointer and by reference, the
+// point by value, by pointer and through a local, and the inlines defined in the other order.
 void OptionScene::Update() {
     mTtsPlayer.Update();
     mScroll += 0x4CC;
