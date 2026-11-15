@@ -6,35 +6,76 @@
 
 // --- The file's constants ---
 
-// The tabs' sequences, off and on, and where they are
 static const u16 sTabSequences[5] = { 0x2B, 0x2D, 0x2F, 0x31, 0x29 };
 static const u16 sTabOnSequences[5] = { 0x2C, 0x2E, 0x30, 0x32, 0x2A };
+static const WindowPoint sLinkIconPosition = { 244, 182 };
 static const ScreenPoint sTabPositions[5] = { { 23, 13 }, { 68, 13 }, { 113, 13 }, { 158, 13 }, { 203, 13 } };
-// The item filter's
-static const u16 sItemFilterSequences[4] = { 0x25, 0x27, 0x14, 0x16 };
-static const u16 sItemFilterOnSequences[4] = { 0x26, 0x28, 0x15, 0x17 };
-static const ScreenPoint sItemFilterPositions[4] = { { 28, 41 }, { 88, 41 }, { 148, 41 }, { 208, 41 } };
-static const int sItemFilters[4] = { 1, 2, 8, 0x10 };
-// The costume filter's
-static const u16 sCostumeFilterSequences[5] = { 0x18, 0x1A, 0x1C, 0x1E, 0x20 };
+static const WindowPoint sTabTouchSize = { 44, 22 };
+static const WindowPoint sBackPosition = { 242, 13 };
+static const WindowPoint sThreeButtonPositions[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
+static const int sButtonSounds[4] = { 10, -1, 0, -1 };
 static const u16 sCostumeFilterOnSequences[5] = { 0x19, 0x1B, 0x1D, 0x1F, 0x21 };
+static const u16 sCostumeFilterSequences[5] = { 0x18, 0x1A, 0x1C, 0x1E, 0x20 };
 static const ScreenPoint sCostumeFilterPositions[5] = { { 26, 41 }, { 72, 41 }, { 118, 41 }, { 164, 41 }, { 210, 41 } };
 static const int sCostumeFilters[5] = { 0, 1, 2, 3, 4 };
-// Where each view of the upper screen rests, and where it comes in from
+static const WindowPoint sButtonTextPositions[3] = { { 38, 68 }, { 38, 100 }, { 38, 118 } };
 static const ScreenPoint sPreviewPositions[3] = { { 128, 134 }, { 190, 172 }, { 128, 128 } };
+static const WindowPoint sItemFilterTouchSize = { 42, 24 };
+static const u16 sItemFilterOnSequences[4] = { 0x26, 0x28, 0x15, 0x17 };
+static const WindowPoint sOkSize = { 94, 30 };
+static const WindowPoint sTextArea = { 24, 5 };
+static const WindowPoint sOkPosition = { 128, 173 };
+static const WindowPoint sButtonSize = { 190, 26 };
+static const VecFx32 sItemCameraTarget = { 0, 0x599, 0 };
+static const VecFx32 sRoomCameraPosition = { 0, 0x2666, 0x5000 };
+static const VecFx32 sRoomCameraTarget = { 0, 0x4CC, 0 };
+static const VecFx32 sItemCameraPosition = { 0, 0x599, 0x4666 };
+static const VecFx32 sZero = { 0, 0, 0 };
+static const WindowPoint sAnswerSizes[2] = { { 94, 30 }, { 94, 30 } };
+static const ScreenRect sQuestionRect = { 20, 20, 216, 152 };
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
+static const WindowPoint sBackTouchSize = { 24, 22 };
+static const WindowPoint sTextPositions[3] = { { 32, 33 }, { 32, 78 }, { 32, 58 } };
+static const char sWindowScreenName[] = "LTL:/Window_common.nsc";
+static const WindowPoint sButtonPositions[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
+static const WindowPoint sOkTouchSize = { 72, 30 };
+static const WindowPoint sThreeButtonTextPositions[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
+static const ScreenPoint sItemFilterPositions[4] = { { 28, 41 }, { 88, 41 }, { 148, 41 }, { 208, 41 } };
+static const WindowPoint sNameTextPosition = { 8, 8 };
 static const ScreenPoint sPreviewStarts[3] = { { 128, 0 }, { 190, 0 }, { 128, 0 } };
+static const WindowPoint sCostumeFilterTouchSize = { 42, 24 };
+static const u8 sAnswerSequences[2] = { 10, 10 };
+static const u8 sAnswerOnSequences[2] = { 11, 11 };
+static const int sItemFilters[4] = { 1, 2, 8, 0x10 };
+static const WindowPoint sAnswerPositions[2] = { { 75, 149 }, { 181, 149 } };
+static const WindowPoint sThreeButtonSize = { 190, 20 };
+static const int sAnswerSounds[2][4] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
+static const u8 sLinkSequences[4] = { 0, 1, 2, 3 };
+static const int sAnswerMessages[2] = { 2, 3 };
+static const u16 sItemFilterSequences[4] = { 0x25, 0x27, 0x14, 0x16 };
+static const VecFx32 sRoomPosition = { 0, 0x333, 0 };
+static const VecFx32 sFarAway = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
+// The tabs' sequences, off and on, and where they are
+// The item filter's
+// The costume filter's
+// Where each view of the upper screen rests, and where it comes in from
+
+// The item filter's and the costume filter's touch sizes
+// The OK and back buttons: where they are and their touch sizes
+// The camera for an item or a costume, and for a room
+// Where the item model is put when it is not shown
 
 // The lights' colours for an item or a costume (a room has its own)
 static GXRgb sLightColors[2] = { GX_RGB(31, 31, 31), GX_RGB(31, 31, 31) };
 
 // What the two DS send each other. The buffers WH sends from are 32-byte aligned.
 static u8 sDisconnected;     // The receiver was called without data: the partner has gone
-static u16 sReceivedCommand; // The command the other DS sent
-static u16 sSending;         // An item is being sent
 static u16 sCommand ATTRIBUTE_ALIGN(32); // What Send sends with a command
 static u16 sReceived;        // An item has come
-static BOOL sReceivedNew;
+static u16 sSending;         // An item is being sent
+static u16 sReceivedCommand; // The command the other DS sent
 static int sItem ATTRIBUTE_ALIGN(32); // The item sent or received: an item, costume + 0x800, or interior + 0x1000
+static BOOL sReceivedNew;
 static BOOL sSent;
 // The partners found, and how long each is still shown
 static int sPartnerTimers[3];
@@ -115,7 +156,7 @@ void ItemTradeTabs::Init(int plane, MessageFile *file, int *charOffset) {
         Sprite_Init(&mButtons[i], plane, sTabSequences[i], 128, 96, TRUE);
         func_02031278(&mButtons[i], sTabSequences[i], sTabOnSequences[i]);
         mButtons[i].SetPosition(FxVec2(sTabPositions[i].x << FX32_SHIFT, sTabPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], 44, 22);
+        func_02031eb0(&mButtons[i], sTabTouchSize.x, sTabTouchSize.y);
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
@@ -255,7 +296,7 @@ void ItemTradeItemFilter::Init(int plane) {
         func_02031278(&mButtons[i], sItemFilterSequences[i], sItemFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sItemFilterPositions[i].x << FX32_SHIFT, sItemFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], 42, 24);
+        func_02031eb0(&mButtons[i], sItemFilterTouchSize.x, sItemFilterTouchSize.y);
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
@@ -315,7 +356,7 @@ void ItemTradeCostumeFilter::Init(int plane) {
         func_02031278(&mButtons[i], sCostumeFilterSequences[i], sCostumeFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sCostumeFilterPositions[i].x << FX32_SHIFT, sCostumeFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], 42, 24);
+        func_02031eb0(&mButtons[i], sCostumeFilterTouchSize.x, sCostumeFilterTouchSize.y);
         func_0203119c(&mButtons[i]);
         func_02031260(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
@@ -402,8 +443,8 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
 
     Sprite_Init(&mOkButton, 1, 10, 128, 96, TRUE);
     func_02031278(&mOkButton, 10, 11);
-    mOkButton.SetPositionFromVec(0x80000, 0xAD000);
-    func_02031eb0(&mOkButton, 72, 30);
+    mOkButton.SetPositionFromVec(sOkPosition.x << FX32_SHIFT, sOkPosition.y << FX32_SHIFT);
+    func_02031eb0(&mOkButton, sOkTouchSize.x, sOkTouchSize.y);
     *charOffset += func_02031f58(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
     func_0203119c(&mOkButton);
     func_02031260(&mOkButton, 4);
@@ -415,8 +456,8 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
 
     Sprite_Init(&mBackButton, 1, 0, 128, 96, TRUE);
     func_02031278(&mBackButton, 0, 1);
-    mBackButton.SetPositionFromVec(0xF2000, 0xD000);
-    func_02031eb0(&mBackButton, 24, 22);
+    mBackButton.SetPositionFromVec(sBackPosition.x << FX32_SHIFT, sBackPosition.y << FX32_SHIFT);
+    func_02031eb0(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
     func_0203119c(&mBackButton);
     func_02031260(&mBackButton, 4);
     mBackButton.mSoundArc = 1;
@@ -888,16 +929,16 @@ void ItemTradeList::UpdateRoom() {
 void ItemTradeList::SetItemCamera() {
     Camera *camera = &data_02122764;
     func_0202a640(camera);
-    VEC_Set(&camera->mPosition, 0, 0x599, 0x4666);
-    VEC_Set(&camera->mTarget, 0, 0x599, 0);
+    VEC_Set(&camera->mPosition, sItemCameraPosition.x, sItemCameraPosition.y, sItemCameraPosition.z);
+    VEC_Set(&camera->mTarget, sItemCameraTarget.x, sItemCameraTarget.y, sItemCameraTarget.z);
     func_0202a748(camera);
 }
 
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
     Camera *camera = &data_02122764;
-    VEC_Set(&camera->mPosition, 0, 0x2666, 0x5000);
-    VEC_Set(&camera->mTarget, 0, 0x4CC, 0);
+    VEC_Set(&camera->mPosition, sRoomCameraPosition.x, sRoomCameraPosition.y, sRoomCameraPosition.z);
+    VEC_Set(&camera->mTarget, sRoomCameraTarget.x, sRoomCameraTarget.y, sRoomCameraTarget.z);
 }
 
 // @0x0214bac4
@@ -922,6 +963,8 @@ static inline BOOL HasSelection(ItemListView *list) {
 // The three views of the upper screen: each slides in when it is chosen, bounces, and fades out when another is
 // @0x0214baf8
 void ItemTradeList::UpdatePreviewStates() {
+    const fx32 unknown1 = 0x3000;
+    const fx32 unknown2 = 0x4000;
     int i;
     switch (*mContext->mSceneState) {
     case 0:
@@ -1169,10 +1212,11 @@ void ItemTradeItemModel::Load(int resourceId) {
 
 // @0x0214c354
 void ItemTradeItemModel::Reset() {
+    const VecFx32 unknown = { 0, FX32_ONE, 0 };
     mVisible = FALSE;
-    mPosition.x = 0x7FFFFFFF;
-    mPosition.y = 0x7FFFFFFF;
-    mPosition.z = 0x7FFFFFFF;
+    mPosition.x = sFarAway.x;
+    mPosition.y = sFarAway.y;
+    mPosition.z = sFarAway.z;
     mScale.x = FX32_ONE;
     mScale.y = FX32_ONE;
     mScale.z = FX32_ONE;
@@ -1218,31 +1262,11 @@ static const WindowButtons sWindowButtonMessages[6] = {
 static const int sOkSounds[6][4] = {
     { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 },
 };
-static const int sButtonSounds[4] = { 10, -1, 0, -1 };
-static const ScreenRect sQuestionRect = { 20, 20, 216, 152 };
-static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-static const WindowPoint sTextArea = { 24, 5 };
-static const WindowPoint sQuestionTextPosition = { 32, 58 };
+// Where the window's text is: with buttons, with OK alone, and with neither
+// The screen (tile map) of the window's background
 // The three buttons, when there are three, and when there are two; the fourth is OK's
-static const WindowPoint sButtonPositions[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
-static const WindowPoint sButtonSize = { 190, 26 };
-static const WindowPoint sButtonTextPositions[3] = { { 38, 68 }, { 38, 100 }, { 38, 118 } };
-static const WindowPoint sThreeButtonPositions[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
-static const WindowPoint sThreeButtonSize = { 190, 20 };
-static const WindowPoint sThreeButtonTextPositions[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
-static const WindowPoint sOkSize = { 94, 30 };
 // Yes and no
-static const u8 sAnswerSequences[2] = { 10, 10 };
-static const u8 sAnswerOnSequences[2] = { 11, 11 };
-static const WindowPoint sAnswerPositions[2] = { { 75, 149 }, { 181, 149 } };
-static const WindowPoint sAnswerSizes[2] = { { 94, 30 }, { 94, 30 } };
-static const int sAnswerMessages[2] = { 2, 3 };
-static const int sAnswerSounds[2][4] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
 // The link icon's sequence by link level
-static const u8 sLinkSequences[4] = { 0, 1, 2, 3 };
-static const WindowPoint sNameTextPosition = { 8, 8 };
-static const VecFx32 sZero = { 0, 0, 0 };
-static const VecFx32 sRoomPosition = { 0, 0x333, 0 };
 
 
 #define GetWindowButton(window, i) ((Button *)(window)->mSprites[i])
@@ -1260,20 +1284,21 @@ static inline BOOL IsWindowOpen(MessageWindow *window) {
 void ItemTradeScene::SetupQuestion(int *charOffset, MessageFile *file, u32 message) {
     ScreenRect rect = sQuestionRect;
     func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, "LTL:/Window_common.nsc", 0x400);
+    func_02033174(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     for (int i = 0; i <= 1; i++) {
         func_02033844(&mWindow, i, 1, sAnswerSequences[i], sAnswerOnSequences[i], sAnswerPositions[i],
                       sAnswerSizes[i], &mMessages[0], sAnswerMessages[i], &gFonts[2].mFont, 0x1000, charOffset,
                       sAnswerSounds[i], 1);
     }
-    func_020338d0(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sQuestionTextPosition, charOffset);
+    func_020338d0(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sTextPositions[2], charOffset);
     mWindow.mTexts[2].mHAlign = mWindow.mTexts[2].mMessageFile->GetAlignment(mWindow.mTexts[2].mMessage);
 }
 
 // Sets the window up for a state
 // @0x0214c5b8
 void ItemTradeScene::SetupWindow(int state) {
+    int i;
     int charOffset = mWindowCharOffset;
     int kind = sWindowKinds[state];
     if (kind == 3) {
@@ -1283,20 +1308,17 @@ void ItemTradeScene::SetupWindow(int state) {
 
     ScreenRect rect = sWindowRect;
     func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, "LTL:/Window_common.nsc", 0x400);
+    func_02033174(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
 
     WindowPoint textPosition;
     int buttons = sWindowButtons[kind].mButtons[0];
     if (buttons != 0) {
-        textPosition.x = 32;
-        textPosition.y = 33;
-    } else if (sWindowButtons[kind].mOk == 0) {
-        textPosition.x = 32;
-        textPosition.y = 78;
+        textPosition = sTextPositions[0];
+    } else if (sWindowButtons[kind].mOk != 0) {
+        textPosition = sTextPositions[2];
     } else {
-        textPosition.x = 32;
-        textPosition.y = 58;
+        textPosition = sTextPositions[1];
     }
     func_020338d0(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
                   &charOffset);
@@ -1305,18 +1327,20 @@ void ItemTradeScene::SetupWindow(int state) {
 
     if (sWindowButtons[kind].mButtons[2]) {
         WindowPoint size = sThreeButtonSize;
-        for (int i = 0; i < 3; i++) {
+        const WindowPoint *positions = sThreeButtonPositions;
+        for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], size, sButtonSounds, 1);
+                func_02033448(&mWindow, i, 1, 0x37, 0x38, positions[i], size, sButtonSounds, 1);
                 func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sThreeButtonTextPositions[i], &charOffset);
             }
         }
     } else {
         WindowPoint size = sButtonSize;
-        for (int i = 0; i < 3; i++) {
+        const WindowPoint *positions = sButtonPositions;
+        for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], size, sButtonSounds, 1);
+                func_02033448(&mWindow, i, 1, 0x35, 0x36, positions[i], size, sButtonSounds, 1);
                 func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sButtonTextPositions[i], &charOffset);
             }
@@ -1403,7 +1427,7 @@ void ItemTradeScene::Init() {
     Init3d();
 
     Sprite_Init(&mLinkIcon, 0, 0, 128, 96, TRUE);
-    mLinkIcon.SetPosition(FxVec2(0xF4000, 0xB6000));
+    mLinkIcon.SetPosition(FxVec2(sLinkIconPosition.x << FX32_SHIFT, sLinkIconPosition.y << FX32_SHIFT));
     mLinkIcon.mVisible = FALSE;
 
     mContext.mCostumes = &mCostumes;
