@@ -228,6 +228,20 @@ LIBRARIES["lib/WH/"] = {
     "includes": ["lib/WH", *SDK_INCLUDES],
 }
 
+# The Mii transfer that wireless play (overlay 109) uses to take Miis from a parent: a protocol, a child-only copy of
+# WH and a list of Mii records, which the project takes for a library that Nintendo built separately and the game
+# links (see docs/binary.md, "The Mii transfer"). Its name is the project's own. It is C++ built as the game's code is,
+# but with an earlier compiler than the game's: it reads statics of 64 bytes and more off the start of a file's .bss,
+# which builds up to 137 (2.0 SP2 patch 2) do and patch 3 does not. Patch 2 is the latest that fits.
+LIBRARIES["lib/MiiTransfer/"] = {
+    "compiler": "2.0/sp2p2",
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c++", "-ipa file"],
+    "sjis": True,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/MiiTransfer", *SDK_INCLUDES],
+}
+
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
 # "Metrowerks C/C++ for ARM 3.0.0.136", the compiler of 2.0/sp2. Its source here is this project's own decompilation,
 # written against the headers of that MSL (internal ones such as ansi_files.h included).

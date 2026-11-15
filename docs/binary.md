@@ -630,6 +630,56 @@ Not done:
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
 
+## The Mii transfer
+
+Wireless play (overlay 109, scene 0x29) takes Miis from another machine through code of the main program,
+0x020776E4 to 0x02079FA0, which nothing else calls. It is three files under `lib/MiiTransfer/` (the name and the file
+names are the project's own: none survives), all built with 2.0 SP2 patch 2 (see "Compiler"):
+
+| File | Code | Data | Functions |
+| --- | --- | --- | --- |
+| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 52 of 54 match |
+| `MiiTransferWH.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
+| `MiiTransferList.cpp`, the Mii records | `0x02079DFC`-`0x02079FA0` | .bss `0x02148680`-`0x02148688` | 7 of 7, complete |
+
+Measured:
+
+- **The bounds.** The code before 0x020776E4 belongs to the code around 0x0206CF6C to 0x020776E4 that works on Miis
+  from one pointer at 0x02145360; the functions after 0x02079FA0 are accessors of a Mii's bit fields, called through a
+  table at 0x020FBC2C. Each of the three files reads its statics from its own block of .bss, and the blocks follow one
+  another in the order of the code.
+- **`MiiTransferWH.cpp` is WH again**, function for function in WH's order (`WH_ChangeSysState`, `WH_SetError`, ...,
+  `WH_Finalize`, `WH_End`), with WH's system states, connect modes and error codes (`WH_ERRCODE_DISCONNECTED` 0x14,
+  `WH_ERRCODE_NO_RADIO` 0x16). It differs from the main copy (`lib/WH`): it scans with `WM_StartScanEx` and connects
+  with `WM_StartConnectEx`, a later revision; it has no strings; and it has only the child's side: of the parent's
+  functions only those that end a parent's session are there, which `WH_Finalize` calls. One function is not in WH as
+  the SDK has it, `func_020791C4`, which picks the parent to connect to from a scan's results (by GGID, and the entry
+  flag). Its statics are where WH's are, by size: the parent parameters (0x40 bytes) at +0x80, the scan parameters at
+  +0xC0, `sBssDesc` +0x120, 0x200 bytes of a data set used by nothing in the ROM at +0x1E0, the scan buffer, the key
+  set and data-sharing buffers, the send, receive and system buffers.
+- **The protocol** (`MiiTransfer.cpp`) is a child only: it starts WH, scans for parents of GGID 0x412, keeps up to eight
+  of them (a timer of 20 frames and an age each), connects to the one overlay 109 picks as an MP child, and exchanges
+  packets of up to 0x60 bytes, one at a time, numbered by a sequence byte that is odd while one is unanswered. In them
+  go messages: 0x10 a Mii record, 0x20 the answer to one, 0x30 to 0x50, 0xD0 idle, 0xE0 cut, 0xF0 the owner's nickname
+  (`OS_GetOwnerInfo`). A Mii received is stored in a free slot of the list, or over the Mii with the same create ID.
+- **The Mii records** are 0x4A bytes with the create ID at 0x18, copied by halfwords. That is the size and layout of
+  the Wii's Mii data (`RFLCharData`). The list is the caller's (overlay 109 passes 100 slots).
+- Its .rodata: the six bytes FF FF FF FF FF FF of the address `WH_StartScan` is given, copied byte by byte to the
+  stack, then, with no padding, 28 names of 20 characters that nothing refers to ("Off", "Scanning", "Connecting", ... "DispRecv",
+  ... "DispSend", ... "CuttingForSaveErr", "DispSaveErr").
+
+Inferred: this is not the game's own code but a library built apart from it and linked in, as the Mii transfer that
+Nintendo's DS games take Miis from the Wii with: it is built with another compiler than the game around it (below),
+carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
+
+Not done: `func_02077858` (the session's update: in the ROM its two loops are not rotated, three values share r4, and
+a copy into a stack buffer that nothing reads is kept, none of which -O4 gives here) and `func_02077F48` (two
+registers the other way round) do not match, with comments above them, so `MiiTransfer.cpp` is not complete. Its data
+is placed: the .bss named, and the .rodata as one object (`data_020B7BE4`, the address and the names together): the
+names start two bytes past a four-byte boundary, right after the address, which two objects cannot give under the
+link's ALIGNALL(4). Measured with the compiler: which statics of one size go where follows from the order of all of the
+file's data objects, that one included.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
@@ -656,6 +706,14 @@ Not done:
   build that fits; 139 is the last 3.0 build there is.
 - **WH is compiled like the game's C++**: `-ipa file` (its pooled statics need it), and as C++ (the order of its
   data needs it), see "WH". The speech engine, C, matches only without `-ipa file`: it was built apart.
+- **The Mii transfer (`lib/MiiTransfer`) is built with an earlier build than the game's.** Its files read statics of
+  64 bytes and more at the pool's address plus an offset: `WH_SetGgid` stores at +0x88 (the GGID of the 0x40 bytes of
+  parent parameters at +0x80, whose first two members `WH_Initialize` clears at +0x80 and +0x84), and the protocol
+  reads the valid flags of its three 0x60-byte packets at +0x1B0, +0x210 and +0x270. With build 137 (2.0 SP2 patch 2)
+  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54; with 138 they drop to 40 and 43, the functions growing
+  by the loads of the statics' own addresses. The main WH (`lib/WH`), the same source, has its parent parameters on their own, as 138 does. So any build up to 137 fits, and patch 2 is the latest that does, not
+  proven to be the one. `-ipa file` is part of it: without it (C++ alone) statics are not pooled at all and they drop
+  to 40 and 9.
 - **The linker** stays patch 2's, with which the ROM links identical; `configure.py` names it on its own
   (`MWLD_VERSION`).
 
