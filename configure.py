@@ -79,6 +79,7 @@ MWCC_SHA256 = {
     "2.0/sp2p2": "b1da5a2f191d1cdea3fd078cedc9c504de46609642ae8e44c015014cef5419a7",
     "2.0/sp1p2": "e66b7495f596d18f8fcc82cdfc3a4af77f15790d96f1aace93e4502ff439a87a",
     "2.0/sp2": "3d97f6ed0a43d131173fc3b15cd3442f38d85fc6059b3fa709139be70fe8532e",
+    "2.0/sp2p3": "900e6b2ce072b5c178e98d47468f83caa8156eda7fb2e1efa786535b73cf86f2",
 }
 MWLD_SHA256 = "a41aea5f282041e16dcd6c3570328009cb1eefb32b0cd05f60a8fdb365aec47c"
 # The same compiler's name on decomp.me, for objdiff's "create scratch" button
@@ -208,6 +209,19 @@ LIBRARIES["lib/SHTTS/"] = {
     "sjis": True,  # Its strings are Japanese too, so its sources go through sjiswrap like the game's
     "defines": SDK_DEFINES,
     "includes": ["lib/SHTTS", *SDK_INCLUDES],
+}
+
+# WH, the wireless wrapper of the SDK's sample code, which the game compiles in. Its source is this project's own
+# decompilation, in C. Measured (docs/binary.md, "WH"): the ROM addresses its statics of up to 32 bytes as one pool,
+# which the compiler does only with -ipa file, and its larger ones on their own, which only 2.0/sp2p3 and sp2p4
+# ("Version 3.0 build 138" and 139) do; every 2.0 release before pools them all.
+LIBRARIES["lib/WH/"] = {
+    "compiler": "2.0/sp2p3",
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, *ENCODING_FLAGS, "-lang=c99", "-ipa file"],
+    "sjis": True,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/WH", *SDK_INCLUDES],
 }
 
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
