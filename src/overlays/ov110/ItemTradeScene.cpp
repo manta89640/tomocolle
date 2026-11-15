@@ -5,6 +5,16 @@
 // virtual table, at the end of .text.
 
 // --- The file's constants ---
+//
+// The compiler pools a file's constants under 64 bytes into one .rodata section sorted by size, and gives objects
+// of one size their places by where they are declared; in this order they come out at the ROM's addresses (the
+// 1-aligned arrays and the tables of 64 bytes and more get sections of their own, also in the ROM's order). Reads
+// of these with a constant index are folded into the code as immediates: the touch sizes, the buttons' positions
+// and the camera vectors are in the ROM though no instruction loads them.
+//
+// What they are: the tabs' and filters' animation sequences (off and on), positions and touch sizes; the upper
+// screen's views, where each rests and where it comes in from; the OK and back buttons; the item and room cameras;
+// and the message window's rectangles, buttons, texts and sounds (used by ItemTradeScene::SetupWindow).
 
 static const u16 sTabSequences[5] = { 0x2B, 0x2D, 0x2F, 0x31, 0x29 };
 static const u16 sTabOnSequences[5] = { 0x2C, 0x2E, 0x30, 0x32, 0x2A };
@@ -35,7 +45,7 @@ static const WindowPoint sAnswerSizes[2] = { { 94, 30 }, { 94, 30 } };
 static const ScreenRect sQuestionRect = { 20, 20, 216, 152 };
 static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
 static const WindowPoint sBackTouchSize = { 24, 22 };
-static const WindowPoint sTextPositions[3] = { { 32, 33 }, { 32, 78 }, { 32, 58 } };
+static const WindowPoint sTextPositions[3] = { { 32, 33 }, { 32, 78 }, { 32, 58 } }; // Buttons, none, OK alone
 static const char sWindowScreenName[] = "LTL:/Window_common.nsc";
 static const WindowPoint sButtonPositions[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
 static const WindowPoint sOkTouchSize = { 72, 30 };
@@ -55,16 +65,6 @@ static const int sAnswerMessages[2] = { 2, 3 };
 static const u16 sItemFilterSequences[4] = { 0x25, 0x27, 0x14, 0x16 };
 static const VecFx32 sRoomPosition = { 0, 0x333, 0 };
 static const VecFx32 sFarAway = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF };
-// The tabs' sequences, off and on, and where they are
-// The item filter's
-// The costume filter's
-// Where each view of the upper screen rests, and where it comes in from
-
-// The item filter's and the costume filter's touch sizes
-// The OK and back buttons: where they are and their touch sizes
-// The camera for an item or a costume, and for a room
-// Where the item model is put when it is not shown
-
 // The lights' colours for an item or a costume (a room has its own)
 static GXRgb sLightColors[2] = { GX_RGB(31, 31, 31), GX_RGB(31, 31, 31) };
 
@@ -925,6 +925,9 @@ void ItemTradeList::UpdateRoom() {
     }
 }
 
+// NOT MATCHING: the original keeps the camera's address in r4 across func_0202a640 and passes it from there;
+// this reloads it from the literal pool after the call (same stores, the function 4 bytes shorter). Written as
+// a local pointer, through VEC_Set, as struct copies and as an inline member of Camera: all compile the same.
 // @0x0214ba40
 void ItemTradeList::SetItemCamera() {
     Camera *camera = &data_02122764;
@@ -934,6 +937,8 @@ void ItemTradeList::SetItemCamera() {
     func_0202a748(camera);
 }
 
+// NOT MATCHING: the original loads the constants first and the camera's address last (into ip, after them in
+// the literal pool); this loads the address first. The same stores otherwise.
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
     Camera *camera = &data_02122764;
@@ -1262,12 +1267,6 @@ static const WindowButtons sWindowButtonMessages[6] = {
     { { 0xFE, 0xFF, 0xF9 }, 9 },        { { 0xFE, 0xFF, 0xF9 }, 5 }, { { 0x102, 0x102, 0x102 }, 5 },
     { { 0xFE, 0xFF, 0xF9 }, 4 },        { { 0xFE, 0xFF, 0xF9 }, 4 }, { { 0xFE, 0xFF, 0xF9 }, 4 },
 };
-// Where the window's text is: with buttons, with OK alone, and with neither
-// The screen (tile map) of the window's background
-// The three buttons, when there are three, and when there are two; the fourth is OK's
-// Yes and no
-// The link icon's sequence by link level
-
 
 #define GetWindowButton(window, i) ((SpriteButton *)(window)->mSprites[i])
 
@@ -1296,6 +1295,11 @@ void ItemTradeScene::SetupQuestion(int *charOffset, MessageFile *file, u32 messa
 }
 
 // Sets the window up for a state
+// NOT MATCHING: the original keeps the base of the button positions (sThreeButtonPositions, sButtonPositions) in
+// r11 through each loop and so keeps this and kind on the stack for the whole function; this reloads the
+// table's address each time and keeps this in r11 (0x20 bytes shorter). The calls and their arguments are the
+// same. Tried: a local pointer to the table, the loops as one inline helper, the button and message rows as
+// locals.
 // @0x0214c5b8
 void ItemTradeScene::SetupWindow(int state) {
     int i;
@@ -1561,6 +1565,10 @@ static void EmptyCallback(void *arg);
 static void SendCallback(BOOL result);
 static void Receive(u16 aid, u16 *data, u16 size);
 
+// NOT MATCHING: the same instructions, but the loop over the partners found has its registers assigned
+// otherwise (the original: i r4, the texts r6, the timers r7, the names r8, the buttons r9; this: the names r4,
+// the buttons r5, i r6, the timers r8, the texts r9). The local for the texts brings `this` to the original's
+// r5; i at the top, in the loop, a while loop, pointers for the names and the timers change nothing.
 // @0x0214d7a8
 void ItemTradeScene::UpdateWireless() {
     int i;
@@ -1615,17 +1623,18 @@ void ItemTradeScene::UpdateWireless() {
             func_0203ba20(session, mNames[func_0203ba10(session)]);
         }
         if (mState == STATE_CHOOSE_PARTNER) {
+            MessageText *texts = mWindow.mTexts;
             for (i = 0; i < 3; i++) {
                 if (sPartnerTimers[i] > 0) {
                     if (sPartnerTimers[i] == 600) {
-                        MessageText *text = &mWindow.mTexts[i + 1];
+                        MessageText *text = &texts[i + 1];
                         text->SetStringArg(mNames[i], 0);
                         ClearText(text);
                         text->DrawAll();
                         func_02031e88(GetWindowButton(&mWindow, i), FALSE);
                     }
                     if (--sPartnerTimers[i] == 0) {
-                        MessageText *text = &mWindow.mTexts[i + 1];
+                        MessageText *text = &texts[i + 1];
                         text->SetStringArg(L"", 0);
                         ClearText(text);
                         text->DrawAll();
@@ -1719,6 +1728,8 @@ void ItemTradeScene::InitWirelessWhenIdle() {
     }
 }
 
+// NOT MATCHING, by one instruction's place: where the connection is lost and there is no window, the original
+// computes the window's address (add r0, r9, #500) before it loads mState for sStateMessages, this after.
 // @0x0214dc20
 void ItemTradeScene::Update() {
     func_0203b800(data_0213b700);
@@ -2017,7 +2028,8 @@ void ItemTradeScene::Update() {
                     mIsParent = TRUE;
                     break;
                 case STATE_CONNECTED_CHILD:
-                    mWindow.mTexts[0].SetStringArg(mNames[data_0213b700->mPartner], 0);
+                    int partner = data_0213b700->mPartner;
+                    mWindow.mTexts[0].SetStringArg(mNames[partner], 0);
                     PlaySound(11);
                     mIsParent = FALSE;
                     break;

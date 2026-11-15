@@ -91,10 +91,12 @@ void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to
 
 // The model of a character with its animations and joints (func_0208eb18 constructs it). The model is a member,
 // not a base: the scene's destructor resets the render callback and then runs AnimModel's destructor, without a
-// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel).
-class CharacterModel {
+// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel). Named
+// CharacterModelMember so as not to clash with the other overlays' stand-ins called CharacterModel, which have
+// AnimModel as a base.
+class CharacterModelMember {
 public:
-    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+    ~CharacterModelMember() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
@@ -108,10 +110,10 @@ public:
 extern "C" {
 // --- The character model's functions (0x0208eb18 to 0x0208fcf8), as this scene calls them ---
 // Fills the archive and model names of the model's owner for a costume (name of the archive, costume, unknown)
-void func_0208ee18(CharacterModel *model, const char *archiveName, int costume, int unk);
-void func_0208ef00(CharacterModel *model, BOOL playOnce, BOOL finished);
-void func_0208ef5c(CharacterModel *model, int unk1, int unk2);
-void func_0208f19c(CharacterModel *model, int unk, int color);
+void func_0208ee18(CharacterModelMember *model, const char *archiveName, int costume, int unk);
+void func_0208ef00(CharacterModelMember *model, BOOL playOnce, BOOL finished);
+void func_0208ef5c(CharacterModelMember *model, int unk1, int unk2);
+void func_0208f19c(CharacterModelMember *model, int unk, int color);
 }
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
@@ -136,7 +138,7 @@ public:
 // The main program's character class that the scenes derive theirs from (0x2B18 bytes).
 class Character : public CharacterBase {
 public:
-    /* 0x25E4 */ CharacterModel mModel;
+    /* 0x25E4 */ CharacterModelMember mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0x78];
 }; // 0x2B18
 
@@ -162,7 +164,7 @@ public:
     /* 0x0E0 */ u8 mUnknown0E0[0x60];
     /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
     /* 0x14C */ u8 mUnknown14C[0x5C];
-    /* 0x1A8 */ CharacterModel mModel;
+    /* 0x1A8 */ CharacterModelMember mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
     /* 0x674 */ char mArchivePath[0x1C]; // What func_0208ee18 sets for the costume
     /* 0x690 */ char mModelPath[0x28];
