@@ -202,8 +202,6 @@ void TushinScene::SetUpYesNoWindow(int *charOffset, MessageFile *file, u32 messa
     mWindow.mTexts[2].mVAlign = 0;
 }
 
-// NOT MATCHING: the store of the text's vertical alignment is scheduled after the loads of sLayouts that
-// decide the button layout (the original stores it first; four instructions in a different order and four bytes more).
 // @0x02149cb4
 void TushinScene::SetUpWindow(int page) {
     int charOffset = mCharOffset;
@@ -232,22 +230,24 @@ void TushinScene::SetUpWindow(int page) {
     func_020338d0(&mWindow, &mMessageFiles[0], sPageMessages[page], &gFonts[0].mFont, 0x1000, sTextPosition, margin,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
-    mWindow.mTexts[0].mVAlign = sLayouts[layout].mHasButton[0] == FALSE ? 1 : 0;
+    if (sLayouts[layout].mHasButton[0] == FALSE) {
+        mWindow.mTexts[0].mVAlign = 1;
+    } else {
+        mWindow.mTexts[0].mVAlign = 0;
+    }
 
     if (sLayouts[layout].mHasButton[2]) {
-        WindowPoint size = sButtonSize3;
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], size, &sButtonStyle, 1);
+                func_02033448(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], sButtonSize3, &sButtonStyle, 1);
                 func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions3[i], &charOffset);
             }
         }
     } else {
-        WindowPoint size = sButtonSize2;
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], size, &sButtonStyle, 1);
+                func_02033448(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], sButtonSize2, &sButtonStyle, 1);
                 func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions2[i], &charOffset);
             }
@@ -272,8 +272,6 @@ void TushinScene::SetUpWindow(int page) {
     mWindow.mButtons[0].mSprite.mUnknown5E = 8;
 }
 
-// NOT MATCHING: the local copy of sListTextPosition is at sp+0x3C where the original has it at sp+0x2C, below
-// the two copies of each button's position (six stores to the stack at other offsets).
 // @0x0214a140
 void TushinScene::SetUpList(int *charOffset) {
     func_020a1fe0(&mList, 6);
@@ -321,18 +319,13 @@ void TushinScene::SetUpList(int *charOffset) {
     for (int i = 0; i < 7; i++) {
         func_02033448(&mListWindow, i, 0, 0x6A, 0x6B, sListItemPositions[i], sListItemSizes[i], &sButtonStyle, 1);
     }
-    {
-        WindowPoint position = sListTextPosition;
-        for (int i = 0; i < 7; i++) {
-            func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, position,
-                          sListTextOrigins[i], charOffset);
-        }
+    for (int i = 0; i < 7; i++) {
+        func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, sListTextPosition,
+                      sListTextOrigins[i], charOffset);
     }
     func_02034f4c(&mListWindow, 1);
 }
 
-// NOT MATCHING: the camera's address, and the constant 0x24CC, are loaded after the stores before them; the
-// original loads them first (scheduling only, 12 instructions).
 // @0x0214a68c
 void TushinScene::InitCharacters() {
     int i;
@@ -363,7 +356,7 @@ void TushinScene::InitCharacters() {
     func_02091a14(&mCharacters[2], FALSE);
     mUnknown3F000 = 0;
     mCamera = &data_02122764;
-    func_0202a640(&data_02122764);
+    func_0202a640(mCamera);
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
     VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
     func_0202a96c(&data_021227cc[0]);
@@ -527,18 +520,15 @@ void TushinScene::SetUpCharacter(int i) {
     func_020919a0(&mCharacters[i], 0x1000);
 }
 
-// NOT MATCHING: the offset of the character (index * 0x2B18) and the model pointer are in r5/r4, swapped
-// against the original (register choice only, 8 instructions).
 // @0x0214b4e8
 void TushinScene::ReloadCharacter(int i) {
-    CharacterModel *model;
     func_0202aecc(data_021223e4, i);
-    model = &mCharacters[i].mModel;
+    CharacterModel *model = &mCharacters[i].mModel;
     ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
     func_02091048(&mCharacters[i], sCharacterArchives[i]);
     ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
     func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
-    func_0208ef5c(model, i, 0);
+    func_0208ef5c(&mCharacters[i].mModel, i, 0);
 }
 
 // @0x0214b590
