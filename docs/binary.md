@@ -678,17 +678,20 @@ Inferred: this is not the game's own code but a library built apart from it and 
 Nintendo's DS games take Miis from the Wii with: it is built with another compiler than the game around it (below),
 carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
 
-Not done: `func_02077858` (the session's update: in the ROM its two loops are not rotated, three values share r4, and
-a copy into a stack buffer that nothing reads is kept, none of which -O4 gives here) and `func_02077F48` (two
-registers the other way round) do not match, with comments above them, so `MiiTransfer.cpp` is not complete. Its data
-is placed: the .bss named, and the .rodata as one object (`data_020B7BE4`, the address and the names together): the
-names start two bytes past a four-byte boundary, right after the address, which two objects cannot give under the
-link's ALIGNALL(4). Measured with the compiler: which statics of one size go where follows from the order of all of the
-file's data objects, that one included.
+Not done: `func_02077858` (the session's update) differs only in five branch offsets of a jump table (the unlisted
+states of case 3 branch to the function's end, where the original branches to the inner switch's break), and
+`func_02077F48` in two registers the other way round, with comments above them, so `MiiTransfer.cpp` is not complete.
+Measured with the compiler: `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
+(its loops are neither rotated nor strength reduced, and the 0 it passes to `WH_StartScan` stays in r4); the
+address is copied from a local array's initialiser, the 6-byte compiler object at 0x020B7BE4, and the 28 names are
+another local array's initialiser that nothing uses, which the compiler keeps and puts in the same section right
+after it, at 0x020B7BEA with no padding, as the ROM has them. Which statics of one size go where in .bss follows
+from the order of all of the file's data objects, those two included; the declarations are ordered so that every
+static is at its ROM offset.
 
 ## Wireless play with items
 
-Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 70 of
+Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 73 of
 its 75 functions match; not complete.
 
 Measured:
@@ -743,10 +746,10 @@ list the player's things (75, 85, 100), copied in.
 
 Not done:
 
-- Five functions differ, each with a comment saying how: `SetItemCamera` and `SetRoomCamera` (the original keeps the
-  camera's address in a register, or loads it after the constants), `SetupWindow` (the original keeps the button
-  positions' table in r11 and so spills `this`), `UpdateWireless` (the partner loop's registers assigned otherwise)
-  and `Update` (one instruction's place). The unit cannot be complete until they match.
+- Two functions differ, each with a comment saying how: `SetupWindow` (the original keeps the button positions'
+  table in r11 and so spills `this`) and `Update` (one instruction's place). `SetItemCamera` and `SetRoomCamera`
+  match under `#pragma opt_propagation off` with the vectors as struct copies, and `UpdateWireless` with its partner
+  loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each use). The unit cannot be complete until they match.
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
   `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and

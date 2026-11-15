@@ -102,82 +102,38 @@ void func_02078f14(int state);
 
 } // extern "C"
 
-// A network address, as WH_StartScan takes it
-typedef struct MacAddress {
-    u8 addr[6];
-} MacAddress;
-
-// The file's constants, in one object: the address that matches any parent, and 28 names of states (of a screen
-// that shows the transfer, by the names) that nothing in the ROM refers to. They are one object because the names
-// follow the address with no padding, at 0x020B7BEA, which two objects cannot give under the link's ALIGNALL(4).
-static const struct {
-    MacAddress anyBssid;
-    char stateNames[28][20];
-} data_020b7be4 = {
-    {{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}},
-    {
-        "Off",
-        "Scanning",
-        "Connecting",
-        "Cutting",
-        "WaitCut",
-        "DispConnect",
-        "DispCut",
-        "CuttingForCommErr",
-        "DispCommErr",
-        "Idle",
-        "Recv",
-        "DispRecv",
-        "DispRecvComb",
-        "DispRecvDBFull",
-        "DispRecvErr",
-        "WaitAftRecv",
-        "StbSend",
-        "DispSend",
-        "Send",
-        "DispSendRtn",
-        "DispSendDBFull",
-        "DispSendDBFullSp",
-        "DispSendErr",
-        "DispSendErrSp",
-        "DispSendErrTmp",
-        "WaitAftSend",
-        "CuttingForSaveErr",
-        "DispSaveErr",
-    },
-};
 
 static u8 sSeq;
-static int sMiiIndex;
-static int sMsgState;
+static int data_021453a0;
 static BOOL sSending;
 static SendCallback sSendCallback;
-static int sSessionState;
+static int sParentCount;
 static BOOL data_02145384;
-static int data_021453c8;
-static BOOL data_021453dc;
+static int data_021453a4;
+static ResultCallback sResultCallback;
+static int sSessionState;
 static BOOL data_021453d8;
+static BOOL data_021453dc;
+static int sParentIndex;
 static int data_021453d4;
 static u32 sStateFrames;
 static int data_021453cc;
-static int data_021453a0;
+static int data_021453c8;
 static int sState;
 static BOOL data_021453c0;
 static BOOL data_021453bc;
-static int sParentCount;
+static int sMiiIndex;
 static void *data_021453b4;
 static BOOL sSendPending;
 static BOOL data_021453ac;
-static int sParentIndex;
-static int data_021453a4;
-static ResultCallback sResultCallback;
+static int sMsgState;
 static OSMutex sMutex;
-static u32 sParentTimers[PARENT_MAX];
 static u32 sParentAges[PARENT_MAX];
-static Message sRecvMsg;
+static u32 sParentTimers[PARENT_MAX];
 static Message sSendMsg;
-static Packet sSendPacket;
+static Message sRecvMsg;
 static Packet sRecvPacket;
+static Packet sSendPacket;
 static Packet sRecvBuffer;
 static Parent sParents[PARENT_MAX];
 
@@ -251,15 +207,16 @@ extern "C" void func_02077814(void) {
     sRecvPacket.unk1 = 0;
 }
 
-// The session's update. DOES NOT MATCH (0x2B0 bytes against 0x2B4): in the ROM its two loops are not rotated (a
-// branch to the test at the bottom, as -O2 compiles them, where -O4 tests first and loops at the bottom, or drops the
-// test for the constant bound), the loop counter, the 0 passed to WH_StartScan and the length of the parent's user
-// game info share r4, and the copy of the user game info into the stack buffer is kept although nothing reads the
-// buffer, where this compiler removes it. Not reproduced with volatile, register, other loop forms, inline helpers, a
-// local structure holding both arrays, or #pragma optimization_level (2 gives the loops but not the rest). The buffer
-// is volatile here only so that the copy is kept, which brings it closest (without it, 0x288 bytes).
+// The session's update. DOES NOT MATCH, by five branches only: every instruction and register is the ROM's, but in the
+// jump table of case 3 the unlisted states branch to the function's end where the original branches to the inner
+// switch's break (0x02077A2C); other case orders and fall-throughs tried give the same. Compiled at optimization level
+// 2 without propagation, as the ROM has it: loops neither rotated nor strength reduced, the 0 for WH_StartScan kept in
+// r4 (a variable, i, shared with the loop and the length), and the copy of the address from a local initialiser.
+#pragma optimization_level 2
+#pragma opt_propagation off
 extern "C" void func_02077858(void) {
     volatile u8 userGameInfo[0x16];
+    int i;
 
     switch (sSessionState) {
     case 0:
@@ -267,9 +224,10 @@ extern "C" void func_02077858(void) {
     case 1:
         switch (WH_GetSystemState()) {
         case WH_SYSSTATE_IDLE: {
-            MacAddress macAddr = data_020b7be4.anyBssid;
+            u8 macAddr[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            i = 0;
             WH_TurnOffPictoCatch();
-            WH_StartScan(func_02077e10, macAddr.addr, 0);
+            WH_StartScan(func_02077e10, macAddr, i);
             sSessionState = 2;
             break;
         }
@@ -278,7 +236,7 @@ extern "C" void func_02077858(void) {
         }
         break;
     case 2:
-        for (int i = 0; i < PARENT_MAX; i++) {
+        for (i = 0; i < PARENT_MAX; i++) {
             if (sParentTimers[i] != 0 && --sParentTimers[i] == 0) {
                 sParentTimers[i] = PARENT_TIMER;
                 sParentAges[i]++;
@@ -294,22 +252,22 @@ extern "C" void func_02077858(void) {
             sSendPacket.valid = FALSE;
             sRecvPacket.valid = FALSE;
             break;
-        case WH_SYSSTATE_SCANNING:
-            WH_EndScan();
-            break;
-        case WH_SYSSTATE_BUSY:
-            break;
         case WH_SYSSTATE_CONNECTED: {
-            int length = func_0207809c(sParentIndex);
+            i = func_0207809c(sParentIndex);
             u16 *info = func_020780b4(sParentIndex);
-            for (int i = 0; i < length; i++) {
-                userGameInfo[i] = *info++;
+            for (int j = 0; j < i; j++) {
+                userGameInfo[j] = *info++;
             }
             sSessionState = 4;
             break;
         }
         case WH_SYSSTATE_CONNECT_FAIL:
             sSessionState = 5;
+            break;
+        case WH_SYSSTATE_SCANNING:
+            WH_EndScan();
+            break;
+        case WH_SYSSTATE_BUSY:
             break;
         }
         break;
@@ -323,9 +281,6 @@ extern "C" void func_02077858(void) {
     }
     case 5:
         switch (WH_GetSystemState()) {
-        case WH_SYSSTATE_STOP:
-            sSessionState = 0;
-            break;
         case WH_SYSSTATE_IDLE:
             WH_End();
             break;
@@ -336,6 +291,9 @@ extern "C" void func_02077858(void) {
             break;
         case WH_SYSSTATE_CONNECTED:
             WH_Finalize();
+            break;
+        case WH_SYSSTATE_STOP:
+            sSessionState = 0;
             break;
         default:
             WH_Reset();
@@ -354,6 +312,7 @@ extern "C" void func_02077858(void) {
         sSessionState = 6;
     }
 }
+#pragma optimization_level reset
 
 extern "C" void func_02077b0c(void) {
     OS_LockMutex(&sMutex);
@@ -1060,6 +1019,37 @@ extern "C" int func_02078f04(void) {
 }
 
 extern "C" void func_02078f14(int state) {
+    // The names of the 28 states, unused: the ROM keeps their initialiser right after the address of func_02077858.
+    const char stateNames[28][20] = {
+        "Off",
+        "Scanning",
+        "Connecting",
+        "Cutting",
+        "WaitCut",
+        "DispConnect",
+        "DispCut",
+        "CuttingForCommErr",
+        "DispCommErr",
+        "Idle",
+        "Recv",
+        "DispRecv",
+        "DispRecvComb",
+        "DispRecvDBFull",
+        "DispRecvErr",
+        "WaitAftRecv",
+        "StbSend",
+        "DispSend",
+        "Send",
+        "DispSendRtn",
+        "DispSendDBFull",
+        "DispSendDBFullSp",
+        "DispSendErr",
+        "DispSendErrSp",
+        "DispSendErrTmp",
+        "WaitAftSend",
+        "CuttingForSaveErr",
+        "DispSaveErr",
+    };
     if (state == sState) {
         return;
     }

@@ -925,26 +925,26 @@ void ItemTradeList::UpdateRoom() {
     }
 }
 
-// NOT MATCHING: the original keeps the camera's address in r4 across func_0202a640 and passes it from there;
-// this reloads it from the literal pool after the call (same stores, the function 4 bytes shorter). Written as
-// a local pointer, through VEC_Set, as struct copies and as an inline member of Camera: all compile the same.
+// The two camera setters are compiled without propagation (`#pragma opt_propagation off`): with it, the camera's
+// address is reloaded from the literal pool after func_0202a640 instead of kept in r4, and loaded before the
+// constants instead of after them.
+#pragma opt_propagation off
 // @0x0214ba40
 void ItemTradeList::SetItemCamera() {
     Camera *camera = &data_02122764;
     func_0202a640(camera);
-    VEC_Set(&camera->mPosition, sItemCameraPosition.x, sItemCameraPosition.y, sItemCameraPosition.z);
-    VEC_Set(&camera->mTarget, sItemCameraTarget.x, sItemCameraTarget.y, sItemCameraTarget.z);
+    camera->mPosition = sItemCameraPosition;
+    camera->mTarget = sItemCameraTarget;
     func_0202a748(camera);
 }
 
-// NOT MATCHING: the original loads the constants first and the camera's address last (into ip, after them in
-// the literal pool); this loads the address first. The same stores otherwise.
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
     Camera *camera = &data_02122764;
-    VEC_Set(&camera->mPosition, sRoomCameraPosition.x, sRoomCameraPosition.y, sRoomCameraPosition.z);
-    VEC_Set(&camera->mTarget, sRoomCameraTarget.x, sRoomCameraTarget.y, sRoomCameraTarget.z);
+    camera->mPosition = sRoomCameraPosition;
+    camera->mTarget = sRoomCameraTarget;
 }
+#pragma opt_propagation reset
 
 // @0x0214bac4
 void ItemTradeList::ResetLights() {
@@ -1565,13 +1565,8 @@ static void EmptyCallback(void *arg);
 static void SendCallback(BOOL result);
 static void Receive(u16 aid, u16 *data, u16 size);
 
-// NOT MATCHING: the same instructions, but the loop over the partners found has its registers assigned
-// otherwise (the original: i r4, the texts r6, the timers r7, the names r8, the buttons r9; this: the names r4,
-// the buttons r5, i r6, the timers r8, the texts r9). The local for the texts brings `this` to the original's
-// r5; i at the top, in the loop, a while loop, pointers for the names and the timers change nothing.
 // @0x0214d7a8
 void ItemTradeScene::UpdateWireless() {
-    int i;
     if (mWait > 0) {
         return;
     }
@@ -1623,23 +1618,21 @@ void ItemTradeScene::UpdateWireless() {
             func_0203ba20(session, mNames[func_0203ba10(session)]);
         }
         if (mState == STATE_CHOOSE_PARTNER) {
-            MessageText *texts = mWindow.mTexts;
-            for (i = 0; i < 3; i++) {
-                if (sPartnerTimers[i] > 0) {
-                    if (sPartnerTimers[i] == 600) {
-                        MessageText *text = &texts[i + 1];
-                        text->SetStringArg(mNames[i], 0);
-                        ClearText(text);
-                        text->DrawAll();
-                        func_02031e88(GetWindowButton(&mWindow, i), FALSE);
-                    }
-                    if (--sPartnerTimers[i] == 0) {
-                        MessageText *text = &texts[i + 1];
-                        text->SetStringArg(L"", 0);
-                        ClearText(text);
-                        text->DrawAll();
-                        func_02031e88(GetWindowButton(&mWindow, i), TRUE);
-                    }
+            for (int i = 0; i < 3; i++) {
+                if (sPartnerTimers[i] <= 0) {
+                    continue;
+                }
+                if (sPartnerTimers[i] == 600) {
+                    mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
+                    ClearText(&mWindow.mTexts[i + 1]);
+                    mWindow.mTexts[i + 1].DrawAll();
+                    func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                }
+                if (--sPartnerTimers[i] == 0) {
+                    mWindow.mTexts[i + 1].SetStringArg(L"", 0);
+                    ClearText(&mWindow.mTexts[i + 1]);
+                    mWindow.mTexts[i + 1].DrawAll();
+                    func_02031e88(GetWindowButton(&mWindow, i), TRUE);
                 }
             }
         }
