@@ -1,18 +1,18 @@
-func_ov098_02149a40 kind:function(arm,size=0xb4) addr:0x02149a40
-func_ov098_02149af4 kind:function(arm,size=0x688) addr:0x02149af4
-func_ov098_0214a17c kind:function(arm,size=0xc2c) addr:0x0214a17c
-func_ov098_0214ada8 kind:function(arm,size=0xa0) addr:0x0214ada8
-func_ov098_0214ae48 kind:function(arm,size=0x60) addr:0x0214ae48
-func_ov098_0214aea8 kind:function(arm,size=0x728) addr:0x0214aea8
-func_ov098_0214b5d0 kind:function(arm,size=0x51c) addr:0x0214b5d0
-func_ov098_0214baec kind:function(arm,size=0x16c) addr:0x0214baec
-func_ov098_0214bc58 kind:function(arm,size=0xe0) addr:0x0214bc58
-func_ov098_0214bd38 kind:function(arm,size=0xe0) addr:0x0214bd38
-func_ov098_0214be18 kind:function(arm,size=0x104) addr:0x0214be18
-func_ov098_0214bf1c kind:function(arm,size=0xdc) addr:0x0214bf1c
-func_ov098_0214bff8 kind:function(arm,size=0xf4) addr:0x0214bff8
-func_ov098_0214c0ec kind:function(arm,size=0x34) addr:0x0214c0ec
-func_ov098_0214c120 kind:function(arm,size=0x3c) addr:0x0214c120
+_ZN11OptionScene12StartLoadingEv kind:function(arm,size=0xb4) addr:0x02149a40
+_ZN11OptionScene4InitEv kind:function(arm,size=0x688) addr:0x02149af4
+_ZN11OptionScene6UpdateEv kind:function(arm,size=0xc2c) addr:0x0214a17c
+_ZN11OptionScene4DrawEv kind:function(arm,size=0xa0) addr:0x0214ada8
+_ZN11OptionScene4ExitEv kind:function(arm,size=0x60) addr:0x0214ae48
+_ZN11OptionScene8SetStateEi kind:function(arm,size=0x728) addr:0x0214aea8
+_ZN11OptionScene10OpenWindowEii kind:function(arm,size=0x51c) addr:0x0214b5d0
+_ZN11OptionScene8ShowYearEm kind:function(arm,size=0x16c) addr:0x0214baec
+_ZN11OptionScene9ShowMonthEm kind:function(arm,size=0xe0) addr:0x0214bc58
+_ZN11OptionScene7ShowDayEm kind:function(arm,size=0xe0) addr:0x0214bd38
+_ZN11OptionScene8ShowHourEm kind:function(arm,size=0x104) addr:0x0214be18
+_ZN11OptionScene10ShowMinuteEm kind:function(arm,size=0xdc) addr:0x0214bf1c
+_ZN11OptionScene14GetDaysInMonthEmm kind:function(arm,size=0xf4) addr:0x0214bff8
+_ZN11OptionSceneD1Ev kind:function(arm,size=0x34) addr:0x0214c0ec
+_ZN11OptionSceneD0Ev kind:function(arm,size=0x3c) addr:0x0214c120
 data_ov098_0214c15c kind:data(any) addr:0x0214c15c
 data_ov098_0214c1ac kind:data(any) addr:0x0214c1ac ambiguous
 data_ov098_0214c1b0 kind:data(any) addr:0x0214c1b0
@@ -47,7 +47,7 @@ data_ov098_0214c520 kind:data(any) addr:0x0214c520 ambiguous
 data_ov098_0214c558 kind:data(any) addr:0x0214c558
 data_ov098_0214c58c kind:data(any) addr:0x0214c58c ambiguous
 data_ov098_0214c5e0 kind:data(any) addr:0x0214c5e0
-data_ov098_0214c708 kind:data(any) addr:0x0214c708 ambiguous
+_ZTV11OptionScene kind:data(any) addr:0x0214c700
 gStr_N83_ov098 kind:data(any) addr:0x0214c724
 gStr_Scn_Scene_SceneOption_LZ_bin kind:data(any) addr:0x0214c728
 gStr_TET_ov098 kind:data(any) addr:0x0214c748

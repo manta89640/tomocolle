@@ -7,6 +7,7 @@
 #include "GameData.h"
 #include "Scene.h"
 #include "Sprite.h"
+#include "SpriteButton.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
 
@@ -19,46 +20,6 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The main program's
 // classes below are STAND-INS (not decompiled): their sizes and the fields that this overlay's code touches.
-
-// --- The main program's sprite button (functions 0x0203115c to 0x02032158) ---------------------------------------
-
-// The sounds a button plays (sequence archive entries of gSoundManager; -1 for none), in the order of its fields.
-// What each is for is not known yet: func_0203133c plays them as the button is touched and released.
-struct ButtonSounds {
-    /* 0x0 */ int mSounds[4];
-}; // 0x10
-
-// A sprite that is a button on the touch screen. A STAND-IN: the constructor func_0203117c sets no sounds and
-// mUnknownDC; func_0203133c, its update, returns whether it was pressed; func_02031d7c draws it. The message
-// window of the main program holds twelve of them (overlay 73's MessageWindow), and the size is measured by the
-// arrays that the scenes' constructors build.
-struct SpriteButton : public Sprite {
-    SpriteButton(); // func_0203117c
-
-    /* 0x0AC */ int mUnknownAC; // These four and mUnknownF0 are cleared by func_0203119c
-    /* 0x0B0 */ int mUnknownB0;
-    /* 0x0B4 */ int mUnknownB4;
-    /* 0x0B8 */ int mUnknownB8;
-    /* 0x0BC */ ScreenRect mTouchRect; // Where it takes a touch, around its position (func_02031eb0 sets it)
-    /* 0x0CC */ ButtonSounds mSounds;  // func_02032158 copies them in
-    /* 0x0DC */ BOOL mUnknownDC;
-    /* 0x0E0 */ int mUnknownE0; // func_02031260 sets it to 1 and mUnknownE4 to 0
-    /* 0x0E4 */ int mUnknownE4;
-    /* 0x0E8 */ int mKind;      // What the button does when touched (func_02031260); func_0203133c switches on it
-    /* 0x0EC */ u16 mSequence;  // The animation sequences of the button as it is and as it is pressed
-    /* 0x0EE */ u16 mPressedSequence;
-    /* 0x0F0 */ int mUnknownF0;
-}; // 0xF4
-
-extern "C" {
-void func_0203119c(SpriteButton *button);                          // Resets it to its normal sequence
-void func_02031260(SpriteButton *button, int kind);                // Sets mKind
-void func_02031278(SpriteButton *button, u16 sequence, u16 pressed); // Sets the two sequences
-BOOL func_0203133c(SpriteButton *button);                          // Updates it: whether it was pressed
-void func_02031d7c(SpriteButton *button);                          // Draws it
-void func_02031eb0(SpriteButton *button, int width, int height);   // Its touch rectangle, centred on it
-void func_02032158(SpriteButton *button, const ButtonSounds *sounds); // Copies its sounds in
-}
 
 // Moves a sprite by an offset, built as an FxVec2 and passed by value (which leaves its dead copies on the stack)
 static inline void MoveSprite(Sprite *sprite, FxVec2 offset) {

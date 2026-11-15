@@ -9,6 +9,8 @@
 #include "text/MessageText.h"
 
 // A size or a position in pixels, as the message window's functions take it (by value, in two registers).
+struct ButtonSounds; // SpriteButton.h
+
 struct WindowPoint {
     /* 0x0 */ int x;
     /* 0x4 */ int y;
@@ -68,11 +70,18 @@ void func_020331bc(MessageWindow *window, int planes, ScreenRect rect);
 void func_020336b4(MessageWindow *window, int a, int b, int c, u8 d, WindowPoint position, WindowPoint size,
                    MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset, int e, int f,
                    int g, int h);
-// Adds a message text: (.., message file, message, font, plane, position, character offset)
-void func_02033a58(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+// Adds a button with a text: (number, .., position, size, the text's message file and message, font, plane,
+// character offset, the button's sounds)
+void func_020337b8(MessageWindow *window, int number, int a, int b, u8 c, WindowPoint position, WindowPoint size,
+                   MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset,
+                   const ButtonSounds *sounds);
+// Adds a message text: (.., message file, message, font, plane, position, character offset); returns the character
+// offset after it
+int func_02033a58(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
                    WindowPoint position, int *charOffset);
 void func_020341d4(MessageWindow *window);                                      // Updates
 void func_020345d8(MessageWindow *window);                                      // Draws
+void func_020346cc(MessageWindow *window);                                      // Releases it (the scenes' Exit)
 void func_02034720(MessageWindow *window, int flags, int unknown);              // Opens it
 void func_020349cc(MessageWindow *window, int flags);                           // Closes it
 void func_02034a3c(MessageWindow *window, int text, int argIndex, const wchar_t *string); // SetStringArg and DrawAll of a text
