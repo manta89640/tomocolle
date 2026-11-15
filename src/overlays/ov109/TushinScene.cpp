@@ -75,8 +75,8 @@ static const WindowLayout sLayouts[9] = {
     { { TRUE, TRUE, TRUE }, TRUE },
     { { FALSE, FALSE, FALSE }, TRUE },
     { { FALSE, FALSE, FALSE }, FALSE },
-    { { FALSE, FALSE, FALSE }, FALSE },
-    { { FALSE, TRUE, FALSE }, FALSE },
+    { { FALSE, FALSE, FALSE }, TRUE },
+    { { FALSE, FALSE, FALSE }, TRUE },
 };
 static const WindowButtonStyle sBackButtonStyles[9] = {
     { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 },
@@ -122,7 +122,7 @@ static const WindowPoint sListTextOrigins[7] = {
 
 static const int sPageLayouts[68] = {
     0, 1, 2, 3, 3, 4, 6, 7, 7, -1, -1, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    5, 6, 7, 3, 4, 6, 7, -1, -1, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 6, 7,
+    7, 5, 6, 7, 3, 4, 6, 7, -1, -1, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 6, 7,
 };
 
 // The Mii data of the residents, as they are sent (all 100 saved characters, empty ones cleared)
@@ -202,8 +202,6 @@ void TushinScene::SetUpYesNoWindow(int *charOffset, MessageFile *file, u32 messa
     mWindow.mTexts[2].mVAlign = 0;
 }
 
-// NOT MATCHING: the store of the text's vertical alignment is scheduled after the loads of sLayouts that
-// decide the button layout (the original stores it first; four instructions in a different order and four bytes more).
 // @0x02149cb4
 void TushinScene::SetUpWindow(int page) {
     int charOffset = mCharOffset;
@@ -232,22 +230,24 @@ void TushinScene::SetUpWindow(int page) {
     func_020338d0(&mWindow, &mMessageFiles[0], sPageMessages[page], &gFonts[0].mFont, 0x1000, sTextPosition, margin,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
-    mWindow.mTexts[0].mVAlign = sLayouts[layout].mHasButton[0] == FALSE ? 1 : 0;
+    if (sLayouts[layout].mHasButton[0] == FALSE) {
+        mWindow.mTexts[0].mVAlign = 1;
+    } else {
+        mWindow.mTexts[0].mVAlign = 0;
+    }
 
     if (sLayouts[layout].mHasButton[2]) {
-        WindowPoint size = sButtonSize3;
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], size, &sButtonStyle, 1);
+                func_02033448(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], sButtonSize3, &sButtonStyle, 1);
                 func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions3[i], &charOffset);
             }
         }
     } else {
-        WindowPoint size = sButtonSize2;
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], size, &sButtonStyle, 1);
+                func_02033448(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], sButtonSize2, &sButtonStyle, 1);
                 func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions2[i], &charOffset);
             }
@@ -272,8 +272,6 @@ void TushinScene::SetUpWindow(int page) {
     mWindow.mButtons[0].mSprite.mUnknown5E = 8;
 }
 
-// NOT MATCHING: the local copy of sListTextPosition is at sp+0x3C where the original has it at sp+0x2C, below
-// the two copies of each button's position (six stores to the stack at other offsets).
 // @0x0214a140
 void TushinScene::SetUpList(int *charOffset) {
     func_020a1fe0(&mList, 6);
@@ -321,18 +319,13 @@ void TushinScene::SetUpList(int *charOffset) {
     for (int i = 0; i < 7; i++) {
         func_02033448(&mListWindow, i, 0, 0x6A, 0x6B, sListItemPositions[i], sListItemSizes[i], &sButtonStyle, 1);
     }
-    {
-        WindowPoint position = sListTextPosition;
-        for (int i = 0; i < 7; i++) {
-            func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, position,
-                          sListTextOrigins[i], charOffset);
-        }
+    for (int i = 0; i < 7; i++) {
+        func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, sListTextPosition,
+                      sListTextOrigins[i], charOffset);
     }
     func_02034f4c(&mListWindow, 1);
 }
 
-// NOT MATCHING: the camera's address, and the constant 0x24CC, are loaded after the stores before them; the
-// original loads them first (scheduling only, 12 instructions).
 // @0x0214a68c
 void TushinScene::InitCharacters() {
     int i;
@@ -363,7 +356,7 @@ void TushinScene::InitCharacters() {
     func_02091a14(&mCharacters[2], FALSE);
     mUnknown3F000 = 0;
     mCamera = &data_02122764;
-    func_0202a640(&data_02122764);
+    func_0202a640(mCamera);
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
     VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
     func_0202a96c(&data_021227cc[0]);
@@ -527,18 +520,15 @@ void TushinScene::SetUpCharacter(int i) {
     func_020919a0(&mCharacters[i], 0x1000);
 }
 
-// NOT MATCHING: the offset of the character (index * 0x2B18) and the model pointer are in r5/r4, swapped
-// against the original (register choice only, 8 instructions).
 // @0x0214b4e8
 void TushinScene::ReloadCharacter(int i) {
-    CharacterModel *model;
     func_0202aecc(data_021223e4, i);
-    model = &mCharacters[i].mModel;
+    CharacterModel *model = &mCharacters[i].mModel;
     ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
     func_02091048(&mCharacters[i], sCharacterArchives[i]);
     ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
     func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
-    func_0208ef5c(model, i, 0);
+    func_0208ef5c(&mCharacters[i].mModel, i, 0);
 }
 
 // @0x0214b590
@@ -659,9 +649,7 @@ void TushinScene::Send(int kind) {
     }
 }
 
-// NOT MATCHING: for messages 7 and 8, the original reads the selected resident's mIndex off the element's address
-// (base + selected * 0x2C0, then +0x2A4); here the offsets 0xB004 and 0x2A4 are folded into one (two instructions
-// fewer).
+#pragma optimization_level 2
 // @0x0214ce60
 void TushinScene::UpdateSending() {
     if (sWireless.m3C != 1) {
@@ -693,7 +681,7 @@ void TushinScene::UpdateSending() {
             case 7:
             case 8: {
                 sWireless.m24 = 0;
-                func_0202c328(&gGameData, mResidents.mResidents[mResidents.mSelected].GetIndex(), 1);
+                func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                 SetOtherStandAnimation();
                 break;
             }
@@ -720,6 +708,7 @@ void TushinScene::UpdateSending() {
     }
 }
 
+#pragma optimization_level reset
 // @0x0214d064
 void TushinScene::SendFoundIndex() {
     sWireless.m48 = 0;
@@ -771,8 +760,9 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2, as the original's loops are): the copy of bits 0..3 of the record's 0x54
-// and the `|=` of 0x299 load their operands into other registers (10 instructions).
+// NOT MATCHING (optimization level 2, as the original's loops are): one instruction, the `orr` of 0x299, whose
+// operands are the other way round (`orr r0, r0, r1`: the record's byte first, the received one loaded first);
+// `record | received`, `|=`, a local, casts and a pointer all load the record's byte first.
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -810,7 +800,8 @@ int TushinScene::ReceiveCharacter() {
             if (bits != 4) {
                 record.mUnknown050Bits29 = bits;
             }
-            record.mUnknown054Bits0 = sTransfer.mUnknown054Bits0;
+            bits = sTransfer.mUnknown054Bits0;
+            record.mUnknown054Bits0 = bits;
             bits = sTransfer.mUnknown054Bits21;
             if (bits != 0) {
                 record.mUnknown054Bits21 = bits;
@@ -832,8 +823,7 @@ int TushinScene::ReceiveCharacter() {
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
             }
-            u8 flags = sTransfer.mUnknown299;
-            record.mUnknown299 |= flags;
+            record.mUnknown299 = sTransfer.mUnknown299 | record.mUnknown299;
             int n = 0;
             for (int i = 0; i < 6; i++) {
                 if (func_0209c718(&sTransfer, i) == 0xFF) {
@@ -1028,8 +1018,6 @@ void TushinScene::UpdateListWindow() {
     }
 }
 
-// NOT MATCHING: in state 4, `go = FALSE` and `next = 0x44` are set in the other order around the test of mPage
-// (two instructions).
 // @0x0214e348
 void TushinScene::UpdateConnection() {
     if (mWait > 0) {
@@ -1083,8 +1071,10 @@ void TushinScene::UpdateConnection() {
         }
         return;
     case 4: {
-        int next = 0x44;
-        BOOL go = FALSE;
+        int next;
+        BOOL go;
+        go = FALSE;
+        next = 0x44;
         switch (mPage) {
         case 3:
             next = 7;
@@ -1122,8 +1112,6 @@ void TushinScene::UpdateConnection() {
     }
 }
 
-// NOT MATCHING: the loop variables get other registers (the original has i in r6, the found partner in r7), and
-// 599 is loaded from the literal pool where here it is computed from the TRUE in fp (one instruction fewer).
 // @0x0214e620
 void TushinScene::UpdateWiiConnection() {
     int state = func_02078f04();
@@ -1133,19 +1121,19 @@ void TushinScene::UpdateWiiConnection() {
     switch (state) {
     case 1:
         sWireless.m4C = func_0207808c();
-        for (u16 i = 0; i < sWireless.m4C; i++) {
+        for (int i = 0; i < sWireless.m4C; i = (u16)(i + 1)) {
             if (!func_0207800c(i)) {
                 continue;
             }
             if (func_02078040(i) > 0) {
                 continue;
             }
-            WMBssDesc *parent = func_02078064(i);
             BOOL known = FALSE;
+            WMBssDesc *parent = func_02078064(i);
             for (int j = 0; j < 3; j++) {
                 if (sParentTimers[j] != 0 && memcmp(parent->bssid, sParents[j].bssid, 12) == 0) {
-                    known = TRUE;
                     sParentTimers[j] = 599;
+                    known = TRUE;
                     break;
                 }
             }
@@ -1158,11 +1146,10 @@ void TushinScene::UpdateWiiConnection() {
                     sParents[k] = *parent;
                     u16 size = func_0207809c(i);
                     const u16 *name = func_020780b4(i);
-                    int length = size / 2;
-                    for (int j = 0; j < length; j++) {
+                    for (int j = 0; j < size / 2; j++) {
                         mParentNames[k][j] = name[j];
                     }
-                    mParentNames[k][length] = 0;
+                    mParentNames[k][size / 2] = 0;
                     mParentIds[k] = i;
                     break;
                 }
@@ -1534,10 +1521,11 @@ void TushinScene::Leave() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the selected resident's mIndex is read with folded offsets (see
-// UpdateSending), mVisible of character 2's model is not read off the model's address, the parent timers are
-// read through their own symbol instead of the .bss pool's base (the .bss is not in the ROM's order yet), and a
-// few moves are scheduled otherwise (0x40 bytes fewer in all).
+// NOT MATCHING (optimization level 2): the parent timers are read through their own symbol instead of the .bss
+// pool's base (the .bss is not in the ROM's order yet); in two of the four calls of func_020a123c with the sort
+// key (pages 13 and 14/15) the original loads the key's offset before the list's address (registers swapped);
+// and `moveq r6, #67` is scheduled after `mov r5, #1` in the original.
+static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -1891,8 +1879,8 @@ void TushinScene::Update() {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
-                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
-                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
+                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
                         StartReceiveAnimation();
                         SetUnknown3F098();
                     }
@@ -1971,7 +1959,7 @@ void TushinScene::Update() {
                 if (sWireless.m22 != 0 || sWireless.m24 != 0) {
                     break;
                 }
-                if (mCharacters[2].mModel.IsVisible()) {
+                if (GetModel(&mCharacters[2])->IsVisible()) {
                     break;
                 }
                 switch (sWireless.m02) {
@@ -2174,7 +2162,7 @@ void TushinScene::Update() {
                     mNextPage = 0x32;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
+                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
@@ -2186,7 +2174,7 @@ void TushinScene::Update() {
                     mNextPage = 0x34;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
+                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 }
@@ -2284,8 +2272,8 @@ void TushinScene::Update() {
                         StartSendAnimation();
                         break;
                     case 0xC:
-                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
-                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
+                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
                         StartReceiveAnimation();
                         break;
                     }
@@ -2695,8 +2683,6 @@ extern "C" void func_ov109_02151eb4(BOOL result) {
     sWireless.m3C = 1;
 }
 
-// NOT MATCHING: the original compares the chunk count with 5 and stores the increment with strhcc/strhcs, two
-// stores of the same value; `if (m26 < 5) m26++; else m26++;` is folded into one here (eight bytes fewer).
 // @0x02151ee0
 extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     switch (size) {
@@ -2725,7 +2711,7 @@ extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     } else {
         MI_CpuCopy8(data, (u8 *)&sTransfer + sWireless.m26 * 0x80, 0x80);
         if (sWireless.m26 < 5) {
-            sWireless.m26++;
+            ++sWireless.m26;
         } else {
             sWireless.m26++;
         }

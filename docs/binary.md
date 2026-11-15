@@ -799,7 +799,7 @@ Not done:
 
 ## Wireless play: the Mii exchange
 
-Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 60 of its 77 functions match, and every section of the
+Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 68 of its 77 functions match, and every section of the
 overlay is claimed by the one file. The unit is not complete. `docs/notes/ov109.md` has the working notes.
 
 Measured:
@@ -859,8 +859,9 @@ Measured, about the compiler:
 
 Not done:
 
-- 17 functions differ, each with a comment saying how: mostly register choice or scheduling of one or two
-  instructions; `Update`, `UpdateSending` and `UpdateCharacters` also read the selected resident's `mIndex` and a
+- 9 entries differ: 6 functions and the static initialiser, each with a comment saying how, plus the two
+  destructors at `0x02152460` and `0x021524A8`, which are still under their address names in `symbols.txt` (ours
+  are `D1`/`D0`). Most of the 6 differ in the register choice or scheduling of one or two instructions; `Update`, `UpdateSending` and `UpdateCharacters` also read the selected resident's `mIndex` and a
   model's `mVisible` with folded offsets, where the original goes through the element's or the model's address.
 - `.data`: the three 4-byte strings of `sCharacterArchives` and the 12-byte group of its pool come out in another
   order than the ROM's.
