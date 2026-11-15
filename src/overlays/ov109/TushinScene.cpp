@@ -649,9 +649,6 @@ void TushinScene::Send(int kind) {
     }
 }
 
-// NOT MATCHING: for messages 7 and 8, the original reads the selected resident's mIndex off the element's address
-// (base + selected * 0x2C0, then +0x2A4); here the offsets 0xB004 and 0x2A4 are folded into one (two instructions
-// fewer).
 #pragma optimization_level 2
 // @0x0214ce60
 void TushinScene::UpdateSending() {
@@ -1524,10 +1521,11 @@ void TushinScene::Leave() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the selected resident's mIndex is read with folded offsets (see
-// UpdateSending), mVisible of character 2's model is not read off the model's address, the parent timers are
-// read through their own symbol instead of the .bss pool's base (the .bss is not in the ROM's order yet), and a
-// few moves are scheduled otherwise (0x40 bytes fewer in all).
+// NOT MATCHING (optimization level 2): the parent timers are read through their own symbol instead of the .bss
+// pool's base (the .bss is not in the ROM's order yet); in two of the four calls of func_020a123c with the sort
+// key (pages 13 and 14/15) the original loads the key's offset before the list's address (registers swapped);
+// and `moveq r6, #67` is scheduled after `mov r5, #1` in the original.
+static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -1881,8 +1879,8 @@ void TushinScene::Update() {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
-                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
-                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
+                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
                         StartReceiveAnimation();
                         SetUnknown3F098();
                     }
@@ -1961,7 +1959,7 @@ void TushinScene::Update() {
                 if (sWireless.m22 != 0 || sWireless.m24 != 0) {
                     break;
                 }
-                if (mCharacters[2].mModel.IsVisible()) {
+                if (GetModel(&mCharacters[2])->IsVisible()) {
                     break;
                 }
                 switch (sWireless.m02) {
@@ -2164,7 +2162,7 @@ void TushinScene::Update() {
                     mNextPage = 0x32;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
+                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
@@ -2176,7 +2174,7 @@ void TushinScene::Update() {
                     mNextPage = 0x34;
                     CloseWindow();
                     sWireless.m40 = 0;
-                    func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 1);
+                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 }
@@ -2274,8 +2272,8 @@ void TushinScene::Update() {
                         StartSendAnimation();
                         break;
                     case 0xC:
-                        func_0202c328(&gGameData, mResidents.GetSelected()->mIndex, 2);
-                        func_0202d110(&gGameData, mResidents.GetSelected()->mIndex);
+                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
+                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
                         StartReceiveAnimation();
                         break;
                     }
