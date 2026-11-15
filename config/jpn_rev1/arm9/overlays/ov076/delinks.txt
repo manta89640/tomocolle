@@ -4,3 +4,10 @@
     .ctor       start:0x0215a0e8 end:0x0215a0ec kind:rodata align:4
     .data       start:0x0215a100 end:0x0215a960 kind:data align:32
     .bss        start:0x0215a960 end:0x0215a960 kind:bss align:32
+
+src/overlays/ov076/MiiEditScene.cpp:
+    .text       start:0x02149a40 end:0x02158748
+    .rodata     start:0x02158748 end:0x0215a020
+    .init       start:0x0215a020 end:0x0215a0e8
+    .ctor       start:0x0215a0e8 end:0x0215a0ec
+    .data       start:0x0215a100 end:0x0215a960
