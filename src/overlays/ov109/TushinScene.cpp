@@ -2685,8 +2685,6 @@ extern "C" void func_ov109_02151eb4(BOOL result) {
     sWireless.m3C = 1;
 }
 
-// NOT MATCHING: the original compares the chunk count with 5 and stores the increment with strhcc/strhcs, two
-// stores of the same value; `if (m26 < 5) m26++; else m26++;` is folded into one here (eight bytes fewer).
 // @0x02151ee0
 extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     switch (size) {
@@ -2715,7 +2713,7 @@ extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     } else {
         MI_CpuCopy8(data, (u8 *)&sTransfer + sWireless.m26 * 0x80, 0x80);
         if (sWireless.m26 < 5) {
-            sWireless.m26++;
+            ++sWireless.m26;
         } else {
             sWireless.m26++;
         }
