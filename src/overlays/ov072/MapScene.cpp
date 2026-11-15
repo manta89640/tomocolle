@@ -1049,14 +1049,14 @@ void MapScene::Draw() {
     func_0207b138(mParticles);
 }
 
-// Not matching yet: the original keeps data_0213bab0's address in r7 across the three calls; this loads it again
-// before each store. Same instructions otherwise.
 void MapScene::Exit() {
     GXRgb clearColor = mSky.mColors[1];
+    // A pointer cast from the byte buffer is kept in a register across the calls; the buffer's address is not.
+    GXRgb *colors = (GXRgb *)data_0213bab0;
     int phase = func_020a6214(&mSky);
-    data_0213bab0[0] = clearColor;
-    data_0213bab0[1] = func_020a6574(phase);
-    data_0213bab0[2] = func_020a659c(phase);
+    colors[0] = clearColor;
+    colors[1] = func_020a6574(phase);
+    colors[2] = func_020a659c(phase);
     for (int i = 0; i < 14; i++) {
         func_0202aecc(data_021223e4, i);
         ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[i]);

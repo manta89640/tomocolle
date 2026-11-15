@@ -526,7 +526,7 @@ Not done:
 
 ## The island map
 
-Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 55 of its 59 functions
+Overlay 72, `src/overlays/ov072/MapScene.cpp`, one unit with `.text`, `.rodata` and `.data`: 56 of its 59 functions
 match (61 in the compiled object, with the base-object constructor and destructor that the link strips); not
 complete.
 
@@ -566,10 +566,12 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Four functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
+- Three functions differ, each with a comment saying how: `Init` and `Update` (registers and scheduling around the
   camera's reset, the lights and the back button, and one register too many in `Update`'s touch loop),
-  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`), `Exit` (a
-  register).
+  `MakeDailyNews` (the second shuffle's inlined `MATH_Rand16`). `Exit` matches since `data_0213bab0` is a byte
+  buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
+  90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
+  kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
