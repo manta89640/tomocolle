@@ -1,11 +1,11 @@
 func_ov076_02149a40 kind:function(arm,size=0x2c) addr:0x02149a40
 func_ov076_02149a6c kind:function(arm,size=0x110) addr:0x02149a6c
 func_ov076_02149b7c kind:function(arm,size=0x30) addr:0x02149b7c
-func_ov076_02149bac kind:function(arm,size=0xec) addr:0x02149bac
-func_ov076_02149c98 kind:function(arm,size=0xd18) addr:0x02149c98
-func_ov076_0214a9b0 kind:function(arm,size=0x438) addr:0x0214a9b0
-func_ov076_0214ade8 kind:function(arm,size=0x278) addr:0x0214ade8
-func_ov076_0214b060 kind:function(arm,size=0x18c) addr:0x0214b060
+_ZN12MiiEditScene12StartLoadingEv kind:function(arm,size=0xec) addr:0x02149bac
+_ZN12MiiEditScene4InitEv kind:function(arm,size=0xd18) addr:0x02149c98
+_ZN12MiiEditScene6UpdateEv kind:function(arm,size=0x438) addr:0x0214a9b0
+_ZN12MiiEditScene4DrawEv kind:function(arm,size=0x278) addr:0x0214ade8
+_ZN12MiiEditScene4ExitEv kind:function(arm,size=0x18c) addr:0x0214b060
 func_ov076_0214b1ec kind:function(arm,size=0x3f0) addr:0x0214b1ec
 func_ov076_0214b5dc kind:function(arm,size=0x94) addr:0x0214b5dc
 func_ov076_0214b670 kind:function(arm,size=0x24) addr:0x0214b670
@@ -78,8 +78,8 @@ func_ov076_0215835c kind:function(arm,size=0x1d0) addr:0x0215835c
 func_ov076_0215852c kind:function(arm,size=0xcc) addr:0x0215852c
 func_ov076_021585f8 kind:function(arm,size=0x10) addr:0x021585f8
 func_ov076_02158608 kind:function(arm,size=0x10) addr:0x02158608
-func_ov076_02158618 kind:function(arm,size=0x94) addr:0x02158618
-func_ov076_021586ac kind:function(arm,size=0x9c) addr:0x021586ac
+_ZN12MiiEditSceneD1Ev kind:function(arm,size=0x94) addr:0x02158618
+_ZN12MiiEditSceneD0Ev kind:function(arm,size=0x9c) addr:0x021586ac
 gStr_jj kind:data(any) addr:0x02158748
 gStr_ii kind:data(any) addr:0x0215874c
 data_ov076_02158750 kind:data(any) addr:0x02158750

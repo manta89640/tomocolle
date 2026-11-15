@@ -818,6 +818,41 @@ Not done:
   reaches from the pool's start. 13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the
   overlay. Inferred: functions that used them were stripped by the link, which keeps the pooled statics they used.
 
+## The Mii maker
+
+Overlay 76, `SceneMiiEdit2`: 83 functions, `.text` `0x02149A40` to `0x02158748` (60 KB). It is cut as one unit,
+`src/overlays/ov076/MiiEditScene.cpp`, which claims every section. Nothing in it is decompiled yet; the header holds
+the scene's layout.
+
+Measured:
+
+- The scene factory (`CreateScene`, cases 66, 67, 68 and 111: scenes 0x42, 0x43, 0x44 and 0x6F) loads overlay 76 (0x4C)
+  and allocates 0x983F8 bytes. The constructor is the main program's (`func_0204332c`), which stores the overlay's
+  virtual table at `0x0215A120`. Its entries are StartLoading `0x02149BAC`, Init `0x02149C98`, Update `0x0214A9B0`,
+  Draw `0x0214ADE8` and Exit `0x0214B060`, then the two destructors `0x02158618` and `0x021586AC`.
+- StartLoading mounts `Scn/Scene/SceneMiiEdit2_LZ.bin` (`E00`), `Cmn/Kbd/SoftKeyboard_LZ.bin` (`KBD`), the etc and
+  common messages (`TBM`, `T02`), `Mdl/Spl/SplEditEffect_LZ.bin` and `Mdl/Ica/ica_mii_edit_LZ.bin`.
+- Init switches on the scene id. For 0x42 and 0x44 it takes a resident's index from `data_0213ba74`+0x20 and reads
+  that saved character into the scene's character at +0x710 (`func_0202c264`, through `0x0214B670`). For 0x43 and 0x6F
+  it takes the first of the 100 save slots that `func_0202c354` reports free, and stops (`OS_Terminate`) when none
+  is. It then sets the character up with a fresh Mii and today's date. **Inferred**: 0x43 and 0x6F make a new Mii,
+  and 0x42 and 0x44 edit an existing one. How 0x42 and 0x44, and 0x43 and 0x6F, differ is not established.
+- The layout, from the constructor and the destructor: six sprite buttons at +0x158; a character (`CharacterBase`
+  and its `CharacterModel`, destroyed inline) at +0x710; a second `CharacterBase` at +0x3228, constructed by
+  `func_0208fd18` and destroyed by `_ZN13CharacterBaseD1Ev`; a `TtsPlayer` at +0x5920; nine `ObjTextBox`es at
+  +0x1A368; two message files at +0x1C0F8; ten message windows (2 at +0x1C138, 6 at +0x354B4, 1 each at +0x824A4 and
+  +0x8D454); the on-screen keyboard at +0x77D6C (`func_02082eac`); and many sprite and text buttons
+  (`MiiEditScene.h`).
+- `func_0208fd18` has the same body as `_ZN13CharacterBaseC2Ev` and builds the complete object that the destructor
+  destroys with `D1`, so it is now `_ZN13CharacterBaseC1Ev`. Both call `func_020979a0`, which has the same body as
+  `_ZN14SavedCharacterC1Ev` just after it, so that is now `_ZN14SavedCharacterC2Ev`.
+- None of the 83 functions has the same bytes as a function already decompiled elsewhere (compared with every
+  overlay's disassembly, the overlays' own symbols masked).
+- `.data` holds a 0x120-byte `const` table at `0x0215A13C` that is zero in the ROM. The static initialiser fills it
+  from two pairs of words of the `.rodata` pool (offsets 0xBC and 0x74), as overlay 109's text origins are filled.
+
+Not done: every function, and the data.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
