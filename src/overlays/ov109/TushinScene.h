@@ -490,10 +490,10 @@ void WH_Finalize(void);
 u16 WH_GetBitmap(void);
 typedef void (*WHReceiverFunc)(u16 aid, u16 *data, u16 size);
 void WH_SetReceiver(WHReceiverFunc proc);
-u16 func_02030a68(void);                                  // The channel measured
+u16 WH_GetMeasureChannel(void);
 int WH_GetLinkLevel(void);
-void func_02030ba4(void);
-BOOL func_02030cf8(int mode, u16 tgid, u16 channel);      // Connects as a parent
+BOOL WH_Initialize(void);
+BOOL WH_ParentConnect(int mode, u16 tgid, u16 channel);
 }
 
 // --- The Wii's Mii Channel connection (main program 0x02077000 to 0x0207a000) ---
@@ -554,7 +554,7 @@ void func_0207777c(void *a, void *miiData, int count);
 void func_02077710(void (*callback)(int, int));
 void func_02077720(void (*callback)(int, int));
 void func_02077804(int a);
-extern u16 data_02138fb4[12];
+extern u16 gWHChildSsid[12]; // WH copies the connecting child's SSID here: the scene shows it as its name
 }
 
 class TushinScene;

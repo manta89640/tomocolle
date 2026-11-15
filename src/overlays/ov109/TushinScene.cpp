@@ -557,7 +557,7 @@ void TushinScene::ResetExchange() {
     ClearParentNames();
     mUnknown3F0B0 = 0;
     for (int i = 0; i < 12; i++) {
-        data_02138fb4[i] = 0;
+        gWHChildSsid[i] = 0;
     }
     mUnknown3F084 = 0;
 }
@@ -1003,7 +1003,7 @@ void TushinScene::UpdateConnection() {
         return;
     case 7: {
         u16 tgid = WM_GetNextTgid();
-        func_02030cf8(0, tgid, func_02030a68());
+        WH_ParentConnect(0, tgid, WH_GetMeasureChannel());
         return;
     }
     case 2:
@@ -1588,7 +1588,7 @@ void TushinScene::Disconnect(int kind) {
         return;
     case 1:
     case 2:
-        func_02030ba4();
+        WH_Initialize();
         return;
     }
 }
@@ -2643,7 +2643,7 @@ void TushinScene::Update() {
                     PlaySound(0xA);
                     break;
                 case 7:
-                    mWindow.mTexts[0].SetStringArg((wchar_t *)data_02138fb4, 0);
+                    mWindow.mTexts[0].SetStringArg((wchar_t *)gWHChildSsid, 0);
                     PlaySound(0xB);
                     mUnknown3F090 = 1;
                     break;
