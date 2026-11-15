@@ -29,8 +29,8 @@ static u32 sRecvBuffer[WH_CHILD_RECV_BUFFER_SIZE / sizeof(u32)] ATTRIBUTE_ALIGN(
 static int sConnectMode;
 static WHJudgeAcceptFunc sJudgeAcceptFunc;
 
-static WMDataSharingInfo sDSInfo ATTRIBUTE_ALIGN(32);
 static WMKeySetBuf sWMKeySetBuf ATTRIBUTE_ALIGN(32);
+static WMDataSharingInfo sDSInfo ATTRIBUTE_ALIGN(32);
 
 static WMBssDesc sBssDesc ATTRIBUTE_ALIGN(32);
 static WMScanParam sScanParam ATTRIBUTE_ALIGN(32);

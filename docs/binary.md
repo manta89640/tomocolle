@@ -107,8 +107,8 @@ Measured from the original objects (in the compiler's MSL archive): MSL was comp
 game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
 `_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
-matched yet: WH, NFL, the text-to-speech middleware, and whatever of the SDK differs between release 30001 and the
-game's 30007.
+matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
+middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.
 
 ## Voice synthesis
 
@@ -479,9 +479,63 @@ Not done:
 - The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
   their addresses.
 
+## WH, the wireless wrapper
+
+WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the
+WM driver's asynchronous calls, which games copied into their own source. The game has it in the main program, in
+`lib/WH/wh.c` here: 66 functions, all of which match.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x0202F42C` to `0x0203115C` | `WH_GetWMErrCodeName` to `WH_End`, after `MessageText.cpp`'s last function; `0x0203115C` on is the game's sprite code (`0x0203119C` is the one that some 40 overlays call) |
+| `.data` | `0x0210F79C` to `0x021102D8` | The three name tables, their strings, then the strings of the code in the order it uses them |
+| `.bss` | `0x02138F40` to `0x0213B5C0` | A pool of the small statics (to `0x02138FE0`), then each larger one on its own, the WM buffer last |
+
+Measured:
+
+- The names are WH's own: its debug strings name its states (`WH_StateInStartParentKeyShare failed`,
+  `WH_StateOutStartScan : MAC=...`, `WH_Finalize, state = %d`), and each state is the WM call it makes and the
+  callback it passes. Its tables name the WH states (`WH_SYSSTATE_STOP` to `WH_SYSSTATE_ERROR`, 10), WM's error
+  codes with WH's three after them (23) and WM's state codes (27).
+- This revision has key-sharing and data-sharing (it calls `WM_StartKeySharing`, `WM_StartDataSharing`), scans with
+  `WM_StartScan` and connects with `WM_StartConnectEx`; a parent takes one child (`maxEntry` 1, the data-sharing
+  AID bitmap 3), data-sharing is on port 13 with 200 bytes a device, and `WH_SendData` sends on port 14.
+- The game's build is a final one: the trace hook `wh_trace` is a null pointer in `.bss` that nothing sets, so
+  none of the strings is ever printed, and a failed check calls `OS_Terminate`.
+- 66 functions are in the ROM; the sample's others (`WH_GetConnectMode`, `WH_GetLastError`, the WEP key
+  generator setters, ...) were stripped by the link, as nothing called them. Their statics are still in the pool:
+  `sParentWEPKeyGenerator`, `sJudgeAcceptFunc` and the others are read and never written.
+- Callers: overlays 109 and 110 (wireless play) call 11 of the functions, and the main program at `0x0203B7EC` to
+  `0x0203BB8C` and `0x0204D890` to `0x0204E38C`. A second, child-only copy of WH with no debug strings is at
+  `0x02078F58` to `0x02079DFC` (another unit).
+- Named from WH's calls, by comparison with the SDK's sources: `WM_Initialize` (`0x02012604`),
+  `WM_StartKeySharing` (`0x02013850`), `WM_EndKeySharing` (`0x0201386C`), `CHT_IsPictochatParent` (`0x020144E4`).
+
+What it showed about the compiler, measured (see "Compiler"):
+
+- **`-ipa file`.** The small statics are one pool, addressed from its start: `sSysState` is the pool's address
+  plus 0x2C everywhere. The compiler pools a file's statics only with `-ipa file`.
+- **Objects of more than 32 bytes are not pooled.** The 32-byte `WMScanParam` is in the pool and reached from its
+  start; the 64-byte `WMParentParam`, the scan's `WMBssDesc` and the buffers are addressed each on its own. Every
+  CodeWarrior for DS 2.0 up to SP2 patch 2 (3.0 build 137) pools them all; 2.0 SP2 patch 3 and patch 4 (builds 138
+  and 139) and the DSi compilers (4.0) keep objects of more than 32 bytes apart. The DSi compilers' code differs
+  (38 of the 66 functions match with them); with build 138 or 139 and `-ipa file`, all 66 match.
+- **Arrays of `char` are not pooled either**, whatever their size: the SSID copies are `u16` arrays, the one that is
+  apart (`sConnectionSsid`, `u8[24]`) is a `char` array.
+- **The pool's order** is the order of the size sort described for overlay 73 (`docs/notes/ov073.md`): the statics
+  were declared in the order that gives it, which says nothing of the original's order but sizes.
+
+Not done:
+
+- `.data`: its sections are in the right places but for the order of the table strings of equal length, see below.
+
 ## Compiler
 
-**Inferred, and only weakly tested so far:** mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
+**Measured, from WH (above):** the game's own code is compiled with CodeWarrior for DS 2.0 SP2 patch 3 or patch 4
+("Version 3.0 build 138" or 139). WH is built with 138 here (`configure.py`, per library); the rest of the game's
+code is still built with 2.0 SP2 patch 2, which gives the same code for every file decompiled so far (below).
+
+Previously inferred: mwccarm 2.0 SP2 patch 2 ("Version 3.0 build 137").
 
 - NitroSDK 4.2 is from 2008, and the game came out in June 2009. Pokémon Platinum (2008), also on NitroSDK 4.2, is
   matched by this version.
@@ -495,9 +549,16 @@ its libraries with, not what the game's own code was built with.
 For the game's code the evidence is now better. `src/voice/TtsPlayer.cpp`, 28 functions of C++ that set up streams
 and threads and pass up to ten arguments, matches in full with this compiler and these flags, 26 of them as first
 written. That does not rule out a neighbouring patch release, which may differ only in code this file does not have.
-The WH code is a good candidate, since its source is the SDK's own sample: compiled with the right compiler and flags,
-it must come out as it is in the ROM. Compiling it needs the SDK's headers and the C library headers that those
-include (`stdio.h`, `stdarg.h`), which do not come with the compiler.
+WH settled it, as above: build 137 cannot give its `.bss` addressing, builds 138 and 139 give all 66 functions.
+
+Measured, building every game source file (the 18 files under `src/` as of overlay 107's and the main-program
+scenes' merge, and the speech engine's four) with builds 137, 138 and 139 and the same flags: the code of every
+file is byte for byte the same with all three, so the functions that match are the same, and with 138 or 139 in
+place of 137 every complete unit still links to an identical ROM. The data differs in two files, overlays 73 and
+74: with 138 and 139 an 88-byte table of their `.rodata` leaves the pool for a section of its own (the 32-byte
+limit above). Nothing found so far tells 138 from 139: the game's files, WH and the speech engine give identical
+objects with both. Among the CodeWarrior 3.0 builds 114 to 139, 138 is the first that keeps objects of more than
+32 bytes out of the pool, and 139 is the last 3.0 build.
 
 The flags in `configure.py` are the usual ones of games of this SDK, adjusted to what is measured above. Each is a
 guess until a function that depends on it matches. One that is now measured: `-str noreuse`. The speech engine's
