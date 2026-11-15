@@ -1146,7 +1146,7 @@ void TushinScene::UpdateWiiConnection() {
                     sParents[k] = *parent;
                     u16 size = func_0207809c(i);
                     const u16 *name = func_020780b4(i);
-                                        for (int j = 0; j < size / 2; j++) {
+                    for (int j = 0; j < size / 2; j++) {
                         mParentNames[k][j] = name[j];
                     }
                     mParentNames[k][size / 2] = 0;
