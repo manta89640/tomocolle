@@ -690,7 +690,7 @@ WM_GetLinkLevel kind:function(arm,size=0x90) addr:0x020123dc
 WM_GetDispersionBeaconPeriod kind:function(arm,size=0x90) addr:0x0201246c
 WM_GetDispersionScanPeriod kind:function(arm,size=0x94) addr:0x020124fc
 WM_GetNextTgid kind:function(arm,size=0x74) addr:0x02012590
-func_02012604 kind:function(arm,size=0x10) addr:0x02012604
+WM_Initialize kind:function(arm,size=0x10) addr:0x02012604
 WMi_InitializeEx kind:function(arm,size=0x60) addr:0x02012614
 WM_Reset kind:function(arm,size=0x38) addr:0x02012674
 WM_End kind:function(arm,size=0x40) addr:0x020126ac
@@ -716,8 +716,8 @@ WmDataSharingReceiveCallback_Child kind:function(arm,size=0xf4) addr:0x0201350c
 WmDataSharingReceiveData kind:function(arm,size=0xcc) addr:0x02013600
 WmDataSharingSendDataSet kind:function(arm,size=0x154) addr:0x020136cc
 WmGetSharedDataAddress kind:function(arm,size=0x30) addr:0x02013820
-func_02013850 kind:function(arm,size=0x1c) addr:0x02013850
-func_0201386c kind:function(arm,size=0xc) addr:0x0201386c
+WM_StartKeySharing kind:function(arm,size=0x1c) addr:0x02013850
+WM_EndKeySharing kind:function(arm,size=0xc) addr:0x0201386c
 WM_SetWEPKey kind:function(arm,size=0x74) addr:0x02013878
 WM_MeasureChannel kind:function(arm,size=0x78) addr:0x020138ec
 WM_SetEntry kind:function(arm,size=0x4c) addr:0x02013964
@@ -742,7 +742,7 @@ CTRDGi_InitTaskInfo kind:function(arm,size=0x14) addr:0x020140ac
 CTRDGi_TaskThread kind:function(arm,size=0xf0) addr:0x020140c0
 MATH_CountPopulation kind:function(arm,size=0x44) addr:0x020141b0
 func_020141f4 kind:function(arm,size=0x2f0) addr:0x020141f4
-func_020144e4 kind:function(arm,size=0x98) addr:0x020144e4
+CHT_IsPictochatParent kind:function(arm,size=0x98) addr:0x020144e4
 STD_CopyString kind:function(arm,size=0x34) addr:0x0201457c
 STD_GetStringLength kind:function(arm,size=0x28) addr:0x020145b0
 func_020145d8 kind:function(arm,size=0x24) addr:0x020145d8
@@ -1196,7 +1196,7 @@ func_0202ae38 kind:function(arm,size=0x94) addr:0x0202ae38
 func_0202aecc kind:function(arm,size=0x34) addr:0x0202aecc
 func_0202af00 kind:function(arm,size=0x54) addr:0x0202af00
 func_0202af54 kind:function(arm,size=0x44) addr:0x0202af54
-func_0202af98 kind:function(arm,size=0x3c) addr:0x0202af98
+_ZN9AnimModelD1Ev kind:function(arm,size=0x3c) addr:0x0202af98
 func_0202afd4 kind:function(arm,size=0x34) addr:0x0202afd4
 func_0202b008 kind:function(arm,size=0x2c) addr:0x0202b008
 func_0202b034 kind:function(arm,size=0x24) addr:0x0202b034
@@ -1372,72 +1372,72 @@ _ZN11MessageText7DrawAllEv kind:function(arm,size=0x98) addr:0x0202ef48
 _ZN11MessageText12DrawNextCharEPPw kind:function(arm,size=0x1ec) addr:0x0202efe0
 _ZN11MessageText10UpdateDrawEv kind:function(arm,size=0x23c) addr:0x0202f1cc
 _ZN15MessageFileListD1Ev kind:function(arm,size=0x24) addr:0x0202f408
-func_0202f42c kind:function(arm,size=0x28) addr:0x0202f42c
-func_0202f454 kind:function(arm,size=0x1c) addr:0x0202f454
-func_0202f470 kind:function(arm,size=0x64) addr:0x0202f470
-func_0202f4d4 kind:function(arm,size=0x1c) addr:0x0202f4d4
-func_0202f4f0 kind:function(arm,size=0x40) addr:0x0202f4f0
-func_0202f530 kind:function(arm,size=0x64) addr:0x0202f530
-func_0202f594 kind:function(arm,size=0x60) addr:0x0202f594
-func_0202f5f4 kind:function(arm,size=0x38) addr:0x0202f5f4
-func_0202f62c kind:function(arm,size=0x58) addr:0x0202f62c
-func_0202f684 kind:function(arm,size=0x1a0) addr:0x0202f684
-func_0202f824 kind:function(arm,size=0x94) addr:0x0202f824
-func_0202f8b8 kind:function(arm,size=0x124) addr:0x0202f8b8
-func_0202f9dc kind:function(arm,size=0x34) addr:0x0202f9dc
-func_0202fa10 kind:function(arm,size=0x64) addr:0x0202fa10
-func_0202fa74 kind:function(arm,size=0x30) addr:0x0202fa74
-func_0202faa4 kind:function(arm,size=0x50) addr:0x0202faa4
-func_0202faf4 kind:function(arm,size=0x28) addr:0x0202faf4
-func_0202fb1c kind:function(arm,size=0x24) addr:0x0202fb1c
-func_0202fb40 kind:function(arm,size=0x84) addr:0x0202fb40
-func_0202fbc4 kind:function(arm,size=0xe0) addr:0x0202fbc4
-func_0202fca4 kind:function(arm,size=0x240) addr:0x0202fca4
-func_0202fee4 kind:function(arm,size=0x34) addr:0x0202fee4
-func_0202ff18 kind:function(arm,size=0x28) addr:0x0202ff18
-func_0202ff40 kind:function(arm,size=0x8c) addr:0x0202ff40
-func_0202ffcc kind:function(arm,size=0x60) addr:0x0202ffcc
-func_0203002c kind:function(arm,size=0x58) addr:0x0203002c
-func_02030084 kind:function(arm,size=0xa4) addr:0x02030084
-func_02030128 kind:function(arm,size=0x168) addr:0x02030128
-func_02030290 kind:function(arm,size=0x6c) addr:0x02030290
-func_020302fc kind:function(arm,size=0x144) addr:0x020302fc
-func_02030440 kind:function(arm,size=0x58) addr:0x02030440
-func_02030498 kind:function(arm,size=0x58) addr:0x02030498
-func_020304f0 kind:function(arm,size=0x30) addr:0x020304f0
-func_02030520 kind:function(arm,size=0x34) addr:0x02030520
-func_02030554 kind:function(arm,size=0x38) addr:0x02030554
-func_0203058c kind:function(arm,size=0x24) addr:0x0203058c
-func_020305b0 kind:function(arm,size=0x30) addr:0x020305b0
-func_020305e0 kind:function(arm,size=0x34) addr:0x020305e0
-func_02030614 kind:function(arm,size=0xac) addr:0x02030614
-func_020306c0 kind:function(arm,size=0x40) addr:0x020306c0
-func_02030700 kind:function(arm,size=0x6c) addr:0x02030700
-func_0203076c kind:function(arm,size=0x28) addr:0x0203076c
-func_02030794 kind:function(arm,size=0x10) addr:0x02030794
-func_020307a4 kind:function(arm,size=0x38) addr:0x020307a4
-func_020307dc kind:function(arm,size=0x14) addr:0x020307dc
-func_020307f0 kind:function(arm,size=0xc) addr:0x020307f0
-func_020307fc kind:function(arm,size=0x10) addr:0x020307fc
-func_0203080c kind:function(arm,size=0x10) addr:0x0203080c
-func_0203081c kind:function(arm,size=0x4) addr:0x0203081c
-func_02030820 kind:function(arm,size=0xc0) addr:0x02030820
-func_020308e0 kind:function(arm,size=0x9c) addr:0x020308e0
-func_0203097c kind:function(arm,size=0xcc) addr:0x0203097c
-func_02030a48 kind:function(arm,size=0x20) addr:0x02030a48
-func_02030a68 kind:function(arm,size=0x60) addr:0x02030a68
-func_02030ac8 kind:function(arm,size=0xdc) addr:0x02030ac8
-func_02030ba4 kind:function(arm,size=0x9c) addr:0x02030ba4
-func_02030c40 kind:function(arm,size=0x20) addr:0x02030c40
-func_02030c60 kind:function(arm,size=0x44) addr:0x02030c60
-func_02030ca4 kind:function(arm,size=0x54) addr:0x02030ca4
-func_02030cf8 kind:function(arm,size=0x11c) addr:0x02030cf8
-func_02030e14 kind:function(arm,size=0x100) addr:0x02030e14
-func_02030f14 kind:function(arm,size=0x54) addr:0x02030f14
-func_02030f68 kind:function(arm,size=0xc) addr:0x02030f68
-func_02030f74 kind:function(arm,size=0x48) addr:0x02030f74
-func_02030fbc kind:function(arm,size=0x144) addr:0x02030fbc
-func_02031100 kind:function(arm,size=0x5c) addr:0x02031100
+WH_GetWMErrCodeName kind:function(arm,size=0x28) addr:0x0202f42c local
+WH_GetWMStateCodeName kind:function(arm,size=0x1c) addr:0x0202f454 local
+WH_ChangeSysState kind:function(arm,size=0x64) addr:0x0202f470 local
+WH_SetError kind:function(arm,size=0x1c) addr:0x0202f4d4 local
+WH_StateInSetParentParam kind:function(arm,size=0x40) addr:0x0202f4f0 local
+WH_StateOutSetParentParam kind:function(arm,size=0x64) addr:0x0202f530 local
+WH_StateInSetParentWEPKey kind:function(arm,size=0x60) addr:0x0202f594 local
+WH_StateOutSetParentWEPKey kind:function(arm,size=0x38) addr:0x0202f5f4 local
+WH_StateInStartParent kind:function(arm,size=0x58) addr:0x0202f62c local
+WH_StateOutStartParent kind:function(arm,size=0x1a0) addr:0x0202f684 local
+WH_StateInStartParentMP kind:function(arm,size=0x94) addr:0x0202f824 local
+WH_StateOutStartParentMP kind:function(arm,size=0x124) addr:0x0202f8b8 local
+WH_StateInStartParentKeyShare kind:function(arm,size=0x34) addr:0x0202f9dc local
+WH_StateInEndParentKeyShare kind:function(arm,size=0x64) addr:0x0202fa10 local
+WH_StateInEndParentMP kind:function(arm,size=0x30) addr:0x0202fa74 local
+WH_StateOutEndParentMP kind:function(arm,size=0x50) addr:0x0202faa4 local
+WH_StateInEndParent kind:function(arm,size=0x28) addr:0x0202faf4 local
+WH_StateOutEndParent kind:function(arm,size=0x24) addr:0x0202fb1c local
+WH_StartScan kind:function(arm,size=0x84) addr:0x0202fb40
+WH_StateInStartScan kind:function(arm,size=0xe0) addr:0x0202fbc4 local
+WH_StateOutStartScan kind:function(arm,size=0x240) addr:0x0202fca4 local
+WH_EndScan kind:function(arm,size=0x34) addr:0x0202fee4
+WH_StateInEndScan kind:function(arm,size=0x28) addr:0x0202ff18 local
+WH_StateOutEndScan kind:function(arm,size=0x8c) addr:0x0202ff40 local
+WH_StateInSetChildWEPKey kind:function(arm,size=0x60) addr:0x0202ffcc local
+WH_StateOutSetChildWEPKey kind:function(arm,size=0x58) addr:0x0203002c local
+WH_StateInStartChild kind:function(arm,size=0xa4) addr:0x02030084 local
+WH_StateOutStartChild kind:function(arm,size=0x168) addr:0x02030128 local
+WH_StateInStartChildMP kind:function(arm,size=0x6c) addr:0x02030290 local
+WH_StateOutStartChildMP kind:function(arm,size=0x144) addr:0x020302fc local
+WH_StateInStartChildKeyShare kind:function(arm,size=0x58) addr:0x02030440 local
+WH_StateInEndChildKeyShare kind:function(arm,size=0x58) addr:0x02030498 local
+WH_StateInEndChildMP kind:function(arm,size=0x30) addr:0x020304f0 local
+WH_StateOutEndChildMP kind:function(arm,size=0x34) addr:0x02030520 local
+WH_StateInEndChild kind:function(arm,size=0x38) addr:0x02030554 local
+WH_StateOutEndChild kind:function(arm,size=0x24) addr:0x0203058c local
+WH_StateInReset kind:function(arm,size=0x30) addr:0x020305b0 local
+WH_StateOutReset kind:function(arm,size=0x34) addr:0x020305e0 local
+WH_StateInSetMPData kind:function(arm,size=0xac) addr:0x02030614 local
+WH_StateOutSetMPData kind:function(arm,size=0x40) addr:0x020306c0 local
+WH_PortReceiveCallback kind:function(arm,size=0x6c) addr:0x02030700 local
+WH_StateOutEnd kind:function(arm,size=0x28) addr:0x0203076c local
+WH_SetGgid kind:function(arm,size=0x10) addr:0x02030794
+WH_SetSsid kind:function(arm,size=0x38) addr:0x020307a4
+WH_SetUserGameInfo kind:function(arm,size=0x14) addr:0x020307dc
+WH_GetLinkLevel kind:function(arm,size=0xc) addr:0x020307f0
+WH_GetBitmap kind:function(arm,size=0x10) addr:0x020307fc
+WH_GetSystemState kind:function(arm,size=0x10) addr:0x0203080c
+WH_PrintBssDesc kind:function(arm,size=0x4) addr:0x0203081c
+WH_StartMeasureChannel kind:function(arm,size=0xc0) addr:0x02030820
+WH_StateInMeasureChannel kind:function(arm,size=0x9c) addr:0x020308e0 local
+WH_StateOutMeasureChannel kind:function(arm,size=0xcc) addr:0x0203097c local
+WHi_MeasureChannel kind:function(arm,size=0x20) addr:0x02030a48 local
+WH_GetMeasureChannel kind:function(arm,size=0x60) addr:0x02030a68
+SelectChannel kind:function(arm,size=0xdc) addr:0x02030ac8 local
+WH_Initialize kind:function(arm,size=0x9c) addr:0x02030ba4
+WH_IndicateHandler kind:function(arm,size=0x20) addr:0x02030c40 local
+WH_StateInInitialize kind:function(arm,size=0x44) addr:0x02030c60 local
+WH_StateOutInitialize kind:function(arm,size=0x54) addr:0x02030ca4 local
+WH_ParentConnect kind:function(arm,size=0x11c) addr:0x02030cf8
+WH_ChildConnect kind:function(arm,size=0x100) addr:0x02030e14
+WH_SetReceiver kind:function(arm,size=0x54) addr:0x02030f14
+WH_SendData kind:function(arm,size=0xc) addr:0x02030f68
+WH_Reset kind:function(arm,size=0x48) addr:0x02030f74
+WH_Finalize kind:function(arm,size=0x144) addr:0x02030fbc
+WH_End kind:function(arm,size=0x5c) addr:0x02031100
 func_0203115c kind:function(arm,size=0x20) addr:0x0203115c
 func_0203117c kind:function(arm,size=0x20) addr:0x0203117c
 func_0203119c kind:function(arm,size=0x8c) addr:0x0203119c
@@ -1737,7 +1737,7 @@ func_0203de78 kind:function(arm,size=0x28) addr:0x0203de78
 _ZN13TextTestSceneC1Ei kind:function(arm,size=0x84) addr:0x0203dea0
 func_0203df24 kind:function(arm,size=0xa8) addr:0x0203df24
 func_0203dfcc kind:function(arm,size=0x54) addr:0x0203dfcc
-func_0203e020 kind:function(arm,size=0x44) addr:0x0203e020
+_ZN9AnimModelC1Ev kind:function(arm,size=0x44) addr:0x0203e020
 func_0203e064 kind:function(arm,size=0x60) addr:0x0203e064
 func_0203e0c4 kind:function(arm,size=0x58) addr:0x0203e0c4
 func_0203e11c kind:function(arm,size=0x4c) addr:0x0203e11c
@@ -1841,7 +1841,7 @@ func_02044c80 kind:function(arm,size=0x41c) addr:0x02044c80
 func_0204509c kind:function(arm,size=0x78) addr:0x0204509c
 func_02045114 kind:function(arm,size=0xd4) addr:0x02045114
 func_020451e8 kind:function(arm,size=0x164) addr:0x020451e8
-func_0204534c kind:function(arm,size=0x1b8) addr:0x0204534c
+_ZN8MapSceneC1Ei kind:function(arm,size=0x1b8) addr:0x0204534c
 func_02045504 kind:function(arm,size=0x21c) addr:0x02045504
 func_02045720 kind:function(arm,size=0x424) addr:0x02045720
 func_02045b44 kind:function(arm,size=0x28) addr:0x02045b44
@@ -2111,7 +2111,7 @@ func_02052174 kind:function(arm,size=0x60) addr:0x02052174
 func_020521d4 kind:function(arm,size=0x10) addr:0x020521d4
 func_020521e4 kind:function(arm,size=0x60) addr:0x020521e4
 func_02052244 kind:function(arm,size=0x68) addr:0x02052244
-func_020522ac kind:function(arm,size=0xd10) addr:0x020522ac
+NewsItem_Make kind:function(arm,size=0xd10) addr:0x020522ac
 func_02052fbc kind:function(arm,size=0x10) addr:0x02052fbc
 func_02052fcc kind:function(arm,size=0x30) addr:0x02052fcc
 func_02052ffc kind:function(arm,size=0x54) addr:0x02052ffc
@@ -3744,7 +3744,7 @@ func_0209ed30 kind:function(arm,size=0x14) addr:0x0209ed30
 func_0209ed44 kind:function(arm,size=0x40) addr:0x0209ed44
 _ZN13InventoryItem3AddEi kind:function(arm,size=0x54) addr:0x0209ed84
 func_0209edd8 kind:function(arm,size=0x28) addr:0x0209edd8
-func_0209ee00 kind:function(arm,size=0x28) addr:0x0209ee00
+_ZN13InventoryItemC1Ev kind:function(arm,size=0x28) addr:0x0209ee00
 _ZN9Inventory4LoadEv kind:function(arm,size=0xd0) addr:0x0209ee28
 _ZN9Inventory4SaveEv kind:function(arm,size=0x94) addr:0x0209eef8
 func_0209ef8c kind:function(arm,size=0x34) addr:0x0209ef8c
@@ -4985,108 +4985,108 @@ _ZTV11MessageText kind:data(any) addr:0x0210f72c
 @13769 kind:data(any) addr:0x0210f770 local
 @13770 kind:data(any) addr:0x0210f774 local
 @13771 kind:data(any) addr:0x0210f788 local
-gStr_N_A kind:data(any) addr:0x0210f79c
-gStr_WH_SYSSTATE_IDLE kind:data(any) addr:0x0210f7a0
-gStr_WH_SYSSTATE_STOP kind:data(any) addr:0x0210f7b4
-gStr_WH_SYSSTATE_BUSY kind:data(any) addr:0x0210f7c8
-gStr_WH_SYSSTATE_ERROR kind:data(any) addr:0x0210f7dc
-gStr_WM_ERRCODE_FAILED kind:data(any) addr:0x0210f7f0
-gStr_WM_ERRCODE_SUCCESS kind:data(any) addr:0x0210f804
-gStr_WM_ERRCODE_NO_DATA kind:data(any) addr:0x0210f818
-gStr_WM_ERRCODE_TIMEOUT kind:data(any) addr:0x0210f82c
-gStr_WM_ERRCODE_NO_CHILD kind:data(any) addr:0x0210f840
-gStr_WM_ERRCODE_NO_ENTRY kind:data(any) addr:0x0210f854
-gStr_WM_ERRCODE_DCF_TEST kind:data(any) addr:0x0210f868
-gStr_WM_STATECODE_MP_IND kind:data(any) addr:0x0210f87c
-gStr_WH_ERRCODE_NO_RADIO kind:data(any) addr:0x0210f890
-gStr_WM_STATECODE_UNKNOWN kind:data(any) addr:0x0210f8a4
-gStr_WH_SYSSTATE_SCANNING kind:data(any) addr:0x0210f8bc
-gStr_WM_STATECODE_DCF_IND kind:data(any) addr:0x0210f8d4
-gStr_WM_ERRCODE_OPERATING kind:data(any) addr:0x0210f8ec
-gStr_WH_SYSSTATE_CONNECTED kind:data(any) addr:0x0210f904
-gStr_WM_STATECODE_MP_START kind:data(any) addr:0x0210f91c
-gStr_WM_ERRCODE_FIFO_ERROR kind:data(any) addr:0x0210f934
-gStr_WM_ERRCODE_NO_DATASET kind:data(any) addr:0x0210f94c
-gStr_WM_ERRCODE_WM_DISABLE kind:data(any) addr:0x0210f964
-gStr_WM_STATECODE_MPEND_IND kind:data(any) addr:0x0210f97c
-gStr_WM_STATECODE_PORT_INIT kind:data(any) addr:0x0210f994
-gStr_WM_STATECODE_MPACK_IND kind:data(any) addr:0x0210f9ac
-gStr_WM_STATECODE_DCF_START kind:data(any) addr:0x0210f9c4
-gStr_WM_ERRCODE_SEND_FAILED kind:data(any) addr:0x0210f9dc
-gStr_WM_ERRCODE_FLASH_ERROR kind:data(any) addr:0x0210f9f4
-gStr_WH_SYSSTATE_KEYSHARING kind:data(any) addr:0x0210fa0c
-gStr_WM_STATECODE_PORT_SEND kind:data(any) addr:0x0210fa24
-gStr_WM_STATECODE_PORT_RECV kind:data(any) addr:0x0210fa3c
-gStr_WM_STATECODE_CONNECTED kind:data(any) addr:0x0210fa54
-gStr_WH_SYSSTATE_DATASHARING kind:data(any) addr:0x0210fa6c
-gStr_WH_ERRCODE_DISCONNECTED kind:data(any) addr:0x0210fa84
-gStr_WM_STATECODE_SCAN_START kind:data(any) addr:0x0210fa9c
-gStr_WM_STATECODE_FIFO_ERROR kind:data(any) addr:0x0210fab4
-gStr_WM_STATECODE_BEACON_LOST kind:data(any) addr:0x0210facc
-gStr_WM_ERRCODE_ILLEGAL_STATE kind:data(any) addr:0x0210fae8
-gStr_WM_ERRCODE_INVALID_PARAM kind:data(any) addr:0x0210fb04
-gStr_WH_SYSSTATE_CONNECT_FAIL kind:data(any) addr:0x0210fb20
-gStr_WM_STATECODE_BEACON_RECV kind:data(any) addr:0x0210fb3c
-gStr_WM_ERRCODE_WL_LENGTH_ERR kind:data(any) addr:0x0210fb58
-gStr_WM_STATECODE_REASSOCIATE kind:data(any) addr:0x0210fb74
-gStr_WM_STATECODE_BEACON_SENT kind:data(any) addr:0x0210fb90
-gStr_WM_STATECODE_INFORMATION kind:data(any) addr:0x0210fbac
-gStr_WM_STATECODE_DISCONNECTED kind:data(any) addr:0x0210fbc8
-gStr_WM_ERRCODE_OVER_MAX_ENTRY kind:data(any) addr:0x0210fbe4
-gStr_WM_STATECODE_DISASSOCIATE kind:data(any) addr:0x0210fc00
-gStr_WM_STATECODE_AUTHENTICATE kind:data(any) addr:0x0210fc1c
-gStr_WM_STATECODE_PARENT_START kind:data(any) addr:0x0210fc38
-gStr_WM_STATECODE_PARENT_FOUND kind:data(any) addr:0x0210fc54
-gStr_WM_ERRCODE_SEND_QUEUE_FULL kind:data(any) addr:0x0210fc70
-gStr_WH_SYSSTATE_MEASURECHANNEL kind:data(any) addr:0x0210fc8c
-gStr_WM_STATECODE_CONNECT_START kind:data(any) addr:0x0210fca8
-gStr_WM_ERRCODE_WL_INVALID_PARAM kind:data(any) addr:0x0210fcc4
-gStr_WH_ERRCODE_PARENT_NOT_FOUND kind:data(any) addr:0x0210fce0
-gStr_WM_ERRCODE_INVALID_POLLBITMAP kind:data(any) addr:0x0210fcfc
-gStr_WM_STATECODE_PARENT_NOT_FOUND kind:data(any) addr:0x0210fd1c
-gStr_WM_STATECODE_DISCONNECTED_FROM_MYSELF kind:data(any) addr:0x0210fd3c
-data_0210fd64 kind:data(any) addr:0x0210fd64
-data_0210fd8c kind:data(any) addr:0x0210fd8c
-data_0210fde8 kind:data(any) addr:0x0210fde8
-gStr_N_A_2 kind:data(any) addr:0x0210fe54
-gStr_N_A_3 kind:data(any) addr:0x0210fe58
-gStr_s kind:data(any) addr:0x0210fe5c
-gStr_s_2 kind:data(any) addr:0x0210fe64
-gStr_StartParent_new_child_aid_0x_x_connected kind:data(any) addr:0x0210fe68
-gStr_StartParent_child_aid_0x_x_disconnected kind:data(any) addr:0x0210fe98
-gStr_StartParent_child_aid_0x_x_disconnected_2 kind:data(any) addr:0x0210fec8
-gStr_unknown_indicate_state_d kind:data(any) addr:0x0210ff04
-gStr_WH_StateInStartParentKeyShare_failed kind:data(any) addr:0x0210ff24
-gStr_unknown_indicate_state_d_2 kind:data(any) addr:0x0210ff4c
-gStr_WH_StateInEndParentMP_failed kind:data(any) addr:0x0210ff6c
-gStr_WH_StateInEndParent_failed kind:data(any) addr:0x0210ff8c
-gStr_WH_StateOutStartScan_MAC_02x_02x_02x_02x kind:data(any) addr:0x0210ffa8
-gStr_pictochat_parent_find kind:data(any) addr:0x0210ffe0
-gStr_not_my_parent_ggid kind:data(any) addr:0x0210fff8
-gStr_not_recieve_entry kind:data(any) addr:0x02110010
-gStr_parent_find kind:data(any) addr:0x02110024
-gStr_WH_StateOutEndScan_startchild_failed kind:data(any) addr:0x02110034
-gStr_WH_StateOutSetChildWEPKey_startchild_fai kind:data(any) addr:0x0211005c
-gStr_WH_StateInStartChild_already_connected kind:data(any) addr:0x0211008c
-gStr_Connect_to_Parent kind:data(any) addr:0x021100b8
-gStr_WH_StateInStartChildMP_failed kind:data(any) addr:0x021100cc
-gStr_Disconnected_from_Parent kind:data(any) addr:0x021100ec
-gStr_unknown_state_d_s kind:data(any) addr:0x02110108
-gStr_WH_StateInStartChildKeyShare_failed kind:data(any) addr:0x02110120
-gStr_WH_StateOutStartChildMP_WM_StartDataShar kind:data(any) addr:0x02110148
-gStr_unknown_indicate_state_d_3 kind:data(any) addr:0x0211017c
-gStr_WH_StateInSetMPData_failed_s kind:data(any) addr:0x0211019c
-gStr_channel_d_bratio_0x_x kind:data(any) addr:0x021101c0
-gStr_decided_channel_d kind:data(any) addr:0x021101dc
-gStr_recv_buffer_size_d kind:data(any) addr:0x021101f4
-gStr_send_buffer_size_d kind:data(any) addr:0x0211020c
-gStr_unknown_connect_mode_d kind:data(any) addr:0x02110224
-gStr_recv_buffer_size_d_2 kind:data(any) addr:0x02110240
-gStr_send_buffer_size_d_2 kind:data(any) addr:0x02110258
-gStr_unknown_connect_mode_d_2 kind:data(any) addr:0x02110270
-gStr_WM_not_Initialized kind:data(any) addr:0x0211028c
-gStr_already_WH_SYSSTATE_IDLE kind:data(any) addr:0x021102a0
-gStr_WH_Finalize_state_d kind:data(any) addr:0x021102bc
+@8557 kind:data(any) addr:0x0210f79c local
+@8592 kind:data(any) addr:0x0210f7a0 local
+@8591 kind:data(any) addr:0x0210f7b4 local
+@8594 kind:data(any) addr:0x0210f7c8 local
+@8600 kind:data(any) addr:0x0210f7dc local
+@8525 kind:data(any) addr:0x0210f7f0 local
+@8524 kind:data(any) addr:0x0210f804 local
+@8538 kind:data(any) addr:0x0210f818 local
+@8533 kind:data(any) addr:0x0210f82c local
+@8531 kind:data(any) addr:0x0210f840 local
+@8535 kind:data(any) addr:0x0210f854 local
+@8540 kind:data(any) addr:0x0210f868 local
+@8568 kind:data(any) addr:0x0210f87c local
+@8546 kind:data(any) addr:0x0210f890 local
+@8580 kind:data(any) addr:0x0210f8a4 local
+@8593 kind:data(any) addr:0x0210f8bc local
+@8571 kind:data(any) addr:0x0210f8d4 local
+@8526 kind:data(any) addr:0x0210f8ec local
+@8595 kind:data(any) addr:0x0210f904 local
+@8566 kind:data(any) addr:0x0210f91c local
+@8532 kind:data(any) addr:0x0210f934 local
+@8529 kind:data(any) addr:0x0210f94c local
+@8528 kind:data(any) addr:0x0210f964 local
+@8567 kind:data(any) addr:0x0210f97c local
+@8581 kind:data(any) addr:0x0210f994 local
+@8569 kind:data(any) addr:0x0210f9ac local
+@8570 kind:data(any) addr:0x0210f9c4 local
+@8539 kind:data(any) addr:0x0210f9dc local
+@8543 kind:data(any) addr:0x0210f9f4 local
+@8597 kind:data(any) addr:0x0210fa0c local
+@8576 kind:data(any) addr:0x0210fa24 local
+@8577 kind:data(any) addr:0x0210fa3c local
+@8563 kind:data(any) addr:0x0210fa54 local
+@8596 kind:data(any) addr:0x0210fa6c local
+@8544 kind:data(any) addr:0x0210fa84 local
+@8559 kind:data(any) addr:0x0210fa9c local
+@8578 kind:data(any) addr:0x0210fab4 local
+@8564 kind:data(any) addr:0x0210facc local
+@8527 kind:data(any) addr:0x0210fae8 local
+@8530 kind:data(any) addr:0x0210fb04 local
+@8599 kind:data(any) addr:0x0210fb20 local
+@8572 kind:data(any) addr:0x0210fb3c local
+@8542 kind:data(any) addr:0x0210fb58 local
+@8574 kind:data(any) addr:0x0210fb74 local
+@8558 kind:data(any) addr:0x0210fb90 local
+@8579 kind:data(any) addr:0x0210fbac local
+@8565 kind:data(any) addr:0x0210fbc8 local
+@8536 kind:data(any) addr:0x0210fbe4 local
+@8573 kind:data(any) addr:0x0210fc00 local
+@8575 kind:data(any) addr:0x0210fc1c local
+@8556 kind:data(any) addr:0x0210fc38 local
+@8561 kind:data(any) addr:0x0210fc54 local
+@8534 kind:data(any) addr:0x0210fc70 local
+@8598 kind:data(any) addr:0x0210fc8c local
+@8562 kind:data(any) addr:0x0210fca8 local
+@8541 kind:data(any) addr:0x0210fcc4 local
+@8545 kind:data(any) addr:0x0210fce0 local
+@8537 kind:data(any) addr:0x0210fcfc local
+@8560 kind:data(any) addr:0x0210fd1c local
+@8582 kind:data(any) addr:0x0210fd3c local
+sysstates$8590 kind:data(any) addr:0x0210fd64 local
+errnames$8523 kind:data(any) addr:0x0210fd8c local
+statenames$8555 kind:data(any) addr:0x0210fde8 local
+@9576 kind:data(any) addr:0x0210fe54 local
+@9582 kind:data(any) addr:0x0210fe58 local
+@9594 kind:data(any) addr:0x0210fe5c local
+@9595 kind:data(any) addr:0x0210fe64 local
+@9674 kind:data(any) addr:0x0210fe68 local
+@9675 kind:data(any) addr:0x0210fe98 local
+@9676 kind:data(any) addr:0x0210fec8 local
+@9677 kind:data(any) addr:0x0210ff04 local
+@9700 kind:data(any) addr:0x0210ff24 local
+@9701 kind:data(any) addr:0x0210ff4c local
+@9712 kind:data(any) addr:0x0210ff6c local
+@9727 kind:data(any) addr:0x0210ff8c local
+@9790 kind:data(any) addr:0x0210ffa8 local
+@9791 kind:data(any) addr:0x0210ffe0 local
+@9792 kind:data(any) addr:0x0210fff8 local
+@9793 kind:data(any) addr:0x02110010 local
+@9794 kind:data(any) addr:0x02110024 local
+@9816 kind:data(any) addr:0x02110034 local
+@9833 kind:data(any) addr:0x0211005c local
+@9845 kind:data(any) addr:0x0211008c local
+@9881 kind:data(any) addr:0x021100b8 local
+@9882 kind:data(any) addr:0x021100cc local
+@9883 kind:data(any) addr:0x021100ec local
+@9884 kind:data(any) addr:0x02110108 local
+@9907 kind:data(any) addr:0x02110120 local
+@9908 kind:data(any) addr:0x02110148 local
+@9909 kind:data(any) addr:0x0211017c local
+@9951 kind:data(any) addr:0x0211019c local
+@10041 kind:data(any) addr:0x021101c0 local
+@10054 kind:data(any) addr:0x021101dc local
+@10111 kind:data(any) addr:0x021101f4 local
+@10112 kind:data(any) addr:0x0211020c local
+@10113 kind:data(any) addr:0x02110224 local
+@10130 kind:data(any) addr:0x02110240 local
+@10131 kind:data(any) addr:0x02110258 local
+@10132 kind:data(any) addr:0x02110270 local
+@10142 kind:data(any) addr:0x0211028c local
+@10177 kind:data(any) addr:0x021102a0 local
+@10178 kind:data(any) addr:0x021102bc local
 data_021102d8 kind:data(any) addr:0x021102d8
 data_021102e8 kind:data(any) addr:0x021102e8
 gText_Go kind:data(any) addr:0x021103a8
@@ -6353,18 +6353,39 @@ sOamBuffer kind:bss addr:0x02138e4c local
 gCardPullOutMonitor kind:bss addr:0x02138f0c
 @12989 kind:bss addr:0x02138f10 local
 gMessageFiles kind:bss(size=0x18) addr:0x02138f1c
-data_02138f40 kind:bss addr:0x02138f40
-data_02138fa0 kind:bss addr:0x02138fa0
-data_02138fb4 kind:bss addr:0x02138fb4
-data_02138fe0 kind:bss addr:0x02138fe0
-data_02139000 kind:bss addr:0x02139000
-data_02139020 kind:bss addr:0x02139020
-data_02139060 kind:bss addr:0x02139060
-data_02139120 kind:bss addr:0x02139120
-data_021392c0 kind:bss addr:0x021392c0
-data_02139680 kind:bss addr:0x02139680
-data_02139ea0 kind:bss addr:0x02139ea0
-data_0213a6c0 kind:bss addr:0x0213a6c0
+sChannelBitmap kind:bss addr:0x02138f40 local
+whInitialized kind:bss addr:0x02138f42 local
+sConnectBitmap kind:bss addr:0x02138f44 local
+sChannelBusyRatio kind:bss addr:0x02138f46 local
+sChannelIndex kind:bss addr:0x02138f48 local
+sChannel kind:bss addr:0x02138f4a local
+sMyAid kind:bss addr:0x02138f4c local
+sAutoConnectFlag kind:bss addr:0x02138f4e local
+sErrCode kind:bss addr:0x02138f50 local
+sRand kind:bss addr:0x02138f54 local
+sPictoCatchFlag kind:bss addr:0x02138f58 local
+sIndicationCallback kind:bss addr:0x02138f5c local
+sReceiverFunc kind:bss addr:0x02138f60 local
+sRecvBufferSize kind:bss addr:0x02138f64 local
+sJudgeAcceptFunc kind:bss addr:0x02138f68 local
+sSysState kind:bss addr:0x02138f6c local
+sParentWEPKeyGenerator kind:bss addr:0x02138f70 local
+wh_trace kind:bss addr:0x02138f74 local
+sChildWEPKeyGenerator kind:bss addr:0x02138f78 local
+sSendBufferSize kind:bss addr:0x02138f7c local
+sScanCallback kind:bss addr:0x02138f80 local
+sConnectMode kind:bss addr:0x02138f84 local
+sWEPKey kind:bss addr:0x02138fa0 local
+gWHChildSsid kind:bss addr:0x02138fb4
+sScanParam kind:bss addr:0x02138fe0 local
+sConnectionSsid kind:bss addr:0x02139000 local
+sParentParam kind:bss addr:0x02139020 local
+sBssDesc kind:bss addr:0x02139060 local
+sSendBuffer kind:bss addr:0x02139120 local
+sRecvBuffer kind:bss addr:0x021392c0 local
+sDSInfo kind:bss addr:0x02139680 local
+sWMKeySetBuf kind:bss addr:0x02139ea0 local
+sWmBuffer kind:bss addr:0x0213a6c0 local
 data_0213b5c0 kind:bss addr:0x0213b5c0
 gSoundManager kind:bss addr:0x0213b5cc
 data_0213b6c0 kind:bss addr:0x0213b6c0
