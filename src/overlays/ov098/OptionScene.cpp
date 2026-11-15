@@ -874,8 +874,8 @@ void OptionScene::ShowDay(u32 day) {
 
 void OptionScene::ShowHour(u32 hour) {
     if (hour >= 12) {
-        Sprite_SetFrame(&mSprites[SPRITE_AM_PM], 1);
         hour -= 12;
+        Sprite_SetFrame(&mSprites[SPRITE_AM_PM], 1);
     } else {
         Sprite_SetFrame(&mSprites[SPRITE_AM_PM], 0);
     }
