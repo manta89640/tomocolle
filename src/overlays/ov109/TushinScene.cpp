@@ -1940,7 +1940,7 @@ void TushinScene::Update() {
                 if (sWireless.m22 != 0 || sWireless.m24 != 0) {
                     break;
                 }
-                if (mCharacters[2].mModel.mVisible) {
+                if (mCharacters[2].mModel.IsVisible()) {
                     break;
                 }
                 switch (sWireless.m02) {
