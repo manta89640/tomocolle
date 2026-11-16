@@ -132,99 +132,125 @@ sPageMessages kind:data(any) addr:0x021529f0 local
 sPageLayouts kind:data(any) addr:0x02152b00 local
 __sinit_TushinScene.cpp kind:function(arm,size=0xcc) addr:0x02152c10 local
 .p__sinit_TushinScene.cpp kind:data(word) addr:0x02152cdc local
-gStr_3HM_ov109 kind:data(any) addr:0x02152d00
-gStr_BI1_ov109 kind:data(any) addr:0x02152d04
-gStr_SRM kind:data(any) addr:0x02152d08
-gText_Shine kind:data(any) addr:0x02152d0c
-data_ov109_02152d12 kind:data(any) addr:0x02152d12
-data_ov109_02152d1a kind:data(any) addr:0x02152d1a
-data_ov109_02152d22 kind:data(any) addr:0x02152d22
-data_ov109_02152d2a kind:data(any) addr:0x02152d2a
-data_ov109_02152d32 kind:data(any) addr:0x02152d32
-data_ov109_02152d3a kind:data(any) addr:0x02152d3a
-data_ov109_02152d42 kind:data(any) addr:0x02152d42
-data_ov109_02152d4a kind:data(any) addr:0x02152d4a
-data_ov109_02152d52 kind:data(any) addr:0x02152d52
-data_ov109_02152d5a kind:data(any) addr:0x02152d5a
-data_ov109_02152d62 kind:data(any) addr:0x02152d62
-data_ov109_02152d6a kind:data(any) addr:0x02152d6a
-data_ov109_02152d72 kind:data(any) addr:0x02152d72
-data_ov109_02152d7a kind:data(any) addr:0x02152d7a
-data_ov109_02152d82 kind:data(any) addr:0x02152d82
-data_ov109_02152d8a kind:data(any) addr:0x02152d8a
-data_ov109_02152d92 kind:data(any) addr:0x02152d92
-data_ov109_02152d9a kind:data(any) addr:0x02152d9a
-data_ov109_02152da2 kind:data(any) addr:0x02152da2
-data_ov109_02152daa kind:data(any) addr:0x02152daa
-gText_Kichigai kind:data(any) addr:0x02152db4
-data_ov109_02152dbe kind:data(any) addr:0x02152dbe
-gText_GouKan kind:data(any) addr:0x02152dc8
-data_ov109_02152dd2 kind:data(any) addr:0x02152dd2
-gText_Chinchin kind:data(any) addr:0x02152ddc
-data_ov109_02152de6 kind:data(any) addr:0x02152de6
-gText_YaraseRo kind:data(any) addr:0x02152df0
-data_ov109_02152dfa kind:data(any) addr:0x02152dfa
-gText_Rorikon kind:data(any) addr:0x02152e04
-data_ov109_02152e0e kind:data(any) addr:0x02152e0e
-gText_AIEki kind:data(any) addr:0x02152e18
-data_ov109_02152e22 kind:data(any) addr:0x02152e22
-gStr_a_ov109 kind:data(any) addr:0x02152e2c
-data_ov109_02152e36 kind:data(any) addr:0x02152e36
-gStr_f_ov109 kind:data(any) addr:0x02152e40
-data_ov109_02152e4a kind:data(any) addr:0x02152e4a
-data_ov109_02152e56 kind:data(any) addr:0x02152e56
-data_ov109_02152e62 kind:data(any) addr:0x02152e62
+sArchive3HM kind:data(any) addr:0x02152d00 local
+sArchiveBI1 kind:data(any) addr:0x02152d04 local
+sArchiveSRM kind:data(any) addr:0x02152d08 local
+sNgWord00 kind:data(any) addr:0x02152d0c local
+sNgWord08 kind:data(any) addr:0x02152d12 local
+sNgWord26 kind:data(any) addr:0x02152d1a local
+sNgWord33 kind:data(any) addr:0x02152d22 local
+sNgWord20 kind:data(any) addr:0x02152d2a local
+sNgWord27 kind:data(any) addr:0x02152d32 local
+sNgWord32 kind:data(any) addr:0x02152d3a local
+sNgWord39 kind:data(any) addr:0x02152d42 local
+sNgWord23 kind:data(any) addr:0x02152d4a local
+sNgWord11 kind:data(any) addr:0x02152d52 local
+sNgWord29 kind:data(any) addr:0x02152d5a local
+sNgWord14 kind:data(any) addr:0x02152d62 local
+sNgWord22 kind:data(any) addr:0x02152d6a local
+sNgWord24 kind:data(any) addr:0x02152d72 local
+sNgWord30 kind:data(any) addr:0x02152d7a local
+sNgWord35 kind:data(any) addr:0x02152d82 local
+sNgWord10 kind:data(any) addr:0x02152d8a local
+sNgWord25 kind:data(any) addr:0x02152d92 local
+sNgWord31 kind:data(any) addr:0x02152d9a local
+sNgWord09 kind:data(any) addr:0x02152da2 local
+sNgWord07 kind:data(any) addr:0x02152daa local
+sNgWord12 kind:data(any) addr:0x02152db4 local
+sNgWord13 kind:data(any) addr:0x02152dbe local
+sNgWord15 kind:data(any) addr:0x02152dc8 local
+sNgWord18 kind:data(any) addr:0x02152dd2 local
+sNgWord21 kind:data(any) addr:0x02152ddc local
+sNgWord34 kind:data(any) addr:0x02152de6 local
+sNgWord36 kind:data(any) addr:0x02152df0 local
+sNgWord37 kind:data(any) addr:0x02152dfa local
+sNgWord40 kind:data(any) addr:0x02152e04 local
+sNgWord06 kind:data(any) addr:0x02152e0e local
+sNgWord01 kind:data(any) addr:0x02152e18 local
+sNgWord17 kind:data(any) addr:0x02152e22 local
+sNgWord03 kind:data(any) addr:0x02152e2c local
+sNgWord02 kind:data(any) addr:0x02152e36 local
+sNgWord04 kind:data(any) addr:0x02152e40 local
+sNgWord05 kind:data(any) addr:0x02152e4a local
+sNgWord19 kind:data(any) addr:0x02152e56 local
+sNgWord28 kind:data(any) addr:0x02152e62 local
 sCharacterArchives kind:data(any) addr:0x02152e70 local
-gText_SangoKujiN kind:data(any) addr:0x02152e7c
-data_ov109_02152e8a kind:data(any) addr:0x02152e8a
+sNgWord16 kind:data(any) addr:0x02152e7c local
+sNgWord38 kind:data(any) addr:0x02152e8a local
 sListTextOrigins kind:data(any) addr:0x02152e98 local
 _ZTV11TushinScene kind:data(any) addr:0x02152ed0
 sNgWords kind:data(any) addr:0x02152ef4 local
-gStr_STS_ov109 kind:data(any) addr:0x02152f98
-gStr_Scn_Scene_SceneTushin_LZ_bin_ov109 kind:data(any) addr:0x02152f9c
-gStr_MLT_ov109 kind:data(any) addr:0x02152fbc
-gStr_Scn_List_List_TushinList_LZ_bin kind:data(any) addr:0x02152fc0
-gStr_TBM_ov109 kind:data(any) addr:0x02152fe0
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov109 kind:data(any) addr:0x02152fe4
-gStr_TBC_ov109 kind:data(any) addr:0x02152ffc
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov109 kind:data(any) addr:0x02153000
-gStr_BIC_ov109 kind:data(any) addr:0x0215301c
-gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov109 kind:data(any) addr:0x02153020
-gStr_STE_ov109 kind:data(any) addr:0x02153040
-gStr_Mdl_Spl_SplTushinEffect_LZ_bin kind:data(any) addr:0x02153044
-gStr_BIC_ov109_2 kind:data(any) addr:0x02153064
-gStr_STE_SplTushinEffect_spa kind:data(any) addr:0x02153068
-gStr_TBM_tmd_etc_msg_JP_bmg_ov109 kind:data(any) addr:0x02153084
-gStr_TBC_tmd_common_msg_JP_bmg_ov109 kind:data(any) addr:0x0215309c
-gStr_MLT_BG_list_ncg_ov109 kind:data(any) addr:0x021530b8
-gStr_MLT_BG_list_ncl_ov109 kind:data(any) addr:0x021530cc
-gStr_STS_BG_up_ncg_ov109 kind:data(any) addr:0x021530e0
-gStr_STS_BG_up_ncl_ov109 kind:data(any) addr:0x021530f0
-gStr_MLT_BG_list_nsc_ov109 kind:data(any) addr:0x02153100
-gStr_MLT_BG_Tushin_frame_nsc kind:data(any) addr:0x02153114
-gStr_STS_BG_up_nsc_ov109 kind:data(any) addr:0x02153130
-gStr_MLT_Obj_Mii_list_nce_ov109 kind:data(any) addr:0x02153140
-gStr_MLT_Obj_list_ncg_ov109 kind:data(any) addr:0x02153158
-gStr_MLT_Obj_list_ncl_ov109 kind:data(any) addr:0x0215316c
-gStr_STS_Obj_up_nce_ov109 kind:data(any) addr:0x02153180
-gStr_STS_Obj_up_ncg_ov109 kind:data(any) addr:0x02153190
-gStr_STS_Obj_up_ncl_ov109 kind:data(any) addr:0x021531a0
-data_ov109_021531b0 kind:data(any) addr:0x021531b0
-data_ov109_021531b4 kind:data(any) addr:0x021531b4
-gStr_STE_ov109_2 kind:data(any) addr:0x021531b8
-gStr_TBC_ov109_2 kind:data(any) addr:0x021531bc
-gStr_TBM_ov109_2 kind:data(any) addr:0x021531c0
-gStr_MLT_ov109_2 kind:data(any) addr:0x021531c4
-gStr_STS_ov109_2 kind:data(any) addr:0x021531c8
-gStr_BIC_ov109_3 kind:data(any) addr:0x021531cc
-sDisconnected kind:bss addr:0x021531e0
-sCommand kind:bss addr:0x02153200
-data_ov109_02153201 kind:bss addr:0x02153201 ambiguous
+@17479 kind:data(any) addr:0x02152f98 local
+@17480 kind:data(any) addr:0x02152f9c local
+@17481 kind:data(any) addr:0x02152fbc local
+@17482 kind:data(any) addr:0x02152fc0 local
+@17483 kind:data(any) addr:0x02152fe0 local
+@17484 kind:data(any) addr:0x02152fe4 local
+@17485 kind:data(any) addr:0x02152ffc local
+@17486 kind:data(any) addr:0x02153000 local
+@17487 kind:data(any) addr:0x0215301c local
+@17488 kind:data(any) addr:0x02153020 local
+@17489 kind:data(any) addr:0x02153040 local
+@17490 kind:data(any) addr:0x02153044 local
+@17661 kind:data(any) addr:0x02153064 local
+@17684 kind:data(any) addr:0x02153068 local
+@17704 kind:data(any) addr:0x02153084 local
+@17705 kind:data(any) addr:0x0215309c local
+@17706 kind:data(any) addr:0x021530b8 local
+@17707 kind:data(any) addr:0x021530cc local
+@17708 kind:data(any) addr:0x021530e0 local
+@17709 kind:data(any) addr:0x021530f0 local
+@17710 kind:data(any) addr:0x02153100 local
+@17711 kind:data(any) addr:0x02153114 local
+@17712 kind:data(any) addr:0x02153130 local
+@17713 kind:data(any) addr:0x02153140 local
+@17714 kind:data(any) addr:0x02153158 local
+@17715 kind:data(any) addr:0x0215316c local
+@17716 kind:data(any) addr:0x02153180 local
+@17717 kind:data(any) addr:0x02153190 local
+@17718 kind:data(any) addr:0x021531a0 local
+@18097 kind:data(any) addr:0x021531b0 local
+@18214 kind:data(any) addr:0x021531b4 local
+@19001 kind:data(any) addr:0x021531b8 local
+@19002 kind:data(any) addr:0x021531bc local
+@19003 kind:data(any) addr:0x021531c0 local
+@19004 kind:data(any) addr:0x021531c4 local
+@19005 kind:data(any) addr:0x021531c8 local
+@19006 kind:data(any) addr:0x021531cc local
+sDisconnected kind:bss addr:0x021531e0 local
+sReceivedCommand kind:bss addr:0x021531e2 local
+sReceivedSongChunks kind:bss addr:0x021531e4 local
+data_ov109_021531e6 kind:bss addr:0x021531e6 local
+data_ov109_021531e8 kind:bss addr:0x021531e8 local
+data_ov109_021531ea kind:bss addr:0x021531ea local
+data_ov109_021531ec kind:bss addr:0x021531ec local
+data_ov109_021531ee kind:bss addr:0x021531ee local
+data_ov109_021531f0 kind:bss addr:0x021531f0 local
+data_ov109_021531f2 kind:bss addr:0x021531f2 local
+data_ov109_021531f4 kind:bss addr:0x021531f4 local
+data_ov109_021531f6 kind:bss addr:0x021531f6 local
+data_ov109_021531f8 kind:bss addr:0x021531f8 local
+data_ov109_021531fa kind:bss addr:0x021531fa local
+data_ov109_021531fc kind:bss addr:0x021531fc local
+data_ov109_021531fe kind:bss addr:0x021531fe local
+sCommand kind:bss addr:0x02153200 local
+sSendChunk kind:bss addr:0x02153202 local
+sSendSongChunk kind:bss addr:0x02153204 local
+sReceiveCount kind:bss addr:0x02153206 local
+sNextReceivedCommand kind:bss addr:0x02153208 local
+data_ov109_0215320c kind:bss addr:0x0215320c local
+sSongsReceived kind:bss addr:0x02153210 local
+sWiiReceiveResult kind:bss addr:0x02153214 local
+sWiiReceivedIndex kind:bss addr:0x02153218 local
+sSent kind:bss addr:0x0215321c local
+sWiiSendDone kind:bss addr:0x02153220 local
+sReceivedResident kind:bss addr:0x02153224 local
+sWiiSendResult kind:bss addr:0x02153228 local
+sWiiParentCount kind:bss addr:0x0215322c local
+data_ov109_02153230 kind:bss addr:0x02153230 local
 sParentTimers kind:bss addr:0x02153234 local
 sReceivedName kind:bss addr:0x02153240 local
 sSongs kind:bss addr:0x02153280 local
 sParents kind:bss addr:0x02153400 local
 sTransfer kind:bss addr:0x02153640 local
 sMiiData kind:bss addr:0x02153980 local
-data_ov109_02154e6c kind:bss addr:0x02154e6c ambiguous
-data_ov109_02154f5c kind:bss addr:0x02154f5c ambiguous
