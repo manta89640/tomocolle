@@ -1581,17 +1581,36 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
   the low nibble of byte 2 and bytes 3 to 7, the six bytes that `MiiData_AssignCreateId` takes from its source.
 - **The second display list.** `NFLi_MakeFacePartsDL` builds it from the seven 0x30-byte records of the context
   (0x78..0x1C8): `NFLi_MakeMouthMolePart` for records 4 and 5 (mouth and mustache), and 6 when the Mii has a mole;
-  `NFLi_MakeEyeBrowPart` for 0 to 3 (the eyes and eyebrows, kind 4 the mirrored side). Those two (6 KB and 4 KB; the
-  second written, not matching) place a part as a quad on the face: a 2x2 grid of points whose Z is taken from the
+  `NFLi_MakeEyeBrowPart` for 0 to 3 (the eyes and eyebrows, kind 4 the mirrored side). Those two (6 KB and 4 KB, both
+  matching) place a part as a quad on the face: a 2x2 grid of points whose Z is taken from the
   planes at `0x020B676C`, normals interpolated bilinearly over the 3x3 grids of points (`0x020B6818`,
   `sNFLFaceGridPoints`) and normals (`0x020B67AC`, `sNFLFaceGridNormals`), their sum normalised and the quad rotated
   onto it (`MTX_RotAxis43` about the cross product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`)
   whose +0x20 (`set`) says the first of a pair has set it.
+- **`NFLi_MakeMouthMolePart` transforms its vertices on the CPU.** Where `NFLi_MakeEyeBrowPart` emits matrix
+  commands (which the expressions patch), it builds the matrix itself (identity, translation, the rotation onto the
+  normal, scale) and sends each corner through `MTX_MultVec43` and each normal through `MTX_MultVec33` (the
+  rotation's 3x3 part) before `G3C_Vtx` and `G3C_Normal`, and clears the patch's matrix command, so the expressions
+  rotate no mouth. It looks the face up at |x| (the face is symmetric) and mirrors the normals of points left of the
+  centre; the mole (kind 0) takes the mean of its own Z and its four corners' Zs. The mouth (kind 1) is a quad strip
+  of three columns whose texture runs from s = width at its right edge through the middle to 0, its side normals
+  tilted by 0x197 in X; the mustache (kind 2) a strip whose texture runs 0, width, 0, so one half mirrors the other
+  (its last normal is tilted in Y where the mouth's is in X); the mole a plain quad. The second of a pair (the
+  mustache) is put at the first's depth only if its centre is within a third of their summed sizes of the first's,
+  else at depth offset 0.
 
 On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
 with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
 cast; without them the instructions are the same and the callee-saved registers are rotated. The five other expressions
-have the right instructions but for a clamp each (see the comments in the source).
+have the right instructions but for a clamp each (see the comments in the source). Measured on
+`NFLi_ApplyExpression5`, whose original keeps the compares of a clamp whose result nothing uses: under
+`#pragma optimization_level 1` it gets the original's callee-saved registers and keeps those compares (with no
+moves), but loses the scheduling, the if-conversion and the folding of the compare into `adds` that the original has.
+No combination tried gives both: every `opt_*` pragma off at levels 2 to 4, `#pragma global_optimizer off` (accepted,
+no effect), the `-opt no...` switches, and every 2.0, 3.0 and 4.0 build. In `NFLi_ApplyExpression2` and `3` the
+original adds `d` again in the else of the clamp; every level from 1 up, every source form tried and every `opt_*`
+pragma reuse the compare's sum instead (only level 0 computes it three times).
+`NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they match at the file's level.
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after

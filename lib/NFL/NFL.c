@@ -2366,21 +2366,360 @@ void NFLi_DLTranslate(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y,
 void NFLi_DLScale(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
 void NFLi_DLVtx(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
 void NFLi_DLNormal(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
-// Not matching yet, a first draft from the code: the instructions are close (0xF98 bytes against 0xFA4) but the
-// registers and stack slots are not the original's. Parts 0 to 3 of NFLi_MakeFacePartsDL, the eyes and eyebrows: a
-// part placed as a quad on the face, its 2x2 points' Z from the planes of sNFLFacePlanes, their normals interpolated
-// over the 3x3 grids of points (sNFLFaceGridPoints) and normals (sNFLFaceGridNormals), the quad turned onto their sum.
-// Kind 4 is the mirrored side: its X is negated and its texture runs the other way.
+// The absolute value of v
+static inline fx32 NFLi_Abs(fx32 v) {
+    return v < 0 ? -v : v;
+}
+
+void NFLi_MapVecFx32NoNegate(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in);
+void NFLi_MapVecFx32Copy(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in);
+
 extern const VecFx32 sNFLFaceGridPoints[3][3];
 extern const VecFx32 sNFLFaceGridNormals[3][3];
 
-#define NFL_PLANE_Z(px, py)                                                                                          \
-    (-FX_Div(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].d +                                                     \
-                 (FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].a, (px)) +                                  \
-                  FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].b, (py))),                                  \
-             sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].c) *                                                    \
-     0x47 / 200)
+// Parts 4 to 6 of NFLi_MakeFacePartsDL, the mouth (kind 1), the mustache (kind 2) and the mole (kind 0): placed as
+// NFLi_MakeEyeBrowPart places its quads, but looked up at |x| (the face is symmetric), and drawn with the vertices
+// transformed here (MTX_MultVec43, the normals by the rotation's 3x3 part) instead of by matrix commands, so the
+// expressions have no rotation to patch (patch->mtx is cleared). The mouth is a strip of two quads whose texture runs
+// from the right edge to the left, the mustache one whose texture is mirrored about its middle, the mole one quad.
+void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state) {
+    MtxFx43 mtx;
+    MtxFx43 rot;
+    MtxFx33 nrmMtx;
+    VecFx32 grid[2][2];
+    VecFx32 normals[2][2];
+    VecFx32 axis;
+    VecFx32 center;
+    VecFx32 normal;
+    VecFx32 up;
+    VecFx32 point;
+    VecFx32 point2;
+    VecFx32 sum;
+    VecFx32 trans;
+    VecFx32 transOut;
+    VecFx32 axisOut;
+    VecFx32 scale;
+    VecFx32 scaleOut;
+    VecFx32 vtx;
+    VecFx32 nrm;
+    VecFx32 vtxOut;
+    VecFx32 nrmOut;
+    fx32 x;
+    fx32 y;
+    fx32 w;
+    fx32 h;
+    u32 kind;
+    int fmt;
+    int texW;
+    int texH;
+    int i;
+    int j;
+    fx32 zSum;
+    int faceType;
+    fx16 cos;
+    fx16 sin;
+    int scaleY;
+    int scaleX;
+    fx32 cross;
+    fx32 dot;
+    int a;
+    int b;
+    int k;
+    fx32 size;
+    fx32 u;
+    fx32 v;
+    fx32 t;
+    fx32 s;
+    fx32 rotation;
+    fx32 cx;
+    fx32 px;
+    int pi;
+    int pj;
+    fx32 top;
+    fx32 bottom;
 
+    texW = 1;
+    texH = 1;
+    x = part->place[0];
+    y = part->place[1];
+    scaleX = part->place[2];
+    scaleY = part->place[3];
+    w = part->place[4];
+    h = part->place[5];
+    rotation = part->place[6];
+    kind = part->place[7];
+    fmt = obj->texFmt;
+    G3C_PushMtx(dl);
+    sin = (fx16)FX_CosIdx((u16)rotation);
+    cos = (fx16)FX_SinIdx((u16)rotation);
+    faceType = data->faceType;
+    zSum = 0;
+    cx = x * 5 / 64;
+    center.y = y * 5 / 64;
+    if (cx < 0) {
+        cx = -cx;
+    }
+    center.x = cx;
+    pi = cx >= 0x1B33 ? 1 : 0;
+    pj = center.y <= 0x167B ? 1 : 0;
+    center.z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, cx) + FX_Mul(sNFLFacePlanes[pj][pi].b, center.y)),
+                       sNFLFacePlanes[pj][pi].c) * 0x47 / 200;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            grid[i][j].x = center.x + w * (i * 2 - 1) * 5 / 128;
+            grid[i][j].y = center.y + h * (j * 2 - 1) * 5 / 128;
+            px = NFLi_Abs(grid[i][j].x);
+            pi = px >= 0x1B33 ? 1 : 0;
+            pj = grid[i][j].y <= 0x167B ? 1 : 0;
+            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, px) +
+                                                                  FX_Mul(sNFLFacePlanes[pj][pi].b, grid[i][j].y)),
+                                   sNFLFacePlanes[pj][pi].c) *
+                           0x47 / 200;
+            u = FX_Div(px - sNFLFaceGridPoints[pj][pi].x, sNFLFaceGridPoints[pj][pi + 1].x - sNFLFaceGridPoints[pj][pi].x);
+            v = FX_Div(grid[i][j].y - sNFLFaceGridPoints[pj][pi].y,
+                       sNFLFaceGridPoints[pj + 1][pi].y - sNFLFaceGridPoints[pj][pi].y);
+            top = sNFLFaceGridNormals[pj][pi].x +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].x - sNFLFaceGridNormals[pj][pi].x, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].x +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].x - sNFLFaceGridNormals[pj + 1][pi].x, u);
+            normals[i][j].x = top + FX_Mul(bottom - top, v);
+            if (grid[i][j].x < 0) {
+                normals[i][j].x = -normals[i][j].x;
+            }
+            top = sNFLFaceGridNormals[pj][pi].y +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].y - sNFLFaceGridNormals[pj][pi].y, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].y +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].y - sNFLFaceGridNormals[pj + 1][pi].y, u);
+            normals[i][j].y = top + FX_Mul(bottom - top, v);
+            top = sNFLFaceGridNormals[pj][pi].z +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].z - sNFLFaceGridNormals[pj][pi].z, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].z +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].z - sNFLFaceGridNormals[pj + 1][pi].z, u);
+            normals[i][j].z = top + FX_Mul(bottom - top, v);
+            VEC_Normalize(&normals[i][j], &normals[i][j]);
+        }
+    }
+    normal.x = 0;
+    normal.y = 0;
+    normal.z = 0;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            normal.x += normals[i][j].x;
+            normal.y += normals[i][j].y;
+            normal.z += normals[i][j].z;
+            zSum += grid[i][j].z;
+        }
+    }
+    if (kind == 0) {
+        center.z = (center.z + zSum / 4) / 2;
+        if (x < 0) {
+            normal.x = -normal.x;
+        }
+    }
+    VEC_Normalize(&normal, &normal);
+    if (state != NULL && state->set == 0) {
+        state->center.x = 0;
+        state->center.y = 0;
+        state->center.z = 0;
+        for (a = 0; a < 2; a++) {
+            for (b = 0; b < 2; b++) {
+                NFLi_GetPartCorner(&point, &center, kind, a, b, scaleX, scaleY, sin, cos);
+                state->center.x += point.x;
+                state->center.y += point.y;
+            }
+        }
+        state->center.x /= 4;
+        state->center.y /= 4;
+        state->center.z = 0;
+        state->size = (scaleX > scaleY ? scaleX : scaleY) * 5 / 128;
+        state->a = normal.x < 0 ? -normal.x : normal.x;
+        state->b = normal.y;
+        state->c = normal.z * 200 / 0x47;
+        state->d = -(FX_Mul(normal.z * 200 / 0x47, center.z) +
+                     (FX_Mul(normal.x < 0 ? -normal.x : normal.x, NFLi_Abs(x / 32)) +
+                      FX_Mul(normal.y, y / 32)));
+    }
+    if (state != NULL) {
+        if (state->set == 1) {
+            sum.x = 0;
+            sum.y = 0;
+            sum.z = 0;
+            for (k = 0; k < 4; k++) {
+                NFLi_GetPartCorner(&point2, &center, kind, k / 2, k % 2, scaleX, scaleY, sin, cos);
+                sum.x += point2.x;
+                sum.y += point2.y;
+            }
+            sum.x /= 4;
+            sum.y /= 4;
+            sum.z = 0;
+            if (scaleX > scaleY) {
+                size = scaleX * 5 / 128;
+            } else {
+                size = scaleY * 5 / 128;
+            }
+            if (VEC_Distance(&sum, &state->center) <= (size + state->size) / 3) {
+                center.z = -FX_Div(state->d + (FX_Mul(state->a, NFLi_Abs(x / 32)) +
+                                                  FX_Mul(state->b, y / 32)),
+                                   state->c);
+            } else {
+                n = 0;
+            }
+        } else {
+            state->set = 1;
+        }
+    }
+    up.x = 0;
+    up.y = 0;
+    up.z = FX32_ONE;
+    dot = VEC_DotProduct(&normal, &up);
+    cross = FX_Sqrt(FX32_ONE - FX_Mul(dot, dot));
+    VEC_CrossProduct(&up, &normal, &axis);
+    if (faceType == 2 || faceType == 6 || faceType == 7) {
+        y += 0x1E60;
+    }
+    if (ref != NULL) {
+        ref->cmd = dl->curr_cmd;
+        ref->param = dl->curr_param;
+    }
+    trans.x = x / 32;
+    trans.y = y / 32;
+    trans.z = obj->partDepth + (center.z + n);
+    NFLi_MapVecFx32(obj, &transOut, &trans);
+    MTX_Identity43(&mtx);
+    MTX_TransApply43(&mtx, &mtx, transOut.x, transOut.y, transOut.z);
+    NFLi_MapVecFx32(obj, &axisOut, &axis);
+    axis.x = axisOut.x;
+    axis.y = axisOut.y;
+    axis.z = axisOut.z;
+    MTX_RotAxis43(&rot, &axis, cross, dot);
+    MTX_Copy43To33(&rot, &nrmMtx);
+    MTX_Concat43(&rot, &mtx, &mtx);
+    if (patch != NULL) {
+        patch->mtx.cmd = NULL;
+        patch->mtx.param = NULL;
+    }
+    scale.x = scaleX / 32;
+    scale.y = scaleY / 32;
+    scale.z = FX32_ONE;
+    NFLi_MapVecFx32NoNegate(obj, &scaleOut, &scale);
+    MTX_ScaleApply43(&mtx, &mtx, scaleOut.x, scaleOut.y, scaleOut.z);
+    if (fmt == GX_TEXFMT_DIRECT) {
+        if (patch != NULL) {
+            patch->tex.cmd = dl->curr_cmd;
+            patch->tex.param = dl->curr_param;
+        }
+        G3C_TexImageParam(dl, GX_TEXFMT_DIRECT, GX_TEXGEN_NONE, part->texSizeS, part->texSizeT, GX_TEXREPEAT_ST,
+                          GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS, part->texAddr);
+    } else {
+        if (patch != NULL) {
+            patch->tex.cmd = dl->curr_cmd;
+            patch->tex.param = dl->curr_param;
+        }
+        G3C_TexImageParam(dl, GX_TEXFMT_PLTT16, GX_TEXGEN_NONE, part->texSizeS, part->texSizeT, GX_TEXREPEAT_ST,
+                          GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS, part->texAddr);
+        if (patch != NULL) {
+            patch->pltt.cmd = dl->curr_cmd;
+            patch->pltt.param = dl->curr_param;
+        }
+        G3C_TexPlttBase(dl, part->plttAddr, GX_TEXFMT_PLTT16);
+    }
+    switch (part->texSizeS) {
+    case 1:
+        texW = 16;
+        break;
+    case 2:
+        texW = 32;
+        break;
+    case 3:
+        texW = 64;
+        break;
+    }
+    switch (part->texSizeT) {
+    case 1:
+        texH = 16;
+        break;
+    case 2:
+        texH = 32;
+        break;
+    case 3:
+        texH = 64;
+        break;
+    }
+#define NFL_NORMAL(nx, ny, nz)                                                                                       \
+    nrm.x = (nx);                                                                                                    \
+    nrm.y = (ny);                                                                                                    \
+    nrm.z = (nz);                                                                                                    \
+    NFLi_MapVecFx32Copy(obj, &nrmOut, &nrm);                                                                         \
+    MTX_MultVec33(&nrmOut, &nrmMtx, &nrm);                                                                           \
+    G3C_Normal(dl, (fx16)nrm.x, (fx16)nrm.y, (fx16)nrm.z)
+#define NFL_VTX(vx, vy, vz)                                                                                          \
+    vtx.x = (vx);                                                                                                    \
+    vtx.y = (vy);                                                                                                    \
+    vtx.z = (vz);                                                                                                    \
+    NFLi_MapVecFx32Copy(obj, &vtxOut, &vtx);                                                                         \
+    MTX_MultVec43(&vtxOut, &mtx, &vtx);                                                                              \
+    G3C_Vtx(dl, (fx16)vtx.x, (fx16)vtx.y, (fx16)vtx.z)
+    s = texW << 12;
+    if (kind == 1) {
+        func_02005124(dl, GX_BEGIN_QUAD_STRIP);
+        G3C_TexCoord(dl, s, 0);
+        NFL_NORMAL(0x197, 0, 0xFEA);
+        NFL_VTX(0x800, -0x800, -0xCC);
+        t = texH << 12;
+        G3C_TexCoord(dl, s, t);
+        NFL_VTX(0x800, 0x800, -0xCC);
+        G3C_TexCoord(dl, s / 2, 0);
+        NFL_NORMAL(0, 0, 0xFFF);
+        NFL_VTX(0, -0x800, 0);
+        G3C_TexCoord(dl, s / 2, t);
+        NFL_VTX(0, 0x800, 0);
+        G3C_TexCoord(dl, 0, 0);
+        NFL_NORMAL(-0x197, 0, 0xFEA);
+        NFL_VTX(-0x800, -0x800, -0xCC);
+        G3C_TexCoord(dl, 0, t);
+        NFL_VTX(-0x800, 0x800, -0xCC);
+    } else if (kind == 2) {
+        func_02005124(dl, GX_BEGIN_QUAD_STRIP);
+        G3C_TexCoord(dl, 0, 0);
+        NFL_NORMAL(0x197, 0, 0xFEA);
+        NFL_VTX(0x800, -0x800, -0xCC);
+        t = texH << 12;
+        G3C_TexCoord(dl, 0, t);
+        NFL_VTX(0x800, 0x800, -0xCC);
+        G3C_TexCoord(dl, s, 0);
+        NFL_NORMAL(0, 0, 0xFFF);
+        NFL_VTX(0, -0x800, 0);
+        G3C_TexCoord(dl, s, t);
+        NFL_VTX(0, 0x800, 0);
+        G3C_TexCoord(dl, 0, 0);
+        NFL_NORMAL(0, -0x197, 0xFEA);
+        NFL_VTX(-0x800, -0x800, -0xCC);
+        G3C_TexCoord(dl, 0, t);
+        NFL_VTX(-0x800, 0x800, -0xCC);
+    } else {
+        func_02005124(dl, GX_BEGIN_QUADS);
+        G3C_TexCoord(dl, 0, 0);
+        NFL_NORMAL(0, 0, 0xFFF);
+        NFL_VTX(-0x800, -0x800, 0);
+        G3C_TexCoord(dl, s, 0);
+        NFL_VTX(0x800, -0x800, 0);
+        t = texH << 12;
+        G3C_TexCoord(dl, s, t);
+        NFL_VTX(0x800, 0x800, 0);
+        G3C_TexCoord(dl, 0, t);
+        NFL_VTX(-0x800, 0x800, 0);
+    }
+#undef NFL_NORMAL
+#undef NFL_VTX
+    func_02005148(dl);
+    G3C_PopMtx(dl, 1);
+}
+
+// Parts 0 to 3 of NFLi_MakeFacePartsDL, the eyes and eyebrows: a part placed as a quad on the face, its 2x2 points'
+// Z from the planes of sNFLFacePlanes, their normals interpolated over the 3x3 grids of points (sNFLFaceGridPoints)
+// and normals (sNFLFaceGridNormals), the quad turned onto their sum by matrix commands that the expressions patch.
+// Kind 4 is the mirrored side: its X is negated and its texture runs the other way.
 void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state) {
     MtxFx43 mtx;
@@ -2394,32 +2733,39 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     VecFx32 point2;
     VecFx32 sum;
     VecFx32 rotated;
-    fx32 s0;
-    fx32 s1;
     fx32 x0;
+    fx32 s1;
+    fx32 s0;
     fx32 x;
     fx32 y;
     fx32 w;
     fx32 h;
-    int kind;
+    u32 kind;
     int fmt;
     int texW;
     int texH;
-    int faceType;
     int i;
     int j;
-    fx32 scaleX;
-    fx32 scaleY;
+    int faceType;
+    int scaleX;
+    int scaleY;
     fx16 sin;
     fx16 cos;
-    fx32 dot;
     fx32 cross;
+    fx32 dot;
     int k;
     int a;
     int b;
     fx32 size;
     fx32 u;
     fx32 v;
+    fx32 rotation;
+    fx32 cx;
+    int pi;
+    int pj;
+    fx32 top;
+    fx32 bottom;
+    fx32 px;
 
     texW = 1;
     texH = 1;
@@ -2429,57 +2775,51 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     scaleY = part->place[3];
     w = part->place[4];
     h = part->place[5];
+    rotation = part->place[6];
     kind = part->place[7];
     fmt = obj->texFmt;
     G3C_PushMtx(dl);
-    sin = FX_CosIdx((u16)part->place[6]);
-    cos = FX_SinIdx((u16)part->place[6]);
+    sin = (fx16)FX_CosIdx((u16)rotation);
+    cos = (fx16)FX_SinIdx((u16)rotation);
     faceType = data->faceType;
-    center.x = x * 5 / 64;
+    cx = x * 5 / 64;
     center.y = y * 5 / 64;
-    if (center.x < 0) {
-        center.x = -center.x;
+    if (cx < 0) {
+        cx = -cx;
     }
-    center.z = NFL_PLANE_Z(center.x, center.y);
+    center.x = cx;
+    pi = cx >= 0x1B33 ? 1 : 0;
+    pj = center.y <= 0x167B ? 1 : 0;
+    center.z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, cx) + FX_Mul(sNFLFacePlanes[pj][pi].b, center.y)),
+                       sNFLFacePlanes[pj][pi].c) * 0x47 / 200;
     for (i = 0; i < 2; i++) {
-        fx32 t1 = i * w * 5 / 64;
-        fx32 ct = FX_Mul(sin, t1);
-        fx32 st = FX_Mul(cos, t1);
-
         for (j = 0; j < 2; j++) {
-            fx32 t2 = h * (j * 2 - 1) * 5 / 128;
-            int pi;
-            int pj;
-            const VecFx32 *p;
-            const VecFx32 *q;
-
-            grid[i][j].x = center.x + ct + FX_Mul(cos, t2);
-            grid[i][j].y = center.y - st + FX_Mul(sin, t2);
-            pi = grid[i][j].x >= 0x1B33;
-            pj = grid[i][j].y <= 0x167B;
-            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, grid[i][j].x) +
+            grid[i][j].x = center.x + FX_Mul(sin, i * w * 5 / 64) + FX_Mul(cos, h * (j * 2 - 1) * 5 / 128);
+            grid[i][j].y = center.y - FX_Mul(cos, i * w * 5 / 64) + FX_Mul(sin, h * (j * 2 - 1) * 5 / 128);
+            px = grid[i][j].x;
+            pi = px >= 0x1B33 ? 1 : 0;
+            pj = grid[i][j].y <= 0x167B ? 1 : 0;
+            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, px) +
                                                                   FX_Mul(sNFLFacePlanes[pj][pi].b, grid[i][j].y)),
                                    sNFLFacePlanes[pj][pi].c) *
                            0x47 / 200;
-            p = &sNFLFaceGridPoints[pj][pi];
-            u = FX_Div(grid[i][j].x - p[0].x, p[1].x - p[0].x);
-            v = FX_Div(grid[i][j].y - p[0].y, p[3].y - p[0].y);
-            q = &sNFLFaceGridNormals[pj][pi];
-            {
-                fx32 top = q[0].x + FX_Mul(q[1].x - q[0].x, u);
-                fx32 bottom = q[3].x + FX_Mul(q[4].x - q[3].x, u);
-                normals[i][j].x = top + FX_Mul(bottom - top, v);
-            }
-            {
-                fx32 top = q[0].y + FX_Mul(q[1].y - q[0].y, u);
-                fx32 bottom = q[3].y + FX_Mul(q[4].y - q[3].y, u);
-                normals[i][j].y = top + FX_Mul(bottom - top, v);
-            }
-            {
-                fx32 top = q[0].z + FX_Mul(q[1].z - q[0].z, u);
-                fx32 bottom = q[3].z + FX_Mul(q[4].z - q[3].z, u);
-                normals[i][j].z = top + FX_Mul(bottom - top, v);
-            }
+            u = FX_Div(px - sNFLFaceGridPoints[pj][pi].x, sNFLFaceGridPoints[pj][pi + 1].x - sNFLFaceGridPoints[pj][pi].x);
+            v = FX_Div(grid[i][j].y - sNFLFaceGridPoints[pj][pi].y, sNFLFaceGridPoints[pj + 1][pi].y - sNFLFaceGridPoints[pj][pi].y);
+            top = sNFLFaceGridNormals[pj][pi].x +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].x - sNFLFaceGridNormals[pj][pi].x, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].x +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].x - sNFLFaceGridNormals[pj + 1][pi].x, u);
+            normals[i][j].x = top + FX_Mul(bottom - top, v);
+            top = sNFLFaceGridNormals[pj][pi].y +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].y - sNFLFaceGridNormals[pj][pi].y, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].y +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].y - sNFLFaceGridNormals[pj + 1][pi].y, u);
+            normals[i][j].y = top + FX_Mul(bottom - top, v);
+            top = sNFLFaceGridNormals[pj][pi].z +
+               FX_Mul(sNFLFaceGridNormals[pj][pi + 1].z - sNFLFaceGridNormals[pj][pi].z, u);
+            bottom = sNFLFaceGridNormals[pj + 1][pi].z +
+                  FX_Mul(sNFLFaceGridNormals[pj + 1][pi + 1].z - sNFLFaceGridNormals[pj + 1][pi].z, u);
+            normals[i][j].z = top + FX_Mul(bottom - top, v);
             VEC_Normalize(&normals[i][j], &normals[i][j]);
         }
     }
@@ -2522,8 +2862,9 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
         state->a = normal.x < 0 ? -normal.x : normal.x;
         state->b = normal.y;
         state->c = normal.z * 200 / 0x47;
-        state->d = -(FX_Mul(state->c, center.z) + (FX_Mul(state->a, x / 32 < 0 ? -(x / 32) : x / 32) +
-                                                          FX_Mul(normal.y, y / 32)));
+        state->d = -(FX_Mul(normal.z * 200 / 0x47, center.z) +
+                     (FX_Mul(normal.x < 0 ? -normal.x : normal.x, NFLi_Abs(x / 32)) +
+                      FX_Mul(normal.y, y / 32)));
     }
     if (state != NULL) {
         if (state->set == 1) {
@@ -2538,13 +2879,17 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
             sum.x /= 4;
             sum.y /= 4;
             sum.z = 0;
-            size = (scaleX > scaleY ? scaleX : scaleY) * 5 / 128;
-            if (VEC_Distance(&sum, &state->center) > (size + state->size) * 3 / 5) {
-                n = 0;
+            if (scaleX > scaleY) {
+                size = scaleX * 5 / 128;
             } else {
-                center.z = -FX_Div(state->d + (FX_Mul(state->a, x / 32 < 0 ? -(x / 32) : x / 32) +
+                size = scaleY * 5 / 128;
+            }
+            if (VEC_Distance(&sum, &state->center) <= (size + state->size) * 3 / 5) {
+                center.z = -FX_Div(state->d + (FX_Mul(state->a, NFLi_Abs(x / 32)) +
                                                   FX_Mul(state->b, y / 32)),
                                    state->c);
+            } else {
+                n = 0;
             }
         } else {
             state->set = 1;
@@ -2556,12 +2901,8 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     dot = VEC_DotProduct(&normal, &up);
     cross = FX_Sqrt(FX32_ONE - FX_Mul(dot, dot));
     VEC_CrossProduct(&up, &normal, &axis);
-    switch (faceType) {
-    case 2:
-    case 6:
-    case 7:
+    if (faceType == 2 || faceType == 6 || faceType == 7) {
         y += 0x1E60;
-        break;
     }
     if (ref != NULL) {
         ref->cmd = dl->curr_cmd;
@@ -2573,7 +2914,9 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
         NFLi_DLTranslate(obj, dl, x / 32, y / 32, obj->partDepth + (center.z + n));
     }
     NFLi_MapVecFx32(obj, &rotated, &axis);
-    axis = rotated;
+    axis.x = rotated.x;
+    axis.y = rotated.y;
+    axis.z = rotated.z;
     MTX_RotAxis43(&mtx, &axis, cross, dot);
     G3C_MultMtx43(dl, &mtx);
     patch->mtx.cmd = dl->curr_cmd;
@@ -2617,14 +2960,17 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
         texH = 64;
         break;
     }
-    if (kind == 3) {
-        x0 = 0;
-        s1 = 0;
-        s0 = texW << 12;
-    } else if (kind == 4) {
+    switch (kind) {
+    case 4:
         x0 = -FX32_ONE;
         s1 = texW << 12;
         s0 = 0;
+        break;
+    case 3:
+        x0 = 0;
+        s1 = 0;
+        s0 = texW << 12;
+        break;
     }
     func_02005124(dl, GX_BEGIN_QUADS);
     G3C_TexCoord(dl, s0, 0);
