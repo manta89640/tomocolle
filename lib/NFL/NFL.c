@@ -4733,39 +4733,43 @@ typedef struct NFLTexBank {
 
 extern const NFLTexBank sNFLTexBankParts[];
 
-// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
-// Not matching: register allocation only (the original keeps the second part's address in r4, which becomes dest)
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does (and in
+// its shape: the first part's base, the second's, the first's size, the copy split over the two parts)
+// Not matching: the instructions and callee-saved registers are the original's, but the original loads the fields'
+// addresses in the order second, first, size (its literal pool +2, +0, +4), which with any statement order that loads
+// them so gives the size and first base the other two registers; here the size is read first (pool +2, +4, +0).
 int NFLi_CopyToTexBank(int bank, const void *src, u32 offset, u32 size) {
-    u32 n;
-    void *dest;
-    int result;
-    u32 second = sNFLTexBankParts[bank].secondBase << 12;
-    u32 first = sNFLTexBankParts[bank].firstBase;
-    u32 split = sNFLTexBankParts[bank].firstSize;
+    u32 szBlk1 = sNFLTexBankParts[bank].firstSize;
+    u32 blk2 = sNFLTexBankParts[bank].secondBase << 12;
+    u32 blk1 = sNFLTexBankParts[bank].firstBase;
     u32 end = offset + size;
+    void *temp;
+    int result;
 
     result = NFLi_CheckTexBank(bank, offset, end);
     if (result != 0) {
         return result;
     }
-    if (second == 0) {
-        dest = (void *)(offset + (first << 12));
-    } else if (end < split << 12) {
-        dest = (void *)(offset + (first << 12));
-    } else if (offset >= split << 12) {
-        dest = (void *)(second + offset - (split << 12));
+    if (blk2 == 0) {
+        temp = (void *)(offset + (blk1 << 12));
+    } else if (end < szBlk1 << 12) {
+        temp = (void *)(offset + (blk1 << 12));
+    } else if (offset >= szBlk1 << 12) {
+        temp = (void *)(blk2 + offset - (szBlk1 << 12));
     } else {
-        n = (split << 12) - offset;
-        dest = (void *)(offset + (first << 12));
-        MIi_CpuCopy32(src, dest, n);
-        DC_FlushRange(dest, n);
-        size -= n;
-        MIi_CpuCopy32((const u8 *)src + n, (void *)second, size);
-        DC_FlushRange((void *)second, size);
+        void *temp2 = (void *)blk2;
+        u32 temp1 = (szBlk1 << 12) - offset;
+
+        temp = (void *)(offset + (blk1 << 12));
+        MIi_CpuCopy32(src, temp, temp1);
+        DC_FlushRange(temp, temp1);
+        size -= temp1;
+        MIi_CpuCopy32((const u8 *)src + temp1, temp2, size);
+        DC_FlushRange(temp2, size);
         return 0;
     }
-    MIi_CpuCopy32(src, dest, size);
-    DC_FlushRange(dest, size);
+    MIi_CpuCopy32(src, temp, size);
+    DC_FlushRange(temp, size);
     return 0;
 }
 
