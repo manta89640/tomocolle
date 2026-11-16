@@ -286,7 +286,7 @@ void TushinScene::SetUpList(int *charOffset) {
     func_020a2104(&mList, 0x100, 0x26);
     func_020278f8(&data_021213b8, 0x5FDF, 0x100);
     mList.InitButtons(0, 0x68, 0x69, sListTitlePos, sListTitleSize);
-    func_020a23cc(&mList, 0, 0x7A, sListCursorPos);
+    mList.InitIcons(0, 0x7A, sListCursorPos);
     mList.InitTexts(0x1000, sListTitleTextPos, charOffset);
     mList.InitUpButton(0, 2, 3, sListScrollDownPos, sListScrollBarSize);
     mList.InitDownButton(0, 4, 5, sListScrollUpPos, sListScrollDownSize);

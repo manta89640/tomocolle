@@ -649,6 +649,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`...; character++; }`); in the `for` header (`i++, character++`) it comes after the compare (overlay 1).
 
 **A value read once where the original reads it twice**
+- Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
+  program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
+  z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
+  a volatile read or `#pragma opt_dead_assignments off` keeps both but gives the light's pointer and x other
+  registers. Statement orders, temporaries' types, inlines and struct copies did not do it.
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
 - Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
@@ -662,6 +667,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
   random number first: the generator's state is stored before the range is read (overlay 76's voice page).
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
+- Read the literal pool's constants, not only the instructions: a tenth of fx32 written `FX32_ONE / 10` is 0x199,
+  `FX32_CONST(0.1)` rounds to 0x19A (overlay 5's `TestDrawMiiCamera::SetRandomRadius`).
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
 - A `wchar_t` set from a choice of two wide constants (`fill = zero ? L'0' : L' ';`) and then compared is compared
   in its register; with `'0' : ' '` the compiler reloads it from the stack, where its address is taken
@@ -692,6 +699,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
   from it: deriving makes the compiler emit its own table and destructors (`RoomDoorModel` in overlay 74, the
   character models).
+- A `VecFx32` returned by value and stored in a member: `mEye = GetEye(...);` copies it field by field from the
+  call's return slot, where `VecFx32 eye = GetEye(...);` then the fields makes a second copy and a larger frame. A
+  vector member assigned through a pointer member, `mCamera->mPosition = mEye;`, loads the pointer once per vector;
+  three field assignments reload it after each store (overlay 5's `TestDrawMiiCamera::Update`).
 - Record copies: `(CharacterRecord &)dst = src` (overlay 109). A copy of a `WMBssDesc` is field by field; a struct
   wrapping one is copied with `ldm`/`stm`.
 - Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is

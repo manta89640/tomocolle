@@ -750,6 +750,42 @@ Measured:
 
 Inferred: a test of the Mii face's placement on a head, from the same test archive as `G3dTestScene`.
 
+## The Mii drawing test scene (overlay 5)
+
+Overlay 5 is scene 5, `TestDrawMiiScene` (0x28F8 bytes; its constructor is the main program's
+`_ZN16TestDrawMiiSceneC1Ei`, 0x0203e1e8): one source file, `src/overlays/ov005/TestDrawMiiScene.cpp`.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x02149A40` to `0x0214A4A0` | The scene's five virtual functions and `UpdateModelFades`, `TestDrawMiiModel`'s constructor, `Init` and `Update`, the camera's five functions, then the implicit destructors (the model's D0, the scene's D1 and D0) |
+| `.rodata` | `0x0214A4A0` to `0x0214A4D0` | Four constants of `Init` and the camera's `Init`, sorted by size: the models' rotations (`u16[2]`), their model indices (`int[2]`), the camera's first angles, the models' places (`VecFx32[2]`) |
+| `.data` | `0x0214A4E0` to `0x0214A560` | `TestDrawMiiModel`'s table, the scene's table, the strings |
+
+Measured:
+
+- It mounts "Scn/Scene/SceneTestDrawMii_LZ.bin" as SME; resource 0 is `SME:/room.imd`. The room is model 0 of it,
+  drawn by a `TestDrawMiiAnimModel` at +0x27E4; two `TestDrawMiiModel`s at +0x25F4 (0xF8 bytes each, derived from
+  `AnimModel`, with their own table in the overlay) are models 1 and 2 of the same file, at (0x5000, 0, 0) and
+  (0, 0, -0x5000), turned 0 and 0x4000 about y. A `CharacterBase` at +0x10 is the Mii: `InitFace(1)` and then a
+  random Mii (`SetRandomMii(0, 0, 2, TRUE)`), drawn with `CharacterBase::Draw`.
+- `Init` also turns on antialiasing, toon shading and W buffering, clears to `GX_RGB(21, 21, 21)` and sets light 0
+  to (0xFFF, 0, 0) and white.
+- The camera at +0x28C4 (`TestDrawMiiCamera`, 0x34 bytes, no constructor) circles a point: its eye is the target
+  shifted right by 3, plus `radius.z * sin(yaw)` on x and `radius.x * cos(yaw)` on z, and `radius.y * sin(pitch)`
+  on y, the angles being sine table indices in fx32 (yaw 0x1600, pitch 0x1200 at first; radius (0x12800, 0x9000,
+  0x12800), target (0, 0x1CCC, 0)). The code is overlay 74's `RoomCamera::GetOrbitPosition`, instruction for instruction.
+  Left and right turn it by 0x100 a frame, up and down raise it by 0x30; with X held, right moves the target to a
+  random place (each of x and z from 0 to 3.9, either sign), left gives x and z of the radius random values from
+  9.0 to 17.9 and up a random yaw. The steps are `FX32_ONE / 10` (0x199), not `FX32_CONST(0.1)` (0x19A).
+- Each frame a model whose distance from the eye on the floor (x and z) is less than the eye's from the origin
+  fades out (its alpha down by 5 a frame to 0, `func_02029f50`), and the others fade back in to 31: the models
+  between the camera and the room's middle get out of the way.
+- `TestDrawMiiModel::Init` is empty; the scene calls it after `Load`. Its complete-object destructor is the main
+  program's copy (`0x0203E2A8`), which the scene's destructor and the model's table refer to; the overlay has only
+  its deleting destructor.
+
+Inferred: a test of how a Mii looks in a room under a moving camera.
+
 ## WH, the wireless wrapper
 
 WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the

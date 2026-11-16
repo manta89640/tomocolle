@@ -328,6 +328,7 @@ struct MiiListPanel {
     void Init(int pageSize);
     void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitTexts(int plane, WindowPoint position, int *charOffset);
+    void InitIcons(int resource, int sequence, WindowPoint position);
     void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void ResetScrollButtons();
@@ -372,7 +373,6 @@ typedef MiiList ResidentList;
 
 extern "C" {
 void func_020a2104(ListView *view, int a, int b);
-void func_020a23cc(ListView *view, int a, int b, WindowPoint c);
 void func_020a26fc(ListView *view, int a, int b, int c, int d, int e, int f, WindowPoint g, ScreenRect h);
 void func_020a27dc(ListView *view, int a, int b, int c);
 }
