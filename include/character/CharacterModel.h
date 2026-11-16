@@ -26,9 +26,9 @@ public:
 struct ClothesData {
     /* 0x00 */ u8 mUnknown00[0xC];
     /* 0x0C */ u32 mUnknown0CBits0 : 4;
-    /*      */ u32 mUnknown0CBits4 : 3;
     /*      */ u32 mColor : 3;          // The digit of the body texture's name ("body_c<n>.ntfp")
-    /*      */ u32 mUnknown0CBits10 : 22;
+    /*      */ u32 mHasFemaleBody : 1;  // The body has a female variant ("body<code>F")
+    /*      */ u32 mUnknown0CBits8 : 24;
     /* 0x10 */ u32 mUnknown10;
 }; // 0x14
 
@@ -65,21 +65,27 @@ public:
     void MakeBodyArchivePath();
     void SetArchive(const char *archiveName, int clothes, BOOL female);
     void SetClothes(int clothes, BOOL female);
-    void SetFemaleBody(BOOL female);
+    void UseFemaleBody(BOOL female);
     void SetAnimFlags(BOOL playOnce, BOOL finished);
     void SetAnimFlagsAndFrame(BOOL playOnce, fx32 frame, BOOL finished);
     void MakeModel(int resourceId, int unk);
     void SetAnimation(u32 resType, int id);
     void BlendToAnimation(u32 resType, int id);
     void RemoveAnimation(u32 resType);
-    void SetTexturePalette(u16 unk);
+    void SetPaletteColor1(GXRgb color);
     void LoadTexturePalette();
-    void SetTexturePaletteColors(u16 color1, u16 color2);
+    void SetPaletteColors(GXRgb color0, GXRgb color1);
     void GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation);
     VecFx32 GetJointPosition(int joint);
-    BOOL GetJointOffset(VecFx32 *out, int joint);
-    BOOL GetJointOffsetFrom(const VecFx32 *from, VecFx32 *out, int joint);
+    BOOL HitTestJoint(int joint);
+    BOOL HitTestJoint(const VecFx32 *origin, const VecFx32 *dir, int joint);
+    BOOL HitTestJoint(VecFx32 origin, VecFx32 dir, int joint) { return HitTestJoint(&origin, &dir, joint); }
     void UpdateBlend();
+    void TurnJoint(NNSG3dRS *rs);
+    static void OnNodeDesc(NNSG3dRS *rs);
+    static void OnNodeDescDone(NNSG3dRS *rs);
+    static void OnShadowNode(NNSG3dRS *rs);
+    static void InitCallbacks(NNSG3dRS *rs);
     void SetScaleFromBody(u32 height, u32 build);
     VecFx32 GetHeldItemScale();
 
@@ -98,9 +104,9 @@ public:
     /* 0x464 */ u16 mJointAngles[10][3];     // x, y, z of the turnable joints (node descriptions 2, 3, 5, 6, 12,
                                              // 13, 14, 16, 17 and 19)
     /* 0x4A0 */ u8 mUnknown4A0[4];
-    /* 0x4A4 */ int mShadowAlpha;           // Given to the shadow's material
-    /* 0x4A8 */ BOOL mShadowMatrixSet;      // Load mShadowMatrix for the shadow
-    /* 0x4AC */ int mShadowMatrix;          // TODO
+    /* 0x4A4 */ BOOL mShadowVisible;        // The visibility of the shadow node
+    /* 0x4A8 */ BOOL mShadowAtHeight;       // Draw the shadow at mShadowHeight instead of its joint's height
+    /* 0x4AC */ fx32 mShadowHeight;
     /* 0x4B0 */ ClothesItem mClothes;
     /* 0x4C8 */ char mArchiveName[4];       // Name its archive is mounted under
     /* 0x4CC */ char mArchivePath[0x1C];    // and the archive's path

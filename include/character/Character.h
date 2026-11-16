@@ -12,11 +12,12 @@
 //   CharacterRecord   0x2A4 bytes  what the save data holds of a character (func_0202c264 copies one out)
 //   SavedCharacter    0x2C0        + its index and what the game derives from the record
 //   CharacterBase     0x25E4       + the Mii's face, drawn with the Mii library (NFL) at the head
-//   Character         0x2B18       + the body (CharacterModel), walking, turning, animations, sounds
+//   Character         0x2B18       + the body (CharacterModel, a second base), walking, turning, animations, sounds
 //
 // The scenes' own characters (SceneCharacter, RoomCharacter, ...) derive from Character. Its constructor and
-// destructor are implicit: the scenes' constructors call CharacterBase's C2 and CharacterModel's C1, and their
-// destructors CharacterModel's inline destructor and CharacterBase's D2. The names are the project's own.
+// destructor are implicit: the scenes' constructors call the base constructors of CharacterBase and of
+// CharacterModel (C2, 0x0208eb18: a model that is a member is built with C1, 0x0208eba0, as the G3D test scene's),
+// and their destructors CharacterModel's inline destructor and CharacterBase's D2. The names are the project's own.
 
 // What the save data holds of a character: the 0x2A4 bytes that func_0202c264 copies out. Overlay 109's implicit
 // copy assignment of it shows its members.
@@ -97,13 +98,27 @@ public:
     /* 0x2BD */ u8 mUnknown2BD[3];
 }; // 0x2C0
 
+// What the Mii library's NFL_SetFaceDrawParam takes (lib/NFL's NFLDrawParam, which is C): the polygon attributes and
+// material colours of a face.
+struct FaceDrawParam {
+    /* 0x00 */ int light;
+    /* 0x04 */ GXPolygonMode polyMode;
+    /* 0x08 */ int polygonID;
+    /* 0x0C */ int alpha;
+    /* 0x10 */ int misc;
+    /* 0x14 */ GXRgb diffuse;
+    /* 0x16 */ GXRgb ambient;
+    /* 0x18 */ GXRgb specular;
+    /* 0x1A */ GXRgb emission;
+}; // 0x1C
+
 // The character with its Mii face, which the Mii library (NFL) draws at the head's matrices.
 class CharacterBase : public SavedCharacter {
 public:
     CharacterBase();
     ~CharacterBase();
 
-    /* 0x02C0 */ u8 mFaceDrawParam[0x1C];  // Given to NFL_SetFaceDrawParam
+    /* 0x02C0 */ FaceDrawParam mFaceDrawParam;
     /* 0x02DC */ u8 mFace[0x2218];         // The library's face object (NFL_AddFace)
     /* 0x24F4 */ int mExpression;          // Given to NFL_SetExpression
     /* 0x24F8 */ int mFaceId;              // The face's id in the library, -1 for none
@@ -131,9 +146,9 @@ public:
 }; // 0x25E4
 
 // The character with its body.
-class Character : public CharacterBase {
+class Character : public CharacterBase, public CharacterModel {
 public:
-    /* 0x25E4 */ CharacterModel mModel;
+    /* 0x25E4 */ // CharacterModel
     /* 0x2AEC */ fx32 mSpeed;
     /* 0x2AF0 */ fx32 mUnknown2AF0;        // DistanceScaled multiplies a distance by it
     /* 0x2AF4 */ fx32 mUnknown2AF4;

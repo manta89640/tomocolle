@@ -94,14 +94,15 @@ class CharacterModel {
 public:
     ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj); }
 
+    void Load(int resourceId, int unk); // 0x0208ec28
+    void Draw();                        // 0x0208ed30
+
     /* 0x000 */ AnimModel mModel;
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x41C];
 }; // 0x508
 
 extern "C" {
-void func_0208ec28(CharacterModel *model, int a, int b);
-void func_0208ed30(CharacterModel *model); // Draws it
 void func_0208fd90(CharacterBase *character, int unknown);
 void func_0208ff68(CharacterBase *character, int a, int b, int c, int d);
 void func_02090214(CharacterBase *character); // Draws it

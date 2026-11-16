@@ -205,6 +205,11 @@ struct CharacterBase : public SavedCharacter {
 // The model of a character with its animations and joints (func_0208eb18 constructs it).
 class CharacterModel : public AnimModel {
 public:
+    // The matrix of one of the model's joints, and its rotation
+    void GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation);
+    // The position of one of the model's joints (0 is the head, 1 and 2 the hands)
+    VecFx32 GetJointPosition(int joint);
+
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x18];
     /* 0x104 */ int mAnimId; // The current 'BCA0' animation
@@ -215,12 +220,6 @@ public:
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-extern "C" {
-// The position of one of the model's joints (0 is the head, 1 and 2 the hands)
-VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
-// The matrix of one of the model's joints, and its rotation
-void CharacterModel_GetJointMatrices(CharacterModel *model, int joint, MtxFx43 *matrix, MtxFx33 *rotation);
-}
 
 // The main program's character class that the scenes derive theirs from (0x2B18 bytes).
 class Character : public CharacterBase {

@@ -664,10 +664,10 @@ void WeddingCharacter::HoldOutGift() {
         return;
     }
     mModel.mUnknown45C = TRUE;
-    rightHand = CharacterModel_GetJointPosition(&mModel, 2);
-    rightArm = CharacterModel_GetJointPosition(&mModel, 9);
-    leftHand = CharacterModel_GetJointPosition(&mModel, 1);
-    leftArm = CharacterModel_GetJointPosition(&mModel, 8);
+    rightHand = mModel.GetJointPosition(2);
+    rightArm = mModel.GetJointPosition(9);
+    leftHand = mModel.GetJointPosition(1);
+    leftArm = mModel.GetJointPosition(8);
 
     VEC_Subtract(&rightHand, &rightArm, &rightOffset);
     VEC_Normalize(&rightOffset, &rightReach);
@@ -730,7 +730,7 @@ void WeddingCharacter::TurnHeadToCamera() {
 
 void WeddingCharacter::LookAtPartner() {
     VecFx32 target;
-    const VecFx32 &head = CharacterModel_GetJointPosition(&mPartner->mModel, 0);
+    const VecFx32 &head = mPartner->mModel.GetJointPosition(0);
     target.x = head.x;
     target.z = head.z;
     target.y = head.y + 0xB33;
@@ -740,7 +740,7 @@ void WeddingCharacter::LookAtPartner() {
 u16 WeddingCharacter::GetHeadPitchTo(VecFx32 *target) {
     MtxFx43 matrix;
     MtxFx33 rotation;
-    CharacterModel_GetJointMatrices(&mModel, 0, &matrix, &rotation);
+    mModel.GetJointMatrices(0, &matrix, &rotation);
     fx32 dz = target->z - mModel.mPos.z;
     fx32 dx = target->x - mModel.mPos.x;
     fx32 eyes = matrix._31 + 0xCCC;

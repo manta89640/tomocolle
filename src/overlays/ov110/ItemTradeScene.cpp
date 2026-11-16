@@ -740,12 +740,12 @@ void ItemTradeList::Draw() {
 void ItemTradeList::ShowCostume(int costume) {
     func_0202aecc(data_021223e4, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
-    func_0208ee18(&mMannequin->mModel, "3MM", costume, MiiData_GetSex(mContext->mPlayer));
+    mMannequin->mModel.SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
     ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
-    func_0208ef5c(&mMannequin->mModel, 0, 0);
-    func_0208f19c(&mMannequin->mModel, NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
-    func_0208ef00(&mMannequin->mModel, TRUE, TRUE);
+    mMannequin->mModel.MakeModel(0, 0);
+    mMannequin->mModel.SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
+    mMannequin->mModel.SetAnimFlags(TRUE, TRUE);
 }
 
 // @0x0214b414
@@ -1371,7 +1371,7 @@ void ItemTradeScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "STS", "Scn/Scene/SceneTushin_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "LTL", "Scn/List/List_TushinItemList_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MH", "Mdl/Misc/headManikin_3D_LZ.bin", 0);
-    func_0208ee18(&mMannequin.mModel, "3MM", 0, 0);
+    mMannequin.mModel.SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
 
     func_0202c264(&gGameData, 0, &mPlayer);
@@ -1535,7 +1535,7 @@ void ItemTradeScene::Init3d() {
     void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
     func_02029660(mMannequin.mModel.mAnim.mResourceSet, RESOURCE_BCA0, animations);
     mMannequin.SetAnimation("idle00");
-    func_0208ef00(&mMannequin.mModel, TRUE, TRUE);
+    mMannequin.mModel.SetAnimFlags(TRUE, TRUE);
     mMannequin.mModel.mUnknown4A4 = FALSE;
     func_020a03bc(&mMannequin, FALSE);
 
