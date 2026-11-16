@@ -765,7 +765,7 @@ Measured:
   character 0, or that character's name when `MiiEditScene::GetNameLength` rejects it. (Overlay 109's source calls it a
   nickname.)
 - `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
-  passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`func_020743a0`):
+  passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`NFL_Random`):
   byte 0 is `0xC0`, the random number times 4 and bits 12-13 of the counter.
 - Two setters, of bit 2 of 0x20 (`MiiData_SetLocalOnly`) and bit 0 of 0x00 (`MiiData_SetFavorite`), are called through
   `func_02098cdc` and `func_02098ce8`. Inferred: they are the Wii's `localOnly` and `favorite`, which `RFLCharData` has
@@ -1157,147 +1157,185 @@ windows' set-up).
 Not done in the first third: `MiiEditScene::Init` (95.8%: the registers of the index and the character offset in the
 loops over the buttons and the text boxes).
 
-## The Mii library (NFL), not cut yet
+## The Mii library (NFL)
 
 Code of the main program from `0x02069BF4` (right after NitroSystem) to `0x020776E4` (the Mii transfer), 144
-functions; started, not decompiled, no unit cut yet. Measured:
+functions, in `lib/NFL/NFL.c`.
+
+**The names are the project's own.** Nothing in the ROM gives the library's names (no string, no assert, no object
+to match), so every function, datum, type and field of `lib/NFL` is named for what its code does: `NFL_` for the 33
+functions called from outside the library (by `main`, the character code, `lib/MiiData`, `lib/MiiTransfer` and the
+overlays, found in their callers), `NFLi_` for the others, `sNFL` for its data.
+
+Measured:
 
 - **Its entry points.** `main` mounts `Cmn/Nfl/NFL_Res_LZ.bin` as `NFL`, gets `NFL:/NFL_Res.dat` and passes it to
-  `func_02072a58` with a work area (`data_02115480`), `data_02115574`, `0x4000` and `data_020fc504`. That function
-  returns 8 when a pointer is null or the size is not a multiple of 4, stores the RTC time in seconds at +0x58 of the
-  work area and the constants of an LCG (`0x5D588B65`, `0x269EC3`) at +0x5C/+0x60, and publishes the work area in
-  `data_02145360` with interrupts disabled. Every frame `main` calls `func_020749e4`, and after `OS_WaitIrq`
-  `func_02076448(0x4000)`: both are state machines on +0x8C and +0x90 of the work area that return small codes
-  (0, 2, 3, 4, 8, 0x13, 0x14).
-- **What it does.** `0x0206CF6C` to `0x020776E4` reads its state through `data_02145360` (38 references), builds
+  `NFL_Init` with a work area (`data_02115480`), `data_02115574`, `0x4000` and `data_020fc504`. That function returns 8
+  when a pointer is null or the size is not a multiple of 4, stores the RTC time in seconds at +0x58 of the work area
+  (`randState`) and the constants of an LCG (`0x5D588B65`, `0x269EC3`) at +0x5C/+0x60, and publishes the work area in
+  `sNFLWork` with interrupts disabled. Every frame `main` calls `NFL_FillBuffer`, and after `OS_WaitIrq`
+  `NFL_LoadVram(0x4000)`: both are state machines on +0x8C and +0x90 of the work area (`phase` and `stage`) that return
+  small codes (0, 2, 3, 4, 8, 0x13, 0x14).
+- **What it does.** `0x0206CF6C` to `0x020776E4` reads its state through `sNFLWork` (38 references), builds
   display lists (`G3_BeginMakeDL`, `G3C_Vtx`, `G3C_TexCoord`, ...), loads textures and palettes (`GX_BeginLoadTex`),
   and reads `OS_GetMacAddress` and `RTC_GetDateTime` (as a Mii's create ID is made of). `0x02069BF4` to `0x0206CF6C`
   is a byte-stream reader and display-list drawing code that calls back into `0x0206CF6C`, `0x020743E4` and
   `0x02074444`, and is called from the other part.
-- **One library, by its table.** The function table `data_02112140` (.data) holds `func_02071578` and six functions of
-  `0x0206AAEC` to `0x0206B024`, so the two parts are linked together. Its .data is inferred to run from `0x02112140`
-  to `0x0211220C`, where the keyboard's tables start; its .rodata from `0x020B6524`, read by both parts.
-- **Callers.** `main`, the main program's character code (`CharacterBase`'s destructors call `func_02072dc0` and
-  `func_02072f34`), overlays 70, 76, 78 and 79 (`func_0206dc84`), and 48, 51, 68, 75, 78 and 100
-  (`func_02073514` to `func_02073550`).
-- **One static.** The library's only .bss is the pointer `data_02145360`: every one of its 38 references loads
+- **One library, by its table.** The function table `sNFLPartPreparers` (.data) holds `NFLi_PrepareFaceParts` and six
+  functions of `0x0206AAEC` to `0x0206B024`, so the two parts are linked together. Its .data is inferred to run from
+  `0x02112140` to `0x0211220C`, where the keyboard's tables start; its .rodata from `0x020B6524`, read by both parts.
+- **Callers.** `main`, the main program's character code (`CharacterBase`'s destructors call `NFL_RemoveFaceSlot` and
+  `NFL_ResetFace`), overlays 70, 76, 78 and 79 (`NFL_GetFaceStatus`), and 48, 51, 68, 75, 78 and 100
+  (`NFL_GetFavoriteColor` to `NFL_IsMiiCreateIdUnassigned`).
+- **One static.** The library's only .bss is the pointer `sNFLWork`: every one of its 38 references loads
   the address and reads or writes at offset 0, and nothing in `0x02069BF4..0x0206CF6C` touches .bss. The 0x1C bytes
   after it, to the Mii transfer's .bss at `0x02145380`, are not referred to. So .bss cannot show where its files
   begin and end, and the compiler's pooling threshold (137 against 138) cannot be read from its statics; its .rodata
-  is the place left to look (`data_020b676c`, `...6770`, `...6774`, `...6778` are each loaded by their own address).
+  is the place left to look (`sNFLFacePlanes` and its words at +4, +8 and +0xC are each loaded by their own
+  address).
 - **No identity string.** The main program holds only two middleware strings, `[SDK+NINTENDO:BACKUP]` and
   `[SDK+SHARP:SHTTS-1_2_0]`; nothing names NFL's version. No objects or sources of NFL (or the Wii's RFL) were found
   on the machine to match against.
 
 Started in `lib/NFL/NFL.c`, one unit for the library's whole range (.text `0x02069BF4`-`0x020776E4`, .rodata
-`0x020B6524`-`0x020B7BE4`, .data `0x02112140`-`0x0211220C`, .bss `0x02145360`-`0x02145380`), not yet divided into
-files. 29 of 144 functions match: the byte-stream reader, the palette makers (16-colour ramps from tables of 8-bit
-colours, `GX_RGB` of each component shifted down 3) and the create-ID and work-area helpers. Measured with them: the
-code compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, as C and as C++, so the compiler is not settled. The Mii
-records it reads have the Wii's layout: the birthday check `func_020731e0` reads the month from bits 10-13 and the day
-from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
-bits 1-4 against 11, as `RFLCharData` places them.
+`0x020B6524`-`0x020B7BE4`, .data `0x02112140`-`0x0211220C`, .bss `0x02145360`-`0x02145380`), not yet divided into files.
+29 of 144 functions match: the byte-stream reader, the palette makers (16-colour ramps from tables of 8-bit colours,
+`GX_RGB` of each component shifted down 3) and the create-ID and work-area helpers. Measured with them: the code
+compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, as C and as C++, so the compiler is not settled. The Mii records
+it reads have the Wii's layout: the birthday check `NFLi_IsValidCharData` reads the month from bits 10-13 and the day
+from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in bits
+1-4 against 11, as `RFLCharData` places them.
 
 Measured from the functions of `0x0206AAEC`-`0x0206EBB0` (the display-list builder, matched but for four):
 
-- **`func_0206d4f8(index, mii, unk)` builds a face's two display lists.** It rejects a Mii whose fields are out of
-  range (`func_0206d040`, a bound for each of 37 fields) or whose birthday is invalid, takes the object of `index`
-  (`func_02073060`), gives it VRAM from the work area's bases at 0x8 and 0xC (0x1A10 bytes of texture and 0x130 of
-  palette per index, 0x6880 of texture in mode 7, the mode being the work area's 0x68), runs the seven part functions
-  of the table at `0x02112140` on a context on its stack, and makes the display list at 0x2A4 of the object (0x1AE0
-  bytes) from eight mesh functions and the one at 0x1D84 (0x494 bytes) from `func_020715ac`. `func_0206db98` sends
-  them to the geometry FIFO under the object's matrices (0x2C, a 4x3, and 0x5C, a 3x3 loaded as the vector matrix).
-- **The resource is a table of 20 categories** (`func_0206cf6c(category, index)`: two halfwords, 20 offsets, then in
-  a category a count, a halfword and the offsets of its items). A mesh item is vertices and normals (three halfwords
-  each), texture coordinates (two), then strips of index triples. The meshes read are: 0 the beard (by its type), 4
-  the face (by the face type; it also holds the three points the other meshes are placed at), 6, 9 and 0x12 the hair
-  (by the hair type), 7 the glasses, 0xF and 0x10 the nose.
-- **An object keeps the fields it was built from** (0x180, 18 halfwords) and a value and a state for each of 21
-  textures (0x1A4 and 0x228, 12 bytes each): the part functions compare the Mii with the kept fields and set a state
-  of 0 where a texture must be redrawn, 7 where there is none; 1 to 6 are states in progress.
+- **`NFL_MakeFace(index, mii, partDepth)` builds a face's two display lists.** It rejects a Mii whose fields are out of
+  range (`NFLi_IsFaceDataInRange`, a bound for each of 37 fields) or whose birthday is invalid, takes the face
+  (`NFLFace`) of `index` (`NFLi_GetFace`), gives it VRAM from the work area's bases at 0x8 and 0xC (`faceTexBase`,
+  `facePlttBase`: 0x1A10 bytes of texture and 0x130 of palette per index, 0x6880 of texture in mode 7, the mode being
+  the work area's 0x68, `texFmt`), runs the seven part functions of `sNFLPartPreparers` on a context on its stack, and
+  makes the display list at 0x2A4 of the face (`dl`, 0x1AE0 bytes) from eight mesh functions and the one at 0x1D84
+  (`partsDl`, 0x494 bytes) from `NFLi_MakeFacePartsDL`. `NFL_DrawFace` sends them to the geometry FIFO under the face's
+  matrices (`mtx`, a 4x3, and `nrmMtx`, a 3x3 loaded as the vector matrix).
+- **The resource is a table of 20 categories** (`NFLi_GetResourceItem(category, index)`: two halfwords, 20 offsets,
+  then in a category a count, a halfword and the offsets of its items). A mesh item is vertices and normals (three
+  halfwords each), texture coordinates (two), then strips of index triples. The meshes read are: 0 the beard (by its
+  type), 4 the face (by the face type; it also holds the three points the other meshes are placed at), 6, 9 and 0x12 the
+  hair (by the hair type), 7 the glasses, 0xF and 0x10 the nose. The textures are categories 1 (beard), 2 (eyes), 3
+  (eyebrows), 5 (face), 8 (glasses), 10 (hair), 11 (mole), 13 (mouth), 14 (mustache) and 17 (nose), by the streams that
+  load them (`sNFLFaceStreamSources`, `sNFLSharedStreamSources`), and 12 is the shared palette.
+- **A face keeps the fields it was built from** (0x180, `keptFields`, 18 halfwords) and a value and a state for each of
+  21 textures (0x1A4 and 0x228, `texStreams` and `plttStreams`, 12 bytes each): the part functions compare the Mii with
+  the kept fields and set a state of 0 where a texture must be redrawn, 7 where there is none; 1 to 6 are states in
+  progress.
 - **Hair types** 5, 7, 0x18, 0x1D, 0x2A, 0x35, 0x3A, 0x45 and 0x47 have a texture of their own, and 0x22 and 0x39 are
   drawn in the favourite colour; hair flip mirrors the hair meshes with a scale of -1 on the X axis.
+- **The colour texture.** `NFLi_MakeColorTexture` makes an 8x8 image of 2-bit pixels, four 4x4 quadrants of colours
+  0 to 3, and `NFLi_MakeColorTexturePltt` its palette: the hair, face, beard and favourite colours (`sNFLHairGXColors`,
+  `sNFLFaceGXColors`, `sNFLFavoriteGXColors`). The untextured meshes take their colour from it by their texture
+  coordinate: (8, 0) the face colour for the hair's category 6 and the nose's 0xF, (0, 0) the hair colour for
+  category 9, (8, 8) the favourite colour for 0x12, (0, 8) the beard colour for a beard without texture. Hence the
+  meshes' names (`NFLi_MakeHairSkinMesh`, `NFLi_MakeHairMesh`, `NFLi_MakeFavoriteColorHairMesh`, ...).
 - **The colour tables** at `0x020B6558`, `0x020B65A0`, `0x020B65E8`, `0x020B6630`, `0x020B6678` and `0x020B66D8` are
-  arrays of {r, g, b} words, and `0x020B676C` four planes of {a, b, c, d} (`func_0206ebb0` takes a part's Z from the
+  arrays of {r, g, b} words (`sNFLGlassesColors`, `sNFLFaceColors`, `sNFLEyeColors`, `sNFLMouthColors`,
+  `sNFLHairColors`, `sNFLFavoriteColors`, by the palette makers that read them and the fields their callers pass), and
+  `0x020B676C` four planes of {a, b, c, d} (`sNFLFacePlanes`: `NFLi_GetPartCorner` takes a part's Z from the
   plane of its quadrant). The symbols that sat on their inner words were fields, now addends in `relocs.txt`.
 
-Measured on the compiler: `func_0206d4f8` matches only under `#pragma optimization_level 2` with
-`#pragma opt_common_subs off`, and the three hair meshes (`func_0206b740`, `func_0206bb24`, `func_0206bfa4`) have
-level 2's unrotated loops but evaluate their calls' arguments from the last to the first, which nothing tried
-reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build, other `-proc`).
+Measured on the compiler: `NFL_MakeFace` matches only under `#pragma optimization_level 2` with
+`#pragma opt_common_subs off`, and the three hair meshes (`NFLi_MakeFavoriteColorHairMesh`, `NFLi_MakeHairMesh`,
+`NFLi_MakeHairSkinMesh`) have level 2's unrotated loops but evaluate their calls' arguments from the last to the first,
+which nothing tried reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build,
+other `-proc`).
 
-The last third, `0x02073514` to `0x020776E4`, measured from its code (in `lib/NFL/NFL.c`; names are still
-addresses):
+The last third, `0x02073514` to `0x020776E4`, measured from its code (in `lib/NFL/NFL.c`):
 
-- **A random Mii.** `func_020737b0` fills a Mii's data from the library's LCG (`func_020743a0`, state at +0x58 of
-  the work area, the constants at +0x5C/+0x60): each part from a picker (`func_02073eac` to `func_02074378`) that
-  takes one of the choices of row `sex * 9 + b * 3 + c` of a table (`data_020b69c0`, `data_020b6c00`, ..., and
-  tables that are local arrays copied to the stack), the face's parts set lower by up to 4, a beard on one man in
-  five; height and build 64, names, create ID and birthday cleared, favourite colour random. `func_02073664`
-  checks its arguments (it tests the first one where the second and third are meant), `func_020736ec` picks 2
-  (sex) and 3 (b, c) at random. `func_0207361c` copies one of six default Miis (`data_020b70c8`, 0x4A bytes each).
-- **Streams into VRAM.** The work area holds a ring buffer (+0x78, +0x7C bytes; write offset +0x84, read offset
-  +0x80, bytes pending +0x88) and seven streams of 12 bytes at +0xA0 (buffer offset, VRAM address, state 0 to 7).
-  Every frame `func_020749e4` copies resources into the buffer (`func_02074b68`: six from the table `data_0211216c`,
-  then `func_0207516c`, the seventh, then the objects' streams, `func_02075528` and `func_02075f50`, eleven each at
-  +0x1A4 and +0x228 of an object, with palettes made from the object's parameters at +0x180); after the interrupt
-  `func_02076448` loads them into texture and palette VRAM (`func_02076680`, `func_02076a98`, `func_02076e1c`,
-  `func_02077300`) through the LCDC (`func_02074814`, `func_02074904`, which check the bank's size first), up to
-  the budget main passes (0x4000). A copy that wraps around the buffer is made in two parts, and one cut short by
-  the budget is resumed the next time (states 3 to 5). Mode 7 (+0x68) converts 4-bit images through a palette
-  (`func_0206dd44`), so its sizes are four times the others'.
-- The coordinate helpers `func_020743e4` to `func_02074688` map x, y and z to the axes of the drawing context
-  (indices at +0xD0..+0xD2, negations at +0xC4..+0xCC) before `G3C_Translate`, `G3C_Scale`, `G3C_Vtx`,
-  `G3C_Normal` and `MTX_RotAxis43`.
-- Two disagreements in the original: `func_02077300` loads ten of the eleven palette streams that
-  `func_02075f50` fills, and the eleventh entry of the array at +0x228 lies over the pointer at +0x2A0 that
-  `func_02072c5c` links its list through.
+- **A random Mii.** `NFLi_MakeRandomMii` fills a Mii's data from the library's LCG (`NFL_Random`, state at +0x58 of the
+  work area, the constants at +0x5C/+0x60: `randState`, `randMul`, `randAdd`): each part from a picker
+  (`NFLi_RandomFaceType` to `NFLi_RandomEyeColor`) that takes one of the choices of row `sex * 9 + b * 3 + c` of a table
+  (`sNFLRandomFaceTypes`, `sNFLRandomFaceTextures`, ..., and tables that are local arrays copied to the stack), the
+  face's parts set lower by up to 4, a beard on one man in five; height and build 64, names, create ID and birthday
+  cleared, favourite colour random. `NFL_MakeRandomMii` checks its arguments (it tests the first one where the second
+  and third are meant), `NFLi_MakeRandomMiiOf` picks 2 (sex) and 3 (b, c) at random. The tables of the pickers that are
+  local arrays are named after them (`sNFLRandomHairTypeChoices`, `sNFLRandomHairTypeCounts`, ...); the compiled code
+  refers to its own anonymous copies. `NFL_CopyDefaultMii` copies one of six default Miis (`sNFLDefaultMiis`, 0x4A bytes
+  each).
+- **Streams into VRAM.** The work area holds a ring buffer (+0x78 `buf`, +0x7C `bufSize`; write offset +0x84, read
+  offset +0x80, bytes pending +0x88) and seven streams of 12 bytes at +0xA0 (`NFLStream`: buffer offset, VRAM address,
+  state 0 to 7). The first six load the shared texture slots at +0x10 (`NFLSharedTex`): the eyes and mouths of the
+  expressions (slots 0 to 4, eye 26, mouth 24, eye 48, mouths 10 and 12 by `sNFLSharedStreamSources`) and the mole's
+  texture (5); the seventh the shared palette. Every frame `NFL_FillBuffer` copies resources into the buffer
+  (`NFLi_CopySharedTextures`: six from the table `sNFLSharedStreamSources`, then `NFLi_CopySharedPltt`, the seventh,
+  then the faces' streams, `NFLi_CopyFaceTextures` and `NFLi_CopyFacePltts`, eleven each at +0x1A4 and +0x228 of a face,
+  with palettes made from the face's kept fields at +0x180); after the interrupt `NFL_LoadVram` loads them into texture
+  and palette VRAM (`NFLi_LoadSharedTextures`, `NFLi_LoadSharedPltt`, `NFLi_LoadFaceTextures`, `NFLi_LoadFacePltts`)
+  through the LCDC (`NFLi_CopyToTexBank`, `NFLi_CopyToTexPlttBank`, which check the bank's size first), up to the budget
+  main passes (0x4000). A copy that wraps around the buffer is made in two parts, and one cut short by the budget is
+  resumed the next time (states 3 to 5). Mode 7 (+0x68) converts 4-bit images through a palette
+  (`NFLi_Convert4BitToDirect`), so its sizes are four times the others'.
+- The coordinate helpers `NFLi_MapVecFx16` to `NFLi_DLNormal` map x, y and z to the axes of the drawing context
+  (indices at +0xD0..+0xD2, `yAxis`, `zAxis`, `xAxis`; negations at +0xC4..+0xCC, `negate`) before `G3C_Translate`,
+  `G3C_Scale`, `G3C_Vtx`, `G3C_Normal` and `MTX_RotAxis43`.
+- Two disagreements in the original: `NFLi_LoadFacePltts` loads ten of the eleven palette streams that
+  `NFLi_CopyFacePltts` fills, and the eleventh entry of the array at +0x228 lies over the pointer at +0x2A0 that
+  `NFL_AddFace` links its list through.
 
 The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/NFL/NFL.c`):
 
-- **The work area is 0xF4 bytes.** `main` calls `func_02072a58(work, resource, buffer, 0x4000, desc, 0x7F, 0)` with
-  the work area at `data_02115480` and the buffer at `data_02115574`, right after it. The function copies the
-  three words of `desc` (`data_020fc504`) to +0x0, +0x4 and +0x68 (the mode), keeps the buffer and its size at +0x78
-  and +0x7C, sets the state of each of the first five streams at +0xA0 to 0 or 7 by the bits 2, 4, 8, 0x20, 0x40 of
-  the flags (`data_020b68d0`), then the first's to 0 and the seventh's to 7 in mode 7 (else 0), and the texture base
-  at +0x8 to `desc[0] + 0x200 + 0x800` per enabled stream (a quarter of that in mode 3, where the palette base at
-  +0xC gets 0x20 more).
-- **Its objects.** `func_02072c5c` appends an object to the list at +0x6C, at most +0x70 of them (which
-  `func_02072d8c` counts up and `func_02072dc0` down); `func_02072dc0` also takes the last one off that list and off
-  the second list at +0x74 (linked through +0x17C of the objects). `func_02073060` returns the n-th, `func_02072f34`
-  sets its +0x170 to 4 and `func_02072fc4` finds the first that has 4 there.
-- **Expressions.** `func_020728fc(index, kind)` gives the n-th object one of seven expressions: kind 0 is
-  `func_0207183c`, 1 to 6 `func_02071f24`, `func_0207219c`, `func_02072418`, `func_02072694`, `func_02071a78` and
-  `func_02071cdc`, each only if its bit of +0x16C is set (kinds 1 to 6: 0x2, 0x4, 0x8, 0x10, 0x20, 0x40); the kind
-  is kept at +0x168 (`func_02072a28`). Each turns the eyes (the patches at 0x110 and 0x128 of the object) and the
-  eyebrows (0xE0, 0xF8) through `func_02071730`, which rewrites the matrix, texture and palette commands that the
-  display list was built with places for, and writes the eyebrows' height into the two translation commands at
-  0x158 and 0x160. The angles are `rotation + table[type] - 32` in 32nds of a turn, with `data_020b689c` for the
-  eyes and `data_020b6884` for the eyebrows, from the object's halfwords at 0x80 (eyebrow Y, eye rotation, eye
-  type, face type, eyebrow rotation, eyebrow type, as `func_0206ddb8` stores them); face types 2, 6 and 7 move the
-  eyebrows by 0x1E60. The other expressions change the rotations by up to two steps (clamped to 0..7 and 0..11)
-  and take some textures from the work area's six slots at +0x10. `data_020b689c` is also indexed by the eye
-  rotation in three of them, so what it is per index is not settled.
-- `func_020730fc` makes a create ID: bytes 0 and 1 zero, byte 2 a random number below 4 times 4 with bits 16-17
+- **The work area is 0xF4 bytes.** `main` calls `NFL_Init(work, resource, buffer, 0x4000, desc, 0x7F, 0)` with the work
+  area at `data_02115480` and the buffer at `data_02115574`, right after it. The function copies the three words of
+  `desc` (`data_020fc504`) to +0x0, +0x4 and +0x68 (`texAddr`, `plttAddr`, `texFmt`), keeps the buffer and its size at
+  +0x78 and +0x7C, sets the state of each of the first five streams at +0xA0 to 0 or 7 by the bits 2, 4, 8, 0x20, 0x40
+  of the flags (`sNFLSharedStreamFlags`), then the first's to 0 and the seventh's to 7 in mode 7 (else 0), and the
+  texture base at +0x8 to `desc[0] + 0x200 + 0x800` per enabled stream (a quarter of that in mode 3, where the palette
+  base at +0xC gets 0x20 more).
+- **Its faces.** `NFL_AddFace` appends a face to the list at +0x6C, at most +0x70 of them (`faces`, `maxFaces`, which
+  `NFL_AddFaceSlot` counts up and `NFL_RemoveFaceSlot` down); `NFL_RemoveFaceSlot` also takes the last one off that list
+  and off the second list at +0x74 (`loadList`, linked through +0x17C of the faces, `nextLoad`). `NFLi_GetFace` returns
+  the n-th, `NFL_ResetFace` sets its +0x170 (`state`) to 4 and `NFL_FindResetFace` finds the first that has 4 there. The
+  character code calls `NFL_AddFaceSlot`, `NFL_AddFace` and `NFL_FindResetFace` in turn and keeps the index it gets,
+  which it then passes to `NFL_MakeFace` and `NFL_SetExpression`.
+- **Expressions.** `NFL_SetExpression(index, kind)` gives the n-th face one of seven expressions: kind 0 is
+  `NFLi_ApplyExpression0`, 1 to 6 `NFLi_ApplyExpression1`, `NFLi_ApplyExpression2`, `NFLi_ApplyExpression3`,
+  `NFLi_ApplyExpression4`, `NFLi_ApplyExpression5` and `NFLi_ApplyExpression6`, each only if its bit of +0x16C
+  (`exprFlags`) is set (kinds 1 to 6: 0x2, 0x4, 0x8, 0x10, 0x20, 0x40); the kind is kept at +0x168
+  (`NFL_GetExpression`). Each turns the eyes (the patches at 0x110 and 0x128 of the face, `eyePatch` and
+  `eyeMirrorPatch`) and the eyebrows (0xE0, 0xF8, `browPatch` and `browMirrorPatch`) through `NFLi_PatchFacePart`, which
+  rewrites the matrix, texture and palette commands that the display list was built with places for, and writes the
+  eyebrows' height into the two translation commands at 0x158 and 0x160. The angles are `rotation + table[type] - 32` in
+  32nds of a turn, with `sNFLEyeTypeRotations` for the eyes and `sNFLEyebrowTypeRotations` for the eyebrows, from the
+  face's halfwords at 0x80 (`exprFields`: eyebrow Y, eye rotation, eye type, face type, eyebrow rotation, eyebrow type,
+  as `NFLi_PrepareFacePartTextures` stores them); face types 2, 6 and 7 move the eyebrows by 0x1E60. The other
+  expressions change the rotations by up to two steps (clamped to 0..7 and 0..11) and take some textures from the work
+  area's six slots at +0x10: kinds 5, 6, 1, 2 and 3 take slots 0 to 4, which `NFLi_AllocExpression5Texture` and the four
+  after it give VRAM, and kind 4 its own eye texture of type 0x31 (stream 5). The expressions keep their numbers in
+  their names (`NFLi_ApplyExpression0` to `6`): nothing shows which face each is. `sNFLEyeTypeRotations` is also indexed
+  by the eye rotation in three of them, so what it is per index is not settled.
+- `NFL_MakeCreateId` makes a create ID: bytes 0 and 1 zero, byte 2 a random number below 4 times 4 with bits 16-17
   of the RTC time in seconds shifted down 5, bytes 3 and 4 that value's bits 8-15 and 0-7, bytes 5 to 7 the last
-  three of the MAC address. `func_020733a4` copies a valid Mii's names (as strings of 11 halfwords), create ID and
-  fields into another record, with height and build capped at 127 and the skin colour of `func_0206dcd0`.
-- **The second display list.** `func_020715ac` builds it from the seven 0x30-byte records of the context
-  (0x78..0x1C8): `func_0206ed94` for records 4 and 5, and 6 when the Mii has a mole; `func_020705d4` for 0 to 3.
-  Those two (6 KB and 4 KB, not written) place a part as a quad on the face: a 2x2 grid of points whose Z is taken
-  from the planes at `0x020B676C`, normals interpolated bilinearly over the 3x3 grids of points (`0x020B6818`) and
-  normals (`0x020B67AC`), their sum normalised and the quad rotated onto it (`MTX_RotAxis43` about the cross
-  product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`) whose +0x20 says the first of a pair
-  has set it.
+  three of the MAC address. `NFL_GetCharInfo` copies a valid Mii's names (as strings of 11 halfwords), create ID and
+  fields into another record, with height and build capped at 127 and the skin colour of `NFLi_GetFaceColor`.
+- **The create-ID bits.** `NFLi_SetUnassignedCreateId` gives the default and random Miis the ID `E0 00 00 ...`, and
+  `MiiData_AssignCreateId` gives a Mii an ID only if bit 5 of its first byte is set (`NFL_IsMiiCreateIdUnassigned`), and
+  the Mii transfer stops with an error on a record that has it (`func_02078db8`): hence "unassigned". Bits 7 and 6 keep
+  their numbers in the names (`NFL_IsCreateIdBit7Clear`, `NFLi_GetCreateIdBit6`). `NFL_IsSameCreateIdSource` compares
+  the low nibble of byte 2 and bytes 3 to 7, the six bytes that `MiiData_AssignCreateId` takes from its source.
+- **The second display list.** `NFLi_MakeFacePartsDL` builds it from the seven 0x30-byte records of the context
+  (0x78..0x1C8): `NFLi_MakeMouthMolePart` for records 4 and 5 (mouth and mustache), and 6 when the Mii has a mole;
+  `NFLi_MakeEyeBrowPart` for 0 to 3 (the eyes and eyebrows, kind 4 the mirrored side). Those two (6 KB and 4 KB; the
+  second written, not matching) place a part as a quad on the face: a 2x2 grid of points whose Z is taken from the
+  planes at `0x020B676C`, normals interpolated bilinearly over the 3x3 grids of points (`0x020B6818`,
+  `sNFLFaceGridPoints`) and normals (`0x020B67AC`, `sNFLFaceGridNormals`), their sum normalised and the quad rotated
+  onto it (`MTX_RotAxis43` about the cross product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`)
+  whose +0x20 (`set`) says the first of a pair has set it.
 
-On the compiler: `func_0207183c` and `func_02071cdc` match only under `#pragma optimization_level 2` with
-`#pragma opt_common_subs off`, as `func_0206d4f8` does, and with each sine and cosine assigned through an `(fx16)`
-cast; without them the instructions are the same and the callee-saved registers are rotated. The five other
-expressions have the right instructions but for a clamp each (see the comments in the source).
+On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
+with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
+cast; without them the instructions are the same and the callee-saved registers are rotated. The five other expressions
+have the right instructions but for a clamp each (see the comments in the source).
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
-it is 2.0 SP2p2, the game SP2p3), and its function names.
+it is 2.0 SP2p2, the game SP2p3), and Nintendo's names for its functions.
 
 ## Compiler
 

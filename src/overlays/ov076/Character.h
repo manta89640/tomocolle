@@ -16,7 +16,7 @@ extern "C" {
 // Frees a block of the main heap
 void func_020267f4(void *block);
 // Of the Mii library (0x0206CF6C on)
-BOOL func_0206dc84(void *face);
+BOOL NFL_GetFaceStatus(void *face);
 }
 
 // A model of the library with its position, rotation and scale.
@@ -154,9 +154,9 @@ struct CharacterBase : public SavedCharacter {
     /* 0x02D4 */ u16 mUnknown02D4;
     /* 0x02D6 */ u16 mUnknown02D6;
     /* 0x02D8 */ u8 mUnknown02D8[0x2220];
-    BOOL IsUnknown24F8Clear() { return !func_0206dc84(mUnknown24F8); }
+    BOOL IsUnknown24F8Clear() { return !NFL_GetFaceStatus(mUnknown24F8); }
 
-    /* 0x24F8 */ void *mUnknown24F8;     // Given to func_0206dc84, of the Mii library
+    /* 0x24F8 */ void *mUnknown24F8;     // Given to NFL_GetFaceStatus, of the Mii library
     /* 0x24FC */ u8 mUnknown24FC[0x18];
     /* 0x2514 */ u8 mUnknown2514[0x24]; // Its address is given to func_0208ff94
     /* 0x2538 */ u8 mUnknown2538[0x30]; // Its address is given to func_0208ff94

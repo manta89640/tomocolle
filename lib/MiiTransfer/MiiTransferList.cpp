@@ -17,7 +17,7 @@ extern "C" void MiiTransferList_Init(MiiRecord *records, u32 count) {
 // Whether slot index holds a Mii
 extern "C" BOOL MiiTransferList_IsUsed(int index) {
     if (index >= 0 && index < sCount) {
-        return !func_02073284(&sRecords[index].createId);
+        return !NFL_IsCreateIdZero(&sRecords[index].createId);
     }
     return FALSE;
 }
@@ -55,7 +55,7 @@ extern "C" MiiCreateId *MiiTransferList_GetCreateId(int index) {
 extern "C" int MiiTransferList_Find(const MiiCreateId *createId) {
     for (u32 i = 0; i < sCount; i++) {
         MiiCreateId *id = MiiTransferList_GetCreateId(i);
-        if (!func_02073284(id) && !func_0207331c(id) && func_02073330(id, createId)) {
+        if (!NFL_IsCreateIdZero(id) && !NFL_IsCreateIdUnassigned(id) && NFL_AreCreateIdsEqual(id, createId)) {
             return i;
         }
     }

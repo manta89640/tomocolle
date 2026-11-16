@@ -254,7 +254,7 @@ void func_020979e0(SavedCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
 struct MiiData;
-void func_02073574(MiiData *mii);
+void NFL_ClearMiiCreateId(MiiData *mii);
 // The models' resource table (0x1C bytes per resource id)
 extern u8 data_021223e4[];
 void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
@@ -279,7 +279,7 @@ void func_0202683c(void);
 void func_0201f508(wchar_t *text);
 void func_02036bb4(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
-int func_020733a4(void *buffer);
+int NFL_GetCharInfo(void *buffer);
 void func_02097c64(SavedCharacter *character);
 void Character_ResetSoundPhase(SceneCharacter *character, int slot);
 void Character_PlaySoundAtAnimPhase(SceneCharacter *character, int slot, int player, int seqArcNo, int index,
@@ -466,8 +466,8 @@ void func_0202c328(GameData *game, int index, int a);
 int func_0202c604(GameData *game, int index);
 BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
 BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
-int func_02073520(CharacterRecord *character);
-int func_02073560(CharacterRecord *a, CharacterRecord *b);
+int NFL_IsMiiCreateIdBit7Clear(CharacterRecord *character);
+int NFL_AreMiiCreateIdsEqual(CharacterRecord *a, CharacterRecord *b);
 int func_02098584(CharacterRecord *character);
 int MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string

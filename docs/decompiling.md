@@ -245,7 +245,7 @@ with loops that are neither rotated nor strength-reduced sit between ordinary on
 `#pragma optimization_level 2` around the function (then `#pragma optimization_level reset`). Nothing at the
 default level gives that shape: not `volatile`, narrower or unsigned counters, other loop forms, or the `opt_*`
 pragmas.
-NFL's `func_0206d4f8` has that shape and also reloads a list link that level 2 alone keeps in a register: it matches
+NFL's `NFL_MakeFace` has that shape and also reloads a list link that level 2 alone keeps in a register: it matches
 with `#pragma opt_common_subs off` added (reset it after the function too: `optimization_level reset` does not).
 
 Other per-function settings found the same way (overlay 109):
@@ -441,7 +441,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`t = cp[i]; cp[i] = cp[7 - i]; cp[7 - i] = t;`) through a `char *` declared in a block of its own keeps both
   accesses indexed, where one through `(char *)&num` is turned into a post-incremented pointer (`double2hex`).
 - Search the declaration order by script rather than by hand: move one declaration line at a time to every other
-  place, keep the best, repeat. NFL's mesh functions (`func_0206b0d8`) went from 18 differing instructions to none
+  place, keep the best, repeat. NFL's mesh functions (`NFLi_MakeBeardMesh`) went from 18 differing instructions to none
   in four rounds; what mattered was declaring the inner loop's index variables at function scope, in an order no
   guess had tried. Keep arrays and address-taken structures where they are: they decide the stack slots.
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
@@ -454,18 +454,18 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   instead (`SoftKeyboard::GetButtonCharCount`).
 - A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
   declared after it, after (`SoftKeyboard::OnTabArea`, `Keyboard.cpp`).
-- In C (lib/NFL, measured on functions whose instructions were already the original's): a pointer initialised
-  from a global with a cast to its own type, `NFLWork *work = (NFLWork *)data_02145360;`, takes r4 where the plain
-  initialiser leaves it last (`func_0207516c`, `func_02076680`, `func_02077300`). An uninitialised local declared
-  above the initialised pointers takes a lower register than they (`u32 dest;` before `stream = work->unkA0` in
-  `func_02076680`), and initialised declarations take registers in their order (`func_02075f50`). A variable used
-  in two exclusive paths is one register for both: giving the second path a variable of its own block moved two
-  registers into place (`func_0207516c`). The type of a block local counts: `u32 over, n` where `int` gave other
-  registers (`func_02076a98`). So does how a value is returned: `if (result != 0) return result; return 1;`, not
-  `if (result == 0) result = 1;` (`func_02076448`), and `result = f(); return result;` kept a tail call out of the
-  shared epilogue (`func_02076e1c`).
-- The order of independent statements in a case decides the scheduling of their loads: `func_02076e1c` and
-  `func_02077300` matched only with one of the six orders of their three assignments, found by trying them all.
+- In C (lib/NFL, measured on functions whose instructions were already the original's): a pointer initialised from a
+  global with a cast to its own type, `NFLWork *work = (NFLWork *)sNFLWork;`, takes r4 where the plain initialiser
+  leaves it last (`NFLi_CopySharedPltt`, `NFLi_LoadSharedTextures`, `NFLi_LoadFacePltts`). An uninitialised local
+  declared above the initialised pointers takes a lower register than they (`u32 dest;` before `stream = work->streams`
+  in `NFLi_LoadSharedTextures`), and initialised declarations take registers in their order (`NFLi_CopyFacePltts`). A
+  variable used in two exclusive paths is one register for both: giving the second path a variable of its own block
+  moved two registers into place (`NFLi_CopySharedPltt`). The type of a block local counts: `u32 over, n` where `int`
+  gave other registers (`NFLi_LoadSharedPltt`). So does how a value is returned:
+  `if (result != 0) return result; return 1;`, not `if (result == 0) result = 1;` (`NFL_LoadVram`), and
+  `result = f(); return result;` kept a tail call out of the shared epilogue (`NFLi_LoadFaceTextures`).
+- The order of independent statements in a case decides the scheduling of their loads: `NFLi_LoadFaceTextures` and
+  `NFLi_LoadFacePltts` matched only with one of the six orders of their three assignments, found by trying them all.
 - Brute-force the order of the C-style declarations at the top, the loop counters included: a script that splices each
   permutation into a copy of the file, compiles it and counts the differing lines of the one function. It took
   `KeyboardCore_MoveCursor` from 153 differing lines to 0 (`int x, endY, endX, dy, dx, px, y;`), and an `int i;`
@@ -496,8 +496,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 
 - A cast to the type a value already has, on an assignment (`sin = (fx16)FX_SinIdx(idx);`), moves that variable
   to the lower callee-saved registers; with `#pragma optimization_level 2` and `opt_common_subs off` it gave
-  `func_0207183c` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is coloured
-  as a new value: there the second pair of assignments had to keep the casts too.
+  `NFLi_ApplyExpression0` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is
+  coloured as a new value: there the second pair of assignments had to keep the casts too.
 - A loop counter and a value it is compared with in the original's registers: `int i; int choice;` at the block's
   top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
   `MiiEditProfilePage::Update`).
@@ -548,7 +548,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 
 **Independent statements scheduled in another order**
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
-  statements matched NFL's `func_0206c2f8` exactly, where the others moved loads and kept a value the original
+  statements matched NFL's `NFLi_MakeGlassesMesh` exactly, where the others moved loads and kept a value the original
   leaves in r0.
 
 **A value read once where the original reads it twice**
@@ -605,7 +605,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   strips C2 and its strings. `name_unit_data.py` lays both copies out, so name the strings of the C1 copy
   (`Keyboard.cpp`: the second nine `@` numbers).
 - dsd puts a symbol on every address the code loads, so a table whose fields' addresses are formed apart (NFL's
-  colour tables and planes, `data_020b676c[j][i].unkC`) shows as one object per field, and a source that indexes the
+  colour tables and planes, `sNFLFacePlanes[j][i].d`) shows as one object per field, and a source that indexes the
   table refers to the first with an addend. Remove the inner symbols from `symbols.txt` and write the references in
   `relocs.txt` as `to:<table> add:<offset>`; `check_relocs.py` is then clean.
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is

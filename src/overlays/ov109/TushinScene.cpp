@@ -410,7 +410,7 @@ void TushinScene::UpdateMiiData() {
             MI_CpuCopy8(&record, &sMiiData[i], sizeof(sMiiData[i]));
         } else {
             MI_CpuFill8(&sMiiData[i], 0, sizeof(sMiiData[i]));
-            func_02073574(&sMiiData[i]);
+            NFL_ClearMiiCreateId(&sMiiData[i]);
         }
     }
 }
@@ -672,11 +672,11 @@ void TushinScene::UpdateSending() {
     }
     if (sSendSongChunk != 0) {
         if (sSendSongChunk >= 3) {
-            int result = func_02073520(GetSelectedResident());
+            int result = NFL_IsMiiCreateIdBit7Clear(GetSelectedResident());
             switch (sReceivedCommand) {
             case 5:
                 sSendSongChunk = 0;
-                if (func_02073520(GetSelectedResident())) {
+                if (NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
                     func_020a0664(&mResidents);
                 }
                 break;
@@ -749,7 +749,7 @@ int TushinScene::FindResident(CharacterRecord *record) {
         if (func_0202c354(&gGameData, i)) {
             CharacterRecord resident;
             func_0202c264(&gGameData, i, &resident);
-            if (func_02073560(&resident, record) == 1) {
+            if (NFL_AreMiiCreateIdsEqual(&resident, record) == 1) {
                 return i;
             }
         }
@@ -783,7 +783,7 @@ int TushinScene::ReceiveCharacter() {
     }
     sReceivedResident = FindResident(&sTransfer);
     if (sReceivedResident != -1) {
-        if (func_02073520(&sTransfer)) {
+        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer)) {
             return 5;
         }
         if (func_02098584(&sTransfer)) {
@@ -897,7 +897,7 @@ int TushinScene::ReceiveCharacter() {
         }
         i++;
     } while (i < 100);
-    return func_02073520(&sTransfer) ? 2 : 1;
+    return NFL_IsMiiCreateIdBit7Clear(&sTransfer) ? 2 : 1;
 received:
     return 0;
 }
@@ -1648,7 +1648,7 @@ void TushinScene::Update() {
                 if (!func_0202c37c(&gGameData)) {
                     return;
                 }
-                if (!func_02073520(GetSelectedResident())) {
+                if (!NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
                     return;
                 }
                 func_020a0664(&mResidents);
@@ -1782,7 +1782,7 @@ void TushinScene::Update() {
                 break;
             case 11:
                 if (result == 0) {
-                    if (func_02073520(GetSelectedResident()) == TRUE) {
+                    if (NFL_IsMiiCreateIdBit7Clear(GetSelectedResident()) == TRUE) {
                         mNextPage = 0xC;
                     } else if (CannotSend(GetSelectedResident())) {
                         mNextPage = 0x21;
@@ -1870,7 +1870,7 @@ void TushinScene::Update() {
                     if (sReceiveCount != 0) {
                         break;
                     }
-                    if (func_02073520(GetSelectedResident()) == TRUE) {
+                    if (NFL_IsMiiCreateIdBit7Clear(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x2D;
                     } else if (CannotSend(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x3F;
@@ -2061,13 +2061,13 @@ void TushinScene::Update() {
                         if (done != TRUE) {
                             break;
                         }
-                        if (func_02073520(&sTransfer) != TRUE) {
+                        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer) != TRUE) {
                             break;
                         }
                     }
                     mShirtDue = 1;
                     ShowReceived();
-                    if (func_02073520(&sTransfer) == TRUE) {
+                    if (NFL_IsMiiCreateIdBit7Clear(&sTransfer) == TRUE) {
                         mPageAfterSave = mNextPage;
                         mNextPage = 0x10;
                         CloseWindow();
@@ -2161,7 +2161,7 @@ void TushinScene::Update() {
                 if (sWiiSendResult == 0) {
                     break;
                 }
-                int sent = func_02073520(GetSelectedResident());
+                int sent = NFL_IsMiiCreateIdBit7Clear(GetSelectedResident());
                 mNextPage = 0x31;
                 switch (sWiiSendResult) {
                 case 1:
@@ -2599,7 +2599,7 @@ BOOL TushinScene::HasNgSong(CharacterRecord *record) {
 // @0x02151c68
 BOOL TushinScene::IsMiiBroken(CharacterRecord *record) {
     u8 buffer[0x3C];
-    return func_020733a4(buffer) ? TRUE : FALSE;
+    return NFL_GetCharInfo(buffer) ? TRUE : FALSE;
 }
 
 // @0x02151c8c
@@ -2789,7 +2789,7 @@ int TushinScene::ReceiveWiiMii() {
     if (sReceivedResident != -1) {
         func_020979e0(&character);
         func_0202c264(&gGameData, sReceivedResident, &character);
-        if (func_02073520(&character)) {
+        if (NFL_IsMiiCreateIdBit7Clear(&character)) {
             PlayResultSound(0xD);
             return 0x38;
         }
@@ -2816,7 +2816,7 @@ int TushinScene::ReceiveWiiMii() {
             func_02097c64(&character);
             func_0202c28c(&gGameData, i, &character);
             MiiData_GetName(&character, sReceivedName);
-            if (func_02073520(&character)) {
+            if (NFL_IsMiiCreateIdBit7Clear(&character)) {
                 SetNeedsSave();
             }
             UpdateMiiData();

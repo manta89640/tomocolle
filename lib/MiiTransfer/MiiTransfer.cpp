@@ -532,8 +532,8 @@ extern "C" void MiiTransfer_HandleMessage(void) {
         MiiRecord *record = MiiTransferList_Get(sMiiIndex);
         switch (sRecvMsg.arg) {
         case 0:
-            if (func_02073264(&record->createId)) {
-                func_02073394(&record->createId);
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
+                NFL_ClearCreateId(&record->createId);
                 sPendingReply = 3;
             } else {
                 MiiTransfer_PostMessage(0x30, 0, NULL);
@@ -542,7 +542,7 @@ extern "C" void MiiTransfer_HandleMessage(void) {
             break;
         case 1:
             MiiTransfer_PostMessage(0x30, 0, NULL);
-            if (func_02073264(&record->createId)) {
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
                 sSendResult = -4;
             } else {
                 sSendResult = -5;
@@ -558,7 +558,7 @@ extern "C" void MiiTransfer_HandleMessage(void) {
             break;
         default:
             MiiTransfer_PostMessage(0x30, 0, NULL);
-            if (func_02073264(&record->createId)) {
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
                 sSendResult = -2;
             } else {
                 sSendResult = -3;
@@ -586,8 +586,8 @@ extern "C" void MiiTransfer_HandleMessage(void) {
             return;
         }
         if (sRecvMsg.type == 0x10) {
-            if (!func_02073284(&sRecvMsg.record.createId)) {
-                if (sAcceptSpecial == FALSE && func_02073264(&sRecvMsg.record.createId)) {
+            if (!NFL_IsCreateIdZero(&sRecvMsg.record.createId)) {
+                if (sAcceptSpecial == FALSE && NFL_IsCreateIdBit7Clear(&sRecvMsg.record.createId)) {
                     sReceiveResult = -2;
                     MiiTransfer_PostMessage(0x20, 4, NULL);
                 } else {
@@ -596,10 +596,10 @@ extern "C" void MiiTransfer_HandleMessage(void) {
                     sRecvMsg.record.unk0[0] &= ~1;
                     sMiiIndex = MiiTransferList_Find(&sRecvMsg.record.createId);
                     if (sMiiIndex >= 0) {
-                        if (func_02073264(&sRecvMsg.record.createId)) {
+                        if (NFL_IsCreateIdBit7Clear(&sRecvMsg.record.createId)) {
                             MiiTransfer_PostMessage(0x20, 5, NULL);
                             MiiTransfer_SetReceivedSpecial(sMiiIndex);
-                        } else if (func_020732a0(sIdSource, &sRecvMsg.record.createId)) {
+                        } else if (NFL_IsSameCreateIdSource(sIdSource, &sRecvMsg.record.createId)) {
                             MiiTransfer_PostMessage(0x20, 2, NULL);
                             MiiTransfer_SetReceivedExisting(sMiiIndex);
                         } else {
@@ -963,13 +963,13 @@ extern "C" void MiiTransfer_Connect(int index) {
 
 extern "C" void MiiTransfer_SendMii(u16 index) {
     MiiRecord *record = MiiTransferList_Get(index);
-    if (record == NULL || func_02073284(&record->createId)) {
+    if (record == NULL || NFL_IsCreateIdZero(&record->createId)) {
         sSendResult = -3;
         MiiTransfer_CallSendResultCallback();
         MiiTransfer_SetState(11);
         return;
     }
-    if (func_0207331c(&record->createId)) {
+    if (NFL_IsCreateIdUnassigned(&record->createId)) {
         sSendResult = -1;
         MiiTransfer_CallSendResultCallback();
         MiiTransfer_SetState(11);
@@ -994,7 +994,7 @@ extern "C" void MiiTransfer_SetReceivedExisting(u16 index) {
 }
 
 extern "C" void MiiTransfer_SetReceiveFull(const MiiCreateId *createId) {
-    if (func_02073264(createId)) {
+    if (NFL_IsCreateIdBit7Clear(createId)) {
         sReceiveResult = -4;
     } else {
         sReceiveResult = -5;

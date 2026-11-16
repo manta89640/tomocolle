@@ -10668,7 +10668,7 @@ int RoomCharacter::StepChangeHeldItems(int itemA, int itemB) {
             int ready = 0;
             mSubSubStep++;
             for (int i = 0; i < 2; i++) {
-                GXRgb color = func_02073514(MiiData_GetFavoriteColor(this));
+                GXRgb color = NFL_GetFavoriteColor(MiiData_GetFavoriteColor(this));
                 NNS_G3dMdlSetMdlDiff(mHeldItems[i]->mResMdl, 0, color);
                 mHeldItems[i]->SetRotation(0, 0, 0);
                 MTX_Identity33(&mHeldItems[i]->mRotation);

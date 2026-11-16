@@ -24,12 +24,12 @@ typedef struct MiiRecord {
 extern "C" {
 
 // The main program's functions on create IDs, not decompiled yet
-BOOL func_02073264(const MiiCreateId *id);              // bit 7 of the first byte is clear
-BOOL func_02073284(const MiiCreateId *id);              // all zero
-BOOL func_020732a0(const void *a, const MiiCreateId *b); // TRUE if equal in the low nibble of byte 2 and bytes 3 to 7
-BOOL func_0207331c(const MiiCreateId *id);              // bit 5 of the first byte is set
-BOOL func_02073330(const MiiCreateId *a, const MiiCreateId *b); // equal, and neither all zero
-void func_02073394(MiiCreateId *id);                     // clears it
+BOOL NFL_IsCreateIdBit7Clear(const MiiCreateId *id);                    // bit 7 of the first byte is clear
+BOOL NFL_IsCreateIdZero(const MiiCreateId *id);                         // all zero
+BOOL NFL_IsSameCreateIdSource(const void *a, const MiiCreateId *b);     // TRUE if equal in the low nibble of byte 2 and bytes 3 to 7
+BOOL NFL_IsCreateIdUnassigned(const MiiCreateId *id);                   // bit 5 of the first byte is set
+BOOL NFL_AreCreateIdsEqual(const MiiCreateId *a, const MiiCreateId *b); // equal, and neither all zero
+void NFL_ClearCreateId(MiiCreateId *id);                                // clears it
 
 // MiiTransferList.cpp
 void MiiTransferList_Init(MiiRecord *records, u32 count);
