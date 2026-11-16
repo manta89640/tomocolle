@@ -68,9 +68,12 @@
 #include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov056/TestNg136Scene.h"
 #include "../overlays/ov057/TestNg137Scene.h"
+#include "../overlays/ov098/OptionScene.h"
+#include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov063/SceneBA.h"
 #include "../overlays/ov064/TestNg149Scene.h"
 #include "../overlays/ov097/Marriage2Scene.h"
+#include "../overlays/ov107/SaveErrorScene.h"
 // End of gap38-b's scene classes
 
 extern "C" {
@@ -933,6 +936,12 @@ TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-b, taken over from gap38-c) ---------------------
 
+// Scenes 0xAC and 0xAD, overlay 98
+OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xAE, overlay 99
+InformationScene::InformationScene(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0xBA, 0xBB, 0xBC, 0xBD and 0xBE, overlay 63
 SceneBA::SceneBA(int sceneId) : Scene(sceneId) {}
 
@@ -941,3 +950,6 @@ TestNg149Scene::TestNg149Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0xC0 and 0xC1, overlay 97
 Marriage2Scene::Marriage2Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xC2, overlay 107
+SaveErrorScene::SaveErrorScene(int sceneId) : Scene(sceneId) {}

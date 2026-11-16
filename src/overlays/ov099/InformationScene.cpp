@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "InformationScene.h"
+#include "MainProgram.h"
 
 // Overlay 99: the mansion's information (InformationScene). One source file: its constants are one pool at the
 // start of .rodata, its strings the .data after the scene's virtual table.

@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "OptionScene.h"
+#include "MainProgram.h"
 
 // Overlay 98: the settings (OptionScene). One source file: its constants are the .rodata (see the comment on
 // them), its strings the .data after the scene's virtual table.

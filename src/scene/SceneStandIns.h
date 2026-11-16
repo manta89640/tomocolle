@@ -153,10 +153,6 @@ SCENE_STAND_IN(SceneAA, 0x1D3A8); // func_0204846c
 
 SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ev
 
-SCENE_STAND_IN(OptionScene, 0x26394); // func_020487e4
-
-SCENE_STAND_IN(InformationScene, 0x51BC); // func_02048918
-
 SCENE_STAND_IN(SceneAF, 0x1BA80); // func_020489b4
 
 SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // func_02048b78
@@ -174,8 +170,6 @@ SCENE_STAND_IN(SceneB7, 0x1A840); // func_0204984c
 SCENE_STAND_IN(SceneB8, 0x1A99C); // func_02049970
 
 SCENE_STAND_IN(SceneB9, 0x1A760); // func_02049a94
-
-SCENE_STAND_IN(SaveErrorScene, 0xAFEC); // _ZN14SaveErrorSceneC1Ei
 
 
 #endif // SCENE_SCENESTANDINS_H

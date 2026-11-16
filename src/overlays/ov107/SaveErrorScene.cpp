@@ -1,4 +1,5 @@
 #include "SaveErrorScene.h"
+#include "MainProgram.h"
 
 // Overlay 107: the screen that says the save data could not be written. One source file: SaveErrorScene and its
 // virtual table, with the scene's implicit destructor at the end of .text.
