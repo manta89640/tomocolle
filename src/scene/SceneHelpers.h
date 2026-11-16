@@ -21,10 +21,19 @@ void MakeNumberText(wchar_t *text, int number);
 
 // SceneCast: src/scene/SceneCast.h
 
+// Where a face is in the camera's plane. A structure of two words of its own, not the first two of a VecFx32:
+// SetTransform(int, FaceTransform) passes it in r2 and r3 with one ldm and the scale beside it as a word, where a
+// VecFx32 split between the registers and the stack is copied to a temporary first.
+struct FacePosition {
+    /* 0x0 */ fx32 x;
+    /* 0x4 */ fx32 y;
+}; // 0x8
+
 // Where one of a FaceCast's faces is, and how it is turned and scaled
 struct FaceTransform {
     /* 0x00 */ u16 mId;
-    /* 0x04 */ VecFx32 mPosition; // x and y in the camera's plane; z is the scale
+    /* 0x04 */ FacePosition mPosition;
+    /* 0x0C */ fx32 mScale;
     /* 0x10 */ u16 mRotX;
     /* 0x12 */ u16 mRotY;
     /* 0x14 */ u16 mRotZ;
@@ -45,7 +54,7 @@ public:
     void ResetCamera();
     BOOL Choose();
     void ReadCharacters();
-    void SetTransform(int index, VecFx32 position, u16 rotX, u16 rotY, u16 rotZ);
+    void SetTransform(int index, FacePosition position, fx32 scale, u16 rotX, u16 rotY, u16 rotZ);
     void SetTransform(int index, u16 id, int x, s8 y, u8 scale, u8 rotX, u8 rotY, u8 rotZ);
     void ApplyTransform(int index);
     void SetTransform(int index, FaceTransform transform);
