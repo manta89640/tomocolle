@@ -92,13 +92,13 @@ struct CharacterBase : public SavedCharacter {
     /* 0x25E3 */ u8 mUnknown25E3;
 }; // 0x25E4
 
-// The model of a character with its animations and joints (func_0208eb18 constructs it). Its destructor is as
-// RoomCharacter's implicit one has it inlined (func_0203eee4).
+// The model of a character with its animations and joints (func_0208eb18 constructs it; main's
+// include/character/CharacterModel.h is the class itself). It holds its AnimModel as a member, and is the second
+// base of Character: the character's constructor builds it with the base-object constructor (C2).
 //
 // The joints are inside the model, not beside it in the character: CharacterModel_GetJointPosition takes the model
-// and returns the last row of mJointMatrices[joint] (0x2A0 + 0x30 * joint from the model). Where the model ends is
-// not known: 0x4BC is where the last thing known to be its own ends.
-class CharacterModel : public AnimModel {
+// and returns the last row of mJointMatrices[joint] (0x2A0 + 0x30 * joint from the model).
+class CharacterModel {
 public:
     // The main program's functions (include/character/Character.h)
     VecFx32 GetJointPosition(int joint);
@@ -107,14 +107,14 @@ public:
 
 public:
     CharacterModel(); // func_0208eb18
-    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
+    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
 
     MtxFx33 *GetJointRotation(int joint) { return &mJointRotations[joint]; }
     MtxFx43 *GetJointMatrix(int joint) { return &mJointMatrices[joint]; }
 
+    /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ u8 mUnknown0EC[0x8];     // func_0208fc34 makes three scale factors from 0xEC and 0xF0
-    /* 0x0F4 */ fx32 mScale;             // Character_IsPointWithinReach scales a reach by it
+    /* 0x0EC */ VecFx32 mScale;          // Character_IsPointWithinReach scales a reach by z
     /* 0x0F8 */ u8 mUnknown0F8[0xC];
     /* 0x104 */ int mAnimId;             // The current 'BCA0' animation
     /* 0x108 */ int mPrevAnimId;         // The one being blended out of
@@ -122,8 +122,11 @@ public:
                                          // (func_0208f050 sets it to 0xC000 on a change)
     /* 0x110 */ int mUnknown110;
     /* 0x114 */ MtxFx33 mJointRotations[10]; // By joint; the held items take their rotation from these
-    /* 0x27C */ MtxFx43 mJointMatrices[12];  // By joint: 0 is the head, 1 and 2 are the hands
-}; // 0x4BC
+    /* 0x27C */ MtxFx43 mJointMatrices[10];  // By joint: 0 is the head, 1 and 2 are the hands
+    /* 0x45C */ u8 mUnknown45C[0x6C];
+    /* 0x4C8 */ char mArchiveName[4];    // Name its archive is mounted under (func_02091048 sets both)
+    /* 0x4CC */ char mArchivePath[0x3C]; // and the archive's path
+}; // 0x508
 
 // The main program's particle system for one effect file (func_02080e80 constructs it, func_02080e98 loads it).
 struct ParticleSystem {
@@ -140,9 +143,9 @@ struct HeadIconShown {
     /* 0x08 */ HeadIconFrame *mFrame;
 };
 
-// The icon shown over a character's head (func_02081034 constructs it, func_020810e4 updates it).
+// The icon shown over a character's head (func_020810e4 updates it).
 struct HeadIcon {
-    HeadIcon();                       // func_02081034
+    HeadIcon();                       // C1 func_02081074, C2 func_02081034
     void Show();                      // func_02080fc4: removes the icon that is shown (frees mShown, clears it)
     void Restart();                   // func_02080ff0: clears three flags of the icon that is shown: plays it again
     void Load(ParticleSystem *particles, int iconId); // func_020810b4: keeps the id and calls func_02080f64 with mPos
@@ -158,6 +161,11 @@ struct HeadIcon {
     /* 0x3C */ u16 mAngle;
     /* 0x3E */ s16 mIconId;           // Which icon: func_020810c8 creates the one of this id
 }; // 0x40
+
+// The head icon as the room's characters and scene hold it: a class derived from HeadIcon, with nothing of its own
+// that the code shows. The characters' constructors build theirs with HeadIcon's base-object constructor (C2,
+// func_02081034), which a HeadIcon member would build with C1 (func_02081074). The name is descriptive.
+struct RoomHeadIcon : public HeadIcon {};
 
 extern "C" {
 
