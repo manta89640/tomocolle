@@ -913,7 +913,7 @@ void MiiEditScene::SaveCharacter() {
         mCharacter.mTroubleState = 1;
         mCharacter.mTroubleCategory = 0;
         mCharacter.mTroubleId = 0;
-        mCharacter.mTroublePartner = 0;
+        mCharacter.mTroubleTarget = 0;
         mCharacter.mTroubleEnd = 0x7FFFFFFFFFFFFFFF;
         break;
     case 0x43:

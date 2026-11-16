@@ -27,9 +27,14 @@ struct ItemInfo {
     /*      */ u32 mAvailable0 : 1; // Whether the random choice can give it, by its first parameter (0 to 2)
     /*      */ u32 mAvailable1 : 1;
     /*      */ u32 mAvailable2 : 1;
-    /*      */ u32 mUnknown0CBits11 : 19;
+    /*      */ u32 mTaste0 : 4;     // How much each kind of character likes it, 0 to 15 (SavedCharacter::GetTaste)
+    /*      */ u32 mTaste1 : 4;
+    /*      */ u32 mTaste2 : 4;
+    /*      */ u32 mTaste3 : 4;
+    /*      */ u32 mFoodSize : 2;   // How much eating it fills (a row of gStr_2K)
+    /*      */ u32 mUnknown0CBit29 : 1;
     /*      */ u32 mGroup : 2; // ChooseItemInGroup chooses among the goods of one
-    /* 0x10 */ u32 mFlags; // Bits the lists can be filtered by
+    /* 0x10 */ u32 mFlags; // Bits the lists can be filtered by; for food, the kinds the food troubles ask for
 }; // 0x14
 
 // An entry of the clothes table (data_020f3ff0, 300 entries)
@@ -44,11 +49,20 @@ struct ClothesInfo {
     /*      */ u32 mAvailable0 : 1; // As ItemInfo's
     /*      */ u32 mAvailable1 : 1;
     /*      */ u32 mAvailable2 : 1;
-    /*      */ u32 mUnknown0CBits11 : 2;
+    /*      */ u32 mSex : 2;  // 1: men's, 2: women's (SavedCharacter::GetClothesLiking, ChooseWantedClothes)
     /*      */ u32 mKind : 3; // The tab it is listed on
-    /*      */ u32 mUnknown0CBits16 : 16;
-    /* 0x10 */ u32 mUnknown10;
+    /*      */ u32 mTaste3 : 4; // How much each kind of personality likes them, 0 to 15 (GetClothesLiking)
+    /*      */ u32 mTaste1 : 4;
+    /*      */ u32 mTaste2 : 4;
+    /*      */ u32 mTaste0 : 4;
+    /* 0x10 */ u32 mStyles : 23; // The kinds the clothes troubles ask for (CLOTHES_WARM, ...)
+    /*      */ u32 mUnknown10Bits23 : 9;
 }; // 0x14
+
+// Bits of ItemInfo::mFlags and ClothesInfo::mStyles, as the troubles' table names the same kinds
+#define ITEM_BAD_FOOD (1 << 12) // Food that tastes bad: the food troubles that choose a food never choose one
+#define CLOTHES_WARM (1 << 0)   // Warm clothes: not asked for from April to September
+#define CLOTHES_COOL (1 << 1)   // Cool clothes: not asked for from October to March
 
 extern "C" {
 extern const ClothesInfo data_020f3ff0[];

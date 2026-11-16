@@ -71,6 +71,20 @@ enum MiiParameter {
     PARAM_COUNT
 };
 
+// What a character is to another (CharacterRecord::mRelationRank), as the game's list of relations names them
+enum Relation {
+    RELATION_NONE,
+    RELATION_FRIENDS,
+    RELATION_LOVERS,
+    RELATION_EX_LOVERS,
+    RELATION_SPOUSES,
+    RELATION_DIVORCED,
+    RELATION_FRIENDS_FIGHTING,
+    RELATION_LOVERS_FIGHTING,
+    RELATION_SPOUSES_FIGHTING,
+    RELATION_BEST_FRIENDS,
+};
+
 // A Mii's create ID (lib/NFL's NFLCreateId)
 struct CreateId {
     u8 data[8];
@@ -116,7 +130,7 @@ struct CharacterRecord {
     /* 0x227 */ u8 mTroubleCategory;     // "TroubleCategory", 0 to 9
     /* 0x228 */ s64 mTroubleStart;       // When the trouble began (a time in seconds)
     /* 0x230 */ s64 mTroubleEnd;         // When it ends (the wedding sets it to the honeymoon's end)
-    /* 0x238 */ u16 mTroublePartner;     // mIndex of the other character of the trouble
+    /* 0x238 */ u16 mTroubleTarget;      // What the trouble is about: mIndex of a character, or an item
     /* 0x23A */ u8 mTroubleState;        // "TroubleState", 0 to 5
     /* 0x23B */ u8 mTroubleProgress;     // 0 to 200
     /* 0x23C */ s64 mUnknown23C;
@@ -264,7 +278,7 @@ public:
     void ResetMeetDate();
     void ResetTouchTalk();
     void ClearUnknown1C8();
-    int CountOwnedClothes();
+    u32 CountOwnedClothes();
     void ClearOwnedClothes();
     u8 GetSongSlot(int slot);
     void SetSongSlot(int slot, u8 song);
@@ -283,11 +297,36 @@ public:
     void RandomizeUnknown24E();
     void ResetUnknown24E();
     int GetPersonalityPairValue(int a, int b);
+    void ExpireTrouble(s64 now, SavedCharacter *partner);
+    void FailTrouble(s64 now, SavedCharacter *target);
+    void EatRandomFood();
+    void FailFightTrouble(s64 now, SavedCharacter *other);
+    void BreakUp(s64 now, SavedCharacter *other);
+    void Divorce(s64 now, SavedCharacter *other);
+    BOOL StartTrouble(int category, int id, s64 now, BOOL shortened, SavedCharacter *partner, BOOL allowFight);
+    s64 GetTroubleDuration(BOOL shortened);
+    BOOL SetTroubleMood(int mood);
+    int ChooseWantedFood();
+    int ChooseWantedClothes(s64 now);
+    int ChooseNewFriend();
+    int ChooseFightOpponent();
+    int ChooseLoverToLeave();
+    int ChooseSpouseToLeave();
+    void CountFights(int *residents, int *fights);
+    void BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner);
+    int ChooseLoveInterest();
+    int ChooseCharacterByRelation();
     // Not written yet
-    BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
     void func_0209e01c();
     BOOL func_0209ccf0();
     void func_0209cda4();
+    u32 CountOwnedInteriors();
+
+    // The steps the trouble functions share
+    void FinishTroubleUnsolved();
+    void StartTroubleWith(int category, int id, SavedCharacter *other, s64 now);
+    void StartHeartbreak(int id, SavedCharacter *other, s64 now);
+    void BeginTrouble(int category, int id, u16 target, s64 now, BOOL shortened, SavedCharacter *partner);
 
     // Marks a row of the clothes table as owned
     void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }

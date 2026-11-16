@@ -44,6 +44,13 @@ void func_0202c264(GameData *game, int index, SavedCharacter *character); // Rea
 void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one back
 
 BOOL func_0202c468(GameData *game, int index);
+u8 func_0202c53c(GameData *game, int index); // The saved character's mTroubleState
+u8 func_0202c58c(GameData *game, int index); // Its mTroubleId
+u8 func_0202c5b4(GameData *game, int index); // Its mTroubleCategory
+int func_0202c604(GameData *game, int index); // Its sex
+int func_0202c680(GameData *game, int index); // Its mRelationBlood
+int MiiData_GetSex(const CharacterRecord *mii);
+extern const u8 data_020f8d7c[6]; // ChooseCharacterByRelation's weights of its groups
 int func_0202c5dc(GameData *game, int index);
 int func_0202c43c(GameData *game, int index, int other);
 extern u8 data_0212348c[];
@@ -64,28 +71,16 @@ extern const int data_020fba28[16]; // The kind (0 to 3) of each personality
 // A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78)
 struct TroubleInfo {
     u32 kind : 8;
-    u32 hours : 16;    // How long it lasts
-    u32 unk0Bits24 : 8;
+    u32 minutes : 16;         // How long it lasts at most
+    u32 weight : 8;           // Its weight in the random choice (ChooseTrouble)
     u32 unk4Bits0 : 8;
-    u32 unk4Bits8 : 8;
+    u32 mood : 8;             // The mood it puts the character in (SetTroubleMood), 0 to 4
     u32 cooldownMinutes : 12; // Added to mTroubleEnd once it is over
-    u32 unk4Bits28 : 4;
-    u32 unk8;
+    u32 hasTarget : 4;        // Not 0: about a character or an item, which StartTrouble chooses (mTroubleTarget)
+    u32 flags;                // Food troubles: the kinds of food; clothes troubles: the kinds of clothes
 }; // 0xC
 extern TroubleInfo *data_02114d78[];
 extern const u8 gStr_Parenthesis_2[]; // The starting progress of each trouble of category 0
-// The goods table (data_020f5f0c, item/Item.h's ItemInfo), as the eating code reads it: bits 27-28 of its fourth word
-struct GoodsFoodInfo {
-    /* 0x00 */ u32 unk0[3];
-    /* 0x0C */ u32 unkCBits0 : 11;
-    /*      */ u32 taste0 : 4; // How much each of the four kinds of character (GetCreateIdParts) likes it
-    /*      */ u32 taste1 : 4;
-    /*      */ u32 taste2 : 4;
-    /*      */ u32 taste3 : 4;
-    /*      */ u32 food : 2; // Row of gStr_2K: how much eating it fills
-    /*      */ u32 unkCBits29 : 3;
-    /* 0x10 */ u32 unk10;
-}; // 0x14
 extern const u8 gStr_2K[4]; // How much each kind of food fills
 extern const u8 data_020f8d8c[10];
 extern const s8 data_020fba10[21];  // A value for each pair of RelationBlood values (0 to 5), a triangle of 6
@@ -121,6 +116,11 @@ template <typename T> BOOL ClampField(T *value, int min, int max, const char *na
         return FALSE;
     }
     return TRUE;
+}
+
+// A random number from 0 to max - 1
+static inline int Rand(int max) {
+    return MATH_Rand16(&gRandom, max);
 }
 
 SavedCharacter::SavedCharacter() {
@@ -1239,7 +1239,7 @@ bool SavedCharacter::IsTroubleStateActive(int state) {
 
 BOOL SavedCharacter::IsInTroubleWithoutUnknown4Bits8() {
     BOOL inTrouble = IsInTrouble();
-    return inTrouble & (data_02114d78[mTroubleCategory][mTroubleId].unk4Bits8 == 0);
+    return inTrouble & (data_02114d78[mTroubleCategory][mTroubleId].mood == 0);
 }
 
 void SavedCharacter::SetTrouble(u8 state, u8 category, u8 id) {
@@ -1393,6 +1393,206 @@ int SavedCharacter::GetEncounterBonus(int base, int value) {
         bonus = 0;
     }
     return bonus;
+}
+
+inline void SavedCharacter::FinishTroubleUnsolved() {
+    mTroubleEnd += data_02114d78[mTroubleCategory][mTroubleId].cooldownMinutes * 60;
+    mTroubleState = 5;
+}
+
+inline void SavedCharacter::StartTroubleWith(int category, int id, SavedCharacter *other, s64 now) {
+    ClearTrouble();
+    SetTrouble(1, category, id);
+    mTroubleTarget = other->mIndex;
+    mTroubleEnd = now + data_02114d78[mTroubleCategory][mTroubleId].minutes * 60;
+    mMood = 0;
+}
+
+// Heartbroken (category 4) by the other, for the trouble's whole time
+inline void SavedCharacter::StartHeartbreak(int id, SavedCharacter *other, s64 now) {
+    ClearTrouble();
+    mTroubleCategory = 4;
+    mTroubleId = id;
+    mTroubleState = 1;
+    mTroubleTarget = other->mIndex;
+    mTroubleEnd = now + data_02114d78[mTroubleCategory][mTroubleId].minutes * 60;
+    mMood = 3;
+    ResetTroubleProgress();
+    mSatisfyMeter = 0;
+    mLongActEnd = now;
+}
+
+inline void SavedCharacter::BeginTrouble(int category, int id, u16 target, s64 now, BOOL shortened,
+                                         SavedCharacter *partner) {
+    mTroubleState = 1;
+    mTroubleId = id;
+    mTroubleCategory = category;
+    mTroubleTarget = target;
+    mTroubleEnd = now + GetTroubleDuration(shortened);
+    SetTroubleMood(data_02114d78[mTroubleCategory][mTroubleId].mood);
+    int mood = data_02114d78[mTroubleCategory][mTroubleId].mood;
+    switch (mood) {
+    case 2:
+    case 3:
+    case 4:
+        mLongActEnd = now;
+        if (partner != NULL) {
+            partner->mLongActEnd = now;
+        }
+        break;
+    }
+}
+// When the trouble's time is over: one still open fails (FailTrouble), one that was solved or failed is cleared
+void SavedCharacter::ExpireTrouble(s64 now, SavedCharacter *partner) {
+    BOOL changed = FALSE;
+    switch (data_02114d78[mTroubleCategory][mTroubleId].mood) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        if (mMood != 0) {
+            mMood = 0;
+            changed = TRUE;
+            switch (mLongActState) {
+            case 6:
+            case 13:
+            case 14:
+                mLongActEnd = now;
+                break;
+            }
+        }
+        break;
+    }
+    switch (mTroubleState) {
+    case 0:
+        break;
+    case 1:
+    case 2:
+        FailTrouble(now, partner);
+        changed = TRUE;
+        break;
+    case 3:
+    case 4:
+    case 5:
+        ClearTrouble();
+        changed = TRUE;
+        break;
+    }
+    if (changed) {
+        func_0202c28c(&gGameData, mIndex, this);
+    }
+}
+
+// What comes of a trouble that nobody solved in time (now -1: at its end)
+void SavedCharacter::FailTrouble(s64 now, SavedCharacter *target) {
+    if (now == -1) {
+        now = mTroubleEnd;
+    }
+    SavedCharacter other;
+    if (IsTroubleOfCategory3Kind8To10() && target == NULL) {
+        u16 index = mTroubleTarget;
+        target = &other;
+        func_0202c264(&gGameData, index, target);
+        other.mIndex = index;
+    }
+    const TroubleInfo *info = &data_02114d78[mTroubleCategory][mTroubleId];
+    switch (info->kind) {
+    case 1:
+        EatRandomFood();
+        return;
+    case 8:
+        FailFightTrouble(now, target);
+        func_0202c28c(&gGameData, target->mIndex, target);
+        return;
+    case 9:
+        BreakUp(now, target);
+        func_0202c28c(&gGameData, target->mIndex, target);
+        return;
+    case 10:
+        Divorce(now, target);
+        func_0202c28c(&gGameData, target->mIndex, target);
+        return;
+    default:
+        mTroubleEnd += info->cooldownMinutes * 60;
+        mTroubleState = 5;
+        return;
+    }
+}
+
+// A food trouble nobody solved: the character eats some food of the goods table by itself
+void SavedCharacter::EatRandomFood() {
+    int food;
+    int foods[255];
+    int count = 0;
+    for (int i = 0; i < 255; i++) {
+        if (data_020f5f0c[(u16)i].mKind == 1) {
+            foods[count] = i;
+            count++;
+        }
+    }
+    food = foods[MATH_Rand16(&gRandom, count)];
+    if (CanEat(mTroubleEnd, food)) {
+        Eat(mTroubleEnd, food);
+        mEatLastFood = food;
+    }
+    FinishTroubleUnsolved();
+}
+
+// An angry trouble after a fight nobody settled: friends part, lovers and spouses each want to leave the other
+void SavedCharacter::FailFightTrouble(s64 now, SavedCharacter *other) {
+    switch (mRelationRank[other->mIndex]) {
+    case RELATION_FRIENDS_FIGHTING:
+        SetRelation(other->mIndex, RELATION_NONE, 100);
+        other->SetRelation(mIndex, RELATION_NONE, 100);
+        mMood = 0;
+        FinishTroubleUnsolved();
+        other->mMood = 0;
+        other->FinishTroubleUnsolved();
+        break;
+    case RELATION_LOVERS_FIGHTING:
+        StartTroubleWith(3, 5, other, now);
+        other->StartTroubleWith(3, 5, this, now);
+        break;
+    case RELATION_SPOUSES_FIGHTING:
+        StartTroubleWith(3, 6, other, now);
+        other->StartTroubleWith(3, 6, this, now);
+        break;
+    }
+}
+
+// A wish to break up nobody talked out of: the two are former lovers, and the other one is heartbroken
+void SavedCharacter::BreakUp(s64 now, SavedCharacter *other) {
+    SetRelation(other->mIndex, RELATION_EX_LOVERS, 100);
+    other->SetRelation(mIndex, RELATION_EX_LOVERS, 100);
+    FinishTroubleUnsolved();
+    if (!other->IsTroubleOfCategory34OrKind20() || other->mTroubleCategory == 4 ||
+        data_02114d78[other->mTroubleCategory][other->mTroubleId].kind == 4) {
+        if (!IsLongActPaired()) {
+            other->StartHeartbreak(1, this, now);
+            return;
+        }
+    }
+    if (data_02114d78[other->mTroubleCategory][other->mTroubleId].kind == 9) {
+        other->ClearTrouble();
+    }
+}
+
+// The same for a divorce
+void SavedCharacter::Divorce(s64 now, SavedCharacter *other) {
+    SetRelation(other->mIndex, RELATION_DIVORCED, 100);
+    other->SetRelation(mIndex, RELATION_DIVORCED, 100);
+    FinishTroubleUnsolved();
+    if (!other->IsTroubleOfCategory34OrKind20() || other->mTroubleCategory == 4 ||
+        data_02114d78[other->mTroubleCategory][other->mTroubleId].kind == 4) {
+        if (!IsLongActPaired()) {
+            other->StartHeartbreak(2, this, now);
+            return;
+        }
+    }
+    if (data_02114d78[other->mTroubleCategory][other->mTroubleId].kind == 10) {
+        other->ClearTrouble();
+    }
 }
 
 void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second) {
@@ -1587,13 +1787,13 @@ int SavedCharacter::ChooseTrouble(int category) {
     int total = 0;
     u32 count = gStr_LessThan_2[category];
     for (u32 i = 0; i < count; i++) {
-        total += data_02114d78[category][i].unk0Bits24;
+        total += data_02114d78[category][i].weight;
     }
     int random = MATH_Rand16(&gRandom, total);
     u8 id = 0;
     int sum = 0;
     for (; id < gStr_LessThan_2[category]; id++) {
-        sum += data_02114d78[category][id].unk0Bits24;
+        sum += data_02114d78[category][id].weight;
         if (random < sum) {
             break;
         }
@@ -1618,7 +1818,7 @@ void SavedCharacter::ClearTrouble() {
     mTroubleState = 0;
     mTroubleCategory = 0;
     mTroubleId = 0;
-    mTroublePartner = 0;
+    mTroubleTarget = 0;
     mTroubleProgress = 0;
     mTroubleEnd = 0;
     mTroubleStart = 0;
@@ -1632,12 +1832,531 @@ BOOL SavedCharacter::StartRandomTrouble(s64 now, int force, SavedCharacter *part
     return StartTrouble(category, ChooseTrouble(category), now, force, partner, unused);
 }
 
+BOOL SavedCharacter::StartTrouble(int category, int id, s64 now, BOOL shortened, SavedCharacter *partner,
+                                  BOOL allowFight) {
+    const TroubleInfo *info = &data_02114d78[category][id];
+    if (info->hasTarget == 0) {
+        int kind = info->kind;
+        if (kind == 1) {
+            if (GetFullness(now) > 0) {
+                return FALSE;
+            }
+        } else if (kind == 3) {
+            if (CountOwnedClothes() >= CLOTHES_SIZE) {
+                return FALSE;
+            }
+            if (MiiData_GetSex(this) == 0) {
+                u32 flags = data_02114d78[category][id].flags;
+                if (flags & 0x40 || flags & 0x80 || flags & 0x1000) {
+                    return FALSE;
+                }
+            }
+            u32 flags = data_02114d78[category][id].flags;
+            if (flags & 1) {
+                RTCDate date;
+                RTCTime time;
+                RTC_ConvertSecondToDateTime(&date, &time, now);
+                if (date.month >= 4 && date.month <= 9) {
+                    return FALSE;
+                }
+            } else if (flags & 2) {
+                RTCDate date;
+                RTCTime time;
+                RTC_ConvertSecondToDateTime(&date, &time, now);
+                if (date.month <= 3 || date.month >= 10) {
+                    return FALSE;
+                }
+            }
+        } else if (kind == 19) {
+            if (CountOwnedInteriors() >= 71) {
+                return FALSE;
+            }
+        }
+        BeginTrouble(category, id, 0, now, shortened, partner);
+        return TRUE;
+    }
+    int kind = info->kind;
+    u16 target;
+    BOOL ok = TRUE;
+    if (kind == 1) {
+        if (GetFullness(now) > 0) {
+            ok = FALSE;
+        } else {
+            int food = ChooseWantedFood();
+            if (food != -1) {
+                target = food;
+            } else {
+                ok = FALSE;
+            }
+        }
+    } else if (kind == 3) {
+        if (CountOwnedClothes() >= CLOTHES_SIZE) {
+            ok = FALSE;
+        } else {
+            int clothes = ChooseWantedClothes(now);
+            if (clothes != -1) {
+                target = clothes;
+            } else {
+                ok = FALSE;
+            }
+        }
+    } else if (kind == 4) {
+        int other = ChooseNewFriend();
+        if (other != -1) {
+            target = other;
+        } else {
+            ok = FALSE;
+        }
+    } else if (kind == 5) {
+        int other = ChooseLoveInterest();
+        if (other != -1) {
+            target = other;
+        } else {
+            ok = FALSE;
+        }
+    } else if (kind == 6 || kind == 7) {
+    } else if (kind == 8) {
+        int residents;
+        int fights;
+        CountFights(&residents, &fights);
+        if (!allowFight || GetEncounterBonus(fights, residents) <= 1) {
+            ok = FALSE;
+        } else {
+            int other = ChooseFightOpponent();
+            if (other != -1) {
+                target = other;
+            } else {
+                ok = FALSE;
+            }
+        }
+    } else if (kind == 9) {
+        int other = ChooseLoverToLeave();
+        if (other != -1) {
+            target = other;
+        } else {
+            ok = FALSE;
+        }
+    } else if (kind == 10) {
+        int other = ChooseSpouseToLeave();
+        if (other != -1) {
+            target = other;
+        } else {
+            ok = FALSE;
+        }
+    } else if (kind == 18) {
+        int other = ChooseCharacterByRelation();
+        if (other != -1) {
+            target = other;
+        } else {
+            ok = FALSE;
+        }
+    }
+    if (ok) {
+        BeginTrouble(category, id, target, now, shortened, partner);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// How long a new trouble lasts: from a half (or, shortened, a quarter) of its table time to all of it, at random
+s64 SavedCharacter::GetTroubleDuration(BOOL shortened) {
+    int seconds = data_02114d78[mTroubleCategory][mTroubleId].minutes * 60;
+    if (shortened) {
+        return (u16)MATH_Rand16(&gRandom, seconds - (seconds >> 2)) + (seconds >> 2);
+    }
+    return (u16)MATH_Rand16(&gRandom, seconds - (seconds >> 1)) + (seconds >> 1);
+}
+
+BOOL SavedCharacter::SetTroubleMood(int mood) {
+    switch (mood) {
+    case 0:
+        mMood = 0;
+        break;
+    case 1:
+        mMood = 1;
+        break;
+    case 2:
+        mMood = 2;
+        break;
+    case 3:
+        mMood = 3;
+        break;
+    case 4:
+        mMood = 4;
+        break;
+    }
+    return TRUE;
+}
+
+// A food trouble's wish: a food of the goods table that is not one of the bad ones, at random; -1 for none
+int SavedCharacter::ChooseWantedFood() {
+    u16 foods[255];
+    int count = 0;
+    for (u16 i = 0; i < 255; i = (u16)(i + 1)) {
+        const ItemInfo *item = &data_020f5f0c[i];
+        if (item->mKind == 1 && !(item->mFlags & ITEM_BAD_FOOD)) {
+            foods[count] = i;
+            count++;
+        }
+    }
+    if (count > 0) {
+        return foods[MATH_Rand16(&gRandom, count)];
+    }
+    return -1;
+}
+
+static inline BOOL IsSummer(int month) {
+    BOOL summer = FALSE;
+    if (month >= 4 && month <= 9) {
+        summer = TRUE;
+    }
+    return summer;
+}
+
+static inline BOOL IsWinter(int month) {
+    BOOL winter = TRUE;
+    if (month > 3 && month < 10) {
+        winter = FALSE;
+    }
+    return winter;
+}
+
+// A clothes trouble's wish: clothes it does not own, for the season (by the month of now) and its sex; -1 for none
+int SavedCharacter::ChooseWantedClothes(s64 now) {
+    RTCDate date;
+    RTCTime time;
+    u16 clothes[CLOTHES_SIZE];
+    int count = 0;
+    RTC_ConvertSecondToDateTime(&date, &time, now);
+    BOOL summer = FALSE;
+    if (date.month >= 4 && date.month <= 9) {
+        summer = TRUE;
+    }
+    BOOL winter = TRUE;
+    if (date.month > 3 && date.month < 10) {
+        winter = FALSE;
+    }
+    for (u16 i = 0; i < CLOTHES_SIZE; i = (u16)(i + 1)) {
+        if ((mOwnedClothes.m[i >> 5] >> (i & 0x1F)) & 1) {
+            continue;
+        }
+        if (summer && data_020f3ff0[i].mStyles & CLOTHES_WARM) {
+            continue;
+        }
+        if (winter && data_020f3ff0[i].mStyles & CLOTHES_COOL) {
+            continue;
+        }
+        if (MiiData_GetSex(this) == 0 && data_020f3ff0[i].mSex == 2) {
+            continue;
+        }
+        if (MiiData_GetSex(this) == 1 && data_020f3ff0[i].mSex == 1) {
+            continue;
+        }
+        clothes[count] = i;
+        count++;
+    }
+    if (count > 0) {
+        return clothes[MATH_Rand16(&gRandom, count)];
+    }
+    return -1;
+}
+
+// Whom it wants to make friends with: another resident it has no relation to; -1 for none, and half of the time
+// when it has more than five friends
+int SavedCharacter::ChooseNewFriend() {
+    u16 others[100];
+    int count = 0;
+    int friends = 0;
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        if (func_0202c3dc(&gGameData, i) && i != mIndex) {
+            u8 rank = mRelationRank[i];
+            if (rank == RELATION_NONE) {
+                others[count] = i;
+                count++;
+            } else if (rank == RELATION_FRIENDS) {
+                friends++;
+            }
+        }
+    }
+    int other = -1;
+    if (count > 0) {
+        other = others[MATH_Rand16(&gRandom, count)];
+    }
+    if (friends > 5 && Rand(100) < 50) {
+        other = -1;
+    }
+    return other;
+}
+
+// Whom it fights with: a friend, lover or spouse who is not in trouble; the last lover or spouse found a fifth of
+// the time
+int SavedCharacter::ChooseFightOpponent() {
+    u16 others[100];
+    int count = 0;
+    int partners = 0;
+    int partner;
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && !func_0202c53c(&gGameData, i) &&
+            IsRank124(mRelationRank[i])) {
+            others[count] = i;
+            count++;
+            if (mRelationRank[i] == RELATION_LOVERS || mRelationRank[i] == RELATION_SPOUSES) {
+                partner = i;
+                partners++;
+            }
+        }
+    }
+    int result = -1;
+    if (partners > 0 && Rand(100) < 20) {
+        return partner;
+    }
+    if (count > 0) {
+        result = others[MATH_Rand16(&gRandom, count)];
+    }
+    return result;
+}
+
+// Whom it wants to break up with: a lover it likes no more than 50, or one it is fighting with; -1 for none
+int SavedCharacter::ChooseLoverToLeave() {
+    int other = -1;
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        u8 rank = mRelationRank[i];
+        BOOL cooled = FALSE;
+        if (rank == RELATION_LOVERS && mRelationMeter[i] <= 50) {
+            cooled = TRUE;
+        }
+        BOOL fighting = rank == RELATION_LOVERS_FIGHTING ? TRUE : FALSE;
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && (fighting || cooled)) {
+            other = i;
+            break;
+        }
+    }
+    return other;
+}
+
+// The same for a spouse
+int SavedCharacter::ChooseSpouseToLeave() {
+    int other = -1;
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        u8 rank = mRelationRank[i];
+        BOOL cooled = FALSE;
+        if (rank == RELATION_SPOUSES && mRelationMeter[i] <= 50) {
+            cooled = TRUE;
+        }
+        BOOL fighting = rank == RELATION_SPOUSES_FIGHTING ? TRUE : FALSE;
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && (fighting || cooled)) {
+            other = i;
+            break;
+        }
+    }
+    return other;
+}
+
+// The number of residents, and of those angry after a fight
+void SavedCharacter::CountFights(int *residents, int *fights) {
+    *residents = 0;
+    *fights = 0;
+    for (int i = 0; i < 100; i++) {
+        if (func_0202c3dc(&gGameData, i)) {
+            (*residents)++;
+            if (IsTrouble3_4State(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
+                                  func_0202c58c(&gGameData, i))) {
+                (*fights)++;
+            }
+        }
+    }
+}
+
+// Meeting one who is angry at it after a fight, the character is angry back until the other's trouble ends
+void SavedCharacter::BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner) {
+    if (!other->IsTrouble3_4()) {
+        return;
+    }
+    s64 end = other->mTroubleEnd;
+    ClearTrouble();
+    SetTrouble(1, 3, 4);
+    mTroubleTarget = other->mIndex;
+    mTroubleEnd = end;
+    mMood = 2;
+    mLongActEnd = now;
+    if (partner != NULL) {
+        partner->mLongActEnd = now;
+    }
+}
+
+// Whom it is in love with: a friend or best friend of the other sex it likes 140 or more, that the blood relations
+// allow; -1 for none, and when it has a lover or spouse already
+int SavedCharacter::ChooseLoveInterest() {
+    u16 others[100];
+    int count = 0;
+    if (FindOtherWithRank2478() != -1) {
+        return -1;
+    }
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && MiiData_GetSex(this) != func_0202c604(&gGameData, i) &&
+            GetRelationBloodPairValue(mRelationBlood, func_0202c680(&gGameData, i)) != 0) {
+            u8 rank = mRelationRank[i];
+            if ((rank == RELATION_FRIENDS || rank == RELATION_BEST_FRIENDS) && mRelationMeter[i] >= 140) {
+                others[count] = i;
+                count++;
+            }
+        }
+    }
+    if (count > 0) {
+        return others[MATH_Rand16(&gRandom, count)];
+    }
+    return -1;
+}
+
+// Whom a trouble of kind 18 is about: first a group by the weights of data_020f8d7c (its lover or spouse, its best
+// friend, friends of the other sex, of its own, others of the other sex, of its own), then one of the group
+int SavedCharacter::ChooseCharacterByRelation() {
+    u8 groups[4][100];
+    int counts[4] = {0, 0, 0, 0};
+    int partner = -1;
+    int bestFriend = -1;
+    int result;
+    for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
+        if (!func_0202c3dc(&gGameData, i) || i == mIndex) {
+            continue;
+        }
+        if (IsRank2Or4(mRelationRank[i])) {
+            partner = i;
+        } else if (mRelationRank[i] == RELATION_BEST_FRIENDS) {
+            bestFriend = i;
+        } else if (mRelationRank[i] == RELATION_FRIENDS) {
+            if (MiiData_GetSex(this) != func_0202c604(&gGameData, i)) {
+                groups[0][counts[0]] = i;
+                counts[0]++;
+            } else {
+                groups[1][counts[1]] = i;
+                counts[1]++;
+            }
+        } else if (mRelationRank[i] == RELATION_NONE) {
+            if (MiiData_GetSex(this) != func_0202c604(&gGameData, i)) {
+                groups[2][counts[2]] = i;
+                counts[2]++;
+            } else {
+                groups[3][counts[3]] = i;
+                counts[3]++;
+            }
+        }
+    }
+    int total = 0;
+    for (int j = 0; j < 6; j++) {
+        int weight = data_020f8d7c[j];
+        switch (j) {
+        case 0:
+            if (partner == -1) {
+                weight = 0;
+            }
+            break;
+        case 1:
+            if (bestFriend == -1) {
+                weight = 0;
+            }
+            break;
+        case 2:
+            if (counts[0] < 1) {
+                weight = 0;
+            }
+            break;
+        case 3:
+            if (counts[1] < 1) {
+                weight = 0;
+            }
+            break;
+        case 4:
+            if (counts[2] < 1) {
+                weight = 0;
+            }
+            break;
+        case 5:
+            if (counts[3] < 1) {
+                weight = 0;
+            }
+            break;
+        }
+        total += weight;
+    }
+    if (total <= 0) {
+        return -1;
+    }
+    int random = MATH_Rand16(&gRandom, total);
+    int sum = 0;
+    int j;
+    for (j = 0; j < 6; j++) {
+        int weight = data_020f8d7c[j];
+        switch (j) {
+        case 0:
+            if (partner == -1) {
+                weight = 0;
+            }
+            break;
+        case 1:
+            if (bestFriend == -1) {
+                weight = 0;
+            }
+            break;
+        case 2:
+            if (counts[0] < 1) {
+                weight = 0;
+            }
+            break;
+        case 3:
+            if (counts[1] < 1) {
+                weight = 0;
+            }
+            break;
+        case 4:
+            if (counts[2] < 1) {
+                weight = 0;
+            }
+            break;
+        case 5:
+            if (counts[3] < 1) {
+                weight = 0;
+            }
+            break;
+        }
+        sum += weight;
+        if (random < sum) {
+            break;
+        }
+    }
+    if (j >= 6) {
+        return -1;
+    }
+    switch (j) {
+    case 0:
+        result = partner;
+        break;
+    case 1:
+        result = bestFriend;
+        break;
+    case 2:
+        result = groups[0][MATH_Rand16(&gRandom, counts[0])];
+        break;
+    case 3:
+        result = groups[1][MATH_Rand16(&gRandom, counts[1])];
+        break;
+    case 4:
+        result = groups[2][MATH_Rand16(&gRandom, counts[2])];
+        break;
+    case 5:
+        result = groups[3][MATH_Rand16(&gRandom, counts[3])];
+        break;
+    }
+    return result;
+}
+
 BOOL SavedCharacter::AddSatisfaction(int value) {
     BOOL levelUp = FALSE;
     int meter = value + mSatisfyMeter;
     if (meter >= 100) {
         levelUp = TRUE;
-        if (mSatisfyLevel >= 99) {
+        int level = mSatisfyLevel;
+        if (level >= 99) {
             mSatisfyMeter = meter - 100;
         } else {
             mSatisfyMeter = meter - 100;
@@ -1663,7 +2382,8 @@ int SavedCharacter::GetFullness(s64 now) {
         mUnknown23C = now;
         elapsed = 0;
     }
-    int fullness = mEatFullness - (u32)(elapsed / 3600) * 10;
+    int digested = elapsed / 3600 * 10; // Ten an hour
+    int fullness = mEatFullness - digested;
     if (fullness > 100) {
         return 100;
     }
@@ -1673,12 +2393,17 @@ int SavedCharacter::GetFullness(s64 now) {
     return fullness;
 }
 
+// How much eating the food fills
+static inline int GetFoodSize(u16 item) {
+    return gStr_2K[data_020f5f0c[item].mFoodSize];
+}
+
 BOOL SavedCharacter::CanEat(s64 now, u16 item) {
-    return GetFullness(now) + gStr_2K[((const GoodsFoodInfo *)data_020f5f0c)[item].food] < 130;
+    return GetFullness(now) + GetFoodSize(item) < 130;
 }
 
 void SavedCharacter::Eat(s64 now, u16 item) {
-    int fullness = GetFullness(now) + gStr_2K[((const GoodsFoodInfo *)data_020f5f0c)[item].food];
+    int fullness = GetFullness(now) + GetFoodSize(item);
     if (fullness >= 130) {
         return;
     }
@@ -1702,7 +2427,7 @@ void SavedCharacter::ClearUnknown246() {
 }
 
 void SavedCharacter::SetUnknown246ByChance() {
-    if (MATH_Rand16(&gRandom, 100) < 50) {
+    if (Rand(100) < 50) {
         mUnknown246 = 1;
     }
 }
@@ -1737,7 +2462,7 @@ void SavedCharacter::ClearUnknown1C8() {
     MI_CpuClear32(&mUnknown1C8, sizeof(mUnknown1C8));
 }
 
-int SavedCharacter::CountOwnedClothes() {
+u32 SavedCharacter::CountOwnedClothes() {
     int count = 0;
     for (u32 i = 0; i < 10; i++) {
         count += MATH_CountPopulation(mOwnedClothes.m[i]);
@@ -1773,16 +2498,16 @@ int SavedCharacter::GetTaste(int item) {
     GetCreateIdParts(&kind, &offset);
     switch (kind) {
     case 0:
-        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste0;
+        taste = data_020f5f0c[item].mTaste0;
         break;
     case 1:
-        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste1;
+        taste = data_020f5f0c[item].mTaste1;
         break;
     case 2:
-        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste2;
+        taste = data_020f5f0c[item].mTaste2;
         break;
     case 3:
-        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste3;
+        taste = data_020f5f0c[item].mTaste3;
         break;
     }
     taste += (u32)(item + offset) % 7 - 3;
