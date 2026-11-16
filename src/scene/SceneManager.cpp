@@ -63,6 +63,7 @@
 #include "../overlays/ov045/Scene88.h"
 #include "../overlays/ov050/Scene8D.h"
 #include "../overlays/ov052/Scene8F.h"
+#include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov057/TestNg137Scene.h"
 // End of gap38-b's scene classes
 
@@ -908,6 +909,9 @@ Scene8D::Scene8D(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x8F and 0x90, overlay 52
 Scene8F::Scene8F(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x91, overlay 53
+Scene91::Scene91(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x95, 0x96, 0x97, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1 and 0xA2, overlay 57
 TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
