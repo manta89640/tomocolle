@@ -2328,7 +2328,7 @@ void MoneyDisplay::SetVisible(BOOL visible) {
 
 void MoneyDisplay::Refresh() {
     wchar_t text[10];
-    func_02036874(mShown, text, 20, 0, 0);
+    FormatNumberWithCommas(mShown, text, 20, 0, 0);
     mText.mText = (const NNSG2dChar *)text;
     NNS_G2dCharCanvasClear(&mText.mCanvas, 0);
     mText.DrawText();

@@ -2,6 +2,7 @@
 #define OV072_MAINPROGRAM_H
 
 #include "MapScene.h"
+#include "text/TextUtil.h"
 #include "SceneManager.h"
 
 // What overlay 72's code uses of the main program, which is not decompiled: STAND-INS and declarations, which only
@@ -267,7 +268,6 @@ BOOL func_02031294(SpriteButton *button);
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
 void Clock_GetDate(int offset, RTCDate *date);
 void Clock_GetTime(int offset, RTCTime *time);
-void func_02036874(int value, wchar_t *buffer, int size, int a, int b);
 
 u8 func_02039c00(IslandState *island, int building);
 void func_02039c0c(IslandState *island, int building, int state);
