@@ -114,11 +114,11 @@ struct CharacterRecord {
     /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
     /* 0x226 */ u8 mTroubleId;           // "TroubleID", 0 to 0x6D
     /* 0x227 */ u8 mTroubleCategory;     // "TroubleCategory", 0 to 9
-    /* 0x228 */ s64 mUnknown228;
-    /* 0x230 */ s64 mAwayUntil;
-    /* 0x238 */ u16 mUnknown238;
+    /* 0x228 */ s64 mTroubleStart;       // When the trouble began (a time in seconds)
+    /* 0x230 */ s64 mTroubleEnd;         // When it ends (the wedding sets it to the honeymoon's end)
+    /* 0x238 */ u16 mTroublePartner;     // mIndex of the other character of the trouble
     /* 0x23A */ u8 mTroubleState;        // "TroubleState", 0 to 5
-    /* 0x23B */ u8 mUnknown23B;
+    /* 0x23B */ u8 mTroubleProgress;     // 0 to 200
     /* 0x23C */ s64 mUnknown23C;
     /* 0x244 */ u8 mEatFullness;         // "EatFullness", 0 to 100
     /* 0x245 */ u8 mEatLastFood;         // "EatLastFood"
@@ -133,10 +133,9 @@ struct CharacterRecord {
     /* 0x24E */ u8 mUnknown24E;          // Below 6, or 0xFF
     /* 0x24F */ u8 mUnknown24F;
     /* 0x250 */ u16 mUnknown250[32];
-    /* 0x290 */ u8 mUnknown290;
-    /* 0x291 */ u8 mUnknown291;
-    /* 0x292 */ u8 mUnknown292[2];
-    /* 0x294 */ u8 mUnknown294;
+    /* 0x290 */ u8 mFavoriteItem;        // GetLiking gives it the most liking, 0xFF for none
+    /* 0x291 */ u8 mDislikedItem;        // and this none
+    /* 0x292 */ u8 mUnknown292[3];
     /* 0x295 */ u8 mMood;                // 0 to 4
     /* 0x296 */ u8 mUnknown296;
     /* 0x297 */ u8 mUnknown297;
@@ -223,26 +222,72 @@ public:
     static BOOL IsLongActIdleState(int state);
     s64 GetLongActDuration(int state, int shift);
     BOOL IsLongActAvailable(int state);
-    // Not written yet
-    void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    int GetLongActWeight(int state);
+    int GetTotalLongActWeight();
     int ChooseLongAct();
-    void func_0209b1d8();
-    void func_0209c4a0();
-    void func_0209c5d8();
-    void func_0209c5f4();
-    void func_0209c698();
-    void func_0209c6b4();
-    void func_0209c700();
-    void func_0209c748();
-    void func_0209cb88();
-    void func_0209d2c0();
-    void func_0209d2d4();
-    void func_0209c680();
-    void func_0209d310();
+    bool IsInTrouble();
+    static bool IsTroubleStateActive(int state);
+    BOOL IsInTroubleWithoutUnknown4Bits8();
+    void SetTrouble(u8 state, u8 category, u8 id);
+    BOOL IsProgressingTrouble();
+    BOOL IsProgressingTroubleInState2();
+    void ResetTroubleProgress();
+    void AddTroubleProgress(int value);
+    static int GetTroubleTimeProgress(s64 now, s64 start);
+    static u32 GetTroubleProgressAt(s64 now, s64 start, int progress);
+    u32 GetTroubleProgress(s64 now);
+    static BOOL IsTroubleProgressFullAt(s64 now, s64 start, int progress);
+    BOOL IsTroubleProgressFull(s64 now);
+    BOOL IsTroubleOfCategory34OrKind20();
+    BOOL IsTroubleOfCategory3Kind8To10();
+    BOOL IsTroubleOfCategory34OrKind18();
+    BOOL IsTrouble3_4();
+    static BOOL IsTrouble3_4State(int state, int category, int id);
+    static int GetEncounterBonus(int base, int value);
+    void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    int ChooseTroubleCategory();
+    int GetTroubleCategoryWeight(int category);
+    int ChooseTrouble(int category);
+    void EndTrouble(s64 now);
+    void ClearTrouble();
+    BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
+    BOOL AddSatisfaction(int value);
+    void ResetSatisfaction();
+    int GetFullness(s64 now);
+    BOOL CanEat(s64 now, u16 item);
+    void Eat(s64 now, u16 item);
+    void ResetEating();
+    void ClearUnknown246();
+    void SetUnknown246ByChance();
+    void SetMeetDate(const RTCDate *date);
+    void GetMeetDate(RTCDate *date);
+    void ResetMeetDate();
+    void ResetTouchTalk();
+    void ClearUnknown1C8();
+    int CountOwnedClothes();
+    void ClearOwnedClothes();
+    u8 GetSongSlot(int slot);
+    void SetSongSlot(int slot, u8 song);
+    void ClearSongSlots();
+    int GetTaste(int item);
+    int GetLiking(int item);
+    void SetUnknown292(int index, u8 value);
+    u8 GetUnknown292(int index);
+    void ResetItemPreferences();
+    BOOL CheckUnknown292();
+    void AddUnknown296(int value);
+    void AddUnknown297(int value);
+    static int GetRelationBloodPairValue(int a, int b);
+    void ResetPatDate();
+    void ResetUnknown2A3();
+    void RandomizeUnknown24E();
+    void ResetUnknown24E();
+    int GetPersonalityPairValue(int a, int b);
+    // Not written yet
+    BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
     void func_0209e01c();
     BOOL func_0209ccf0();
     void func_0209cda4();
-    BOOL func_0209d1d0();
 
     // Marks a row of the clothes table as owned
     void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }

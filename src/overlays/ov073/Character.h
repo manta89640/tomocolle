@@ -15,6 +15,14 @@
 // out by index, func_0202c28c back in). func_020979c0 is its constructor. The scene makes temporary ones on the
 // stack for the residents that are not in the room.
 struct SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    void AddRelationMeter(int index, int change);
+    s8 GetPersonality();
+    static BOOL IsAwayState(int state);
+    void Reset();
+    void SetParameter(int param, int value);
+    void SetRelation(int index, u8 rank, u8 meter);
+
     SavedCharacter(); // func_020979c0
 
     /* 0x0000 */ u16 mUnknown0000;
@@ -60,6 +68,11 @@ struct SavedCharacter {
 // The character as the main program draws it: the saved character and its model's resources. func_0208fcf8 is its
 // constructor.
 struct CharacterBase : public SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    BOOL ClampHeadAngle(u16 *angle, int limit);
+    void MakeFace();
+    void SetFace(int kind);
+
     CharacterBase(); // func_0208fcf8
 
     /* 0x02C0 */ u8 mUnknown02C0[0x2240];
@@ -86,6 +99,12 @@ struct CharacterBase : public SavedCharacter {
 // and returns the last row of mJointMatrices[joint] (0x2A0 + 0x30 * joint from the model). Where the model ends is
 // not known: 0x4BC is where the last thing known to be its own ends.
 class CharacterModel : public AnimModel {
+public:
+    // The main program's functions (include/character/Character.h)
+    VecFx32 GetJointPosition(int joint);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+    void SetAnimFlagsAndFrame(BOOL playOnce, fx32 frame, BOOL finished);
+
 public:
     CharacterModel(); // func_0208eb18
     ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
@@ -142,33 +161,11 @@ struct HeadIcon {
 
 extern "C" {
 
-// --- The model (0x0208eb18 to 0x0208fcf8) ---
-// Set the current animation's two flags (mPlayOnce, mFinished); func_0208ef28 also sets its frame
-void func_0208ef00(CharacterModel *model, BOOL playOnce, BOOL finished);
-void func_0208ef28(CharacterModel *model, BOOL playOnce, fx32 frame, BOOL finished);
-// The position of one of the model's joints
-VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
-// Three scale factors from the model's 0xEC and 0xF0: the states 0x69 to 0x6D give them to a held item
-VecFx32 func_0208fc34(CharacterModel *model);
 
-// --- The saved character and the character (0x0208fcf8 to 0x0209d898) ---
-// Resets the character to nothing, and sets its appearance (the scene does both when the saved game has no such one)
-void func_020979e0(SavedCharacter *character);
-void func_02098c40(SavedCharacter *character, int kind, int value);
-s8 func_02098f2c(SavedCharacter *character);   // Computes its personality (0..15) from two pairs of its values
-void func_02099088(SavedCharacter *character, int index, int change); // Adds to its affinity for another
-void func_020990b0(SavedCharacter *character, int index, u8 relation, int affinity); // Sets its relation to another
 // Copies the saved character's name out as a string
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // For each kind of relation, how much each reaction changes the affinity by, halved
 extern const s8 *data_021135c8[];
-void func_02091048(CharacterBase *character, const char *archiveName); // Names its archive
-void func_02090fdc(CharacterBase *character, int slot, int unknown2, int unknown3); // Sets it up
-void func_0208fefc(CharacterBase *character);
-void func_02091a24(CharacterBase *character);
-void func_02091a6c(CharacterBase *character);
-void func_020910d4(CharacterBase *character);
-void func_02091a88(CharacterBase *character);
 // Binds the joint animations of an archive to a model's resource
 void func_02029660(void *resource, u32 resType, void *archive);
 

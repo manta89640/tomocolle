@@ -4,6 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+#include "CharacterCalls.h"
 #include "sound/SoundManager.h"
 #include "voice/TtsPlayer.h"
 
@@ -30,52 +31,6 @@ extern "C" {
 // --- Main program, not named yet (or named in symbols.txt): functions of the character (0x0208fcf8 to
 // 0x0209d898). All take the character as their object. ---
 
-// Sets the face (expression) and restarts its animation
-void Character_SetFace(RoomCharacter *self, int face);
-// Lip sync: opens the mouth (face 7) while the phoneme is a vowel or 'w'
-void func_02090a58(RoomCharacter *self, const char *phoneme, int face);
-// Tests of where a point (x, z) is, seen from the character: in front of it, within that width
-BOOL func_02091d44(RoomCharacter *self, fx32 x, fx32 z, fx32 width);
-// The point is nearer to the character than the square root of that
-BOOL func_02091edc(RoomCharacter *self, FloorPos pos, fx32 distanceSq);
-// Clamps an angle to +-limit
-BOOL func_02090c78(RoomCharacter *self, u16 *angle, int limit);
-void func_020910d4(RoomCharacter *self);
-// Turns towards mTarget; TRUE when facing it
-BOOL Character_TurnToWalkTarget(RoomCharacter *self, int speed, int accel);
-// Turns mAngle towards mTargetAngle
-BOOL Character_TurnToTargetAngle(RoomCharacter *self, int speed, int accel);
-// Moves by mSpeed along mMoveAngle
-void Character_MoveAlongAngle(RoomCharacter *self);
-// Sets mTarget
-void Character_SetWalkTarget(RoomCharacter *self, VecFx32 target);
-// Sets mAngle and mMoveAngle
-void Character_SetAngle(RoomCharacter *self, u16 angle);
-// Sets the walk target away from a point
-void func_02091598(RoomCharacter *self, FloorPos pos);
-// Turns towards a point
-void func_0209171c(RoomCharacter *self, FloorPos pos);
-void func_02091968(RoomCharacter *self);
-// Starts an animation of the model, at the speed mAnimSpeed (RoomCharacter::SetAnimation calls it)
-void func_020919e8(RoomCharacter *self, u32 resType, int id);
-void func_02091a6c(RoomCharacter *self);
-// Tests of where a point (x, z) is, seen from the character: within that width of the line the character faces
-// along (func_02091d44: and in front of it)
-BOOL func_02091b80(RoomCharacter *self, fx32 x, fx32 z, fx32 width);
-BOOL func_02091c80(RoomCharacter *self, fx32 x, fx32 z);
-// The point is nearer than the model's scale times the reach (and than maxReach, if that is positive)
-BOOL Character_IsPointWithinReach(RoomCharacter *self, fx32 x, fx32 z, fx32 reach, fx32 maxReach);
-// Restarts a slot's progress of Character_PlaySoundAtAnimPhase (mSoundPhase); func_02091fa0 does it for both slots
-void Character_ResetSoundPhase(RoomCharacter *self, int slot);
-void func_02091fa0(RoomCharacter *self);
-// Starts sound `index` of sequence archive `seqArc` once per animation
-int func_02091fbc(RoomCharacter *self, int player, int seqArc, int index);
-// Starts sound `index` of sequence archive `seqArc` at given quarters (bit mask) of the current animation
-int Character_PlaySoundAtAnimPhase(RoomCharacter *self, int slot, int player, int seqArc, int index, int quarters);
-// A number below max from a generator seeded by the character (func_020985f8), not the game's generator
-int func_02098e88(RoomCharacter *self, int max);
-// A value up to 200 from the saved character's 0x4A and 0x4B
-int func_02098ec4(RoomCharacter *self);
 int func_0209d804(RoomCharacter *self, s8 value);
 // Applies the character's voice to the speech engine
 void func_0209d898(RoomCharacter *self, TtsPlayer *player);
@@ -83,7 +38,6 @@ int MiiData_GetFavoriteColor(RoomCharacter *self);
 
 // --- Main program, not named yet: others ---
 GXRgb NFL_GetFavoriteColor(int color);
-BOOL func_02099e34(u8 value);
 
 // --- Data ---
 extern MATHRandContext16 gRandom; // The game's random number generator
@@ -220,12 +174,12 @@ public:
     u16 GetHeadPitch(VecFx32 from, VecFx32 to, u16 limit);
     // From the head (joint 0) to one of the partner's joints, limited
     u16 GetHeadPitchToPartner(int joint, u16 limit);
-    // One step of walking to mTarget, with the step sound (func_02091fbc(1, 0, 0x1a)); TRUE when there. Turns the
+    // One step of walking to mTarget, with the step sound (((Character *)(1))->PlaySoundOnce(0, 0x1a)); TRUE when there. Turns the
     // head by lookAngle less the walking direction when lookLimit is below 0x4000
     BOOL StepWalkLooking(u32 lookLimit, int lookAngle, fx32 reach, int speed, int turnShift);
     // The same with Character_TurnToWalkTarget
     BOOL StepTurnLooking(int speed, int accel, u32 lookLimit);
-    // Character_ResetSoundPhase(this, 0) unless IsMovingAnim()
+    // ((Character *)(this))->ResetSoundPhase(0) unless IsMovingAnim()
     void RestartStepSound();
     // HeldItem::SetShowState for both held items
     void SetHeldItemsShowState(int state);
@@ -278,7 +232,7 @@ public:
         return FX_Atan2Idx(delta.z, delta.x);
     }
     BOOL IsWithinReach(FloorPos pos, fx32 reach, fx32 maxReach) {
-        return Character_IsPointWithinReach(this, pos.x, pos.z, reach, maxReach);
+        return ((Character *)(this))->IsPointWithinReach(pos.x, pos.z, reach, maxReach);
     }
     void SetFloorPos(fx32 x, fx32 z) {
         mModel.mPos.x = x;
@@ -295,25 +249,25 @@ public:
     // into a local first: the scene's encounter functions match only so
     BOOL IsBeside(const RoomCharacter *other, fx32 width) {
         FloorPos pos = other->GetFloorPos();
-        return func_02091b80(this, pos.x, pos.z, width);
+        return ((Character *)(this))->IsBeside(pos.x, pos.z, width);
     }
     BOOL IsFacing(const RoomCharacter *other) {
         FloorPos pos = other->GetFloorPos();
-        return func_02091c80(this, pos.x, pos.z);
+        return ((Character *)(this))->IsInFront(pos.x, pos.z);
     }
     BOOL IsAhead(const RoomCharacter *other, fx32 width) {
         FloorPos pos = other->GetFloorPos();
-        return func_02091d44(this, pos.x, pos.z, width);
+        return ((Character *)(this))->IsAhead(pos.x, pos.z, width);
     }
     BOOL IsNearerThan(const RoomCharacter *other, fx32 distanceSq) {
         FloorPos pos;
         pos.x = other->mModel.mPos.x;
         pos.z = other->mModel.mPos.z;
-        return func_02091edc(this, pos, distanceSq);
+        return ((Character *)(this))->IsNearerThan(pos, distanceSq);
     }
     BOOL IsWithinReach(const RoomCharacter *other, fx32 reach, fx32 maxReach) {
         FloorPos pos = other->GetFloorPos();
-        return Character_IsPointWithinReach(this, pos.x, pos.z, reach, maxReach);
+        return ((Character *)(this))->IsPointWithinReach(pos.x, pos.z, reach, maxReach);
     }
 
     // Where it walks to
@@ -390,7 +344,7 @@ public:
     }
     // Plays one of the four sounds 10 to 13 of sequence archive 0x22, picked by the character's own generator
     void PlayRandomSoundOfFour() {
-        int pick = func_02098e88(this, 4);
+        int pick = ((SavedCharacter *)(this))->RandomFromCreateId(4);
         if (pick == 0) {
             gSoundManager.StartSeqArc(1, 0x22, 10);
         } else if (pick == 1) {

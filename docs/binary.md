@@ -1674,6 +1674,66 @@ data cache and disables or enables the instruction cache around it. Only `main` 
 of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
 linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
 
+## The characters
+
+The main program's character code, `0x0208EB18` to `0x0209E140`, which every scene with a resident uses: four units
+under `src/character/`, with the classes in `include/character/Character.h`, `CharacterModel.h` and `FloorPos.h`.
+The class names are the project's own; the field names in quotes below are the game's.
+
+| Unit | Code | What |
+| --- | --- | --- |
+| `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
+| `Character.cpp` | to `0x02092178`, 73 functions, 68 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
+| `CharacterSort.cpp` | to `0x020979A0`, 23 functions, 15 matching | The resident list's orders: name normalization, collation, comparators |
+| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 85 matching | `SavedCharacter`: the record, its parameters, relations, long activities, troubles |
+
+Measured:
+
+- **The bounds.** `.rodata` `0x020FB768` to `0x020FB864` is one size-sorted list (a 12-byte vector, then twelve 20-byte
+  joint names) read only by the model's code; the 12-byte object at `0x020FB864` (read at `0x0209005C`) and the two
+  40-byte animation tables after it, which only overlays read, are the next file's. `0x020FB8C0` to `0x020FBCDC` is
+  one list read from `0x02098EF0` to `0x0209E00C`; `0x020FBCDC` begins the item file, whose `ClothesItem` constructor
+  is at `0x0209E140`. The functions `0x02092178` to `0x020979A0` call only each other and are called only by the
+  resident list (`0x020A1xxx`) and overlays. The strings `0x02114DA0` to `0x02114E3C` are the model's,
+  `0x02114E3C` to `0x02114F80` the saved character's. What lies between SHTTS and the model in `.rodata`
+  (`0x020F3FF0` to `0x020FB768`: the clothes table, the goods, room and trouble tables) and in `.data`
+  (`0x021135A0` to `0x02114DA0`) has no code: data-only files, not cut.
+- **`CharacterModel` (0x508 bytes)** holds an `AnimModel` as a member and has no virtual table of its own. It is the
+  second base of the 0x2B18-byte `Character` (`class Character : public CharacterBase, public CharacterModel`): the
+  scenes' constructors call `0x0208EB18`, the first of the two identical constructors the compiler emits, which is the
+  base constructor C2, while a model that is a member (the G3D test scene's) is built with `0x0208EBA0`, C1. It keeps
+  the matrices of ten joints, found by name with `NNS_G3D_GET_JNTID` in its render callbacks (neck, `L_hand1`,
+  `R_hand1`, body; with `mTrackLimbs` the elbows, knees and ankles), scales the body from the Mii's height and build,
+  turns joints by angles, and shows or places the shadow. It wears a `ClothesItem` (+0x4B0): the archive is
+  `Mdl/Body/body<model name>[F]_3D_LZ.bin`, `F` for a female Mii when the clothes table has a female body, and the
+  texture `body_c<colour>.ntfp`.
+- **`CharacterBase` (0x25E4)** is `SavedCharacter` with its Mii face: an `NFLFace` of the Mii library (+0x2DC), its
+  draw parameters (+0x2C0, NFL's `NFLDrawParam`), the head joint's matrices that the body leaves it, and the face's
+  moods: `UpdateFace` runs one of 26 kinds (show an expression once, blink, wink, alternate expressions on timers).
+  `LipSync` opens the mouth while the phoneme is a vowel or `w`.
+- **`CharacterHead` (0x2728)** is a `CharacterBase` with an `AnimModel` head instead of a body: overlays 2, 77 and 79.
+- **`Character`** adds walking (`WalkToTarget`, `TurnTo...`, `MoveAlongAngle`; its speeds scale with the Mii's height
+  and the animation speed), the point tests (`IsBeside`, `IsInFront`, `IsAhead`, `IsPointWithinReach`), and sounds at
+  quarters of an animation. `SetWalkTargetAwayFrom` is NitroSDK's `VEC_Normalize` written out in two dimensions.
+- **The record's fields** are named by `SavedCharacter::Validate`, which checks each field and passes its name to the
+  clamping template: "character" (the personality answers, +0x4A), "voice", "motto1" and "motto" (the texts),
+  "RelationMeter" (+0xFC, 0 to 200), "RelationRank" (+0x160, 0 to 10), "LongActState" (+0x224, 0 to 0x2E),
+  "TroubleState" (+0x23A, 0 to 5), "TroubleID", "TroubleCategory", "SatisfyMeter", "SatisfyLevel", "EatFullness",
+  "EatLastFood", "MeetYear"/"Month"/"Day", "PatYear"/"Month"/"Day", "TouchTalkMonth"/"Day"/"Hour", "RelationBlood".
+- **The Mii's parameters** (`GetParameter`, `SetParameter`) are numbered as the Mii data's getter and setter tables
+  (`MiiParameter`); for a Mii made on another console the birth month and day are the record's own.
+- **The long activities** (`mLongActState`): odd states 0x17 to 0x2D are done with a partner, the even ones after them
+  are the partner's side, 0x13 to 0x16 are away; `ChooseLongAct` draws one by weights for the personality's kind and
+  the mood (`data_020F8CC0`: minutes, weight, personality bits, mood bits).
+- **The collation**: `CharacterSort::GetCollationKey`, a switch of 522 characters (punctuation, Latin, Greek, kana,
+  ...) to ranks, times ten plus five for a full-width letter; names are compared after normalizing in up to five
+  rounds of decreasing strength.
+
+Inferred:
+
+- The `func_0209E0E8`/`func_0209E114` pair at the end of `SavedCharacter.cpp` is one template instantiated for `s16`
+  and `u8`: out-of-line template code is emitted after the file's last function.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:

@@ -167,10 +167,6 @@ void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02091968(SceneCharacter *character); // Draws it
-void func_0208fefc(CharacterBase *character);
-void func_0208ff94(CharacterBase *character, void *a, void *b);
-void func_02090214(CharacterBase *character);
 void func_0207b258(ParticleSystem *system, void *a);
 }
 
@@ -238,9 +234,6 @@ extern Light data_021227cc;
 extern Light data_021227d8;
 BOOL func_02023fa4(ScreenControl *screens, int planes);
 void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
-void func_02091578(SceneCharacter *character, u16 angle);
-void func_02090a58(SceneCharacter *character, const char *phoneme, int face); // Lip sync
-void func_020910a8(SceneCharacter *character);
 void func_0207b138(ParticleSystem *system);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Writes one
@@ -253,39 +246,22 @@ void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
-void func_02091048(SceneCharacter *character, const char *archiveName);
-void Character_SetAnimation(SceneCharacter *character, u32 resType, int id); // Starts an animation
-void Character_SetAngle(SceneCharacter *character, u16 angle);
-void func_02091a88(SceneCharacter *character);
-void func_02091a24(SceneCharacter *character);
-void func_02091a6c(SceneCharacter *character);
 void func_0209e01c(CharacterRecord *character);
-s8 func_02098f2c(CharacterRecord *character); // Its personality
 extern const int data_020fba28[];
-void func_0209930c(CharacterRecord *character, int a, int b, s64 c);
-void func_0209b1d8(CharacterRecord *character);
 void func_02029f10(CharacterModel *model, GXRgb color);
 void func_02029f20(CharacterModel *model, GXRgb color);
 void func_02029f30(CharacterModel *model, GXRgb color);
 void func_02029f40(CharacterModel *model, GXRgb color);
-void func_02092178(wchar_t *name);
 }
 
 struct Renderer3d;
 extern "C" {
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
-void func_02090fdc(SceneCharacter *character, int slot, int a, int b);
-void Character_SetFace(SceneCharacter *character, int face);
 void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
-void func_02091a14(SceneCharacter *character, BOOL visible);
 BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
-void func_020979e0(CharacterRecord *character);
 extern void *data_02123440[];
 void Clock_GetDate(void *clock, RTCDate *date);
-void func_020984e0(CharacterRecord *character, int year, int month, int day);
-void func_0208fd90(CharacterBase *character, int a);
-int func_02098dac(SavedCharacter *character, int param);
 void func_0202a640(Camera *camera);
 extern Camera data_02122764;
 void func_0202a96c(Light *light);
@@ -298,7 +274,6 @@ ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, i
 void func_0207ac78(ParticleSystem *system, void *file);
 void func_0207b110(ParticleSystem *system);
 void func_0207b124(ParticleSystem *system);
-BOOL func_02098584(SavedCharacter *character);
 }
 
 static inline void SetCanvasPosition(ObjTextCanvas &canvas, WindowPoint position) {
@@ -321,8 +296,8 @@ void MiiEditScene::Init() {
     gSoundManager.LoadGroup(1);
     gSoundManager.StartSeq(0, 2);
     ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
-    func_02090fdc(&mCharacter, 0, 0, 2);
-    Character_SetFace(&mCharacter, 8);
+    mCharacter.Character::Init(0, 0, 2);
+    mCharacter.CharacterBase::SetFace(8);
     switch (mSceneId) {
     case 0x42:
         mUnknown5824 = gSceneMemory.mCharacters[0];
@@ -334,17 +309,17 @@ void MiiEditScene::Init() {
         u8 a;
         u8 b;
         func_0209cbac(&mCharacter, &a, &b);
-        mCharacter.mUnknown290 = a;
-        mCharacter.mUnknown291 = b;
+        mCharacter.mFavoriteItem = a;
+        mCharacter.mDislikedItem = b;
         break;
     }
     case 0x43:
     case 0x6F: {
         void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
         func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
-        Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
-        Character_SetAngle(&mCharacter, 0x4000);
-        func_02091a14(&mCharacter, FALSE);
+        mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
+        mCharacter.Character::SetAngle(0x4000);
+        mCharacter.Character::SetVisible(FALSE);
         int i;
         for (i = 0; i < 100; i++) {
             if (!func_0202c354(&gGameData, i)) {
@@ -356,34 +331,34 @@ void MiiEditScene::Init() {
         } else {
             OS_Terminate();
         }
-        func_020979e0(&mCharacter);
+        ((SavedCharacter *)(&mCharacter))->Reset();
         func_0209e01c(&mCharacter);
         RTCDate date;
         Clock_GetDate(data_02123440[0], &date);
-        func_020984e0(&mCharacter, date.year, date.month, date.day);
+        ((SavedCharacter *)(&mCharacter))->SetRegisteredDate(date.year, date.month, date.day);
         break;
     }
     }
-    func_02091a24(&mCharacter);
+    ((Character *)(&mCharacter))->UpdateBodyScale();
     mUnknown5828 = FALSE;
-    func_02091a6c(&mCharacter);
-    func_0208fd90(&mEditedCharacter, 0);
+    ((Character *)(&mCharacter))->UpdateAnimSpeed();
+    ((CharacterBase *)(&mEditedCharacter))->InitFace(0);
     *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
-    func_0208fefc(&mEditedCharacter);
+    mEditedCharacter.CharacterBase::MakeFace();
     VecFx32 v = mCharacter.mFaceOffset;
     mEditedCharacter.mFaceOffset = v;
     mEditedCharacter.mHeadPitchNow = mCharacter.mHeadPitchNow;
     mEditedCharacter.mHeadYawNow = mCharacter.mHeadYawNow;
     mEditedCharacter.mHeadRollNow = mCharacter.mHeadRollNow;
     mEditedCharacter.mFaceRoll = mCharacter.mFaceRoll;
-    func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
+    mEditedCharacter.CharacterBase::SetHeadMatrices(&mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
     mUnknown580C = TRUE;
     mCamera = &data_02122764;
     func_0202a640(mCamera);
     mCamera->mUnknown00 = 0x11E;
     mCamera->mUnknown04 = 0xFF6;
     VEC_Set(&mCamera->mPosition, 0, 0x1EA4, 0xE58A);
-    mCamera->mPosition.y += ((u32)func_02098dac(&mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+    mCamera->mPosition.y += ((u32)((SavedCharacter *)(&mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
     mCamera->mTarget.x = mCamera->mPosition.x;
     mCamera->mTarget.y = mCamera->mPosition.y;
     mCamera->mTarget.z = mCamera->mPosition.z - FX32_CONST(8);
@@ -496,7 +471,7 @@ void MiiEditScene::Init() {
         mProgressSprite.SetPlace(4);
         mUnknown58E0 = FALSE;
         SetPage(2);
-        if (!func_02098584(&mCharacter)) {
+        if (!((SavedCharacter *)(&mCharacter))->IsMiiFromThisConsole()) {
             func_02031e88(&mButtons[0], TRUE);
         }
         break;
@@ -553,13 +528,13 @@ void MiiEditScene::Update() {
         break;
     }
     if (mUnknown5828) {
-        func_02091578(&mCharacter, 0xFE00);
+        mCharacter.Character::Turn(0xFE00);
         if (mCharacter.mAngle == 0x4000) {
             mUnknown5828 = FALSE;
         }
     }
-    func_02090a58(&mCharacter, mTtsPlayer.GetPhonemeName(), 1);
-    func_020910a8(&mCharacter);
+    ((CharacterBase *)(&mCharacter))->LipSync(mTtsPlayer.GetPhonemeName(), 1);
+    ((Character *)(&mCharacter))->Update();
     func_0207b138(mParticles);
     UpdateCamera();
     func_0202aa28(&data_021227cc, mCamera, sLightDirection0);
@@ -653,22 +628,22 @@ void MiiEditScene::Draw() {
         Sprite_Draw(&mProgressSprite);
     }
     mText1B94C[0].ObjTextCanvas::Draw();
-    func_02091968(&mCharacter);
+    mCharacter.Character::Draw();
     if (IsFaceClear(&mCharacter)) {
         if (mUnknown580C == TRUE) {
             *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
-            func_0208fefc(&mEditedCharacter);
+            mEditedCharacter.CharacterBase::MakeFace();
             VecFx32 v = mCharacter.mFaceOffset;
             mEditedCharacter.mFaceOffset = v;
             mEditedCharacter.mHeadPitchNow = mCharacter.mHeadPitchNow;
             mEditedCharacter.mHeadYawNow = mCharacter.mHeadYawNow;
             mEditedCharacter.mHeadRollNow = mCharacter.mHeadRollNow;
-            func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
+            mEditedCharacter.CharacterBase::SetHeadMatrices(&mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
             mUnknown580C = FALSE;
         }
     } else {
-        func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
-        func_02090214(&mEditedCharacter);
+        mEditedCharacter.CharacterBase::SetHeadMatrices(&mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
+        mEditedCharacter.CharacterBase::Draw();
     }
     func_0202ad84(data_021223e4);
     NNS_G3dGlbFlushP();
@@ -856,7 +831,7 @@ void MiiEditScene::LoadModel() {
         case 0:
             func_0202aecc(data_021223e4, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
-            func_02091048(&mCharacter, "B0I");
+            mCharacter.Character::SetArchive("B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
             ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
             mCharacter.MakeModel(0, 0);
@@ -864,7 +839,7 @@ void MiiEditScene::LoadModel() {
         case 1:
             func_0202aecc(data_021223e4, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
-            func_02091048(&mCharacter, "B0I");
+            mCharacter.Character::SetArchive("B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
             ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
             mCharacter.MakeModel(0, 0);
@@ -873,19 +848,19 @@ void MiiEditScene::LoadModel() {
     } else {
         func_0202aecc(data_021223e4, 0);
         ArchiveManager_Unmount(&gArchiveManager, "B0I");
-        func_02091048(&mCharacter, "B0I");
+        mCharacter.Character::SetArchive("B0I");
         ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
         ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
         mCharacter.MakeModel(0, 0);
     }
     void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
     func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
-    Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
-    Character_SetAngle(&mCharacter, 0x4000);
-    func_0208fefc(&mCharacter);
-    func_02091a88(&mCharacter);
-    func_02091a24(&mCharacter);
-    func_02091a6c(&mCharacter);
+    mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
+    mCharacter.Character::SetAngle(0x4000);
+    mCharacter.CharacterBase::MakeFace();
+    mCharacter.Character::UpdateBodyColors();
+    mCharacter.Character::UpdateBodyScale();
+    mCharacter.Character::UpdateAnimSpeed();
 }
 
 static inline void SetFlag(u32 *flags, u8 flag) {
@@ -901,7 +876,7 @@ void MiiEditScene::SaveCharacter() {
         mCharacter.mUnknown050Bit0 = 0;
         func_0209e01c(&mCharacter);
     }
-    int kind = data_020fba28[func_02098f2c(&mCharacter)];
+    int kind = data_020fba28[((SavedCharacter *)(&mCharacter))->GetPersonality()];
     int style = 8;
     switch (kind) {
     case 0:
@@ -933,18 +908,18 @@ void MiiEditScene::SaveCharacter() {
     }
     switch (mSceneId) {
     case 0x6F:
-        func_0209930c(&mCharacter, 0x13, 0, 0x7FFFFFFFFFFFFFFF);
+        mCharacter.SetLongAct(0x13, 0, 0x7FFFFFFFFFFFFFFF);
         mCharacter.mTroubleState = 1;
         mCharacter.mTroubleCategory = 0;
         mCharacter.mTroubleId = 0;
-        mCharacter.mUnknown238 = 0;
-        mCharacter.mAwayUntil = 0x7FFFFFFFFFFFFFFF;
+        mCharacter.mTroublePartner = 0;
+        mCharacter.mTroubleEnd = 0x7FFFFFFFFFFFFFFF;
         break;
     case 0x43:
     case 0x44:
-        func_0209930c(&mCharacter, 0x13, 0, 0x7FFFFFFFFFFFFFFF);
-        func_0209b1d8(&mCharacter);
-        mCharacter.mAwayUntil = 0x7FFFFFFFFFFFFFFF;
+        ((SavedCharacter *)(&mCharacter))->SetLongAct(0x13, 0, 0x7FFFFFFFFFFFFFFF);
+        mCharacter.ClearTrouble();
+        mCharacter.mTroubleEnd = 0x7FFFFFFFFFFFFFFF;
         break;
     }
     func_0202c28c(&gGameData, mUnknown5824, &mCharacter);
@@ -1038,14 +1013,8 @@ void MiiEditSexPage::Init(MiiEditScene *scene) {
 extern "C" {
 void func_020341d4(MessageWindow *window);
 void func_020349cc(MessageWindow *window, int flags);
-void func_02098cd0(CharacterRecord *character, int sex);
-void func_0208ff44(SceneCharacter *character, int a, int b);
-void func_02098d68(CharacterRecord *character, int index, s16 value);
 extern const s16 data_020fbaac[];
-void func_0209859c(CharacterRecord *character);
 void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
-void func_02098c40(CharacterRecord *character, int kind, int value);
-void func_02091a14(SceneCharacter *character, BOOL visible);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_SetName(CharacterRecord *character, const wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
@@ -1065,33 +1034,33 @@ void MiiEditSexPage::Update() {
             } else {
                 mWindows[0].mUnknownSetBeforeClose = 15;
                 func_020349cc(&mWindows[0], 0x24);
-                func_02098cd0(&mScene->mCharacter, result);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetSex(result);
                 switch (MiiData_GetSex(&mScene->mCharacter)) {
                 case 0:
-                    func_0208ff44(&mScene->mCharacter, 2, 1);
+                    ((CharacterBase *)(&mScene->mCharacter))->SetDefaultMii(2, 1);
                     for (int i = 0; i < 6; i++) {
-                        func_02098d68(&mScene->mCharacter, i, data_020fbaac[i + 12]);
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, data_020fbaac[i + 12]);
                     }
                     break;
                 case 1:
-                    func_0208ff44(&mScene->mCharacter, 5, 1);
+                    ((CharacterBase *)(&mScene->mCharacter))->SetDefaultMii(5, 1);
                     for (int i = 0; i < 6; i++) {
-                        func_02098d68(&mScene->mCharacter, i, data_020fbaac[i + 18]);
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, data_020fbaac[i + 18]);
                     }
                     mScene->mUnknown580C = TRUE;
                     break;
                 }
-                func_0209859c(&mScene->mCharacter);
+                ((SavedCharacter *)(&mScene->mCharacter))->AssignCreateId();
                 u8 a;
                 u8 b;
                 func_0209cbac(&mScene->mCharacter, &a, &b);
-                mScene->mCharacter.mUnknown290 = a;
-                mScene->mCharacter.mUnknown291 = b;
-                func_02098c40(&mScene->mCharacter, 0x28, 0);
-                func_02098c40(&mScene->mCharacter, 0x24, 0);
+                mScene->mCharacter.mFavoriteItem = a;
+                mScene->mCharacter.mDislikedItem = b;
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x28, 0);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x24, 0);
                 MiiData_SetName(&mScene->mCharacter, L"");
                 mScene->LoadModel();
-                func_02091a14(&mScene->mCharacter, FALSE);
+                ((Character *)(&mScene->mCharacter))->SetVisible(FALSE);
                 mScene->SetCharacterColors(TRUE);
                 if (mScene->mUnknown5824 != 0) {
                     wchar_t name[11];
@@ -1112,7 +1081,7 @@ void MiiEditSexPage::Update() {
         if (!mWindows[0].mTransitionDone) {
             return;
         }
-        func_02091a14(&mScene->mCharacter, TRUE);
+        ((Character *)(&mScene->mCharacter))->SetVisible(TRUE);
         mScene->SetPage(1);
         break;
     case 1:
@@ -1132,7 +1101,7 @@ void MiiEditSexPage::Update() {
         if (!mWindows[1].mTransitionDone) {
             return;
         }
-        func_02091a14(&mScene->mCharacter, TRUE);
+        ((Character *)(&mScene->mCharacter))->SetVisible(TRUE);
         mScene->SetPage(mNextPage);
         break;
     }
@@ -1239,7 +1208,7 @@ void MiiEditProgressSprite::AdvanceTo(int place) {
 int MiiEditScene::GetNameLength(const wchar_t *name) {
     wchar_t buffer[11];
     wcsncpy(buffer, name, 11);
-    func_02092178(buffer);
+    CharacterSort::RemoveSpaces(buffer);
     return wcslen(buffer);
 }
 
@@ -1383,15 +1352,15 @@ void MiiEditFacePage::Update() {
             switch (mUndoMode) {
             case 1:
                 SetParameter(mUndoParameter, mUndoValue);
-                func_02091a24(&mScene->mCharacter);
-                func_02091a6c(&mScene->mCharacter);
+                ((Character *)(&mScene->mCharacter))->UpdateBodyScale();
+                ((Character *)(&mScene->mCharacter))->UpdateAnimSpeed();
                 ShowPart(mCategory, 1);
                 SetUndoMode(2);
                 break;
             case 2:
                 SetParameter(mUndoParameter, mUndoValue);
-                func_02091a24(&mScene->mCharacter);
-                func_02091a6c(&mScene->mCharacter);
+                ((Character *)(&mScene->mCharacter))->UpdateBodyScale();
+                ((Character *)(&mScene->mCharacter))->UpdateAnimSpeed();
                 ShowPart(mCategory, 1);
                 SetUndoMode(1);
                 break;
@@ -1410,7 +1379,7 @@ void MiiEditFacePage::Update() {
                 }
                 Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
                 ShowPartButtons(mUnknown314C[0], 12, mCategory);
-                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), mCategory);
+                u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x19), mCategory);
                 int index = button % 12;
                 int page = button / 12;
                 if (page == mUnknown314C[0]) {
@@ -1428,7 +1397,7 @@ void MiiEditFacePage::Update() {
                 }
                 Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
                 ShowPartButtons(mUnknown314C[1], 12, mCategory);
-                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), mCategory);
+                u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(6), mCategory);
                 int index = button % 12;
                 int page = button / 12;
                 if (page == mUnknown314C[1]) {
@@ -1446,7 +1415,7 @@ void MiiEditFacePage::Update() {
                 }
                 Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
                 ShowPartButtons(mUnknown314C[2], 12, mCategory);
-                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), mCategory);
+                u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0), mCategory);
                 int index = button % 12;
                 int page = button / 12;
                 if (page == mUnknown314C[2]) {
@@ -1464,7 +1433,7 @@ void MiiEditFacePage::Update() {
                 }
                 Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
                 ShowPartButtons(mUnknown314C[3], 12, mCategory);
-                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), mCategory);
+                u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xC), mCategory);
                 int index = button % 12;
                 int page = button / 12;
                 if (page == mUnknown314C[3]) {
@@ -1550,7 +1519,7 @@ void MiiEditFacePage::Update() {
             }
             break;
         case 3:
-            if (func_02098dac(&mScene->mCharacter, 6) == 0x17) {
+            if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(6) == 0x17) {
                 limit = TRUE;
                 break;
             }
@@ -1644,7 +1613,7 @@ void MiiEditFacePage::Update() {
         case 7:
             switch (mEtcTab.mTab) {
             case 0:
-                if (func_02098dac(&mScene->mCharacter, 0x1F) == 0) {
+                if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1F) == 0) {
                     limit = TRUE;
                     break;
                 }
@@ -1664,7 +1633,7 @@ void MiiEditFacePage::Update() {
                 }
                 break;
             case 1:
-                if (func_02098dac(&mScene->mCharacter, 0x12) == 0) {
+                if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x12) == 0) {
                     limit = TRUE;
                     break;
                 }
@@ -1684,7 +1653,7 @@ void MiiEditFacePage::Update() {
                 }
                 break;
             case 2:
-                if (func_02098dac(&mScene->mCharacter, 0x15) == 0) {
+                if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x15) == 0) {
                     limit = TRUE;
                     break;
                 }
@@ -1803,16 +1772,16 @@ void MiiEditFacePage::Update() {
                 switch (i) {
                 case 0: {
                     int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
-                    func_02098dac(&mScene->mCharacter, 0x2A);
-                    func_02091a24(&mScene->mCharacter);
-                    func_02098c40(&mScene->mCharacter, 0x29, value);
+                    ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x2A);
+                    ((Character *)(&mScene->mCharacter))->UpdateBodyScale();
+                    ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x29, value);
                     break;
                 }
                 case 1: {
-                    func_02098dac(&mScene->mCharacter, 0x29);
+                    ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29);
                     int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
-                    func_02091a24(&mScene->mCharacter);
-                    func_02098c40(&mScene->mCharacter, 0x2A, value);
+                    ((Character *)(&mScene->mCharacter))->UpdateBodyScale();
+                    ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x2A, value);
                     break;
                 }
                 }
@@ -1904,25 +1873,25 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
             mSprites2DF4[i].mSprite.mVisible = TRUE;
             mSprites2FF4[i].mVisible = TRUE;
         }
-        func_02032514(&mSprites2DF4[0], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x29));
-        func_02032514(&mSprites2DF4[1], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x2A));
+        func_02032514(&mSprites2DF4[0], 0, 0x7F, ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29));
+        func_02032514(&mSprites2DF4[1], 0, 0x7F, ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x2A));
         SelectColorButton(0, part, -1);
         break;
     case 1: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
         mFaceTab.SelectTab(mFaceTab.mTab, a);
         break;
     }
     case 2: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
-        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), part);
+        u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x19), part);
         int page = button / 12;
         int index = button % 12;
-        int color = func_02098dac(&mScene->mCharacter, 0x1A);
+        int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1A);
         func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
@@ -1952,12 +1921,12 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
     }
     case 3: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
-        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), part);
+        u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(6), part);
         int page = button / 12;
         int index = button % 12;
-        int color = func_02098dac(&mScene->mCharacter, 7);
+        int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(7);
         func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
@@ -1990,12 +1959,12 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
     }
     case 4: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
-        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), part);
+        u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0), part);
         int page = button / 12;
         int index = button % 12;
-        int color = func_02098dac(&mScene->mCharacter, 1);
+        int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(1);
         func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xE0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 6) {
@@ -2028,9 +1997,9 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
     }
     case 5: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
-        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x1C), part);
+        u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1C), part);
         int index = button % 12;
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 0) {
@@ -2058,12 +2027,12 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
     }
     case 6: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
-        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), part);
+        u32 button = GetPartButton(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xC), part);
         int page = button / 12;
         int index = button % 12;
-        int color = func_02098dac(&mScene->mCharacter, 0xD);
+        int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xD);
         func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x120, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 3) {
@@ -2096,7 +2065,7 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
     }
     case 7: {
         VecFx32 goal = data_ov076_02158850;
-        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        goal.y += ((u32)((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x29) * 0x1130 >> 7) - 0x898;
         mScene->MoveCameraTo(goal);
         mEtcTab.SelectTab(mEtcTab.mTab, a);
         break;
@@ -2130,10 +2099,6 @@ void MiiEditFacePage::Exit() {}
 extern "C" {
 BOOL func_02031d00(SpriteButton *button); // Whether it is selected (mUnknownB0)
 void func_02031ca4(SpriteButton *button); // Shows its pressed sequence, playing
-// A Mii parameter of the character (numbered as the Mii data's getters and setters are, data_020fbc2c)
-int func_02098dac(SavedCharacter *character, int param);
-void func_020986c4(SavedCharacter *character, int param, int *min, int *max); // Its range
-void func_0208fed8(CharacterBase *character, int parameter, int value, BOOL a);  // Sets it
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 }
 
@@ -2220,7 +2185,7 @@ int MiiEditFacePage::GetPartButton(int type, int category) {
     int max, min;
     switch (category) {
     case 2:
-        func_020986c4(&mScene->mCharacter, 0x19, &min, &max);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x19, &min, &max);
         for (int i = min; i <= max; i++) {
             if (type == sHairTypes[i]) {
                 type = i;
@@ -2229,7 +2194,7 @@ int MiiEditFacePage::GetPartButton(int type, int category) {
         }
         break;
     case 3:
-        func_020986c4(&mScene->mCharacter, 6, &min, &max);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(6, &min, &max);
         for (int i = min; i <= max; i++) {
             if (type == sEyebrowTypes[i]) {
                 type = i;
@@ -2238,7 +2203,7 @@ int MiiEditFacePage::GetPartButton(int type, int category) {
         }
         break;
     case 4:
-        func_020986c4(&mScene->mCharacter, 0, &min, &max);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0, &min, &max);
         for (int i = min; i <= max; i++) {
             if (type == sEyeTypes[i]) {
                 type = i;
@@ -2247,7 +2212,7 @@ int MiiEditFacePage::GetPartButton(int type, int category) {
         }
         break;
     case 5:
-        func_020986c4(&mScene->mCharacter, 0x1C, &min, &max);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x1C, &min, &max);
         for (int i = min; i <= max; i++) {
             if (type == sNoseTypes[i]) {
                 type = i;
@@ -2256,7 +2221,7 @@ int MiiEditFacePage::GetPartButton(int type, int category) {
         }
         break;
     case 6:
-        func_020986c4(&mScene->mCharacter, 0xC, &min, &max);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0xC, &min, &max);
         for (int i = min; i <= max; i++) {
             if (type == sMouthTypes[i]) {
                 type = i;
@@ -2300,7 +2265,7 @@ void MiiEditFacePage::SetParameter(int parameter, int value) {
     case 0x23:
     case 0x25:
         mUndoParameter = parameter;
-        mUndoValue = func_02098dac(&mScene->mCharacter, parameter);
+        mUndoValue = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(parameter);
         SetUndoMode(1);
         break;
     }
@@ -2308,41 +2273,39 @@ void MiiEditFacePage::SetParameter(int parameter, int value) {
     case 0: {
         int delta = sEyeRotations[mUndoValue] - sEyeRotations[value];
         int min, max;
-        func_020986c4(&mScene->mCharacter, 3, &min, &max);
-        func_0208fed8(&mScene->mCharacter, 3, CLAMP(func_02098dac(&mScene->mCharacter, 3) + delta, min, max),
-                      FALSE);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(3, &min, &max);
+        ((CharacterBase *)(&mScene->mCharacter))->SetMiiParameter(3, CLAMP(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(3) + delta, min, max), FALSE);
         break;
     }
     case 6: {
         int delta = sEyebrowRotations[mUndoValue] - sEyebrowRotations[value];
         int min, max;
-        func_020986c4(&mScene->mCharacter, 9, &min, &max);
-        func_0208fed8(&mScene->mCharacter, 9, CLAMP(func_02098dac(&mScene->mCharacter, 9) + delta, min, max),
-                      FALSE);
+        ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(9, &min, &max);
+        ((CharacterBase *)(&mScene->mCharacter))->SetMiiParameter(9, CLAMP(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(9) + delta, min, max), FALSE);
         break;
     }
     }
-    func_0208fed8(&mScene->mCharacter, parameter, value, TRUE);
-    func_02091a88(&mScene->mCharacter);
+    ((CharacterBase *)(&mScene->mCharacter))->SetMiiParameter(parameter, value, TRUE);
+    ((Character *)(&mScene->mCharacter))->UpdateBodyColors();
     mScene->mUnknown580C = TRUE;
     switch (parameter) {
     case 0:
-        mScene->PlayEffectAtHead(0, (12 - func_02098dac(&mScene->mCharacter, 5)) * FX32_ONE / 30 + 0x333);
+        mScene->PlayEffectAtHead(0, (12 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(5)) * FX32_ONE / 30 + 0x333);
         break;
     case 1:
         mScene->PlayEffectAtHead(0, 0x333);
         break;
     case 6:
-        mScene->PlayEffectAtHead(0, (10 - func_02098dac(&mScene->mCharacter, 0xB)) * FX32_ONE / 30 + 0x4CC);
+        mScene->PlayEffectAtHead(0, (10 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xB)) * FX32_ONE / 30 + 0x4CC);
         break;
     case 7:
-        if (func_02098dac(&mScene->mCharacter, 6) == 0x17) {
+        if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(6) == 0x17) {
             break;
         }
         mScene->PlayEffectAtHead(0, 0x4CC);
         break;
     case 12:
-        mScene->PlayEffectAtHead(0, (13 - func_02098dac(&mScene->mCharacter, 0xF)) * FX32_ONE / 30 - 0x333);
+        mScene->PlayEffectAtHead(0, (13 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xF)) * FX32_ONE / 30 - 0x333);
         break;
     case 13:
         mScene->PlayEffectAtHead(0, -0x333);
@@ -2351,34 +2314,34 @@ void MiiEditFacePage::SetParameter(int parameter, int value) {
         mScene->PlayEffectAtHead(0, -0x666);
         break;
     case 17:
-        if (func_02098dac(&mScene->mCharacter, 0x10) == 0 && func_02098dac(&mScene->mCharacter, 0x12) == 0) {
+        if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x10) == 0 && ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x12) == 0) {
             break;
         }
         mScene->PlayEffectAtHead(0, -0x666);
         break;
     case 18:
-        mScene->PlayEffectAtHead(0, (10 - func_02098dac(&mScene->mCharacter, 0x14)) * FX32_ONE / 30 - 0x333);
+        mScene->PlayEffectAtHead(0, (10 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x14)) * FX32_ONE / 30 - 0x333);
         break;
     case 21:
-        mScene->PlayEffectAtHead(0, (20 - func_02098dac(&mScene->mCharacter, 0x18)) * FX32_ONE / 30);
+        mScene->PlayEffectAtHead(0, (20 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x18)) * FX32_ONE / 30);
         break;
     case 25:
         mScene->PlayEffectAtHead(0, 0x800);
         break;
     case 26:
-        if (func_02098dac(&mScene->mCharacter, 0x19) == 0x1E) {
+        if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x19) == 0x1E) {
             break;
         }
         mScene->PlayEffectAtHead(0, 0x800);
         break;
     case 28:
-        mScene->PlayEffectAtHead(0, (9 - func_02098dac(&mScene->mCharacter, 0x1E)) * FX32_ONE / 30);
+        mScene->PlayEffectAtHead(0, (9 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1E)) * FX32_ONE / 30);
         break;
     case 31:
-        mScene->PlayEffectAtHead(0, (10 - func_02098dac(&mScene->mCharacter, 0x22)) * FX32_ONE / 30 + 0x333);
+        mScene->PlayEffectAtHead(0, (10 - ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x22)) * FX32_ONE / 30 + 0x333);
         break;
     case 32:
-        if (func_02098dac(&mScene->mCharacter, 0x1F) == 0) {
+        if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1F) == 0) {
             break;
         }
         mScene->PlayEffectAtHead(0, 0x333);
@@ -2395,10 +2358,10 @@ void MiiEditFacePage::SetParameter(int parameter, int value) {
 // Moves a Mii parameter by a step, around its range or up to its ends; returns whether it stopped at an end
 BOOL MiiEditFacePage::StepParameter(int parameter, int step, BOOL wrap) {
     BOOL stopped = FALSE;
-    int value = func_02098dac(&mScene->mCharacter, parameter);
+    int value = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(parameter);
     int min, max;
     value += step;
-    func_020986c4(&mScene->mCharacter, parameter, &min, &max);
+    ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(parameter, &min, &max);
     if (wrap) {
         if (value < min) {
             value += max - min + 1;
@@ -2414,7 +2377,7 @@ BOOL MiiEditFacePage::StepParameter(int parameter, int step, BOOL wrap) {
             stopped = TRUE;
         }
     }
-    func_0208fed8(&mScene->mCharacter, parameter, (u16)value, TRUE);
+    ((CharacterBase *)(&mScene->mCharacter))->SetMiiParameter(parameter, (u16)value, TRUE);
     mScene->mUnknown580C = TRUE;
     return stopped;
 }
@@ -2479,10 +2442,10 @@ void MiiEditFaceTab::SelectTab(int tab, BOOL pressed) {
         }
         break;
     }
-    int color = func_02098dac(&mPage->mScene->mCharacter, 0x24);
+    int color = ((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x24);
     switch (tab) {
     case 0: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x23), 1);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x23), 1);
         button %= 8;
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
@@ -2492,7 +2455,7 @@ void MiiEditFaceTab::SelectTab(int tab, BOOL pressed) {
         break;
     }
     case 1: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x25), 1);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x25), 1);
         button %= 12;
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
@@ -2592,9 +2555,9 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
     }
     switch (tab) {
     case 0: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x1F), 7);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x1F), 7);
         button %= 9;
-        int color = func_02098dac(&mPage->mScene->mCharacter, 0x20);
+        int color = ((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x20);
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
         } else {
@@ -2617,9 +2580,9 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         break;
     }
     case 1: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x12), 7);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x12), 7);
         button %= 4;
-        int color = func_02098dac(&mPage->mScene->mCharacter, 0x11);
+        int color = ((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x11);
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
         } else {
@@ -2642,7 +2605,7 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         break;
     }
     case 2: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x15), 7);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x15), 7);
         button %= 2;
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
@@ -2666,9 +2629,9 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         break;
     }
     case 3: {
-        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x10), 7);
+        u32 button = mPage->GetPartButton(((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x10), 7);
         button %= 4;
-        int color = func_02098dac(&mPage->mScene->mCharacter, 0x11);
+        int color = ((SavedCharacter *)(&mPage->mScene->mCharacter))->GetParameter(0x11);
         if (!pressed) {
             func_02031e28(&mPage->mButtons227C[button], TRUE);
         } else {
@@ -2712,8 +2675,6 @@ BOOL func_02024118(ScreenControl *screens, int planes, int level);
 
 extern "C" u16 KeyboardCore_GetChar(void); // The character typed (8 erases, 7 and 9 add the voicing marks, 11 makes it small)
 BOOL func_02031294(SpriteButton *button);
-void func_02098cf4(CharacterBase *character, u16 year);
-void func_02098d44(CharacterBase *character, int a);
 wchar_t *wcscpy(wchar_t *dst, const wchar_t *src);
 }
 
@@ -2978,7 +2939,7 @@ void MiiEditProfilePage::Update() {
                     year = 1900;
                 }
                 SetNumberDigits(year);
-                func_02098cf4(&mScene->mCharacter, year);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(year);
                 UpdateDayButton();
                 break;
             }
@@ -2988,7 +2949,7 @@ void MiiEditProfilePage::Update() {
                     year = 2099;
                 }
                 SetNumberDigits(year);
-                func_02098cf4(&mScene->mCharacter, year);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(year);
                 UpdateDayButton();
                 break;
             }
@@ -2997,7 +2958,7 @@ void MiiEditProfilePage::Update() {
         if (READ(mWindows[2].mResult) != -1) {
             switch (READ(mWindows[2].mResult)) {
             case 2:
-                func_02098cf4(&mScene->mCharacter, 0xFFF);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(0xFFF);
                 mWindows[2].mUnknownSetBeforeClose = 15;
                 func_020349cc(&mWindows[2], 0x24);
                 break;
@@ -3018,59 +2979,59 @@ void MiiEditProfilePage::Update() {
         if (result != -1) {
             switch (result) {
             case 0: {
-                int month = func_02098dac(&mScene->mCharacter, 0x26) + 1;
+                int month = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26) + 1;
                 if (month > 12) {
                     month = 1;
                 }
                 SetMonthDigits(month);
-                func_02098c40(&mScene->mCharacter, 0x26, month);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, month);
                 int min, max;
-                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
-                int day = func_02098dac(&mScene->mCharacter, 0x27);
+                ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x27, &min, &max);
+                int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27);
                 if (day > max) {
                     day = max;
                 }
                 SetDayDigits(day);
-                func_02098c40(&mScene->mCharacter, 0x27, day);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, day);
                 break;
             }
             case 1: {
-                int month = func_02098dac(&mScene->mCharacter, 0x26) - 1;
+                int month = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26) - 1;
                 if (month < 1) {
                     month = 12;
                 }
                 SetMonthDigits(month);
-                func_02098c40(&mScene->mCharacter, 0x26, month);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, month);
                 int min, max;
-                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
-                int day = func_02098dac(&mScene->mCharacter, 0x27);
+                ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x27, &min, &max);
+                int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27);
                 if (day > max) {
                     day = max;
                 }
                 SetDayDigits(day);
-                func_02098c40(&mScene->mCharacter, 0x27, day);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, day);
                 break;
             }
             case 2: {
                 int min, max;
-                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
-                int day = func_02098dac(&mScene->mCharacter, 0x27) + 1;
+                ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x27, &min, &max);
+                int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) + 1;
                 if (day > max) {
                     day = 1;
                 }
                 SetDayDigits(day);
-                func_02098c40(&mScene->mCharacter, 0x27, day);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, day);
                 break;
             }
             case 3: {
                 int min, max;
-                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
-                int day = func_02098dac(&mScene->mCharacter, 0x27) - 1;
+                ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x27, &min, &max);
+                int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) - 1;
                 if (day < 1) {
                     day = max;
                 }
                 SetDayDigits(day);
-                func_02098c40(&mScene->mCharacter, 0x27, day);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, day);
                 break;
             }
             }
@@ -3078,8 +3039,8 @@ void MiiEditProfilePage::Update() {
         if (READ(mWindows[3].mResult) != -1) {
             switch (READ(mWindows[3].mResult)) {
             case 4:
-                func_02098c40(&mScene->mCharacter, 0x26, 0);
-                func_02098c40(&mScene->mCharacter, 0x27, 0);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, 0);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, 0);
                 mWindows[3].mUnknownSetBeforeClose = 15;
                 func_020349cc(&mWindows[3], 0x24);
                 break;
@@ -3101,19 +3062,19 @@ void MiiEditProfilePage::Update() {
         if (READ(mWindows[0].mUnknownAF7C) != -1 && (choice = READ(mWindows[0].mUnknownAF7C)) != 4) {
             switch (choice) {
             case 0:
-                func_02098d44(&mScene->mCharacter, 0);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(0);
                 break;
             case 1:
-                func_02098d44(&mScene->mCharacter, 1);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(1);
                 break;
             case 2:
-                func_02098d44(&mScene->mCharacter, 2);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(2);
                 break;
             case 3:
-                func_02098d44(&mScene->mCharacter, 3);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(3);
                 break;
             case 4:
-                func_02098d44(&mScene->mCharacter, 4);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(4);
                 break;
             }
             for (i = 0; i < 4; i++) {
@@ -3127,7 +3088,7 @@ void MiiEditProfilePage::Update() {
             func_020349cc(&mWindows[0], 0x24);
         }
         if (READ(mWindows[0].mResult) != -1 && READ(mWindows[0].mResult) == 4) {
-            func_02098d44(&mScene->mCharacter, 4);
+            ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(4);
             mWindows[0].mUnknownSetBeforeClose = 15;
             func_020349cc(&mWindows[0], 0x24);
         }
@@ -3148,8 +3109,8 @@ void MiiEditProfilePage::Update() {
         int choice;
         if (READ(mWindows[1].mUnknownAF7C) != -1 && (choice = READ(mWindows[1].mUnknownAF7C)) < 12) {
             if (choice >= 0 && choice < 12) {
-                func_02098c40(&mScene->mCharacter, 0x28, choice);
-                func_02091a88(&mScene->mCharacter);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x28, choice);
+                ((Character *)(&mScene->mCharacter))->UpdateBodyColors();
                 mScene->LoadModel();
             }
             for (i = 0; i < 12; i++) {
@@ -3221,11 +3182,11 @@ void MiiEditProfilePage::Update() {
         if (READ(mWindows[5].mUnknownAF7C) != -1 && (choice = READ(mWindows[5].mUnknownAF7C)) < 2) {
             switch (choice) {
             case 0:
-                func_02098cd0(&mScene->mCharacter, 0);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetSex(0);
                 mScene->LoadModel();
                 break;
             case 1:
-                func_02098cd0(&mScene->mCharacter, 1);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetSex(1);
                 mScene->LoadModel();
                 break;
             }
@@ -3256,8 +3217,6 @@ void func_02024c14(u32 *manager, void *a, int planes);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
 void func_02032140(SpriteButton *button, int a, int b, int c, int d); // Its four sounds
-BOOL func_02098584(SavedCharacter *character);
-BOOL func_02098e50(SavedCharacter *character, int param);
 // The keyboard
 
 
@@ -3338,12 +3297,12 @@ void MiiEditProfilePage::SetState(int state) {
         if (mScene->mSceneId != 0x43 && mScene->mSceneId != 0x6F) {
             func_02031e88(&mButtons[9], TRUE);
         }
-        if (!func_02098584(&mScene->mCharacter)) {
+        if (!((SavedCharacter *)(&mScene->mCharacter))->IsMiiFromThisConsole()) {
             func_02031e88(&mButtons[4], TRUE);
             func_02031e88(&mButtons[5], TRUE);
             func_02031e88(&mButtons[7], TRUE);
-            int month = func_02098e50(&mScene->mCharacter, 0x26);
-            int day = func_02098e50(&mScene->mCharacter, 0x27);
+            int month = ((SavedCharacter *)(&mScene->mCharacter))->GetRawParameter(0x26);
+            int day = ((SavedCharacter *)(&mScene->mCharacter))->GetRawParameter(0x27);
             if (month != 0 && day != 0) {
                 func_02031e88(&mButtons[6], TRUE);
             }
@@ -3475,7 +3434,7 @@ void MiiEditProfilePage::SetState(int state) {
             if (mScene->GetNameLength(mScene->mCharacter.mFamilyName) &&
                 mScene->GetNameLength(mScene->mCharacter.mName) &&
                 mScene->GetNameLength(name) && mScene->mCharacter.mBirthYear != 0xFFF &&
-                func_02098dac(&mScene->mCharacter, 0x26) != 0 && func_02098dac(&mScene->mCharacter, 0x27) != 0) {
+                ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26) != 0 && ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) != 0) {
                 complete = TRUE;
             } else {
                 complete = FALSE;
@@ -3604,19 +3563,19 @@ void MiiEditProfilePage::SetState(int state) {
     case 11:
         func_02034720(&mWindows[2], 0x12, 1);
         if (0xFFF == mScene->mCharacter.mBirthYear) {
-            func_02098cf4(&mScene->mCharacter, 1990);
+            ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(1990);
         }
         SetNumberDigits(mScene->mCharacter.mBirthYear);
         UpdateDayButton();
         break;
     case 12:
         func_02034720(&mWindows[3], 0x12, 1);
-        if (func_02098dac(&mScene->mCharacter, 0x26) == 0 || func_02098dac(&mScene->mCharacter, 0x27) == 0) {
-            func_02098c40(&mScene->mCharacter, 0x26, 1);
-            func_02098c40(&mScene->mCharacter, 0x27, 1);
+        if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26) == 0 || ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) == 0) {
+            ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, 1);
+            ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, 1);
         }
-        SetMonthDigits(func_02098dac(&mScene->mCharacter, 0x26));
-        SetDayDigits(func_02098dac(&mScene->mCharacter, 0x27));
+        SetMonthDigits(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26));
+        SetDayDigits(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27));
         break;
     case 13: {
         func_02034720(&mWindows[0], 0x12, 1);
@@ -3628,7 +3587,7 @@ void MiiEditProfilePage::SetState(int state) {
     }
     case 14: {
         func_02034720(&mWindows[1], 0x12, 1);
-        int color = func_02098dac(&mScene->mCharacter, 0x28);
+        int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x28);
         if (color >= 0 && color <= 11) {
             Sprite_SetSequence(&mWindows[1].mSprites[color], (u16)(sChoiceSequences[color + 4] + 1), TRUE);
         }
@@ -3729,10 +3688,6 @@ extern "C" {
 void func_02037478(wchar_t *text); // Applied to the texts of numbers before they are shown
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
-int func_02098dac(SavedCharacter *character, int param);  // A parameter of the character (0x26, 0x27: birth month, day)
-BOOL func_02098e50(SavedCharacter *character, int param);
-void func_020986c4(SavedCharacter *character, int param, int *min, int *max); // The range of a parameter
-BOOL func_02098584(SavedCharacter *character);
 }
 
 // Puts a text in mText (up to 10 characters) and shows it in the scene's character box, 13 pixels a character
@@ -3846,8 +3801,8 @@ void MiiEditProfilePage::UpdateTexts() {
         swprintf(NUMBER_TEXT(mScene), 5, L"%d", number);
         func_02037478(NUMBER_TEXT(mScene));
     }
-    int month = func_02098dac(&mScene->mCharacter, 0x26);
-    int day = func_02098dac(&mScene->mCharacter, 0x27);
+    int month = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26);
+    int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27);
     if (month > 0 && month <= 12 && day > 0 && day <= 31) {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"%d/%d", month, day);
         func_02037478(BIRTHDAY_TEXT(mScene));
@@ -3867,11 +3822,11 @@ void MiiEditProfilePage::UpdateTexts() {
     mScene->mTextBoxes[6].SetText((const NNSG2dChar *)CREATOR_NAME_TEXT(mScene));
     mScene->mTextBoxes[7].SetText(
         (const NNSG2dChar *)mScene->mMessageFiles[0].GetText(mScene->mCharacter.mRelationBlood + 0x54));
-    if (!func_02098584(&mScene->mCharacter)) {
+    if (!mScene->mCharacter.IsMiiFromThisConsole()) {
         mScene->mTextBoxes[2].mColor = 9;
         mScene->mTextBoxes[6].mColor = 9;
-        BOOL monthSet = func_02098e50(&mScene->mCharacter, 0x26);
-        BOOL daySet = func_02098e50(&mScene->mCharacter, 0x27);
+        BOOL monthSet = ((SavedCharacter *)(&mScene->mCharacter))->GetRawParameter(0x26);
+        BOOL daySet = ((SavedCharacter *)(&mScene->mCharacter))->GetRawParameter(0x27);
         if (monthSet && daySet) {
             mScene->mTextBoxes[5].mColor = 9;
         }
@@ -3885,14 +3840,14 @@ void MiiEditProfilePage::UpdateTexts() {
         point.y = position->y - 7;
         SetTextBoxPosition(&mScene->mTextBoxes[i], point);
     }
-    Sprite_SetFrame(&mSprites[0], func_02098dac(&mScene->mCharacter, 0x28));
+    Sprite_SetFrame(&mSprites[0], ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x28));
 }
 
 // Darkens the second button of the third window while the birth day is past the last day the month has
 void MiiEditProfilePage::UpdateDayButton() {
     int min, max;
-    func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
-    if (func_02098dac(&mScene->mCharacter, 0x27) > max) {
+    ((SavedCharacter *)(&mScene->mCharacter))->GetParameterRange(0x27, &min, &max);
+    if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) > max) {
         func_02031e88((SpriteButton *)&mWindows[2].mButtons[1], TRUE);
     } else {
         func_02031e88((SpriteButton *)&mWindows[2].mButtons[1], FALSE);
@@ -3938,7 +3893,6 @@ void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
 void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
 BOOL func_02031d00(SpriteButton *button);
 void func_0209d898(SceneCharacter *character, TtsPlayer *player);
-void Character_SetFace(SceneCharacter *character, int face);
 void func_020372bc(wchar_t *text, int size);
 }
 // The reading of a number, in the synthesizer's notation (src/scene/SceneHelpers.cpp)
@@ -4058,7 +4012,7 @@ void MiiEditVoicePage::Update() {
                 case 4:
                 case 5:
                     for (int k = 0; k < 6; k++) {
-                        func_02098d68(&mScene->mCharacter, k, VOICE_PRESETS[i][k]);
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, VOICE_PRESETS[i][k]);
                     }
                     ShowVoiceSettings();
                     StartSpeaking();
@@ -4072,7 +4026,7 @@ void MiiEditVoicePage::Update() {
                     break;
                 case 6:
                     for (int k = 0; k < 5; k++) {
-                        func_02098d68(&mScene->mCharacter, k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
                     }
                     ShowVoiceSettings();
                     StartSpeaking();
@@ -4167,7 +4121,7 @@ void MiiEditVoicePage::Update() {
             case 16:
                 RememberForUndo();
                 for (int k = 0; k < 6; k++) {
-                    func_02098d68(&mScene->mCharacter, k, VOICE_PRESETS[i - 11][k]);
+                    ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, VOICE_PRESETS[i - 11][k]);
                 }
                 ShowVoiceSettings();
                 StartSpeaking();
@@ -4175,9 +4129,9 @@ void MiiEditVoicePage::Update() {
             case 17:
                 RememberForUndo();
                 for (int k = 0; k < 5; k++) {
-                    func_02098d68(&mScene->mCharacter, k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                    ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
                 }
-                func_02098d68(&mScene->mCharacter, 5, MATH_Rand16(&gRandom, 4));
+                ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(5, MATH_Rand16(&gRandom, 4));
                 ShowVoiceSettings();
                 StartSpeaking();
                 break;
@@ -4186,7 +4140,7 @@ void MiiEditVoicePage::Update() {
             case 20:
             case 21:
                 RememberForUndo();
-                func_02098d68(&mScene->mCharacter, 5, i - 18);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(5, i - 18);
                 for (int k = 18; k <= 21; k++) {
                     if (i != k) {
                         func_02031e28(&mButtons[k], FALSE);
@@ -4223,7 +4177,7 @@ void MiiEditVoicePage::Update() {
                 } else {
                     value = func_020324e0(&mSprites2B2C[i], data_020fb940[i].mMin, data_020fb940[i].mMax);
                 }
-                func_02098d68(&mScene->mCharacter, i, value);
+                ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, value);
                 StartSpeaking();
             }
             if (func_02032414(&mSprites2B2C[i])) {
@@ -4398,7 +4352,7 @@ void MiiEditVoicePage::SpeakProfile(int step) {
     switch (step) {
     case 0:
         mScene->mTtsPlayer.StopEngine();
-        Character_SetFace(&mScene->mCharacter, 8);
+        ((CharacterBase *)(&mScene->mCharacter))->SetFace(8);
         break;
     case 1:
         if (wcslen(mSpeechTexts.mFamilyNameReading) + wcslen(mSpeechTexts.mGivenNameReading) == 0) {
@@ -4428,8 +4382,8 @@ void MiiEditVoicePage::SpeakProfile(int step) {
     case 3: {
         MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
         u32 number = mScene->mCharacter.mBirthYear;
-        int month = func_02098dac(&mScene->mCharacter, 0x26);
-        int day = func_02098dac(&mScene->mCharacter, 0x27);
+        int month = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26);
+        int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27);
         wchar_t numberText[32];
         wchar_t monthText[32];
         wchar_t dayText[32];
@@ -4492,7 +4446,7 @@ void MiiEditVoicePage::SpeakProfile(int step) {
     }
     case 6:
         MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
-        mText.SetMessageArg(mScene->mMessageFiles[0].GetText(func_02098dac(&mScene->mCharacter, 0x28) + 0x44), 0);
+        mText.SetMessageArg(mScene->mMessageFiles[0].GetText(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x28) + 0x44), 0);
         mText.mMessage = 0x35;
         mText.ExpandMessage();
         STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
@@ -4534,8 +4488,6 @@ int MiiEditVoicePage::GetStarSignMessage(int month, int day) {
 // What this page uses of the main program (stand-ins)
 extern "C" {
 extern TouchInput gTouchInput;
-void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mAnswers[index]
-void func_02091a6c(SceneCharacter *character);
 }
 
 void MiiEditCharacterPage::Init(MiiEditScene *scene) {
@@ -4598,8 +4550,8 @@ void MiiEditCharacterPage::Update() {
             ScreenRect rect = data_ov076_021592d0[j];
             rect.y += y;
             if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mAnswers[i]) {
-                func_02098d5c(&mScene->mCharacter, i, j + 1);
-                func_02091a6c(&mScene->mCharacter);
+                mScene->mCharacter.SetAnswer(i, j + 1);
+                mScene->mCharacter.Character::UpdateAnimSpeed();
                 mButtons[i].mVisible = TRUE;
                 mButtons[i].mPosition.x = (0x87 - (4 - j) * 14) << FX32_SHIFT;
                 gSoundManager.StartSeqArc(1, 14, 1);
