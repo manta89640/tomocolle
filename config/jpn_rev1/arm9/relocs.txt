@@ -6054,7 +6054,7 @@ from:0x020401e0 kind:arm_call to:0x0202e770 module:main
 from:0x02040204 kind:arm_call to:0x0202e770 module:main
 from:0x02040228 kind:arm_call to:0x0202e770 module:main
 from:0x02040244 kind:load to:0x02110970 add:0x8 module:main
-from:0x02040248 kind:load to:0x0214cf58 module:overlays(57,68,80,85,90,102)
+from:0x02040248 kind:load to:0x0214cf50 add:0x8 module:overlay(80)
 from:0x0204024c kind:load to:0x0208fd38 module:main
 from:0x02040254 kind:load to:0x0208fd18 module:main
 from:0x02040258 kind:load to:0x02040284 module:main

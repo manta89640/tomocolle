@@ -39,6 +39,7 @@ struct PaletteLoader {
 #include "../overlays/ov068/Scene1E.h"
 #include "../overlays/ov070/RightJobScene.h"
 #include "../overlays/ov071/RightJob2Scene.h"
+#include "../overlays/ov080/VoteScene.h"
 #include "MiiListMenuScene.h"
 #include "G3SpriteTestScene.h"
 #include "MiiListScene.h"
@@ -878,6 +879,9 @@ Scene1E::Scene1E(int sceneId) : Scene(sceneId) {}
 RightJobScene::RightJobScene(int sceneId) : Scene(sceneId) {}
 
 RightJob2Scene::RightJob2Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x23, overlay 80
+VoteScene::VoteScene(int sceneId) : Scene(sceneId) {}
 
 // (VoteScene)
 

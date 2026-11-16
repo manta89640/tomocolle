@@ -61,7 +61,6 @@ SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
 
 
-SCENE_STAND_IN(VoteScene, 0x3CD5C); // 0x020400f0
 
 
 

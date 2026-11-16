@@ -1774,8 +1774,8 @@ _ZN7Scene1EC1Ei kind:function(arm,size=0x46c) addr:0x0203f900
 _ZN13RightJobSceneC1Ei kind:function(arm,size=0x25c) addr:0x0203fd6c
 _ZN14RightJob2SceneC1Ei kind:function(arm,size=0x128) addr:0x0203ffc8
 _ZN9VoteSceneC1Ei kind:function(arm,size=0x178) addr:0x020400f0
-func_02040268 kind:function(arm,size=0x1c) addr:0x02040268
-func_02040284 kind:function(arm,size=0x4) addr:0x02040284
+_ZN14VoteSpritePairC1Ev kind:function(arm,size=0x1c) addr:0x02040268
+_ZN14VoteSpritePairD1Ev kind:function(arm,size=0x4) addr:0x02040284
 _ZN16MiiListMenuSceneC1Ei kind:function(arm,size=0xe4) addr:0x02040288
 _ZN17G3SpriteTestSceneC1Ei kind:function(arm,size=0x7c) addr:0x0204036c
 _ZN12MiiListSceneC1Ei kind:function(arm,size=0x190) addr:0x020403e8
@@ -5334,14 +5334,14 @@ _ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
 @13626 kind:data(any) addr:0x021119e4 local
 @13627 kind:data(any) addr:0x021119e8 local
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-@13903 kind:data(any) addr:0x02111a10 local
-@13904 kind:data(any) addr:0x02111a14 local
-@13905 kind:data(any) addr:0x02111a30 local
-@13906 kind:data(any) addr:0x02111a34 local
-@13918 kind:data(any) addr:0x02111a58 local
-@13919 kind:data(any) addr:0x02111a68 local
-@13932 kind:data(any) addr:0x02111a78 local
-@13933 kind:data(any) addr:0x02111a7c local
+@13910 kind:data(any) addr:0x02111a10 local
+@13911 kind:data(any) addr:0x02111a14 local
+@13912 kind:data(any) addr:0x02111a30 local
+@13913 kind:data(any) addr:0x02111a34 local
+@13925 kind:data(any) addr:0x02111a58 local
+@13926 kind:data(any) addr:0x02111a68 local
+@13939 kind:data(any) addr:0x02111a78 local
+@13940 kind:data(any) addr:0x02111a7c local
 sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
@@ -6339,7 +6339,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14938 kind:bss addr:0x0213b704 local
+@14945 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
