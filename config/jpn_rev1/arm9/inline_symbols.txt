@@ -1,0 +1,9 @@
+# Inline functions and implicit members, which the compiler emits in every file that uses them (binding 13) and of
+# which the linker kept the first copy in link order. dsd delinks them as global symbols; tools/inline_symbols.py
+# gives those in the delinked objects the compiler's binding back, so that a complete unit's own copy links against
+# them as it did in the original link. One mangled name per line, with the address of the game's copy and the file
+# that holds it. See docs/decompiling.md, "Functions emitted in every file that uses them".
+
+_ZN9AnimModelD1Ev                       # 0x0202af98, the 3D models' file, after its last function
+_ZN11ClothesItem12GetModelNameEv        # 0x0204ad20, src/scene/SceneManager.cpp
+_ZN14SceneCharacterD1Ev                 # 0x0203e188, src/scene/SceneManager.cpp

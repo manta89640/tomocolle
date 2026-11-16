@@ -857,11 +857,39 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Functions whose body is a table of character conversions are best understood by running them in an emulator over
   every character (unicorn, on `extract/.../arm9.bin`): that is how the normalization steps were named.
 - A unit whose constructor builds an `AnimModel` member after another member with an out-of-line constructor emits
-  `~AnimModel` (binding 13); it cannot be linked while the gap holds the global `0x0202AF98`, and marking that symbol
-  weak makes the linker keep the new copy instead (`CharacterModel.cpp`, matched but not complete).
+  `~AnimModel` (binding 13), though nothing in it calls it; see "Functions emitted in every file that uses them".
 - The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
+
+## Functions emitted in every file that uses them
+
+Measured (fix-link, test files under the game's compiler and flags, and the ROM):
+
+- An **inline function** (a member defined in its class, an implicit or inline destructor or constructor) is emitted
+  by every file that needs it, after the file's last function, under mwccarm's symbol binding 13 (readelf: "processor
+  specific"). The linker keeps the copy of the first object in link order and drops the others, so the ROM has one
+  copy, in the first file that emitted it. A virtual destructor written in the class comes out as D0 (deleting) then
+  D1 (complete), the derived class's pair before its base's, with the base's body inlined into D1 and no D2:
+  `AnimModel` D0 `0x0202AF54`, D1 `0x0202AF98` (0x3C bytes), `Model` D0, D1 after the last function of the 3D
+  models' file. That is what an inline destructor looks like in the ROM.
+- A **non-inline** destructor (`AnimModel::~AnimModel() { ... }` in a `.cpp`) is emitted once, global, at its place
+  among the file's functions, as D1, D0 and D2, and a derived class's destructor calls the base's D2 instead of
+  inlining it. So declaring an inline destructor non-inline in a header, to stop units emitting it, changes every
+  derived destructor: it is not the original's source.
+- dsd delinks every symbol as global. A complete unit whose object defines such a function (binding 13) then fails to
+  link with "Multiply-defined" while the copy the game kept is in a unit that is not complete (the gap, or an
+  incomplete file's delinked object): the linker takes global plus binding 13 as two definitions, and a weak (`STB_WEAK`)
+  original makes it keep the new copy instead. **Fix**: name the function in `config/<version>/arm9/inline_symbols.txt`
+  (with the address and file of the game's copy); the delink step (`tools/inline_symbols.py`) gives it binding 13 in
+  the delinked objects, as the original object had, and the linker keeps the game's copy. Do not declare the
+  function out of line and do not make the unit incomplete for it. Once the holder of the game's copy is complete
+  the entry is harmless.
+- The same applies across modules: an overlay's copy of `SceneCharacter::~SceneCharacter()` (overlay 39) against the
+  copy `src/scene/SceneManager.cpp` emitted at `0x0203E188`, and to any inline member, not only destructors
+  (`ClothesItem::GetModelName`, `0x0204AD20`, which `CharacterModel.cpp` emits too).
+- So: before marking a unit complete, `readelf -s` its object for binding 13 functions; for each that the ROM has
+  elsewhere (an earlier file), add the name to the list.
 
 ## A match is instructions and references
 
