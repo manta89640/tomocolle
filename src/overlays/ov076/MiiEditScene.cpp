@@ -2686,7 +2686,7 @@ void MiiEditProfilePage::Init(MiiEditScene *scene) {
     SetState(1);
 }
 
-// The original reads the windows' choice and result (MessageWindow::mUnknownAF7C, mResult) anew at each use here,
+// The original reads the windows' choice and result (MessageWindow::mTouchedButton, mResult) anew at each use here,
 // as it would a volatile. Declaring them volatile in MessageWindow.h does the same, but costs overlay 106's
 // PreStartScene::Ask its match, so the volatile is in this file's reads only (a STAND-IN for whatever the
 // original's declaration was).
@@ -3060,7 +3060,7 @@ void MiiEditProfilePage::Update() {
         func_020341d4(&mWindows[0]);
         int i;
         int choice;
-        if (READ(mWindows[0].mUnknownAF7C) != -1 && (choice = READ(mWindows[0].mUnknownAF7C)) != 4) {
+        if (READ(mWindows[0].mTouchedButton) != -1 && (choice = READ(mWindows[0].mTouchedButton)) != 4) {
             switch (choice) {
             case 0:
                 ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(0);
@@ -3108,7 +3108,7 @@ void MiiEditProfilePage::Update() {
         func_020341d4(&mWindows[1]);
         int i;
         int choice;
-        if (READ(mWindows[1].mUnknownAF7C) != -1 && (choice = READ(mWindows[1].mUnknownAF7C)) < 12) {
+        if (READ(mWindows[1].mTouchedButton) != -1 && (choice = READ(mWindows[1].mTouchedButton)) < 12) {
             if (choice >= 0 && choice < 12) {
                 ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x28, choice);
                 ((Character *)(&mScene->mCharacter))->UpdateBodyColors();
@@ -3141,9 +3141,9 @@ void MiiEditProfilePage::Update() {
     }
     case 10: {
         func_020341d4(&mWindows[4]);
-        if (READ(mWindows[4].mUnknownAF7C) != -1) {
+        if (READ(mWindows[4].mTouchedButton) != -1) {
             int i;
-            int choice = READ(mWindows[4].mUnknownAF7C);
+            int choice = READ(mWindows[4].mTouchedButton);
             switch (choice) {
             case 0:
                 mScene->mCharacter.mRelationBlood = 2;
@@ -3180,7 +3180,7 @@ void MiiEditProfilePage::Update() {
         func_020341d4(&mWindows[5]);
         int i;
         int choice;
-        if (READ(mWindows[5].mUnknownAF7C) != -1 && (choice = READ(mWindows[5].mUnknownAF7C)) < 2) {
+        if (READ(mWindows[5].mTouchedButton) != -1 && (choice = READ(mWindows[5].mTouchedButton)) < 2) {
             switch (choice) {
             case 0:
                 ((SavedCharacter *)(&mScene->mCharacter))->SetSex(0);

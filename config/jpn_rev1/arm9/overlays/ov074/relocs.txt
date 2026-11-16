@@ -3873,7 +3873,7 @@ from:0x0216b7e0 kind:arm_call to:0x0216b8a8 module:overlay(74)
 from:0x0216b800 kind:arm_call to:0x0216b8b8 module:overlay(74)
 from:0x0216b84c kind:arm_call to:0x0202ab2c module:main
 from:0x0216b894 kind:arm_call to:0x0202ab2c module:main
-from:0x0216b8a0 kind:load to:0x020f7300 module:main
+from:0x0216b8a0 kind:load to:0x020f72f8 add:0x8 module:main
 from:0x0216b908 kind:arm_call to:0x02028b98 module:main
 from:0x0216b97c kind:arm_call to:0x0216b9c0 module:overlay(74)
 from:0x0216b9a8 kind:arm_call to:0x0216b9c0 module:overlay(74)

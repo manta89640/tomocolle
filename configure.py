@@ -635,7 +635,9 @@ def main():
     n.rule("check_baserom", f"$python tools/check_rom.py base $in --sha1 {info['sha1']} --stamp $out",
            "Checking $in")
     n.rule("extract", "$dsd rom extract --rom $in --output-path $extract_dir $bios", "Extracting $in")
-    n.rule("delink", "$dsd delink --config-path $config", "Delinking")
+    # dsd delinks every symbol as global; the inline functions listed get the binding the compiler gave them back
+    n.rule("delink", "$dsd delink --config-path $config && $python tools/inline_symbols.py $inline_list $delinks_dir",
+           "Delinking")
     n.rule("lcf", "$dsd lcf --config-path $config", "Generating the linker script")
     # mwccarm writes the dependency file next to the object, with Windows paths that fix_depfile.py converts
     n.rule("mwcc", "$wrapper $sjiswrap $mwcc $cc_flags $lang $defines $includes -gccdep -MD -c $in -o $out "
@@ -673,7 +675,9 @@ def main():
     baserom_ok = build_dir / "baserom.ok"
     n.build([baserom_ok], "check_baserom", [baserom], implicit=["tools/check_rom.py"])
     n.build([extract_config], "extract", [baserom], implicit=[baserom_ok], variables={"extract_dir": extract_dir})
-    n.build(delink_outputs, "delink", configs, implicit=[extract_config])
+    inline_list = config_dir / "arm9" / "inline_symbols.txt"
+    n.build(delink_outputs, "delink", configs, implicit=[extract_config, inline_list, "tools/inline_symbols.py"],
+            variables={"inline_list": inline_list, "delinks_dir": build_dir / "delinks"})
     n.build([lcf_file, objects_file], "lcf", configs, implicit=[extract_config])
 
     # Sources. Each is compiled whether or not its delinks.txt entry is marked complete: a complete file's object is

@@ -1,7 +1,7 @@
 #ifndef SCENE_TTSTESTSCENE_H
 #define SCENE_TTSTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
 #include "voice/TtsPlayer.h"
 
 // Scene 14 (main program, no overlay): a test of the speech synthesizer (TtsPlayer). A speaks a weather report
@@ -13,6 +13,8 @@
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class TtsTestScene : public Scene {
 public:
+    TtsTestScene(int sceneId);
+
     enum { CAPTURE_SAMPLES = 0x2AF80 };
 
     virtual void StartLoading();

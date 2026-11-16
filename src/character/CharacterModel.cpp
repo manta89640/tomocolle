@@ -85,7 +85,7 @@ void CharacterModel::Load(int resourceId, int unk) {
 }
 
 void CharacterModel::Draw() {
-    static const VecFx32 sDrawOffset = {0, 0, 0};
+    static const VecFx32 sDrawOffset = {0, 0xCC, 0};
 
     UpdateBlend();
     VEC_Add(&mPos, &sDrawOffset, &mAnim.mPosition);

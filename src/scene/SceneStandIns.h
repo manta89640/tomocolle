@@ -26,25 +26,16 @@
 
 
 
-SCENE_STAND_IN(DrawManTestScene, 0x272C); // 0x0203e320
-
-SCENE_STAND_IN(HumanTestScene, 0x1D8); // 0x0203e394
-
-SCENE_STAND_IN(ParticleTestScene, 0x53C); // 0x0203e430
-
-SCENE_STAND_IN(G3dTestScene, 0x5C2C); // 0x0203e470
-
-SCENE_STAND_IN(BgTextTestScene, 0x1D4); // 0x0203e524
-
-SCENE_STAND_IN(MessageTestScene, 0x2D84); // 0x0203e564
-
-SCENE_STAND_IN(KeyboardTestScene, 0x6AF8); // 0x0203e620
 
 
 
-SCENE_STAND_IN(TtsTestScene, 0x6A858); // 0x0203e9ec
 
-SCENE_STAND_IN(EmptyScene, 0x10); // 0x0203ea2c
+
+
+
+
+
+
 
 
 
@@ -54,7 +45,6 @@ SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ei
 
 
 
-SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
 
 

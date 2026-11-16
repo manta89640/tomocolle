@@ -1,4 +1,5 @@
 #include "KeyboardTestScene.h"
+#include "MainProgram3d.h"
 
 extern "C" {
 // The graphics manager: saves and restores the graphics state of planes

@@ -36,50 +36,53 @@ struct ButtonSequences {
 
 // The rectangle of the floor the characters walk on. The static initialiser computes its size from its origin.
 static FloorRect gWalkArea = { -FX32_CONST(2.5), -FX32_CONST(2.5), -gWalkArea.x * 2, -gWalkArea.z * 2 };
-// The message window's button: where it is and how large
+// The order of these declarations is the one that puts each in its place in .rodata (see docs/decompiling.md, "How
+// a file's data is laid out"): objects of one size can be declared in any order, and only this one gives the ROM's.
+// The message window's button: where it is
 static const WindowPoint sWindowButtonPosition = { 128, 149 };
 // Where a character coming in by the door walks to (the door is at z -9.0): state 10 inside the door and then to
 // the front of the room, state 12 to the doorstep and then past the door
 static const FloorPos sInsideDoor = { 0, -0x4800 };
-static const FloorPos sRoomFront = { 0, -0x1000 };
 // Where each kind of touch button is (the tutorial has kind 0 only)
 static const ButtonPosition sButtonPositions[1] = { { 128, 177 } };
+static const FloorPos sRoomFront = { 0, -0x1000 };
+static const FloorPos sPastDoor = { 0, -0x3666 };
+// The message window's button: how large
 static const WindowPoint sWindowButtonSize = { 94, 30 };
-static const FloorPos sDoorstep = { 0, -0x6000 };
 // The screen (tile map) of the message window's background: the two uses share one address
 static const char sWindowScreenName[] = "MLT:/Window_down2.nsc";
-static const FloorPos sPastDoor = { 0, -0x3666 };
-// The rectangle of the message window, in pixels
-static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-// How fast the camera's orbit slows down, and its fastest, in elevation (x) and direction (y). The values are
-// folded into TutorialRoomCamera::UpdateOrbit; the objects stay in .rodata, as in the ROM
-static const VecFx32 sOrbitFriction = { 0x4000, 0x7000, 0 };
+static const FloorPos sDoorstep = { 0, -0x6000 };
 // The rectangle around the cursor on the building front that takes a touch
 static const ScreenRect sCursorTouchRect = { -16, -12, 34, 26 };
+// How fast the camera's orbit slows down, and its fastest, in elevation (x) and direction (y). The values are
+// folded into TutorialRoomCamera::UpdateOrbit; the objects stay in .rodata, as in the ROM
+static const VecFx32 sOrbitMaxSpeed = { 0x40000, 0x100000, 0 };
 // How far the building front scrolls per floor, by building size
 static const fx32 sScrollPerFloor[4] = { 0x16000, 0x16000, 0x19000, 0x1C000 };
+// The rectangles of the touch button that take a touch: of kind 0, and of the others
+static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
 // The id of the head icon of each mood (mood 0 shows none)
 static const s16 sMoodHeadIcons[5] = { 4, 5, 0, 1, 7 };
 // Which of the seven pictures of the sky each time of day shows
 static const s8 sSkyPictures[32] = {
     0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 0,
 };
-// The animation sequences of each kind of touch button: normal and pressed
-static const ButtonSequences sButtonSequences[1] = { { 2, 3 } };
+// How many rooms a building of each size has
+static const u8 sRoomCounts[4] = { 24, 48, 72, 100 };
 // Where the message window's text is
 static const WindowPoint sWindowTextPosition = { 38, 33 };
-static const VecFx32 sOrbitMaxSpeed = { 0x40000, 0x100000, 0 };
-// The rectangles of the touch button that take a touch: of kind 0, and of the others
-static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
+static const VecFx32 sOrbitFriction = { 0x4000, 0x7000, 0 };
 static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
+// The rectangle of the message window, in pixels
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
 // The animation sequence and the position of each sprite of the clock
 static const u16 sClockSequences[TutorialClockDisplay::SPRITE_COUNT] = { 0, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0 };
 static const ButtonPosition sClockPositions[TutorialClockDisplay::SPRITE_COUNT] = {
     { 160, 8 }, { 167, 8 }, { 174, 8 }, { 181, 8 }, { 188, 8 }, { 205, 8 },
     { 222, 8 }, { 229, 8 }, { 236, 8 }, { 243, 8 }, { 250, 8 },
 };
-// How many rooms a building of each size has
-static const u8 sRoomCounts[4] = { 24, 48, 72, 100 };
+// The animation sequences of each kind of touch button: normal and pressed
+static const ButtonSequences sButtonSequences[1] = { { 2, 3 } };
 
 static inline int Random(int max) {
     return MATH_Rand16(&gRandom, max);
@@ -230,7 +233,7 @@ void TutorialRoomScene::Init() {
         ((Character *)(&mCharacters[i]))->UpdateSpeedScales();
         ((Character *)(&mCharacters[i]))->UpdateBodyColors();
         mCharacters[i].CopyName();
-        func_02029660(mCharacters[i].mModel.mUnknown04, RESOURCE_BCA0, animations);
+        func_02029660(mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAngle(0x4000);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mApartmentRoom = &mRoom;
@@ -429,7 +432,7 @@ void TutorialRoomScene::StartTutorialStep() {
         mCharacters[0].mPresent = TRUE;
         mCharacters[0].SetState(3);
         mCharacters[0].mWait = 120;
-        mCharacters[0].mModel.mPos.x = -0x1000;
+        mCharacters[0].mPos.x = -0x1000;
         ((Character *)(&mCharacters[0]))->SetAngle(0x2000);
         FloorPos target;
         mCharacters[0].GetRandomPosInArea(&target);
@@ -447,7 +450,7 @@ void TutorialRoomScene::StartTutorialStep() {
         mCharacters[0].mPresent = TRUE;
         mCharacters[0].SetState(3);
         mCharacters[0].mWait = 120;
-        mCharacters[0].mModel.mPos.x = 0x1000;
+        mCharacters[0].mPos.x = 0x1000;
         ((Character *)(&mCharacters[0]))->SetAngle(0x5800);
         FloorPos target;
         mCharacters[0].GetRandomPosInArea(&target);
@@ -618,8 +621,8 @@ void TutorialRoomScene::UpdateState() {
                 mCharacters[0].SetState(9);
                 mCharacters[1].SetState(9);
                 // The mark goes halfway between the two
-                VecFx32 position = ((CharacterModel *)(&mCharacters[0].mModel))->GetJointPosition(3);
-                VecFx32 other = ((CharacterModel *)(&mCharacters[1].mModel))->GetJointPosition(3);
+                VecFx32 position = mCharacters[0].CharacterModel::GetJointPosition(3);
+                VecFx32 other = mCharacters[1].CharacterModel::GetJointPosition(3);
                 VEC_Add(&position, &other, &position);
                 Halve(&position);
                 VEC_Set(&mIcon[0].mPos, position.x, position.y, position.z);
@@ -999,7 +1002,7 @@ void TutorialRoomCharacter::UpdateStates01To04() {
     switch (mState) {
     case 1:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1010,7 +1013,7 @@ void TutorialRoomCharacter::UpdateStates01To04() {
         break;
     case 2:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1022,7 +1025,7 @@ void TutorialRoomCharacter::UpdateStates01To04() {
         break;
     case 3:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 ResetSoundPhaseUnlessWalking();
@@ -1039,7 +1042,7 @@ void TutorialRoomCharacter::UpdateStates01To04() {
         break;
     case 4:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound0UnlessGroupA();
                 SetAnimation(BCA0, 0x19);
@@ -1060,7 +1063,7 @@ void TutorialRoomCharacter::UpdateStates05To08() {
     switch (mState) {
     case 5:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 ResetSoundPhaseUnlessWalking();
@@ -1078,7 +1081,7 @@ void TutorialRoomCharacter::UpdateStates05To08() {
         break;
     case 6:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 ResetSoundPhaseUnlessWalking();
                 if (((Character *)(this))->TurnToWalkTarget(0x100, 0)) {
                     mStep += 2;
@@ -1097,7 +1100,7 @@ void TutorialRoomCharacter::UpdateStates05To08() {
                 mStep++;
             }
         } else {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 SetState(0);
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1110,11 +1113,11 @@ void TutorialRoomCharacter::UpdateStates05To08() {
         break;
     case 7:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 SetAnimation(BCA0, 0x55);
                 ((CharacterBase *)(this))->SetFace(0x15);
-                if (mModel.mBlendFrames > 0) {
+                if (mBlendFrames > 0) {
                     ((Character *)(this))->ResetSoundPhase(0);
                 }
                 SetHeadIcon(13);
@@ -1125,12 +1128,12 @@ void TutorialRoomCharacter::UpdateStates05To08() {
         break;
     case 8:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 SetAnimation(BCA0, 0x4A);
                 ((CharacterBase *)(this))->SetFace(2);
                 mHeadIcon.SetMode(1);
-                if (mModel.mBlendFrames > 0) {
+                if (mBlendFrames > 0) {
                     ((Character *)(this))->ResetSoundPhase(0);
                 }
             }
@@ -1148,7 +1151,7 @@ void TutorialRoomCharacter::UpdateState09() {
     switch (mState) {
     case 9:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 mTimer = 30;
                 StartSound3IfAnimOfGroup();
@@ -1158,15 +1161,15 @@ void TutorialRoomCharacter::UpdateState09() {
             }
         } else if (mStep == 1) {
             mTimer--;
-            if (mTimer <= 0 && mModel.mBlendFrames <= 0) {
+            if (mTimer <= 0 && mBlendFrames <= 0) {
                 mStep++;
                 SetAnimation(BCA0, 0x3A);
-                ((CharacterModel *)(&mModel))->SetAnimFlags(1, 0);
+                CharacterModel::SetAnimFlags(1, 0);
                 ((Character *)(this))->ResetSoundPhase(0);
             }
         } else if (mStep == 2) {
             ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1F, 2, 2);
-            if (AnimModel_FindAnimation(&mModel, BCA0, mModel.mAnimId)->mFinished) {
+            if (AnimModel_FindAnimation(&mAnim, BCA0, mAnimId)->mFinished) {
                 mStep++;
                 mTimer = 140;
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1188,11 +1191,11 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
     switch (mState) {
     case 10:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 mSoundArmed = 1;
                 SetAnimation(BCA0, GetWalkAnim());
-                AnimModel_FindAnimation(&mModel, BCA0, mModel.mAnimId)->mAnmObj->frame = 0;
+                AnimModel_FindAnimation(&mAnim, BCA0, mAnimId)->mAnmObj->frame = 0;
                 ((CharacterBase *)(this))->SetFace(8);
                 VecFx32 pos = { 0, 0, -0x9000 };
                 SetPos(pos);
@@ -1225,7 +1228,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         break;
     case 11:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 mSoundArmed = 1;
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1242,7 +1245,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         break;
     case 12:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 mSoundArmed = 1;
                 SetAnimation(BCA0, GetWalkAnim());
@@ -1277,32 +1280,32 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnFrames);
         } else if (mStep == 4) {
             if (StepTurnLooking(0x120, 0, 0x3800)) {
-                if (mModel.mBlendFrames <= 0) {
+                if (mBlendFrames <= 0) {
                     mStep++;
                     SetAnimation(BCA0, GetIdleAnim());
                     SetHeadTurn(0, 0, 0, mHeadTurnFrames);
                 }
             }
         } else if (mStep == 5) {
-            if (mModel.mBlendFrames <= 0 && mPartner->mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0 && mPartner->mBlendFrames <= 0) {
                 mStep++;
                 if (!GetRelationToPartner()) {
                     SetAnimation(BCA0, 0x3A);
                 } else {
                     SetAnimation(BCA0, 0x39);
                 }
-                ((CharacterModel *)(&mModel))->SetAnimFlagsAndFrame(1, 0, 0);
+                CharacterModel::SetAnimFlagsAndFrame(1, 0, 0);
                 mPartner->SetState(13);
                 ((Character *)(this))->ResetSoundPhase(0);
             }
         } else {
-            if (mModel.mAnimId == 0x3A) {
+            if (mAnimId == 0x3A) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1F, 2, 2);
-            } else if (mModel.mAnimId == 0x39) {
+            } else if (mAnimId == 0x39) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1F, 4, 2);
             }
-            if (AnimModel_FindAnimation(&mModel, BCA0, mModel.mAnimId)->mFinished) {
-                if (mPartner->mModel.mBlendFrames <= 0) {
+            if (AnimModel_FindAnimation(&mAnim, BCA0, mAnimId)->mFinished) {
+                if (mPartner->mBlendFrames <= 0) {
                     SetState(15);
                     mPartner->SetState(15);
                 }
@@ -1311,7 +1314,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         break;
     case 13:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 if (!GetRelationToPartner()) {
@@ -1319,25 +1322,25 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 } else {
                     SetAnimation(BCA0, 0x39);
                 }
-                ((CharacterModel *)(&mModel))->SetAnimFlagsAndFrame(1, 0, 0);
+                CharacterModel::SetAnimFlagsAndFrame(1, 0, 0);
                 ShowHeadIcon();
                 SetHeadTurn(0, 0, 0, 5);
                 ((Character *)(this))->ResetSoundPhase(0);
             }
         } else {
-            if (mModel.mAnimId == 0x3A) {
+            if (mAnimId == 0x3A) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1F, 2, 2);
-            } else if (mModel.mAnimId == 0x39) {
+            } else if (mAnimId == 0x39) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1F, 4, 2);
             }
-            if (AnimModel_FindAnimation(&mModel, BCA0, mModel.mAnimId)->mFinished) {
+            if (AnimModel_FindAnimation(&mAnim, BCA0, mAnimId)->mFinished) {
                 SetState(0);
             }
         }
         break;
     case 14:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, GetWalkAnim());
@@ -1347,7 +1350,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         } else if (mStep == 1) {
             SetWalkTargetOnFloor(mPartner->GetFloorPos());
             if (StepTurnLooking(0x140, 0, 0x3800)) {
-                if (mModel.mBlendFrames <= 0) {
+                if (mBlendFrames <= 0) {
                     mStep++;
                     SetAnimation(BCA0, GetIdleAnim());
                 }
@@ -1361,7 +1364,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
         break;
     case 15:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, GetIdleAnim());
@@ -1370,7 +1373,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 ShowHeadIcon();
             }
         } else {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 SetState(0);
             }
         }
@@ -1386,7 +1389,7 @@ void TutorialRoomCharacter::UpdateStates10To12() {
     switch (mState) {
     case 0x10:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 mTimer = 90;
                 StartSound3IfAnimOfGroup();
@@ -1410,7 +1413,7 @@ void TutorialRoomCharacter::UpdateStates10To12() {
         break;
     case 0x11:
         if (mStep == 0) {
-            if (mModel.mBlendFrames <= 0) {
+            if (mBlendFrames <= 0) {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, 10);
@@ -1437,14 +1440,14 @@ void TutorialRoomCharacter::UpdateStates10To12() {
                 mTimer = 30;
             }
             VecFx32 offset = mCamera->mPosition;
-            VEC_Subtract(&offset, &mModel.mPos, &offset);
+            VEC_Subtract(&offset, &mPos, &offset);
             offset.x >>= 1;
             offset.y >>= 1;
             offset.z >>= 1;
             SetWalkTarget(offset.x, 0, offset.z);
         } else {
             mTimer--;
-            if (mTimer <= 0 && mModel.mBlendFrames <= 0) {
+            if (mTimer <= 0 && mBlendFrames <= 0) {
                 SetState(0);
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, 7);
@@ -1506,8 +1509,8 @@ u16 TutorialRoomCharacter::GetHeadPitch(VecFx32 from, VecFx32 to, u16 limit) {
 
 // @0x0214dc58
 u16 TutorialRoomCharacter::GetHeadPitchToPartner(int joint, u16 limit) {
-    return GetHeadPitch(((CharacterModel *)(&mModel))->GetJointPosition(0),
-                        ((CharacterModel *)(&mPartner->mModel))->GetJointPosition(joint), limit);
+    return GetHeadPitch(CharacterModel::GetJointPosition(0),
+                        mPartner->CharacterModel::GetJointPosition(joint), limit);
 }
 
 // @0x0214dcc8
@@ -1543,7 +1546,7 @@ BOOL TutorialRoomCharacter::StepTurnLooking(int speed, int accel, u32 lookLimit)
 // @0x0214de28
 void TutorialRoomCharacter::SetAnimation(u32 resType, int id) {
     ((Character *)(this))->BlendToAnimation(resType, id);
-    ((CharacterModel *)(&mModel))->SetAnimFlags(0, 0);
+    CharacterModel::SetAnimFlags(0, 0);
 }
 
 // @0x0214de4c
@@ -1561,7 +1564,7 @@ void TutorialRoomCharacter::LoadHeadIcon(ParticleSystem *particles) {
 // @0x0214def8
 void TutorialRoomCharacter::PlaceHeadIcon() {
     mHeadIcon.mAngle = 0x4000 - mAngle + mUnknown25D6;
-    MtxFx43 *head = mModel.GetJointMatrix(0);
+    MtxFx43 *head = GetJointMatrix(0);
     VEC_Set(&mHeadIcon.mPos, head->_30, head->_31, head->_32);
 }
 
@@ -1586,7 +1589,7 @@ void TutorialRoomCharacter::ShowHeadIcon() {
 
 // @0x0214dfec
 BOOL TutorialRoomCharacter::IsWalkAnim() {
-    int anim = mModel.mAnimId;
+    int anim = mAnimId;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 5; j++) {
             if (anim == data_020fb898[i][j]) {
@@ -1637,7 +1640,7 @@ BOOL TutorialRoomCharacter::IsAnimOfGroupA(int anim) {
 // @0x0214e148
 void TutorialRoomCharacter::StartSound3IfAnimOfGroup() {
     if (mSoundArmed) {
-        if (IsAnimOfGroupA(mModel.mAnimId) || IsAnimOfGroupB(mModel.mAnimId)) {
+        if (IsAnimOfGroupA(mAnimId) || IsAnimOfGroupB(mAnimId)) {
             gSoundManager.StartSeqArc(1, 0x1E, 3);
         }
     } else {
@@ -1648,7 +1651,7 @@ void TutorialRoomCharacter::StartSound3IfAnimOfGroup() {
 // @0x0214e1b0
 void TutorialRoomCharacter::StartSound0UnlessGroupA() {
     if (mSoundArmed) {
-        if (!IsAnimOfGroupA(mModel.mAnimId)) {
+        if (!IsAnimOfGroupA(mAnimId)) {
             gSoundManager.StartSeqArc(1, 0x1E, 0);
         }
     } else {
@@ -1851,14 +1854,14 @@ void TutorialRoomCamera::Update() {
     case MODE_BOTH: {
         UpdateOrbit();
         VecFx32 target;
-        VEC_Add(&mCharacters[0]->mModel.mPos, &mCharacters[1]->mModel.mPos, &target);
+        VEC_Add(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &target);
         target.x >>= 1;
         target.z >>= 1;
         target.y = 0x1C00;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
         VecFx32 radius;
-        VEC_Subtract(&mCharacters[0]->mModel.mPos, &mCharacters[1]->mModel.mPos, &radius);
+        VEC_Subtract(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &radius);
         func_02028e0c(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0x9000;
         radius.z = (radius.z * 9 >> 2) + 0x9000;

@@ -52,7 +52,7 @@ from:0x02149ea8 kind:load to:0x021223e4 module:main
 from:0x02149eac kind:load to:0x0214a620 module:overlay(32)
 from:0x02149eb0 kind:load to:0x0214a630 module:overlay(32)
 from:0x02149ebc kind:load to:0x021227cc module:main
-from:0x02149ec4 kind:load to:0x020f7300 module:main
+from:0x02149ec4 kind:load to:0x020f72f8 add:0x8 module:main
 from:0x02149ec8 kind:load to:0x021227d8 module:main
 from:0x02149ecc kind:load to:0x021213b8 module:main
 from:0x02149ed0 kind:load to:0x0214a640 module:overlay(32)

@@ -467,6 +467,22 @@ vectors are declared in the order that sorts them as the ROM has them. The scene
 `"TCM:tmd_common_msg_JP.bmg"` and so on, without the slash after the colon that the source had (the strings are
 the ROM's now, and with them the offsets of everything after them in `.data`).
 
+## The message window's buttons
+
+Measured (fix-link) on the window's update, `func_020341d4`: it sets +0xAF7C, +0xAF80 and +0xAF84 to -1 at the
+start of each frame, then three helpers walk the window's sprite buttons (count +0xAD58, the numbers they were
+added with at +0xAD68) and text buttons (count +0xAD5C, numbers at +0xAD98) and store the number of the first one
+that reports:
+
+| Field | Set by | Means | Name |
+| --- | --- | --- | --- |
+| +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`func_02031294`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
+| +0xAF80 | `func_0203404c` | its update, `func_0203133c`, returned TRUE: it was pressed. Open (`func_02034720`) also clears it | `mResult` |
+| +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`func_02031d7c`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
+
+So a scene that reacts at once reads +0xAF80, one that waits for the button's animation +0xAF84 (inferred from
+the flags; the names are descriptive).
+
 ## The save screens
 
 Three small overlays put a message window (the main program's, 0xAFA4 bytes, the same stand-in as overlay 73's, now
@@ -638,9 +654,9 @@ Measured:
   front of it, and moves one of them each frame: a test.
 - No call of `func_0203c02c` (which asks for the next scene) has 0x24 to 0x27 put in its argument by an
   instruction just before it. Whether anything reaches these scenes, by a table or a computed id, is not known.
-- The message window's result is at +0xAF84 in these scenes (measured on all four of scene 0x24's windows, which
-  start at +0x230 where the constructor stores the window's table), and what the scenes keep for after a window
-  closes at +0xAF98.
+- These scenes act on the message window's +0xAF84 (measured on all four of scene 0x24's windows, which
+  start at +0x230 where the constructor stores the window's table), and keep what to do after a window closes at
+  +0xAF98. What +0xAF84 is: see "The message window's buttons" below.
 - `_ZTV5Model` and `_ZTV9AnimModel` were named 8 bytes into their tables; they are at `0x0210F640` and `0x0210F65C`
   now, and every reference to them is `add:0x8`. Linking scene 0x25's destructor from source showed it.
 

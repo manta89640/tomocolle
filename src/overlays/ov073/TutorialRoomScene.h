@@ -44,7 +44,7 @@ struct MessageWindow {
     /* 0x7A74 */ MessageText mTexts[8];
     /* 0xA9F4 */ u8 mUnknownA9F4[0x58C];
     /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the scene waits for it to change
-    /* 0xAF84 */ int mUnknownAF84;
+    /* 0xAF84 */ int mFinishedButton;       // As in include/MessageWindow.h
     /* 0xAF88 */ int mUnknownAF88;
     /* 0xAF8C */ BOOL mTransitionDone;      // func_02034720 clears it; set when the window has finished moving
     /* 0xAF90 */ int mUnknownAF90;

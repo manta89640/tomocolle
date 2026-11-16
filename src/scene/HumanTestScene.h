@@ -1,7 +1,10 @@
 #ifndef SCENE_HUMANTESTSCENE_H
 #define SCENE_HUMANTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "Model.h"
+
+struct Camera;
 
 // Scene 7 (main program, no overlay): a test of a head model and a body model with textures loaded later, with the
 // archives "Scn/Scene/TestHuman00Itp_LZ.bin" (HP0), "Scn/Scene/TestHuman00Imd_LZ.bin" (HM0) and
@@ -12,6 +15,8 @@
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 class HumanTestScene : public Scene {
 public:
+    HumanTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

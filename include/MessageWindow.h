@@ -61,9 +61,14 @@ struct MessageWindow {
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
     /* 0xAD54 */ BOOL mUnknownAD54;         // ShopWindow draws its own buttons and canvases only while it is set
     /* 0xAD58 */ u8 mUnknownAD58[0x224];
-    /* 0xAF7C */ int mUnknownAF7C;          // Overlay 76 reads the choice made from it (-1: none yet)
-    /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the button pressed, when one is
-    /* 0xAF84 */ int mUnknownAF84;
+    // What the window's buttons did this frame, each as the number the button was added with (the arrays at
+    // +0xAD68 for the sprite buttons, +0xAD98 for the text buttons), -1 for none. The update clears all three, then
+    // sets each from the first button that reports it (func_02033f6c, func_0203404c, func_02034110):
+    /* 0xAF7C */ int mTouchedButton;        // The stylus came down on it (func_02031294 and gTouchInput.mTouched)
+    /* 0xAF80 */ int mResult;               // It was pressed: its update returned TRUE (func_0203133c). Opening the
+                                            // window (func_02034720) also sets it to -1
+    /* 0xAF84 */ int mFinishedButton;       // Its press played out: its pressed sequence ended (func_02031ccc,
+                                            // set by its draw, func_02031d7c). The list scenes act on this one
     /* 0xAF88 */ BOOL mUnknownAF88;         // The scenes wait for it after opening a window without buttons
     /* 0xAF8C */ BOOL mTransitionDone;      // func_02034720 clears it; set when the window has finished moving
     /* 0xAF90 */ int mUnknownAF90;

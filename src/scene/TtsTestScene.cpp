@@ -1,4 +1,5 @@
 #include "TtsTestScene.h"
+#include "MainProgram3d.h"
 
 // What the scene speaks: the text in the engine's notation, as wide characters (A) and in Shift JIS (the second
 // is not used)
@@ -8,7 +9,7 @@ struct TtsTestTexts {
     const char *mCapture;
 };
 
-static const TtsTestTexts sTexts = {
+static TtsTestTexts sTexts = {
     L"ナラ’ケンノ＿アスノ／テ’ンキワ＿ハレ＿＿トコロニヨ’リ＿ニワカア’メガ／フ’ルデショー．\t<\\Echo>コレワ_テ'ストデス．アイウエオカキクケコサシスセソタチツテト.",
     "ナラ’ケンノ＿アスノ／テ’ンキワ＿ハレ＿＿トコロニヨ’リ＿ニワカア’メガ／フ’ルデショー．",
     "<\\Echo>コレワ_テ'ストデス.",

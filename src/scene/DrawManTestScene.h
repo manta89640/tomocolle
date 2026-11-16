@@ -1,7 +1,11 @@
 #ifndef SCENE_DRAWMANTESTSCENE_H
 #define SCENE_DRAWMANTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "Model.h"
+#include "character/Character.h"
+
+struct Camera;
 
 // Scene 6 (main program, no overlay): a test of drawing a character's head model, with the archives
 // "Scn/Scene/SceneTestDrawMan_LZ.bin" (DMN) and "Scn/Scene/SceneTestG3d_3_LZ.bin" (CA3). It shows the model
@@ -13,6 +17,8 @@
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 class DrawManTestScene : public Scene {
 public:
+    DrawManTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

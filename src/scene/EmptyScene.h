@@ -9,6 +9,8 @@
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class EmptyScene : public Scene {
 public:
+    EmptyScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

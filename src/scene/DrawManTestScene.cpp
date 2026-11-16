@@ -1,4 +1,5 @@
 #include "DrawManTestScene.h"
+#include "MainProgram3d.h"
 
 #include <nnsys/g3d/util.h>
 

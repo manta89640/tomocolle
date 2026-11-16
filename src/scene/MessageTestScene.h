@@ -1,7 +1,9 @@
 #ifndef SCENE_MESSAGETESTSCENE_H
 #define SCENE_MESSAGETESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "text/MessageFile.h"
+#include "text/TextCanvas.h"
 #include "text/MessageText.h"
 
 // Scene 10 (main program, no overlay): a test of the message texts, with the etc and item messages
@@ -14,6 +16,8 @@
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class MessageTestScene : public Scene {
 public:
+    MessageTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

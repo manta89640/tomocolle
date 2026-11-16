@@ -1,7 +1,9 @@
 #ifndef SCENE_KEYBOARDTESTSCENE_H
 #define SCENE_KEYBOARDTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "text/MessageFile.h"
+#include "text/TextCanvas.h"
 #include "keyboard/SoftKeyboard.h"
 
 // Scene 11 (main program, no overlay): a test of the on-screen keyboard (SoftKeyboard) on the lower screen, with
@@ -14,6 +16,8 @@
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class KeyboardTestScene : public Scene {
 public:
+    KeyboardTestScene(int sceneId);
+
     enum { NAME_LENGTH = 10 };
 
     virtual void StartLoading();

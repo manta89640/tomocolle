@@ -76,7 +76,7 @@ static inline int Random(int max) {
 // a switch over a range of states.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
-class RoomCharacter : public CharacterBase {
+class RoomCharacter : public Character {
 public:
     // mOverrideState: what is done with the character's model while its own states do not run
     enum OverrideState {
@@ -220,12 +220,12 @@ public:
     // the point on the callers' stacks.
     FloorPos GetFloorPos() const {
         FloorPos pos;
-        pos.x = mModel.mPos.x;
-        pos.z = mModel.mPos.z;
+        pos.x = mPos.x;
+        pos.z = mPos.z;
         return pos;
     }
-    VecFx32 GetPos() const { return mModel.mPos; }
-    void SetPos(VecFx32 pos) { mModel.mPos = pos; }
+    VecFx32 GetPos() const { return mPos; }
+    void SetPos(VecFx32 pos) { mPos = pos; }
     // The angle of the way from where the character stands to a point
     u16 AngleTo(FloorPos target) {
         FloorPos delta = target - GetFloorPos();
@@ -235,8 +235,8 @@ public:
         return ((Character *)(this))->IsPointWithinReach(pos.x, pos.z, reach, maxReach);
     }
     void SetFloorPos(fx32 x, fx32 z) {
-        mModel.mPos.x = x;
-        mModel.mPos.z = z;
+        mPos.x = x;
+        mPos.z = z;
     }
     // From where the character stands to a point
     FloorPos GetOffsetTo(const FloorPos &to) { return to - GetFloorPos(); }
@@ -261,8 +261,8 @@ public:
     }
     BOOL IsNearerThan(const RoomCharacter *other, fx32 distanceSq) {
         FloorPos pos;
-        pos.x = other->mModel.mPos.x;
-        pos.z = other->mModel.mPos.z;
+        pos.x = other->mPos.x;
+        pos.z = other->mPos.z;
         return ((Character *)(this))->IsNearerThan(pos, distanceSq);
     }
     BOOL IsWithinReach(const RoomCharacter *other, fx32 reach, fx32 maxReach) {
@@ -307,10 +307,10 @@ public:
     // The standing and the walking animation of the character's personality and mood
     s16 GetIdleAnim() { return data_020fb870[data_020fba28[mPersonality]][mMood]; }
     s16 GetWalkAnim() { return data_020fb898[data_020fba28[mPersonality]][mMood]; }
-    ModelAnimation *GetCurrentAnimation() { return AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, mModel.mAnimId); }
+    ModelAnimation *GetCurrentAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
     BOOL IsAnimationFinished() { return GetCurrentAnimation()->mFinished; }
     // A joint's matrix, as GetMidpoint takes it
-    PositionedNode *GetNode(int joint) { return (PositionedNode *)&mModel.mJointMatrices[joint]; }
+    PositionedNode *GetNode(int joint) { return (PositionedNode *)&mJointMatrices[joint]; }
 
     // GetFlagOfPartner (0x021686f4) as the states have it inline
     u8 GetFlagOfPartnerInline() { return mRelation[mPartner->mIndex]; }
@@ -358,23 +358,7 @@ public:
     // Turns the head to the camera, up or down by a quarter of the camera's elevation (defined below)
     void LookAtCamera(u8 frames);
 
-    /* 0x25E4 */ CharacterModel mModel;
-    /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];     // Name its archive is mounted under (func_02091048 sets both)
-    /* 0x2AB0 */ char mArchivePath[0x3C];  // and the archive's path
-    /* 0x2AEC */ fx32 mSpeed;
-    /* 0x2AF0 */ fx32 mUnknown2AF0;        // func_02091174 multiplies a distance by it
-    /* 0x2AF4 */ fx32 mUnknown2AF4;
-    /* 0x2AF8 */ VecFx32 mTarget;          // Where it walks to (Character_SetWalkTarget)
-    /* 0x2B04 */ int mUnknown2B04;
-    /* 0x2B08 */ u16 mMoveAngle;           // The way Character_MoveAlongAngle moves it
-    /* 0x2B0A */ u16 mAngle;               // The way the character faces (Character_SetAngle sets both)
-    /* 0x2B0C */ u16 mTargetAngle;         // Character_TurnToTargetAngle turns mAngle towards it
-    /* 0x2B0E */ u16 mWalkAngle;           // The direction to mTarget, as func_02091194 and Character_TurnToWalkTarget
-                                           // find it; its negative is the head's yaw while turning
-    /* 0x2B10 */ s8 mSoundPhase[2];        // Character_PlaySoundAtAnimPhase's progress through an animation, per slot
-    /* 0x2B12 */ u8 mUnknown2B12[2];
-    /* 0x2B14 */ fx32 mAnimSpeed;          // func_020919e8 gives it to the model when an animation starts
+    /* 0x25E4 */ // Character: CharacterModel, then its own fields
     /* 0x2B18 */ int mState;
     /* 0x2B1C */ int mPrevState;           // SetState keeps the state before
     /* 0x2B20 */ int mOverrideState;       // A second state (SetOverrideState sets it); mState does not run while it is set
@@ -384,7 +368,7 @@ public:
     /* 0x2B2C */ BOOL mPresent;            // The character is in the room
     /* 0x2B30 */ RoomCharacter *mPartner;  // The other of the two
     /* 0x2B34 */ VecFx32 mSavedTarget;
-    /* 0x2B40 */ HeadIcon mHeadIcon;
+    /* 0x2B40 */ RoomHeadIcon mHeadIcon;
     /* 0x2B80 */ HeldItem *mHeldItems[2];  // What it holds in its hands
     /* 0x2B88 */ ApartmentRoom *mRoom;     // The states of leaving and entering move its door
     /* 0x2B8C */ RoomCamera *mCamera;      // The character turns to it and looks into it

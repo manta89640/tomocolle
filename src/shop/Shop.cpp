@@ -1325,9 +1325,9 @@ int ShopItemPanel::GetCountMessage(int count) {
 // Mounts the head staff's archives: its model, its clothes, its animations and its head
 void ShopStaff::Mount() {
     mCharacter.CharacterModel::SetArchive("3HM", 0, 0);
-    mMannequin.mBody.SetArchive("3CM", 0, 0);
+    mMannequin.SetArchive("3CM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacter.mArchiveName, mCharacter.mArchivePath, 0);
-    ArchiveManager_MountCompressed(&gArchiveManager, mMannequin.mBody.mArchiveName, mMannequin.mBody.mArchivePath,
+    ArchiveManager_MountCompressed(&gArchiveManager, mMannequin.mArchiveName, mMannequin.mArchivePath,
                                    0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3HA", "Mdl/Ica/ica_mii_contents_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3CH", "Mdl/Misc/headStaff_3D_LZ.bin", 0);
@@ -1363,7 +1363,7 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
     mGreet = FALSE;
     mTalking = FALSE;
     ModelResources_SetModel(data_021223e4, 28, mCharacter.mModelPath);
-    ModelResources_SetModel(data_021223e4, 30, mMannequin.mBody.mModelPath);
+    ModelResources_SetModel(data_021223e4, 30, mMannequin.mModelPath);
     ModelResources_SetModel(data_021223e4, 31, "3CH:/head.imd");
     void *animations = func_0202ad04(data_021223e4, 28, "3HA", 0);
     mCharacter.Init(28, 0, 0);
@@ -1395,21 +1395,21 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
         mMannequin.Init(30, 0, 31, 0);
         func_0202aecc(data_021223e4, 30);
         ArchiveManager_Unmount(&gArchiveManager, "3CM");
-        mMannequin.mBody.SetArchive("3CM", uniform, 0);
-        ArchiveManager_MountCompressed(&gArchiveManager, "3CM", mMannequin.mBody.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 30, mMannequin.mBody.mModelPath);
-        mMannequin.mBody.MakeModel(30, 0);
+        mMannequin.SetArchive("3CM", uniform, 0);
+        ArchiveManager_MountCompressed(&gArchiveManager, "3CM", mMannequin.mArchivePath, 1);
+        ModelResources_SetModel(data_021223e4, 30, mMannequin.mModelPath);
+        mMannequin.MakeModel(30, 0);
         mMannequin.LoadHead(31, 0);
-        mMannequin.mBody.LoadTexturePalette();
-        mMannequin.mBody.SetPaletteColor1(0x5FBE);
+        mMannequin.LoadTexturePalette();
+        mMannequin.SetPaletteColor1(0x5FBE);
         void *headAnimations = func_0202ad04(data_021223e4, 30, "3HA", 0);
-        func_02029660(mMannequin.mBody.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
+        func_02029660(mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
         mMannequin.SetAnimation(RESOURCE_BCA0, 33);
-        mMannequin.mBody.mShadowVisible = TRUE;
+        mMannequin.mShadowVisible = TRUE;
         VecFx32 pos = mPosition;
-        mMannequin.mBody.mPos.x = pos.x;
-        mMannequin.mBody.mPos.y = pos.y;
-        mMannequin.mBody.mPos.z = pos.z;
+        mMannequin.mPos.x = pos.x;
+        mMannequin.mPos.y = pos.y;
+        mMannequin.mPos.z = pos.z;
         mMannequin.SetAngle(mAngle);
         mMannequin.ApplyAngle();
         mMannequin.Draw();
@@ -1556,7 +1556,7 @@ void ShopStaff::UpdateHeadStaff() {
     case STATE_GREETING:
         switch (mStep) {
         case 0:
-            if (mMannequin.mBody.mBlendFrames <= 0) {
+            if (mMannequin.mBlendFrames <= 0) {
                 BowDown();
                 mStep++;
             }
@@ -1582,17 +1582,17 @@ void ShopStaff::UpdateHeadStaff() {
             mStep++;
             break;
         case 1:
-            if (mMannequin.mBody.mBlendFrames <= 0) {
+            if (mMannequin.mBlendFrames <= 0) {
                 mSpeechWindow->Show(mMessages[0], 0, 120);
                 mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
                 mMannequin.BlendToAnimation(RESOURCE_BCA0, 29);
-                AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+                AnimModel_FindAnimation(&mMannequin.mAnim, RESOURCE_BCA0, mMannequin.mAnimId)
                     ->mPlayOnce = TRUE;
                 mStep++;
             }
             break;
         case 2:
-            if (AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+            if (AnimModel_FindAnimation(&mMannequin.mAnim, RESOURCE_BCA0, mMannequin.mAnimId)
                     ->mFinished) {
                 mMannequin.BlendToAnimation(RESOURCE_BCA0, 33);
                 mAnimationDone = TRUE;
@@ -1609,7 +1609,7 @@ void ShopStaff::UpdateHeadStaff() {
                 mSpeechWindow->Show(mMessages[0], 0, 120);
                 mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
                 mMannequin.SetAnimation(RESOURCE_BCA0, 29);
-                AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+                AnimModel_FindAnimation(&mMannequin.mAnim, RESOURCE_BCA0, mMannequin.mAnimId)
                     ->mPlayOnce = TRUE;
             }
             break;
@@ -1618,7 +1618,7 @@ void ShopStaff::UpdateHeadStaff() {
     case STATE_TURNING_BACK:
         switch (mStep) {
         case 0:
-            if (mMannequin.mBody.mBlendFrames <= 0) {
+            if (mMannequin.mBlendFrames <= 0) {
                 mMannequin.BlendToAnimation(RESOURCE_BCA0, 33);
                 mStep++;
             }
@@ -1690,10 +1690,10 @@ void ShopStaff::UpdateHeldModel() {
         MI_Copy36B(&rotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
         mHeldModel->mRotY = 0x4000;
     } else {
-        MtxFx43 *matrices = mMannequin.mBody.mJointMatrices;
+        MtxFx43 *matrices = mMannequin.mJointMatrices;
         mHeldModel->SetPosition(matrices[CharacterModel::JOINT_R_HAND]._30, matrices[CharacterModel::JOINT_R_HAND]._31,
                                 matrices[CharacterModel::JOINT_R_HAND]._32);
-        MtxFx33 *rotations = mMannequin.mBody.mJointRotations;
+        MtxFx33 *rotations = mMannequin.mJointRotations;
         MI_Copy36B(&rotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
         mHeldModel->mRotY = 0x4000;
     }

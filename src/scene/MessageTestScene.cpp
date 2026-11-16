@@ -1,4 +1,5 @@
 #include "MessageTestScene.h"
+#include "MainProgram3d.h"
 
 extern "C" {
 extern Font gFonts[3];

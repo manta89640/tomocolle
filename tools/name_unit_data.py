@@ -71,26 +71,28 @@ def main() -> int:
             align = max(align, 4)
             address = (address + align - 1) // align * align
             for offset, symbol, binding in sorted(syms.get(index, [])):
-                placed.append((address + offset, symbol, binding))
+                placed.append((address + offset, symbol, binding, kind))
             address += size
         print(f"{kind}: ends at {address:#010x}, the range at {end:#010x}")
-    for address, symbol, binding in placed:
+    for address, symbol, binding, _ in placed:
         print(f"{address:#010x} {symbol} {binding.lower()}")
 
     if args.apply:
         lines = open(args.symbols).read().rstrip("\n").split("\n")
         # Only a symbol at an address the object names is replaced. One the object has but readelf does not list
         # as OBJECT or NOTYPE, such as the virtual tables MW emits with binding 13, is kept as it is.
-        named = {address for address, _, _ in placed}
+        named = {address for address, _, _, _ in placed}
         kept = []
         for line in lines:
             match = re.search(r"addr:(0x[0-9a-fA-F]+)", line)
             address = int(match[1], 16) if match else None
-            if address in named and "kind:data" in line and any(s <= address < e for s, e in ranges.values()):
+            if address in named and ("kind:data" in line or "kind:bss" in line) and any(s <= address < e for s, e in ranges.values()):
                 continue
             kept.append(line)
-        for address, symbol, binding in placed:
-            kept.append(f"{symbol} kind:data(any) addr:{address:#010x}" + (" local" if binding == "LOCAL" else ""))
+        for address, symbol, binding, kind in placed:
+            # A .bss object is kind:bss: dsd dis reads the bytes of a data symbol, and panics on .bss (overlay 110)
+            kind = "bss" if kind in (".bss", ".sbss") else "data(any)"
+            kept.append(f"{symbol} kind:{kind} addr:{address:#010x}" + (" local" if binding == "LOCAL" else ""))
 
         def where(line: str) -> int:
             match = re.search(r"addr:(0x[0-9a-fA-F]+)", line)

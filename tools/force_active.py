@@ -14,6 +14,8 @@ from pathlib import Path
 
 SHT_SYMTAB = 2
 STB_GLOBAL = 1
+# mwccarm's binding of a function emitted in every file that uses it (tools/inline_symbols.py)
+STB_MW_INLINE = 13
 # What the linker script takes for a name. The labels left out (".L_02020bf8") are inside functions that are named.
 IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -31,7 +33,7 @@ def global_symbols(path: Path) -> list[str]:
         strings = sections[link][4]
         for i in range(size // entsize):
             name, _, _, info, _, shndx = struct.unpack_from("<3I2BH", data, offset + i * entsize)
-            if info >> 4 == STB_GLOBAL and shndx != 0 and name:
+            if info >> 4 in (STB_GLOBAL, STB_MW_INLINE) and shndx != 0 and name:
                 end = data.index(b"\0", strings + name)
                 names.append(data[strings + name:end].decode("latin-1"))
     return names

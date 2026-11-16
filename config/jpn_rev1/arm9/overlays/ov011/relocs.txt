@@ -74,7 +74,7 @@ from:0x0214a154 kind:load to:0x0214b270 module:overlay(11)
 from:0x0214a158 kind:load to:0x0214b250 module:overlay(11)
 from:0x0214a16c kind:load to:0x02121834 module:main
 from:0x0214a170 kind:load to:0x021227cc module:main
-from:0x0214a178 kind:load to:0x020f7300 module:main
+from:0x0214a178 kind:load to:0x020f72f8 add:0x8 module:main
 from:0x0214a17c kind:load to:0x021227d8 module:main
 from:0x0214a180 kind:load to:0x0214b390 module:overlay(11)
 from:0x0214a184 kind:load to:0x0214b3b4 module:overlay(11)
