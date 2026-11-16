@@ -50,7 +50,7 @@ void HumanTestScene::Update() {
         func_02029c20(&mBody, RESOURCE_BTX0, 1, 0);
         mTexturesLoaded = TRUE;
     } else if (mTexturesLoaded && (data_0211f9d4.mTrigger & PAD_BUTTON_B)) {
-        u32 address = NNS_GfdGetPlttKeyAddr(((NNSG3dResTex *)mBody.mUnknown10)->plttInfo.vramKey);
+        u32 address = NNS_GfdGetPlttKeyAddr(mBody.mResTex->plttInfo.vramKey);
         GXRgb *palette = (GXRgb *)ArchiveManager_GetFileByName(&gArchiveManager, "BT0:/style01.ntfp");
         palette[0] = GX_RGB(17, 8, 4);
         GX_BeginLoadTexPltt();

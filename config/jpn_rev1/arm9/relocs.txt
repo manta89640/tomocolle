@@ -5526,7 +5526,7 @@ from:0x0203e0b0 kind:arm_call to:0x0208fd64 module:main
 from:0x0203e0bc kind:load to:0x0210f65c add:0x8 module:main
 from:0x0203e0c0 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0203e110 kind:load to:0x02110978 module:main
-from:0x0203e114 kind:load to:0x02149ec8 module:overlays(3,8,64)
+from:0x0203e114 kind:load to:0x02149ec0 add:0x8 module:overlay(3)
 from:0x0203e118 kind:load to:0x0210f640 add:0x8 module:main
 from:0x0203e148 kind:arm_call to:0x0208fcf8 module:main
 from:0x0203e154 kind:arm_call to:0x0208eb18 module:main
