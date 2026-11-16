@@ -376,6 +376,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   also what gives the original's `lsr #3`).
 
 **Two operands loaded in the other order**
+- `f(b)` called before `f(a)` and compared `cmp r0, r5` (the later result first): `int sb = f(b); int sa = f(a);
+  if (sa == sb)`; `f(b) == f(a)` gives the calls in that order but the compare the other way
+  (`EncounterJudge::Judge`).
+- A range check `(int)(now - start) >> 9` on an `s64` difference shifts only the low word: the cast is in the source
+  (`DayPhase::Compute`).
 - How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
   `MessageFile *files = &mEtcMessages; files[1].Open(...); files[0].Open(...);` (`MiiListMenuScene::Init`).
 - Do arithmetic in a statement of its own before the call: `hour -= tens * 10; f(hour);` rather than
@@ -397,6 +402,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   operands the other way (`MiiEditFacePage::StepParameter`).
 
 **Stack slots in the wrong order, or a frame too large**
+- A struct zeroed through a pointer into one slot and copied with `ldm`/`stm` into another, whose address is passed:
+  an inline that returns it, `RTCTime time = Midnight();` with `RTCTime t = {0, 0, 0}; return t;` inside
+  (`GetDayNumber`, `src/shop/ShopStock.cpp`); a named local, a block or a by-value parameter put the two slots the
+  other way round.
+- Two objects of a class with a constructor, constructed in address order with the first at the lower address:
+  an array, `SavedCharacter characters[2]` (`EncounterJudge::MeetRandomPair`); two locals are constructed in
+  declaration order but placed the first-declared higher.
 - A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
   that builds it, went below the other arrays and gave the original's frame. A union holding a `long double` is
   8-aligned.
