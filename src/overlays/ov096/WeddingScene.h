@@ -679,7 +679,7 @@ public:
         STATE_LEAVE,
     };
 
-    WeddingScene(); // func_02048600, the main program's
+    WeddingScene(int sceneId); // 0x02048600, in the main program
 
     virtual void StartLoading();
     virtual void Init();
