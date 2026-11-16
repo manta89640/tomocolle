@@ -13,15 +13,16 @@
 //   them gives the NaN state's registers in another order.
 // - The loop that packs the mantissa into the result counts bits with one variable and indexes the result's bytes
 //   with another (k and i), and the byte swap after it has a signed counter of its own.
-// Not matching yet: 40 instructions of the hexadecimal tail, all register choices: the pointer to the result's bytes
-// is in r3 where the original has r4, and the values the original keeps in r3 (the mantissa's first byte and
-// address, the bit position, the swap's counter) are in r4.
-// Also tried (round 3): the pointer assigned later, made const, cast, or replaced by the union's array in each part
-// of the tail; the union at function scope; the block's declarations in every order a climb reaches; the swap counter
-// set at the block's top or before the exponent (that puts p in r4 but moves the rest); the i loop counting with k; a
-// separate index for the packing loop; every set of one to three of the opt_* pragmas. `#pragma opt_lifetimes off`
-// alone puts p in r4 and matches up to the packing loop, whose counters then take other registers, and computes
-// exp << 21 into a fresh register where the original reuses exp's.
+// - Compiled with #pragma opt_lifetimes off, which puts the pointer to the result's bytes in r4 as the original has it;
+//   the leading-zero loop then counts with k (the packing loop's bit counter, r2 in both), and uch and bitpos are
+//   declared at the top of the else block.
+// Not matching yet: in the packing loop the byte index i, bitpos and the strength-reduced k / 8 are in r3, r6 and r7
+// where the original has r7, r3 and r6, and exp << 21 at the end is computed into a fresh register where the original
+// reuses exp's (which is what the default lifetimes give, but they put the pointer in r3).
+// Tried before (rounds 3 and 4): the pointer assigned later, made const, cast, or replaced by the union's array; the
+// union at function scope; every order of the block's declarations; the order and place of the packing loop's
+// initialisations; the increments in the for header; exp <<= 21 and other spellings of the tail; every set of one to
+// three of the opt_* pragmas.
 
 #include <ansi_fp.h>
 #include <ctype.h>
@@ -74,6 +75,7 @@ enum {
 #define fetch()         (count++, (*ReadProc)(ReadProcArg, 0, __GetAChar))
 #define unfetch(c)      (*ReadProc)(ReadProcArg, c, __UngetAChar)
 
+#pragma opt_lifetimes off
 long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *ReadProcArg, int *chars_scanned,
                       int *overflow)
 {
@@ -480,21 +482,23 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 			long double ld;
 			unsigned char uc[8];
 		} uld;
-		unsigned i;
 		unsigned shift;
 		unsigned k;
+		unsigned i;
 		int m;
 		unsigned char *p = uld.uc;
 		unsigned char carry;
+		unsigned char uch;
+		unsigned bitpos;
 
 		if (expsign)
 			exp = -exp;
 		exp += intdigits * 4;
 
-		for (i = 0; i < 4 && !(mantissa[0] & (0x80 >> i)); i++)
+		for (k = 0; k < 4 && !(mantissa[0] & (0x80 >> k)); k++)
 			exp--;
 
-		shift = i + 1;
+		shift = k + 1;
 		if (shift) {
 			carry = 0;
 			for (chptr = mantissa + 7; chptr >= mantissa; chptr--) {
@@ -506,9 +510,8 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 
 		memset(p, 0, 8);
 		{
-			unsigned bitpos;
 			for (k = 0, i = 1, bitpos = 12; k < 52; k += 8) {
-				unsigned char uch = mantissa[k / 8];
+				uch = mantissa[k / 8];
 				if (k + 8 > 52)
 					uch &= 0xff << (52 - k);
 				p[i] |= (unsigned char)(uch >> (bitpos % 8));
