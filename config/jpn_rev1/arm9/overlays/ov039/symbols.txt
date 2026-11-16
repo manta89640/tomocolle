@@ -1,14 +1,14 @@
-func_ov039_02149a40 kind:function(arm,size=0x2f4) addr:0x02149a40
-func_ov039_02149d34 kind:function(arm,size=0xb64) addr:0x02149d34
-func_ov039_0214a898 kind:function(arm,size=0x468) addr:0x0214a898
-func_ov039_0214ad00 kind:function(arm,size=0x84) addr:0x0214ad00
-func_ov039_0214ad84 kind:function(arm,size=0x58) addr:0x0214ad84
-func_ov039_0214addc kind:function(arm,size=0x74c) addr:0x0214addc
-func_ov039_0214b528 kind:function(arm,size=0xd8) addr:0x0214b528
-func_ov039_0214b600 kind:function(arm,size=0x14) addr:0x0214b600
-func_ov039_0214b614 kind:function(arm,size=0x10) addr:0x0214b614
-func_ov039_0214b624 kind:function(arm,size=0x54) addr:0x0214b624
-func_ov039_0214b678 kind:function(arm,size=0x5c) addr:0x0214b678
+_ZN11TravelScene12StartLoadingEv kind:function(arm,size=0x2f4) addr:0x02149a40
+_ZN11TravelScene4InitEv kind:function(arm,size=0xb64) addr:0x02149d34
+_ZN11TravelScene6UpdateEv kind:function(arm,size=0x468) addr:0x0214a898
+_ZN11TravelScene4DrawEv kind:function(arm,size=0x84) addr:0x0214ad00
+_ZN11TravelScene4ExitEv kind:function(arm,size=0x58) addr:0x0214ad84
+_ZN11TravelScene8SetStateEi kind:function(arm,size=0x74c) addr:0x0214addc
+_ZN11TravelScene5SpeakEimi kind:function(arm,size=0xd8) addr:0x0214b528
+_ZN11TravelScene12GetSightNameEii kind:function(arm,size=0x14) addr:0x0214b600
+_ZN11TravelScene15GetSightReadingEii kind:function(arm,size=0x10) addr:0x0214b614
+_ZN11TravelSceneD1Ev kind:function(arm,size=0x54) addr:0x0214b624
+_ZN11TravelSceneD0Ev kind:function(arm,size=0x5c) addr:0x0214b678
 data_ov039_0214b6d4 kind:data(any) addr:0x0214b6d4
 data_ov039_0214b6d6 kind:data(any) addr:0x0214b6d6
 data_ov039_0214b6d8 kind:data(any) addr:0x0214b6d8
@@ -51,10 +51,8 @@ gStr_Scn_Travel_Italia_LZ_bin kind:data(any) addr:0x0214ba00
 data_ov039_0214ba18 kind:data(any) addr:0x0214ba18 ambiguous
 gStr_Scn_Travel_Okinawa_LZ_bin kind:data(any) addr:0x0214ba1c
 gStr_Scn_Travel_Hongkong_LZ_bin kind:data(any) addr:0x0214ba38
-data_ov039_0214ba54 kind:data(any) addr:0x0214ba54
-data_ov039_0214ba68 kind:data(any) addr:0x0214ba68 ambiguous
-data_ov039_0214ba78 kind:data(any) addr:0x0214ba78 ambiguous
-data_ov039_0214ba8c kind:data(any) addr:0x0214ba8c ambiguous
+gStr_Scn_Travel_Shanghai_LZ_bin kind:data(any) addr:0x0214ba54
+_ZTV11TravelScene kind:data(any) addr:0x0214ba70
 data_ov039_0214ba94 kind:data(any) addr:0x0214ba94
 data_ov039_0214baa8 kind:data(any) addr:0x0214baa8 ambiguous
 gStr_TBM_ov039 kind:data(any) addr:0x0214bac0

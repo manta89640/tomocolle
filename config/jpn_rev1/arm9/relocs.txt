@@ -7124,7 +7124,7 @@ from:0x02046170 kind:arm_call to:0x0202e770 module:main
 from:0x02046188 kind:arm_call to:0x0202e770 module:main
 from:0x020461a0 kind:arm_call to:0x0202e770 module:main
 from:0x020461b8 kind:load to:0x02110978 module:main
-from:0x020461bc kind:load to:0x0214ba78 module:overlays(31,39,43,44,46,70,71)
+from:0x020461bc kind:load to:0x0214ba70 add:0x8 module:overlay(39)
 from:0x020461c0 kind:load to:0x0203e188 module:main
 from:0x020461c8 kind:load to:0x0203e168 module:main
 from:0x020461cc kind:load to:0x0202e46c module:main

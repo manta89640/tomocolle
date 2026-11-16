@@ -186,7 +186,7 @@ void SceneCast::LipSync(const char *phoneme) {
     }
 }
 
-void SceneCast::UpdateCharacters() {
+void SceneCast::UpdateCharacters(int) {
     for (int i = 0; i < mCount; i++) {
         mCharacters[i]->Update();
     }
