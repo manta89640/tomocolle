@@ -99,6 +99,13 @@ template <class A, class B> static inline A AddPoints(A a, B b) {
     return p;
 }
 
+static inline ScreenPoint MakePoint(int x, int y) {
+    ScreenPoint p;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
 // Puts a canvas at a point in pixels
 template <class P> static inline void SetCanvasPosition(ObjTextCanvas *canvas, P position) {
     canvas->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
@@ -108,25 +115,6 @@ template <class P> static inline void SetCanvasPosition(ObjTextCanvas *canvas, P
 template <class P> static inline void SetSpritePosition(Sprite *sprite, const P &position) {
     sprite->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
-
-// A point that starts at the origin
-struct ZeroPoint {
-    ZeroPoint() {
-        x = 0;
-        y = 0;
-    }
-    int x;
-    int y;
-};
-
-struct ZeroPoint2 {
-    ZeroPoint2() {
-        y = 0;
-        x = 0;
-    }
-    int x;
-    int y;
-};
 
 // --- The file's tables ---------------------------------------------------------------------------------------------
 
@@ -450,10 +438,7 @@ static inline void PlaceRow(ItemListView *list, int i, ScreenPoint row) {
 // Puts each row where its item is at the scroll position, and scrolls the background with them
 void ItemListView::Refresh() {
     for (int i = 0; i < mRowCount; i++) {
-        ScreenPoint offset;
-        offset.x = 0;
-        offset.y = GetRowItem(i) * 20 - mScroll;
-        PlaceRow(this, i, AddPoints(mPosition, offset));
+        PlaceRow(this, i, AddPoints(mPosition, MakePoint(0, GetRowItem(i) * 20 - mScroll)));
     }
     func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
 }
@@ -854,21 +839,13 @@ void ShopItemListView::SetVisible(BOOL visible) {
 
 void ShopItemListView::Refresh() {
     for (int i = 0; i < mRowCount; i++) {
-        ScreenPoint offset;
-        offset.x = 0;
-        offset.y = GetRowItem(i) * 20 - mScroll;
-        ScreenPoint row = AddPoints(mPosition, offset);
-        mRowButtons[i].SetPosition(FxVec2(row.x << FX32_SHIFT, row.y << FX32_SHIFT));
-        ScreenPoint text = AddPoints(row, sShopTextOffset);
-        mRowTexts[i].SetPositionFromVec(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
-        ScreenPoint price = AddPoints(row, sShopPriceOffset);
-        mRowPrices[i].SetPositionFromVec(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
-        ScreenPoint icon = AddPoints(row, sShopPriceIconOffset);
-        mRowPriceIcons[i].SetPosition(FxVec2(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT));
-        ScreenPoint count = AddPoints(row, sShopCountOffset);
-        mRowCounts2[i].SetPositionFromVec(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
-        ScreenPoint mark = AddPoints(row, sShopMarkOffset);
-        mMarks[i].SetPosition(FxVec2(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT));
+        ScreenPoint row = AddPoints(mPosition, MakePoint(0, GetRowItem(i) * 20 - mScroll));
+        SetSpritePosition(&mRowButtons[i], row);
+        SetCanvasPosition(&mRowTexts[i], AddPoints(row, sShopTextOffset));
+        SetCanvasPosition(&mRowPrices[i], AddPoints(row, sShopPriceOffset));
+        SetSpritePosition(&mRowPriceIcons[i], AddPoints(row, sShopPriceIconOffset));
+        SetCanvasPosition(&mRowCounts2[i], AddPoints(row, sShopCountOffset));
+        SetSpritePosition(&mMarks[i], AddPoints(row, sShopMarkOffset));
     }
     func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
 }
