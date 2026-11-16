@@ -186,7 +186,7 @@ public:
 
     /* 0x0000 */ BOOL mUnknown0000[8]; // Set for each part as func_ov076_0214de94 shows it
     /* 0x0020 */ int mCategory; // Which part the parts' buttons show (GetPartType's category)
-    /* 0x0024 */ u8 mUnknown0024[4];
+    /* 0x0024 */ int mUnknown0024;
     /* 0x0028 */ MiiEditScene *mScene;
     /* 0x002C */ SpriteButton mButtons[36];
     /* 0x227C */ SpriteButton mButtons227C[12]; // The parts to choose from

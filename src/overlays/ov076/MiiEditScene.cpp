@@ -78,7 +78,7 @@ static const int data_ov076_02158abc[8] = { 158, 76, 138, 76, 118, 76, 98, 76 };
 static const int data_ov076_02158adc[8] = { 170, 76, 150, 76, 90, 76, 70, 76 };
 static const int data_ov076_02158afc[8] = { 80, 77, 123, 77, 80, 114, 123, 114 };
 static const int data_ov076_02158b1c[8] = { 14, 15, 16, 17, 18, 19, 20, 21 };
-static const int data_ov076_021589fc[8] = { 207, 48, 239, 48, 207, 74, 239, 74 };
+static const WindowPoint data_ov076_021589fc[4] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 } };
 static const int data_ov076_02158a1c[8] = { 14, -1, 0, -1, 16, -1, 0, -1 };
 static const int data_ov076_02158a3c[8] = { 15, -1, 0, -1, 16, -1, 0, -1 };
 static const WindowPoint data_ov076_02158a5c[4] = { { 80, 90 }, { 176, 90 }, { 80, 90 }, { 176, 90 } };
@@ -1318,6 +1318,273 @@ void MiiEditFacePage::func_ov076_0214c6d0(MiiEditScene *scene) {
         mUnknown0000[i] = FALSE;
     }
     func_ov076_0214de94(1, 0);
+}
+
+extern "C" {
+void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
+void func_02031ca4(SpriteButton *button);
+}
+
+void MiiEditFacePage::func_ov076_0214de94(int part, BOOL a) {
+    mUnknown0000[part] = TRUE;
+    if (mScene->mSprite582C.mPlace == 0 && mScene->mUnknown58E8[2] == FALSE) {
+        BOOL all = TRUE;
+        for (int i = 0; i < 8; i++) {
+            if (i != 7 && mUnknown0000[i] == FALSE) {
+                all = FALSE;
+                break;
+            }
+        }
+        if (all) {
+            mScene->mUnknown58DC = TRUE;
+        }
+    }
+    for (int i = 0; i < 2; i++) {
+        mSprites2DF4[i].mSprite.mVisible = FALSE;
+        mSprites2FF4[i].mVisible = FALSE;
+    }
+    mButtons[25].mVisible = FALSE;
+    mButtons[26].mVisible = FALSE;
+    mButtons[8].mVisible = FALSE;
+    mButtons[9].mVisible = FALSE;
+    mButtons[10].mVisible = FALSE;
+    mButtons[11].mVisible = FALSE;
+    mButtons[12].mVisible = FALSE;
+    mButtons[13].mVisible = FALSE;
+    mSprite315C.mVisible = FALSE;
+    mSprite3208.mVisible = FALSE;
+    mSprite32B4.mVisible = FALSE;
+    mSprite3360.mVisible = FALSE;
+    for (int i = 0; i <= 7; i++) {
+        if (i != part) {
+            func_02031e28(&mButtons[i], FALSE);
+        }
+    }
+    mButtons[24].mVisible = FALSE;
+    mButtons[14].mVisible = FALSE;
+    mButtons[15].mVisible = FALSE;
+    mButtons[16].mVisible = FALSE;
+    mButtons[17].mVisible = FALSE;
+    mButtons[18].mVisible = FALSE;
+    mButtons[19].mVisible = FALSE;
+    mButtons[20].mVisible = FALSE;
+    mButtons[21].mVisible = FALSE;
+    mButtons[22].mVisible = FALSE;
+    mButtons[23].mVisible = FALSE;
+    for (u16 i = 28; i <= 35; i++) {
+        mButtons[i].mVisible = FALSE;
+    }
+    func_ov076_0214fa14(0);
+    switch (part) {
+    case 0:
+        mScene->MoveCameraTo(data_ov076_0215885c);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].mVisible = FALSE;
+        }
+        for (int i = 0; i < 2; i++) {
+            mSprites2DF4[i].mSprite.mVisible = TRUE;
+            mSprites2FF4[i].mVisible = TRUE;
+        }
+        func_02032514(&mSprites2DF4[0], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x29));
+        func_02032514(&mSprites2DF4[1], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x2A));
+        func_ov076_0214ee7c(0, part, -1);
+        break;
+    case 1: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        mFaceTab.SelectTab(mFaceTab.mTab, a);
+        break;
+    }
+    case 2: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 0x1A);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        mButtons[24].mVisible = TRUE;
+        mUnknown314C[0] = page;
+        mSprite315C.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Hair.nce", "E00:/Hair.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[0], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 3: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 7);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 8; i++) {
+            mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+            mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[1] = page;
+        mSprite3208.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Eyebrow.nce", "E00:/Eyebrow.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[1], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 4: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 1);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xE0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 6) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 8; i++) {
+            mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+            mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[2] = page;
+        mSprite32B4.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Eye.nce", "E00:/Eye.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[2], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 5: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x1C), part);
+        int index = button % 12;
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 0) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(0, part, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mButtons[data_ov076_0215893c[i]].mVisible = TRUE;
+            mButtons[data_ov076_0215893c[i]].SetPositionFromVec(data_ov076_021589fc[i].x << FX32_SHIFT, data_ov076_021589fc[i].y << FX32_SHIFT);
+        }
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Nose.nce", "E00:/Nose.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(0, 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 6: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 0xD);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x120, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 3) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mButtons[data_ov076_0215893c[i]].mVisible = TRUE;
+            mButtons[data_ov076_0215893c[i]].SetPositionFromVec(data_ov076_021589fc[i].x << FX32_SHIFT, data_ov076_021589fc[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[3] = page;
+        mSprite3360.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Mouth.nce", "E00:/Mouth.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[3], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 7: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += (func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        mEtcTab.SelectTab(mEtcTab.mTab, a);
+        break;
+    }
+    }
+    mCategory = part;
+    mUnknown0024 = 0;
 }
 
 void MiiEditFacePage::Draw() {
