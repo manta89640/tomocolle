@@ -130,15 +130,23 @@ int MiiData_GetSex(SavedCharacter *character);
 void func_0209a1fc(SavedCharacter *character, int a, int b, int c);
 void func_0209a588(SavedCharacter *character, s64 now, int a);
 void func_0209be98(SavedCharacter *character, SavedCharacter *other, s64 now, SavedCharacter *partner);
-s64 func_0209c4b4(SavedCharacter *character, s64 now);
+int func_0209c4b4(SavedCharacter *character, s64 now);
 void func_0209c56c(SavedCharacter *character, s64 time, u16 item);
 int func_0209c89c(SavedCharacter *character, int clothes);
 }
 
 #define NO_TIME 0x7FFFFFFFFFFFFFFFLL
 
-static inline u16 Rand(u16 max) {
+// The random number comes back as an int: the original truncates it to 16 bits a second time where it is stored in
+// a u16 (MeetRandomPair)
+static inline int Rand(u16 max) {
     return MATH_Rand16(&gRandom, max);
+}
+
+static inline void Swap(u16 &a, u16 &b) {
+    u16 t = a;
+    a = b;
+    b = t;
 }
 
 int GetRandomEventCount(int *force);
@@ -435,11 +443,7 @@ int ListRandomEventCandidates(u16 *indices) {
 void ShuffleRandomEventCandidates(u16 *indices) {
     u16 count = ListRandomEventCandidates(indices);
     for (int i = 0; i < 200; i++) {
-        u16 a = Rand(count);
-        u16 b = Rand(count);
-        u16 index = indices[a];
-        indices[a] = indices[b];
-        indices[b] = index;
+        Swap(indices[Rand(count)], indices[Rand(count)]);
     }
 }
 
@@ -684,10 +688,11 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
     func_0202c28c(&gGameData, secondIndex, second);
 }
 
-// The two go out together (event, kind) for between three quarters and all of the outing's length
+// The two go out together (event, kind) for between three quarters and all of the outing's length. The original
+// reads kind from its stack slot at both calls: one volatile read keeps the parameter in memory.
 void EncounterJudge::StartOuting(SavedCharacter *first, SavedCharacter *second, int event, u8 kind, s64 now) {
     first->ClearTrouble();
-    func_0209a1fc(first, 1, event, kind);
+    func_0209a1fc(first, 1, event, *(volatile u8 *)&kind);
     first->mMoodPartner = second->mIndex;
     int minutes = data_02114d78[first->mOutingTable][first->mOutingIndex].mMinutes;
     int least = (minutes * 3) >> 2;
