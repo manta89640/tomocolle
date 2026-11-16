@@ -240,7 +240,7 @@ void MiiEditProfilePage::Draw() {
     case 5:
     case 7:
     case 9:
-        func_02083bcc(&mKeyboard);
+        mKeyboard.Draw();
         mScene->mText1B35C.ObjTextCanvas::Draw();
         mScene->mCharBox.Draw();
         func_02031d7c(&mButton);
@@ -470,7 +470,7 @@ void MiiEditProfilePage::UpdateKeyboardKey(int state) {
         }
         break;
     }
-    func_02083608(mKeyboard.mKeys[0], enabled);
+    mKeyboard.mButtons[0].SetVisible(enabled);
 }
 
 // --- The voice page ---

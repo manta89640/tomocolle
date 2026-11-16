@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "Character.h"
+#include "keyboard/SoftKeyboard.h"
 #include "MessageWindow.h"
 #include "Scene.h"
 #include "Sprite.h"
@@ -53,19 +54,6 @@ u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int
 void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-}
-
-// The on-screen keyboard of the main program (func_02082eac constructs it). Its code reads nothing past 0x5F98;
-// what follows it in the profile page up to the next member (0x6014 bytes on) is the page's, not the keyboard's.
-struct SoftKeyboard {
-    /* 0x0000 */ u8 mUnknown0000[0x5178];
-    /* 0x5178 */ u8 mKeys[2][0x6B8]; // Constructed by func_0208329c; func_02083608 enables one
-    /* 0x5EE8 */ u8 mUnknown5EE8[0x110];
-}; // 0x5FF8 or less
-
-extern "C" {
-void func_02083bcc(SoftKeyboard *keyboard); // Draws it
-void func_02083608(void *key, BOOL enabled);
 }
 
 // The particle system of the main program (0x0207ab20 to 0x0207b364)

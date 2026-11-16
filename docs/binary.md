@@ -898,8 +898,10 @@ unit is linked from its object. It is the object a scene holds for the on-screen
   `sTabAreas`, `sLayoutPositions`; `.data` is the nine paths. The `gText_Yu` and `gStr_F` that the string tool had
   named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`.
 
-Inferred: the 0x1C bytes from +0x5FF8 to the end are part of the object (the Mii maker's next member starts there),
-but nothing in this file touches them.
+Measured: the object is 0x5FF8 bytes. The Mii maker's profile page keeps a text of its own from +0x5FF8 of its
+keyboard (it clears 0x16 bytes there and counts the characters at +0x6010), and two scene constructors of the main
+program construct their next member at +0x5FFC from the keyboard's start. Nothing in this file touches anything
+past +0x5FF8.
 
 ## The Mii maker
 
