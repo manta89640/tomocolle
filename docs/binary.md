@@ -670,6 +670,35 @@ Not done (each a near-miss of instruction order or registers, not of what the co
 - `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
 
+## The face test scene (overlay 2)
+
+Overlay 2 is scene 2, `FaceTestScene` (0x4DDC bytes; its constructor is the main program's `_ZN13FaceTestSceneC1Ei`,
+0x0203df24): one source file, `src/overlays/ov002/FaceTestScene.cpp`, all seven functions match and the unit is
+complete.
+
+Measured:
+
+- It mounts "Scn/Scene/SceneTestG3d_LZ.bin" as TG3, as the main program's `G3dTestScene` (scene 16) does, and
+  "Mdl/Ica/head_ICA_LZ.bin" as TGH. Resource 0 is TG3's glasses (`Glass6.imd`), drawn by a plain `Model` at +0x10
+  (rotated 0x6000 about y, at y -0x1199); resource 1 is TGH's `head.imd` and `wait00.ica`, the head model of a
+  `CharacterHead` at +0x26AC (at x 1.0), whose animation 0 starts at a random frame.
+- Beside it a bare `CharacterBase` at +0xC8: a face drawn with no head model, at its own head matrices.
+  `Init` sets its `mHeadRoll` to 0x2000. `Update` changes it alone: with A held the pad moves its `mFaceOffset` by
+  0x40, with B it changes `mHeadRollNow` and `mHeadPitchNow` by 0xB0, with Y `mHeadYawNow` by 0xA0. X with up and
+  down counts +0x4DD4 through 0 to 26, and left or right gives it to `SetFace`; L does the same with +0x4DD8 (0 to
+  7) for `mHeadTurn`. With R held the pad moves the camera (`Camera_Translate`, 0x0202a6fc: adds to its position
+  and target alike). Every frame it runs the face's `UpdateFace` and `UpdateHeadTurn`.
+- Touching the screen sets the touch line (`ModelResources_SetTouchLine`, 0x0202af00: `NNS_G3dScrPosToWorldLine` of
+  the point into `data_021223e4 + 0x428`, then the normalised direction from the camera's eye, `data_02122764 + 0x20`,
+  into `data_021223e4 + 0x434` = `data_02122818`, which `CharacterBase::HitTestFace()` reads); when the line hits
+  the face it gets a random default Mii of 6 (`SetDefaultMii`).
+- `Init` resets lights 0 and 1 with `func_0202a96c` (direction (0, 0, -0xFFF), colour 0x7FFF, on) and has none of
+  `G3dTestScene`'s light-0 code.
+- `AnimModel_SetAnimationFrame` (0x0202a5d8) finds a model's animation by type and id and sets its `NNSG3dAnmObj`'s
+  frame.
+
+Inferred: a test of the Mii face's placement on a head, from the same test archive as `G3dTestScene`.
+
 ## WH, the wireless wrapper
 
 WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the

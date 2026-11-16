@@ -633,6 +633,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   branch) is an SDK inline built on `MATH_CountLeadingZeros`, called for nothing: the compiler drops the arithmetic
   around it but keeps the inline assembly. `MATH_QSortStackSize(8);` as a statement gives it exactly (overlay 1's
   `NameSortTestScene::Init`).
+- A shift to fx32 and back that the original keeps (`ldrh; lsl #12; asr #12; lsl #16; lsrs #16`, before
+  `MATH_Rand16` reads its state) goes through an `int` variable: `int frames = (numFrame << FX32_SHIFT) >>
+  FX32_SHIFT;` then `MATH_Rand16(&gRandom, frames)`. Passed straight to the call, as
+  `FX_Whole(NNS_G3dAnmObjGetNumFrame(...))` or any other spelling, the shifts fold away (overlay 2's `Init`;
+  overlay 74 has the same).
+- A point passed by value in two registers with a dead copy of it on the stack (`sub sp,#8`, `str r1,[sp]`,
+  `str r2,[sp,#4]` beside the call) goes through a `static inline` that takes the struct by value and passes its
+  fields (`SetTouchLine(ScreenPoint point)` in overlay 2's `Update`). Passing the struct, or a local copy of it,
+  to the function directly gives `ldm` or other registers.
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving

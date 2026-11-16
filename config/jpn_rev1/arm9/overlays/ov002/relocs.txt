@@ -24,7 +24,7 @@ from:0x02149c0c kind:load to:0x0214a1c4 module:overlay(2)
 from:0x02149c10 kind:load to:0x0211d604 module:main
 from:0x02149c18 kind:load to:0x02122764 module:main
 from:0x02149c1c kind:load to:0x021227cc module:main
-from:0x02149c20 kind:load to:0x021227d8 module:main
+from:0x02149c20 kind:load to:0x021227cc add:0xc module:main
 from:0x02149c28 kind:load to:0x02121eac module:main
 from:0x02149df8 kind:arm_call to:0x02090234 module:main
 from:0x02149e9c kind:arm_call to:0x0202a6fc module:main
