@@ -664,7 +664,8 @@ What it showed about the compiler, measured (see "Compiler"):
 Overlay 3 is scene 3, `BodyPaletteTestScene` (0x1BC bytes; its constructor is the main program's
 `_ZN20BodyPaletteTestSceneC1Ei`, 0x0203e0c4): one source file, `src/overlays/ov003/BodyPaletteTestScene.cpp`, with
 the whole `.text` (seven functions, the two destructors implicit) and `.data` (the virtual table at `0x02149EC0`,
-then the strings in the order of the code).
+then the strings in the order of the code). Six of the seven functions match; `Init` is at 79% (scheduling only, see
+decompiling.md on the light-0 block), so the unit is not complete and its data not yet placed.
 
 Measured:
 
