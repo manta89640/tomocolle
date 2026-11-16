@@ -3113,7 +3113,8 @@ void func_020731b8(u8 *p) {
     }
 }
 
-extern const int data_020b68d8[];
+// The days of each month, from month 0, with February's 29: the same table as lib/MiiData's sDaysInMonth
+extern const int sNFLDaysInMonth[];
 
 // Whether a Mii's data is valid: height and build at most 128, a favourite colour of the 12, a date that exists, and
 // a create ID
@@ -3130,7 +3131,7 @@ BOOL func_020731e0(const NFLCharData *data) {
     if (data->birthMonth > 12) {
         return FALSE;
     }
-    if (data->birthDay > data_020b68d8[data->birthMonth]) {
+    if (data->birthDay > sNFLDaysInMonth[data->birthMonth]) {
         return FALSE;
     }
     return !func_02073284(&data->createId);
