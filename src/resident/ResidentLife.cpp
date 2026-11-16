@@ -794,11 +794,11 @@ void EncounterJudge::MeetWhileAway(int count, u8 *residents) {
     }
 }
 
-// While the game was off, residents (half of them for every six hours, at most half) pick an item of kind 1
+// While the game was off, residents (half of them for every day, at most half) pick an item of kind 1
 void EncounterJudge::PickItemsWhileAway(int count, u8 *residents, s64 now) {
     int items[0xFF];
     int half = count / 2;
-    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 6;
+    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, half);
     int itemCount = 0;
     for (int i = 0; i < 0xFF; i++) {
@@ -833,10 +833,10 @@ void EncounterJudge::PickItem(int index, int *items, int itemCount, s64 now) {
     func_0202c28c(&gGameData, index, &character);
 }
 
-// While the game was off, residents (a fifth of them for every six hours, at most a fifth) change their clothes
+// While the game was off, residents (a fifth of them for every day, at most a fifth) change their clothes
 void EncounterJudge::ChangeClothesWhileAway(int count, u8 *residents) {
     int fifth = count / 5;
-    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 6;
+    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, fifth);
     for (int j = 0; j < times; j++) {
         ChangeClothes(residents[Rand(count)]);
