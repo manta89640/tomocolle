@@ -64,14 +64,14 @@ struct CharLoader;
 struct Renderer3d;
 
 extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
+extern Camera gCamera;
+extern Light gLights[];
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
+extern Renderer3d gVramManagerWork;
 extern void *data_02123440;
 // By SavedCharacter::mUnknown0227, a table of these by mUnknown0226
 struct EventInfo {
@@ -83,14 +83,14 @@ struct EventInfo {
 }; // 0xC
 extern const EventInfo *data_02114d78[];
 
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-void func_0202a96c(Light *light);
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
 void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
 void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_0202b0e8(Renderer3d *renderer);
+void VramManagers_Reset(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);

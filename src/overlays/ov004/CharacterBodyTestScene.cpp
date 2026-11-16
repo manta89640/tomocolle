@@ -24,14 +24,14 @@ void CharacterBodyTestScene::StartLoading() {
 #pragma push
 #pragma opt_propagation off
 void CharacterBodyTestScene::Init() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.Show(1);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
     gScreenControl.mUnknown44 = 0;
     gScreenControl.mUnknown44Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 15, 0x7FFF, 63, FALSE);
-    Light *light = &data_021227cc[0];
+    Light *light = &gLights[0];
     u16 color = sLightColor;
     light->mDirection.x = 0xFFF;
     fx16 x = light->mDirection.x;
@@ -40,11 +40,11 @@ void CharacterBodyTestScene::Init() {
     light->mDirection.x = x;
     light->mDirection.y = 0;
     light->mDirection.z = 0;
-    ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
+    ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");
     mCharacter.Character::Init(0, 0, 0);
     mCharacter.mTurnJoints = TRUE;
     mCharacter.mTrackLimbs = TRUE;
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mCamera->mAngleY = 0x4000;
     mBodyStep = 0;
     mUnknown2B2C = 0;
@@ -58,17 +58,17 @@ void CharacterBodyTestScene::Init() {
 // Sets the line from the camera through the touched point. The point goes by value through an inline: that is what
 // leaves the original's dead copy of it on the stack.
 static inline int SetTouchLine(ScreenPoint point) {
-    return ModelResources_SetTouchLine(data_021223e4, point.x, point.y);
+    return ModelResources_SetTouchLine(gModelResources, point.x, point.y);
 }
 
 void CharacterBodyTestScene::Update() {
     if (gPadInput.mTrigger & PAD_BUTTON_B) {
         switch (++mBodyStep % 4) {
         case 0:
-            func_0202aecc(data_021223e4, 0);
+            ModelResources_ReleaseModel(gModelResources, 0);
             ArchiveManager_Unmount(&gArchiveManager, "TG3");
             ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body000_3D_LZ.bin", 1);
-            ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
+            ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");
             mCharacter.CharacterModel::MakeModel(0, 0);
             break;
         case 1:
@@ -76,10 +76,10 @@ void CharacterBodyTestScene::Update() {
                           -1, -1);
             break;
         case 2:
-            func_02029758(data_021223e4, RESOURCE_BMD0);
+            func_02029758(gModelResources, RESOURCE_BMD0);
             ArchiveManager_Unmount(&gArchiveManager, "TG3");
             ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
-            ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
+            ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");
             mCharacter.CharacterModel::MakeModel(0, 0);
             break;
         case 3:
@@ -156,7 +156,7 @@ void CharacterBodyTestScene::Update() {
     if (gTouchInput.mTouched) {
         SetTouchLine(gTouchInput.mPoint);
         mCharacter.HitTestJoint(CharacterModel::JOINT_BODY);
-        mCharacter.HitTestJoint(mCamera->mEye, data_02122818, CharacterModel::JOINT_L_KNEE);
+        mCharacter.HitTestJoint(mCamera->mEye, gTouchLineDirection, CharacterModel::JOINT_L_KNEE);
     }
 }
 
@@ -165,7 +165,7 @@ void CharacterBodyTestScene::Draw() {
 }
 
 void CharacterBodyTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "TG3");
     ArchiveManager_Unmount(&gArchiveManager, "CA3");
 }

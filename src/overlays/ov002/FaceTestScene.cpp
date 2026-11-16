@@ -14,10 +14,10 @@ void FaceTestScene::StartLoading() {
 }
 
 void FaceTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "TG3:/Glass6.imd");
-    ModelResources_SetModel(data_021223e4, 1, "TGH:/head.imd");
-    ModelResources_SetModel(data_021223e4, 1, "TGH:/wait00.ica");
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "TG3:/Glass6.imd");
+    ModelResources_SetModel(gModelResources, 1, "TGH:/head.imd");
+    ModelResources_SetModel(gModelResources, 1, "TGH:/wait00.ica");
     gScreenControl.Show(1);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
@@ -26,9 +26,9 @@ void FaceTestScene::Init() {
     mGlasses.Load(0, 0);
     mGlasses.mRotY = 0x6000;
     mGlasses.mPosition.y = -0x1199;
-    mCamera = &data_02122764;
-    func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(&data_021227cc[1]);
+    mCamera = &gCamera;
+    Light_Reset(&gLights[0]);
+    Light_Reset(&gLights[1]);
     mFace.InitFace(0);
     mFaceKind = 0;
     mHeadTurn = 0;
@@ -47,7 +47,7 @@ void FaceTestScene::Init() {
 // Sets the line from the camera through the touched point, which CharacterBase::HitTestFace() tests. The point goes
 // by value through an inline: that is what leaves the original's dead copy of it on the stack.
 static inline int SetTouchLine(ScreenPoint point) {
-    return ModelResources_SetTouchLine(data_021223e4, point.x, point.y);
+    return ModelResources_SetTouchLine(gModelResources, point.x, point.y);
 }
 
 void FaceTestScene::Update() {
@@ -132,8 +132,8 @@ void FaceTestScene::Draw() {
 }
 
 void FaceTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "TG3");
     ArchiveManager_Unmount(&gArchiveManager, "TGH");
 }

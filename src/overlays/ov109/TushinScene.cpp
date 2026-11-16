@@ -343,7 +343,7 @@ void TushinScene::SetUpList(int *charOffset) {
 // @0x0214a68c
 void TushinScene::InitCharacters() {
     int i;
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     for (i = 2; i >= 0; i--) {
         SavedCharacter *resident = &mResidents.mResidents[mResidents.mSelected];
         CharacterRecord *record = &mCharacters[i];
@@ -351,9 +351,9 @@ void TushinScene::InitCharacters() {
         ((Character *)(&mCharacters[i]))->SetArchive(sCharacterArchives[i]);
         CharacterModel *model = &mCharacters[i];
         ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
-        func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
+        ModelResources_BindArchive(gModelResources, i, model->mArchiveName, 0);
     }
-    void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 0x1F, "BIC", 0);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
     for (i = 0; i < 3; i++) {
         ((Character *)(&mCharacters[i]))->Init(i, 0, 0);
@@ -369,15 +369,15 @@ void TushinScene::InitCharacters() {
     ((Character *)(&mCharacters[1]))->SetVisible(FALSE);
     ((Character *)(&mCharacters[2]))->SetVisible(FALSE);
     mCharactersVisible = 0;
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
     VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
-    func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(data_021227d8);
-    func_0202ab2c(&data_021227cc[0], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, 0x3E8 - 0x640,
+    Light_Reset(&gLights[0]);
+    Light_Reset(gLight1);
+    Light_SetRotatedDirection(&gLights[0], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, 0x3E8 - 0x640,
                   -0xFA0);
-    func_0202ab2c(data_021227d8, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
+    Light_SetRotatedDirection(gLight1, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
     LoadCharacters();
 }
 
@@ -544,12 +544,12 @@ void TushinScene::SetUpCharacter(int i) {
 
 // @0x0214b4e8
 void TushinScene::ReloadCharacter(int i) {
-    func_0202aecc(data_021223e4, i);
+    ModelResources_ReleaseModel(gModelResources, i);
     CharacterModel *model = &mCharacters[i];
     ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
     ((Character *)(&mCharacters[i]))->SetArchive(sCharacterArchives[i]);
     ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
-    func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, i, model->mArchiveName, 0);
     ((CharacterModel *)(&mCharacters[i]))->MakeModel(i, 0);
 }
 
@@ -1488,7 +1488,7 @@ void TushinScene::DrawParticles() {
     if (mParticleFrames > 600) {
         return;
     }
-    func_0202ad84(data_021223e4);
+    ModelResources_BeginDraw(gModelResources);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     func_0207b138(mParticles);
@@ -2485,7 +2485,7 @@ void TushinScene::Exit() {
     for (int i = 0; i < 3; i++) {
         CharacterModel *model = &mCharacters[i];
         ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
-        func_0202aecc(data_021223e4, i);
+        ModelResources_ReleaseModel(gModelResources, i);
     }
     func_02024234(&gScreenControl, 0x3F00, 0);
     ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);

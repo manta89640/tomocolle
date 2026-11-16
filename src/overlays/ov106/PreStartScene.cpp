@@ -34,7 +34,7 @@ void PreStartScene::StartLoading() {
 
 // @0x02149abc
 void PreStartScene::Init() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);

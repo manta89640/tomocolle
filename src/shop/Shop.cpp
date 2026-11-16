@@ -50,9 +50,9 @@ extern TouchInput gTouchInput;
 extern ScreenLoader gScreenLoader;
 extern ArchiveLoader gArchiveManager;
 extern u8 gScreenControl[];
-extern u8 data_02122824[];
-extern u8 data_02122764[];
-extern Light data_021227cc[];
+extern u8 gVramManagerWork[];
+extern u8 gCamera[];
+extern Light gLights[];
 extern GameData gGameData;
 extern MATHRandContext16 gRandom;
 
@@ -78,9 +78,9 @@ void func_0202c264(GameData *game, int index, Character *character); // Reads a 
 int MiiData_GetSex(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
 void ScreenControl_SetBlendAlpha(void *a, int b, int c, int d, int e);
-void func_0202b0e8(void *a);
-void func_0202a640(Camera *camera);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+void VramManagers_Reset(void *a);
+void Camera_Reset(Camera *camera);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 
 BOOL func_0202c354(GameData *game, int index);
 u8 func_0202c468(GameData *game, int index); // The character's event
@@ -1334,10 +1334,10 @@ void ShopStaff::Mount() {
 }
 
 void ShopStaff::Unmount() {
-    func_0202aecc(data_021223e4, 28);
-    func_0202aecc(data_021223e4, 29);
-    func_0202aecc(data_021223e4, 30);
-    func_0202aecc(data_021223e4, 31);
+    ModelResources_ReleaseModel(gModelResources, 28);
+    ModelResources_ReleaseModel(gModelResources, 29);
+    ModelResources_ReleaseModel(gModelResources, 30);
+    ModelResources_ReleaseModel(gModelResources, 31);
     ArchiveManager_Unmount(&gArchiveManager, "3HM");
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
     ArchiveManager_Unmount(&gArchiveManager, "3CM");
@@ -1362,20 +1362,20 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
     }
     mGreet = FALSE;
     mTalking = FALSE;
-    ModelResources_SetModel(data_021223e4, 28, mCharacter.mModelPath);
-    ModelResources_SetModel(data_021223e4, 30, mMannequin.mModelPath);
-    ModelResources_SetModel(data_021223e4, 31, "3CH:/head.imd");
-    void *animations = func_0202ad04(data_021223e4, 28, "3HA", 0);
+    ModelResources_SetModel(gModelResources, 28, mCharacter.mModelPath);
+    ModelResources_SetModel(gModelResources, 30, mMannequin.mModelPath);
+    ModelResources_SetModel(gModelResources, 31, "3CH:/head.imd");
+    void *animations = ModelResources_BindArchive(gModelResources, 28, "3HA", 0);
     mCharacter.Init(28, 0, 0);
     func_02029660(mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacter.SetAnimation(RESOURCE_BCA0, 33);
     if (mResident) {
         func_0202c264(&gGameData, mResidentIndex, &mCharacter);
-        func_0202aecc(data_021223e4, 28);
+        ModelResources_ReleaseModel(gModelResources, 28);
         ArchiveManager_Unmount(&gArchiveManager, mCharacter.mArchiveName);
         mCharacter.CharacterModel::SetArchive(mCharacter.mArchiveName, uniform, MiiData_GetSex(&mCharacter));
         ArchiveManager_MountCompressed(&gArchiveManager, mCharacter.mArchiveName, mCharacter.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 28, mCharacter.mModelPath);
+        ModelResources_SetModel(gModelResources, 28, mCharacter.mModelPath);
         mCharacter.MakeModel(28, 0);
         mCharacter.MakeFace();
         mCharacter.UpdateBodyColors();
@@ -1393,16 +1393,16 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
         func_0209d898(&mCharacter, player);
     } else {
         mMannequin.Init(30, 0, 31, 0);
-        func_0202aecc(data_021223e4, 30);
+        ModelResources_ReleaseModel(gModelResources, 30);
         ArchiveManager_Unmount(&gArchiveManager, "3CM");
         mMannequin.SetArchive("3CM", uniform, 0);
         ArchiveManager_MountCompressed(&gArchiveManager, "3CM", mMannequin.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 30, mMannequin.mModelPath);
+        ModelResources_SetModel(gModelResources, 30, mMannequin.mModelPath);
         mMannequin.MakeModel(30, 0);
         mMannequin.LoadHead(31, 0);
         mMannequin.LoadTexturePalette();
         mMannequin.SetPaletteColor1(0x5FBE);
-        void *headAnimations = func_0202ad04(data_021223e4, 30, "3HA", 0);
+        void *headAnimations = ModelResources_BindArchive(gModelResources, 30, "3HA", 0);
         func_02029660(mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
         mMannequin.SetAnimation(RESOURCE_BCA0, 33);
         mMannequin.mShadowVisible = TRUE;
@@ -1715,12 +1715,12 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     mSpeechWindow.mText[0].mVAlign = 1;
     mSpeechWindow.Hide();
     ScreenControl_SetBlendAlpha(gScreenControl, 4, 17, 8, 8);
-    func_0202b0e8(data_02122824);
+    VramManagers_Reset(gVramManagerWork);
     *(BOOL *)(gScreenControl + 0x48) = TRUE;
     *(BOOL *)(gScreenControl + 0xEC) = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    Camera *camera = (Camera *)data_02122764;
-    func_0202a640(camera);
+    Camera *camera = (Camera *)gCamera;
+    Camera_Reset(camera);
     camera->mUnknown00 = 0x281;
     camera->mUnknown04 = 0xFCE;
     camera->mUnknown08 = 0x1555;
@@ -1728,12 +1728,12 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     camera->mUnknown10 = 0x50000;
     camera->mPosition = cameraPosition;
     camera->mTarget = cameraTarget;
-    Light *light0 = (Light *)data_021227cc;
+    Light *light0 = (Light *)gLights;
     light0->mColor = sCounterLightColors[1];
-    func_0202aa28(light0, camera, sCounterLightDirection0);
-    Light *light1 = &data_021227cc[1];
+    Light_SetDirectionByCamera(light0, camera, sCounterLightDirection0);
+    Light *light1 = &gLights[1];
     light1->mColor = sCounterLightColors[0];
-    func_0202aa28(light1, camera, sCounterLightDirection1);
+    Light_SetDirectionByCamera(light1, camera, sCounterLightDirection1);
     ScreenLoader_SetPriority(&gScreenLoader, 1, 1);
 }
 

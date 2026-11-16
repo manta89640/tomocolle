@@ -13,9 +13,9 @@ void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202a96c(Light *light);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
-extern Light data_021227d8;
+void Light_Reset(Light *light);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
+extern Light gLight1;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 BOOL func_02031294(SpriteButton *button);
@@ -158,9 +158,9 @@ void SceneCast::MountArchives(const char *animationArchive) {
 }
 
 void SceneCast::InitCharacters() {
-    void *animations = func_0202ad04(data_021223e4, 31, "BIC", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 31, "BIC", 0);
     for (int i = 0; i < mCount; i++) {
-        ModelResources_SetModel(data_021223e4, i, mCharacters[i]->mModelPath);
+        ModelResources_SetModel(gModelResources, i, mCharacters[i]->mModelPath);
         mCharacters[i]->Init(i, 0, 2);
         func_0202c264(&gGameData, mChosen[i], mCharacters[i]);
         mCharacters[i]->MakeFace();
@@ -172,7 +172,7 @@ void SceneCast::InitCharacters() {
         mCharacters[i]->SetAngle(0x4000);
         MakeCharacterSpeechTexts(&mSpeechTexts[i], mCharacters[i]);
     }
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mSpeaker = -1;
 }
 
@@ -196,21 +196,21 @@ void SceneCast::DrawCharacters() {
 
 void SceneCast::Release() {
     for (int i = 0; i < mCount; i++) {
-        func_0202aecc(data_021223e4, i);
+        ModelResources_ReleaseModel(gModelResources, i);
         ArchiveManager_Unmount(&gArchiveManager, sArchiveNames[i]);
     }
-    func_0202aecc(data_021223e4, 31);
+    ModelResources_ReleaseModel(gModelResources, 31);
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
 }
 
 // Loads a character's archive and model again (after its clothes changed)
 void SceneCast::ReloadCharacter(int index) {
-    func_0202aecc(data_021223e4, index);
+    ModelResources_ReleaseModel(gModelResources, index);
     ArchiveManager_Unmount(&gArchiveManager, sArchiveNames[index]);
     mCharacters[index]->SetArchive(sArchiveNames[index]);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[index]->mArchiveName,
                                    mCharacters[index]->mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, index, mCharacters[index]->mModelPath);
+    ModelResources_SetModel(gModelResources, index, mCharacters[index]->mModelPath);
     mCharacters[index]->MakeModel(index, 0);
     mCharacters[index]->UpdateBodyColors();
     mCharacters[index]->UpdateBodyScale();
@@ -251,16 +251,16 @@ void FaceCast::Init(int capacity) {
 // The camera at its start, and the two lights from the front left and the back
 #pragma opt_propagation off
 void FaceCast::SetupCamera() {
-    Camera *camera = &data_02122764;
-    func_0202a640(camera);
-    func_0202a93c(camera, 1);
-    Light *light = &data_021227cc[0];
-    data_021223e4[0x424 / 4] = 0;
-    func_0202a96c(light);
-    func_0202aa28(light, camera, sLightDirections[0]);
-    light = &data_021227d8;
-    func_0202a96c(light);
-    func_0202aa28(light, camera, sLightDirections[1]);
+    Camera *camera = &gCamera;
+    Camera_Reset(camera);
+    Camera_SetProjection(camera, 1);
+    Light *light = &gLights[0];
+    gModelResources[0x424 / 4] = 0;
+    Light_Reset(light);
+    Light_SetDirectionByCamera(light, camera, sLightDirections[0]);
+    light = &gLight1;
+    Light_Reset(light);
+    Light_SetDirectionByCamera(light, camera, sLightDirections[1]);
 }
 
 #pragma opt_propagation reset
@@ -311,8 +311,8 @@ void FaceCast::DrawFaces() {
 }
 
 void FaceCast::ResetCamera() {
-    func_0202a640(&data_02122764);
-    data_021223e4[0x424 / 4] = 1;
+    Camera_Reset(&gCamera);
+    gModelResources[0x424 / 4] = 1;
 }
 
 // Chooses mCount saved characters as SceneCast::Choose does

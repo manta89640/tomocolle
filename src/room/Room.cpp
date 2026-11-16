@@ -7,7 +7,7 @@
 // interior items and the player's list of them, and the random choice of interiors on offer.
 
 extern "C" {
-extern u8 data_02122764[];
+extern u8 gCamera[];
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 void ArchiveManager_MountCompressed(void *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(void *loader, const char *name);
@@ -76,7 +76,7 @@ void RoomObject::Unmount() {
 
 void RoomObject::ReleaseModel() {
     if (mResourceId >= 0) {
-        func_0202aecc(data_021223e4, mResourceId);
+        ModelResources_ReleaseModel(gModelResources, mResourceId);
         mResourceId = -1;
     }
 }
@@ -102,8 +102,8 @@ void RoomDoor::SetArchive(const char *archiveName, const char *modelName) {
 
 void RoomDoor::BindModels() {
     int id = mResourceId;
-    ModelResources_SetModel(data_021223e4, id, mModelPath);
-    ModelResources_SetModel(data_021223e4, id, mAnimPath);
+    ModelResources_SetModel(gModelResources, id, mModelPath);
+    ModelResources_SetModel(gModelResources, id, mAnimPath);
 }
 
 void RoomDoor::InitModel() {
@@ -222,7 +222,7 @@ RoomPart::RoomPart() {
 }
 
 void RoomPart::BindModel() {
-    ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
 }
 
 void RoomPart::InitModel() {
@@ -296,7 +296,7 @@ void RoomPart::SetFlags(int flags) {
 }
 
 RoomModels::RoomModels() {
-    mCamera = data_02122764;
+    mCamera = gCamera;
     mVisible = TRUE;
     SetState(STATE_IDLE);
     mNearY = 0x2000;

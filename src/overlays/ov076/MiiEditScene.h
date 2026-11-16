@@ -279,7 +279,7 @@ public:
     /* 0x00710 */ SceneCharacter mCharacter;    // The Mii shown
     /* 0x03228 */ CharacterBase mEditedCharacter;
     /* 0x0580C */ BOOL mUnknown580C;
-    /* 0x05810 */ Camera *mCamera;              // data_02122764
+    /* 0x05810 */ Camera *mCamera;              // gCamera
     /* 0x05814 */ int mCameraFrame;             // UpdateCamera moves the camera while it is under 40
     /* 0x05818 */ VecFx32 mCameraGoal;
     /* 0x05824 */ int mUnknown5824;            // The saved character's index (func_0202c264, func_0202c28c)

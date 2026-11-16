@@ -30,15 +30,15 @@ extern "C" {
 // The main program's model functions (0x02029b04 on), not decompiled yet
 void func_0202a308(AnimModel *model, u32 resType, int id);  // Removes an animation
 void func_0202a4d8(AnimModel *model, fx32 speed);           // Sets the speed of its animations
-void func_0202ad84(u32 *resources);
+void ModelResources_BeginDraw(u32 *resources);
 void func_02028bc0(MtxFx33 *rotation, u16 x, u16 y, u16 z); // Turns a rotation by angles
 BOOL func_02028e98(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
 
 extern MATHRandContext16 gRandom;
 
-// A line that HitTestFace tests the face against: from data_02122764 + 0x20, along data_02122818
-extern VecFx32 data_02122818;
-extern u8 data_02122764[];
+// A line that HitTestFace tests the face against: from gCamera + 0x20, along gTouchLineDirection
+extern VecFx32 gTouchLineDirection;
+extern u8 gCamera[];
 }
 
 static inline int Rand(int max) {
@@ -138,7 +138,7 @@ void CharacterBase::SetHeadMatrices(const MtxFx43 *matrix, const MtxFx33 *rotati
 
 BOOL CharacterBase::HitTestFace() {
     // The copies of the line are the by-value parameters of an inline
-    return HitTestFace(*(VecFx32 *)(data_02122764 + 0x20), data_02122818);
+    return HitTestFace(*(VecFx32 *)(gCamera + 0x20), gTouchLineDirection);
 }
 
 BOOL CharacterBase::HitTestFace(const VecFx32 *origin, const VecFx32 *dir) {
@@ -193,7 +193,7 @@ void CharacterBase::DrawFace() {
 }
 
 void CharacterBase::Draw() {
-    func_0202ad84(data_021223e4);
+    ModelResources_BeginDraw(gModelResources);
     DrawFace();
 }
 

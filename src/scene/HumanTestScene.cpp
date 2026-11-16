@@ -13,14 +13,14 @@ void HumanTestScene::StartLoading() {
 
 void HumanTestScene::Init() {
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "HP0:/H00point00.itp");
-    ModelResources_SetModel(data_021223e4, 0, "HM0:/HUMAN00_.imd");
-    ModelResources_SetModel(data_021223e4, 1, "BM0:/body00_.imd");
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "HP0:/H00point00.itp");
+    ModelResources_SetModel(gModelResources, 0, "HM0:/HUMAN00_.imd");
+    ModelResources_SetModel(gModelResources, 1, "BM0:/body00_.imd");
     G3X_SetClearColor(GX_RGB(1, 1, 1), 31, 0x7FFF, 63, FALSE);
     gScreenControl.Show(1);
-    mCamera = &data_02122764;
-    Light *light = &data_021227cc[0];
+    mCamera = &gCamera;
+    Light *light = &gLights[0];
     u16 color = light->mColor;
     light->mDirection.x = 0xFFF;
     light->mEnabled = TRUE;
@@ -42,12 +42,12 @@ void HumanTestScene::Update() {
     if (gPadInput.mTrigger & PAD_BUTTON_A) {
         ArchiveManager_Unmount(&gArchiveManager, "HT0");
         ArchiveManager_MountCompressed(&gArchiveManager, "HT0", "Scn/Scene/TestHuman00Tex_LZ.bin", 1);
-        ModelResources_SetModel(data_021223e4, 0, "HT0:/HUMAN00.itx");
+        ModelResources_SetModel(gModelResources, 0, "HT0:/HUMAN00.itx");
         func_02029c20(&mHead, RESOURCE_BTX0, 0, 0);
         mHead.SetAnimation(RESOURCE_BTP0, 1);
         ArchiveManager_Unmount(&gArchiveManager, "BT0");
         ArchiveManager_MountCompressed(&gArchiveManager, "BT0", "Scn/Scene/TestBody00Tex_LZ.bin", 1);
-        ModelResources_SetModel(data_021223e4, 1, "BT0:/body00.itx");
+        ModelResources_SetModel(gModelResources, 1, "BT0:/body00.itx");
         func_02029c20(&mBody, RESOURCE_BTX0, 1, 0);
         mTexturesLoaded = TRUE;
     } else if (mTexturesLoaded && (gPadInput.mTrigger & PAD_BUTTON_B)) {
@@ -77,8 +77,8 @@ void HumanTestScene::Draw() {
 }
 
 void HumanTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "HP0");
     ArchiveManager_Unmount(&gArchiveManager, "HM0");
     ArchiveManager_Unmount(&gArchiveManager, "BM0");

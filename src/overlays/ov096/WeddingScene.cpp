@@ -124,26 +124,26 @@ void WeddingScene::Init3d() {
     VecFx32 points[2];
     void *animations;
 
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     ScreenLoader_SetPriority(&gScreenLoader, 1, 3);
-    func_0202a640(&data_02122764);
+    Camera_Reset(&gCamera);
     mCamera.Init(&mCharacters[0], &mCharacters[1]);
     mCamera.Reset(gSceneManager.mPreviousSceneId);
     mCamera.GetStandingPoints(&points[0], &points[1]);
-    mLights.Init(&data_02122764, &mRoom);
+    mLights.Init(&gCamera, &mRoom);
     mRoom.Load(3);
     mRoom.LoadParts(4);
     mRoom.SetState(2);
-    ModelResources_SetModel(data_021223e4, 10, mGift.mModelPath);
+    ModelResources_SetModel(gModelResources, 10, mGift.mModelPath);
     mGift.Load(10);
     mGift.SetPosition(sFarAway);
     mGift.mVisible = FALSE;
-    animations = func_0202ad04(data_021223e4, 2, "3HA", 0);
-    ModelResources_SetModel(data_021223e4, 0, mCharacters[0].mModelPath);
-    ModelResources_SetModel(data_021223e4, 1, mCharacters[1].mModelPath);
+    animations = ModelResources_BindArchive(gModelResources, 2, "3HA", 0);
+    ModelResources_SetModel(gModelResources, 0, mCharacters[0].mModelPath);
+    ModelResources_SetModel(gModelResources, 1, mCharacters[1].mModelPath);
     mCharacters[0].Character::Init(0, 0, 0);
     mCharacters[1].Character::Init(1, 0, 0);
     for (int i = 0; i < 2; i++) {
@@ -322,15 +322,15 @@ void WeddingScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "TTM");
     ArchiveManager_Unmount(&gArchiveManager, "TIM");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "3H0");
     ArchiveManager_Unmount(&gArchiveManager, "3H1");
     ArchiveManager_Unmount(&gArchiveManager, mGift.mArchiveName);
-    func_0202aecc(data_021223e4, 10);
+    ModelResources_ReleaseModel(gModelResources, 10);
 }
 
 // Which saved character each of the two is: when the scene comes back from scene 0x40 or 0xC0, the ones that it
@@ -582,8 +582,8 @@ void WeddingCharacter::SetState(int state) {
 
 void WeddingCharacter::FaceCamera() {
     FloorPos camera;
-    camera.x = data_02122764.mEye.x;
-    camera.z = data_02122764.mEye.z;
+    camera.x = gCamera.mEye.x;
+    camera.z = gCamera.mEye.z;
     Character::SetAngle(AngleTo(camera));
 }
 
@@ -721,11 +721,11 @@ void WeddingCharacter::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit)
 }
 
 void WeddingCharacter::LookAtCamera() {
-    LookAt(&data_02122764.mEye, 0x2000, 0x3200);
+    LookAt(&gCamera.mEye, 0x2000, 0x3200);
 }
 
 void WeddingCharacter::TurnHeadToCamera() {
-    TurnHeadTo(&data_02122764.mEye, 0x2000, 0x3200);
+    TurnHeadTo(&gCamera.mEye, 0x2000, 0x3200);
 }
 
 void WeddingCharacter::LookAtPartner() {
@@ -754,14 +754,14 @@ u16 WeddingCharacter::GetHeadYawTo(VecFx32 *target) {
 // --- The camera -------------------------------------------------------------------------------------------------
 
 void WeddingCamera::Init(WeddingCharacter *first, WeddingCharacter *second) {
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     mCamera->SetPosition(sCameraStartPosition);
     mCamera->SetTarget(sCameraStartTarget);
     mCamera->mAngleX = 0;
     mCamera->mAngleY = 0;
     mCamera->mAngleZ = 0;
-    func_0202a748(mCamera);
+    Camera_UpdateEye(mCamera);
     mFirst = first;
     mSecond = second;
     CopyVec(&mPosition, &mCamera->mPosition);
@@ -788,7 +788,7 @@ void WeddingCamera::Reset(BOOL restore) {
     mPosition.y = 0x41D0;
     CopyVec(&mCamera->mPosition, &mPosition);
     CopyVec(&mCamera->mTarget, &mTarget);
-    func_0202a748(mCamera);
+    Camera_UpdateEye(mCamera);
 }
 
 // Follows the middle between the two, keeping the distance and the height
@@ -856,8 +856,8 @@ void WeddingLights::Init(Camera *camera, Room *room) {
     VEC_Subtract(&mCamera->mPosition, &mCamera->mTarget, &view);
     u16 angle = FX_Atan2Idx(view.x, view.z);
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(&data_021227cc[i]);
+        mLights[i] = &gLights[i];
+        Light_Reset(&gLights[i]);
         mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
         Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
     }
@@ -895,11 +895,11 @@ void WeddingGiftModel::Load(int resourceId) {
 
 // Shows another item: lets go of the old one's files, and loads the new one's
 void WeddingGiftModel::ChangeItem(int item) {
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
     SetItem(mArchiveName, item);
     ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
     LoadAnimation(mResourceId);
     ResetScale();
 }

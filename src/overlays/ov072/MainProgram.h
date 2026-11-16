@@ -64,7 +64,7 @@ struct SceneMemory {
     /* 0x20 */ u8 mCharacters[12]; // The characters the next scene shows (0xFF: none); the news scene reads them
 };
 
-// The main program's camera (data_02122764)
+// The main program's camera (gCamera)
 struct Camera {
     void SetPosition(VecFx32 position) {
         mPosition.x = position.x;
@@ -91,10 +91,10 @@ struct Camera {
 
 // One of the main program's 3D lights
 struct Light;
-extern "C" void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+extern "C" void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 struct Light {
     // Points the light, relative to the camera
-    void SetDirection(Camera *camera, VecFx32 direction) { func_0202aa28(this, camera, direction); }
+    void SetDirection(Camera *camera, VecFx32 direction) { Light_SetDirectionByCamera(this, camera, direction); }
 
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ GXRgb mColor;
@@ -209,9 +209,9 @@ extern SceneMemory gSceneMemory;
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
 extern u8 data_0213bab0[100];
 extern IslandState data_0212348c;
-extern Camera data_02122764;
-extern Light data_021227cc;
-extern Light data_021227d8;
+extern Camera gCamera;
+extern Light gLights;
+extern Light gLight1;
 extern int data_02123440[];
 extern wchar_t data_02123510[]; // The player's name
 extern const NewsKind data_020fa1d0[];
@@ -227,7 +227,7 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
+extern Renderer3d gVramManagerWork;
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
@@ -247,13 +247,13 @@ void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 int func_0202a1f8(AnimModel *model, u32 resType, int slot);
-void func_0202a640(Camera *camera);
-void func_0202a96c(Light *light);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+void Camera_Reset(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
-void func_0202ad84(void *resources);
-void func_0202ae38(void *resources);
-void func_0202b0e8(Renderer3d *renderer);
+void ModelResources_BeginDraw(void *resources);
+void ModelResources_Reset(void *resources);
+void VramManagers_Reset(Renderer3d *renderer);
 
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
 void func_0202c264(GameData *game, int index, SavedCharacter *character);

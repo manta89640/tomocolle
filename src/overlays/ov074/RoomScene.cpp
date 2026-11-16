@@ -123,9 +123,9 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
-void func_0202ae38(void *resources); // Of the models' resource table, data_021223e4 (Model.h)
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
+void ModelResources_Reset(void *resources); // Of the models' resource table, gModelResources (Model.h)
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
@@ -351,8 +351,8 @@ void RoomScene::Init() {
     void *animations;
     int charOffset;
 
-    func_0202b0e8(&data_02122824);
-    func_0202ae38(data_021223e4);
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_Reset(gModelResources);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
@@ -397,13 +397,13 @@ void RoomScene::Init() {
     mRoom.mDoor.mSoundPlayer = 2;
     for (i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
-        func_0202ad04(data_021223e4, i + 2, item->mArchiveName, 0);
+        ModelResources_BindArchive(gModelResources, i + 2, item->mArchiveName, 0);
         item->Init(i + 2);
     }
     mTtsPlayer.InitEngine();
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_0202ad04(data_021223e4, 1, mCharacters[1].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 1, mCharacters[1].mArchiveName, 0);
     mCharacters[0].Init(0, 0, 0);
     mCharacters[1].Init(1, 0, 1);
     mCharacters[0].mPartner = &mCharacters[1];
@@ -416,7 +416,7 @@ void RoomScene::Init() {
     mCharacters[1].mSoundHandle = 5;
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
-    animations = func_0202ad04(data_021223e4, 6, "BIC", 0);
+    animations = ModelResources_BindArchive(gModelResources, 6, "BIC", 0);
     for (int i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         ((CharacterBase *)(&mCharacters[i]))->MakeFace();
@@ -559,13 +559,13 @@ void RoomScene::Exit() {
     FinishEncounter();
     SaveCharacters();
     DestroyMainFrameHeap();
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
-    func_0202aecc(data_021223e4, 3);
-    func_0202aecc(data_021223e4, 4);
-    func_0202aecc(data_021223e4, 5);
-    func_0202aecc(data_021223e4, 6);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
+    ModelResources_ReleaseModel(gModelResources, 3);
+    ModelResources_ReleaseModel(gModelResources, 4);
+    ModelResources_ReleaseModel(gModelResources, 5);
+    ModelResources_ReleaseModel(gModelResources, 6);
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mArchiveName);
     ArchiveManager_Unmount(&gArchiveManager, "MNU");
@@ -10864,10 +10864,10 @@ int func_020253d4(void *graphicsManager, int plane);
 // Splits a 15-bit colour
 void func_02028b98(int color, int *r, int *g, int *b);
 // Resets a light: direction straight down... colour white, enabled
-void func_0202a96c(Light *light);
+void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
-extern Light data_021227cc[];
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+extern Light gLights[];
 
 // The saved game: what is known of a character by its index
 u8 func_0202c53c(SavedGame *game, int character);
@@ -11157,7 +11157,7 @@ void RoomCharacter::UpdateOverrideState() {
         ClearSpeechTexts();
         ((Character *)(this))->ResetSoundPhases();
         mSoundArmed = FALSE;
-        func_0202aecc(data_021223e4, mSlot);
+        ModelResources_ReleaseModel(gModelResources, mSlot);
         ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
         break;
     case OVERRIDE_LOAD_ARCHIVE:
@@ -11178,7 +11178,7 @@ void RoomCharacter::UpdateOverrideState() {
         break;
     case OVERRIDE_MAKE_MODEL:
         if (mOverrideStep == 0) {
-            func_0202ad04(data_021223e4, mSlot, mArchiveName, 0);
+            ModelResources_BindArchive(gModelResources, mSlot, mArchiveName, 0);
             CharacterModel::MakeModel(mSlot, 0);
             ((Character *)(this))->UpdateBodyColors();
             ResetBody();
@@ -11445,13 +11445,13 @@ void HeldItem::Unload() {
     SetShowState(SHOW_IDLE);
     mVisible = FALSE;
     RemoveAnims();
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
 }
 
 // @0x0216a1f0
 void HeldItem::Reload() {
-    func_0202ad04(data_021223e4, mResourceId, mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, mResourceId, mArchiveName, 0);
     AnimModel::Load(mResourceId, 0);
     mVisible = FALSE;
 }
@@ -11460,7 +11460,7 @@ void HeldItem::Reload() {
 void HeldItem::StartPattern() {
     BOOL hasPattern = sHeldItemHasPattern[mKind];
     if (hasPattern) {
-        func_0202ad04(data_021223e4, mResourceId, mArchiveName, hasPattern);
+        ModelResources_BindArchive(gModelResources, mResourceId, mArchiveName, hasPattern);
         SetAnimation(RESOURCE_BTP0, 0);
     }
 }
@@ -11556,7 +11556,7 @@ void ApartmentRoom::UpdateState() {
 
 // @0x0216a4a4
 RoomCamera::RoomCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0216a4b4
@@ -11572,7 +11572,7 @@ void RoomCamera::Reset() {
     SetState(STATE_TURN_RIGHT, 0);
     mSnap = TRUE;
     mIgnoreInput = FALSE;
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mPosition.x = 0;
     mPosition.y = FX32_CONST(1);
     mPosition.z = FX32_CONST(16);
@@ -11758,7 +11758,7 @@ void RoomCamera::Update() {
     }
 
     if (mState == STATE_TURNED) {
-        func_0202a748(mCamera);
+        Camera_UpdateEye(mCamera);
     }
 }
 
@@ -11838,8 +11838,8 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
     mCamera = camera;
     mRoom = room;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
         mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
     }
 }
@@ -11896,9 +11896,9 @@ void RoomLight::Update() {
         }
         break;
     }
-    func_0202ab2c(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
+    Light_SetRotatedDirection(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
                   -600, -4000);
-    func_0202ab2c(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
+    Light_SetRotatedDirection(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
                   -4000, 1500);
 }
 

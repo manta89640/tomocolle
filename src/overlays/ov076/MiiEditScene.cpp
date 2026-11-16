@@ -158,9 +158,9 @@ extern "C" {
 extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-extern u32 data_021223e4[];
-void func_0202aecc(void *resources, int resourceId);
-void func_0202ad84(void *resources);
+extern u32 gModelResources[];
+void ModelResources_ReleaseModel(void *resources, int resourceId);
+void ModelResources_BeginDraw(void *resources);
 void DestroyMainFrameHeap(void);
 extern ScreenControl gScreenControl;
 extern ScreenLoader gScreenLoader;
@@ -231,18 +231,18 @@ extern "C" {
 extern PadInput gPadInput;
 extern SceneManager gSceneManager;
 extern SceneMemory gSceneMemory;
-extern Light data_021227cc;
-extern Light data_021227d8;
+extern Light gLights;
+extern Light gLight1;
 BOOL ScreenControl_GetBlendBrightness(ScreenControl *screens, int planes);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 void func_0207b138(ParticleSystem *system);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Writes one
 void func_02031e88(SpriteButton *button, BOOL a);
 void func_0207b3dc(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
-void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
-void func_0202aecc(void *resources, int resourceId);
+void *ModelResources_BindArchive(void *resources, int resourceId, const char *archiveName, int unk);
+void ModelResources_ReleaseModel(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
@@ -255,14 +255,14 @@ void func_02029f40(CharacterModel *model, GXRgb color);
 
 struct Renderer3d;
 extern "C" {
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
 extern void *data_02123440[];
 void Clock_GetDate(void *clock, RTCDate *date);
-void func_0202a640(Camera *camera);
-extern Camera data_02122764;
-void func_0202a96c(Light *light);
+void Camera_Reset(Camera *camera);
+extern Camera gCamera;
+void Light_Reset(Light *light);
 void GraphicsManager_SaveState(u32 *manager, void *a, int planes);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
@@ -292,14 +292,14 @@ static inline void SetCanvasPosition(ObjTextCanvas *canvas, WindowPoint position
 void MiiEditScene::Init() {
     mPage = -1;
     mUnknown1B32C = FALSE;
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.SetUnknown44(1);
     gScreenControl.Show(1);
     gScreenControl.SetUnknown48(1);
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     gSoundManager.LoadGroup(1);
     gSoundManager.StartSeq(0, 2);
-    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+    ModelResources_SetModel(gModelResources, 0, mCharacter.mModelPath);
     mCharacter.Character::Init(0, 0, 2);
     mCharacter.CharacterBase::SetFace(8);
     switch (mSceneId) {
@@ -319,7 +319,7 @@ void MiiEditScene::Init() {
     }
     case 0x43:
     case 0x6F: {
-        void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
+        void *animations = ModelResources_BindArchive(gModelResources, 0x1F, "BIC", 0);
         func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
         mCharacter.Character::SetAngle(0x4000);
@@ -357,8 +357,8 @@ void MiiEditScene::Init() {
     mEditedCharacter.mFaceRoll = mCharacter.mFaceRoll;
     mEditedCharacter.CharacterBase::SetHeadMatrices(&mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
     mUnknown580C = TRUE;
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     mCamera->mUnknown00 = 0x11E;
     mCamera->mUnknown04 = 0xFF6;
     VEC_Set(&mCamera->mPosition, 0, 0x1EA4, 0xE58A);
@@ -367,8 +367,8 @@ void MiiEditScene::Init() {
     mCamera->mTarget.y = mCamera->mPosition.y;
     mCamera->mTarget.z = mCamera->mPosition.z - FX32_CONST(8);
     ResetCameraGoal();
-    func_0202a96c(&data_021227cc);
-    func_0202a96c(&data_021227d8);
+    Light_Reset(&gLights);
+    Light_Reset(&gLight1);
     mTtsPlayer.InitEngine();
     GraphicsManager_SaveState(gGraphicsManager, mUnknown00010, 0x3F00);
     func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
@@ -541,8 +541,8 @@ void MiiEditScene::Update() {
     ((Character *)(&mCharacter))->Update();
     func_0207b138(mParticles);
     UpdateCamera();
-    func_0202aa28(&data_021227cc, mCamera, sLightDirection0);
-    func_0202aa28(&data_021227d8, mCamera, sLightDirection1);
+    Light_SetDirectionByCamera(&gLights, mCamera, sLightDirection0);
+    Light_SetDirectionByCamera(&gLight1, mCamera, sLightDirection1);
     mUnknown5904 += 0x4CC;
     ScreenLoader_SetScrollX(&gScreenLoader, 4, mUnknown5904 >> FX32_SHIFT);
     switch (mPage) {
@@ -649,7 +649,7 @@ void MiiEditScene::Draw() {
         mEditedCharacter.CharacterBase::SetHeadMatrices(&mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
         mEditedCharacter.CharacterBase::Draw();
     }
-    func_0202ad84(data_021223e4);
+    ModelResources_BeginDraw(gModelResources);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     for (u16 i = 0; i < 6; i++) {
@@ -681,8 +681,8 @@ void MiiEditScene::Draw() {
 }
 
 void MiiEditScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 0x1F);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 0x1F);
     ArchiveManager_Unmount(&gArchiveManager, "E00");
     ArchiveManager_Unmount(&gArchiveManager, "B0I");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
@@ -833,31 +833,31 @@ void MiiEditScene::LoadModel() {
     if (mCharacter.mClothesId <= 1) {
         switch (MiiData_GetSex(&mCharacter)) {
         case 0:
-            func_0202aecc(data_021223e4, 0);
+            ModelResources_ReleaseModel(gModelResources, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             mCharacter.Character::SetArchive("B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+            ModelResources_SetModel(gModelResources, 0, mCharacter.mModelPath);
             mCharacter.MakeModel(0, 0);
             break;
         case 1:
-            func_0202aecc(data_021223e4, 0);
+            ModelResources_ReleaseModel(gModelResources, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             mCharacter.Character::SetArchive("B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+            ModelResources_SetModel(gModelResources, 0, mCharacter.mModelPath);
             mCharacter.MakeModel(0, 0);
             break;
         }
     } else {
-        func_0202aecc(data_021223e4, 0);
+        ModelResources_ReleaseModel(gModelResources, 0);
         ArchiveManager_Unmount(&gArchiveManager, "B0I");
         mCharacter.Character::SetArchive("B0I");
         ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+        ModelResources_SetModel(gModelResources, 0, mCharacter.mModelPath);
         mCharacter.MakeModel(0, 0);
     }
-    void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 0x1F, "BIC", 0);
     func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
     mCharacter.Character::SetAngle(0x4000);

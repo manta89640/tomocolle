@@ -56,8 +56,8 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
@@ -67,7 +67,7 @@ void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
-// The main program's camera (data_02122764; func_0202a640 resets it). A stand-in with the fields the scene sets.
+// The main program's camera (gCamera; Camera_Reset resets it). A stand-in with the fields the scene sets.
 struct Camera {
     /* 0x00 */ int mUnknown00;
     /* 0x04 */ int mUnknown04;
@@ -81,7 +81,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -103,13 +103,13 @@ BOOL func_0202cd74(GameData *game); // The same after func_0202c8f8(game, 0) and
 BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
 
 // --- 3D ---
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-extern Light data_021227cc[];
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+extern Light gLights[];
 // Resets a light: direction straight down, colour white, enabled
-void func_0202a96c(Light *light);
+void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a resource set the animations of an archive
 void *func_020295a4(void *resourceSet, u32 resType);
 

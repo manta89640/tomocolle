@@ -61,7 +61,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -104,8 +104,8 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 // The same without the characters. It returns something (what ObjResourceManager_Load leaves in r0) that the
 // scene's Init does not use: declared void, Init's instructions come out in another order.
@@ -126,13 +126,13 @@ void func_02028b98(int color, int *r, int *g, int *b);
 void func_02028e0c(const VecFx32 *in, VecFx32 *out);
 
 // --- 3D ---
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-extern Light data_021227cc[];
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+extern Light gLights[];
 // Resets a light: direction straight down, colour white, enabled
-void func_0202a96c(Light *light);
+void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 
 // --- The saved game ---
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists

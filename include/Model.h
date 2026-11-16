@@ -105,11 +105,11 @@ public:
 }; // 0xE0
 
 extern "C" {
-// The models' resource table (data_021223e4, 0x1c bytes per resource id): func_0202ad04 binds the files of a
-// mounted archive to an id, func_0202aecc releases its model ('BMD0') and texture ('BTX0')
-extern u32 data_021223e4[];
-void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
-void func_0202aecc(void *resources, int resourceId);
+// The models' resource table (gModelResources, 0x1c bytes per resource id): ModelResources_BindArchive binds the files of a
+// mounted archive to an id, ModelResources_ReleaseModel releases its model ('BMD0') and texture ('BTX0')
+extern u32 gModelResources[];
+void *ModelResources_BindArchive(void *resources, int resourceId, const char *archiveName, int unk);
+void ModelResources_ReleaseModel(void *resources, int resourceId);
 }
 
 #endif // MODEL_H

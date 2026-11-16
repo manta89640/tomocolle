@@ -70,27 +70,27 @@ struct CharLoader;
 struct Renderer3d;
 
 extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
-extern Light data_021227d8[];
+extern Camera gCamera;
+extern Light gLights[];
+extern Light gLight1[];
 extern Lighting data_021226e4;
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
+extern Renderer3d gVramManagerWork;
 extern const VecFx32 gMannequinHeadScale;
 extern const VecFx32 gMannequinBodyScale;
 
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-void func_0202a96c(Light *light);
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
-void func_0202b0e8(Renderer3d *renderer);
+void VramManagers_Reset(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);

@@ -37,7 +37,7 @@ public:
     /* 0x0010 */ SceneCharacter mCharacter;
     /* 0x2B28 */ int mBodyStep;    // B steps it: which body model or palette the character is given next
     /* 0x2B2C */ int mUnknown2B2C; // Only cleared
-    /* 0x2B30 */ Camera *mCamera;  // &data_02122764
+    /* 0x2B30 */ Camera *mCamera;  // &gCamera
     /* 0x2B34 */ int mTurnTest;    // TurnTest
 }; // 0x2B38
 
@@ -46,9 +46,9 @@ public:
 extern "C" {
 // Moves the camera, its position and its target alike
 void Camera_Translate(Camera *camera, fx32 x, fx32 y, fx32 z);
-// Sets the line from the camera's eye through the touched point, its direction at data_02122818
+// Sets the line from the camera's eye through the touched point, its direction at gTouchLineDirection
 int ModelResources_SetTouchLine(void *resources, int x, int y);
-extern VecFx32 data_02122818;
+extern VecFx32 gTouchLineDirection;
 }
 
 #endif // OV004_CHARACTERBODYTESTSCENE_H

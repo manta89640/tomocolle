@@ -22,9 +22,9 @@ fx32 func_0202a5fc(AnimModel *model, u32 resType, int id);                   // 
 void func_02028bc0(MtxFx33 *rotation, u16 x, u16 y, u16 z);                  // Turns a rotation by angles
 BOOL func_02028e98(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);  // The line meets the sphere
 
-// A line that HitTestJoint tests the joints against: from data_02122764 + 0x20, along data_02122818
-extern VecFx32 data_02122818;
-extern u8 data_02122764[];
+// A line that HitTestJoint tests the joints against: from gCamera + 0x20, along gTouchLineDirection
+extern VecFx32 gTouchLineDirection;
+extern u8 gCamera[];
 }
 
 #define GET_JNTID(pMdl, pJntID, name) \
@@ -239,7 +239,7 @@ VecFx32 CharacterModel::GetJointPosition(int joint) {
 
 BOOL CharacterModel::HitTestJoint(int joint) {
     // The copies of the line are the by-value parameters of an inline
-    return HitTestJoint(*(VecFx32 *)(data_02122764 + 0x20), data_02122818, joint);
+    return HitTestJoint(*(VecFx32 *)(gCamera + 0x20), gTouchLineDirection, joint);
 }
 
 BOOL CharacterModel::HitTestJoint(const VecFx32 *origin, const VecFx32 *dir, int joint) {

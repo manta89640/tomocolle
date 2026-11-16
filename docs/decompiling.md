@@ -790,7 +790,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `#pragma pop`). A store between the x store and its reload (`mEnabled = TRUE;` or y) is what keeps the reload;
   `x = x` straight after it is dropped. In overlay 3 a `const char *path` local for `ModelResources_SetModel`'s path
   gave the original's early `ldr r2` of it. Measured there too: what is left of such an `Init` is scheduling that
-  flips with unrelated code earlier in the function (removing the first call, `func_0202b0e8`, puts the virtual
+  flips with unrelated code earlier in the function (removing the first call, `VramManagers_Reset`, puts the virtual
   `Load` calls' argument set-up in the original's order), so search the light statements' orders last, in the
   file as it will stay.
 
@@ -814,7 +814,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
     argument (`Set(p->x = 0xFFF, ...)`). Overlay 4 always comes out `mov r0,#1; str r0,[r3,#8]; strh r2,[r3]`, against
     the original's x store first. No single `opt_*` pragma, `scheduling` or `peephole` moves it.
   - Volatile accesses keep their source order. Making the colour, x and `mEnabled` stores volatile gives overlay 4
-    the original's store order. The call's first argument (`ldr r0,=data_021223e4`) then moves above them, so 1
+    the original's store order. The call's first argument (`ldr r0,=gModelResources`) then moves above them, so 1
     goes to r2. In DrawManTestScene, volatile reads of x and stores of y and z leave only the x store and the
     constants 0 and 0xFFF out of place. Both look like the scheduler/allocator interplay that fix-nfl also left
     open (call arguments loaded before or after a value's last use).

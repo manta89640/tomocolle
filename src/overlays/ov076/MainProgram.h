@@ -9,7 +9,7 @@
 
 // --- What the scene uses of the main program (STAND-INS, not decompiled) ----------------------------------------
 
-// The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
+// The main program's camera (gCamera; Camera_Reset resets it). As overlay 109 has it.
 struct Camera {
     /* 0x00 */ int mUnknown00;
     /* 0x04 */ int mUnknown04;

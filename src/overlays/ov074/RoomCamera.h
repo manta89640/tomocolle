@@ -13,7 +13,7 @@
 
 // Shared by the units of overlay 74 (it began as RoomObjects' RoomCamera.h).
 
-// The main program's camera (data_02122764; func_0202a640 resets it, func_0202a748 turns its position around
+// The main program's camera (gCamera; Camera_Reset resets it, Camera_UpdateEye turns its position around
 // its target by its angles). Not decompiled: a stand-in with the fields the room camera uses.
 struct Camera; // The main program's camera (MainProgram.h)
 

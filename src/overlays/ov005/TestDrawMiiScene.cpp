@@ -23,7 +23,7 @@ static const int sModelIndices[2] = {1, 2};
 static const VecFx32 sModelHomes[2] = {{0x5000, 0, 0}, {0, 0, -0x5000}};
 
 void TestDrawMiiScene::Init() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.Show(1);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
@@ -36,7 +36,7 @@ void TestDrawMiiScene::Init() {
     // and stores them again with y and z (light in r4, x reloaded into r0). Here the compiler drops the reload of x
     // and its store; volatile reads or `#pragma opt_dead_assignments off` keep them but give other registers. The
     // same block is unmatched in three of the main program's test scenes and in overlay 3.
-    Light *light = &data_021227cc[0];
+    Light *light = &gLights[0];
     light->mEnabled = TRUE;
     light->mDirection.x = 0xFFF;
     light->mColor = 0x7FFF;
@@ -46,7 +46,7 @@ void TestDrawMiiScene::Init() {
     light->mDirection.y = 0;
     light->mDirection.z = 0;
     light->mColor = color;
-    ModelResources_SetModel(data_021223e4, 0, "SME:/room.imd");
+    ModelResources_SetModel(gModelResources, 0, "SME:/room.imd");
     mAnimModel.Load(0, 0);
     for (int i = 0; i < 2; i++) {
         TestDrawMiiModel *model = &mModels[i];
@@ -101,7 +101,7 @@ void TestDrawMiiScene::Draw() {
 }
 
 void TestDrawMiiScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "SME");
 }
 
@@ -172,8 +172,8 @@ static const VecFx32 sCameraAngles = {0x1200 << FX32_SHIFT, 0x1600 << FX32_SHIFT
 
 void TestDrawMiiCamera::Init() {
 
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     SetCameraAngles(mCamera, 0, 0, 0);
     VecFx32 angles = sCameraAngles;
     mAngles.x = angles.x;

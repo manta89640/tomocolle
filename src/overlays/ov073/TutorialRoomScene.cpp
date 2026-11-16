@@ -173,7 +173,7 @@ void TutorialRoomScene::Init() {
     void *file;
     void *animations;
 
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
@@ -217,13 +217,13 @@ void TutorialRoomScene::Init() {
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_0202ad04(data_021223e4, 1, mCharacters[1].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 1, mCharacters[1].mArchiveName, 0);
     ((Character *)(&mCharacters[0]))->Init(0, 0, 0);
     ((Character *)(&mCharacters[1]))->Init(1, 0, 1);
     mCharacters[0].mPartner = &mCharacters[1];
     mCharacters[1].mPartner = &mCharacters[0];
-    animations = func_0202ad04(data_021223e4, 2, "BIC", 0);
+    animations = ModelResources_BindArchive(gModelResources, 2, "BIC", 0);
     for (i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         ((CharacterBase *)(&mCharacters[i]))->MakeFace();
@@ -331,9 +331,9 @@ void TutorialRoomScene::Exit() {
     ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
     ScreenControl_ClearBlend(&gScreenControl, 0x3F3F);
     DestroyMainFrameHeap();
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
@@ -1745,7 +1745,7 @@ void TutorialApartmentRoom::UpdateState() {
 
 // @0x0214e41c
 TutorialRoomCamera::TutorialRoomCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0214e42c
@@ -1760,7 +1760,7 @@ void TutorialRoomCamera::Reset() {
     SetMode(MODE_NONE);
     mIgnoreInput = FALSE;
     mSnap = TRUE;
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mPosition.x = 0;
     mPosition.y = FX32_CONST(5);
     mPosition.z = FX32_CONST(16);
@@ -1955,8 +1955,8 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
     mCamera = camera;
     mRoom = room;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
         mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
     }
 }
@@ -2013,9 +2013,9 @@ void TutorialRoomLight::Update() {
         }
         break;
     }
-    func_0202ab2c(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
+    Light_SetRotatedDirection(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
                   -600, -4000);
-    func_0202ab2c(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
+    Light_SetRotatedDirection(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
                   -4000, 1500);
 }
 

@@ -24,7 +24,7 @@ void ParticleTestScene::StartLoading() {
 }
 
 void ParticleTestScene::Init() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.Show(1);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
@@ -40,12 +40,12 @@ void ParticleTestScene::Init() {
     VecFx32 origin = {0, 0, 0};
     mEmitterPosition = origin;
     mEmitter = func_0207b2fc(mParticles, mEffectCount, &mEmitterPosition);
-    ModelResources_SetModel(data_021223e4, 0, "STI:/body.imd");
+    ModelResources_SetModel(gModelResources, 0, "STI:/body.imd");
     mBody.Reload(0, 0);
     mBody.mAnim.mRotY = 0x3000;
     mBody.mPos.x = FX32_ONE;
     mBody.mPos.y = -FX32_ONE;
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mCamera->mPosition.z = 0xF000;
 }
 
@@ -95,7 +95,7 @@ void ParticleTestScene::Update() {
 
 void ParticleTestScene::Draw() {
     mBody.Draw();
-    func_0202ad84(data_021223e4);
+    ModelResources_BeginDraw(gModelResources);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     func_0207b138(mParticles);
@@ -103,7 +103,7 @@ void ParticleTestScene::Draw() {
 
 void ParticleTestScene::Exit() {
     DestroyMainFrameHeap();
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "STE");
     ArchiveManager_Unmount(&gArchiveManager, "STI");
 }

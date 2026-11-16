@@ -53,8 +53,8 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
@@ -63,9 +63,9 @@ void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 // --- 3D ---
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-void func_0202a93c(Camera *camera, int unknown);
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+void Camera_SetProjection(Camera *camera, int unknown);
 extern MATHRandContext16 gRandom;
 
 // --- The button ---

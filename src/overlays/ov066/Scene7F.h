@@ -27,7 +27,7 @@ public:
     /* 0x91A */ s16 mUnknown91A;
 }; // 0x91C
 
-// What the overlay's 0x0214B108 constructs: a pointer to the main program's camera (data_02122764), whose fields
+// What the overlay's 0x0214B108 constructs: a pointer to the main program's camera (gCamera), whose fields
 // 0x0214B124 sets.
 class Scene7FCamera {
 public:

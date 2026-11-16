@@ -137,14 +137,14 @@ void TravelScene::Init() {
 
 
     gSoundManager.StartSeq(0, sSequences[mDestination]);
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown44 = 1;
     gScreenControl.mUnknown44Changed = TRUE;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 0, 0x7FFF, 63, FALSE);
     mCast.InitCharacters();
-    func_0202a96c(data_021227cc);
-    func_0202a96c(data_021227d8);
-    func_0202a640(mCast.mCamera);
+    Light_Reset(gLights);
+    Light_Reset(gLight1);
+    Camera_Reset(mCast.mCamera);
     SetCameraPosition(mCast.mCamera, sCameraPosition);
     SetCameraTarget(mCast.mCamera, sCameraTarget);
     mCast.mCamera->mAngleX = 0x200;

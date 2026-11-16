@@ -16,16 +16,16 @@
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the
 // rest of the main program are in include/.
 
-// The models' resource table (data_021223e4, which Model.h declares as words)
+// The models' resource table (gModelResources, which Model.h declares as words)
 struct ModelResources {
     /* 0x000 */ u8 mUnknown000[0x424];
     /* 0x424 */ int mUnknown424;
 };
-#define sModelResources (*(ModelResources *)data_021223e4)
+#define sModelResources (*(ModelResources *)gModelResources)
 
 extern "C" {
 void ModelResources_SetModel(ModelResources *resources, int resourceId, const char *modelPath);
-void func_0202ae38(ModelResources *resources);
+void ModelResources_Reset(ModelResources *resources);
 }
 
 // The scene.

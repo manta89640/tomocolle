@@ -413,18 +413,18 @@ the file is placed by that order, and by which object of that part of `.bss` has
 
 | `.init` | Size | File (code) | What it constructs | |
 | --- | --- | --- | --- | --- |
-| `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `data_0211D604` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
+| `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `gScreenControl` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
 | `0x020B04CC` | 4 | The archive manager's (`0x02024370` to `0x020249FC`) | `bx lr`: `gArchiveManager` (`ArchiveManager_Init` from `NitroStartUp`) | inferred |
 | `0x020B04D0` | 4 | The graphics manager's (`0x020249FC` on) | `bx lr`: `gGraphicsManager` (0x10A4 bytes: `GraphicsManager_Init` clears 0x140, 0xC0, 0xEA0 = 0x48 entries of 0x34 from 0x204) | inferred |
 | `0x020B04D4` | 0x18 | `src/MainHeap.cpp` (`0x0202678C`, `operator new`, to `0x02026A1C`) | `gMainHeap` (0x3C bytes): stores 0 at 0x1C and 0x20, the frame heap and its memory (`MainHeap::CreateFrameHeap` sets them, `MainHeap::DestroyFrameHeap` clears them) | measured |
-| `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `data_0211F9D4` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
+| `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `gPadInput` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
 | `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
-| `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `data_021213B8` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
+| `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `gPaletteLoader` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
 | `0x020B0518` | 4 | `src/OwnerInfo.cpp` (`0x02027A08` to `0x02027A7C`) | `bx lr`: `gOwnerInfo` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56), whose constructor is empty | measured: the file compiles to it |
 | `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `gScreenLoader` (0x624 bytes): stores 0 at 0x480 | measured |
 | `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
-| `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `data_021223E4` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `func_0202a640` on the camera at +0x380 (`data_02122764`), `func_0202a96c` on four lights of 0xC at +0x3E8 (`data_021227CC`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
+| `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `gModelResources` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `Camera_Reset` on the camera at +0x380 (`gCamera`), `Light_Reset` on four lights of 0xC at +0x3E8 (`gLights`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
 | `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `data_021232E4` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
 | `0x020B05D0` | 4 | `src/LcdPower.cpp` (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `gLcdPower` (0xC bytes: `LcdPower::Update` turns the LCDs off after 20 frames of the lid closed and on after 10 open), whose constructor is empty | measured: the file compiles to it |
 | `0x020B05D4` | 4 | `GameData`'s (`0x0202B840` to `Font.cpp`, `0x0202D5A4`) | `bx lr`: `gGameData` (`func_0202b840` from `NitroMain`) | inferred |
@@ -458,7 +458,7 @@ uses):
 | `0x02121834` | 0x624 | `ScreenLoader_Init` (clears 0x484 and 0x5C4, and eight 0x1C entries at 0x4F8) | Screens |
 | `0x02121E58`, `0x02121EAC`, `0x02121EB8` | 0x54, 0xC, 0x2C | `gTouchInput` (`TouchInput_Init`, `0x02028880`); `gRandom`; the path buffer of `func_02028af4` | Touch, random numbers, paths (two or three files) |
 | `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
-| `0x021223D8` to `0x021232E4` | | The destructor record, `data_021223E4` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `data_02123024` (`0x020299E8`, `0x02029D40`) | Models |
+| `0x021223D8` to `0x021232E4` | | The destructor record, `gModelResources` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `gVramTransferTasks` (`0x020299E8`, `0x02029D40`) | Models |
 | `0x021232E4` | 0x150 | `func_0202b2e8`, `func_0202b4dc` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
 | `0x02123434` | 0xC | `gLcdPower` (`LcdPower::Init`, `LcdPower::Update`) | `LcdPower.cpp` |
 | `0x02123440` to `0x02138E1C` | | `data_02123440`, `data_02123444`, `gGameData` | GameData |
@@ -475,11 +475,20 @@ Inferred from this:
   `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840` (cut and decompiled: `src/LcdPower.cpp`).
   GameData is `0x0202B840` to `0x0202D5A4`. The graphics code between `0x020249FC` and `0x0202678C` may be more than
   one file: only one part of `.bss` belongs to it.
-- `data_021223E4` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the
-  camera at +0x380 and four lights at +0x3E8. The initialiser computes the lights' end from `data_021223E4`, and
+- `gModelResources` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the
+  camera at +0x380 and four lights at +0x3E8. The initialiser computes the lights' end from `gModelResources`, and
   `ModelResources_Init` writes +0x418 and +0x41C. The registered destructor destroys only the array, because the
-  camera and the lights have trivial destructors. `func_0202a640` and `func_0202a96c` set a camera's and a light's
+  camera and the lights have trivial destructors. `Camera_Reset` and `Light_Reset` set a camera's and a light's
   defaults: either they are the constructors, out of line, or inline constructors call them.
+  Measured: code loads some of its members by their own addresses, so dsd made symbols of them. They are named, and
+  they are members of the one object at these offsets: `gCamera` (+0x380), `gLights` (+0x3E8), `gLight1`,
+  `gLight2` and `gLight3` (+0x3F4, +0x400, +0x40C, the other three lights), and `gTouchLineDirection` (+0x434, where
+  `ModelResources_SetTouchLine` stores the direction). `data_021226E4` (+0x300) is no member: the compiler reached
+  the lights' fields from that address plus 0xE8 (`ModelResources_BeginDraw` does the same in a register), and some
+  overlays' code loads it. Open work: fold these symbols into `gModelResources` plus addend in `relocs.txt`, as
+  "Subdividing units" in decompiling.md describes. That needs one shared `ModelResources` class in `include/` for
+  the overlays' own `Camera` and `Light` stand-ins to give way to. The object is 0x440 bytes. `gVramManagerWork`
+  (0x800 bytes, `VramManagers_Init`'s work areas) and `gVramTransferTasks` (0x2C tasks of 0x10 bytes) follow it.
 - MessageWindow's file has `.init` `0x020B0650` to `0x020B0674`, `.ctor` `0x020FC4DC` to `0x020FC4E0`, `.rodata`
   `0x020B5AEC` to `0x020B5C44` (every object there is used by `func_02032fb8` to `func_020341d4`), `.data`
   `0x021102D8` to `0x021102F0` (the pair, then `MessageWindow`'s virtual table at `0x021102E0`, whose two functions
@@ -1062,10 +1071,10 @@ Measured:
   7) for `mHeadTurn`. With R held the pad moves the camera (`Camera_Translate`, 0x0202a6fc: adds to its position
   and target alike). Every frame it runs the face's `UpdateFace` and `UpdateHeadTurn`.
 - Touching the screen sets the touch line (`ModelResources_SetTouchLine`, 0x0202af00: `NNS_G3dScrPosToWorldLine` of
-  the point into `data_021223e4 + 0x428`, then the normalised direction from the camera's eye, `data_02122764 + 0x20`,
-  into `data_021223e4 + 0x434` = `data_02122818`, which `CharacterBase::HitTestFace()` reads); when the line hits
+  the point into `gModelResources + 0x428`, then the normalised direction from the camera's eye, `gCamera + 0x20`,
+  into `gModelResources + 0x434` = `gTouchLineDirection`, which `CharacterBase::HitTestFace()` reads); when the line hits
   the face it gets a random default Mii of 6 (`SetDefaultMii`).
-- `Init` resets lights 0 and 1 with `func_0202a96c` (direction (0, 0, -0xFFF), colour 0x7FFF, on) and has none of
+- `Init` resets lights 0 and 1 with `Light_Reset` (direction (0, 0, -0xFFF), colour 0x7FFF, on) and has none of
   `G3dTestScene`'s light-0 code.
 - `AnimModel_SetAnimationFrame` (0x0202a5d8) finds a model's animation by type and id and sets its `NNSG3dAnmObj`'s
   frame.
@@ -1137,7 +1146,7 @@ Measured:
   3)` and `SetAngle` a step a frame until it faces it. Otherwise the pad turns the camera.
 - Touching the screen sets the touch line (`ModelResources_SetTouchLine`) and hit-tests two of the character's
   joints, the body (`CharacterModel::HitTestJoint(int)`) and the left knee (`HitTestJoint` with the
-  camera's eye and the line's direction, `data_02122818`); both results are thrown away.
+  camera's eye and the line's direction, `gTouchLineDirection`); both results are thrown away.
 - +0x2B2C is only cleared, in `Init`.
 
 Not done: `Init` (97%), the light-0 block of scenes 6, 7 and 16: with `#pragma opt_propagation off` every register
@@ -1280,7 +1289,7 @@ Measured:
   `HumanTestScene`.
 - `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `func_02029d40` (0x02029d40, `Model*`, palette, offset,
   size) takes the palette's VRAM address and size from its `plttInfo.vramKey` when offset or size is negative, and
-  queues the transfer with `func_0202b108(data_02123024, 1, ...)`, which passes it on to
+  queues the transfer with `VramTransfer_RegisterTask(gVramTransferTasks, 1, ...)`, which passes it on to
   `NNS_GfdRegisterNewVramTransferTask` (type 1, `NNS_GFD_DST_3D_TEX_PLTT`). `func_02060c1c` passes the linked VRAM managers'
   state (`data_021423d8`) to `NNSi_GfdDumpLnkVramManFreeListInfo`.
 
@@ -1377,7 +1386,7 @@ Not done:
 
 - Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop
   reaches the camera through a pointer, the apartment mark is set with `SetPositionFromVec`, which orders its dead
-  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `func_0202a640`; the registers and order of
+  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `Camera_Reset`; the registers and order of
   the touch loop's rectangle arithmetic differ) and `MakeDailyNews` (the registers of the loop that picks the
   month's kind of news). `Init` matches with the second light's colour through a local. `Exit` matches since
   `data_0213bab0` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with

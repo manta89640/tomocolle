@@ -9,14 +9,14 @@ void DrawManTestScene::StartLoading() {
 }
 
 void DrawManTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00_.imd");
-    ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00_.imd");
+    ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00.itx");
     gScreenControl.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mCamera->mPosition.z = 0x12000;
-    Light *light = &data_021227cc[0];
+    Light *light = &gLights[0];
     light->mDirection.x = 0xFFF;
     light->mEnabled = TRUE;
     u16 color = light->mColor;
@@ -57,8 +57,8 @@ void DrawManTestScene::Update() {
         func_02029758(resourceSet, RESOURCE_BTX0);
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
-        func_0202b0e8(&data_02122824);
-        ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
+        VramManagers_Reset(&gVramManagerWork);
+        ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00.itx");
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
     } else {
@@ -82,7 +82,7 @@ void DrawManTestScene::Draw() {
 }
 
 void DrawManTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "DMN");
     ArchiveManager_Unmount(&gArchiveManager, "CA3");
 }

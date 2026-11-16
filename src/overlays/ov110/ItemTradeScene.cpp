@@ -739,11 +739,11 @@ void ItemTradeList::Draw() {
 // Dresses the mannequin in a costume
 // @0x0214b314
 void ItemTradeList::ShowCostume(int costume) {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
     mMannequin->SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
+    ModelResources_SetModel(gModelResources, 0, mMannequin->mModelPath);
     mMannequin->MakeModel(0, 0);
     mMannequin->SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
     mMannequin->SetAnimFlags(TRUE, TRUE);
@@ -751,10 +751,10 @@ void ItemTradeList::ShowCostume(int costume) {
 
 // @0x0214b414
 void ItemTradeList::LoadMannequinHead() {
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "3MH");
     ArchiveManager_MountCompressed(&gArchiveManager, "3MH", "Mdl/Misc/headManikin_3D_LZ.bin", 1);
-    ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
+    ModelResources_SetModel(gModelResources, 1, "3MH:/head.imd");
 }
 
 // @0x0214b470
@@ -928,21 +928,21 @@ void ItemTradeList::UpdateRoom() {
 }
 
 // The two camera setters are compiled without propagation (`#pragma opt_propagation off`): with it, the camera's
-// address is reloaded from the literal pool after func_0202a640 instead of kept in r4, and loaded before the
+// address is reloaded from the literal pool after Camera_Reset instead of kept in r4, and loaded before the
 // constants instead of after them.
 #pragma opt_propagation off
 // @0x0214ba40
 void ItemTradeList::SetItemCamera() {
-    Camera *camera = &data_02122764;
-    func_0202a640(camera);
+    Camera *camera = &gCamera;
+    Camera_Reset(camera);
     camera->mPosition = sItemCameraPosition;
     camera->mTarget = sItemCameraTarget;
-    func_0202a748(camera);
+    Camera_UpdateEye(camera);
 }
 
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
-    Camera *camera = &data_02122764;
+    Camera *camera = &gCamera;
     camera->mPosition = sRoomCameraPosition;
     camera->mTarget = sRoomCameraTarget;
 }
@@ -1236,11 +1236,11 @@ void ItemTradeItemModel::Reset() {
 // Shows another item: lets go of the old one's files, and loads the new one's
 // @0x0214c384
 void ItemTradeItemModel::ChangeItem(int item) {
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
     SetItem(mArchiveName, item);
     ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
     LoadAnimation(mResourceId);
     ResetScale();
 }
@@ -1514,26 +1514,26 @@ void ItemTradeScene::Init() {
 
 // @0x0214d418
 void ItemTradeScene::Init3d() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     ScreenLoader_SetPriority(&gScreenLoader, 1, 0);
     ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
 
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     VEC_Set(&mCamera->mPosition, 0, 0x599, 0x4666);
     VEC_Set(&mCamera->mTarget, 0, 0x599, 0);
-    func_0202a96c(data_021227cc);
-    func_0202a96c(data_021227d8);
-    func_0202ab2c(data_021227cc, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, -0x258, -0xFA0);
-    func_0202ab2c(data_021227d8, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
+    Light_Reset(gLights);
+    Light_Reset(gLight1);
+    Light_SetRotatedDirection(gLights, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, -0x258, -0xFA0);
+    Light_SetRotatedDirection(gLight1, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
 
-    ModelResources_SetModel(data_021223e4, 0, mMannequin.mModelPath);
-    ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
+    ModelResources_SetModel(gModelResources, 0, mMannequin.mModelPath);
+    ModelResources_SetModel(gModelResources, 1, "3MH:/head.imd");
     mMannequin.Init(0, 0, 1, 0);
-    void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 0, "3HA", 0);
     func_02029660((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     SetMannequinAnimation(&mMannequin, "idle00");
     mMannequin.SetAnimFlags(TRUE, TRUE);
@@ -1555,7 +1555,7 @@ void ItemTradeScene::Init3d() {
     mMannequin.mHeadScale.y = gMannequinHeadScale.y * 4 / 10;
     mMannequin.mHeadScale.z = gMannequinHeadScale.z * 4 / 10;
 
-    ModelResources_SetModel(data_021223e4, 2, mItemModel.mModelPath);
+    ModelResources_SetModel(gModelResources, 2, mItemModel.mModelPath);
     mItemModel.Load(2);
     VecFx32 itemPosition = zero;
     mItemModel.mPosition.x = itemPosition.x;
@@ -2172,10 +2172,10 @@ void ItemTradeScene::Exit() {
     mInventory.Save();
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mItemModel.mArchiveName);
-    func_0202aecc(data_021223e4, 2);
+    ModelResources_ReleaseModel(gModelResources, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
     ArchiveManager_Unmount(&gArchiveManager, "3MH");
     ArchiveManager_Unmount(&gArchiveManager, "LTL");

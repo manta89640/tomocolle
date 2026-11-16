@@ -29,8 +29,8 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 int ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
@@ -90,7 +90,7 @@ int NFL_GetCharInfo(void *buffer);
 
 // --- 3D ---
 
-// The main program's camera (data_02122764; func_0202a640 resets it).
+// The main program's camera (gCamera; Camera_Reset resets it).
 struct Camera {
     /* 0x00 */ u8 mUnknown00[0x14];
     /* 0x14 */ VecFx32 mPosition;
@@ -102,7 +102,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (func_0202a96c resets one).
+// One of the main program's 3D lights (Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -110,12 +110,12 @@ struct Light {
 }; // 0xC
 
 extern "C" {
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-extern Light data_021227cc[];
-extern Light data_021227d8[]; // The second light, referred to by its own address (as overlay 110 does)
-void func_0202a96c(Light *light);
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+extern Light gLights[];
+extern Light gLight1[]; // The second light, referred to by its own address (as overlay 110 does)
+void Light_Reset(Light *light);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 }
 
 // --- Particles (main program 0x0207ab20 to 0x0207b364) ---
@@ -137,7 +137,7 @@ ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *po
 void func_0207b364(ParticleSystem *system, ParticleEmitter *emitter);
 void func_0207b258(ParticleSystem *system, void *a);
 void func_0207b138(ParticleSystem *system);
-void func_0202ad84(void *resources);
+void ModelResources_BeginDraw(void *resources);
 }
 
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---

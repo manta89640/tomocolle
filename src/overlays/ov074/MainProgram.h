@@ -35,9 +35,9 @@ static inline void SetMemoryOrbit(SceneMemory *memory, s16 x, s16 y, s16 z) {
 }
 
 extern "C" {
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
 // The absolute value of each component
 void func_02028e0c(const VecFx32 *in, VecFx32 *out);
 }
@@ -46,7 +46,7 @@ void func_02028e0c(const VecFx32 *in, VecFx32 *out);
 // new random angle now and then, and can be turned by hand.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;

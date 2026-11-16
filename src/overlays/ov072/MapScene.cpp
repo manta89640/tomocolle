@@ -307,8 +307,8 @@ BOOL MapCamera::IsAtHome() {
 // --- MapScene ---
 
 inline void MapScene::ResetCamera() {
-    mCamera.mCamera = &data_02122764;
-    func_0202a640(mCamera.mCamera);
+    mCamera.mCamera = &gCamera;
+    Camera_Reset(mCamera.mCamera);
     mCamera.mCamera->mPosition = sCameraHome;
     mCamera.mCamera->mTarget = sCameraHomeTarget;
     mCamera.mCamera->mAngleX = 0;
@@ -408,11 +408,11 @@ void MapScene::Init() {
     const int titleTextCount = 1;
     const int titleMessage = 0x96;
     mNewsDue = FALSE;
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.SetUnknown44(0);
     gScreenControl.Show(1);
     gScreenControl.SetUnknown48(1);
-    func_0202ae38(data_021223e4);
+    ModelResources_Reset(gModelResources);
     func_02027290(&gObjResourceManager, "S00:/Obj_down.nce", 0x10, 1);
     func_02028f24(&gVramTransferQueue, "S00:/Obj_down.ncg", 0x10, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "S00:/Obj_down.ncl", 0x10, -1, -1, -1);
@@ -460,12 +460,12 @@ void MapScene::Init() {
     }
     UpdateWindows();
     for (int i = 0; i < 14; i++) {
-        ModelResources_SetModel(data_021223e4, i, sResourceModels[i]);
+        ModelResources_SetModel(gModelResources, i, sResourceModels[i]);
     }
-    ModelResources_SetModel(data_021223e4, 0, "M00:/wait.ita");
-    ModelResources_SetModel(data_021223e4, 0, "M00:/wait.ima");
-    ModelResources_SetModel(data_021223e4, 11, "M10:/new.itp");
-    ModelResources_SetModel(data_021223e4, 6, "M05:/wait.ita");
+    ModelResources_SetModel(gModelResources, 0, "M00:/wait.ita");
+    ModelResources_SetModel(gModelResources, 0, "M00:/wait.ima");
+    ModelResources_SetModel(gModelResources, 11, "M10:/new.itp");
+    ModelResources_SetModel(gModelResources, 6, "M05:/wait.ita");
     CreateMainFrameHeap(0x4000);
     mParticles = func_0207ab20(AllocFromMainFrameHeap, 3, 100, 0, 1, 30);
     mParticleResource = ArchiveManager_GetFileByName(&gArchiveManager, "SPL:/SplMapEffect.spa");
@@ -512,12 +512,12 @@ void MapScene::Init() {
     ResetCamera();
     mSelected = -1;
     mUnknown384C = -1;
-    mLights[0] = &data_021227cc;
-    func_0202a96c(mLights[0]);
+    mLights[0] = &gLights;
+    Light_Reset(mLights[0]);
     mLights[0]->mColor = sLightColors[1];
     mLights[0]->SetDirection(mCamera.mCamera, sLightDirection0);
-    mLights[1] = &data_021227d8;
-    func_0202a96c(mLights[1]);
+    mLights[1] = &gLight1;
+    Light_Reset(mLights[1]);
     mLights[1]->mColor = sLightColors[0];
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
     int phase = mSky.GetPhase();
@@ -740,11 +740,11 @@ void MapScene::Update() {
                             mWindowCount = GetApartmentStageRooms(mIslandStage);
                             const Point &mark = sApartmentMarkPositions[mIslandStage];
                             mNewMarks[MODEL_APARTMENT].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
-                            func_0202aecc(data_021223e4, 9);
+                            ModelResources_ReleaseModel(gModelResources, 9);
                             ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[9]);
                             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[9],
                                                            sApartmentModels[mIslandStage], 1);
-                            ModelResources_SetModel(data_021223e4, 9, sResourceModels[9]);
+                            ModelResources_SetModel(gModelResources, 9, sResourceModels[9]);
                             ShowBuilding(i);
                             UpdateWindows();
                         } else {
@@ -1058,7 +1058,7 @@ void MapScene::Draw() {
     Sprite_Draw(&mTitleSprite);
     Sprite_Draw(&mSprite41BC);
     mSky.Draw();
-    func_0202ad84(data_021223e4);
+    ModelResources_BeginDraw(gModelResources);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     func_0207b138(mParticles);
@@ -1073,7 +1073,7 @@ void MapScene::Exit() {
     colors[1] = GetSkyLightColor(phase);
     colors[2] = GetSkyLightColor2(phase);
     for (int i = 0; i < 14; i++) {
-        func_0202aecc(data_021223e4, i);
+        ModelResources_ReleaseModel(gModelResources, i);
         ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[i]);
     }
     ArchiveManager_Unmount(&gArchiveManager, "S00");

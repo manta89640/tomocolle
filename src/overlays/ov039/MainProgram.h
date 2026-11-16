@@ -9,7 +9,7 @@
 
 // --- The main program, as far as this overlay uses it ---
 
-// The main program's camera (data_02122764): SceneCast::mCamera points at it. As MainProgram3d.h has it.
+// The main program's camera (gCamera): SceneCast::mCamera points at it. As MainProgram3d.h has it.
 struct Camera {
     /* 0x00 */ u8 mUnknown00[0x14];
     /* 0x14 */ VecFx32 mPosition;
@@ -21,7 +21,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one)
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one)
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -43,9 +43,9 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-extern Light data_021227cc[]; // The lights (as overlay 110 declares them)
-extern Light data_021227d8[];
+extern Renderer3d gVramManagerWork;
+extern Light gLights[]; // The lights (as overlay 110 declares them)
+extern Light gLight1[];
 extern MATHRandContext16 gRandom;
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
@@ -56,9 +56,9 @@ void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_0202b0e8(Renderer3d *renderer);
-void func_0202a640(Camera *camera); // Resets it
-void func_0202a96c(Light *light);   // Resets it
+void VramManagers_Reset(Renderer3d *renderer);
+void Camera_Reset(Camera *camera); // Resets it
+void Light_Reset(Light *light);   // Resets it
 // The screens' brightness and fades (as overlays 72, 76 and 96 call them)
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);

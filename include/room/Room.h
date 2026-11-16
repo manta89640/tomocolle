@@ -243,7 +243,7 @@ public:
 
     /* 0x000 */ RoomDoor mDoor;
     /* 0x1A4 */ RoomPart mParts[ROOM_PART_COUNT];
-    /* 0x8DC */ void *mCamera; // The main program's camera, data_02122764
+    /* 0x8DC */ void *mCamera; // The main program's camera, gCamera
     /* 0x8E0 */ int mState;
     /* 0x8E4 */ BOOL mVisible;
     /* 0x8E8 */ fx32 mNearY;

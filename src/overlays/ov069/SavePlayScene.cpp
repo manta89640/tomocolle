@@ -66,7 +66,7 @@ void SavePlayScene::StartLoading() {
 
 // @0x02149c4c
 void SavePlayScene::Init() {
-    func_0202b0e8(&data_02122824);
+    VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
@@ -94,9 +94,9 @@ void SavePlayScene::Init() {
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
     mCharacters[0].Character::Init(0, 0, 0);
-    void *animations = func_0202ad04(data_021223e4, 1, "BIC", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 1, "BIC", 0);
     func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     mCharacters[0].CharacterBase::MakeFace();
     mCharacters[0].Character::UpdateBodyScale();
@@ -163,8 +163,8 @@ void SavePlayScene::Draw() {
 // @0x0214a204
 void SavePlayScene::Exit() {
     gSoundManager.SetSeqTempoRatio(0, 0x100);
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "MLT");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
@@ -453,12 +453,12 @@ void SavePlayScene::UpdateObjects() {
 
 // @0x0214ab6c
 SavePlayCamera::SavePlayCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0214ab7c
 void SavePlayCamera::Init() {
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mCamera->mUnknown00 = 0x281;
     mCamera->mUnknown04 = 0xFCE;
     VEC_Set(&mCamera->mPosition, 0x13000, 0x3666, 0x18000);
@@ -473,15 +473,15 @@ void SavePlayCamera::Update() {
 void SavePlayLights::Init(SavePlayCamera *camera) {
     mCamera = camera;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
     }
 }
 
 // @0x0214ac24
 void SavePlayLights::Update() {
-    func_0202ab2c(mLights[0], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, 0x1388,
+    Light_SetRotatedDirection(mLights[0], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, 0x1388,
                   -0xFA0, -0x1B58);
-    func_0202ab2c(mLights[1], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, -0x2328,
+    Light_SetRotatedDirection(mLights[1], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, -0x2328,
                   -0x7D0, -0xE74);
 }
