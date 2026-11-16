@@ -47,9 +47,7 @@ SCENE_STAND_IN(TtsTestScene, 0x6A858); // func_0203e9ec
 
 SCENE_STAND_IN(EmptyScene, 0x10); // func_0203ea2c
 
-SCENE_STAND_IN(Scene17, 0x39A8C); // func_0203ea54
 
-SCENE_STAND_IN(Scene18, 0x1AA50); // func_0203ebf8
 
 SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ev
 

@@ -1,10 +1,10 @@
-func_ov077_02149a40 kind:function(arm,size=0xd0) addr:0x02149a40
-func_ov077_02149b10 kind:function(arm,size=0x994) addr:0x02149b10
-func_ov077_0214a4a4 kind:function(arm,size=0x44) addr:0x0214a4a4
+_ZN7Scene1712StartLoadingEv kind:function(arm,size=0xd0) addr:0x02149a40
+_ZN7Scene174InitEv kind:function(arm,size=0x994) addr:0x02149b10
+_ZN7Scene176UpdateEv kind:function(arm,size=0x44) addr:0x0214a4a4
 func_ov077_0214a4e8 kind:function(arm,size=0x21c) addr:0x0214a4e8
 func_ov077_0214a704 kind:function(arm,size=0x24c) addr:0x0214a704
-func_ov077_0214a950 kind:function(arm,size=0xe4) addr:0x0214a950
-func_ov077_0214aa34 kind:function(arm,size=0x6c) addr:0x0214aa34
+_ZN7Scene174DrawEv kind:function(arm,size=0xe4) addr:0x0214a950
+_ZN7Scene174ExitEv kind:function(arm,size=0x6c) addr:0x0214aa34
 func_ov077_0214aaa0 kind:function(arm,size=0x24) addr:0x0214aaa0
 func_ov077_0214aac4 kind:function(arm,size=0x70) addr:0x0214aac4
 func_ov077_0214ab34 kind:function(arm,size=0x28) addr:0x0214ab34
@@ -22,8 +22,8 @@ func_ov077_0214ba90 kind:function(arm,size=0x1d8) addr:0x0214ba90
 func_ov077_0214bc68 kind:function(arm,size=0x58) addr:0x0214bc68
 func_ov077_0214bcc0 kind:function(arm,size=0x240) addr:0x0214bcc0
 func_ov077_0214bf00 kind:function(arm,size=0x1f4) addr:0x0214bf00
-func_ov077_0214c0f4 kind:function(arm,size=0x70) addr:0x0214c0f4
-func_ov077_0214c164 kind:function(arm,size=0x78) addr:0x0214c164
+_ZN7Scene17D1Ev kind:function(arm,size=0x70) addr:0x0214c0f4
+_ZN7Scene17D0Ev kind:function(arm,size=0x78) addr:0x0214c164
 data_ov077_0214c1dc kind:data(any) addr:0x0214c1dc
 data_ov077_0214c230 kind:data(any) addr:0x0214c230 ambiguous
 data_ov077_0214c248 kind:data(any) addr:0x0214c248
@@ -48,7 +48,7 @@ gStr_e_ov077 kind:data(any) addr:0x0214c3a8
 data_ov077_0214c3e8 kind:data(any) addr:0x0214c3e8
 gStr_C kind:data(any) addr:0x0214c428
 data_ov077_0214c4c0 kind:data(any) addr:0x0214c4c0
-data_ov077_0214c4cc kind:data(any) addr:0x0214c4cc ambiguous
+_ZTV7Scene17 kind:data(any) addr:0x0214c4c4
 gStr_TCM_ov077 kind:data(any) addr:0x0214c4e8
 gStr_Msg_TmdCommonMsgJP_LZ_bin_ov077 kind:data(any) addr:0x0214c4ec
 gStr_TEM_ov077 kind:data(any) addr:0x0214c508

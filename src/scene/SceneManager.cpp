@@ -23,6 +23,8 @@
 #include "../overlays/ov004/Scene04.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
 #include "../overlays/ov001/Scene0C.h"
+#include "../overlays/ov077/Scene17.h"
+#include "../overlays/ov007/Scene18.h"
 // End of gap38-a's scene classes
 
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
@@ -784,6 +786,12 @@ TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 // (Scenes 0x06 to 0x08, 0x10, 0x09 to 0x0B: gap38-c's test scenes)
 
 Scene0C::Scene0C(int sceneId) : Scene(sceneId) {}
+
+// (Scene 0x0F; scenes 0x0E and 0x16: gap38-c's test scenes)
+
+Scene17::Scene17(int sceneId) : Scene(sceneId) {}
+
+Scene18::Scene18(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 

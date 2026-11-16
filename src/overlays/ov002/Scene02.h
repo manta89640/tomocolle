@@ -25,7 +25,7 @@ public:
     /* 0x00C4 */ u8 mUnknown00C4[4];
     /* 0x00C8 */ CharacterBase mCharacter;
     /* 0x26AC */ AnimModelCharacter mAnimCharacter;
-    /* 0x4D70 */ u8 mUnknown4D70[0x6C];
+    /* 0x4DD4 */ u8 mUnknown4DD4[8];
 }; // 0x4DDC
 
 #endif // OV002_SCENE02_H

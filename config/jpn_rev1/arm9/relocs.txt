@@ -5778,7 +5778,7 @@ from:0x0203eb84 kind:arm_call to:0x0202e770 module:main
 from:0x0203eba8 kind:arm_call to:0x02022d2c module:main
 from:0x0203ebc8 kind:arm_call to:0x02022d2c module:main
 from:0x0203ebd8 kind:load to:0x02110970 add:0x8 module:main
-from:0x0203ebdc kind:load to:0x0214c4cc module:overlays(37,56,71,77,83,84,88,90,98)
+from:0x0203ebdc kind:load to:0x0214c4c4 add:0x8 module:overlay(77)
 from:0x0203ebe0 kind:load to:0x021102e0 add:0x8 module:main
 from:0x0203ebe4 kind:load to:0x0202e46c module:main
 from:0x0203ebe8 kind:load to:0x0202e44c module:main
@@ -5792,7 +5792,7 @@ from:0x0203ec9c kind:arm_call to:0x0202e770 module:main
 from:0x0203ecb4 kind:arm_call to:0x0202e770 module:main
 from:0x0203ecd8 kind:arm_call to:0x0203117c module:main
 from:0x0203ecf4 kind:load to:0x02110970 add:0x8 module:main
-from:0x0203ecf8 kind:load to:0x0214af68 module:overlays(7,8,17,19,34,36,45,53,58,94,97)
+from:0x0203ecf8 kind:load to:0x0214af60 add:0x8 module:overlay(7)
 from:0x0203ecfc kind:load to:0x0203e188 module:main
 from:0x0203ed04 kind:load to:0x0203e168 module:main
 from:0x0203ed08 kind:load to:0x0202e46c module:main

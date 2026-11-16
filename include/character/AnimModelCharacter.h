@@ -13,6 +13,7 @@ public:
     ~AnimModelCharacter() { NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj); }
 
     /* 0x25E4 */ AnimModel mModel;
-}; // 0x26C4
+    /* 0x26C4 */ u8 mUnknown26C4[0x64];
+}; // 0x2728
 
 #endif // CHARACTER_ANIMMODELCHARACTER_H
