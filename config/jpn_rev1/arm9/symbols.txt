@@ -5091,20 +5091,21 @@ gText_Ekkusu kind:data(any) addr:0x021107b8
 data_021107c2 kind:data(any) addr:0x021107c2
 sDigitReadings kind:data(any) addr:0x021107cc local
 sLetterReadings kind:data(any) addr:0x021107f4 local
-data_0211085c kind:data(any) addr:0x0211085c
-data_02110860 kind:data(any) addr:0x02110860
+_ZTT14Scene7FTextBox kind:data(any) addr:0x0211085c
 _ZTT10ObjTextBox kind:data(any) addr:0x02110864
 _ZTT10ObjCharBox kind:data(any) addr:0x0211086c
 _ZTT18Scene0FTextCanvas2 kind:data(any) addr:0x02110874
-data_02110880 kind:data(any) addr:0x02110880
+_ZTT17Scene7FTextCanvas kind:data(any) addr:0x0211087c
 _ZTT17Scene0FTextCanvas kind:data(any) addr:0x02110884
 _ZTT14Scene0FTextBox kind:data(any) addr:0x0211088c
+_ZTV14Scene7FTextBox kind:data(any) addr:0x02110894
 _ZTV14Scene0FTextBox kind:data(any) addr:0x021108a0
 _ZTV10ObjTextBox kind:data(any) addr:0x021108ac
 data_021108c4 kind:data(any) addr:0x021108c4
 _ZTV18Scene0FTextCanvas2 kind:data(any) addr:0x021108d0
 _ZTV17Scene0FTextCanvas kind:data(any) addr:0x021108dc
 _ZTV13ObjTextCanvas__10TextCanvas_at_340 kind:data(any) addr:0x021108e8
+_ZTV17Scene7FTextCanvas kind:data(any) addr:0x021108f4
 _ZTV10ObjCharBox kind:data(any) addr:0x02110900
 data_02110914 kind:data(any) addr:0x02110914
 _ZTV14TestNg134Model kind:data(any) addr:0x0211091c
@@ -6346,7 +6347,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14883 kind:bss addr:0x0213b704 local
+@14888 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
