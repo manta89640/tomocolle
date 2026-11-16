@@ -616,6 +616,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`...; character++; }`); in the `for` header (`i++, character++`) it comes after the compare (overlay 1).
 
 **A value read once where the original reads it twice**
+- Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
+  program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
+  z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
+  a volatile read or `#pragma opt_dead_assignments off` keeps both but gives the light's pointer and x other
+  registers. Statement orders, temporaries' types, inlines and struct copies did not do it.
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
 - Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch

@@ -38,6 +38,10 @@ void TestDrawMiiScene::Init() {
     G3X_SetShading(GX_SHADING_TOON);
     G3_SwapBuffers(GX_SORTMODE_AUTO, GX_BUFFERMODE_W);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
+    // Light 0 along x, white. NOT MATCHED (Init is 93%): the original stores x and the colour, reads both back
+    // and stores them again with y and z (light in r4, x reloaded into r0). Here the compiler drops the reload of x
+    // and its store; volatile reads or `#pragma opt_dead_assignments off` keep them but give other registers. The
+    // same block is unmatched in three of the main program's test scenes and in overlay 3.
     Light *light = &data_021227cc[0];
     light->mEnabled = TRUE;
     light->mDirection.x = 0xFFF;
