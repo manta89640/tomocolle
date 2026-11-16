@@ -1045,20 +1045,20 @@ func_020274e8 kind:function(arm,size=0x30) addr:0x020274e8
 func_02027518 kind:function(arm,size=0x10) addr:0x02027518
 PaletteLoader_Init kind:function(arm,size=0xc) addr:0x02027528
 func_02027534 kind:function(arm,size=0x8c) addr:0x02027534
-func_020275c0 kind:function(arm,size=0x64) addr:0x020275c0
-func_02027624 kind:function(arm,size=0x2c) addr:0x02027624
-func_02027650 kind:function(arm,size=0x2c) addr:0x02027650
-func_0202767c kind:function(arm,size=0x2c) addr:0x0202767c
-func_020276a8 kind:function(arm,size=0x2c) addr:0x020276a8
-func_020276d4 kind:function(arm,size=0x2c) addr:0x020276d4
-func_02027700 kind:function(arm,size=0x2c) addr:0x02027700
-func_0202772c kind:function(arm,size=0x2c) addr:0x0202772c
-func_02027758 kind:function(arm,size=0x2c) addr:0x02027758
-func_02027784 kind:function(arm,size=0x2c) addr:0x02027784
-func_020277b0 kind:function(arm,size=0x2c) addr:0x020277b0
+PaletteLoader_ReadFile kind:function(arm,size=0x64) addr:0x020275c0
+_Z14LoadBGExtPltt0PKvmm kind:function(arm,size=0x2c) addr:0x02027624 local
+_Z14LoadBGExtPltt1PKvmm kind:function(arm,size=0x2c) addr:0x02027650 local
+_Z14LoadBGExtPltt2PKvmm kind:function(arm,size=0x2c) addr:0x0202767c local
+_Z14LoadBGExtPltt3PKvmm kind:function(arm,size=0x2c) addr:0x020276a8 local
+_Z17LoadSubBGExtPltt0PKvmm kind:function(arm,size=0x2c) addr:0x020276d4 local
+_Z17LoadSubBGExtPltt1PKvmm kind:function(arm,size=0x2c) addr:0x02027700 local
+_Z17LoadSubBGExtPltt2PKvmm kind:function(arm,size=0x2c) addr:0x0202772c local
+_Z17LoadSubBGExtPltt3PKvmm kind:function(arm,size=0x2c) addr:0x02027758 local
+_Z14LoadOBJExtPlttPKvmm kind:function(arm,size=0x2c) addr:0x02027784 local
+_Z17LoadSubOBJExtPlttPKvmm kind:function(arm,size=0x2c) addr:0x020277b0 local
 func_020277dc kind:function(arm,size=0x11c) addr:0x020277dc
 func_020278f8 kind:function(arm,size=0x34) addr:0x020278f8
-func_0202792c kind:function(arm,size=0xc8) addr:0x0202792c
+PaletteLoader_Transfer kind:function(arm,size=0xc8) addr:0x0202792c
 func_020279f4 kind:function(arm,size=0x14) addr:0x020279f4
 _ZN9OwnerInfo4InitEv kind:function(arm,size=0x38) addr:0x02027a08
 _ZN9OwnerInfo7GetTimeEPiS0_S0_ kind:function(arm,size=0x3c) addr:0x02027a40
@@ -4186,7 +4186,7 @@ __sinit_020b04d0 kind:function(arm,size=0x4) addr:0x020b04d0
 __sinit_MainHeap.cpp kind:function(arm,size=0x18) addr:0x020b04d4 local
 __sinit_PadInput.cpp kind:function(arm,size=0x4) addr:0x020b04ec local
 __sinit_020b04f0 kind:function(arm,size=0x14) addr:0x020b04f0
-__sinit_020b0504 kind:function(arm,size=0x14) addr:0x020b0504
+__sinit_PaletteLoader.cpp kind:function(arm,size=0x14) addr:0x020b0504 local
 __sinit_OwnerInfo.cpp kind:function(arm,size=0x4) addr:0x020b0518 local
 __sinit_020b051c kind:function(arm,size=0x14) addr:0x020b051c
 __sinit_020b0530 kind:function(arm,size=0x4) addr:0x020b0530
@@ -4234,7 +4234,7 @@ data_020b5944 kind:data(any) addr:0x020b5944
 gStr_G kind:data(any) addr:0x020b594c
 data_020b596c kind:data(any) addr:0x020b596c
 data_020b598c kind:data(any) addr:0x020b598c
-data_020b599c kind:data(any) addr:0x020b599c
+sLoaders kind:data(any) addr:0x020b599c local
 data_020b59ec kind:data(any) addr:0x020b59ec
 data_020b5a0c kind:data(any) addr:0x020b5a0c
 gText_YaY kind:data(any) addr:0x020b5a2c
@@ -4781,7 +4781,7 @@ sMacAddress kind:data(any) addr:0x020fc48c local
 .p__sinit_MainHeap.cpp kind:data(word) addr:0x020fc4a0 local
 .p__sinit_PadInput.cpp kind:data(word) addr:0x020fc4a4 local
 .p__sinit_020b04f0 kind:data(word) addr:0x020fc4a8
-.p__sinit_020b0504 kind:data(word) addr:0x020fc4ac
+.p__sinit_PaletteLoader.cpp kind:data(word) addr:0x020fc4ac local
 .p__sinit_OwnerInfo.cpp kind:data(word) addr:0x020fc4b0 local
 .p__sinit_020b051c kind:data(word) addr:0x020fc4b4
 .p__sinit_020b0530 kind:data(word) addr:0x020fc4b8
@@ -4913,7 +4913,7 @@ data_0210f5c8 kind:data(any) addr:0x0210f5c8
 data_0210f5f4 kind:data(any) addr:0x0210f5f4
 gStr_NCER kind:data(any) addr:0x0210f618
 gStr_NANR kind:data(any) addr:0x0210f620
-gStr_NCLR kind:data(any) addr:0x0210f628
+@12868 kind:data(any) addr:0x0210f628 local
 gStr_NSCR kind:data(any) addr:0x0210f630
 gStr_NCGR kind:data(any) addr:0x0210f638
 _ZTV5Model kind:data(any) addr:0x0210f640
