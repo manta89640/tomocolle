@@ -6,7 +6,7 @@ extern "C" {
 extern const u16 data_020b5abc[];
 // Queues colours for copying to the palette of a plane: (loader, colours, plane, offset in bytes, size in bytes,
 // unknown)
-void func_020277dc(PaletteLoader *loader, const void *colors, int plane, int offset, int size, int unknown);
+void PaletteLoader_QueueColors(PaletteLoader *loader, const void *colors, int plane, int offset, int size, int unknown);
 }
 
 void BgTextTestScene::StartLoading() {
@@ -19,8 +19,8 @@ void BgTextTestScene::Init() {
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
     data_0211d604.Show(4);
     func_02028280(&data_02121834, 4, 0);
-    func_020278f8(&data_021213b8, 0, 0x101);
-    func_020277dc(&data_021213b8, data_020b5abc, 4, 0x1E0, 0x20, 0);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
+    PaletteLoader_QueueColors(&gPaletteLoader, data_020b5abc, 4, 0x1E0, 0x20, 0);
     mCanvas.InitText(&gFonts[2].mFont, 4, 25, 2, 2, 1, 1, 0, 1, 15, NULL, NNS_G2D_TEXT_BG_WIDTH_256,
                      NNS_G2D_CHARA_COLORMODE_16);
     mCanvas.mColor = 1;

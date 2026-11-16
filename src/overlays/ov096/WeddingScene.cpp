@@ -71,7 +71,7 @@ void WeddingScene::Init() {
     InitLowerScreen();
     Init3d();
 
-    func_02027534(&data_021213b8, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
     data_0211d604.Set(0x1111);
@@ -80,10 +80,10 @@ void WeddingScene::Init() {
     func_02028154(&data_02121834, 0x2F00, 0);
     func_02027290(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
     func_02028f24(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
     data_0211d604.mUnknown44 = 0;
     data_0211d604.mUnknown44Changed = TRUE;
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 
     mContext.mSceneId = mSceneId;
     mContext.mCommonMessages = &mMessageFiles[0];
@@ -109,7 +109,7 @@ void WeddingScene::Init() {
 
 // The touch screen: the window for the messages over a background
 void WeddingScene::InitLowerScreen() {
-    func_02027534(&data_021213b8, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);

@@ -19,7 +19,7 @@ struct ModelAnimation;
 
 extern "C" {
 // Frees a block of the main heap
-void func_020267f4(void *block);
+void FreeToMainHeap(void *block);
 // Finds an animation of a model by its resource type and id
 ModelAnimation *AnimModel_FindAnimation(AnimModel *model, u32 resType, int id);
 // Marks all of a model's animations finished
@@ -48,7 +48,7 @@ public:
     }
     virtual ~Model() {
         if (mResource != NULL) {
-            func_020267f4(mResource);
+            FreeToMainHeap(mResource);
         }
     }
     virtual void Load(int resourceId, int unk); // func_02029b04

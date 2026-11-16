@@ -27,11 +27,11 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 // func_02023cd4 and func_02023ddc add to the brightness at +0x04 and +0x08 until it reaches 0 or one end)
 void func_02023c54(ScreenControl *screens, int mask, fx32 speed);
 
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);

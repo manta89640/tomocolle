@@ -12,7 +12,7 @@ void HumanTestScene::StartLoading() {
 }
 
 void HumanTestScene::Init() {
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     func_0202b0e8(&data_02122824);
     ModelResources_SetModel(data_021223e4, 0, "HP0:/H00point00.itp");
     ModelResources_SetModel(data_021223e4, 0, "HM0:/HUMAN00_.imd");

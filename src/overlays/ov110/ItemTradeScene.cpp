@@ -428,7 +428,7 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
 
     mList.Init();
     mList.SetBackground(0x100, 0x38);
-    func_020278f8(&data_021213b8, 0x5FDF, 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x5FDF, 0x100);
     mList.InitRows(1, 8, 9, charOffset);
     mList.InitCounts(charOffset);
     mList.InitUpButton(1, 2, 3);
@@ -529,7 +529,7 @@ void ItemTradeList::UpdatePreviews() {
 // @0x0214a93c
 void ItemTradeList::Open() {
     mItemModel = mContext->mItemModel;
-    func_020278f8(&data_021213b8, 0x5FDF, 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x5FDF, 0x100);
     switch (mMode) {
     case 0:
     case 1:
@@ -1411,9 +1411,9 @@ void ItemTradeScene::Init() {
     mMessages[6].Open("TXM:tmd_explain_msg_JP.bmg");
 
     func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "STS:/BG_up.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
     func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
@@ -1425,10 +1425,10 @@ void ItemTradeScene::Init() {
     data_0211d604.Set(0x1313);
     data_0211d604.Set(0x1313);
     func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
-    func_02027534(&data_021213b8, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
-    func_02027534(&data_021213b8, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "STS:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "STS:/Obj_up.nce", 0x10, 0);
     Init3d();

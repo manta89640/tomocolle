@@ -54,11 +54,11 @@ void MiiListMenuScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
     func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x400, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x400, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x400, -1, -1, -1);
     func_02027d7c(&data_02121834, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     data_0211d604.Set(0x1400);
     // The two files opened through one pointer, as two consecutive files: written as two members, the second Open
     // computes the file's address before loading the path, where the original does the reverse.
@@ -134,7 +134,7 @@ void MiiListMenuScene::Init() {
     }
 
     mCharOffset = maxCharOffset;
-    func_020278f8(&data_021213b8, 0xFFFF, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0xFFFF, 0x101);
 }
 
 void MiiListMenuScene::Update() {

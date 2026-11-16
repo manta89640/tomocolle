@@ -3,9 +3,9 @@
 
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
-void func_0202680c(int size);    // Sets aside a heap for the particles
-void *func_02026824(int size);   // The allocator the particle system is given
-void func_0202683c(void);        // Frees it
+void CreateMainFrameHeap(int size);    // Sets aside a heap for the particles
+void *AllocFromMainFrameHeap(int size);   // The allocator the particle system is given
+void DestroyMainFrameHeap(void);        // Frees it
 // The particle library (main program 0x0207AB20 on)
 ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
 void func_0207ac78(ParticleSystem *system, void *file);
@@ -29,8 +29,8 @@ void ParticleTestScene::Init() {
     data_0211d604.mUnknown48 = 1;
     data_0211d604.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 5, 5), 31, 0x7FFF, 63, FALSE);
-    func_0202680c(0x4000);
-    mParticles = func_0207ab20(func_02026824, 1, 100, 0, 1, 30);
+    CreateMainFrameHeap(0x4000);
+    mParticles = func_0207ab20(AllocFromMainFrameHeap, 1, 100, 0, 1, 30);
     mEffectFile = ArchiveManager_GetFileByName(&gArchiveManager, "STE:/SplRoomEffect.spa");
     func_0207ac78(mParticles, mEffectFile);
     func_0207b110(mParticles);
@@ -102,7 +102,7 @@ void ParticleTestScene::Draw() {
 }
 
 void ParticleTestScene::Exit() {
-    func_0202683c();
+    DestroyMainFrameHeap();
     func_0202aecc(data_021223e4, 0);
     ArchiveManager_Unmount(&gArchiveManager, "STE");
     ArchiveManager_Unmount(&gArchiveManager, "STI");

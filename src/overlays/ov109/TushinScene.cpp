@@ -290,7 +290,7 @@ void TushinScene::SetUpWindow(int page) {
 void TushinScene::SetUpList(int *charOffset) {
     mList.Init(6);
     mList.SetBackground(0x100, 0x26);
-    func_020278f8(&data_021213b8, 0x5FDF, 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x5FDF, 0x100);
     mList.InitButtons(0, 0x68, 0x69, sListTitlePos, sListTitleSize);
     mList.InitIcons(0, 0x7A, sListCursorPos);
     mList.InitTexts(0x1000, sListTitleTextPos, charOffset);
@@ -392,8 +392,8 @@ template <class T> static inline void SetEmitterFlag(T *emitter, u32 flag) {
 #pragma opt_dead_assignments off
 // @0x0214ad80
 void TushinScene::InitParticles() {
-    func_0202680c(0x4000);
-    mParticles = func_0207ab20(func_02026824, 2, 100, 0, 1, 30);
+    CreateMainFrameHeap(0x4000);
+    mParticles = func_0207ab20(AllocFromMainFrameHeap, 2, 100, 0, 1, 30);
     mParticleFile = ArchiveManager_GetFileByName(&gArchiveManager, "STE:/SplTushinEffect.spa");
     func_0207ac78(mParticles, mParticleFile);
     func_0207b110(mParticles);
@@ -435,9 +435,9 @@ void TushinScene::Init() {
     mMessageFiles[0].Open("TBM:tmd_etc_msg_JP.bmg");
     mMessageFiles[1].Open("TBC:tmd_common_msg_JP.bmg");
     func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "STS:/BG_up.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
     func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028280(&data_02121834, 0x100, 3);
     func_02027d7c(&data_02121834, "MLT:/BG_Tushin_frame.nsc", 0x200, 0, 0, 0, 0, -1);
@@ -445,9 +445,9 @@ void TushinScene::Init() {
     func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
     func_02028280(&data_02121834, 2, 3);
     ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_Mii_list.nce", "MLT:/Obj_list.ncg", 0x1000, 0, -1);
-    mPalette = func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    mPalette = PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "STS:/Obj_up.nce", "STS:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
     data_0211d604.mPlanes = 0x1713;
     data_0211d604.mPlanesChanged = TRUE;
     func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
@@ -2490,7 +2490,7 @@ void TushinScene::Exit() {
     func_02024234(&data_0211d604, 0x3F00, 0);
     func_02023f4c(&data_0211d604, 0x3F00, 0);
     func_02023eac(&data_0211d604, 0x3F00);
-    func_0202683c();
+    DestroyMainFrameHeap();
     ArchiveManager_Unmount(&gArchiveManager, "STE");
     ArchiveManager_Unmount(&gArchiveManager, "TBC");
     ArchiveManager_Unmount(&gArchiveManager, "TBM");

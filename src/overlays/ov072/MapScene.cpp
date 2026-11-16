@@ -415,9 +415,9 @@ void MapScene::Init() {
     func_0202ae38(data_021223e4);
     func_02027290(&gObjResourceManager, "S00:/Obj_down.nce", 0x10, 1);
     func_02028f24(&gVramTransferQueue, "S00:/Obj_down.ncg", 0x10, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "S00:/Obj_down.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "S00:/Obj_down.ncl", 0x10, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "S00:/Obj_up.nce", "S00:/Obj_up.ncg", 0x1000, 0, 0x8000);
-    func_02027534(&data_021213b8, "S00:/Obj_up.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "S00:/Obj_up.ncl", 0x1000, -1, -1, -1);
     for (int i = 0; i < MODEL_COUNT; i++) {
         Sprite_Init(&mNewMarks[i], 1, 0x19, 128, 96, TRUE);
         if (i == MODEL_APARTMENT) {
@@ -435,11 +435,11 @@ void MapScene::Init() {
     Sprite_Init(&mSprite41BC, 1, 0x1C, 128, 96, TRUE);
     mSprite41BC.mVisible = FALSE;
     func_02028f24(&gVramTransferQueue, "S00:/BG_down.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "S00:/BG_down.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "S00:/BG_down.ncl", 2, -1, -1, -1);
     func_02027d7c(&data_02121834, "S00:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
     func_02027d7c(&data_02121834, sTitleScreen, 0x100, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
+    PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
     func_02028f24(&gVramTransferQueue, "SKY:/BG_up.ncg", 0x2F00, 0x6000, 0x6000, 0x2000, -1);
     func_02027d7c(&data_02121834, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
@@ -466,8 +466,8 @@ void MapScene::Init() {
     ModelResources_SetModel(data_021223e4, 0, "M00:/wait.ima");
     ModelResources_SetModel(data_021223e4, 11, "M10:/new.itp");
     ModelResources_SetModel(data_021223e4, 6, "M05:/wait.ita");
-    func_0202680c(0x4000);
-    mParticles = func_0207ab20(func_02026824, 3, 100, 0, 1, 30);
+    CreateMainFrameHeap(0x4000);
+    mParticles = func_0207ab20(AllocFromMainFrameHeap, 3, 100, 0, 1, 30);
     mParticleResource = ArchiveManager_GetFileByName(&gArchiveManager, "SPL:/SplMapEffect.spa");
     func_0207ac78(mParticles, mParticleResource);
     func_0207b110(mParticles);
@@ -1081,7 +1081,7 @@ void MapScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "TCO");
     ArchiveManager_Unmount(&gArchiveManager, "TET");
     ArchiveManager_Unmount(&gArchiveManager, "SKY");
-    func_0202683c();
+    DestroyMainFrameHeap();
     ArchiveManager_Unmount(&gArchiveManager, "SPL");
     mSound.Stop();
 }
@@ -1094,7 +1094,7 @@ void MapScene::SetState(int state) {
         mTitleSprite.mVisible = TRUE;
         func_02034f38(&mMessageWindows[0], 0, 0xA5);
         func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
-        func_02027534(&data_021213b8, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
+        PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sTitleScreen, 0x100);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
         NNS_G2dCharCanvasClear(&mMessageWindows[0].mTexts[0].mCanvas, 0);
@@ -1272,7 +1272,7 @@ void MapScene::OpenWindow() {
     u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[mSelected]);
     if (state == 0 || state == 3) {
         func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
-        func_02027534(&data_021213b8, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
+        PaletteLoader_LoadFile(&gPaletteLoader, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBoardScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sBoardTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
@@ -1280,7 +1280,7 @@ void MapScene::OpenWindow() {
     }
     if (mHasInfo) {
         func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
-        func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
+        PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
@@ -1307,7 +1307,7 @@ void MapScene::OpenWindow() {
     }
     if (mSelected == 5) {
         func_02028f24(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
-        func_02027534(&data_021213b8, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
+        PaletteLoader_LoadFile(&gPaletteLoader, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
         func_02033174(&mMessageWindows[0], sQuestionScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
         func_02034720(&mMessageWindows[0], 0x1A, 1);
@@ -1315,7 +1315,7 @@ void MapScene::OpenWindow() {
         return;
     }
     func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
-    func_02027534(&data_021213b8, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
+    PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
     func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
     mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
     func_02034720(&mMessageWindows[0], 0x1A, 1);

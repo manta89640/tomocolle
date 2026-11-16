@@ -20,7 +20,7 @@ void MessageTestScene::StartLoading() {
 
 #pragma opt_propagation off
 void MessageTestScene::Init() {
-    func_020278f8(&data_021213b8, 0x2800, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x2800, 0x101);
     mMessage = 0;
     mFiles[0].Open("TBM:/tmd_etc_msg_JP.bmg");
     mFiles[1].Open("ITM:/tmd_item_msg_JP.bmg");

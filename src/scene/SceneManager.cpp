@@ -172,8 +172,8 @@ void func_02027c0c(void *manager, void *state, u32 flags);
 void func_02023848(ScreenControl *screens, void *state, u32 flags);
 void func_02023a00(ScreenControl *screens, void *state, u32 flags);
 void func_02027270(void *manager);
-void func_020279f4(void *manager);
-void func_0202683c(void);
+void PaletteLoader_ClearDefaults(void *manager);
+void DestroyMainFrameHeap(void);
 // The pad input: +0x14 says whether it is read
 struct PadInputState {
     /* 0x00 */ u8 mUnknown00[0x14];
@@ -236,8 +236,8 @@ void SceneManager::Init() {
     func_02028280(&data_02121834, 0x4, 3);
     func_02027270(&gObjResourceManager);
     data_02120a10.mUnknown99C = 1;
-    func_020279f4(&data_021213b8);
-    data_021213b8.mUnknown41C = 0x1E0;
+    PaletteLoader_ClearDefaults(&gPaletteLoader);
+    gPaletteLoader.mUnknown41C = 0x1E0;
     data_0211f9d4.mEnabled = TRUE;
     func_02024b10(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
     func_02027ad0(&data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
@@ -255,7 +255,7 @@ void SceneManager::Update() {
     if (phase == Scene::PHASE_RUN) {
         gLcdPower.Update();
     } else if (phase == Scene::PHASE_DONE) {
-        func_0202683c();
+        DestroyMainFrameHeap();
         delete mScene;
         UnloadSceneOverlay(mPreviousSceneId);
         mScene = CreateScene(mNextSceneId);
@@ -264,8 +264,8 @@ void SceneManager::Update() {
         func_02023a00(&data_0211d604, mScreenControlState, GRAPHICS_STATE_ALL);
         func_02027270(&gObjResourceManager);
         data_02120a10.mUnknown99C = 1;
-        func_020279f4(&data_021213b8);
-        data_021213b8.mUnknown41C = 0x1E0;
+        PaletteLoader_ClearDefaults(&gPaletteLoader);
+        gPaletteLoader.mUnknown41C = 0x1E0;
     }
     mScene->Run();
 }

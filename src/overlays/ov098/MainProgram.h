@@ -39,7 +39,7 @@ struct TouchInput {
 extern "C" {
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern ScreenControl data_0211d604;
@@ -48,7 +48,7 @@ extern void *data_02123440; // The game's clock
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);

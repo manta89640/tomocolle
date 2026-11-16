@@ -26,14 +26,14 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
 int ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
@@ -82,7 +82,7 @@ extern "C" {
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
-void func_0202683c(void);
+void DestroyMainFrameHeap(void);
 void func_0201f508(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
 int NFL_GetCharInfo(void *buffer);
@@ -127,8 +127,8 @@ struct ParticleEmitter {
 struct ParticleSystem;
 
 extern "C" {
-void *func_0202680c(int size);
-void *func_02026824(int size); // An allocator the particle system is given
+void *CreateMainFrameHeap(int size);
+void *AllocFromMainFrameHeap(int size); // An allocator the particle system is given
 ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
 void func_0207ac78(ParticleSystem *system, void *file);
 void func_0207b110(ParticleSystem *system);

@@ -61,7 +61,7 @@ void MiiListScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
     func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
     func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028280(&data_02121834, 0x100, 3);
     func_02027d7c(&data_02121834, "MLT:/BG_frame_L.nsc", 0x200, 0, 0, 0, 0, -1);
@@ -69,7 +69,7 @@ void MiiListScene::Init() {
     func_02027d7c(&data_02121834, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     data_0211d604.Set(0x1700);
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 

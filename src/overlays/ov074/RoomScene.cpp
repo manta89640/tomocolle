@@ -120,22 +120,22 @@ struct ScreenLoader;
 struct CharLoader;
 struct Renderer3d;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
 void func_0202ae38(void *resources); // Of the models' resource table, data_021223e4 (Model.h)
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, int a, int b);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
 void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int x);
 void func_02028154(ScreenLoader *loader, int plane, int y);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_0202680c(int size);
-void func_0202683c();
+void CreateMainFrameHeap(int size);
+void DestroyMainFrameHeap();
 void NNS_GfdDumpLnkPlttVramManager();
 
 // The particle system
@@ -356,23 +356,23 @@ void RoomScene::Init() {
     data_0211d604.mUnknown48 = 1;
     data_0211d604.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
-    func_0202680c(0x4000);
+    CreateMainFrameHeap(0x4000);
 
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_down.nce", "MNU:/Obj_down.ncg", 0x1000, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_up.nce", "MNU:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
     mFront.mScreen = (u16 *)func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
     func_02027d7c(&data_02121834, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
-    mSky.mColors = (u16 *)func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
+    mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
     func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-    mSky.mPalette = func_02027534(&data_021213b8, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
-    func_020278f8(&data_021213b8, 0, 1);
+    mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 1);
     func_02028280(&data_02121834, 1, 2);
     func_02028280(&data_02121834, 2, 1);
     func_02028108(&data_02121834, 2, 0);
@@ -558,7 +558,7 @@ void RoomScene::Exit() {
     func_02023eac(&data_0211d604, 0x3F);
     FinishEncounter();
     SaveCharacters();
-    func_0202683c();
+    DestroyMainFrameHeap();
     func_0202aecc(data_021223e4, 0);
     func_0202aecc(data_021223e4, 1);
     func_0202aecc(data_021223e4, 2);
@@ -12354,7 +12354,7 @@ void SkyBackground::UpdateState() {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
                 func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-                mPalette = func_02027534(&data_021213b8, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+                mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
         }
@@ -12372,7 +12372,7 @@ void SkyBackground::UpdatePaths() {
 
 // @0x0216c5bc
 void SkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- NamePanel ---

@@ -161,7 +161,7 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 extern u32 data_021223e4[];
 void func_0202aecc(void *resources, int resourceId);
 void func_0202ad84(void *resources);
-void func_0202683c(void);
+void DestroyMainFrameHeap(void);
 extern ScreenControl data_0211d604;
 extern ScreenLoader data_02121834;
 void func_02024234(ScreenControl *screens, int planes, int a);
@@ -266,8 +266,8 @@ void func_0202a96c(Light *light);
 void func_02024b10(u32 *manager, void *a, int planes);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void *func_0202680c(int size);
-void *func_02026824(int size); // An allocator the particle system is given
+void *CreateMainFrameHeap(int size);
+void *AllocFromMainFrameHeap(int size); // An allocator the particle system is given
 ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
 void func_0207ac78(ParticleSystem *system, void *file);
 void func_0207b110(ParticleSystem *system);
@@ -373,13 +373,13 @@ void MiiEditScene::Init() {
     func_02024b10(gGraphicsManager, mUnknown00010, 0x3F00);
     func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
     func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
     func_02027d7c(&data_02121834, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
     func_02028280(&data_02121834, 1, 1);
@@ -405,8 +405,8 @@ void MiiEditScene::Init() {
     mUnknown58E0 = TRUE;
     mUnknown58E4 = FALSE;
     mUnknown58DC = FALSE;
-    func_0202680c(0x4000);
-    mParticles = func_0207ab20(func_02026824, 1, 100, 0, 1, 30);
+    CreateMainFrameHeap(0x4000);
+    mParticles = func_0207ab20(AllocFromMainFrameHeap, 1, 100, 0, 1, 30);
     mParticleFile = ArchiveManager_GetFileByName(&gArchiveManager, "SPL:/SplEditEffect.spa");
     func_0207ac78(mParticles, mParticleFile);
     func_0207b110(mParticles);
@@ -687,7 +687,7 @@ void MiiEditScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "B0I");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "SPL");
-    func_0202683c();
+    DestroyMainFrameHeap();
     ArchiveManager_Unmount(&gArchiveManager, "KBD");
     ArchiveManager_Unmount(&gArchiveManager, "TBM");
     ArchiveManager_Unmount(&gArchiveManager, "T02");
@@ -1895,7 +1895,7 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
         int page = button / 12;
         int index = button % 12;
         int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x1A);
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
                 mButtons[i].mVisible = TRUE;
@@ -1930,7 +1930,7 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
         int page = button / 12;
         int index = button % 12;
         int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(7);
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
                 mButtons[i].mVisible = TRUE;
@@ -1968,7 +1968,7 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
         int page = button / 12;
         int index = button % 12;
         int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(1);
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xE0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xE0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 6) {
                 mButtons[i].mVisible = TRUE;
@@ -2036,7 +2036,7 @@ void MiiEditFacePage::ShowPart(int part, BOOL a) {
         int page = button / 12;
         int index = button % 12;
         int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0xD);
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x120, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0x120, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 3) {
                 mButtons[i].mVisible = TRUE;
@@ -2148,7 +2148,7 @@ void MiiEditFacePage::SelectColorButton(int selected, int category, int tab) {
         row = selected + 8;
         break;
     }
-    func_02027534(&data_021213b8, "E00:/Fw_parts.ncl", 0x1000, row << 5, 0, 0x20);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_parts.ncl", 0x1000, row << 5, 0, 0x20);
 }
 
 // Shows a page of the parts' buttons: "count" of them, from the page's first
@@ -2468,7 +2468,7 @@ void MiiEditFaceTab::SelectTab(int tab, BOOL pressed) {
         break;
     }
     }
-    func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x60, 0x40, 0x60);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0x60, 0x40, 0x60);
     for (u16 i = 28; i <= 35; i++) {
         if (i - 28 < 6) {
             mPage->mButtons[i].mVisible = TRUE;
@@ -2566,7 +2566,7 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         } else {
             func_02031ca4(&mPage->mButtons227C[button]);
         }
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x140, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0x140, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 6) {
                 mPage->mButtons[i].mVisible = TRUE;
@@ -2591,7 +2591,7 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         } else {
             func_02031ca4(&mPage->mButtons227C[button]);
         }
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
                 mPage->mButtons[i].mVisible = TRUE;
@@ -2615,7 +2615,7 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         } else {
             func_02031ca4(&mPage->mButtons227C[button]);
         }
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 0) {
                 mPage->mButtons[i].mVisible = TRUE;
@@ -2640,7 +2640,7 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
         } else {
             func_02031ca4(&mPage->mButtons227C[button]);
         }
-        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
         for (u16 i = 28; i <= 35; i++) {
             if (i - 28 < 8) {
                 mPage->mButtons[i].mVisible = TRUE;
@@ -3257,7 +3257,7 @@ void MiiEditProfilePage::SetState(int state) {
         func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
         func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
-        func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
         data_0211d604.mPlanes = 0x17;
         data_0211d604.mPlanesChanged = TRUE;
         func_02023f4c(&data_0211d604, 0x3F00, 0x10);
@@ -3265,7 +3265,7 @@ void MiiEditProfilePage::SetState(int state) {
     case 1: {
         int charOffset = 0x384;
         mScene->ShowControls();
-        func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
         ObjResourceManager_Load(&gObjResourceManager, "E00:/Profile.nce", "E00:/Profile.ncg", 0x1000, 1, 0x10000);
         for (u16 i = 0; i < 10; i++) {
             u16 sequence = sProfileButtonSequences[i];
@@ -3497,7 +3497,7 @@ void MiiEditProfilePage::SetState(int state) {
         }
         func_02024c14(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
         func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x200, 0, 0, 0, -1);
-        func_02027534(&data_021213b8, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
         func_02027d7c(&data_02121834, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
         G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000, GX_BG_CHARBASE_0x08000,
                           GX_BG_EXTPLTT_01);
@@ -3680,7 +3680,7 @@ void MiiEditProfilePage::Exit() {
         func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
         func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
-        func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
         mScene->ShowControls();
         break;
     }
@@ -3909,12 +3909,12 @@ void MakeNumberReading(wchar_t *text, int number);
 void MiiEditVoicePage::Init(MiiEditScene *scene) {
     mState = -1;
     mScene = scene;
-    func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
     func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
     mScene->ShowControls();
     ObjResourceManager_Load(&gObjResourceManager, "E00:/Voice.nce", "E00:/Voice.ncg", 0x1000, 1, 0x10000);
     for (u16 i = 0; i < 22; i++) {
@@ -4318,7 +4318,7 @@ void MiiEditVoicePage::Exit() {
     func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
-    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
     mScene->ShowControls();
 }
 

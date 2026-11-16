@@ -18,19 +18,19 @@ extern "C" void *AllocFromMainHeap(u32 size, int align) {
     return gMainHeap.Alloc(size, align);
 }
 
-extern "C" void func_020267f4(void *block) {
+extern "C" void FreeToMainHeap(void *block) {
     gMainHeap.Free(block);
 }
 
-extern "C" void func_0202680c(u32 size) {
+extern "C" void CreateMainFrameHeap(u32 size) {
     gMainHeap.CreateFrameHeap(size);
 }
 
-extern "C" void *func_02026824(u32 size) {
+extern "C" void *AllocFromMainFrameHeap(u32 size) {
     return gMainHeap.AllocFromFrameHeap(size);
 }
 
-extern "C" void func_0202683c(void) {
+extern "C" void DestroyMainFrameHeap(void) {
     gMainHeap.DestroyFrameHeap();
 }
 
@@ -79,7 +79,7 @@ void MainHeap::DestroyFrameHeap() {
         mFrameHeap = NULL;
     }
     if (mFrameHeapMemory != NULL) {
-        func_020267f4(mFrameHeapMemory);
+        FreeToMainHeap(mFrameHeapMemory);
         mFrameHeapMemory = NULL;
     }
     OS_UnlockMutex(&mFrameHeapMutex);

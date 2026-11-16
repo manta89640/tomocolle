@@ -38,7 +38,7 @@ void KeyboardTestScene::Init() {
     func_02024b10(gGraphicsManager, mSavedGraphics, 0x3F00);
     func_02027d7c(&data_02121834, "KBD:/bg_keyboard_10.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x400, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
     data_0211d604.Show(0x400);
     mKeyboard.SetArchiveName("KBD");
     G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000, GX_BG_CHARBASE_0x08000,
@@ -91,14 +91,14 @@ void KeyboardTestScene::Update() {
         func_02028154(&data_02121834, 0x100, 0);
         func_02027d7c(&data_02121834, "MNU:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "MNU:/BG_down.ncg", 0x100, 0, 0, 0, -1);
-        func_02027534(&data_021213b8, "MNU:/BG_down.ncl", 0x100, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_down.ncl", 0x100, -1, -1, -1);
         data_0211d604.mPlanes &= ~0x400;
         data_0211d604.mPlanesChanged = TRUE;
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
         func_02024c14(gGraphicsManager, mSavedGraphics, 0x3F00);
         func_02027d7c(&data_02121834, "KBD:/bg_keyboard0.nsc", 0x400, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x400, 0, 0, 0, -1);
-        func_02027534(&data_021213b8, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
         data_0211d604.Show(0x400);
         G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000,
                           GX_BG_CHARBASE_0x08000, GX_BG_EXTPLTT_01);

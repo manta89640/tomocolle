@@ -26,11 +26,11 @@ struct TouchInput {
 
 extern "C" {
 extern TouchInput gTouchInput;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CellLoader gObjResourceManager;
 extern u8 gVramTransferQueue[];
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void func_02027f3c(ScreenLoader *loader, const void *screen, int plane, int a, int size);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 void func_02028154(ScreenLoader *loader, int plane, int offset);
@@ -143,7 +143,7 @@ void SoftKeyboard::TransferScreen() {
 }
 
 void SoftKeyboard::LoadBgPalette(int offset) {
-    func_02027534(&data_021213b8, mBgPaletteFile, mPlane, offset, mPalette * 32, 32);
+    PaletteLoader_LoadFile(&gPaletteLoader, mBgPaletteFile, mPlane, offset, mPalette * 32, 32);
 }
 
 void SoftKeyboard::Update(int pad, TPData tp) {
@@ -308,7 +308,7 @@ void SoftKeyboard::LoadObjCells(int a) {
 }
 
 void SoftKeyboard::LoadObjPalette(int palette) {
-    func_02027534(&data_021213b8, mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
+    PaletteLoader_LoadFile(&gPaletteLoader, mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
 }
 
 void SoftKeyboard::InitSprites() {

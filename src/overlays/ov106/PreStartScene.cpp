@@ -41,16 +41,16 @@ void PreStartScene::Init() {
 
     func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, sScreenName, 0x200, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
     func_02027290(&gObjResourceManager, "MNU:/Obj_up.nce", 0x10, 1);
     func_02028f24(&gVramTransferQueue, "MNU:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
     data_0211d604.Set(1);
     data_0211d604.Show(0x1210);
-    func_020278f8(&data_021213b8, 0x7FFF, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
 
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");

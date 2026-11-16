@@ -177,27 +177,27 @@ void TutorialRoomScene::Init() {
     data_0211d604.mUnknown48 = 1;
     data_0211d604.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
-    func_0202680c(0x4000);
+    CreateMainFrameHeap(0x4000);
 
     func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
     func_02027d7c(&data_02121834, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
     mFront.mScreen = func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
+    PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
     func_02028f24(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
     func_02027d7c(&data_02121834, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_up.nce", "MLT:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_up.ncl", 0x10, -1, -1, -1);
-    mSky.mColors = (u16 *)func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_up.ncl", 0x10, -1, -1, -1);
+    mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
     func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-    mSky.mPalette = func_02027534(&data_021213b8, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     func_02028280(&data_02121834, 1, 2);
     func_02028280(&data_02121834, 2, 1);
     data_0211d604.Set(0x1600);
@@ -330,7 +330,7 @@ void TutorialRoomScene::Exit() {
     SaveCharacters();
     func_02023f4c(&data_0211d604, 0x3F00, 0);
     func_02023eac(&data_0211d604, 0x3F3F);
-    func_0202683c();
+    DestroyMainFrameHeap();
     func_0202aecc(data_021223e4, 0);
     func_0202aecc(data_021223e4, 1);
     func_0202aecc(data_021223e4, 2);
@@ -2387,7 +2387,7 @@ void TutorialSkyBackground::UpdateState() {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
                 func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-                mPalette = func_02027534(&data_021213b8, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+                mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
         }
@@ -2405,7 +2405,7 @@ void TutorialSkyBackground::UpdatePaths() {
 
 // @0x0214fe10
 void TutorialSkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- TutorialNamePanel ---

@@ -32,7 +32,7 @@ public:
 
     /* 0x28 */ TutorialClock *mClock;
     /* 0x2C */ int mState;
-    /* 0x30 */ u16 *mColors;      // By time of day: what ApplyPalette gives to func_020278f8
+    /* 0x30 */ u16 *mColors;      // By time of day: what ApplyPalette gives to PaletteLoader_SetBackdrop
     /* 0x34 */ void *mPalette;    // What loading mPalettePath returned
     /* 0x38 */ s16 mStep;
     /* 0x3A */ u8 mBuildingSize;

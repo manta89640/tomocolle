@@ -114,13 +114,13 @@ void OptionScene::Init() {
     mMessageFiles[1].Open("TCO:/tmd_common_msg_JP.bmg");
     mScroll = 0;
 
-    func_02027534(&data_021213b8, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
     func_02027d7c(&data_02121834, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/BG_up.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 2, -1, -1, -1);
     func_02027d7c(&data_02121834, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
 
     for (int a = 0; a < BUTTON_COUNT; a++) {

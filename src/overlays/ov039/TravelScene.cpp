@@ -180,14 +180,14 @@ void TravelScene::Init() {
     switch (mSceneId) {
     case SCENE_PAIR_DRESSED:
         ObjResourceManager_Load(&gObjResourceManager, "N00:/Obj_up_hm.nce", "N00:/Obj_up_hm.ncg", 0x10, 0, -1);
-        func_02027534(&data_021213b8, "N00:/Obj_up_hm.ncl", 0x10, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "N00:/Obj_up_hm.ncl", 0x10, -1, -1, -1);
         func_02027d7c(&data_02121834, "N00:/BG_airplane_hm.nsc", 4, 0, 0, 0, 0, -1);
         func_02027d7c(&data_02121834, "N00:/BG_down_hm.nsc", 0x200, 0, 0, 0, 0, -1);
         break;
     case SCENE_SOLO:
     case SCENE_PAIR:
         ObjResourceManager_Load(&gObjResourceManager, "N00:/Obj_up.nce", "N00:/Obj_up.ncg", 0x10, 0, -1);
-        func_02027534(&data_021213b8, "N00:/Obj_up.ncl", 0x10, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "N00:/Obj_up.ncl", 0x10, -1, -1, -1);
         func_02027d7c(&data_02121834, "N00:/BG_airplane.nsc", 4, 0, 0, 0, 0, -1);
         func_02027d7c(&data_02121834, "N00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
         break;
@@ -199,7 +199,7 @@ void TravelScene::Init() {
     Sprite_Init(&mSprites[3], 0, 11, 128, 96, TRUE);
     mSprites[0].mVisible = FALSE;
     ObjResourceManager_Load(&gObjResourceManager, "N00:/Obj_down.nce", "N00:/Obj_down.ncg", 0x1000, 1, -1);
-    func_02027534(&data_021213b8, "N00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N00:/Obj_down.ncl", 0x1000, -1, -1, -1);
     Sprite_Init(&mSprites[4], 1, 2, 128, 96, TRUE);
     mSprites[4].mVisible = FALSE;
 
@@ -215,10 +215,10 @@ void TravelScene::Init() {
         mButtons[i].mVisible = FALSE;
     }
 
-    func_02027534(&data_021213b8, "N00:/BG_up.ncl", 0x2F, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_up.ncl", 0x2F, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "N00:/BG_up.ncg", 0xC, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "N00:/BG_pictureframe.nsc", 8, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N00:/BG_down.ncl", 0x200, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_down.ncl", 0x200, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "N00:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     mMessageFiles[0].Open("TBM:/tmd_minicontents_msg_JP.bmg");
     mText.mMessageFile = &mMessageFiles[0];
@@ -280,7 +280,7 @@ void TravelScene::Init() {
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x200, 1);
     data_0211d604.Set(0x1217);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     mTtsPlayer.InitEngine();
     mLastSpot = -1;
     SetState(STATE_START);
@@ -507,7 +507,7 @@ void TravelScene::SetState(int state) {
         palette[9] = digit;
         screen[9] = digit;
         chars[9] = digit;
-        func_02027534(&data_021213b8, palette, 0x2F, -1, -1, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, palette, 0x2F, -1, -1, -1);
         func_02027d7c(&data_02121834, screen, 4, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, chars, 0xC, 0, 0, 0, -1);
         data_0211d604.Set(0x1217);
@@ -551,7 +551,7 @@ void TravelScene::SetState(int state) {
     case STATE_PHOTO_FLASH:
     case STATE_PHOTO2_FLASH:
     case STATE_PHOTO3_FLASH:
-        func_020278f8(&data_021213b8, 0, 0x101);
+        PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
         data_0211d604.Set(0x1200);
         for (int i = 0; i < mTravellerCount; i++) {
             ModelAnimation *animation =

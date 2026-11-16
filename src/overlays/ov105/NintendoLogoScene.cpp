@@ -11,10 +11,10 @@ void NintendoLogoScene::StartLoading() {
 }
 
 void NintendoLogoScene::Init() {
-    func_020278f8(&data_021213b8, 0x7FFF, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
     func_02027d7c(&data_02121834, "MNU:/Gray_White.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "MNU:/Gray_White.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/Gray_White.ncl", 2, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Gray_White.ncl", 2, -1, -1, -1);
     data_0211d604.Set(2);
     SetState(STATE_SHOW);
 }

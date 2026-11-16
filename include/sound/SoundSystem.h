@@ -6,7 +6,7 @@
 
 extern "C" {
 // Frees a block of the main heap
-void func_020267f4(void *block);
+void FreeToMainHeap(void *block);
 }
 
 // The sound library's setup and what it plays with: the sound heap, the sound archive, and the handles of the
@@ -27,7 +27,7 @@ public:
     SoundSystem() { mHeapMemory = NULL; }
     ~SoundSystem() {
         if (mHeapMemory != NULL) {
-            func_020267f4(mHeapMemory);
+            FreeToMainHeap(mHeapMemory);
         }
     }
 

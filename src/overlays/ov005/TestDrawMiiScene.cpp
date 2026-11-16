@@ -27,7 +27,7 @@ void TestDrawMiiScene::Init() {
     data_0211d604.Show(1);
     data_0211d604.mUnknown48 = 1;
     data_0211d604.mUnknown48Changed = TRUE;
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     G3X_AntiAlias(TRUE);
     G3X_SetShading(GX_SHADING_TOON);
     G3_SwapBuffers(GX_SORTMODE_AUTO, GX_BUFFERMODE_W);

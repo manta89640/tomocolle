@@ -667,7 +667,7 @@ Measured:
   its fades take ten frames (`func_02023c54(&data_0211d604, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
   +0x10, the steps `func_02023cd4` and `func_02023ddc` add to their brightness, +0x04 and +0x08, each frame). `Init`
   loads `MNU:/Gray_White.nsc`, `.ncg` and `.ncl` into plane 2 (one of the main engine's, whose planes are 0x3F in
-  the screens' masks), shows that plane alone, and has `func_020278f8` set colour 0x7FFF with 0x101, as
+  the screens' masks), shows that plane alone, and has `PaletteLoader_SetBackdrop` set colour 0x7FFF with 0x101, as
   `PreStartScene` does. `Update` counts frames in its one state and on the 61st asks for scene 0x39
   (`PreStartScene`, overlay 106). `Exit` unmounts "MNU", `Draw` is empty, and the field at +0x14 is cleared by
   `SetState` and read by nothing.

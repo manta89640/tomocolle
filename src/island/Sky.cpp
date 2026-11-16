@@ -12,11 +12,11 @@ struct ScreenLoader;
 extern "C" {
 extern void *data_02123440; // The game's clock
 extern MATHRandContext16 gRandom;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
 void Clock_GetTime(void *clock, RTCTime *time);
-const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
+const GXRgb *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 }
 
@@ -246,7 +246,7 @@ void SkyPalette::LoadPalette() {
             STD_ConcatenateString(path, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
-    mPalette = func_02027534(&data_021213b8, path, mPlane, mPhase * 32, 0, 0x20);
+    mPalette = PaletteLoader_LoadFile(&gPaletteLoader, path, mPlane, mPhase * 32, 0, 0x20);
 }
 
 // --- Sky --------------------------------------------------------------------------------------------------------
@@ -623,8 +623,8 @@ void Sky::LoadPalettes() {
             STD_ConcatenateString(bgPath, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
-    mObjPalette = func_02027534(&data_021213b8, objPath, mObjPlane, mPhase * 32, 0, 0x20);
-    mBgPalette = func_02027534(&data_021213b8, bgPath, mBgPlane, mPhase * 32, 0, 0x20);
+    mObjPalette = PaletteLoader_LoadFile(&gPaletteLoader, objPath, mObjPlane, mPhase * 32, 0, 0x20);
+    mBgPalette = PaletteLoader_LoadFile(&gPaletteLoader, bgPath, mBgPlane, mPhase * 32, 0, 0x20);
 }
 
 // --- SkyBirds ---------------------------------------------------------------------------------------------------

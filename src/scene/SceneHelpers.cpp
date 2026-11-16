@@ -434,7 +434,7 @@ void ReturnButton::MountArchive() {
 void ReturnButton::Init(int sceneId, int plane, int resource) {
     mSceneId = sceneId;
     ObjResourceManager_Load(&gObjResourceManager, "RET:/Obj_down.nce", "RET:/Obj_down.ncg", plane, resource, -1);
-    func_02027534(&data_021213b8, "RET:/Obj_down.ncl", plane, 0xE0, 0xE0, 0x40);
+    PaletteLoader_LoadFile(&gPaletteLoader, "RET:/Obj_down.ncl", plane, 0xE0, 0xE0, 0x40);
     Sprite_Init(this, resource, 2, 0x80, 0x60, TRUE);
     func_02031eb0(this, 24, 22);
     func_02031278(this, 2, 3);
@@ -547,17 +547,17 @@ void NewsButton::LoadBackground() {
     ArchiveManager_MountCompressed(&gArchiveManager, "NEW", "Scn/Scene/SceneMiiNews_LZ.bin", 1);
     func_02027d7c(&data_02121834, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
     func_02027d7c(&data_02121834, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
     func_02023f4c(&data_0211d604, 0x17, -16);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
 void NewsButton::Init(int resource) {
     func_02027290(&gObjResourceManager, "NEW:/Obj_down.nce", 0x1000, resource);
     func_02028f24(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
     Sprite_Init(this, 1, 6, 0x80, 0x60, TRUE);
     func_02031eb0(this, 116, 30);
     func_02031278(this, 6, 7);
@@ -568,7 +568,7 @@ void NewsButton::Init(int resource) {
     func_02028280(&data_02121834, 8, 0);
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x100, 1);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
 void NewsButton::Update(Scene *scene, BOOL leave) {
@@ -590,5 +590,5 @@ void NewsButton::Draw() {
 
 void NewsButton::Unload() {
     ArchiveManager_Unmount(&gArchiveManager, "NEW");
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
