@@ -87,8 +87,6 @@ SCENE_STAND_IN(ChangeRoomScene, 0x17BF8); // func_02041f80
 
 SCENE_STAND_IN(TestNg55Scene, 0x1C3D8); // func_02042254
 
-SCENE_STAND_IN(TestNg63Scene, 0x1CEA8); // func_02042634
-
 SCENE_STAND_IN(Scene40, 0x6F908); // func_020428e0
 
 SCENE_STAND_IN(WriteSongScene, 0x81224); // func_02044c80

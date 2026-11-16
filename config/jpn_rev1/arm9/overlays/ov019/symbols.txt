@@ -4,7 +4,7 @@ func_ov019_0214a15c kind:function(arm,size=0x134) addr:0x0214a15c
 func_ov019_0214a290 kind:function(arm,size=0x7c) addr:0x0214a290
 func_ov019_0214a30c kind:function(arm,size=0xc0) addr:0x0214a30c
 func_ov019_0214a3cc kind:function(arm,size=0x34c) addr:0x0214a3cc
-_ZN12Scene3EModelC1Ev kind:function(arm,size=0x6c) addr:0x0214a718
+_ZN13TestNg63ModelC1Ev kind:function(arm,size=0x6c) addr:0x0214a718
 func_ov019_0214a784 kind:function(arm,size=0x30) addr:0x0214a784
 func_ov019_0214a7b4 kind:function(arm,size=0x48) addr:0x0214a7b4
 func_ov019_0214a7fc kind:function(arm,size=0x160) addr:0x0214a7fc
@@ -36,7 +36,7 @@ gStr_P06_ov019 kind:data(any) addr:0x0214ae40
 gStr_P05_ov019 kind:data(any) addr:0x0214ae44
 gStr_P04_ov019 kind:data(any) addr:0x0214ae48
 gStr_P03_ov019 kind:data(any) addr:0x0214ae4c
-_ZTV7Scene3E kind:data(any) addr:0x0214ae50
+_ZTV13TestNg63Scene kind:data(any) addr:0x0214ae50
 data_ov019_0214ae7c kind:data(any) addr:0x0214ae7c
 data_ov019_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov019_0214ae98 kind:data(any) addr:0x0214ae98

@@ -1,5 +1,5 @@
-#ifndef OV019_SCENE3E_H
-#define OV019_SCENE3E_H
+#ifndef OV019_TESTNG63SCENE_H
+#define OV019_TESTNG63SCENE_H
 
 #include <nitro.h>
 
@@ -19,24 +19,25 @@
 // "Scn/Scene/SceneTestNg63_LZ.bin", "Msg/TmdMiniContentsMsgJP_LZ.bin", "Scn/Scene/NgCaption_LZ.bin",
 // "Mdl/Misc/search_3D_LZ.bin".
 //
-// The name is the scene id: nothing names this class, and no name of it survives in the ROM.
+// The name is after the scene's archive, "Scn/Scene/SceneTestNg63_LZ.bin", which no other overlay mounts; it is not the
+// original: no name of this class survives in the ROM.
 // A model of the scene, of 0x144 bytes: the main program's AnimModel and something after it. Its constructor is the
 // overlay's (0x0214A718); its destructor, which only destroys the model, is the main program's (after the scene's
 // constructor), emitted for the scene's __cxa_vec_ctor. A member, not a base: the destructor stores only the model's
 // tables.
 //
 // The name is descriptive, not the original.
-class Scene3EModel {
+class TestNg63Model {
 public:
-    Scene3EModel();
+    TestNg63Model();
 
     /* 0x000 */ AnimModel mModel;
     /* 0x0E0 */ u8 mUnknown0E0[0x64];
 }; // 0x144
 
-class Scene3E : public Scene {
+class TestNg63Scene : public Scene {
 public:
-    Scene3E(int sceneId);
+    TestNg63Scene(int sceneId);
 
     virtual void StartLoading();
     virtual void Init();
@@ -46,7 +47,7 @@ public:
 
     /* 0x00010 */ SceneCharacter mCharacters[1];
     /* 0x02B28 */ u8 mUnknown02B28[0x1BBC];
-    /* 0x046E4 */ Scene3EModel mModels46E4[30];
+    /* 0x046E4 */ TestNg63Model mModels46E4[30];
     /* 0x06CDC */ u8 mUnknown06CDC[0x108];
     /* 0x06DE4 */ TtsPlayer mTtsPlayer;
     /* 0x1B728 */ MessageFile mMessageFiles[1];
@@ -61,4 +62,4 @@ public:
     /* 0x1CDC8 */ AnimModel mModels1CDC8[1];
 }; // 0x1CEA8
 
-#endif // OV019_SCENE3E_H
+#endif // OV019_TESTNG63SCENE_H

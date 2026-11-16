@@ -43,7 +43,7 @@
 #include "../overlays/ov016/Scene3B.h"
 #include "../overlays/ov017/Scene3C.h"
 #include "../overlays/ov018/TestNg62Scene.h"
-#include "../overlays/ov019/Scene3E.h"
+#include "../overlays/ov019/TestNg63Scene.h"
 #include "../overlays/ov020/Scene3F.h"
 #include "../overlays/ov021/TestNg69Scene.h"
 #include "../overlays/ov076/MiiEditScene.h"
@@ -895,7 +895,7 @@ Scene3C::Scene3C(int sceneId) : Scene(sceneId) {}
 TestNg62Scene::TestNg62Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x3E, overlay 19
-Scene3E::Scene3E(int sceneId) : Scene(sceneId) {}
+TestNg63Scene::TestNg63Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x3F, overlay 20
 Scene3F::Scene3F(int sceneId) : Scene(sceneId) {}
