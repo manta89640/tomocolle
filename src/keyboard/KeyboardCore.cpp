@@ -119,161 +119,59 @@ void func_02082e8c(void *arg, int sound);
 
 }
 
-static wchar_t sCharsQwertyUpper[] = {
-    0xFEFF, L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'-', L'=', L'Q', L'W', L'E', L'R', L'T',
-    L'Y', L'U', L'I', L'O', L'P', L'A', L'S', L'D', L'F', L'G', L'H', L'J', L'K', L'L', L'Z', L'X', L'C', L'V',
-    L'B', L'N', L'M', L',', L'.', L'/', L';', L'`', L'[', L']',
-};
-static wchar_t sCharsQwertyLower[] = {
-    0xFEFF, L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'-', L'=', L'q', L'w', L'e', L'r', L't',
-    L'y', L'u', L'i', L'o', L'p', L'a', L's', L'd', L'f', L'g', L'h', L'j', L'k', L'l', L'z', L'x', L'c', L'v',
-    L'b', L'n', L'm', L',', L'.', L'/', L';', L'`', L'[', L']',
-};
-static wchar_t sCharsQwertySymbols[] = {
-    0xFEFF, L'!', L'@', L'#', L'$', L'%', L'^', L'&', L'*', L'(', L')', L'_', L'+', L'Q', L'W', L'E', L'R', L'T',
-    L'Y', L'U', L'I', L'O', L'P', L'A', L'S', L'D', L'F', L'G', L'H', L'J', L'K', L'L', L'Z', L'X', L'C', L'V',
-    L'B', L'N', L'M', L'<', L'>', L'?', L':', L'~', L'{', L'}',
-};
-static wchar_t sCharsEuro[] = {
-    0xFEFF, 0x00E0, 0x00E1, 0x00E2, 0x00E4, 0x00E8, 0x00E9, 0x00EA, 0x00EB, 0x00EC, 0x00ED, 0x00EE, 0x00EF, 0x00F2,
-    0x00F3, 0x00F4, 0x00F6, 0x0153, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00E7, 0x00F1, 0x00DF, 0x00C0, 0x00C1, 0x00C2,
-    0x00C4, 0x00C8, 0x00C9, 0x00CA, 0x00CB, 0x00CC, 0x00CD, 0x00CE, 0x00CF, 0x00D2, 0x00D3, 0x00D4, 0x00D6, 0x0152,
-    0x00D9, 0x00DA, 0x00DB, 0x00DC, 0x00C7, 0x00D1, 0x00A1, 0x00BF, 0x20AC, 0x00A2, 0x00A3, L' ', L' ', L' ',
-};
-static wchar_t sCharsHiragana[] = {
-    0xFEFF, L'あ', L'い', L'う', L'え', L'お', L'か', L'き', L'く', L'け', L'こ', L'さ', L'し', L'す', L'せ', L'そ', L'た', L'ち',
-    L'つ', L'て', L'と', L'な', L'に', L'ぬ', L'ね', L'の', L'は', L'ひ', L'ふ', L'へ', L'ほ', L'ま', L'み', L'む', L'め', L'も',
-    L'や', L'ゆ', L'よ', L'！', L'？', L'ら', L'り', L'る', L'れ', L'ろ', L'わ', L'を', L'ん', L'、', L'。', L'ー',
-};
-static wchar_t sCharsKatakana[] = {
-    0xFEFF, L'ア', L'イ', L'ウ', L'エ', L'オ', L'カ', L'キ', L'ク', L'ケ', L'コ', L'サ', L'シ', L'ス', L'セ', L'ソ', L'タ', L'チ',
-    L'ツ', L'テ', L'ト', L'ナ', L'ニ', L'ヌ', L'ネ', L'ノ', L'ハ', L'ヒ', L'フ', L'ヘ', L'ホ', L'マ', L'ミ', L'ム', L'メ', L'モ',
-    L'ヤ', L'ユ', L'ヨ', L'！', L'？', L'ラ', L'リ', L'ル', L'レ', L'ロ', L'ワ', L'ヲ', L'ン', L'、', L'。', L'ー',
-};
-static wchar_t sCharsPicto[] = {
-    0xFEFF, L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'=', 0xE008, 0xE009, 0xE00A, 0xE00B, 0xE00C, 0xE00D,
-    0xE00E, 0xE00F, 0xE012, 0xE013, 0xE007, 0xE000, 0xE001, 0xE002, 0xE003, 0xE004, 0xE005, 0xE006, 0xE015, 0xE016, 0xE017, 0xE018, 0xE010, 0xE011,
-    L'+', L'-', 0x2606, 0x25CB, 0x25C7, 0x25A1, 0x25B3, 0x25BD, 0x25CE, 0xE019, 0xE01A, 0xE01B, 0xE01C, 0x2605, 0x25CF,
-    0x25C6, 0x25A0, 0x25B2, 0x25BC, 0xE028,
-};
-static wchar_t sCharsSign[] = {
-    0xFEFF, L'!', L'?', L'&', L'\'', L'～', L':', L';', L'@', L'~', L'_', L'+', L'-', L'*', L'/', 0x00D7, 0x00F7,
-    L'=', 0x2192, 0x2190, 0x2191, 0x2193, L'「', L'」', 0x201C, 0x201D, L'(', L')', L'<', L'>', L'{', L'}', 0x2022,
-    L'%', 0x203B, L'〒', L'#', 0x266D, 0x266A, 0x00B1, L'$', 0x00A2, 0x00A3, L'\\', L'^', 0x00B0, 0x221E, 0x2234,
-    0x2026, 0x2122, 0x00A9, 0x00AE,
-};
-static KeyRect sKeysEnglish[49] = {
-    {173, 24, 25, 15, 0, 1}, {68, 72, 79, 14, 0, 2}, {2, 56, 25, 15, 0, 3}, {2, 40, 17, 15, 0, 4},
-    {4, 9, 15, 14, 0, 5}, {20, 9, 15, 14, 0, 6}, {36, 9, 15, 14, 0, 7}, {52, 9, 15, 14, 0, 8},
-    {68, 9, 15, 14, 0, 9}, {84, 9, 15, 14, 0, 10}, {100, 9, 15, 14, 0, 11}, {116, 9, 15, 14, 0, 12},
-    {132, 9, 15, 14, 0, 13}, {148, 9, 15, 14, 0, 14}, {164, 9, 15, 14, 0, 15}, {180, 9, 15, 14, 0, 16},
-    {13, 24, 15, 15, 0, 17}, {29, 24, 15, 15, 0, 18}, {45, 24, 15, 15, 0, 19}, {61, 24, 15, 15, 0, 20},
-    {77, 24, 15, 15, 0, 21}, {93, 24, 15, 15, 0, 22}, {109, 24, 15, 15, 0, 23}, {125, 24, 15, 15, 0, 24},
-    {141, 24, 15, 15, 0, 25}, {157, 24, 15, 15, 0, 26}, {20, 40, 15, 15, 0, 27}, {36, 40, 15, 15, 0, 28},
-    {52, 40, 15, 15, 0, 29}, {68, 40, 15, 15, 0, 30}, {84, 40, 15, 15, 0, 31}, {100, 40, 15, 15, 0, 32},
-    {116, 40, 15, 15, 0, 33}, {132, 40, 15, 15, 0, 34}, {148, 40, 15, 15, 0, 35}, {28, 56, 15, 15, 0, 36},
-    {44, 56, 15, 15, 0, 37}, {60, 56, 15, 15, 0, 38}, {76, 56, 15, 15, 0, 39}, {92, 56, 15, 15, 0, 40},
-    {108, 56, 15, 15, 0, 41}, {124, 56, 15, 15, 0, 42}, {140, 56, 15, 15, 0, 43}, {156, 56, 15, 15, 0, 44},
-    {172, 56, 15, 15, 0, 45}, {36, 72, 15, 14, 0, 46}, {52, 72, 15, 14, 0, 47}, {148, 72, 15, 14, 0, 48},
-    {164, 72, 15, 14, 0, 49},
-};
-static KeyRect sKeysEuro[54] = {
-    {180, 24, 18, 15, 0, 1}, {180, 40, 18, 47, 0, 2}, {2, 8, 17, 15, 0, 3}, {20, 8, 15, 15, 0, 4},
-    {36, 8, 15, 15, 0, 5}, {52, 8, 15, 15, 0, 6}, {68, 8, 15, 15, 0, 7}, {84, 8, 15, 15, 0, 8},
-    {100, 8, 15, 15, 0, 9}, {116, 8, 15, 15, 0, 10}, {132, 8, 15, 15, 0, 11}, {148, 8, 15, 15, 0, 12},
-    {164, 8, 15, 15, 0, 13}, {164, 24, 15, 15, 0, 14}, {2, 24, 17, 15, 0, 15}, {20, 24, 15, 15, 0, 16},
-    {36, 24, 15, 15, 0, 17}, {52, 24, 15, 15, 0, 18}, {68, 24, 15, 15, 0, 19}, {84, 24, 15, 15, 0, 20},
-    {100, 24, 15, 15, 0, 21}, {116, 24, 15, 15, 0, 22}, {132, 24, 15, 15, 0, 23}, {148, 24, 15, 15, 0, 24},
-    {2, 40, 17, 15, 0, 25}, {20, 40, 15, 15, 0, 26}, {36, 40, 15, 15, 0, 27}, {52, 40, 15, 15, 0, 28},
-    {68, 40, 15, 15, 0, 29}, {84, 40, 15, 15, 0, 30}, {100, 40, 15, 15, 0, 31}, {116, 40, 15, 15, 0, 32},
-    {132, 40, 15, 15, 0, 33}, {148, 40, 15, 15, 0, 34}, {164, 40, 15, 15, 0, 35}, {2, 56, 17, 15, 0, 36},
-    {20, 56, 15, 15, 0, 37}, {36, 56, 15, 15, 0, 38}, {52, 56, 15, 15, 0, 39}, {68, 56, 15, 15, 0, 40},
-    {84, 56, 15, 15, 0, 41}, {100, 56, 15, 15, 0, 42}, {116, 56, 15, 15, 0, 43}, {132, 56, 15, 15, 0, 44},
-    {148, 56, 15, 15, 0, 45}, {164, 56, 15, 15, 0, 46}, {2, 72, 17, 15, 0, 47}, {20, 72, 15, 15, 0, 48},
-    {36, 72, 15, 15, 0, 49}, {52, 72, 15, 15, 0, 50}, {68, 72, 15, 15, 0, 51}, {84, 72, 15, 15, 0, 52},
-    {100, 72, 15, 15, 0, 53}, {116, 72, 15, 15, 0, 54},
-};
-static KeyRect sKeysKana[58] = {
-    {180, 24, 18, 15, 0, 1}, {180, 40, 18, 47, 0, 2}, {2, 8, 17, 15, 0, 3}, {2, 24, 17, 15, 0, 4},
-    {2, 40, 17, 15, 0, 5}, {2, 56, 17, 15, 0, 6}, {2, 72, 17, 15, 0, 7}, {20, 8, 15, 15, 0, 8},
-    {20, 24, 15, 15, 0, 9}, {20, 40, 15, 15, 0, 10}, {20, 56, 15, 15, 0, 11}, {20, 72, 15, 15, 0, 12},
-    {36, 8, 15, 15, 0, 13}, {36, 24, 15, 15, 0, 14}, {36, 40, 15, 15, 0, 15}, {36, 56, 15, 15, 0, 16},
-    {36, 72, 15, 15, 0, 17}, {52, 8, 15, 15, 0, 18}, {52, 24, 15, 15, 0, 19}, {52, 40, 15, 15, 0, 20},
-    {52, 56, 15, 15, 0, 21}, {52, 72, 15, 15, 0, 22}, {68, 8, 15, 15, 0, 23}, {68, 24, 15, 15, 0, 24},
-    {68, 40, 15, 15, 0, 25}, {68, 56, 15, 15, 0, 26}, {68, 72, 15, 15, 0, 27}, {84, 8, 15, 15, 0, 28},
-    {84, 24, 15, 15, 0, 29}, {84, 40, 15, 15, 0, 30}, {84, 56, 15, 15, 0, 31}, {84, 72, 15, 15, 0, 32},
-    {100, 8, 15, 15, 0, 33}, {100, 24, 15, 15, 0, 34}, {100, 40, 15, 15, 0, 35}, {100, 56, 15, 15, 0, 36},
-    {100, 72, 15, 15, 0, 37}, {116, 8, 15, 15, 0, 38}, {116, 24, 15, 15, 0, 39}, {116, 40, 15, 15, 0, 40},
-    {116, 56, 15, 15, 0, 41}, {116, 72, 15, 15, 0, 42}, {132, 8, 15, 15, 0, 43}, {132, 24, 15, 15, 0, 44},
-    {132, 40, 15, 15, 0, 45}, {132, 56, 15, 15, 0, 46}, {132, 72, 15, 15, 0, 47}, {148, 8, 15, 15, 0, 48},
-    {148, 24, 15, 15, 0, 49}, {148, 40, 15, 15, 0, 50}, {148, 56, 15, 15, 0, 51}, {148, 72, 15, 15, 0, 52},
-    {164, 8, 15, 15, 0, 53}, {164, 24, 15, 15, 0, 54}, {164, 40, 15, 15, 0, 55}, {164, 56, 15, 15, 0, 56},
-    {164, 72, 15, 15, 0, 57}, {180, 8, 18, 15, 0, 58},
-};
-static KeyRect sKeysSign[53] = {
-    {180, 24, 18, 15, 0, 1}, {180, 40, 18, 47, 0, 2}, {2, 8, 17, 15, 0, 3}, {20, 8, 15, 15, 0, 4},
-    {36, 8, 15, 15, 0, 5}, {52, 8, 15, 15, 0, 6}, {68, 8, 15, 15, 0, 7}, {84, 8, 15, 15, 0, 8},
-    {100, 8, 15, 15, 0, 9}, {116, 8, 15, 15, 0, 10}, {132, 8, 15, 15, 0, 11}, {148, 8, 15, 15, 0, 12},
-    {2, 24, 17, 15, 0, 13}, {20, 24, 15, 15, 0, 14}, {36, 24, 15, 15, 0, 15}, {52, 24, 15, 15, 0, 16},
-    {68, 24, 15, 15, 0, 17}, {84, 24, 15, 15, 0, 18}, {100, 24, 15, 15, 0, 19}, {116, 24, 15, 15, 0, 20},
-    {132, 24, 15, 15, 0, 21}, {148, 24, 15, 15, 0, 22}, {164, 24, 15, 15, 0, 23}, {2, 40, 17, 15, 0, 24},
-    {20, 40, 15, 15, 0, 25}, {36, 40, 15, 15, 0, 26}, {52, 40, 15, 15, 0, 27}, {68, 40, 15, 15, 0, 28},
-    {84, 40, 15, 15, 0, 29}, {100, 40, 15, 15, 0, 30}, {116, 40, 15, 15, 0, 31}, {132, 40, 15, 15, 0, 32},
-    {148, 40, 15, 15, 0, 33}, {164, 40, 15, 15, 0, 34}, {2, 56, 17, 15, 0, 35}, {20, 56, 15, 15, 0, 36},
-    {36, 56, 15, 15, 0, 37}, {52, 56, 15, 15, 0, 38}, {68, 56, 15, 15, 0, 39}, {84, 56, 15, 15, 0, 40},
-    {100, 56, 15, 15, 0, 41}, {116, 56, 15, 15, 0, 42}, {132, 56, 15, 15, 0, 43}, {148, 56, 15, 15, 0, 44},
-    {164, 56, 15, 15, 0, 45}, {2, 72, 17, 15, 0, 46}, {20, 72, 15, 15, 0, 47}, {36, 72, 15, 15, 0, 48},
-    {52, 72, 15, 15, 0, 49}, {68, 72, 15, 15, 0, 50}, {84, 72, 15, 15, 0, 51}, {100, 72, 15, 15, 0, 52},
-    {116, 72, 15, 15, 0, 53},
-};
-static KeyRect sKeysPicto[57] = {
-    {180, 24, 18, 15, 0, 1}, {180, 40, 18, 47, 0, 2}, {2, 8, 17, 15, 0, 3}, {20, 8, 15, 15, 0, 4},
-    {36, 8, 15, 15, 0, 5}, {52, 8, 15, 15, 0, 6}, {68, 8, 15, 15, 0, 7}, {84, 8, 15, 15, 0, 8},
-    {100, 8, 15, 15, 0, 9}, {116, 8, 15, 15, 0, 10}, {132, 8, 15, 15, 0, 11}, {148, 8, 15, 15, 0, 12},
-    {164, 8, 15, 15, 0, 13}, {2, 24, 17, 15, 0, 14}, {20, 24, 15, 15, 0, 15}, {36, 24, 15, 15, 0, 16},
-    {52, 24, 15, 15, 0, 17}, {68, 24, 15, 15, 0, 18}, {84, 24, 15, 15, 0, 19}, {100, 24, 15, 15, 0, 20},
-    {116, 24, 15, 15, 0, 21}, {132, 24, 15, 15, 0, 22}, {148, 24, 15, 15, 0, 23}, {164, 24, 15, 15, 0, 24},
-    {2, 40, 17, 15, 0, 25}, {20, 40, 15, 15, 0, 26}, {36, 40, 15, 15, 0, 27}, {52, 40, 15, 15, 0, 28},
-    {68, 40, 15, 15, 0, 29}, {84, 40, 15, 15, 0, 30}, {100, 40, 15, 15, 0, 31}, {116, 40, 15, 15, 0, 32},
-    {132, 40, 15, 15, 0, 33}, {148, 40, 15, 15, 0, 34}, {164, 40, 15, 15, 0, 35}, {2, 56, 17, 15, 0, 36},
-    {20, 56, 15, 15, 0, 37}, {36, 56, 15, 15, 0, 38}, {52, 56, 15, 15, 0, 39}, {68, 56, 15, 15, 0, 40},
-    {84, 56, 15, 15, 0, 41}, {100, 56, 15, 15, 0, 42}, {116, 56, 15, 15, 0, 43}, {132, 56, 15, 15, 0, 44},
-    {148, 56, 15, 15, 0, 45}, {164, 56, 15, 15, 0, 46}, {2, 72, 17, 15, 0, 47}, {20, 72, 15, 15, 0, 48},
-    {36, 72, 15, 15, 0, 49}, {52, 72, 15, 15, 0, 50}, {68, 72, 15, 15, 0, 51}, {84, 72, 15, 15, 0, 52},
-    {100, 72, 15, 15, 0, 53}, {116, 72, 15, 15, 0, 54}, {132, 72, 15, 15, 0, 55}, {148, 72, 15, 15, 0, 56},
-    {164, 72, 15, 15, 0, 57},
-};
+// The character and key tables of the layouts are not this file's: they lie before its data, in the order of no
+// one file's data, and the code reads them as separately linked binary data is read, the character tables (UTF-16
+// text with a byte-order mark, which is skipped) through a cast and the key tables' sizes as the bytes between their
+// start and their end. See docs/binary.md, "The keyboard's core".
+extern "C" {
+extern wchar_t KeyboardCharsQwertyUpper[46];
+extern wchar_t KeyboardCharsQwertyLower[46];
+extern wchar_t KeyboardCharsQwertySymbols[46];
+extern wchar_t KeyboardCharsEuro[56];
+extern wchar_t KeyboardCharsHiragana[52];
+extern wchar_t KeyboardCharsKatakana[52];
+extern wchar_t KeyboardCharsPicto[56];
+extern wchar_t KeyboardCharsSign[52];
+extern KeyRect KeyboardKeysEnglish[49];
+extern KeyRect KeyboardKeysEuro[54];
+extern KeyRect KeyboardKeysKana[58];
+extern KeyRect KeyboardKeysSign[53];
+extern KeyRect KeyboardKeysPicto[57];
+}
+
+// The kana, and what a modifier key turns each of them into (a space for none)
+static wchar_t sKanaHandakuten[60] = L"　　　　　　　　　　　　　　　　　　　　ぱぴぷぺぽ　　　　　　　　　　　　　　　　　　　　　　　　パピプペポ　　　　";
+static wchar_t sKanaSmall[60] = L"ぁぃぅぇぉ　　　　　　　　　　　　っ　　　　　　　ゃゅょゎァィゥェォヵ　　ヶ　　　　　　　　ッ　　　　　　　ャュョヮ";
+static wchar_t sKanaPlain[60] = L"あいうえおかきくけこさしすせそたちつてとはひふへほやゆよわアイウエオカキクケコサシスセソタチツテトハヒフヘホヤユヨワ";
+static wchar_t sKanaDakuten[60] = L"　　　　　がぎぐげござじずぜぞだぢづでどばびぶべぼ　　　　　　ヴ　　ガギグゲゴザジズゼゾダヂヅデドバビブベボ　　　　";
+static const wchar_t *sKanaTables[4] = {sKanaPlain, sKanaDakuten, sKanaHandakuten, sKanaSmall};
 static KeyRect data_02112dec[2] = {
     {104, 89, 92, 13, 0, 0}, {4, 89, 92, 13, 0, 0},
 };
 
-// The kana that a modifier key turns each kana of the first table into
-static const wchar_t *sKanaTables[4] = {
-    L"あいうえおかきくけこさしすせそたちつてとはひふへほやゆよわアイウエオカキクケコサシスセソタチツテトハヒフヘホヤユヨワ",
-    L"　　　　　がぎぐげござじずぜぞだぢづでどばびぶべぼ　　　　　　ヴ　　ガギグゲゴザジズゼゾダヂヅデドバビブベボ　　　　",
-    L"　　　　　　　　　　　　　　　　　　　　ぱぴぷぺぽ　　　　　　　　　　　　　　　　　　　　　　　　パピプペポ　　　　",
-    L"ぁぃぅぇぉ　　　　　　　　　　　　っ　　　　　　　ゃゅょゎァィゥェォヵ　　ヶ　　　　　　　　ッ　　　　　　　ャュョヮ",
+struct KanaPair {
+    const wchar_t *from;
+    const wchar_t *to;
 };
-static const wchar_t *const sKanaPairs[3][2] = {
-    {sKanaTables[0], sKanaTables[1]},
-    {sKanaTables[0], sKanaTables[2]},
-    {sKanaTables[0], sKanaTables[3]},
-};
+static const KanaPair sKanaPairDakuten = {sKanaTables[0], sKanaTables[1]};
+static const KanaPair sKanaPairHandakuten = {sKanaTables[0], sKanaTables[2]};
+static const KanaPair sKanaPairSmall = {sKanaTables[0], sKanaTables[3]};
 
 static KeyLayout sLayouts[5] = {
-    {sKeysEnglish, NULL, func_02082c58, 4, 0},
-    {sKeysKana, NULL, func_02082bf0, 7, 0},
-    {sKeysEuro, NULL, func_02082c8c, 2, 0},
-    {sKeysSign, NULL, func_02082d70, 2, 0},
-    {sKeysPicto, NULL, func_02082d74, 2, 0},
+    {KeyboardKeysEnglish, NULL, func_02082c58, 4, 0},
+    {KeyboardKeysKana, NULL, func_02082bf0, 7, 0},
+    {KeyboardKeysEuro, NULL, func_02082c8c, 2, 0},
+    {KeyboardKeysSign, NULL, func_02082d70, 2, 0},
+    {KeyboardKeysPicto, NULL, func_02082d74, 2, 0},
 };
 
-static BOOL sInitialized;
-static int sOriginX;
 static int sOriginY;
-static u8 *sCharData;
 static u8 *sBaseCharData;
+static int sOriginX;
+static BOOL sInitialized;
+static u8 *sCharData;
 static KeyboardState sKeyboard;
+static u32 data_021486d8[6]; // Only a function the link drops refers to it
 
 extern "C" u16 func_0208179c(const KeyLayout *layout) {
     for (u16 i = 0; i < layout->numKeys; i++) {
@@ -391,8 +289,8 @@ extern "C" BOOL func_02081cb8(KeyboardState *kb) {
 }
 
 extern "C" void func_02081cf8(u16 *screen, int palette, int charBase) {
-    const int blank = 0x113;
     const int width = 25;
+    const int blank = 0x113;
     const int height = 11;
     int x, y;
     MI_CpuFill16(screen, blank, 0x800);
@@ -428,11 +326,11 @@ extern "C" void func_02081df0(int x, int y, BOOL unk_3c, void (*func)(void *arg,
     sInitialized = TRUE;
     func_020813fc();
     func_02081688(PAD_BUTTON_B | PAD_BUTTON_X | PAD_KEY_UP | PAD_KEY_DOWN | PAD_KEY_LEFT | PAD_KEY_RIGHT);
-    sLayouts[0].numKeys = KEY_COUNT(sKeysEnglish);
-    sLayouts[1].numKeys = KEY_COUNT(sKeysKana);
-    sLayouts[2].numKeys = KEY_COUNT(sKeysEuro);
-    sLayouts[3].numKeys = KEY_COUNT(sKeysSign);
-    sLayouts[4].numKeys = KEY_COUNT(sKeysPicto);
+    sLayouts[0].numKeys = KEY_COUNT(KeyboardKeysEnglish);
+    sLayouts[1].numKeys = KEY_COUNT(KeyboardKeysKana);
+    sLayouts[2].numKeys = KEY_COUNT(KeyboardKeysEuro);
+    sLayouts[3].numKeys = KEY_COUNT(KeyboardKeysSign);
+    sLayouts[4].numKeys = KEY_COUNT(KeyboardKeysPicto);
     sKeyboard.unk_c = NULL;
     sKeyboard.unk_10 = NULL;
     sKeyboard.cursor = &sLayouts[1].keys[sLayouts[1].unk_c];
@@ -475,7 +373,9 @@ extern "C" void func_02081f38(int layout) {
 }
 
 extern "C" void func_02081ff0(int index, BOOL sound) {
+    const int unused2[5] = {2, 3, 1, 4, 0};
     int layouts[5] = {0, 2, 1, 3, 4};
+    const int unused1[5] = {2, 0, 3, 4, 1};
     layouts[0] = 1;
     layouts[1] = 0;
     layouts[2] = 2;
@@ -611,6 +511,7 @@ extern "C" u16 func_02082560(void) {
 }
 
 extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
+    const u32 space = L' ';
     if (code == 0 || code >= 0x100) {
         return 0;
     }
@@ -621,7 +522,7 @@ extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
         case 20:
             return 10;
         case 2:
-            return 0x20;
+            return space;
         case 5:
             if (kb->unk_30 == 1) {
                 return 7;
@@ -642,7 +543,7 @@ extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
         }
     } else {
         u16 c = kb->chars[code - kb->layout->unk_c - 1];
-        if (c <= 0x20) {
+        if (c <= space) {
             return 0;
         }
         return c;
@@ -791,28 +692,28 @@ extern "C" const KeyRect *func_02082914(u32 dir, const KeyRect *cursor, const Ke
 
 extern "C" void func_02082b48(KeyboardState *kb) {
     kb->layout = &sLayouts[0];
-    kb->chars = (const u16 *)sCharsQwertyLower + 1;
+    kb->chars = (const u16 *)KeyboardCharsQwertyLower + 1;
 }
 
 extern "C" void func_02082b68(KeyboardState *kb) {
     kb->layout = &sLayouts[1];
-    kb->chars = (const u16 *)sCharsHiragana + 1;
+    kb->chars = (const u16 *)KeyboardCharsHiragana + 1;
     kb->unk_2e = 3;
 }
 
 extern "C" void func_02082b90(KeyboardState *kb) {
     kb->layout = &sLayouts[2];
-    kb->chars = (const u16 *)sCharsEuro + 1;
+    kb->chars = (const u16 *)KeyboardCharsEuro + 1;
 }
 
 extern "C" void func_02082bb0(KeyboardState *kb) {
     kb->layout = &sLayouts[3];
-    kb->chars = (const u16 *)sCharsSign + 1;
+    kb->chars = (const u16 *)KeyboardCharsSign + 1;
 }
 
 extern "C" void func_02082bd0(KeyboardState *kb) {
     kb->layout = &sLayouts[4];
-    kb->chars = (const u16 *)sCharsPicto + 1;
+    kb->chars = (const u16 *)KeyboardCharsPicto + 1;
 }
 
 extern "C" void func_02082bf0(KeyboardState *kb) {
@@ -821,11 +722,11 @@ extern "C" void func_02082bf0(KeyboardState *kb) {
     }
     switch (kb->code) {
     case 3:
-        kb->chars = (const u16 *)sCharsHiragana + 1;
+        kb->chars = (const u16 *)KeyboardCharsHiragana + 1;
         kb->unk_2e = 3;
         break;
     case 4:
-        kb->chars = (const u16 *)sCharsKatakana + 1;
+        kb->chars = (const u16 *)KeyboardCharsKatakana + 1;
         kb->unk_2e = 4;
         break;
     }
@@ -833,7 +734,7 @@ extern "C" void func_02082bf0(KeyboardState *kb) {
 }
 
 extern "C" void func_02082c58(KeyboardState *kb) {
-    const u16 *tables[3] = {(const u16 *)sCharsQwertyLower, (const u16 *)sCharsQwertySymbols, (const u16 *)sCharsQwertyUpper};
+    const u16 *tables[3] = {(const u16 *)KeyboardCharsQwertyLower, (const u16 *)KeyboardCharsQwertySymbols, (const u16 *)KeyboardCharsQwertyUpper};
     func_02082c90(kb, tables);
 }
 
@@ -931,6 +832,13 @@ extern "C" void func_02082e8c(void *arg, int sound) {
 }
 
 // Nothing calls this: it keeps sKanaPairs, which only the static initialiser refers to, as in the original
-extern "C" const wchar_t *KeyboardCore_Unused(int i, int j) {
-    return sKanaPairs[i][j];
+extern "C" const KanaPair *KeyboardCore_Unused(int i) {
+    data_021486d8[i] = 0;
+    switch (i) {
+    case 0:
+        return &sKanaPairDakuten;
+    case 1:
+        return &sKanaPairHandakuten;
+    }
+    return &sKanaPairSmall;
 }
