@@ -4,19 +4,10 @@
 
 // --- Data ---
 
-// The archives of the destinations, mounted as "N01"
-static const char *sDestinationArchives[TravelScene::DESTINATION_COUNT] = {
-    "Scn/Travel/France_LZ.bin",  "Scn/Travel/Hawaii_LZ.bin",   "Scn/Travel/Hongkong_LZ.bin",
-    "Scn/Travel/Italia_LZ.bin",  "Scn/Travel/Kyoto_LZ.bin",    "Scn/Travel/Okinawa_LZ.bin",
-    "Scn/Travel/Shanghai_LZ.bin", "Scn/Travel/Spain_LZ.bin",   "Scn/Travel/Thai_LZ.bin",
-};
+// The data is declared in an order that gives the ROM's: see docs/decompiling.md, "How a file's data is laid out".
 
-// The files of a sight's picture in the destination's archive; the second "0" becomes the sight's number
-static const char *sSightPictureFiles[3] = {
-    "N01:/BG_00.ncg",
-    "N01:/BG_00.ncl",
-    "N01:/BG_00.nsc",
-};
+static const u32 sSightMessages[TravelScene::DESTINATION_COUNT] = {0x4B6, 0x4C6, 0x4D4, 0x4DC, 0x4EA,
+                                                      0x4F4, 0x502, 0x50A, 0x51A};
 
 // --- The scene ---
 
@@ -49,6 +40,12 @@ static inline u16 Rand(int max) {
 }
 
 void TravelScene::StartLoading() {
+    // The archives of the destinations, mounted as "N01"
+    static const char *sDestinationArchives[DESTINATION_COUNT] = {
+        "Scn/Travel/France_LZ.bin",  "Scn/Travel/Hawaii_LZ.bin",   "Scn/Travel/Hongkong_LZ.bin",
+        "Scn/Travel/Italia_LZ.bin",  "Scn/Travel/Kyoto_LZ.bin",    "Scn/Travel/Okinawa_LZ.bin",
+        "Scn/Travel/Shanghai_LZ.bin", "Scn/Travel/Spain_LZ.bin",   "Scn/Travel/Thai_LZ.bin",
+    };
     static const u8 sSightCounts[DESTINATION_COUNT] = {8, 7, 4, 7, 5, 7, 4, 8, 4};
     static const int sSceneMemoryValues[DESTINATION_COUNT] = {0xB6, 0xC3, 0xD9, 0xC2, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8};
     // The clothes of the dressed pair: for a man, for a woman
@@ -57,6 +54,7 @@ void TravelScene::StartLoading() {
         {0x85, 0x83}, {0x90, 0x8F}, {0xD2, 0x17}, {0x20, 0x20},
     };
     static const int sSoundGroups[DESTINATION_COUNT] = {0x3E, 0x27, 0x25, 0x3D, 0x24, 0x23, 0x26, 0x28, 0x3F};
+
 
     int sights[MAX_SIGHTS];
 
@@ -111,28 +109,31 @@ void TravelScene::StartLoading() {
 }
 
 void TravelScene::Init() {
-    static const int sSequences[DESTINATION_COUNT] = {0x6F, 0x34, 0x32, 0x6E, 0x31, 0x30, 0x33, 0x35, 0x70};
-    // Where the travellers stand at first: points of the lower screen, put on the plane z = -7.0
-    static const ScreenPoint sSoloScreenPoints[1] = {{64, 120}};
-    static const ScreenPoint sPairScreenPoints[2] = {{36, 120}, {92, 120}};
-    static const u16 sSoloAnimations[1] = {0};
-    static const u16 sPairAnimations[2] = {1, 10};
-    // The sprites of the upper screen: the destination's title
-    static const u16 sDestinationSequences[DESTINATION_COUNT] = {2, 3, 4, 5, 6, 7, 8, 9, 10};
-    static const u16 sShutterSequences[1] = {0};
-    static const ScreenPoint sShutterPositions[1] = {{195, 89}};
-    static const ScreenPoint sShutterSizes[1] = {{64, 64}};
+    static const VecFx32 sCameraTarget = {0, FX32_CONST(2.25), FX32_CONST(-1.25)};
     static const ButtonSounds sShutterSounds = {{-1, -1, 0, -1}};
-    static const int sCaptionFonts[1] = {0};
-    static const ScreenPoint sCaptionPositions[1] = {{128, 14}};
     static const u16 sButtonSequences[4] = {3, 3, 3, 3};
-    static const ScreenPoint sButtonPositions[4] = {{128, 96}, {128, 96}, {128, 96}, {128, 96}};
-    static const ScreenPoint sButtonSizes[4] = {{96, 32}, {96, 32}, {96, 32}, {96, 32}};
     static const int sButtonKinds[4] = {4, 4, 4, 4};
     static const ButtonSounds sButtonSounds[4] = {
         {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}}, {{10, -1, 0, -1}},
     };
     static const u32 sButtonMessages[4] = {0x535, 0x532, 0x533, 0x534};
+    static const u16 sPairAnimations[2] = {1, 10};
+    static const ScreenPoint sPairScreenPoints[2] = {{36, 120}, {92, 120}};
+    static const int sCaptionFonts[1] = {0};
+    static const ScreenPoint sCaptionPositions[1] = {{128, 14}};
+    static const VecFx32 sCameraPosition = {0, FX32_CONST(2.25), FX32_CONST(10.75)};
+    static const ScreenPoint sShutterSizes[1] = {{64, 64}};
+    static const ScreenPoint sShutterPositions[1] = {{195, 89}};
+    // The sprites of the upper screen: the destination's title
+    static const u16 sDestinationSequences[DESTINATION_COUNT] = {2, 3, 4, 5, 6, 7, 8, 9, 10};
+    static const u16 sSoloAnimations[1] = {0};
+    static const int sSequences[DESTINATION_COUNT] = {0x6F, 0x34, 0x32, 0x6E, 0x31, 0x30, 0x33, 0x35, 0x70};
+    static const ScreenPoint sButtonPositions[4] = {{128, 96}, {128, 96}, {128, 96}, {128, 96}};
+    static const u16 sShutterSequences[1] = {0};
+    // Where the travellers stand at first: points of the lower screen, put on the plane z = -7.0
+    static const ScreenPoint sSoloScreenPoints[1] = {{64, 120}};
+    static const ScreenPoint sButtonSizes[4] = {{96, 32}, {96, 32}, {96, 32}, {96, 32}};
+
 
     gSoundManager.StartSeq(0, sSequences[mDestination]);
     func_0202b0e8(&data_02122824);
@@ -143,8 +144,6 @@ void TravelScene::Init() {
     func_0202a96c(&data_021227cc[0]);
     func_0202a96c(&data_021227cc[1]);
     func_0202a640(mCast.mCamera);
-    static const VecFx32 sCameraPosition = {0, FX32_CONST(2.25), FX32_CONST(10.75)};
-    static const VecFx32 sCameraTarget = {0, FX32_CONST(2.25), FX32_CONST(-1.25)};
     SetCameraPosition(mCast.mCamera, sCameraPosition);
     SetCameraTarget(mCast.mCamera, sCameraTarget);
     mCast.mCamera->mAngleX = 0x200;
@@ -226,15 +225,17 @@ void TravelScene::Init() {
     func_02028f24(&gVramTransferQueue, "SFL:/caption.ncg", 2, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SFL:/caption.nsc", 2, 0, 0, 0, 0, -1);
 
+    const u32 pairCaption = 0x4AD; // "<name> and <name>'s"
+    const u32 soloCaption = 0x4B2; // "<name>'s"
     int charOffset = 0x100;
     int buttonCharOffset = 200;
     charOffset += mSpeechWindow.Init(charOffset, &mMessageFiles[0], 2, 0x10, &mTtsPlayer, FALSE);
     for (int i = 0; i < 1; i++) {
         if (mTravellerCount == 1) {
-            mCaptions[i].InitObjForMessage(&mMessageFiles[0], 0x4B2, &gFonts[sCaptionFonts[i]].mFont, 0x10, charOffset, 0,
+            mCaptions[i].InitObjForMessage(&mMessageFiles[0], soloCaption, &gFonts[sCaptionFonts[i]].mFont, 0x10, charOffset, 0,
                                        1, 0, 0, 15, NULL);
         } else {
-            mCaptions[i].InitObjForMessage(&mMessageFiles[0], 0x4AD, &gFonts[sCaptionFonts[i]].mFont, 0x10, charOffset, 0,
+            mCaptions[i].InitObjForMessage(&mMessageFiles[0], pairCaption, &gFonts[sCaptionFonts[i]].mFont, 0x10, charOffset, 0,
                                        1, 0, 0, 15, NULL);
         }
         SetPixelPosition(&mCaptions[i].mSprite, sCaptionPositions[i]);
@@ -419,6 +420,11 @@ void TravelScene::Exit() {
 }
 
 void TravelScene::SetState(int state) {
+    static const VecFx32 sPairSpots[2] = {
+        {-0x1333, 0x333, -0x1000},
+        {0x1333, 0x333, -0x1000},
+    };
+    static const u16 sSoloAngles[4] = {0x38E3, 0x471C, 0x4000, 0x3555};
     // Where the travellers stand for a photograph: the lone one at one of four spots, never twice at one
     static const VecFx32 sSoloSpots[4] = {
         {-0x1333, 0, 0},
@@ -426,12 +432,14 @@ void TravelScene::SetState(int state) {
         {0, 0, -0x2CCC},
         {-0xCCC, 0x333, 0x3333},
     };
-    static const u16 sSoloAngles[4] = {0x38E3, 0x471C, 0x4000, 0x3555};
-    static const VecFx32 sPairSpots[2] = {
-        {-0x1333, 0x333, -0x1000},
-        {0x1333, 0x333, -0x1000},
-    };
     static const u16 sPairAngles[2] = {0x38E3, 0x471C};
+    // The files of a sight's picture in the destination's archive; the second "0" becomes the sight's number
+    static const char *sSightPictureFiles[3] = {
+        "N01:/BG_00.ncg",
+        "N01:/BG_00.ncl",
+        "N01:/BG_00.nsc",
+    };
+
 
     char palette[15];
     char screen[15];
@@ -602,8 +610,6 @@ void TravelScene::Speak(int speaker, u32 message, int mode) {
 
 // The messages of a destination's sights: each has its name, then its reading
 u32 TravelScene::GetSightName(int destination, int sight) {
-    static const u32 sSightMessages[DESTINATION_COUNT] = {0x4B6, 0x4C6, 0x4D4, 0x4DC, 0x4EA,
-                                                          0x4F4, 0x502, 0x50A, 0x51A};
     return sSightMessages[destination] + sight * 2;
 }
 
