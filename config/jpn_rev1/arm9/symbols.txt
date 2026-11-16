@@ -4200,7 +4200,7 @@ __sinit_CardPullOutMonitor.cpp kind:function(arm,size=0x4) addr:0x020b0604 local
 __sinit_MessageText.cpp kind:function(arm,size=0x48) addr:0x020b0608 local
 __sinit_020b0650 kind:function(arm,size=0x24) addr:0x020b0650
 __sinit_ValueRamp.cpp kind:function(arm,size=0x2c) addr:0x020b0674 local
-__sinit_020b06a0 kind:function(arm,size=0x2c) addr:0x020b06a0
+__sinit_SceneManager.cpp kind:function(arm,size=0x2c) addr:0x020b06a0 local
 __sinit_020b06cc kind:function(arm,size=0x14) addr:0x020b06cc
 __sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
 __sinit_MiiListMenuScene.cpp kind:function(arm,size=0x88) addr:0x020b06f4 local
@@ -4820,7 +4820,7 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_MessageText.cpp kind:data(word) addr:0x020fc4d8 local
 .p__sinit_020b0650 kind:data(word) addr:0x020fc4dc
 .p__sinit_ValueRamp.cpp kind:data(word) addr:0x020fc4e0 local
-.p__sinit_020b06a0 kind:data(word) addr:0x020fc4e4
+.p__sinit_SceneManager.cpp kind:data(word) addr:0x020fc4e4 local
 .p__sinit_020b06cc kind:data(word) addr:0x020fc4e8
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
 .p__sinit_MiiListMenuScene.cpp kind:data(word) addr:0x020fc4f0 local
@@ -6377,7 +6377,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-data_0213b704 kind:bss addr:0x0213b704
+@14615 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 data_0213ba74 kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
