@@ -742,7 +742,7 @@ factory's file, the destructors (implicit) in theirs.
 | 11 | `KeyboardTestScene` | 0x6AF8 | `0x0204CE28` | 6 of 7 | The on-screen keyboard (`SoftKeyboard`), typing ten characters into a text box |
 | 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
 | 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
-| 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 11 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
+| 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 13 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
 | | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
 
 Measured:
@@ -790,8 +790,11 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   copies, volatile reads, accesses through the array).
 - `MessageTestScene::Init` keeps 0 and 1 in a callee-saved register as `#pragma opt_propagation off` does; with the
   pragma the sprite positions get one dead copy too many. `KeyboardTestScene::Init`: two dead position copies
-  stored in another order. `WirelessTestScene`: `Init` (the store of `date.week`), `Update` and `Redraw` (loops
-  not rotated as at optimisation level 2, which gives the rest differently).
+  stored in another order (none of the 25 combinations of the five position setters for the two boxes gives it).
+  `WirelessTestScene::Update` (78%): its loops are not rotated as at optimisation level 2, but level 2, with
+  `opt_common_subs` off or the eight IR passes off, still differs in 130 lines (shared epilogue, registers).
+  `WirelessTestScene::Init` matched once the clock setter `func_02035460` got its fourth argument (it reads r3; overlay
+  98 passes it): the 0 in r3 is also the `date.week` stored. `Redraw` matched at level 2 with `opt_propagation` off.
 - `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
 

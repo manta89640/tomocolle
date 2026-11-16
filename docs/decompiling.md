@@ -738,6 +738,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart`, 7 and about 30 differing instructions to none). A static
   inline `abs` (`return v < 0 ? -v : v;`) between the store and the reads does the same.
 
+**A call's arguments**
+- A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
+  fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
+  (`WirelessTestScene::Init`, the clock setter `func_02035460`).
+- A pointer passed through an inline cast helper (`ToG2dChars(mParentNames[i])`) scheduled its address computation
+  before a store the original makes first; the plain cast gave the original's order (`WirelessTestScene::Redraw`, at
+  level 2 with `opt_propagation` off).
+
 **Constants and arithmetic**
 - A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in
   our declaration: write the cast at the call (`Sprite_Init(..., (u16)(i * 2), ...)`).
@@ -850,6 +858,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`mwccarm-3.0-138.exe` for the game, `-3.0-137.exe` for the Mii transfer), against about twenty under wine. The
   code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
   one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
+
+**Found on DS Protect (`lib/DSProtect`)**
+- In a function with inline assembly the compiler gives a variable live across an `asm` block its initial value with
+  an `ldr` from the literal pool (`int r = 0;` gives `ldr r4, =0`), and does not fold a shift of a variable that holds
+  a constant: the original's `ldr r7, =1; lsl r7, r7, #26` and `mov r4, #1; lsl r4, r4, #15` are `u32 base = 1;
+  base <<= 26;` and `one << 15` with `u32 one = 1;`. Neither the `#pragma opt_*` switches nor the optimisation level
+  changed anything in such functions.
+- Data emitted by `dcd` in an `asm` block gets a `$d` mapping symbol, so objdiff shows it as data; a word dsd delinks
+  inside a function without a mapping is shown as an instruction. The two cannot compare equal in objdiff even when the
+  bytes are.
 
 **Found on the character code (`src/character/`)**
 - A chain of assignments, `mMoveAngle = mAngle = mTargetAngle = mWalkAngle = 0;`, gives the original's order of the
