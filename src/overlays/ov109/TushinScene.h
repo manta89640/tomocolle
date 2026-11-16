@@ -583,7 +583,7 @@ struct WindowLayout {
 // a DS whether to recruit a partner (the parent) or to find one (a child). A resident is chosen in the list on the
 // lower screen and sent: the 0x2C0-byte character (sTransfer) in 0x80-byte chunks, then the songs of its six slots
 // (sSongs); the receiver checks it (IsInvalid, the NG words of HasNgWord, a resident with the same Mii), stores it
-// as a new resident or updates the one it has, and answers with a 2-byte code (sWireless.m20). The Wii sends Miis
+// as a new resident or updates the one it has, and answers with a 2-byte code (data_ov109_02153200). The Wii sends Miis
 // only: ReceiveWiiMii adds one from sMiiData. A DS or Wii T-shirt is given the first time (GiveShirt,
 // GiveWiiShirt). The scene factory (main CreateScene, case 41) loads overlay 109 and allocates 0x3F0B4 bytes; the
 // constructor is the main program's (func_02040644).
