@@ -625,7 +625,11 @@ lib/NitroSystem/libraries/g2d/src/g2d_Animation.c:
     .text       start:0x02059638 end:0x02059a50
 
 lib/NitroSystem/libraries/g2d/src/g2d_OAM.c:
+    complete
     .text       start:0x02059a50 end:0x0205a150
+    .rodata     start:0x020b61d0 end:0x020b6200
+    .data       start:0x02111de0 end:0x02111df4
+    .bss        start:0x02140410 end:0x021413d4
 
 lib/NitroSystem/libraries/g2d/src/g2d_OAMEx.c:
     .text       start:0x0205a150 end:0x0205a7e8

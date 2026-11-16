@@ -10373,15 +10373,15 @@ from:0x02059ad4 kind:arm_call to:0x020097e8 module:main
 from:0x02059ae4 kind:arm_call to:0x020097e8 module:main
 from:0x02059af4 kind:arm_call to:0x020097e8 module:main
 from:0x02059b04 kind:arm_call to:0x020097e8 module:main
-from:0x02059b0c kind:load to:0x02140514 module:main
-from:0x02059b10 kind:load to:0x02140a54 module:main
-from:0x02059b14 kind:load to:0x02140f94 module:main
+from:0x02059b0c kind:load to:0x02140414 add:0x100 module:main
+from:0x02059b10 kind:load to:0x02140414 add:0x640 module:main
+from:0x02059b14 kind:load to:0x02140414 add:0xb80 module:main
 from:0x02059b1c kind:load to:0x02140414 module:main
-from:0x02059b20 kind:load to:0x02140954 module:main
-from:0x02059b24 kind:load to:0x02140e94 module:main
-from:0x02059b28 kind:load to:0x02140914 module:main
-from:0x02059b2c kind:load to:0x02140e54 module:main
-from:0x02059b30 kind:load to:0x02141394 module:main
+from:0x02059b20 kind:load to:0x02140414 add:0x540 module:main
+from:0x02059b24 kind:load to:0x02140414 add:0xa80 module:main
+from:0x02059b28 kind:load to:0x02140414 add:0x500 module:main
+from:0x02059b2c kind:load to:0x02140414 add:0xa40 module:main
+from:0x02059b30 kind:load to:0x02140414 add:0xf80 module:main
 from:0x02059bd4 kind:arm_call to:0x020097e8 module:main
 from:0x02059c64 kind:arm_call to:0x020097e8 module:main
 from:0x02059c84 kind:load to:0x02140414 module:main

@@ -2364,8 +2364,8 @@ NNS_G2dInitAnimCtrl kind:function(arm,size=0x40) addr:0x02059988
 NNS_G2dInitAnimCallBackFunctor kind:function(arm,size=0x18) addr:0x020599c8
 NNS_G2dResetAnimCtrlState kind:function(arm,size=0x60) addr:0x020599e0
 NNS_G2dBindAnimCtrl kind:function(arm,size=0x10) addr:0x02059a40
-CpuLoadOAMSub_ kind:function(arm,size=0x14) addr:0x02059a50
-CpuLoadOAMMain_ kind:function(arm,size=0x10) addr:0x02059a64
+CpuLoadOAMSub_ kind:function(arm,size=0x14) addr:0x02059a50 local
+CpuLoadOAMMain_ kind:function(arm,size=0x10) addr:0x02059a64 local
 NNS_G2dInitOamManagerModule kind:function(arm,size=0xc0) addr:0x02059a74
 NNS_G2dGetNewOamManagerInstanceAsFastTransferMode kind:function(arm,size=0x15c) addr:0x02059b34
 NNS_G2dEntryOamManagerOam kind:function(arm,size=0xd0) addr:0x02059c90
@@ -4332,8 +4332,8 @@ sSortMenuScreenName kind:data(any) addr:0x020b60e4 local
 data_020b60fc kind:data(any) addr:0x020b60fc
 cAdpcmIndexTable kind:data(any) addr:0x020b610c
 cAdpcmStepSizeTable kind:data(any) addr:0x020b611c
-NNSi_objSizeHTbl kind:data(any) addr:0x020b61d0
-NNSi_objSizeWTbl kind:data(any) addr:0x020b61e8
+NNSi_objSizeHTbl kind:data(short[12]) addr:0x020b61d0
+NNSi_objSizeWTbl kind:data(short[12]) addr:0x020b61e8
 data_020b6208 kind:data(any) addr:0x020b6208
 data_020b6210 kind:data(any) addr:0x020b6210
 gxTexSizeSTbl kind:data(any) addr:0x020b6230
@@ -5626,7 +5626,7 @@ gText_Nen kind:data(any) addr:0x02111dc8
 gText_Tsuki kind:data(any) addr:0x02111dd0
 gText_Gatsu kind:data(any) addr:0x02111dd4
 gText_Hi kind:data(any) addr:0x02111ddc
-data_02111de0 kind:data(any) addr:0x02111de0
+funcTbl$9085 kind:data(any) addr:0x02111de0 local
 gText_Chi kind:data(any) addr:0x02111df4
 firstSRTransformedMtxIdx_ kind:data(any) addr:0x02111dfc local
 currenVramTransferHandle_ kind:data(any) addr:0x02111e00 local
@@ -6602,16 +6602,8 @@ sStrmPlayer kind:bss addr:0x0213fc2c
 sDecodeBufferArea kind:bss addr:0x02140200
 sRootListInitialized kind:bss addr:0x02140400
 sRootList kind:bss addr:0x02140404
-numRegisterdInstance_ kind:bss addr:0x02140410
-data_02140414 kind:bss addr:0x02140414
-data_02140514 kind:bss addr:0x02140514
-data_02140914 kind:bss addr:0x02140914
-data_02140954 kind:bss addr:0x02140954
-data_02140a54 kind:bss addr:0x02140a54
-data_02140e54 kind:bss addr:0x02140e54
-data_02140e94 kind:bss addr:0x02140e94
-data_02140f94 kind:bss addr:0x02140f94
-data_02141394 kind:bss addr:0x02141394
+numRegisterdInstance_ kind:bss(size=0x2) addr:0x02140410 local
+oamCache_ kind:bss(size=0xfc0) addr:0x02140414 local
 currentMtxCachePos_ kind:bss(size=0x2) addr:0x021413d4 local
 groupID_ kind:bss(size=0x2) addr:0x021413d6 local
 bDonotUseSRTransform kind:bss(size=0x4) addr:0x021413d8 local
