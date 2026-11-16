@@ -1,7 +1,11 @@
+#include <wchar.h>
+
 #include "Scene40.h"
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
 #include "SceneMemory.h"
+#include "sound/SoundManager.h"
+#include "text/TextUtil.h"
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -13,9 +17,25 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_02161988(Scene40Character *character);
-void func_ov075_02161d94(Scene40Character *character);
+void func_ov075_0217aea8(void *object);
+void func_ov075_021782cc(Scene40CharacterPartA *balloon, int resourceId, int unk, CharacterBase *face,
+                         Scene40Character *character);
+void func_ov075_02178c34(Scene40CharacterPartB *cover, int kind);
+void func_ov075_02178e94(Scene40CharacterPartB *cover, VecFx32 position, u16 angle);
+void func_ov075_02178f38(Scene40CharacterPartB *cover, GXRgb color);
 void func_ov075_02178364(Scene40CharacterPartA *part);
+}
+
+// The head icon of each mood
+extern const s16 sMoodHeadIcons[5];
+
+// A model's scale, given by value. The copy of the parameter is the original's: ShowBed has the call's result,
+// the parameter and this copy on its stack.
+static inline void SetModelScale(Model *model, VecFx32 scale) {
+    VecFx32 s = scale;
+    model->mScale.x = s.x;
+    model->mScale.y = s.y;
+    model->mScale.z = s.z;
 }
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
@@ -27,7 +47,7 @@ void func_ov075_02178364(Scene40CharacterPartA *part);
 void Scene40::Draw() {
     MessageWindow_Draw(&mWindows[0]);
     MessageWindow_Draw(&mWindows[1]);
-    func_ov075_0214fc00(mUnknown30B50);
+    func_ov075_0214fc00(&mPages);
     Sprite_Draw(&mSprite013D0);
 
     switch (mDrawState) {
@@ -112,45 +132,6 @@ void Scene40::Exit() {
     }
 }
 
-// --- The scene's character ------------------------------------------------------------------------------------------
-
-// With speaking set, the lips follow the scene's speech
-void Scene40Character::Update(BOOL speaking) {
-    Character::Update();
-    func_ov075_02161988(this);
-    mHeadIcons[0].Update();
-    mHeadIcons[1].Update();
-    func_ov075_02178364(&mPartA);
-    if (!speaking) {
-        return;
-    }
-    func_ov075_02161d94(this);
-    if (mTtsPlayer->IsEngineIdle()) {
-        return;
-    }
-    if (!mLipSync) {
-        return;
-    }
-    LipSync(mTtsPlayer->GetPhonemeName(), 1);
-}
-
-// objdiff scores this 99.5% though its instructions and relocations equal the original's (checked with objdump
-// against the delinked object; check_relocs lists nothing): the two functions it calls are byte for byte the same,
-// and the report seems to pair one call with the other's.
-void Scene40Character::Draw() {
-    Character::Draw();
-    mPartA.Draw();
-    mPartB.Draw();
-}
-
-void Scene40CharacterPartA::Draw() {
-    mModel.Draw();
-}
-
-void Scene40CharacterPartB::Draw() {
-    mModel.Draw();
-}
-
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------
 
 void Scene40ListView::Draw() {
@@ -191,6 +172,546 @@ void Scene40ListView::DrawRow(int row, int item) {
 void Scene40ListView::ClearRow(int row) {
     ItemListView::ClearRow(row);
     mMarks[row].mVisible = FALSE;
+}
+
+// --- The meters of the character's status page -------------------------------------------------------------------
+
+void Scene40Meter::Init() {
+    mTarget = 0;
+    mValue = 0;
+    mFull = FALSE;
+    mState = STATE_IDLE;
+    mRiseStep = 1;
+    mFallStep = 1;
+    mSeqArc = 27;
+    mRiseSound = 0;
+    mFallSound = 1;
+    mRiseEndSound = 2;
+    mFallEndSound = 3;
+}
+
+// One frame of moving the value to the target
+void Scene40Meter::Update() {
+    mFull = FALSE;
+    mEmpty = FALSE;
+    switch (mState) {
+    case STATE_IDLE:
+        break;
+    case STATE_START:
+        if (mValue < mTarget) {
+            gSoundManager.StartSeqArc(1, mSeqArc, mRiseSound);
+            mState = STATE_MOVING;
+            mFalling = FALSE;
+        } else if (mValue <= mTarget) {
+            mState = STATE_ARRIVED;
+        } else {
+            gSoundManager.StartSeqArc(1, mSeqArc, mFallSound);
+            mState = STATE_MOVING;
+            mFalling = TRUE;
+        }
+        break;
+    case STATE_MOVING:
+        if (mValue == mTarget) {
+            gSoundManager.StopSeqArc(1, 0);
+            if (!mFalling) {
+                gSoundManager.StartSeqArc(1, mSeqArc, mRiseEndSound);
+            } else {
+                gSoundManager.StartSeqArc(1, mSeqArc, mFallEndSound);
+            }
+            mState = STATE_ARRIVED;
+            if (mValue == 100) {
+                mFull = TRUE;
+            }
+            if (mValue == 0) {
+                mEmpty = TRUE;
+            }
+        } else if (mValue < mTarget) {
+            mValue += mRiseStep;
+            if (mValue > mTarget) {
+                mValue = mTarget;
+            }
+            Show(mValue);
+            mFalling = FALSE;
+        } else if (mTarget < mValue) {
+            mValue -= mFallStep;
+            if (mValue < mTarget) {
+                mValue = mTarget;
+            }
+            Show(mValue);
+            mFalling = TRUE;
+        }
+        break;
+    case STATE_ARRIVED:
+        mState = STATE_IDLE;
+        break;
+    }
+}
+
+void Scene40Meter::SetMoveSounds(int seqArc, int riseSound, int fallSound) {
+    mSeqArc = seqArc;
+    mRiseSound = riseSound;
+    mFallSound = fallSound;
+}
+
+void Scene40Meter::SetArriveSounds(int seqArc, int riseSound, int fallSound) {
+    mSeqArc = seqArc;
+    mRiseEndSound = riseSound;
+    mFallEndSound = fallSound;
+}
+
+void Scene40Meter::SetSteps(int riseStep, int fallStep) {
+    mRiseStep = riseStep;
+    mFallStep = fallStep;
+}
+
+// Shows a value at once
+void Scene40Meter::SetValue(int value) {
+    if (value > 100) {
+        value = 100;
+    } else if (value < 0) {
+        value = 0;
+    }
+    mTarget = mValue = value;
+    Show(value);
+}
+
+// Where Update moves the value to
+void Scene40Meter::SetTarget(int value) {
+    if (value > 100) {
+        value = 100;
+    } else if (value < 0) {
+        value = 0;
+    }
+    mTarget = value;
+}
+
+void Scene40SegmentMeter::Draw() {
+    for (int i = 0; i < 10; i++) {
+        Sprite_Draw(&mSegments[i]);
+    }
+}
+
+void Scene40SegmentMeter::SetPosition(ScreenPoint position) {
+    for (int i = 0; i < 10; i++) {
+        mSegments[i].SetPosition(FxVec2((position.x + mSpacing * (i * 10 - 50)) << FX32_SHIFT, position.y << FX32_SHIFT));
+    }
+}
+
+// Each segment shows up to 10 of the value, as its frame
+void Scene40SegmentMeter::Show(int value) {
+    if (value > 100) {
+        value = 100;
+    } else if (value < 0) {
+        value = 0;
+    }
+    for (int i = 0; i < 10; i++) {
+        int frame = value - i * 10;
+        if (frame > 10) {
+            frame = 10;
+        } else if (frame < 0) {
+            frame = 0;
+        }
+        Sprite_SetFrame(&mSegments[i], (u16)frame);
+    }
+}
+
+void Scene40SegmentMeter::SetVisible(BOOL visible) {
+    for (int i = 0; i < 10; i++) {
+        mSegments[i].mVisible = visible;
+    }
+}
+
+// When the points arrive at the target, a full meter goes on to the next level
+void Scene40LevelMeter::Update() {
+    mLevelChanged = FALSE;
+    Scene40Meter::Update();
+    if (mState != STATE_ARRIVED) {
+        return;
+    }
+    mPoints = mTarget;
+    mTotal = mLevel * 100 + mPoints;
+    if (mFull) {
+        mLevelChanged = TRUE;
+        mLevel++;
+        ShowLevel(mLevel);
+    }
+}
+
+void Scene40LevelMeter::Draw() {
+    Scene40SegmentMeter::Draw();
+    mLevelText.Draw();
+}
+
+// Shows a level and its points at once
+void Scene40LevelMeter::SetLevel(int level, int points) {
+    mLevel = mTargetLevel = level;
+    mPoints = mTargetPoints = points;
+    mTotal = mTargetTotal = mLevel * 100 + points;
+    mDistance = 0;
+    ShowLevel(mLevel);
+    SetValue(points);
+}
+
+// Sets where the meter goes: to the end of the meter if the target is in another level, else to its points. With
+// beyondTop, a character at level 99 may go on to 100.
+void Scene40LevelMeter::SetTargetLevel(int level, int points, BOOL beyondTop) {
+    mTargetLevel = level;
+    mTargetPoints = points;
+    mTargetTotal = mTargetLevel * 100 + points;
+    if (beyondTop && mTargetLevel >= 99 && mLevel == 99) {
+        mTargetLevel++;
+        mTargetTotal += 100;
+    }
+    mDistance = mTargetTotal - mTotal;
+    if (mDistance > 0) {
+        if (mTargetPoints < mPoints || mTargetTotal - mTotal >= 100) {
+            SetTarget(100);
+        } else {
+            SetTarget(mTargetPoints);
+        }
+    } else if (mDistance < 0) {
+        if (mPoints < mTargetPoints || mTotal - mTargetTotal >= 100) {
+            SetTarget(0);
+        } else {
+            SetTarget(mTargetPoints);
+        }
+    }
+}
+
+// Starts the meter moving; after a level went up it starts from empty
+void Scene40LevelMeter::Start() {
+    if (mTotal <= mTargetTotal) {
+        SetValue(mPoints = 0);
+        if (mTargetTotal - mTotal >= 100) {
+            SetTarget(100);
+        } else {
+            SetTarget(mTargetPoints);
+        }
+    }
+    mState = STATE_START;
+}
+
+// "Ｌｖ" and the level, at most 99
+void Scene40LevelMeter::ShowLevel(int level) {
+    wchar_t text[10] = L"Ｌｖ";
+    wchar_t number[10];
+    if (level > 99) {
+        level = 99;
+    } else if (level < 0) {
+        level = 0;
+    }
+    FormatNumber(level, number, sizeof(number), 2, TRUE);
+    wcscat(text, number);
+    mLevelText.SetText((const NNSG2dChar *)text);
+    mLevelText.Redraw();
+}
+
+void Scene40LevelMeter::SetVisible(BOOL visible) {
+    Scene40SegmentMeter::SetVisible(visible);
+    mLevelText.mSprite.mVisible = visible;
+}
+
+// Shows the frame of the value: the sprite has 33 of them
+void Scene40SpriteMeter::Init(int resource, int sequence) {
+    Sprite_Init(&mSprite, resource, sequence, 0x80, 0x60, TRUE);
+    mSprite.mOverwritePalette = 1;
+    Sprite_SetFrame(&mSprite, 0);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mSprite.mAnim));
+}
+
+void Scene40SpriteMeter::Draw() {
+    Sprite_Draw(&mSprite);
+}
+
+void Scene40SpriteMeter::SetPosition(ScreenPoint position) {
+    mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+void Scene40SpriteMeter::Show(int value) {
+    if (value > 100) {
+        value = 100;
+    } else if (value < 0) {
+        value = 0;
+    }
+    int frame = value / 3;
+    if (frame > 32) {
+        frame = 32;
+    } else if (frame < 0) {
+        frame = 0;
+    }
+    Sprite_SetFrame(&mSprite, (u16)frame);
+}
+
+void Scene40SpriteMeter::SetVisible(BOOL visible) {
+    mSprite.mVisible = visible;
+}
+
+// --- The present the character receives -------------------------------------------------------------------------
+
+void Scene40Gift::Set(int kind, int id) {
+    mKind = kind;
+    switch (kind) {
+    case 0:
+        mItem.InventoryItem::mId = id;
+        mMessage = id;
+        switch (gGoodsTable[mItem.InventoryItem::mId].mKind) {
+        case 1:
+            mGiftKind = 0;
+            return;
+        case 2:
+            mGiftKind = 4;
+            return;
+        case 3:
+            switch (mItem.InventoryItem::mId) {
+            case 206:
+                mGiftKind = 6;
+                return;
+            case 212:
+                mGiftKind = 7;
+                return;
+            case 205:
+                mGiftKind = 8;
+                return;
+            case 204:
+                mGiftKind = 9;
+                return;
+            case 214:
+                mGiftKind = 10;
+                return;
+            case 213:
+                mGiftKind = 11;
+                return;
+            case 207:
+                mGiftKind = 12;
+                return;
+            case 137:
+                mGiftKind = 13;
+                return;
+            case 215:
+                mGiftKind = 14;
+                return;
+            case 208:
+                mGiftKind = 15;
+                return;
+            default:
+                mGiftKind = 16;
+                return;
+            }
+        default:
+            mGiftKind = 16;
+            return;
+        }
+    case 1:
+        mItem.InventoryItem::mId = id;
+        mGiftKind = 1;
+        mMessage = 0xF7;
+        return;
+    case 2:
+        mItem.InventoryItem::mId = id;
+        mGiftKind = 2;
+        mMessage = 0xF9;
+        return;
+    case 3:
+        mItem.InventoryItem::mId = id;
+        mGiftKind = 3;
+        mMessage = 0xF4;
+        return;
+    case 4:
+        mItem.InventoryItem::mId = id;
+        mGiftKind = 5;
+        mMessage = 0xF5;
+        return;
+    }
+}
+
+// --- The scene's character ------------------------------------------------------------------------------------------
+
+void Scene40Character::Init(int resourceId, int unk, u32 defaultMii) {
+    Character::Init(resourceId, unk, defaultMii);
+    func_ov075_0217aea8(mUnknown2B18);
+    mState = mNextState = 0;
+    mEntered = TRUE;
+    mHeldItem = NULL;
+    mLipSync = TRUE;
+    mUnknown30A0 = 0;
+    mUnknown2ED0[0] = 0;
+    mUnknown2ED0[1] = 0;
+    mUnknown2ED0[2] = 0;
+    mUnknown2ED0[3] = 0;
+    mUnknown1C4Added[0] = FALSE;
+    mUnknown1C4Added[1] = FALSE;
+    mUnknown1C4Added[2] = FALSE;
+    mUnknown2EE0[0] = 0;
+    mUnknown2EE0[1] = 0;
+    mUnknown2EE0[2] = 0;
+    mUnknown3094 = TRUE;
+}
+
+// Both head icons show the icon of the mood, over the head
+void Scene40Character::LoadHeadIcons(ParticleSystem *particles) {
+    for (int i = 0; i < 2; i++) {
+        mHeadIcons[i].Load(particles, sMoodHeadIcons[mMood]);
+        mHeadIconPlaces[i] = ICON_AT_HEAD;
+    }
+}
+
+void Scene40Character::PlaceHeadIcons() {
+    for (int i = 0; i < 2; i++) {
+        switch (mHeadIconPlaces[i]) {
+        case ICON_AT_HEAD:
+            PlaceHeadIconAtHead(i);
+            break;
+        case ICON_AT_BODY:
+            PlaceHeadIconAtBody(i);
+            break;
+        case ICON_AT_FEET:
+            PlaceHeadIconAtFeet(i);
+            break;
+        case ICON_AT_HAND:
+            PlaceHeadIconAtHand(i);
+            break;
+        }
+    }
+}
+
+void Scene40Character::PlaceHeadIconAtHead(int icon) {
+    mHeadIcons[icon].mAngle = 0x4000 - mAngle + mHeadYawNow;
+    MtxFx43 *matrices = mJointMatrices;
+    mHeadIcons[icon].SetPos(matrices[JOINT_NECK]._30, matrices[JOINT_NECK]._31, matrices[JOINT_NECK]._32);
+}
+
+void Scene40Character::PlaceHeadIconAtBody(int icon) {
+    mHeadIcons[icon].mAngle = 0x4000 - mAngle;
+    MtxFx43 *matrices = mJointMatrices;
+    mHeadIcons[icon].SetPos(matrices[JOINT_BODY]._30, matrices[JOINT_BODY]._31, matrices[JOINT_BODY]._32);
+}
+
+void Scene40Character::PlaceHeadIconAtFeet(int icon) {
+    mHeadIcons[icon].mAngle = 0x4000 - mAngle;
+    VecFx32 *pos = &mPos;
+    mHeadIcons[icon].SetPos(pos->x, pos->y, pos->z);
+}
+
+void Scene40Character::PlaceHeadIconAtHand(int icon) {
+    mHeadIcons[icon].mAngle = 0x4000 - mAngle;
+    MtxFx43 *matrices = mJointMatrices;
+    mHeadIcons[icon].SetPos(matrices[JOINT_R_HAND]._30, matrices[JOINT_R_HAND]._31, matrices[JOINT_R_HAND]._32);
+}
+
+// The first head icon shows the mood's icon over the head, from its start; none in the first mood
+void Scene40Character::ShowMoodHeadIcon() {
+    mHeadIconPlaces[0] = ICON_AT_HEAD;
+    if (mMood == 0) {
+        mHeadIcons[0].SetMode(1);
+        return;
+    }
+    mHeadIcons[0].mAngle = 0x4000 - mAngle + mHeadYawNow;
+    s16 id = sMoodHeadIcons[mMood];
+    if (mHeadIcons[0].mIconId != id) {
+        mHeadIcons[0].Show();
+        mHeadIcons[0].mIconId = id;
+        mHeadIcons[0].Reload();
+        mHeadIcons[0].SetMode(3);
+    } else {
+        mHeadIcons[0].Restart();
+        mHeadIcons[0].SetMode(3);
+    }
+}
+
+void Scene40Character::InitBalloon(int resourceId, int unk, CharacterBase *face) {
+    func_ov075_021782cc(&mPartA, resourceId, unk, face, this);
+}
+
+// 0: the bed, 1: the dressing curtain
+void Scene40Character::InitCover(int kind) {
+    func_ov075_02178c34(&mPartB, kind);
+}
+
+// Puts the bed where the character lies down, at the character's scale
+void Scene40Character::ShowBed(VecFx32 position, u16 angle, GXRgb color) {
+    if (*(int *)mPartB.mUnknown00 != 0) {
+        return;
+    }
+    func_ov075_02178e94(&mPartB, position, angle);
+    func_ov075_02178f38(&mPartB, color);
+    mPartB.mModel.mVisible = TRUE;
+    SetModelScale(&mPartB.mModel, GetHeldItemScale());
+}
+
+void Scene40Character::SetContext(Scene40Context *context) {
+    mContext = context;
+    mTtsPlayer = mContext->mTtsPlayer;
+    mSpeechWindow = (Scene40SpeechWindow *)mContext->mSpeechWindow;
+}
+
+// With speaking set, the lips follow the scene's speech
+void Scene40Character::Update(BOOL speaking) {
+    Character::Update();
+    PlaceHeadIcons();
+    mHeadIcons[0].Update();
+    mHeadIcons[1].Update();
+    func_ov075_02178364(&mPartA);
+    if (!speaking) {
+        return;
+    }
+    UpdateState();
+    if (mTtsPlayer->IsEngineIdle()) {
+        return;
+    }
+    if (!mLipSync) {
+        return;
+    }
+    LipSync(mTtsPlayer->GetPhonemeName(), 1);
+}
+
+// objdiff scores this 99.5% though its instructions and relocations equal the original's (checked with objdump
+// against the delinked object; check_relocs lists nothing): the two functions it calls are byte for byte the same,
+// and the report seems to pair one call with the other's.
+void Scene40Character::Draw() {
+    Character::Draw();
+    mPartA.Draw();
+    mPartB.Draw();
+}
+
+// Runs the group function of the state's range
+void Scene40Character::UpdateState() {
+    mState = mNextState;
+    if (mState <= 0x19) {
+        UpdateStates00To19();
+    } else if (mState <= 0x1C) {
+        UpdateStates1ATo1C();
+    } else if (mState <= 0x27) {
+        UpdateStates1DTo27();
+    } else if (mState <= 0x2D) {
+        UpdateStates28To2D();
+    } else if (mState <= 0x43) {
+        UpdateStates2ETo43();
+    } else if (mState <= 0x47) {
+        UpdateStates44To47();
+    } else if (mState <= 0x4E) {
+        UpdateStates48To4E();
+    } else if (mState <= 0x66) {
+        UpdateStates4FTo66();
+    } else if (mState <= 0x85) {
+        UpdateStates67To85();
+    } else if (mState <= 0xB2) {
+        UpdateStates86ToB2();
+    } else if (mState <= 0xBC) {
+        UpdateStatesB3ToBC();
+    } else if (mState <= 0xC5) {
+        UpdateStatesBDToC5();
+    } else if (mState <= 0xD1) {
+        UpdateStatesC6ToD1();
+    }
+    mFrame++;
+}
+
+void Scene40CharacterPartA::Draw() {
+    mModel.Draw();
+}
+
+void Scene40CharacterPartB::Draw() {
+    mModel.Draw();
 }
 
 // --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
