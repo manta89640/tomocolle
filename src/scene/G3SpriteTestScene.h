@@ -81,6 +81,10 @@ void func_0202ae38(ModelResources *resources);
 struct CharacterBase {
     ~CharacterBase();
 
+    void InitFace(u32 defaultMii);
+    void SetRandomMii(int sex, int unk1, int unk2, BOOL makeFace);
+    void Draw();
+
     /* 0x0000 */ u8 mUnknown0000[0x2568];
     /* 0x2568 */ fx32 mUnknown2568;
     /* 0x256C */ u8 mUnknown256C[4];
@@ -103,11 +107,6 @@ public:
     /* 0x0EC */ u8 mUnknown0EC[0x41C];
 }; // 0x508
 
-extern "C" {
-void func_0208fd90(CharacterBase *character, int unknown);
-void func_0208ff68(CharacterBase *character, int a, int b, int c, int d);
-void func_02090214(CharacterBase *character); // Draws it
-}
 
 // The scene.
 class G3SpriteTestScene : public Scene {

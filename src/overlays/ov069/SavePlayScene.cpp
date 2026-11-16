@@ -60,7 +60,7 @@ void SavePlayScene::StartLoading() {
         mCharacters[0].mIndex = mResidents[Rand(mResidentCount)];
         func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     }
-    func_02091048(&mCharacters[0], "MT0");
+    mCharacters[0].Character::SetArchive("MT0");
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
 }
 
@@ -95,18 +95,18 @@ void SavePlayScene::Init() {
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
 
     func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_02090fdc(&mCharacters[0], 0, 0, 0);
+    mCharacters[0].Character::Init(0, 0, 0);
     void *animations = func_0202ad04(data_021223e4, 1, "BIC", 0);
     func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
-    func_0208fefc(&mCharacters[0]);
-    func_02091a24(&mCharacters[0]);
+    mCharacters[0].CharacterBase::MakeFace();
+    mCharacters[0].Character::UpdateBodyScale();
     mCharacters[0].mPersonality = func_02098f2c(&mCharacters[0]);
     func_0209decc(&mCharacters[0]);
-    func_02091a6c(&mCharacters[0]);
-    func_020910d4(&mCharacters[0]);
-    func_02091a88(&mCharacters[0]);
+    mCharacters[0].Character::UpdateAnimSpeed();
+    mCharacters[0].Character::UpdateSpeedScales();
+    mCharacters[0].Character::UpdateBodyColors();
     func_02029660((void *)mCharacters[0].mAnim.mUnknown04, RESOURCE_BCA0, animations);
-    Character_SetAngle(&mCharacters[0], 0x4000);
+    mCharacters[0].Character::SetAngle(0x4000);
 
     int count = 0;
     void *resourceSet = (void *)mCharacters[0].mAnim.mUnknown04;
@@ -117,8 +117,8 @@ void SavePlayScene::Init() {
         count++;
     }
     mAnimationCount = count;
-    Character_SetAnimation(&mCharacters[0], RESOURCE_BCA0, Rand(mAnimationCount));
-    func_02091a14(&mCharacters[0], 0);
+    mCharacters[0].Character::SetAnimation(RESOURCE_BCA0, Rand(mAnimationCount));
+    mCharacters[0].Character::SetVisible(0);
     mCharacters[0].mShadowVisible = FALSE;
     mCamera.Init();
     mLights.Init(&mCamera);
@@ -156,7 +156,7 @@ void SavePlayScene::Update() {
 
 // @0x0214a1e4
 void SavePlayScene::Draw() {
-    func_02091968(&mCharacters[0]);
+    mCharacters[0].Character::Draw();
     func_020345d8(&mWindow[0]);
 }
 
@@ -197,7 +197,7 @@ void SavePlayScene::UpdateSaveStates() {
     case STATE_SAVING:
         if (mStep == 0) {
             mStep++;
-            func_02091a14(&mCharacters[0], 1);
+            mCharacters[0].Character::SetVisible(1);
         } else if (ShowMessage(0x17D)) {
             SetState(STATE_SAVE);
         }
@@ -211,7 +211,7 @@ void SavePlayScene::UpdateSaveStates() {
     case STATE_ASK_CONTINUE:
         if (mStep == 0) {
             mStep++;
-            func_02091a14(&mCharacters[0], 0);
+            mCharacters[0].Character::SetVisible(0);
         } else if (Ask(0x17E, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW)) {
             if (mAnswer == MessageWindow::BUTTON_YES) {
                 SetState(STATE_CONTINUE);
@@ -277,7 +277,7 @@ void SavePlayScene::UpdateWirelessStates() {
     case STATE_SAVING_WIRELESS:
         if (mStep == 0) {
             mStep++;
-            func_02091a14(&mCharacters[0], 1);
+            mCharacters[0].Character::SetVisible(1);
         } else if (ShowMessage(0x17D)) {
             SetState(STATE_SAVE_WIRELESS);
         }
@@ -291,7 +291,7 @@ void SavePlayScene::UpdateWirelessStates() {
     case STATE_SAVED_WIRELESS:
         if (mStep == 0) {
             mStep++;
-            func_02091a14(&mCharacters[0], 0);
+            mCharacters[0].Character::SetVisible(0);
         } else if (ShowOk(0x182)) {
             SetState(STATE_LEAVE_WIRELESS);
             mNextSceneId = 0x29;
@@ -447,7 +447,7 @@ BOOL SavePlayScene::Ask(u32 message, int flags) {
 void SavePlayScene::UpdateObjects() {
     func_020341d4(&mWindow[0]);
     mCamera.Update();
-    func_020910a8(&mCharacters[0]);
+    mCharacters[0].Character::Update();
     mLights.Update();
 }
 

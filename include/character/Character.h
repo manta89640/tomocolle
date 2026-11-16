@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "character/CharacterModel.h"
+#include "character/FloorPos.h"
 
 // The main program's character classes (src/character/), from the record that the save data holds to the character
 // that a scene draws:
@@ -31,7 +32,7 @@ struct CharacterRecord {
     /*       */ u32 mBloodType : 3;
     /* 0x054 */ u32 mUnknown054Bits0 : 4;
     /*       */ u32 mInterior : 7;       // Which interior its room has
-    /*       */ u32 mUnknown054Bits11 : 9;
+    /*       */ u32 mClothesId : 9;       // The clothes it wears (row of the clothes table)
     /*       */ u32 mUnknown054Bits20 : 12;
     /* 0x058 */ wchar_t mName[11];
     /* 0x06E */ wchar_t mFamilyName[11];
@@ -91,6 +92,11 @@ class SavedCharacter : public CharacterRecord {
 public:
     SavedCharacter();
 
+    void SetParameter(int param, int value);
+    int GetParameter(int param);
+    GXRgb GetFaceColor();
+    int GetAnswerScore01();
+
     /* 0x2A4 */ u16 mIndex;              // Which of the saved characters this is
     /* 0x2A6 */ s16 mReaction;
     /* 0x2A8 */ u8 mUnknown2A8[0x14];
@@ -115,45 +121,154 @@ struct FaceDrawParam {
 // The character with its Mii face, which the Mii library (NFL) draws at the head's matrices.
 class CharacterBase : public SavedCharacter {
 public:
+    // mFaceKind: which way the face moves by itself (UpdateFace)
+    enum FaceKind {
+        FACE_NONE,
+        // 1 to 7: show expression 0 to 6 once
+        FACE_BLINK = 8,          // 8, 9 and 13: blink, with eyes open in expression 0, 1 or 4
+        FACE_LIP_SYNC_OPEN = 7,  // LipSync shows it while the mouth is open
+    };
+
     CharacterBase();
     ~CharacterBase();
+
+    void InitFace(u32 defaultMii);
+    void ResetFace();
+    void AddFace();
+    void SetMiiParameter(int param, int value, BOOL makeFace);
+    void MakeFace();
+    void SetExpression(int expression);
+    void SetDefaultMii(u32 index, BOOL makeFace);
+    void SetRandomMii(int sex, int unk1, int unk2, BOOL makeFace);
+    void SetHeadMatrices(const MtxFx43 *matrix, const MtxFx33 *rotation);
+    BOOL HitTestFace();
+    BOOL HitTestFace(const VecFx32 *origin, const VecFx32 *dir);
+    BOOL HitTestFace(VecFx32 origin, VecFx32 dir) { return HitTestFace(&origin, &dir); }
+    void DrawFace();
+    void Draw();
+    void SetFace(int kind);
+    void UpdateBlink(int expression);
+    void UpdateBlinkOrWink(int expression, fx32 closedTime);
+    void UpdateRandomExpressions(int expression0, int expression1, int expression2, int expression3, fx32 time1,
+                                 fx32 time2, int chance);
+    void UpdateFace();
+    void LipSync(const char *phoneme, int face);
+    void UpdateHeadTurn();
+    BOOL ClampHeadAngle(u16 *angle, int limit);
+    static u16 StepAngle(u16 angle, u16 target, int shift);
+    static fx32 GetAnimSpeedOf(int liveliness);
 
     /* 0x02C0 */ FaceDrawParam mFaceDrawParam;
     /* 0x02DC */ u8 mFace[0x2218];         // The library's face object (NFL_AddFace)
     /* 0x24F4 */ int mExpression;          // Given to NFL_SetExpression
     /* 0x24F8 */ int mFaceId;              // The face's id in the library, -1 for none
     /* 0x24FC */ BOOL mFaceVisible;
-    /* 0x2500 */ int mFaceKind;            // Which face (expression set) is shown
-    /* 0x2504 */ fx32 mUnknown2504;
-    /* 0x2508 */ int mUnknown2508;
-    /* 0x250C */ u16 mUnknown250C;
-    /* 0x2510 */ BOOL mHeadTurnActive;     // The head is turning to mHeadPitch/mHeadYaw/mHeadRoll
+    /* 0x2500 */ int mFaceKind;            // How the face moves by itself (UpdateFace)
+    /* 0x2504 */ fx32 mFaceTimerStep;      // What the face timer advances by in a frame
+    /* 0x2508 */ fx32 mFaceTimer;
+    /* 0x250C */ s16 mFaceStep;            // The step of the face's movement
+    /* 0x2510 */ int mHeadTurn;            // Which of the head's angles turn (1: all three, 2, 3, 4: one), 0 none
     /* 0x2514 */ MtxFx33 mHeadRotation;    // The head joint's matrices, as the body last drew it
     /* 0x2538 */ MtxFx43 mHeadMatrix;
     /* 0x2568 */ VecFx32 mFaceOffset;
     /* 0x2574 */ VecFx32 mFaceScale;
     /* 0x2580 */ MtxFx33 mFaceRotation;
-    /* 0x25A4 */ MtxFx43 mFaceMatrix;
+    /* 0x25A4 */ MtxFx43 mFaceMatrix;      // Where the face was drawn: the clip matrix
     /* 0x25D4 */ u16 mHeadPitchNow;        // Where the head is turned now
     /* 0x25D6 */ u16 mHeadYawNow;
     /* 0x25D8 */ u16 mHeadRollNow;
     /* 0x25DA */ u16 mHeadPitch;           // Where it turns to
     /* 0x25DC */ u16 mHeadYaw;
     /* 0x25DE */ u16 mHeadRoll;
-    /* 0x25E0 */ u16 mUnknown25E0;
-    /* 0x25E2 */ u8 mHeadTurnFrames;
+    /* 0x25E0 */ u16 mFaceRoll;            // Added to the face's roll
+    /* 0x25E2 */ u8 mHeadTurnShift;        // The head turns by the distance shifted right by this, at least 0x20
     /* 0x25E3 */ u8 mUnknown25E3;
 }; // 0x25E4
+
+// A Mii head without a body: the face on a head model of its own (overlays 2, 77 and 79).
+class CharacterHead : public CharacterBase {
+public:
+    void Init(int resourceId, u32 defaultMii);
+    void Update();
+    void Draw();
+    void SetAnimSpeed(fx32 speed);
+    void SetAnimation(u32 resType, int id);
+    void UpdateBlend();
+    static void OnNode(NNSG3dRS *rs);
+    static void InitCallbacks(NNSG3dRS *rs);
+
+    /* 0x25E4 */ AnimModel mHead;
+    /* 0x26C4 */ int mAnimId;              // The current 'BCA0' animation
+    /* 0x26C8 */ int mPrevAnimId;
+    /* 0x26CC */ fx32 mBlendFrames;
+    /* 0x26D0 */ fx32 mAnimSpeed;
+    /* 0x26D4 */ MtxFx33 mRootRotation;    // The matrices of the head model's node 0
+    /* 0x26F8 */ MtxFx43 mRootMatrix;
+}; // 0x2728
 
 // The character with its body.
 class Character : public CharacterBase, public CharacterModel {
 public:
+    void Init(int resourceId, int unk, u32 defaultMii);
+    void SetArchive(const char *archiveName);
+    void UpdateClothes();
+    void Update();
+    void UpdateSpeedScales();
+    void UpdateWalkSpeedScale();
+    void UpdateTurnSpeedScale();
+    fx32 ScaleBySpeed(fx32 value);
+    BOOL WalkToTarget(fx32 reach, fx32 speed, int turnShift);
+    BOOL TurnToWalkTarget(int turnSpeed, int walkSpeed);
+    BOOL TurnToTargetAngle(int turnSpeed, int walkSpeed);
+    BOOL TurnTo(int turnSpeed, int walkSpeed, u16 angle);
+    void MoveAlongAngle();
+    void SetWalkTarget(VecFx32 target);
+    void SetAngle(u16 angle);
+    void Turn(u16 delta);
+    void SetWalkTargetAwayFrom(FloorPos pos);
+    void SetWalkTargetReflected(FloorPos pos);
+    void Draw();
+    void SetAnimSpeed(fx32 speed);
+    void SetAnimation(u32 resType, int id);
+    void BlendToAnimation(u32 resType, int id);
+    void SetVisible(BOOL visible);
+    void UpdateBodyScale();
+    fx32 GetAnimSpeed();
+    void UpdateAnimSpeed();
+    void UpdateBodyColors();
+    FloorPos GetPointInFront(fx32 distance);
+    BOOL IsBeside(fx32 x, fx32 z, fx32 width);
+    BOOL IsInFront(fx32 x, fx32 z);
+    BOOL IsAhead(fx32 x, fx32 z, fx32 width);
+    BOOL IsPointWithinReach(fx32 x, fx32 z, fx32 reach, fx32 maxReach);
+    BOOL IsNearerThan(FloorPos pos, fx32 distanceSq);
+    void SetLight(int light);
+    void ResetSoundPhase(int slot);
+    void ResetSoundPhases();
+    int PlaySoundOnce(int player, int index, int seqArc);
+    int PlaySoundAtAnimPhase(int slot, int player, int seqArc, int index, int quarters);
+
+    // Where the character stands, on the floor. Filling a local and returning it is what leaves the dead copies of
+    // the point on the callers' stacks.
+    FloorPos GetFloorPos() const {
+        FloorPos pos;
+        pos.x = mPos.x;
+        pos.z = mPos.z;
+        return pos;
+    }
+    FloorPos GetTargetFloorPos() const {
+        FloorPos pos;
+        pos.x = mTarget.x;
+        pos.z = mTarget.z;
+        return pos;
+    }
+
     /* 0x25E4 */ // CharacterModel
     /* 0x2AEC */ fx32 mSpeed;
-    /* 0x2AF0 */ fx32 mUnknown2AF0;        // DistanceScaled multiplies a distance by it
-    /* 0x2AF4 */ fx32 mUnknown2AF4;
+    /* 0x2AF0 */ fx32 mWalkSpeedScale;     // From the Mii's parameter 0x29 and mAnimSpeed
+    /* 0x2AF4 */ fx32 mTurnSpeedScale;
     /* 0x2AF8 */ VecFx32 mTarget;          // Where it walks to
-    /* 0x2B04 */ int mUnknown2B04;
+    /* 0x2B04 */ int mTurnStep;            // How far it turned in the last step
     /* 0x2B08 */ u16 mMoveAngle;           // The way MoveAlongAngle moves it
     /* 0x2B0A */ u16 mAngle;               // The way the character faces
     /* 0x2B0C */ u16 mTargetAngle;         // TurnToTargetAngle turns mAngle towards it

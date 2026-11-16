@@ -3443,75 +3443,75 @@ _ZN13CharacterBaseC2Ev kind:function(arm,size=0x20) addr:0x0208fcf8
 _ZN13CharacterBaseC1Ev kind:function(arm,size=0x20) addr:0x0208fd18
 _ZN13CharacterBaseD1Ev kind:function(arm,size=0x2c) addr:0x0208fd38
 _ZN13CharacterBaseD2Ev kind:function(arm,size=0x2c) addr:0x0208fd64
-func_0208fd90 kind:function(arm,size=0x40) addr:0x0208fd90
-func_0208fdd0 kind:function(arm,size=0xe4) addr:0x0208fdd0
-func_0208feb4 kind:function(arm,size=0x24) addr:0x0208feb4
-func_0208fed8 kind:function(arm,size=0x24) addr:0x0208fed8
-func_0208fefc kind:function(arm,size=0x30) addr:0x0208fefc
-func_0208ff2c kind:function(arm,size=0x18) addr:0x0208ff2c
-func_0208ff44 kind:function(arm,size=0x24) addr:0x0208ff44
-func_0208ff68 kind:function(arm,size=0x2c) addr:0x0208ff68
-func_0208ff94 kind:function(arm,size=0x30) addr:0x0208ff94
-func_0208ffc4 kind:function(arm,size=0x4c) addr:0x0208ffc4
-func_02090010 kind:function(arm,size=0x54) addr:0x02090010
-func_02090064 kind:function(arm,size=0x1b0) addr:0x02090064
-func_02090214 kind:function(arm,size=0x20) addr:0x02090214
-Character_SetFace kind:function(arm,size=0x24) addr:0x02090234
-func_02090258 kind:function(arm,size=0xc8) addr:0x02090258
-func_02090320 kind:function(arm,size=0x11c) addr:0x02090320
-func_0209043c kind:function(arm,size=0x15c) addr:0x0209043c
-func_02090598 kind:function(arm,size=0x4c0) addr:0x02090598
-func_02090a58 kind:function(arm,size=0xb8) addr:0x02090a58
-func_02090b10 kind:function(arm,size=0x168) addr:0x02090b10
-func_02090c78 kind:function(arm,size=0x3c) addr:0x02090c78
-func_02090cb4 kind:function(arm,size=0x68) addr:0x02090cb4
-func_02090d1c kind:function(arm,size=0xa0) addr:0x02090d1c
-func_02090dbc kind:function(arm,size=0x18) addr:0x02090dbc
-func_02090dd4 kind:function(arm,size=0x44) addr:0x02090dd4
-func_02090e18 kind:function(arm,size=0x14) addr:0x02090e18
-func_02090e2c kind:function(arm,size=0x1c) addr:0x02090e2c
-func_02090e48 kind:function(arm,size=0x4c) addr:0x02090e48
-func_02090e94 kind:function(arm,size=0xe4) addr:0x02090e94
-func_02090f78 kind:function(arm,size=0x4c) addr:0x02090f78
-func_02090fc4 kind:function(arm,size=0x18) addr:0x02090fc4
-func_02090fdc kind:function(arm,size=0x6c) addr:0x02090fdc
-func_02091048 kind:function(arm,size=0x34) addr:0x02091048
-func_0209107c kind:function(arm,size=0x2c) addr:0x0209107c
-func_020910a8 kind:function(arm,size=0x2c) addr:0x020910a8
-func_020910d4 kind:function(arm,size=0x18) addr:0x020910d4
-func_020910ec kind:function(arm,size=0x44) addr:0x020910ec
-func_02091130 kind:function(arm,size=0x44) addr:0x02091130
-func_02091174 kind:function(arm,size=0x20) addr:0x02091174
-func_02091194 kind:function(arm,size=0x188) addr:0x02091194
-Character_TurnToWalkTarget kind:function(arm,size=0x88) addr:0x0209131c
-Character_TurnToTargetAngle kind:function(arm,size=0x14) addr:0x020913a4
-func_020913b8 kind:function(arm,size=0x104) addr:0x020913b8
-Character_MoveAlongAngle kind:function(arm,size=0x80) addr:0x020914bc
-Character_SetWalkTarget kind:function(arm,size=0x28) addr:0x0209153c
-Character_SetAngle kind:function(arm,size=0x14) addr:0x02091564
-func_02091578 kind:function(arm,size=0x20) addr:0x02091578
-func_02091598 kind:function(arm,size=0x184) addr:0x02091598
-func_0209171c kind:function(arm,size=0x24c) addr:0x0209171c
-func_02091968 kind:function(arm,size=0x38) addr:0x02091968
-func_020919a0 kind:function(arm,size=0x1c) addr:0x020919a0
-Character_SetAnimation kind:function(arm,size=0x2c) addr:0x020919bc
-func_020919e8 kind:function(arm,size=0x2c) addr:0x020919e8
-func_02091a14 kind:function(arm,size=0x10) addr:0x02091a14
-func_02091a24 kind:function(arm,size=0x38) addr:0x02091a24
-func_02091a5c kind:function(arm,size=0x10) addr:0x02091a5c
-func_02091a6c kind:function(arm,size=0x1c) addr:0x02091a6c
-func_02091a88 kind:function(arm,size=0x34) addr:0x02091a88
-func_02091abc kind:function(arm,size=0xc4) addr:0x02091abc
-func_02091b80 kind:function(arm,size=0x100) addr:0x02091b80
-func_02091c80 kind:function(arm,size=0xc4) addr:0x02091c80
-func_02091d44 kind:function(arm,size=0xf8) addr:0x02091d44
-Character_IsPointWithinReach kind:function(arm,size=0xa0) addr:0x02091e3c
-func_02091edc kind:function(arm,size=0x98) addr:0x02091edc
-func_02091f74 kind:function(arm,size=0x18) addr:0x02091f74
-Character_ResetSoundPhase kind:function(arm,size=0x14) addr:0x02091f8c
-func_02091fa0 kind:function(arm,size=0x1c) addr:0x02091fa0
-func_02091fbc kind:function(arm,size=0x28) addr:0x02091fbc
-Character_PlaySoundAtAnimPhase kind:function(arm,size=0x194) addr:0x02091fe4
+_ZN13CharacterBase8InitFaceEm kind:function(arm,size=0x40) addr:0x0208fd90
+_ZN13CharacterBase9ResetFaceEv kind:function(arm,size=0xe4) addr:0x0208fdd0
+_ZN13CharacterBase7AddFaceEv kind:function(arm,size=0x24) addr:0x0208feb4
+_ZN13CharacterBase15SetMiiParameterEiii kind:function(arm,size=0x24) addr:0x0208fed8
+_ZN13CharacterBase8MakeFaceEv kind:function(arm,size=0x30) addr:0x0208fefc
+_ZN13CharacterBase13SetExpressionEi kind:function(arm,size=0x18) addr:0x0208ff2c
+_ZN13CharacterBase13SetDefaultMiiEmi kind:function(arm,size=0x24) addr:0x0208ff44
+_ZN13CharacterBase12SetRandomMiiEiiii kind:function(arm,size=0x2c) addr:0x0208ff68
+_ZN13CharacterBase15SetHeadMatricesEPK7MtxFx43PK7MtxFx33 kind:function(arm,size=0x30) addr:0x0208ff94
+_ZN13CharacterBase11HitTestFaceEv kind:function(arm,size=0x4c) addr:0x0208ffc4
+_ZN13CharacterBase11HitTestFaceEPK7VecFx32S2_ kind:function(arm,size=0x54) addr:0x02090010
+_ZN13CharacterBase8DrawFaceEv kind:function(arm,size=0x1b0) addr:0x02090064
+_ZN13CharacterBase4DrawEv kind:function(arm,size=0x20) addr:0x02090214
+_ZN13CharacterBase7SetFaceEi kind:function(arm,size=0x24) addr:0x02090234
+_ZN13CharacterBase11UpdateBlinkEi kind:function(arm,size=0xc8) addr:0x02090258
+_ZN13CharacterBase17UpdateBlinkOrWinkEil kind:function(arm,size=0x11c) addr:0x02090320
+_ZN13CharacterBase23UpdateRandomExpressionsEiiiilli kind:function(arm,size=0x15c) addr:0x0209043c
+_ZN13CharacterBase10UpdateFaceEv kind:function(arm,size=0x4c0) addr:0x02090598
+_ZN13CharacterBase7LipSyncEPKci kind:function(arm,size=0xb8) addr:0x02090a58
+_ZN13CharacterBase14UpdateHeadTurnEv kind:function(arm,size=0x168) addr:0x02090b10
+_ZN13CharacterBase14ClampHeadAngleEPti kind:function(arm,size=0x3c) addr:0x02090c78
+_ZN13CharacterBase9StepAngleEtti kind:function(arm,size=0x68) addr:0x02090cb4
+_ZN13CharacterHead4InitEim kind:function(arm,size=0xa0) addr:0x02090d1c
+_ZN13CharacterHead6UpdateEv kind:function(arm,size=0x18) addr:0x02090dbc
+_ZN13CharacterHead4DrawEv kind:function(arm,size=0x44) addr:0x02090dd4
+_ZN13CharacterBase14GetAnimSpeedOfEi kind:function(arm,size=0x14) addr:0x02090e18
+_ZN13CharacterHead12SetAnimSpeedEl kind:function(arm,size=0x1c) addr:0x02090e2c
+_ZN13CharacterHead12SetAnimationEmi kind:function(arm,size=0x4c) addr:0x02090e48
+_ZN13CharacterHead11UpdateBlendEv kind:function(arm,size=0xe4) addr:0x02090e94
+_ZN13CharacterHead6OnNodeEP9NNSG3dRS_ kind:function(arm,size=0x4c) addr:0x02090f78
+_ZN13CharacterHead13InitCallbacksEP9NNSG3dRS_ kind:function(arm,size=0x18) addr:0x02090fc4
+_ZN9Character4InitEiim kind:function(arm,size=0x6c) addr:0x02090fdc
+_ZN9Character10SetArchiveEPKc kind:function(arm,size=0x34) addr:0x02091048
+_ZN9Character13UpdateClothesEv kind:function(arm,size=0x2c) addr:0x0209107c
+_ZN9Character6UpdateEv kind:function(arm,size=0x2c) addr:0x020910a8
+_ZN9Character17UpdateSpeedScalesEv kind:function(arm,size=0x18) addr:0x020910d4
+_ZN9Character20UpdateWalkSpeedScaleEv kind:function(arm,size=0x44) addr:0x020910ec
+_ZN9Character20UpdateTurnSpeedScaleEv kind:function(arm,size=0x44) addr:0x02091130
+_ZN9Character12ScaleBySpeedEl kind:function(arm,size=0x20) addr:0x02091174
+_ZN9Character12WalkToTargetElli kind:function(arm,size=0x188) addr:0x02091194
+_ZN9Character16TurnToWalkTargetEii kind:function(arm,size=0x88) addr:0x0209131c
+_ZN9Character17TurnToTargetAngleEii kind:function(arm,size=0x14) addr:0x020913a4
+_ZN9Character6TurnToEiit kind:function(arm,size=0x104) addr:0x020913b8
+_ZN9Character14MoveAlongAngleEv kind:function(arm,size=0x80) addr:0x020914bc
+_ZN9Character13SetWalkTargetE7VecFx32 kind:function(arm,size=0x28) addr:0x0209153c
+_ZN9Character8SetAngleEt kind:function(arm,size=0x14) addr:0x02091564
+_ZN9Character4TurnEt kind:function(arm,size=0x20) addr:0x02091578
+_ZN9Character21SetWalkTargetAwayFromE8FloorPos kind:function(arm,size=0x184) addr:0x02091598
+_ZN9Character22SetWalkTargetReflectedE8FloorPos kind:function(arm,size=0x24c) addr:0x0209171c
+_ZN9Character4DrawEv kind:function(arm,size=0x38) addr:0x02091968
+_ZN9Character12SetAnimSpeedEl kind:function(arm,size=0x1c) addr:0x020919a0
+_ZN9Character12SetAnimationEmi kind:function(arm,size=0x2c) addr:0x020919bc
+_ZN9Character16BlendToAnimationEmi kind:function(arm,size=0x2c) addr:0x020919e8
+_ZN9Character10SetVisibleEi kind:function(arm,size=0x10) addr:0x02091a14
+_ZN9Character15UpdateBodyScaleEv kind:function(arm,size=0x38) addr:0x02091a24
+_ZN9Character12GetAnimSpeedEv kind:function(arm,size=0x10) addr:0x02091a5c
+_ZN9Character15UpdateAnimSpeedEv kind:function(arm,size=0x1c) addr:0x02091a6c
+_ZN9Character16UpdateBodyColorsEv kind:function(arm,size=0x34) addr:0x02091a88
+_ZN9Character15GetPointInFrontEl kind:function(arm,size=0xc4) addr:0x02091abc
+_ZN9Character8IsBesideElll kind:function(arm,size=0x100) addr:0x02091b80
+_ZN9Character9IsInFrontEll kind:function(arm,size=0xc4) addr:0x02091c80
+_ZN9Character7IsAheadElll kind:function(arm,size=0xf8) addr:0x02091d44
+_ZN9Character18IsPointWithinReachEllll kind:function(arm,size=0xa0) addr:0x02091e3c
+_ZN9Character12IsNearerThanE8FloorPosl kind:function(arm,size=0x98) addr:0x02091edc
+_ZN9Character8SetLightEi kind:function(arm,size=0x18) addr:0x02091f74
+_ZN9Character15ResetSoundPhaseEi kind:function(arm,size=0x14) addr:0x02091f8c
+_ZN9Character16ResetSoundPhasesEv kind:function(arm,size=0x1c) addr:0x02091fa0
+_ZN9Character13PlaySoundOnceEiii kind:function(arm,size=0x28) addr:0x02091fbc
+_ZN9Character20PlaySoundAtAnimPhaseEiiiii kind:function(arm,size=0x194) addr:0x02091fe4
 func_02092178 kind:function(arm,size=0x54) addr:0x02092178
 func_020921cc kind:function(arm,size=0x9c) addr:0x020921cc
 func_02092268 kind:function(arm,size=0x3d4) addr:0x02092268
@@ -3553,7 +3553,7 @@ func_020985f8 kind:function(arm,size=0x9c) addr:0x020985f8
 func_02098694 kind:function(arm,size=0x30) addr:0x02098694
 func_020986c4 kind:function(arm,size=0x560) addr:0x020986c4
 func_02098c24 kind:function(arm,size=0x1c) addr:0x02098c24
-func_02098c40 kind:function(arm,size=0x74) addr:0x02098c40
+_ZN14SavedCharacter12SetParameterEii kind:function(arm,size=0x74) addr:0x02098c40
 func_02098cb4 kind:function(arm,size=0x1c) addr:0x02098cb4
 func_02098cd0 kind:function(arm,size=0xc) addr:0x02098cd0
 func_02098cdc kind:function(arm,size=0xc) addr:0x02098cdc
@@ -3565,11 +3565,11 @@ func_02098d44 kind:function(arm,size=0x18) addr:0x02098d44
 func_02098d5c kind:function(arm,size=0xc) addr:0x02098d5c
 func_02098d68 kind:function(arm,size=0xc) addr:0x02098d68
 func_02098d74 kind:function(arm,size=0x38) addr:0x02098d74
-func_02098dac kind:function(arm,size=0xa4) addr:0x02098dac
+_ZN14SavedCharacter12GetParameterEi kind:function(arm,size=0xa4) addr:0x02098dac
 func_02098e50 kind:function(arm,size=0x18) addr:0x02098e50
-func_02098e68 kind:function(arm,size=0x20) addr:0x02098e68
+_ZN14SavedCharacter12GetFaceColorEv kind:function(arm,size=0x20) addr:0x02098e68
 func_02098e88 kind:function(arm,size=0x3c) addr:0x02098e88
-func_02098ec4 kind:function(arm,size=0x14) addr:0x02098ec4
+_ZN14SavedCharacter16GetAnswerScore01Ev kind:function(arm,size=0x14) addr:0x02098ec4
 func_02098ed8 kind:function(arm,size=0x20) addr:0x02098ed8
 func_02098ef8 kind:function(arm,size=0x14) addr:0x02098ef8
 func_02098f0c kind:function(arm,size=0x20) addr:0x02098f0c
@@ -4702,7 +4702,7 @@ data_020fa14c kind:data(any) addr:0x020fa14c
 data_020fa1d0 kind:data(any) addr:0x020fa1d0
 data_020fa1ea kind:data(any) addr:0x020fa1ea
 data_020fa1eb kind:data(any) addr:0x020fa1eb
-sDrawOffset$12738 kind:data(any) addr:0x020fb768 local
+sDrawOffset$12881 kind:data(any) addr:0x020fb768 local
 sShadowA kind:data(any) addr:0x020fb774 local
 sLeftElbow kind:data(any) addr:0x020fb788 local
 sRightElbow kind:data(any) addr:0x020fb79c local
@@ -4715,7 +4715,7 @@ sLeftAnkle kind:data(any) addr:0x020fb814 local
 sLeftHand kind:data(any) addr:0x020fb828 local
 sRightHand kind:data(any) addr:0x020fb83c local
 sRightAnkle kind:data(any) addr:0x020fb850 local
-data_020fb864 kind:data(any) addr:0x020fb864
+sFaceCenter$13237 kind:data(any) addr:0x020fb864
 data_020fb870 kind:data(any) addr:0x020fb870
 data_020fb898 kind:data(any) addr:0x020fb898
 gStr_2K kind:data(any) addr:0x020fb8c0
@@ -5365,14 +5365,14 @@ _ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
 @13464 kind:data(any) addr:0x021119e4 local
 @13465 kind:data(any) addr:0x021119e8 local
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-@13176 kind:data(any) addr:0x02111a10 local
-@13177 kind:data(any) addr:0x02111a14 local
-@13178 kind:data(any) addr:0x02111a30 local
-@13179 kind:data(any) addr:0x02111a34 local
-@13191 kind:data(any) addr:0x02111a58 local
-@13192 kind:data(any) addr:0x02111a68 local
-@13205 kind:data(any) addr:0x02111a78 local
-@13206 kind:data(any) addr:0x02111a7c local
+@13173 kind:data(any) addr:0x02111a10 local
+@13174 kind:data(any) addr:0x02111a14 local
+@13175 kind:data(any) addr:0x02111a30 local
+@13176 kind:data(any) addr:0x02111a34 local
+@13188 kind:data(any) addr:0x02111a58 local
+@13189 kind:data(any) addr:0x02111a68 local
+@13202 kind:data(any) addr:0x02111a78 local
+@13203 kind:data(any) addr:0x02111a7c local
 sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
@@ -6065,14 +6065,14 @@ gStr_rm01_1 kind:data(any) addr:0x02114598
 gStr_rm01_0 kind:data(any) addr:0x021145a0
 data_021145a8 kind:data(any) addr:0x021145a8
 data_02114d78 kind:data(any) addr:0x02114d78
-@13441 kind:data(any) addr:0x02114da0 local
-@13442 kind:data(any) addr:0x02114dbc local
-@13443 kind:data(any) addr:0x02114dcc local
-@13458 kind:data(any) addr:0x02114de0 local
-@13459 kind:data(any) addr:0x02114dfc local
-@13460 kind:data(any) addr:0x02114e0c local
-@13478 kind:data(any) addr:0x02114e20 local
-@13484 kind:data(any) addr:0x02114e30 local
+@13584 kind:data(any) addr:0x02114da0 local
+@13585 kind:data(any) addr:0x02114dbc local
+@13586 kind:data(any) addr:0x02114dcc local
+@13601 kind:data(any) addr:0x02114de0 local
+@13602 kind:data(any) addr:0x02114dfc local
+@13603 kind:data(any) addr:0x02114e0c local
+@13621 kind:data(any) addr:0x02114e20 local
+@13629 kind:data(any) addr:0x02114e30 local
 data_02114e3c kind:data(any) addr:0x02114e3c
 data_02114e40 kind:data(any) addr:0x02114e40
 gStr_character kind:data(any) addr:0x02114e44

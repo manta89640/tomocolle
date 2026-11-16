@@ -188,8 +188,13 @@ struct SavedCharacter {
     /* 0x02BC */ s8 mPersonality;     // What func_02098f2c computes
 }; // 0x2C0
 
-// The character as the main program draws it (func_0208fcf8 is its constructor).
+// The character with its Mii face (include/character/Character.h has the class).
 struct CharacterBase : public SavedCharacter {
+    void MakeFace();
+    void SetFace(int kind);
+    void LipSync(const char *phoneme, int face); // Opens the mouth (face 7) while the phoneme is a vowel or 'w'
+    BOOL ClampHeadAngle(u16 *angle, int limit);  // Clamps an angle of the head to +-limit
+
     /* 0x02C0 */ u8 mUnknown02C0[0x2250];
     /* 0x2510 */ BOOL mHeadTurnActive; // The head is turning to mHeadPitch/mHeadYaw
     /* 0x2514 */ u8 mUnknown2514[0xC0];
@@ -221,12 +226,25 @@ public:
 }; // 0x4BC
 
 
-// The main program's character class that the scenes derive theirs from (0x2B18 bytes).
+// The main program's character class that the scenes derive theirs from (0x2B18 bytes; include/character/Character.h
+// has the class, whose second base, CharacterModel, is mModel here).
 class Character : public CharacterBase {
 public:
+    void Init(int resourceId, int unk, u32 defaultMii);
+    void SetArchive(const char *archiveName);
+    void Update();
+    void UpdateSpeedScales();
+    void Draw();
+    void SetAnimation(u32 resType, int id);
+    void BlendToAnimation(u32 resType, int id);
+    void SetAngle(u16 angle);
+    void UpdateBodyScale();
+    void UpdateAnimSpeed();
+    void UpdateBodyColors();
+
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];  // Name its archive is mounted under (func_02091048 sets both)
+    /* 0x2AAC */ char mArchiveName[4];  // Name its archive is mounted under (Character::SetArchive sets both)
     /* 0x2AB0 */ char mArchivePath[0x1C]; // and the archive's path
     /* 0x2ACC */ char mModelPath[0x20];   // The model in the archive
     /* 0x2AEC */ u8 mUnknown2AEC[0x1E];
@@ -235,21 +253,6 @@ public:
 }; // 0x2B18
 
 extern "C" {
-void Character_SetFace(Character *character, int face);
-void Character_SetAngle(Character *character, u16 angle);
-void func_02090a58(Character *character, const char *phoneme, int face); // Lip sync
-BOOL func_02090c78(Character *character, u16 *angle, int limit);        // Clamps an angle of the head
-void func_02090fdc(Character *character, int slot, int param2, int param3);
-void func_02091048(Character *character, const char *archiveName);
-void func_020910a8(Character *character);
-void func_020910d4(Character *character);
-void func_02091968(Character *character); // Draws it
-void Character_SetAnimation(Character *character, u32 resType, int id); // Starts an animation
-void func_020919e8(Character *character, u32 resType, int id); // Starts an animation
-void func_0208fefc(Character *character);
-void func_02091a24(Character *character);
-void func_02091a6c(Character *character);
-void func_02091a88(Character *character);
 s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
@@ -584,7 +587,7 @@ public:
     u16 GetHeadYawTo(VecFx32 *target);
 
     void PlayAnimation(const char *name, BOOL once) {
-        func_020919e8(this, RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mResourceSet, RESOURCE_BCA0, name));
+        Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mResourceSet, RESOURCE_BCA0, name));
         AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, mModel.mAnimId)->mPlayOnce = once;
     }
     VecFx32 GetPos() { return mModel.mPos; }

@@ -108,8 +108,8 @@ void InformationScene::Init() {
             func_0202c264(&gGameData, i, &character);
             year = character.mBirthYear;
             if (year != BIRTH_YEAR_UNKNOWN) {
-                month = func_02098dac(&character, PROPERTY_BIRTH_MONTH);
-                int day = func_02098dac(&character, PROPERTY_BIRTH_DAY);
+                month = character.GetParameter(PROPERTY_BIRTH_MONTH);
+                int day = character.GetParameter(PROPERTY_BIRTH_DAY);
                 int age = GetAge(year, month, day);
                 if (age != -1) {
                     ageSum += age;

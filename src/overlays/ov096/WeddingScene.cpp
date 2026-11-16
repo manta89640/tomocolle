@@ -15,10 +15,10 @@ static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0,
 void WeddingScene::StartLoading() {
     func_0202c264(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
     mCharacters[0].mIndex = GetCharacterIndex(0);
-    func_02091048(&mCharacters[0], "3H0");
+    mCharacters[0].Character::SetArchive("3H0");
     func_0202c264(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
     mCharacters[1].mIndex = GetCharacterIndex(1);
-    func_02091048(&mCharacters[1], "3H1");
+    mCharacters[1].Character::SetArchive("3H1");
     mRoom.mStyle = mCharacters[0].mInterior;
     func_020a54c4(&mRoom, "CO0", 0);
     func_020a56bc(&mRoom, "RM?", 0);
@@ -143,23 +143,22 @@ void WeddingScene::Init3d() {
     animations = func_0202ad04(data_021223e4, 2, "3HA", 0);
     ModelResources_SetModel(data_021223e4, 0, mCharacters[0].mModelPath);
     ModelResources_SetModel(data_021223e4, 1, mCharacters[1].mModelPath);
-    func_02090fdc(&mCharacters[0], 0, 0, 0);
-    func_02090fdc(&mCharacters[1], 1, 0, 0);
+    mCharacters[0].Character::Init(0, 0, 0);
+    mCharacters[1].Character::Init(1, 0, 0);
     for (int i = 0; i < 2; i++) {
         WeddingCharacter *character = &mCharacters[i];
         func_0202c264(&gGameData, GetCharacterIndex(i), character);
-        func_0208fefc(character);
-        func_02091a88(character);
-        func_02091a24(character);
-        func_02091a6c(character);
+        character->CharacterBase::MakeFace();
+        character->Character::UpdateBodyColors();
+        character->Character::UpdateBodyScale();
+        character->Character::UpdateAnimSpeed();
         mCharacters[i].mPersonality = func_02098f2c(character);
         func_0209decc(character);
-        func_020910d4(character);
+        character->Character::UpdateSpeedScales();
         func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
         mCharacters[i].mModel.mUnknown4A4 = TRUE;
-        Character_SetFace(character, 10);
-        Character_SetAnimation(character, RESOURCE_BCA0,
-                      ResourceSet_FindIndexByName(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, "idle00"));
+        character->CharacterBase::SetFace(10);
+        character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, "idle00"));
         mCharacters[i].SetPos(points[i]);
         character->FaceCamera();
         character->TurnHeadToCamera();
@@ -307,8 +306,8 @@ void WeddingScene::Draw() {
     case 1:
         break;
     }
-    func_02091968(&mCharacters[0]);
-    func_02091968(&mCharacters[1]);
+    mCharacters[0].Character::Draw();
+    mCharacters[1].Character::Draw();
     func_020a4a50(&mRoom.mParts);
     mGift.Draw();
 }
@@ -366,13 +365,13 @@ void WeddingCharacter::Init(WeddingContext *context) {
 }
 
 void WeddingCharacter::Update() {
-    func_020910a8(this);
+    Character::Update();
     UpdateState();
     if (mTtsPlayer->IsEngineIdle()) {
         return;
     }
     if (mLipSync) {
-        func_02090a58(this, mTtsPlayer->GetPhonemeName(), 1);
+        CharacterBase::LipSync(mTtsPlayer->GetPhonemeName(), 1);
     }
 }
 
@@ -403,7 +402,7 @@ void WeddingCharacter::UpdateState() {
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
                 mDone = TRUE;
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
             }
             break;
         }
@@ -434,7 +433,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 2:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mDone = TRUE;
             }
             break;
@@ -445,7 +444,7 @@ void WeddingCharacter::UpdateState() {
         if (mEntered) {
             mEntered = FALSE;
             LookAtPartner();
-            Character_SetFace(this, 9);
+            CharacterBase::SetFace(9);
         }
         break;
 
@@ -468,7 +467,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mDone = TRUE;
             }
             break;
@@ -556,7 +555,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mFrame = 0;
                 mStep++;
             }
@@ -584,7 +583,7 @@ void WeddingCharacter::FaceCamera() {
     FloorPos camera;
     camera.x = data_02122764.mEye.x;
     camera.z = data_02122764.mEye.z;
-    Character_SetAngle(this, AngleTo(camera));
+    Character::SetAngle(AngleTo(camera));
 }
 
 // Shows a message of the trouble messages (file 0) or of the other messages (file 1) in the window, with its
@@ -701,8 +700,8 @@ void WeddingCharacter::LookAt(VecFx32 *target, int pitchLimit, int yawLimit) {
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
     mHeadTurnActive = TRUE;
-    func_02090c78(this, &pitch, pitchLimit);
-    func_02090c78(this, &yaw, yawLimit);
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
     mHeadYaw = yaw;
 }
@@ -712,8 +711,8 @@ void WeddingCharacter::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit)
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
     mHeadTurnActive = TRUE;
-    func_02090c78(this, &pitch, pitchLimit);
-    func_02090c78(this, &yaw, yawLimit);
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
     mHeadYaw = yaw;
     mHeadPitchNow = pitch;
