@@ -5,36 +5,7 @@
 #include <nnsys.h>
 
 #include "Model.h"
-
-// STAND-IN for the item class of the main program (0x0209e140 on), as far as the character model uses it: the
-// clothes the model wears. Its virtual function 2 returns the clothes' model code, the end of the body archive's name.
-class ClothesItem {
-public:
-    ClothesItem(); // _ZN11ClothesItemC1Ev
-    virtual u32 VirtualUnknown0();
-    virtual u32 VirtualUnknown1();
-    virtual const char *GetModelCode();
-
-    /* 0x04 */ u16 mId; // Row of the clothes table (data_020f3ff0)
-    /* 0x08 */ BOOL mOwned;
-    /* 0x0C */ int mUnknown0C;
-    /* 0x10 */ int mCount;
-    /* 0x14 */ int mUnknown14;
-}; // 0x18
-
-// One row of the clothes table (data_020f3ff0), as the character model reads it.
-struct ClothesData {
-    /* 0x00 */ u8 mUnknown00[0xC];
-    /* 0x0C */ u32 mUnknown0CBits0 : 4;
-    /*      */ u32 mColor : 3;          // The digit of the body texture's name ("body_c<n>.ntfp")
-    /*      */ u32 mHasFemaleBody : 1;  // The body has a female variant ("body<code>F")
-    /*      */ u32 mUnknown0CBits8 : 24;
-    /* 0x10 */ u32 mUnknown10;
-}; // 0x14
-
-extern "C" {
-extern const ClothesData data_020f3ff0[];
-}
+#include "item/Item.h"
 
 // The model of a character: its body, wearing clothes, with the joints the game follows (the head, the hands,
 // elbows, knees and ankles) and a shadow. The model is a member, not a base: its constructor stores no virtual

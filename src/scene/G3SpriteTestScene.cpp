@@ -40,8 +40,8 @@ void G3SpriteTestScene::Init() {
     mModel.Load(0, 0);
     mModel.mPos.x = FX32_ONE;
     mModel.mPos.z = FX32_ONE;
-    func_0208fd90(&mCharacter, 1);
-    func_0208ff68(&mCharacter, 2, 3, 3, 1);
+    mCharacter.InitFace(1);
+    mCharacter.SetRandomMii(2, 3, 3, 1);
     mCharacter.mUnknown2570 = FX32_ONE;
     mCharacter.mUnknown2568 = -FX32_ONE;
 }
@@ -52,7 +52,7 @@ void G3SpriteTestScene::Update() {
 
 void G3SpriteTestScene::Draw() {
     mModel.Draw();
-    func_02090214(&mCharacter);
+    mCharacter.Draw();
     for (int i = 0; i < SPRITE_COUNT; i++) {
         func_0202b4a4(&mSprites[i]);
     }

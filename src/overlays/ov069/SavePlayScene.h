@@ -116,12 +116,31 @@ struct CharacterModel {
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-// The main program's character class that the scenes derive theirs from (0x2B18 bytes).
-struct Character : public SavedCharacter {
+// The character with its Mii face (include/character/Character.h has the class).
+struct CharacterBase : public SavedCharacter {
+    void MakeFace();
+
     /* 0x02C0 */ u8 mUnknown02C0[0x2324];
+}; // 0x25E4
+
+// The main program's character class that the scenes derive theirs from (0x2B18 bytes; include/character/Character.h
+// has the class, whose second base, CharacterModel, is mModel here).
+struct Character : public CharacterBase {
+    void Init(int resourceId, int unk, u32 defaultMii);
+    void SetArchive(const char *archiveName);
+    void Update();
+    void UpdateSpeedScales();
+    void Draw();
+    void SetAnimation(u32 resType, int id);
+    void SetAngle(u16 angle);
+    void SetVisible(BOOL visible);
+    void UpdateBodyScale();
+    void UpdateAnimSpeed();
+    void UpdateBodyColors();
+
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];    // Name its archive is mounted under (func_02091048 sets both)
+    /* 0x2AAC */ char mArchiveName[4];    // Name its archive is mounted under (Character::SetArchive sets both)
     /* 0x2AB0 */ char mArchivePath[0x1C]; // and the archive's path
     /* 0x2ACC */ u8 mUnknown2ACC[0x4C];
 }; // 0x2B18
@@ -160,18 +179,6 @@ void *func_020295a4(void *resourceSet, u32 resType);
 
 // --- Characters ---
 void func_020979e0(SavedCharacter *character);
-void func_02090fdc(Character *character, int slot, int param2, int param3);
-void func_02091048(Character *character, const char *archiveName);
-void func_020910a8(Character *character);
-void func_020910d4(Character *character);
-void func_02091968(Character *character); // Draws it
-void Character_SetAnimation(Character *character, u32 resType, int id); // Starts an animation
-void Character_SetAngle(Character *character, u16 angle);
-void func_02091a14(Character *character, int unknown);
-void func_0208fefc(Character *character);
-void func_02091a24(Character *character);
-void func_02091a6c(Character *character);
-void func_02091a88(Character *character);
 s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 }

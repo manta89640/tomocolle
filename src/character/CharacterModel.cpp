@@ -103,8 +103,8 @@ void CharacterModel::Reload(int resourceId, int unk) {
 
 void CharacterModel::MakeBodyArchivePath() {
     STD_CopyString(mArchivePath, "Mdl/Body/body");
-    func_020145d8(mArchivePath, mClothes.GetModelCode());
-    mTexturePath[11] = '0' + data_020f3ff0[mClothes.mId].mColor;
+    func_020145d8(mArchivePath, mClothes.GetModelName());
+    mTexturePath[11] = '0' + data_020f3ff0[mClothes.mId].mBodyColor;
 }
 
 void CharacterModel::SetArchive(const char *archiveName, int clothes, BOOL female) {
