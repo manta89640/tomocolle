@@ -326,11 +326,15 @@ void func_0202ad84(void *resources);
 
 struct MiiListPanel {
     void Init(int pageSize);
+    void SetBackground(int plane, int offset);
     void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitTexts(int plane, WindowPoint position, int *charOffset);
     void InitIcons(int resource, int sequence, WindowPoint position);
     void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitScrollBar(int resource, int sequence, int knobSequence, int a, int b, int c, WindowPoint position,
+                       ScreenRect rect);
+    void SetUpScrollBar(int a, int b, int c);
     void ResetScrollButtons();
     void SetScrollUnknown(BOOL value);
 
@@ -370,12 +374,6 @@ struct MiiList {
     /* 0x113A0 */ u8 mUnknown113A0[8];
 }; // 0x113A8
 typedef MiiList ResidentList;
-
-extern "C" {
-void func_020a2104(ListView *view, int a, int b);
-void func_020a26fc(ListView *view, int a, int b, int c, int d, int e, int f, WindowPoint g, ScreenRect h);
-void func_020a27dc(ListView *view, int a, int b, int c);
-}
 
 // --- Window buttons (the others are in SpriteButton.h) ---
 

@@ -14,14 +14,6 @@
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the
 // rest of the main program are STAND-INS: their sizes and the fields this scene touches.
 
-extern "C" {
-
-void func_020a2104(MiiListPanel *panel, int plane, int unknown);
-void func_020a26fc(MiiListPanel *panel, int a, int b, int c, int d, int e, int f, WindowPoint position,
-                   ScreenRect rect);
-
-}
-
 // The scene.
 class MiiListScene : public Scene {
 public:

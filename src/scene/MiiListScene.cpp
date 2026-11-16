@@ -74,12 +74,12 @@ void MiiListScene::Init() {
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 
     mPanel.Init(6);
-    func_020a2104(&mPanel, 0x100, 0);
+    mPanel.SetBackground(0x100, 0);
     mPanel.InitButtons(0, 0x68, 0x68, sPanelPosition, sPanelSize);
     mPanel.InitTexts(0x1000, sPanelTextPosition, &mCharOffset);
     mPanel.InitUpButton(0, 2, 3, sPanelPosition0, sPanelSize0);
     mPanel.InitDownButton(0, 4, 5, sPanelPosition2, sPanelSize2);
-    func_020a26fc(&mPanel, 0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
+    mPanel.InitScrollBar(0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
 
     mTabs.InitTabs();
     for (int i = 0; i < 5; i++) {

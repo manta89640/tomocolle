@@ -673,6 +673,17 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The operands of a `+` evaluated right first where the original evaluates the left first, the left one holding
   `x < 0 ? -x : x`: write the absolute value as a static inline function, `NFLi_Abs(x / 32)` (lib/NFL's mesh
   builders). Inline, the conditional seems to weigh less in the choice of which operand to evaluate first.
+**Loops (MiiList.cpp)**
+- A search loop whose test is one predicated chain (`ldr; ldr; cmp; add; sub; cmple; addgt; bgt`), where `while
+  (a > x || x > b + c - 1) n++;` is rotated: `for (;;) { count = c[n]; last = b[n] + c[n] - 1; if (!(b[n] > x || x >
+  last)) break; n++; }` with `count` and `last` used after the loop (`RemoveSelected`, `Sort`).
+- A row's `y << 12` recomputed each pass from `y += 20` (not strength-reduced to `+= 81920`): write
+  `(position.y + i * 20) << FX32_SHIFT` (the panel's `InitButtons`, `InitTexts`, `InitIcons`).
+- A by-value point's y loaded into a callee-saved register before the first call although used after it: `int y =
+  position.y;` at the top (`InitScrollBar`).
+- Dead copies of four sprites' positions per row in the original's slots: one of the 27 combinations of the three
+  position setters, found by script (`PlaceButtons`).
+
 **Two registers holding one counter**
 - A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
@@ -815,6 +826,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   call's return slot, where `VecFx32 eye = GetEye(...);` then the fields makes a second copy and a larger frame. A
   vector member assigned through a pointer member, `mCamera->mPosition = mEye;`, loads the pointer once per vector;
   three field assignments reload it after each store (overlay 5's `TestDrawMiiCamera::Update`).
+- A class's implicit assignment copies a base class field by field and a member structure in one block (`ldm`/`stm`
+  loop). A copy that moves the first 0x2A4 bytes as a block and then `SavedCharacter`'s own fields is that of a class
+  holding the record as a member: `MiiList.cpp` copies through a mirror structure (`SavedCharacterCopy`).
+- A three-byte structure copied through stack temporaries (loaded, stored to a temporary, the signed byte read
+  back) goes through static inline accessors taking or returning it by value (`GetPairA(i)`, `SetPairA(n, pair)` in
+  `RemovePairsOf`).
 - Record copies: `(CharacterRecord &)dst = src` (overlay 109). A copy of a `WMBssDesc` is field by field; a struct
   wrapping one is copied with `ldm`/`stm`.
 - Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is

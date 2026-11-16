@@ -368,6 +368,11 @@ void RoomModels::SetPartScales(fx32 scale) {
     }
 }
 
+// Not matching yet (98.8%): in STATE_FADE_NEAR the original multiplies z*z and x*x first and rounds x*x first
+// (xx in r8, zz in r7, then IsPartNear(xx + zz)), as STATE_HIDE_NEAR does; here zz is rounded between the two
+// products and the registers follow. Tried (miilist): the squares in either order, declared apart or together,
+// const, as int/u32, through locals for diff.x/z, written out instead of FX_Mul, inside the call, both operand
+// orders of the sum, diff and the squares at function scope, mStep read into a local.
 void RoomModels::Update() {
     switch (mState) {
     case STATE_IDLE:

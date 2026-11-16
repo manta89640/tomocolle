@@ -1646,6 +1646,27 @@ Measured:
 - The list's `.rodata` ends at `0x020FBFD4`; the room's begins there with an unreferenced halfword `0xFFFF` (its
   objects sort by size: 2, 0x10, 0x14 bytes) and ends at `0x020FBFFC`.
 
+The Mii list (`MiiList.cpp`, complete, 66 of 66), measured:
+- `MiiList` holds the 100 saved characters in the order of `mSortKey` and in up to 17 groups of that order (the
+  kana rows of the names, the sexes, months, blood types, personalities); `MiiListTabs` shows one of five tabs of
+  group buttons; `MiiListPanel` a page of buttons with the names. The panel has one button more than a page and uses
+  them round (`GetButtonEntry`): scrolling a row writes only the button that comes into view (`ShowEntryAbove`,
+  `ShowEntryBelow`), and a button's text is written again only when its character or the mode changed. A mark beside
+  a name (`mIcons`) shows that the names, the creator's name, the birthday and the blood type are all set.
+- The name sorts move the names that start with no kana (`CharacterSort::GetNameInitialGroup` 10) after the kana
+  ones by exchanging the two runs (`SwapRuns`), and fold groups 11 and 12 into 10.
+- `RemoveSelected` will not remove the first saved character (index 0); otherwise it removes the selected one from
+  the list and `EraseCharacter` from the saved game: the other characters' relations with it are reset (meter 100,
+  rank 0) and their long acts and troubles with it ended (`ForgetCharacter`), the news items about it dropped
+  (`RemoveNewsOf`), the pairs naming it dropped from the two 100-entry tables of character pairs at
+  `gGameData+0x155E4` and `+0x154B8` (`RemovePairsOf`), the saved songs' notes for it changed (`RemoveFromSongs`) and
+  its record reset (`ClearRecord`).
+- The list copies whole characters as 0x2A4 bytes in one block and then `SavedCharacter`'s own fields. A derived
+  class's implicit assignment copies its base field by field (measured with the game's compiler), so the original
+  `SavedCharacter` held the record as a member, not as a base (inferred); the source copies through a mirror
+  structure.
+- Overlays 70, 78, 95 and 109 and the main program's `MiiListScene` use the list.
+
 Inferred: the classes' names are descriptive; none survives in the ROM. That the first virtual function is a price
 rests on the values (250, 480, 5800).
 
