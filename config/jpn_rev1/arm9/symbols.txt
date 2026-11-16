@@ -3641,7 +3641,7 @@ _ZN14SavedCharacter13ChooseTroubleEi kind:function(arm,size=0xd0) addr:0x0209b07
 _ZN14SavedCharacter10EndTroubleEx kind:function(arm,size=0x8c) addr:0x0209b14c
 _ZN14SavedCharacter12ClearTroubleEv kind:function(arm,size=0x30) addr:0x0209b1d8
 _ZN14SavedCharacter18StartRandomTroubleExiPS_i kind:function(arm,size=0x74) addr:0x0209b208
-func_0209b27c kind:function(arm,size=0x4a0) addr:0x0209b27c
+_ZN14SavedCharacter12StartTroubleEiixiPS_i kind:function(arm,size=0x4a0) addr:0x0209b27c
 func_0209b71c kind:function(arm,size=0xb8) addr:0x0209b71c
 func_0209b7d4 kind:function(arm,size=0x60) addr:0x0209b7d4
 func_0209b834 kind:function(arm,size=0xb8) addr:0x0209b834
@@ -3716,8 +3716,8 @@ func_0209dea0 kind:function(arm,size=0x2c) addr:0x0209dea0
 func_0209decc kind:function(arm,size=0x150) addr:0x0209decc
 func_0209e01c kind:function(arm,size=0x98) addr:0x0209e01c
 func_0209e0b4 kind:function(arm,size=0x34) addr:0x0209e0b4
-func_0209e0e8 kind:function(arm,size=0x2c) addr:0x0209e0e8
-func_0209e114 kind:function(arm,size=0x2c) addr:0x0209e114
+_Z10ClampFieldIsEiPT_iiPKc kind:function(arm,size=0x2c) addr:0x0209e0e8
+_Z10ClampFieldIhEiPT_iiPKc kind:function(arm,size=0x2c) addr:0x0209e114
 func_0209e140 kind:function(arm,size=0x28) addr:0x0209e140
 _ZN11ClothesItemC1Ev kind:function(arm,size=0x28) addr:0x0209e168
 func_0209e190 kind:function(arm,size=0x18) addr:0x0209e190
@@ -4721,10 +4721,10 @@ data_020fb898 kind:data(any) addr:0x020fb898
 gStr_2K kind:data(any) addr:0x020fb8c0
 data_020fb8c4 kind:data(any) addr:0x020fb8c4
 data_020fb8d4 kind:data(any) addr:0x020fb8d4
-data_020fb8e4 kind:data(any) addr:0x020fb8e4
-data_020fb8ed kind:data(any) addr:0x020fb8ed
-data_020fb8f6 kind:data(any) addr:0x020fb8f6
-data_020fb8ff kind:data(any) addr:0x020fb8ff
+sScoresAnswer0 kind:data(any) addr:0x020fb8e4
+sScoresAnswer1 kind:data(any) addr:0x020fb8ed
+sScoresAnswer2 kind:data(any) addr:0x020fb8f6
+sScoresAnswer3 kind:data(any) addr:0x020fb8ff
 data_020fb912 kind:data(any) addr:0x020fb912
 data_020fb940 kind:data(any) addr:0x020fb940
 data_020fb970 kind:data(any) addr:0x020fb970
