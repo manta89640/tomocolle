@@ -770,6 +770,23 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   elsewhere, or the compare written inside the index expression all let the compiler forward and reorder (lib/NFL's
   `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart`, 7 and about 30 differing instructions to none). A static
   inline `abs` (`return v < 0 ? -v : v;`) between the store and the reads does the same.
+- A sum computed twice, once for a clamp's compares and again in its else (`adds r0, r7, r6; movmi r7, #0; bmi;
+  cmp r0, #11; movgt r7, #11; addle r7, r7, r6`), where every level from 1 up folds the else into the compare's sum:
+  the compares read a copy of the variable and the else adds to the variable itself,
+  `browRot = obj->exprFields[6]; brow = browRot; ... if (browRot + d < 0) brow = 0; else if (browRot + d > 11)
+  brow = 11; else brow += d;` (lib/NFL's `NFLi_ApplyExpression2` and `3`). With one variable in both places the
+  compiler turns the clamp into `brow += d` and two compares, whatever the form (temporaries, ternaries, inline
+  helpers, types, operand orders). The copy must be made at the top, with the field's load: a copy made just before
+  the clamp is coalesced and folded again.
+
+**A computation kept whose result nothing uses**
+- A clamp whose moves are gone but whose `adds`, `bmi` and `cmp` remain (`adds r0, r1, r0; bmi L; cmp r0, #7; L:`),
+  with its operands loaded: the clamp is dead, and the function was compiled with `#pragma opt_dead_assignments off`
+  (lib/NFL's `NFLi_ApplyExpression5`, which computes the eye's rotation as kinds 1 and 4 do and then passes the
+  Mii's own). Without the pragma the IR drops the whole clamp; with it and the clamp written on the variable itself,
+  the backend drops the moves before if-conversion and leaves `cmppl`; written in the copy form above (a copy
+  assigned at the top, the compares on the original, the else adding), the moves go after if-conversion and the
+  `bmi`/`cmp` stay. Level 1 keeps the compares too, but not the original's scheduling.
 
 **A call's arguments**
 - A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a

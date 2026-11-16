@@ -726,7 +726,10 @@ static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) 
 
 // The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
 // Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
+// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
+// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
+// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -846,7 +849,10 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
 
 // The hair's other mesh, for the types with a texture of their own
 // Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
+// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
+// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
+// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -3086,11 +3092,13 @@ void NFLi_ApplyExpression0(NFLFace *obj) {
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own.
-// Not matching yet: the original keeps the compare and branch of this clamp, whose result nothing uses (the eye's
-// rotation goes in unclamped); here the compiler drops the whole clamp.
+// Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own: the rotation moved by
+// sNFLEyeTypeRotations as in kinds 1 and 4 and kept to 0..7 goes unused, and the eyes take the Mii's rotation.
+// The original keeps that clamp's compares and drops only its moves, which is what opt_dead_assignments off gives
+// with the clamp written on a copy (newRot) and the else adding d again.
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression5(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3099,18 +3107,24 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     u16 idx;
     fx32 v;
     int rot;
+    int d;
+    int newRot;
 
-    idx = (u16)(((obj->exprFields[3] + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
-    rot = obj->exprFields[3] + (sNFLEyeTypeRotations[obj->exprFields[3]] - sNFLEyeTypeRotations[26]);
-    if (rot < 0) {
-        rot = 0;
-    } else if (rot > 7) {
-        rot = 7;
-    }
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
-    type = obj->exprFields[5];
+    rot = obj->exprFields[3];
+    d = sNFLEyeTypeRotations[rot] - sNFLEyeTypeRotations[26];
+    newRot = rot;
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     cos = (fx16)FX_CosIdx(idx);
+    type = obj->exprFields[5];
+    if (rot + d < 0) {
+        newRot = 0;
+    } else if (rot + d > 7) {
+        newRot = 7;
+    } else {
+        newRot += d;
+    }
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[0].texAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[0].texAddr, obj->eyePlttAddr);
     idx = (u16)((obj->exprFields[6] + sNFLEyebrowTypeRotations[obj->exprFields[7]] - 0x20) << 11);
@@ -3136,6 +3150,7 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
+#pragma opt_dead_assignments reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
@@ -3186,6 +3201,10 @@ void NFLi_ApplyExpression6(NFLFace *obj) {
 // Kind 1: the eyes of shared slot 2 (eye type 48's texture), their rotation moved by sNFLEyeTypeRotations at the
 // rotation less at 48 and kept to 0..7.
 // Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
+// Tried (round 4): the clamp on a copy (as kinds 2, 3 and 5), with d a variable, through inline helpers; every order
+// of the first statements and of the declarations; the forms of idx, sin and cos; sin and cos computed in the call's
+// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4. Behind the r3: the original loads
+// the call's stack arguments (texFmt, 2) and the sine table's address before rot's last use, which ours does after.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -3239,27 +3258,28 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
 #pragma optimization_level reset
 
 // Kind 2: the eyes turned 2 steps more (kept to 0..7), the eyebrows 2 more (to 0..11), the mouth of shared slot 3.
-// Not matching yet: for the eyebrow the original adds d twice (once to compare, once in the else), where this folds
-// the sum into brow before the compares. opt_propagation off keeps d in a register, as the original does.
+// The eyebrow's sum is tested on a copy of the rotation and added again in the else: the original adds d twice.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
 void NFLi_ApplyExpression2(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
-    fx32 y;
-    int type;
     u16 idx;
     fx32 v;
     int rot;
     int brow;
     int d;
+    int browRot;
+    fx32 y;
+    int type;
 
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
+    browRot = obj->exprFields[6];
     type = obj->exprFields[5];
-    brow = obj->exprFields[6];
+    brow = browRot;
     d = 2;
-    rot = obj->exprFields[3] + 2;
+    rot = obj->exprFields[3] + d;
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     if (rot < 0) {
         rot = 0;
     } else if (rot > 7) {
@@ -3270,9 +3290,9 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
-    if (brow + d < 0) {
+    if (browRot + d < 0) {
         brow = 0;
-    } else if (brow + d > 11) {
+    } else if (browRot + d > 11) {
         brow = 11;
     } else {
         brow += d;
@@ -3304,27 +3324,29 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4.
-// Not matching yet: as NFLi_ApplyExpression2, with d = -2 and an eyebrow rotation past 11 set to 0.
+// Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4; an eyebrow rotation past 11 is set
+// to 0
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
 void NFLi_ApplyExpression3(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
-    fx32 y;
-    int type;
     u16 idx;
     fx32 v;
     int rot;
     int brow;
     int d;
+    int browRot;
+    fx32 y;
+    int type;
 
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
+    browRot = obj->exprFields[6];
     type = obj->exprFields[5];
-    brow = obj->exprFields[6];
+    brow = browRot;
     d = -2;
-    rot = obj->exprFields[3] + -2;
+    rot = obj->exprFields[3] + d;
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     if (rot < 0) {
         rot = 0;
     } else if (rot > 7) {
@@ -3335,9 +3357,9 @@ void NFLi_ApplyExpression3(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
-    if (brow + d < 0) {
+    if (browRot + d < 0) {
         brow = 0;
-    } else if (brow + d > 11) {
+    } else if (browRot + d > 11) {
         brow = 0;
     } else {
         brow += d;
@@ -4721,39 +4743,43 @@ typedef struct NFLTexBank {
 
 extern const NFLTexBank sNFLTexBankParts[];
 
-// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
-// Not matching: register allocation only (the original keeps the second part's address in r4, which becomes dest)
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does (and in
+// its shape: the first part's base, the second's, the first's size, the copy split over the two parts)
+// Not matching: the instructions and callee-saved registers are the original's, but the original loads the fields'
+// addresses in the order second, first, size (its literal pool +2, +0, +4), which with any statement order that loads
+// them so gives the size and first base the other two registers; here the size is read first (pool +2, +4, +0).
 int NFLi_CopyToTexBank(int bank, const void *src, u32 offset, u32 size) {
-    u32 n;
-    void *dest;
-    int result;
-    u32 second = sNFLTexBankParts[bank].secondBase << 12;
-    u32 first = sNFLTexBankParts[bank].firstBase;
-    u32 split = sNFLTexBankParts[bank].firstSize;
+    u32 szBlk1 = sNFLTexBankParts[bank].firstSize;
+    u32 blk2 = sNFLTexBankParts[bank].secondBase << 12;
+    u32 blk1 = sNFLTexBankParts[bank].firstBase;
     u32 end = offset + size;
+    void *temp;
+    int result;
 
     result = NFLi_CheckTexBank(bank, offset, end);
     if (result != 0) {
         return result;
     }
-    if (second == 0) {
-        dest = (void *)(offset + (first << 12));
-    } else if (end < split << 12) {
-        dest = (void *)(offset + (first << 12));
-    } else if (offset >= split << 12) {
-        dest = (void *)(second + offset - (split << 12));
+    if (blk2 == 0) {
+        temp = (void *)(offset + (blk1 << 12));
+    } else if (end < szBlk1 << 12) {
+        temp = (void *)(offset + (blk1 << 12));
+    } else if (offset >= szBlk1 << 12) {
+        temp = (void *)(blk2 + offset - (szBlk1 << 12));
     } else {
-        n = (split << 12) - offset;
-        dest = (void *)(offset + (first << 12));
-        MIi_CpuCopy32(src, dest, n);
-        DC_FlushRange(dest, n);
-        size -= n;
-        MIi_CpuCopy32((const u8 *)src + n, (void *)second, size);
-        DC_FlushRange((void *)second, size);
+        void *temp2 = (void *)blk2;
+        u32 temp1 = (szBlk1 << 12) - offset;
+
+        temp = (void *)(offset + (blk1 << 12));
+        MIi_CpuCopy32(src, temp, temp1);
+        DC_FlushRange(temp, temp1);
+        size -= temp1;
+        MIi_CpuCopy32((const u8 *)src + temp1, temp2, size);
+        DC_FlushRange(temp2, size);
         return 0;
     }
-    MIi_CpuCopy32(src, dest, size);
-    DC_FlushRange(dest, size);
+    MIi_CpuCopy32(src, temp, size);
+    DC_FlushRange(temp, size);
     return 0;
 }
 
@@ -4889,6 +4915,8 @@ extern NFLSharedStreamSource sNFLSharedStreamSources[];
 // Stage 0 of NFL_FillBuffer: the six shared streams (sNFLSharedStreamSources) into the ring buffer, converted to direct
 // colours in mode 7, then on to the shared palette or, in mode 7, the faces.
 // Not matching: register allocation only (the original has pal in r5, source in r7 and the zero of extra in r8)
+// Tried (round 4): every order of the function's five and the block's six declarations, casts on the pointers'
+// initialisers, pal or extra at function scope, the else's p as src, and each opt_* pragma alone: none moves the three.
 BOOL NFLi_CopySharedTextures(u32 *pos) {
     NFLWork *work = (NFLWork *)sNFLWork;
     NFLSharedStreamSource *source = sNFLSharedStreamSources;
