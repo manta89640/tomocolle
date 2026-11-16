@@ -605,7 +605,7 @@ lib/NitroSystem/libraries/g3d/src/util.c:
 
 lib/NitroSystem/libraries/g3d/src/model.c:
     complete
-    .text       start:0x02065614 end:0x0206597c
+    .text       start:0x02065614 end:0x02065b3c
 
 lib/NitroSystem/libraries/g3d/src/binres/res_struct_accessor.c:
     complete

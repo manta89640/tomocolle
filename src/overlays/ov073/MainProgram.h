@@ -70,7 +70,7 @@ struct SceneManager {
     /* 0x8 */ int mPreviousSceneId;
 };
 
-// What the scenes leave for each other (data_0213ba74): the camera as the last room camera left it, and how far
+// What the scenes leave for each other (gSceneMemory): the camera as the last room camera left it, and how far
 // the tutorial is.
 struct SceneMemory {
     void SetOrbit(s16 x, s16 y, s16 z) {
@@ -216,7 +216,7 @@ int func_020a6214(DayPhase *phase);
 // --- Scenes ---
 extern SceneManager gSceneManager;
 void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
-extern SceneMemory data_0213ba74;
+extern SceneMemory gSceneMemory;
 
 } // extern "C"
 

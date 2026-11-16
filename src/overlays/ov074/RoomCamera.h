@@ -49,13 +49,13 @@ struct SavedCamera {
 
 extern "C" {
 extern Camera data_02122764;
-// What the scenes remember for each other (data_0213ba74): the camera, and the saved character whose room was
+// What the scenes remember for each other (gSceneMemory): the camera, and the saved character whose room was
 // shown last
 struct SceneMemory {
     /* 0x00 */ SavedCamera mCamera;
     /* 0x20 */ u8 mCharacter;
 };
-extern SceneMemory data_0213ba74;
+extern SceneMemory gSceneMemory;
 void func_0202a640(Camera *camera);
 void func_0202a748(Camera *camera);
 // The absolute value of each component

@@ -42,6 +42,10 @@ struct ScreenControl {
         mPlanes |= planes;
         mPlanesChanged = TRUE;
     }
+    void Hide(u32 planes) {
+        mPlanes &= ~planes;
+        mPlanesChanged = TRUE;
+    }
 
     /* 0x00 */ u32 mPlanes;
     /* 0x04 */ u8 mUnknown04[0x40];

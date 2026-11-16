@@ -108,7 +108,7 @@ void TutorialRoomScene::StartLoading() {
     gSoundManager.StartSeqIfNotPlaying(0, 11);
     gSoundManager.SetSeqTrackMuteOnly(0, 0x1C1, TRUE);
     gSoundManager.SetSeqTrackModDepth(0, 0xFFFF, 0);
-    mTutorialStep = data_0213ba74.mTutorialStep;
+    mTutorialStep = gSceneMemory.mTutorialStep;
 
     for (int i = 0; i < 100; i++) {
         if (func_0202c3dc(&gGameData, i)) {
@@ -1746,9 +1746,9 @@ TutorialRoomCamera::TutorialRoomCamera() {
 
 // @0x0214e42c
 TutorialRoomCamera::~TutorialRoomCamera() {
-    VEC_Set(&data_0213ba74.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
-    VEC_Set(&data_0213ba74.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
-    data_0213ba74.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
+    VEC_Set(&gSceneMemory.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
+    VEC_Set(&gSceneMemory.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
+    gSceneMemory.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
 }
 
 // @0x0214e48c

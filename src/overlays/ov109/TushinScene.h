@@ -249,7 +249,6 @@ s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(SceneCharacter *character);
 void func_0208ef00(CharacterModel *model, int a, int b);
 void func_0208ef5c(CharacterModel *model, int resourceId, int a);
-void func_02065abc(NNSG3dResMdl *model, int a);
 void func_020979e0(SavedCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index

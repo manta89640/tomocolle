@@ -232,7 +232,7 @@ struct Light;
 extern "C" {
 extern PadInput data_0211f9d4;
 extern SceneManager gSceneManager;
-extern SceneMemory data_0213ba74;
+extern SceneMemory gSceneMemory;
 extern Light data_021227cc;
 extern Light data_021227d8;
 void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
@@ -327,11 +327,11 @@ void MiiEditScene::Init() {
     Character_SetFace(&mCharacter, 8);
     switch (mSceneId) {
     case 0x42:
-        mUnknown5824 = data_0213ba74.mCharacters[0];
+        mUnknown5824 = gSceneMemory.mCharacters[0];
         LoadCharacter(mUnknown5824);
         break;
     case 0x44: {
-        mUnknown5824 = data_0213ba74.mCharacters[0];
+        mUnknown5824 = gSceneMemory.mCharacters[0];
         LoadCharacter(mUnknown5824);
         u8 a;
         u8 b;
@@ -4696,11 +4696,11 @@ void MiiEditRegisterPage::Update() {
             break;
         case 0x43:
         case 0x44:
-            data_0213ba74.mCharacters[0] = mScene->mUnknown5824;
+            gSceneMemory.mCharacters[0] = mScene->mUnknown5824;
             func_0203c02c(&gSceneManager, 0x74);
             break;
         case 0x6F:
-            data_0213ba74.mCharacters[0] = mScene->mUnknown5824;
+            gSceneMemory.mCharacters[0] = mScene->mUnknown5824;
             func_0203c02c(&gSceneManager, 0x69);
             break;
         }

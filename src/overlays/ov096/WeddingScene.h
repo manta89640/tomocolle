@@ -392,7 +392,7 @@ struct Renderer3d;
 extern "C" {
 extern Camera data_02122764;
 extern Light data_021227cc[];
-extern SceneMemory data_0213ba74;
+extern SceneMemory gSceneMemory;
 extern ScreenControl data_0211d604;
 extern SceneManager gSceneManager;
 extern ArchiveLoader gArchiveManager;
@@ -434,7 +434,6 @@ void func_02023f4c(ScreenControl *screens, int planes, int level);
 s64 Clock_GetSeconds(void *clock);
 }
 
-#define gSceneMemory data_0213ba74
 
 // How long a character's honeymoon lasts
 inline u32 GetHoneymoonMinutes(SavedCharacter *character) {
