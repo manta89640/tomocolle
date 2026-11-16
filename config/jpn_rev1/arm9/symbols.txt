@@ -1779,7 +1779,7 @@ func_02040284 kind:function(arm,size=0x4) addr:0x02040284
 func_02040288 kind:function(arm,size=0xe4) addr:0x02040288
 func_0204036c kind:function(arm,size=0x7c) addr:0x0204036c
 func_020403e8 kind:function(arm,size=0x190) addr:0x020403e8
-func_02040578 kind:function(arm,size=0xcc) addr:0x02040578
+_ZN14MapModelsSceneC1Ei kind:function(arm,size=0xcc) addr:0x02040578
 _ZN11TushinSceneC1Ei kind:function(arm,size=0x260) addr:0x02040644
 func_020408a4 kind:function(arm,size=0x29c) addr:0x020408a4
 func_02040b40 kind:function(arm,size=0xbc) addr:0x02040b40
@@ -5395,8 +5395,7 @@ _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
 @13231 kind:data(any) addr:0x02111be0 local
 @13259 kind:data(any) addr:0x02111bf8 local
 @13260 kind:data(any) addr:0x02111bfc local
-data_02111c00 kind:data(any) addr:0x02111c00
-data_02111c08 kind:data(any) addr:0x02111c08
+_ZTV14MapModelsScene kind:data(any) addr:0x02111c00
 gStr_M00_3 kind:data(any) addr:0x02111c24
 gStr_Mdl_Misc_map_sky_3D_LZ_bin kind:data(any) addr:0x02111c28
 gStr_M01_3 kind:data(any) addr:0x02111c44

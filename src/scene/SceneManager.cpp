@@ -13,7 +13,12 @@
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 
+#include "MapModelsScene.h"
 #include "../overlays/ov069/SavePlayScene.h"
+#include "../overlays/ov072/MapScene.h"
+
+// Scene 0x27
+MapModelsScene::MapModelsScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x2C and 0x2D, overlay 69
 SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
@@ -24,5 +29,8 @@ SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
 SavePlayCharacter::SavePlayCharacter() {}
 
 SavePlayCharacter::~SavePlayCharacter() {}
+
+// Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
+MapScene::MapScene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-c) -------------------------------------------------

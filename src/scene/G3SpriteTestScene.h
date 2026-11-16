@@ -2,6 +2,7 @@
 #define SCENE_G3SPRITETESTSCENE_H
 
 #include "MainProgram.h"
+#include "G3Sprite.h"
 
 // Scene 0x25 (main program, no overlay): a test of the main program's 3D sprites, with the archive
 // "Scn/Scene/SceneTestG3Sprite_LZ.bin". A hundred sprites of the texture "Face.tga" (32 by 32 pixels, one of four
@@ -105,42 +106,6 @@ void func_0208ed30(CharacterModel *model); // Draws it
 void func_0208fd90(CharacterBase *character, int unknown);
 void func_0208ff68(CharacterBase *character, int a, int b, int c, int d);
 void func_02090214(CharacterBase *character); // Draws it
-}
-
-// --- 3D sprites (main program 0x0202b0e8 to 0x0202b6d0) ---
-
-// A textured square drawn by the 3D engine: a rectangle of a texture of the sprite texture list
-// (data_021232e4), at a position, with a scale. func_0202b130 constructs it.
-class G3Sprite {
-public:
-    virtual ~G3Sprite(); // func_0202b6cc, which does nothing
-
-    /* 0x04 */ int mTexture;
-    /* 0x08 */ BOOL mUnknown08;     // func_0202b4a4 draws nothing while it or mUnknown18 is 0
-    /* 0x0C */ int mFrames;       // The scene counts the frames since the sprite last moved
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ int mUnknown14;
-    /* 0x18 */ u8 mUnknown18;      // 31 by default
-    /* 0x19 */ u8 mUnknown19;
-    /* 0x1A */ u16 mUnknown1A;
-    /* 0x1C */ fx32 mScaleX;       // 1.0 by default
-    /* 0x20 */ fx32 mScaleY;
-    /* 0x24 */ int mX;            // The scene puts it at a random place
-    /* 0x28 */ int mY;
-    /* 0x2C */ ScreenRect mRect;   // Of the texture
-    /* 0x3C */ u8 mUnknown3C[0x10];
-}; // 0x4C
-
-// The textures of the 3D sprites
-struct G3SpriteTextures;
-
-extern "C" {
-extern G3SpriteTextures data_021232e4;
-void func_0202b4d8(G3SpriteTextures *textures);
-void func_0202b4dc(G3SpriteTextures *textures, int index, const char *path, int format, int width, int height);
-void func_0202b1f0(G3Sprite *sprite, int texture, const ScreenRect *rect); // Sets its texture and rectangle
-void func_0202b4a4(G3Sprite *sprite);                                         // Draws it
-void func_0202b4c4(G3Sprite *sprite);
 }
 
 // The scene.

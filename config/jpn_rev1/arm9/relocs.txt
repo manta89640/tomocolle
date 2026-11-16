@@ -5989,7 +5989,7 @@ from:0x020405c8 kind:arm_call to:0x0202a618 module:main
 from:0x020405f8 kind:arm_call to:0x0202a618 module:main
 from:0x02040628 kind:arm_call to:0x0202a618 module:main
 from:0x02040634 kind:load to:0x02110978 module:main
-from:0x02040638 kind:load to:0x02111c08 module:main
+from:0x02040638 kind:load to:0x02111c00 add:0x8 module:main
 from:0x0204063c kind:load to:0x0210f640 add:0x8 module:main
 from:0x02040640 kind:load to:0x0210f65c add:0x8 module:main
 from:0x02040688 kind:arm_call to:0x02022d2c module:main

@@ -119,7 +119,7 @@ void SavePlayScene::Init() {
     mAnimationCount = count;
     Character_SetAnimation(&mCharacters[0], RESOURCE_BCA0, Rand(mAnimationCount));
     func_02091a14(&mCharacters[0], 0);
-    mCharacters[0].mModel.mShadowAlpha = 0;
+    mCharacters[0].mModel.mShadowVisible = FALSE;
     mCamera.Init();
     mLights.Init(&mCamera);
 

@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "MapScene.h"
+#include "MainProgram.h"
 
 // Overlay 72: the island map (MapScene). It is one source file: its small constants share one pool at the start of
 // .rodata that functions throughout the overlay read by offset, its tables of strings share one in .data, and the
@@ -565,7 +566,7 @@ void MapScene::Init() {
     func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
     func_02033174(&mMessageWindows[1], sWindowDownScreen, 2);
     func_020337b8(&mMessageWindows[1], 0, 1, 0x14, 0x15, sTutorialButtonPosition, sTutorialButtonSize,
-                  &mMessageFiles[0], 4, &gFonts[2].mFont, 0x10, &charOffset, sTutorialButtonUnknown);
+                  &mMessageFiles[0], 4, &gFonts[2].mFont, 0x10, &charOffset, (const ButtonSounds *)sTutorialButtonUnknown);
     func_02033a58(&mMessageWindows[1], &mMessageFiles[1], 0x152, &gFonts[0].mFont, 0x10, sTutorialTextPosition,
                   &charOffset);
     func_02034f94(&mMessageWindows[1], 1);
@@ -1679,16 +1680,16 @@ void MapScene::UpdateWindows() {
 void MapSound::Init(MapClock *clock, int mode) {
     gSoundManager.StartSeqArcIfNotPlaying(0, 3, 4);
     for (int i = 0; i < 4; i++) {
-        mRamps.mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
+        mRamps[0].mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
         int value = sModelMusic[0][i] << FX32_SHIFT;
-        mRamps.mRamps[i].mValue = value;
-        mRamps.mRamps[i].mTarget = value;
-        mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[0].mRamps[i].mValue = value;
+        mRamps[0].mRamps[i].mTarget = value;
+        mRamps[0].mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
-    gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps.mRamps[1].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTempoRatio(0, mRamps.mRamps[2].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps.mRamps[3].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcVolume(0, mRamps[0].mRamps[0].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps[0].mRamps[1].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTempoRatio(0, mRamps[0].mRamps[2].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps[0].mRamps[3].mValue >> FX32_SHIFT);
     SetMode(clock, mode);
 }
 
@@ -1703,7 +1704,7 @@ void MapSound::SetMode(MapClock *clock, int mode) {
             gSoundManager.LoadGroup(sSeasonSoundGroups[mSeason]);
             mTimeOfDay = GetTimeOfDay(&clock->mTime);
             StartSurroundings(0, mSeason, mTimeOfDay);
-            mSurroundingRamps.mRamps[0].mValue = 0x7E900;
+            mRamps[1].mRamps[0].mValue = 0x7E900;
         }
         mDayOrNight = GetDayOrNight(&clock->mTime);
         switch (mDayOrNight) {
@@ -1722,7 +1723,7 @@ void MapSound::SetMode(MapClock *clock, int mode) {
         gSoundManager.LoadGroup(sSeasonSoundGroups[mSeason]);
         mTimeOfDay = GetTimeOfDay(&clock->mTime);
         StartSurroundings(0, mSeason, mTimeOfDay);
-        mSurroundingRamps.mRamps[0].mValue = 0x7E900;
+        mRamps[1].mRamps[0].mValue = 0x7E900;
         break;
     case MODE_TUTORIAL:
         mDayOrNight = GetDayOrNight(&clock->mTime);
@@ -1744,14 +1745,14 @@ void MapSound::SetMode(MapClock *clock, int mode) {
 }
 
 void MapSound::Update(MapClock *clock) {
-    mRamps.Update();
-    gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps.mRamps[1].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTempoRatio(0, mRamps.mRamps[2].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps.mRamps[3].mValue >> FX32_SHIFT);
+    mRamps[0].Update();
+    gSoundManager.SetSeqArcVolume(0, mRamps[0].mRamps[0].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps[0].mRamps[1].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTempoRatio(0, mRamps[0].mRamps[2].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps[0].mRamps[3].mValue >> FX32_SHIFT);
     if (!(mMode != MODE_START && mMode != MODE_RESTART && mMode != MODE_CONTINUE)) {
-        mSurroundingRamps.Update();
-        int volume = mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT;
+        mRamps[1].Update();
+        int volume = mRamps[1].mRamps[0].mValue >> FX32_SHIFT;
         switch (mSurroundingState) {
         case 0:
             gSoundManager.SetSeqArcVolume(5, volume);
@@ -1802,8 +1803,8 @@ void MapSound::Update(MapClock *clock) {
 
 void MapSound::SetBuilding(int model) {
     for (int i = 0; i < 4; i++) {
-        mRamps.mRamps[i].mTarget = sModelMusic[model][i] << FX32_SHIFT;
-        mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[0].mRamps[i].mTarget = sModelMusic[model][i] << FX32_SHIFT;
+        mRamps[0].mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
 }
 
@@ -1814,10 +1815,10 @@ void MapSound::Stop() {
 void MapSound::StartSurroundings(int kind, int season, int timeOfDay) {
     switch (kind) {
     case 0: {
-        mSurroundingRamps.mRamps[0].mStep = 0x90;
-        mSurroundingRamps.mRamps[0].mValue = 0;
-        mSurroundingRamps.mRamps[0].mTarget = 0x7E900;
-        mSurroundingRamps.mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[1].mRamps[0].mStep = 0x90;
+        mRamps[1].mRamps[0].mValue = 0;
+        mRamps[1].mRamps[0].mTarget = 0x7E900;
+        mRamps[1].mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
         mLongSound = FALSE;
         gSoundManager.StopSeqArc(5, 0);
         gSoundManager.StopSeqArc(4, 0);
@@ -1825,16 +1826,16 @@ void MapSound::StartSurroundings(int kind, int season, int timeOfDay) {
         for (int i = 0; i < 3; i++) {
             StartSurroundingSound(*sounds++);
         }
-        gSoundManager.SetSeqArcVolume(5, mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT);
+        gSoundManager.SetSeqArcVolume(5, mRamps[1].mRamps[0].mValue >> FX32_SHIFT);
         break;
     }
     case 1: {
-        mSurroundingRamps.mRamps[0].mStep = 0x90;
-        mSurroundingRamps.mRamps[0].mValue = 0x7E900;
-        mSurroundingRamps.mRamps[0].mTarget = 0;
-        mSurroundingRamps.mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[1].mRamps[0].mStep = 0x90;
+        mRamps[1].mRamps[0].mValue = 0x7E900;
+        mRamps[1].mRamps[0].mTarget = 0;
+        mRamps[1].mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
         mLongSound = FALSE;
-        gSoundManager.SetSeqArcVolume(5, mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT);
+        gSoundManager.SetSeqArcVolume(5, mRamps[1].mRamps[0].mValue >> FX32_SHIFT);
         gSoundManager.StopSeqArc(4, 0x78);
         const u8 *sounds = &sSurroundingSounds[season][timeOfDay * 3];
         for (int i = 0; i < 3; i++) {

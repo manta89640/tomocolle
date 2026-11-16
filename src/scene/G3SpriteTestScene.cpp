@@ -30,7 +30,7 @@ void G3SpriteTestScene::Init() {
         mSprites[i].mScaleY = FX32_ONE;
         mSprites[i].mScaleX = FX32_ONE;
         func_0202b4c4(&mSprites[i]);
-        mSprites[i].mFrames = i;
+        mSprites[i].mDepth = i;
         mSprites[i].mUnknown19 = 20;
         mSprites[i].mX = 0;
         mSprites[i].mY = 0;
@@ -74,9 +74,9 @@ void G3SpriteTestScene::SetRandomPosition(int index) {
 void G3SpriteTestScene::UpdateSprites() {
     for (int i = 0; i < SPRITE_COUNT; i++) {
         if (i != mNextSprite) {
-            mSprites[i].mFrames++;
+            mSprites[i].mDepth++;
         } else {
-            mSprites[i].mFrames = 0;
+            mSprites[i].mDepth = 0;
             SetRandomPosition(i);
             mSprites[i].mScaleX = mSprites[i].mScaleY = (MATH_Rand16(&gRandom, 0) & 0xF) * 0x100 + FX32_ONE;
         }

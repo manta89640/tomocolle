@@ -15,6 +15,9 @@ struct WindowPoint {
     /* 0x4 */ int y;
 };
 
+struct MessageWindow;
+extern "C" void func_02034fc8(MessageWindow *window, int text, int x, int y);
+
 // The main program's message window (virtual table data_021102e8, functions func_02032fb8 to func_02034f94): a
 // window on a background that slides in and out, with sprites, buttons and up to eight message texts. Not
 // decompiled: a stand-in with its size, as the constructors of the scenes that hold one show it, and the fields that
@@ -43,6 +46,9 @@ struct MessageWindow {
 
     MessageWindow() {}
 
+    // Where a text of the window is
+    void SetTextPosition(int text, WindowPoint position) { func_02034fc8(this, text, position.x, position.y); }
+
     // Its table (0x021102E0) has these two
     virtual void SetVisible(BOOL visible); // func_02034a94: of every sprite, button, text and plain sprite, and its planes
     virtual void func_02034bc4();         // Not known: it takes more arguments than four
@@ -61,7 +67,9 @@ struct MessageWindow {
     /* 0xAF8C */ BOOL mTransitionDone;      // func_02034720 clears it; set when the window has finished moving
     /* 0xAF90 */ int mUnknownAF90;
     /* 0xAF94 */ int mUnknownSetBeforeClose; // The scenes set it (5 or 15) before func_020349cc; the update reads it
-    /* 0xAF98 */ u8 mUnknownAF98[0xC];
+    /* 0xAF98 */ int mUnknownAF98;          // The main program's list scenes keep there what to do when it has closed
+    /* 0xAF9C */ int mUnknownAF9C;          // The island map sets it (0 or 1) as it opens its title window
+    /* 0xAFA0 */ int mUnknownAFA0;
 }; // 0xAFA4
 
 extern "C" {

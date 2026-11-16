@@ -55,6 +55,17 @@ public:
     virtual void UnknownVirtual3();             // func_02029bd4
     virtual void Draw();                        // func_02029df4
 
+    void SetPosition(VecFx32 position) {
+        mPosition.x = position.x;
+        mPosition.y = position.y;
+        mPosition.z = position.z;
+    }
+    void SetPosition(fx32 x, fx32 y, fx32 z) {
+        mPosition.x = x;
+        mPosition.y = y;
+        mPosition.z = z;
+    }
+
     /* 0x04 */ int mUnknown04;
     /* 0x08 */ int mUnknown08;
     /* 0x0C */ NNSG3dResMdl *mResMdl;
