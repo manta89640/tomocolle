@@ -50,6 +50,14 @@ public:
 // 0x0215E4E0, table 0x02182CD0). Its constructor is inline.
 class Scene40ListView : public ItemListView {
 public:
+    // What the rows' marks show (mMarkKind): whether the character has had the row's item, by the kind of item
+    enum MarkKind {
+        MARK_NONE = 0,
+        MARK_ITEMS = 1,     // The record's bits at 0x1C8
+        MARK_CLOTHES = 2,   // mOwnedClothes
+        MARK_INTERIORS = 3, // mOwnedInteriors
+    };
+
     Scene40ListView() {}
 
     virtual void Draw();
@@ -57,7 +65,11 @@ public:
     virtual void Refresh();
     virtual void DrawRow(int row, int item);
     virtual void ClearRow(int row);
-}; // 0x13F64
+
+    /* 0x13F64 */ u32 mMarkKind;
+    /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from
+    /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
+}; // 0x14420
 
 // What the overlay's 0x02179728 constructs: 0x10 and 0xC bytes cleared and two ints.
 class Scene40Unknown30A8C {
@@ -166,7 +178,7 @@ public:
     /* 0x32B00 */ ClothesList mClothesList2;
     /* 0x34BD4 */ u8 mUnknown34BD4[0x4B4];
     /* 0x35088 */ Scene40ListView mList;
-    /* 0x48FEC */ u8 mUnknown48FEC[0x4C8];
+    /* 0x494A8 */ u8 mUnknown494A8[0xC];
     /* 0x494B4 */ SpriteButton mButtons[4];
     /* 0x49884 */ u8 mUnknown49884[0x18];
     /* 0x4989C */ SpriteButton mButtons2[4];
