@@ -100,10 +100,13 @@ struct Light {
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
+    void Reset();          // Clears the character and gives it the default Mii
+    s8 GetPersonality();   // Computes its personality (0 to 15) from its answers
+
     /* 0x000 */ u8 mUnknown000[0x2A4];
     /* 0x2A4 */ u16 mIndex;        // Which of the saved characters this is
     /* 0x2A6 */ u8 mUnknown2A6[0x16];
-    /* 0x2BC */ s8 mPersonality;   // What func_02098f2c computes
+    /* 0x2BC */ s8 mPersonality;   // What GetPersonality computes
     /* 0x2BD */ u8 mUnknown2BD[3];
 }; // 0x2C0
 
@@ -178,8 +181,6 @@ void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a re
 void *func_020295a4(void *resourceSet, u32 resType);
 
 // --- Characters ---
-void func_020979e0(SavedCharacter *character);
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 }
 

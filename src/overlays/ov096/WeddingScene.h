@@ -169,7 +169,8 @@ u16 func_020a4d90(Room *room); // The room's light colour now
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
-    SavedCharacter(); // func_020979c0
+    SavedCharacter();
+    s8 GetPersonality(); // Computes its personality (0 to 15) from its answers
 
     /* 0x0000 */ u8 mUnknown0000[0x54];
     /* 0x0054 */ u32 mUnknown0054Bits0 : 4;
@@ -185,7 +186,7 @@ struct SavedCharacter {
     /* 0x023B */ u8 mUnknown023B[0x69];
     /* 0x02A4 */ u16 mIndex;          // Which of the saved characters this is
     /* 0x02A6 */ u8 mUnknown02A6[0x16];
-    /* 0x02BC */ s8 mPersonality;     // What func_02098f2c computes
+    /* 0x02BC */ s8 mPersonality;     // What GetPersonality computes
 }; // 0x2C0
 
 // The character with its Mii face (include/character/Character.h has the class).
@@ -253,7 +254,6 @@ public:
 }; // 0x2B18
 
 extern "C" {
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string

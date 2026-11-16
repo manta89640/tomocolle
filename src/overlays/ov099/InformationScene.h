@@ -38,7 +38,8 @@ static inline void MoveSprite(Sprite *sprite, fx32 x, fx32 y) {
 // SavedCharacter has more).
 struct SavedCharacter {
     SavedCharacter();
-    int GetParameter(int param); // A parameter of the Mii data, or of the character (CharacterProperty)
+    int GetParameter(int param);
+    s8 GetPersonality(); // Its personality, 0 to 15 // A parameter of the Mii data, or of the character (CharacterProperty)
 
     /* 0x000 */ u8 mUnknown000[0x50];
     /* 0x050 */ u32 mUnknown050Bits0 : 17;
@@ -113,7 +114,6 @@ void Clock_GetDate(void *clock, Date *date); // The date with the game's offset 
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
 BOOL func_0202c604(GameData *game, int index); // The gender bit of its Mii (set for a woman)
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-s8 func_02098f2c(SavedCharacter *character); // Its personality, 0 to 15
 
 // A number as a string: (value, buffer, size of the buffer in bytes, ...)
 wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);

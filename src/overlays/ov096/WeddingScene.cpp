@@ -152,7 +152,7 @@ void WeddingScene::Init3d() {
         character->Character::UpdateBodyColors();
         character->Character::UpdateBodyScale();
         character->Character::UpdateAnimSpeed();
-        mCharacters[i].mPersonality = func_02098f2c(character);
+        mCharacters[i].mPersonality = character->GetPersonality();
         func_0209decc(character);
         character->Character::UpdateSpeedScales();
         func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
