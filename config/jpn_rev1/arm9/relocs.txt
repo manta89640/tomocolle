@@ -13183,12 +13183,12 @@ from:0x02083474 kind:load to:0x02121e58 add:0x30 module:main
 from:0x02083480 kind:arm_call to:0x0205996c module:main
 from:0x020834e0 kind:arm_call to:0x0202e0bc module:main
 from:0x020834e8 kind:arm_call to:0x02026c48 module:main
-from:0x020834f0 kind:load to:0x020b7f48 module:main
+from:0x020834f0 kind:load to:0x020b7f44 add:0x4 module:main
 from:0x02083540 kind:arm_call to:0x0202e890 module:main
 from:0x020835ec kind:arm_call to:0x0202ef48 module:main
 from:0x020835fc kind:load to:0x02138e1c add:0x18 module:main
 from:0x02083600 kind:load to:0x020b7f44 module:main
-from:0x02083604 kind:load to:0x020b7f48 module:main
+from:0x02083604 kind:load to:0x020b7f44 add:0x4 module:main
 from:0x0208365c kind:arm_call to:0x02028d88 module:main
 from:0x0208367c kind:load to:0x020b7f54 module:main
 from:0x020836c8 kind:arm_call to:0x0202ef48 module:main

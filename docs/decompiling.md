@@ -324,6 +324,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- A loop over an array of objects that reads a member's member: `mButtons[i].GetCharCount()`, an inline of the
+  element's class, keeps a pointer to the element; `mButtons[i].mText.GetCharCount()` keeps one to the member
+  instead (`SoftKeyboard::GetButtonCharCount`).
+- A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
+  declared after it, after (`func_02083c54`, `Keyboard.cpp`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -333,6 +338,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
   (`if (i != n) x++; else ...`).
 - An if/else assigning a member stores at once; a ternary lets the store be scheduled later.
+- The same member assigned in both branches (`if (...) y = A << 12; else y = (A + 2) << 12;`) where a local set in
+  each branch and stored after them schedules the shift and store differently (`KeyboardButton::Draw`).
 - A switch with the cases in the order of the original's code: `default` first puts its code after the compare
   chain; a jump table's values that only go to the default must be written out as cases; the tutorial's cases
   first gave `MapScene::Init`'s compare chain. `case 0: case 9: case 10:` gives `cmp; cmpne; cmpne` where `||`
@@ -368,6 +375,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **Tools to mind**
 - `tools/name_unit_data.py` reads only what `readelf` lists as OBJECT or NOTYPE: run it after any change to a
   complete unit or to a header it includes, since the compiler's `@` numbers move.
+- A constructor emitted as C1 and C2 (no virtual base) has its string literals twice, the C2 copy first; the link
+  strips C2 and its strings. `name_unit_data.py` lays both copies out, so name the strings of the C1 copy
+  (`Keyboard.cpp`: the second nine `@` numbers).
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
   data; rename it when the code shows what it is.
 
