@@ -40,7 +40,7 @@ static const WindowPoint sSortTextPositions[7] = {
     {sSortButtonPositions[6].x - 0x20, sSortButtonPositions[6].y - 6},
 };
 
-static const WindowPoint sMiiMenuSpritePosition = {0xB5, 0x95}; // func_02033bb4's: a sprite, sequence 0x76
+static const WindowPoint sMiiMenuSpritePosition = {0xB5, 0x95}; // MessageWindow_AddSprite's: a sprite, sequence 0x76
 static const WindowPoint sCancelPosition = {0x4B, 0x95};
 static const WindowPoint sCancelSize = {0x5E, 0x1E};
 
@@ -82,21 +82,21 @@ void MiiListMenuScene::Init() {
     // The Mii menu
     charOffset = mCharOffset;
     ScreenRect rect = sMiiMenuRect;
-    func_02032fb8(&mWindows[0], rect);
-    func_02033174(&mWindows[0], sMiiMenuScreenName, 0x400);
+    MessageWindow_Init(&mWindows[0], rect);
+    MessageWindow_SetScreen(&mWindows[0], sMiiMenuScreenName, 0x400);
     func_020331bc(&mWindows[0], 0x3F00, rect);
     for (int i = 0; i <= 2; i++) {
-        func_02033390(&mWindows[0], i, 0, sMiiMenuSequencesA[i], sMiiMenuSequencesB[i],
+        MessageWindow_AddSpriteButton(&mWindows[0], i, 0, sMiiMenuSequencesA[i], sMiiMenuSequencesB[i],
                       sMiiMenuButtonPositions[i], sMiiMenuButtonSizes[i]);
     }
-    func_0203373c(&mWindows[0], 3, 0, 0x76, 0x77, sCancelPosition, sCancelSize, &mCommonMessages, 5,
+    MessageWindow_AddTextButton(&mWindows[0], 3, 0, 0x76, 0x77, sCancelPosition, sCancelSize, &mCommonMessages, 5,
                   &gFonts[2].mFont, 0x1000, &charOffset);
     for (int i = 0; i < 3; i++) {
-        func_02033a58(&mWindows[0], &mEtcMessages, sMiiMenuMessages[i], &gFonts[0].mFont, 0x1000,
+        MessageWindow_AddText(&mWindows[0], &mEtcMessages, sMiiMenuMessages[i], &gFonts[0].mFont, 0x1000,
                       sMiiMenuTextPositions[i], &charOffset);
     }
-    func_02034f4c(&mWindows[0], 1);
-    func_02033bb4(&mWindows[0], 0, 0x76, sMiiMenuSpritePosition);
+    MessageWindow_SetTextsHAlign(&mWindows[0], 1);
+    MessageWindow_AddSprite(&mWindows[0], 0, 0x76, sMiiMenuSpritePosition);
     if (charOffset > maxCharOffset) {
         maxCharOffset = charOffset;
     }
@@ -104,17 +104,17 @@ void MiiListMenuScene::Init() {
     // The sort menu
     charOffset = mCharOffset;
     ScreenRect sortRect = sSortMenuRect;
-    func_02032fb8(&mWindows[1], sortRect);
-    func_02033174(&mWindows[1], sSortMenuScreenName, 0x400);
+    MessageWindow_Init(&mWindows[1], sortRect);
+    MessageWindow_SetScreen(&mWindows[1], sSortMenuScreenName, 0x400);
     func_020331bc(&mWindows[1], 0x3F00, sortRect);
     for (int i = 0; i <= 6; i++) {
-        func_02033390(&mWindows[1], i, 0, 0x69, 0x66, sSortButtonPositions[i], sSortButtonSizes[i]);
+        MessageWindow_AddSpriteButton(&mWindows[1], i, 0, 0x69, 0x66, sSortButtonPositions[i], sSortButtonSizes[i]);
     }
     for (int i = 0; i < 7; i++) {
-        func_020338d0(&mWindows[1], &mEtcMessages, sSortMessages[i], &gFonts[0].mFont, 0x1000,
+        MessageWindow_AddTextInArea(&mWindows[1], &mEtcMessages, sSortMessages[i], &gFonts[0].mFont, 0x1000,
                       sSortTextOffsets[i], sSortTextPositions[i], &charOffset);
     }
-    func_02034f4c(&mWindows[1], 1);
+    MessageWindow_SetTextsHAlign(&mWindows[1], 1);
     if (charOffset > maxCharOffset) {
         maxCharOffset = charOffset;
     }
@@ -170,17 +170,17 @@ void MiiListMenuScene::UpdateIdle() {
     switch (pressed) {
     case 0:
         mState = STATE_MII_MENU;
-        func_02034720(&mWindows[0], 0x12, 1);
+        MessageWindow_Open(&mWindows[0], 0x12, 1);
         break;
     case 1:
         mState = STATE_SORT_MENU;
-        func_02034720(&mWindows[1], 0x12, 1);
+        MessageWindow_Open(&mWindows[1], 0x12, 1);
         break;
     }
 }
 
 void MiiListMenuScene::UpdateMiiMenu() {
-    func_020341d4(&mWindows[0]);
+    MessageWindow_Update(&mWindows[0]);
     switch (mWindows[0].mFinishedButton) {
     case 0: // Edit: not done here
         break;
@@ -189,22 +189,22 @@ void MiiListMenuScene::UpdateMiiMenu() {
     case 2:
         mWindows[0].mUnknownAF98 = NEXT_CONFIRM;
         mWindows[0].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[0], 0x1C);
+        MessageWindow_Close(&mWindows[0], 0x1C);
         break;
     case 3:
         mWindows[0].mUnknownAF98 = NEXT_IDLE;
         mWindows[0].mUnknownSetBeforeClose = 5;
-        func_020349cc(&mWindows[0], 0x24);
+        MessageWindow_Close(&mWindows[0], 0x24);
         break;
     }
     if (mWindows[0].mTransitionDone) {
         switch (mWindows[0].mUnknownAF98) {
         case NEXT_CONFIRM: {
             mState = STATE_CONFIRM;
-            func_02034f38(&mWindows[2], 0, 0x7A);
+            MessageWindow_SetTextMessage(&mWindows[2], 0, 0x7A);
             wchar_t name[] = L"「削除したいMii」";
-            func_02034a3c(&mWindows[2], 0, 0, name);
-            func_02034720(&mWindows[2], 0x1A, 1);
+            MessageWindow_SetTextStringArg(&mWindows[2], 0, 0, name);
+            MessageWindow_Open(&mWindows[2], 0x1A, 1);
             break;
         }
         case NEXT_IDLE:
@@ -215,35 +215,35 @@ void MiiListMenuScene::UpdateMiiMenu() {
 }
 
 void MiiListMenuScene::UpdateSortMenu() {
-    func_020341d4(&mWindows[1]);
+    MessageWindow_Update(&mWindows[1]);
     switch (mWindows[1].mFinishedButton) {
     case 0:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 1:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 2:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 3:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 4:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 5:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     case 6:
         mWindows[1].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[1], 0x24);
+        MessageWindow_Close(&mWindows[1], 0x24);
         break;
     }
     if (mWindows[1].mTransitionDone) {
@@ -252,17 +252,17 @@ void MiiListMenuScene::UpdateSortMenu() {
 }
 
 void MiiListMenuScene::UpdateConfirm() {
-    func_020341d4(&mWindows[2]);
+    MessageWindow_Update(&mWindows[2]);
     switch (mWindows[2].mFinishedButton) {
     case 0:
         mWindows[2].mUnknownAF98 = 0;
         mWindows[2].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[2], 0x1C);
+        MessageWindow_Close(&mWindows[2], 0x1C);
         break;
     case 1:
         mWindows[2].mUnknownAF98 = 1;
         mWindows[2].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindows[2], 0x14);
+        MessageWindow_Close(&mWindows[2], 0x14);
         break;
     }
     if (mWindows[2].mTransitionDone) {
@@ -270,8 +270,8 @@ void MiiListMenuScene::UpdateConfirm() {
         case 0: {
             mState = STATE_MOVED_OUT;
             wchar_t name[] = L"「削除したMii」";
-            func_02034a3c(&mWindows[3], 0, 0, name);
-            func_02034720(&mWindows[3], 0x1A, 1);
+            MessageWindow_SetTextStringArg(&mWindows[3], 0, 0, name);
+            MessageWindow_Open(&mWindows[3], 0x1A, 1);
             break;
         }
         case 1:
@@ -282,10 +282,10 @@ void MiiListMenuScene::UpdateConfirm() {
 }
 
 void MiiListMenuScene::UpdateMovedOut() {
-    func_020341d4(&mWindows[3]);
+    MessageWindow_Update(&mWindows[3]);
     if (mWindows[3].mFinishedButton != -1) {
         mWindows[3].mUnknownSetBeforeClose = 5;
-        func_020349cc(&mWindows[3], 0x14);
+        MessageWindow_Close(&mWindows[3], 0x14);
     }
     if (mWindows[3].mTransitionDone) {
         mState = STATE_IDLE;
@@ -294,7 +294,7 @@ void MiiListMenuScene::UpdateMovedOut() {
 
 void MiiListMenuScene::Draw() {
     for (int i = 0; i < 4; i++) {
-        func_020345d8(&mWindows[i]);
+        MessageWindow_Draw(&mWindows[i]);
     }
     for (int i = 0; i < 2; i++) {
         func_02031d7c(&mButtons[i]);

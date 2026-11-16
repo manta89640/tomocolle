@@ -179,7 +179,7 @@ void OptionScene::Init() {
     ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
     gScreenControl.Set(0x1302);
     mCharOffset = charOffset;
-    func_02032fb8(&mWindow, sScreenRect);
+    MessageWindow_Init(&mWindow, sScreenRect);
     mTtsPlayer.InitEngine();
     mSpeechMessage.mMessageFile = &mMessageFiles[0];
     if (mSceneId == 0xAD) {
@@ -194,7 +194,7 @@ void OptionScene::Update() {
     mTtsPlayer.Update();
     mScroll += 0x4CC;
     ScreenLoader_SetScrollX(&gScreenLoader, 0x202, mScroll >> FX32_SHIFT);
-    func_020341d4(&mWindow);
+    MessageWindow_Update(&mWindow);
 
     switch (mState) {
     case STATE_MENU:
@@ -480,7 +480,7 @@ void OptionScene::Update() {
     case STATE_ASK_FIRST_CLOCK:
         if (mWindow.mResult != -1) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
             mWindowResult = mWindow.mResult;
         }
         if (!mWindow.mTransitionDone) {
@@ -515,7 +515,7 @@ void OptionScene::Update() {
     case STATE_SAVING_CLOCK:
         if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
         }
         if (mWindow.mTransitionDone) {
             SetState(mState + 1);
@@ -529,7 +529,7 @@ void OptionScene::Update() {
     case STATE_ERASING:
         if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
         }
         if (mWindow.mTransitionDone) {
             SetState(mState + 1);
@@ -544,7 +544,7 @@ void OptionScene::Update() {
 }
 
 void OptionScene::Draw() {
-    func_020345d8(&mWindow);
+    MessageWindow_Draw(&mWindow);
     for (int i = 0; i < TEXT_COUNT; i++) {
         mTexts[i].Draw();
     }
@@ -566,7 +566,7 @@ void OptionScene::Exit() {
     (void)sUnknown3;
     (void)sUnknown4;
     ScreenLoader_SetScrollX(&gScreenLoader, 1, 0);
-    func_020346cc(&mWindow);
+    MessageWindow_Release(&mWindow);
     ArchiveManager_Unmount(&gArchiveManager, "N83");
     ArchiveManager_Unmount(&gArchiveManager, "TET");
     ArchiveManager_Unmount(&gArchiveManager, "TCO");
@@ -623,16 +623,16 @@ void OptionScene::SetState(int state) {
             mTextButtons[TEXT_BUTTON_SET].mVisible = FALSE;
             mTextButtons[TEXT_BUTTON_DONE].mVisible = TRUE;
             OpenWindow(WINDOW_SET_CLOCK, mCharOffset);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_Open(&mWindow, 0x12, 1);
         }
         break;
     case STATE_ASK_SAVE_CLOCK:
         OpenWindow(WINDOW_ASK_SAVE_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_SAVING_CLOCK:
         OpenWindow(WINDOW_SAVING_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         func_02035460(data_02123440, &mDate, &mTime, FALSE);
         func_0202c8f8(&gGameData, 0);
         if (!GameData_StartSave(&gGameData)) {
@@ -641,7 +641,7 @@ void OptionScene::SetState(int state) {
         break;
     case STATE_CLOCK_SAVED:
         OpenWindow(WINDOW_CLOCK_SAVED, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         gSoundManager.StartSeqArc(1, 0x18, 0);
         break;
     case STATE_SOUND:
@@ -676,26 +676,26 @@ void OptionScene::SetState(int state) {
         gSoundManager.MoveSeqVolume(0, 0x40, 0x3C);
         gSoundManager.StartSeqArc(0, 8, 1);
         OpenWindow(WINDOW_ASK_ERASE, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ASK_ERASE_AGAIN:
         OpenWindow(WINDOW_ASK_ERASE_AGAIN, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ASK_ERASE_LAST:
         OpenWindow(WINDOW_ASK_ERASE_LAST, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ERASING:
         OpenWindow(WINDOW_ERASING, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         if (!func_0202cd94(&gGameData)) {
             gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_ERASED:
         OpenWindow(WINDOW_ERASED, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         gSoundManager.StartSeqArc(1, 0x18, 0);
         break;
     case STATE_FIRST_CLOCK_SET:
@@ -703,7 +703,7 @@ void OptionScene::SetState(int state) {
     case STATE_ASK_FIRST_CLOCK:
         func_02035668(data_02123440, &mDate, &mTime);
         OpenWindow(WINDOW_ASK_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     }
     mState = state;
@@ -714,7 +714,7 @@ void OptionScene::SetState(int state) {
 static inline void AddYesNoButtons(OptionScene *scene, int *charOffset) {
     WindowPoint size = sWindowButtonSize;
     for (int i = 0; i < 2; i++) {
-        func_020337b8(&scene->mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &scene->mMessageFiles[1],
+        MessageWindow_AddTextButtonWithSounds(&scene->mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &scene->mMessageFiles[1],
                       sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sWindowButtonSounds[i]);
     }
 }
@@ -722,8 +722,8 @@ static inline void AddYesNoButtons(OptionScene *scene, int *charOffset) {
 // Opens the message window with one of its messages, and its buttons
 void OptionScene::OpenWindow(int window, int charOffset) {
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     int i;
     switch (window) {
@@ -732,7 +732,7 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ASK_ERASE_AGAIN:
     case WINDOW_ASK_ERASE_LAST:
     {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sQuestionTextPosition, &charOffset);
         AddYesNoButtons(this, &charOffset);
         break;
@@ -767,21 +767,21 @@ void OptionScene::OpenWindow(int window, int charOffset) {
                 FormatNumber(mTime.minute, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             }
-            func_02034a3c(&mWindow, 0, j, text);
+            MessageWindow_SetTextStringArg(&mWindow, 0, j, text);
         }
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sClockTextPosition, &charOffset);
         WindowPoint size = sWindowButtonSize;
         for (i = 0; i < 2; i++) {
-            func_020337b8(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
+            MessageWindow_AddTextButtonWithSounds(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
                           sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[i]);
         }
         break;
     }
     case WINDOW_SET_CLOCK: {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sSetClockTextPosition, &charOffset);
-        func_020337b8(&mWindow, 0, 1, 10, 0xB, sOkButtonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
+        MessageWindow_AddTextButtonWithSounds(&mWindow, 0, 1, 10, 0xB, sOkButtonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
                       &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[1]);
         break;
     }
@@ -790,13 +790,13 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ERASING:
     case WINDOW_ERASED:
     {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sMessageTextPosition, &charOffset);
         break;
     }
     }
-    func_02034f4c(&mWindow, 1);
-    func_02034f94(&mWindow, 1);
+    MessageWindow_SetTextsHAlign(&mWindow, 1);
+    MessageWindow_SetTextsVAlign(&mWindow, 1);
 }
 
 void OptionScene::ShowYear(u32 year) {

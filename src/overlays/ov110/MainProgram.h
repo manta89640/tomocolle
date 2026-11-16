@@ -110,15 +110,15 @@ BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being wr
 // --- The message window's functions this scene calls besides MessageWindow.h's ---
 extern "C" {
 // Adds a button: (window, number, unknown, sequence, sequence when on, position, size, its sounds, unknown)
-void func_02033448(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+void MessageWindow_AddSpriteButtonEx(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
                    WindowPoint size, const int *sounds, int unk2);
-// Adds a button with a text: as func_02033448, with the text's message file and message, font, plane, and
+// Adds a button with a text: as MessageWindow_AddSpriteButtonEx, with the text's message file and message, font, plane, and
 // character offset
-void func_02033844(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const int *sounds, int unk2);
 // Adds the window's message text: (window, file, message, font, plane, area, position, character offset)
-void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint area, WindowPoint position, int *charOffset);
 }
 

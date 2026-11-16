@@ -1287,15 +1287,15 @@ static inline BOOL IsWindowOpen(MessageWindow *window) {
 // @0x0214c400
 void ItemTradeScene::SetupQuestion(int *charOffset, MessageFile *file, u32 message) {
     ScreenRect rect = sQuestionRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow, i, 1, sAnswerSequences[i], sAnswerOnSequences[i], sAnswerPositions[i],
+        MessageWindow_AddTextButtonEx(&mWindow, i, 1, sAnswerSequences[i], sAnswerOnSequences[i], sAnswerPositions[i],
                       sAnswerSizes[i], &mMessages[0], sAnswerMessages[i], &gFonts[2].mFont, 0x1000, charOffset,
                       sAnswerSounds[i], 1);
     }
-    func_020338d0(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sTextPositions[2], charOffset);
+    MessageWindow_AddTextInArea(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sTextPositions[2], charOffset);
     mWindow.mTexts[2].mHAlign = mWindow.mTexts[2].mMessageFile->GetAlignment(mWindow.mTexts[2].mMessage);
 }
 
@@ -1313,8 +1313,8 @@ void ItemTradeScene::SetupWindow(int state) {
     }
 
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
 
     WindowPoint textPosition;
@@ -1326,7 +1326,7 @@ void ItemTradeScene::SetupWindow(int state) {
     } else {
         textPosition = sTextPositions[1];
     }
-    func_020338d0(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
+    MessageWindow_AddTextInArea(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
     if (buttons == 0) {
@@ -1338,24 +1338,24 @@ void ItemTradeScene::SetupWindow(int state) {
     if (sWindowButtons[kind].mButtons[2]) {
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], sThreeButtonSize, sButtonSounds,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], sThreeButtonSize, sButtonSounds,
                               1);
-                func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
+                MessageWindow_AddText(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sThreeButtonTextPositions[i], &charOffset);
             }
         }
     } else {
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], sButtonSize, sButtonSounds, 1);
-                func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], sButtonSize, sButtonSounds, 1);
+                MessageWindow_AddText(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sButtonTextPositions[i], &charOffset);
             }
         }
     }
 
     if (sWindowButtons[kind].mOk) {
-        func_02033844(&mWindow, 3, 1, 10, 11, sButtonPositions[3], sOkSize, &mMessages[0],
+        MessageWindow_AddTextButtonEx(&mWindow, 3, 1, 10, 11, sButtonPositions[3], sOkSize, &mMessages[0],
                       sWindowButtonMessages[kind].mOk, &gFonts[2].mFont, 0x1000, &charOffset, sOkSounds[kind], 1);
     }
 }
@@ -1490,8 +1490,8 @@ void ItemTradeScene::Init() {
     mNextState = STATE_CHOOSE;
     mWindowCharOffset = mListCharOffset;
     SetupWindow(mState);
-    func_02034f38(&mWindow, 0, sStateMessages[mState]);
-    func_02034720(&mWindow, 0x12, 1);
+    MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+    MessageWindow_Open(&mWindow, 0x12, 1);
     sReceivedCommand = 0;
     sSending = 0;
     sReceived = 0;
@@ -1605,7 +1605,7 @@ void ItemTradeScene::UpdateWireless() {
             if (next == STATE_CONNECTED_PARENT) {
                 SetEntry(FALSE);
             }
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
         }
         break;
     }
@@ -1646,7 +1646,7 @@ void ItemTradeScene::UpdateWireless() {
         }
         mNextState = STATE_ERROR;
         if (mWindow.mUnknownAD50 & 1) {
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
         }
         WH_Reset();
         break;
@@ -1731,7 +1731,7 @@ void ItemTradeScene::Update() {
     gWirelessSession->UpdateEnd();
     UpdateMusic();
     UpdateLinkIcon();
-    func_020341d4(&mWindow);
+    MessageWindow_Update(&mWindow);
     if (mWindow.mTransitionDone) {
         mWindowDone = TRUE;
     }
@@ -1762,8 +1762,8 @@ void ItemTradeScene::Update() {
         Send(COMMAND_READY);
         sReceivedNew = FALSE;
         SetupWindow(mState);
-        func_02034f38(&mWindow, 0, sStateMessages[mState]);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+        MessageWindow_Open(&mWindow, 0x12, 1);
     }
 
     int kind = sWindowKinds[mState];
@@ -1785,13 +1785,13 @@ void ItemTradeScene::Update() {
         mList.Hide();
         if (kind != -1) {
             mWindow.mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
             PlaySound(13);
         } else {
             mState = next;
             SetupWindow(mState);
-            func_02034f38(&mWindow, 0, sStateMessages[mState]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
             PlaySound(12);
         }
         return;
@@ -1891,7 +1891,7 @@ void ItemTradeScene::Update() {
                 gSceneManager.RequestScene(0x29);
                 break;
             }
-            func_020349cc(&mWindow, flags);
+            MessageWindow_Close(&mWindow, flags);
         } else {
             switch (mState) {
             case STATE_SEARCHING:
@@ -1899,7 +1899,7 @@ void ItemTradeScene::Update() {
                     mNextState != STATE_CHOOSE_PARTNER && gWirelessSession->CountParents() > 0) {
                     mNextState = STATE_CHOOSE_PARTNER;
                     mWindow.mUnknownSetBeforeClose = 15;
-                    func_020349cc(&mWindow, 0x1C);
+                    MessageWindow_Close(&mWindow, 0x1C);
                 }
                 break;
             case STATE_ASK_SEND:
@@ -1907,7 +1907,7 @@ void ItemTradeScene::Update() {
                 if (mPartnerSending == TRUE && mNextState != STATE_SENDING) {
                     mNextState = STATE_RECEIVING;
                     mWindow.mUnknownSetBeforeClose = 15;
-                    func_020349cc(&mWindow, 0x1C);
+                    MessageWindow_Close(&mWindow, 0x1C);
                 }
                 break;
             case STATE_SENDING:
@@ -1948,7 +1948,7 @@ void ItemTradeScene::Update() {
                         sSent = FALSE;
                         sSending = 0;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                 }
                 break;
@@ -1959,13 +1959,13 @@ void ItemTradeScene::Update() {
                         Send(COMMAND_RECEIVED);
                         mNextState = STATE_SAVING;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     } else {
                         Send(COMMAND_FULL);
                         sReceived = 0;
                         mNextState = STATE_FULL;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                     sReceivedNew = FALSE;
                 }
@@ -1978,7 +1978,7 @@ void ItemTradeScene::Update() {
                     } else {
                         mNextState = STATE_RECEIVED;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                 }
                 break;
@@ -2082,11 +2082,11 @@ void ItemTradeScene::Update() {
                     PlaySound(13);
                     break;
                 }
-                func_02034f38(&mWindow, 0, sStateMessages[mNextState]);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mNextState]);
                 if (mState > mNextState) {
-                    func_02034720(&mWindow, 0x2A, 1);
+                    MessageWindow_Open(&mWindow, 0x2A, 1);
                 } else {
-                    func_02034720(&mWindow, 0x1A, 1);
+                    MessageWindow_Open(&mWindow, 0x1A, 1);
                 }
                 if (nextKind == 2) {
                     for (int i = 0; i < 3; i++) {
@@ -2108,8 +2108,8 @@ void ItemTradeScene::Update() {
             mState = STATE_RECEIVING;
             sReceivedNew = FALSE;
             SetupWindow(mState);
-            func_02034f38(&mWindow, 0, sStateMessages[mState]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
         } else if (mState == STATE_LIST) {
             switch (result) {
             case ItemTradeList::RESULT_OK: {
@@ -2132,16 +2132,16 @@ void ItemTradeScene::Update() {
                     break;
                 }
                 mWindow.mTexts[0].SetStringArg(name, 0);
-                func_02034f38(&mWindow, 0, sStateMessages[mState]);
-                func_02034720(&mWindow, 0x12, 1);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+                MessageWindow_Open(&mWindow, 0x12, 1);
                 break;
             }
             case ItemTradeList::RESULT_BACK:
                 mState = STATE_ASK_DISCONNECT;
                 mList.Hide();
                 SetupWindow(mState);
-                func_02034f38(&mWindow, 0, sStateMessages[mState]);
-                func_02034720(&mWindow, 0x12, 1);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+                MessageWindow_Open(&mWindow, 0x12, 1);
                 break;
             }
         }
@@ -2154,7 +2154,7 @@ void ItemTradeScene::Update() {
 void ItemTradeScene::Draw() {
     Sprite_Draw(&mLinkIcon);
     mList.Draw();
-    func_020345d8(&mWindow);
+    MessageWindow_Draw(&mWindow);
     mMannequin.Draw();
     mItemModel.Draw();
     mRoom.RoomModels::Draw();

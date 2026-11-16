@@ -248,14 +248,14 @@ void TutorialRoomScene::Init() {
 
     int charOffset = 0x200;
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], sWindowScreenName, 0x100);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], sWindowScreenName, 0x100);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_020336b4(&mWindow[0], 0, 0, 6, 7, sWindowButtonPosition, sWindowButtonSize, &mCommonMessages, 4,
+    MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], 0, 0, 6, 7, sWindowButtonPosition, sWindowButtonSize, &mCommonMessages, 4,
                   &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, 10);
-    func_02033a58(&mWindow[0], &mEtcMessages, 0x159, &gFonts[0].mFont, 0x1000, sWindowTextPosition, &charOffset);
-    func_02034f94(&mWindow[0], 1);
-    func_02034f4c(&mWindow[0], 1);
+    MessageWindow_AddText(&mWindow[0], &mEtcMessages, 0x159, &gFonts[0].mFont, 0x1000, sWindowTextPosition, &charOffset);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
     ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
     mWindow[0].mTexts[0].SetStringArg(mCharacters[0].mNameText, 0);
 
@@ -317,7 +317,7 @@ void TutorialRoomScene::Draw() {
     }
     func_02080f00(&mParticles, 0);
     mTimedMessage.Draw();
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
     mButtonLabel[0].Draw();
     mNamePanel.Draw();
     mButtons[0].Draw();
@@ -504,16 +504,16 @@ void TutorialRoomScene::UpdateState() {
             if (mTimer > 240) {
                 mStep++;
                 ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
-                func_02034f38(&mWindow[0], 0, 0x159);
-                func_02034a3c(&mWindow[0], 0, 0, mCharacters[0].mNameText);
-                func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+                MessageWindow_SetTextMessage(&mWindow[0], 0, 0x159);
+                MessageWindow_SetTextStringArg(&mWindow[0], 0, 0, mCharacters[0].mNameText);
+                MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
             }
             UpdateIdle();
         } else if (mStep == 4) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
             }
             UpdateIdle();
         } else if (mStep == 5) {
@@ -655,36 +655,36 @@ void TutorialRoomScene::UpdateState() {
         if (mStep == 0) {
             mStep++;
             mWindow[0].mTexts[0].mMessage = 0x165;
-            func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+            MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
         } else if (mStep == 1) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 2) {
             if (mWindow[0].mTransitionDone) {
                 mStep++;
                 mWindow[0].mTexts[0].mMessage = 0x166;
-                func_02034720(&mWindow[0], 0x1A, 0);
+                MessageWindow_Open(&mWindow[0], 0x1A, 0);
             }
         } else if (mStep == 3) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 4) {
             if (mWindow[0].mTransitionDone) {
                 mStep++;
                 mWindow[0].mTexts[0].mMessage = 0x167;
-                func_02034720(&mWindow[0], 0x1A, 0);
+                MessageWindow_Open(&mWindow[0], 0x1A, 0);
             }
         } else if (mStep == 5) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 6) {
             if (mWindow[0].mTransitionDone) {
@@ -705,15 +705,15 @@ void TutorialRoomScene::UpdateState() {
             if (mTimer > 60) {
                 mStep++;
                 ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
-                func_02034f38(&mWindow[0], 0, 0x16C);
-                func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+                MessageWindow_SetTextMessage(&mWindow[0], 0, 0x16C);
+                MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
             }
             UpdateIdle();
         } else if (mStep == 1) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
             }
             UpdateIdle();
         } else if (mStep == 2) {
@@ -759,7 +759,7 @@ void TutorialRoomScene::UpdateState() {
 void TutorialRoomScene::UpdateObjects() {
     mClock.UpdateIfArchiveIdle();
     mCamera.Update();
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
     func_0207b138(mParticles.mManager);
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Update();

@@ -202,15 +202,15 @@ void TushinScene::StartLoading() {
 // @0x02149b08
 void TushinScene::SetUpYesNoWindow(int *charOffset, MessageFile *file, u32 message) {
     ScreenRect rect = sYesNoWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow, i, 0, sYesNoSequences[i], sYesNoSequences2[i], sYesNoPositions[i], sYesNoSizes[i],
+        MessageWindow_AddTextButtonEx(&mWindow, i, 0, sYesNoSequences[i], sYesNoSequences2[i], sYesNoPositions[i], sYesNoSizes[i],
                       &mMessageFiles[1], sYesNoMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sYesNoStyles[i],
                       1);
     }
-    func_020338d0(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextPosition, sTextMargins[2],
+    MessageWindow_AddTextInArea(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextPosition, sTextMargins[2],
                   charOffset);
     mWindow.mTexts[2].mHAlign = mWindow.mTexts[2].mMessageFile->GetAlignment(mWindow.mTexts[2].mMessage);
     mWindow.mTexts[2].mVAlign = 0;
@@ -226,8 +226,8 @@ void TushinScene::SetUpWindow(int page) {
     }
 
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
 
     WindowPoint margin;
@@ -241,7 +241,7 @@ void TushinScene::SetUpWindow(int page) {
         margin.x = 32;
         margin.y = 50;
     }
-    func_020338d0(&mWindow, &mMessageFiles[0], sPageMessages[page], &gFonts[0].mFont, 0x1000, sTextPosition, margin,
+    MessageWindow_AddTextInArea(&mWindow, &mMessageFiles[0], sPageMessages[page], &gFonts[0].mFont, 0x1000, sTextPosition, margin,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
     if (sLayouts[layout].mHasButton[0] == FALSE) {
@@ -253,23 +253,23 @@ void TushinScene::SetUpWindow(int page) {
     if (sLayouts[layout].mHasButton[2]) {
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], sButtonSize3, &sButtonStyle, 1);
-                func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 0, 0x6E, 0x6F, sButtonPositions3[i], sButtonSize3, &sButtonStyle, 1);
+                MessageWindow_AddText(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions3[i], &charOffset);
             }
         }
     } else {
         for (int i = 0; i < 3; i++) {
             if (sLayouts[layout].mHasButton[i]) {
-                func_02033448(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], sButtonSize2, &sButtonStyle, 1);
-                func_02033a58(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 0, 0x6C, 0x6D, sButtonPositions2[i], sButtonSize2, &sButtonStyle, 1);
+                MessageWindow_AddText(&mWindow, &mMessageFiles[0], sLayoutMessages[layout][i], &gFonts[0].mFont, 0x1000,
                               sButtonTextPositions2[i], &charOffset);
             }
         }
     }
 
     if (sLayouts[layout].mHasBackButton) {
-        func_02033844(&mWindow, 3, 0, 0x74, 0x75, sButtonPositions2[3], sBackButtonSize, &mMessageFiles[1],
+        MessageWindow_AddTextButtonEx(&mWindow, 3, 0, 0x74, 0x75, sButtonPositions2[3], sBackButtonSize, &mMessageFiles[1],
                       sLayoutMessages[layout][3], &gFonts[2].mFont, 0x1000, &charOffset, &sBackButtonStyles[layout],
                       1);
     }
@@ -278,7 +278,7 @@ void TushinScene::SetUpWindow(int page) {
         return;
     }
     for (int i = 0; i < 2; i++) {
-        func_02033bb4(&mWindow, 0, 0x7E, sFirstPageIconPositions[i]);
+        MessageWindow_AddSprite(&mWindow, 0, 0x7E, sFirstPageIconPositions[i]);
     }
     for (int i = 0; i < 3; i++) {
         mWindow.mSprites[i].mUnknown5E = 8;
@@ -327,17 +327,17 @@ void TushinScene::SetUpList(int *charOffset) {
     func_02031e88(&mButtons[2], 0);
 
     ScreenRect rect = sListWindowRect;
-    func_02032fb8(&mListWindow, rect);
-    func_02033174(&mListWindow, sListWindowScreenName, 0x400);
+    MessageWindow_Init(&mListWindow, rect);
+    MessageWindow_SetScreen(&mListWindow, sListWindowScreenName, 0x400);
     func_020331bc(&mListWindow, 0x3F00, rect);
     for (int i = 0; i < 7; i++) {
-        func_02033448(&mListWindow, i, 0, 0x6A, 0x6B, sListItemPositions[i], sListItemSizes[i], &sButtonStyle, 1);
+        MessageWindow_AddSpriteButtonEx(&mListWindow, i, 0, 0x6A, 0x6B, sListItemPositions[i], sListItemSizes[i], &sButtonStyle, 1);
     }
     for (int i = 0; i < 7; i++) {
-        func_020338d0(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, sListTextPosition,
+        MessageWindow_AddTextInArea(&mListWindow, &mMessageFiles[0], sListMessages[i], &gFonts[0].mFont, 0x1000, sListTextPosition,
                       sListTextOrigins[i], charOffset);
     }
-    func_02034f4c(&mListWindow, 1);
+    MessageWindow_SetTextsHAlign(&mListWindow, 1);
 }
 
 // @0x0214a68c
@@ -463,8 +463,8 @@ void TushinScene::Init() {
     SetUpList(&charOffset);
     mCharOffset = charOffset;
     SetUpWindow(mPage);
-    func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-    func_02034720(&mWindow, 0x12, 1);
+    MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
+    MessageWindow_Open(&mWindow, 0x12, 1);
     InitCharacters();
     InitParticles();
 
@@ -933,7 +933,7 @@ void TushinScene::UpdateListButtons() {
         } else {
             mPage = 0x2B;
         }
-        func_02034720(&mListWindow, 0x12, 1);
+        MessageWindow_Open(&mListWindow, 0x12, 1);
         break;
     case 1:
         if (GetMode() == 1) {
@@ -942,14 +942,14 @@ void TushinScene::UpdateListButtons() {
             mPage = 0x41;
         }
         SetUpWindow(mPage);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case 2:
         mPage = GetMode() == 1 ? 0xB : 0x2C;
         MiiData_GetName(GetSelectedResident(), sReceivedName);
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case -1:
         if (sReceiveCount == 0) {
@@ -966,8 +966,8 @@ void TushinScene::UpdateListButtons() {
         sSongsReceived = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-        func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     }
     mResidents.Update();
@@ -983,7 +983,7 @@ void TushinScene::UpdateListButtons() {
 // elsewhere: that keeps it in r1 for the test and copies it to r4 for the table, as the original does.
 // @0x0214e144
 void TushinScene::UpdateListWindow() {
-    func_020341d4(&mListWindow);
+    MessageWindow_Update(&mListWindow);
     if (mListWindow.mTransitionDone) {
         if (sReceiveCount != 0 || mCloseListToReceive == 1) {
             if (GetMode() == 1) {
@@ -998,8 +998,8 @@ void TushinScene::UpdateListWindow() {
             }
             SetUpWindow(mPage);
             mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-            func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
             return;
         }
         if (mLostInList == 1) {
@@ -1021,7 +1021,7 @@ void TushinScene::UpdateListWindow() {
     }
     if (((mListWindow.mUnknownAD50 & 1) && sReceiveCount != 0) || mCloseListToReceive == 1 || mLostInList == 1) {
         mListWindow.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mListWindow, 0x24);
+        MessageWindow_Close(&mListWindow, 0x24);
         for (int i = 0; i < 7; i++) {
             func_02031228(&mListWindow.mSprites[i]);
         }
@@ -1032,7 +1032,7 @@ void TushinScene::UpdateListWindow() {
         return;
     }
     mListWindow.mUnknownSetBeforeClose = 15;
-    func_020349cc(&mListWindow, 0x24);
+    MessageWindow_Close(&mListWindow, 0x24);
     int order = sListOrders[result];
     if (order != mResidents.mSortKey) {
         mResidents.Sort(order, 0);
@@ -1117,7 +1117,7 @@ void TushinScene::UpdateConnection() {
         if (next == 7) {
             SetEntry(FALSE);
         }
-        func_020349cc(&mWindow, 0x1C);
+        MessageWindow_Close(&mWindow, 0x1C);
         return;
     }
     case 8:
@@ -1126,7 +1126,7 @@ void TushinScene::UpdateConnection() {
         }
         mNextPage = 0x25;
         if (mWindow.mUnknownAD50 & 1) {
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
         }
         WH_Reset();
         return;
@@ -1458,7 +1458,7 @@ void TushinScene::ShowReceived() {
 // @0x0214f45c
 void TushinScene::CloseWindow() {
     mWindow.mUnknownSetBeforeClose = 15;
-    func_020349cc(&mWindow, 0x1C);
+    MessageWindow_Close(&mWindow, 0x1C);
 }
 
 // @0x0214f47c
@@ -1588,7 +1588,7 @@ void TushinScene::Update() {
         MiiTransfer_Update();
         break;
     }
-    func_020341d4(&mWindow);
+    MessageWindow_Update(&mWindow);
     if (mWindow.mTransitionDone) {
         mWindowReady = 1;
     }
@@ -1641,8 +1641,8 @@ void TushinScene::Update() {
         sSongsReceived = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-        func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
+        MessageWindow_Open(&mWindow, 0x12, 1);
     }
 
     BOOL lost = FALSE;
@@ -1708,8 +1708,8 @@ void TushinScene::Update() {
         } else {
             mPage = next;
             SetUpWindow(mPage);
-            func_02034f38(&mWindow, 0, sPageMessages[mPage]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
             PlaySound(0xC);
         }
         ResetList();
@@ -1962,7 +1962,7 @@ void TushinScene::Update() {
                 }
                 break;
             }
-            func_020349cc(&mWindow, close);
+            MessageWindow_Close(&mWindow, close);
         } else {
             switch (mPage) {
             case 4:
@@ -2179,7 +2179,7 @@ void TushinScene::Update() {
                 mNextPage = NextPageAfterReceive();
                 CloseWindow();
                 mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-                func_02034f38(&mWindow, 0, sPageMessages[mPage]);
+                MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mPage]);
                 break;
             case 46:
             case 47: {
@@ -2419,11 +2419,11 @@ void TushinScene::Update() {
                     PlaySound(0xD);
                     break;
                 }
-                func_02034f38(&mWindow, 0, sPageMessages[mNextPage]);
+                MessageWindow_SetTextMessage(&mWindow, 0, sPageMessages[mNextPage]);
                 if (mPage > mNextPage) {
-                    func_02034720(&mWindow, 0x2A, 1);
+                    MessageWindow_Open(&mWindow, 0x2A, 1);
                 } else {
-                    func_02034720(&mWindow, 0x1A, 1);
+                    MessageWindow_Open(&mWindow, 0x1A, 1);
                 }
                 if (nextLayout == 4) {
                     for (int i = 0; i < 3; i++) {
@@ -2461,11 +2461,11 @@ void TushinScene::Update() {
 // @0x02151590
 void TushinScene::Draw() {
     Sprite_Draw(&mSprite);
-    func_020345d8(&mWindow);
+    MessageWindow_Draw(&mWindow);
     for (int i = 0; i < 3; i++) {
         func_0203206c(&mButtons[i]);
     }
-    func_020345d8(&mListWindow);
+    MessageWindow_Draw(&mListWindow);
     mResidents.Draw();
     DrawParticles();
     DrawCharacters();

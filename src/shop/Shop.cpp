@@ -59,14 +59,14 @@ extern MATHRandContext16 gRandom;
 // The message window's other functions
 // Adds a button with a text: (number, resource, .., .., position, size, the text's message file and message, font,
 // plane, character offset, the button's sounds, ..)
-void func_02033844(MessageWindow *window, int number, int resource, u8 a, u8 b, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int number, int resource, u8 a, u8 b, WindowPoint position,
                    WindowPoint size, MessageFile *file, int message, const NNSG2dFont *font, int plane,
                    int *charOffset, const ButtonSounds *sounds, int c);
 // Adds a message text: (message file, message, font, plane, position, size, character offset)
-void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
                    WindowPoint position, WindowPoint size, int *charOffset);
-void func_02033bb4(MessageWindow *window, int resource, int sequence, WindowPoint position);
-void func_02034f80(MessageWindow *window, int a, int b);
+void MessageWindow_AddSprite(MessageWindow *window, int resource, int sequence, WindowPoint position);
+void MessageWindow_SetTextHAlign(MessageWindow *window, int a, int b);
 
 void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y); // Scrolls a background
 void ScreenLoader_SetPriority(ScreenLoader *loader, int a, int b);
@@ -863,7 +863,7 @@ void ShopItemListView::ClearRow(int row) {
 // --- The price window ---------------------------------------------------------------------------------------------
 
 void ShopWindow::Init(ScreenRect rect) {
-    func_02032fb8(this, rect);
+    MessageWindow_Init(this, rect);
     mMode = MODE_BUY;
     mCount = 0;
 }
@@ -903,7 +903,7 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
         mTextCanvases[i].mSprite.mOverwritePalette = 0;
         *charOffset += mTextCanvases[i].GetCharCount();
     }
-    func_02033bb4(this, resource, 0x33, sIconPosition);
+    MessageWindow_AddSprite(this, resource, 0x33, sIconPosition);
     mMessageFile = file;
 }
 
@@ -911,22 +911,22 @@ void ShopWindow::Init(const char *screenName, int plane, int resource, int *char
                       MessageFile *buttonFile, int *money) {
     ScreenRect rect = sShopWindowRect;
     Init(rect);
-    func_02033174(this, screenName, plane);
+    MessageWindow_SetScreen(this, screenName, plane);
     func_020331bc(this, 0x3F00, rect);
     InitButtons(resource, charOffset, file);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(this, i, resource, sWindowButtonB[i], sWindowButtonA[i], sWindowButtonPositions[i], sWindowButtonSizes[i], buttonFile,
+        MessageWindow_AddTextButtonEx(this, i, resource, sWindowButtonB[i], sWindowButtonA[i], sWindowButtonPositions[i], sWindowButtonSizes[i], buttonFile,
                       sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sWindowButtonSounds[i], 1);
     }
-    func_020338d0(this, file, sTextMessage[0], &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
-    func_02034f80(this, 0, 1);
+    MessageWindow_AddTextInArea(this, file, sTextMessage[0], &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
+    MessageWindow_SetTextHAlign(this, 0, 1);
     mMoney = money;
 }
 
 // The plus and minus buttons change the count, as far as the money, the item's count and the 99 the player can own
 // allow
 void ShopWindow::Update() {
-    func_020341d4(this);
+    MessageWindow_Update(this);
     if (!(mUnknownAD50 & 1)) {
         return;
     }
@@ -984,11 +984,11 @@ void ShopWindow::Draw() {
         func_02031d7c(&mPlusButton);
         func_02031d7c(&mMinusButton);
     }
-    func_020345d8(this);
+    MessageWindow_Draw(this);
 }
 
 void ShopWindow::Open(int flags, int mode) {
-    func_02034720(this, flags, 1);
+    MessageWindow_Open(this, flags, 1);
     mCount = 1;
     switch (mode) {
     case MODE_BUY:

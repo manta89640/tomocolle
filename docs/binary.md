@@ -490,7 +490,7 @@ Inferred from this:
   the overlays' own `Camera` and `Light` stand-ins to give way to. The object is 0x440 bytes. `gVramManagerWork`
   (0x800 bytes, `VramManagers_Init`'s work areas) and `gVramTransferTasks` (0x2C tasks of 0x10 bytes) follow it.
 - MessageWindow's file has `.init` `0x020B0650` to `0x020B0674`, `.ctor` `0x020FC4DC` to `0x020FC4E0`, `.rodata`
-  `0x020B5AEC` to `0x020B5C44` (every object there is used by `func_02032fb8` to `func_020341d4`), `.data`
+  `0x020B5AEC` to `0x020B5C44` (every object there is used by `MessageWindow_Init` to `MessageWindow_Update`), `.data`
   `0x021102D8` to `0x021102F0` (the pair, then `MessageWindow`'s virtual table at `0x021102E0`, whose two functions
   are `0x02034A94` and `0x02034BC4`), and no `.bss`. `wh.cpp`'s `.data` ends at `0x021102D8` and `TextUtil.cpp`'s
   begins at `0x021102F0`. Its initialiser is the pattern of `MiiListMenuScene.cpp`: a `const` aggregate initialised
@@ -607,7 +607,7 @@ the ROM's now, and with them the offsets of everything after them in `.data`).
 
 ## The message window's buttons
 
-Measured (fix-link) on the window's update, `func_020341d4`: it sets +0xAF7C, +0xAF80 and +0xAF84 to -1 at the
+Measured (fix-link) on the window's update, `MessageWindow_Update`: it sets +0xAF7C, +0xAF80 and +0xAF84 to -1 at the
 start of each frame, then three helpers walk the window's sprite buttons (count +0xAD58, the numbers they were
 added with at +0xAD68) and text buttons (count +0xAD5C, numbers at +0xAD98) and store the number of the first one
 that reports:
@@ -615,7 +615,7 @@ that reports:
 | Field | Set by | Means | Name |
 | --- | --- | --- | --- |
 | +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`func_02031294`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
-| +0xAF80 | `func_0203404c` | its update, `func_0203133c`, returned TRUE: it was pressed. Open (`func_02034720`) also clears it | `mResult` |
+| +0xAF80 | `func_0203404c` | its update, `func_0203133c`, returned TRUE: it was pressed. Open (`MessageWindow_Open`) also clears it | `mResult` |
 | +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`func_02031d7c`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
 
 So a scene that reacts at once reads +0xAF80, one that waits for the button's animation +0xAF84 (inferred from
@@ -1798,7 +1798,7 @@ Measured, from the last third of the file (`0x02153CF4` on):
   (`func_02098d5c`), 1 to 8, 0 while unset.
 - **The profile page (2)** keeps its own text (11 `wchar_t` and a count) right after its keyboard. The keyboard
   object is therefore 0x5FF8 bytes. Its helpers show the birthday and a four-digit number with a window's plain
-  sprites (MessageWindow +0xA9F4, five sprites that `func_020345d8` draws), and the profile in the scene's nine text
+  sprites (MessageWindow +0xA9F4, five sprites that `MessageWindow_Draw` draws), and the profile in the scene's nine text
   boxes. That number is bits 17-28 of the record's +0x50, 0xFFF for none.
 - **The voice page (3)** has six voice presets (`data_020FBAAC`, six `s16` each), a random voice (`MATH_Rand16`
   over each value's range, `data_020FB940`), five sliders and a choice of four for +0xEE..+0xF9 of the record (six

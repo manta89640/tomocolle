@@ -555,21 +555,21 @@ void MapScene::Init() {
         charOffset += func_02031f58(&mButtons[i], &mMessageFiles[1], sButtonMessages[i], &gFonts[sButtonFonts[i]].mFont,
                                     0x10, charOffset);
     }
-    func_02032fb8(&mMessageWindows[0], sTitleWindowRect);
-    func_02033174(&mMessageWindows[0], sWindowTitleScreen, 0x100);
+    MessageWindow_Init(&mMessageWindows[0], sTitleWindowRect);
+    MessageWindow_SetScreen(&mMessageWindows[0], sWindowTitleScreen, 0x100);
     mMessageWindows[0].mUnknownAF9C = 0;
     MessageFile *files = mMessageFiles;
     for (int i = 0; i < titleTextCount; i++) {
-        func_02033a58(&mMessageWindows[0], &files[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
+        MessageWindow_AddText(&mMessageWindows[0], &files[1], titleMessage, &gFonts[sTitleFonts[i]].mFont, 0x1000,
                       sTitleTextPosition, &titleCharOffset);
     }
-    func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
-    func_02033174(&mMessageWindows[1], sWindowDownScreen, 2);
-    func_020337b8(&mMessageWindows[1], 0, 1, 0x14, 0x15, sTutorialButtonPosition, sTutorialButtonSize,
+    MessageWindow_Init(&mMessageWindows[1], sTutorialWindowRect);
+    MessageWindow_SetScreen(&mMessageWindows[1], sWindowDownScreen, 2);
+    MessageWindow_AddTextButtonWithSounds(&mMessageWindows[1], 0, 1, 0x14, 0x15, sTutorialButtonPosition, sTutorialButtonSize,
                   &mMessageFiles[0], 4, &gFonts[2].mFont, 0x10, &charOffset, (const ButtonSounds *)sTutorialButtonUnknown);
-    func_02033a58(&mMessageWindows[1], &mMessageFiles[1], 0x152, &gFonts[0].mFont, 0x10, sTutorialTextPosition,
+    MessageWindow_AddText(&mMessageWindows[1], &mMessageFiles[1], 0x152, &gFonts[0].mFont, 0x10, sTutorialTextPosition,
                   &charOffset);
-    func_02034f94(&mMessageWindows[1], 1);
+    MessageWindow_SetTextsVAlign(&mMessageWindows[1], 1);
     mMoney = gGameData.mCappedCounter;
     mMoneyDisplay.Init(&mMoney, &charOffset);
     ScreenLoader_SetPriority(&gScreenLoader, 0x10, 0);
@@ -613,7 +613,7 @@ void MapScene::Update() {
     mClockDisplay.Update();
     mMoneyDisplay.Update();
     for (int i = 0; i < 2; i++) {
-        func_020341d4(&mMessageWindows[i]);
+        MessageWindow_Update(&mMessageWindows[i]);
     }
     if (mSky.mChanged) {
         int phase = mSky.GetPhase();
@@ -655,7 +655,7 @@ void MapScene::Update() {
         case 23:
             if (mMessageWindows[1].mResult != -1) {
                 mMessageWindows[1].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mMessageWindows[1], 0x24);
+                MessageWindow_Close(&mMessageWindows[1], 0x24);
             }
             if (mMessageWindows[1].mTransitionDone) {
                 SetTutorialStep(mTutorialStep + 1);
@@ -666,7 +666,7 @@ void MapScene::Update() {
         case 24:
             if (mMessageWindows[1].mResult != -1) {
                 mMessageWindows[1].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mMessageWindows[1], 0x24);
+                MessageWindow_Close(&mMessageWindows[1], 0x24);
             }
             if (mMessageWindows[1].mTransitionDone) {
                 gSceneManager.RequestScene(0x69);
@@ -1038,7 +1038,7 @@ void MapScene::Update() {
 
 void MapScene::Draw() {
     for (int i = 0; i < 2; i++) {
-        func_020345d8(&mMessageWindows[i]);
+        MessageWindow_Draw(&mMessageWindows[i]);
     }
     mClockDisplay.Draw();
     mMoneyDisplay.Draw();
@@ -1092,13 +1092,13 @@ void MapScene::SetState(int state) {
         mMoneyDisplay.SetVisible(FALSE);
         mClockDisplay.SetVisible(FALSE);
         mTitleSprite.mVisible = TRUE;
-        func_02034f38(&mMessageWindows[0], 0, 0xA5);
+        MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0xA5);
         func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
-        func_02033174(&mMessageWindows[0], sTitleScreen, 0x100);
-        func_02034720(&mMessageWindows[0], 0x1A, 1);
+        MessageWindow_SetScreen(&mMessageWindows[0], sTitleScreen, 0x100);
+        MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
         NNS_G2dCharCanvasClear(&mMessageWindows[0].mTexts[0].mCanvas, 0);
-        func_020341d4(&mMessageWindows[0]);
+        MessageWindow_Update(&mMessageWindows[0]);
         mTitleCamera.Start(mCamera.mCamera);
         for (int i = 1; i < MODEL_COUNT; i++) {
             mNewMarks[i].mVisible = FALSE;
@@ -1190,65 +1190,65 @@ void MapScene::SelectBuilding(int model) {
     mSelected = model;
     mMessageWindows[0].mUnknownAF9C = 1;
     mMessageWindows[0].mUnknownSetBeforeClose = 5;
-    func_020349cc(&mMessageWindows[0], 0x1C);
+    MessageWindow_Close(&mMessageWindows[0], 0x1C);
     ArchiveManager_Unmount(&gArchiveManager, "S01");
     int building = sModelBuildings[model];
     u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(building);
     if (state == 0 || state == 3) {
         ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBoardWindowArchive, 1);
-        func_02034f38(&mMessageWindows[0], 0, sBoardMessages[building]);
+        MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBoardMessages[building]);
     } else {
         mHasInfo = TRUE;
         switch (model) {
         case 5:
             if (!IsNewDay()) {
                 ArchiveManager_MountCompressed(&gArchiveManager, "S01", sQuestionWindowArchive, 1);
-                func_02034f38(&mMessageWindows[0], 0, 0xA4);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0xA4);
                 mHasInfo = FALSE;
             } else {
                 ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-                func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             }
             break;
         case 3:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
             if (!mFacilities.HasTwoOfEachSex()) {
-                func_02034f38(&mMessageWindows[0], 0, 0x9A);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0x9A);
                 mHasInfo = FALSE;
             } else {
-                func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             }
             break;
         case 1:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
             if (!mFacilities.HasTwoWithBirthdays()) {
-                func_02034f38(&mMessageWindows[0], 0, 0xA6);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0xA6);
                 mHasInfo = FALSE;
             } else {
-                func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             }
             break;
         case 2:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
             if (!mFacilities.HasFourResidents()) {
-                func_02034f38(&mMessageWindows[0], 0, 0x9D);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0x9D);
                 mHasInfo = FALSE;
             } else {
-                func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             }
             break;
         case 10:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
             if (!mFacilities.HasSevenResidentsThreeOfEachSex()) {
-                func_02034f38(&mMessageWindows[0], 0, 0x9F);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0x9F);
                 mHasInfo = FALSE;
             } else {
-                func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+                MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             }
             break;
         default:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            func_02034f38(&mMessageWindows[0], 0, sBuildingMessages[building]);
+            MessageWindow_SetTextMessage(&mMessageWindows[0], 0, sBuildingMessages[building]);
             break;
         }
     }
@@ -1273,17 +1273,17 @@ void MapScene::OpenWindow() {
     if (state == 0 || state == 3) {
         func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
-        func_02033174(&mMessageWindows[0], sBoardScreen, 0x100);
+        MessageWindow_SetScreen(&mMessageWindows[0], sBoardScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sBoardTextPosition);
-        func_02034720(&mMessageWindows[0], 0x1A, 1);
+        MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
         return;
     }
     if (mHasInfo) {
         func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
-        func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
+        MessageWindow_SetScreen(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
-        func_02034720(&mMessageWindows[0], 0x1A, 1);
+        MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
         switch (mSelected) {
         case 7:
         case 10:
@@ -1308,17 +1308,17 @@ void MapScene::OpenWindow() {
     if (mSelected == 5) {
         func_02028f24(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
-        func_02033174(&mMessageWindows[0], sQuestionScreen, 0x100);
+        MessageWindow_SetScreen(&mMessageWindows[0], sQuestionScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
-        func_02034720(&mMessageWindows[0], 0x1A, 1);
+        MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
         mButtons[0].mVisible = TRUE;
         return;
     }
     func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
-    func_02033174(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
+    MessageWindow_SetScreen(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
     mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
-    func_02034720(&mMessageWindows[0], 0x1A, 1);
+    MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
     mButtons[0].mVisible = FALSE;
 }
 
@@ -1334,7 +1334,7 @@ void MapScene::Deselect(BOOL sound, int unknown) {
     mButtons[2].mVisible = FALSE;
     mMessageWindows[0].mUnknownAF9C = unknown;
     mMessageWindows[0].mUnknownSetBeforeClose = 0;
-    func_020349cc(&mMessageWindows[0], 0x1C);
+    MessageWindow_Close(&mMessageWindows[0], 0x1C);
     if (sound) {
         gSoundManager.StartSeqArc(1, 3, 2);
     }
@@ -1344,37 +1344,37 @@ void MapScene::Deselect(BOOL sound, int unknown) {
 void MapScene::SetTutorialStep(int step) {
     switch (step) {
     case 1:
-        func_02034f38(&mMessageWindows[1], 0, 0x152);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x152);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 2:
-        func_02034f38(&mMessageWindows[1], 0, 0x153);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x153);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 3: {
-        func_02034f38(&mMessageWindows[1], 0, 0x154);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x154);
         wchar_t name[8];
         wcscpy(name, data_02123510);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     }
     case 4:
-        func_02034f38(&mMessageWindows[1], 0, 0x155);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x155);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 5:
-        func_02034f38(&mMessageWindows[1], 0, 0x156);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x156);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 6: {
         SavedCharacter character;
         GameData_ReadCharacter(&gGameData, 0, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034f38(&mMessageWindows[1], 0, 0x157);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x157);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         int room = mResidentRooms[0];
         ScreenRect rect = sWindowTextureRect6;
         func_0202b1f0(&mWindows[room], 3, &rect);
@@ -1385,9 +1385,9 @@ void MapScene::SetTutorialStep(int step) {
         GameData_ReadCharacter(&gGameData, 0, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034f38(&mMessageWindows[1], 0, 0x158);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x158);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     }
     case 9:
@@ -1401,8 +1401,8 @@ void MapScene::SetTutorialStep(int step) {
         mButtons[0].mVisible = TRUE;
         break;
     case 11:
-        func_02034f38(&mMessageWindows[1], 0, 0x16B);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x16B);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 12:
         gSoundManager.StartSeqArc(1, 3, 1);
@@ -1413,9 +1413,9 @@ void MapScene::SetTutorialStep(int step) {
         GameData_ReadCharacter(&gGameData, 1, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034f38(&mMessageWindows[1], 0, 0x16E);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x16E);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     }
     case 16: {
@@ -1440,9 +1440,9 @@ void MapScene::SetTutorialStep(int step) {
         GameData_ReadCharacter(&gGameData, 1, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034f38(&mMessageWindows[1], 0, 0x16F);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x16F);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     }
     case 19:
@@ -1450,25 +1450,25 @@ void MapScene::SetTutorialStep(int step) {
         mCamera.MoveTo(sCameraZoomOffset);
         break;
     case 21: {
-        func_02034f38(&mMessageWindows[1], 0, 0x177);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x177);
         wchar_t name[8];
         wcscpy(name, data_02123510);
-        func_02034a3c(&mMessageWindows[1], 0, 0, name);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextStringArg(&mMessageWindows[1], 0, 0, name);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         mSound.SetMode(&mClock, MapSound::MODE_TUTORIAL);
         break;
     }
     case 22:
-        func_02034f38(&mMessageWindows[1], 0, 0x178);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x178);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 23:
-        func_02034f38(&mMessageWindows[1], 0, 0x179);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x179);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         break;
     case 24:
-        func_02034f38(&mMessageWindows[1], 0, 0x17A);
-        func_02034720(&mMessageWindows[1], 0x12, 1);
+        MessageWindow_SetTextMessage(&mMessageWindows[1], 0, 0x17A);
+        MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         ((SaveHeader *)&gIsland)->SetUnknown44(5, 3);
         break;
     }

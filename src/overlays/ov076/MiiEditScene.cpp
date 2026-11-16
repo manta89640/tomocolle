@@ -964,9 +964,9 @@ void MiiEditScene::ShowControlsWithWindow() {
 // --- Page 0 ---
 
 extern "C" {
-void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
+void MessageWindow_AddSpriteButtonEx(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, const ButtonSounds *sounds, int b);
-void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const ButtonSounds *sounds, int b);
 }
@@ -978,45 +978,45 @@ void MiiEditSexPage::Init(MiiEditScene *scene) {
     mScene->ShowControlsWithWindow();
     ScreenRect rect = sWindowRect;
     for (int i = 0; i < 2; i++) {
-        func_02032fb8(&mWindows[i], rect);
-        func_02033174(&mWindows[i], sWindowScreenName, 0x100);
+        MessageWindow_Init(&mWindows[i], rect);
+        MessageWindow_SetScreen(&mWindows[i], sWindowScreenName, 0x100);
         func_020331bc(&mWindows[i], 0x3F00, rect);
-        func_02034f4c(&mWindows[i], 1);
+        MessageWindow_SetTextsHAlign(&mWindows[i], 1);
     }
     int number = 0;
     for (int i = 0; i <= 1; i++) {
         if (mScene->mSceneId == 0x6F) {
-            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+            MessageWindow_AddSpriteButtonEx(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
                           data_ov076_02158a7c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
         } else {
-            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+            MessageWindow_AddSpriteButtonEx(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
                           data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
         }
         number++;
     }
     if (mScene->mSceneId == 0x43) {
-        func_02033844(&mWindows[0], number, 0, 0x69, 0x6A, data_ov076_021587a0, data_ov076_02158808,
+        MessageWindow_AddTextButtonEx(&mWindows[0], number, 0, 0x69, 0x6A, data_ov076_021587a0, data_ov076_02158808,
                       &mScene->mMessageFiles[1], 5, &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_021588ec, 1);
     }
-    charOffset = func_02033a58(&mWindows[0], &mScene->mMessageFiles[0], 0x1A, &gFonts[0].mFont, 0x1000,
+    charOffset = MessageWindow_AddText(&mWindows[0], &mScene->mMessageFiles[0], 0x1A, &gFonts[0].mFont, 0x1000,
                                data_ov076_021587e0, &charOffset);
-    func_02034f4c(&mWindows[0], 1);
-    func_02034f94(&mWindows[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindows[0], 1);
+    MessageWindow_SetTextsVAlign(&mWindows[0], 1);
     number = 0;
     for (int i = 2; i <= 3; i++) {
-        func_02033448(&mWindows[1], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+        MessageWindow_AddSpriteButtonEx(&mWindows[1], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
                       data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
         number++;
     }
-    charOffset = func_02033a58(&mWindows[1], &mScene->mMessageFiles[0], 0x1B, &gFonts[0].mFont, 0x1000,
+    charOffset = MessageWindow_AddText(&mWindows[1], &mScene->mMessageFiles[0], 0x1B, &gFonts[0].mFont, 0x1000,
                                data_ov076_021587d8, &charOffset);
-    func_02034f4c(&mWindows[1], 1);
+    MessageWindow_SetTextsHAlign(&mWindows[1], 1);
     SetState(0);
 }
 
 extern "C" {
-void func_020341d4(MessageWindow *window);
-void func_020349cc(MessageWindow *window, int flags);
+void MessageWindow_Update(MessageWindow *window);
+void MessageWindow_Close(MessageWindow *window, int flags);
 extern const s16 gVoicePresets[];
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_SetName(CharacterRecord *character, const wchar_t *name);
@@ -1027,7 +1027,7 @@ void MiiData_SetCreatorName(CharacterRecord *character, const wchar_t *name);
 void MiiEditSexPage::Update() {
     switch (mState) {
     case 0:
-        func_020341d4(&mWindows[0]);
+        MessageWindow_Update(&mWindows[0]);
         // The original reads mResult again after this test, which only a volatile read gives here (making the
         // field volatile in MessageWindow.h breaks PreStartScene::Ask)
         if (*(volatile int *)&mWindows[0].mResult != -1) {
@@ -1036,7 +1036,7 @@ void MiiEditSexPage::Update() {
                 gSceneManager.RequestScene(0x5E);
             } else {
                 mWindows[0].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindows[0], 0x24);
+                MessageWindow_Close(&mWindows[0], 0x24);
                 ((SavedCharacter *)(&mScene->mCharacter))->SetSex(result);
                 switch (MiiData_GetSex(&mScene->mCharacter)) {
                 case 0:
@@ -1088,10 +1088,10 @@ void MiiEditSexPage::Update() {
         mScene->SetPage(1);
         break;
     case 1:
-        func_020341d4(&mWindows[1]);
+        MessageWindow_Update(&mWindows[1]);
         if (mWindows[1].mResult != -1) {
             mWindows[1].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[1], 0x24);
+            MessageWindow_Close(&mWindows[1], 0x24);
             switch (mWindows[1].mResult) {
             case 0:
                 mNextPage = 1;
@@ -1113,10 +1113,10 @@ void MiiEditSexPage::Update() {
 void MiiEditSexPage::SetState(int state) {
     switch (state) {
     case 0:
-        func_02034720(&mWindows[0], 0x12, 1);
+        MessageWindow_Open(&mWindows[0], 0x12, 1);
         break;
     case 1:
-        func_02034720(&mWindows[1], 0x12, 1);
+        MessageWindow_Open(&mWindows[1], 0x12, 1);
         break;
     }
     mState = state;
@@ -1125,13 +1125,13 @@ void MiiEditSexPage::SetState(int state) {
 
 void MiiEditSexPage::Draw() {
     for (int i = 0; i < 2; i++) {
-        func_020345d8(&mWindows[i]);
+        MessageWindow_Draw(&mWindows[i]);
     }
 }
 
 void MiiEditSexPage::Exit() {
     for (int i = 0; i < 2; i++) {
-        func_020346cc(&mWindows[i]);
+        MessageWindow_Release(&mWindows[i]);
     }
 }
 
@@ -2932,7 +2932,7 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 11: {
-        func_020341d4(&mWindows[2]);
+        MessageWindow_Update(&mWindows[2]);
         int result = READ(mWindows[2].mResult);
         if (result != -1) {
             switch (result) {
@@ -2963,11 +2963,11 @@ void MiiEditProfilePage::Update() {
             case 2:
                 ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(0xFFF);
                 mWindows[2].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindows[2], 0x24);
+                MessageWindow_Close(&mWindows[2], 0x24);
                 break;
             case 3:
                 mWindows[2].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindows[2], 0x24);
+                MessageWindow_Close(&mWindows[2], 0x24);
                 break;
             }
         }
@@ -2977,7 +2977,7 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 12: {
-        func_020341d4(&mWindows[3]);
+        MessageWindow_Update(&mWindows[3]);
         int result = READ(mWindows[3].mResult);
         if (result != -1) {
             switch (result) {
@@ -3045,11 +3045,11 @@ void MiiEditProfilePage::Update() {
                 ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, 0);
                 ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, 0);
                 mWindows[3].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindows[3], 0x24);
+                MessageWindow_Close(&mWindows[3], 0x24);
                 break;
             case 5:
                 mWindows[3].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindows[3], 0x24);
+                MessageWindow_Close(&mWindows[3], 0x24);
                 break;
             }
         }
@@ -3059,7 +3059,7 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 13: {
-        func_020341d4(&mWindows[0]);
+        MessageWindow_Update(&mWindows[0]);
         int i;
         int choice;
         if (READ(mWindows[0].mTouchedButton) != -1 && (choice = READ(mWindows[0].mTouchedButton)) != 4) {
@@ -3088,12 +3088,12 @@ void MiiEditProfilePage::Update() {
                 }
             }
             mWindows[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[0], 0x24);
+            MessageWindow_Close(&mWindows[0], 0x24);
         }
         if (READ(mWindows[0].mResult) != -1 && READ(mWindows[0].mResult) == 4) {
             ((SavedCharacter *)(&mScene->mCharacter))->SetBloodType(4);
             mWindows[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[0], 0x24);
+            MessageWindow_Close(&mWindows[0], 0x24);
         }
         if (mWindows[0].mTransitionDone) {
             SetState(1);
@@ -3101,13 +3101,13 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 14:
-        func_020341d4(&mWindows[1]);
+        MessageWindow_Update(&mWindows[1]);
         if (mWindows[1].mUnknownAF88) {
             SetState(15);
         }
         return;
     case 15: {
-        func_020341d4(&mWindows[1]);
+        MessageWindow_Update(&mWindows[1]);
         int i;
         int choice;
         if (READ(mWindows[1].mTouchedButton) != -1 && (choice = READ(mWindows[1].mTouchedButton)) < 12) {
@@ -3124,14 +3124,14 @@ void MiiEditProfilePage::Update() {
                 }
             }
             mWindows[1].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[1], 0x24);
+            MessageWindow_Close(&mWindows[1], 0x24);
             for (int i = 0; i < 9; i++) {
                 mScene->mTextBoxes[i].mSprite.mVisible = TRUE;
             }
         }
         if (READ(mWindows[1].mResult) != -1 && READ(mWindows[1].mResult) == 12) {
             mWindows[1].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[1], 0x24);
+            MessageWindow_Close(&mWindows[1], 0x24);
             for (int i = 0; i < 9; i++) {
                 mScene->mTextBoxes[i].mSprite.mVisible = TRUE;
             }
@@ -3142,7 +3142,7 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 10: {
-        func_020341d4(&mWindows[4]);
+        MessageWindow_Update(&mWindows[4]);
         if (READ(mWindows[4].mTouchedButton) != -1) {
             int i;
             int choice = READ(mWindows[4].mTouchedButton);
@@ -3171,7 +3171,7 @@ void MiiEditProfilePage::Update() {
                 }
             }
             mWindows[4].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[4], 0x24);
+            MessageWindow_Close(&mWindows[4], 0x24);
         }
         if (mWindows[4].mTransitionDone) {
             SetState(1);
@@ -3179,7 +3179,7 @@ void MiiEditProfilePage::Update() {
         return;
     }
     case 16: {
-        func_020341d4(&mWindows[5]);
+        MessageWindow_Update(&mWindows[5]);
         int i;
         int choice;
         if (READ(mWindows[5].mTouchedButton) != -1 && (choice = READ(mWindows[5].mTouchedButton)) < 2) {
@@ -3201,11 +3201,11 @@ void MiiEditProfilePage::Update() {
                 }
             }
             mWindows[5].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[5], 0x24);
+            MessageWindow_Close(&mWindows[5], 0x24);
         }
         if (READ(mWindows[5].mResult) != -1 && READ(mWindows[5].mResult) == 2) {
             mWindows[5].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindows[5], 0x24);
+            MessageWindow_Close(&mWindows[5], 0x24);
         }
         if (mWindows[5].mTransitionDone) {
             SetState(1);
@@ -3218,7 +3218,7 @@ void MiiEditProfilePage::Update() {
 extern "C" {
 void GraphicsManager_RestoreState(u32 *manager, void *a, int planes);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
-void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
+void MessageWindow_AddSprite(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
 void func_02032140(SpriteButton *button, int a, int b, int c, int d); // Its four sounds
 // The keyboard
 
@@ -3246,7 +3246,7 @@ void MiiEditProfilePage::SetState(int state) {
     case 15:
     case 16:
         for (int i = 0; i < 6; i++) {
-            func_020346cc(&mWindows[i]);
+            MessageWindow_Release(&mWindows[i]);
         }
         break;
     }
@@ -3312,38 +3312,38 @@ void MiiEditProfilePage::SetState(int state) {
         }
         ScreenRect rect = sWindowRect;
         for (int i = 0; i < 6; i++) {
-            func_02032fb8(&mWindows[i], rect);
-            func_02033174(&mWindows[i], sWindowScreenName, 0x100);
+            MessageWindow_Init(&mWindows[i], rect);
+            MessageWindow_SetScreen(&mWindows[i], sWindowScreenName, 0x100);
             func_020331bc(&mWindows[i], 0x3F00, rect);
-            func_02034f4c(&mWindows[i], 1);
+            MessageWindow_SetTextsHAlign(&mWindows[i], 1);
         }
         int n = 0;
         for (int i = 0; i <= 3; i++) {
             u16 sequence = sChoiceSequences[i];
-            func_02033448(&mWindows[0], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddSpriteButtonEx(&mWindows[0], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[0].mSprites[n], sChoiceKinds[i]);
             n++;
         }
         WindowPoint okPosition = data_ov076_021587a8;
         WindowPoint okSize = data_ov076_021587c0;
-        func_02033844(&mWindows[0], n, 0, 0x69, 0x6A, okPosition, okSize, &mScene->mMessageFiles[1], 7,
+        MessageWindow_AddTextButtonEx(&mWindows[0], n, 0, 0x69, 0x6A, okPosition, okSize, &mScene->mMessageFiles[1], 7,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
         n = 0;
         for (int i = 4; i <= 15; i++) {
             u16 sequence = sChoiceSequences[i];
-            func_02033448(&mWindows[1], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddSpriteButtonEx(&mWindows[1], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[1].mSprites[n], sChoiceKinds[i]);
             n++;
         }
         WindowPoint okPosition1 = data_ov076_021587a8;
-        func_02033844(&mWindows[1], n, 0, 0x69, 0x6A, okPosition1, okSize, &mScene->mMessageFiles[1], 5,
+        MessageWindow_AddTextButtonEx(&mWindows[1], n, 0, 0x69, 0x6A, okPosition1, okSize, &mScene->mMessageFiles[1], 5,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
         n = 0;
         for (int i = 18; i <= 19; i++) {
             u16 sequence = sChoiceSequences[i];
-            func_02033448(&mWindows[2], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddSpriteButtonEx(&mWindows[2], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[2].mSprites[n], 1);
             mWindows[2].mSprites[n].mUnknownE0 = 6;
@@ -3353,22 +3353,22 @@ void MiiEditProfilePage::SetState(int state) {
         }
         WindowPoint okPosition2 = data_ov076_021587a8;
         WindowPoint yearSize = data_ov076_021587c0;
-        func_02033844(&mWindows[2], n, 0, 0x69, 0x6A, okPosition2, yearSize, &mScene->mMessageFiles[1], 7,
+        MessageWindow_AddTextButtonEx(&mWindows[2], n, 0, 0x69, 0x6A, okPosition2, yearSize, &mScene->mMessageFiles[1], 7,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
         WindowPoint clearPosition = data_ov076_02158790;
-        func_02033844(&mWindows[2], n + 1, 0, 0x69, 0x6A, clearPosition, yearSize, &mScene->mMessageFiles[1], 6,
+        MessageWindow_AddTextButtonEx(&mWindows[2], n + 1, 0, 0x69, 0x6A, clearPosition, yearSize, &mScene->mMessageFiles[1], 6,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[0], 14);
         for (int i = 0; i < 4; i++) {
-            func_02033bb4(&mWindows[2], 1, 0x4A, data_ov076_02158abc[i]);
+            MessageWindow_AddSprite(&mWindows[2], 1, 0x4A, data_ov076_02158abc[i]);
             mWindows[2].mPlainSprites[i].mOverwritePalette = 0;
             NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mWindows[2].mPlainSprites[i].mAnim));
             mWindows[2].mPlainSprites[i].mVisible = FALSE;
         }
-        func_02033bb4(&mWindows[2], 1, 0x4B, data_ov076_021587b8);
+        MessageWindow_AddSprite(&mWindows[2], 1, 0x4B, data_ov076_021587b8);
         n = 0;
         for (int i = 20; i <= 23; i++) {
             u16 sequence = sChoiceSequences[i];
-            func_02033448(&mWindows[3], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddSpriteButtonEx(&mWindows[3], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[3].mSprites[n], 1);
             mWindows[3].mSprites[n].mUnknownE0 = 6;
@@ -3378,17 +3378,17 @@ void MiiEditProfilePage::SetState(int state) {
         }
         WindowPoint okPosition3 = data_ov076_021587a8;
         WindowPoint dateSize = data_ov076_021587c0;
-        func_02033844(&mWindows[3], n, 0, 0x69, 0x6A, okPosition3, dateSize, &mScene->mMessageFiles[1], 7,
+        MessageWindow_AddTextButtonEx(&mWindows[3], n, 0, 0x69, 0x6A, okPosition3, dateSize, &mScene->mMessageFiles[1], 7,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
-        func_02033844(&mWindows[3], n + 1, 0, 0x69, 0x6A, clearPosition, dateSize, &mScene->mMessageFiles[1], 6,
+        MessageWindow_AddTextButtonEx(&mWindows[3], n + 1, 0, 0x69, 0x6A, clearPosition, dateSize, &mScene->mMessageFiles[1], 6,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[0], 14);
         for (int i = 0; i < 4; i++) {
-            func_02033bb4(&mWindows[3], 1, 0x4A, data_ov076_02158adc[i]);
+            MessageWindow_AddSprite(&mWindows[3], 1, 0x4A, data_ov076_02158adc[i]);
             mWindows[3].mPlainSprites[i].mOverwritePalette = 0;
             NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mWindows[3].mPlainSprites[i].mAnim));
             mWindows[3].mPlainSprites[i].mVisible = FALSE;
         }
-        func_02033bb4(&mWindows[3], 1, 0x4C, data_ov076_021587d0);
+        MessageWindow_AddSprite(&mWindows[3], 1, 0x4C, data_ov076_021587d0);
         n = 0;
         for (int i = 24; i <= 28; i++) {
             int value;
@@ -3410,7 +3410,7 @@ void MiiEditProfilePage::SetState(int state) {
                 break;
             }
             u16 sequence = sChoiceSequences[i];
-            func_02033844(&mWindows[4], n, 1, sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddTextButtonEx(&mWindows[4], n, 1, sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &mScene->mMessageFiles[0], value + 0x54, &gFonts[0].mFont, 0x1000, &charOffset,
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[4].mButtons[i - 24], sChoiceKinds[i - 24]);
@@ -3420,13 +3420,13 @@ void MiiEditProfilePage::SetState(int state) {
         n = 0;
         for (int i = 16; i <= 17; i++) {
             u16 sequence = sChoiceSequences[i];
-            func_02033448(&mWindows[5], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
+            MessageWindow_AddSpriteButtonEx(&mWindows[5], n, 1, (u8)sequence, sequence + 1, sChoicePositions[i], sChoiceSizes[i],
                           &sChoiceSounds[i], 14);
             func_02031260((SpriteButton *)&mWindows[5].mSprites[n], sChoiceKinds[i]);
             n++;
         }
         WindowPoint okPosition5 = data_ov076_021587a8;
-        func_02033844(&mWindows[5], n, 0, 0x69, 0x6A, okPosition5, okSize, &mScene->mMessageFiles[1], 5,
+        MessageWindow_AddTextButtonEx(&mWindows[5], n, 0, 0x69, 0x6A, okPosition5, okSize, &mScene->mMessageFiles[1], 5,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
         mScene->mText1B35C[0].mSprite.mVisible = FALSE;
         UpdateTexts();
@@ -3564,7 +3564,7 @@ void MiiEditProfilePage::SetState(int state) {
         break;
     }
     case 11:
-        func_02034720(&mWindows[2], 0x12, 1);
+        MessageWindow_Open(&mWindows[2], 0x12, 1);
         if (0xFFF == mScene->mCharacter.mBirthYear) {
             ((SavedCharacter *)(&mScene->mCharacter))->SetBirthYear(1990);
         }
@@ -3572,7 +3572,7 @@ void MiiEditProfilePage::SetState(int state) {
         UpdateDayButton();
         break;
     case 12:
-        func_02034720(&mWindows[3], 0x12, 1);
+        MessageWindow_Open(&mWindows[3], 0x12, 1);
         if (((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26) == 0 || ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27) == 0) {
             ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x26, 1);
             ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x27, 1);
@@ -3581,7 +3581,7 @@ void MiiEditProfilePage::SetState(int state) {
         SetDayDigits(((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27));
         break;
     case 13: {
-        func_02034720(&mWindows[0], 0x12, 1);
+        MessageWindow_Open(&mWindows[0], 0x12, 1);
         int choice = mScene->mCharacter.mBloodType;
         if (choice >= 0 && choice <= 3) {
             Sprite_SetSequence(&mWindows[0].mSprites[choice], (u16)(sChoiceSequences[choice] + 1), TRUE);
@@ -3589,7 +3589,7 @@ void MiiEditProfilePage::SetState(int state) {
         break;
     }
     case 14: {
-        func_02034720(&mWindows[1], 0x12, 1);
+        MessageWindow_Open(&mWindows[1], 0x12, 1);
         int color = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x28);
         if (color >= 0 && color <= 11) {
             Sprite_SetSequence(&mWindows[1].mSprites[color], (u16)(sChoiceSequences[color + 4] + 1), TRUE);
@@ -3602,7 +3602,7 @@ void MiiEditProfilePage::SetState(int state) {
         }
         break;
     case 10: {
-        func_02034720(&mWindows[4], 0x12, 1);
+        MessageWindow_Open(&mWindows[4], 0x12, 1);
         int value = mScene->mCharacter.mRelationBlood;
         if (value == 1) {
             break;
@@ -3629,7 +3629,7 @@ void MiiEditProfilePage::SetState(int state) {
         break;
     }
     case 16: {
-        func_02034720(&mWindows[5], 0x12, 1);
+        MessageWindow_Open(&mWindows[5], 0x12, 1);
         int sex = MiiData_GetSex(&mScene->mCharacter);
         if (sex >= 0 && sex <= 1) {
             Sprite_SetSequence(&mWindows[5].mSprites[sex], (u16)(sChoiceSequences[sex + 16] + 1), TRUE);
@@ -3653,7 +3653,7 @@ void MiiEditProfilePage::Draw() {
         func_02031d7c(&mButtons[i]);
     }
     for (int i = 0; i < 6; i++) {
-        func_020345d8(&mWindows[i]);
+        MessageWindow_Draw(&mWindows[i]);
     }
     switch (mState) {
     case 3:
@@ -3670,7 +3670,7 @@ void MiiEditProfilePage::Draw() {
 
 void MiiEditProfilePage::Exit() {
     for (int i = 0; i < 6; i++) {
-        func_020346cc(&mWindows[i]);
+        MessageWindow_Release(&mWindows[i]);
     }
     switch (mState) {
     case 3:
@@ -4597,7 +4597,7 @@ void MiiEditCharacterPage::Exit() {}
 
 // What these pages use of the main program (stand-ins)
 extern "C" {
-void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 pressedSequence, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int number, int a, u8 sequence, u8 pressedSequence, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const ButtonSounds *sounds, int b);
 }
@@ -4608,29 +4608,29 @@ void MiiEditRegisterPage::Init(MiiEditScene *scene, int previousPage) {
     mPreviousPage = previousPage;
     ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], "E00:/Window_down.nsc", 0x100);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], "E00:/Window_down.nsc", 0x100);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_02034f4c(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
     int number = 0;
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
+        MessageWindow_AddTextButtonEx(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
                       data_ov076_021588fc[i], data_ov076_0215894c[i], &mScene->mMessageFiles[1],
                       data_ov076_021587f0[i], &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158a3c[i], 1);
         number++;
     }
-    charOffset = func_02033a58(&mWindow[0], &mScene->mMessageFiles[0], 0x2D, &gFonts[0].mFont, 0x1000,
+    charOffset = MessageWindow_AddText(&mWindow[0], &mScene->mMessageFiles[0], 0x2D, &gFonts[0].mFont, 0x1000,
                                data_ov076_02158800, &charOffset);
-    func_02034f4c(&mWindow[0], 1);
-    func_02034f94(&mWindow[0], 1);
-    func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
 void MiiEditRegisterPage::Update() {
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
     if (mWindow[0].mResult != -1) {
         mWindow[0].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
+        MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
         switch (mWindow[0].mResult) {
         case 0:
             mNextPage = -1;
@@ -4665,11 +4665,11 @@ void MiiEditRegisterPage::Update() {
 }
 
 void MiiEditRegisterPage::Draw() {
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
 }
 
 void MiiEditRegisterPage::Exit() {
-    func_020346cc(&mWindow[0]);
+    MessageWindow_Release(&mWindow[0]);
 }
 
 void MiiEditQuitPage::Init(MiiEditScene *scene, int previousPage) {
@@ -4677,29 +4677,29 @@ void MiiEditQuitPage::Init(MiiEditScene *scene, int previousPage) {
     mPreviousPage = previousPage;
     ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], "E00:/Window_down.nsc", 0x100);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], "E00:/Window_down.nsc", 0x100);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_02034f4c(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
     int number = 0;
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
+        MessageWindow_AddTextButtonEx(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
                       data_ov076_021588fc[i], data_ov076_0215894c[i], &mScene->mMessageFiles[1],
                       data_ov076_021587f0[i], &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158a1c[i], 1);
         number++;
     }
-    func_02033a58(&mWindow[0], &mScene->mMessageFiles[0], 0x2E, &gFonts[0].mFont, 0x1000, data_ov076_02158800,
+    MessageWindow_AddText(&mWindow[0], &mScene->mMessageFiles[0], 0x2E, &gFonts[0].mFont, 0x1000, data_ov076_02158800,
                   &charOffset);
-    func_02034f4c(&mWindow[0], 1);
-    func_02034f94(&mWindow[0], 1);
-    func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
 void MiiEditQuitPage::Update() {
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
     if (mWindow[0].mResult != -1) {
         mWindow[0].mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
+        MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
         switch (mWindow[0].mResult) {
         case 0:
             mNextPage = -1;
@@ -4728,11 +4728,11 @@ void MiiEditQuitPage::Update() {
 }
 
 void MiiEditQuitPage::Draw() {
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
 }
 
 void MiiEditQuitPage::Exit() {
-    func_020346cc(&mWindow[0]);
+    MessageWindow_Release(&mWindow[0]);
 }
 
 // TEMPORARY: refers to every object of .rodata, so that the compiler keeps the ones that only functions not

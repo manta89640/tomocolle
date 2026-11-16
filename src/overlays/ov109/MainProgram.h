@@ -48,16 +48,16 @@ void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, in
 extern "C" {
 // Adds a button with a text: (.., number, .., two sprite sequences, position, size, the text's message file and
 // message, font, plane, character offset, style, ..)
-void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const ButtonSounds *style, int b);
 // Adds a button without a text
-void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
+void MessageWindow_AddSpriteButtonEx(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, const ButtonSounds *style, int b);
 // Sets the window's message text up
-void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint position, WindowPoint margin, int *charOffset);
-void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position);
+void MessageWindow_AddSprite(MessageWindow *window, int a, int sequence, WindowPoint position);
 }
 
 

@@ -72,12 +72,12 @@ extern MATHRandContext16 gRandom;
 BOOL func_02031ccc(SpriteButton *button); // Whether it was pressed
 
 // --- The message window ---
-void func_02033390(MessageWindow *window, int index, int a, u8 b, u8 c, WindowPoint position, WindowPoint size);
-void func_0203373c(MessageWindow *window, int index, int a, int b, int c, WindowPoint position, WindowPoint size,
+void MessageWindow_AddSpriteButton(MessageWindow *window, int index, int a, u8 b, u8 c, WindowPoint position, WindowPoint size);
+void MessageWindow_AddTextButton(MessageWindow *window, int index, int a, int b, int c, WindowPoint position, WindowPoint size,
                    MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset);
-void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
                    WindowPoint a, WindowPoint b, int *charOffset);
-void func_02033bb4(MessageWindow *window, int a, int b, WindowPoint position);
+void MessageWindow_AddSprite(MessageWindow *window, int a, int b, WindowPoint position);
 void func_02033c88(MessageWindow *window, int plane, int objPlane, MessageFile *file, int message, int a,
                    MessageFile *buttonFile, int *charOffset);
 void func_02033ddc(MessageWindow *window, int plane, int objPlane, MessageFile *file, int message, int a,

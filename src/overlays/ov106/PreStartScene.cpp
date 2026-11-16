@@ -59,18 +59,18 @@ void PreStartScene::Init() {
     MessageFile *etc = &mEtcMessages;
     MessageFile *common = &mCommonMessages;
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], sScreenName, 0x200);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], sScreenName, 0x200);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_020336b4(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
+    MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
                   &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, 10);
     for (int i = 0; i < 2; i++) {
-        func_020336b4(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize, common,
+        MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize, common,
                       sChoiceMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, -1);
     }
-    func_02033a58(&mWindow[0], etc, 0x1A2, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
-    func_02034f94(&mWindow[0], 1);
-    func_02034f4c(&mWindow[0], 1);
+    MessageWindow_AddText(&mWindow[0], etc, 0x1A2, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
     ScreenLoader_SetPriority(&gScreenLoader, 0x200, 0);
 
     mSavingIcon.Init();
@@ -158,7 +158,7 @@ void PreStartScene::Update() {
                 mStep++;
                 mSubStep = 0;
                 mWindow[0].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                                MessageWindow::FLAG_FROM_BELOW);
                 mSavingIcon.mVisible = FALSE;
             }
@@ -187,7 +187,7 @@ void PreStartScene::Update() {
 
 // @0x0214a230
 void PreStartScene::Draw() {
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
     mSavingIcon.Draw();
 }
 
@@ -208,7 +208,7 @@ void PreStartScene::SetState(int state) {
 
 // @0x0214a2b0
 void PreStartScene::UpdateWindow() {
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
 }
 
 // Lists the residents and has the main program work out, from the clock, what they did while the game was off
@@ -243,8 +243,8 @@ void PreStartScene::UpdateResidents() {
 BOOL PreStartScene::ShowMessage(u32 message) {
     if (mSubStep == 0) {
         mSubStep++;
-        func_02034f38(&mWindow[0], 0, message);
-        func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
+        MessageWindow_SetTextMessage(&mWindow[0], 0, message);
+        MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         for (int i = 0; i < 3; i++) {
             mWindow[0].mButtons[i].mVisible = FALSE;
@@ -266,7 +266,7 @@ BOOL PreStartScene::ShowOk(u32 message) {
     if (mSubStep == 0) {
         mSubStep++;
         mWindow[0].mTexts[0].mMessage = message;
-        func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
+        MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         mWindow[0].mButtons[MessageWindow::BUTTON_YES].mVisible = FALSE;
         mWindow[0].mButtons[MessageWindow::BUTTON_NO].mVisible = FALSE;
@@ -274,7 +274,7 @@ BOOL PreStartScene::ShowOk(u32 message) {
         if (mWindow[0].mResult != -1) {
             mSubStep++;
             mWindow[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+            MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                            MessageWindow::FLAG_FROM_BELOW);
         }
     } else if (mSubStep == 2) {
@@ -294,8 +294,8 @@ BOOL PreStartScene::Ask(u32 message, int flags) {
     if (mSubStep == 0) {
         mSubStep++;
         mAnswer = -1;
-        func_02034f38(&mWindow[0], 0, message);
-        func_02034720(&mWindow[0], flags, 0);
+        MessageWindow_SetTextMessage(&mWindow[0], 0, message);
+        MessageWindow_Open(&mWindow[0], flags, 0);
         mWindow[0].mButtons[MessageWindow::BUTTON_OK].mVisible = FALSE;
     } else if (mSubStep == 1) {
         int result = mWindow[0].mResult;
@@ -303,7 +303,7 @@ BOOL PreStartScene::Ask(u32 message, int flags) {
             mSubStep++;
             mAnswer = result;
             mWindow[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+            MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                            MessageWindow::FLAG_FROM_BELOW);
             if (result == MessageWindow::BUTTON_YES) {
                 gSoundManager.StartSeqArc(1, 1, 10);
