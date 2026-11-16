@@ -391,6 +391,17 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
 - `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
   rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
   replace the range's lines in place.
+- Anonymous strings of an initialiser (a table of pointers to literals) cannot be permuted, since the table's order
+  is fixed: make them named arrays (`static wchar_t sNgWord05[] = L"...";`, non-`const` to stay in `.data`), declared
+  where the literals were, and the same-size permutation applies to them. Overlay 109's 44 strings went into the
+  ROM's order in one pass of a script that reads each compiled slot and finds the object the ROM has there by its
+  contents (`scratchpad/near-miss2/bin/permute.py`); a pointer table among them (`sCharacterArchives`) is placed by
+  its known address and may move after its strings' declarations.
+- Room in `.bss` that nothing uses is the objects' own size or alignment, and the alignment shows in the code:
+  `ATTRIBUTE_ALIGN(32)` on a large static changed how the functions that use it address it (overlay 109's
+  `sParents`, `sTransfer`, `sMiiData`), except where it did not (`sSongs`). A static whose type is a class with a
+  constructor is built by the static initialiser with C1; a larger buffer made by deriving from the class calls C2
+  instead, one made by holding it as a member keeps C1.
 - Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
   at the end), in the order of their declarations: overlay 39's two message numbers.
 - When a same-size group cannot be solved by swapping names (a local `const` array, or virtual tables, sit at fixed
