@@ -650,3 +650,33 @@ void ShopCounter::SetStaffUnknown14() {
 BOOL ShopCounter::IsStaffIdle() {
     return mStaff.IsIdle();
 }
+
+extern "C" {
+extern struct GameData gGameData;
+extern MATHRandContext16 gRandom;
+BOOL func_0202c354(GameData *game, int index);
+u8 func_0202c468(GameData *game, int index); // The character's event
+u8 func_0202c490(GameData *game, int index); // The place of its event
+}
+
+// Picks at random one of the residents whose event (0x14) is at the given place, for the staff to be
+BOOL FindResidentAt(int place, BOOL *found, int *index) {
+    int candidates[100];
+    int count = 0;
+    *found = FALSE;
+    *index = 0;
+    for (int i = 0; i < 100; i++) {
+        if (func_0202c354(&gGameData, i) && func_0202c468(&gGameData, i) == 0x14 &&
+            place == func_0202c490(&gGameData, i)) {
+            candidates[count] = i;
+            count++;
+        }
+    }
+    if (count != 0) {
+        *found = TRUE;
+        *index = candidates[MATH_Rand16(&gRandom, count)];
+    } else {
+        *found = FALSE;
+    }
+    return *found;
+}
