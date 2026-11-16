@@ -1819,15 +1819,16 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
 
 On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
 with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
-cast; without them the instructions are the same and the callee-saved registers are rotated. The five other expressions
-have the right instructions but for a clamp each (see the comments in the source). Measured on
-`NFLi_ApplyExpression5`, whose original keeps the compares of a clamp whose result nothing uses: under
-`#pragma optimization_level 1` it gets the original's callee-saved registers and keeps those compares (with no
-moves), but loses the scheduling, the if-conversion and the folding of the compare into `adds` that the original has.
-No combination tried gives both: every `opt_*` pragma off at levels 2 to 4, `#pragma global_optimizer off` (accepted,
-no effect), the `-opt no...` switches, and every 2.0, 3.0 and 4.0 build. In `NFLi_ApplyExpression2` and `3` the
-original adds `d` again in the else of the clamp; every level from 1 up, every source form tried and every `opt_*`
-pragma reuse the compare's sum instead (only level 0 computes it three times).
+cast; without them the instructions are the same and the callee-saved registers are rotated. `NFLi_ApplyExpression2`
+and `3` match with `#pragma opt_propagation off` added and the eyebrow's clamp written on a copy of the rotation (the
+compares on the copy, the else adding `d` to the variable): the original adds `d` twice, which every level from 1 up
+folds into one sum when the clamp reads and writes one variable. `NFLi_ApplyExpression5` matches with
+`#pragma opt_dead_assignments off` instead of propagation off and its clamp in the same copy form: the original keeps
+the adds, branch and compare of a clamp whose result nothing uses (the eyes take the Mii's own rotation), and that
+pragma is the only setting found that keeps them with the level-2 scheduling (level 1 keeps them without it).
+Inferred from these: the expressions were not compiled under one setting. `NFLi_ApplyExpression1` and `4` still differ
+by the register of the clamped rotation (r3 where the original reuses the field's r4): no statement or declaration
+order, single `opt_*` pragma, clamp form (direct, copy, inline helper) or sine/cosine form tried moves it.
 `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they match at the file's level.
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
