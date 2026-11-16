@@ -855,6 +855,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `cs`, `cc`): the value went through an `int` first, `int level = mSatisfyLevel;`, or an inline
   `static inline int Rand(int max) { return MATH_Rand16(&gRandom, max); }`; the same inline also gave the original's
   registers around the generator in five functions (`SavedCharacter.cpp`).
+- Three byte loads given the scratch registers in another order: a field extracted as `(b & 0x0F) << 12` where
+  `(u16)(b << 12)` gives the same instructions with the loads defined in another order (`GetCreateIdNumber`).
 - A result kept in r1 where ours puts it in r0, with r0 unused afterwards: the function returns the value r0 holds
   (`GetCreateIdParts` returns the number it splits).
 - `sum *= 1000; sum /= 32767 * 3;` where `sum = sum * 1000 / (32767 * 3)` schedules the whole function differently

@@ -1958,7 +1958,7 @@ The class names are the project's own; the field names in quotes below are the g
 | `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
 | `Character.cpp` | to `0x02092178`, 73 functions, 69 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
 | `CharacterSort.cpp` | to `0x020979A0`, 23 functions, all matching, complete | The resident list's orders: name normalization, collation, comparators |
-| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 177 matching (Validate's string labels aside) | `SavedCharacter`: the record, its parameters, relations, long activities, troubles, tastes, reactions, birthday and biorhythm |
+| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 178 matching (Validate's string labels aside) | `SavedCharacter`: the record, its parameters, relations, long activities, troubles, tastes, reactions, birthday and biorhythm |
 
 Measured:
 

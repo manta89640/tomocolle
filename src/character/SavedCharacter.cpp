@@ -692,11 +692,11 @@ u32 SavedCharacter::GetCreateIdNumber() {
     copy = id;
     u32 number = 0;
     if (NFL_GetMiiCreateIdBit6(this)) {
-        number += (u16)(copy.data[0] << 12);
+        number += (copy.data[0] & 0x0F) << 12;
         number += copy.data[1] << 4;
         number += copy.data[2] >> 4;
     } else {
-        number += (u16)(copy.data[3] << 14);
+        number += (copy.data[3] & 0x03) << 14;
         number += copy.data[2] << 6;
         number += copy.data[3] >> 2;
     }
