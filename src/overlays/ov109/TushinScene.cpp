@@ -2749,16 +2749,17 @@ int TushinScene::NextPageAfterReceive() {
     return page;
 }
 
-// NOT MATCHING: the original derives the -1 for sReceivedResident from a register holding 0 (mov r2, #0; sub r1, r2,
-// #1), and sets that 0 earlier (five instructions). mwcc derives a constant so when a register already holds a nearby
-// one (storing 0 first does it, but then the stores come out in the other order); a variable equal to 0 that is not
-// propagated would do it too (ItemTradeList::Receive), but none fits here.
+// The -1 for sReceivedResident is derived from a register holding 0 (mov r2, #0; sub r1, r2, #1), which is a local
+// assigned 0 that the compiler keeps: with dead assignments left in (opt_dead_assignments off) it is not folded.
 // @0x02152014
+#pragma push
+#pragma opt_dead_assignments off
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;
-    sReceivedResident = -1;
+    int zero = 0;
+    sReceivedResident = zero - 1;
     int result = sWiiReceiveResult;
-    sWiiReceiveResult = 0;
+    sWiiReceiveResult = zero;
     switch (result) {
     case -5:
         PlayResultSound(0xD);
@@ -2824,6 +2825,7 @@ int TushinScene::ReceiveWiiMii() {
     }
     return 0x3A;
 }
+#pragma pop
 
 // @0x021523a4
 extern "C" void TushinScene_OnWiiMiiReceived(int index, int result) {
