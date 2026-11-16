@@ -321,7 +321,9 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   fixed, so this is mechanical: read where each declaration landed in the compiled object, give each position the
   declaration whose ROM address has that rank among its size, and compile once more.
 - The same compiler run under wibo instead of wine (with the source converted to Shift JIS) gives the same code but
-  another order of same-size objects: judge data layout only with the build's own compile.
+  another order of same-size objects: judge data layout only with the build's own compile. This holds for a
+  `.bss` pool too: four `int` statics came out in different slots under wibo and in the build
+  (`WirelessTestScene.cpp`), so permute declarations by `objdump -t` of the build's object.
 - A pool that looks out of size order is often made of smaller objects than it seems. The 0x28 bytes at
   `0x02112DC4` that the static initialiser fills (0x18 of pairs, then a 0x10 table, then a 0x10 key array) are three
   8-byte objects, not one 0x18 array, and then sort as the model says (`KeyboardCore.cpp`). Data that is in no
@@ -517,6 +519,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
   does not (overlay 76's question pages).
 
+**A function inlined where the original calls it**
+- An inline constructor that the original's static initialiser calls out of line, emitted after the file's
+  implicit destructors: `__attribute__((never_inline))` on the inline definition (`SceneMemory`, `EmptyScene.cpp`).
+  A non-inline definition instead comes before the destructors, as C1 and C2.
+
 **Branches and switches laid out differently**
 - A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
   if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
@@ -538,6 +545,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   gives a range test.
 - `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
   that is rotated at level 2 is a `do { } while`.
+- A retry loop whose "taken" case jumps straight back to the body without testing the count again:
+  `for (; n < count; n++) { retry: ...; if (taken) goto retry; }` (`SceneCast::Choose`); `while` with `continue`
+  or an `if (!taken) n++` re-test the count.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
 - A test whose second branch the original places first (`cmp #1; beq later; cmp #2; bne end; <case 2>`) is a
   switch with that case written first (overlay 76's voice page).
