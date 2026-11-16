@@ -110,6 +110,25 @@ the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the gam
 matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
 middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.
 
+How MSL was built, measured on the archive's objects and confirmed by files of it that match and link: each object
+pools its 4-byte statics and globals into one section (`abort_exit_arm.o`'s `.bss` holds `__console_exit`,
+`__stdio_exit`, `__atexit_curr_func`, `__aborting` and the 256-byte `__atexit_funcs` at 0, 4, 8, 12 and 16), which
+the compiler does only with `-ipa file`; the stdio, exit and signal code calls `OS_TryLockMutex` and `OS_LockMutex` for
+its critical regions, so the library was built thread-safe, which only MSL's prefix file `PREFIX_NITRO.h` sets (and
+`critical_regions.NITRO.h` includes the SDK's thread and mutex headers); and the console is buffered
+(`_MSL_BUFFERED_CONSOLE`): `ansi_files.o` has three 256-byte buffers, with stdin and stdout line buffered and stderr
+unbuffered in the FILE table. The build of `lib/MSL_C/` does all three, and leaves out the exception tables.
+
+The MSL files the game links whole are written and complete: `string.c` (8 functions), `mem.c` (4), `mem_funcs.c`
+(1), `buffer_io.c` (5), `char_io.c` (2), `file_io.c` (1), `ansi_files.c` (1, and the FILE table at `0x0210F09C`),
+`signal.c` (1, and its handlers), `abort_exit_arm.c` (3: it begins at `abort`, `0x02014A80`), `arith.c` (`abs`), and
+two files of data only, the archive's `critical_regions` member (`__cs_id`, `__cs_ref`, `__cs`, `0x0211D1C0`) and
+`errno.c`. Measured: `abs` is byte for byte `labs` too, so which of the two the game links is not known; and `atoi`
+(`0x0201A8EC`) is `atol` too. `snprintf` (`0x020175A8`), `sscanf` (`0x020188F4`) and `atoi` end `printf.o`,
+`scanf.o` and `strtoul.o`'s stretches in the game, each the next function of its object after the one before it and
+calling `vsnprintf`, `vsscanf` and `strtol`. `__read_console`, `__write_console` and `__close_console` are at
+`0x02021778`, `0x020217C8` and `0x020217FC`, outside MSL: the FILE table refers to them.
+
 ## Voice synthesis
 
 The Miis' voices come from Sharp's text-to-speech engine, SHTTS 1.2.0 (the version is in the SDK's list of library
