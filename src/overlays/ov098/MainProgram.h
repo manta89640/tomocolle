@@ -3,6 +3,7 @@
 
 #include "OptionScene.h"
 #include "SceneManager.h"
+#include "text/TextUtil.h"
 
 // What overlay 98's code uses of the main program, which is not decompiled: STAND-INS and declarations, which only
 // the overlay's source includes (the scene's classes, in OptionScene.h, are also included by the main program's
@@ -66,8 +67,6 @@ void func_0202c8f8(GameData *game, int unknown);
 BOOL func_0202cd48(GameData *game);
 BOOL func_0202cd94(GameData *game);
 
-// A number as a string: (value, buffer, size of the buffer in bytes, ...)
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);
 }
 
 

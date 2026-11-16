@@ -2,6 +2,7 @@
 #define OV073_ROOM_H
 
 #include <nitro.h>
+#include "text/TextUtil.h"
 #include <nnsys.h>
 
 #include "Model.h"
@@ -104,7 +105,6 @@ void func_020a5854(Room *room, int unk);
 u16 func_020a4d90(Room *room);
 void func_020a4dcc(Room *room, int *r, int *g, int *b);
 // Writes a number as full-width digits: (value, buffer, buffer size in bytes, digits, BOOL unk)
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);
 }
 
 // The room of the tutorial's apartment scene: a Room that can change its style in the background, and that knows

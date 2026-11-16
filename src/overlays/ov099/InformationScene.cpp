@@ -219,17 +219,17 @@ void InformationScene::Init() {
             mTexts[t].mMessage = typeMessage;
             break;
         case TEXT_RESIDENTS:
-            func_0203673c(residents, numbers[0], sizeof(numbers[0]), 0, FALSE);
+            FormatNumber(residents, numbers[0], sizeof(numbers[0]), 0, FALSE);
             mTexts[t].SetStringArg(numbers[0], 0);
             break;
         case TEXT_AGE:
-            func_02036a2c(averageAge, numbers[0], sizeof(numbers[0]), 0, 0, 1);
+            FormatDecimal(averageAge, numbers[0], sizeof(numbers[0]), 0, 0, 1);
             mTexts[t].SetStringArg(numbers[0], 0);
             break;
         case TEXT_RATIO:
-            func_0203673c(men, numbers[0], sizeof(numbers[0]), 0, FALSE);
+            FormatNumber(men, numbers[0], sizeof(numbers[0]), 0, FALSE);
             mTexts[t].SetStringArg(numbers[0], 0);
-            func_0203673c(women, numbers[1], sizeof(numbers[1]), 0, FALSE);
+            FormatNumber(women, numbers[1], sizeof(numbers[1]), 0, FALSE);
             mTexts[t].SetStringArg(numbers[1], 1);
             break;
         case TEXT_COMFORT:
@@ -250,12 +250,12 @@ void InformationScene::Init() {
                         mStars[j].mVisible = FALSE;
                     }
                 }
-                func_0203673c(comfort, numbers[0], sizeof(numbers[0]), 0, FALSE);
+                FormatNumber(comfort, numbers[0], sizeof(numbers[0]), 0, FALSE);
                 mTexts[t].SetStringArg(numbers[0], 0);
             }
             break;
         case TEXT_TROUBLES:
-            func_0203673c(troubles, numbers[0], sizeof(numbers[0]), 0, FALSE);
+            FormatNumber(troubles, numbers[0], sizeof(numbers[0]), 0, FALSE);
             mTexts[t].SetStringArg(numbers[0], 0);
             break;
         }

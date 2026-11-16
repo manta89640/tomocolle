@@ -57,12 +57,12 @@ struct MiiEditSprite100 {
 struct CharacterSpeechTexts {
     /* 0x000 */ char mUnknown000[0x52];      // mUnknown068 in Shift JIS
     /* 0x052 */ wchar_t mUnknown052[11];     // The Mii's name (MiiData_GetName)
-    /* 0x068 */ wchar_t mUnknown068[41];     // The same, through func_020372bc
-    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mFamilyName, through func_020372d0
-    /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through func_020372d0
+    /* 0x068 */ wchar_t mUnknown068[41];     // The same, through MakeSpeechTextInPlace
+    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mFamilyName, through MakeSpeechText
+    /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through MakeSpeechText
     /* 0x15E */ char mUnknown15E[0x82];      // mUnknown202 in Shift JIS
     /* 0x1E0 */ wchar_t mUnknown1E0[17];     // CharacterRecord::mSpeechDefault, or gText_MiNyuuRyoku when empty
-    /* 0x202 */ wchar_t mUnknown202[65];     // mUnknown1E0 through func_020372d0
+    /* 0x202 */ wchar_t mUnknown202[65];     // mUnknown1E0 through MakeSpeechText
     /* 0x284 */ u8 mUnknown284[0xC];
     /* 0x290 */ BOOL mUnknown290;            // Whether mSpeechDefault was set
 }; // 0x294

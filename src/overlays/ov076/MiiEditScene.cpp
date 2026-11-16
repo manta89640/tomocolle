@@ -1,4 +1,5 @@
 #include "MiiEditScene.h"
+#include "text/TextUtil.h"
 #include "MainProgram.h"
 #include "sound/SoundManager.h"
 
@@ -3727,7 +3728,6 @@ void MiiEditProfilePage::Exit() {
 
 // What the profile page uses of the main program (stand-ins)
 extern "C" {
-void func_02037478(wchar_t *text); // Applied to the texts of numbers before they are shown
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
 int func_02098dac(SavedCharacter *character, int param);  // A parameter of the character (0x26, 0x27: birth month, day)
@@ -3845,13 +3845,13 @@ void MiiEditProfilePage::UpdateTexts() {
         swprintf(NUMBER_TEXT(mScene), 5, L"", number);
     } else {
         swprintf(NUMBER_TEXT(mScene), 5, L"%d", number);
-        func_02037478(NUMBER_TEXT(mScene));
+        ToFullWidthDigits(NUMBER_TEXT(mScene));
     }
     int month = func_02098dac(&mScene->mCharacter, 0x26);
     int day = func_02098dac(&mScene->mCharacter, 0x27);
     if (month > 0 && month <= 12 && day > 0 && day <= 31) {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"%d/%d", month, day);
-        func_02037478(BIRTHDAY_TEXT(mScene));
+        ToFullWidthDigits(BIRTHDAY_TEXT(mScene));
     } else {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"");
     }
@@ -3942,7 +3942,6 @@ void func_0204e4b4(CharacterSpeechTexts *texts, SavedCharacter *character); // F
 void func_0204e62c(wchar_t *text, int value);                               // Writes a number
 void func_0209d898(SceneCharacter *character, TtsPlayer *player);
 void Character_SetFace(SceneCharacter *character, int face);
-void func_020372bc(wchar_t *text, int size);
 }
 
 // The scene's buffer of the text to speak, in Shift JIS (0x102 bytes)
@@ -4465,7 +4464,7 @@ void MiiEditVoicePage::SpeakProfile(int step) {
         wchar_t creatorName[41];
         MI_CpuClear16(creatorName, sizeof(creatorName));
         MiiData_GetCreatorName(&mScene->mCharacter, creatorName);
-        func_020372bc(creatorName, sizeof(creatorName));
+        MakeSpeechTextInPlace(creatorName, sizeof(creatorName));
         if (!mScene->GetNameLength(creatorName)) {
             SpeakProfile(step + 1);
             return;

@@ -5,6 +5,7 @@
 // of functions as they were decompiled.
 
 #include <nitro.h>
+#include "text/TextUtil.h"
 #include <nnsys.h>
 
 #include "sound/SoundManager.h"
@@ -10954,7 +10955,6 @@ void func_0209107c(RoomCharacter *character);
 // Makes the model from the resources of an id
 void func_0208ef5c(CharacterModel *model, int resourceId, int unk);
 // Copies a text, of at most that many bytes
-void func_020372d0(wchar_t *dest, const wchar_t *src, int size);
 }
 
 // @0x02168d24
@@ -11329,7 +11329,7 @@ void RoomCharacter::ConvertSpeechTexts() {
     if (mSpeechDefault[0] == L'\0') {
         MI_CpuFill8(mSpeechTextDefault, 0, 4);
     } else {
-        func_020372d0(text, mSpeechDefault, sizeof(mSpeechTextDefault));
+        MakeSpeechText(text, mSpeechDefault, sizeof(mSpeechTextDefault));
         STD_ConvertStringUnicodeToSjis(mSpeechTextDefault, NULL, (const u16 *)text, NULL, NULL);
     }
     for (int i = 0; i < 4; i++) {
@@ -11338,7 +11338,7 @@ void RoomCharacter::ConvertSpeechTexts() {
         if (source[0] == L'\0') {
             MI_CpuFill8(dest, 0, 4);
         } else {
-            func_020372d0(text, source, sizeof(mSpeechTextByMood[i]));
+            MakeSpeechText(text, source, sizeof(mSpeechTextByMood[i]));
             STD_ConvertStringUnicodeToSjis(dest, NULL, (const u16 *)text, NULL, NULL);
         }
     }
@@ -11562,7 +11562,7 @@ void ApartmentRoom::SetStyle(u16 style) {
 void ApartmentRoom::UpdateNumberText() {
     int room = (mRoomIndex & 7) + 1;
     int floor = (mRoomIndex >> 3) + 1;
-    func_0203673c(floor * 100 + room, mNumberText, sizeof(mNumberText), 4, FALSE);
+    FormatNumber(floor * 100 + room, mNumberText, sizeof(mNumberText), 4, FALSE);
 }
 
 // @0x0216a330

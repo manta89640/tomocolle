@@ -744,13 +744,13 @@ void OptionScene::OpenWindow(int window, int charOffset) {
             MI_CpuClear16(text, sizeof(mDateTexts[j]));
             switch (j) {
             case 0:
-                func_0203673c(mDate.year + 2000, text, sizeof(mDateTexts[j]), 0, FALSE);
+                FormatNumber(mDate.year + 2000, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 1:
-                func_0203673c(mDate.month, text, sizeof(mDateTexts[j]), 0, FALSE);
+                FormatNumber(mDate.month, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 2:
-                func_0203673c(mDate.day, text, sizeof(mDateTexts[j]), 0, FALSE);
+                FormatNumber(mDate.day, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 3:
                 if (hour >= 12) {
@@ -761,10 +761,10 @@ void OptionScene::OpenWindow(int window, int charOffset) {
                 }
                 break;
             case 4:
-                func_0203673c(hour, text, sizeof(mDateTexts[j]), 0, FALSE);
+                FormatNumber(hour, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             case 5:
-                func_0203673c(mTime.minute, text, sizeof(mDateTexts[j]), 0, FALSE);
+                FormatNumber(mTime.minute, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             }
             func_02034a3c(&mWindow, 0, j, text);

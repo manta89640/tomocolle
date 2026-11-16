@@ -617,7 +617,7 @@ void WeddingCharacter::Speak(int file, u32 message, int count, int *types, int *
             case ARG_CHARACTER:
                 func_0202c264(&gGameData, values[i], &character);
                 MiiData_GetName(&character, names[i]);
-                func_020372d0(pronunciations[i], names[i], sizeof(names[i]));
+                MakeSpeechText(pronunciations[i], names[i], sizeof(names[i]));
                 break;
             case ARG_ITEM:
                 wcscpy(names[i], mContext->mItemMessages->GetText(values[i]));
