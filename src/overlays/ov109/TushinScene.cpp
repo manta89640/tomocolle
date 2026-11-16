@@ -1199,15 +1199,18 @@ void TushinScene::UpdateWiiConnection() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the original reads mVisible of character 2's model off the model's
-// address and hoists only &mCharacters[0] and &mCharacters[0].mModel out of the loop; here more addresses are
-// hoisted and the registers differ (four bytes fewer).
+#pragma opt_common_subs off
+// NOT MATCHING (optimization level 2, without common subexpressions): one block, the call that finds the current
+// animation, where the original computes the animation id (r2, through r0) before the model's address (r0); here
+// the address comes first and the id goes through r1. Without opt_common_subs the original's hoisting (only
+// &mCharacters[0] and its model) and its registers come out.
+static inline CharacterModel *GetModelOf(CharacterModel *model) { return model; }
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
     int i;
     for (i = 0; i < 3; i++) {
-        if (i == 2 && mCharacters[i].mModel.IsVisible() == TRUE) {
+        if (i == 2 && GetModelOf(&mCharacters[i].mModel)->IsVisible() == TRUE) {
             int animation = mCharacters[i].mModel.mAnimId;
             if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
                 switch (mPage) {
@@ -1288,7 +1291,7 @@ void TushinScene::UpdateCharacters() {
     if (sent != TRUE) {
         return;
     }
-    if (FindResident(&sTransfer) != FindResident(&mResidents.mResidents[mResidents.mSelected])) {
+    if (FindResident(&sTransfer) != FindResident(GetSelectedResident())) {
         return;
     }
     BOOL show = FALSE;
@@ -1304,6 +1307,7 @@ void TushinScene::UpdateCharacters() {
     ShowNextCharacter();
     StartEmitter(1);
 }
+#pragma opt_common_subs reset
 #pragma optimization_level reset
 
 // @0x0214ef08
