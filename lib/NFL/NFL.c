@@ -1226,3 +1226,133 @@ void func_02074b34(const void *src, void *dest, const u16 *palette, u32 size, BO
         MIi_CpuCopy32(src, dest, size);
     }
 }
+
+// Takes obj out of the list at unk74 of the work area
+void func_020763e0(NFLObj *obj) {
+    NFLWork *work = data_02145360;
+    NFLObj *prev = work->unk74;
+    NFLObj *cur;
+
+    if (prev == obj) {
+        work->unk74 = obj->unk17C;
+        obj->unk17C = NULL;
+        return;
+    }
+    for (cur = prev->unk17C; cur != NULL; cur = cur->unk17C) {
+        if (cur == obj) {
+            prev->unk17C = obj->unk17C;
+            obj->unk17C = NULL;
+            return;
+        }
+        prev = cur;
+    }
+}
+
+int func_02076680(u32 *size);
+int func_02076a98(u32 *size);
+int func_02076e1c(NFLObj *obj, u32 *size);
+int func_02077300(NFLObj *obj, u32 *size);
+
+// The library's work after the frame's interrupt, which main calls with 0x4000: 8 a size not a multiple of 4, 4 not
+// set up, 0x13 and 0x14 busy, 2 and 3 nothing to do
+int func_02076448(u32 size) {
+    u32 rest = size;
+    NFLWork *work;
+    NFLObj *obj;
+    int result;
+
+    if (rest & 3) {
+        return 8;
+    }
+    work = data_02145360;
+    if (work == NULL) {
+        return 4;
+    }
+    if (work->unk8C == 1) {
+        return 0x13;
+    }
+    if (work->unk8C == 3) {
+        return 0x14;
+    }
+    if (work->unk8C == 0) {
+        return 2;
+    }
+    if (work->unk8C == 4) {
+        return 3;
+    }
+    work->unk8C = 3;
+    switch (work->unk90) {
+    case 0:
+        result = func_02076680(&rest);
+        if (result != 0 && result != 2) {
+            work->unk90 = 3;
+            work->unk8C = 4;
+            return result;
+        }
+        if (result == 2) {
+            work->unk8C = 0;
+        } else {
+            work->unk8C = 2;
+        }
+        break;
+    case 1:
+        result = func_02076a98(&rest);
+        if (result != 0 && result != 2) {
+            work->unk90 = 3;
+            work->unk8C = 4;
+            return result;
+        }
+        if (result == 2) {
+            work->unk8C = 0;
+        } else {
+            work->unk8C = 2;
+        }
+        break;
+    case 2:
+        obj = work->unk74;
+        if (obj == NULL) {
+            work->unk8C = 4;
+            return 2;
+        }
+        switch (obj->unk170) {
+        case 0:
+            result = func_02076e1c(obj, &rest);
+            if (result != 0 && result != 2) {
+                obj->unk170 = 3;
+                func_020763e0(work->unk74);
+                work->unk8C = 0;
+                return result;
+            }
+            if (result == 2) {
+                work->unk8C = 0;
+            } else {
+                work->unk8C = 2;
+            }
+            break;
+        case 1:
+            result = func_02077300(obj, &rest);
+            if (result != 0 && result != 2) {
+                obj->unk170 = 3;
+                func_020763e0(work->unk74);
+                work->unk8C = 0;
+                return result;
+            }
+            if (result == 2) {
+                work->unk8C = 0;
+            } else {
+                work->unk8C = 2;
+            }
+            break;
+        case 2:
+        case 4:
+            func_020763e0(obj);
+            work->unk8C = 0;
+            break;
+        }
+        break;
+    }
+    if (result != 0) {
+        return result;
+    }
+    return 1;
+}
