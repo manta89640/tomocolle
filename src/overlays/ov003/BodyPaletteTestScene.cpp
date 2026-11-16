@@ -52,13 +52,13 @@ void BodyPaletteTestScene::Update() {
     if (gPadInput.mTrigger & PAD_BUTTON_A) {
         GXRgb *palette = (GXRgb *)ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp");
         palette[1] = GX_RGB(31, 0, 0);
-        func_02029d40(&mBody, palette, -1, -1);
+        Model_QueuePalette(&mBody, palette, -1, -1);
     } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
         func_02029758(gModelResources, RESOURCE_BMD0);
         ArchiveManager_Unmount(&gArchiveManager, "TG3");
         ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
         ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");
-        func_02029c20(&mBody, RESOURCE_BMD0, 0, 0);
+        Model_BindResource(&mBody, RESOURCE_BMD0, 0, 0);
         NNS_GfdDumpLnkTexVramManager();
         NNS_GfdDumpLnkPlttVramManager();
     } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
@@ -74,7 +74,7 @@ void BodyPaletteTestScene::Update() {
         NNSG3dResTex *textures = mBody.mResTex;
         GXRgb *palette = (GXRgb *)((u8 *)textures + textures->plttInfo.ofsPlttData);
         palette[1] = GX_RGB(0, 31, 31);
-        func_02029d40(&mBody, palette, -1, 4);
+        Model_QueuePalette(&mBody, palette, -1, 4);
     } else {
         if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;

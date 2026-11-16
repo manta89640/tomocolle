@@ -34,7 +34,7 @@ void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane,
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 // Queues a character file for transfer to VRAM
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
 #endif // OV105_MAINPROGRAM_H

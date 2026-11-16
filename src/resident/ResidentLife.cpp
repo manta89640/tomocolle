@@ -73,7 +73,7 @@ struct SavedCharacter {
     /* 0x2A6 */ u8 mUnknown2A6[0x1A];
 }; // 0x2C0
 
-// The game's clock (data_02123440 points at it)
+// The game's clock (gGameClock points at it)
 struct GameClock {
     /* 0x00 */ u8 mUnknown00[0x18];
     /* 0x18 */ s64 mSecondsAway;       // How long the game was off
@@ -97,7 +97,7 @@ struct EventInfo {
     u32 mUnknownBits12 : 20;
 };
 
-// What the item table (data_020f5f0c, 0x14 bytes an item) says of an item, as far as is used here
+// What the item table (gGoodsTable, 0x14 bytes an item) says of an item, as far as is used here
 struct ItemInfo {
     /* 0x00 */ u8 mUnknown00[0xC];
     /* 0x0C */ u32 mUnknown0CBits0 : 4;
@@ -108,14 +108,14 @@ struct ItemInfo {
 
 
 extern "C" {
-extern GameClock *data_02123440;
+extern GameClock *gGameClock;
 extern MATHRandContext16 gRandom;
 extern const EventInfo data_020f8cc0[];    // By event
 extern const s8 data_020f8ca8[];           // By month: an adjustment in hours
 extern const u8 data_020f8f5c[];           // By number of residents
 extern const OutingEntry *const data_02114d78[];
 extern const s8 *const data_021135a0[];    // By relation: changes of affinity
-extern const ItemInfo data_020f5f0c[];
+extern const ItemInfo gGoodsTable[];
 s64 Clock_GetSeconds(GameClock *clock);
 s64 func_02035ae0(GameClock *clock);
 BOOL GameData_CharacterExists(GameData *game, int index);
@@ -339,11 +339,11 @@ void ShiftEventTimes(s64 now) {
     RTCTime time;
     s64 offset;
     RTC_ConvertSecondToDateTime(&date, &time, now);
-    BOOL otherConsole = data_02123440->mOtherConsole;
+    BOOL otherConsole = gGameClock->mOtherConsole;
     if (otherConsole) {
         offset = 0;
     } else {
-        offset = func_02035ae0(data_02123440);
+        offset = func_02035ae0(gGameClock);
         s64 diff = now - offset;
         if (diff > CENTURY - 1) {
             if (offset < 0) {
@@ -468,7 +468,7 @@ int EncounterJudge::GetMeetingInterval(int count) {
 
 // How many meetings the time the game was off makes, up to 500
 int EncounterJudge::GetMeetingsWhileAway(int count) {
-    s64 minutes = data_02123440->mSecondsAway / 60;
+    s64 minutes = gGameClock->mSecondsAway / 60;
     int interval = GetMeetingInterval(count);
     if (interval == 0) {
         return 0;
@@ -677,13 +677,13 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
             second->SetRelation(firstIndex, result, 100);
             first->SetMoodFromResult(result, relation);
             second->SetMoodFromResult(result, relation);
-            Apply(first, second, relation, Clock_GetSeconds(data_02123440));
+            Apply(first, second, relation, Clock_GetSeconds(gGameClock));
         } else if (change < 0) {
             first->SetRelation(secondIndex, result, 100);
             second->SetRelation(firstIndex, result, 100);
             first->SetMoodFromResult(result, relation);
             second->SetMoodFromResult(result, relation);
-            ApplyEnd(first, second, relation, Clock_GetSeconds(data_02123440), TRUE);
+            ApplyEnd(first, second, relation, Clock_GetSeconds(gGameClock), TRUE);
         }
     }
     if (change == 0 && result == 10) {
@@ -809,11 +809,11 @@ void EncounterJudge::MeetWhileAway(int count, u8 *residents) {
 void EncounterJudge::PickItemsWhileAway(int count, u8 *residents, s64 now) {
     int items[0xFF];
     int half = count / 2;
-    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 24;
+    int times = half * (int)(gGameClock->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, half);
     int itemCount = 0;
     for (int i = 0; i < 0xFF; i++) {
-        if (data_020f5f0c[(u16)i].mKind == 1) {
+        if (gGoodsTable[(u16)i].mKind == 1) {
             items[itemCount] = i;
             itemCount++;
         }
@@ -847,7 +847,7 @@ void EncounterJudge::PickItem(int index, int *items, int itemCount, s64 now) {
 // While the game was off, residents (a fifth of them for every day, at most a fifth) change their clothes
 void EncounterJudge::ChangeClothesWhileAway(int count, u8 *residents) {
     int fifth = count / 5;
-    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 24;
+    int times = fifth * (int)(gGameClock->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, fifth);
     for (int j = 0; j < times; j++) {
         ChangeClothes(residents[Rand(count)]);

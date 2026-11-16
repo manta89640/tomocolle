@@ -246,7 +246,7 @@ BOOL KeyboardButton::Contains(ScreenPoint point) {
     ScreenRect rect = sButtonRect;
     rect.x += mPosition.x >> FX32_SHIFT;
     rect.y += mPosition.y >> FX32_SHIFT;
-    return func_02028d88(&rect, &point) ? TRUE : FALSE;
+    return ScreenRect_Contains(&rect, &point) ? TRUE : FALSE;
 }
 
 void KeyboardButton::SetSounds(int handle, int seqArc, int touchSound, int releaseSound) {

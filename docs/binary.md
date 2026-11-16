@@ -425,7 +425,7 @@ the file is placed by that order, and by which object of that part of `.bss` has
 | `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
 | `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `gModelResources` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `Camera_Reset` on the camera at +0x380 (`gCamera`), `Light_Reset` on four lights of 0xC at +0x3E8 (`gLights`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
-| `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `data_021232E4` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
+| `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `gG3SpriteTextures` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
 | `0x020B05D0` | 4 | `src/LcdPower.cpp` (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `gLcdPower` (0xC bytes: `LcdPower::Update` turns the LCDs off after 20 frames of the lid closed and on after 10 open), whose constructor is empty | measured: the file compiles to it |
 | `0x020B05D4` | 4 | `GameData`'s (`0x0202B840` to `Font.cpp`, `0x0202D5A4`) | `bx lr`: `gGameData` (`func_0202b840` from `NitroMain`) | inferred |
 | `0x020B05D8` | 0x2C | `src/text/Font.cpp` | `gFonts`: three `Font`s through `__cxa_vec_ctor` | measured |
@@ -459,9 +459,9 @@ uses):
 | `0x02121E58`, `0x02121EAC`, `0x02121EB8` | 0x54, 0xC, 0x2C | `gTouchInput` (`TouchInput_Init`, `0x02028880`); `gRandom`; the path buffer of `func_02028af4` | Touch, random numbers, paths (two or three files) |
 | `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
 | `0x021223D8` to `0x021232E4` | | The destructor record, `gModelResources` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `gVramTransferTasks` (`0x020299E8`, `0x02029D40`) | Models |
-| `0x021232E4` | 0x150 | `func_0202b2e8`, `func_0202b4dc` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
+| `0x021232E4` | 0x150 | `func_0202b2e8`, `G3SpriteTextures_Load` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
 | `0x02123434` | 0xC | `gLcdPower` (`LcdPower::Init`, `LcdPower::Update`) | `LcdPower.cpp` |
-| `0x02123440` to `0x02138E1C` | | `data_02123440`, `data_02123444`, `gGameData` | GameData |
+| `0x02123440` to `0x02138E1C` | | `gGameClock`, `data_02123444`, `gGameData` | GameData |
 
 Inferred from this:
 
@@ -574,7 +574,7 @@ Not done:
   `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
   order the compiler does give, by which its pool is reproduced.
 - `tools/check_relocs.py` lists, for overlay 74, only string literals and `data_020f7300`, which is
-  `data_020f72f8[0].mLightColor` (other overlays refer to it by that name too); for overlay 73, string literals and
+  `gInteriorTable[0].mLightColor` (other overlays refer to it by that name too); for overlay 73, string literals and
   three anonymous vectors.
 - `docs/notes/ov074.md` and `docs/notes/ov073.md` keep the working notes, with the evidence for names and layouts.
 
@@ -647,7 +647,7 @@ Measured:
   `gGameData+0xB1` as a flag: when it is set, it lists the residents and runs the main program's functions around
   `EncounterJudge`'s (0x020ad294 to 0x020aef80) on them with the clock's time, then asks for scene 0x6A; when it is
   not, it sets it and asks for scene 0x69. The warning about another console comes when the game clock's +0x34
-  (`data_02123440`) is set.
+  (`gGameClock`) is set.
 - `SavePlayScene` shows one resident, picked at random, with a random animation of `Mdl/Ica/ica_mii_save_LZ.bin`.
   The character is an array of one: the scene's destructor calls `__cxa_vec_cleanup` with a count of 1 and the main
   program's `_ZN17SavePlayCharacterD1Ev`. 0x60000 bytes of the scene, from 0xDB14, are touched by nothing in the
@@ -1047,7 +1047,7 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   stored in another order (none of the 25 combinations of the five position setters for the two boxes gives it).
   `WirelessTestScene::Update` (78%): its loops are not rotated as at optimisation level 2, but level 2, with
   `opt_common_subs` off or the eight IR passes off, still differs in 130 lines (shared epilogue, registers).
-  `WirelessTestScene::Init` matched once the clock setter `func_02035460` got its fourth argument (it reads r3; overlay
+  `WirelessTestScene::Init` matched once the clock setter `Clock_SetDateTime` got its fourth argument (it reads r3; overlay
   98 passes it): the 0 in r3 is also the `date.week` stored. `Redraw` matched at level 2 with `opt_propagation` off.
 - `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
@@ -1109,7 +1109,7 @@ Measured:
   random place (each of x and z from 0 to 3.9, either sign), left gives x and z of the radius random values from
   9.0 to 17.9 and up a random yaw. The steps are `FX32_ONE / 10` (0x199), not `FX32_CONST(0.1)` (0x19A).
 - Each frame a model whose distance from the eye on the floor (x and z) is less than the eye's from the origin
-  fades out (its alpha down by 5 a frame to 0, `func_02029f50`), and the others fade back in to 31: the models
+  fades out (its alpha down by 5 a frame to 0, `Model_SetAlpha`), and the others fade back in to 31: the models
   between the camera and the room's middle get out of the way.
 - `TestDrawMiiModel::Init` is empty; the scene calls it after `Load`. Its complete-object destructor is the main
   program's copy (`0x0203E2A8`), which the scene's destructor and the model's table refer to; the overlay has only
@@ -1136,7 +1136,7 @@ Measured:
   camera's y angle to 0x4000.
 - B steps +0x2B28 (`mBodyStep`) through four changes: TG3 mounted again with body000 and the model made again
   (`CharacterModel::MakeModel`), the palette file `TG3:/body_c1.ntfp` sent to the body's palette in VRAM
-  (`func_02029d40`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
+  (`Model_QueuePalette`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
   again.
 - With A held the pad rotates the body model about z and x (by 0x80) and turns the character (`Character::Turn`,
   ±0x100); with X it scales the body in y and z (by 0x40, `mInvScale` kept as `FX_Inv` of `mScale`); with Y right
@@ -1280,14 +1280,14 @@ Measured:
   points light 0 along x with the code of the main program's `G3dTestScene` and `HumanTestScene` (x stored,
   reloaded and stored again, the colour loaded and stored back).
 - `Update`, by the button pressed this frame: A gets the file "TG3:/body_c1.ntfp" (a palette), makes its colour 1
-  red and gives it to `func_02029d40` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
+  red and gives it to `Model_QueuePalette` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
   X makes colour 1 of `mBody`'s own palette data (`mResTex->plttInfo.ofsPlttData`) cyan and transfers 4 bytes;
   B releases the model resource (`func_02029758`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
-  `body.imd` to resource 0 again and rebinds `mBody`'s model (`func_02029c20`); Y walks the palette-to-material
+  `body.imd` to resource 0 again and rebinds `mBody`'s model (`Model_BindResource`); Y walks the palette-to-material
   dictionary of `mBody`'s materials and looks each name up in its textures' palette dictionary
   (`NNS_G3dGetPlttDataByName`), with nothing done with the result. Otherwise the pad turns the camera, as in
   `HumanTestScene`.
-- `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `func_02029d40` (0x02029d40, `Model*`, palette, offset,
+- `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `Model_QueuePalette` (0x02029d40, `Model*`, palette, offset,
   size) takes the palette's VRAM address and size from its `plttInfo.vramKey` when offset or size is negative, and
   queues the transfer with `VramTransfer_RegisterTask(gVramTransferTasks, 1, ...)`, which passes it on to
   `NNS_GfdRegisterNewVramTransferTask` (type 1, `NNS_GFD_DST_3D_TEX_PLTT`). `func_02060c1c` passes the linked VRAM managers'
@@ -1318,7 +1318,7 @@ Measured:
   `FS_LoadOverlay(0x62)`, virtual table at `0x0214C700`) is the settings, with the etc messages 0xD7 to 0xF4 and
   0x150/0x151: the sound settings (stereo or mono, and the volumes of music, effects and voice, 0 to 3, in
   `gGameData` 0xC8 to 0xCB; the voice's volume is spoken, "ボリュームゼロ" to "ボリュームサン"), the clock (date
-  and time on sprite digits, written to the game's clock by func_02035460 and saved), and erasing all the data after
+  and time on sprite digits, written to the game's clock by Clock_SetDateTime and saved), and erasing all the data after
   three questions. Scene 0xAD is the first start ("時刻を設定してください"), which goes on to scene 0x69.
 - Both scenes are built from two main-program classes, now stand-ins in `include/SpriteButton.h`: a sprite button
   of 0xF4 bytes (constructor `0x0203117C`, update `0x0203133C`, draw `0x02031D7C`) and a button with a message
@@ -1369,7 +1369,7 @@ Measured:
   has its own volume, pitch, tempo and pan for the music, ramped to when it is selected.
 - The news stand's texture animation shows whether a new issue is due (`IsNewsDue`: the newest item is from before
   the last 7:00 or 19:00 edition by half a day); entering it then makes the day's news (`MakeDailyNews`: a
-  resident's birthday, else a random kind of news of the month, `data_020fa1d0`).
+  resident's birthday, else a random kind of news of the month, `gNewsKinds`).
 - `MapClock` and `MapClockDisplay` are overlay 74's `Clock` and `ClockDisplay` but for the sprite bank;
   `MoneyDisplay` counts the shown money up to `gGameData`'s.
 
@@ -1567,7 +1567,7 @@ How the last functions matched:
 Not done:
 
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
-  `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
+  `gInteriorTable[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and
   value (0x30, 0x34 of `ItemTradeSelection`) are for: nothing in the overlay reads them.
 
@@ -1886,9 +1886,9 @@ Measured:
   `s16` and `u8`, called only by `0x02097D8C`, and such instances follow the last function of the file that uses
   them. The item file ends with ItemModel's implicit deleting destructor (`0x020A0078`, entry 1 of its table).
 - `Item` (virtual table `_ZTV4Item`, `0x02114F78`) has seven entries, all 0: pure virtual functions. Its three
-  kinds read their tables: `ClothesItem` the clothes (`data_020f3ff0`, 0x14 bytes a row, 300 rows), `InventoryItem`
-  the goods (`data_020f5f0c`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
-  (`data_020f72f8`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
+  kinds read their tables: `ClothesItem` the clothes (`gClothesTable`, 0x14 bytes a row, 300 rows), `InventoryItem`
+  the goods (`gGoodsTable`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
+  (`gInteriorTable`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
   (+8 for goods and clothes, +0xA for interiors) and four weights, one of which `gGameData+0x4E` selects; the random
   choices of goods, clothes and interiors on offer sum those weights. The goods' and clothes' getters are emitted
   at `0x0204ABAC`..`0x0204AD84` (in the scene constructors' file), the interiors' at the end of Room.cpp.

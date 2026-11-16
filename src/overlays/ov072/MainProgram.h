@@ -106,7 +106,7 @@ struct Light {
 // One of the eleven news items of the saved game (GameData_GetNewsItem copies one out, GameData_SetNewsItem in): the news scene
 // (overlay 87, scene 0x46) shows them.
 struct NewsItem {
-    /* 0x00 */ u8 mKind;      // An entry of data_020fa1d0; 0x1D is a birthday
+    /* 0x00 */ u8 mKind;      // An entry of gNewsKinds; 0x1D is a birthday
     /* 0x01 */ u8 mUnknown01[2];
     /* 0x03 */ u8 mCharacter; // Of a birthday: whose
     /* 0x04 */ u8 mUnknown04[8];
@@ -124,7 +124,7 @@ struct NewsItem {
     /* 0x12 */ u8 mUnknown12[2];
 }; // 0x14
 
-// What a news kind is (data_020fa1d0, 0xAC of them, 0x20 bytes each)
+// What a news kind is (gNewsKinds, 0xAC of them, 0x20 bytes each)
 struct NewsKind {
     /* 0x00 */ u32 mUnknown00;
     /* 0x04 */ u32 mUnknown04Bits0 : 16;
@@ -208,13 +208,13 @@ extern SceneMemory gSceneMemory;
 // 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
 extern u8 data_0213bab0[100];
-extern IslandState data_0212348c;
+extern IslandState gIslandState;
 extern Camera gCamera;
 extern Light gLights;
 extern Light gLight1;
-extern int data_02123440[];
+extern int gGameClock[];
 extern wchar_t data_02123510[]; // The player's name
-extern const NewsKind data_020fa1d0[];
+extern const NewsKind gNewsKinds[];
 
 struct ArchiveLoader;
 struct CellLoader;
@@ -239,12 +239,12 @@ BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int level);
 void CreateMainFrameHeap(int size);
 void AllocFromMainFrameHeap();
 void DestroyMainFrameHeap();
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 int func_0202a1f8(AnimModel *model, u32 resType, int slot);
 void Camera_Reset(Camera *camera);
@@ -274,11 +274,11 @@ BOOL SpriteButton_IsTouched(SpriteButton *button);
 // --- The message window ---
 
 // --- The clock ---
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
 void Clock_GetDate(int offset, RTCDate *date);
 void Clock_GetTime(int offset, RTCTime *time);
 
-void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
+void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (gNewsKinds), with its characters
 void NNS_GfdDumpLnkPlttVramManager();
 
 // --- Particles ---
@@ -306,7 +306,7 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 
 }
 
-#define gIsland data_0212348c
+#define gIsland gIslandState
 
 
 #endif // OV072_MAINPROGRAM_H

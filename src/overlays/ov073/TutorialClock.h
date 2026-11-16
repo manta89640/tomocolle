@@ -6,7 +6,7 @@
 
 #include "Sprite.h"
 
-// The apartment scene's clock: the current date and time, read through the main program's func_02035870 (which
+// The apartment scene's clock: the current date and time, read through the main program's Clock_GetDateTime (which
 // applies the game's own offset to the real-time clock), and the sprites that show them.
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. Overlay 74 has the
@@ -18,7 +18,7 @@ public:
     void Update();
     void UpdateIfArchiveIdle();
 
-    /* 0x00 */ s64 mSeconds; // The same moment as seconds, as func_02035870 returns it
+    /* 0x00 */ s64 mSeconds; // The same moment as seconds, as Clock_GetDateTime returns it
     /* 0x08 */ RTCTime mTime;
     /* 0x14 */ RTCDate mDate;
 }; // 0x24

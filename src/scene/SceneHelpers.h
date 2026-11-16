@@ -107,7 +107,7 @@ public:
     /* 0x8DC */ u8 mUnknown8DC[0x18];
 }; // 0x8F4
 
-// The styles a room can have, 0x54 bytes each (data_020f72f8)
+// The styles a room can have, 0x54 bytes each (gInteriorTable)
 struct RoomStyle {
     /* 0x00 */ u8 mUnknown00[8];
     /* 0x08 */ u16 mLightColor;
@@ -129,13 +129,13 @@ public:
     void Update();
 
     /* 0x000 */ void *mVtable;
-    /* 0x004 */ u16 mStyle; // Index into data_020f72f8
+    /* 0x004 */ u16 mStyle; // Index into gInteriorTable
     /* 0x008 */ u8 mUnknown008[0xC];
     /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
-extern const RoomStyle data_020f72f8[];
+extern const RoomStyle gInteriorTable[];
 }
 
 // A scene's room: the room with its archives ("CO0", "RM") and a short start.

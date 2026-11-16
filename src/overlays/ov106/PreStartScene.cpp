@@ -39,14 +39,14 @@ void PreStartScene::Init() {
     gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
 
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, sScreenName, 0x200, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    func_02027290(&gObjResourceManager, "MNU:/Obj_up.nce", 0x10, 1);
-    func_02028f24(&gVramTransferQueue, "MNU:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MNU:/Obj_up.nce", 0x10, 1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MNU:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
     gScreenControl.Set(1);
     gScreenControl.Show(0x1210);
@@ -84,7 +84,7 @@ void PreStartScene::Init() {
             return;
         }
         mClock.Update();
-        if (data_02123440->mUnknown34) {
+        if (gGameClock->mUnknown34) {
             SetState(STATE_OTHER_DS);
             return;
         }
@@ -331,9 +331,9 @@ PreStartClock::PreStartClock() {
 
 // @0x0214a65c
 void PreStartClock::Update() {
-    mSeconds = func_02035870(data_02123440, &mDate, &mTime);
-    mUnknown08 = func_02035ae0(data_02123440);
-    mUnknown2C = func_02035aa4(data_02123440);
+    mSeconds = Clock_GetDateTime(gGameClock, &mDate, &mTime);
+    mUnknown08 = func_02035ae0(gGameClock);
+    mUnknown2C = func_02035aa4(gGameClock);
 }
 
 // @0x0214a6ac

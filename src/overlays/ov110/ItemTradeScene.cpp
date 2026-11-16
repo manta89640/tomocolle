@@ -112,7 +112,7 @@ void ItemTradeSelection::Set(int kind, int id) {
         mValue = id;
         {
             u16 item = InventoryItem::mId;
-            int itemKind = data_020f5f0c[item].mKind;
+            int itemKind = gGoodsTable[item].mKind;
             if (itemKind == 1) {
                 mCategory = 0;
             } else if (itemKind == 2) {
@@ -919,8 +919,8 @@ void ItemTradeList::UpdateRoom() {
         case 5:
             SetRoomMode(0);
             mRoom->RoomModels::SetVisible(TRUE);
-            data_021226e4.mLights[0].mColor = data_020f72f8[mRoom->mId].mLightColor;
-            data_021226e4.mLights[1].mColor = data_020f72f8[mRoom->mId].mLightColor;
+            data_021226e4.mLights[0].mColor = gInteriorTable[mRoom->mId].mLightColor;
+            data_021226e4.mLights[1].mColor = gInteriorTable[mRoom->mId].mLightColor;
             break;
         }
         break;
@@ -1125,7 +1125,7 @@ void ItemTradeList::UpdatePreviewStates() {
             mPreviewTimers[i] = 15;
             switch (i) {
             case PREVIEW_ITEM:
-                func_02029f50(mItemModel, 31 - mPreviewTimers[i] * 2);
+                Model_SetAlpha(mItemModel, 31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_COSTUME:
                 mMannequin->SetAlpha(31 - mPreviewTimers[i] * 2);
@@ -1141,7 +1141,7 @@ void ItemTradeList::UpdatePreviewStates() {
                 mItemModel->SetVisible(FALSE);
                 mRoom->RoomModels::SetAlpha(31);
                 mMannequin->SetAlpha(31);
-                func_02029f50(mItemModel, 31);
+                Model_SetAlpha(mItemModel, 31);
                 mPreviewStates[i] = 0;
                 if (i == PREVIEW_ROOM) {
                     mPreviewOffsets[i] = -0x34CC;
@@ -1410,11 +1410,11 @@ void ItemTradeScene::Init() {
     mMessages[5].Open("TEM:tmd_etc_msg_JP.bmg");
     mMessages[6].Open("TXM:tmd_explain_msg_JP.bmg");
 
-    func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
@@ -1426,11 +1426,11 @@ void ItemTradeScene::Init() {
     gScreenControl.Set(0x1313);
     ScreenControl_SetBlendAlpha(&gScreenControl, 1, 0x12, 8, 8);
     PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "STS:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "STS:/Obj_up.nce", 0x10, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "STS:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "STS:/Obj_up.nce", 0x10, 0);
     Init3d();
 
     Sprite_Init(&mLinkIcon, 0, 0, 128, 96, TRUE);
@@ -1534,7 +1534,7 @@ void ItemTradeScene::Init3d() {
     ModelResources_SetModel(gModelResources, 1, "3MH:/head.imd");
     mMannequin.Init(0, 0, 1, 0);
     void *animations = ModelResources_BindArchive(gModelResources, 0, "3HA", 0);
-    func_02029660((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    ResourceSet_SetArchive((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     SetMannequinAnimation(&mMannequin, "idle00");
     mMannequin.SetAnimFlags(TRUE, TRUE);
     mMannequin.mShadowVisible = FALSE;

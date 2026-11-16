@@ -165,7 +165,7 @@ void TutorialRoomScene::StartLoading() {
 // are loaded, and starts the part of the tutorial that is due.
 //
 // The window's button position, size and text position are read from the pool of constants at the start of
-// .rodata (see the constants at the top). Two things matter besides: func_02027290 is declared returning a value,
+// .rodata (see the constants at the top). Two things matter besides: ObjResourceManager_LoadCell is declared returning a value,
 // and the character counts read the canvas through a pointer (GetCharCount above).
 // @0x02149d8c
 void TutorialRoomScene::Init() {
@@ -179,23 +179,23 @@ void TutorialRoomScene::Init() {
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     CreateMainFrameHeap(0x4000);
 
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
     mFront.mScreen = ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_up.nce", "MLT:/Obj_up.ncg", 0x10, 1, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_up.ncl", 0x10, -1, -1, -1);
     mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
-    func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
     mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
@@ -233,7 +233,7 @@ void TutorialRoomScene::Init() {
         ((Character *)(&mCharacters[i]))->UpdateSpeedScales();
         ((Character *)(&mCharacters[i]))->UpdateBodyColors();
         mCharacters[i].CopyName();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAngle(0x4000);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mApartmentRoom = &mRoom;
@@ -1592,7 +1592,7 @@ BOOL TutorialRoomCharacter::IsWalkAnim() {
     int anim = mAnimId;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 5; j++) {
-            if (anim == data_020fb898[i][j]) {
+            if (anim == gWalkAnimations[i][j]) {
                 return TRUE;
             }
         }
@@ -1837,7 +1837,7 @@ void TutorialRoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -1862,7 +1862,7 @@ void TutorialRoomCamera::Update() {
         Clamp(&target.z, 0x3800);
         VecFx32 radius;
         VEC_Subtract(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &radius);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0x9000;
         radius.z = (radius.z * 9 >> 2) + 0x9000;
         radius.y = 0x8000;
@@ -1957,7 +1957,7 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
     for (int i = 0; i < 2; i++) {
         mLights[i] = &gLights[i];
         Light_Reset(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
     }
 }
 
@@ -1965,7 +1965,7 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
 void TutorialRoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mId].mLightColor);
+        SetColor(gInteriorTable[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -1977,10 +1977,10 @@ void TutorialRoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
+            SplitColor(gInteriorTable[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mId].mLightColor;
+                color = gInteriorTable[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);
@@ -2034,7 +2034,7 @@ void TutorialRoomLight::SetColor(u16 color) {
 
 // @0x0214f3b8
 void TutorialRoomLight::BlendColor(int *targetR, int *targetG, int *targetB, int *r, int *g, int *b) {
-    func_02028b98(mLights[0]->mColor, r, g, b);
+    SplitColor(mLights[0]->mColor, r, g, b);
     fx32 weight = FX_Mul(mFade, mFade);
     *r = *r + ((weight * (*targetR - *r)) >> FX32_SHIFT);
     *g = *g + ((weight * (*targetG - *g)) >> FX32_SHIFT);
@@ -2072,7 +2072,7 @@ BOOL TutorialRoomCursor::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- TutorialBuildingButton ---
@@ -2386,7 +2386,7 @@ void TutorialSkyBackground::UpdateState() {
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
-                func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+                VramTransferQueue_LoadFile(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
                 mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
@@ -2522,7 +2522,7 @@ BOOL TutorialTouchSprite::Contains(ScreenPoint point) {
     ScreenRect rect = *mTouchRect;
     rect.x += mX;
     rect.y += mY;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // @0x02150264
@@ -2599,13 +2599,13 @@ TutorialClock::TutorialClock() {
 
 // @0x021504cc
 void TutorialClock::Update() {
-    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
 }
 
 // @0x021504f4
 void TutorialClock::UpdateIfArchiveIdle() {
     if (ArchiveManager_IsIdle(&gArchiveManager)) {
-        mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+        mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
     }
 }
 

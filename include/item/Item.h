@@ -5,12 +5,12 @@
 
 #include "Model.h"
 
-// The things the player can own: goods (data_020f5f0c), clothes (data_020f3ff0) and room interiors (data_020f72f8),
+// The things the player can own: goods (gGoodsTable), clothes (gClothesTable) and room interiors (gInteriorTable),
 // each kind with a table of what each item is and a class that reads its entry (main program 0x0209e140 to
 // 0x020a00bc, src/item/Item.cpp, and the interiors in src/room/Room.cpp). The names are descriptive: no name of
 // these classes survives in the ROM.
 
-// An entry of the goods table (data_020f5f0c, 255 entries)
+// An entry of the goods table (gGoodsTable, 255 entries)
 struct ItemInfo {
     /* 0x00 */ u32 mPrice : 24;   // What GetPrice returns (250, 480, ...: the values look like prices)
     /*      */ u32 mSortKey : 8;  // The lists are sorted by it
@@ -37,7 +37,7 @@ struct ItemInfo {
     /* 0x10 */ u32 mFlags; // Bits the lists can be filtered by; for food, the kinds the food troubles ask for
 }; // 0x14
 
-// An entry of the clothes table (data_020f3ff0, 300 entries)
+// An entry of the clothes table (gClothesTable, 300 entries)
 struct ClothesInfo {
     /* 0x00 */ u32 mPrice : 23;
     /*      */ u32 mSortKey : 9;
@@ -65,8 +65,8 @@ struct ClothesInfo {
 #define CLOTHES_COOL (1 << 1)   // Cool clothes: not asked for from October to March
 
 extern "C" {
-extern const ClothesInfo data_020f3ff0[];
-extern const ItemInfo data_020f5f0c[];
+extern const ClothesInfo gClothesTable[];
+extern const ItemInfo gGoodsTable[];
 }
 
 // What the player owns of one item: the base class of the three kinds. Its seven virtual functions read the
@@ -98,13 +98,13 @@ class ClothesItem : public Item {
 public:
     ClothesItem();
 
-    virtual int GetPrice() { return data_020f3ff0[mId].mPrice; }
-    virtual int GetPrice2() { return data_020f3ff0[mId].mPrice; }
-    virtual const char *GetModelName() { return data_020f3ff0[mId].mModelName; }
-    virtual u8 GetWeight0() { return data_020f3ff0[mId].mWeights[0]; }
-    virtual u8 GetWeight1() { return data_020f3ff0[mId].mWeights[1]; }
-    virtual u8 GetWeight2() { return data_020f3ff0[mId].mWeights[2]; }
-    virtual u8 GetWeight3() { return data_020f3ff0[mId].mWeights[3]; }
+    virtual int GetPrice() { return gClothesTable[mId].mPrice; }
+    virtual int GetPrice2() { return gClothesTable[mId].mPrice; }
+    virtual const char *GetModelName() { return gClothesTable[mId].mModelName; }
+    virtual u8 GetWeight0() { return gClothesTable[mId].mWeights[0]; }
+    virtual u8 GetWeight1() { return gClothesTable[mId].mWeights[1]; }
+    virtual u8 GetWeight2() { return gClothesTable[mId].mWeights[2]; }
+    virtual u8 GetWeight3() { return gClothesTable[mId].mWeights[3]; }
 
     void Clear();
     void Settle();
@@ -117,13 +117,13 @@ class InventoryItem : public Item {
 public:
     InventoryItem();
 
-    virtual int GetPrice() { return data_020f5f0c[mId].mPrice; }
-    virtual int GetPrice2() { return data_020f5f0c[mId].mPrice; }
-    virtual const char *GetModelName() { return data_020f5f0c[mId].mModelName; }
-    virtual u8 GetWeight0() { return data_020f5f0c[mId].mWeight0; }
-    virtual u8 GetWeight1() { return data_020f5f0c[mId].mWeight1; }
-    virtual u8 GetWeight2() { return data_020f5f0c[mId].mWeight2; }
-    virtual u8 GetWeight3() { return data_020f5f0c[mId].mWeight3; }
+    virtual int GetPrice() { return gGoodsTable[mId].mPrice; }
+    virtual int GetPrice2() { return gGoodsTable[mId].mPrice; }
+    virtual const char *GetModelName() { return gGoodsTable[mId].mModelName; }
+    virtual u8 GetWeight0() { return gGoodsTable[mId].mWeight0; }
+    virtual u8 GetWeight1() { return gGoodsTable[mId].mWeight1; }
+    virtual u8 GetWeight2() { return gGoodsTable[mId].mWeight2; }
+    virtual u8 GetWeight3() { return gGoodsTable[mId].mWeight3; }
 }; // 0x14
 
 #define INVENTORY_SIZE 255

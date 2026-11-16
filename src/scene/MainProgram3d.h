@@ -20,14 +20,14 @@ extern "C" {
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
 void ModelResources_BeginDraw(void *resources);
 // Binds the resources of a type (textures, ...) of the model's resource id to the model
-void func_02029c20(Model *model, u32 resType, int resourceId, int unk);
-void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
+void Model_BindResource(Model *model, u32 resType, int resourceId, int unk);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
 NNSG3dResFileHeader *func_020295a4(void *resourceSet, u32 resType); // The file of a type in a resource set
 void func_02029758(void *resourceSet, u32 resType);
 void NNS_GfdDumpFrmPlttVramManager(void);
 // Queues a transfer of palette colours to the model's palette in VRAM (a NNS_GFD_DST_3D_TEX_PLTT task): size bytes
 // at offset bytes into it, each taken from the palette's VRAM key when negative
-void func_02029d40(Model *model, const void *pltt, int offset, int size);
+void Model_QueuePalette(Model *model, const void *pltt, int offset, int size);
 void NNS_GfdDumpLnkPlttVramManager(void);
 }
 

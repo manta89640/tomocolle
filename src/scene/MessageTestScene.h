@@ -10,7 +10,7 @@
 // ("Msg/TmdEtcMsgJP_LZ.bin", "Msg/TmdItemMsgJP_LZ.bin"). It shows a line of text on a sprite canvas, an etc
 // message on sprites and two on background 2, one of them with a string and two item messages put in its tags.
 // A shows the next etc message in all three, drawn a character at a time on sprites, at once and a character
-// at a time on the background; Y draws the rest of the last at once. The scene factory (main func_0203c050, case 10)
+// at a time on the background; Y draws the rest of the last at once. The scene factory (main SceneManager::CreateScene, case 10)
 // allocates 0x2D84 bytes.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.

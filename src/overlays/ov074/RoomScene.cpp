@@ -39,7 +39,7 @@ s64 GameData_GetCharacterAwayUntil(SavedGame *game, int index);  // The time its
 extern const s8 *data_021135c8[];
 
 
-void func_02029660(void *resource, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resource, u32 resType, void *archive);
 
 // The archive loader: archives are asked for by name and path, and load on a thread
 struct ArchiveLoader;
@@ -133,7 +133,7 @@ void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, i
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
 void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void CreateMainFrameHeap(int size);
 void DestroyMainFrameHeap();
 void NNS_GfdDumpLnkPlttVramManager();
@@ -364,13 +364,13 @@ void RoomScene::Init() {
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
     mFront.mScreen = (u16 *)ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
     mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
-    func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
     mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 1);
     ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
@@ -427,7 +427,7 @@ void RoomScene::Init() {
         mCharacters[i].CopyName();
         mCharacters[i].mTtsPlayer = &mTtsPlayer;
         mCharacters[i].RefreshSpeechTexts();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].SetState(1);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mRoom = &mRoom;
@@ -10735,7 +10735,7 @@ BOOL RoomCharacter::IsWalkAnim() {
     int anim = mAnimId;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 5; j++) {
-            if (anim == data_020fb898[i][j]) {
+            if (anim == gWalkAnimations[i][j]) {
                 return TRUE;
             }
         }
@@ -10862,7 +10862,7 @@ extern "C" {
 int func_020253d4(void *graphicsManager, int plane);
 
 // Splits a 15-bit colour
-void func_02028b98(int color, int *r, int *g, int *b);
+void SplitColor(int color, int *r, int *g, int *b);
 // Resets a light: direction straight down... colour white, enabled
 void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
@@ -10883,8 +10883,8 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 // The time-of-day tracker
 
 // The current time with the game's offset applied, as seconds and as date and time
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
-extern int data_02123440[];
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
+extern int gGameClock[];
 
 // Copies a text, of at most that many bytes
 }
@@ -11690,7 +11690,7 @@ void RoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -11715,7 +11715,7 @@ void RoomCamera::Update() {
         Clamp(&target.z, 0x3800);
         VecFx32 radius;
         VEC_Subtract(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &radius);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0x9000;
         radius.z = (radius.z * 9 >> 2) + 0x9000;
         radius.y = 0x8000;
@@ -11741,7 +11741,7 @@ void RoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -11840,7 +11840,7 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
     for (int i = 0; i < 2; i++) {
         mLights[i] = &gLights[i];
         Light_Reset(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
     }
 }
 
@@ -11848,7 +11848,7 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
 void RoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mId].mLightColor);
+        SetColor(gInteriorTable[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -11860,10 +11860,10 @@ void RoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
+            SplitColor(gInteriorTable[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mId].mLightColor;
+                color = gInteriorTable[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);
@@ -11917,7 +11917,7 @@ void RoomLight::SetColor(u16 color) {
 
 // @0x0216b8d4
 void RoomLight::BlendColor(int *targetR, int *targetG, int *targetB, int *r, int *g, int *b) {
-    func_02028b98(mLights[0]->mColor, r, g, b);
+    SplitColor(mLights[0]->mColor, r, g, b);
     fx32 weight = FX_Mul(mFade, mFade);
     *r = *r + ((weight * (*targetR - *r)) >> FX32_SHIFT);
     *g = *g + ((weight * (*targetG - *g)) >> FX32_SHIFT);
@@ -11959,7 +11959,7 @@ BOOL RoomCursor::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- BuildingButton ---
@@ -12007,7 +12007,7 @@ BOOL BuildingButton::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- ApartmentFront ---
@@ -12353,7 +12353,7 @@ void SkyBackground::UpdateState() {
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
-                func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+                VramTransferQueue_LoadFile(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
                 mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
@@ -12511,7 +12511,7 @@ BOOL TouchSprite::Contains(ScreenPoint point) {
     ScreenRect rect = *mTouchRect;
     rect.x += mX;
     rect.y += mY;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // @0x0216ca14
@@ -12597,13 +12597,13 @@ Clock::Clock() {
 
 // @0x0216ccac
 void Clock::Update() {
-    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
 }
 
 // @0x0216ccd4
 void Clock::UpdateIfArchiveIdle() {
     if (ArchiveManager_IsIdle(&gArchiveManager)) {
-        mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+        mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
     }
 }
 

@@ -10,7 +10,7 @@
 extern "C" {
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
 // Gives a resource set the animations of an archive
-void func_02029660(void *resourceSet, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 void func_0209decc(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
@@ -72,7 +72,7 @@ extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d gVramManagerWork;
-extern void *data_02123440;
+extern void *gGameClock;
 // By SavedCharacter::mUnknown0227, a table of these by mUnknown0226
 struct EventInfo {
     /* 0x0 */ u32 mUnknown0;
@@ -91,14 +91,14 @@ void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void VramManagers_Reset(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
 void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
 void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 s64 Clock_GetSeconds(void *clock);

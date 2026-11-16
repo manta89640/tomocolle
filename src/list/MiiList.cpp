@@ -20,7 +20,7 @@ struct TouchInput {
 // One of the eleven news items of the saved game (GameData_GetNewsItem copies one out, GameData_SetNewsItem in), as far as
 // removing a character reads it
 struct NewsItem {
-    /* 0x00 */ u8 mKind;          // An entry of data_020fa1d0
+    /* 0x00 */ u8 mKind;          // An entry of gNewsKinds
     /* 0x01 */ u8 mCharacters[3]; // mIndex of the characters it is about
     /* 0x04 */ u8 mUnknown04[8];
     /* 0x0C */ u32 mValid : 1;
@@ -28,7 +28,7 @@ struct NewsItem {
     /* 0x10 */ u8 mUnknown10[4];
 }; // 0x14
 
-// What a news kind is (data_020fa1d0, 0x20 bytes each)
+// What a news kind is (gNewsKinds, 0x20 bytes each)
 struct NewsKind {
     /* 0x00 */ u8 mUnknown00[0x1C];
     /* 0x1C */ u32 mUnknown1CBits0 : 8;
@@ -66,7 +66,7 @@ struct SavedCharacterCopy {
 
 extern "C" {
 extern TouchInput gTouchInput;
-extern const NewsKind data_020fa1d0[];
+extern const NewsKind gNewsKinds[];
 extern u8 gScreenLoader[]; // The background screens' loader
 BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);                          // Whether there is a saved character
 void GameData_ReadCharacter(GameData *game, int index, CharacterRecord *record); // Reads a saved character
@@ -320,7 +320,7 @@ void RemoveNewsOf(int index) {
     for (int i = 0; i < 11; i++) {
         BOOL about = FALSE;
         if (items[i].mValid == 1) {
-            for (u32 j = 0; j < data_020fa1d0[items[i].mKind].mCharacterCount + 2; j++) {
+            for (u32 j = 0; j < gNewsKinds[items[i].mKind].mCharacterCount + 2; j++) {
                 u8 c = items[i].mCharacters[j];
                 if (c == index) {
                     about = TRUE;
@@ -1025,7 +1025,7 @@ void MiiListPanel::Update() {
             }
             return;
         }
-        if (gTouchInput.mTp.touch && func_02028d88(&mRect, &gTouchInput.mPoint) && mTouchable) {
+        if (gTouchInput.mTp.touch && ScreenRect_Contains(&mRect, &gTouchInput.mPoint) && mTouchable) {
             for (int i = 0; i < mButtonCount; i++) {
                 if (SpriteButton_Update(&mButtons[i])) {
                     if (mSelectedButton != -1 && mSelectedButton != i) {

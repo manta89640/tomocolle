@@ -26,7 +26,7 @@ void DrawManTestScene::Init() {
     light->mDirection.x = x;
     light->mColor = color;
     mModel.Load(0, 0);
-    func_02029c20(&mModel, RESOURCE_BTX0, 0, 1);
+    Model_BindResource(&mModel, RESOURCE_BTX0, 0, 1);
     NNS_GfdDumpFrmTexVramManager();
     NNS_GfdDumpFrmPlttVramManager();
     NNS_G3dRenderObjSetCallBack(&mModel.mRenderObj, HeadCallback, NULL, NNS_G3D_SBC_NODEDESC,

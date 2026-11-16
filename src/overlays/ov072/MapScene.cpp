@@ -223,7 +223,7 @@ static inline int Rand(int max) {
 static inline void UpdateCharacterTimes() {
     RTCTime time;
     RTCDate date;
-    s64 now = func_02035870(data_02123440[0], &date, &time);
+    s64 now = Clock_GetDateTime(gGameClock[0], &date, &time);
     LimitEventTimes(now);
     UpdateResidents(now, &time);
     StartNextEvents(now, &time);
@@ -413,8 +413,8 @@ void MapScene::Init() {
     gScreenControl.Show(1);
     gScreenControl.SetUnknown48(1);
     ModelResources_Reset(gModelResources);
-    func_02027290(&gObjResourceManager, "S00:/Obj_down.nce", 0x10, 1);
-    func_02028f24(&gVramTransferQueue, "S00:/Obj_down.ncg", 0x10, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "S00:/Obj_down.nce", 0x10, 1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "S00:/Obj_down.ncg", 0x10, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "S00:/Obj_down.ncl", 0x10, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "S00:/Obj_up.nce", "S00:/Obj_up.ncg", 0x1000, 0, 0x8000);
     PaletteLoader_LoadFile(&gPaletteLoader, "S00:/Obj_up.ncl", 0x1000, -1, -1, -1);
@@ -434,27 +434,27 @@ void MapScene::Init() {
     mTitleSprite.mVisible = FALSE;
     Sprite_Init(&mSprite41BC, 1, 0x1C, 128, 96, TRUE);
     mSprite41BC.mVisible = FALSE;
-    func_02028f24(&gVramTransferQueue, "S00:/BG_down.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "S00:/BG_down.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "S00:/BG_down.ncl", 2, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "S00:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
     ScreenLoader_LoadFile(&gScreenLoader, sTitleScreen, 0x100, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
-    func_02028f24(&gVramTransferQueue, "SKY:/BG_up.ncg", 0x2F00, 0x6000, 0x6000, 0x2000, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SKY:/BG_up.ncg", 0x2F00, 0x6000, 0x6000, 0x2000, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "SKY:/Obj_up.nce", 0x1000, 3);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "SKY:/Obj_up.nce", 0x1000, 3);
     mSky.Init("SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
     mSky.Update();
     G3X_SetClearColor(mSky.mBgPalette[1], 31, 0x7FFF, 63, FALSE);
-    func_0202b4d8(&data_021232e4);
-    func_0202b4dc(&data_021232e4, 0, "S00:/w_live.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 1, "S00:/w_pinch.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 2, "S00:/w_vacant.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 3, "S00:/w_dark.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 4, "S00:/w_depressed.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 5, "S00:/w_love.tga", 3, 32, 32);
-    func_0202b4dc(&data_021232e4, 6, "S00:/w_game.tga", 3, 32, 32);
+    func_0202b4d8(&gG3SpriteTextures);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 0, "S00:/w_live.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 1, "S00:/w_pinch.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 2, "S00:/w_vacant.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 3, "S00:/w_dark.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 4, "S00:/w_depressed.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 5, "S00:/w_love.tga", 3, 32, 32);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 6, "S00:/w_game.tga", 3, 32, 32);
     for (int i = 0; i < mWindowCount; i++) {
         mWindows[i].mVisible = FALSE;
     }
@@ -907,7 +907,7 @@ void MapScene::Update() {
                 // slots are above the touch loop's, which an inline's locals are not), the date first
                 RTCDate date;
                 RTCTime time;
-                s64 now = func_02035870(data_02123440[0], &date, &time);
+                s64 now = Clock_GetDateTime(gGameClock[0], &date, &time);
                 LimitEventTimes(now);
                 UpdateResidents(now, &time);
                 StartNextEvents(now, &time);
@@ -978,7 +978,7 @@ void MapScene::Update() {
                 rect = MakeRect(sModelTouchRects[i].x * 27 / 10 + x, sModelTouchRects[i].y * 27 / 10 + (y + 20),
                                 sModelTouchRects[i].width * 27 / 10, sModelTouchRects[i].height * 27 / 10);
             }
-            if (!func_02028d88(&rect, &point)) {
+            if (!ScreenRect_Contains(&rect, &point)) {
                 continue;
             }
             if (i == mSelected) {
@@ -1047,7 +1047,7 @@ void MapScene::Draw() {
         TextButton_Draw(&mButtons[i]);
     }
     for (int i = 0; i < mWindowCount; i++) {
-        func_0202b4a4(&mWindows[i]);
+        G3Sprite_Draw(&mWindows[i]);
     }
     for (int i = 0; i < MODEL_COUNT; i++) {
         mModels[i].Draw();
@@ -1093,7 +1093,7 @@ void MapScene::SetState(int state) {
         mClockDisplay.SetVisible(FALSE);
         mTitleSprite.mVisible = TRUE;
         MessageWindow_SetTextMessage(&mMessageWindows[0], 0, 0xA5);
-        func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
         MessageWindow_SetScreen(&mMessageWindows[0], sTitleScreen, 0x100);
         MessageWindow_Open(&mMessageWindows[0], 0x1A, 1);
@@ -1271,7 +1271,7 @@ void MapScene::OpenWindow() {
     mLastBuilding = mSelected;
     u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[mSelected]);
     if (state == 0 || state == 3) {
-        func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
         MessageWindow_SetScreen(&mMessageWindows[0], sBoardScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sBoardTextPosition);
@@ -1279,7 +1279,7 @@ void MapScene::OpenWindow() {
         return;
     }
     if (mHasInfo) {
-        func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
         MessageWindow_SetScreen(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
@@ -1306,7 +1306,7 @@ void MapScene::OpenWindow() {
         return;
     }
     if (mSelected == 5) {
-        func_02028f24(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, sQuestionChars, 0x2F00, 0, 0, 0x6000, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, sQuestionPalette, 0x100, 0x20, 0x20, 0x40);
         MessageWindow_SetScreen(&mMessageWindows[0], sQuestionScreen, 0x100);
         mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
@@ -1314,7 +1314,7 @@ void MapScene::OpenWindow() {
         mButtons[0].mVisible = TRUE;
         return;
     }
-    func_02028f24(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, sBuildingChars[sModelBuildings[mSelected]], 0x2F00, 0, 0, 0x6000, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, sBuildingPalettes[sModelBuildings[mSelected]], 0x100, 0x20, 0x20, 0x40);
     MessageWindow_SetScreen(&mMessageWindows[0], sBuildingScreens[sModelBuildings[mSelected]], 0x100);
     mMessageWindows[0].SetTextPosition(0, sTitleTextPosition);
@@ -1377,7 +1377,7 @@ void MapScene::SetTutorialStep(int step) {
         MessageWindow_Open(&mMessageWindows[1], 0x12, 1);
         int room = mResidentRooms[0];
         ScreenRect rect = sWindowTextureRect6;
-        func_0202b1f0(&mWindows[room], 3, &rect);
+        G3Sprite_SetTexture(&mWindows[room], 3, &rect);
         break;
     }
     case 8: {
@@ -1480,8 +1480,8 @@ void MapScene::SetTutorialStep(int step) {
 BOOL MapScene::IsNewsDue() {
     RTCDate date;
     RTCTime time;
-    Clock_GetDate(data_02123440[0], &date);
-    Clock_GetTime(data_02123440[0], &time);
+    Clock_GetDate(gGameClock[0], &date);
+    Clock_GetTime(gGameClock[0], &time);
     NewsItem item;
     GameData_GetNewsItem(&gGameData, 0, &item);
     RTCDate itemDate;
@@ -1520,7 +1520,7 @@ BOOL MapScene::IsNewsDue() {
 void MapScene::MakeDailyNews() {
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440[0], &date, &time);
+    Clock_GetDateTime(gGameClock[0], &date, &time);
     RTC_ConvertSecondToDateTime(&date, &time, RTC_ConvertDateTimeToSecond(&date, &time) - 7 * 60 * 60);
     date.year += 2000;
     if (date.month == 0) {
@@ -1592,7 +1592,7 @@ void MapScene::MakeDailyNews() {
     } else {
         for (;;) {
             kind = Rand(0xAC);
-            if (data_020fa1d0[kind].mMonths & (1 << monthBit)) {
+            if (gNewsKinds[kind].mMonths & (1 << monthBit)) {
                 break;
             }
         }
@@ -1660,7 +1660,7 @@ void MapScene::UpdateWindows() {
     for (int i = 0; i < mWindowCount; i++) {
         int texture = GetWindowTexture(mRoomResidents[i]);
         ScreenRect rect = sWindowTextureRect;
-        func_0202b1f0(&mWindows[i], texture, &rect);
+        G3Sprite_SetTexture(&mWindows[i], texture, &rect);
         mWindows[i].mScaleY = 0xD5;
         mWindows[i].mScaleX = 0xD5;
         func_0202b4c4(&mWindows[i]);
@@ -2149,12 +2149,12 @@ MapClock::MapClock() {
 }
 
 void MapClock::Update() {
-    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
 }
 
 void MapClock::UpdateIfArchiveIdle() {
     if (ArchiveManager_IsIdle(&gArchiveManager)) {
-        mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+        mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
     }
 }
 

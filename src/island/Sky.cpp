@@ -10,11 +10,11 @@ struct PaletteLoader;
 struct ScreenLoader;
 
 extern "C" {
-extern void *data_02123440; // The game's clock
+extern void *gGameClock; // The game's clock
 extern MATHRandContext16 gRandom;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
-void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
+void Clock_GetDateTime(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
 void Clock_GetTime(void *clock, RTCTime *time);
 const GXRgb *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
@@ -89,7 +89,7 @@ void DayPhase::Init(const RTCDate *date, const RTCTime *time) {
 void DayPhase::Update() {
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     Update(&date, &time);
 }
 
@@ -203,7 +203,7 @@ GXRgb GetSkyLightColor2(int phase) {
 void SkyPalette::Init(const char *archiveName, int plane) {
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     DayPhase::Init(&date, &time);
     MI_CpuFill8(mArchiveName, 0, sizeof(mArchiveName));
     mArchiveName[0] = archiveName[0];
@@ -261,7 +261,7 @@ void Sky::Init(const char *archiveName, int resource, int objPlane, int bgPlane,
     mUnknown28 = TRUE;
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     DayPhase::Init(&date, &time);
     MI_CpuFill8(mArchiveName, 0, sizeof(mArchiveName));
     mArchiveName[0] = archiveName[0];
@@ -427,7 +427,7 @@ void Sky::SetMoonAge(const RTCDate *date) {
 
 void Sky::PlaceMoon() {
     RTCTime time;
-    Clock_GetTime(data_02123440, &time);
+    Clock_GetTime(gGameClock, &time);
     int minutes = ((int)time.hour * 60 + (int)time.minute + 1440 - (mMoonAge * 1440 / 30 + 360)) % 1440;
     mMoon.SetPosition(FxVec2(((minutes << 8) / 720) << FX32_SHIFT, FX32_CONST(48)));
 }

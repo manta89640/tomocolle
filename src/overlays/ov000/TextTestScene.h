@@ -14,7 +14,7 @@
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 //
-// The size and the members are from the main program: the scene factory func_0203c050, for scene 1, loads overlay 0,
+// The size and the members are from the main program: the scene factory SceneManager::CreateScene, for scene 1, loads overlay 0,
 // allocates 0x5C8 bytes and calls the constructor func_0203dea0, which stores the table of Scene and then this
 // class's (0x02149c68), constructs three BgTextCanvas (0x6C each) from 0x10, an ObjTextCanvas at 0x154 and, at
 // 0x40C, an ObjTextCanvas base with the table of ObjCharBox.

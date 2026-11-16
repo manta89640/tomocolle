@@ -243,14 +243,14 @@ void func_0207b3dc(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
 void *ModelResources_BindArchive(void *resources, int resourceId, const char *archiveName, int unk);
 void ModelResources_ReleaseModel(void *resources, int resourceId);
-void func_02029660(void *resourceSet, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
 extern const int gPersonalityKinds[];
-void func_02029f10(CharacterModel *model, GXRgb color);
-void func_02029f20(CharacterModel *model, GXRgb color);
-void func_02029f30(CharacterModel *model, GXRgb color);
-void func_02029f40(CharacterModel *model, GXRgb color);
+void Model_SetDiffuse(CharacterModel *model, GXRgb color);
+void Model_SetAmbient(CharacterModel *model, GXRgb color);
+void Model_SetSpecular(CharacterModel *model, GXRgb color);
+void Model_SetEmission(CharacterModel *model, GXRgb color);
 }
 
 struct Renderer3d;
@@ -258,13 +258,13 @@ extern "C" {
 extern Renderer3d gVramManagerWork;
 void VramManagers_Reset(Renderer3d *renderer);
 BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
-extern void *data_02123440[];
+extern void *gGameClock[];
 void Clock_GetDate(void *clock, RTCDate *date);
 void Camera_Reset(Camera *camera);
 extern Camera gCamera;
 void Light_Reset(Light *light);
 void GraphicsManager_SaveState(u32 *manager, void *a, int planes);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void *CreateMainFrameHeap(int size);
 void *AllocFromMainFrameHeap(int size); // An allocator the particle system is given
@@ -320,7 +320,7 @@ void MiiEditScene::Init() {
     case 0x43:
     case 0x6F: {
         void *animations = ModelResources_BindArchive(gModelResources, 0x1F, "BIC", 0);
-        func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
         mCharacter.Character::SetAngle(0x4000);
         mCharacter.Character::SetVisible(FALSE);
@@ -338,7 +338,7 @@ void MiiEditScene::Init() {
         ((SavedCharacter *)(&mCharacter))->Reset();
         mCharacter.AssignFreeRoom();
         RTCDate date;
-        Clock_GetDate(data_02123440[0], &date);
+        Clock_GetDate(gGameClock[0], &date);
         ((SavedCharacter *)(&mCharacter))->SetRegisteredDate(date.year, date.month, date.day);
         break;
     }
@@ -371,14 +371,14 @@ void MiiEditScene::Init() {
     Light_Reset(&gLight1);
     mTtsPlayer.InitEngine();
     GraphicsManager_SaveState(gGraphicsManager, mUnknown00010, 0x3F00);
-    func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
@@ -858,7 +858,7 @@ void MiiEditScene::LoadModel() {
         mCharacter.MakeModel(0, 0);
     }
     void *animations = ModelResources_BindArchive(gModelResources, 0x1F, "BIC", 0);
-    func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    ResourceSet_SetArchive((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacter.Character::SetAnimation(RESOURCE_BCA0, 0);
     mCharacter.Character::SetAngle(0x4000);
     mCharacter.CharacterBase::MakeFace();
@@ -933,15 +933,15 @@ void MiiEditScene::SetCharacterColors(BOOL a) {
     if (a) {
         mCharacter.mFaceDrawParam.diffuse = 0;
         mCharacter.mFaceDrawParam.ambient = 0;
-        func_02029f10(&mCharacter, 0);
-        func_02029f20(&mCharacter, 0);
-        func_02029f30(&mCharacter, 0);
-        func_02029f40(&mCharacter, 0);
+        Model_SetDiffuse(&mCharacter, 0);
+        Model_SetAmbient(&mCharacter, 0);
+        Model_SetSpecular(&mCharacter, 0);
+        Model_SetEmission(&mCharacter, 0);
     } else {
         mCharacter.mFaceDrawParam.diffuse = GX_RGB(31, 31, 31);
         mCharacter.mFaceDrawParam.ambient = GX_RGB(8, 8, 8);
-        func_02029f10(&mCharacter, GX_RGB(31, 31, 31));
-        func_02029f20(&mCharacter, GX_RGB(8, 8, 8));
+        Model_SetDiffuse(&mCharacter, GX_RGB(31, 31, 31));
+        Model_SetAmbient(&mCharacter, GX_RGB(8, 8, 8));
     }
 }
 
@@ -3256,7 +3256,7 @@ void MiiEditProfilePage::SetState(int state) {
         ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
         ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
         ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
-        func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
         gScreenControl.mPlanes = 0x17;
         gScreenControl.mPlanesChanged = TRUE;
@@ -3496,7 +3496,7 @@ void MiiEditProfilePage::SetState(int state) {
             mSprites[i].mVisible = FALSE;
         }
         GraphicsManager_RestoreState(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
-        func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x200, 0, 0, 0, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x200, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
         ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
         G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000, GX_BG_CHARBASE_0x08000,
@@ -3679,7 +3679,7 @@ void MiiEditProfilePage::Exit() {
     case 9:
         ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
         ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
-        func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
         PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
         mScene->ShowControls();
         break;
@@ -3913,7 +3913,7 @@ void MiiEditVoicePage::Init(MiiEditScene *scene) {
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
     mScene->ShowControls();
     ObjResourceManager_Load(&gObjResourceManager, "E00:/Voice.nce", "E00:/Voice.ncg", 0x1000, 1, 0x10000);
@@ -4317,7 +4317,7 @@ void MiiEditVoicePage::Exit() {
     }
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
     mScene->ShowControls();
 }
@@ -4554,7 +4554,7 @@ void MiiEditCharacterPage::Update() {
         for (j = 0; j < 8; j++) {
             ScreenRect rect = data_ov076_021592d0[j];
             rect.y += y;
-            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mAnswers[i]) {
+            if (ScreenRect_Contains(&rect, &point) && j + 1 != mScene->mCharacter.mAnswers[i]) {
                 mScene->mCharacter.SetAnswer(i, j + 1);
                 mScene->mCharacter.Character::UpdateAnimSpeed();
                 mButtons[i].mVisible = TRUE;

@@ -72,14 +72,14 @@ void WeddingScene::Init() {
     Init3d();
 
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
     gScreenControl.Set(0x1111);
     ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
     ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
     ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
-    func_02027290(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
-    func_02028f24(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
     gScreenControl.mUnknown44 = 0;
     gScreenControl.mUnknown44Changed = TRUE;
@@ -110,7 +110,7 @@ void WeddingScene::Init() {
 // The touch screen: the window for the messages over a background
 void WeddingScene::InitLowerScreen() {
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);
     ScreenLoader_SetPriority(&gScreenLoader, 4, 0);
@@ -156,7 +156,7 @@ void WeddingScene::Init3d() {
         mCharacters[i].mPersonality = character->GetPersonality();
         character->UpdateBiorhythm();
         character->Character::UpdateSpeedScales();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].mShadowVisible = TRUE;
         character->CharacterBase::SetFace(10);
         character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, "idle00"));
@@ -277,7 +277,7 @@ void WeddingScene::Update() {
     }
     case STATE_LEAVE:
         if (mFrame >= 52) {
-            s64 now = Clock_GetSeconds(data_02123440);
+            s64 now = Clock_GetSeconds(gGameClock);
             mCharacters[0].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[0]) * 60;
             mCharacters[1].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
             mCharacters[0].mTroubleState = 3;
@@ -858,7 +858,7 @@ void WeddingLights::Init(Camera *camera, Room *room) {
     for (int i = 0; i < 2; i++) {
         mLights[i] = &gLights[i];
         Light_Reset(&gLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
         Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
     }
 }

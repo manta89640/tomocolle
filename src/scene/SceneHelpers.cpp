@@ -17,7 +17,7 @@ void Light_Reset(Light *light);
 void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 extern Light gLight1;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 BOOL SpriteButton_IsTouched(SpriteButton *button);
 BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
@@ -167,7 +167,7 @@ void SceneCast::InitCharacters() {
         mCharacters[i]->UpdateBodyScale();
         mCharacters[i]->UpdateAnimSpeed();
         mCharacters[i]->UpdateBodyColors();
-        func_02029660((void *)mCharacters[i]->mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i]->mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i]->SetAnimation(RESOURCE_BCA0, 0);
         mCharacters[i]->SetAngle(0x4000);
         MakeCharacterSpeechTexts(&mSpeechTexts[i], mCharacters[i]);
@@ -512,7 +512,7 @@ void SceneRoom::Draw() {
 // The z of a piece of the style's furniture. The index is a u32: with an int, the compiler strength-reduces the
 // piece's address in ShowParts' loop, where the original computes it from the counter at each use.
 static inline s16 GetPieceZ(u16 style, u32 i) {
-    return data_020f72f8[style].mParts[i].mUnknown8;
+    return gInteriorTable[style].mParts[i].mUnknown8;
 }
 
 void SceneRoom::ShowParts(int mode) {
@@ -546,17 +546,17 @@ void SceneRoom::ShowParts(int mode) {
 void NewsButton::LoadBackground() {
     ArchiveManager_MountCompressed(&gArchiveManager, "NEW", "Scn/Scene/SceneMiiNews_LZ.bin", 1);
     ScreenLoader_LoadFile(&gScreenLoader, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
     ScreenControl_SetBlendBrightness(&gScreenControl, 0x17, -16);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
 void NewsButton::Init(int resource) {
-    func_02027290(&gObjResourceManager, "NEW:/Obj_down.nce", 0x1000, resource);
-    func_02028f24(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "NEW:/Obj_down.nce", 0x1000, resource);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
     Sprite_Init(this, 1, 6, 0x80, 0x60, TRUE);
     SpriteButton_SetTouchRect(this, 116, 30);

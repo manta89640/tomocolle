@@ -58,13 +58,13 @@ extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d gVramManagerWork;
 void VramManagers_Reset(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 // Queues a character file for transfer to VRAM
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
 // The main program's camera (gCamera; Camera_Reset resets it). A stand-in with the fields the scene sets.
@@ -110,7 +110,7 @@ extern Light gLights[];
 void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
 void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
-void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a resource set the animations of an archive
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive); // Gives a resource set the animations of an archive
 void *func_020295a4(void *resourceSet, u32 resType);
 
 // --- Characters ---

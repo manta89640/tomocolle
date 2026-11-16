@@ -38,7 +38,7 @@ u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, in
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
 // Queues a character file for transfer to VRAM
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 }
 
@@ -69,12 +69,12 @@ struct MiiData {
 }; // 0x4A
 
 extern "C" {
-extern const s16 data_020fb870[4][5]; // Animation ids, by a row and by mood: standing
+extern const s16 gStandAnimations[4][5]; // Animation ids, by a row and by mood: standing
 void func_0209decc(SceneCharacter *character);
 void GameData_ReadCharacter(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);                          // Whether there is one with that index
 void NFL_ClearMiiCreateId(MiiData *mii);
-void func_02029660(void *resourceSet, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 }
 
 

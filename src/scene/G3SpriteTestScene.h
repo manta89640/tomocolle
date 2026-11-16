@@ -10,7 +10,7 @@
 // "Scn/Scene/SceneTestG3Sprite_LZ.bin". A hundred sprites of the texture "Face.tga" (32 by 32 pixels, one of four
 // picked at random) stand at random places in front of a character's body model ("Mdl/Body/body000_3D_LZ.bin");
 // each frame one of them, in turn, moves to a new place and gets a new random size. The scene factory (main
-// func_0203c050, case 37) allocates 0x48B4 bytes and calls the constructor, which is in the main program's file of
+// SceneManager::CreateScene, case 37) allocates 0x48B4 bytes and calls the constructor, which is in the main program's file of
 // scene constructors (func_0204036c).
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the

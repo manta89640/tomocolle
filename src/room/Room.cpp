@@ -13,18 +13,18 @@ void ArchiveManager_MountCompressed(void *loader, const char *name, const char *
 void ArchiveManager_Unmount(void *loader, const char *name);
 extern u8 gArchiveManager[];
 
-void func_02029c20(Model *model, u32 resType, int resourceId, int unk);
+void Model_BindResource(Model *model, u32 resType, int resourceId, int unk);
 void func_02029e94(Model *model);
-void func_02029f10(Model *model, int flags);
-void func_02029f20(Model *model, int flags);
-void func_02029f30(Model *model, int flags);
-void func_02029f40(Model *model, int flags);
-void func_02028b98(GXRgb color, int *r, int *g, int *b); // Splits a colour into its components
+void Model_SetDiffuse(Model *model, int flags);
+void Model_SetAmbient(Model *model, int flags);
+void Model_SetSpecular(Model *model, int flags);
+void Model_SetEmission(Model *model, int flags);
+void SplitColor(GXRgb color, int *r, int *g, int *b); // Splits a colour into its components
 
 int GameData_GetInteriorCount(GameData *game, int interior); // The interior's count, -1 when it is not owned
 void GameData_SetInteriorCount(GameData *game, int interior, s8 count);
 
-extern void *data_02123440;
+extern void *gGameClock;
 void Clock_GetDate(void *clock, RTCDate *date);
 extern MATHRandContext16 gRandom;
 }
@@ -121,7 +121,7 @@ void RoomDoor::LoadModel() {
 void RoomDoor::Reload() {
     NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj);
     mModel.RemoveAnims();
-    func_02029c20(&mModel, RESOURCE_BMD0, mResourceId, 0);
+    Model_BindResource(&mModel, RESOURCE_BMD0, mResourceId, 0);
     mModel.SetAnimation(RESOURCE_BCA0, 1);
     AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, 1)->mFinished = TRUE;
     mEntranceVisible = FALSE;
@@ -182,10 +182,10 @@ void RoomDoor::PlayAnimation(u32 resType, int id, BOOL playOnce) {
 }
 
 void RoomDoor::SetFlags(int flags) {
-    func_02029f10(&mModel, flags);
-    func_02029f20(&mModel, flags);
-    func_02029f30(&mModel, flags);
-    func_02029f40(&mModel, flags);
+    Model_SetDiffuse(&mModel, flags);
+    Model_SetAmbient(&mModel, flags);
+    Model_SetSpecular(&mModel, flags);
+    Model_SetEmission(&mModel, flags);
 }
 
 void RoomDoor::SetCallbacks() {
@@ -234,7 +234,7 @@ void RoomPart::LoadModel() {
 
 void RoomPart::Reload() {
     func_02029e94(&mModel);
-    func_02029c20(&mModel, RESOURCE_BMD0, mResourceId, 0);
+    Model_BindResource(&mModel, RESOURCE_BMD0, mResourceId, 0);
     mAlpha = 31;
 }
 
@@ -253,12 +253,12 @@ void RoomPart::Update() {
     case STATE_OPAQUE:
         mState = STATE_IDLE;
         mAlpha = 31;
-        func_02029f50(&mModel, mAlpha);
+        Model_SetAlpha(&mModel, mAlpha);
         break;
     case STATE_CLEAR:
         mState = STATE_IDLE;
         mAlpha = 0;
-        func_02029f50(&mModel, mAlpha);
+        Model_SetAlpha(&mModel, mAlpha);
         break;
     case STATE_FADE_IN:
         if (mAlpha < 31) {
@@ -266,7 +266,7 @@ void RoomPart::Update() {
             if (mAlpha > 31) {
                 mAlpha = 31;
             }
-            func_02029f50(&mModel, mAlpha);
+            Model_SetAlpha(&mModel, mAlpha);
         }
         break;
     case STATE_FADE_OUT:
@@ -275,7 +275,7 @@ void RoomPart::Update() {
             if (mAlpha < 0) {
                 mAlpha = 0;
             }
-            func_02029f50(&mModel, mAlpha);
+            Model_SetAlpha(&mModel, mAlpha);
         }
         break;
     }
@@ -289,10 +289,10 @@ void RoomPart::Draw(const MtxFx33 *rotation, const MtxFx43 *matrix) {
 }
 
 void RoomPart::SetFlags(int flags) {
-    func_02029f10(&mModel, flags);
-    func_02029f20(&mModel, flags);
-    func_02029f30(&mModel, flags);
-    func_02029f40(&mModel, flags);
+    Model_SetDiffuse(&mModel, flags);
+    Model_SetAmbient(&mModel, flags);
+    Model_SetSpecular(&mModel, flags);
+    Model_SetEmission(&mModel, flags);
 }
 
 RoomModels::RoomModels() {
@@ -509,7 +509,7 @@ void RoomModels::SetFlags(int flags) {
 }
 
 void RoomModels::SetAlpha(int alpha) {
-    func_02029f50(&mDoor.mModel, alpha);
+    Model_SetAlpha(&mDoor.mModel, alpha);
     for (int i = 0; i < ROOM_PART_COUNT; i++) {
         if (mParts[i].mResourceId >= 0) {
             mParts[i].SetModelAlpha(alpha);
@@ -564,7 +564,7 @@ GXRgb InteriorItem::GetLightColor() {
 }
 
 void InteriorItem::GetLightRGB(int *r, int *g, int *b) {
-    func_02028b98(data_020f72f8[mId].mLightColor, r, g, b);
+    SplitColor(gInteriorTable[mId].mLightColor, r, g, b);
     DimLight(r, g, b);
 }
 
@@ -670,7 +670,7 @@ void InteriorList::SortHeldFirst() {
 }
 
 static s32 CompareInteriors(void *a, void *b) {
-    return data_020f72f8[(*(InteriorItem **)a)->mId].mSortKey - data_020f72f8[(*(InteriorItem **)b)->mId].mSortKey;
+    return gInteriorTable[(*(InteriorItem **)a)->mId].mSortKey - gInteriorTable[(*(InteriorItem **)b)->mId].mSortKey;
 }
 
 static s32 CompareInteriorsHeldFirst(void *a, void *b) {
@@ -706,7 +706,7 @@ void InteriorList::GetOwnedKind16(Item **list, int *count) {
     int n = 0;
     for (int i = 0; i < mCount; i++) {
         InteriorItem *item = mList[i];
-        if (data_020f72f8[item->mId].mKind == 16) {
+        if (gInteriorTable[item->mId].mKind == 16) {
             list[n] = item;
             (*count)++;
             n++;
@@ -719,11 +719,11 @@ void InteriorList::GetOnOffer(Item **list, int *count) {
     int n = 0;
     for (int i = 0; i < mCount; i++) {
         BOOL ok = TRUE;
-        ok &= data_020f72f8[mList[i]->mId].mKind != 0;
-        ok &= data_020f72f8[mList[i]->mId].mKind != 13;
-        ok &= data_020f72f8[mList[i]->mId].mKind != 16;
+        ok &= gInteriorTable[mList[i]->mId].mKind != 0;
+        ok &= gInteriorTable[mList[i]->mId].mKind != 13;
+        ok &= gInteriorTable[mList[i]->mId].mKind != 16;
         BOOL ok2 = TRUE;
-        if (!mList[i]->mOwned && data_020f72f8[mList[i]->mId].mKind != 15) {
+        if (!mList[i]->mOwned && gInteriorTable[mList[i]->mId].mKind != 15) {
             ok2 = FALSE;
         }
         if (ok & ok2) {
@@ -752,7 +752,7 @@ void InteriorList::GetKind13(Item **list, int *count) {
     int n = 0;
     for (int i = 0; i < mCount; i++) {
         InteriorItem *item = mList[i];
-        if (data_020f72f8[item->mId].mKind == 13) {
+        if (gInteriorTable[item->mId].mKind == 13) {
             list[n] = item;
             (*count)++;
             n++;
@@ -779,7 +779,7 @@ void Room::SetArchive(const char *archiveName) {
 }
 
 const char *InteriorItem::GetModelName() {
-    return data_020f72f8[mId].mModelName;
+    return gInteriorTable[mId].mModelName;
 }
 
 void Room::SetModel() {
@@ -826,13 +826,13 @@ void Room::SetPartsArchive(const char *archiveName) {
 }
 
 void Room::SetPartModels() {
-    for (u32 i = 0; i < data_020f72f8[mId].mPieceCount; i++) {
-        SetPartModelName(data_021145a8[data_020f72f8[mId].mPieces[i].mName], i);
+    for (u32 i = 0; i < gInteriorTable[mId].mPieceCount; i++) {
+        SetPartModelName(data_021145a8[gInteriorTable[mId].mPieces[i].mName], i);
     }
 }
 
 void Room::MountParts(int unk) {
-    for (int i = 0; i < data_020f72f8[mId].mPieceCount; i++) {
+    for (int i = 0; i < gInteriorTable[mId].mPieceCount; i++) {
         mParts[i].Mount(unk);
     }
 }
@@ -848,33 +848,33 @@ void Room::MountPartModels(int unk) {
 }
 
 void Room::ReleaseParts() {
-    for (int i = 0; i < data_020f72f8[mId].mPieceCount; i++) {
+    for (int i = 0; i < gInteriorTable[mId].mPieceCount; i++) {
         mParts[i].Release();
     }
 }
 
 void Room::LoadParts(int resourceId) {
-    for (u32 i = 0; i < data_020f72f8[mId].mPieceCount; i++) {
+    for (u32 i = 0; i < gInteriorTable[mId].mPieceCount; i++) {
         LoadPart(resourceId, i);
         VecFx32 pos;
-        pos.x = data_020f72f8[mId].mPieces[i].mX;
-        pos.y = data_020f72f8[mId].mPieces[i].mY;
-        pos.z = data_020f72f8[mId].mPieces[i].mZ;
+        pos.x = gInteriorTable[mId].mPieces[i].mX;
+        pos.y = gInteriorTable[mId].mPieces[i].mY;
+        pos.z = gInteriorTable[mId].mPieces[i].mZ;
         SetPartPosition(i, pos);
-        SetPartRotY(i, data_020f72f8[mId].mPieces[i].mRotY);
+        SetPartRotY(i, gInteriorTable[mId].mPieces[i].mRotY);
         resourceId++;
     }
 }
 
 void Room::ReloadParts(int resourceId) {
-    for (u32 i = 0; i < data_020f72f8[mId].mPieceCount; i++) {
+    for (u32 i = 0; i < gInteriorTable[mId].mPieceCount; i++) {
         ReloadPart(resourceId, i);
         VecFx32 pos;
-        pos.x = data_020f72f8[mId].mPieces[i].mX;
-        pos.y = data_020f72f8[mId].mPieces[i].mY;
-        pos.z = data_020f72f8[mId].mPieces[i].mZ;
+        pos.x = gInteriorTable[mId].mPieces[i].mX;
+        pos.y = gInteriorTable[mId].mPieces[i].mY;
+        pos.z = gInteriorTable[mId].mPieces[i].mZ;
         SetPartPosition(i, pos);
-        SetPartRotY(i, data_020f72f8[mId].mPieces[i].mRotY);
+        SetPartRotY(i, gInteriorTable[mId].mPieces[i].mRotY);
         resourceId++;
     }
 }
@@ -898,16 +898,16 @@ static int GetInteriorWeight(u16 interior) {
     int weight = 0;
     switch (gGameData.mUnknown4E[0]) {
     case 0:
-        weight = data_020f72f8[interior].mWeight0;
+        weight = gInteriorTable[interior].mWeight0;
         break;
     case 1:
-        weight = data_020f72f8[interior].mWeight1;
+        weight = gInteriorTable[interior].mWeight1;
         break;
     case 2:
-        weight = data_020f72f8[interior].mWeight2;
+        weight = gInteriorTable[interior].mWeight2;
         break;
     case 3:
-        weight = data_020f72f8[interior].mWeight3;
+        weight = gInteriorTable[interior].mWeight3;
         break;
     }
     return weight;
@@ -924,10 +924,10 @@ u8 ChooseInteriors(u8 *interiors, int count) {
     if (gGameData.mUnknownB2[0] < 1) {
         gGameData.mUnknownB2[0] = 1;
     }
-    Clock_GetDate(data_02123440, &date);
+    Clock_GetDate(gGameClock, &date);
     for (int i = 0; i < INTERIOR_COUNT; i++) {
         free[i] = TRUE;
-        ofKind[i] = data_020f72f8[i].mKind == 14;
+        ofKind[i] = gInteriorTable[i].mKind == 14;
     }
     for (int n = 0; n < count; n++) {
         int total = 0;

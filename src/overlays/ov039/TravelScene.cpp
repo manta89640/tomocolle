@@ -216,14 +216,14 @@ void TravelScene::Init() {
     }
 
     PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_up.ncl", 0x2F, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "N00:/BG_up.ncg", 0xC, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N00:/BG_up.ncg", 0xC, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_pictureframe.nsc", 8, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_down.ncl", 0x200, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "N00:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N00:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     mMessageFiles[0].Open("TBM:/tmd_minicontents_msg_JP.bmg");
     mText.mMessageFile = &mMessageFiles[0];
     ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x1D, 8, 8);
-    func_02028f24(&gVramTransferQueue, "SFL:/caption.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SFL:/caption.ncg", 2, 0, 0, 0, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "SFL:/caption.nsc", 2, 0, 0, 0, 0, -1);
 
     const u32 pairCaption = 0x4AD; // "<name> and <name>'s"
@@ -509,7 +509,7 @@ void TravelScene::SetState(int state) {
         chars[9] = digit;
         PaletteLoader_LoadFile(&gPaletteLoader, palette, 0x2F, -1, -1, -1);
         ScreenLoader_LoadFile(&gScreenLoader, screen, 4, 0, 0, 0, 0, -1);
-        func_02028f24(&gVramTransferQueue, chars, 0xC, 0, 0, 0, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, chars, 0xC, 0, 0, 0, -1);
         gScreenControl.Set(0x1217);
         mSpeechWindow.Hide();
         break;

@@ -73,7 +73,7 @@ void ScreenLoader_SetPriority(ScreenLoader *loader, int a, int b);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_02029660(int resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
+void ResourceSet_SetArchive(int resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
 void GameData_ReadCharacter(GameData *game, int index, Character *character); // Reads a saved character
 int MiiData_GetSex(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
@@ -357,7 +357,7 @@ void ItemListView::Update() {
         } else if (down && CanScrollDown()) {
             mScrolling = 2;
             gSoundManager.StartSeqArc(0, 1, 9);
-        } else if (gTouchInput.mTouching && func_02028d88(&mRect, &gTouchInput.mPoint) && mTouchable) {
+        } else if (gTouchInput.mTouching && ScreenRect_Contains(&mRect, &gTouchInput.mPoint) && mTouchable) {
             for (int i = 0; i < mRowCount; i++) {
                 if (SpriteButton_Update(&mRowButtons[i])) {
                     if (mTouchedRow != -1 && mTouchedRow != i) {
@@ -1367,7 +1367,7 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
     ModelResources_SetModel(gModelResources, 31, "3CH:/head.imd");
     void *animations = ModelResources_BindArchive(gModelResources, 28, "3HA", 0);
     mCharacter.Init(28, 0, 0);
-    func_02029660(mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    ResourceSet_SetArchive(mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacter.SetAnimation(RESOURCE_BCA0, 33);
     if (mResident) {
         GameData_ReadCharacter(&gGameData, mResidentIndex, &mCharacter);
@@ -1403,7 +1403,7 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
         mMannequin.LoadTexturePalette();
         mMannequin.SetPaletteColor1(0x5FBE);
         void *headAnimations = ModelResources_BindArchive(gModelResources, 30, "3HA", 0);
-        func_02029660(mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
+        ResourceSet_SetArchive(mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
         mMannequin.SetAnimation(RESOURCE_BCA0, 33);
         mMannequin.mShadowVisible = TRUE;
         VecFx32 pos = mPosition;

@@ -12,7 +12,7 @@
 // ありません" shown) in four packets of 0x80 bytes. The child scans, lists up to three parents by the nickname each
 // sends as its user game info, connects to the one chosen with up and down, and stores what it receives as a new
 // saved character in the first free slot. After a transfer a touch asks for scene 0x11. Exit ends WH. The scene
-// factory (main func_0203c050, case 27) allocates 0xCC bytes.
+// factory (main SceneManager::CreateScene, case 27) allocates 0xCC bytes.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class WirelessTestScene : public Scene {

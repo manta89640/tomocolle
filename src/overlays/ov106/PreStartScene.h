@@ -26,7 +26,7 @@ public:
     PreStartClock();
     void Update();
 
-    /* 0x00 */ s64 mSeconds; // The same moment as seconds, as func_02035870 returns it
+    /* 0x00 */ s64 mSeconds; // The same moment as seconds, as Clock_GetDateTime returns it
     /* 0x08 */ s64 mUnknown08; // What func_02035ae0 returns
     /* 0x10 */ RTCDate mDate;
     /* 0x20 */ RTCTime mTime;

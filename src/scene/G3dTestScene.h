@@ -12,7 +12,7 @@ struct Camera;
 // (THM) and "Scn/Scene/SceneTestG3d_LZ.bin" (TG3, "Glass6.imd"). Edge marking is on, and each model gets its own
 // polygon id. The glasses follow the first character's left hand. With B held the pad turns the first character's
 // model; X starts a room animation (by the direction held, or at random), Y another face, and with R held the pad
-// turns the camera. The scene factory (main func_0203c050, case 16) allocates 0x5C2C bytes.
+// turns the camera. The scene factory (main SceneManager::CreateScene, case 16) allocates 0x5C2C bytes.
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 class G3dTestScene : public Scene {

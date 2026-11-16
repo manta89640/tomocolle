@@ -8,7 +8,7 @@
 // to 0x020a3b00) shows the saved characters on five tabs, and a button at the top right of the touch screen opens
 // a menu of the seven orders it can be sorted in (name, nickname, sex, year of birth, birthday, blood type,
 // personality: etc messages 0x7F to 0x85). The order is kept in the game data (GameData::mMiiListSortKey) when it
-// has changed. The scene factory (main func_0203c050, case 38) allocates 0x2AA44 bytes and calls the constructor,
+// has changed. The scene factory (main SceneManager::CreateScene, case 38) allocates 0x2AA44 bytes and calls the constructor,
 // which is in the main program's file of scene constructors (func_020403e8).
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the

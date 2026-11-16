@@ -59,7 +59,7 @@ extern PaletteLoader gPaletteLoader;
 extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern ScreenControl gScreenControl;
-extern void *data_02123440; // The game's clock
+extern void *gGameClock; // The game's clock
 // The mansion's name (what the information's title shows)
 extern wchar_t data_02123510[];
 
@@ -67,7 +67,7 @@ void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, con
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);

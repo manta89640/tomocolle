@@ -11,7 +11,7 @@
 // ten characters typed are shown on a sprite text box on the upper screen, the last of them also alone, centred
 // over its place, on a character box; touching the keyboard's two buttons presses one and releases the other. A
 // puts the room's background "MNU:/BG_down" on the keyboard's plane, B the keyboard's again. The scene factory
-// (main func_0203c050, case 11) allocates 0x6AF8 bytes.
+// (main SceneManager::CreateScene, case 11) allocates 0x6AF8 bytes.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class KeyboardTestScene : public Scene {

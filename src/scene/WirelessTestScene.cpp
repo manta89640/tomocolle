@@ -9,8 +9,8 @@
 #include "text/TextUtil.h"
 
 extern "C" {
-extern void *data_02123440[];                  // The game's clock
-void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
+extern void *gGameClock[];                  // The game's clock
+void Clock_SetDateTime(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
 void Clock_GetDate(void *clock, RTCDate *date);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads a saved character
 void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
@@ -79,8 +79,8 @@ void WirelessTestScene::Init() {
     time.minute = 13;
     time.second = 14;
     date.week = RTC_WEEK_SUNDAY;
-    func_02035460(data_02123440[0], &date, &time, FALSE);
-    Clock_GetDate(data_02123440[0], &date);
+    Clock_SetDateTime(gGameClock[0], &date, &time, FALSE);
+    Clock_GetDate(gGameClock[0], &date);
 }
 
 void WirelessTestScene::UpdateIdle() {

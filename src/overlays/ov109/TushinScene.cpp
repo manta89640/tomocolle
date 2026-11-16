@@ -357,7 +357,7 @@ void TushinScene::InitCharacters() {
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
     for (i = 0; i < 3; i++) {
         ((Character *)(&mCharacters[i]))->Init(i, 0, 0);
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAnimation(RESOURCE_BCA0, GetStandAnimation(i));
         mCharacters[i].mPos.y = 0;
         mCharacters[i].mPos.x = -0x1000;
@@ -434,9 +434,9 @@ void TushinScene::UpdateMiiData() {
 void TushinScene::Init() {
     mMessageFiles[0].Open("TBM:tmd_etc_msg_JP.bmg");
     mMessageFiles[1].Open("TBC:tmd_common_msg_JP.bmg");
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
     ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
@@ -1356,7 +1356,7 @@ void TushinScene::DrawCharacters() {
 
 // @0x0214f088
 int TushinScene::GetStandAnimation(int i) {
-    return data_020fb870[3][0];
+    return gStandAnimations[3][0];
 }
 
 // @0x0214f098

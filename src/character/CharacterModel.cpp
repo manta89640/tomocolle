@@ -11,11 +11,11 @@ extern ArchiveLoader gArchiveManager;
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 // The main program's model functions (0x02029b04 on), not decompiled yet
-void func_02029c20(AnimModel *model, u32 resType, int resourceId, int unk);   // Makes the model
-void func_02029d40(AnimModel *model, const void *pltt, int offset, int size); // Loads palette colours
+void Model_BindResource(AnimModel *model, u32 resType, int resourceId, int unk);   // Makes the model
+void Model_QueuePalette(AnimModel *model, const void *pltt, int offset, int size); // Loads palette colours
 int func_0202a1b0(AnimModel *model, u32 resType);                            // Counts its animations of a type
 void func_0202a25c(AnimModel *model, u32 resType, int id);                   // Adds an animation
-void func_0202a308(AnimModel *model, u32 resType, int id);                   // Removes an animation
+void AnimModel_RemoveAnimation(AnimModel *model, u32 resType, int id);                   // Removes an animation
 void func_0202a3b0(AnimModel *model, u32 resType);                           // Removes the animations of a type
 void AnimModel_SetAnimationFrame(AnimModel *model, fx32 frame, u32 resType, int id); // Sets an animation's frame
 fx32 func_0202a5fc(AnimModel *model, u32 resType, int id);                   // An animation's frame
@@ -103,7 +103,7 @@ void CharacterModel::Reload(int resourceId, int unk) {
 void CharacterModel::MakeBodyArchivePath() {
     STD_CopyString(mArchivePath, "Mdl/Body/body");
     STD_ConcatenateString(mArchivePath, mClothes.GetModelName());
-    mTexturePath[11] = '0' + data_020f3ff0[mClothes.mId].mBodyColor;
+    mTexturePath[11] = '0' + gClothesTable[mClothes.mId].mBodyColor;
 }
 
 void CharacterModel::SetArchive(const char *archiveName, int clothes, BOOL female) {
@@ -123,7 +123,7 @@ void CharacterModel::SetClothes(int clothes, BOOL female) {
 }
 
 void CharacterModel::UseFemaleBody(BOOL female) {
-    if (female == TRUE && (data_020f3ff0[mClothes.mId].mHasFemaleBody & 1)) {
+    if (female == TRUE && (gClothesTable[mClothes.mId].mHasFemaleBody & 1)) {
         mArchivePath[16] = 'F';
         mArchivePath[17] = '\0';
     }
@@ -146,7 +146,7 @@ void CharacterModel::MakeModel(int resourceId, int unk) {
     fx32 frame = func_0202a5fc(&mAnim, RESOURCE_BCA0, mAnimId);
     NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj);
     mAnim.RemoveAnims();
-    func_02029c20(&mAnim, RESOURCE_BMD0, resourceId, unk);
+    Model_BindResource(&mAnim, RESOURCE_BMD0, resourceId, unk);
     if (mAnimId >= 0) {
         SetAnimation(RESOURCE_BCA0, mAnimId);
     }
@@ -181,7 +181,7 @@ void CharacterModel::BlendToAnimation(u32 resType, int id) {
         if (id == mAnimId) {
             return;
         }
-        func_0202a308(&mAnim, RESOURCE_BCA0, mPrevAnimId);
+        AnimModel_RemoveAnimation(&mAnim, RESOURCE_BCA0, mPrevAnimId);
         mPrevAnimId = mAnimId;
         mAnimId = id;
         if (mPrevAnimId >= 0) {
@@ -210,18 +210,18 @@ void CharacterModel::SetPaletteColor1(GXRgb color) {
     NNSG3dResTex *tex = mAnim.mResTex;
     GXRgb *pltt = (GXRgb *)((u8 *)tex + tex->plttInfo.ofsPlttData);
     pltt[1] = color;
-    func_02029d40(&mAnim, pltt, -1, 4);
+    Model_QueuePalette(&mAnim, pltt, -1, 4);
 }
 
 void CharacterModel::LoadTexturePalette() {
-    func_02029d40(&mAnim, ArchiveManager_GetFileByName(&gArchiveManager, mTexturePath), -1, 0x20);
+    Model_QueuePalette(&mAnim, ArchiveManager_GetFileByName(&gArchiveManager, mTexturePath), -1, 0x20);
 }
 
 void CharacterModel::SetPaletteColors(GXRgb color0, GXRgb color1) {
     GXRgb *pltt = (GXRgb *)ArchiveManager_GetFileByName(&gArchiveManager, mTexturePath);
     pltt[0] = color0;
     pltt[1] = color1;
-    func_02029d40(&mAnim, pltt, -1, 0x20);
+    Model_QueuePalette(&mAnim, pltt, -1, 0x20);
 }
 
 void CharacterModel::GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation) {
@@ -314,7 +314,7 @@ void CharacterModel::UpdateBlend() {
         }
     }
     if (mBlendFrames == 0) {
-        func_0202a308(&mAnim, RESOURCE_BCA0, mPrevAnimId);
+        AnimModel_RemoveAnimation(&mAnim, RESOURCE_BCA0, mPrevAnimId);
     }
 }
 

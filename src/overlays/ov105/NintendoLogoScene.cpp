@@ -13,7 +13,7 @@ void NintendoLogoScene::StartLoading() {
 void NintendoLogoScene::Init() {
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
     ScreenLoader_LoadFile(&gScreenLoader, "MNU:/Gray_White.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "MNU:/Gray_White.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MNU:/Gray_White.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Gray_White.ncl", 2, -1, -1, -1);
     gScreenControl.Set(2);
     SetState(STATE_SHOW);

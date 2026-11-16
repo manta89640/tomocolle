@@ -39,7 +39,7 @@ extern Camera gCamera;
 void Camera_Reset(Camera *camera);
 void Camera_UpdateEye(Camera *camera);
 // The absolute value of each component
-void func_02028e0c(const VecFx32 *in, VecFx32 *out);
+void AbsVec(const VecFx32 *in, VecFx32 *out);
 }
 
 // The camera of the apartment room: it circles the room, a character or the middle between both, turning to a

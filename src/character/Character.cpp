@@ -28,8 +28,8 @@ int MiiData_GetFavoriteColor(CharacterRecord *character);
 
 extern "C" {
 // The main program's model functions (0x02029b04 on), not decompiled yet
-void func_0202a308(AnimModel *model, u32 resType, int id);  // Removes an animation
-void func_0202a4d8(AnimModel *model, fx32 speed);           // Sets the speed of its animations
+void AnimModel_RemoveAnimation(AnimModel *model, u32 resType, int id);  // Removes an animation
+void AnimModel_SetSpeed(AnimModel *model, fx32 speed);           // Sets the speed of its animations
 void ModelResources_BeginDraw(u32 *resources);
 void func_02028bc0(MtxFx33 *rotation, u16 x, u16 y, u16 z); // Turns a rotation by angles
 BOOL func_02028e98(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
@@ -550,7 +550,7 @@ fx32 CharacterBase::GetAnimSpeedOf(int liveliness) {
 
 void CharacterHead::SetAnimSpeed(fx32 speed) {
     mAnimSpeed = speed;
-    func_0202a4d8(&mHead, speed);
+    AnimModel_SetSpeed(&mHead, speed);
 }
 
 void CharacterHead::SetAnimation(u32 resType, int id) {
@@ -559,7 +559,7 @@ void CharacterHead::SetAnimation(u32 resType, int id) {
         mAnimId = id;
     }
     mHead.SetAnimation(resType, id);
-    func_0202a4d8(&mHead, mAnimSpeed);
+    AnimModel_SetSpeed(&mHead, mAnimSpeed);
 }
 
 void CharacterHead::UpdateBlend() {
@@ -582,7 +582,7 @@ void CharacterHead::UpdateBlend() {
         }
     }
     if (mBlendFrames == 0) {
-        func_0202a308(&mHead, RESOURCE_BCA0, mPrevAnimId);
+        AnimModel_RemoveAnimation(&mHead, RESOURCE_BCA0, mPrevAnimId);
     }
 }
 
@@ -759,17 +759,17 @@ void Character::Draw() {
 
 void Character::SetAnimSpeed(fx32 speed) {
     mAnimSpeed = speed;
-    func_0202a4d8(&mAnim, speed);
+    AnimModel_SetSpeed(&mAnim, speed);
 }
 
 void Character::SetAnimation(u32 resType, int id) {
     CharacterModel::SetAnimation(resType, id);
-    func_0202a4d8(&mAnim, mAnimSpeed);
+    AnimModel_SetSpeed(&mAnim, mAnimSpeed);
 }
 
 void Character::BlendToAnimation(u32 resType, int id) {
     CharacterModel::BlendToAnimation(resType, id);
-    func_0202a4d8(&mAnim, mAnimSpeed);
+    AnimModel_SetSpeed(&mAnim, mAnimSpeed);
 }
 
 void Character::SetVisible(BOOL visible) {

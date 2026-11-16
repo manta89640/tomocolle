@@ -12,7 +12,7 @@ struct Camera;
 // the first effect plays, its particles kept at the body's neck. A starts a new emitter; with B held, up pauses or
 // resumes the emitter, down and left stop it and right starts another; Y sets its emission interval to 10 frames;
 // with X held, right and left move it up and back and down pauses its emission; else the pad turns the camera.
-// The scene factory (main func_0203c050, case 8) allocates 0x53C bytes.
+// The scene factory (main SceneManager::CreateScene, case 8) allocates 0x53C bytes.
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 

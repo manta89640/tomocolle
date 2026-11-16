@@ -43,12 +43,12 @@ void HumanTestScene::Update() {
         ArchiveManager_Unmount(&gArchiveManager, "HT0");
         ArchiveManager_MountCompressed(&gArchiveManager, "HT0", "Scn/Scene/TestHuman00Tex_LZ.bin", 1);
         ModelResources_SetModel(gModelResources, 0, "HT0:/HUMAN00.itx");
-        func_02029c20(&mHead, RESOURCE_BTX0, 0, 0);
+        Model_BindResource(&mHead, RESOURCE_BTX0, 0, 0);
         mHead.SetAnimation(RESOURCE_BTP0, 1);
         ArchiveManager_Unmount(&gArchiveManager, "BT0");
         ArchiveManager_MountCompressed(&gArchiveManager, "BT0", "Scn/Scene/TestBody00Tex_LZ.bin", 1);
         ModelResources_SetModel(gModelResources, 1, "BT0:/body00.itx");
-        func_02029c20(&mBody, RESOURCE_BTX0, 1, 0);
+        Model_BindResource(&mBody, RESOURCE_BTX0, 1, 0);
         mTexturesLoaded = TRUE;
     } else if (mTexturesLoaded && (gPadInput.mTrigger & PAD_BUTTON_B)) {
         u32 address = NNS_GfdGetPlttKeyAddr((mBody.mResTex)->plttInfo.vramKey);

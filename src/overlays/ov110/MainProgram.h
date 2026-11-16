@@ -11,7 +11,7 @@ void ModelResources_SetModel(void *resources, int resourceId, const char *modelP
 // The id of an animation of a resource set by its name
 int ResourceSet_FindIndexByName(void *resourceSet, u32 resType, const char *name);
 // Gives a resource set the animations of an archive
-void func_02029660(void *resourceSet, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 }
 
 extern "C" {
@@ -91,14 +91,14 @@ void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, con
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 void VramManagers_Reset(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
 void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
 void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // --- The saved game ---

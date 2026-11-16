@@ -8,7 +8,7 @@
 // ("Nara prefecture, tomorrow's weather...") and a test sentence with an echo straight to the stream, B stops the
 // engine; with Y held, right synthesizes the short test sentence into the capture buffer and plays it, left stops
 // that, up synthesizes it on the player's thread and down plays the capture once that thread is done. The scene
-// factory (main func_0203c050, case 14) allocates 0x6A858 bytes.
+// factory (main SceneManager::CreateScene, case 14) allocates 0x6A858 bytes.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class TtsTestScene : public Scene {

@@ -7,7 +7,7 @@
 // top of the touch screen open them: the left one a menu of what to do with a Mii (edit it, change its clothes, or
 // make it move out, which asks for confirmation and then says that it has gone), the right one a menu of the seven
 // orders the list can be sorted in (name, nickname, sex, year of birth, birthday, blood type, personality). Nothing
-// is done with the choices. The scene factory (main func_0203c050, case 36) allocates 0x2C0C0 bytes and calls the
+// is done with the choices. The scene factory (main SceneManager::CreateScene, case 36) allocates 0x2C0C0 bytes and calls the
 // constructor, which is in the main program's file of scene constructors (func_02040288).
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.

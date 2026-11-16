@@ -55,7 +55,7 @@ void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane,
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void VramManagers_Reset(Renderer3d *renderer);
 void Camera_Reset(Camera *camera); // Resets it
 void Light_Reset(Light *light);   // Resets it

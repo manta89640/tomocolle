@@ -72,7 +72,7 @@ void CharacterBodyTestScene::Update() {
             mCharacter.CharacterModel::MakeModel(0, 0);
             break;
         case 1:
-            func_02029d40(&mCharacter.mAnim, ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp"),
+            Model_QueuePalette(&mCharacter.mAnim, ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp"),
                           -1, -1);
             break;
         case 2:
@@ -83,7 +83,7 @@ void CharacterBodyTestScene::Update() {
             mCharacter.CharacterModel::MakeModel(0, 0);
             break;
         case 3:
-            func_02029d40(&mCharacter.mAnim, ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp"),
+            Model_QueuePalette(&mCharacter.mAnim, ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp"),
                           -1, -1);
             break;
         }

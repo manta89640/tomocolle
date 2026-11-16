@@ -6,7 +6,7 @@
 
 // Scene 9 (main program, no overlay): sets up a text canvas on background 2 of the main screen, in the 12-pixel
 // font, and does nothing else: Update, Draw and Exit are empty, and nothing is drawn on the canvas. The scene
-// factory (main func_0203c050, case 9) allocates 0x1D4 bytes; only the canvas is used of them.
+// factory (main SceneManager::CreateScene, case 9) allocates 0x1D4 bytes; only the canvas is used of them.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class BgTextTestScene : public Scene {

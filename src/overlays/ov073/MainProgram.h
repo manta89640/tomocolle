@@ -109,7 +109,7 @@ void VramManagers_Reset(Renderer3d *renderer);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 // The same without the characters. It returns something (what ObjResourceManager_Load leaves in r0) that the
 // scene's Init does not use: declared void, Init's instructions come out in another order.
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
@@ -117,13 +117,13 @@ void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 // Sets the scroll of the planes of the mask
 void ScreenLoader_SetScrollY(ScreenLoader *loader, int planes, int y);
 // Queues a character file for transfer to VRAM
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void CreateMainFrameHeap(int size);
 void DestroyMainFrameHeap();
 // Splits a 15-bit colour
-void func_02028b98(int color, int *r, int *g, int *b);
+void SplitColor(int color, int *r, int *g, int *b);
 // The absolute value of each component
-void func_02028e0c(const VecFx32 *in, VecFx32 *out);
+void AbsVec(const VecFx32 *in, VecFx32 *out);
 
 // --- 3D ---
 extern Camera gCamera;
@@ -149,8 +149,8 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The clock ---
 // The current time with the game's offset applied, as seconds and as date and time
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
-extern int data_02123440[];
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
+extern int gGameClock[];
 
 // --- Scenes ---
 
@@ -164,7 +164,7 @@ void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // For each kind of relation, how much each reaction changes the affinity by, halved
 extern const s8 *data_021135c8[];
 // Binds the joint animations of an archive to a model's resource
-void func_02029660(void *resource, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resource, u32 resType, void *archive);
 
 // --- The particle system and the head icon (0x02080e80 to 0x020810e4) ---
 void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);

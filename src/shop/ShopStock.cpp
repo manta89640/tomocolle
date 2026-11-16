@@ -18,7 +18,7 @@ struct ShopStock {
 }; // 0x34
 
 extern "C" {
-extern void *data_02123440;
+extern void *gGameClock;
 s64 Clock_GetSeconds(void *clock);
 int func_02035aa4(void *clock);
 void GameData_GetShopStock(GameData *game, int index, ShopStock *stock);
@@ -77,7 +77,7 @@ void InitShopStocks() {
     ShopStock first;
     ShopStock next;
     RTCDate today;
-    GetGameDate(Clock_GetSeconds(data_02123440), &today);
+    GetGameDate(Clock_GetSeconds(gGameClock), &today);
     first.MakeFirst();
     first.SetDate(&today);
     next.Make();
@@ -99,7 +99,7 @@ void UpdateShopStocks() {
         GameData_GetShopStock(&gGameData, 1, &next);
     }
     stockDate = current.mDate;
-    GetGameDate(Clock_GetSeconds(data_02123440), &today);
+    GetGameDate(Clock_GetSeconds(gGameClock), &today);
     int todayNumber = GetDayNumber(&today);
     int stockNumber = GetDayNumber(&stockDate);
     BOOL update = TRUE;
@@ -118,7 +118,7 @@ void UpdateShopStocks() {
     if (!update) {
         return;
     }
-    if (func_02035aa4(data_02123440) != 0) {
+    if (func_02035aa4(gGameClock) != 0) {
         return;
     }
     next.SetDate(&today);

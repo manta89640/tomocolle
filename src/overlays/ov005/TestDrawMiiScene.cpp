@@ -10,7 +10,7 @@
 // distances and up a random turn.
 
 extern "C" {
-void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
+void Model_SetAlpha(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
 void TestDrawMiiScene::StartLoading() {
@@ -141,7 +141,7 @@ void TestDrawMiiModel::Update() {
             if (mAlpha > 31) {
                 mAlpha = 31;
             }
-            func_02029f50(this, mAlpha);
+            Model_SetAlpha(this, mAlpha);
         }
         break;
     case FADE_OUT:
@@ -150,7 +150,7 @@ void TestDrawMiiModel::Update() {
             if (mAlpha < 0) {
                 mAlpha = 0;
             }
-            func_02029f50(this, mAlpha);
+            Model_SetAlpha(this, mAlpha);
         }
         break;
     }

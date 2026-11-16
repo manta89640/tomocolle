@@ -125,7 +125,7 @@ int MiiData_GetNoseY(CharacterRecord *mii);
 
 // The clock (gap)
 void Clock_GetDate(void *clock, RTCDate *date);
-extern void *data_02123440;
+extern void *gGameClock;
 extern MiiIdSource data_0212349c; // Where this console's Miis' create IDs come from
 
 // The saved game (gap)
@@ -162,7 +162,7 @@ extern const ReactionInfo data_020f5df8[15];
 extern const u8 data_020f5e28[][15];       // By the reaction before: the weights of the next
 int GameData_GetCharacterMood(GameData *game, int index);
 u8 GameData_GetCharacterAffinity(GameData *game, int index, int other); // Its mRelationMeter for another
-extern u8 data_0212348c[];
+extern u8 gIslandState[];
 extern const s8 gStr_AFKPUUA[24];  // By hour: the chance (of 100) that an idle character goes to sleep
 extern const s8 data_020f8ca8[24]; // By hour: how many hours it then sleeps on top of the activity's length
 
@@ -657,7 +657,7 @@ void SavedCharacter::SetRegisteredDate(int year, int month, int day) {
 
 void SavedCharacter::SetRegisteredDateToday() {
     RTCDate date;
-    Clock_GetDate(data_02123440, &date);
+    Clock_GetDate(gGameClock, &date);
     SetRegisteredDate(date.year, date.month, date.day);
 }
 
@@ -1754,7 +1754,7 @@ void SavedCharacter::EatRandomFood() {
     int foods[255];
     int count = 0;
     for (int i = 0; i < 255; i++) {
-        if (data_020f5f0c[(u16)i].mKind == 1) {
+        if (gGoodsTable[(u16)i].mKind == 1) {
             foods[count] = i;
             count++;
         }
@@ -1913,19 +1913,19 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
     } else if (state == 0x14) {
         int choices[4];
         int count = 0;
-        if (((SaveHeader *)data_0212348c)->GetUnknown44(3)) {
+        if (((SaveHeader *)gIslandState)->GetUnknown44(3)) {
             choices[count] = 0;
             count++;
         }
-        if (((SaveHeader *)data_0212348c)->GetUnknown44(10)) {
+        if (((SaveHeader *)gIslandState)->GetUnknown44(10)) {
             choices[count] = 1;
             count++;
         }
-        if (((SaveHeader *)data_0212348c)->GetUnknown44(11)) {
+        if (((SaveHeader *)gIslandState)->GetUnknown44(11)) {
             choices[count] = 2;
             count++;
         }
-        if (((SaveHeader *)data_0212348c)->GetUnknown44(8)) {
+        if (((SaveHeader *)gIslandState)->GetUnknown44(8)) {
             choices[count] = 3;
             count++;
         }
@@ -1991,7 +1991,7 @@ int SavedCharacter::GetTroubleCategoryWeight(int category) {
         }
         break;
     case 2:
-        if (!((SaveHeader *)data_0212348c)->GetUnknown44(10)) {
+        if (!((SaveHeader *)gIslandState)->GetUnknown44(10)) {
             weight = 0;
         }
         break;
@@ -2002,7 +2002,7 @@ int SavedCharacter::GetTroubleCategoryWeight(int category) {
     case 7:
         break;
     case 8:
-        if (!((SaveHeader *)data_0212348c)->GetUnknown44(11)) {
+        if (!((SaveHeader *)gIslandState)->GetUnknown44(11)) {
             weight = 0;
         }
         break;
@@ -2224,7 +2224,7 @@ int SavedCharacter::ChooseWantedFood() {
     u16 foods[255];
     int count = 0;
     for (u16 i = 0; i < 255; i = (u16)(i + 1)) {
-        const ItemInfo *item = &data_020f5f0c[i];
+        const ItemInfo *item = &gGoodsTable[i];
         if (item->mKind == 1 && !(item->mFlags & ITEM_BAD_FOOD)) {
             foods[count] = i;
             count++;
@@ -2271,16 +2271,16 @@ int SavedCharacter::ChooseWantedClothes(s64 now) {
         if ((mOwnedClothes.m[i >> 5] >> (i & 0x1F)) & 1) {
             continue;
         }
-        if (summer && data_020f3ff0[i].mStyles & CLOTHES_WARM) {
+        if (summer && gClothesTable[i].mStyles & CLOTHES_WARM) {
             continue;
         }
-        if (winter && data_020f3ff0[i].mStyles & CLOTHES_COOL) {
+        if (winter && gClothesTable[i].mStyles & CLOTHES_COOL) {
             continue;
         }
-        if (MiiData_GetSex(this) == 0 && data_020f3ff0[i].mSex == 2) {
+        if (MiiData_GetSex(this) == 0 && gClothesTable[i].mSex == 2) {
             continue;
         }
-        if (MiiData_GetSex(this) == 1 && data_020f3ff0[i].mSex == 1) {
+        if (MiiData_GetSex(this) == 1 && gClothesTable[i].mSex == 1) {
             continue;
         }
         clothes[count] = i;
@@ -2626,7 +2626,7 @@ int SavedCharacter::GetFullness(s64 now) {
 
 // How much eating the food fills
 static inline int GetFoodSize(u16 item) {
-    return sFoodSizes[data_020f5f0c[item].mFoodSize];
+    return sFoodSizes[gGoodsTable[item].mFoodSize];
 }
 
 BOOL SavedCharacter::CanEat(s64 now, u16 item) {
@@ -2729,16 +2729,16 @@ int SavedCharacter::GetTaste(int item) {
     GetCreateIdParts(&kind, &offset);
     switch (kind) {
     case 0:
-        taste = data_020f5f0c[item].mTaste0;
+        taste = gGoodsTable[item].mTaste0;
         break;
     case 1:
-        taste = data_020f5f0c[item].mTaste1;
+        taste = gGoodsTable[item].mTaste1;
         break;
     case 2:
-        taste = data_020f5f0c[item].mTaste2;
+        taste = gGoodsTable[item].mTaste2;
         break;
     case 3:
-        taste = data_020f5f0c[item].mTaste3;
+        taste = gGoodsTable[item].mTaste3;
         break;
     }
     taste += (u32)(item + offset) % 7 - 3;
@@ -2771,22 +2771,22 @@ int SavedCharacter::GetClothesLiking(int clothes) {
     GetCreateIdParts(&high, &low);
     switch (gPersonalityKinds[mPersonality]) {
     case 3:
-        liking = data_020f3ff0[clothes].mTaste3;
+        liking = gClothesTable[clothes].mTaste3;
         break;
     case 1:
-        liking = data_020f3ff0[clothes].mTaste1;
+        liking = gClothesTable[clothes].mTaste1;
         break;
     case 2:
-        liking = data_020f3ff0[clothes].mTaste2;
+        liking = gClothesTable[clothes].mTaste2;
         break;
     case 0:
-        liking = data_020f3ff0[clothes].mTaste0;
+        liking = gClothesTable[clothes].mTaste0;
         break;
     }
     liking += (u32)(clothes + low) % 7 - 3;
-    if (MiiData_GetSex(this) == 0 && data_020f3ff0[clothes].mSex == 2) {
+    if (MiiData_GetSex(this) == 0 && gClothesTable[clothes].mSex == 2) {
         liking >>= 1;
-    } else if (MiiData_GetSex(this) == 1 && data_020f3ff0[clothes].mSex == 1) {
+    } else if (MiiData_GetSex(this) == 1 && gClothesTable[clothes].mSex == 1) {
         liking -= 2;
     }
     if (liking > 15) {
@@ -2805,22 +2805,22 @@ int SavedCharacter::GetInteriorLiking(int interior) {
     GetCreateIdParts(&high, &low);
     switch (gPersonalityKinds[mPersonality]) {
     case 3:
-        liking = data_020f72f8[interior].mTaste3;
+        liking = gInteriorTable[interior].mTaste3;
         break;
     case 1:
-        liking = data_020f72f8[interior].mTaste1;
+        liking = gInteriorTable[interior].mTaste1;
         break;
     case 2:
-        liking = data_020f72f8[interior].mTaste2;
+        liking = gInteriorTable[interior].mTaste2;
         break;
     case 0:
-        liking = data_020f72f8[interior].mTaste0;
+        liking = gInteriorTable[interior].mTaste0;
         break;
     }
     liking += (u32)(interior + low) % 7 - 3;
-    if (MiiData_GetSex(this) == 0 && data_020f72f8[interior].mSex == 2) {
+    if (MiiData_GetSex(this) == 0 && gInteriorTable[interior].mSex == 2) {
         liking >>= 1;
-    } else if (MiiData_GetSex(this) == 1 && data_020f72f8[interior].mSex == 1) {
+    } else if (MiiData_GetSex(this) == 1 && gInteriorTable[interior].mSex == 1) {
         liking -= 2;
     }
     if (liking > 15) {
@@ -2855,7 +2855,7 @@ void SavedCharacter::ChooseFoodPreferences(u8 *favorite, u8 *disliked) {
     u8 *nextTasty = tasty;
     int foodCount = 0;
     for (int i = 0; i < 255; i++) {
-        const ItemInfo *item = &data_020f5f0c[(u16)i];
+        const ItemInfo *item = &gGoodsTable[(u16)i];
         if (item->mKind != 1 || item->mFlags & ITEM_BAD_FOOD) {
             continue;
         }
@@ -2884,13 +2884,13 @@ BOOL SavedCharacter::AreFoodPreferencesValid() {
     BOOL valid = TRUE;
     if (mFavoriteItem == 0xFF || mDislikedItem == 0xFF) {
         valid = FALSE;
-    } else if (data_020f5f0c[mFavoriteItem].mKind != 1 || data_020f5f0c[mDislikedItem].mKind != 1 ||
+    } else if (gGoodsTable[mFavoriteItem].mKind != 1 || gGoodsTable[mDislikedItem].mKind != 1 ||
                mFavoriteItem == mDislikedItem) {
         valid = FALSE;
     }
     for (int i = 0; i < 3; i++) {
         u8 item = mUnknown292[i];
-        if (item != 0xFF && data_020f5f0c[item].mKind != 1) {
+        if (item != 0xFF && gGoodsTable[item].mKind != 1) {
             valid = FALSE;
             break;
         }
@@ -3228,7 +3228,7 @@ int SavedCharacter::GetAgeInDays() {
     RTCDate birthday;
     GetBirthday(&birthday);
     RTCDate today;
-    Clock_GetDate(data_02123440, &today);
+    Clock_GetDate(gGameClock, &today);
     today.year += 2000;
     return GetDaysBetween(birthday, today);
 }

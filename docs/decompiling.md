@@ -516,7 +516,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
   `SetUpWindow`, `SetUpList`). Where the original has the slot, make the local and pass its address, point first
-  (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); func_02028d88(&rect, &point);`,
+  (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); ScreenRect_Contains(&rect, &point);`,
   `OptionScene::Update`).
 - Two dead copies of a vector are the by-value `FxVec2` of `SetPosition(FxVec2(x, y))`; which of
   `SetPosition`/`SetPositionFromVec` is called decides their order. All three forms (`SetPosition(FxVec2(...))`,
@@ -698,7 +698,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Dead copies of four sprites' positions per row in the original's slots: one of the 27 combinations of the three
   position setters, found by script (`PlaceButtons`).
 **A value the original computes from the counter at each use, where ours strength-reduces it**
-- Index the array with a `u32`: `data_020f72f8[style].mParts[i]` read through `static inline s16 GetPieceZ(u16 style,
+- Index the array with a `u32`: `gInteriorTable[style].mParts[i]` read through `static inline s16 GetPieceZ(u16 style,
   u32 i)` (or `[(u32)i]`) keeps the original's `mla i, #10` at each use, where an `int` index is strength-reduced
   into a pointer stepped by 10; it also brought the loop's three hoisted zeros into the original's registers
   (`SceneRoom::ShowParts`). `#pragma opt_strength_reduction off` gave the same `mla` but no longer reduced the
@@ -850,7 +850,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **A call's arguments**
 - A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
   fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
-  (`WirelessTestScene::Init`, the clock setter `func_02035460`).
+  (`WirelessTestScene::Init`, the clock setter `Clock_SetDateTime`).
 - A pointer passed through an inline cast helper (`ToG2dChars(mParentNames[i])`) scheduled its address computation
   before a store the original makes first; the plain cast gave the original's order (`WirelessTestScene::Redraw`, at
   level 2 with `opt_propagation` off).

@@ -10,7 +10,7 @@ struct ScreenPoint {
     /* 0x4 */ int y;
 };
 
-// A rectangle in pixels; func_02028d88 tests whether a ScreenPoint is inside one.
+// A rectangle in pixels; ScreenRect_Contains tests whether a ScreenPoint is inside one.
 struct ScreenRect {
     /* 0x0 */ int x;
     /* 0x4 */ int y;
@@ -96,7 +96,7 @@ void Sprite_SetFrame(Sprite *sprite, int frame);
 // Lets the animation run or stops it; running also makes the sprite visible.
 void Sprite_SetPlaying(Sprite *sprite, BOOL playing);
 // Whether the point is inside the rectangle.
-BOOL func_02028d88(const ScreenRect *rect, const ScreenPoint *point);
+BOOL ScreenRect_Contains(const ScreenRect *rect, const ScreenPoint *point);
 }
 
 #endif // SPRITE_H

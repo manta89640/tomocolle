@@ -66,7 +66,7 @@ void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane,
 u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
 

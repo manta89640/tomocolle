@@ -116,10 +116,10 @@ void OptionScene::Init() {
 
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 2, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
 
@@ -462,7 +462,7 @@ void OptionScene::Update() {
             // The point and the rectangle as locals in this order, the inline's own rectangle below them
             ScreenPoint point = *touch;
             ScreenRect rect = GetAmPmRect();
-            if (func_02028d88(&rect, &point)) {
+            if (ScreenRect_Contains(&rect, &point)) {
                 mTime.hour += 12;
                 if (mTime.hour >= 24) {
                     mTime.hour -= 24;
@@ -611,8 +611,8 @@ void OptionScene::SetState(int state) {
         }
         ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
         gScreenControl.Set(0x1302);
-        Clock_GetDate(data_02123440, &mDate);
-        Clock_GetTime(data_02123440, &mTime);
+        Clock_GetDate(gGameClock, &mDate);
+        Clock_GetTime(gGameClock, &mTime);
         ShowYear(mDate.year);
         ShowMonth(mDate.month);
         ShowDay(mDate.day);
@@ -633,7 +633,7 @@ void OptionScene::SetState(int state) {
     case STATE_SAVING_CLOCK:
         OpenWindow(WINDOW_SAVING_CLOCK, mCharOffset);
         MessageWindow_Open(&mWindow, 0x12, 1);
-        func_02035460(data_02123440, &mDate, &mTime, FALSE);
+        Clock_SetDateTime(gGameClock, &mDate, &mTime, FALSE);
         func_0202c8f8(&gGameData, 0);
         if (!GameData_StartSave(&gGameData)) {
             gSceneManager.RequestScene(0xC2);
@@ -701,7 +701,7 @@ void OptionScene::SetState(int state) {
     case STATE_FIRST_CLOCK_SET:
         break;
     case STATE_ASK_FIRST_CLOCK:
-        func_02035668(data_02123440, &mDate, &mTime);
+        func_02035668(gGameClock, &mDate, &mTime);
         OpenWindow(WINDOW_ASK_CLOCK, mCharOffset);
         MessageWindow_Open(&mWindow, 0x12, 1);
         break;

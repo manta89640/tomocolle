@@ -51,17 +51,17 @@ void InformationScene::StartLoading() {
 }
 
 void InformationScene::Init() {
-    Clock_GetDate(data_02123440, &mDate);
+    Clock_GetDate(gGameClock, &mDate);
     mDate.year += 2000;
     int charOffset = 100;
     mMessageFiles[0].Open("TET:/tmd_etc_msg_JP.bmg");
 
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 1, -1, -1, -1);
     ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_up.nsc", 1, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 1, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_up.ncg", 1, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_up.ncl", 0x10, -1, -1, -1);
