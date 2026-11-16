@@ -640,10 +640,12 @@ src/item/Mannequin.cpp:
 
 src/list/MiiList.cpp:
     .text       start:0x020a03e8 end:0x020a3c68
+    .rodata     start:0x020fbe18 end:0x020fbfd4
     .data       start:0x02115098 end:0x021150c0
 
 src/room/Room.cpp:
     .text       start:0x020a3c68 end:0x020a5cc4
+    .rodata     start:0x020fbfd4 end:0x020fbffc
     .data       start:0x021150c0 end:0x02115140
 
 lib/MSL_C/abort_exit_arm.c:

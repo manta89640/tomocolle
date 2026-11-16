@@ -81,11 +81,11 @@ void MiiListScene::Init() {
     func_020a2644(&mPanel, 0, 4, 5, sPanelPosition2, sPanelSize2);
     func_020a26fc(&mPanel, 0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
 
-    func_020a36ec(&mTabs);
+    mTabs.InitTabs();
     for (int i = 0; i < 5; i++) {
-        func_020a371c(&mTabs, i, 0, sTabSequences[i], sTabPressedSequences[i]);
+        mTabs.AddButtons(i, 0, sTabSequences[i], sTabPressedSequences[i]);
     }
-    func_020a37cc(&mTabs);
+    mTabs.Reset();
     func_020a03e8(&mList, &mPanel, &mTabs);
     func_020a05dc(&mList);
     mSortKey = gGameData.mMiiListSortKey;

@@ -15,6 +15,11 @@
 
 // The tabs of the list (0x5158 bytes): five of 0x1044 bytes, each with seventeen buttons.
 struct MiiListTabs {
+    void InitTabs();
+    // The animation sequences of a tab's buttons, released and pressed (data_020fbe28 has how many there are)
+    void AddButtons(int tab, int resource, const u8 *sequences, const u8 *pressedSequences);
+    void Reset();
+
     /* 0x0000 */ int mUnknown0000;
     /* 0x0004 */ u8 mTabs[5][0x1044];
 }; // 0x5158
@@ -48,10 +53,6 @@ void func_020a2644(MiiListPanel *panel, int a, int b, int c, WindowPoint positio
 void func_020a26fc(MiiListPanel *panel, int a, int b, int c, int d, int e, int f, WindowPoint position,
                    ScreenRect rect);
 
-void func_020a36ec(MiiListTabs *tabs);
-// The animation sequences of a tab's buttons, released and pressed (data_020fbe28 has how many there are)
-void func_020a371c(MiiListTabs *tabs, int tab, int a, const u8 *sequences, const u8 *pressedSequences);
-void func_020a37cc(MiiListTabs *tabs);
 }
 
 // The scene.
