@@ -278,21 +278,82 @@ void func_0206a99c(u16 *palette, int index) {
     palette[15] = 0;
 }
 
-int func_0206ddb8(void *part);
-int func_0206e650(void *part);
-void func_0206e724(void *part);
+// The state that func_0206ed94 and func_020705d4 share across calls (func_020715ac clears unk20 between pairs)
+typedef struct NFLMakeState {
+    u8 unk0[0x20];
+    int unk20;
+} NFLMakeState;
 
-int func_02071578(void *part) {
-    int result = func_0206ddb8(part);
+void func_0206ed94(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state);
+void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state);
+
+void func_020715ac(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *data = ctx->unk1CC;
+    NFLMakeState state;
+
+    state.unk20 = 0;
+    func_0206ed94(&ctx->unk64, &ctx->unk78[4], obj, data, &obj->unk140, NULL, 0, &state);
+    func_0206ed94(&ctx->unk64, &ctx->unk78[5], obj, data, NULL, NULL, 0x20, &state);
+    state.unk20 = 0;
+    func_020705d4(&ctx->unk64, &ctx->unk78[0], obj, data, &obj->unk128, NULL, 0, &state);
+    func_020705d4(&ctx->unk64, &ctx->unk78[2], obj, data, &obj->unkF8, &obj->unk160, 0x20, &state);
+    state.unk20 = 0;
+    func_020705d4(&ctx->unk64, &ctx->unk78[1], obj, data, &obj->unk110, NULL, 0, &state);
+    func_020705d4(&ctx->unk64, &ctx->unk78[3], obj, data, &obj->unkE0, &obj->unk158, 0x20, &state);
+    if (data->moleType == 1) {
+        func_0206ed94(&ctx->unk64, &ctx->unk78[6], obj, data, NULL, NULL, 0, NULL);
+    }
+}
+
+void func_02074548(NFLObj *obj, MtxFx43 *mtx, fx16 sin, fx16 cos);
+
+// Patches a face part's display list: its rotation, if it has a matrix command, and its texture and palette
+void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fmt, GXTexSizeS s, GXTexSizeT t,
+                   u32 texAddr, u32 plttAddr) {
+    GXDLInfo dl;
+    MtxFx43 mtx;
+
+    if (patch->mtx.cmd != NULL && patch->mtx.param != NULL) {
+        dl.curr_cmd = patch->mtx.cmd;
+        dl.curr_param = patch->mtx.param;
+        func_02074548(obj, &mtx, sin, cos);
+        G3CS_MultMtx43(&dl, &mtx);
+    }
+    dl.curr_cmd = patch->tex.cmd;
+    dl.curr_param = patch->tex.param;
+    if (texAddr == 0) {
+        return;
+    }
+    if (fmt == GX_TEXFMT_DIRECT) {
+        G3CS_TexImageParam(&dl, fmt, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS,
+                           texAddr);
+        return;
+    }
+    G3CS_TexImageParam(&dl, GX_TEXFMT_PLTT16, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST,
+                       GX_TEXPLTTCOLOR0_TRNS, texAddr);
+    dl.curr_cmd = patch->pltt.cmd;
+    dl.curr_param = patch->pltt.param;
+    G3CS_TexPlttBase(&dl, plttAddr, fmt);
+}
+
+int func_0206ddb8(NFLMakeCtx *ctx);
+int func_0206e650(NFLMakeCtx *ctx);
+void func_0206e724(NFLMakeCtx *ctx);
+
+int func_02071578(NFLMakeCtx *ctx) {
+    int result = func_0206ddb8(ctx);
 
     if (result != 0) {
         return result;
     }
-    result = func_0206e650(part);
+    result = func_0206e650(ctx);
     if (result != 0) {
         return result;
     }
-    func_0206e724(part);
+    func_0206e724(ctx);
     return result;
 }
 

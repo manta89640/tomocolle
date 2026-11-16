@@ -72,9 +72,48 @@ typedef struct NFLCharData {
     /* 0x36 */ u16 creatorName[10];
 } NFLCharData; // 0x4A
 
+// A command in a display list, to be patched later: where its command byte and its parameters are
+typedef struct NFLDLRef {
+    u8 *cmd;
+    u32 *param;
+} NFLDLRef;
+
+// The commands of a face part's display list that func_02071730 patches: a matrix, a texture and its palette
+typedef struct NFLPatch {
+    NFLDLRef mtx;
+    NFLDLRef tex;
+    NFLDLRef pltt;
+} NFLPatch;
+
 // Something the library keeps in a list from its work area (func_02072c5c): linked through unk2A0
 typedef struct NFLObj {
-    u8 unk0[0x168];
+    u8 unk0[0x10];
+    u32 unk10; // a texture address (func_0207183c)
+    u32 unk14; // a palette address
+    u8 unk18[0x20 - 0x18];
+    u32 unk20; // a texture address
+    u32 unk24; // a palette address
+    u8 unk28[0x84 - 0x28];
+    u16 unk84;
+    u16 unk86;
+    u16 unk88;
+    u16 unk8A;
+    u16 unk8C;
+    u16 unk8E;
+    int unk90; // a texture format (GXTexFmt)
+    u8 unk94[0xC4 - 0x94];
+    VecFx32 unkC4;
+    u8 unkD0;
+    u8 unkD1;
+    u8 unkD2;
+    u8 unkD3[0xE0 - 0xD3];
+    NFLPatch unkE0;
+    NFLPatch unkF8;
+    NFLPatch unk110;
+    NFLPatch unk128;
+    NFLPatch unk140;
+    NFLDLRef unk158;
+    NFLDLRef unk160;
     int unk168;
     u8 unk16C;
     u8 unk16D[0x170 - 0x16D];
@@ -142,6 +181,21 @@ typedef struct NFLWorkFrom74 {
     u8 unk9D[3];
     NFLWorkEntry unkA0[7];
 } NFLWorkFrom74;
+
+// A part of NFLMakeCtx that func_0206ed94 and func_020705d4 make a face part's display list from
+typedef struct NFLMakePart {
+    u32 unk0[8];
+    u8 unk20[0x30 - 0x20];
+} NFLMakePart;
+
+// The state of the making of an NFLObj's display lists: unk1C8 the object, unk1CC the Mii's data
+typedef struct NFLMakeCtx {
+    u8 unk0[0x64];
+    GXDLInfo unk64;
+    NFLMakePart unk78[7];
+    NFLObj *unk1C8;
+    const NFLCharData *unk1CC;
+} NFLMakeCtx;
 
 extern NFLWork *data_02145360;
 
