@@ -390,6 +390,10 @@ def download_msl(tools_dir: Path, versions: list[str]) -> Path:
                 try:
                     content.decode("utf-8")
                 except UnicodeDecodeError:
+                    if relative.suffix in (".a", ".o"):
+                        # MSL's library archive, binary: to be compared with, it must stay as it is
+                        target.write_bytes(content)
+                        continue
                     # A stray byte in a comment, such as a copyright sign in Latin-1. sjiswrap, which reads the
                     # game's sources and what they include as UTF-8, refuses the file otherwise.
                     content = bytes(byte if byte < 0x80 else ord("?") for byte in content)

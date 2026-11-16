@@ -370,6 +370,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   complete unit or to a header it includes, since the compiler's `@` numbers move.
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
   data; rename it when the code shows what it is.
+- MSL's files are best checked against the archive's own object: `tools/compare_object.py build/.../x.o
+  <member>.o` compares the functions of the same names, and `readelf` shows its data and relocations. A checkout
+  configured before the fix in `download_msl` has the archive under `tools/bin/msl/` with every byte from 0x80 up
+  turned into `?`, unreadable; delete `tools/bin/msl` and run `configure.py` again. Two members are both named
+  `critical_regions` (names are cut to sixteen characters): extract by position, not by name.
+
+**MSL**
+- A loop that the original enters without testing its pointer is a `do`/`while` (`__flush_all`).
+- A bitfield struct copied to a local (`__file_modes mode = file->mode;`) is given a stack slot; reading the field
+  through the pointer again reuses the loaded word, as the original does (`__get_char`).
 
 ## A match is instructions and references
 
