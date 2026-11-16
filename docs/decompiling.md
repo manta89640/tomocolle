@@ -426,6 +426,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   hoists it and tests the guard twice: write the expression again at each use instead of keeping it in a local
   (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `func_02082738`).
 
+- A cast to the type a value already has, on an assignment (`sin = (fx16)FX_SinIdx(idx);`), moves that variable
+  to the lower callee-saved registers; with `#pragma optimization_level 2` and `opt_common_subs off` it gave
+  `func_0207183c` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is coloured
+  as a new value: there the second pair of assignments had to keep the casts too.
+
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
