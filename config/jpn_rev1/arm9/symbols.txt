@@ -4756,6 +4756,7 @@ data_020fbee4 kind:data(any) addr:0x020fbee4
 gStr_f kind:data(any) addr:0x020fbf4c
 data_020fbfd6 kind:data(any) addr:0x020fbfd6
 gStr_entrance kind:data(any) addr:0x020fbfe8
+data_020fbffc kind:data(any) addr:0x020fbffc
 data_020fc002 kind:data(any) addr:0x020fc002
 data_020fc00c kind:data(any) addr:0x020fc00c
 gStr_0_3 kind:data(any) addr:0x020fc040

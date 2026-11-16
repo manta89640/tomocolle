@@ -56,6 +56,7 @@ LIBRARIES = {
     "MiiTransfer": ("miitransfer", "Mii transfer"),
     "NFL": ("nfl", "Mii face library (NFL)"),
     "MiiData": ("miidata", "Mii data"),
+    "DSProtect": ("dsprotect", "Anti-piracy (DS Protect)"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
@@ -63,6 +64,10 @@ SUBSYSTEMS = {
     "voice": ("voice", "Speech player"),
     "scene": ("scene", "Scenes of the main program"),
     "keyboard": ("keyboard", "Keyboard"),
+    "shop": ("shop", "Shops"),
+    "island": ("island", "The island: its buildings and sky"),
+    "resident": ("resident", "The residents' life"),
+    "song": ("song", "Songs"),
 }
 CATEGORIES += [{"id": id, "name": name} for id, name in [*LIBRARIES.values(), *SUBSYSTEMS.values()]]
 
