@@ -133,10 +133,9 @@ struct CharacterRecord {
     /* 0x24E */ u8 mUnknown24E;          // Below 6, or 0xFF
     /* 0x24F */ u8 mUnknown24F;
     /* 0x250 */ u16 mUnknown250[32];
-    /* 0x290 */ u8 mUnknown290;
-    /* 0x291 */ u8 mUnknown291;
-    /* 0x292 */ u8 mUnknown292[2];
-    /* 0x294 */ u8 mUnknown294;
+    /* 0x290 */ u8 mFavoriteItem;        // GetLiking gives it the most liking, 0xFF for none
+    /* 0x291 */ u8 mDislikedItem;        // and this none
+    /* 0x292 */ u8 mUnknown292[3];
     /* 0x295 */ u8 mMood;                // 0 to 4
     /* 0x296 */ u8 mUnknown296;
     /* 0x297 */ u8 mUnknown297;
@@ -252,25 +251,43 @@ public:
     void EndTrouble(s64 now);
     void ClearTrouble();
     BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
+    BOOL AddSatisfaction(int value);
+    void ResetSatisfaction();
+    int GetFullness(s64 now);
+    BOOL CanEat(s64 now, u16 item);
+    void Eat(s64 now, u16 item);
+    void ResetEating();
+    void ClearUnknown246();
+    void SetUnknown246ByChance();
+    void SetMeetDate(const RTCDate *date);
+    void GetMeetDate(RTCDate *date);
+    void ResetMeetDate();
+    void ResetTouchTalk();
+    void ClearUnknown1C8();
+    int CountOwnedClothes();
+    void ClearOwnedClothes();
+    u8 GetSongSlot(int slot);
+    void SetSongSlot(int slot, u8 song);
+    void ClearSongSlots();
+    int GetTaste(int item);
+    int GetLiking(int item);
+    void SetUnknown292(int index, u8 value);
+    u8 GetUnknown292(int index);
+    void ResetItemPreferences();
+    BOOL CheckUnknown292();
+    void AddUnknown296(int value);
+    void AddUnknown297(int value);
+    static int GetRelationBloodPairValue(int a, int b);
+    void ResetPatDate();
+    void ResetUnknown2A3();
+    void RandomizeUnknown24E();
+    void ResetUnknown24E();
+    int GetPersonalityPairValue(int a, int b);
     // Not written yet
     BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
-    void func_0209c4a0();
-    void func_0209c5d8();
-    void func_0209c5f4();
-    void func_0209c698();
-    void func_0209c6b4();
-    void func_0209c700();
-    void func_0209c748();
-    void func_0209cb88();
-    void func_0209d2c0();
-    void func_0209d2d4();
-    void func_0209c680();
-    void func_0209d310();
     void func_0209e01c();
     BOOL func_0209ccf0();
     void func_0209cda4();
-    BOOL func_0209d1d0();
-    void func_0209c600();
 
     // Marks a row of the clothes table as owned
     void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }

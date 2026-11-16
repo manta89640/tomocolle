@@ -74,7 +74,22 @@ struct TroubleInfo {
 }; // 0xC
 extern TroubleInfo *data_02114d78[];
 extern const u8 gStr_Parenthesis_2[]; // The starting progress of each trouble of category 0
-extern const u8 data_020f8d8c[10];     // The weight of each trouble category in the random choice
+// The goods table (data_020f5f0c, item/Item.h's ItemInfo), as the eating code reads it: bits 27-28 of its fourth word
+struct GoodsFoodInfo {
+    /* 0x00 */ u32 unk0[3];
+    /* 0x0C */ u32 unkCBits0 : 11;
+    /*      */ u32 taste0 : 4; // How much each of the four kinds of character (GetCreateIdParts) likes it
+    /*      */ u32 taste1 : 4;
+    /*      */ u32 taste2 : 4;
+    /*      */ u32 taste3 : 4;
+    /*      */ u32 food : 2; // Row of gStr_2K: how much eating it fills
+    /*      */ u32 unkCBits29 : 3;
+    /* 0x10 */ u32 unk10;
+}; // 0x14
+extern const u8 gStr_2K[4]; // How much each kind of food fills
+extern const u8 data_020f8d8c[10];
+extern const s8 data_020fba10[21];  // A value for each pair of RelationBlood values (0 to 5), a triangle of 6
+extern const s8 data_020fbaf4[136]; // A value for each pair of personalities (0 to 15), a triangle of 16     // The weight of each trouble category in the random choice
 extern const u32 gStr_LessThan_2[10];  // The number of troubles of each category
 extern const LongActInfo data_020f8cc0[];
 }
@@ -150,23 +165,23 @@ void SavedCharacter::Reset() {
     ResetMood();
     ClearLongAct();
     ClearTrouble();
-    func_0209c4a0();
-    func_0209c5d8();
-    func_0209c5f4();
-    func_0209c698();
+    ResetSatisfaction();
+    ResetEating();
+    ClearUnknown246();
+    ResetTouchTalk();
     mUnknown054Bit20 = 0;
-    func_0209c6b4();
-    func_0209c700();
+    ClearUnknown1C8();
+    ClearOwnedClothes();
     OwnClothes(mClothesId);
-    func_0209c748();
-    func_0209cb88();
+    ClearSongSlots();
+    ResetItemPreferences();
     mUnknown296 = 0;
     mUnknown297 = 0;
     mRelationBlood = 0;
-    func_0209d2c0();
-    func_0209d2d4();
-    func_0209c680();
-    func_0209d310();
+    ResetPatDate();
+    ResetUnknown2A3();
+    ResetMeetDate();
+    ResetUnknown24E();
     MI_CpuClear32(mUnknown2A8, sizeof(mUnknown2A8));
     mUnknown2B4 = 0;
     mUnknown2B8 = 0;
@@ -197,15 +212,15 @@ void SavedCharacter::Register() {
     ResetMood();
     ClearLongAct();
     ClearTrouble();
-    func_0209c5d8();
-    func_0209c5f4();
-    func_0209c698();
+    ResetEating();
+    ClearUnknown246();
+    ResetTouchTalk();
     mUnknown054Bit20 = 0;
     mRelationBlood = 0;
-    func_0209d2c0();
-    func_0209d2d4();
-    func_0209c680();
-    func_0209d310();
+    ResetPatDate();
+    ResetUnknown2A3();
+    ResetMeetDate();
+    ResetUnknown24E();
 }
 
 // Checks every field of the record and puts the ones out of range back in it; FALSE when any was out
@@ -376,7 +391,7 @@ BOOL SavedCharacter::Validate() {
         func_0209cda4();
         valid = FALSE;
     }
-    valid &= func_0209d1d0();
+    valid &= CheckUnknown292();
     if (!ClampField(&mRelationBlood, 0, 5, "RelationBlood")) {
         valid = FALSE;
     }
@@ -1021,7 +1036,7 @@ void SavedCharacter::EndLongAct(SavedCharacter *first, SavedCharacter *second) {
         func_0202c28c(&gGameData, partner, partnerCharacter);
     }
     ClearLongAct();
-    func_0209c5f4();
+    ClearUnknown246();
     func_0202c28c(&gGameData, mIndex, this);
 }
 
@@ -1499,13 +1514,13 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
         if (time->hour < 24 && gStr_AFKPUUA[time->hour] > MATH_Rand16(&gRandom, 100)) {
             s64 end = now + GetLongActDuration(0x12, 3);
             SetLongAct(0x12, 0, end + data_020f8ca8[time->hour] * 3600);
-            func_0209c600();
+            SetUnknown246ByChance();
         } else {
             SetLongAct(0, 0, now + GetLongActDuration(0, 3));
         }
     } else if (state == 0xF) {
         SetLongAct(state, 0, now + GetLongActDuration(state, 3));
-        func_0209c600();
+        SetUnknown246ByChance();
     } else if (state == 0x11) {
         if (mTroubleState == 0) {
             SetLongAct(state, 0, now + GetLongActDuration(state, 3));
@@ -1615,4 +1630,266 @@ BOOL SavedCharacter::StartRandomTrouble(s64 now, int force, SavedCharacter *part
     }
     int category = ChooseTroubleCategory();
     return StartTrouble(category, ChooseTrouble(category), now, force, partner, unused);
+}
+
+BOOL SavedCharacter::AddSatisfaction(int value) {
+    BOOL levelUp = FALSE;
+    int meter = value + mSatisfyMeter;
+    if (meter >= 100) {
+        levelUp = TRUE;
+        if (mSatisfyLevel >= 99) {
+            mSatisfyMeter = meter - 100;
+        } else {
+            mSatisfyMeter = meter - 100;
+            mSatisfyLevel++;
+        }
+    } else {
+        if (meter < 0) {
+            meter = levelUp;
+        }
+        mSatisfyMeter = meter;
+    }
+    return levelUp;
+}
+
+void SavedCharacter::ResetSatisfaction() {
+    mSatisfyMeter = 0;
+    mSatisfyLevel = 1;
+}
+
+int SavedCharacter::GetFullness(s64 now) {
+    s64 elapsed = now - mUnknown23C;
+    if (elapsed < 0) {
+        mUnknown23C = now;
+        elapsed = 0;
+    }
+    int fullness = mEatFullness - (u32)(elapsed / 3600) * 10;
+    if (fullness > 100) {
+        return 100;
+    }
+    if (fullness < 0) {
+        return 0;
+    }
+    return fullness;
+}
+
+BOOL SavedCharacter::CanEat(s64 now, u16 item) {
+    return GetFullness(now) + gStr_2K[((const GoodsFoodInfo *)data_020f5f0c)[item].food] < 130;
+}
+
+void SavedCharacter::Eat(s64 now, u16 item) {
+    int fullness = GetFullness(now) + gStr_2K[((const GoodsFoodInfo *)data_020f5f0c)[item].food];
+    if (fullness >= 130) {
+        return;
+    }
+    if (fullness > 100) {
+        fullness = 100;
+    } else if (fullness < 0) {
+        fullness = 0;
+    }
+    mEatFullness = fullness;
+    mUnknown23C = now;
+}
+
+void SavedCharacter::ResetEating() {
+    mEatFullness = 0;
+    mUnknown23C = 0;
+    mEatLastFood = 0xFF;
+}
+
+void SavedCharacter::ClearUnknown246() {
+    mUnknown246 = 0;
+}
+
+void SavedCharacter::SetUnknown246ByChance() {
+    if (MATH_Rand16(&gRandom, 100) < 50) {
+        mUnknown246 = 1;
+    }
+}
+
+void SavedCharacter::SetMeetDate(const RTCDate *date) {
+    mMeetYear = date->year;
+    mMeetMonth = date->month;
+    mMeetDay = date->day;
+}
+
+void SavedCharacter::GetMeetDate(RTCDate *date) {
+    date->year = mMeetYear;
+    date->month = mMeetMonth;
+    date->day = mMeetDay;
+    date->week = RTC_WEEK_SUNDAY;
+}
+
+void SavedCharacter::ResetMeetDate() {
+    mMeetYear = 0;
+    mMeetMonth = 1;
+    mMeetDay = 1;
+}
+
+void SavedCharacter::ResetTouchTalk() {
+    mUnknown24A = 0;
+    mTouchTalkMonth = 1;
+    mTouchTalkDay = 1;
+    mTouchTalkHour = 0;
+}
+
+void SavedCharacter::ClearUnknown1C8() {
+    MI_CpuClear32(&mUnknown1C8, sizeof(mUnknown1C8));
+}
+
+int SavedCharacter::CountOwnedClothes() {
+    int count = 0;
+    for (u32 i = 0; i < 10; i++) {
+        count += MATH_CountPopulation(mOwnedClothes.m[i]);
+    }
+    return count;
+}
+
+void SavedCharacter::ClearOwnedClothes() {
+    MI_CpuClear32(&mOwnedClothes, sizeof(mOwnedClothes));
+}
+
+u8 SavedCharacter::GetSongSlot(int slot) {
+    u8 song = mSongSlots[slot];
+    if (!((mUnknown299 >> (slot & 0x1F)) & 1) || song == 0xFF) {
+        return 0xFF;
+    }
+    return song;
+}
+
+void SavedCharacter::SetSongSlot(int slot, u8 song) {
+    mSongSlots[slot] = song;
+}
+
+void SavedCharacter::ClearSongSlots() {
+    MI_CpuFill8(mSongSlots, 0xFF, sizeof(mSongSlots));
+    mUnknown299 = 0;
+}
+
+int SavedCharacter::GetTaste(int item) {
+    int kind;
+    int offset;
+    int taste;
+    GetCreateIdParts(&kind, &offset);
+    switch (kind) {
+    case 0:
+        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste0;
+        break;
+    case 1:
+        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste1;
+        break;
+    case 2:
+        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste2;
+        break;
+    case 3:
+        taste = ((const GoodsFoodInfo *)data_020f5f0c)[item].taste3;
+        break;
+    }
+    taste += (u32)(item + offset) % 7 - 3;
+    if (taste > 15) {
+        return 15;
+    }
+    if (taste < 0) {
+        return 0;
+    }
+    return taste;
+}
+
+int SavedCharacter::GetLiking(int item) {
+    int liking = GetTaste(item) + 1;
+    if (item == mFavoriteItem) {
+        liking = 17;
+    }
+    if (item == mDislikedItem) {
+        liking = 0;
+    }
+    return liking;
+}
+
+void SavedCharacter::SetUnknown292(int index, u8 value) {
+    mUnknown292[index] = value;
+}
+
+u8 SavedCharacter::GetUnknown292(int index) {
+    return mUnknown292[index];
+}
+
+void SavedCharacter::ResetItemPreferences() {
+    mFavoriteItem = 0xFF;
+    mDislikedItem = 0xFF;
+    MI_CpuFill8(mUnknown292, 0xFF, sizeof(mUnknown292));
+}
+
+BOOL SavedCharacter::CheckUnknown292() {
+    BOOL valid = TRUE;
+    if (mUnknown292[0] == mFavoriteItem) {
+        for (int i = 0; i < 2; i++) {
+            mUnknown292[i] = mUnknown292[i + 1];
+        }
+        mUnknown292[2] = 0xFF;
+        valid = FALSE;
+    }
+    return valid;
+}
+
+void SavedCharacter::AddUnknown296(int value) {
+    s64 sum = value + mUnknown296;
+    if (sum > 0xFF) {
+        sum = 0xFF;
+    } else if (sum < 0) {
+        sum = 0;
+    }
+    mUnknown296 = sum;
+}
+
+void SavedCharacter::AddUnknown297(int value) {
+    s64 sum = value + mUnknown297;
+    if (sum > 0xFF) {
+        sum = 0xFF;
+    } else if (sum < 0) {
+        sum = 0;
+    }
+    mUnknown297 = sum;
+}
+
+int SavedCharacter::GetRelationBloodPairValue(int a, int b) {
+    if (a >= 6 || b >= 6) {
+        return 0;
+    }
+    if (a < b) {
+        int t = a;
+        a = b;
+        b = t;
+    }
+    return data_020fba10[b * 6 + a - ((b * (b + 1)) >> 1)];
+}
+
+void SavedCharacter::ResetPatDate() {
+    mPatYear = 0;
+    mPatMonth = 0;
+    mPatDay = 0;
+}
+
+void SavedCharacter::ResetUnknown2A3() {
+    mUnknown2A3 = 0xFF;
+}
+
+void SavedCharacter::RandomizeUnknown24E() {
+    mUnknown24E = MATH_Rand16(&gRandom, 6);
+}
+
+void SavedCharacter::ResetUnknown24E() {
+    mUnknown24E = 0xFF;
+}
+
+int SavedCharacter::GetPersonalityPairValue(int a, int b) {
+    if (a >= 16 || b >= 16) {
+        return 50;
+    }
+    if (a < b) {
+        int t = a;
+        a = b;
+        b = t;
+    }
+    return data_020fbaf4[a + b * 16 - ((b * (b + 1)) >> 1)];
 }
