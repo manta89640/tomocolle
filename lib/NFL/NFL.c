@@ -726,7 +726,10 @@ static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) 
 
 // The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
 // Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
+// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
+// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
+// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -846,7 +849,10 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
 
 // The hair's other mesh, for the types with a texture of their own
 // Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
+// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
+// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
+// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -3195,6 +3201,10 @@ void NFLi_ApplyExpression6(NFLFace *obj) {
 // Kind 1: the eyes of shared slot 2 (eye type 48's texture), their rotation moved by sNFLEyeTypeRotations at the
 // rotation less at 48 and kept to 0..7.
 // Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
+// Tried (round 4): the clamp on a copy (as kinds 2, 3 and 5), with d a variable, through inline helpers; every order
+// of the first statements and of the declarations; the forms of idx, sin and cos; sin and cos computed in the call's
+// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4. Behind the r3: the original loads
+// the call's stack arguments (texFmt, 2) and the sine table's address before rot's last use, which ours does after.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -4905,6 +4915,8 @@ extern NFLSharedStreamSource sNFLSharedStreamSources[];
 // Stage 0 of NFL_FillBuffer: the six shared streams (sNFLSharedStreamSources) into the ring buffer, converted to direct
 // colours in mode 7, then on to the shared palette or, in mode 7, the faces.
 // Not matching: register allocation only (the original has pal in r5, source in r7 and the zero of extra in r8)
+// Tried (round 4): every order of the function's five and the block's six declarations, casts on the pointers'
+// initialisers, pal or extra at function scope, the else's p as src, and each opt_* pragma alone: none moves the three.
 BOOL NFLi_CopySharedTextures(u32 *pos) {
     NFLWork *work = (NFLWork *)sNFLWork;
     NFLSharedStreamSource *source = sNFLSharedStreamSources;
