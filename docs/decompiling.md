@@ -698,6 +698,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   exhaustive search of the block's statement orders, inline setters, global or pointer accesses and local types
   found no source with x's first.
 
+- The test scenes' light-0 block (x stored, reloaded and stored again, the colour loaded and stored back:
+  `G3dTestScene`, `HumanTestScene`, overlays 3, 4 and 5) gets the original's registers (the light in ip, the colour
+  in r3, 0 in r1 before the reload) only with `#pragma opt_propagation off` around `Init` (inside `#pragma push` /
+  `#pragma pop`). A store between the x store and its reload (`mEnabled = TRUE;` or y) is what keeps the reload;
+  `x = x` straight after it is dropped. In overlay 3 a `const char *path` local for `ModelResources_SetModel`'s path
+  gave the original's early `ldr r2` of it. Measured there too: what is left of such an `Init` is scheduling that
+  flips with unrelated code earlier in the function (removing the first call, `func_0202b0e8`, puts the virtual
+  `Load` calls' argument set-up in the original's order), so search the light statements' orders last, in the
+  file as it will stay.
+
 **A value read once where the original reads it twice**
 - Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
   program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
