@@ -291,12 +291,12 @@ void TushinScene::SetUpList(int *charOffset) {
     func_020a2644(&mList, 0, 4, 5, sListScrollUpPos, sListScrollDownSize);
     func_020a26fc(&mList, 0, 6, 7, 0x61, 0x4A, 1, sListBarPos, sListBarRect);
     func_020a27dc(&mList, 3, 6, 7);
-    func_020a380c(&mPages, 0, 8);
-    func_020a03e8(&mResidents, &mList, &mPages);
-    func_020a05dc(&mResidents);
+    mPages.Init(0, 8);
+    mResidents.Init(&mList, &mPages);
+    mResidents.Load();
     mUnknown35924 = mList.mUnknown9464;
     mSortKey = gGameData.mMiiListSortKey;
-    func_020a123c(&mResidents, mSortKey, 1);
+    mResidents.Sort(mSortKey, 1);
     mResidents.mUnknown1139C = 1;
 
     for (int i = 0; i < 3; i++) {
@@ -905,7 +905,7 @@ received:
 
 // @0x0214df0c
 void TushinScene::UpdateListButtons() {
-    func_020a3658(&mList, TRUE);
+    mList.SetScrollUnknown(TRUE);
     int pressed = -1;
     for (int i = 0; i < 3; i++) {
         if (func_0203133c(&mButtons[i])) {
@@ -946,7 +946,7 @@ void TushinScene::UpdateListButtons() {
         } else {
             mPage = NextPageAfterReceive();
             ResetList();
-            func_020a3634(&mList);
+            mList.ResetScrollButtons();
             func_02031228(&mButtons[0]);
         }
         sSongsReceived = 0;
@@ -1021,7 +1021,7 @@ void TushinScene::UpdateListWindow() {
     func_020349cc(&mListWindow, 0x24);
     int order = sListOrders[result];
     if (order != mResidents.mUnknown11306) {
-        func_020a123c(&mResidents, order, 0);
+        mResidents.Sort(order, 0);
     }
 }
 
@@ -1408,7 +1408,7 @@ void TushinScene::UpdateMusic() {
 
 // @0x0214f374
 void TushinScene::ResetList() {
-    func_020a3658(&mList, FALSE);
+    mList.SetScrollUnknown(FALSE);
     func_020a0454(&mResidents);
 }
 
@@ -1603,7 +1603,7 @@ void TushinScene::Update() {
             mPage = 0xF;
         }
         ResetList();
-        func_020a3634(&mList);
+        mList.ResetScrollButtons();
         func_02031228(&mButtons[0]);
         mPartnerSending = 0;
         Send(4);
@@ -1682,7 +1682,7 @@ void TushinScene::Update() {
             PlaySound(0xC);
         }
         ResetList();
-        func_020a3634(&mList);
+        mList.ResetScrollButtons();
         func_02031228(&mButtons[0]);
         mLostInList = 0;
         return;
@@ -2001,8 +2001,8 @@ void TushinScene::Update() {
                 }
                 sReceivedCommand = 0;
                 CloseWindow();
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 break;
             case 14:
             case 15: {
@@ -2016,8 +2016,8 @@ void TushinScene::Update() {
                 if (sSongsReceived == 1) {
                     sSongsReceived = 0;
                     mReceiveResult = ReceiveCharacter();
-                    func_020a05dc(&mResidents);
-                    func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                    mResidents.Load();
+                    mResidents.Sort(mResidents.mUnknown11306, 0);
                     mNextPage = 0x17;
                     if (mReceiveResult != 0) {
                         sReceiveCount = 0;
@@ -2214,16 +2214,16 @@ void TushinScene::Update() {
                 mNextPage = mPageAfterSave;
                 CloseWindow();
                 sWiiSendDone = 0;
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
                 if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
                     break;
                 }
                 sReceiveCount = 0;
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
                     mWiiShirtDue = 1;
@@ -2428,7 +2428,7 @@ void TushinScene::Draw() {
         func_0203206c(&mButtons[i]);
     }
     func_020345d8(&mListWindow);
-    func_020a05b8(&mResidents);
+    mResidents.Draw();
     DrawParticles();
     DrawCharacters();
     mBgScroll += 0x4CC;

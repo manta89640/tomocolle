@@ -341,22 +341,31 @@ extern u8 data_02142438[];
 
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---
 
-struct ListView {
+struct MiiListPanel {
+    void ResetScrollButtons();
+    void SetScrollUnknown(BOOL value);
+
     /* 0x0000 */ u8 mUnknown0000[0x9464];
     /* 0x9464 */ int mUnknown9464;
     /* 0x9468 */ u8 mUnknown9468[0x10];
 }; // 0x9478
+typedef MiiListPanel ListView; // include/list/MiiList.h has the main program's classes
 
 extern "C" {
-void func_020a3634(ListView *view);
-void func_020a3658(ListView *view, BOOL a);
 }
 
-struct ListPages {
+struct MiiListTabs {
+    void Init(int resource, int sequence);
+
     /* 0x0000 */ u8 mUnknown0000[0x5158];
 }; // 0x5158
+typedef MiiListTabs ListPages;
 
-struct ResidentList {
+struct MiiList {
+    void Init(MiiListPanel *panel, MiiListTabs *tabs);
+    void Draw();
+    void Load();
+    void Sort(int sortKey, BOOL selectFirst);
     SavedCharacter *GetSelected() { return &mResidents[mSelected]; }
 
     /* 0x00000 */ SavedCharacter mResidents[100];
@@ -369,13 +378,10 @@ struct ResidentList {
     /* 0x1139C */ int mUnknown1139C;
     /* 0x113A0 */ u8 mUnknown113A0[8];
 }; // 0x113A8
+typedef MiiList ResidentList;
 
 extern "C" {
-void func_020a03e8(ResidentList *list, ListView *view, ListPages *pages);
-void func_020a05dc(ResidentList *list);
 void func_020a0454(ResidentList *list);
-void func_020a05b8(ResidentList *list); // Draws it
-void func_020a123c(ResidentList *list, int a, int b);
 void func_020a1fe0(ListView *view, int a);
 void func_020a2104(ListView *view, int a, int b);
 void func_020a2118(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
@@ -385,7 +391,6 @@ void func_020a258c(ListView *view, int a, int b, int c, WindowPoint d, WindowPoi
 void func_020a2644(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
 void func_020a26fc(ListView *view, int a, int b, int c, int d, int e, int f, WindowPoint g, ScreenRect h);
 void func_020a27dc(ListView *view, int a, int b, int c);
-void func_020a380c(ListPages *pages, int a, int b);
 }
 
 // --- Window buttons ---
