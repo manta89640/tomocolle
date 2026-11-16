@@ -30,7 +30,7 @@ public:
     int Judge(SavedCharacter *first, SavedCharacter *second);
     int JudgeEnd(SavedCharacter *first, SavedCharacter *second, BOOL check);
     void Meet(SavedCharacter *first, SavedCharacter *second, int change);
-    void StartOuting(SavedCharacter *first, SavedCharacter *second, int event, u8 kind, s64 now);
+    void StartOuting(SavedCharacter *first, SavedCharacter *second, u8 category, u8 id, s64 now);
     void SetEventEnds(SavedCharacter *first, SavedCharacter *second, s64 end, BOOL partners);
     void Apply(SavedCharacter *first, SavedCharacter *second, int relation, s64 now);
     void ApplyEnd(SavedCharacter *first, SavedCharacter *second, int relation, s64 now, int param);
