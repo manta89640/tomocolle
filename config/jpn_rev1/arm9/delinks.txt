@@ -325,6 +325,13 @@ lib/NitroSDK/libraries/std/src/std_string.c:
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
 
+src/PadInput.cpp:
+    complete
+    .text       start:0x02026a1c end:0x02026b48
+    .init       start:0x020b04ec end:0x020b04f0
+    .ctor       start:0x020fc4a4 end:0x020fc4a8
+    .bss        start:0x0211f9d4 end:0x0211f9f8
+
 src/OwnerInfo.cpp:
     complete
     .text       start:0x02027a08 end:0x02027a7c
