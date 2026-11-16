@@ -54,21 +54,17 @@
 
 
 
-SCENE_STAND_IN(Scene2F, 0x474B0); // 0x02041124
-
-SCENE_STAND_IN(Scene35, 0x46D4C); // 0x02041a04
 
 
 
 
 
 
-SCENE_STAND_IN(Scene68, 0x47854); // 0x02045720
 
 
 
 
-SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // 0x02048b78
+
 
 
 

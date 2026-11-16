@@ -66,11 +66,13 @@ struct PaletteLoader {
 #include "../overlays/ov109/TushinScene.h"
 #include "../overlays/ov010/Scene2B.h"
 #include "../overlays/ov069/SavePlayScene.h"
+#include "../overlays/ov083/Scene2F.h"
 #include "InteriorViewScene.h"
 #include "../overlays/ov081/Scene30.h"
 #include "../overlays/ov011/Scene31.h"
 #include "../overlays/ov082/Scene33.h"
 #include "../overlays/ov012/Scene34.h"
+#include "../overlays/ov084/Scene35.h"
 #include "../overlays/ov013/TestNg48Scene.h"
 #include "../overlays/ov014/TestNg50Scene.h"
 #include "../overlays/ov086/ChangeRoomScene.h"
@@ -106,6 +108,7 @@ struct PaletteLoader {
 #include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
+#include "../overlays/ov085/Scene68.h"
 #include "../overlays/ov108/TutorialStepScene.h"
 #include "../overlays/ov088/Scene67.h"
 #include "../overlays/ov093/Scene72.h"
@@ -139,6 +142,7 @@ struct PaletteLoader {
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov101/SceneAF.h"
+#include "../overlays/ov110/ItemTradeScene.h"
 #include "../overlays/ov102/SceneB2.h"
 #include "../overlays/ov103/SceneB3.h"
 #include "../overlays/ov100/AlbumScene.h"
@@ -972,6 +976,9 @@ InteriorViewScene::InteriorViewScene(int sceneId) : Scene(sceneId) {
     SetState(0);
 }
 
+// Scene 0x2F, overlay 83
+Scene2F::Scene2F(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0x30 and 0x70, overlay 81
 Scene30::Scene30(int sceneId) : Scene(sceneId) {}
 
@@ -983,6 +990,9 @@ Scene33::Scene33(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x34, overlay 12
 Scene34::Scene34(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x35, overlay 84
+Scene35::Scene35(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x36, overlay 13
 TestNg48Scene::TestNg48Scene(int sceneId) : Scene(sceneId) {}
@@ -1094,6 +1104,9 @@ MapScene::MapScene(int sceneId) : Scene(sceneId) {}
 // Scene 0x67, overlay 88
 Scene67::Scene67(int sceneId) : Scene(sceneId) {}
 
+// Scenes 0x68 and 0x71, overlay 85
+Scene68::Scene68(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x69, overlay 108
 TutorialStepScene::TutorialStepScene(int sceneId) : Scene(sceneId) {}
 
@@ -1195,6 +1208,9 @@ InformationScene::InformationScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xAF, overlay 101
 SceneAF::SceneAF(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB1, overlay 110
+ItemTradeScene::ItemTradeScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB2, overlay 102
 SceneB2::SceneB2(int sceneId) : Scene(sceneId) {}

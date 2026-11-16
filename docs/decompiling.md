@@ -897,6 +897,25 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A constructor of an overlay's class called from the main program's scene constructor is emitted as C1 and C2; the
   link keeps the one called, so the unit can still be complete.
 
+**Moving an overlay onto the shared headers** (overlays 73, 74, 96, 109 and 110, measured)
+- Work by comparison with the overlay's own compile from before the change, not with the original: compile the
+  file once before (the quick compiler is enough), then after each step compare every function
+  (`tools/compare_object.py new.o old.o`) and the bytes of `.data`/`.rodata`/`.bss` (`objdump -s`). Functions
+  the new compile emits in addition (copies of inline members such as a character's D1) are the main
+  program's in the original; list them in `inline_symbols.txt`.
+- Keep the main-program declarations that have no shared header in a `MainProgram.h` beside the scene that
+  only the `.cpp` includes; the scene's header must compile in `SceneManager.cpp` next to every other scene's.
+- A member that a stand-in had (`mModel`) and the shared class has as a base: a pointer converted to the base
+  gets a null test (`adds; addne`) where `&x.mModel` had none. Convert a reference instead
+  (`CharacterModel &model = *c; return &model;`), and keep an inline accessor where the stand-in had one (the
+  offsets are then not folded across it, as before).
+- Names the derived class also declares hide the base's: `mRoom.mParts.SetState(...)` becomes
+  `mRoom.RoomModels::SetState(...)`, not `mRoom.SetState(...)` (which is `ApartmentRoom::SetState`), and the same
+  for fields (`RoomModels::mState`).
+- Inline members that a stand-in had and the shared class lacks go into the overlay's own derived class or a
+  static inline in `MainProgram.h`; adding inline members to a widely included shared header renumbers the
+  `@` literals of every complete unit that includes it (a declaration with unnamed parameters does not).
+
 **Tools to mind**
 - A `.bss` object named `kind:data(...)` in `symbols.txt` (what `name_unit_data.py --apply` writes) makes `dsd dis`
   read bytes the module does not have and panic (`dis.rs:222`, `Option::unwrap()` on `None`; overlay 110's

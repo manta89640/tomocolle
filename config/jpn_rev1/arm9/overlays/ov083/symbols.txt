@@ -1,6 +1,6 @@
-func_ov083_02149a40 kind:function(arm,size=0xc0) addr:0x02149a40
-func_ov083_02149b00 kind:function(arm,size=0xb4c) addr:0x02149b00
-func_ov083_0214a64c kind:function(arm,size=0x80) addr:0x0214a64c
+_ZN7Scene2F12StartLoadingEv kind:function(arm,size=0xc0) addr:0x02149a40
+_ZN7Scene2F4InitEv kind:function(arm,size=0xb4c) addr:0x02149b00
+_ZN7Scene2F6UpdateEv kind:function(arm,size=0x80) addr:0x0214a64c
 func_ov083_0214a6cc kind:function(arm,size=0x100) addr:0x0214a6cc
 func_ov083_0214a7cc kind:function(arm,size=0x1c8) addr:0x0214a7cc
 func_ov083_0214a994 kind:function(arm,size=0x158) addr:0x0214a994
@@ -15,8 +15,8 @@ func_ov083_0214b810 kind:function(arm,size=0x68) addr:0x0214b810
 func_ov083_0214b878 kind:function(arm,size=0x50) addr:0x0214b878
 func_ov083_0214b8c8 kind:function(arm,size=0x7c) addr:0x0214b8c8
 func_ov083_0214b944 kind:function(arm,size=0x64) addr:0x0214b944
-func_ov083_0214b9a8 kind:function(arm,size=0xa4) addr:0x0214b9a8
-func_ov083_0214ba4c kind:function(arm,size=0xdc) addr:0x0214ba4c
+_ZN7Scene2F4DrawEv kind:function(arm,size=0xa4) addr:0x0214b9a8
+_ZN7Scene2F4ExitEv kind:function(arm,size=0xdc) addr:0x0214ba4c
 func_ov083_0214bb28 kind:function(arm,size=0x88) addr:0x0214bb28
 func_ov083_0214bbb0 kind:function(arm,size=0x80) addr:0x0214bbb0
 func_ov083_0214bc30 kind:function(arm,size=0x1c8) addr:0x0214bc30
@@ -27,8 +27,8 @@ func_ov083_0214bf4c kind:function(arm,size=0xb4) addr:0x0214bf4c
 func_ov083_0214c000 kind:function(arm,size=0x24) addr:0x0214c000
 func_ov083_0214c024 kind:function(arm,size=0x1c) addr:0x0214c024
 func_ov083_0214c040 kind:function(arm,size=0x94) addr:0x0214c040
-func_ov083_0214c0d4 kind:function(arm,size=0x164) addr:0x0214c0d4
-func_ov083_0214c238 kind:function(arm,size=0x16c) addr:0x0214c238
+_ZN7Scene2FD1Ev kind:function(arm,size=0x164) addr:0x0214c0d4
+_ZN7Scene2FD0Ev kind:function(arm,size=0x16c) addr:0x0214c238
 data_ov083_0214c3a4 kind:data(any) addr:0x0214c3a4
 gStr_CommaComma_ov083 kind:data(any) addr:0x0214c3a8
 gStr_PlusPlus_ov083 kind:data(any) addr:0x0214c3ac
@@ -55,7 +55,7 @@ data_ov083_0214c504 kind:data(any) addr:0x0214c504
 data_ov083_0214c514 kind:data(any) addr:0x0214c514
 data_ov083_0214c520 kind:data(any) addr:0x0214c520 ambiguous
 data_ov083_0214c580 kind:data(any) addr:0x0214c580
-data_ov083_0214c58c kind:data(any) addr:0x0214c58c ambiguous
+_ZTV7Scene2F kind:data(any) addr:0x0214c584
 gStr_TIM_ov083 kind:data(any) addr:0x0214c5a8
 gStr_Msg_TmdItemMsgJP_LZ_bin_ov083 kind:data(any) addr:0x0214c5ac
 gStr_TXM_ov083 kind:data(any) addr:0x0214c5c4

@@ -1894,7 +1894,7 @@ _ZN7SceneAFC1Ei kind:function(arm,size=0x138) addr:0x020489b4
 _ZN16SceneAFCharacterC1Ev kind:function(arm,size=0x2c) addr:0x02048aec
 _ZN16SceneAFCharacterD1Ev kind:function(arm,size=0x60) addr:0x02048b18
 _ZN14ItemTradeSceneC1Ei kind:function(arm,size=0x328) addr:0x02048b78
-func_02048ea0 kind:function(arm,size=0x3c) addr:0x02048ea0
+_ZN18ItemTradeItemModelD1Ev kind:function(arm,size=0x3c) addr:0x02048ea0
 _ZN7SceneB2C1Ei kind:function(arm,size=0x134) addr:0x02048edc
 _ZN16SceneB2CharacterC1Ev kind:function(arm,size=0x2c) addr:0x02049010
 _ZN16SceneB2CharacterD1Ev kind:function(arm,size=0x60) addr:0x0204903c
@@ -1934,7 +1934,7 @@ _ZN20TestDrawMiiAnimModelD0Ev kind:function(arm,size=0x44) addr:0x0204ad88
 _ZN16Scene40ItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204adcc
 _ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
 _ZN16WeddingGiftModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae54
-func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
+_ZN18ItemTradeItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae98
 _ZN14AlbumItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204aedc
 _ZN5Scene3RunEv kind:function(arm,size=0x170) addr:0x0204af20
 _ZN16DrawManTestScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x0204b090
@@ -5326,13 +5326,11 @@ _ZTV20TestDrawMiiAnimModel kind:data(any) addr:0x02110954
 _ZTV5Scene kind:data(any) addr:0x02110970
 _ZTV12RankingPiece kind:data(any) addr:0x02110994
 _ZTV14AlbumItemModel kind:data(any) addr:0x021109bc
-data_02110a04 kind:data(any) addr:0x02110a04
-data_02110a20 kind:data(any) addr:0x02110a20
+_ZTV18ItemTradeItemModel kind:data(any) addr:0x021109fc
 _ZTV16WeddingGiftModel kind:data(any) addr:0x02110a3c
 _ZTV16Scene40ItemModel kind:data(any) addr:0x02110a7c
 _ZTV10AlbumItems kind:data(any) addr:0x02110abc
-data_02110b0c kind:data(any) addr:0x02110b0c
-data_02110b30 kind:data(any) addr:0x02110b30
+_ZTV18ItemTradeSelection kind:data(any) addr:0x02110b04
 _ZTV12Scene40Items kind:data(any) addr:0x02110b4c
 _ZTV16DrawManTestScene kind:data(any) addr:0x02110b94
 gStr_DMN kind:data(any) addr:0x02110bb8
@@ -6543,7 +6541,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@15898 kind:bss addr:0x0213b704 local
+@16147 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
