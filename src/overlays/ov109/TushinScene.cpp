@@ -1198,11 +1198,17 @@ void TushinScene::UpdateWiiConnection() {
 
 #pragma optimization_level 2
 #pragma opt_common_subs off
-// NOT MATCHING (optimization level 2, without common subexpressions): one block, the call that finds the current
-// animation, where the original computes the animation id (r2, through r0) before the model's address (r0); here
-// the address comes first and the id goes through r1. Without opt_common_subs the original's hoisting (only
-// &mCharacters[0] and its model) and its registers come out.
+// Optimization level 2 without common subexpressions: the original's hoisting (only &mCharacters[0] and its model)
+// and its registers. The call that finds the current animation computes the id (r2, through r0) before the model's
+// address (r0): that is the call made through an inline forwarder with dead assignments kept (opt_dead_assignments
+// off), which binds the forwarder's arguments last to first; called directly, or without that pragma, the address
+// comes first.
 static inline CharacterModel *GetModelOf(CharacterModel *model) { return model; }
+template <class M> static inline ModelAnimation *FindAnimationOf(M *model, u32 resType, int id) {
+    return AnimModel_FindAnimation(model, resType, id);
+}
+#pragma push
+#pragma opt_dead_assignments off
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
@@ -1226,7 +1232,7 @@ void TushinScene::UpdateCharacters() {
                 }
             }
         }
-        if (AnimModel_FindAnimation(&mCharacters[i].mModel, RESOURCE_BCA0, mCharacters[i].mModel.mAnimId)->mFinished) {
+        if (FindAnimationOf(&mCharacters[i].mModel, RESOURCE_BCA0, mCharacters[i].mModel.mAnimId)->mFinished) {
             mCharacters[i].mModel.mPos.x = -0x1000;
             int next = GetStandAnimation(i);
             switch (mCharacters[i].mModel.mAnimId) {
@@ -1305,6 +1311,7 @@ void TushinScene::UpdateCharacters() {
     ShowNextCharacter();
     StartEmitter(1);
 }
+#pragma pop
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
