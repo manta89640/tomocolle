@@ -433,4 +433,32 @@ public:
     /* 0x2B14 */ fx32 mAnimSpeed;          // Given to the model when an animation starts
 }; // 0x2B18
 
+// The resident list's orders (src/character/CharacterSort.cpp). The name is the project's own.
+class CharacterSort {
+public:
+    static void RemoveSpaces(wchar_t *str);
+    static void KatakanaToHiragana(wchar_t *str);
+    static void EnlargeSmallKana(wchar_t *str);
+    static void RemoveVoicedMarks(wchar_t *str);
+    static void ExpandLongVowelMarks(wchar_t *str);
+    static void ExpandLigatures(wchar_t *str);
+    static void ToUpperCase(wchar_t *str);
+    static void ToUpperCaseWithoutAccents(wchar_t *str);
+    static void ToCollationKeys(wchar_t *str);
+    static int GetCollationKey(wchar_t c);
+    static void MakeSortKeys(wchar_t *str);
+    static int CompareNames(const SavedCharacter *a, const SavedCharacter *b, int field);
+    static int CompareByName(const SavedCharacter *a, const SavedCharacter *b);
+    static int CompareByFamilyName(const SavedCharacter *a, const SavedCharacter *b);
+    static int CompareByMiiName(const SavedCharacter *a, const SavedCharacter *b);
+    static int CompareStrings(const wchar_t *a, const wchar_t *b);
+    static int CompareByPersonality(SavedCharacter *a, SavedCharacter *b);
+    static int CompareByBirthday(SavedCharacter *a, SavedCharacter *b);
+    static int CompareByBirthdayInYear(SavedCharacter *a, SavedCharacter *b);
+    static int CompareBySex(SavedCharacter *a, SavedCharacter *b);
+    static int CompareByBloodType(SavedCharacter *a, SavedCharacter *b);
+    static int GetInitialGroup(wchar_t c);
+    static int GetNameInitialGroup(const wchar_t *name);
+};
+
 #endif // CHARACTER_CHARACTER_H
