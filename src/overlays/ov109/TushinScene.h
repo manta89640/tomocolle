@@ -474,7 +474,7 @@ void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as
 void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
 void func_020a0664(ResidentList *list);
-void func_02078db8(int index);
+void MiiTransfer_SendMii(int index);
 }
 
 // --- WH, the SDK's wireless sample code (main program) ---
@@ -502,13 +502,13 @@ BOOL WH_ParentConnect(int mode, u16 tgid, u16 channel);
 // --- The Wii's Mii Channel connection (main program 0x02077000 to 0x0207a000) ---
 
 extern "C" {
-int func_02078f04(void);
-int func_0207808c(void);
-BOOL func_0207800c(int i);
-int func_02078040(int i);
-WMBssDesc *func_02078064(int i);
-u16 func_0207809c(int i);
-const u16 *func_020780b4(int i);
+int MiiTransfer_GetState(void);
+int MiiTransfer_GetParentCount(void);
+BOOL MiiTransfer_HasParent(int i);
+int MiiTransfer_GetParentAge(int i);
+WMBssDesc *MiiTransfer_GetParent(int i);
+u16 MiiTransfer_GetParentUserGameInfoLength(int i);
+const u16 *MiiTransfer_GetParentUserGameInfo(int i);
 }
 
 // --- Wireless (main program) ---
@@ -535,13 +535,13 @@ void func_0203b940(WirelessManager *manager, int a);
 void func_0203b968(WirelessManager *manager, int a);
 int func_0203b9c4(WirelessManager *manager);
 void func_0203bac4(WirelessManager *manager, int parent);
-void func_02078d04(void);
-void func_02078d48(void);
-void func_02078da4(u16 id);
+void MiiTransfer_Start(void);
+void MiiTransfer_Cut(void);
+void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
 void func_0203b8b4(WirelessManager *manager, int a);
-void func_020777f4(void);
+void MiiTransfer_Update(void);
 void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
 void func_0203b7e0(WirelessManager *manager, void *buffer);
 void func_0203b898(WirelessManager *manager);
@@ -553,10 +553,10 @@ void func_0203b9fc(WirelessManager *manager);
 int func_0203ba10(WirelessManager *manager);
 void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
-void func_0207777c(void *a, void *miiData, int count);
-void func_02077710(void (*callback)(int, int));
-void func_02077720(void (*callback)(int, int));
-void func_02077804(int a);
+void MiiTransfer_Init(void *a, void *miiData, int count);
+void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));
+void MiiTransfer_SetSendResultCallback(void (*callback)(int, int));
+void MiiTransfer_SetAcceptSpecial(int a);
 extern u16 gWHChildSsid[12]; // WH copies the connecting child's SSID here: the scene shows it as its name
 }
 

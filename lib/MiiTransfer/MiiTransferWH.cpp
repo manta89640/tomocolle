@@ -214,7 +214,7 @@ static BOOL WH_StateInStartScan(void) {
 
 // Looks through the parents found for one to connect to: a PictoChat parent if those are sought, or one of this
 // game that takes entries. Not in WH as the SDK has it.
-extern "C" BOOL func_020791c4(WMStartScanExCallback *cb) {
+BOOL WH_FindParentInScan(WMStartScanExCallback *cb) {
     DC_InvalidateRange(sScanExParam.scanBuf, WH_SCAN_BUF_SIZE);
     for (s16 i = 0; i < cb->bssDescCount; i++) {
         if (sPictoCatchFlag && CHT_IsPictochatParent(cb->bssDesc[i])) {
@@ -258,7 +258,7 @@ static void WH_StateOutStartScan(void *arg) {
     case WM_STATECODE_PARENT_NOT_FOUND:
         break;
     case WM_STATECODE_PARENT_FOUND:
-        if (func_020791c4(cb) && sAutoConnectFlag) {
+        if (WH_FindParentInScan(cb) && sAutoConnectFlag) {
             if (!WH_StateInEndScan()) {
                 WH_ChangeSysState(WH_SYSSTATE_ERROR);
             }

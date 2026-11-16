@@ -487,10 +487,10 @@ void TushinScene::Init() {
     mUnknown3F0AC = 0;
     mUnknown3F0B0 = 0;
     data_ov109_02153230 = 0;
-    func_0207777c(&data_0212349c, sMiiData, 100);
-    func_02077720(func_ov109_02151fcc);
-    func_02077710(func_ov109_021523a4);
-    func_02077804(1);
+    MiiTransfer_Init(&data_0212349c, sMiiData, 100);
+    MiiTransfer_SetSendResultCallback(func_ov109_02151fcc);
+    MiiTransfer_SetReceiveCallback(func_ov109_021523a4);
+    MiiTransfer_SetAcceptSpecial(1);
     UpdateMiiData();
     gSoundManager.LoadGroup(0x5D);
     ResetExchange();
@@ -722,7 +722,7 @@ void TushinScene::SendFoundIndex() {
     if (index == -1) {
         return;
     }
-    func_02078db8(index);
+    MiiTransfer_SendMii(index);
 }
 
 // @0x0214d0b0
@@ -1120,22 +1120,22 @@ void TushinScene::UpdateConnection() {
 
 // @0x0214e620
 void TushinScene::UpdateWiiConnection() {
-    int state = func_02078f04();
+    int state = MiiTransfer_GetState();
     if (state == 0) {
         return;
     }
     switch (state) {
     case 1:
-        data_ov109_0215322c = func_0207808c();
+        data_ov109_0215322c = MiiTransfer_GetParentCount();
         for (int i = 0; i < data_ov109_0215322c; i = (u16)(i + 1)) {
-            if (!func_0207800c(i)) {
+            if (!MiiTransfer_HasParent(i)) {
                 continue;
             }
-            if (func_02078040(i) > 0) {
+            if (MiiTransfer_GetParentAge(i) > 0) {
                 continue;
             }
             BOOL known = FALSE;
-            WMBssDesc *parent = func_02078064(i);
+            WMBssDesc *parent = MiiTransfer_GetParent(i);
             for (int j = 0; j < 3; j++) {
                 if (sParentTimers[j] != 0 && memcmp(parent->bssid, sParents[j].bssid, 12) == 0) {
                     sParentTimers[j] = 599;
@@ -1150,8 +1150,8 @@ void TushinScene::UpdateWiiConnection() {
                 if (sParentTimers[k] == 0) {
                     sParentTimers[k] = 600;
                     sParents[k] = *parent;
-                    u16 size = func_0207809c(i);
-                    const u16 *name = func_020780b4(i);
+                    u16 size = MiiTransfer_GetParentUserGameInfoLength(i);
+                    const u16 *name = MiiTransfer_GetParentUserGameInfo(i);
                     for (int j = 0; j < size / 2; j++) {
                         mParentNames[k][j] = name[j];
                     }
@@ -1547,13 +1547,13 @@ void TushinScene::Update() {
     case 0x29:
     case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37: case 0x38: case 0x39:
     case 0x3A: case 0x3B: case 0x3C: case 0x3D: case 0x3E: case 0x3F:
-        if (func_02078f04() == 6) {
+        if (MiiTransfer_GetState() == 6) {
             break;
         }
-        func_020777f4();
+        MiiTransfer_Update();
         break;
     default:
-        func_020777f4();
+        MiiTransfer_Update();
         break;
     }
     func_020341d4(&mWindow);
@@ -1638,7 +1638,7 @@ void TushinScene::Update() {
         next = 0x22;
         break;
     case 2:
-        if (func_02078f04() == 0 && mPage != 0x26 && mPage != 0x27 && mPage != 0x42 && mPage != 0x30 &&
+        if (MiiTransfer_GetState() == 0 && mPage != 0x26 && mPage != 0x27 && mPage != 0x42 && mPage != 0x30 &&
             mNextPage != 0x40 && mNextPage != 0x43 && mNextPage != 0x30) {
             if (mUnknown3F098 == 1) {
                 mUnknown18 = 0x40;
@@ -1847,13 +1847,13 @@ void TushinScene::Update() {
             case 38:
                 mNextPage = 1;
                 close = 0x2C;
-                func_02078d48();
+                MiiTransfer_Cut();
                 break;
             case 39:
                 if (result == 3) {
                     mNextPage = 1;
                     close = 0x2C;
-                    func_02078d48();
+                    MiiTransfer_Cut();
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
                     data_0213b700->mParent = result;
                     mUnknown3F0B0 = 1;
@@ -2109,7 +2109,7 @@ void TushinScene::Update() {
                 }
                 break;
             case 38:
-                if (func_02078f04() != 1) {
+                if (MiiTransfer_GetState() != 1) {
                     break;
                 }
                 if (!IsWindowOpen(&mWindow) || mNextPage == 0x27) {
@@ -2125,11 +2125,11 @@ void TushinScene::Update() {
                 if (mUnknown3F0B0 != 1) {
                     break;
                 }
-                func_02078da4(mParentIds[data_0213b700->mParent]);
+                MiiTransfer_Connect(mParentIds[data_0213b700->mParent]);
                 mUnknown3F0B0 = 0;
                 break;
             case 66:
-                if (func_02078f04() == 0) {
+                if (MiiTransfer_GetState() == 0) {
                     mNextPage = 0;
                     CloseWindow();
                     ResetExchange();
@@ -2356,9 +2356,9 @@ void TushinScene::Update() {
                     PlaySound(0xB);
                     break;
                 case 66: {
-                    int state = func_02078f04();
+                    int state = MiiTransfer_GetState();
                     if (state != 7 && state != 10) {
-                        func_02078d48();
+                        MiiTransfer_Cut();
                     }
                     mWait = 60;
                     break;
@@ -2375,7 +2375,7 @@ void TushinScene::Update() {
                         mParentIds[i] = 0;
                     }
                     ClearParentNames();
-                    func_02078d04();
+                    MiiTransfer_Start();
                     break;
                 case 67:
                     PlaySound(0xD);
@@ -2464,12 +2464,12 @@ void TushinScene::Exit() {
         }
         return;
     }
-    if (func_02078f04() == 0) {
+    if (MiiTransfer_GetState() == 0) {
         return;
     }
     do {
-        func_020777f4();
-    } while (func_02078f04() != 0);
+        MiiTransfer_Update();
+    } while (MiiTransfer_GetState() != 0);
 }
 
 // @0x021517c8

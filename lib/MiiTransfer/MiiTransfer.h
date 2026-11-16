@@ -32,13 +32,13 @@ BOOL func_02073330(const MiiCreateId *a, const MiiCreateId *b); // equal, and ne
 void func_02073394(MiiCreateId *id);                     // clears it
 
 // MiiTransferList.cpp
-void func_02079dfc(MiiRecord *records, u32 count);
-BOOL func_02079e10(int index);
-int func_02079e5c(void);
-MiiRecord *func_02079ea4(int index);
-void func_02079ed4(int index, const MiiRecord *record);
-MiiCreateId *func_02079f0c(int index);
-int func_02079f28(const MiiCreateId *createId);
+void MiiTransferList_Init(MiiRecord *records, u32 count);
+BOOL MiiTransferList_IsUsed(int index);
+int MiiTransferList_FindFree(void);
+MiiRecord *MiiTransferList_Get(int index);
+void MiiTransferList_Set(int index, const MiiRecord *record);
+MiiCreateId *MiiTransferList_GetCreateId(int index);
+int MiiTransferList_Find(const MiiCreateId *createId);
 
 } // extern "C"
 
