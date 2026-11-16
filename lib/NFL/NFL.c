@@ -3239,27 +3239,28 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
 #pragma optimization_level reset
 
 // Kind 2: the eyes turned 2 steps more (kept to 0..7), the eyebrows 2 more (to 0..11), the mouth of shared slot 3.
-// Not matching yet: for the eyebrow the original adds d twice (once to compare, once in the else), where this folds
-// the sum into brow before the compares. opt_propagation off keeps d in a register, as the original does.
+// The eyebrow's sum is tested on a copy of the rotation and added again in the else: the original adds d twice.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
 void NFLi_ApplyExpression2(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
-    fx32 y;
-    int type;
     u16 idx;
     fx32 v;
     int rot;
     int brow;
     int d;
+    int browRot;
+    fx32 y;
+    int type;
 
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
+    browRot = obj->exprFields[6];
     type = obj->exprFields[5];
-    brow = obj->exprFields[6];
+    brow = browRot;
     d = 2;
-    rot = obj->exprFields[3] + 2;
+    rot = obj->exprFields[3] + d;
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     if (rot < 0) {
         rot = 0;
     } else if (rot > 7) {
@@ -3270,9 +3271,9 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
-    if (brow + d < 0) {
+    if (browRot + d < 0) {
         brow = 0;
-    } else if (brow + d > 11) {
+    } else if (browRot + d > 11) {
         brow = 11;
     } else {
         brow += d;
@@ -3304,27 +3305,29 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4.
-// Not matching yet: as NFLi_ApplyExpression2, with d = -2 and an eyebrow rotation past 11 set to 0.
+// Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4; an eyebrow rotation past 11 is set
+// to 0
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
 void NFLi_ApplyExpression3(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
-    fx32 y;
-    int type;
     u16 idx;
     fx32 v;
     int rot;
     int brow;
     int d;
+    int browRot;
+    fx32 y;
+    int type;
 
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
+    browRot = obj->exprFields[6];
     type = obj->exprFields[5];
-    brow = obj->exprFields[6];
+    brow = browRot;
     d = -2;
-    rot = obj->exprFields[3] + -2;
+    rot = obj->exprFields[3] + d;
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     if (rot < 0) {
         rot = 0;
     } else if (rot > 7) {
@@ -3335,9 +3338,9 @@ void NFLi_ApplyExpression3(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->eyeTexAddr, obj->eyePlttAddr);
-    if (brow + d < 0) {
+    if (browRot + d < 0) {
         brow = 0;
-    } else if (brow + d > 11) {
+    } else if (browRot + d > 11) {
         brow = 0;
     } else {
         brow += d;
