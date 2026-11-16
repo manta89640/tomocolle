@@ -2401,3 +2401,463 @@ int func_02076680(u32 *rest) {
     }
     return 2;
 }
+
+// The VRAM side of the seventh stream (func_0207516c): loads it into texture palette VRAM (func_020749a4), then
+// hands on to the object streams
+int func_02076a98(u32 *rest) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    BOOL go = FALSE;
+    u32 dest;
+    int size;
+    u8 *src;
+    int result;
+
+    if (work->unk68 == 7) {
+        return 0;
+    }
+    switch (work->unkA0[6].unk8) {
+    case 2:
+        dest = work->unkA0[6].unk4;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        size = 32;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 3:
+        dest = work->unkA0[6].unk4;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        size = work->unk98;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 4:
+        size = work->unk98 - work->unk94;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        dest = work->unkA0[6].unk4;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 5:
+        size = 32 - work->unk94;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        dest = work->unkA0[6].unk4;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 0:
+    case 1:
+        work->unk88 = go;
+        work->unk80 = go;
+        work->unk84 = go;
+        return 2;
+    }
+    if (*rest == 0) {
+        return 0;
+    }
+    if (go == TRUE) {
+        if (*rest >= size) {
+            if (work->unkA0[6].unk0 + size <= work->unk7C) {
+                result = func_020749a4(src, dest, size);
+            } else {
+                u32 over = work->unkA0[6].unk0 + size - work->unk7C;
+                u32 n = size - over;
+
+                result = func_020749a4(src, dest, n);
+                if (result == 0) {
+                    result = func_020749a4(work->unk78, dest + n, over);
+                }
+            }
+            if (result != 0) {
+                work->unkA0[6].unk8 = 6;
+                return result;
+            }
+            work->unk80 = (work->unkA0[6].unk0 + size) % work->unk7C;
+            if (work->unk84 >= work->unk80) {
+                work->unk88 = work->unk84 - work->unk80;
+            } else {
+                work->unk88 = work->unk7C + work->unk84 - work->unk80;
+            }
+            if (work->unkA0[6].unk8 == 2) {
+                work->unkA0[6].unk8 = 7;
+            } else if (work->unkA0[6].unk8 == 5) {
+                work->unkA0[6].unk8 = 7;
+                work->unk94 = 0;
+            } else {
+                work->unkA0[6].unk8 = 1;
+                work->unk94 = work->unk98;
+                work->unk98 = 0;
+            }
+            *rest -= size;
+        } else {
+            if (work->unkA0[6].unk0 + *rest <= (u32)(work->unk78 + work->unk7C)) {
+                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, *rest);
+            } else {
+                u32 over = work->unkA0[6].unk0 + *rest - work->unk7C;
+                u32 n = *rest - over;
+
+                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, n);
+                if (result == 0) {
+                    result = func_020749a4(work->unk78, work->unkA0[6].unk4 + n, over);
+                }
+            }
+            if (result != 0) {
+                work->unkA0[6].unk8 = 6;
+                return result;
+            }
+            work->unk80 = (work->unkA0[6].unk0 + *rest) % work->unk7C;
+            if (work->unk84 >= work->unk80) {
+                work->unk88 = work->unk84 - work->unk80;
+            } else {
+                work->unk88 = work->unk7C + work->unk84 - work->unk80;
+            }
+            if (work->unkA0[6].unk8 == 3 || work->unkA0[6].unk8 == 4) {
+                work->unkA0[6].unk8 = 4;
+            } else {
+                work->unkA0[6].unk8 = 5;
+            }
+            work->unk94 += *rest;
+            work->unkA0[6].unk0 = (work->unkA0[6].unk0 + *rest) % work->unk7C;
+            work->unkA0[6].unk4 += *rest;
+            *rest = 0;
+            return 0;
+        }
+    }
+    work->unk90 = 2;
+    if (*rest == 0) {
+        return 2;
+    }
+    if (work->unk74 != NULL) {
+        switch (work->unk74->unk170) {
+        case 0:
+            return func_02076e1c(work->unk74, rest);
+        case 1:
+            return func_02077300(work->unk74, rest);
+        case 2:
+        case 4:
+            func_020763e0(work->unk74);
+            break;
+        }
+    }
+    return 2;
+}
+
+// Where each of an object's eleven streams goes in texture VRAM, from the object's base (unkD4): the first offset in
+// the other modes, the second in mode 7
+typedef struct NFLObjDest {
+    u32 unk0;
+    u32 unk4;
+} NFLObjDest;
+
+extern const NFLObjDest data_020b7b8c[];
+
+// The VRAM side of an object's eleven streams (func_02075528)
+int func_02076e1c(NFLObj *obj, u32 *rest) {
+    NFLWork *work = data_02145360;
+    int i;
+    u32 dest;
+    NFLWorkUnkA0 *stream = obj->unk1A4;
+    int result;
+
+    for (i = 0; i < 11; stream++, i++) {
+        BOOL go = FALSE;
+        u8 *src;
+        u32 size;
+
+        switch (stream->unk8) {
+        case 2:
+            if (data_02145360->unk68 == 7) {
+                if (i == 0) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+            } else {
+                size = data_021121b4[i].unk4;
+                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+            }
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            go = TRUE;
+            break;
+        case 3:
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = obj->unkD4 + (data_02145360->unk68 == 7 ? data_020b7b8c[i].unk4 : data_020b7b8c[i].unk0);
+            size = obj->unk178;
+            go = TRUE;
+            break;
+        case 4:
+            size = obj->unk178 - obj->unk174;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            if (data_02145360->unk68 == 7) {
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+            } else {
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+            }
+            go = TRUE;
+            break;
+        case 5:
+            if (data_02145360->unk68 == 7) {
+                if (i == 0) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+            } else {
+                size = data_021121b4[i].unk4;
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+            }
+            size -= obj->unk174;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            go = TRUE;
+            break;
+        case 0:
+        case 1:
+            work->unk88 = go;
+            work->unk80 = go;
+            work->unk84 = go;
+            return 2;
+        }
+        if (*rest == 0) {
+            return 0;
+        }
+        if (go == TRUE) {
+            if (*rest >= size) {
+                if (stream->unk0 + size <= work->unk7C) {
+                    result = func_02074964(src, dest, size);
+                } else {
+                    int over = stream->unk0 + size - work->unk7C;
+                    int n = size - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + size) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 2) {
+                    stream->unk8 = 7;
+                } else if (stream->unk8 == 5) {
+                    stream->unk8 = 7;
+                    obj->unk174 = 0;
+                } else {
+                    stream->unk8 = 1;
+                    obj->unk174 = obj->unk178;
+                    obj->unk178 = 0;
+                    *rest -= size;
+                    return 2;
+                }
+                *rest -= size;
+            } else {
+                if (stream->unk0 + *rest <= work->unk7C) {
+                    result = func_02074964(src, dest, *rest);
+                } else {
+                    int over = stream->unk0 + *rest - work->unk7C;
+                    int n = *rest - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 3 || stream->unk8 == 4) {
+                    stream->unk8 = 4;
+                } else {
+                    stream->unk8 = 5;
+                }
+                obj->unk174 += *rest;
+                stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                *rest = 0;
+                return 0;
+            }
+        }
+    }
+    result = 2;
+    if (data_02145360->unk68 == 7) {
+        if (obj->unk17C != NULL && *rest != 0) {
+            result = func_02076e1c(obj->unk17C, rest);
+            if (result != 0 && result != 2) {
+                return result;
+            }
+        }
+        if (obj->unk170 != 4) {
+            obj->unk170 = 2;
+        }
+        func_020763e0(obj);
+    } else {
+        obj->unk170 = 1;
+        if (*rest == 0) {
+            return result;
+        }
+        result = func_02077300(obj, rest);
+        return result;
+    }
+    return result;
+}
+
+// Where each of an object's palette streams goes in texture palette VRAM, from the object's base (unkD8)
+extern const u32 data_020b7b64[];
+
+// The VRAM side of an object's palette streams (func_02075f50): ten of them here, where func_02075f50 fills eleven
+int func_02077300(NFLObj *obj, u32 *rest) {
+    NFLWork *work = data_02145360;
+    int result;
+
+    if (work->unk68 != 7) {
+        NFLWorkUnkA0 *stream = obj->unk228;
+        int i;
+
+        for (i = 0; i < 10; stream++, i++) {
+            BOOL go = FALSE;
+            u8 *src;
+            u32 dest;
+            u32 size;
+
+            switch (stream->unk8) {
+            case 2:
+                dest = obj->unkD8 + data_020b7b64[i];
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                if (i == 0) {
+                    size = 16;
+                } else {
+                    size = 32;
+                }
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 3:
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                size = obj->unk178;
+                dest = obj->unkD8 + data_020b7b64[i];
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 4:
+                size = obj->unk178 - obj->unk174;
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 5:
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                if (i == 0) {
+                    size = 16 - obj->unk174;
+                } else {
+                    size = 32 - obj->unk174;
+                }
+                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 0:
+            case 1:
+                work->unk88 = go;
+                work->unk80 = go;
+                work->unk84 = go;
+                return 2;
+            }
+            if (*rest == 0) {
+                return 0;
+            }
+            if (go == TRUE) {
+                if (*rest >= size) {
+                    if (stream->unk0 + size <= work->unk7C) {
+                        result = func_020749a4(src, dest, size);
+                    } else {
+                        int over = stream->unk0 + size - work->unk7C;
+                        int n = size - over;
+
+                        result = func_020749a4(src, dest, n);
+                        if (result == 0) {
+                            result = func_020749a4(work->unk78, dest + n, over);
+                        }
+                    }
+                    if (result != 0) {
+                        stream->unk8 = 6;
+                        return result;
+                    }
+                    work->unk80 = (stream->unk0 + size) % work->unk7C;
+                    if (work->unk84 >= work->unk80) {
+                        work->unk88 = work->unk84 - work->unk80;
+                    } else {
+                        work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                    }
+                    if (stream->unk8 == 2) {
+                        stream->unk8 = 7;
+                    } else if (stream->unk8 == 5) {
+                        stream->unk8 = 7;
+                        obj->unk174 = 0;
+                    } else {
+                        stream->unk8 = 1;
+                        obj->unk174 = obj->unk178;
+                        obj->unk178 = 0;
+                    }
+                    *rest -= size;
+                } else {
+                    if (stream->unk0 + *rest <= work->unk7C) {
+                        result = func_020749a4(src, dest, *rest);
+                    } else {
+                        int over = stream->unk0 + *rest - work->unk7C;
+                        int n = *rest - over;
+
+                        result = func_020749a4(src, dest, n);
+                        if (result == 0) {
+                            result = func_020749a4(work->unk78, dest + n, over);
+                        }
+                    }
+                    if (result != 0) {
+                        stream->unk8 = 6;
+                        return result;
+                    }
+                    work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                    if (work->unk84 >= work->unk80) {
+                        work->unk88 = work->unk84 - work->unk80;
+                    } else {
+                        work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                    }
+                    if (stream->unk8 == 3 || stream->unk8 == 4) {
+                        stream->unk8 = 4;
+                    } else {
+                        stream->unk8 = 5;
+                    }
+                    obj->unk174 += *rest;
+                    stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                    *rest = 0;
+                    return 0;
+                }
+            }
+        }
+    }
+    result = 2;
+    if (obj->unk17C != NULL && *rest != 0) {
+        result = func_02076e1c(obj->unk17C, rest);
+        if (result != 0 && result != 2) {
+            return result;
+        }
+    }
+    if (obj->unk170 != 4) {
+        obj->unk170 = 2;
+    }
+    func_020763e0(obj);
+    return result;
+}

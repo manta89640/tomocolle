@@ -28,7 +28,10 @@ typedef struct NFLWorkUnkA0 {
 } NFLWorkUnkA0;
 
 typedef struct NFLObj {
-    u8 unk0[0x170];
+    u8 unk0[0xD4];
+    u32 unkD4; // Where its textures go in texture VRAM (func_02076e1c)
+    u32 unkD8; // Where its palettes go in texture palette VRAM (func_02077300)
+    u8 unkDC[0x170 - 0xDC];
     int unk170;
     u32 unk174;
     u32 unk178;
