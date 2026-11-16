@@ -938,6 +938,34 @@ Measured:
 - `.data` holds a 0x120-byte `const` table at `0x0215A13C` that is zero in the ROM. The static initialiser fills it
   from two pairs of words of the `.rodata` pool (offsets 0xBC and 0x74), as overlay 109's text origins are filled.
 
+Measured, from the last third of the file (`0x02153CF4` on):
+
+- **The pages' Init and Update.** The scene's page switch (`func_ov076_0214b1ec`) calls the old page's Exit and then
+  the new page's first function with the scene (pages 5 and 6 also get the page that was open). The scene's Update
+  calls one function of the page shown. Each page keeps the scene in a member.
+- **Pages 5 and 6** are a question in a window with two buttons, common messages 2 and 3 ("はい", "いいえ"), under
+  etc message 0x2E (5) or 0x2D (6). The first button leaves the scene: page 6 first calls `func_ov076_0214b890` and
+  passes the resident on in `data_0213ba74`+0x20 (scenes 0x74 or 0x69); page 5 asks for 0x1A or 0x5E. The second
+  goes back to the page that was open.
+- **The personality page (4)** has five sliders of eight steps. They set the five bytes at +0x4A of the record
+  (`func_02098d5c`), 1 to 8, 0 while unset.
+- **The profile page (2)** keeps its own text (11 `wchar_t` and a count) right after its keyboard. The keyboard
+  object is therefore 0x5FF8 bytes. Its helpers show the birthday and a four-digit number with a window's plain
+  sprites (MessageWindow +0xA9F4, five sprites that `func_020345d8` draws), and the profile in the scene's nine text
+  boxes. That number is bits 17-28 of the record's +0x50, 0xFFF for none.
+- **The voice page (3)** has six voice presets (`data_020FBAAC`, six `s16` each), a random voice (`MATH_Rand16`
+  over each value's range, `data_020FB940`), five sliders and a choice of four for +0xEE..+0xF9 of the record (six
+  `s16`, `func_02098d68`). It keeps two copies of the record: one to undo a change, one to restore on cancel.
+- **The voice page speaks the profile** with the scene's `TtsPlayer`, one part at a time (`func_ov076_02157508`,
+  etc messages 0x2F to 0x36) through `CharacterSpeechTexts`, 0x294 bytes of texts that `func_0204E4B4` makes from a
+  record. Each part goes on once the engine is idle.
+- **The star signs.** One part speaks the star sign of the birthday: `data_ov076_02158D34` holds the first day of
+  each sign in its month, from January's (21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22), and etc message 0x38 is
+  the sign that begins in January.
+- **The record's members.** The voice page copies the 0x2A4-byte record with its implicit assignment. That copy
+  goes member by member and shows overlay 109's layout of `CharacterRecord` exactly, down to twelve single bytes at
+  +0x244 and single bytes from +0x294.
+
 Not done: the other 59 functions (the scene's Init and Update, the pages' Init and Update, and the large edit
 functions), and the data.
 

@@ -265,6 +265,10 @@ notes ([ov072](notes/ov072.md), [ov098](notes/ov098.md), [wh](notes/wh.md)) have
 6. The strings of the code (literals in function bodies) are not on the list: they follow it in `.data`, in the
    order the code uses them.
 
+Measured on overlay 76: because the list is one for all three sections, adding a reference to one `.data`
+object (a table of pointers to wide literals) moved 65 of the 122 `.rodata` pool objects. So a pool laid out
+while some functions are missing has to be laid out again as their statics come in.
+
 Not settled: overlay 109's agent found that this model does not reproduce its compiled `.data`/`.bss`, and the
 best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 60) short. Test files on overlay
 109's shape are the next step. Two other things the data showed:
@@ -334,6 +338,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
+**Two registers holding one counter**
+- A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
+  i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
+  does not (overlay 76's question pages).
+
 **Branches and switches laid out differently**
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
   (`if (i != n) x++; else ...`).
@@ -347,10 +356,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
   that is rotated at level 2 is a `do { } while`.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
+- A test whose second branch the original places first (`cmp #1; beq later; cmp #2; bne end; <case 2>`) is a
+  switch with that case written first (overlay 76's voice page).
+- A loop of one iteration kept as a loop: `for (u16 i = 0; i <= 0; i++)`; `i < 1` is folded away.
 
 **Constants and arithmetic**
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
   original's registers.
+- A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
+  random number first: the generator's state is stored before the range is read (overlay 76's voice page).
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
 
