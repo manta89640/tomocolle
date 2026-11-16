@@ -725,6 +725,8 @@ static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) 
 }
 
 // The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
+// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -843,6 +845,8 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
 #pragma pop
 
 // The hair's other mesh, for the types with a texture of their own
+// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
+// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches)
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
