@@ -525,6 +525,54 @@ Not done:
 
 - The constructors are in the scene factory's file (`src/scene/SceneManager.cpp`); see "The scene constructors".
 
+## The main program from 0x0203671C to 0x02040578
+
+Cut into files by gap38-a. Measured, from the decompiled code and the delinked sections:
+
+| File | `.text` | Other sections | |
+| --- | --- | --- | --- |
+| `src/sound/ValueRamp.cpp` (end) | `0x0203671C` | `.init`, `.ctor`, `.bss` `0x0213B5C0` to `0x0213B6B0` | `gSoundManager` (0xE4 bytes) is defined in the file of `ValueRamp`: the static initialiser constructs it (`SoundSystem`'s inline constructor) and registers its destructor `0x0203671C` |
+| `src/text/TextUtil.cpp` | `0x0203673C` to `0x02039660` | `.data` `0x021102F0` to `0x0211085C` | Wide-string helpers (`include/text/TextUtil.h`): numbers in full-width digits, and text made ready for the speech engine |
+| `src/text/SpeechWindow.cpp` | `0x02039660` to `0x020398E4` | `.rodata` `0x020B5C54` (`sTextPosition`, {16, 162}) | The window of what a character says, on sprites, hidden when the speech engine is done or after a number of frames |
+| `src/save/SaveBlocks.cpp` | `0x020398E4` to `0x0203B748` | `.rodata` `0x020B5C5C` to `0x020B5CFC` | The blocks of the save data, members of `gGameData` |
+| `src/wireless/WirelessSession.cpp` | `0x0203B748` to `0x0203BCE0` | `.rodata` `0x020B5CFC` to `0x020B5D04`, `.bss` `0x0213B6B0` to `0x0213B700` | The game's layer over WH for finding a parent DS and connecting as a child (overlays 109 and 110) |
+| `src/scene/SceneManager.cpp` | `0x0203BCE0` to `0x0204AF20` | `.init` `0x020B06A0`, `.ctor` `0x020FC4E4`, `.data` `0x0211085C` to `0x02110B94`, `.bss` `0x0213B700` to `0x0213BA74` | The scene manager, the scene factory and every scene's constructor |
+
+- **Save blocks.** Each block is its data as it is in the card's backup memory (a 16-byte magic string first, a
+  checksum, `GameData::Checksum` at `0x0202CD00`, last), followed by two flags: read, and valid. Each has its place
+  in each of two slots of 0x40000 bytes. The ten magic strings are `.rodata` in an order that is not the order of
+  the functions that use them; the source declares them in the ROM's order. Two of them have hyphens:
+  "TOMODACHI-FAIRY" and "N-EAST-WEST-S". The card is locked around each access (`CARD_LockBackup`,
+  `CARD_UnlockBackup` at `0x02010594`, `0x020105A4`, with `gGameData.mCardLockId`).
+- **Wireless session.** A parent is one of this game only if its user game information (the owner's nickname, 15
+  characters) ends with the same 16-bit id as this DS's. The scene counts each parent's timer down: 600 when it is
+  found, 599 when it is seen again. `gWirelessSession` is defined in the scene manager's file: it is the first
+  object of that file's `.bss` (`0x0213B700`), before `gSceneManager`'s destructor record, and the scene
+  manager's static initialiser constructs it.
+- **The scene manager** (`gSceneManager`, 0x364 bytes, `include/SceneManager.h`): `Update` runs the scene; when it
+  is done, deletes it, unloads its overlay (`UnloadSceneOverlay`), constructs the next (`CreateScene`, which loads
+  the scene's overlay and sound group) and restores the graphics managers to the state `Init` recorded (three
+  buffers of 0x140, 0x140 and 0xD4 bytes). `RequestScene` (`0x0203C02C`) is what the overlays call. `CreateScene`'s
+  overlay ids are `overlay_id` relocations (`include/Overlay.h`).
+- **Scene constructors 0x00 to 0x26** follow `CreateScene` in id order, as those after them do (next section).
+  The class tables of `Scene` (`0x02110970`), `ObjTextBox` (VTT `0x02110864`, table `0x021108AC`) and `ObjCharBox`
+  (VTT `0x0211086C`, table `0x02110900`) are this file's, as are the main program's `TestDrawMiiAnimModel`'s
+  (`0x02110954`, D1 `0x0203E2E4`, D0 `0x0204AD88`).
+- Every scene's constructor takes the scene id (`r1`, stored at +4), including `RoomScene`, `TutorialRoomScene` and
+  `WeddingScene`'s, which the symbols had as taking nothing.
+
+Inferred: scene 0x04's overlay tests a character's body (`CharacterBodyTestScene`, the name overlay 4's agent gave
+from its code); scenes 0x1F to 0x22 are the right-job scenes after their archives `SceneRightJob` and
+`SceneRightJob2`.
+
+Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
+`FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
+`0x02037568` (8 KB, about 0x500 bytes of spilled constants), and the constructors of gap38-c's ten test scenes
+(`0x0203E320` to `0x0203EA2C`, `0x0203F654`; their headers are in main), `Scene0F` (`0x0203E748`), `RoomScene`
+(`0x0203ED10`) and `TutorialRoomScene` (`0x0203EFC0`, whose overlay headers declare base classes of their own),
+`FriendListScene` (`0x0203F350`), `Scene1E` (`0x0203F900`, which holds the shops' item list, table `0x021153BC`,
+in a derived class, table `0x021153A0`) and `VoteScene` (`0x020400F0`, a member of the class of `0x02025B5C`).
+
 ## The scene constructors (0x02040578 to 0x0204AF20)
 
 The constructors of scenes 0x27 to 0xC2, and the scene manager's `UnloadSceneOverlay` and `SetSoundGroup` after
