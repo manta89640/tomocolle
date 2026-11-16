@@ -953,3 +953,438 @@ Marriage2Scene::Marriage2Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xC2, overlay 107
 SaveErrorScene::SaveErrorScene(int sceneId) : Scene(sceneId) {}
+
+// Unloads the overlay of the scene with the id, if it has one. The cases are in the order of the original's code.
+void SceneManager::UnloadSceneOverlay(int sceneId) {
+    switch (sceneId) {
+    case 0x00:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        break;
+    case 0x01:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(0));
+        break;
+    case 0x02:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(2));
+        break;
+    case 0x03:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(3));
+        break;
+    case 0x04:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(4));
+        break;
+    case 0x05:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(5));
+        break;
+    case 0x0F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(6));
+        break;
+    case 0x0C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(1));
+        break;
+    case 0x28:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        break;
+    case 0x0D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        break;
+    case 0x29:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(109));
+        break;
+    case 0x5D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(65));
+        break;
+    case 0x7F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(66));
+        break;
+    case 0x11:
+    case 0x12:
+    case 0x13:
+    case 0x14:
+    case 0x15:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(74));
+        break;
+    case 0x6B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(73));
+        break;
+    case 0x40:
+    case 0x6C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(75));
+        break;
+    case 0x42:
+    case 0x43:
+    case 0x44:
+    case 0x6F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(76));
+        break;
+    case 0x5F:
+    case 0x60:
+    case 0x61:
+    case 0x62:
+    case 0x63:
+    case 0x64:
+    case 0x65:
+    case 0x66:
+    case 0x6A:
+    case 0x6D:
+    case 0x6E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(72));
+        break;
+    case 0x1F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(70));
+        break;
+    case 0x20:
+    case 0x21:
+    case 0x22:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(71));
+        break;
+    case 0x1D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(67));
+        break;
+    case 0x1E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(68));
+        break;
+    case 0x2C:
+    case 0x2D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(69));
+        break;
+    case 0x17:
+    case 0x7D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(77));
+        break;
+    case 0x1A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(78));
+        break;
+    case 0x2A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(79));
+        break;
+    case 0x23:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(80));
+        break;
+    case 0x30:
+    case 0x70:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(81));
+        break;
+    case 0x33:
+    case 0x73:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(82));
+        break;
+    case 0x2F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(83));
+        break;
+    case 0x35:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(84));
+        break;
+    case 0x68:
+    case 0x71:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(85));
+        break;
+    case 0x38:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(86));
+        break;
+    case 0x46:
+    case 0x47:
+    case 0x48:
+    case 0x49:
+    case 0x4A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(87));
+        break;
+    case 0x67:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(88));
+        break;
+    case 0x56:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(89));
+        break;
+    case 0x5A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(90));
+        break;
+    case 0x5E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(91));
+        break;
+    case 0x5B:
+    case 0x5C:
+    case 0xB0:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(92));
+        break;
+    case 0x69:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(108));
+        break;
+    case 0x72:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(93));
+        break;
+    case 0x74:
+    case 0x7E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(94));
+        break;
+    case 0x80:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(95));
+        break;
+    case 0xAB:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(96));
+        break;
+    case 0xC0:
+    case 0xC1:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(97));
+        break;
+    case 0xAC:
+    case 0xAD:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(98));
+        break;
+    case 0xAE:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(99));
+        break;
+    case 0xAF:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(101));
+        break;
+    case 0xB2:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(102));
+        break;
+    case 0xB3:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(103));
+        break;
+    case 0xB1:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(110));
+        break;
+    case 0xB4:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(100));
+        break;
+    case 0xB5:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(104));
+        break;
+    case 0xB6:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        break;
+    case 0x39:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(106));
+        break;
+    case 0xC2:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(107));
+        break;
+    case 0x18:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(7));
+        break;
+    case 0x19:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(8));
+        break;
+    case 0x1C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(9));
+        break;
+    case 0x2B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(10));
+        break;
+    case 0x31:
+    case 0x32:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(11));
+        break;
+    case 0x34:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(12));
+        break;
+    case 0x36:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(13));
+        break;
+    case 0x37:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(14));
+        break;
+    case 0x3A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(15));
+        break;
+    case 0x3B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(16));
+        break;
+    case 0x3C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(17));
+        break;
+    case 0x3D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(18));
+        break;
+    case 0x3E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(19));
+        break;
+    case 0x3F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(20));
+        break;
+    case 0x41:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(21));
+        break;
+    case 0x45:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(22));
+        break;
+    case 0x4B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(23));
+        break;
+    case 0x4C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(24));
+        break;
+    case 0x4D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(25));
+        break;
+    case 0x4E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(26));
+        break;
+    case 0x4F:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(27));
+        break;
+    case 0x50:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(28));
+        break;
+    case 0x51:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(29));
+        break;
+    case 0x52:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(30));
+        break;
+    case 0x53:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(31));
+        break;
+    case 0x54:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(32));
+        break;
+    case 0x55:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(33));
+        break;
+    case 0x57:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(34));
+        break;
+    case 0x58:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(35));
+        break;
+    case 0x59:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(36));
+        break;
+    case 0x75:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(37));
+        break;
+    case 0x76:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(38));
+        break;
+    case 0x77:
+    case 0x78:
+    case 0x79:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(39));
+        break;
+    case 0x7A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(40));
+        break;
+    case 0x7B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(41));
+        break;
+    case 0x7C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(42));
+        break;
+    case 0x81:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(43));
+        break;
+    case 0x82:
+    case 0x83:
+    case 0x84:
+    case 0x85:
+    case 0x86:
+    case 0x87:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(44));
+        break;
+    case 0x88:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(45));
+        break;
+    case 0x89:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(46));
+        break;
+    case 0x8A:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(47));
+        break;
+    case 0x8B:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(48));
+        break;
+    case 0x8C:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(49));
+        break;
+    case 0x8D:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(50));
+        break;
+    case 0x8E:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(51));
+        break;
+    case 0x8F:
+    case 0x90:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(52));
+        break;
+    case 0x91:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(53));
+        break;
+    case 0x92:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(54));
+        break;
+    case 0x93:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(55));
+        break;
+    case 0x94:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(56));
+        break;
+    case 0x95:
+    case 0x96:
+    case 0x97:
+    case 0x98:
+    case 0x99:
+    case 0x9A:
+    case 0x9B:
+    case 0x9C:
+    case 0x9D:
+    case 0x9E:
+    case 0x9F:
+    case 0xA0:
+    case 0xA1:
+    case 0xA2:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(57));
+        break;
+    case 0xA3:
+    case 0xA4:
+    case 0xA5:
+    case 0xA6:
+    case 0xA7:
+    case 0xA8:
+    case 0xA9:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(58));
+        break;
+    case 0xAA:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(59));
+        break;
+    case 0xB7:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(60));
+        break;
+    case 0xB8:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(61));
+        break;
+    case 0xB9:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(62));
+        break;
+    case 0xBA:
+    case 0xBB:
+    case 0xBC:
+    case 0xBD:
+    case 0xBE:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(63));
+        break;
+    case 0xBF:
+        FS_UnloadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(64));
+        break;
+    }
+}
+
+// Loads a sound group into the sound heap, keeping it if it is the one loaded: -1 unloads, -2 keeps what is loaded
+void SceneManager::SetSoundGroup(int group) {
+    if (group == -1) {
+        gSoundManager.StopAllSeq(0);
+        gSoundManager.LoadHeapState(0);
+        mSoundGroup = group;
+        return;
+    }
+    if (group == mSoundGroup || group == -2) {
+        if (gSoundManager.GetHeapLevel() > 1) {
+            gSoundManager.LoadHeapState(1);
+        }
+        return;
+    }
+    gSoundManager.StopAllSeq(0);
+    gSoundManager.LoadHeapState(0);
+    mSoundGroup = group;
+    gSoundManager.LoadGroup(group);
+    gSoundManager.SaveHeapState(1);
+}
