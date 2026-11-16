@@ -4,72 +4,72 @@
 
 #include "NFL.h"
 
-NFLWork *data_02145360;
+NFLWork *sNFLWork;
 
 // The reader of the library's resource streams: one byte, advancing the stream
-u8 func_02069bf4(const u8 **stream) {
+u8 NFLi_ReadU8(const u8 **stream) {
     const u8 *p = *stream;
     u8 value = *p++;
     *stream = p;
     return value;
 }
 
-u16 func_02069c08(const u8 **stream) {
-    u8 lo = func_02069bf4(stream);
-    u8 hi = func_02069bf4(stream);
+u16 NFLi_ReadU16(const u8 **stream) {
+    u8 lo = NFLi_ReadU8(stream);
+    u8 hi = NFLi_ReadU8(stream);
     return lo | (hi << 8);
 }
 
-s16 func_02069c30(const u8 **stream) {
-    u8 lo = func_02069bf4(stream);
-    u8 hi = func_02069bf4(stream);
+s16 NFLi_ReadS16(const u8 **stream) {
+    u8 lo = NFLi_ReadU8(stream);
+    u8 hi = NFLi_ReadU8(stream);
     return lo | (hi << 8);
 }
 
-u32 func_02069c58(const u8 **stream) {
-    u8 b0 = func_02069bf4(stream);
-    u8 b1 = func_02069bf4(stream);
-    u8 b2 = func_02069bf4(stream);
-    u8 b3 = func_02069bf4(stream);
+u32 NFLi_ReadU32(const u8 **stream) {
+    u8 b0 = NFLi_ReadU8(stream);
+    u8 b1 = NFLi_ReadU8(stream);
+    u8 b2 = NFLi_ReadU8(stream);
+    u8 b3 = NFLi_ReadU8(stream);
     return b0 | ((b1 << 8) | ((b3 << 24) | (b2 << 16)));
 }
 
-s32 func_02069c9c(const u8 **stream) {
-    u8 b0 = func_02069bf4(stream);
-    u8 b1 = func_02069bf4(stream);
-    u8 b2 = func_02069bf4(stream);
-    u8 b3 = func_02069bf4(stream);
+s32 NFLi_ReadS32(const u8 **stream) {
+    u8 b0 = NFLi_ReadU8(stream);
+    u8 b1 = NFLi_ReadU8(stream);
+    u8 b2 = NFLi_ReadU8(stream);
+    u8 b3 = NFLi_ReadU8(stream);
     return b0 | ((b1 << 8) | ((b3 << 24) | (b2 << 16)));
 }
 
 // A count, then three halfwords for each
-u16 func_02069ce0(const u8 **stream, s16 *out) {
+u16 NFLi_ReadVec16Array(const u8 **stream, s16 *out) {
     int i;
-    u16 count = func_02069c08(stream);
+    u16 count = NFLi_ReadU16(stream);
     int n = count * 3;
 
     for (i = 0; i < n; i++) {
-        out[i] = func_02069c30(stream);
+        out[i] = NFLi_ReadS16(stream);
     }
     return count;
 }
 
 // A count, then two halfwords for each
-u16 func_02069d28(const u8 **stream, s16 *out) {
+u16 NFLi_ReadTexCoordArray(const u8 **stream, s16 *out) {
     int i;
-    u16 count = func_02069c08(stream);
+    u16 count = NFLi_ReadU16(stream);
     int n = count * 2;
 
     for (i = 0; i < n; i++) {
-        out[i] = func_02069c30(stream);
+        out[i] = NFLi_ReadS16(stream);
     }
     return count;
 }
 
-int func_02069d70(const u8 **stream) {
+int NFLi_ReadPrimitive(const u8 **stream) {
     int type = 2;
 
-    switch (func_02069bf4(stream)) {
+    switch (NFLi_ReadU8(stream)) {
     case 0x90:
         type = 0;
         break;
@@ -95,17 +95,17 @@ typedef struct NFLColor {
     u32 b;
 } NFLColor;
 
-extern const NFLColor data_020b6678[];
-extern const NFLColor data_020b65e8[];
-extern const NFLColor data_020b6630[];
+extern const NFLColor sNFLHairColors[];
+extern const NFLColor sNFLEyeColors[];
+extern const NFLColor sNFLMouthColors[];
 
 #define NFL_RGB(r, g, b) GX_RGB((r) >> 3, (g) >> 3, (b) >> 3)
 
-// A palette of 16: colour index of data_020b6678, then darker by 5% a step down to 60%
-void func_02069de4(u16 *palette, int index) {
-    u32 r = data_020b6678[index].r;
-    u32 g = data_020b6678[index].g;
-    u32 b = data_020b6678[index].b;
+// A palette of 16: colour index of sNFLHairColors, then darker by 5% a step down to 60%
+void NFLi_MakeHairPltt(u16 *palette, int index) {
+    u32 r = sNFLHairColors[index].r;
+    u32 g = sNFLHairColors[index].g;
+    u32 b = sNFLHairColors[index].b;
 
     palette[0] = 0;
     palette[1] = NFL_RGB(r, g, b);
@@ -125,12 +125,12 @@ void func_02069de4(u16 *palette, int index) {
     palette[15] = 0;
 }
 
-// A palette of 16: colour index of data_020b65e8, 70% and 30% of it, 30% and 70% of the way to white, then fixed
+// A palette of 16: colour index of sNFLEyeColors, 70% and 30% of it, 30% and 70% of the way to white, then fixed
 // colours
-void func_0206a014(u16 *palette, int index) {
-    u32 r = data_020b65e8[index].r;
-    u32 g = data_020b65e8[index].g;
-    u32 b = data_020b65e8[index].b;
+void NFLi_MakeEyePltt(u16 *palette, int index) {
+    u32 r = sNFLEyeColors[index].r;
+    u32 g = sNFLEyeColors[index].g;
+    u32 b = sNFLEyeColors[index].b;
 
     palette[0] = 0;
     palette[1] = NFL_RGB(r, g, b);
@@ -150,14 +150,14 @@ void func_0206a014(u16 *palette, int index) {
     palette[15] = 0;
 }
 
-// A palette of 16: the colours 2 * index and 2 * index + 1 of data_020b6630 and their mean, then fixed colours
-void func_0206a1b4(u16 *palette, int index) {
-    u32 r0 = data_020b6630[index * 2].r;
-    u32 g0 = data_020b6630[index * 2].g;
-    u32 b0 = data_020b6630[index * 2].b;
-    u32 r1 = data_020b6630[index * 2 + 1].r;
-    u32 g1 = data_020b6630[index * 2 + 1].g;
-    u32 b1 = data_020b6630[index * 2 + 1].b;
+// A palette of 16: the colours 2 * index and 2 * index + 1 of sNFLMouthColors and their mean, then fixed colours
+void NFLi_MakeMouthPltt(u16 *palette, int index) {
+    u32 r0 = sNFLMouthColors[index * 2].r;
+    u32 g0 = sNFLMouthColors[index * 2].g;
+    u32 b0 = sNFLMouthColors[index * 2].b;
+    u32 r1 = sNFLMouthColors[index * 2 + 1].r;
+    u32 g1 = sNFLMouthColors[index * 2 + 1].g;
+    u32 b1 = sNFLMouthColors[index * 2 + 1].b;
 
     palette[0] = 0;
     palette[1] = NFL_RGB(r0, g0, b0);
@@ -178,35 +178,35 @@ void func_0206a1b4(u16 *palette, int index) {
 }
 
 // from + (to - from) * weight / (rest + weight), in either direction
-u32 func_0206a2a4(u32 from, u32 to, u32 rest, u32 weight) {
+u32 NFLi_BlendComponent(u32 from, u32 to, u32 rest, u32 weight) {
     if (from < to) {
         return from + (to - from) * weight / (rest + weight);
     }
     return from - (from - to) * weight / (rest + weight);
 }
 
-extern const NFLColor data_020b65a0[];
+extern const NFLColor sNFLFaceColors[];
 
 #define NFL_LERP_RGB(r, g, b, r2, g2, b2, rest, weight)                                                              \
-    NFL_RGB(func_0206a2a4(r, r2, rest, weight), func_0206a2a4(g, g2, rest, weight), func_0206a2a4(b, b2, rest, weight))
+    NFL_RGB(NFLi_BlendComponent(r, r2, rest, weight), NFLi_BlendComponent(g, g2, rest, weight), NFLi_BlendComponent(b, b2, rest, weight))
 
-// A palette of 16: colour index of data_020b65a0, and four ramps from it to four colours made from it
-void func_0206a2e4(u16 *palette, int index) {
-    u32 r = data_020b65a0[index].r;
-    u32 g = data_020b65a0[index].g;
-    u32 b = data_020b65a0[index].b;
-    u32 r1 = func_0206a2a4(r, 0, 3, 1);
-    u32 g1 = func_0206a2a4(g, 0, 3, 1);
-    u32 b1 = func_0206a2a4(b, 0, 3, 1);
-    u32 r2 = func_0206a2a4(r, 0, 3, 1);
-    u32 g2 = func_0206a2a4(g, 0xFF, 3, 1);
-    u32 b2 = func_0206a2a4(b, 0xDE, 3, 1);
-    u32 r3 = func_0206a2a4(r, 0xFF, 3, 1);
-    u32 g3 = func_0206a2a4(g, 0x92, 3, 1);
-    u32 b3 = func_0206a2a4(b, 0x88, 3, 1);
-    u32 r4 = func_0206a2a4(r, 0x55, 3, 2);
-    u32 g4 = func_0206a2a4(g, 0x6D, 3, 2);
-    u32 b4 = func_0206a2a4(b, 0x66, 3, 2);
+// A palette of 16: colour index of sNFLFaceColors, and four ramps from it to four colours made from it
+void NFLi_MakeFacePltt(u16 *palette, int index) {
+    u32 r = sNFLFaceColors[index].r;
+    u32 g = sNFLFaceColors[index].g;
+    u32 b = sNFLFaceColors[index].b;
+    u32 r1 = NFLi_BlendComponent(r, 0, 3, 1);
+    u32 g1 = NFLi_BlendComponent(g, 0, 3, 1);
+    u32 b1 = NFLi_BlendComponent(b, 0, 3, 1);
+    u32 r2 = NFLi_BlendComponent(r, 0, 3, 1);
+    u32 g2 = NFLi_BlendComponent(g, 0xFF, 3, 1);
+    u32 b2 = NFLi_BlendComponent(b, 0xDE, 3, 1);
+    u32 r3 = NFLi_BlendComponent(r, 0xFF, 3, 1);
+    u32 g3 = NFLi_BlendComponent(g, 0x92, 3, 1);
+    u32 b3 = NFLi_BlendComponent(b, 0x88, 3, 1);
+    u32 r4 = NFLi_BlendComponent(r, 0x55, 3, 2);
+    u32 g4 = NFLi_BlendComponent(g, 0x6D, 3, 2);
+    u32 b4 = NFLi_BlendComponent(b, 0x66, 3, 2);
 
     palette[0] = NFL_RGB(r, g, b);
     palette[1] = NFL_LERP_RGB(r, g, b, r1, g1, b1, 75, 25);
@@ -226,13 +226,13 @@ void func_0206a2e4(u16 *palette, int index) {
     palette[15] = 0;
 }
 
-extern const NFLColor data_020b66d8[];
+extern const NFLColor sNFLFavoriteColors[];
 
-// A palette of 16: colour index of data_020b66d8, then 84%, 68% and 50% of it
-void func_0206a894(u16 *palette, int index) {
-    u32 r = data_020b66d8[index].r;
-    u32 g = data_020b66d8[index].g;
-    u32 b = data_020b66d8[index].b;
+// A palette of 16: colour index of sNFLFavoriteColors, then 84%, 68% and 50% of it
+void NFLi_MakeFavoriteColorPltt(u16 *palette, int index) {
+    u32 r = sNFLFavoriteColors[index].r;
+    u32 g = sNFLFavoriteColors[index].g;
+    u32 b = sNFLFavoriteColors[index].b;
 
     palette[0] = NFL_RGB(r, g, b);
     palette[1] = NFL_RGB(r * 84 / 100, g * 84 / 100, b * 84 / 100);
@@ -252,13 +252,13 @@ void func_0206a894(u16 *palette, int index) {
     palette[15] = 0;
 }
 
-extern const NFLColor data_020b6558[];
+extern const NFLColor sNFLGlassesColors[];
 
-// A palette of 16: colour index of data_020b6558, half of it, and 50% and 25% of the way to white
-void func_0206a99c(u16 *palette, int index) {
-    u32 r = data_020b6558[index].r;
-    u32 g = data_020b6558[index].g;
-    u32 b = data_020b6558[index].b;
+// A palette of 16: colour index of sNFLGlassesColors, half of it, and 50% and 25% of the way to white
+void NFLi_MakeGlassesPltt(u16 *palette, int index) {
+    u32 r = sNFLGlassesColors[index].r;
+    u32 g = sNFLGlassesColors[index].g;
+    u32 b = sNFLGlassesColors[index].b;
 
     palette[0] = 0;
     palette[1] = NFL_RGB(r, g, b);
@@ -279,7 +279,7 @@ void func_0206a99c(u16 *palette, int index) {
 }
 
 // The glasses
-int func_0206aaec(NFLMakeCtx *ctx) {
+int NFLi_PrepareGlasses(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -309,7 +309,7 @@ int func_0206aaec(NFLMakeCtx *ctx) {
 }
 
 // The beard
-int func_0206abb4(NFLMakeCtx *ctx) {
+int NFLi_PrepareBeard(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -347,7 +347,7 @@ int func_0206abb4(NFLMakeCtx *ctx) {
 }
 
 // The hair
-int func_0206acc0(NFLMakeCtx *ctx) {
+int NFLi_PrepareHair(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -391,7 +391,7 @@ int func_0206acc0(NFLMakeCtx *ctx) {
 }
 
 // The hair again, for the two types (0x22 and 0x39) that the other leaves alone
-int func_0206ae14(NFLMakeCtx *ctx) {
+int NFLi_PrepareFavoriteColorHair(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -428,7 +428,7 @@ int func_0206ae14(NFLMakeCtx *ctx) {
 }
 
 // The face's texture
-int func_0206af1c(NFLMakeCtx *ctx) {
+int NFLi_PrepareFaceTexture(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -462,7 +462,7 @@ int func_0206af1c(NFLMakeCtx *ctx) {
 }
 
 // The nose
-int func_0206b024(NFLMakeCtx *ctx) {
+int NFLi_PrepareNose(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -490,7 +490,7 @@ int func_0206b024(NFLMakeCtx *ctx) {
 }
 
 // The beard's mesh
-int func_0206b0d8(NFLMakeCtx *ctx) {
+int NFLi_MakeBeardMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x5C4];
@@ -515,15 +515,15 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
     fx16 z;
     int tc;
 
-    stream = func_0206cf6c(0, type);
+    stream = NFLi_GetResourceItem(0, type);
     s = type > 1 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
     t = type > 1 ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     if (obj->unk90 == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
@@ -538,24 +538,24 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[1].x;
     position.y = ctx->unk0[1].y;
     position.z = ctx->unk0[1].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         if (type < 2) {
             G3C_TexCoord(&ctx->unk64, 0, 0x8000);
         }
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             if (type > 1) {
                 G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -580,7 +580,7 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
 }
 
 // The face's mesh, and the three positions the other meshes are placed at
-int func_0206b3f4(NFLMakeCtx *ctx) {
+int NFLi_MakeFaceMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x17C];
@@ -603,24 +603,24 @@ int func_0206b3f4(NFLMakeCtx *ctx) {
     fx16 z;
     int tc;
 
-    stream = func_0206cf6c(4, mii->faceType);
+    stream = NFLi_GetResourceItem(4, mii->faceType);
     s = mii->faceTexture != 0 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
     t = mii->faceTexture != 0 ? GX_TEXSIZE_T64 : GX_TEXSIZE_T8;
-    ctx->unk0[0].x = func_02069c9c(&stream);
-    ctx->unk0[0].y = func_02069c9c(&stream);
-    ctx->unk0[0].z = func_02069c9c(&stream);
-    ctx->unk0[1].x = func_02069c9c(&stream);
-    ctx->unk0[1].y = func_02069c9c(&stream);
-    ctx->unk0[1].z = func_02069c9c(&stream);
-    ctx->unk0[2].x = func_02069c9c(&stream);
-    ctx->unk0[2].y = func_02069c9c(&stream);
-    ctx->unk0[2].z = func_02069c9c(&stream);
-    if (func_02069ce0(&stream, vertices) == 0) {
+    ctx->unk0[0].x = NFLi_ReadS32(&stream);
+    ctx->unk0[0].y = NFLi_ReadS32(&stream);
+    ctx->unk0[0].z = NFLi_ReadS32(&stream);
+    ctx->unk0[1].x = NFLi_ReadS32(&stream);
+    ctx->unk0[1].y = NFLi_ReadS32(&stream);
+    ctx->unk0[1].z = NFLi_ReadS32(&stream);
+    ctx->unk0[2].x = NFLi_ReadS32(&stream);
+    ctx->unk0[2].y = NFLi_ReadS32(&stream);
+    ctx->unk0[2].z = NFLi_ReadS32(&stream);
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     if (obj->unk90 == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
@@ -632,21 +632,21 @@ int func_0206b3f4(NFLMakeCtx *ctx) {
         G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[1].unk4, format);
     }
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         if (mii->faceTexture == 0) {
             G3C_TexCoord(&ctx->unk64, 0x8000, 0);
         }
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             if (mii->faceTexture != 0) {
                 G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
             }
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -671,7 +671,7 @@ int func_0206b3f4(NFLMakeCtx *ctx) {
 
 // The hair's mesh
 #pragma optimization_level 2
-int func_0206b740(NFLMakeCtx *ctx) {
+int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x17C];
@@ -696,19 +696,19 @@ int func_0206b740(NFLMakeCtx *ctx) {
     int n;
     int tc;
 
-    stream = func_0206cf6c(0x12, mii->hairType);
+    stream = NFLi_GetResourceItem(0x12, mii->hairType);
     bald = mii->hairType == 0x22 || mii->hairType == 0x39;
     s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
     t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
     obj->unk94[1].cmd = NULL;
     obj->unk94[1].param = NULL;
     obj->unk94[1].unk8 = 0;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     if (obj->unk90 == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
@@ -727,7 +727,7 @@ int func_0206b740(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[2].x;
     position.y = ctx->unk0[2].y;
     position.z = ctx->unk0[2].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
@@ -740,21 +740,21 @@ int func_0206b740(NFLMakeCtx *ctx) {
         G3C_LoadMtx43(&ctx->unk64, &mtx);
     }
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         if (!bald) {
             G3C_TexCoord(&ctx->unk64, 0x8000, 0x8000);
         }
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             if (bald) {
                 G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -779,7 +779,7 @@ int func_0206b740(NFLMakeCtx *ctx) {
 
 // The hair's other mesh, for the types with a texture of their own
 #pragma optimization_level 2
-int func_0206bb24(NFLMakeCtx *ctx) {
+int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x5C4];
@@ -806,7 +806,7 @@ int func_0206bb24(NFLMakeCtx *ctx) {
     int tc;
 
     type = mii->hairType;
-    stream = func_0206cf6c(9, type);
+    stream = NFLi_GetResourceItem(9, type);
     bald = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
            type == 0x45 || type == 0x47;
     s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
@@ -814,12 +814,12 @@ int func_0206bb24(NFLMakeCtx *ctx) {
     obj->unk94[0].cmd = NULL;
     obj->unk94[0].param = NULL;
     obj->unk94[0].unk8 = 0;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     if (obj->unk90 == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
@@ -838,7 +838,7 @@ int func_0206bb24(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[2].x;
     position.y = ctx->unk0[2].y;
     position.z = ctx->unk0[2].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
@@ -851,21 +851,21 @@ int func_0206bb24(NFLMakeCtx *ctx) {
         G3C_LoadMtx43(&ctx->unk64, &mtx);
     }
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         if (!bald) {
             G3C_TexCoord(&ctx->unk64, 0, 0);
         }
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             if (bald) {
                 G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -890,7 +890,7 @@ int func_0206bb24(NFLMakeCtx *ctx) {
 
 // The hair's third mesh, untextured
 #pragma optimization_level 2
-int func_0206bfa4(NFLMakeCtx *ctx) {
+int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     VecFx32 position;
@@ -910,16 +910,16 @@ int func_0206bfa4(NFLMakeCtx *ctx) {
     int v;
     int n;
 
-    stream = func_0206cf6c(6, mii->hairType);
+    stream = NFLi_GetResourceItem(6, mii->hairType);
     format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
     obj->unk94[2].cmd = NULL;
     obj->unk94[2].param = NULL;
     obj->unk94[2].unk8 = 0;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    polygons = NFLi_ReadU8(&stream);
     obj->unk94[2].cmd = ctx->unk64.curr_cmd;
     obj->unk94[2].param = ctx->unk64.curr_param;
     obj->unk94[2].unk8 = mii->hairFlip;
@@ -933,7 +933,7 @@ int func_0206bfa4(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[2].x;
     position.y = ctx->unk0[2].y;
     position.z = ctx->unk0[2].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
@@ -946,15 +946,15 @@ int func_0206bfa4(NFLMakeCtx *ctx) {
         G3C_LoadMtx43(&ctx->unk64, &mtx);
     }
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         G3C_TexCoord(&ctx->unk64, 0x8000, 0);
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -978,7 +978,7 @@ int func_0206bfa4(NFLMakeCtx *ctx) {
 #pragma optimization_level reset
 
 // The glasses' mesh
-int func_0206c2f8(NFLMakeCtx *ctx) {
+int NFLi_MakeGlassesMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x17C];
@@ -1003,7 +1003,7 @@ int func_0206c2f8(NFLMakeCtx *ctx) {
     fx16 z;
     int tc;
 
-    stream = func_0206cf6c(7, 0);
+    stream = NFLi_GetResourceItem(7, 0);
     format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
     y0 = (11 - mii->glassesY) * 114 + 387;
     scale = (mii->glassesScale - 4) * 633 + 3987;
@@ -1013,12 +1013,12 @@ int func_0206c2f8(NFLMakeCtx *ctx) {
     if (mii->glassesType == 0) {
         return 0;
     }
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     obj->unk94[3].cmd = ctx->unk64.curr_cmd;
     obj->unk94[3].param = ctx->unk64.curr_param;
     obj->unk94[3].unk8 = 0;
@@ -1032,20 +1032,20 @@ int func_0206c2f8(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[0].x;
     position.y = ctx->unk0[0].y + y0;
     position.z = ctx->unk0[0].z + 0xA3;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     G3C_Scale(&ctx->unk64, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -1070,7 +1070,7 @@ int func_0206c2f8(NFLMakeCtx *ctx) {
 }
 
 // The nose's mesh
-int func_0206c65c(NFLMakeCtx *ctx) {
+int NFLi_MakeNoseMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     s16 texCoords[0x17C];
@@ -1095,16 +1095,16 @@ int func_0206c65c(NFLMakeCtx *ctx) {
     fx16 z;
     int tc;
 
-    stream = func_0206cf6c(0x10, mii->noseType);
+    stream = NFLi_GetResourceItem(0x10, mii->noseType);
     format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
     y0 = (mii->noseY - 8) * -114 + 32;
     scale = (mii->noseScale - 4) * 685 + 4377;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    func_02069d28(&stream, texCoords);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    NFLi_ReadTexCoordArray(&stream, texCoords);
+    polygons = NFLi_ReadU8(&stream);
     G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S32, GX_TEXSIZE_T64, GX_TEXREPEAT_S, GX_TEXFLIP_S,
                       GX_TEXPLTTCOLOR0_TRNS, ctx->unk2C[6].unk0);
     if (format != GX_TEXFMT_DIRECT) {
@@ -1114,20 +1114,20 @@ int func_0206c65c(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[0].x;
     position.y = ctx->unk0[0].y + y0;
     position.z = ctx->unk0[0].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     G3C_Scale(&ctx->unk64, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            n = func_02069bf4(&stream) * 3;
-            tc = func_02069bf4(&stream) * 2;
+            v = NFLi_ReadU8(&stream) * 3;
+            n = NFLi_ReadU8(&stream) * 3;
+            tc = NFLi_ReadU8(&stream) * 2;
             G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -1152,7 +1152,7 @@ int func_0206c65c(NFLMakeCtx *ctx) {
 }
 
 // The nose's other mesh, untextured
-int func_0206c964(NFLMakeCtx *ctx) {
+int NFLi_MakeNoseSkinMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
     VecFx32 position;
@@ -1174,15 +1174,15 @@ int func_0206c964(NFLMakeCtx *ctx) {
     fx16 y;
     fx16 z;
 
-    stream = func_0206cf6c(0xF, mii->noseType);
+    stream = NFLi_GetResourceItem(0xF, mii->noseType);
     format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
     y0 = (mii->noseY - 8) * -114 + 32;
     scale = (mii->noseScale - 4) * 685 + 4377;
-    if (func_02069ce0(&stream, vertices) == 0) {
+    if (NFLi_ReadVec16Array(&stream, vertices) == 0) {
         return 0;
     }
-    func_02069ce0(&stream, normals);
-    polygons = func_02069bf4(&stream);
+    NFLi_ReadVec16Array(&stream, normals);
+    polygons = NFLi_ReadU8(&stream);
     G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
                       GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
     if (obj->unk90 != 7) {
@@ -1192,18 +1192,18 @@ int func_0206c964(NFLMakeCtx *ctx) {
     position.x = ctx->unk0[0].x;
     position.y = ctx->unk0[0].y + y0;
     position.z = ctx->unk0[0].z;
-    func_02074444(obj, &translation, &position);
+    NFLi_MapVecFx32(obj, &translation, &position);
     G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
     G3C_Scale(&ctx->unk64, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
-        count = func_02069bf4(&stream);
-        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        count = NFLi_ReadU8(&stream);
+        func_02005124(&ctx->unk64, NFLi_ReadPrimitive(&stream));
         G3C_TexCoord(&ctx->unk64, 0x8000, 0);
         for (j = 0; j < count; j++) {
-            v = func_02069bf4(&stream) * 3;
-            func_020743e4(obj, &normal, (const VecFx16 *)&normals[func_02069bf4(&stream) * 3]);
+            v = NFLi_ReadU8(&stream) * 3;
+            NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[NFLi_ReadU8(&stream) * 3]);
             G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
-            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (x == vertex.x) {
                     G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
@@ -1227,11 +1227,11 @@ int func_0206c964(NFLMakeCtx *ctx) {
     return 1;
 }
 
-extern const u16 data_020b6524[];
-extern const u16 data_020b6530[];
-extern const u16 data_020b6540[];
+extern const u16 sNFLFaceGXColors[];
+extern const u16 sNFLHairGXColors[];
+extern const u16 sNFLFavoriteGXColors[];
 
-void func_0206cc30(u16 *palette) {
+void NFLi_MakeColorTexture(u16 *palette) {
     int i;
 
     for (i = 0; i < 4; i++) {
@@ -1241,38 +1241,38 @@ void func_0206cc30(u16 *palette) {
     DC_FlushRange(palette, 0x10);
 }
 
-void func_0206cc6c(u16 *palette, const s16 *params) {
-    palette[0] = data_020b6530[params[4]];
-    palette[1] = data_020b6524[params[2]];
-    palette[2] = data_020b6530[params[14]];
-    palette[3] = data_020b6540[params[0]];
+void NFLi_MakeColorTexturePltt(u16 *palette, const s16 *params) {
+    palette[0] = sNFLHairGXColors[params[4]];
+    palette[1] = sNFLFaceGXColors[params[2]];
+    palette[2] = sNFLHairGXColors[params[14]];
+    palette[3] = sNFLFavoriteGXColors[params[0]];
     DC_FlushRange(palette, 0x10);
 }
 
-void func_0206cd9c(u16 *palette, const s16 *params) {
+void NFLi_MakeColorTextureDirect(u16 *palette, const s16 *params) {
     int i;
     int j;
 
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 4; j++) {
-            palette[i * 8 + j] = data_020b6530[params[4]];
+            palette[i * 8 + j] = sNFLHairGXColors[params[4]];
         }
         for (j = 4; j < 8; j++) {
-            palette[i * 8 + j] = data_020b6524[params[2]];
+            palette[i * 8 + j] = sNFLFaceGXColors[params[2]];
         }
     }
     for (i = 4; i < 8; i++) {
         for (j = 0; j < 4; j++) {
-            palette[i * 8 + j] = data_020b6530[params[14]];
+            palette[i * 8 + j] = sNFLHairGXColors[params[14]];
         }
         for (j = 4; j < 8; j++) {
-            palette[i * 8 + j] = data_020b6540[params[0]];
+            palette[i * 8 + j] = sNFLFavoriteGXColors[params[0]];
         }
     }
     DC_FlushRange(palette, 0x80);
 }
 
-int func_0206ccd4(NFLMakeCtx *ctx) {
+int NFLi_PrepareColorTexturePltt(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -1290,7 +1290,7 @@ int func_0206ccd4(NFLMakeCtx *ctx) {
     return 0;
 }
 
-int func_0206cea8(NFLMakeCtx *ctx) {
+int NFLi_PrepareColorTextureDirect(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -1305,36 +1305,36 @@ int func_0206cea8(NFLMakeCtx *ctx) {
     return 0;
 }
 
-int func_0206cf48(NFLMakeCtx *ctx) {
+int NFLi_PrepareColorTexture(NFLMakeCtx *ctx) {
     if (ctx->unk1C8->unk90 == 7) {
-        return func_0206cea8(ctx);
+        return NFLi_PrepareColorTextureDirect(ctx);
     }
-    return func_0206ccd4(ctx);
+    return NFLi_PrepareColorTexturePltt(ctx);
 }
 
 // The stream of item index of category in the library's resource
-const u8 *func_0206cf6c(int category, u32 index) {
-    const u8 *header = data_02145360->unk64;
+const u8 *NFLi_GetResourceItem(int category, u32 index) {
+    const u8 *header = sNFLWork->unk64;
     const u8 *items;
     u32 offsets[20];
     int i;
     u16 count;
     u32 offset;
 
-    func_02069c08(&header);
-    func_02069c08(&header);
+    NFLi_ReadU16(&header);
+    NFLi_ReadU16(&header);
     for (i = 0; i < 20; i++) {
-        offsets[i] = func_02069c58(&header);
+        offsets[i] = NFLi_ReadU32(&header);
     }
-    items = data_02145360->unk64 + offsets[category];
-    count = func_02069c08(&items);
-    func_02069c08(&items);
+    items = sNFLWork->unk64 + offsets[category];
+    count = NFLi_ReadU16(&items);
+    NFLi_ReadU16(&items);
     offset = 0;
     if (count < index) {
         return NULL;
     }
     for (i = 0; i < count; i++) {
-        u32 value = func_02069c58(&items);
+        u32 value = NFLi_ReadU32(&items);
         if (i == index) {
             offset = value;
         }
@@ -1343,7 +1343,7 @@ const u8 *func_0206cf6c(int category, u32 index) {
 }
 
 // Whether every field of a Mii's data is in its range
-BOOL func_0206d040(const NFLCharData *mii) {
+BOOL NFLi_IsFaceDataInRange(const NFLCharData *mii) {
     if (mii->faceType > 7) {
         return FALSE;
     }
@@ -1464,7 +1464,7 @@ BOOL func_0206d040(const NFLCharData *mii) {
     return TRUE;
 }
 
-void func_0206d374(NFLObj *obj) {
+void NFLi_ResetKeptFields(NFLObj *obj) {
     s16 *params = obj->unk180;
 
     params[0] = -1;
@@ -1488,7 +1488,7 @@ void func_0206d374(NFLObj *obj) {
 }
 
 // Keeps the fields of the Mii's data that its display lists were made from
-void func_0206d3cc(NFLObj *obj, const NFLCharData *mii) {
+void NFLi_KeepFields(NFLObj *obj, const NFLCharData *mii) {
     s16 *params = obj->unk180;
 
     params[0] = mii->favoriteColor;
@@ -1519,13 +1519,13 @@ typedef struct NFLAxes {
     u8 unkE;
 } NFLAxes;
 
-extern int (*const data_02112140[])(NFLMakeCtx *ctx);
-extern const NFLAxes data_0211215c;
+extern int (*const sNFLPartPreparers[])(NFLMakeCtx *ctx);
+extern const NFLAxes sNFLDefaultAxes;
 
 // Makes object index's display lists from a Mii's data
 #pragma optimization_level 2
 #pragma opt_common_subs off
-int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
+int NFL_MakeFace(int index, const NFLCharData *mii, u32 unk) {
     OSIntrMode enabled;
     NFLMakeCtx ctx;
     NFLObj *obj;
@@ -1538,29 +1538,29 @@ int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
     if (mii == NULL) {
         return 8;
     }
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    if (!func_020735dc() || !func_020735fc()) {
+    if (!NFLi_HasResource() || !NFLi_HasBuffer()) {
         return 4;
     }
-    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+    if (sNFLWork->unk8C == 1 || sNFLWork->unk8C == 3) {
         return 6;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
     entries = obj->unk1A4;
     entries2 = obj->unk228;
-    if (!func_0206d040(mii) || !func_020731e0(mii)) {
+    if (!NFLi_IsFaceDataInRange(mii) || !NFLi_IsValidCharData(mii)) {
         return 7;
     }
     ctx.unk1C8 = obj;
     ctx.unk1CC = mii;
-    obj->unk90 = data_02145360->unk68;
+    obj->unk90 = sNFLWork->unk68;
     obj->unk168 = 0;
-    obj->unk16C = data_02145360->unk71;
+    obj->unk16C = sNFLWork->unk71;
     obj->unk0 = 0;
     obj->unk4 = 0;
     obj->unk28 = unk;
@@ -1569,11 +1569,11 @@ int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
     obj->unk178 = 0;
     if (obj->unk170 == 4) {
         if (obj->unk90 == 7) {
-            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x6880;
-            obj->unkD8 = ctx.unk28 = data_02145360->unkC;
+            obj->unkD4 = ctx.unk24 = sNFLWork->unk8 + index * 0x6880;
+            obj->unkD8 = ctx.unk28 = sNFLWork->unkC;
         } else {
-            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x1A10;
-            obj->unkD8 = ctx.unk28 = data_02145360->unkC + index * 0x130;
+            obj->unkD4 = ctx.unk24 = sNFLWork->unk8 + index * 0x1A10;
+            obj->unkD8 = ctx.unk28 = sNFLWork->unkC + index * 0x130;
         }
         for (i = 0; i < 11; i++) {
             entries[i].value = -1;
@@ -1583,21 +1583,21 @@ int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
             entries2[i].value = -1;
             entries2[i].state = 7;
         }
-        func_0206d374(obj);
+        NFLi_ResetKeptFields(obj);
     } else {
         ctx.unk24 = obj->unkD4;
         ctx.unk28 = obj->unkD8;
     }
-    obj->unkD0 = data_0211215c.unkC;
-    obj->unkD1 = data_0211215c.unkD;
-    obj->unkD2 = data_0211215c.unkE;
-    obj->unkC4.x = data_0211215c.unk0.x;
-    obj->unkC4.y = data_0211215c.unk0.y;
-    obj->unkC4.z = data_0211215c.unk0.z;
+    obj->unkD0 = sNFLDefaultAxes.unkC;
+    obj->unkD1 = sNFLDefaultAxes.unkD;
+    obj->unkD2 = sNFLDefaultAxes.unkE;
+    obj->unkC4.x = sNFLDefaultAxes.unk0.x;
+    obj->unkC4.y = sNFLDefaultAxes.unk0.y;
+    obj->unkC4.z = sNFLDefaultAxes.unk0.z;
     enabled = OS_DisableInterrupts();
-    func_0206cf48(&ctx);
+    NFLi_PrepareColorTexture(&ctx);
     for (i = 0; i < 7; i++) {
-        result = data_02112140[i](&ctx);
+        result = sNFLPartPreparers[i](&ctx);
         if (result != 0) {
             return result;
         }
@@ -1621,12 +1621,12 @@ int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
     if (found == TRUE) {
         NFLObj *p;
 
-        if (data_02145360->unk74 == obj) {
-            data_02145360->unk74 = obj->unk17C;
+        if (sNFLWork->unk74 == obj) {
+            sNFLWork->unk74 = obj->unk17C;
         }
-        p = data_02145360->unk74;
+        p = sNFLWork->unk74;
         if (p == NULL) {
-            data_02145360->unk74 = obj;
+            sNFLWork->unk74 = obj;
         } else {
             while (p->unk17C != NULL) {
                 if (p->unk17C == obj) {
@@ -1643,40 +1643,40 @@ int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
         obj->unk170 = 2;
     }
     obj->unk17C = NULL;
-    if (data_02145360->unk8C == 4) {
-        data_02145360->unk8C = 0;
+    if (sNFLWork->unk8C == 4) {
+        sNFLWork->unk8C = 0;
     }
     OS_RestoreInterrupts(enabled);
     G3_BeginMakeDL(&ctx.unk64, obj->unk2A4, sizeof(obj->unk2A4));
-    func_0206b3f4(&ctx);
-    func_0206b0d8(&ctx);
-    func_0206c964(&ctx);
-    func_0206c65c(&ctx);
-    func_0206b740(&ctx);
-    func_0206bb24(&ctx);
-    func_0206bfa4(&ctx);
-    func_0206c2f8(&ctx);
+    NFLi_MakeFaceMesh(&ctx);
+    NFLi_MakeBeardMesh(&ctx);
+    NFLi_MakeNoseSkinMesh(&ctx);
+    NFLi_MakeNoseMesh(&ctx);
+    NFLi_MakeFavoriteColorHairMesh(&ctx);
+    NFLi_MakeHairMesh(&ctx);
+    NFLi_MakeHairSkinMesh(&ctx);
+    NFLi_MakeGlassesMesh(&ctx);
     obj->unk0 = G3_EndMakeDL(&ctx.unk64);
     G3_BeginMakeDL(&ctx.unk64, obj->unk1D84, sizeof(obj->unk1D84));
-    func_020715ac(&ctx);
+    NFLi_MakeFacePartsDL(&ctx);
     obj->unk4 = G3_EndMakeDL(&ctx.unk64);
-    func_0206d3cc(obj, mii);
-    func_020728fc(index, 0);
+    NFLi_KeepFields(obj, mii);
+    NFL_SetExpression(index, 0);
     return 0;
 }
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
+int NFL_SetFaceMatrices(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
     NFLObj *obj;
 
     if (mtx33 == NULL || mtx43 == NULL) {
         return 8;
     }
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
@@ -1686,17 +1686,17 @@ int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
 }
 
 // Sets the polygon attributes of an object's display list (at the places its makers kept) and the material colours
-int func_0206d984(int index, const NFLDrawParam *param) {
+int NFL_SetFaceDrawParam(int index, const NFLDrawParam *param) {
     NFLObj *obj;
     GXDLInfo info;
 
     if (param == NULL) {
         return 8;
     }
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
@@ -1731,17 +1731,17 @@ int func_0206d984(int index, const NFLDrawParam *param) {
 }
 
 // Sends an object's display lists to the geometry engine, under its matrices
-int func_0206db98(int index, BOOL withSecond) {
+int NFL_DrawFace(int index, BOOL withSecond) {
     NFLObj *obj;
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
-    if (func_0206dc84(index) != 0) {
+    if (NFL_GetFaceStatus(index) != 0) {
         return 0xF;
     }
     G3_PushMtx();
@@ -1761,13 +1761,13 @@ int func_0206db98(int index, BOOL withSecond) {
     return 0;
 }
 
-int func_0206dc84(int index) {
+int NFL_GetFaceStatus(int index) {
     NFLObj *obj;
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
@@ -1780,18 +1780,18 @@ int func_0206dc84(int index) {
     return 0;
 }
 
-extern const NFLColor data_020b65a0[];
+extern const NFLColor sNFLFaceColors[];
 
-GXRgb func_0206dcd0(int index) {
-    return GX_RGB(data_020b65a0[index].r >> 3, data_020b65a0[index].g >> 3, data_020b65a0[index].b >> 3);
+GXRgb NFLi_GetFaceColor(int index) {
+    return GX_RGB(sNFLFaceColors[index].r >> 3, sNFLFaceColors[index].g >> 3, sNFLFaceColors[index].b >> 3);
 }
 
-GXRgb func_0206dd1c(int index) {
-    return data_020b6540[index] & 0x7FFF;
+GXRgb NFLi_GetFavoriteColor(int index) {
+    return sNFLFavoriteGXColors[index] & 0x7FFF;
 }
 
 // Expands count 4-bit pixels into direct colours from palette, colour 0 transparent if asked
-void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL transparent) {
+void NFLi_Convert4BitToDirect(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL transparent) {
     int i;
 
     for (i = 0; i < count / 2; i++) {
@@ -1812,7 +1812,7 @@ void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL 
 }
 
 // The eyes, eyebrows, mouth, mustache and mole: their textures and states, by part
-int func_0206ddb8(NFLMakeCtx *ctx) {
+int NFLi_PrepareFacePartTextures(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *mii = ctx->unk1CC;
     s16 *params = obj->unk180;
@@ -1945,33 +1945,33 @@ int func_0206ddb8(NFLMakeCtx *ctx) {
         case 4:
             ctx->unk78[6].unk28 = 1;
             ctx->unk78[6].unk2C = 1;
-            if (data_02145360->unk10[5].unk8 == 0) {
-                ctx->unk78[6].unk20 = data_02145360->unk0;
-                ctx->unk78[6].unk24 = data_02145360->unk4;
-                data_02145360->unk10[5].unk0 = data_02145360->unk0;
-                data_02145360->unk10[5].unk4 = data_02145360->unk4;
-                data_02145360->unk90 = 0;
-                data_02145360->unkA0[5].unk8 = 0;
+            if (sNFLWork->unk10[5].unk8 == 0) {
+                ctx->unk78[6].unk20 = sNFLWork->unk0;
+                ctx->unk78[6].unk24 = sNFLWork->unk4;
+                sNFLWork->unk10[5].unk0 = sNFLWork->unk0;
+                sNFLWork->unk10[5].unk4 = sNFLWork->unk4;
+                sNFLWork->unk90 = 0;
+                sNFLWork->unkA0[5].unk8 = 0;
                 if (obj->unk90 == 7) {
-                    data_02145360->unk0 += 0x200;
-                    data_02145360->unk12C = 7;
+                    sNFLWork->unk0 += 0x200;
+                    sNFLWork->unk12C = 7;
                 } else {
-                    data_02145360->unk0 += 0x80;
-                    data_02145360->unk4 += 0x20;
+                    sNFLWork->unk0 += 0x80;
+                    sNFLWork->unk4 += 0x20;
                 }
-                data_02145360->unk10[5].unk8 = 1;
+                sNFLWork->unk10[5].unk8 = 1;
                 return 0;
             }
-            ctx->unk78[6].unk20 = data_02145360->unk10[5].unk0;
-            ctx->unk78[6].unk24 = data_02145360->unk10[5].unk4;
+            ctx->unk78[6].unk20 = sNFLWork->unk10[5].unk0;
+            ctx->unk78[6].unk24 = sNFLWork->unk10[5].unk4;
             return 0;
         }
     }
     return 0;
 }
 
-int func_0206e38c(NFLObj *obj, u32 *address) {
-    NFLWork *work = data_02145360;
+int NFLi_AllocExpression5Texture(NFLObj *obj, u32 *address) {
+    NFLWork *work = sNFLWork;
 
     if (work->unk10[0].unk8 == 0) {
         work->unk10[0].unk0 = *address;
@@ -1981,14 +1981,14 @@ int func_0206e38c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[0].unk4 = obj->unk14;
         }
-        data_02145360->unkA0[0].unk8 = 0;
+        sNFLWork->unkA0[0].unk8 = 0;
         work->unk10[0].unk8 = 1;
     }
     return 0;
 }
 
-int func_0206e3fc(NFLObj *obj, u32 *address) {
-    NFLWork *work = data_02145360;
+int NFLi_AllocExpression6Texture(NFLObj *obj, u32 *address) {
+    NFLWork *work = sNFLWork;
 
     if (work->unk10[1].unk8 == 0) {
         work->unk10[1].unk0 = *address;
@@ -1998,14 +1998,14 @@ int func_0206e3fc(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[1].unk4 = obj->unk24;
         }
-        data_02145360->unkA0[1].unk8 = 0;
+        sNFLWork->unkA0[1].unk8 = 0;
         work->unk10[1].unk8 = 1;
     }
     return 0;
 }
 
-int func_0206e46c(NFLObj *obj, u32 *address) {
-    NFLWork *work = data_02145360;
+int NFLi_AllocExpression1Texture(NFLObj *obj, u32 *address) {
+    NFLWork *work = sNFLWork;
 
     if (work->unk10[2].unk8 == 0) {
         work->unk10[2].unk0 = *address;
@@ -2015,14 +2015,14 @@ int func_0206e46c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[2].unk4 = obj->unk14;
         }
-        data_02145360->unkA0[2].unk8 = 0;
+        sNFLWork->unkA0[2].unk8 = 0;
         work->unk10[2].unk8 = 1;
     }
     return 0;
 }
 
-int func_0206e4dc(NFLObj *obj, u32 *address) {
-    NFLWork *work = data_02145360;
+int NFLi_AllocExpression2Texture(NFLObj *obj, u32 *address) {
+    NFLWork *work = sNFLWork;
 
     if (work->unk10[3].unk8 == 0) {
         work->unk10[3].unk0 = *address;
@@ -2032,14 +2032,14 @@ int func_0206e4dc(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[3].unk4 = obj->unk14;
         }
-        data_02145360->unkA0[3].unk8 = 0;
+        sNFLWork->unkA0[3].unk8 = 0;
         work->unk10[3].unk8 = 1;
     }
     return 0;
 }
 
-int func_0206e54c(NFLObj *obj, u32 *address) {
-    NFLWork *work = data_02145360;
+int NFLi_AllocExpression3Texture(NFLObj *obj, u32 *address) {
+    NFLWork *work = sNFLWork;
 
     if (work->unk10[4].unk8 == 0) {
         work->unk10[4].unk0 = *address;
@@ -2049,13 +2049,13 @@ int func_0206e54c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[4].unk4 = obj->unk14;
         }
-        data_02145360->unkA0[4].unk8 = 0;
+        sNFLWork->unkA0[4].unk8 = 0;
         work->unk10[4].unk8 = 1;
     }
     return 0;
 }
 
-int func_0206e5bc(NFLObj *obj, u32 *address) {
+int NFLi_PrepareExpression4Texture(NFLObj *obj, u32 *address) {
     s16 *params = obj->unk180;
     const NFLCharData *mii = obj->unkDC;
 
@@ -2075,58 +2075,58 @@ int func_0206e5bc(NFLObj *obj, u32 *address) {
     return 0;
 }
 
-int func_0206e650(NFLMakeCtx *ctx) {
+int NFLi_AllocExpressionTextures(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     int result;
 
     if (obj->unk16C & 0x20) {
-        result = func_0206e38c(obj, &data_02145360->unk0);
+        result = NFLi_AllocExpression5Texture(obj, &sNFLWork->unk0);
         if (result != 0) {
             return result;
         }
     }
     if (obj->unk16C & 0x40) {
-        result = func_0206e3fc(obj, &data_02145360->unk0);
+        result = NFLi_AllocExpression6Texture(obj, &sNFLWork->unk0);
         if (result != 0) {
             return result;
         }
     }
     if (obj->unk16C & 0x2) {
-        result = func_0206e46c(obj, &data_02145360->unk0);
+        result = NFLi_AllocExpression1Texture(obj, &sNFLWork->unk0);
         if (result != 0) {
             return result;
         }
     }
     if (obj->unk16C & 0x4) {
-        result = func_0206e4dc(obj, &data_02145360->unk0);
+        result = NFLi_AllocExpression2Texture(obj, &sNFLWork->unk0);
         if (result != 0) {
             return result;
         }
     }
     if (obj->unk16C & 0x8) {
-        result = func_0206e54c(obj, &data_02145360->unk0);
+        result = NFLi_AllocExpression3Texture(obj, &sNFLWork->unk0);
         if (result != 0) {
             return result;
         }
     }
-    return func_0206e5bc(obj, &ctx->unk24);
+    return NFLi_PrepareExpression4Texture(obj, &ctx->unk24);
 }
 
 
-extern const u8 data_020b6884[];
-extern const u8 data_020b689c[];
+extern const u8 sNFLEyebrowTypeRotations[];
+extern const u8 sNFLEyeTypeRotations[];
 
 // The places, sizes and rotations of the seven parts (NFLMakeCtx 0x78), from the Mii's data
-void func_0206e724(NFLMakeCtx *ctx) {
+void NFLi_PlaceFaceParts(NFLMakeCtx *ctx) {
     const NFLCharData *mii = ctx->unk1CC;
     fx32 eyeX = mii->eyeX * 0xE95 - 0x280;
     fx32 eyeY = -(mii->eyeY * 0x11A1 - 0x21149);
     fx32 eyeScale = FX_Mul(mii->eyeScale * 0x700 + 0x1000, 0x4C00);
-    int eyeRotation = data_020b689c[mii->eyeType] + mii->eyeRotation - 0x20;
+    int eyeRotation = sNFLEyeTypeRotations[mii->eyeType] + mii->eyeRotation - 0x20;
     fx32 eyebrowX = mii->eyebrowX * 0xE95 - 0x2E0;
     fx32 eyebrowY = -(mii->eyebrowY * 0x10E1 - 0x22490);
     fx32 eyebrowScale = FX_Mul(mii->eyebrowScale * 0x680 + 0x1000, 0x4C40);
-    int eyebrowRotation = data_020b6884[mii->eyebrowType] + mii->eyebrowRotation - 0x20;
+    int eyebrowRotation = sNFLEyebrowTypeRotations[mii->eyebrowType] + mii->eyebrowRotation - 0x20;
     fx32 mouthY = -(mii->mouthY * 0x10A1 - 0x161BA);
     fx32 mouthScale = mii->mouthScale * 0x6E0 + 0x1000;
     fx32 beardY = -(mii->beardY * 0x10E1 - 0x13DB7);
@@ -2197,7 +2197,7 @@ void func_0206e724(NFLMakeCtx *ctx) {
     ctx->unk78[6].unk0[7] = 0;
 }
 
-// Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (func_0206ebb0)
+// Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (NFLi_GetPartCorner)
 typedef struct NFLPlane {
     fx32 unk0;
     fx32 unk4;
@@ -2205,11 +2205,11 @@ typedef struct NFLPlane {
     fx32 unkC;
 } NFLPlane;
 
-extern const NFLPlane data_020b676c[2][2];
+extern const NFLPlane sNFLFacePlanes[2][2];
 
 // A part's place on the face, from the face's origin, its X and Y and the sine and cosine of its rotation; its
 // Z from the plane of its quadrant
-void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, fx32 scaleX, fx32 scaleY, fx16 sin,
+void NFLi_GetPartCorner(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, fx32 scaleX, fx32 scaleY, fx16 sin,
                    fx16 cos) {
     int i;
     int j;
@@ -2226,13 +2226,13 @@ void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, 
     }
     i = out->x >= 0x1B33;
     j = out->y <= 0x167B;
-    out->z = -FX_Div(data_020b676c[j][i].unkC + (FX_Mul(data_020b676c[j][i].unk0, out->x) +
-                                                  FX_Mul(data_020b676c[j][i].unk4, out->y)),
-                     data_020b676c[j][i].unk8) *
+    out->z = -FX_Div(sNFLFacePlanes[j][i].unkC + (FX_Mul(sNFLFacePlanes[j][i].unk0, out->x) +
+                                                  FX_Mul(sNFLFacePlanes[j][i].unk4, out->y)),
+                     sNFLFacePlanes[j][i].unk8) *
              0x47 / 200;
 }
 
-// The state that func_0206ed94 and func_020705d4 share across calls (func_020715ac clears unk20 between pairs)
+// The state that NFLi_MakeMouthMolePart and NFLi_MakeEyeBrowPart share across calls (NFLi_MakeFacePartsDL clears unk20 between pairs)
 typedef struct NFLMakeState {
     fx32 unk0;
     fx32 unk4;
@@ -2243,31 +2243,31 @@ typedef struct NFLMakeState {
     int unk20;
 } NFLMakeState;
 
-void func_0206ed94(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state);
-void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state);
 
-void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal);
-void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
-void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
-void func_02074644(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
-void func_02074688(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
+void NFLi_MakeRotZMtx(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal);
+void NFLi_DLTranslate(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
+void NFLi_DLScale(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
+void NFLi_DLVtx(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
+void NFLi_DLNormal(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
 // Not matching yet, a first draft from the code: the instructions are close (0xF98 bytes against 0xFA4) but the
-// registers and stack slots are not the original's. Records 0 to 3 of func_020715ac: a part placed as a quad on the
-// face, its 2x2 points' Z from the planes of data_020b676c, their normals interpolated over the 3x3 grids of points
-// (data_020b6818) and normals (data_020b67ac), the quad turned onto their sum.
-extern const VecFx32 data_020b6818[3][3];
-extern const VecFx32 data_020b67ac[3][3];
+// registers and stack slots are not the original's. Records 0 to 3 of NFLi_MakeFacePartsDL: a part placed as a quad on the
+// face, its 2x2 points' Z from the planes of sNFLFacePlanes, their normals interpolated over the 3x3 grids of points
+// (sNFLFaceGridPoints) and normals (sNFLFaceGridNormals), the quad turned onto their sum.
+extern const VecFx32 sNFLFaceGridPoints[3][3];
+extern const VecFx32 sNFLFaceGridNormals[3][3];
 
 #define NFL_PLANE_Z(px, py)                                                                                          \
-    (-FX_Div(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unkC +                                                     \
-                 (FX_Mul(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk0, (px)) +                                  \
-                  FX_Mul(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk4, (py))),                                  \
-             data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk8) *                                                    \
+    (-FX_Div(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].unkC +                                                     \
+                 (FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].unk0, (px)) +                                  \
+                  FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].unk4, (py))),                                  \
+             sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].unk8) *                                                    \
      0x47 / 200)
 
-void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state) {
     MtxFx43 mtx;
     VecFx32 grid[2][2];
@@ -2343,14 +2343,14 @@ void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
             grid[i][j].y = center.y - st + FX_Mul(sin, t2);
             pi = grid[i][j].x >= 0x1B33;
             pj = grid[i][j].y <= 0x167B;
-            grid[i][j].z = -FX_Div(data_020b676c[pj][pi].unkC + (FX_Mul(data_020b676c[pj][pi].unk0, grid[i][j].x) +
-                                                                  FX_Mul(data_020b676c[pj][pi].unk4, grid[i][j].y)),
-                                   data_020b676c[pj][pi].unk8) *
+            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].unkC + (FX_Mul(sNFLFacePlanes[pj][pi].unk0, grid[i][j].x) +
+                                                                  FX_Mul(sNFLFacePlanes[pj][pi].unk4, grid[i][j].y)),
+                                   sNFLFacePlanes[pj][pi].unk8) *
                            0x47 / 200;
-            p = &data_020b6818[pj][pi];
+            p = &sNFLFaceGridPoints[pj][pi];
             u = FX_Div(grid[i][j].x - p[0].x, p[1].x - p[0].x);
             v = FX_Div(grid[i][j].y - p[0].y, p[3].y - p[0].y);
-            q = &data_020b67ac[pj][pi];
+            q = &sNFLFaceGridNormals[pj][pi];
             {
                 fx32 top = q[0].x + FX_Mul(q[1].x - q[0].x, u);
                 fx32 bottom = q[3].x + FX_Mul(q[4].x - q[3].x, u);
@@ -2396,7 +2396,7 @@ void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
         state->unk10.z = 0;
         for (a = 0; a < 2; a++) {
             for (b = 0; b < 2; b++) {
-                func_0206ebb0(&point, &center, kind, a, b, scaleX, scaleY, sin, cos);
+                NFLi_GetPartCorner(&point, &center, kind, a, b, scaleX, scaleY, sin, cos);
                 state->unk10.x += point.x;
                 state->unk10.y += point.y;
             }
@@ -2417,7 +2417,7 @@ void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
             sum.y = 0;
             sum.z = 0;
             for (k = 0; k < 4; k++) {
-                func_0206ebb0(&point2, &center, kind, k / 2, k % 2, scaleX, scaleY, sin, cos);
+                NFLi_GetPartCorner(&point2, &center, kind, k / 2, k % 2, scaleX, scaleY, sin, cos);
                 sum.x += point2.x;
                 sum.y += point2.y;
             }
@@ -2454,19 +2454,19 @@ void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
         ref->param = dl->curr_param;
     }
     if (kind == 4) {
-        func_020745b0(obj, dl, -x / 32, y / 32, obj->unk28 + (center.z + n));
+        NFLi_DLTranslate(obj, dl, -x / 32, y / 32, obj->unk28 + (center.z + n));
     } else {
-        func_020745b0(obj, dl, x / 32, y / 32, obj->unk28 + (center.z + n));
+        NFLi_DLTranslate(obj, dl, x / 32, y / 32, obj->unk28 + (center.z + n));
     }
-    func_02074444(obj, &rotated, &axis);
+    NFLi_MapVecFx32(obj, &rotated, &axis);
     axis = rotated;
     MTX_RotAxis43(&mtx, &axis, cross, dot);
     G3C_MultMtx43(dl, &mtx);
     patch->mtx.cmd = dl->curr_cmd;
     patch->mtx.param = dl->curr_param;
-    func_02074548(obj, &mtx, cos, sin);
+    NFLi_MakeRotZMtx(obj, &mtx, cos, sin);
     G3C_MultMtx43(dl, &mtx);
-    func_020745f4(obj, dl, scaleX / 32, scaleY / 32, FX32_ONE);
+    NFLi_DLScale(obj, dl, scaleX / 32, scaleY / 32, FX32_ONE);
     if (fmt == GX_TEXFMT_DIRECT) {
         patch->tex.cmd = dl->curr_cmd;
         patch->tex.param = dl->curr_param;
@@ -2514,40 +2514,40 @@ void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
     }
     func_02005124(dl, GX_BEGIN_QUADS);
     G3C_TexCoord(dl, s0, 0);
-    func_02074688(obj, dl, 0, 0, 0xFEA);
-    func_02074644(obj, dl, x0, -0x800, 0);
+    NFLi_DLNormal(obj, dl, 0, 0, 0xFEA);
+    NFLi_DLVtx(obj, dl, x0, -0x800, 0);
     G3C_TexCoord(dl, s1, 0);
-    func_02074644(obj, dl, x0 + FX32_ONE, -0x800, 0);
+    NFLi_DLVtx(obj, dl, x0 + FX32_ONE, -0x800, 0);
     G3C_TexCoord(dl, s1, texH << 12);
-    func_02074644(obj, dl, x0 + FX32_ONE, 0x800, 0);
+    NFLi_DLVtx(obj, dl, x0 + FX32_ONE, 0x800, 0);
     G3C_TexCoord(dl, s0, texH << 12);
-    func_02074644(obj, dl, x0, 0x800, 0);
+    NFLi_DLVtx(obj, dl, x0, 0x800, 0);
     func_02005148(dl);
     G3C_PopMtx(dl, 1);
 }
 
-void func_020715ac(NFLMakeCtx *ctx) {
+void NFLi_MakeFacePartsDL(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
     const NFLCharData *data = ctx->unk1CC;
     NFLMakeState state;
 
     state.unk20 = 0;
-    func_0206ed94(&ctx->unk64, &ctx->unk78[4], obj, data, &obj->unk140, NULL, 0, &state);
-    func_0206ed94(&ctx->unk64, &ctx->unk78[5], obj, data, NULL, NULL, 0x20, &state);
+    NFLi_MakeMouthMolePart(&ctx->unk64, &ctx->unk78[4], obj, data, &obj->unk140, NULL, 0, &state);
+    NFLi_MakeMouthMolePart(&ctx->unk64, &ctx->unk78[5], obj, data, NULL, NULL, 0x20, &state);
     state.unk20 = 0;
-    func_020705d4(&ctx->unk64, &ctx->unk78[0], obj, data, &obj->unk128, NULL, 0, &state);
-    func_020705d4(&ctx->unk64, &ctx->unk78[2], obj, data, &obj->unkF8, &obj->unk160, 0x20, &state);
+    NFLi_MakeEyeBrowPart(&ctx->unk64, &ctx->unk78[0], obj, data, &obj->unk128, NULL, 0, &state);
+    NFLi_MakeEyeBrowPart(&ctx->unk64, &ctx->unk78[2], obj, data, &obj->unkF8, &obj->unk160, 0x20, &state);
     state.unk20 = 0;
-    func_020705d4(&ctx->unk64, &ctx->unk78[1], obj, data, &obj->unk110, NULL, 0, &state);
-    func_020705d4(&ctx->unk64, &ctx->unk78[3], obj, data, &obj->unkE0, &obj->unk158, 0x20, &state);
+    NFLi_MakeEyeBrowPart(&ctx->unk64, &ctx->unk78[1], obj, data, &obj->unk110, NULL, 0, &state);
+    NFLi_MakeEyeBrowPart(&ctx->unk64, &ctx->unk78[3], obj, data, &obj->unkE0, &obj->unk158, 0x20, &state);
     if (data->moleType == 1) {
-        func_0206ed94(&ctx->unk64, &ctx->unk78[6], obj, data, NULL, NULL, 0, NULL);
+        NFLi_MakeMouthMolePart(&ctx->unk64, &ctx->unk78[6], obj, data, NULL, NULL, 0, NULL);
     }
 }
 
 
 // Patches a face part's display list: its rotation, if it has a matrix command, and its texture and palette
-void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fmt, GXTexSizeS s, GXTexSizeT t,
+void NFLi_PatchFacePart(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fmt, GXTexSizeS s, GXTexSizeT t,
                    u32 texAddr, u32 plttAddr) {
     GXDLInfo dl;
     MtxFx43 mtx;
@@ -2555,7 +2555,7 @@ void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fm
     if (patch->mtx.cmd != NULL && patch->mtx.param != NULL) {
         dl.curr_cmd = patch->mtx.cmd;
         dl.curr_param = patch->mtx.param;
-        func_02074548(obj, &mtx, sin, cos);
+        NFLi_MakeRotZMtx(obj, &mtx, sin, cos);
         G3CS_MultMtx43(&dl, &mtx);
     }
     dl.curr_cmd = patch->tex.cmd;
@@ -2575,12 +2575,12 @@ void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fm
     G3CS_TexPlttBase(&dl, plttAddr, fmt);
 }
 
-extern const u8 data_020b689c[];
-extern const u8 data_020b6884[];
+extern const u8 sNFLEyeTypeRotations[];
+extern const u8 sNFLEyebrowTypeRotations[];
 
 #pragma optimization_level 2
 #pragma opt_common_subs off
-void func_0207183c(NFLObj *obj) {
+void NFLi_ApplyExpression0(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2588,18 +2588,18 @@ void func_0207183c(NFLObj *obj) {
     u16 idx;
     fx32 v;
 
-    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((obj->unk80[3] + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     y = -(obj->unk80[2] * 0x10E1 - 0x22490);
     type = obj->unk80[5];
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk80[6] + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2616,7 +2616,7 @@ void func_0207183c(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
 }
 #pragma opt_common_subs reset
 #pragma optimization_level reset
@@ -2625,7 +2625,7 @@ void func_0207183c(NFLObj *obj) {
 // rotation goes in unclamped); here the compiler drops the whole clamp.
 #pragma optimization_level 2
 #pragma opt_common_subs off
-void func_02071a78(NFLObj *obj) {
+void NFLi_ApplyExpression5(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2634,8 +2634,8 @@ void func_02071a78(NFLObj *obj) {
     fx32 v;
     int rot;
 
-    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
-    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[26]);
+    idx = (u16)(((obj->unk80[3] + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
+    rot = obj->unk80[3] + (sNFLEyeTypeRotations[obj->unk80[3]] - sNFLEyeTypeRotations[26]);
     if (rot < 0) {
         rot = 0;
     } else if (rot > 7) {
@@ -2645,13 +2645,13 @@ void func_02071a78(NFLObj *obj) {
     type = obj->unk80[5];
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[0].unk0, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[0].unk0, obj->unk14);
-    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[0].unk0, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[0].unk0, obj->unk14);
+    idx = (u16)((obj->unk80[6] + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2668,14 +2668,14 @@ void func_02071a78(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
 }
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
 #pragma optimization_level 2
 #pragma opt_common_subs off
-void func_02071cdc(NFLObj *obj) {
+void NFLi_ApplyExpression6(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2683,18 +2683,18 @@ void func_02071cdc(NFLObj *obj) {
     u16 idx;
     fx32 v;
 
-    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((obj->unk80[3] + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     y = -(obj->unk80[2] * 0x10E1 - 0x22490);
     type = obj->unk80[5];
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk80[6] + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2711,7 +2711,7 @@ void func_02071cdc(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[1].unk0, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[1].unk0, obj->unk24);
 }
 #pragma opt_common_subs reset
 #pragma optimization_level reset
@@ -2720,7 +2720,7 @@ void func_02071cdc(NFLObj *obj) {
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
-void func_02071f24(NFLObj *obj) {
+void NFLi_ApplyExpression1(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2729,7 +2729,7 @@ void func_02071f24(NFLObj *obj) {
     fx32 v;
     int rot;
 
-    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[48]);
+    rot = obj->unk80[3] + (sNFLEyeTypeRotations[obj->unk80[3]] - sNFLEyeTypeRotations[48]);
     y = -(obj->unk80[2] * 0x10E1 - 0x22490);
     type = obj->unk80[5];
     if (rot < 0) {
@@ -2737,16 +2737,16 @@ void func_02071f24(NFLObj *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[2].unk0, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[2].unk0, obj->unk14);
-    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[2].unk0, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[2].unk0, obj->unk14);
+    idx = (u16)((obj->unk80[6] + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2763,7 +2763,7 @@ void func_02071f24(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
 }
 #pragma opt_propagation reset
 #pragma opt_common_subs reset
@@ -2774,7 +2774,7 @@ void func_02071f24(NFLObj *obj) {
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
-void func_0207219c(NFLObj *obj) {
+void NFLi_ApplyExpression2(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2795,11 +2795,11 @@ void func_0207219c(NFLObj *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
     if (brow + d < 0) {
         brow = 0;
     } else if (brow + d > 11) {
@@ -2807,11 +2807,11 @@ void func_0207219c(NFLObj *obj) {
     } else {
         brow += d;
     }
-    idx = (u16)((brow + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    idx = (u16)((brow + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2828,17 +2828,17 @@ void func_0207219c(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[3].unk0, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[3].unk0, obj->unk24);
 }
 #pragma opt_propagation reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Not matching yet: as func_0207219c, with d = -2 and an eyebrow rotation past 11 set to 0.
+// Not matching yet: as NFLi_ApplyExpression2, with d = -2 and an eyebrow rotation past 11 set to 0.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
-void func_02072418(NFLObj *obj) {
+void NFLi_ApplyExpression3(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2859,11 +2859,11 @@ void func_02072418(NFLObj *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
     if (brow + d < 0) {
         brow = 0;
     } else if (brow + d > 11) {
@@ -2871,11 +2871,11 @@ void func_02072418(NFLObj *obj) {
     } else {
         brow += d;
     }
-    idx = (u16)((brow + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    idx = (u16)((brow + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2892,17 +2892,17 @@ void func_02072418(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[4].unk0, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->unk10[4].unk0, obj->unk24);
 }
 #pragma opt_propagation reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Not matching yet: as func_02071f24.
+// Not matching yet: as NFLi_ApplyExpression1.
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
-void func_02072694(NFLObj *obj) {
+void NFLi_ApplyExpression4(NFLObj *obj) {
     fx16 sin;
     fx16 cos;
     fx32 y;
@@ -2911,7 +2911,7 @@ void func_02072694(NFLObj *obj) {
     fx32 v;
     int rot;
 
-    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[49]);
+    rot = obj->unk80[3] + (sNFLEyeTypeRotations[obj->unk80[3]] - sNFLEyeTypeRotations[49]);
     y = -((obj->unk80[2] - 2) * 0x10E1 - 0x22490);
     type = obj->unk80[5];
     if (rot < 0) {
@@ -2919,16 +2919,16 @@ void func_02072694(NFLObj *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
-    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
-    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    NFLi_PatchFacePart(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
+    NFLi_PatchFacePart(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
+    idx = (u16)((obj->unk80[6] + sNFLEyebrowTypeRotations[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
-    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    NFLi_PatchFacePart(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
     switch (type) {
     case 2:
     case 6:
@@ -2945,105 +2945,105 @@ void func_02072694(NFLObj *obj) {
     obj->unk160.param[obj->unkD0] = v;
     sin = (fx16)FX_SinIdx(0);
     cos = (fx16)FX_CosIdx(0);
-    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+    NFLi_PatchFacePart(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
 }
 #pragma opt_propagation reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-int func_0206ddb8(NFLMakeCtx *ctx);
-int func_0206e650(NFLMakeCtx *ctx);
-void func_0206e724(NFLMakeCtx *ctx);
+int NFLi_PrepareFacePartTextures(NFLMakeCtx *ctx);
+int NFLi_AllocExpressionTextures(NFLMakeCtx *ctx);
+void NFLi_PlaceFaceParts(NFLMakeCtx *ctx);
 
-int func_02071578(NFLMakeCtx *ctx) {
-    int result = func_0206ddb8(ctx);
+int NFLi_PrepareFaceParts(NFLMakeCtx *ctx) {
+    int result = NFLi_PrepareFacePartTextures(ctx);
 
     if (result != 0) {
         return result;
     }
-    result = func_0206e650(ctx);
+    result = NFLi_AllocExpressionTextures(ctx);
     if (result != 0) {
         return result;
     }
-    func_0206e724(ctx);
+    NFLi_PlaceFaceParts(ctx);
     return result;
 }
 
-NFLObj *func_02073060(int index);
-void func_0207183c(NFLObj *obj);
-void func_02071a78(NFLObj *obj);
-void func_02071cdc(NFLObj *obj);
-void func_02071f24(NFLObj *obj);
-void func_0207219c(NFLObj *obj);
-void func_02072418(NFLObj *obj);
-void func_02072694(NFLObj *obj);
+NFLObj *NFLi_GetFace(int index);
+void NFLi_ApplyExpression0(NFLObj *obj);
+void NFLi_ApplyExpression5(NFLObj *obj);
+void NFLi_ApplyExpression6(NFLObj *obj);
+void NFLi_ApplyExpression1(NFLObj *obj);
+void NFLi_ApplyExpression2(NFLObj *obj);
+void NFLi_ApplyExpression3(NFLObj *obj);
+void NFLi_ApplyExpression4(NFLObj *obj);
 
-int func_020728fc(int index, int type) {
+int NFL_SetExpression(int index, int type) {
     NFLObj *obj;
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return 9;
     }
     switch (type) {
     case 5:
         if (obj->unk16C & 0x20) {
-            func_02071a78(obj);
+            NFLi_ApplyExpression5(obj);
             obj->unk168 = 5;
             return 0;
         }
         break;
     case 6:
         if (obj->unk16C & 0x40) {
-            func_02071cdc(obj);
+            NFLi_ApplyExpression6(obj);
             obj->unk168 = 6;
             return 0;
         }
         break;
     case 1:
         if (obj->unk16C & 0x2) {
-            func_02071f24(obj);
+            NFLi_ApplyExpression1(obj);
             obj->unk168 = 1;
             return 0;
         }
         break;
     case 2:
         if (obj->unk16C & 0x4) {
-            func_0207219c(obj);
+            NFLi_ApplyExpression2(obj);
             obj->unk168 = 2;
             return 0;
         }
         break;
     case 3:
         if (obj->unk16C & 0x8) {
-            func_02072418(obj);
+            NFLi_ApplyExpression3(obj);
             obj->unk168 = 3;
             return 0;
         }
         break;
     case 4:
         if (obj->unk16C & 0x10) {
-            func_02072694(obj);
+            NFLi_ApplyExpression4(obj);
             obj->unk168 = 4;
             return 0;
         }
         break;
     }
-    func_0207183c(obj);
+    NFLi_ApplyExpression0(obj);
     obj->unk168 = 0;
     return 0;
 }
 
-int func_02072a28(int index) {
+int NFL_GetExpression(int index) {
     NFLObj *obj;
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         return -1;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         return -1;
     }
@@ -3057,12 +3057,12 @@ typedef struct NFLDesc {
     u32 unk8;
 } NFLDesc;
 
-int func_02072c38(u8 *p);
-int func_02073584(void *p);
-extern const u8 data_020b68d0[];
+int NFLi_ResetSharedTextures(u8 *p);
+int NFLi_SetResource(void *p);
+extern const u8 sNFLSharedStreamFlags[];
 
 // The library's initialisation: main passes NFL_Res.dat's data as res
-int func_02072a58(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *desc, u8 flags, u8 max) {
+int NFL_Init(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *desc, u8 flags, u8 max) {
     u32 seed = 0;
     int n = 0;
     int i;
@@ -3077,7 +3077,7 @@ int func_02072a58(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *
     if (size & 3) {
         return 8;
     }
-    func_02072c38((u8 *)work);
+    NFLi_ResetSharedTextures((u8 *)work);
     if (RTC_GetDateTime(&date, &time) == RTC_RESULT_SUCCESS) {
         seed = RTC_ConvertDateTimeToSecond(&date, &time);
     }
@@ -3100,7 +3100,7 @@ int func_02072a58(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *
     work->unk98 = 0;
     sub = (NFLWorkFrom74 *)&work->unk74;
     for (i = 0; i < 5; i++) {
-        if (flags & data_020b68d0[i]) {
+        if (flags & sNFLSharedStreamFlags[i]) {
             sub->unkA0[i].unk8 = 0;
             n++;
         } else {
@@ -3123,17 +3123,17 @@ int func_02072a58(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *
         work->unkC = desc->unk4;
     }
     enabled = OS_DisableInterrupts();
-    data_02145360 = work;
-    func_02073584(res);
+    sNFLWork = work;
+    NFLi_SetResource(res);
     OS_RestoreInterrupts(enabled);
     return 0;
 }
 
-BOOL func_02072c1c(void) {
-    return data_02145360 != NULL;
+BOOL NFLi_IsInitialized(void) {
+    return sNFLWork != NULL;
 }
 
-int func_02072c38(u8 *p) {
+int NFLi_ResetSharedTextures(u8 *p) {
     *(u32 *)(p + 0x18) = 0;
     *(u32 *)(p + 0x24) = 0;
     *(u32 *)(p + 0x30) = 0;
@@ -3143,7 +3143,7 @@ int func_02072c38(u8 *p) {
     return 0;
 }
 
-int func_02072c5c(NFLObj *obj) {
+int NFL_AddFace(NFLObj *obj) {
     OSIntrMode enabled;
     NFLWork *work;
     NFLObj *last;
@@ -3153,11 +3153,11 @@ int func_02072c5c(NFLObj *obj) {
         return 8;
     }
     enabled = OS_DisableInterrupts();
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         OS_RestoreInterrupts(enabled);
         return 4;
     }
-    work = data_02145360;
+    work = sNFLWork;
     if (work->unk8C == 1 || work->unk8C == 3) {
         OS_RestoreInterrupts(enabled);
         return 6;
@@ -3197,15 +3197,15 @@ int func_02072c5c(NFLObj *obj) {
     return 0;
 }
 
-int func_02072d8c(void) {
-    if (!func_02072c1c()) {
+int NFL_AddFaceSlot(void) {
+    if (!NFLi_IsInitialized()) {
         return 4;
     }
-    data_02145360->unk70++;
+    sNFLWork->unk70++;
     return 0;
 }
 
-int func_02072dc0(NFLObj **removed) {
+int NFL_RemoveFaceSlot(NFLObj **removed) {
     OSIntrMode enabled;
     NFLObj *obj = NULL;
     NFLWork *work;
@@ -3214,11 +3214,11 @@ int func_02072dc0(NFLObj **removed) {
     NFLObj *cur;
 
     enabled = OS_DisableInterrupts();
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         OS_RestoreInterrupts(enabled);
         return 4;
     }
-    work = data_02145360;
+    work = sNFLWork;
     if (work->unk8C == 1 || work->unk8C == 3) {
         OS_RestoreInterrupts(enabled);
         return 6;
@@ -3229,18 +3229,18 @@ int func_02072dc0(NFLObj **removed) {
     if (removed != NULL) {
         *removed = NULL;
     }
-    prev = data_02145360->unk6C;
+    prev = sNFLWork->unk6C;
     if (prev != NULL) {
-        if (data_02145360->unk70 == 0) {
+        if (sNFLWork->unk70 == 0) {
             prev->unk170 = 4;
             obj = prev;
-            data_02145360->unk6C = NULL;
+            sNFLWork->unk6C = NULL;
         } else {
             cur = prev->next;
             n = 1;
             while (cur != NULL) {
                 if (cur->next == NULL) {
-                    if (n >= data_02145360->unk70) {
+                    if (n >= sNFLWork->unk70) {
                         cur->unk170 = 4;
                         obj = cur;
                         prev->next = NULL;
@@ -3257,7 +3257,7 @@ int func_02072dc0(NFLObj **removed) {
         if (removed != NULL) {
             *removed = obj;
         }
-        work = data_02145360;
+        work = sNFLWork;
         prev = work->unk74;
         if (prev != NULL) {
             if (prev == obj) {
@@ -3277,19 +3277,19 @@ int func_02072dc0(NFLObj **removed) {
     return 0;
 }
 
-int func_02072f34(int index) {
+int NFL_ResetFace(int index) {
     OSIntrMode enabled = OS_DisableInterrupts();
     NFLObj *obj;
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         OS_RestoreInterrupts(enabled);
         return 4;
     }
-    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+    if (sNFLWork->unk8C == 1 || sNFLWork->unk8C == 3) {
         OS_RestoreInterrupts(enabled);
         return 6;
     }
-    obj = func_02073060(index);
+    obj = NFLi_GetFace(index);
     if (obj == NULL) {
         OS_RestoreInterrupts(enabled);
         return 9;
@@ -3299,17 +3299,17 @@ int func_02072f34(int index) {
     return 0;
 }
 
-int func_02072fc4(void) {
+int NFL_FindResetFace(void) {
     int n;
     NFLObj *obj;
     NFLWork *work;
     OSIntrMode enabled = OS_DisableInterrupts();
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         OS_RestoreInterrupts(enabled);
         return -1;
     }
-    work = data_02145360;
+    work = sNFLWork;
     if (work->unk70 == 0) {
         OS_RestoreInterrupts(enabled);
         return -1;
@@ -3326,17 +3326,17 @@ int func_02072fc4(void) {
     return -1;
 }
 
-NFLObj *func_02073060(int index) {
+NFLObj *NFLi_GetFace(int index) {
     int i;
     NFLObj *obj;
     NFLWork *work;
     OSIntrMode enabled = OS_DisableInterrupts();
 
-    if (!func_02072c1c()) {
+    if (!NFLi_IsInitialized()) {
         OS_RestoreInterrupts(enabled);
         return NULL;
     }
-    work = data_02145360;
+    work = sNFLWork;
     if (index >= work->unk70) {
         OS_RestoreInterrupts(enabled);
         return NULL;
@@ -3353,10 +3353,10 @@ NFLObj *func_02073060(int index) {
     return NULL;
 }
 
-u16 func_020743a0(u16 max);
+u16 NFL_Random(u16 max);
 
 // Makes a create ID from the time, a random number and the MAC address
-BOOL func_020730fc(NFLCreateId *id) {
+BOOL NFL_MakeCreateId(NFLCreateId *id) {
     u16 random;
     s64 seconds;
     u32 t;
@@ -3365,7 +3365,7 @@ BOOL func_020730fc(NFLCreateId *id) {
     u8 mac[6];
 
     if (RTC_GetDateTime(&date, &time) == RTC_RESULT_SUCCESS) {
-        random = func_020743a0(4);
+        random = NFL_Random(4);
         seconds = RTC_ConvertDateTimeToSecond(&date, &time);
 
         if (seconds == -1) {
@@ -3386,7 +3386,7 @@ BOOL func_020730fc(NFLCreateId *id) {
     return TRUE;
 }
 
-void func_020731b8(u8 *p) {
+void NFLi_SetUnassignedCreateId(u8 *p) {
     int i;
 
     p[0x18] = 0xE0;
@@ -3400,7 +3400,7 @@ extern const int sNFLDaysInMonth[];
 
 // Whether a Mii's data is valid: height and build at most 128, a favourite colour of the 12, a date that exists, and
 // a create ID
-BOOL func_020731e0(const NFLCharData *data) {
+BOOL NFLi_IsValidCharData(const NFLCharData *data) {
     if (data->height > 0x80) {
         return FALSE;
     }
@@ -3416,26 +3416,26 @@ BOOL func_020731e0(const NFLCharData *data) {
     if (data->birthDay > sNFLDaysInMonth[data->birthMonth]) {
         return FALSE;
     }
-    return !func_02073284(&data->createId);
+    return !NFL_IsCreateIdZero(&data->createId);
 }
 
-BOOL func_02073264(const NFLCreateId *id) {
+BOOL NFL_IsCreateIdBit7Clear(const NFLCreateId *id) {
     return !(id->data[0] & 0x80);
 }
 
-u32 func_02073278(const NFLCreateId *id) {
+u32 NFLi_GetCreateIdBit6(const NFLCreateId *id) {
     return id->data[0] & 0x40;
 }
 
 // Whether the create ID is all zero
-BOOL func_02073284(const NFLCreateId *id) {
+BOOL NFL_IsCreateIdZero(const NFLCreateId *id) {
     return *(u32 *)&id->data[0] == 0 && *(u32 *)&id->data[4] == 0;
 }
 
-BOOL func_020732a0(const NFLCreateId *a, const NFLCreateId *b) {
+BOOL NFL_IsSameCreateIdSource(const NFLCreateId *a, const NFLCreateId *b) {
     int i;
 
-    if (func_02073284(b) || func_0207331c(b)) {
+    if (NFL_IsCreateIdZero(b) || NFL_IsCreateIdUnassigned(b)) {
         return FALSE;
     }
     if ((a->data[2] & 0xF) != (b->data[2] & 0xF)) {
@@ -3449,17 +3449,17 @@ BOOL func_020732a0(const NFLCreateId *a, const NFLCreateId *b) {
     return TRUE;
 }
 
-BOOL func_0207331c(const NFLCreateId *id) {
+BOOL NFL_IsCreateIdUnassigned(const NFLCreateId *id) {
     return (id->data[0] & 0x20) ? TRUE : FALSE;
 }
 
 // Whether two create IDs are equal and neither is all zero
-BOOL func_02073330(const NFLCreateId *a, const NFLCreateId *b) {
+BOOL NFL_AreCreateIdsEqual(const NFLCreateId *a, const NFLCreateId *b) {
     const u8 *p = a->data;
     const u8 *q = b->data;
     int i;
 
-    if (func_02073284(a) || func_02073284(b)) {
+    if (NFL_IsCreateIdZero(a) || NFL_IsCreateIdZero(b)) {
         return FALSE;
     }
     for (i = 0; i < 8; i++) {
@@ -3472,12 +3472,12 @@ BOOL func_02073330(const NFLCreateId *a, const NFLCreateId *b) {
     return TRUE;
 }
 
-void func_02073394(NFLCreateId *id) {
+void NFL_ClearCreateId(NFLCreateId *id) {
     *(u32 *)&id->data[0] = 0;
     *(u32 *)&id->data[4] = 0;
 }
 
-// What func_020733a4 makes of a Mii's data
+// What NFL_GetCharInfo makes of a Mii's data
 typedef struct NFLCharInfo {
     /* 0x00 */ u16 name[11];
     /* 0x16 */ u16 creatorName[11];
@@ -3493,13 +3493,13 @@ typedef struct NFLCharInfo {
     /* 0x38 */ u16 unk38;
 } NFLCharInfo;
 
-u16 func_0206dcd0(int faceColor);
+u16 NFLi_GetFaceColor(int faceColor);
 
-int func_020733a4(NFLCharInfo *info, const NFLCharData *data) {
+int NFL_GetCharInfo(NFLCharInfo *info, const NFLCharData *data) {
     u8 height;
     u8 build;
 
-    if (!func_020731e0(data)) {
+    if (!NFLi_IsValidCharData(data)) {
         return 7;
     }
     MI_CpuClear16(info->name, sizeof(info->name));
@@ -3523,44 +3523,44 @@ int func_020733a4(NFLCharInfo *info, const NFLCharData *data) {
     info->height = height;
     info->build = build;
     info->unk34Bits29 = (*(const u32 *)&data->createId & 0x80000000) ? 0 : 3;
-    info->unk38 = func_0206dcd0(data->faceColor);
+    info->unk38 = NFLi_GetFaceColor(data->faceColor);
     return 0;
 }
 
-u16 func_0206dd1c(int index);
+u16 NFLi_GetFavoriteColor(int index);
 
-u16 func_02073514(int index) {
-    return func_0206dd1c(index);
+u16 NFL_GetFavoriteColor(int index) {
+    return NFLi_GetFavoriteColor(index);
 }
 
 // The create-ID helpers above, on a Mii's data
-BOOL func_02073520(const NFLCharData *data) {
-    return func_02073264(&data->createId);
+BOOL NFL_IsMiiCreateIdBit7Clear(const NFLCharData *data) {
+    return NFL_IsCreateIdBit7Clear(&data->createId);
 }
 
-u32 func_02073530(const NFLCharData *data) {
-    return func_02073278(&data->createId);
+u32 NFL_GetMiiCreateIdBit6(const NFLCharData *data) {
+    return NFLi_GetCreateIdBit6(&data->createId);
 }
 
-BOOL func_02073540(const NFLCreateId *a, const NFLCharData *b) {
-    return func_020732a0(a, &b->createId);
+BOOL NFL_IsSameMiiCreateIdSource(const NFLCreateId *a, const NFLCharData *b) {
+    return NFL_IsSameCreateIdSource(a, &b->createId);
 }
 
-BOOL func_02073550(const NFLCharData *data) {
-    return func_0207331c(&data->createId);
+BOOL NFL_IsMiiCreateIdUnassigned(const NFLCharData *data) {
+    return NFL_IsCreateIdUnassigned(&data->createId);
 }
 
-BOOL func_02073560(const NFLCharData *a, const NFLCharData *b) {
-    return func_02073330(&a->createId, &b->createId);
+BOOL NFL_AreMiiCreateIdsEqual(const NFLCharData *a, const NFLCharData *b) {
+    return NFL_AreCreateIdsEqual(&a->createId, &b->createId);
 }
 
-void func_02073574(NFLCharData *data) {
-    func_02073394(&data->createId);
+void NFL_ClearMiiCreateId(NFLCharData *data) {
+    NFL_ClearCreateId(&data->createId);
 }
 
-int func_02073584(void *p) {
+int NFLi_SetResource(void *p) {
     OSIntrMode enabled = OS_DisableInterrupts();
-    NFLWork *work = data_02145360;
+    NFLWork *work = sNFLWork;
 
     if (work == NULL) {
         OS_RestoreInterrupts(enabled);
@@ -3575,33 +3575,33 @@ int func_02073584(void *p) {
     return 0;
 }
 
-BOOL func_020735dc(void) {
-    return data_02145360->unk64 != NULL;
+BOOL NFLi_HasResource(void) {
+    return sNFLWork->unk64 != NULL;
 }
 
-BOOL func_020735fc(void) {
-    return data_02145360->unk78 != NULL;
+BOOL NFLi_HasBuffer(void) {
+    return sNFLWork->unk78 != NULL;
 }
 
-extern const NFLCharData data_020b70c8[];
+extern const NFLCharData sNFLDefaultMiis[];
 
 // Copies Mii index (0 to 5) of the library's table into data, and gives it a blank create ID
-int func_0207361c(NFLCharData *data, u32 index) {
+int NFL_CopyDefaultMii(NFLCharData *data, u32 index) {
     if (index > 5) {
         return 8;
     }
     if (data == NULL) {
         return 8;
     }
-    MI_CpuCopy8(&data_020b70c8[index], data, sizeof(NFLCharData));
-    func_020731b8((u8 *)data);
+    MI_CpuCopy8(&sNFLDefaultMiis[index], data, sizeof(NFLCharData));
+    NFLi_SetUnassignedCreateId((u8 *)data);
     return 0;
 }
 
-void func_020736ec(NFLCharData *data, int sex, int b, int c);
+void NFLi_MakeRandomMiiOf(NFLCharData *data, int sex, int b, int c);
 
-int func_02073664(NFLCharData *data, int sex, int b, int c) {
-    if (data_02145360 == NULL) {
+int NFL_MakeRandomMii(NFLCharData *data, int sex, int b, int c) {
+    if (sNFLWork == NULL) {
         return 4;
     }
     if (data == NULL) {
@@ -3617,28 +3617,28 @@ int func_02073664(NFLCharData *data, int sex, int b, int c) {
     if (c < 0 || sex > 3) {
         return 8;
     }
-    func_020736ec(data, sex, b, c);
-    func_020731b8((u8 *)data);
+    NFLi_MakeRandomMiiOf(data, sex, b, c);
+    NFLi_SetUnassignedCreateId((u8 *)data);
     return 0;
 }
 
-u16 func_020743a0(u16 max);
-void func_020737b0(NFLCharData *data, int sex, int b, int c);
+u16 NFL_Random(u16 max);
+void NFLi_MakeRandomMii(NFLCharData *data, int sex, int b, int c);
 
 // Picks at random what is 2 (sex) or 3 (b and c) on entry, then makes the Mii
-void func_020736ec(NFLCharData *data, int sex, int b, int c) {
+void NFLi_MakeRandomMiiOf(NFLCharData *data, int sex, int b, int c) {
     int d;
     u16 r;
 
     if (sex == 2) {
-        if (func_020743a0(2) == 0) {
+        if (NFL_Random(2) == 0) {
             sex = 0;
         } else {
             sex = 1;
         }
     }
     if (b == 3) {
-        r = func_020743a0(10);
+        r = NFL_Random(10);
         if (r < 4) {
             b = 0;
         } else if (r < 8) {
@@ -3658,7 +3658,7 @@ void func_020736ec(NFLCharData *data, int sex, int b, int c) {
         d = 2;
         break;
     case 3:
-        r = func_020743a0(10);
+        r = NFL_Random(10);
         if (r < 4) {
             d = 2;
         } else if (r < 8) {
@@ -3668,94 +3668,94 @@ void func_020736ec(NFLCharData *data, int sex, int b, int c) {
         }
         break;
     }
-    func_020737b0(data, sex, b, d);
+    NFLi_MakeRandomMii(data, sex, b, d);
 }
 
 
-u8 func_02073eac(int sex, int b, int c);
-u8 func_02073eec(int sex, int b, int c);
-u8 func_02073f94(int sex, int b, int c);
-u8 func_02074034(int sex, int b, int c);
-u8 func_020740a8(int sex, int b, int c);
-u8 func_02074148(int sex, int b, int c);
-u8 func_020741e8(int sex, int b, int c);
-u8 func_02074228(int b);
-u8 func_02074310(int sex, int c);
-u8 func_02074344(int b, int c);
-u8 func_02074378(int c);
+u8 NFLi_RandomFaceType(int sex, int b, int c);
+u8 NFLi_RandomHairType(int sex, int b, int c);
+u8 NFLi_RandomEyeType(int sex, int b, int c);
+u8 NFLi_RandomEyebrowType(int sex, int b, int c);
+u8 NFLi_RandomNoseType(int sex, int b, int c);
+u8 NFLi_RandomMouthType(int sex, int b, int c);
+u8 NFLi_RandomFaceTexture(int sex, int b, int c);
+u8 NFLi_RandomGlassesType(int b);
+u8 NFLi_RandomFaceColor(int sex, int c);
+u8 NFLi_RandomHairColor(int b, int c);
+u8 NFLi_RandomEyeColor(int c);
 
-extern const u8 data_020b689c[];
-extern const u8 data_020b6884[];
+extern const u8 sNFLEyeTypeRotations[];
+extern const u8 sNFLEyebrowTypeRotations[];
 
 // Makes a Mii's data at random, for sex, b and c: the parts from the tables of the functions after it, the face's
 // parts placed lower by up to 4 for sex 1 and for b 0, a beard on one man in 5 of b 1 and 2
-void func_020737b0(NFLCharData *data, int sex, int b, int c) {
+void NFLi_MakeRandomMii(NFLCharData *data, int sex, int b, int c) {
     u8 offset = 0;
     int i;
 
     if (sex == 1) {
-        offset += func_020743a0(3);
+        offset += NFL_Random(3);
     }
     if (b == 0) {
-        offset += func_020743a0(3);
+        offset += NFL_Random(3);
     }
-    data->faceType = func_02073eac(sex, b, c);
-    data->faceColor = func_02074310(sex, c);
-    data->faceTexture = func_020741e8(sex, b, c);
-    data->hairType = func_02073eec(sex, b, c);
-    data->hairColor = func_02074344(b, c);
-    data->hairFlip = func_020743a0(2);
-    data->eyeType = func_02073f94(sex, b, c);
-    data->eyeColor = func_02074378(c);
+    data->faceType = NFLi_RandomFaceType(sex, b, c);
+    data->faceColor = NFLi_RandomFaceColor(sex, c);
+    data->faceTexture = NFLi_RandomFaceTexture(sex, b, c);
+    data->hairType = NFLi_RandomHairType(sex, b, c);
+    data->hairColor = NFLi_RandomHairColor(b, c);
+    data->hairFlip = NFL_Random(2);
+    data->eyeType = NFLi_RandomEyeType(sex, b, c);
+    data->eyeColor = NFLi_RandomEyeColor(c);
     data->eyeScale = 4;
     if (sex == 0) {
         data->eyeRotation = 4;
-        data->eyeRotation += data_020b689c[2] - data_020b689c[data->eyeType];
+        data->eyeRotation += sNFLEyeTypeRotations[2] - sNFLEyeTypeRotations[data->eyeType];
     } else {
         data->eyeRotation = 3;
-        data->eyeRotation += data_020b689c[4] - data_020b689c[data->eyeType];
+        data->eyeRotation += sNFLEyeTypeRotations[4] - sNFLEyeTypeRotations[data->eyeType];
     }
     data->eyeX = 2;
     data->eyeY = offset + 12;
-    data->eyebrowType = func_02074034(sex, b, c);
+    data->eyebrowType = NFLi_RandomEyebrowType(sex, b, c);
     data->eyebrowColor = data->hairColor;
     data->eyebrowScale = 4;
     data->eyebrowRotation = 6;
     data->eyebrowX = 2;
     if (c == 2) {
         data->eyebrowY = offset + 9;
-        data->eyebrowRotation += data_020b6884[6] - data_020b6884[data->eyebrowType];
+        data->eyebrowRotation += sNFLEyebrowTypeRotations[6] - sNFLEyebrowTypeRotations[data->eyebrowType];
     } else {
         data->eyebrowY = offset + 10;
-        data->eyebrowRotation += data_020b6884[0] - data_020b6884[data->eyebrowType];
+        data->eyebrowRotation += sNFLEyebrowTypeRotations[0] - sNFLEyebrowTypeRotations[data->eyebrowType];
     }
-    data->noseType = func_020740a8(sex, b, c);
+    data->noseType = NFLi_RandomNoseType(sex, b, c);
     if (sex == 0) {
         data->noseScale = 4;
     } else {
         data->noseScale = 3;
     }
     data->noseY = offset + 9;
-    data->mouthType = func_02074148(sex, b, c);
+    data->mouthType = NFLi_RandomMouthType(sex, b, c);
     if (sex == 0) {
         data->mouthColor = 0;
     } else {
-        data->mouthColor = func_020743a0(3);
+        data->mouthColor = NFL_Random(3);
     }
     data->mouthScale = 4;
     data->mouthY = offset + 13;
-    if (sex == 0 && (b == 1 || b == 2) && func_020743a0(10) < 2) {
-        u16 r = func_020743a0(3);
+    if (sex == 0 && (b == 1 || b == 2) && NFL_Random(10) < 2) {
+        u16 r = NFL_Random(3);
 
         if (r == 0) {
             data->mustacheType = 0;
-            data->beardType = func_020743a0(3) + 1;
+            data->beardType = NFL_Random(3) + 1;
         } else if (r == 1) {
-            data->mustacheType = func_020743a0(3) + 1;
+            data->mustacheType = NFL_Random(3) + 1;
             data->beardType = 0;
         } else if (r == 2) {
-            data->mustacheType = func_020743a0(3) + 1;
-            data->beardType = func_020743a0(3) + 1;
+            data->mustacheType = NFL_Random(3) + 1;
+            data->beardType = NFL_Random(3) + 1;
         }
         data->beardColor = data->hairColor;
         data->beardScale = 4;
@@ -3767,7 +3767,7 @@ void func_020737b0(NFLCharData *data, int sex, int b, int c) {
         data->beardScale = 4;
         data->beardY = offset + 10;
     }
-    data->glassesType = func_02074228(b);
+    data->glassesType = NFLi_RandomGlassesType(b);
     data->glassesColor = 0;
     data->glassesScale = 4;
     data->glassesY = offset + 10;
@@ -3789,19 +3789,19 @@ void func_020737b0(NFLCharData *data, int sex, int b, int c) {
     data->sex = sex;
     data->birthMonth = 0;
     data->birthDay = 0;
-    data->favoriteColor = func_020743a0(12);
+    data->favoriteColor = NFL_Random(12);
     data->unk00Bit0 = 0;
     data->unk20Bit2 = 0;
 }
 
-extern const u8 data_020b69c0[][10];
+extern const u8 sNFLRandomFaceTypes[][10];
 
-u8 func_02073eac(int sex, int b, int c) {
-    return data_020b69c0[sex * 9 + b * 3 + c][func_020743a0(10)];
+u8 NFLi_RandomFaceType(int sex, int b, int c) {
+    return sNFLRandomFaceTypes[sex * 9 + b * 3 + c][NFL_Random(10)];
 }
 
 // The hair type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
-u8 func_02073eec(int sex, int b, int c) {
+u8 NFLi_RandomHairType(int sex, int b, int c) {
     u8 choices[18][72] = {
         {13, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 54, 56, 57, 64, 66},
         {13, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 54, 56, 57, 64, 66},
@@ -3825,11 +3825,11 @@ u8 func_02073eec(int sex, int b, int c) {
     u8 counts[18] = {26, 26, 26, 34, 34, 34, 16, 17, 17, 33, 33, 33, 37, 36, 36, 22, 22, 22};
     u8 index = sex * 9 + b * 3 + c;
 
-    return choices[index][func_020743a0(counts[index])];
+    return choices[index][NFL_Random(counts[index])];
 }
 
 // The eye type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
-u8 func_02073f94(int sex, int b, int c) {
+u8 NFLi_RandomEyeType(int sex, int b, int c) {
     u8 choices[18][48] = {
         {2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 16, 18, 27, 29, 32, 34, 36, 38, 39, 41, 43, 47},
         {2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 16, 18, 27, 29, 32, 34, 36, 38, 39, 41, 43, 47},
@@ -3853,21 +3853,21 @@ u8 func_02073f94(int sex, int b, int c) {
     u8 counts[18] = {22, 22, 23, 29, 29, 29, 24, 24, 24, 34, 34, 35, 40, 40, 40, 20, 20, 20};
     u8 index = sex * 9 + b * 3 + c;
 
-    return choices[index][func_020743a0(counts[index])];
+    return choices[index][NFL_Random(counts[index])];
 }
 
-extern const u8 data_020b6f18[][24];
+extern const u8 sNFLRandomEyebrowTypes[][24];
 
 // The eyebrow type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
-u8 func_02074034(int sex, int b, int c) {
+u8 NFLi_RandomEyebrowType(int sex, int b, int c) {
     u8 counts[18] = {18, 18, 18, 23, 23, 23, 21, 21, 21, 9, 9, 9, 11, 11, 11, 9, 9, 9};
     u8 index = sex * 9 + b * 3 + c;
 
-    return data_020b6f18[index][func_020743a0(counts[index])];
+    return sNFLRandomEyebrowTypes[index][NFL_Random(counts[index])];
 }
 
 // The nose type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
-u8 func_020740a8(int sex, int b, int c) {
+u8 NFLi_RandomNoseType(int sex, int b, int c) {
     u8 choices[18][12] = {
         {0, 1, 2, 3, 4, 5, 7, 8, 10},
         {0, 1, 2, 3, 4, 5, 7, 8, 10},
@@ -3891,11 +3891,11 @@ u8 func_020740a8(int sex, int b, int c) {
     u8 counts[18] = {9, 9, 9, 12, 12, 11, 12, 12, 11, 6, 6, 6, 9, 9, 8, 9, 9, 8};
     u8 index = sex * 9 + b * 3 + c;
 
-    return choices[index][func_020743a0(counts[index])];
+    return choices[index][NFL_Random(counts[index])];
 }
 
 // The mouth type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
-u8 func_02074148(int sex, int b, int c) {
+u8 NFLi_RandomMouthType(int sex, int b, int c) {
     u8 choices[18][24] = {
         {0, 2, 3, 6, 7, 8, 9, 10, 12, 14, 15, 17, 18, 19, 21, 22, 23},
         {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
@@ -3919,17 +3919,17 @@ u8 func_02074148(int sex, int b, int c) {
     u8 counts[18] = {17, 19, 19, 19, 21, 21, 19, 21, 21, 19, 20, 20, 19, 20, 20, 20, 21, 21};
     u8 index = sex * 9 + b * 3 + c;
 
-    return choices[index][func_020743a0(counts[index])];
+    return choices[index][NFL_Random(counts[index])];
 }
 
-extern const u8 data_020b6c00[][20];
+extern const u8 sNFLRandomFaceTextures[][20];
 
-u8 func_020741e8(int sex, int b, int c) {
-    return data_020b6c00[sex * 9 + b * 3 + c][func_020743a0(20)];
+u8 NFLi_RandomFaceTexture(int sex, int b, int c) {
+    return sNFLRandomFaceTextures[sex * 9 + b * 3 + c][NFL_Random(20)];
 }
 
-u8 func_02074228(int b) {
-    u16 r = func_020743a0(100);
+u8 NFLi_RandomGlassesType(int b) {
+    u16 r = NFL_Random(100);
 
     switch (b) {
     case 0:
@@ -3984,27 +3984,27 @@ u8 func_02074228(int b) {
     return 0;
 }
 
-extern const u8 data_020b6984[][10];
+extern const u8 sNFLRandomFaceColors[][10];
 
-u8 func_02074310(int sex, int c) {
-    return data_020b6984[sex * 3 + c][func_020743a0(10)];
+u8 NFLi_RandomFaceColor(int sex, int c) {
+    return sNFLRandomFaceColors[sex * 3 + c][NFL_Random(10)];
 }
 
-extern const u8 data_020b6a74[][20];
+extern const u8 sNFLRandomHairColors[][20];
 
-u8 func_02074344(int b, int c) {
-    return data_020b6a74[c * 3 + b][func_020743a0(20)];
+u8 NFLi_RandomHairColor(int b, int c) {
+    return sNFLRandomHairColors[c * 3 + b][NFL_Random(20)];
 }
 
-extern const u8 data_020b6966[][10];
+extern const u8 sNFLRandomEyeColors[][10];
 
-u8 func_02074378(int c) {
-    return data_020b6966[c][func_020743a0(10)];
+u8 NFLi_RandomEyeColor(int c) {
+    return sNFLRandomEyeColors[c][NFL_Random(10)];
 }
 
 // A random number below max (a 16-bit one when max is 0), from the LCG in the work area
-u16 func_020743a0(u16 max) {
-    NFLWork *work = data_02145360;
+u16 NFL_Random(u16 max) {
+    NFLWork *work = sNFLWork;
 
     u32 r;
 
@@ -4019,25 +4019,25 @@ u16 func_020743a0(u16 max) {
 
 // The coordinate helpers: a vector in the library's axes to the drawing context's, each component to the axis its
 // index says, negated where its flag says
-void func_020743e4(const NFLDrawContext *ctx, VecFx16 *out, const VecFx16 *in) {
+void NFLi_MapVecFx16(const NFLDrawContext *ctx, VecFx16 *out, const VecFx16 *in) {
     ((fx16 *)out)[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
     ((fx16 *)out)[ctx->unkD0] = ctx->unkC4.x ? -in->y : in->y;
     ((fx16 *)out)[ctx->unkD1] = ctx->unkC4.y ? -in->z : in->z;
 }
 
-void func_02074444(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+void NFLi_MapVecFx32(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
     ((fx32 *)out)[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
     ((fx32 *)out)[ctx->unkD0] = ctx->unkC4.x ? -in->y : in->y;
     ((fx32 *)out)[ctx->unkD1] = ctx->unkC4.y ? -in->z : in->z;
 }
 
-void func_02074498(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+void NFLi_MapVecFx32NoNegate(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
     ((fx32 *)out)[ctx->unkD2] = in->x;
     ((fx32 *)out)[ctx->unkD0] = in->y;
     ((fx32 *)out)[ctx->unkD1] = in->z;
 }
 
-void func_020744c0(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+void NFLi_MapVecFx32Copy(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
     fx32 v[3];
 
     v[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
@@ -4049,7 +4049,7 @@ void func_020744c0(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
 }
 
 // Rotation about the context's z axis
-void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal) {
+void NFLi_MakeRotZMtx(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal) {
     fx32 a[3];
     VecFx32 axis;
 
@@ -4062,20 +4062,20 @@ void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 co
     MTX_RotAxis43(mtx, &axis, sinVal, cosVal);
 }
 
-void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+void NFLi_DLTranslate(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
     VecFx32 in;
     VecFx32 out;
 
     in.x = x;
     in.y = y;
     in.z = z;
-    func_02074444(ctx, &out, &in);
+    NFLi_MapVecFx32(ctx, &out, &in);
     G3C_Translate(info, out.x, out.y, out.z);
 }
 
 // Not matching: the original loads G3C_Scale's arguments last to first (out[2], out[1], out[0]). The stores to in
 // are the original's too, which keeps them only while its address is taken: hence the index i
-void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+void NFLi_DLScale(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
     VecFx32 in;
     fx32 out[3];
     int i = 0;
@@ -4089,30 +4089,30 @@ void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx
     G3C_Scale(info, out[0], out[1], out[2]);
 }
 
-void func_02074644(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+void NFLi_DLVtx(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
     VecFx16 in;
     VecFx16 out;
 
     in.x = x;
     in.y = y;
     in.z = z;
-    func_020743e4(ctx, &out, &in);
+    NFLi_MapVecFx16(ctx, &out, &in);
     G3C_Vtx(info, out.x, out.y, out.z);
 }
 
-void func_02074688(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+void NFLi_DLNormal(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
     VecFx16 in;
     VecFx16 out;
 
     in.x = x;
     in.y = y;
     in.z = z;
-    func_020743e4(ctx, &out, &in);
+    NFLi_MapVecFx16(ctx, &out, &in);
     G3C_Normal(info, out.x, out.y, out.z);
 }
 
 // Whether end bytes fit in the texture palette slots of a GXVRamTexPltt: 14 an unknown one, 13 too many
-int func_020746cc(int bank, u32 offset, u32 end) {
+int NFLi_CheckTexPlttBank(int bank, u32 offset, u32 end) {
     switch (bank) {
     case 0x20:
     case 0x40:
@@ -4147,7 +4147,7 @@ int func_020746cc(int bank, u32 offset, u32 end) {
 }
 
 // Whether end bytes fit in the texture slots of a GXVRamTex: 12 none, 11 too many
-int func_02074778(int bank, u32 offset, u32 end) {
+int NFLi_CheckTexBank(int bank, u32 offset, u32 end) {
     switch (bank) {
     case 1:
     case 2:
@@ -4195,20 +4195,20 @@ typedef struct NFLTexBank {
     u16 unk4;
 } NFLTexBank;
 
-extern const NFLTexBank data_020b7b04[];
+extern const NFLTexBank sNFLTexBankParts[];
 
 // Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
 // Not matching: register allocation only (the original keeps the second part's address in r4, which becomes dest)
-int func_02074814(int bank, const void *src, u32 offset, u32 size) {
+int NFLi_CopyToTexBank(int bank, const void *src, u32 offset, u32 size) {
     u32 n;
     void *dest;
     int result;
-    u32 second = data_020b7b04[bank].unk2 << 12;
-    u32 first = data_020b7b04[bank].unk0;
-    u32 split = data_020b7b04[bank].unk4;
+    u32 second = sNFLTexBankParts[bank].unk2 << 12;
+    u32 first = sNFLTexBankParts[bank].unk0;
+    u32 split = sNFLTexBankParts[bank].unk4;
     u32 end = offset + size;
 
-    result = func_02074778(bank, offset, end);
+    result = NFLi_CheckTexBank(bank, offset, end);
     if (result != 0) {
         return result;
     }
@@ -4233,12 +4233,12 @@ int func_02074814(int bank, const void *src, u32 offset, u32 size) {
     return 0;
 }
 
-extern const u16 data_020b7af4[];
+extern const u16 sNFLTexPlttBankBases[];
 
 // Copies size bytes of palettes to offset of the texture palette slots, through the LCDC, as GX_LoadTexPltt does
-int func_02074904(int bank, const void *src, u32 offset, u32 size) {
-    u32 base = data_020b7af4[bank >> 4] << 12;
-    int result = func_020746cc(bank, offset, offset + size);
+int NFLi_CopyToTexPlttBank(int bank, const void *src, u32 offset, u32 size) {
+    u32 base = sNFLTexPlttBankBases[bank >> 4] << 12;
+    int result = NFLi_CheckTexPlttBank(bank, offset, offset + size);
     void *dest;
 
     if (result != 0) {
@@ -4253,35 +4253,35 @@ int func_02074904(int bank, const void *src, u32 offset, u32 size) {
 int func_0200473c(void);
 int func_0200474c(void);
 
-int func_02074964(const void *src, u32 offset, u32 size) {
+int NFLi_LoadTex(const void *src, u32 offset, u32 size) {
     int bank = func_0200473c();
     int result;
 
     GX_BeginLoadTex();
-    result = func_02074814(bank, src, offset, size);
+    result = NFLi_CopyToTexBank(bank, src, offset, size);
     GX_EndLoadTex();
     return result;
 }
 
-int func_020749a4(const void *src, u32 offset, u32 size) {
+int NFLi_LoadTexPltt(const void *src, u32 offset, u32 size) {
     int bank = func_0200474c();
     int result;
 
     GX_BeginLoadTexPltt();
-    result = func_02074904(bank, src, offset, size);
+    result = NFLi_CopyToTexPlttBank(bank, src, offset, size);
     GX_EndLoadTexPltt();
     return result;
 }
 
-BOOL func_02074b68(u32 *arg);
-BOOL func_0207516c(u32 *arg);
-BOOL func_02075528(NFLObj *obj, u32 *arg);
-BOOL func_02075f50(NFLObj *obj, u32 *arg);
-void func_020763e0(NFLObj *obj);
+BOOL NFLi_CopySharedTextures(u32 *arg);
+BOOL NFLi_CopySharedPltt(u32 *arg);
+BOOL NFLi_CopyFaceTextures(NFLObj *obj, u32 *arg);
+BOOL NFLi_CopyFacePltts(NFLObj *obj, u32 *arg);
+void NFLi_RemoveFromLoadList(NFLObj *obj);
 
 // The library's work of a frame, which main calls every frame: 4 not set up, 0x14 and 0x13 busy, 3 nothing to do
-int func_020749e4(void) {
-    NFLWork *work = data_02145360;
+int NFL_FillBuffer(void) {
+    NFLWork *work = sNFLWork;
     u32 arg;
 
     if (work == NULL) {
@@ -4301,11 +4301,11 @@ int func_020749e4(void) {
     work->unk9C = 0;
     switch (work->unk90) {
     case 0:
-        func_02074b68(&arg);
+        NFLi_CopySharedTextures(&arg);
         work->unk8C = 2;
         break;
     case 1:
-        func_0207516c(&arg);
+        NFLi_CopySharedPltt(&arg);
         work->unk8C = 2;
         break;
     case 2:
@@ -4318,16 +4318,16 @@ int func_020749e4(void) {
         }
         switch (work->unk74->unk170) {
         case 0:
-            func_02075528(work->unk74, &arg);
+            NFLi_CopyFaceTextures(work->unk74, &arg);
             work->unk8C = 2;
             break;
         case 1:
-            func_02075f50(work->unk74, &arg);
+            NFLi_CopyFacePltts(work->unk74, &arg);
             work->unk8C = 2;
             break;
         case 2:
         case 4:
-            func_020763e0(work->unk74);
+            NFLi_RemoveFromLoadList(work->unk74);
             work->unk8C = 0;
             break;
         }
@@ -4340,30 +4340,30 @@ int func_020749e4(void) {
 
 
 // Copies size bytes, or converts them through palette when there is one
-void func_02074b34(const void *src, void *dest, const u16 *palette, u32 size, BOOL arg4) {
+void NFLi_CopyTexData(const void *src, void *dest, const u16 *palette, u32 size, BOOL arg4) {
     if (palette != NULL) {
-        func_0206dd44(dest, src, palette, size, arg4);
+        NFLi_Convert4BitToDirect(dest, src, palette, size, arg4);
     } else {
         MIi_CpuCopy32(src, dest, size);
     }
 }
 
-// What func_02074b68 copies to each of its six streams: a resource (func_0206cf6c's kind and index) and its size
+// What NFLi_CopySharedTextures copies to each of its six streams: a resource (NFLi_GetResourceItem's kind and index) and its size
 typedef struct NFLStreamSource {
     int unk0;
     int unk4;
     u32 unk8;
 } NFLStreamSource;
 
-extern NFLStreamSource data_0211216c[];
+extern NFLStreamSource sNFLSharedStreamSources[];
 
 
 
 // Not matching: register allocation only (the original has pal in r5 before stream, source, extra and size)
-BOOL func_02074b68(u32 *pos) {
-    NFLWork *work = (NFLWork *)data_02145360;
+BOOL NFLi_CopySharedTextures(u32 *pos) {
+    NFLWork *work = (NFLWork *)sNFLWork;
     NFLWorkUnkA0 *stream = work->unkA0;
-    NFLStreamSource *source = data_0211216c;
+    NFLStreamSource *source = sNFLSharedStreamSources;
     int i;
     u16 palette[16];
 
@@ -4393,16 +4393,16 @@ BOOL func_02074b68(u32 *pos) {
         extra = 0;
         overflowB = FALSE;
         overflowA = FALSE;
-        if (data_02145360->unk68 == 7) {
+        if (sNFLWork->unk68 == 7) {
             size = source->unk8 * 4;
             if (source->unk0 == 2) {
-                func_0206a014(palette, 0);
+                NFLi_MakeEyePltt(palette, 0);
                 pal = palette;
             } else if (source->unk0 == 13) {
-                func_0206a1b4(palette, 0);
+                NFLi_MakeMouthPltt(palette, 0);
                 pal = palette;
             } else {
-                pal = func_0206cf6c(12, 0);
+                pal = NFLi_GetResourceItem(12, 0);
             }
         } else {
             size = source->unk8;
@@ -4420,23 +4420,23 @@ BOOL func_02074b68(u32 *pos) {
                 overflowB = TRUE;
             }
             if (!overflowB) {
-                src = func_0206cf6c(source->unk0, source->unk4);
-                func_02074b34(src, work->unk78 + offset, pal, size, TRUE);
+                src = NFLi_GetResourceItem(source->unk0, source->unk4);
+                NFLi_CopyTexData(src, work->unk78 + offset, pal, size, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, size);
             } else {
                 int over = work->unk84 + size - work->unk7C;
                 int n;
 
-                src = func_0206cf6c(source->unk0, source->unk4);
+                src = NFLi_GetResourceItem(source->unk0, source->unk4);
                 n = size - over;
-                func_02074b34(src, work->unk78 + work->unk84, pal, n, TRUE);
+                NFLi_CopyTexData(src, work->unk78 + work->unk84, pal, n, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, n);
-                if (data_02145360->unk68 == 7) {
+                if (sNFLWork->unk68 == 7) {
                     src += n / 4;
                 } else {
                     src += n;
                 }
-                func_02074b34(src, work->unk78, pal, over, TRUE);
+                NFLi_CopyTexData(src, work->unk78, pal, over, TRUE);
                 DC_FlushRange(work->unk78, over);
             }
             if (!overflowA) {
@@ -4447,11 +4447,11 @@ BOOL func_02074b68(u32 *pos) {
             }
             stream->unk0 = work->unk84;
         } else {
-            u8 *p = func_0206cf6c(source->unk0, source->unk4);
+            u8 *p = NFLi_GetResourceItem(source->unk0, source->unk4);
 
             switch (stream->unk8) {
             case 3:
-                if (data_02145360->unk68 == 7) {
+                if (sNFLWork->unk68 == 7) {
                     p += (int)work->unk98 / 4;
                 } else {
                     p += work->unk98;
@@ -4460,7 +4460,7 @@ BOOL func_02074b68(u32 *pos) {
                 extra = 0;
                 break;
             case 4:
-                if (data_02145360->unk68 == 7) {
+                if (sNFLWork->unk68 == 7) {
                     p += (int)work->unk98 / 4;
                 } else {
                     p += work->unk98;
@@ -4470,7 +4470,7 @@ BOOL func_02074b68(u32 *pos) {
                 break;
             case 1:
                 extra = work->unk94;
-                if (data_02145360->unk68 == 7) {
+                if (sNFLWork->unk68 == 7) {
                     p += (int)extra / 4;
                 } else {
                     p += extra;
@@ -4502,68 +4502,68 @@ BOOL func_02074b68(u32 *pos) {
                 }
             }
             if (!overflowB) {
-                func_02074b34(p, work->unk78 + work->unk84, palette, size, TRUE);
+                NFLi_CopyTexData(p, work->unk78 + work->unk84, palette, size, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, size);
             } else {
                 int over = work->unk84 + size - work->unk7C;
                 int n = size - over;
 
-                func_02074b34(p, work->unk78 + work->unk84, palette, n, TRUE);
+                NFLi_CopyTexData(p, work->unk78 + work->unk84, palette, n, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, n);
-                if (data_02145360->unk68 == 7) {
+                if (sNFLWork->unk68 == 7) {
                     p += n / 4;
                 } else {
                     p += n;
                 }
-                func_02074b34(p, work->unk78, palette, over, TRUE);
+                NFLi_CopyTexData(p, work->unk78, palette, over, TRUE);
                 DC_FlushRange(work->unk78, over);
             }
         }
         switch (i) {
         case 0:
-            stream->unk4 = data_02145360->unk10[0].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[0].unk0 + extra;
             break;
         case 1:
-            stream->unk4 = data_02145360->unk10[1].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[1].unk0 + extra;
             break;
         case 2:
-            stream->unk4 = data_02145360->unk10[2].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[2].unk0 + extra;
             break;
         case 3:
-            stream->unk4 = data_02145360->unk10[3].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[3].unk0 + extra;
             break;
         case 4:
-            stream->unk4 = data_02145360->unk10[4].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[4].unk0 + extra;
             break;
         case 5:
-            stream->unk4 = data_02145360->unk10[5].unk0 + extra;
+            stream->unk4 = sNFLWork->unk10[5].unk0 + extra;
             break;
         }
         work->unk84 = (work->unk84 + size) % work->unk7C;
         *pos += size;
         }
     }
-    if (data_02145360->unk68 != 7) {
-        func_0207516c(pos);
+    if (sNFLWork->unk68 != 7) {
+        NFLi_CopySharedPltt(pos);
     } else {
         if (work->unk74 == NULL) {
             return TRUE;
         }
         switch (work->unk74->unk170) {
         case 0:
-            func_02075528(work->unk74, pos);
+            NFLi_CopyFaceTextures(work->unk74, pos);
             break;
         case 1:
-            func_02075f50(work->unk74, pos);
+            NFLi_CopyFacePltts(work->unk74, pos);
             break;
         }
     }
     return TRUE;
 }
 
-// The seventh stream of the work area: 32 bytes of resource 12, 0 (the palette func_02074b68 uses)
-BOOL func_0207516c(u32 *pos) {
-    NFLWork *work = (NFLWork *)data_02145360;
+// The seventh stream of the work area: 32 bytes of resource 12, 0 (the palette NFLi_CopySharedTextures uses)
+BOOL NFLi_CopySharedPltt(u32 *pos) {
+    NFLWork *work = (NFLWork *)sNFLWork;
 
     if (work->unk68 != 7) {
         if (*pos >= work->unk7C) {
@@ -4602,14 +4602,14 @@ BOOL func_0207516c(u32 *pos) {
                 if (!overflowB) {
                     u8 *buf = work->unk78;
 
-                    src = func_0206cf6c(12, 0);
+                    src = NFLi_GetResourceItem(12, 0);
                     MIi_CpuCopy32(src, buf + offset, size);
                     DC_FlushRange(work->unk78 + work->unk84, size);
                 } else {
                     int over = offset + size - work->unk7C;
                     int n;
 
-                    src = func_0206cf6c(12, 0);
+                    src = NFLi_GetResourceItem(12, 0);
                     n = size - over;
                     MIi_CpuCopy32(src, work->unk78 + work->unk84, n);
                     DC_FlushRange(work->unk78 + work->unk84, n);
@@ -4624,7 +4624,7 @@ BOOL func_0207516c(u32 *pos) {
                 }
                 work->unkA0[6].unk0 = work->unk84;
             } else {
-                u8 *p = func_0206cf6c(12, 0);
+                u8 *p = NFLi_GetResourceItem(12, 0);
 
                 switch (work->unkA0[6].unk8) {
                 case 3:
@@ -4674,7 +4674,7 @@ BOOL func_0207516c(u32 *pos) {
 
                     MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
                     DC_FlushRange(work->unk78 + work->unk84, n);
-                    if (data_02145360->unk68 == 7) {
+                    if (sNFLWork->unk68 == 7) {
                         p += n / 4;
                     } else {
                         p += n;
@@ -4684,7 +4684,7 @@ BOOL func_0207516c(u32 *pos) {
                 }
             }
             work->unk84 = (work->unk84 + size) % work->unk7C;
-            work->unkA0[6].unk4 = data_02145360->unk10[5].unk4 + extra;
+            work->unkA0[6].unk4 = sNFLWork->unk10[5].unk4 + extra;
             *pos += size;
         }
     }
@@ -4696,30 +4696,30 @@ BOOL func_0207516c(u32 *pos) {
     }
     switch (work->unk74->unk170) {
     case 0:
-        func_02075528(work->unk74, pos);
+        NFLi_CopyFaceTextures(work->unk74, pos);
         break;
     case 1:
-        func_02075f50(work->unk74, pos);
+        NFLi_CopyFacePltts(work->unk74, pos);
         break;
     }
     return TRUE;
 }
 
-// What func_02075528 copies to each of an object's eleven streams: a resource kind (func_0206cf6c's) and its size
+// What NFLi_CopyFaceTextures copies to each of an object's eleven streams: a resource kind (NFLi_GetResourceItem's) and its size
 typedef struct NFLObjSource {
     int unk0;
     u32 unk4;
 } NFLObjSource;
 
-extern NFLObjSource data_021121b4[];
+extern NFLObjSource sNFLFaceStreamSources[];
 
-void func_0206cd9c(u16 *palette, const s16 *params);
-void func_0206cc30(u16 *palette);
+void NFLi_MakeColorTextureDirect(u16 *palette, const s16 *params);
+void NFLi_MakeColorTexture(u16 *palette);
 
 // Not matching: register allocation only (the original has stream in r4, then size, pal, obj, work)
-BOOL func_02075528(NFLObj *obj, u32 *pos) {
+BOOL NFLi_CopyFaceTextures(NFLObj *obj, u32 *pos) {
     NFLWorkUnkA0 *stream;
-    NFLWork *work = data_02145360;
+    NFLWork *work = sNFLWork;
     s16 *params = obj->unk180;
     int i;
     u16 palette[64];
@@ -4751,27 +4751,27 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
             }
         }
         if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
-            kind = data_021121b4[i].unk0;
+            kind = sNFLFaceStreamSources[i].unk0;
             index = stream->unk4;
             overflowB = FALSE;
             overflowA = FALSE;
             arg4 = TRUE;
-            pal = data_02145360->unk68 == 7 ? palette : NULL;
-            if (data_02145360->unk68 == 7) {
+            pal = sNFLWork->unk68 == 7 ? palette : NULL;
+            if (sNFLWork->unk68 == 7) {
                 if (kind == 21) {
                     size = 0x80;
                 } else {
-                    size = data_021121b4[i].unk4 * 4;
+                    size = sNFLFaceStreamSources[i].unk4 * 4;
                 }
             } else {
-                size = data_021121b4[i].unk4;
+                size = sNFLFaceStreamSources[i].unk4;
             }
             switch (kind) {
             case 21:
-                if (data_02145360->unk68 == 7) {
-                    func_0206cd9c(palette, params);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeColorTextureDirect(palette, params);
                 } else {
-                    func_0206cc30(palette);
+                    NFLi_MakeColorTexture(palette);
                 }
                 if (stream->unk8 == 0) {
                     if (*pos + size > work->unk7C) {
@@ -4854,28 +4854,28 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                 *pos += size;
                 break;
             case 2:
-                if (data_02145360->unk68 == 7) {
-                    func_0206a014(pal, params[8]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeEyePltt(pal, params[8]);
                 }
                 break;
             case 3:
-                if (data_02145360->unk68 == 7) {
-                    func_02069de4(pal, params[6]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeHairPltt(pal, params[6]);
                 }
                 break;
             case 13:
-                if (data_02145360->unk68 == 7) {
-                    func_0206a1b4(pal, params[10]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeMouthPltt(pal, params[10]);
                 }
                 break;
             case 14:
-                if (data_02145360->unk68 == 7) {
-                    func_02069de4(pal, params[14]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeHairPltt(pal, params[14]);
                 }
                 break;
             case 8:
-                if (data_02145360->unk68 == 7) {
-                    func_0206a99c(pal, params[12]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeGlassesPltt(pal, params[12]);
                 }
                 break;
             case 1:
@@ -4887,13 +4887,13 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                     index = 1;
                     break;
                 }
-                if (data_02145360->unk68 == 7) {
-                    func_02069de4(pal, params[14]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeHairPltt(pal, params[14]);
                 }
                 break;
             case 5:
-                if (data_02145360->unk68 == 7) {
-                    func_0206a2e4(pal, params[2]);
+                if (sNFLWork->unk68 == 7) {
+                    NFLi_MakeFacePltt(pal, params[2]);
                 }
                 arg4 = FALSE;
                 break;
@@ -4907,8 +4907,8 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         index = 1;
                         break;
                     }
-                    if (data_02145360->unk68 == 7) {
-                        func_0206a894(pal, params[0]);
+                    if (sNFLWork->unk68 == 7) {
+                        NFLi_MakeFavoriteColorPltt(pal, params[0]);
                     }
                     kind = 19;
                     arg4 = FALSE;
@@ -4942,8 +4942,8 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         index = 8;
                         break;
                     }
-                    if (data_02145360->unk68 == 7) {
-                        func_02069de4(pal, params[4]);
+                    if (sNFLWork->unk68 == 7) {
+                        NFLi_MakeHairPltt(pal, params[4]);
                     }
                     if (params[3] == 29) {
                         arg4 = TRUE;
@@ -4953,8 +4953,8 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                 }
                 break;
             case 17:
-                if (data_02145360->unk68 == 7) {
-                    pal = func_0206cf6c(12, 0);
+                if (sNFLWork->unk68 == 7) {
+                    pal = NFLi_GetResourceItem(12, 0);
                 }
                 break;
             }
@@ -4972,23 +4972,23 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         overflowB = TRUE;
                     }
                     if (!overflowB) {
-                        src = func_0206cf6c(kind, index);
-                        func_02074b34(src, work->unk78 + offset, pal, size, arg4);
+                        src = NFLi_GetResourceItem(kind, index);
+                        NFLi_CopyTexData(src, work->unk78 + offset, pal, size, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, size);
                     } else {
                         int over = work->unk84 + size - work->unk7C;
                         int n;
 
-                        src = func_0206cf6c(kind, index);
+                        src = NFLi_GetResourceItem(kind, index);
                         n = size - over;
-                        func_02074b34(src, work->unk78 + work->unk84, pal, n, arg4);
+                        NFLi_CopyTexData(src, work->unk78 + work->unk84, pal, n, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, n);
-                        if (data_02145360->unk68 == 7) {
+                        if (sNFLWork->unk68 == 7) {
                             src += n / 4;
                         } else {
                             src += n;
                         }
-                        func_02074b34(src, work->unk78, pal, over, arg4);
+                        NFLi_CopyTexData(src, work->unk78, pal, over, arg4);
                         DC_FlushRange(work->unk78, over);
                     }
                     if (!overflowA) {
@@ -4998,12 +4998,12 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         stream->unk8 = 3;
                     }
                 } else {
-                    u8 *p2 = func_0206cf6c(kind, index);
+                    u8 *p2 = NFLi_GetResourceItem(kind, index);
 
                     switch (stream->unk8) {
                     case 3:
                     case 4:
-                        if (data_02145360->unk68 == 7) {
+                        if (sNFLWork->unk68 == 7) {
                             p2 += (int)obj->unk178 / 4;
                         } else {
                             p2 += obj->unk178;
@@ -5011,7 +5011,7 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         size -= obj->unk178;
                         break;
                     case 1:
-                        if (data_02145360->unk68 == 7) {
+                        if (sNFLWork->unk68 == 7) {
                             p2 += (int)obj->unk174 / 4;
                         } else {
                             p2 += obj->unk174;
@@ -5028,20 +5028,20 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         overflowB = TRUE;
                     }
                     if (!overflowB) {
-                        func_02074b34(p2, work->unk78 + work->unk84, pal, size, arg4);
+                        NFLi_CopyTexData(p2, work->unk78 + work->unk84, pal, size, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, size);
                     } else {
                         int over = work->unk84 + size - work->unk7C;
                         int n = size - over;
 
-                        func_02074b34(p2, work->unk78 + work->unk84, pal, n, arg4);
+                        NFLi_CopyTexData(p2, work->unk78 + work->unk84, pal, n, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, n);
-                        if (data_02145360->unk68 == 7) {
+                        if (sNFLWork->unk68 == 7) {
                             p2 += n / 4;
                         } else {
                             p2 += n;
                         }
-                        func_02074b34(p2, work->unk78, pal, over, arg4);
+                        NFLi_CopyTexData(p2, work->unk78, pal, over, arg4);
                         DC_FlushRange(work->unk78, over);
                     }
                     if (!overflowA) {
@@ -5065,21 +5065,21 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
             }
         }
     }
-    if (data_02145360->unk68 == 7) {
+    if (sNFLWork->unk68 == 7) {
         if (obj->unk17C != NULL) {
-            func_02075528(obj->unk17C, pos);
+            NFLi_CopyFaceTextures(obj->unk17C, pos);
         }
     } else {
-        func_02075f50(obj, pos);
+        NFLi_CopyFacePltts(obj, pos);
     }
     return TRUE;
 }
 
-void func_0206cc6c(u16 *palette, const s16 *params);
+void NFLi_MakeColorTexturePltt(u16 *palette, const s16 *params);
 
 // The palettes of an object's eleven palette streams (unk228), made from its parameters at unk180
-BOOL func_02075f50(NFLObj *obj, u32 *pos) {
-    NFLWork *work = (NFLWork *)data_02145360;
+BOOL NFLi_CopyFacePltts(NFLObj *obj, u32 *pos) {
+    NFLWork *work = (NFLWork *)sNFLWork;
     s16 *params = obj->unk180;
 
     if (work->unk68 != 7) {
@@ -5118,38 +5118,38 @@ BOOL func_02075f50(NFLObj *obj, u32 *pos) {
                 }
                 switch (i) {
                 case 0:
-                    func_0206cc6c(pal, params);
+                    NFLi_MakeColorTexturePltt(pal, params);
                     break;
                 case 1:
-                    func_0206a014(pal, params[8]);
+                    NFLi_MakeEyePltt(pal, params[8]);
                     break;
                 case 2:
-                    func_02069de4(pal, params[6]);
+                    NFLi_MakeHairPltt(pal, params[6]);
                     break;
                 case 3:
-                    func_0206a1b4(pal, params[10]);
+                    NFLi_MakeMouthPltt(pal, params[10]);
                     break;
                 case 4:
-                    func_02069de4(pal, params[14]);
+                    NFLi_MakeHairPltt(pal, params[14]);
                     break;
                 case 5:
-                    func_0206a99c(pal, params[12]);
+                    NFLi_MakeGlassesPltt(pal, params[12]);
                     break;
                 case 6:
-                    func_02069de4(pal, params[14]);
+                    NFLi_MakeHairPltt(pal, params[14]);
                     break;
                 case 7:
-                    func_0206a2e4(pal, params[2]);
+                    NFLi_MakeFacePltt(pal, params[2]);
                     break;
                 case 8:
                     if (params[3] == 34 || params[3] == 57) {
-                        func_0206a894(pal, params[0]);
+                        NFLi_MakeFavoriteColorPltt(pal, params[0]);
                     } else {
-                        func_02069de4(pal, params[4]);
+                        NFLi_MakeHairPltt(pal, params[4]);
                     }
                     break;
                 case 9:
-                    MIi_CpuCopy32(func_0206cf6c(12, 0), pal, size);
+                    MIi_CpuCopy32(NFLi_GetResourceItem(12, 0), pal, size);
                     DC_FlushRange(pal, size);
                     break;
                 }
@@ -5235,14 +5235,14 @@ BOOL func_02075f50(NFLObj *obj, u32 *pos) {
         }
     }
     if (obj->unk17C != NULL) {
-        func_02075528(obj->unk17C, pos);
+        NFLi_CopyFaceTextures(obj->unk17C, pos);
     }
     return TRUE;
 }
 
 // Takes obj out of the list at unk74 of the work area
-void func_020763e0(NFLObj *obj) {
-    NFLWork *work = data_02145360;
+void NFLi_RemoveFromLoadList(NFLObj *obj) {
+    NFLWork *work = sNFLWork;
     NFLObj *prev = work->unk74;
     NFLObj *cur;
 
@@ -5261,14 +5261,14 @@ void func_020763e0(NFLObj *obj) {
     }
 }
 
-int func_02076680(u32 *size);
-int func_02076a98(u32 *size);
-int func_02076e1c(NFLObj *obj, u32 *size);
-int func_02077300(NFLObj *obj, u32 *size);
+int NFLi_LoadSharedTextures(u32 *size);
+int NFLi_LoadSharedPltt(u32 *size);
+int NFLi_LoadFaceTextures(NFLObj *obj, u32 *size);
+int NFLi_LoadFacePltts(NFLObj *obj, u32 *size);
 
 // The library's work after the frame's interrupt, which main calls with 0x4000: 8 a size not a multiple of 4, 4 not
 // set up, 0x13 and 0x14 busy, 2 and 3 nothing to do
-int func_02076448(u32 size) {
+int NFL_LoadVram(u32 size) {
     u32 rest = size;
     NFLWork *work;
     NFLObj *obj;
@@ -5277,7 +5277,7 @@ int func_02076448(u32 size) {
     if (rest & 3) {
         return 8;
     }
-    work = data_02145360;
+    work = sNFLWork;
     if (work == NULL) {
         return 4;
     }
@@ -5296,7 +5296,7 @@ int func_02076448(u32 size) {
     work->unk8C = 3;
     switch (work->unk90) {
     case 0:
-        result = func_02076680(&rest);
+        result = NFLi_LoadSharedTextures(&rest);
         if (result != 0 && result != 2) {
             work->unk90 = 3;
             work->unk8C = 4;
@@ -5309,7 +5309,7 @@ int func_02076448(u32 size) {
         }
         break;
     case 1:
-        result = func_02076a98(&rest);
+        result = NFLi_LoadSharedPltt(&rest);
         if (result != 0 && result != 2) {
             work->unk90 = 3;
             work->unk8C = 4;
@@ -5329,10 +5329,10 @@ int func_02076448(u32 size) {
         }
         switch (obj->unk170) {
         case 0:
-            result = func_02076e1c(obj, &rest);
+            result = NFLi_LoadFaceTextures(obj, &rest);
             if (result != 0 && result != 2) {
                 obj->unk170 = 3;
-                func_020763e0(work->unk74);
+                NFLi_RemoveFromLoadList(work->unk74);
                 work->unk8C = 0;
                 return result;
             }
@@ -5343,10 +5343,10 @@ int func_02076448(u32 size) {
             }
             break;
         case 1:
-            result = func_02077300(obj, &rest);
+            result = NFLi_LoadFacePltts(obj, &rest);
             if (result != 0 && result != 2) {
                 obj->unk170 = 3;
-                func_020763e0(work->unk74);
+                NFLi_RemoveFromLoadList(work->unk74);
                 work->unk8C = 0;
                 return result;
             }
@@ -5358,7 +5358,7 @@ int func_02076448(u32 size) {
             break;
         case 2:
         case 4:
-            func_020763e0(obj);
+            NFLi_RemoveFromLoadList(obj);
             work->unk8C = 0;
             break;
         }
@@ -5370,14 +5370,14 @@ int func_02076448(u32 size) {
     return 1;
 }
 
-// The VRAM side of func_02074b68's streams, after the frame's interrupt: loads up to *rest bytes of what the six
-// streams have put in the ring buffer into texture VRAM (func_02074964), then hands on to the object streams
-// (func_02076e1c) or the seventh stream (func_02076a98)
-int func_02076680(u32 *rest) {
-    NFLWork *work = (NFLWork *)data_02145360;
+// The VRAM side of NFLi_CopySharedTextures's streams, after the frame's interrupt: loads up to *rest bytes of what the six
+// streams have put in the ring buffer into texture VRAM (NFLi_LoadTex), then hands on to the object streams
+// (NFLi_LoadFaceTextures) or the seventh stream (NFLi_LoadSharedPltt)
+int NFLi_LoadSharedTextures(u32 *rest) {
+    NFLWork *work = (NFLWork *)sNFLWork;
     u32 dest;
     NFLWorkUnkA0 *stream = work->unkA0;
-    NFLStreamSource *source = data_0211216c;
+    NFLStreamSource *source = sNFLSharedStreamSources;
     int i;
 
     for (i = 0; i < 6; stream++, source++, i++) {
@@ -5388,7 +5388,7 @@ int func_02076680(u32 *rest) {
 
         switch (stream->unk8) {
         case 2:
-            if (data_02145360->unk68 == 7) {
+            if (sNFLWork->unk68 == 7) {
                 size = source->unk8 * 4;
             } else {
                 size = source->unk8;
@@ -5413,7 +5413,7 @@ int func_02076680(u32 *rest) {
             go = TRUE;
             break;
         case 5:
-            if (data_02145360->unk68 == 7) {
+            if (sNFLWork->unk68 == 7) {
                 size = source->unk8 * 4;
             } else {
                 size = source->unk8;
@@ -5437,14 +5437,14 @@ int func_02076680(u32 *rest) {
         if (go == TRUE) {
             if (*rest >= size) {
                 if (stream->unk0 + size <= work->unk7C) {
-                    result = func_02074964(src, dest, size);
+                    result = NFLi_LoadTex(src, dest, size);
                 } else {
                     int over = stream->unk0 + size - work->unk7C;
                     int n = size - over;
 
-                    result = func_02074964(src, dest, n);
+                    result = NFLi_LoadTex(src, dest, n);
                     if (result == 0) {
-                        result = func_02074964(work->unk78, dest + n, over);
+                        result = NFLi_LoadTex(work->unk78, dest + n, over);
                     }
                 }
                 if (result != 0) {
@@ -5470,14 +5470,14 @@ int func_02076680(u32 *rest) {
                 *rest -= size;
             } else {
                 if (stream->unk0 + *rest <= work->unk7C) {
-                    result = func_02074964(src, dest, *rest);
+                    result = NFLi_LoadTex(src, dest, *rest);
                 } else {
                     int over = stream->unk0 + *rest - work->unk7C;
                     int n = *rest - over;
 
-                    result = func_02074964(src, dest, n);
+                    result = NFLi_LoadTex(src, dest, n);
                     if (result == 0) {
-                        result = func_02074964(work->unk78, dest + n, over);
+                        result = NFLi_LoadTex(work->unk78, dest + n, over);
                     }
                 }
                 if (result != 0) {
@@ -5503,7 +5503,7 @@ int func_02076680(u32 *rest) {
             }
         }
     }
-    if (data_02145360->unk68 == 7) {
+    if (sNFLWork->unk68 == 7) {
         work->unk90 = 2;
         if (*rest == 0) {
             return 2;
@@ -5511,10 +5511,10 @@ int func_02076680(u32 *rest) {
         if (work->unk74 != NULL) {
             switch (work->unk74->unk170) {
             case 0:
-                return func_02076e1c(work->unk74, rest);
+                return NFLi_LoadFaceTextures(work->unk74, rest);
             case 2:
             case 4:
-                func_020763e0(work->unk74);
+                NFLi_RemoveFromLoadList(work->unk74);
                 break;
             }
         }
@@ -5523,15 +5523,15 @@ int func_02076680(u32 *rest) {
         if (*rest == 0) {
             return 2;
         }
-        return func_02076a98(rest);
+        return NFLi_LoadSharedPltt(rest);
     }
     return 2;
 }
 
-// The VRAM side of the seventh stream (func_0207516c): loads it into texture palette VRAM (func_020749a4), then
+// The VRAM side of the seventh stream (NFLi_CopySharedPltt): loads it into texture palette VRAM (NFLi_LoadTexPltt), then
 // hands on to the object streams
-int func_02076a98(u32 *rest) {
-    NFLWork *work = (NFLWork *)data_02145360;
+int NFLi_LoadSharedPltt(u32 *rest) {
+    NFLWork *work = (NFLWork *)sNFLWork;
     BOOL go = FALSE;
     u32 dest;
     int size;
@@ -5583,14 +5583,14 @@ int func_02076a98(u32 *rest) {
     if (go == TRUE) {
         if (*rest >= size) {
             if (work->unkA0[6].unk0 + size <= work->unk7C) {
-                result = func_020749a4(src, dest, size);
+                result = NFLi_LoadTexPltt(src, dest, size);
             } else {
                 u32 over = work->unkA0[6].unk0 + size - work->unk7C;
                 u32 n = size - over;
 
-                result = func_020749a4(src, dest, n);
+                result = NFLi_LoadTexPltt(src, dest, n);
                 if (result == 0) {
-                    result = func_020749a4(work->unk78, dest + n, over);
+                    result = NFLi_LoadTexPltt(work->unk78, dest + n, over);
                 }
             }
             if (result != 0) {
@@ -5616,14 +5616,14 @@ int func_02076a98(u32 *rest) {
             *rest -= size;
         } else {
             if (work->unkA0[6].unk0 + *rest <= (u32)(work->unk78 + work->unk7C)) {
-                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, *rest);
+                result = NFLi_LoadTexPltt(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, *rest);
             } else {
                 u32 over = work->unkA0[6].unk0 + *rest - work->unk7C;
                 u32 n = *rest - over;
 
-                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, n);
+                result = NFLi_LoadTexPltt(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, n);
                 if (result == 0) {
-                    result = func_020749a4(work->unk78, work->unkA0[6].unk4 + n, over);
+                    result = NFLi_LoadTexPltt(work->unk78, work->unkA0[6].unk4 + n, over);
                 }
             }
             if (result != 0) {
@@ -5655,12 +5655,12 @@ int func_02076a98(u32 *rest) {
     if (work->unk74 != NULL) {
         switch (work->unk74->unk170) {
         case 0:
-            return func_02076e1c(work->unk74, rest);
+            return NFLi_LoadFaceTextures(work->unk74, rest);
         case 1:
-            return func_02077300(work->unk74, rest);
+            return NFLi_LoadFacePltts(work->unk74, rest);
         case 2:
         case 4:
-            func_020763e0(work->unk74);
+            NFLi_RemoveFromLoadList(work->unk74);
             break;
         }
     }
@@ -5674,11 +5674,11 @@ typedef struct NFLObjDest {
     u32 unk4;
 } NFLObjDest;
 
-extern const NFLObjDest data_020b7b8c[];
+extern const NFLObjDest sNFLFaceTexOffsets[];
 
-// The VRAM side of an object's eleven streams (func_02075528)
-int func_02076e1c(NFLObj *obj, u32 *rest) {
-    NFLWork *work = data_02145360;
+// The VRAM side of an object's eleven streams (NFLi_CopyFaceTextures)
+int NFLi_LoadFaceTextures(NFLObj *obj, u32 *rest) {
+    NFLWork *work = sNFLWork;
     int i;
     u32 dest;
     NFLWorkUnkA0 *stream = obj->unk1A4;
@@ -5691,16 +5691,16 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
 
         switch (stream->unk8) {
         case 2:
-            if (data_02145360->unk68 == 7) {
+            if (sNFLWork->unk68 == 7) {
                 if (i == 0) {
                     size = 0x80;
                 } else {
-                    size = data_021121b4[i].unk4 * 4;
+                    size = sNFLFaceStreamSources[i].unk4 * 4;
                 }
-                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+                dest = obj->unkD4 + sNFLFaceTexOffsets[i].unk4;
             } else {
-                size = data_021121b4[i].unk4;
-                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+                size = sNFLFaceStreamSources[i].unk4;
+                dest = obj->unkD4 + sNFLFaceTexOffsets[i].unk0;
             }
             src = (u8 *)stream->unk0 + (u32)work->unk78;
             go = TRUE;
@@ -5708,34 +5708,34 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
         case 3:
             size = obj->unk178;
             src = (u8 *)stream->unk0 + (u32)work->unk78;
-            if (data_02145360->unk68 == 7) {
-                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+            if (sNFLWork->unk68 == 7) {
+                dest = obj->unkD4 + sNFLFaceTexOffsets[i].unk4;
             } else {
-                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+                dest = obj->unkD4 + sNFLFaceTexOffsets[i].unk0;
             }
             go = TRUE;
             break;
         case 4:
             size = obj->unk178 - obj->unk174;
             src = (u8 *)stream->unk0 + (u32)work->unk78;
-            if (data_02145360->unk68 == 7) {
-                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+            if (sNFLWork->unk68 == 7) {
+                dest = obj->unk174 + (obj->unkD4 + sNFLFaceTexOffsets[i].unk4);
             } else {
-                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+                dest = obj->unk174 + (obj->unkD4 + sNFLFaceTexOffsets[i].unk0);
             }
             go = TRUE;
             break;
         case 5:
-            if (data_02145360->unk68 == 7) {
+            if (sNFLWork->unk68 == 7) {
                 if (i == 0) {
                     size = 0x80;
                 } else {
-                    size = data_021121b4[i].unk4 * 4;
+                    size = sNFLFaceStreamSources[i].unk4 * 4;
                 }
-                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+                dest = obj->unk174 + (obj->unkD4 + sNFLFaceTexOffsets[i].unk4);
             } else {
-                size = data_021121b4[i].unk4;
-                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+                size = sNFLFaceStreamSources[i].unk4;
+                dest = obj->unk174 + (obj->unkD4 + sNFLFaceTexOffsets[i].unk0);
             }
             size -= obj->unk174;
             src = (u8 *)stream->unk0 + (u32)work->unk78;
@@ -5754,14 +5754,14 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
         if (go == TRUE) {
             if (*rest >= size) {
                 if (stream->unk0 + size <= work->unk7C) {
-                    result = func_02074964(src, dest, size);
+                    result = NFLi_LoadTex(src, dest, size);
                 } else {
                     int over = stream->unk0 + size - work->unk7C;
                     int n = size - over;
 
-                    result = func_02074964(src, dest, n);
+                    result = NFLi_LoadTex(src, dest, n);
                     if (result == 0) {
-                        result = func_02074964(work->unk78, dest + n, over);
+                        result = NFLi_LoadTex(work->unk78, dest + n, over);
                     }
                 }
                 if (result != 0) {
@@ -5789,14 +5789,14 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
                 *rest -= size;
             } else {
                 if (stream->unk0 + *rest <= work->unk7C) {
-                    result = func_02074964(src, dest, *rest);
+                    result = NFLi_LoadTex(src, dest, *rest);
                 } else {
                     int over = stream->unk0 + *rest - work->unk7C;
                     int n = *rest - over;
 
-                    result = func_02074964(src, dest, n);
+                    result = NFLi_LoadTex(src, dest, n);
                     if (result == 0) {
-                        result = func_02074964(work->unk78, dest + n, over);
+                        result = NFLi_LoadTex(work->unk78, dest + n, over);
                     }
                 }
                 if (result != 0) {
@@ -5822,9 +5822,9 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
         }
     }
     result = 2;
-    if (data_02145360->unk68 == 7) {
+    if (sNFLWork->unk68 == 7) {
         if (obj->unk17C != NULL && *rest != 0) {
-            result = func_02076e1c(obj->unk17C, rest);
+            result = NFLi_LoadFaceTextures(obj->unk17C, rest);
             if (result != 0 && result != 2) {
                 return result;
             }
@@ -5832,24 +5832,24 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
         if (obj->unk170 != 4) {
             obj->unk170 = 2;
         }
-        func_020763e0(obj);
+        NFLi_RemoveFromLoadList(obj);
     } else {
         obj->unk170 = 1;
         if (*rest == 0) {
             return result;
         }
-        result = func_02077300(obj, rest);
+        result = NFLi_LoadFacePltts(obj, rest);
         return result;
     }
     return result;
 }
 
 // Where each of an object's palette streams goes in texture palette VRAM, from the object's base (unkD8)
-extern const u32 data_020b7b64[];
+extern const u32 sNFLFacePlttOffsets[];
 
-// The VRAM side of an object's palette streams (func_02075f50): ten of them here, where func_02075f50 fills eleven
-int func_02077300(NFLObj *obj, u32 *rest) {
-    NFLWork *work = (NFLWork *)data_02145360;
+// The VRAM side of an object's palette streams (NFLi_CopyFacePltts): ten of them here, where NFLi_CopyFacePltts fills eleven
+int NFLi_LoadFacePltts(NFLObj *obj, u32 *rest) {
+    NFLWork *work = (NFLWork *)sNFLWork;
     int result;
 
     if (work->unk68 != 7) {
@@ -5864,7 +5864,7 @@ int func_02077300(NFLObj *obj, u32 *rest) {
 
             switch (stream->unk8) {
             case 2:
-                dest = obj->unkD8 + data_020b7b64[i];
+                dest = obj->unkD8 + sNFLFacePlttOffsets[i];
                 if (i == 0) {
                     size = 16;
                 } else {
@@ -5877,14 +5877,14 @@ int func_02077300(NFLObj *obj, u32 *rest) {
             case 3:
                 src = (u8 *)stream->unk0 + (u32)work->unk78;
                 size = obj->unk178;
-                dest = obj->unkD8 + data_020b7b64[i];
+                dest = obj->unkD8 + sNFLFacePlttOffsets[i];
                 DC_FlushRange(src, size);
                 go = TRUE;
                 break;
             case 4:
                 size = obj->unk178 - obj->unk174;
                 src = (u8 *)stream->unk0 + (u32)work->unk78;
-                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                dest = obj->unk174 + (obj->unkD8 + sNFLFacePlttOffsets[i]);
                 DC_FlushRange(src, size);
                 go = TRUE;
                 break;
@@ -5895,7 +5895,7 @@ int func_02077300(NFLObj *obj, u32 *rest) {
                     size = 32 - obj->unk174;
                 }
                 src = (u8 *)stream->unk0 + (u32)work->unk78;
-                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                dest = obj->unk174 + (obj->unkD8 + sNFLFacePlttOffsets[i]);
                 DC_FlushRange(src, size);
                 go = TRUE;
                 break;
@@ -5912,14 +5912,14 @@ int func_02077300(NFLObj *obj, u32 *rest) {
             if (go == TRUE) {
                 if (*rest >= size) {
                     if (stream->unk0 + size <= work->unk7C) {
-                        result = func_020749a4(src, dest, size);
+                        result = NFLi_LoadTexPltt(src, dest, size);
                     } else {
                         int over = stream->unk0 + size - work->unk7C;
                         int n = size - over;
 
-                        result = func_020749a4(src, dest, n);
+                        result = NFLi_LoadTexPltt(src, dest, n);
                         if (result == 0) {
-                            result = func_020749a4(work->unk78, dest + n, over);
+                            result = NFLi_LoadTexPltt(work->unk78, dest + n, over);
                         }
                     }
                     if (result != 0) {
@@ -5945,14 +5945,14 @@ int func_02077300(NFLObj *obj, u32 *rest) {
                     *rest -= size;
                 } else {
                     if (stream->unk0 + *rest <= work->unk7C) {
-                        result = func_020749a4(src, dest, *rest);
+                        result = NFLi_LoadTexPltt(src, dest, *rest);
                     } else {
                         int over = stream->unk0 + *rest - work->unk7C;
                         int n = *rest - over;
 
-                        result = func_020749a4(src, dest, n);
+                        result = NFLi_LoadTexPltt(src, dest, n);
                         if (result == 0) {
-                            result = func_020749a4(work->unk78, dest + n, over);
+                            result = NFLi_LoadTexPltt(work->unk78, dest + n, over);
                         }
                     }
                     if (result != 0) {
@@ -5980,7 +5980,7 @@ int func_02077300(NFLObj *obj, u32 *rest) {
     }
     result = 2;
     if (obj->unk17C != NULL && *rest != 0) {
-        result = func_02076e1c(obj->unk17C, rest);
+        result = NFLi_LoadFaceTextures(obj->unk17C, rest);
         if (result != 0 && result != 2) {
             return result;
         }
@@ -5988,6 +5988,6 @@ int func_02077300(NFLObj *obj, u32 *rest) {
     if (obj->unk170 != 4) {
         obj->unk170 = 2;
     }
-    func_020763e0(obj);
+    NFLi_RemoveFromLoadList(obj);
     return result;
 }

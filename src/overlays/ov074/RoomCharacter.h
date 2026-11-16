@@ -82,7 +82,7 @@ void func_0209d898(RoomCharacter *self, TtsPlayer *player);
 int MiiData_GetFavoriteColor(RoomCharacter *self);
 
 // --- Main program, not named yet: others ---
-GXRgb func_02073514(int color);
+GXRgb NFL_GetFavoriteColor(int color);
 BOOL func_02099e34(u8 value);
 
 // --- Data ---

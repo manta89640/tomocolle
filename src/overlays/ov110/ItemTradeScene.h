@@ -148,7 +148,7 @@ s8 func_02098f2c(SavedCharacter *character); // Its personality
 extern const int data_020fba28[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);
 int MiiData_GetSex(SavedCharacter *character);
-int func_02073514(int unk);
+int NFL_GetFavoriteColor(int unk);
 }
 
 // The model the scene dresses in a costume to show it: a body ("3MM") with a head ("3MH:/head.imd",

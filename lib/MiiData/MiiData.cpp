@@ -497,15 +497,15 @@ struct MiiIdSource {
     /* 0x2 */ u8 mBytes[6];
 };
 
-extern "C" BOOL func_02073550(MiiData *mii);
-extern "C" u16 func_020743a0(int max);
+extern "C" BOOL NFL_IsMiiCreateIdUnassigned(MiiData *mii);
+extern "C" u16 NFL_Random(int max);
 
 // Gives the Mii a new create ID, from a counter (which it advances) and six bytes of source
 extern "C" BOOL MiiData_AssignCreateId(MiiIdSource *source, MiiData *mii) {
-    if (!func_02073550(mii) || MiiData_IsNameEmpty(mii)) {
+    if (!NFL_IsMiiCreateIdUnassigned(mii) || MiiData_IsNameEmpty(mii)) {
         return FALSE;
     }
-    mii->mCreateId[0] = (func_020743a0(4) << 2) | 0xC0 | ((source->mCounter & 0x3000) >> 12);
+    mii->mCreateId[0] = (NFL_Random(4) << 2) | 0xC0 | ((source->mCounter & 0x3000) >> 12);
     mii->mCreateId[1] = (source->mCounter & 0xFF0) >> 4;
     mii->mCreateId[2] = (((u32)source->mCounter << 28) >> 24) | source->mBytes[0];
     mii->mCreateId[3] = source->mBytes[1];

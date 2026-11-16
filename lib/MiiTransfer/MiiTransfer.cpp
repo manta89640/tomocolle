@@ -532,8 +532,8 @@ extern "C" void func_02078114(void) {
         MiiRecord *record = func_02079ea4(sMiiIndex);
         switch (sRecvMsg.arg) {
         case 0:
-            if (func_02073264(&record->createId)) {
-                func_02073394(&record->createId);
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
+                NFL_ClearCreateId(&record->createId);
                 data_021453a0 = 3;
             } else {
                 func_02078824(0x30, 0, NULL);
@@ -542,7 +542,7 @@ extern "C" void func_02078114(void) {
             break;
         case 1:
             func_02078824(0x30, 0, NULL);
-            if (func_02073264(&record->createId)) {
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
                 data_021453c8 = -4;
             } else {
                 data_021453c8 = -5;
@@ -558,7 +558,7 @@ extern "C" void func_02078114(void) {
             break;
         default:
             func_02078824(0x30, 0, NULL);
-            if (func_02073264(&record->createId)) {
+            if (NFL_IsCreateIdBit7Clear(&record->createId)) {
                 data_021453c8 = -2;
             } else {
                 data_021453c8 = -3;
@@ -586,8 +586,8 @@ extern "C" void func_02078114(void) {
             return;
         }
         if (sRecvMsg.type == 0x10) {
-            if (!func_02073284(&sRecvMsg.record.createId)) {
-                if (data_021453ac == FALSE && func_02073264(&sRecvMsg.record.createId)) {
+            if (!NFL_IsCreateIdZero(&sRecvMsg.record.createId)) {
+                if (data_021453ac == FALSE && NFL_IsCreateIdBit7Clear(&sRecvMsg.record.createId)) {
                     data_021453a4 = -2;
                     func_02078824(0x20, 4, NULL);
                 } else {
@@ -595,10 +595,10 @@ extern "C" void func_02078114(void) {
                     sRecvMsg.record.unk0[0] &= ~1;
                     sMiiIndex = func_02079f28(&sRecvMsg.record.createId);
                     if (sMiiIndex >= 0) {
-                        if (func_02073264(&sRecvMsg.record.createId)) {
+                        if (NFL_IsCreateIdBit7Clear(&sRecvMsg.record.createId)) {
                             func_02078824(0x20, 5, NULL);
                             func_02078ebc(sMiiIndex);
-                        } else if (func_020732a0(data_021453b4, &sRecvMsg.record.createId)) {
+                        } else if (NFL_IsSameCreateIdSource(data_021453b4, &sRecvMsg.record.createId)) {
                             func_02078824(0x20, 2, NULL);
                             func_02078e70(sMiiIndex);
                         } else {
@@ -962,13 +962,13 @@ extern "C" void func_02078da4(int index) {
 
 extern "C" void func_02078db8(u16 index) {
     MiiRecord *record = func_02079ea4(index);
-    if (record == NULL || func_02073284(&record->createId)) {
+    if (record == NULL || NFL_IsCreateIdZero(&record->createId)) {
         data_021453c8 = -3;
         func_02077758();
         func_02078f14(11);
         return;
     }
-    if (func_0207331c(&record->createId)) {
+    if (NFL_IsCreateIdUnassigned(&record->createId)) {
         data_021453c8 = -1;
         func_02077758();
         func_02078f14(11);
@@ -993,7 +993,7 @@ extern "C" void func_02078e70(u16 index) {
 }
 
 extern "C" void func_02078e88(const MiiCreateId *createId) {
-    if (func_02073264(createId)) {
+    if (NFL_IsCreateIdBit7Clear(createId)) {
         data_021453a4 = -4;
     } else {
         data_021453a4 = -5;
