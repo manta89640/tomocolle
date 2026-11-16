@@ -277,12 +277,12 @@ void RoomScene::StartLoading() {
         }
     }
 
-    last = data_0213ba74.mCharacter;
+    last = gSceneMemory.mCharacter;
     if (last < 100 && func_0202c3dc(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
-        data_0213ba74.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacter = mCharacters[0].mIndex;
     }
     LoadCharacters();
     func_02091048(&mCharacters[0], "3HM");
@@ -747,7 +747,7 @@ void RoomScene::PressButton(int button) {
         SetEventState(EVENT_NONE);
         mTtsPlayer.Stop();
         mNextSceneId = 0x5F;
-        data_0213ba74.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacter = mCharacters[0].mIndex;
         break;
     }
 }
@@ -803,7 +803,7 @@ void RoomScene::GoToInformation() {
     SetEventState(EVENT_NONE);
     mTtsPlayer.Stop();
     mNextSceneId = 0xAE;
-    data_0213ba74.mCharacter = mCharacters[0].mIndex;
+    gSceneMemory.mCharacter = mCharacters[0].mIndex;
 }
 
 // Enables the two buttons as the state allows.
@@ -1036,7 +1036,7 @@ void RoomScene::ChangeRoom() {
         mNamePanel.SetState(2);
     } else {
         ChooseCharacters(resident);
-        data_0213ba74.mCharacter = resident;
+        gSceneMemory.mCharacter = resident;
         LoadCharacters();
         mRoom.SetNextStyle(mCharacters[0].mInterior);
         mNamePanel.SetState(1);
@@ -11628,9 +11628,9 @@ RoomCamera::RoomCamera() {
 
 // @0x0216a4b4
 RoomCamera::~RoomCamera() {
-    VEC_Set(&data_0213ba74.mCamera.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
-    VEC_Set(&data_0213ba74.mCamera.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
-    data_0213ba74.mCamera.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
+    VEC_Set(&gSceneMemory.mCamera.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
+    VEC_Set(&gSceneMemory.mCamera.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
+    gSceneMemory.mCamera.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
 }
 
 // @0x0216a514

@@ -84,7 +84,7 @@ struct SceneManager {
     /* 0x8 */ int mPreviousSceneId;
 };
 
-// What the scenes leave for each other (data_0213ba74)
+// What the scenes leave for each other (gSceneMemory)
 struct SceneMemory {
     /* 0x00 */ u8 mUnknown00[0x1E];
     /* 0x1E */ u8 mTutorialStep;
@@ -364,7 +364,7 @@ extern PadInput data_0211f9d4;
 extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
 extern SceneManager gSceneManager;
-extern SceneMemory data_0213ba74;
+extern SceneMemory gSceneMemory;
 // 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
 extern u8 data_0213bab0[100];
@@ -521,7 +521,6 @@ BOOL func_020af9c0(IslandFacilities *island);
 BOOL func_020af9dc(IslandFacilities *island);
 }
 
-#define gSceneMemory data_0213ba74
 #define gIsland data_0212348c
 
 // --- This overlay's classes -----------------------------------------------------------------------------------

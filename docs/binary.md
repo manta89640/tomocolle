@@ -530,6 +530,78 @@ Not done:
 - The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
   their addresses.
 
+## The main program's test scenes and the scenes' helpers
+
+From `0x0204AF20` (where the scene factory's file, `SceneManager.cpp`, ends) to the list scenes at `0x0204FC74`: the scene
+base class's runner, ten test scenes of the main program and the helpers that the scene overlays share. Each test
+scene is one file under `src/scene/`, its class in a header of its own; their constructors are in the scene
+factory's file, the destructors (implicit) in theirs.
+
+| Scene | Class | Size | File's `.text` | Functions | What it does |
+| --- | --- | --- | --- | --- | --- |
+| | `Scene::Run` | | `Scene.cpp`, `0x0204AF20` | 1 of 1 | The phase runner (see `include/Scene.h`): the scene manager's update calls it |
+| 6 | `DrawManTestScene` | 0x272C | `0x0204B090` | 7 of 8 | "SceneTestDrawMan": a head model whose render callback keeps the matrix of the joint `head_h2`, and a character's face drawn with it |
+| 16 | `G3dTestScene` | 0x5C2C | `0x0204B504` | 6 of 7 | "SceneTestG3d": two characters, a body model and glasses (`Glass6.imd`) at the first one's hand, edge marking by polygon id |
+| 7 | `HumanTestScene` | 0x1D8 | `0x0204BC78` | 6 of 7 | "TestHuman00": a head and a body model, their textures loaded later, a palette swapped in |
+| 8 | `ParticleTestScene` | 0x53C | `0x0204C174` | 8 of 8 | The particle library with `SplRoomEffect.spa`, the particles kept at a body's neck |
+| 9 | `BgTextTestScene` | 0x1D4 | `0x0204C6F4` | 7 of 7 | Sets a text canvas up on background 2 and nothing else |
+| 10 | `MessageTestScene` | 0x2D84 | `0x0204C860` | 6 of 7 | Etc messages on sprites and on background 2, with a string and item messages in their tags |
+| 11 | `KeyboardTestScene` | 0x6AF8 | `0x0204CE28` | 6 of 7 | The on-screen keyboard (`SoftKeyboard`), typing ten characters into a text box |
+| 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
+| 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
+| 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 11 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
+| | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
+
+Measured:
+
+- **The files' bounds.** Each test scene has its own virtual table in `.data` (`0x02110B94` to `0x02111424`),
+  followed by the strings its code uses in the order of its code, and the static initialisers in `.init` follow
+  the files' order (`0x020B06CC` constructs `gSceneMemory`, `0x020B06E0` the wireless test's `SavedCharacter`).
+  The tables are named `_ZTV<Class>` at their start, and the constructors refer to them with `add:0x8`.
+- **`gSceneMemory`** (`0x0213BA74`, `include/SceneMemory.h`): what the scenes leave for each other. Its constructor
+  (`0x0204D824`, not inlined into the initialiser: `__attribute__((never_inline))` gives that) zeroes the camera
+  position and target and the orbit, and fills the twelve character indices and 16 more bytes with 0xFF.
+- **Scene 9 is not overlay 0's `TextTestScene`**, whose constructor is the scene factory's first; scene 9 only
+  sets a canvas up.
+- **The wireless test** (scene 27) shows WH's states with its own texts ("通信モード－親（送信）", "接続中  親を選択して
+  スタート", "送信成功(タッチで終了)"...), scans with a broadcast MAC address (`sAnyParent`, `.rodata`
+  `0x020B5D3C`), keeps up to three parents (`sParents`, `WMBssDesc`), and puts the owner's nickname in the
+  parent's user game info. It sets the game clock to 2011-02-03 12:13:14 at its start. It is not a copy of WH;
+  the child-only copy is elsewhere (see "WH, the wireless wrapper").
+- **`SceneHelpers.cpp`** is one file: its tables (`0x02111648` on) are read by the number reading and by
+  `SceneCast` alike, its strings follow the code's order, and its `.rodata` pool (`0x020B5D44` to `0x020B5DAC`)
+  is sorted by size across the classes (six 8-byte pairs that the code folds: the buttons' positions and touch
+  sizes; the two 12-byte light directions; the two 16-byte `ButtonSounds`). In it:
+  - `MakeCharacterSpeechTexts` fills `CharacterSpeechTexts` (`include/character/CharacterSpeechTexts.h`, 0x294
+    bytes) from a saved character: the Mii's name, the family and given names, and the character's phrase
+    (`mSpeechDefault`, "ミニュウリョク" when empty), each turned into the synthesizer's notation by `func_020372d0`,
+    the readings also in Shift JIS. Overlay 76's voice page and ten other overlays call it.
+  - `MakeNumberReading` reads a number from 0 to 9999 out in the synthesizer's notation ("サ’ンゼン/ヨ’ンヒャク/...",
+    "レイ" for 0); `MakeNumberText` writes it as digits.
+  - `SceneCast` (called by overlays 7 to 63): up to ten characters with bodies, chosen among the saved ones,
+    `gSceneMemory.mCharacters` first and the rest at random, each given an archive "B0I" to "B9I" and the room
+    animations "BIC" (resource 31).
+  - `FaceCast` (overlays 14, 15, 23, 27, 71, 80, 87, 95, 97): up to eleven characters shown as their Mii faces
+    only (`CharacterBase`), each placed by a `FaceTransform` (x, y, a scale, three turns), the first turned by
+    dragging the stylus.
+  - `ReturnButton` ("Scn/Scene/ReturnBtn_LZ.bin", asks for a scene when pressed), `SceneRoom` (a `Room` with its
+    archives "CO0" and "RM", which hides its parts by the room style's table) and `NewsButton` (the Mii news
+    screen's lower background, "SceneMiiNews", and its button, which asks for scene 0x49).
+- **NitroSystem's `NNS_G3dMdlSetMdl*All`** (`0x0206597C` to `0x02065B3C`, the seven "for every material" setters of
+  `model.c`) were not matched by the library matcher; they are now in `model.c`'s unit, linked from source.
+
+Not done (each a near-miss of instruction order or registers, not of what the code does):
+
+- The `Init`s of scenes 6, 7 and 16 set light 0 to point along x with an x stored, reloaded and stored again, and
+  the colour loaded and stored back; no source form tried gives the original's registers (local copies, struct
+  copies, volatile reads, accesses through the array).
+- `MessageTestScene::Init` keeps 0 and 1 in a callee-saved register as `#pragma opt_propagation off` does; with the
+  pragma the sprite positions get one dead copy too many. `KeyboardTestScene::Init`: two dead position copies
+  stored in another order. `WirelessTestScene`: `Init` (the store of `date.week`), `Update` and `Redraw` (loops
+  not rotated as at optimisation level 2, which gives the rest differently).
+- `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
+  FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
+
 ## WH, the wireless wrapper
 
 WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the
@@ -559,7 +631,7 @@ Measured:
 - One variable is the game's, not the sample's: when a child connects, the parent's callback copies the child's
   24-byte SSID (the user data of its connection) into `gWHChildSsid` (`0x02138FB4`), which overlays 109 and 110 read.
 - Callers: overlays 109 and 110 (wireless play) call 11 of the functions, and the main program at `0x0203B7EC` to
-  `0x0203BB8C` and `0x0204D890` to `0x0204E38C`. A second, child-only copy of WH with no debug strings is at
+  `0x0203BB8C` and the wireless test scene (`src/scene/WirelessTestScene.cpp`, `0x0204D880` to `0x0204E4B4`). A second, child-only copy of WH with no debug strings is at
   `0x02078F58` to `0x02079DFC` (another unit).
 - Named from WH's calls, by comparison with the SDK's sources: `WM_Initialize` (`0x02012604`),
   `WM_StartKeySharing` (`0x02013850`), `WM_EndKeySharing` (`0x0201386C`), `CHT_IsPictochatParent` (`0x020144E4`).

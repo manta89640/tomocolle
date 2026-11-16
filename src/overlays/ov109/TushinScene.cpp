@@ -355,7 +355,7 @@ void TushinScene::InitCharacters() {
         mCharacters[i].mModel.mPos.y = 0;
         mCharacters[i].mModel.mPos.x = -0x1000;
         mCharacters[i].mUnknown02C8 = 10;
-        func_02065abc(mCharacters[i].mModel.mResMdl, 3);
+        NNS_G3dMdlSetMdlPolygonIDAll(mCharacters[i].mModel.mResMdl, 3);
     }
     func_02091a14(&mCharacters[0], TRUE);
     mCurrent = 1;
