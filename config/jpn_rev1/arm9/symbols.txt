@@ -773,13 +773,13 @@ memset kind:function(arm,size=0x14) addr:0x0201536c
 memchr kind:function(arm,size=0x2c) addr:0x02015380
 memcmp kind:function(arm,size=0x40) addr:0x020153ac
 __fill_mem kind:function(arm,size=0xb0) addr:0x020153ec
-func_0201549c kind:function(arm,size=0x590) addr:0x0201549c
-func_02015a2c kind:function(arm,size=0x24c) addr:0x02015a2c
-func_02015c78 kind:function(arm,size=0x2fc) addr:0x02015c78
-func_02015f74 kind:function(arm,size=0x4dc) addr:0x02015f74
-func_02016450 kind:function(arm,size=0x124) addr:0x02016450
-func_02016574 kind:function(arm,size=0x764) addr:0x02016574
-__pformatter kind:function(arm,size=0x824) addr:0x02016cd8
+parse_format kind:function(arm,size=0x590) addr:0x0201549c local
+long2str kind:function(arm,size=0x24c) addr:0x02015a2c local
+longlong2str kind:function(arm,size=0x2fc) addr:0x02015c78 local
+double2hex kind:function(arm,size=0x4dc) addr:0x02015f74 local
+round_decimal kind:function(arm,size=0x124) addr:0x02016450 local
+float2str kind:function(arm,size=0x764) addr:0x02016574 local
+__pformatter kind:function(arm,size=0x824) addr:0x02016cd8 local
 __StringWrite kind:function(arm,size=0x44) addr:0x020174fc
 vsnprintf kind:function(arm,size=0x68) addr:0x02017540
 snprintf kind:function(arm,size=0x28) addr:0x020175a8
@@ -4899,17 +4899,17 @@ gStr_a_b_e_T_Y kind:data(any) addr:0x0210f1fc
 gStr_Sun_Sunday_Mon_Monday_Tue_Tuesday_Wed_We kind:data(any) addr:0x0210f20c
 gStr_Jan_January_Feb_February_Mar_March_Apr_A kind:data(any) addr:0x0210f264
 data_0210f2ec kind:data(any) addr:0x0210f2ec
-gStr_0x0p0 kind:data(any) addr:0x0210f3ac
-gStr_INF kind:data(any) addr:0x0210f3b4
-gStr_inf kind:data(any) addr:0x0210f3bc
-gStr_INF_2 kind:data(any) addr:0x0210f3c4
-gStr_inf_2 kind:data(any) addr:0x0210f3c8
-gStr_NAN_2 kind:data(any) addr:0x0210f3cc
-gStr_nan kind:data(any) addr:0x0210f3d4
-gStr_NAN_3 kind:data(any) addr:0x0210f3dc
-gStr_nan_2 kind:data(any) addr:0x0210f3e0
-data_0210f3e4 kind:data(any) addr:0x0210f3e4
-data_0210f3e8 kind:data(any) addr:0x0210f3e8
+@2363 kind:data(any) addr:0x0210f3ac local
+@2364 kind:data(any) addr:0x0210f3b4 local
+@2365 kind:data(any) addr:0x0210f3bc local
+@2366 kind:data(any) addr:0x0210f3c4 local
+@2367 kind:data(any) addr:0x0210f3c8 local
+@2368 kind:data(any) addr:0x0210f3cc local
+@2369 kind:data(any) addr:0x0210f3d4 local
+@2370 kind:data(any) addr:0x0210f3dc local
+@2371 kind:data(any) addr:0x0210f3e0 local
+@2768 kind:data(any) addr:0x0210f3e4 local
+@2769 kind:data(any) addr:0x0210f3e8 local
 @1921 kind:data(any) addr:0x0210f3ec local
 @1922 kind:data(any) addr:0x0210f3f8 local
 @1923 kind:data(any) addr:0x0210f404 local
