@@ -2640,15 +2640,15 @@ BOOL TushinScene::CannotSend(CharacterRecord *record) {
 
 // @0x02151dac
 BOOL TushinScene::GiveItem(int item) {
-    ClothesInventory inventory;
+    ClothesList inventory;
     BOOL given = FALSE;
-    func_0209e248(&inventory);
+    inventory.Load();
     ClothesItem *clothes = &inventory.mItems[item];
     if (clothes->mOwned == FALSE) {
         clothes->Add(1);
         given = TRUE;
     }
-    func_0209e310(&inventory);
+    inventory.Save();
     return given;
 }
 

@@ -405,9 +405,10 @@ BOOL func_0203133c(void *button);
 
 // --- Items (main program) ---
 
-class InventoryItem {
+// What the player owns of an item (include/item/Item.h has the main program's classes)
+class Item {
 public:
-    BOOL Add(int count); // func_0209ed84
+    BOOL Add(int count);
 
     /* 0x00 */ void *mVtable;
     /* 0x04 */ u16 mId;
@@ -416,27 +417,25 @@ public:
     /* 0x10 */ int mCount;
 }; // 0x14
 
-// One kind of clothes the player owns or not (func_0209e168 constructs it). That these are the clothes is
-// inferred: the wireless scene gives item 0x113 or 0x114 with the messages "got a DS T-shirt" and "got a Wii
-// T-shirt" (etc messages 0x124 and 0x125).
-class ClothesItem : public InventoryItem {
+// One kind of clothes the player owns or not. The wireless scene gives item 0x113 or 0x114 with the messages "got
+// a DS T-shirt" and "got a Wii T-shirt" (etc messages 0x124 and 0x125).
+class ClothesItem : public Item {
 public:
-    ClothesItem(); // func_0209e168
+    ClothesItem();
 
     /* 0x14 */ int mUnknown14;
 }; // 0x18
 
-// The clothes, loaded from and saved to the save data together (func_0209e248 and func_0209e310).
-struct ClothesInventory {
+// The clothes, loaded from and saved to the save data together.
+class ClothesList {
+public:
+    void Load();
+    void Save();
+
     /* 0x0000 */ int mCount;
     /* 0x0004 */ ClothesItem mItems[300];
     /* 0x1C24 */ ClothesItem *mList[300];
 }; // 0x20D4
-
-extern "C" {
-void func_0209e248(ClothesInventory *inventory); // Loads it
-void func_0209e310(ClothesInventory *inventory); // Saves it
-}
 
 // --- Songs (main program) ---
 

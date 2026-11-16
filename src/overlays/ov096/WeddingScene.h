@@ -273,40 +273,37 @@ class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
+    BOOL Add(int count); // _ZN4Item3AddEi (include/item/Item.h has the main program's classes)
 
-class InventoryItem : public Item {
-public:
-    BOOL Add(int count); // func_0209ed84
-
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
 }; // 0x14
 
+class InventoryItem : public Item {}; // 0x14
+
 // The player's items: what the save data holds of each kind, loaded and saved together.
 class Inventory {
 public:
-    void Load(); // func_0209ee28
-    void Save(); // func_0209eef8
+    void Load();
+    void Save();
 
     /* 0x0000 */ int mCount;
     /* 0x0004 */ InventoryItem mItems[255];
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// The 3D model of an item (constructor func_0209f5f0)
+// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
 class ItemModel : public AnimModel {
 public:
-    void SetItem(const char *archiveName, int item); // func_0209f700
-    void LoadModel(int resourceId);                  // func_0209f770
-    void LoadAnimation(int resourceId);              // func_0209f790
-    void ResetScale();                               // func_0209f7fc
-    void SetScale(fx32 scale);                       // func_0209f84c
+    void SetItem(const char *archiveName, int item);
+    void LoadModel(int resourceId);                
+    void LoadAnimation(int resourceId);            
+    void ResetScale();        
+    void SetScale(fx32 scale);
 
     /* 0x0E0 */ Item mItem;
-    /* 0x0E8 */ u8 mUnknownE8[0xC];
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];

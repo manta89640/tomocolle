@@ -300,7 +300,7 @@ lib/NitroSDK/libraries/math/src/math.c:
 
 lib/NitroSDK/libraries/std/src/std_string.c:
     complete
-    .text       start:0x0201457c end:0x020145d8
+    .text       start:0x0201457c end:0x020145fc
 
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80

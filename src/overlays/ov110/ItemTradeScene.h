@@ -184,47 +184,58 @@ inline void Mannequin::SetAnimation(const char *name) {
 
 // --- Items (main program 0x0209e140 to 0x0209f84c, 0x020a4d34 to 0x020a5ca0) ---------------------------------
 
-// An item: the base class of everything the player can own.
+// An item: the base class of everything the player can own (include/item/Item.h has the main program's classes).
 class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
+    BOOL Add(int count); // _ZN4Item3AddEi
 
-// One kind of thing the player owns, with how many.
-class InventoryItem : public Item {
-public:
-    BOOL Add(int count); // func_0209ed84
-
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
 }; // 0x14
 
-// A costume the player owns (func_0209e168 constructs one; the list holds 300).
-class CostumeItem : public InventoryItem {
+// One kind of goods the player owns, with how many.
+class InventoryItem : public Item {}; // 0x14
+
+// A kind of clothes the player owns (func_0209e168 constructs one; the list holds 300).
+class ClothesItem : public Item {
 public:
     /* 0x14 */ int mUnknown14;
 }; // 0x18
 
-// The player's items: what the save data holds of each kind, loaded and saved together.
+// The player's goods: what the save data holds of each kind, loaded and saved together.
 class Inventory {
 public:
-    void Load(); // func_0209ee28
-    void Save(); // func_0209eef8
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count, int kind, u32 flags);
+    void GetOwnedKind3(Item **list, int *count);
+    void GetOwnedKinds4And5Again(Item **list, int *count);
+    BOOL HasAnyOwnedKind1();
+    BOOL HasAnyOwnedKind3();
+    BOOL HasAnyOwnedKinds4And5();
 
     /* 0x0000 */ int mCount;
     /* 0x0004 */ InventoryItem mItems[255];
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// The player's costumes, in the same way.
-class CostumeList {
+// The player's clothes, in the same way.
+class ClothesList {
 public:
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count, int kind);
+    BOOL HasAnyOwned();
+
     /* 0x0000 */ int mCount;
-    /* 0x0004 */ CostumeItem mItems[300];
-    /* 0x1C24 */ CostumeItem *mList[300];
+    /* 0x0004 */ ClothesItem mItems[300];
+    /* 0x1C24 */ ClothesItem *mList[300];
 }; // 0x20D4
 
 // The player's room interiors, in the same way.
@@ -247,37 +258,24 @@ struct ItemInfo {
 extern "C" {
 extern const ItemInfo data_020f5f0c[];
 // Each fills a list of the items owned (the list, its count) and returns nothing
-void func_0209f0f0(Inventory *inventory, InventoryItem **list, int *count, int unk, int filter);
-void func_0209f208(Inventory *inventory, InventoryItem **list, int *count);
-void func_0209f28c(Inventory *inventory, InventoryItem **list, int *count);
-void func_0209e4ac(CostumeList *costumes, InventoryItem **list, int *count, int filter);
-void func_020a5174(InteriorList *interiors, InventoryItem **list, int *count);
+void func_020a5174(InteriorList *interiors, Item **list, int *count);
 // Each returns whether there is anything to show on one of the tabs
-int func_0209f4b4(Inventory *inventory);
-int func_0209f51c(Inventory *inventory);
-int func_0209f584(Inventory *inventory);
-int func_0209e7dc(CostumeList *costumes);
 int func_020a53c8(InteriorList *interiors);
 // Loading and saving
-void func_0209ef8c(Inventory *inventory);
-void func_0209e248(CostumeList *costumes);
-void func_0209e3c8(CostumeList *costumes);
-void func_0209e310(CostumeList *costumes); // Saves them
 void func_020a4f58(InteriorList *interiors);
 void func_020a5090(InteriorList *interiors);
 void func_020a5008(InteriorList *interiors); // Saves them
 }
 
-// The 3D model of an item (constructor func_0209f5f0)
+// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
 class ItemModel : public AnimModel {
 public:
-    void SetItem(const char *archiveName, int item); // func_0209f700
-    void LoadModel(int resourceId);                  // func_0209f770
-    void LoadAnimation(int resourceId);              // func_0209f790
-    void ResetScale();                               // func_0209f7fc
+    void SetItem(const char *archiveName, int item); 
+    void LoadModel(int resourceId);                  
+    void LoadAnimation(int resourceId);              
+    void ResetScale();                               
 
     /* 0x0E0 */ Item mItem;
-    /* 0x0E8 */ u8 mUnknownE8[0xC];
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];
@@ -367,7 +365,7 @@ public:
     virtual void SetVisible(BOOL visible);
 
     /* 0x004 */ u8 mUnknown004[8];
-    /* 0x00C */ InventoryItem **mItems; // What func_020a9b40 gave it
+    /* 0x00C */ Item **mItems; // What func_020a9b40 gave it
     /* 0x010 */ int mItemCount;
     /* 0x014 */ int mUnknown014;
     /* 0x018 */ BOOL mTouched;           // An item was touched
@@ -389,7 +387,7 @@ void func_020a8ab0(ItemListView *list, int unk1, int unk2, int unk3);
 void func_020a8adc(ItemListView *list); // Updates it
 void func_020a9810(ItemListView *list, int unk);
 void func_020a9b10(ItemListView *list, MessageFile *file); // Where the items' names are
-void func_020a9b40(ItemListView *list, InventoryItem **items, int count);
+void func_020a9b40(ItemListView *list, Item **items, int count);
 void func_020a9bf4(ItemListView *list, int index);
 void func_020a9de4(ItemListView *list);
 int func_020a9e28(ItemListView *list, u16 id); // Where the item with that id is
@@ -590,7 +588,7 @@ class ItemTradeScene;
 // What the scene gives its list: the player's things, the message files and the scene's objects (0x3C bytes at
 // 0x1B1F0 of the scene).
 struct ItemTradeContext {
-    /* 0x00 */ CostumeList *mCostumes;
+    /* 0x00 */ ClothesList *mCostumes;
     /* 0x04 */ Inventory *mInventory;
     /* 0x08 */ InteriorList *mInteriors;
     /* 0x0C */ MessageFile *mCommonMessages;
@@ -608,7 +606,7 @@ struct ItemTradeContext {
 }; // 0x3C
 
 // What is chosen: the kind of thing, its number, and two values for it. Its first parts are an InventoryItem and a
-// CostumeItem of classes the main program defines (virtual tables data_02110b0c and data_02110b30, which the
+// ClothesItem of classes the main program defines (virtual tables data_02110b0c and data_02110b30, which the
 // scene's constructor stores).
 class ItemTradeSelection {
 public:
@@ -636,7 +634,7 @@ public:
     };
 
     void Init(int plane, MessageFile *file, int *charOffset);
-    void SetMasks(Inventory *inventory, CostumeList *costumes, InteriorList *interiors);
+    void SetMasks(Inventory *inventory, ClothesList *costumes, InteriorList *interiors);
     void Update();
     void Draw();
     void SetVisible(BOOL visible);
@@ -750,10 +748,10 @@ public:
     /* 0x00010 */ BOOL mChosen;
     /* 0x00014 */ int mUnknown14;
     /* 0x00018 */ ItemTradeSelection mSelection;
-    /* 0x00050 */ CostumeList *mCostumes;
+    /* 0x00050 */ ClothesList *mCostumes;
     /* 0x00054 */ Inventory *mInventory;
     /* 0x00058 */ InteriorList *mInteriors;
-    /* 0x0005C */ InventoryItem *mItems[300]; // What the list shows
+    /* 0x0005C */ Item *mItems[300]; // What the list shows
     /* 0x0050C */ int mItemCount;
     /* 0x00510 */ ItemListView mList;
     /* 0x14474 */ ItemTradeTabs mTabs;
@@ -851,7 +849,7 @@ public:
     /* 0x16B3C */ MessageText mNameText;
     /* 0x1712C */ int mNameCharOffset;
     /* 0x17130 */ int mListCharOffset;
-    /* 0x17134 */ CostumeList mCostumes;
+    /* 0x17134 */ ClothesList mCostumes;
     /* 0x19208 */ Inventory mInventory;
     /* 0x1A9F4 */ InteriorList mInteriors;
     /* 0x1B148 */ MessageFile mMessages[7]; // Common, trouble, item, costume, room, etc and explain messages

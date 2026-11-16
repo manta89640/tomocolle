@@ -167,12 +167,12 @@ void ItemTradeTabs::Init(int plane, MessageFile *file, int *charOffset) {
 }
 
 // @0x02149c88
-void ItemTradeTabs::SetMasks(Inventory *inventory, CostumeList *costumes, InteriorList *interiors) {
-    mMasks[0] = func_0209f4b4(inventory);
-    mMasks[3] = func_0209f51c(inventory);
-    mMasks[1] = func_0209e7dc(costumes);
+void ItemTradeTabs::SetMasks(Inventory *inventory, ClothesList *costumes, InteriorList *interiors) {
+    mMasks[0] = inventory->HasAnyOwnedKind1();
+    mMasks[3] = inventory->HasAnyOwnedKind3();
+    mMasks[1] = costumes->HasAnyOwned();
     mMasks[2] = func_020a53c8(interiors);
-    mMasks[4] = func_0209f584(inventory);
+    mMasks[4] = inventory->HasAnyOwnedKinds4And5();
 }
 
 // @0x02149cdc
@@ -542,7 +542,7 @@ void ItemTradeList::Open() {
         mItemFilter.Select(0);
         mCostumeFilter.SetVisible(FALSE);
         mCostumeFilter.Select(0);
-        func_0209f0f0(mInventory, mItems, &mItemCount, 1, 1);
+        mInventory->GetOwned(mItems, &mItemCount, 1, 1);
         mOkButton.mVisible = TRUE;
         func_02031e88(&mOkButton, TRUE);
         ClearText(&mOkButton.mText);
@@ -587,7 +587,7 @@ int ItemTradeList::Run() {
             mItemFilter.SetVisible(TRUE);
             mItemFilter.Select(0);
             mCostumeFilter.SetVisible(FALSE);
-            func_0209f0f0(mInventory, mItems, &mItemCount, 1, 1);
+            mInventory->GetOwned(mItems, &mItemCount, 1, 1);
             func_020a9b10(&mList, mContext->mItemMessages);
             func_020a9b40(&mList, mItems, mItemCount);
             mSelection.Set(0, 0);
@@ -595,7 +595,7 @@ int ItemTradeList::Run() {
         case ItemTradeTabs::TAB_ITEMS_2:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
-            func_0209f208(mInventory, mItems, &mItemCount);
+            mInventory->GetOwnedKind3(mItems, &mItemCount);
             func_020a9b10(&mList, mContext->mItemMessages);
             func_020a9b40(&mList, mItems, mItemCount);
             mSelection.Set(0, 0);
@@ -604,7 +604,7 @@ int ItemTradeList::Run() {
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(TRUE);
             mCostumeFilter.Select(0);
-            func_0209e4ac(mCostumes, mItems, &mItemCount, 0);
+            mCostumes->GetOwned(mItems, &mItemCount, 0);
             func_020a9b10(&mList, mContext->mCostumeMessages);
             func_020a9b40(&mList, mItems, mItemCount);
             mSelection.Set(1, 0);
@@ -620,7 +620,7 @@ int ItemTradeList::Run() {
         case ItemTradeTabs::TAB_ITEMS_3:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
-            func_0209f28c(mInventory, mItems, &mItemCount);
+            mInventory->GetOwnedKinds4And5Again(mItems, &mItemCount);
             func_020a9b10(&mList, mContext->mItemMessages);
             func_020a9b40(&mList, mItems, mItemCount);
             mSelection.Set(0, 0);
@@ -632,7 +632,7 @@ int ItemTradeList::Run() {
 
     mItemFilter.Update();
     if (mItemFilter.mPressed != -1) {
-        func_0209f0f0(mInventory, mItems, &mItemCount, 1, mItemFilter.GetFilter());
+        mInventory->GetOwned(mItems, &mItemCount, 1, mItemFilter.GetFilter());
         func_020a9b40(&mList, mItems, mItemCount);
         mPendingIndex = -1;
         func_02031e88(&mOkButton, TRUE);
@@ -643,7 +643,7 @@ int ItemTradeList::Run() {
         switch (mMode) {
         case 0:
         case 1:
-            func_0209e4ac(mCostumes, mItems, &mItemCount, mCostumeFilter.GetFilter());
+            mCostumes->GetOwned(mItems, &mItemCount, mCostumeFilter.GetFilter());
             func_020a9b40(&mList, mItems, mItemCount);
             break;
         case 2:
@@ -656,7 +656,7 @@ int ItemTradeList::Run() {
 
     func_020a8adc(&mList);
     if (mList.mTouched && mList.mSelected != -1) {
-        InventoryItem *item = mList.mItems[mList.mSelected];
+        Item *item = mList.mItems[mList.mSelected];
         int id = item->mId;
         func_02031e88(&mOkButton, item->mCount <= 0);
         mPendingIndex = mList.mSelected;
@@ -759,7 +759,7 @@ void ItemTradeList::LoadMannequinHead() {
 // @0x0214b470
 void ItemTradeList::Save() {
     mInventory->Save();
-    func_0209e310(mCostumes);
+    mCostumes->Save();
     func_020a5008(mInteriors);
 }
 
@@ -788,21 +788,21 @@ void ItemTradeList::AddOne() {
 BOOL ItemTradeList::Receive(int id) {
     BOOL received = TRUE;
     if (id >= 0x1000) {
-        InventoryItem *item = &mInteriors->mItems[id & 0xFFF];
+        Item *item = &mInteriors->mItems[id & 0xFFF];
         if (item->mCount >= 99) {
             received = FALSE;
         } else {
             item->Add(1);
         }
     } else if (id >= 0x800) {
-        InventoryItem *item = &mCostumes->mItems[id & 0x7FF];
+        Item *item = &mCostumes->mItems[id & 0x7FF];
         if (item->mCount >= 99) {
             received = FALSE;
         } else {
             item->Add(1);
         }
     } else {
-        InventoryItem *item = &mInventory->mItems[id];
+        Item *item = &mInventory->mItems[id];
         if (item->mCount >= 99) {
             received = FALSE;
         } else {
@@ -828,19 +828,19 @@ BOOL ItemTradeList::Receive(int id) {
 void ItemTradeList::RefreshList() {
     switch (mTabs.mSelected) {
     case 0:
-        func_0209f0f0(mInventory, mItems, &mItemCount, 1, mItemFilter.GetFilter());
+        mInventory->GetOwned(mItems, &mItemCount, 1, mItemFilter.GetFilter());
         break;
     case 1:
-        func_0209e4ac(mCostumes, mItems, &mItemCount, mCostumeFilter.GetFilter());
+        mCostumes->GetOwned(mItems, &mItemCount, mCostumeFilter.GetFilter());
         break;
     case 2:
         func_020a5174(mInteriors, mItems, &mItemCount);
         break;
     case 3:
-        func_0209f208(mInventory, mItems, &mItemCount);
+        mInventory->GetOwnedKind3(mItems, &mItemCount);
         break;
     case 4:
-        func_0209f28c(mInventory, mItems, &mItemCount);
+        mInventory->GetOwnedKinds4And5Again(mItems, &mItemCount);
         break;
     }
     func_020a9b40(&mList, mItems, mItemCount);
@@ -1475,10 +1475,10 @@ void ItemTradeScene::Init() {
     mSaveAfterReturn = FALSE;
     mWindowDone = FALSE;
 
-    func_0209e248(&mCostumes);
-    func_0209e3c8(&mCostumes);
+    mCostumes.Load();
+    mCostumes.Sort();
     mInventory.Load();
-    func_0209ef8c(&mInventory);
+    mInventory.Sort();
     func_020a4f58(&mInteriors);
     func_020a5090(&mInteriors);
     mList.Init(&mContext, &mListCharOffset);
@@ -2167,7 +2167,7 @@ void ItemTradeScene::Exit() {
         WH_Finalize();
         func_0203b8b4(data_0213b700, TRUE);
     }
-    func_0209e310(&mCostumes);
+    mCostumes.Save();
     mInventory.Save();
     func_020a5948(&mRoom);
     ArchiveManager_Unmount(&gArchiveManager, mItemModel.mArchiveName);
