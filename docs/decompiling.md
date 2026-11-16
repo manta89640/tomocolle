@@ -159,8 +159,8 @@ dsd got wrong shows as a near-miss: a constant it took for an address, or a call
 - a structure that dsd cut into its fields (it puts a symbol on every address the code loads) is folded back: one
   symbol, and every reference in every `relocs.txt` as `to:<structure> add:<offset>` (negative addends are accepted,
   `add:-0x4`, for `table - 1`);
-- `tools/name_unit_data.py --apply` writes `kind:data(any)` for `.bss` objects and can leave a symbol twice: make
-  them `kind:bss` and check `symbols.txt` for duplicate addresses afterwards.
+- `tools/name_unit_data.py --apply` writes `kind:bss` for `.bss` objects (it wrote `kind:data(any)` before, which
+  makes `dsd dis` panic) and can leave a symbol twice: check `symbols.txt` for duplicate addresses afterwards.
 
 ### Where the game's release of a file differs (awaiting the user's review)
 
