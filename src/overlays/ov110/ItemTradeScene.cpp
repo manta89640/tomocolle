@@ -283,8 +283,9 @@ void ItemTradeTabs::SetEnabled(int tabs) {
     }
 }
 
+// Empty; called once, by ItemTradeList::Open, after the tabs are set up
 // @0x0214a0bc
-void ItemTradeTabs::func_ov110_0214a0bc() {
+void ItemTradeTabs::OnOpen() {
 }
 
 // --- The item filter ---
@@ -536,7 +537,7 @@ void ItemTradeList::Open() {
         mTabs.SetVisible(TRUE);
         mTabs.SetEnabled(0x1F);
         mTabs.Select(ItemTradeTabs::TAB_ITEMS);
-        mTabs.func_ov110_0214a0bc();
+        mTabs.OnOpen();
         mItemFilter.SetVisible(TRUE);
         mItemFilter.Select(0);
         mCostumeFilter.SetVisible(FALSE);
@@ -952,8 +953,10 @@ void ItemTradeList::ResetLights() {
     data_021226e4.mLights[1].mColor = sLightColors[1];
 }
 
+// Resets the list view's two buttons (func_020a9e6c: func_02031228, the main program's button reset, on the
+// buttons at +0x3C and +0x130), when the partner starts sending
 // @0x0214bae8
-void ItemTradeList::func_ov110_0214bae8() {
+void ItemTradeList::ResetListButtons() {
     func_020a9e6c(&mList);
 }
 
@@ -1754,7 +1757,7 @@ void ItemTradeScene::Update() {
         mPartnerSending = FALSE;
         mState = STATE_RECEIVING;
         mList.Hide();
-        mList.func_ov110_0214bae8();
+        mList.ResetListButtons();
         Send(COMMAND_READY);
         sReceivedNew = FALSE;
         SetupWindow(mState);
