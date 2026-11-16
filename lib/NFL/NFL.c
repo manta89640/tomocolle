@@ -1325,22 +1325,23 @@ BOOL func_02074b68(u32 *pos) {
             }
             stream->unk0 = work->unk84;
         } else {
-            src = func_0206cf6c(source->unk0, source->unk4);
+            u8 *p = func_0206cf6c(source->unk0, source->unk4);
+
             switch (stream->unk8) {
             case 3:
                 if (data_02145360->unk68 == 7) {
-                    src += (int)work->unk98 / 4;
+                    p += (int)work->unk98 / 4;
                 } else {
-                    src += work->unk98;
+                    p += work->unk98;
                 }
                 size -= work->unk98;
                 extra = 0;
                 break;
             case 4:
                 if (data_02145360->unk68 == 7) {
-                    src += (int)work->unk98 / 4;
+                    p += (int)work->unk98 / 4;
                 } else {
-                    src += work->unk98;
+                    p += work->unk98;
                 }
                 size -= work->unk98;
                 extra = work->unk94;
@@ -1348,9 +1349,9 @@ BOOL func_02074b68(u32 *pos) {
             case 1:
                 extra = work->unk94;
                 if (data_02145360->unk68 == 7) {
-                    src += (int)extra / 4;
+                    p += (int)extra / 4;
                 } else {
-                    src += extra;
+                    p += extra;
                 }
                 size -= extra;
                 stream->unk0 = work->unk84;
@@ -1379,20 +1380,20 @@ BOOL func_02074b68(u32 *pos) {
                 }
             }
             if (!overflowB) {
-                func_02074b34(src, work->unk78 + work->unk84, palette, size, TRUE);
+                func_02074b34(p, work->unk78 + work->unk84, palette, size, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, size);
             } else {
                 int over = work->unk84 + size - work->unk7C;
                 int n = size - over;
 
-                func_02074b34(src, work->unk78 + work->unk84, palette, n, TRUE);
+                func_02074b34(p, work->unk78 + work->unk84, palette, n, TRUE);
                 DC_FlushRange(work->unk78 + work->unk84, n);
                 if (data_02145360->unk68 == 7) {
-                    src += n / 4;
+                    p += n / 4;
                 } else {
-                    src += n;
+                    p += n;
                 }
-                func_02074b34(src, work->unk78, palette, over, TRUE);
+                func_02074b34(p, work->unk78, palette, over, TRUE);
                 DC_FlushRange(work->unk78, over);
             }
         }
@@ -1594,11 +1595,13 @@ void func_0206cd9c(u16 *palette, const s16 *params);
 void func_0206cc30(u16 *palette);
 
 BOOL func_02075528(NFLObj *obj, u32 *pos) {
+    NFLWorkUnkA0 *stream;
     NFLWork *work = data_02145360;
     s16 *params = obj->unk180;
-    NFLWorkUnkA0 *stream = obj->unk1A4;
     int i;
     u16 palette[64];
+
+    stream = obj->unk1A4;
 
     for (i = 0; i < 11; stream++, i++) {
         int kind;
@@ -1872,22 +1875,23 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         stream->unk8 = 3;
                     }
                 } else {
-                    src = func_0206cf6c(kind, index);
+                    u8 *p2 = func_0206cf6c(kind, index);
+
                     switch (stream->unk8) {
                     case 3:
                     case 4:
                         if (data_02145360->unk68 == 7) {
-                            src += (int)obj->unk178 / 4;
+                            p2 += (int)obj->unk178 / 4;
                         } else {
-                            src += obj->unk178;
+                            p2 += obj->unk178;
                         }
                         size -= obj->unk178;
                         break;
                     case 1:
                         if (data_02145360->unk68 == 7) {
-                            src += (int)obj->unk174 / 4;
+                            p2 += (int)obj->unk174 / 4;
                         } else {
-                            src += obj->unk174;
+                            p2 += obj->unk174;
                         }
                         size -= obj->unk174;
                         stream->unk0 = work->unk84;
@@ -1901,20 +1905,20 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
                         overflowB = TRUE;
                     }
                     if (!overflowB) {
-                        func_02074b34(src, work->unk78 + work->unk84, pal, size, arg4);
+                        func_02074b34(p2, work->unk78 + work->unk84, pal, size, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, size);
                     } else {
                         int over = work->unk84 + size - work->unk7C;
                         int n = size - over;
 
-                        func_02074b34(src, work->unk78 + work->unk84, pal, n, arg4);
+                        func_02074b34(p2, work->unk78 + work->unk84, pal, n, arg4);
                         DC_FlushRange(work->unk78 + work->unk84, n);
                         if (data_02145360->unk68 == 7) {
-                            src += n / 4;
+                            p2 += n / 4;
                         } else {
-                            src += n;
+                            p2 += n;
                         }
-                        func_02074b34(src, work->unk78, pal, over, arg4);
+                        func_02074b34(p2, work->unk78, pal, over, arg4);
                         DC_FlushRange(work->unk78, over);
                     }
                     if (!overflowA) {
