@@ -27,7 +27,7 @@ void func_ov075_02178364(Scene40CharacterPartA *part);
 void Scene40::Draw() {
     MessageWindow_Draw(&mWindows[0]);
     MessageWindow_Draw(&mWindows[1]);
-    func_ov075_0214fc00(mUnknown30B50);
+    func_ov075_0214fc00(&mPages);
     Sprite_Draw(&mSprite013D0);
 
     switch (mDrawState) {
