@@ -8,7 +8,7 @@
 #include "Model.h"
 #include "Scene.h"
 #include "SpriteButton.h"
-#include "character/AnimModelCharacter.h"
+#include "character/Character.h"
 #include "text/MessageFile.h"
 #include "text/TextCanvas.h"
 
@@ -84,9 +84,9 @@ public:
     /* 0xBC8 */ u8 mUnknownBC8[0x900];
 }; // 0x14C8
 
-// The scene's characters, six of them: an AnimModelCharacter and 0x10 bytes more. Its implicit constructor and
+// The scene's characters, six of them: a CharacterHead (gap66-a's) and 0x10 bytes more. Its implicit constructor and
 // destructor are the main program's copies 0x02040D6C and 0x02040DC0.
-class RankingCharacter : public AnimModelCharacter {
+class RankingCharacter : public CharacterHead {
 public:
     /* 0x2728 */ u8 mUnknown2728[0x10];
 }; // 0x2738

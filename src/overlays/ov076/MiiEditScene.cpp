@@ -935,10 +935,10 @@ void MiiEditScene::SaveCharacter() {
     switch (mSceneId) {
     case 0x6F:
         func_0209930c(&mCharacter, 0x13, 0, 0x7FFFFFFFFFFFFFFF);
-        mCharacter.mMoodLocked = 1;
-        mCharacter.mUnknown227 = 0;
-        mCharacter.mUnknown226 = 0;
-        mCharacter.mMoodPartner = 0;
+        mCharacter.mTroubleState = 1;
+        mCharacter.mTroubleCategory = 0;
+        mCharacter.mTroubleId = 0;
+        mCharacter.mUnknown238 = 0;
         mCharacter.mAwayUntil = 0x7FFFFFFFFFFFFFFF;
         break;
     case 0x43:
@@ -1106,7 +1106,7 @@ void MiiEditSexPage::Update() {
                     }
                     MiiData_SetCreatorName(&mScene->mCharacter, name);
                 } else {
-                    mScene->mCharacter.mRelationToPlayer = 1;
+                    mScene->mCharacter.mRelationBlood = 1;
                 }
             }
         }
@@ -3185,19 +3185,19 @@ void MiiEditProfilePage::Update() {
             int choice = READ(mWindows[4].mUnknownAF7C);
             switch (choice) {
             case 0:
-                mScene->mCharacter.mRelationToPlayer = 2;
+                mScene->mCharacter.mRelationBlood = 2;
                 break;
             case 1:
-                mScene->mCharacter.mRelationToPlayer = 3;
+                mScene->mCharacter.mRelationBlood = 3;
                 break;
             case 2:
-                mScene->mCharacter.mRelationToPlayer = 4;
+                mScene->mCharacter.mRelationBlood = 4;
                 break;
             case 3:
-                mScene->mCharacter.mRelationToPlayer = 5;
+                mScene->mCharacter.mRelationBlood = 5;
                 break;
             case 4:
-                mScene->mCharacter.mRelationToPlayer = 0;
+                mScene->mCharacter.mRelationBlood = 0;
                 break;
             }
             for (i = 0; i < 5; i++) {
@@ -3642,7 +3642,7 @@ void MiiEditProfilePage::SetState(int state) {
         break;
     case 10: {
         func_02034720(&mWindows[4], 0x12, 1);
-        int value = mScene->mCharacter.mRelationToPlayer;
+        int value = mScene->mCharacter.mRelationBlood;
         if (value == 1) {
             break;
         }
@@ -3867,7 +3867,7 @@ void MiiEditProfilePage::UpdateTexts() {
     MiiData_GetCreatorName(&mScene->mCharacter, CREATOR_NAME_TEXT(mScene));
     mScene->mTextBoxes[6].SetText((const NNSG2dChar *)CREATOR_NAME_TEXT(mScene));
     mScene->mTextBoxes[7].SetText(
-        (const NNSG2dChar *)mScene->mMessageFiles[0].GetText(mScene->mCharacter.mRelationToPlayer + 0x54));
+        (const NNSG2dChar *)mScene->mMessageFiles[0].GetText(mScene->mCharacter.mRelationBlood + 0x54));
     if (!func_02098584(&mScene->mCharacter)) {
         mScene->mTextBoxes[2].mColor = 9;
         mScene->mTextBoxes[6].mColor = 9;
@@ -4535,7 +4535,7 @@ int MiiEditVoicePage::GetStarSignMessage(int month, int day) {
 // What this page uses of the main program (stand-ins)
 extern "C" {
 extern TouchInput gTouchInput;
-void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mUnknown04A[index]
+void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mAnswers[index]
 void func_02091a6c(SceneCharacter *character);
 }
 
@@ -4555,7 +4555,7 @@ void MiiEditCharacterPage::Init(MiiEditScene *scene) {
         mButtons[i].mVisible = FALSE;
     }
     for (int i = 0; i < 5; i++) {
-        u8 value = mScene->mCharacter.mUnknown04A[i];
+        u8 value = mScene->mCharacter.mAnswers[i];
         if (value == 0) {
             mButtons[i].mVisible = FALSE;
         } else {
@@ -4576,7 +4576,7 @@ void MiiEditCharacterPage::Init(MiiEditScene *scene) {
 static inline BOOL IsPersonalitySet(MiiEditScene *scene) {
     BOOL set = TRUE;
     for (int i = 0; i < 5; i++) {
-        if (scene->mCharacter.mUnknown04A[i] == 0) {
+        if (scene->mCharacter.mAnswers[i] == 0) {
             set = FALSE;
             break;
         }
@@ -4598,7 +4598,7 @@ void MiiEditCharacterPage::Update() {
         for (j = 0; j < 8; j++) {
             ScreenRect rect = data_ov076_021592d0[j];
             rect.y += y;
-            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mUnknown04A[i]) {
+            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mAnswers[i]) {
                 func_02098d5c(&mScene->mCharacter, i, j + 1);
                 func_02091a6c(&mScene->mCharacter);
                 mButtons[i].mVisible = TRUE;
@@ -4612,7 +4612,7 @@ void MiiEditCharacterPage::Update() {
     }
     BOOL set = TRUE;
     for (int i = 0; i < 5; i++) {
-        if (mScene->mCharacter.mUnknown04A[i] == 0) {
+        if (mScene->mCharacter.mAnswers[i] == 0) {
             set = FALSE;
             break;
         }

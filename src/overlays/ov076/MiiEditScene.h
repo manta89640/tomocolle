@@ -216,7 +216,7 @@ public:
     void Exit();
 
     /* 0x000 */ MiiEditScene *mScene;
-    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value of CharacterRecord::mUnknown04A[0..4]
+    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value of CharacterRecord::mAnswers[0..4]
     /* 0x4C8 */ Sprite mSprites[5];
     /* 0x824 */
 }; // 0x824
