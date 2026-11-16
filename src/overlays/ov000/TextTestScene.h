@@ -20,6 +20,8 @@
 // 0x40C, an ObjTextCanvas base with the table of ObjCharBox.
 class TextTestScene : public Scene {
 public:
+    TextTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

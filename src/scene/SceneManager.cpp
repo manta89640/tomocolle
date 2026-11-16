@@ -15,6 +15,10 @@
 
 #include "SceneStandIns.h"
 
+// The scene classes of the constructors 0x0203de78..0x02040578 (gap38-a)
+#include "../overlays/ov000/TextTestScene.h"
+// End of gap38-a's scene classes
+
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
 #include "MapModelsScene.h"
 #include "../overlays/ov010/Scene2B.h"
@@ -754,6 +758,8 @@ Scene *SceneManager::CreateScene(int sceneId) {
 }
 
 // ---- Constructors 0x0203de78..0x02040578: scenes up to 0x26 (gap38-a) --------------------------------------------
+
+TextTestScene::TextTestScene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 

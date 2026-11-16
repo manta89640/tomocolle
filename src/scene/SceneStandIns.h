@@ -22,7 +22,6 @@
 
 SCENE_STAND_IN(Scene00, 0x1C); // func_0203de78
 
-SCENE_STAND_IN(TextTestScene, 0x5C8); // _ZN13TextTestSceneC1Ei
 
 SCENE_STAND_IN(Scene02, 0x4DDC); // func_0203df24
 
