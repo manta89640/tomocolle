@@ -382,6 +382,63 @@ src/scene/SceneManager.cpp:
     .data       start:0x02110860 end:0x02110b94
     .bss        start:0x0213b700 end:0x0213ba74
 
+src/scene/Scene.cpp:
+    .text       start:0x0204af20 end:0x0204b090
+
+src/scene/DrawManTestScene.cpp:
+    .text       start:0x0204b090 end:0x0204b504
+    .rodata     start:0x020b5d04 end:0x020b5d2c
+    .data       start:0x02110b94 end:0x02110c48
+
+src/scene/G3dTestScene.cpp:
+    .text       start:0x0204b504 end:0x0204bc78
+    .rodata     start:0x020b5d2c end:0x020b5d3c
+    .data       start:0x02110c48 end:0x02110d00
+
+src/scene/HumanTestScene.cpp:
+    .text       start:0x0204bc78 end:0x0204c174
+    .data       start:0x02110d00 end:0x02110e68
+
+src/scene/ParticleTestScene.cpp:
+    .text       start:0x0204c174 end:0x0204c6f4
+    .data       start:0x02110e68 end:0x02110f00
+
+src/scene/BgTextTestScene.cpp:
+    .text       start:0x0204c6f4 end:0x0204c860
+    .data       start:0x02110f00 end:0x02110f24
+
+src/scene/MessageTestScene.cpp:
+    .text       start:0x0204c860 end:0x0204ce28
+    .data       start:0x02110f24 end:0x02110fdc
+
+src/scene/KeyboardTestScene.cpp:
+    .text       start:0x0204ce28 end:0x0204d678
+    .data       start:0x02110fdc end:0x0211115c
+
+src/scene/TtsTestScene.cpp:
+    .text       start:0x0204d678 end:0x0204d7f8
+    .data       start:0x0211115c end:0x021112b0
+
+src/scene/EmptyScene.cpp:
+    .text       start:0x0204d7f8 end:0x0204d880
+    .init       start:0x020b06cc end:0x020b06e0
+    .ctor       start:0x020fc4e8 end:0x020fc4ec
+    .data       start:0x021112b0 end:0x021112d4
+    .bss        start:0x0213ba74 end:0x0213bb20
+
+src/scene/WirelessTestScene.cpp:
+    .text       start:0x0204d880 end:0x0204e4b4
+    .init       start:0x020b06e0 end:0x020b06f4
+    .rodata     start:0x020b5d3c end:0x020b5d74
+    .ctor       start:0x020fc4ec end:0x020fc4f0
+    .data       start:0x021112d4 end:0x02111478
+    .bss        start:0x0213bb20 end:0x0213c060
+
+src/scene/SceneHelpers.cpp:
+    .text       start:0x0204e4b4 end:0x0204fc74
+    .rodata     start:0x020b5d74 end:0x020b5dac
+    .data       start:0x02111478 end:0x02111868
+
 src/scene/MiiListMenuScene.cpp:
     complete
     .text       start:0x0204fc74 end:0x02050884

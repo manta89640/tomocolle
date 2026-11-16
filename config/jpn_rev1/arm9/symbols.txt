@@ -5149,8 +5149,7 @@ data_02110b0c kind:data(any) addr:0x02110b0c
 data_02110b30 kind:data(any) addr:0x02110b30
 data_02110b54 kind:data(any) addr:0x02110b54
 data_02110b78 kind:data(any) addr:0x02110b78
-data_02110b94 kind:data(any) addr:0x02110b94
-data_02110b9c kind:data(any) addr:0x02110b9c
+_ZTV16DrawManTestScene kind:data(any) addr:0x02110b94
 gStr_DMN kind:data(any) addr:0x02110bb8
 gStr_Scn_Scene_SceneTestDrawMan_LZ_bin kind:data(any) addr:0x02110bbc
 gStr_CA3 kind:data(any) addr:0x02110be0
@@ -5160,7 +5159,7 @@ gStr_DMN_HUMAN00_itx kind:data(any) addr:0x02110c18
 gStr_DMN_HUMAN00_itx_2 kind:data(any) addr:0x02110c2c
 gStr_DMN_2 kind:data(any) addr:0x02110c40
 gStr_CA3_2 kind:data(any) addr:0x02110c44
-data_02110c50 kind:data(any) addr:0x02110c50
+_ZTV12G3dTestScene kind:data(any) addr:0x02110c48
 gStr_BIC kind:data(any) addr:0x02110c6c
 gStr_Mdl_Ica_ica_mii_room_LZ_bin kind:data(any) addr:0x02110c70
 gStr_THM kind:data(any) addr:0x02110c8c
@@ -5173,7 +5172,7 @@ gStr_TG3_Glass6_imd kind:data(any) addr:0x02110ce4
 gStr_TG3_2 kind:data(any) addr:0x02110cf4
 gStr_THM_2 kind:data(any) addr:0x02110cf8
 gStr_BIC_3 kind:data(any) addr:0x02110cfc
-data_02110d08 kind:data(any) addr:0x02110d08
+_ZTV14HumanTestScene kind:data(any) addr:0x02110d00
 gStr_HP0 kind:data(any) addr:0x02110d24
 gStr_Scn_Scene_TestHuman00Itp_LZ_bin kind:data(any) addr:0x02110d28
 gStr_HM0 kind:data(any) addr:0x02110d48
@@ -5197,7 +5196,7 @@ gStr_HM0_2 kind:data(any) addr:0x02110e58
 gStr_BM0_2 kind:data(any) addr:0x02110e5c
 gStr_BT0_3 kind:data(any) addr:0x02110e60
 gStr_HT0_3 kind:data(any) addr:0x02110e64
-data_02110e70 kind:data(any) addr:0x02110e70
+_ZTV17ParticleTestScene kind:data(any) addr:0x02110e68
 gStr_STE kind:data(any) addr:0x02110e8c
 gStr_Mdl_Spl_SplRoomEffect_LZ_bin kind:data(any) addr:0x02110e90
 gStr_STI kind:data(any) addr:0x02110eb0
@@ -5206,10 +5205,10 @@ gStr_STE_SplRoomEffect_spa kind:data(any) addr:0x02110ed0
 gStr_STI_body_imd kind:data(any) addr:0x02110ee8
 gStr_STE_2 kind:data(any) addr:0x02110ef8
 gStr_STI_2 kind:data(any) addr:0x02110efc
-data_02110f08 kind:data(any) addr:0x02110f08
+_ZTV15BgTextTestScene kind:data(any) addr:0x02110f00
 data_02110f24 kind:data(any) addr:0x02110f24
 gStr_B0D0F0H0J0 kind:data(any) addr:0x02110f28
-data_02110f3c kind:data(any) addr:0x02110f3c
+_ZTV16MessageTestScene kind:data(any) addr:0x02110f34
 gStr_TBM kind:data(any) addr:0x02110f58
 gStr_Msg_TmdEtcMsgJP_LZ_bin kind:data(any) addr:0x02110f5c
 gStr_ITM kind:data(any) addr:0x02110f74
@@ -5219,7 +5218,7 @@ gStr_ITM_tmd_item_msg_JP_bmg kind:data(any) addr:0x02110fa8
 data_02110fc4 kind:data(any) addr:0x02110fc4
 gStr_TBM_2 kind:data(any) addr:0x02110fd4
 gStr_ITM_2 kind:data(any) addr:0x02110fd8
-data_02110fe4 kind:data(any) addr:0x02110fe4
+_ZTV17KeyboardTestScene kind:data(any) addr:0x02110fdc
 gStr_KBD kind:data(any) addr:0x02111000
 gStr_Cmn_Kbd_SoftKeyboard_LZ_bin kind:data(any) addr:0x02111004
 gStr_MNU kind:data(any) addr:0x02111020
@@ -5242,10 +5241,10 @@ gStr_MNU_2 kind:data(any) addr:0x02111154
 gStr_TBM_4 kind:data(any) addr:0x02111158
 data_0211115c kind:data(any) addr:0x0211115c
 gText_LessThanReverseSolidusEchoGreaterThan kind:data(any) addr:0x02111168
-data_0211118c kind:data(any) addr:0x0211118c
+_ZTV12TtsTestScene kind:data(any) addr:0x02111184
 gText_NaraSingleQuotationKenNoLowLineAsuNo kind:data(any) addr:0x021111a8
 gText_NaraSingleQuotationKenNoLowLineAsuNo_2 kind:data(any) addr:0x02111204
-data_021112b8 kind:data(any) addr:0x021112b8
+_ZTV10EmptyScene kind:data(any) addr:0x021112b0
 data_021112d4 kind:data(any) addr:0x021112d4
 gText_SoushinChuu kind:data(any) addr:0x021112dc
 gText_SetsuzokuChuu kind:data(any) addr:0x021112e4
@@ -5262,7 +5261,7 @@ gText_SoushinSeikouParenthesisTatchiDeShuuryou kind:data(any) addr:0x02111398
 data_021113b2 kind:data(any) addr:0x021113b2
 data_021113d2 kind:data(any) addr:0x021113d2
 data_021113f4 kind:data(any) addr:0x021113f4
-data_0211142c kind:data(any) addr:0x0211142c
+_ZTV17WirelessTestScene kind:data(any) addr:0x02111424
 gText_TatchiDeSoujushinKirikae kind:data(any) addr:0x02111448
 data_02111460 kind:data(any) addr:0x02111460
 gText_DetaGaAriMaseN kind:data(any) addr:0x02111464
