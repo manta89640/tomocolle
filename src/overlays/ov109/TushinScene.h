@@ -310,7 +310,8 @@ struct Light {
 extern "C" {
 extern Camera data_02122764;
 void func_0202a640(Camera *camera);
-extern Light data_021227cc[2];
+extern Light data_021227cc[];
+extern Light data_021227d8[]; // The second light, referred to by its own address (as overlay 110 does)
 void func_0202a96c(Light *light);
 void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 }

@@ -366,10 +366,10 @@ void TushinScene::InitCharacters() {
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
     VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
     func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(&data_021227cc[1]);
+    func_0202a96c(data_021227d8);
     func_0202ab2c(&data_021227cc[0], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, 0x3E8 - 0x640,
                   -0xFA0);
-    func_0202ab2c(&data_021227cc[1], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
+    func_0202ab2c(data_021227d8, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
     LoadCharacters();
 }
 
