@@ -4,6 +4,11 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+extern "C" {
+// Frees a block of the main heap
+void func_020267f4(void *block);
+}
+
 // The sound library's setup and what it plays with: the sound heap, the sound archive, and the handles of the
 // sequences (played by sequence number), of the sequence archive entries, and of the archive's stream.
 // SoundManager (SoundManager.h) is built on it and is what the game uses.
@@ -18,6 +23,13 @@ public:
         HEAP_STATE_COUNT = 3,
         STRM_THREAD_PRIORITY = 10,
     };
+
+    SoundSystem() { mHeapMemory = NULL; }
+    ~SoundSystem() {
+        if (mHeapMemory != NULL) {
+            func_020267f4(mHeapMemory);
+        }
+    }
 
     void Init(const char *archivePath, u32 heapSize);
     BOOL StartSeqIfNotPlaying(int handle, int seqNo);

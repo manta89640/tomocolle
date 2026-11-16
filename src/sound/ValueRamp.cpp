@@ -1,5 +1,7 @@
 #include "sound/ValueRamp.h"
 
+#include "sound/SoundManager.h"
+
 ValueRamp::ValueRamp() {
     Reset();
 }
@@ -76,3 +78,7 @@ void SoundParamRamps::Update() {
         mRamps[i].Update();
     }
 }
+
+// The sound manager is defined in this file: its destructor, which the static initialiser registers, is emitted
+// after the static initialiser, as the file's last function (0x0203671C), right after the ramps' functions.
+SoundManager gSoundManager;

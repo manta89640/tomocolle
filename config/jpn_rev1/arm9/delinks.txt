@@ -351,7 +351,10 @@ src/sound/SoundManager.cpp:
 
 src/sound/ValueRamp.cpp:
     complete
-    .text       start:0x02036558 end:0x0203671c
+    .text       start:0x02036558 end:0x0203673c
+    .init       start:0x020b0674 end:0x020b06a0
+    .ctor       start:0x020fc4e0 end:0x020fc4e4
+    .bss        start:0x0213b5c0 end:0x0213b6b0
 
 src/text/TextUtil.cpp:
     .text       start:0x0203673c end:0x02039660

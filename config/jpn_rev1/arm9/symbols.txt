@@ -1585,7 +1585,7 @@ _ZN9ValueRamp6UpdateEv kind:function(arm,size=0xf4) addr:0x02036590
 _ZN9ValueRamp7SetModeEi kind:function(arm,size=0x8) addr:0x02036684
 _ZN15SoundParamRamps5ResetEv kind:function(arm,size=0x68) addr:0x0203668c
 _ZN15SoundParamRamps6UpdateEv kind:function(arm,size=0x28) addr:0x020366f4
-func_0203671c kind:function(arm,size=0x20) addr:0x0203671c
+_ZN12SoundManagerD1Ev kind:function(arm,size=0x20) addr:0x0203671c
 func_0203673c kind:function(arm,size=0x138) addr:0x0203673c
 func_02036874 kind:function(arm,size=0x1b8) addr:0x02036874
 func_02036a2c kind:function(arm,size=0x170) addr:0x02036a2c
@@ -4199,7 +4199,7 @@ __sinit_Font.cpp kind:function(arm,size=0x2c) addr:0x020b05d8 local
 __sinit_CardPullOutMonitor.cpp kind:function(arm,size=0x4) addr:0x020b0604 local
 __sinit_MessageText.cpp kind:function(arm,size=0x48) addr:0x020b0608 local
 __sinit_020b0650 kind:function(arm,size=0x24) addr:0x020b0650
-__sinit_020b0674 kind:function(arm,size=0x2c) addr:0x020b0674
+__sinit_ValueRamp.cpp kind:function(arm,size=0x2c) addr:0x020b0674 local
 __sinit_020b06a0 kind:function(arm,size=0x2c) addr:0x020b06a0
 __sinit_020b06cc kind:function(arm,size=0x14) addr:0x020b06cc
 __sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
@@ -4819,7 +4819,7 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_CardPullOutMonitor.cpp kind:data(word) addr:0x020fc4d4 local
 .p__sinit_MessageText.cpp kind:data(word) addr:0x020fc4d8 local
 .p__sinit_020b0650 kind:data(word) addr:0x020fc4dc
-.p__sinit_020b0674 kind:data(word) addr:0x020fc4e0
+.p__sinit_ValueRamp.cpp kind:data(word) addr:0x020fc4e0 local
 .p__sinit_020b06a0 kind:data(word) addr:0x020fc4e4
 .p__sinit_020b06cc kind:data(word) addr:0x020fc4e8
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
