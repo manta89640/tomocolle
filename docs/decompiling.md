@@ -626,6 +626,30 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
   one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
 
+**Found on the character code (`src/character/`)**
+- A chain of assignments, `mMoveAngle = mAngle = mTargetAngle = mWalkAngle = 0;`, gives the original's order of the
+  stores and of the constants' registers where one statement per field schedules them otherwise (`Character::Init`,
+  `CharacterBase::ResetFace`, `CharacterHead::Init`: `mPrevAnimId = mAnimId = -1`).
+- Two dead copies of globals passed to a function by pointer are the by-value parameters of an inline overload:
+  `BOOL HitTestJoint(VecFx32 origin, VecFx32 dir, int joint) { return HitTestJoint(&origin, &dir, joint); }`.
+- `VEC_Set(&r->scale, s.x, s.y, s.z)` loads the three in reverse and stores them with one `stmib`, where a structure
+  copy or three assignments do not (the model's joint callback).
+- A template the file uses keeps an unused parameter only when it is not `static`: with `static` and `-ipa file`
+  the compiler drops the argument at every call (`ClampField` in `SavedCharacter::Validate`, whose name strings
+  otherwise vanish from the literal pools).
+- `FX32_CONST(variable)` is a floating-point conversion; shift instead.
+- A switch of hundreds of cases (`CharacterSort::GetCollationKey`) can be written from the original's compare tree
+  by running the tree for every input value (a small interpreter of its `cmp`/branch/jump-table code) and listing one
+  case per body in the bodies' address order; the compiler then rebuilds the same tree.
+- Functions whose body is a table of character conversions are best understood by running them in an emulator over
+  every character (unicorn, on `extract/.../arm9.bin`): that is how the normalization steps were named.
+- A unit whose constructor builds an `AnimModel` member after another member with an out-of-line constructor emits
+  `~AnimModel` (binding 13); it cannot be linked while the gap holds the global `0x0202AF98`, and marking that symbol
+  weak makes the linker keep the new copy instead (`CharacterModel.cpp`, matched but not complete).
+- The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
+  them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
+  the ROM's name) placed all twelve.
+
 ## A match is instructions and references
 
 objdiff compares instructions, and counts a call or an address load as equal whatever it refers to. So after `ninja`,
