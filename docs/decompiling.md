@@ -618,6 +618,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 
 **MSL**
 - A loop that the original enters without testing its pointer is a `do`/`while` (`__flush_all`).
+- A copy loop written `for (; i < ie; ++i, ++ib) *ib = *i;` and `*ib++ = *i++` compile to the same instructions but
+  colour differently, and the difference reaches back over the whole function: in `__minus_dec` the second gave five
+  pointers a rotation of the original's registers, which no declaration order undid (`ansi_fp.c`). Search a tail's
+  forms by script (loop form, which pointer advances, whether a pointer is set again after) when the registers of an
+  early part change with it.
+- A double whose bits are read through a cast (`*(unsigned long long *)&frac`) lives in memory and is reloaded for
+  the next call; the original kept it in registers and cast a copy (`__num2dec_internal`).
 - A bitfield struct copied to a local (`__file_modes mode = file->mode;`) is given a stack slot; reading the field
   through the pointer again reuses the loaded word, as the original does (`__get_char`).
 - For quick looks at code, a file compiles in about a second under `~/Projects/pokesxf/tools/wibo/wibo-macos-1.2.0`

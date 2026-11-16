@@ -16,6 +16,12 @@
 // Not matching yet: 40 instructions of the hexadecimal tail, all register choices: the pointer to the result's bytes
 // is in r3 where the original has r4, and the values the original keeps in r3 (the mantissa's first byte and
 // address, the bit position, the swap's counter) are in r4.
+// Also tried (round 3): the pointer assigned later, made const, cast, or replaced by the union's array in each part
+// of the tail; the union at function scope; the block's declarations in every order a climb reaches; the swap counter
+// set at the block's top or before the exponent (that puts p in r4 but moves the rest); the i loop counting with k; a
+// separate index for the packing loop; every set of one to three of the opt_* pragmas. `#pragma opt_lifetimes off`
+// alone puts p in r4 and matches up to the packing loop, whose counters then take other registers, and computes
+// exp << 21 into a fresh register where the original reuses exp's.
 
 #include <ansi_fp.h>
 #include <ctype.h>
