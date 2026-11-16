@@ -1,6 +1,6 @@
-func_ov078_02149a40 kind:function(arm,size=0xf4) addr:0x02149a40
-func_ov078_02149b34 kind:function(arm,size=0x10c8) addr:0x02149b34
-func_ov078_0214abfc kind:function(arm,size=0xb8) addr:0x0214abfc
+_ZN15FriendListScene12StartLoadingEv kind:function(arm,size=0xf4) addr:0x02149a40
+_ZN15FriendListScene4InitEv kind:function(arm,size=0x10c8) addr:0x02149b34
+_ZN15FriendListScene6UpdateEv kind:function(arm,size=0xb8) addr:0x0214abfc
 func_ov078_0214acb4 kind:function(arm,size=0x6b0) addr:0x0214acb4
 func_ov078_0214b364 kind:function(arm,size=0x1fc) addr:0x0214b364
 func_ov078_0214b560 kind:function(arm,size=0xd4) addr:0x0214b560
@@ -9,8 +9,8 @@ func_ov078_0214b804 kind:function(arm,size=0x5c) addr:0x0214b804
 func_ov078_0214b860 kind:function(arm,size=0xc8) addr:0x0214b860
 func_ov078_0214b928 kind:function(arm,size=0x58) addr:0x0214b928
 func_ov078_0214b980 kind:function(arm,size=0x31c) addr:0x0214b980
-func_ov078_0214bc9c kind:function(arm,size=0xac) addr:0x0214bc9c
-func_ov078_0214bd48 kind:function(arm,size=0xd8) addr:0x0214bd48
+_ZN15FriendListScene4DrawEv kind:function(arm,size=0xac) addr:0x0214bc9c
+_ZN15FriendListScene4ExitEv kind:function(arm,size=0xd8) addr:0x0214bd48
 func_ov078_0214be20 kind:function(arm,size=0xac) addr:0x0214be20
 func_ov078_0214becc kind:function(arm,size=0x1c) addr:0x0214becc
 func_ov078_0214bee8 kind:function(arm,size=0xdc) addr:0x0214bee8
@@ -33,8 +33,8 @@ func_ov078_0214e0fc kind:function(arm,size=0x2c) addr:0x0214e0fc
 func_ov078_0214e128 kind:function(arm,size=0x160) addr:0x0214e128
 func_ov078_0214e288 kind:function(arm,size=0x44) addr:0x0214e288
 func_ov078_0214e2cc kind:function(arm,size=0x10) addr:0x0214e2cc
-func_ov078_0214e2dc kind:function(arm,size=0x58) addr:0x0214e2dc
-func_ov078_0214e334 kind:function(arm,size=0x60) addr:0x0214e334
+_ZN15FriendListSceneD1Ev kind:function(arm,size=0x58) addr:0x0214e2dc
+_ZN15FriendListSceneD0Ev kind:function(arm,size=0x60) addr:0x0214e334
 gStr_uu_ov078 kind:data(any) addr:0x0214e394
 gStr_tt_ov078 kind:data(any) addr:0x0214e398
 data_ov078_0214e39c kind:data(any) addr:0x0214e39c
@@ -88,7 +88,7 @@ __sinit_ov078_0214ea44 kind:function(arm,size=0x98) addr:0x0214ea44
 data_ov078_0214eb00 kind:data(any) addr:0x0214eb00
 data_ov078_0214eb04 kind:data(any) addr:0x0214eb04
 data_ov078_0214eb24 kind:data(any) addr:0x0214eb24
-data_ov078_0214eb64 kind:data(any) addr:0x0214eb64 ambiguous
+_ZTV15FriendListScene kind:data(any) addr:0x0214eb5c
 gStr_SFL_ov078 kind:data(any) addr:0x0214eb80
 gStr_Scn_Scene_SceneFriendList_LZ_bin kind:data(any) addr:0x0214eb84
 gStr_MLT_ov078 kind:data(any) addr:0x0214eba8

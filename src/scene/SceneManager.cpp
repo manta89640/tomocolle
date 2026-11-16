@@ -34,6 +34,7 @@ struct PaletteLoader {
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
 #include "../overlays/ov009/TestNg20Scene.h"
+#include "../overlays/ov078/FriendListScene.h"
 #include "../overlays/ov067/ChangeClothesScene.h"
 #include "../overlays/ov070/RightJobScene.h"
 #include "../overlays/ov071/RightJob2Scene.h"
@@ -855,7 +856,9 @@ Scene18::Scene18(int sceneId) : Scene(sceneId) {}
 
 Scene19::Scene19(int sceneId) : Scene(sceneId) {}
 
-// (FriendListScene; scene 0x1B: gap38-c's test scene)
+FriendListScene::FriendListScene(int sceneId) : Scene(sceneId) {}
+
+// (Scene 0x1B: gap38-c's test scene)
 
 TestNg20Scene::TestNg20Scene(int sceneId) : Scene(sceneId) {}
 

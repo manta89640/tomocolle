@@ -53,7 +53,6 @@ SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ei
 SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ei
 
 
-SCENE_STAND_IN(FriendListScene, 0x7A3B8); // 0x0203f350
 
 SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
