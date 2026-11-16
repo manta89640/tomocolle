@@ -224,7 +224,9 @@ struct PadInput {
     /* 0x04 */ u8 mUnknown04[0x1C];
     /* 0x20 */ u32 mUnknown20;
 };
-struct SceneManager;
+struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+};
 struct SceneMemory {
     /* 0x00 */ u8 mUnknown00[0x20];
     /* 0x20 */ u8 mCharacters[12]; // The first is the character the scene edits
@@ -236,7 +238,6 @@ extern SceneManager gSceneManager;
 extern SceneMemory data_0213ba74;
 extern Light data_021227cc;
 extern Light data_021227d8;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 BOOL func_02023fa4(ScreenControl *screens, int planes);
 void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
 void func_02091578(SceneCharacter *character, u16 angle);
@@ -632,7 +633,7 @@ void MiiEditScene::Update() {
                 CharacterRecord record;
                 func_0202c264(&gGameData, (u16)mUnknown5824, &record);
                 if (!func_0209d900(&record, &mCharacter)) {
-                    func_0203c02c(&gSceneManager, 0x1A);
+                    gSceneManager.RequestScene(0x1A);
                 } else {
                     SetPage(5);
                 }
@@ -1064,7 +1065,7 @@ void MiiEditSexPage::Update() {
         if (*(volatile int *)&mWindows[0].mResult != -1) {
             int result = mWindows[0].mResult;
             if (result == 2) {
-                func_0203c02c(&gSceneManager, 0x5E);
+                gSceneManager.RequestScene(0x5E);
             } else {
                 mWindows[0].mUnknownSetBeforeClose = 15;
                 func_020349cc(&mWindows[0], 0x24);
@@ -4693,16 +4694,16 @@ void MiiEditRegisterPage::Update() {
         mScene->SaveCharacter();
         switch (mScene->mSceneId) {
         case 0x42:
-            func_0203c02c(&gSceneManager, 0x1A);
+            gSceneManager.RequestScene(0x1A);
             break;
         case 0x43:
         case 0x44:
             data_0213ba74.mCharacters[0] = mScene->mUnknown5824;
-            func_0203c02c(&gSceneManager, 0x74);
+            gSceneManager.RequestScene(0x74);
             break;
         case 0x6F:
             data_0213ba74.mCharacters[0] = mScene->mUnknown5824;
-            func_0203c02c(&gSceneManager, 0x69);
+            gSceneManager.RequestScene(0x69);
             break;
         }
     } else {
@@ -4762,10 +4763,10 @@ void MiiEditQuitPage::Update() {
         switch (mScene->mSceneId) {
         case 0x42:
         case 0x44:
-            func_0203c02c(&gSceneManager, 0x1A);
+            gSceneManager.RequestScene(0x1A);
             break;
         case 0x43:
-            func_0203c02c(&gSceneManager, 0x5E);
+            gSceneManager.RequestScene(0x5E);
             break;
         }
     } else {

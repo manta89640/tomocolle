@@ -1525,9 +1525,9 @@ void TushinScene::Leave() {
     func_020af224(&check, 0, 0);
     func_020af260(&check);
     if (func_020af4d8(&check, 0) != -1) {
-        func_0203c02c(&gSceneManager, 0x5F);
+        gSceneManager.RequestScene(0x5F);
     } else {
-        func_0203c02c(&gSceneManager, 0x5E);
+        gSceneManager.RequestScene(0x5E);
     }
 }
 
@@ -1700,7 +1700,7 @@ void TushinScene::Update() {
                     mNextPage = 1;
                     break;
                 case 1:
-                    func_0203c02c(&gSceneManager, 0xB1);
+                    gSceneManager.RequestScene(0xB1);
                     mNextPage = 1;
                     close = 0x2C;
                     break;
@@ -2675,7 +2675,7 @@ void TushinScene::ClearParentNames() {
 // @0x02151e78
 void TushinScene::Save() {
     if (!func_0202cd48(&gGameData)) {
-        func_0203c02c(&gSceneManager, 0xC2);
+        gSceneManager.RequestScene(0xC2);
     }
 }
 

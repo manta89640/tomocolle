@@ -7,11 +7,716 @@
 
 #include <nitro.h>
 
+#include "Overlay.h"
+#include "SceneManager.h"
+#include "ScreenControl.h"
+#include "sound/SoundManager.h"
 #include "wireless/WirelessSession.h"
+
+#include "SceneStandIns.h"
+
+extern "C" {
+// --- The graphics managers, not decompiled: each records its state into a buffer and restores it from one ---
+extern u8 gGraphicsManager[];
+extern u8 data_02121834[]; // The backgrounds' screens
+extern u8 gObjResourceManager[];
+struct Unknown02120a10 {
+    /* 0x000 */ u8 mUnknown000[0x99C];
+    /* 0x99C */ int mUnknown99C;
+};
+extern Unknown02120a10 data_02120a10;
+struct Unknown021213b8 {
+    /* 0x000 */ u8 mUnknown000[0x41C];
+    /* 0x41C */ int mUnknown41C;
+};
+extern Unknown021213b8 data_021213b8;
+extern u8 data_02123434[];
+void func_02024b10(void *manager, void *state, u32 flags);
+void func_02024c14(void *manager, void *state, u32 flags);
+void func_02027ad0(void *manager, void *state, u32 flags);
+void func_02027c0c(void *manager, void *state, u32 flags);
+void func_02023848(ScreenControl *screens, void *state, u32 flags);
+void func_02023a00(ScreenControl *screens, void *state, u32 flags);
+void func_02028280(void *screens, int plane, int priority); // A background's priority
+void func_02027270(void *manager);
+void func_020279f4(void *manager);
+void func_0202683c(void);
+void func_0202b6ec(void *unknown);
+// The pad input: +0x14 says whether it is read
+struct PadInputState {
+    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x14 */ BOOL mEnabled;
+};
+extern PadInputState data_0211f9d4;
+}
 
 // ---- The scene manager and CreateScene (gap38-a) ----------------------------------------------------------------
 
 WirelessSession *gWirelessSession;
+SceneManager gSceneManager;
+
+// What the graphics managers record and restore (all of their parts)
+#define GRAPHICS_STATE_ALL 0x3F3F
+
+SceneManager::~SceneManager() {}
+
+void SceneManager::Init() {
+    GX_ResetBankForBG();
+    GX_ResetBankForOBJ();
+    GX_ResetBankForBGExtPltt();
+    GX_ResetBankForOBJExtPltt();
+    GX_ResetBankForTex();
+    GX_ResetBankForTexPltt();
+    GX_ResetBankForClearImage();
+    GX_ResetBankForSubBG();
+    GX_ResetBankForSubOBJ();
+    GX_ResetBankForSubBGExtPltt();
+    GX_ResetBankForSubOBJExtPltt();
+    GX_ResetBankForARM7();
+    GX_SetBankForBG(GX_VRAM_BG_128_A);
+    GX_SetBankForSubBG(GX_VRAM_SUB_BG_48_HI);
+    GX_SetBankForOBJ(GX_VRAM_OBJ_64_E);
+    GX_SetBankForSubOBJ(GX_VRAM_SUB_OBJ_128_D);
+    GX_SetBankForBGExtPltt(GX_VRAM_BGEXTPLTT_NONE);
+    GX_SetBankForOBJExtPltt(GX_VRAM_OBJEXTPLTT_NONE);
+    GX_SetBankForTex(GX_VRAM_TEX_01_BC);
+    GX_SetBankForTexPltt(GX_VRAM_TEXPLTT_01_FG);
+    GX_SetBankForSubBGExtPltt(GX_VRAM_SUB_BGEXTPLTT_NONE);
+    GX_SetBankForSubOBJExtPltt(GX_VRAM_SUB_OBJEXTPLTT_NONE);
+    GX_SetBankForClearImage(GX_VRAM_CLEARIMAGE_NONE);
+    GX_SetBankForARM7(GX_VRAM_ARM7_NONE);
+    GX_SetBankForLCDC(GX_VRAM_LCDC_NONE);
+    GX_SetOBJVRamModeChar(GX_OBJVRAMMODE_CHAR_1D_128K);
+    GXS_SetOBJVRamModeChar(GX_OBJVRAMMODE_CHAR_1D_128K);
+    GXS_SetOBJVRamModeBmp(GX_OBJVRAMMODE_BMP_2D_W256);
+    gSoundManager.LoadGroup(0x44);
+    gSoundManager.SaveHeapState(0);
+    gSoundManager.SaveHeapState(1);
+    data_0211d604.mUnknown44 = 1;
+    data_0211d604.mUnknown44Changed = TRUE;
+    func_02028280(data_02121834, 0x100, 0);
+    func_02028280(data_02121834, 0x800, 1);
+    func_02028280(data_02121834, 0x200, 2);
+    func_02028280(data_02121834, 0x400, 3);
+    func_02028280(data_02121834, 0x2, 0);
+    func_02028280(data_02121834, 0x1, 1);
+    func_02028280(data_02121834, 0x8, 2);
+    func_02028280(data_02121834, 0x4, 3);
+    func_02027270(gObjResourceManager);
+    data_02120a10.mUnknown99C = 1;
+    func_020279f4(&data_021213b8);
+    data_021213b8.mUnknown41C = 0x1E0;
+    data_0211f9d4.mEnabled = TRUE;
+    func_02024b10(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
+    func_02027ad0(data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+    func_02023848(&data_0211d604, mScreenControlState, GRAPHICS_STATE_ALL);
+    mScene = CreateScene(0xB6);
+    mPreviousSceneId = 0;
+    mNextSceneId = 0;
+}
+
+void SceneManager::Update() {
+    if (mScene == NULL) {
+        return;
+    }
+    int phase = mScene->mPhase;
+    if (phase == Scene::PHASE_RUN) {
+        func_0202b6ec(data_02123434);
+    } else if (phase == Scene::PHASE_DONE) {
+        func_0202683c();
+        delete mScene;
+        UnloadSceneOverlay(mPreviousSceneId);
+        mScene = CreateScene(mNextSceneId);
+        func_02024c14(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
+        func_02027c0c(data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+        func_02023a00(&data_0211d604, mScreenControlState, GRAPHICS_STATE_ALL);
+        func_02027270(gObjResourceManager);
+        data_02120a10.mUnknown99C = 1;
+        func_020279f4(&data_021213b8);
+        data_021213b8.mUnknown41C = 0x1E0;
+    }
+    mScene->Run();
+}
+
+void SceneManager::RequestScene(int sceneId) {
+    if (mScene == NULL) {
+        return;
+    }
+    mScene->mPhase = Scene::PHASE_FADE_OUT;
+    mPreviousSceneId = mScene->mSceneId;
+    mNextSceneId = sceneId;
+}
+
+// Constructs the scene with the id, after loading its overlay (if it has one) and its sound group. The cases are
+// in the order of the original's code.
+Scene *SceneManager::CreateScene(int sceneId) {
+    switch (sceneId) {
+    case 0x00:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        return new Scene00(sceneId);
+    case 0x01:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(0));
+        return new TextTestScene(sceneId);
+    case 0x02:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(2));
+        return new Scene02(sceneId);
+    case 0x03:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(3));
+        return new Scene03(sceneId);
+    case 0x04:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(4));
+        return new Scene04(sceneId);
+    case 0x05:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(5));
+        return new TestDrawMiiScene(sceneId);
+    case 0x06:
+        SetSoundGroup(-1);
+        return new DrawManTestScene(sceneId);
+    case 0x07:
+        SetSoundGroup(-1);
+        return new HumanTestScene(sceneId);
+    case 0x08:
+        SetSoundGroup(-1);
+        return new ParticleTestScene(sceneId);
+    case 0x10:
+        SetSoundGroup(-1);
+        return new G3dTestScene(sceneId);
+    case 0x09:
+        SetSoundGroup(-1);
+        return new BgTextTestScene(sceneId);
+    case 0x0A:
+        SetSoundGroup(-1);
+        return new MessageTestScene(sceneId);
+    case 0x0B:
+        SetSoundGroup(-1);
+        return new KeyboardTestScene(sceneId);
+    case 0x0C:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(1));
+        return new Scene0C(sceneId);
+    case 0x0F:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(6));
+        return new Scene0F(sceneId);
+    case 0x0E:
+        SetSoundGroup(-1);
+        return new TtsTestScene(sceneId);
+    case 0x16:
+        SetSoundGroup(-1);
+        return new EmptyScene(sceneId);
+    case 0x17:
+    case 0x7D:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(77));
+        return new Scene17(sceneId);
+    case 0x18:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(7));
+        return new Scene18(sceneId);
+    case 0x0D:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        return new Scene00(sceneId);
+    case 0x11:
+    case 0x12:
+    case 0x13:
+    case 0x14:
+    case 0x15:
+        SetSoundGroup(9);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(74));
+        return new RoomScene(sceneId);
+    case 0x6B:
+        SetSoundGroup(9);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(73));
+        return new TutorialRoomScene(sceneId);
+    case 0x19:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(8));
+        return new Scene19(sceneId);
+    case 0x1A:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(78));
+        return new FriendListScene(sceneId);
+    case 0x1B:
+        SetSoundGroup(-1);
+        return new WirelessTestScene(sceneId);
+    case 0x1C:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(9));
+        return new TestNg20Scene(sceneId);
+    case 0x1D:
+        SetSoundGroup(0);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(67));
+        return new ChangeClothesScene(sceneId);
+    case 0x1E:
+        SetSoundGroup(20);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(68));
+        return new Scene1E(sceneId);
+    case 0x1F:
+        SetSoundGroup(46);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(70));
+        return new RightJobScene(sceneId);
+    case 0x20:
+    case 0x21:
+    case 0x22:
+        SetSoundGroup(46);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(71));
+        return new RightJob2Scene(sceneId);
+    case 0x23:
+        SetSoundGroup(0);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(80));
+        return new VoteScene(sceneId);
+    case 0x24:
+        SetSoundGroup(-1);
+        return new MiiListMenuScene(sceneId);
+    case 0x25:
+        SetSoundGroup(-1);
+        return new G3SpriteTestScene(sceneId);
+    case 0x26:
+        SetSoundGroup(-1);
+        return new MiiListScene(sceneId);
+    case 0x27:
+        SetSoundGroup(-1);
+        return new MapModelsScene(sceneId);
+    case 0x28:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        return new Scene00(sceneId);
+    case 0x29:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(109));
+        return new TushinScene(sceneId);
+    case 0x2A:
+        SetSoundGroup(48);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(79));
+        return new RankingScene(sceneId);
+    case 0x2B:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(10));
+        return new Scene2B(sceneId);
+    case 0x2C:
+    case 0x2D:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(69));
+        return new SavePlayScene(sceneId);
+    case 0x2E:
+        return new Scene2E(sceneId);
+    case 0x2F:
+        SetSoundGroup(21);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(83));
+        return new Scene2F(sceneId);
+    case 0x30:
+    case 0x70:
+        SetSoundGroup(0);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(81));
+        return new Scene30(sceneId);
+    case 0x31:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(11));
+        return new Scene31(sceneId);
+    case 0x32:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(11));
+        return new Scene31(sceneId);
+    case 0x33:
+    case 0x73:
+        SetSoundGroup(0);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(82));
+        return new Scene33(sceneId);
+    case 0x34:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(12));
+        return new Scene34(sceneId);
+    case 0x35:
+        SetSoundGroup(22);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(84));
+        return new Scene35(sceneId);
+    case 0x36:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(13));
+        return new TestNg48Scene(sceneId);
+    case 0x37:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(14));
+        return new TestNg50Scene(sceneId);
+    case 0x38:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(86));
+        return new ChangeRoomScene(sceneId);
+    case 0x39:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(106));
+        return new PreStartScene(sceneId);
+    case 0x3A:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(15));
+        return new TestNg55Scene(sceneId);
+    case 0x3B:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(16));
+        return new Scene3B(sceneId);
+    case 0x3C:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(17));
+        return new Scene3C(sceneId);
+    case 0x3D:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(18));
+        return new TestNg62Scene(sceneId);
+    case 0x3E:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(19));
+        return new TestNg63Scene(sceneId);
+    case 0x3F:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(20));
+        return new Scene3F(sceneId);
+    case 0x40:
+    case 0x6C:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(75));
+        return new Scene40(sceneId);
+    case 0x41:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(21));
+        return new TestNg69Scene(sceneId);
+    case 0x42:
+    case 0x43:
+    case 0x44:
+    case 0x6F:
+        SetSoundGroup(1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(76));
+        return new MiiEditScene(sceneId);
+    case 0x45:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(22));
+        return new Scene45(sceneId);
+    case 0x46:
+    case 0x47:
+    case 0x48:
+    case 0x49:
+    case 0x4A:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(87));
+        return new MiiNewsScene(sceneId);
+    case 0x4B:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(23));
+        return new Scene4B(sceneId);
+    case 0x4C:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(24));
+        return new Scene4C(sceneId);
+    case 0x4D:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(25));
+        return new Scene4D(sceneId);
+    case 0x4E:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(26));
+        return new TestNg87Scene(sceneId);
+    case 0x4F:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(27));
+        return new Scene4F(sceneId);
+    case 0x50:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(28));
+        return new Scene50(sceneId);
+    case 0x51:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(29));
+        return new Scene51(sceneId);
+    case 0x52:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(30));
+        return new TestNg94Scene(sceneId);
+    case 0x53:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(31));
+        return new TestNg95Scene(sceneId);
+    case 0x54:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(32));
+        return new Scene54(sceneId);
+    case 0x55:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(33));
+        return new TestNg100Scene(sceneId);
+    case 0x56:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(89));
+        return new Scene56(sceneId);
+    case 0x57:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(34));
+        return new TestNg104Scene(sceneId);
+    case 0x58:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(35));
+        return new Scene58(sceneId);
+    case 0x59:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(36));
+        return new TestNg107Scene(sceneId);
+    case 0x5A:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(90));
+        return new RomanceScene(sceneId);
+    case 0x5B:
+    case 0x5C:
+    case 0xB0:
+        SetSoundGroup(9);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(92));
+        return new WriteSongScene(sceneId);
+    case 0x5D:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(65));
+        return new Scene5D(sceneId);
+    case 0x5E:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(91));
+        return new CityHallScene(sceneId);
+    case 0x5F:
+    case 0x60:
+    case 0x61:
+    case 0x62:
+    case 0x63:
+    case 0x64:
+    case 0x65:
+    case 0x66:
+    case 0x6A:
+    case 0x6D:
+    case 0x6E:
+        if (sceneId != 0x6E) {
+            SetSoundGroup(0x10);
+        }
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(72));
+        return new MapScene(sceneId);
+    case 0x67:
+        SetSoundGroup(0);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(88));
+        return new Scene67(sceneId);
+    case 0x68:
+    case 0x71:
+        SetSoundGroup(19);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(85));
+        return new Scene68(sceneId);
+    case 0x69:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(108));
+        return new Scene69(sceneId);
+    case 0x72:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(93));
+        return new Scene72(sceneId);
+    case 0x74:
+    case 0x7E:
+        SetSoundGroup(1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(94));
+        return new Scene74(sceneId);
+    case 0x75:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(37));
+        return new Scene75(sceneId);
+    case 0x76:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(38));
+        return new TestNg111Scene(sceneId);
+    case 0x77:
+    case 0x78:
+    case 0x79:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(39));
+        return new TestNg116Scene(sceneId);
+    case 0x7A:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(40));
+        return new Scene7A(sceneId);
+    case 0x7B:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(41));
+        return new Scene7B(sceneId);
+    case 0x7C:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(42));
+        return new TestNg119Scene(sceneId);
+    case 0x7F:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(66));
+        return new Scene7F(sceneId);
+    case 0x80:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(95));
+        return new AffinityScene(sceneId);
+    case 0x81:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(43));
+        return new Scene81(sceneId);
+    case 0x82:
+    case 0x83:
+    case 0x84:
+    case 0x85:
+    case 0x86:
+    case 0x87:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(44));
+        return new TestNg121Scene(sceneId);
+    case 0x88:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(45));
+        return new Scene88(sceneId);
+    case 0x89:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(46));
+        return new Scene89(sceneId);
+    case 0x8A:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(47));
+        return new TestNg125Scene(sceneId);
+    case 0x8B:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(48));
+        return new Scene8B(sceneId);
+    case 0x8C:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(49));
+        return new Scene8C(sceneId);
+    case 0x8D:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(50));
+        return new Scene8D(sceneId);
+    case 0x8E:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(51));
+        return new TestNg129Scene(sceneId);
+    case 0x8F:
+    case 0x90:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(52));
+        return new Scene8F(sceneId);
+    case 0x91:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(53));
+        return new Scene91(sceneId);
+    case 0x92:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(54));
+        return new TestNg133Scene(sceneId);
+    case 0x93:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(55));
+        return new TestNg134Scene(sceneId);
+    case 0x94:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(56));
+        return new TestNg136Scene(sceneId);
+    case 0x95:
+    case 0x96:
+    case 0x97:
+    case 0x98:
+    case 0x99:
+    case 0x9A:
+    case 0x9B:
+    case 0x9C:
+    case 0x9D:
+    case 0x9E:
+    case 0x9F:
+    case 0xA0:
+    case 0xA1:
+    case 0xA2:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(57));
+        return new TestNg137Scene(sceneId);
+    case 0xA3:
+    case 0xA4:
+    case 0xA5:
+    case 0xA6:
+    case 0xA7:
+    case 0xA8:
+    case 0xA9:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(58));
+        return new SceneA3(sceneId);
+    case 0xAA:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(59));
+        return new SceneAA(sceneId);
+    case 0xAB:
+        SetSoundGroup(15);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(96));
+        return new WeddingScene(sceneId);
+    case 0xAC:
+    case 0xAD:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(98));
+        return new OptionScene(sceneId);
+    case 0xAE:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(99));
+        return new InformationScene(sceneId);
+    case 0xAF:
+        SetSoundGroup(9);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(101));
+        return new SceneAF(sceneId);
+    case 0xB1:
+        SetSoundGroup(54);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(110));
+        return new ItemTradeScene(sceneId);
+    case 0xB2:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(102));
+        return new SceneB2(sceneId);
+    case 0xB3:
+        SetSoundGroup(58);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(103));
+        return new SceneB3(sceneId);
+    case 0xB4:
+        SetSoundGroup(2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(100));
+        return new SceneB4(sceneId);
+    case 0xB5:
+        SetSoundGroup(66);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(104));
+        return new SceneB5(sceneId);
+    case 0xB6:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
+        return new Scene00(sceneId);
+    case 0xB7:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(60));
+        return new SceneB7(sceneId);
+    case 0xB8:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(61));
+        return new SceneB8(sceneId);
+    case 0xB9:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(62));
+        return new SceneB9(sceneId);
+    case 0xBA:
+    case 0xBB:
+    case 0xBC:
+    case 0xBD:
+    case 0xBE:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(63));
+        return new SceneBA(sceneId);
+    case 0xBF:
+        SetSoundGroup(-2);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(64));
+        return new SceneBF(sceneId);
+    case 0xC0:
+    case 0xC1:
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(97));
+        return new SceneC0(sceneId);
+    case 0xC2:
+        SetSoundGroup(-1);
+        FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(107));
+        return new SaveErrorScene(sceneId);
+    }
+    return NULL;
+}
 
 // ---- Constructors 0x0203de78..0x02040578: scenes up to 0x26 (gap38-a) --------------------------------------------
 

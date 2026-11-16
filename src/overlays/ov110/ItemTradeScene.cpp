@@ -1821,7 +1821,7 @@ void ItemTradeScene::Update() {
                     WH_SetReceiver(Receive);
                     break;
                 case 3:
-                    func_0203c02c(&gSceneManager, 0x29);
+                    gSceneManager.RequestScene(0x29);
                     flags = 0x2C;
                     break;
                 }
@@ -1875,7 +1875,7 @@ void ItemTradeScene::Update() {
                 flags = 0x14;
                 break;
             case STATE_DISCONNECTED:
-                func_0203c02c(&gSceneManager, 0x29);
+                gSceneManager.RequestScene(0x29);
                 break;
             case STATE_ASK_DISCONNECT:
                 if (result == 0) {
@@ -1887,7 +1887,7 @@ void ItemTradeScene::Update() {
                 break;
             case STATE_ERROR:
                 mNextState = STATE_CHOOSE;
-                func_0203c02c(&gSceneManager, 0x29);
+                gSceneManager.RequestScene(0x29);
                 break;
             }
             func_020349cc(&mWindow, flags);
@@ -1983,7 +1983,7 @@ void ItemTradeScene::Update() {
                 break;
             case STATE_WAIT:
                 if (WH_GetSystemState() == WH_SYSSTATE_STOP || WH_GetSystemState() == WH_SYSSTATE_IDLE) {
-                    func_0203c02c(&gSceneManager, 0x29);
+                    gSceneManager.RequestScene(0x29);
                 }
                 break;
             }
@@ -2247,7 +2247,7 @@ void ItemTradeScene::ClearNames() {
 // @0x0214ee88
 void ItemTradeScene::WriteSave() {
     if (!func_0202cd48(&gGameData)) {
-        func_0203c02c(&gSceneManager, 0xC2);
+        gSceneManager.RequestScene(0xC2);
     }
 }
 

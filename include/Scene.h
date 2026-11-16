@@ -29,6 +29,8 @@ public:
     virtual void Exit() = 0;
     virtual ~Scene() {}
 
+    void Run(); // One frame of the scene, by its phase (src/scene/Scene.cpp)
+
     /* 0x04 */ int mSceneId;
     /* 0x08 */ int mPhase;
     /* 0x0C */ BOOL mSkipFade;

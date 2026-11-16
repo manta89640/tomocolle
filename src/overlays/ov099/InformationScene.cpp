@@ -269,7 +269,7 @@ void InformationScene::Init() {
 
 void InformationScene::Update() {
     if (func_0203133c(&mButtons[0])) {
-        func_0203c02c(&gSceneManager, 0x11);
+        gSceneManager.RequestScene(0x11);
     }
 }
 

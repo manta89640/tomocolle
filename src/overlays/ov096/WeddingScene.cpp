@@ -244,7 +244,7 @@ void WeddingScene::Update() {
     case STATE_GIVE_ALBUM:
         if (mFrame >= 56) {
             mInventory.mItems[ITEM_WEDDING_ALBUM].Add(1);
-            func_0203c02c(&gSceneManager, 0xC0);
+            gSceneManager.RequestScene(0xC0);
             gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
             gSceneMemory.mCharacters[1] = mCharacters[1].mIndex;
         }
@@ -282,7 +282,7 @@ void WeddingScene::Update() {
             mCharacters[1].mAwayUntil = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
             mCharacters[0].mMoodLocked = 3;
             mCharacters[1].mMoodLocked = 3;
-            func_0203c02c(&gSceneManager, 0x77);
+            gSceneManager.RequestScene(0x77);
             gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
             gSceneMemory.mCharacters[1] = mCharacters[1].mIndex;
         }

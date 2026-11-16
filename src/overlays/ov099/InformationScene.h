@@ -74,6 +74,8 @@ struct ScreenControl {
 };
 
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -93,7 +95,6 @@ extern wchar_t data_02123510[];
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);

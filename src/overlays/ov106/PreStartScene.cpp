@@ -150,7 +150,7 @@ void PreStartScene::Update() {
                 mSavingIcon.mVisible = TRUE;
                 func_0202c8f8(&gGameData, 0);
                 if (!func_0202cd48(&gGameData)) {
-                    func_0203c02c(&gSceneManager, 0xC2);
+                    gSceneManager.RequestScene(0xC2);
                 }
             }
         } else if (mStep == 2) {
@@ -179,7 +179,7 @@ void PreStartScene::Update() {
         }
         break;
     case STATE_LEAVE:
-        func_0203c02c(&gSceneManager, mNextSceneId);
+        gSceneManager.RequestScene(mNextSceneId);
         break;
     }
     UpdateWindow();

@@ -186,12 +186,13 @@ void func_020a4a50(RoomParts *parts); // Draws them
 
 // The scene manager
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
 };
 extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 
 
 } // extern "C"
@@ -986,7 +987,7 @@ void RoomScene::UpdateInput() {
             return;
         }
         SetInputState(INPUT_LEAVING);
-        func_0203c02c(&gSceneManager, mNextSceneId);
+        gSceneManager.RequestScene(mNextSceneId);
         SetFadeState(2);
         if (mNextSceneId == 0x5F) {
             gSoundManager.StartSeqArc(2, 1, 13);

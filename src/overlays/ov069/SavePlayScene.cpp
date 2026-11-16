@@ -30,7 +30,7 @@ static inline int Rand(int max) {
 // @0x02149a40
 void SavePlayScene::StartLoading() {
     if (mSceneId == 0x2D) {
-        func_0204ab04(&gSceneManager, 0x36);
+        gSceneManager.SetSoundGroup(0x36);
         gSoundManager.StopSeq(0, 0);
         gSoundManager.StartSeqIfNotPlaying(0, 0x61);
     } else {
@@ -244,7 +244,7 @@ void SavePlayScene::UpdateSaveStates() {
     case STATE_LEAVE:
         if (mStep == 0) {
             mStep++;
-            func_0203c02c(&gSceneManager, mNextSceneId);
+            gSceneManager.RequestScene(mNextSceneId);
         }
         break;
     case STATE_FADE_OUT:
@@ -300,7 +300,7 @@ void SavePlayScene::UpdateWirelessStates() {
     case STATE_LEAVE_WIRELESS:
         if (mStep == 0) {
             mStep++;
-            func_0203c02c(&gSceneManager, mNextSceneId);
+            gSceneManager.RequestScene(mNextSceneId);
         }
         break;
     case STATE_17:
@@ -330,7 +330,7 @@ BOOL SavePlayScene::Save(int kind) {
             return TRUE;
         }
         if (!ok) {
-            func_0203c02c(&gSceneManager, 0xC2);
+            gSceneManager.RequestScene(0xC2);
         }
     } else if (mSubStep == 1) {
         mFrames++;

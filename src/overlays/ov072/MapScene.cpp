@@ -669,7 +669,7 @@ void MapScene::Update() {
                 func_020349cc(&mMessageWindows[1], 0x24);
             }
             if (mMessageWindows[1].mTransitionDone) {
-                func_0203c02c(&gSceneManager, 0x69);
+                gSceneManager.RequestScene(0x69);
             }
             break;
         case 0:
@@ -690,7 +690,7 @@ void MapScene::Update() {
         case 20:
             for (int i = 0; i < 3; i++) {
                 if (func_0203133c(&mButtons[i]) && i == 0) {
-                    func_0203c02c(&gSceneManager, 0x69);
+                    gSceneManager.RequestScene(0x69);
                 }
             }
             break;
@@ -806,7 +806,7 @@ void MapScene::Update() {
                 }
                 ClearSceneCharacters();
                 AddNews(news);
-                func_0203c02c(&gSceneManager, 0x46);
+                gSceneManager.RequestScene(0x46);
                 gSoundManager.StartSeqArc(2, 1, 11);
             }
         } else {
@@ -879,7 +879,7 @@ void MapScene::Update() {
                 }
                 ClearSceneCharacters();
                 AddNews(news);
-                func_0203c02c(&gSceneManager, 0x46);
+                gSceneManager.RequestScene(0x46);
                 gSoundManager.StartSeqArc(2, 1, 11);
             }
         }
@@ -920,7 +920,7 @@ void MapScene::Update() {
             break;
         }
         if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
-            func_0203c02c(&gSceneManager, 0x2C);
+            gSceneManager.RequestScene(0x2C);
         }
         BOOL held = FALSE;
         for (int i = 0; i < 3; i++) {
@@ -946,7 +946,7 @@ void MapScene::Update() {
                 if (func_0203133c(&mBackButtons[i])) {
                     if (mCamera.IsAtHome()) {
                         gSceneMemory.mCharacters[0] = 0;
-                        func_0203c02c(&gSceneManager, 0x11);
+                        gSceneManager.RequestScene(0x11);
                     } else {
                         Deselect(TRUE, 1);
                     }
@@ -1107,7 +1107,7 @@ void MapScene::SetState(int state) {
     case STATE_LEAVE_TITLE:
         gSoundManager.StartSeqArc(1, 3, 0);
         if (!func_0202cd54(&gGameData)) {
-            func_0203c02c(&gSceneManager, 0xC2);
+            gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_TUTORIAL:
@@ -2021,45 +2021,45 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
         switch (button) {
         default:
             if (Rand(2) == 0) {
-                func_0203c02c(&gSceneManager, 0x23);
+                gSceneManager.RequestScene(0x23);
             } else {
-                func_0203c02c(&gSceneManager, 0x81);
+                gSceneManager.RequestScene(0x81);
             }
             break;
         case 1:
-            func_0203c02c(&gSceneManager, 0x23);
+            gSceneManager.RequestScene(0x23);
             break;
         case 2:
-            func_0203c02c(&gSceneManager, 0x81);
+            gSceneManager.RequestScene(0x81);
             break;
         }
         break;
     case 9:
-        func_0203c02c(&gSceneManager, 0x2F);
+        gSceneManager.RequestScene(0x2F);
         break;
     case 4:
-        func_0203c02c(&gSceneManager, 0x68);
+        gSceneManager.RequestScene(0x68);
         break;
     case 6:
-        func_0203c02c(&gSceneManager, 0x5E);
+        gSceneManager.RequestScene(0x5E);
         break;
     case 7:
-        func_0203c02c(&gSceneManager, 0x2A);
+        gSceneManager.RequestScene(0x2A);
         break;
     case 3:
-        func_0203c02c(&gSceneManager, 0x1F);
+        gSceneManager.RequestScene(0x1F);
         break;
     case 11:
-        func_0203c02c(&gSceneManager, 0x1E);
+        gSceneManager.RequestScene(0x1E);
         break;
     case 12:
-        func_0203c02c(&gSceneManager, 0x35);
+        gSceneManager.RequestScene(0x35);
         break;
     case 5:
         if (!IsNewDay()) {
             ClearSceneCharacters();
             if (mFacilities.mApartmentSize < 4) {
-                func_0203c02c(&gSceneManager, 0x57);
+                gSceneManager.RequestScene(0x57);
                 break;
             }
             u32 minutes = mClock.mTime.hour * 60 + mClock.mTime.minute;
@@ -2072,43 +2072,43 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
             }
             switch (kind) {
             case 0:
-                func_0203c02c(&gSceneManager, 0x94);
+                gSceneManager.RequestScene(0x94);
                 break;
             case 1:
-                func_0203c02c(&gSceneManager, 0x3F);
+                gSceneManager.RequestScene(0x3F);
                 break;
             case 2:
-                func_0203c02c(&gSceneManager, 0x95);
+                gSceneManager.RequestScene(0x95);
                 break;
             case 3:
-                func_0203c02c(&gSceneManager, 0x57);
+                gSceneManager.RequestScene(0x57);
                 break;
             case 4: {
                 u32 tens = (u32)mClock.mTime.minute / 10;
                 if (!(tens & 1)) {
-                    func_0203c02c(&gSceneManager, tens + 0x9D);
+                    gSceneManager.RequestScene(tens + 0x9D);
                 } else {
-                    func_0203c02c(&gSceneManager, 0x57);
+                    gSceneManager.RequestScene(0x57);
                 }
                 break;
             }
             }
         } else {
-            func_0203c02c(&gSceneManager, 0x30);
+            gSceneManager.RequestScene(0x30);
         }
         break;
     case 1:
-        func_0203c02c(&gSceneManager, 0x80);
+        gSceneManager.RequestScene(0x80);
         break;
     case 10:
         if (newsDue) {
             MakeDailyNews();
         }
-        func_0203c02c(&gSceneManager, 0x46);
+        gSceneManager.RequestScene(0x46);
         break;
     case MODEL_APARTMENT:
         gSceneMemory.mCharacters[0] = 0;
-        func_0203c02c(&gSceneManager, 0x11);
+        gSceneManager.RequestScene(0x11);
         break;
     }
     int building = sModelBuildings[model];
