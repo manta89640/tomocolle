@@ -4223,7 +4223,7 @@ gText_Abu kind:data(any) addr:0x020b5478
 data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
 data_020b5534 kind:data(any) addr:0x020b5534
-data_020b555c kind:data(any) addr:0x020b555c
+__upper_mapC kind:data(any) addr:0x020b555c
 __ctype_mapC kind:data(any) addr:0x020b55dc
 data_020b56dc kind:data(any) addr:0x020b56dc
 gStr_NAN kind:data(any) addr:0x020b5704
