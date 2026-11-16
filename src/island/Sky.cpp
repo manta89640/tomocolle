@@ -20,18 +20,26 @@ const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 }
 
-static inline u16 Rand(u16 max) {
+static inline u16 Rand(int max) {
     return MATH_Rand16(&gRandom, max);
 }
 
 // Midnight, from which the time of day is counted
 static const RTCTime sMidnight = {0, 0, 0};
 
-// The colours of the 3D scenes' two lights through the day: the 16 phases of the dawn, then the 16 of the dusk
+// The colours of the 3D scenes' two lights through the day: the 16 phases of the dawn, then the 16 of the dusk.
+// The tables are declared in this order (sunset between the two colour tables) because it puts GetSunrise's and
+// GetSunset's local seconds tables and their guards in the ROM's order (see decompiling.md, "How a file's data is
+// laid out").
 static const GXRgb sLightColors[32] = {
     0x7DEC, 0x7DEC, 0x7DEC, 0x7DEC, 0x6A92, 0x6A92, 0x6A92, 0x4B18, 0x4B18, 0x4B18, 0x4B18, 0x4B18,
     0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7F3B, 0x7F3B, 0x7F3B, 0x7F3B,
     0x7EB7, 0x7EB7, 0x7EB7, 0x7EB7, 0x7E52, 0x7E52, 0x6A92, 0x7DEC,
+};
+// Sunset and sunrise in each month
+static const RTCTime sSunsetTimes[12] = {
+    {17, 20, 0}, {17, 40, 0}, {18, 0, 0},  {18, 20, 0}, {18, 40, 0}, {19, 0, 0},
+    {18, 40, 0}, {18, 20, 0}, {18, 0, 0},  {17, 40, 0}, {17, 20, 0}, {17, 0, 0},
 };
 static const GXRgb sLightColors2[32] = {
     0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94,
@@ -39,11 +47,6 @@ static const GXRgb sLightColors2[32] = {
     0x3EBF, 0x3EBF, 0x3EBF, 0x3EBF, 0x629A, 0x629A, 0x7E94, 0x7E94,
 };
 
-// Sunrise and sunset in each month
-static const RTCTime sSunsetTimes[12] = {
-    {17, 20, 0}, {17, 40, 0}, {18, 0, 0},  {18, 20, 0}, {18, 40, 0}, {19, 0, 0},
-    {18, 40, 0}, {18, 20, 0}, {18, 0, 0},  {17, 40, 0}, {17, 20, 0}, {17, 0, 0},
-};
 static const RTCTime sSunriseTimes[12] = {
     {6, 40, 0}, {6, 20, 0}, {6, 0, 0}, {5, 40, 0}, {5, 20, 0}, {5, 0, 0},
     {5, 20, 0}, {5, 40, 0}, {6, 0, 0}, {6, 20, 0}, {6, 40, 0}, {7, 0, 0},
@@ -62,12 +65,6 @@ static inline void Swap(u16 &a, u16 &b) {
     u16 t = a;
     a = b;
     b = t;
-}
-
-static inline void Swap(u16 *a, u16 *b) {
-    u16 t = *a;
-    *a = *b;
-    *b = t;
 }
 
 static inline u32 ToSeconds(const RTCTime &time) {
@@ -482,13 +479,8 @@ void Sky::ShuffleCloudFrames() {
     for (int i = 0; i < mClouds.mFrameCount; i++) {
         mCloudFrames[i] = mClouds.mFirstFrame + i;
     }
-    u16 *frames = mCloudFrames;
     for (int i = 0; i < mClouds.mFrameCount * 2; i++) {
-        u16 a = Rand(mClouds.mFrameCount);
-        u16 b = Rand(mClouds.mFrameCount);
-        u16 frame = frames[a];
-        frames[a] = frames[b];
-        frames[b] = frame;
+        Swap(mCloudFrames[Rand(mClouds.mFrameCount)], mCloudFrames[Rand(mClouds.mFrameCount)]);
     }
 }
 
@@ -671,6 +663,11 @@ void SkyBirds::Draw() {
     }
 }
 
+// 97.9%: the loop's guard is tested once where the original tests mCount > 0 twice (cmp; ...; cmpgt; ble), and the
+// three pointers and vy are in a rotation of the original's r7/r8/r9. Tried: declarations at the top, while, i
+// initialised from x, a guarding if, a point local, the velocity stores first, pragma sets (level 2, common subs,
+// propagation, the eight passes, lifetimes, loop invariants, strength reduction). The y and the step of x are
+// computed before SetPosition: that is what chains the two Rand calls (one store of the state), as the original has.
 void SkyBirds::Start() {
     if (mFlying) {
         return;
@@ -687,11 +684,13 @@ void SkyBirds::Start() {
             Sprite_Init(&mSprites[i], mResource, 0x38, 0x80, 0x60, TRUE);
             Sprite_SetFrame(&mSprites[i], (u16)(Rand(69) + 1));
         }
-        mSprites[i].SetPosition(FxVec2((x + 264) << FX32_SHIFT, (Rand(128) + 32) << FX32_SHIFT));
+        int px = x + 264;
+        int py = Rand(128) + 32;
+        x += Rand(40) + 10;
+        mSprites[i].SetPosition(FxVec2(px << FX32_SHIFT, py << FX32_SHIFT));
         mSprites[i].mVisible = TRUE;
         mVelocities[i].x = vx;
         mVelocities[i].y = vy;
-        x += Rand(40) + 10;
     }
     if (mCount == 1) {
         gSoundManager.StartSeqArc(2, 3, 6);

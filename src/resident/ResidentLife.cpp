@@ -36,28 +36,34 @@ struct SavedCharacter {
     static int GetRelationBloodPairValue(int a, int b);
     void RandomizeUnknown24E();
     void ResetUnknown24E();
+    void SetTrouble(u8 state, u8 category, u8 id);
+    void ExpireTrouble(s64 now, SavedCharacter *partner);
+    void BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner);
+    int GetFullness(s64 now);
+    void Eat(s64 now, u16 item);
+    int GetClothesLiking(int clothes);
 
     /* 0x000 */ u8 mUnknown000[0x54];
     /* 0x054 */ u32 mUnknown054Bits0 : 11;
     /*       */ u32 mClothesId : 9;    // The clothes it wears (row of the clothes table)
     /*       */ u32 mUnknown054Bits20 : 12;
     /* 0x058 */ u8 mUnknown058[0xA4];
-    /* 0x0FC */ u8 mAffinity[100];     // For each other character by index
-    /* 0x160 */ u8 mRelation[100];     // For each other character by index
+    /* 0x0FC */ u8 mRelationMeter[100];     // For each other character by index
+    /* 0x160 */ u8 mRelationRank[100];     // For each other character by index
     /* 0x1C4 */ u8 mUnknown1C4[0x24];
-    /* 0x1E8 */ u32 mClothesSeen[10];  // A bit for each of the 300 clothes
+    /* 0x1E8 */ u32 mOwnedClothes[10];  // A bit for each of the 300 clothes
     /* 0x210 */ u8 mUnknown210[0xC];
-    /* 0x21C */ s64 mEventEnd;         // A time in seconds; 0x7FFFFFFFFFFFFFFF for none
-    /* 0x224 */ u8 mEvent;
-    /* 0x225 */ u8 mEventPartner;      // mIndex of the character it is doing it with
-    /* 0x226 */ u8 mOutingIndex;       // Row and table of data_02114d78 for the time it is out
-    /* 0x227 */ u8 mOutingTable;
-    /* 0x228 */ s64 mOutingStart;
-    /* 0x230 */ s64 mAwayUntil;
-    /* 0x238 */ u16 mMoodPartner;
-    /* 0x23A */ u8 mMoodLocked;        // While it is set, the character is out (mAwayUntil, mOutingStart count)
+    /* 0x21C */ s64 mLongActEnd;         // A time in seconds; 0x7FFFFFFFFFFFFFFF for none
+    /* 0x224 */ u8 mLongActState;
+    /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
+    /* 0x226 */ u8 mTroubleId;       // Row and table of data_02114d78 for the time it is out
+    /* 0x227 */ u8 mTroubleCategory;
+    /* 0x228 */ s64 mTroubleStart;
+    /* 0x230 */ s64 mTroubleEnd;
+    /* 0x238 */ u16 mTroubleTarget;
+    /* 0x23A */ u8 mTroubleState;        // While it is set, the character is out (mTroubleEnd, mTroubleStart count)
     /* 0x23B */ u8 mUnknown23B[0xA];
-    /* 0x245 */ u8 mUnknown245;        // aeb78 sets it to the item it picked
+    /* 0x245 */ u8 mEatLastFood;        // aeb78 sets it to the item it picked
     /* 0x246 */ u8 mUnknown246[0x4F];
     /* 0x295 */ u8 mMood;              // 0..4
     /* 0x296 */ u8 mUnknown296[2];
@@ -127,18 +133,20 @@ u8 func_0202c5b4(GameData *game, int index);
 u8 func_0202c748(GameData *game, int index);
 BOOL func_0202c354(GameData *game, int index);
 int MiiData_GetSex(SavedCharacter *character);
-void func_0209a1fc(SavedCharacter *character, int a, int b, int c);
-void func_0209a588(SavedCharacter *character, s64 now, int a);
-void func_0209be98(SavedCharacter *character, SavedCharacter *other, s64 now, SavedCharacter *partner);
-s64 func_0209c4b4(SavedCharacter *character, s64 now);
-void func_0209c56c(SavedCharacter *character, s64 time, u16 item);
-int func_0209c89c(SavedCharacter *character, int clothes);
 }
 
 #define NO_TIME 0x7FFFFFFFFFFFFFFFLL
 
-static inline u16 Rand(u16 max) {
+// The random number comes back as an int: the original truncates it to 16 bits a second time where it is stored in
+// a u16 (MeetRandomPair)
+static inline int Rand(u16 max) {
     return MATH_Rand16(&gRandom, max);
+}
+
+static inline void Swap(u16 &a, u16 &b) {
+    u16 t = a;
+    a = b;
+    b = t;
 }
 
 int GetRandomEventCount(int *force);
@@ -162,8 +170,8 @@ void StartRandomEvents(s64 now) {
         func_0202c264(&gGameData, indices[i], &character);
         character.mIndex = indices[i];
         if (character.IsLongActPaired()) {
-            func_0202c264(&gGameData, character.mEventPartner, &partner);
-            partner.mIndex = character.mEventPartner;
+            func_0202c264(&gGameData, character.mLongActPartner, &partner);
+            partner.mIndex = character.mLongActPartner;
             started = character.StartRandomTrouble(now, force, &partner, TRUE);
             func_0202c28c(&gGameData, partner.mIndex, &partner);
         } else {
@@ -173,24 +181,24 @@ void StartRandomEvents(s64 now) {
             if (character.IsTrouble3_4()) {
                 SavedCharacter other;
                 SavedCharacter otherPartner;
-                int otherIndex = character.mMoodPartner;
+                int otherIndex = character.mTroubleTarget;
                 func_0202c264(&gGameData, otherIndex, &other);
                 other.mIndex = otherIndex;
                 if (other.IsLongActPaired()) {
-                    if (other.mEventPartner != character.mIndex) {
-                        func_0202c264(&gGameData, other.mEventPartner, &otherPartner);
-                        otherPartner.mIndex = other.mEventPartner;
-                        func_0209be98(&other, &character, now, &otherPartner);
+                    if (other.mLongActPartner != character.mIndex) {
+                        func_0202c264(&gGameData, other.mLongActPartner, &otherPartner);
+                        otherPartner.mIndex = other.mLongActPartner;
+                        other.BecomeAngryAt(&character, now, &otherPartner);
                         func_0202c28c(&gGameData, otherPartner.mIndex, &otherPartner);
                     } else {
-                        func_0209be98(&other, &character, now, NULL);
+                        other.BecomeAngryAt(&character, now, NULL);
                     }
                 } else {
-                    func_0209be98(&other, &character, now, NULL);
+                    other.BecomeAngryAt(&character, now, NULL);
                 }
-                u8 relation = GetRelationAfter(character.mRelation[other.mIndex]);
-                character.mRelation[other.mIndex] = relation;
-                other.mRelation[character.mIndex] = relation;
+                u8 relation = GetRelationAfter(character.mRelationRank[other.mIndex]);
+                character.mRelationRank[other.mIndex] = relation;
+                other.mRelationRank[character.mIndex] = relation;
                 func_0202c28c(&gGameData, other.mIndex, &other);
             }
             func_0202c28c(&gGameData, character.mIndex, &character);
@@ -245,7 +253,7 @@ void UpdateResident(int index, s64 now, RTCTime *time) {
         SavedCharacter character;
         func_0202c264(&gGameData, index, &character);
         character.mIndex = index;
-        func_0209a588(&character, now, 0);
+        character.ExpireTrouble(now, NULL);
         return;
     }
     if (!IsOutingOver(index, now)) {
@@ -266,7 +274,12 @@ void UpdateResidents(s64 now, RTCTime *time) {
 }
 
 // Brings each resident's event end and return from an outing back within their lengths from now (after the
-// clock was put back)
+// clock was put back).
+// 97%: the instructions are the original's, the registers a rotation: the original has gGameData's address in r5, i
+// in r6 and the event's length (later the outing's table and limit) in r7/r8, where this gives the length r5. Tried:
+// i declared at the top, a GameData pointer (plain and cast), an int or a separate minutes local for the length,
+// nested ifs instead of continue, and the pragma sets (level 2, common subs, propagation, the eight passes,
+// lifetimes, loop invariants, strength reduction).
 void LimitEventTimes(s64 now) {
     RTCDate date;
     RTCTime time;
@@ -283,10 +296,10 @@ void LimitEventTimes(s64 now) {
                 func_0202c264(&gGameData, i, &character);
                 character.mIndex = (u8)i;
                 s64 newEnd = now + length;
-                if (character.mEvent == 0x12) {
+                if (character.mLongActState == 0x12) {
                     newEnd += (s64)data_020f8ca8[time.hour] * 3600;
                 }
-                character.mEventEnd = newEnd;
+                character.mLongActEnd = newEnd;
                 func_0202c28c(&gGameData, i, &character);
             }
         }
@@ -309,8 +322,8 @@ void LimitEventTimes(s64 now) {
         if (limit < away) {
             SavedCharacter character;
             func_0202c264(&gGameData, i, &character);
-            character.mAwayUntil = limit;
-            character.mOutingStart = now;
+            character.mTroubleEnd = limit;
+            character.mTroubleStart = now;
             character.mIndex = (u8)i;
             func_0202c28c(&gGameData, i, &character);
         }
@@ -354,25 +367,25 @@ void ShiftEventTimes(s64 now) {
         SavedCharacter character;
         func_0202c264(&gGameData, i, &character);
         character.mIndex = (u8)i;
-        if (character.mEventEnd != NO_TIME) {
-            s64 end = offset + character.mEventEnd;
+        if (character.mLongActEnd != NO_TIME) {
+            s64 end = offset + character.mLongActEnd;
             if (end < 0) {
                 do {
                     end += CENTURY;
                 } while (end < 0);
             }
-            s64 length = data_020f8cc0[character.mEvent].mMinutes * 60;
+            s64 length = data_020f8cc0[character.mLongActState].mMinutes * 60;
             if (now + length * 2 < end || otherConsole) {
                 end = now + length;
-                if (character.mEvent == 0x12) {
+                if (character.mLongActState == 0x12) {
                     end += (s64)data_020f8ca8[time.hour] * 3600;
                 }
             }
-            character.mEventEnd = end;
+            character.mLongActEnd = end;
         }
-        if (character.mMoodLocked != 0 && character.mAwayUntil != NO_TIME) {
-            s64 start = offset + character.mOutingStart;
-            s64 away = offset + character.mAwayUntil;
+        if (character.mTroubleState != 0 && character.mTroubleEnd != NO_TIME) {
+            s64 start = offset + character.mTroubleStart;
+            s64 away = offset + character.mTroubleEnd;
             if (away < 0) {
                 do {
                     away += CENTURY;
@@ -380,17 +393,17 @@ void ShiftEventTimes(s64 now) {
             }
             u32 seconds;
             if (character.IsInTrouble()) {
-                seconds = data_02114d78[character.mOutingTable][character.mOutingIndex].mMinutes * 60;
+                seconds = data_02114d78[character.mTroubleCategory][character.mTroubleId].mMinutes * 60;
             } else {
-                seconds = data_02114d78[character.mOutingTable][character.mOutingIndex].mMinutes2 * 60;
+                seconds = data_02114d78[character.mTroubleCategory][character.mTroubleId].mMinutes2 * 60;
             }
             s64 limit = now + seconds;
             if (limit < away || otherConsole) {
                 away = limit;
                 start = now;
             }
-            character.mAwayUntil = away;
-            character.mOutingStart = start;
+            character.mTroubleEnd = away;
+            character.mTroubleStart = start;
         }
         func_0202c28c(&gGameData, i, &character);
     }
@@ -435,11 +448,7 @@ int ListRandomEventCandidates(u16 *indices) {
 void ShuffleRandomEventCandidates(u16 *indices) {
     u16 count = ListRandomEventCandidates(indices);
     for (int i = 0; i < 200; i++) {
-        u16 a = Rand(count);
-        u16 b = Rand(count);
-        u16 index = indices[a];
-        indices[a] = indices[b];
-        indices[b] = index;
+        Swap(indices[Rand(count)], indices[Rand(count)]);
     }
 }
 
@@ -473,7 +482,7 @@ int EncounterJudge::GetMeetingsWhileAway(int count) {
 
 // The change of affinity a meeting brings: a random one of the relation's eight
 int EncounterJudge::GetMeetingChange(SavedCharacter *first, SavedCharacter *second) {
-    u8 relation = first->mRelation[second->mIndex];
+    u8 relation = first->mRelationRank[second->mIndex];
     return data_021135a0[relation][Rand(8)] * 2;
 }
 
@@ -491,10 +500,10 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
         }
         residents++;
         if (i != first->mIndex) {
-            counts[first->mRelation[i]]++;
+            counts[first->mRelationRank[i]]++;
         }
         if (i != second->mIndex) {
-            counts[10 + second->mRelation[i]]++;
+            counts[10 + second->mRelationRank[i]]++;
         }
         if (i == first->mIndex) {
             if (first->IsTrouble3_4()) {
@@ -509,7 +518,7 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
                               func_0202c58c(&gGameData, i))) {
                 (*a)++;
             }
-            if (first->IsRank1249Or678(first->mRelation[i]) && second->IsRank1249Or678(second->mRelation[i])) {
+            if (first->IsRank1249Or678(first->mRelationRank[i]) && second->IsRank1249Or678(second->mRelationRank[i])) {
                 (*b)++;
             }
         }
@@ -526,8 +535,8 @@ int EncounterJudge::Judge(SavedCharacter *first, SavedCharacter *second) {
     int firstIndex = first->mIndex;
     int secondIndex = second->mIndex;
     int result = 10;
-    u8 relation = first->mRelation[secondIndex];
-    if (firstIndex == secondIndex || first->mAffinity[secondIndex] < 200 || second->mAffinity[firstIndex] < 200) {
+    u8 relation = first->mRelationRank[secondIndex];
+    if (firstIndex == secondIndex || first->mRelationMeter[secondIndex] < 200 || second->mRelationMeter[firstIndex] < 200) {
         return 10;
     }
     CountAcquaintances(first, second, counts, &a, &b);
@@ -599,10 +608,10 @@ int EncounterJudge::JudgeEnd(SavedCharacter *first, SavedCharacter *second, BOOL
     s16 b;
     u16 secondIndex = second->mIndex;
     u16 firstIndex = first->mIndex;
-    u8 relation = first->mRelation[secondIndex];
+    u8 relation = first->mRelationRank[secondIndex];
     if (check) {
-        if (firstIndex == secondIndex || first->mAffinity[second->mIndex] != 0 ||
-            second->mAffinity[first->mIndex] != 0) {
+        if (firstIndex == secondIndex || first->mRelationMeter[second->mIndex] != 0 ||
+            second->mRelationMeter[first->mIndex] != 0) {
             return 10;
         }
     }
@@ -662,7 +671,7 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
         result = JudgeEnd(first, second, TRUE);
     }
     if (result != 10) {
-        u8 relation = first->mRelation[secondIndex];
+        u8 relation = first->mRelationRank[secondIndex];
         if (change > 0) {
             first->SetRelation(secondIndex, result, 100);
             second->SetRelation(firstIndex, result, 100);
@@ -684,53 +693,55 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
     func_0202c28c(&gGameData, secondIndex, second);
 }
 
-// The two go out together (event, kind) for between three quarters and all of the outing's length
-void EncounterJudge::StartOuting(SavedCharacter *first, SavedCharacter *second, int event, u8 kind, s64 now) {
+// The two go out together (trouble state 1 of the category and id) for between three quarters and all of the
+// trouble's length. Both are u8, as SetTrouble takes them: the u8 on the stack is then read from its slot at each
+// call, as the original does.
+void EncounterJudge::StartOuting(SavedCharacter *first, SavedCharacter *second, u8 category, u8 id, s64 now) {
     first->ClearTrouble();
-    func_0209a1fc(first, 1, event, kind);
-    first->mMoodPartner = second->mIndex;
-    int minutes = data_02114d78[first->mOutingTable][first->mOutingIndex].mMinutes;
+    first->SetTrouble(1, category, id);
+    first->mTroubleTarget = second->mIndex;
+    int minutes = data_02114d78[first->mTroubleCategory][first->mTroubleId].mMinutes;
     int least = (minutes * 3) >> 2;
     int length = least + Rand(minutes - least) + 1;
     s64 away = now + length * 60;
-    first->mAwayUntil = away;
+    first->mTroubleEnd = away;
     second->ClearTrouble();
-    func_0209a1fc(second, 1, event, kind);
-    second->mMoodPartner = first->mIndex;
-    second->mAwayUntil = away;
+    second->SetTrouble(1, category, id);
+    second->mTroubleTarget = first->mIndex;
+    second->mTroubleEnd = away;
 }
 
 // Sets the end of the two's events, and of their partners' when asked
 void EncounterJudge::SetEventEnds(SavedCharacter *first, SavedCharacter *second, s64 end, BOOL partners) {
-    first->mEventEnd = end;
-    second->mEventEnd = end;
+    first->mLongActEnd = end;
+    second->mLongActEnd = end;
     if (!partners) {
         return;
     }
     if (first->IsLongActPaired()) {
-        u8 index = first->mEventPartner;
+        u8 index = first->mLongActPartner;
         if (index != second->mIndex) {
             SavedCharacter partner;
             func_0202c264(&gGameData, index, &partner);
-            partner.mEventEnd = end;
+            partner.mLongActEnd = end;
             func_0202c28c(&gGameData, index, &partner);
         }
     }
     if (!second->IsLongActPaired()) {
         return;
     }
-    u8 index = second->mEventPartner;
+    u8 index = second->mLongActPartner;
     if (index == first->mIndex) {
         return;
     }
     SavedCharacter partner;
     func_0202c264(&gGameData, index, &partner);
-    partner.mEventEnd = end;
+    partner.mLongActEnd = end;
     func_0202c28c(&gGameData, index, &partner);
 }
 
 void EncounterJudge::Apply(SavedCharacter *first, SavedCharacter *second, int relation, s64 now) {
-    if (first->mRelation[second->mIndex] != 4) {
+    if (first->mRelationRank[second->mIndex] != 4) {
         return;
     }
     if (relation == 8) {
@@ -740,15 +751,15 @@ void EncounterJudge::Apply(SavedCharacter *first, SavedCharacter *second, int re
     first->mMood = 1;
     second->mMood = 1;
     if (!first->IsLongActPaired()) {
-        first->mEventEnd = now;
+        first->mLongActEnd = now;
     }
     if (!second->IsLongActPaired()) {
-        second->mEventEnd = now;
+        second->mLongActEnd = now;
     }
 }
 
 void EncounterJudge::ApplyEnd(SavedCharacter *first, SavedCharacter *second, int relation, s64 now, int param) {
-    u8 current = first->mRelation[second->mIndex];
+    u8 current = first->mRelationRank[second->mIndex];
     if (current == 5) {
         first->ClearTrouble();
         second->ClearTrouble();
@@ -794,11 +805,11 @@ void EncounterJudge::MeetWhileAway(int count, u8 *residents) {
     }
 }
 
-// While the game was off, residents (half of them for every six hours, at most half) pick an item of kind 1
+// While the game was off, residents (half of them for every day, at most half) pick an item of kind 1
 void EncounterJudge::PickItemsWhileAway(int count, u8 *residents, s64 now) {
     int items[0xFF];
     int half = count / 2;
-    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 6;
+    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, half);
     int itemCount = 0;
     for (int i = 0; i < 0xFF; i++) {
@@ -824,19 +835,19 @@ void EncounterJudge::PickItem(int index, int *items, int itemCount, s64 now) {
     SavedCharacter character;
     func_0202c264(&gGameData, index, &character);
     character.mIndex = index;
-    if (func_0209c4b4(&character, now) > 0) {
+    if (character.GetFullness(now) > 0) {
         return;
     }
     int item = items[Rand(itemCount)];
-    func_0209c56c(&character, now - Rand(7200), item);
-    character.mUnknown245 = item;
+    character.Eat(now - Rand(7200), item);
+    character.mEatLastFood = item;
     func_0202c28c(&gGameData, index, &character);
 }
 
-// While the game was off, residents (a fifth of them for every six hours, at most a fifth) change their clothes
+// While the game was off, residents (a fifth of them for every day, at most a fifth) change their clothes
 void EncounterJudge::ChangeClothesWhileAway(int count, u8 *residents) {
     int fifth = count / 5;
-    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 6;
+    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, fifth);
     for (int j = 0; j < times; j++) {
         ChangeClothes(residents[Rand(count)]);
@@ -844,7 +855,7 @@ void EncounterJudge::ChangeClothesWhileAway(int count, u8 *residents) {
 }
 
 // The resident puts on clothes it has seen, chosen at random with three chances for those it likes most
-// (func_0209c89c at least 13), two for 10 and one for 6
+// (GetClothesLiking at least 13), two for 10 and one for 6
 void EncounterJudge::ChangeClothes(int index) {
     SavedCharacter character;
     u16 choices[1800];
@@ -852,17 +863,17 @@ void EncounterJudge::ChangeClothes(int index) {
     func_0202c264(&gGameData, index, &character);
     character.mIndex = index;
     for (int i = 1; i < 300; i++) {
-        if ((character.mClothesSeen[i >> 5] >> (i & 31)) & 1) {
-            if (func_0209c89c(&character, i) >= 13) {
+        if ((character.mOwnedClothes[i >> 5] >> (i & 31)) & 1) {
+            if (character.GetClothesLiking(i) >= 13) {
                 choices[count] = i;
                 choices[count + 1] = i;
                 choices[count + 2] = i;
                 count += 3;
-            } else if (func_0209c89c(&character, i) >= 10) {
+            } else if (character.GetClothesLiking(i) >= 10) {
                 choices[count] = i;
                 choices[count + 1] = i;
                 count += 2;
-            } else if (func_0209c89c(&character, i) >= 6) {
+            } else if (character.GetClothesLiking(i) >= 6) {
                 choices[count] = i;
                 count++;
             }

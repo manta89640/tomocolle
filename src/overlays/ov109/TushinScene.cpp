@@ -381,8 +381,15 @@ void TushinScene::InitCharacters() {
     LoadCharacters();
 }
 
-// NOT MATCHING: the two `|= 2` of the emitters' flags use r2/r3 where the original uses r0/r2 and sets
-// mParticleFrames's 0 after them (register choice, 9 instructions).
+// Sets a flag of a particle emitter
+template <class T> static inline void SetEmitterFlag(T *emitter, u32 flag) {
+    emitter->mFlags |= flag;
+}
+
+// Compiled with dead assignments kept: the emitters' flags set through the inline then take r0/r2 and leave the 0 of
+// mParticleFrames after them, as the original has it (with the plain `|= 2`, or without the pragma, they do not).
+#pragma push
+#pragma opt_dead_assignments off
 // @0x0214ad80
 void TushinScene::InitParticles() {
     func_0202680c(0x4000);
@@ -403,10 +410,11 @@ void TushinScene::InitParticles() {
     mEmitterPositions[1].z = position1.z;
     mEmitters[0] = func_0207b2fc(mParticles, mParticleResource, &mEmitterPositions[0]);
     mEmitters[1] = func_0207b2fc(mParticles, mParticleResource, &mEmitterPositions[1]);
-    mEmitters[0]->mFlags |= 2;
-    mEmitters[1]->mFlags |= 2;
+    SetEmitterFlag(mEmitters[0], 2);
+    SetEmitterFlag(mEmitters[1], 2);
     mParticleFrames = 0;
 }
+#pragma pop
 
 // @0x0214aed8
 void TushinScene::UpdateMiiData() {
@@ -774,9 +782,9 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2, as the original's loops are): one instruction, the `orr` of 0x299, whose
-// operands are the other way round (`orr r0, r0, r1`: the record's byte first, the received one loaded first);
-// `record | received`, `|=`, a local, casts and a pointer all load the record's byte first.
+// Compiled at optimization level 2, as the original's loops are. The received byte 0x299 is read through a volatile
+// cast into a local before it is or-ed into the record's: that loads it first and still puts the record's byte first
+// in the `orr`, as the original has it (every plain form loads the record's byte first).
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -837,7 +845,8 @@ int TushinScene::ReceiveCharacter() {
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
             }
-            record.mUnknown299 = sTransfer.mUnknown299 | record.mUnknown299;
+            u8 received = *(volatile u8 *)&sTransfer.mUnknown299;
+            record.mUnknown299 = record.mUnknown299 | received;
             int n = 0;
             for (int i = 0; i < 6; i++) {
                 if (sTransfer.GetSongSlot(i) == 0xFF) {
@@ -970,8 +979,8 @@ void TushinScene::UpdateListButtons() {
     mUnknown35924 = mList.mSelected;
 }
 
-// NOT MATCHING: the original keeps the list window's result in r1 for the test against -1 and copies it to r4
-// for the table; here it is loaded into r4 directly (one instruction fewer).
+// The list window's result is tested through a volatile read of the field, as the message windows' results are read
+// elsewhere: that keeps it in r1 for the test and copies it to r4 for the table, as the original does.
 // @0x0214e144
 void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
@@ -1019,7 +1028,7 @@ void TushinScene::UpdateListWindow() {
         return;
     }
     int result = mListWindow.mResult;
-    if (result == -1) {
+    if (*(volatile int *)&mListWindow.mResult == -1) {
         return;
     }
     mListWindow.mUnknownSetBeforeClose = 15;
@@ -1203,11 +1212,17 @@ void TushinScene::UpdateWiiConnection() {
 
 #pragma optimization_level 2
 #pragma opt_common_subs off
-// NOT MATCHING (optimization level 2, without common subexpressions): one block, the call that finds the current
-// animation, where the original computes the animation id (r2, through r0) before the model's address (r0); here
-// the address comes first and the id goes through r1. Without opt_common_subs the original's hoisting (only
-// &mCharacters[0] and its model) and its registers come out.
+// Optimization level 2 without common subexpressions: the original's hoisting (only &mCharacters[0] and its model)
+// and its registers. The call that finds the current animation computes the id (r2, through r0) before the model's
+// address (r0): that is the call made through an inline forwarder with dead assignments kept (opt_dead_assignments
+// off), which binds the forwarder's arguments last to first; called directly, or without that pragma, the address
+// comes first.
 static inline CharacterModel *GetModelOf(CharacterModel &model) { return &model; }
+template <class M> static inline ModelAnimation *FindAnimationOf(M *model, u32 resType, int id) {
+    return AnimModel_FindAnimation(model, resType, id);
+}
+#pragma push
+#pragma opt_dead_assignments off
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
@@ -1231,7 +1246,7 @@ void TushinScene::UpdateCharacters() {
                 }
             }
         }
-        if (AnimModel_FindAnimation(&mCharacters[i].mAnim, RESOURCE_BCA0, mCharacters[i].mAnimId)->mFinished) {
+        if (FindAnimationOf(&mCharacters[i].mAnim, RESOURCE_BCA0, mCharacters[i].mAnimId)->mFinished) {
             mCharacters[i].mPos.x = -0x1000;
             int next = GetStandAnimation(i);
             switch (mCharacters[i].mAnimId) {
@@ -1310,6 +1325,7 @@ void TushinScene::UpdateCharacters() {
     ShowNextCharacter();
     StartEmitter(1);
 }
+#pragma pop
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
@@ -1536,15 +1552,22 @@ void TushinScene::Leave() {
     }
 }
 
-#pragma optimization_level 2
-// NOT MATCHING (optimization level 2): register order only. In the four calls of func_020a123c with the sort key the
-// original loads the key's offset into r0 and forms the list's address through r2 (ours: r1, r0), and in the two
-// SetStringArg calls with a parent's name the parent index and the names' base swap r2/r3 in the mla. The same
-// call alone in a test file comes out as in the original: the surrounding code decides it, not the call's form.
 static inline CharacterModel *GetModel(SceneCharacter *c) {
     CharacterModel &model = *c;
     return &model;
 }
+
+// Sorts a list through an inline forwarder: without propagation, the forwarder's arguments are formed last to first
+// (Update's re-sorts load the key's offset into r0 and form the list's address through r2, as the original does)
+template <class L> static inline void SortBy(L *list, int key, BOOL selectFirst) {
+    list->Sort(key, selectFirst);
+}
+
+// Compiled at optimization level 2 and without propagation: the re-sorts go through SortBy, and the parent's index
+// for a found parent's name is a local, which gives the original's registers in the mla of the name's address.
+#pragma optimization_level 2
+#pragma push
+#pragma opt_propagation off
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -2010,7 +2033,7 @@ void TushinScene::Update() {
                 sReceivedCommand = 0;
                 CloseWindow();
                 mResidents.Load();
-                mResidents.Sort(mResidents.mSortKey, 0);
+                SortBy(&mResidents, mResidents.mSortKey, 0);
                 break;
             case 14:
             case 15: {
@@ -2025,7 +2048,7 @@ void TushinScene::Update() {
                     sSongsReceived = 0;
                     mReceiveResult = ReceiveCharacter();
                     mResidents.Load();
-                    mResidents.Sort(mResidents.mSortKey, 0);
+                    SortBy(&mResidents, mResidents.mSortKey, 0);
                     mNextPage = 0x17;
                     if (mReceiveResult != 0) {
                         sReceiveCount = 0;
@@ -2223,7 +2246,7 @@ void TushinScene::Update() {
                 CloseWindow();
                 sWiiSendDone = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mSortKey, 0);
+                SortBy(&mResidents, mResidents.mSortKey, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
                 if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
@@ -2231,7 +2254,7 @@ void TushinScene::Update() {
                 }
                 sReceiveCount = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mSortKey, 0);
+                SortBy(&mResidents, mResidents.mSortKey, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
                     mWiiShirtDue = 1;
@@ -2315,7 +2338,10 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 8:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
+                    {
+                        int parent = gWirelessSession->mParent;
+                        mWindow.mTexts[0].SetStringArg(mParentNames[parent], 0);
+                    }
                     PlaySound(0xB);
                     mUnknown3F090 = 0;
                     break;
@@ -2354,7 +2380,10 @@ void TushinScene::Update() {
                     mWait = 60;
                     break;
                 case 41:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
+                    {
+                        int parent = gWirelessSession->mParent;
+                        mWindow.mTexts[0].SetStringArg(mParentNames[parent], 0);
+                    }
                     PlaySound(0xB);
                     break;
                 case 46:
@@ -2426,6 +2455,7 @@ void TushinScene::Update() {
     UpdateSending();
     UpdateSaving();
 }
+#pragma pop
 #pragma optimization_level reset
 
 // @0x02151590
@@ -2758,16 +2788,17 @@ int TushinScene::NextPageAfterReceive() {
     return page;
 }
 
-// NOT MATCHING: the original derives the -1 for sReceivedResident from a register holding 0 (mov r2, #0; sub r1, r2,
-// #1), and sets that 0 earlier (five instructions). mwcc derives a constant so when a register already holds a nearby
-// one (storing 0 first does it, but then the stores come out in the other order); a variable equal to 0 that is not
-// propagated would do it too (ItemTradeList::Receive), but none fits here.
+// The -1 for sReceivedResident is derived from a register holding 0 (mov r2, #0; sub r1, r2, #1), which is a local
+// assigned 0 that the compiler keeps: with dead assignments left in (opt_dead_assignments off) it is not folded.
 // @0x02152014
+#pragma push
+#pragma opt_dead_assignments off
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;
-    sReceivedResident = -1;
+    int zero = 0;
+    sReceivedResident = zero - 1;
     int result = sWiiReceiveResult;
-    sWiiReceiveResult = 0;
+    sWiiReceiveResult = zero;
     switch (result) {
     case -5:
         PlayResultSound(0xD);
@@ -2833,6 +2864,7 @@ int TushinScene::ReceiveWiiMii() {
     }
     return 0x3A;
 }
+#pragma pop
 
 // @0x021523a4
 extern "C" void TushinScene_OnWiiMiiReceived(int index, int result) {

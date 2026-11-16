@@ -403,6 +403,13 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   field (folded into immediates) is still an object of the pool, so the ROM's pool has every folded static too.
 - Mind the build: when a quick `ninja <object>` fails (compile error), the old object stays and a layout read from it
   is stale.
+- A function-local static with a dynamic initialiser goes on the list where its declaration is parsed, not where the
+  function is compiled: its table, then its guard (`.bss`). So file statics declared after the function come after
+  it on the list, and the declarations' order *across* functions moves it. `Sky.cpp`'s two seconds tables
+  (`GetSunrise`, `GetSunset`, 48 bytes each, with 4-byte guards) came out reversed in `.data` with any order of the
+  seven file statics at the top that keeps the guards right, and both came right with `sSunsetTimes` declared between
+  the two colour tables. The heap-sort model with the locals placed so (table, guard) reproduced every compile tried
+  and found that order at once (`scratchpad` search over placements before, between and after the functions).
 
 ## Matching techniques
 
@@ -683,6 +690,27 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   position.y;` at the top (`InitScrollBar`).
 - Dead copies of four sprites' positions per row in the original's slots: one of the 27 combinations of the three
   position setters, found by script (`PlaceButtons`).
+**A value the original computes from the counter at each use, where ours strength-reduces it**
+- Index the array with a `u32`: `data_020f72f8[style].mParts[i]` read through `static inline s16 GetPieceZ(u16 style,
+  u32 i)` (or `[(u32)i]`) keeps the original's `mla i, #10` at each use, where an `int` index is strength-reduced
+  into a pointer stepped by 10; it also brought the loop's three hoisted zeros into the original's registers
+  (`SceneRoom::ShowParts`). `#pragma opt_strength_reduction off` gave the same `mla` but no longer reduced the
+  loop's other pointer, which the original does reduce.
+
+**Overlay 109's last register and argument-order near-misses (round 4)**
+- `#pragma opt_dead_assignments off` (inside `#pragma push`/`pop`) is a setting the original used per function. With
+  it, a local assigned 0 is kept rather than folded, so `int zero = 0; s = zero - 1; ...; t = zero;` gives the
+  original's `mov r2, #0; sub r1, r2, #1` (`ReceiveWiiMii`); and an inline forwarder's arguments are bound last to
+  first, as with the eight passes off: `FindAnimationOf(model, BCA0, model->mAnimId)` forms the id before the
+  model's address (`UpdateCharacters`), `SetEmitterFlag(e, 2)` twice leaves the function's last `mov r0, #0` after
+  the two `orr`s (`InitParticles`). Neither the forwarder nor the pragma alone does it.
+- `#pragma opt_propagation off` with an inline forwarder does the same for a member call (`SortBy(&list, key, 0)`
+  in overlay 109's `Update`: the key's offset in r0, the list's address formed through r2); a parent index read
+  into a local before indexing the names gave the mla's registers there.
+- A value the original loads into one register and copies into another (`ldr r1; mov r4, r1; cmp r1`): test it
+  through a volatile read of the field and keep a plain local for the later use (`UpdateListWindow`). A load the
+  original does first whose value is the second operand of an `orr`: read it through a volatile cast into a local,
+  then `own | received` (`ReceiveCharacter`).
 
 **Two registers holding one counter**
 - A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
@@ -815,6 +843,22 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   level 2 with `opt_propagation` off).
 
 **Constants and arithmetic**
+- Read the shift after a division's magic multiply: `smull` by 0x2AAAAAAB then `asr #2` is `/ 24`, not `/ 6`
+  (`ResidentLife`'s `PickItemsWhileAway`: a share of the residents for every day the game was off).
+- A random number truncated to 16 bits twice (`lsl #16; lsr #16; lsl #16`, then the `lsr` folded into the use)
+  where it is stored in a `u16`: the inline returns an `int`, `static inline int Rand(u16 max) { return
+  MATH_Rand16(&gRandom, max); }` (`EncounterJudge::MeetRandomPair`). A shuffle whose swap took the original's
+  registers only as `Swap(a[Rand(n)], a[Rand(n)])`, an inline taking two `u16 &`, with `Rand(int max)` (Sky's
+  `ShuffleCloudFrames`, `ShuffleRandomEventCandidates`).
+- Two draws of the generator chained with one store of its state (`mla; mla; str`) where ours stores it between
+  them: nothing that may alias `gRandom` (a store to a member) may stand between the two calls in the source. Draw
+  both into locals before the stores (`SkyBirds::Start`'s y and the step of x).
+- A `u8` parameter on the stack read from its slot at each use (`ldrb r3, [sp, #24]` before each call) instead of
+  kept in a register: the callee takes a `u8` too, so nothing needs truncating and the compiler reads the slot
+  again. Declared `int` with an `int` callee, it is loaded once; a volatile read also gives the reloads
+  (`EncounterJudge::StartOuting`, passing a trouble's category and id on to `SetTrouble(u8, u8, u8)`).
+- A call result compared as 32 bits (`cmp r0, #0; popgt`) where ours compares 64 (`subs; sbcs`): the callee
+  returns an `int`, not an `s64` (`SavedCharacter::GetFullness`, called by `PickItem`).
 - A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in
   our declaration: write the cast at the call (`Sprite_Init(..., (u16)(i * 2), ...)`).
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
