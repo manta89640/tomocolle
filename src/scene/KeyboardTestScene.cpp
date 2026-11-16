@@ -91,7 +91,8 @@ void KeyboardTestScene::Update() {
         func_02027d7c(&data_02121834, "MNU:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "MNU:/BG_down.ncg", 0x100, 0, 0, 0, -1);
         func_02027534(&data_021213b8, "MNU:/BG_down.ncl", 0x100, -1, -1, -1);
-        data_0211d604.Hide(0x400);
+        data_0211d604.mPlanes &= ~0x400;
+        data_0211d604.mPlanesChanged = TRUE;
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
         func_02024c14(gGraphicsManager, mSavedGraphics, 0x3F00);
         func_02027d7c(&data_02121834, "KBD:/bg_keyboard0.nsc", 0x400, 0, 0, 0, 0, -1);

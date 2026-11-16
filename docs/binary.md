@@ -546,7 +546,7 @@ factory's file, the destructors (implicit) in theirs.
 | 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
 | 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
 | 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 11 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
-| | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 37 of 42 | See below |
+| | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
 
 Measured:
 
@@ -595,7 +595,7 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   pragma the sprite positions get one dead copy too many. `KeyboardTestScene::Init`: two dead position copies
   stored in another order. `WirelessTestScene`: `Init` (the store of `date.week`), `Update` and `Redraw` (loops
   not rotated as at optimisation level 2, which gives the rest differently).
-- `SceneHelpers.cpp`: `FaceCast::Init` (two stores), `UpdateDrag`, `ApplyTransform`, `SetTransform(int,
+- `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
 
 ## WH, the wireless wrapper

@@ -249,8 +249,7 @@ void FaceCast::Init(int capacity) {
         mTransforms[i].mRotY = 0;
     }
     mSpeaker = -1;
-    mDragY = 0;
-    mDragX = 0;
+    mDragX = mDragY = 0;
 }
 
 // The camera at its start, and the two lights from the front left and the back
@@ -276,15 +275,19 @@ void FaceCast::UpdateFaces() {
     }
 }
 
+static inline ScreenPoint operator-(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint result;
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    return result;
+}
+
 // The stylus dragged across the screen turns the first face
 void FaceCast::UpdateDrag() {
     if (gTouchInput.mTp.touch && !gTouchInput.mTouched) {
         ScreenPoint last = gTouchInput.mLastPoint;
         ScreenPoint now = gTouchInput.mPoint;
-        ScreenPoint delta;
-        delta.x = now.x - last.x;
-        delta.y = now.y - last.y;
-        ScreenPoint drag = delta;
+        ScreenPoint drag = now - last;
         int x = mDragX + drag.x;
         if (x > 32) {
             x = 32;
@@ -390,9 +393,9 @@ void FaceCast::SetTransform(int index, u16 id, int x, s8 y, u8 scale, u8 rotX, u
 
 // Gives a face the matrices of its transform
 void FaceCast::ApplyTransform(int index) {
+    MtxFx43 matrix;
     MtxFx33 rotation;
     MtxFx33 turn;
-    MtxFx43 matrix;
     MTX_Identity33(&rotation);
     MTX_Identity33(&turn);
     MTX_Identity43(&matrix);
