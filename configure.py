@@ -146,7 +146,7 @@ LD_FLAGS = [
     "-interworking",
     "-map closure,unused",
     "-msgstyle gcc",
-    "-m Entry",             # The entry function
+    "-m _start",            # The entry function, crt0.c's
 ]
 
 INCLUDE_DIRS = ["include"]
