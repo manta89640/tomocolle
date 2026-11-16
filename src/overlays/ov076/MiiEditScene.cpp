@@ -286,6 +286,12 @@ static inline void SetCanvasPosition(ObjTextCanvas *canvas, WindowPoint position
     canvas->mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
 }
 
+// 96.4%: in the loops over the buttons and the text boxes the counter (and the text boxes' width and character
+// offset) sit one register over from the original's, and the text box's character count is read in another order.
+// The canvas through the reference overload and y adjusted before x brought the position code to the original's.
+// Tried: one u16 counter for both loops at the top or before them, the offset declared at every place between the
+// loops or as a u32, the width at function scope, the position through a pointer or two ints, pragma sets
+// (lifetimes, common subs, loop invariants, strength reduction).
 void MiiEditScene::Init() {
     mPage = -1;
     mUnknown1B32C = FALSE;
@@ -441,11 +447,11 @@ void MiiEditScene::Init() {
         mTextBoxes[i].Init(0x1000, width, 2, charOffset, 0, 0, 0, 0, NULL);
         charOffset += mTextBoxes[i].GetCharCount();
         WindowPoint position = sProfileButtonPositions[data_ov076_02158b3c[i]];
-        position.x += -position.x / 2 + 8;
         position.y -= 7;
+        position.x += -position.x / 2 + 8;
         mTextBoxes[i].mSprite.mOverwritePalette = 1;
         mTextBoxes[i].mColor = 8;
-        SetCanvasPosition(&mTextBoxes[i], position);
+        SetCanvasPosition(mTextBoxes[i], position);
         mTextBoxes[i].Update(TRUE);
     }
     mCharBox.Init(0x1000, 0x20, 2, charOffset, 0, 0, NULL);
