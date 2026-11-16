@@ -157,7 +157,7 @@ void func_020a27dc(ListView *view, int a, int b, int c);
 // --- Window buttons (the others are in SpriteButton.h) ---
 
 extern "C" {
-void func_02031e88(void *button, int a);
+void SpriteButton_SetDisabled(void *button, int a);
 void func_02031228(void *sprite);
 }
 

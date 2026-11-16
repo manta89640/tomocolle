@@ -614,9 +614,9 @@ that reports:
 
 | Field | Set by | Means | Name |
 | --- | --- | --- | --- |
-| +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`func_02031294`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
-| +0xAF80 | `func_0203404c` | its update, `func_0203133c`, returned TRUE: it was pressed. Open (`MessageWindow_Open`) also clears it | `mResult` |
-| +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`func_02031d7c`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
+| +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`SpriteButton_IsTouched`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
+| +0xAF80 | `func_0203404c` | its update, `SpriteButton_Update`, returned TRUE: it was pressed. Open (`MessageWindow_Open`) also clears it | `mResult` |
+| +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`SpriteButton_Draw`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
 
 So a scene that reacts at once reads +0xAF80, one that waits for the button's animation +0xAF84 (inferred from
 the flags; the names are descriptive).

@@ -211,11 +211,11 @@ void ItemListView::InitRows(int resource, u16 sequence, u16 pressedSequence, int
         mRowCounts[i] = 0x4D;
         mPosition = position;
         Sprite_Init(&mRowButtons[i], resource, sequence, 0x80, 0x60, TRUE);
-        func_02031260(&mRowButtons[i], 3);
-        func_02031278(&mRowButtons[i], sequence, pressedSequence);
+        SpriteButton_SetKind(&mRowButtons[i], 3);
+        SpriteButton_SetSequences(&mRowButtons[i], sequence, pressedSequence);
         mRowButtons[i].SetPosition(FxVec2(sRowsPosition.x << FX32_SHIFT, (sRowsPosition.y + i * 20) << FX32_SHIFT));
-        func_02031eb0(&mRowButtons[i], sRowTouchSize.x, sRowTouchSize.y);
-        func_0203119c(&mRowButtons[i]);
+        SpriteButton_SetTouchRect(&mRowButtons[i], sRowTouchSize.x, sRowTouchSize.y);
+        SpriteButton_Reset(&mRowButtons[i]);
         mRowButtons[i].mOverwritePalette = 3;
         mRowButtons[i].mVisible = FALSE;
         mRowButtons[i].mUnknownDC = TRUE;
@@ -231,7 +231,7 @@ void ItemListView::InitRows(int resource, u16 sequence, u16 pressedSequence, int
     mRect.y = position.y - 10;
     mRect.width = 0xE5;
     mRect.height = mVisibleRows * 20;
-    func_02032c28(&mTouchArea, mRect);
+    TouchScrollArea_Init(&mTouchArea, mRect);
     mTouchArea.mUnknown44 = TRUE;
 }
 
@@ -273,11 +273,11 @@ void ItemListView::InitCounts(int *charOffset) {
 void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                 ScreenPoint size) {
     Sprite_Init(&mUpButton, resource, sequence, 0x80, 0x60, TRUE);
-    func_02031260(&mUpButton, 1);
-    func_02031278(&mUpButton, sequence, pressedSequence);
+    SpriteButton_SetKind(&mUpButton, 1);
+    SpriteButton_SetSequences(&mUpButton, sequence, pressedSequence);
     mUpButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
-    func_02031eb0(&mUpButton, size.x, size.y);
-    func_0203119c(&mUpButton);
+    SpriteButton_SetTouchRect(&mUpButton, size.x, size.y);
+    SpriteButton_Reset(&mUpButton);
     mUpButton.mOverwritePalette = 2;
 }
 
@@ -288,11 +288,11 @@ void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence)
 void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                   ScreenPoint size) {
     Sprite_Init(&mDownButton, resource, sequence, 0x80, 0x60, TRUE);
-    func_02031260(&mDownButton, 1);
-    func_02031278(&mDownButton, sequence, pressedSequence);
+    SpriteButton_SetKind(&mDownButton, 1);
+    SpriteButton_SetSequences(&mDownButton, sequence, pressedSequence);
     mDownButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
-    func_02031eb0(&mDownButton, size.x, size.y);
-    func_0203119c(&mDownButton);
+    SpriteButton_SetTouchRect(&mDownButton, size.x, size.y);
+    SpriteButton_Reset(&mDownButton);
     mDownButton.mOverwritePalette = 2;
 }
 
@@ -303,7 +303,7 @@ void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequenc
 void ItemListView::InitScrollBar(int resource, int sequence, int knobSequence, int a, int b, int c,
                                  ScreenPoint position, ScreenRect knob) {
     Sprite_Init(&mScrollBar, resource, sequence, 0x80, 0x60, TRUE);
-    func_020325dc(&mScrollBar, a, b, c, knob.x, knob.y, knob.width, knob.height);
+    ScrollBar_Init(&mScrollBar, a, b, c, knob.x, knob.y, knob.width, knob.height);
     mScrollBar.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
     func_02032aa4(&mScrollBar, sequence, knobSequence);
     mScrollBar.mOverwritePalette = 2;
@@ -326,21 +326,21 @@ void ItemListView::Update() {
     BOOL moveBar = FALSE;
     BOOL scrolled = moveBar;
     mTouched = scrolled;
-    BOOL up = func_0203133c(&mUpButton);
-    BOOL down = func_0203133c(&mDownButton);
+    BOOL up = SpriteButton_Update(&mUpButton);
+    BOOL down = SpriteButton_Update(&mDownButton);
     int max = (mItemCount - mVisibleRows) * 20;
     if (max < 0) {
         max = 0;
     }
     switch (mScrolling) {
     case 0:
-        func_02032678(&mScrollBar);
-        func_02032cc0(&mTouchArea, mScroll, 0, max);
+        ScrollBar_Update(&mScrollBar);
+        TouchScrollArea_Update(&mTouchArea, mScroll, 0, max);
         if (mScrollBar.mDragging) {
-            mScroll = func_020329d4(&mScrollBar, 0, max);
+            mScroll = ScrollBar_GetPosition(&mScrollBar, 0, max);
             scrolled = TRUE;
         } else if (mScrollBar.mReleased) {
-            mScroll = (func_020329d4(&mScrollBar, 0, max) + 10) / 20 * 20;
+            mScroll = (ScrollBar_GetPosition(&mScrollBar, 0, max) + 10) / 20 * 20;
             moveBar = TRUE;
             scrolled = moveBar;
         } else if (mTouchArea.mDragging) {
@@ -359,9 +359,9 @@ void ItemListView::Update() {
             gSoundManager.StartSeqArc(0, 1, 9);
         } else if (gTouchInput.mTouching && func_02028d88(&mRect, &gTouchInput.mPoint) && mTouchable) {
             for (int i = 0; i < mRowCount; i++) {
-                if (func_0203133c(&mRowButtons[i])) {
+                if (SpriteButton_Update(&mRowButtons[i])) {
                     if (mTouchedRow != -1 && mTouchedRow != i) {
-                        func_02031e28(&mRowButtons[mTouchedRow], FALSE);
+                        SpriteButton_SetSelected(&mRowButtons[mTouchedRow], FALSE);
                     }
                     mTouchedRow = i;
                     mSelected = GetRowItem(i);
@@ -396,7 +396,7 @@ void ItemListView::Update() {
         break;
     }
     if (moveBar) {
-        func_02032a0c(&mScrollBar, 0, max, mScroll);
+        ScrollBar_SetPosition(&mScrollBar, 0, max, mScroll);
     }
     if (scrolled) {
         SetScroll(mScroll);
@@ -406,8 +406,8 @@ void ItemListView::Update() {
 }
 
 void ItemListView::Draw() {
-    func_02031d7c(&mUpButton);
-    func_02031d7c(&mDownButton);
+    SpriteButton_Draw(&mUpButton);
+    SpriteButton_Draw(&mDownButton);
     Sprite_Draw(&mScrollBar);
     for (int i = 0; i < mRowCount; i++) {
         mRowTexts[i].Draw();
@@ -423,7 +423,7 @@ void ItemListView::Draw() {
             mRowCounts2[i].Draw();
             break;
         }
-        func_02031d7c(&mRowButtons[i]);
+        SpriteButton_Draw(&mRowButtons[i]);
     }
 }
 
@@ -474,9 +474,9 @@ void ItemListView::DrawRow(int row, int item) {
     mRowButtons[row].mVisible = TRUE;
     if (item == mSelected) {
         mTouchedRow = row;
-        func_02031e28(&mRowButtons[row], TRUE);
+        SpriteButton_SetSelected(&mRowButtons[row], TRUE);
     } else {
-        func_02031e28(&mRowButtons[row], FALSE);
+        SpriteButton_SetSelected(&mRowButtons[row], FALSE);
     }
     ClearCanvas(mRowTexts[row], 0);
     mRowTexts[row].mColor = mRowPalettes[row];
@@ -686,7 +686,7 @@ void ItemListView::SetItems(Item **items, int count) {
         mUpButton.mVisible = TRUE;
         mDownButton.mVisible = TRUE;
         mScrollBar.mVisible = TRUE;
-        func_02032a0c(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, 0);
+        ScrollBar_SetPosition(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, 0);
     }
     UpdateRows();
     DrawDirtyRows();
@@ -707,13 +707,13 @@ void ItemListView::Select(int index) {
     }
     mSelected = index;
     for (int i = 0; i < mRowCount; i++) {
-        func_02031e28(&mRowButtons[i], FALSE);
+        SpriteButton_SetSelected(&mRowButtons[i], FALSE);
     }
     int top = mScroll / 20;
     if (top <= index && index < mRowCount + top) {
         int row = index % mRowCount;
         mTouchedRow = row;
-        func_02031e28(&mRowButtons[row], TRUE);
+        SpriteButton_SetSelected(&mRowButtons[row], TRUE);
         return;
     }
     mTouchedRow = -1;
@@ -752,7 +752,7 @@ void ItemListView::ScrollTo(int top) {
     }
     top = MATH_CLAMP(top, 0, max);
     mScroll = top * 20;
-    func_02032a0c(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, mScroll);
+    ScrollBar_SetPosition(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, mScroll);
     SetScroll(mScroll);
     DrawDirtyRows();
     Refresh();
@@ -871,22 +871,22 @@ void ShopWindow::Init(ScreenRect rect) {
 // The plus and minus buttons and the three canvases
 void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     Sprite_Init(&mPlusButton, resource, 6, 0x80, 0x60, TRUE);
-    func_02031260(&mPlusButton, 1);
-    func_02031278(&mPlusButton, 6, 7);
+    SpriteButton_SetKind(&mPlusButton, 1);
+    SpriteButton_SetSequences(&mPlusButton, 6, 7);
     mPlusButton.SetPosition(FxVec2(56 << FX32_SHIFT, 51 << FX32_SHIFT));
-    func_02031eb0(&mPlusButton, sPlusTouchSize.x, sPlusTouchSize.y);
+    SpriteButton_SetTouchRect(&mPlusButton, sPlusTouchSize.x, sPlusTouchSize.y);
     mPlusButton.mUnknownE0 = 6;
-    func_0203119c(&mPlusButton);
+    SpriteButton_Reset(&mPlusButton);
     mPlusButton.mOverwritePalette = 0;
     mPlusButton.mVisible = FALSE;
     mPlusButton.mUnknownDC = TRUE;
     Sprite_Init(&mMinusButton, resource, 8, 0x80, 0x60, TRUE);
-    func_02031260(&mMinusButton, 1);
-    func_02031278(&mMinusButton, 8, 9);
+    SpriteButton_SetKind(&mMinusButton, 1);
+    SpriteButton_SetSequences(&mMinusButton, 8, 9);
     mMinusButton.SetPositionFromVec(56 << FX32_SHIFT, 93 << FX32_SHIFT);
-    func_02031eb0(&mMinusButton, sMinusTouchSize.x, sMinusTouchSize.y);
+    SpriteButton_SetTouchRect(&mMinusButton, sMinusTouchSize.x, sMinusTouchSize.y);
     mMinusButton.mUnknownE0 = 6;
-    func_0203119c(&mMinusButton);
+    SpriteButton_Reset(&mMinusButton);
     mMinusButton.mOverwritePalette = 0;
     mMinusButton.mVisible = FALSE;
     mMinusButton.mUnknownDC = TRUE;
@@ -932,7 +932,7 @@ void ShopWindow::Update() {
     }
     switch (mMode) {
     case MODE_BUY:
-        if (func_0203133c(&mPlusButton)) {
+        if (SpriteButton_Update(&mPlusButton)) {
             int count = mCount + 1;
             if (count + mItem->mCount <= 99 && count + mItem->mUnknown0C >= 0 && GetBuyTotal(mItem, count) <= *mMoney) {
                 mCount++;
@@ -941,7 +941,7 @@ void ShopWindow::Update() {
                 return;
             }
         }
-        if (func_0203133c(&mMinusButton)) {
+        if (SpriteButton_Update(&mMinusButton)) {
             int count = mCount - 1;
             if (count > 0) {
                 mCount = count;
@@ -951,7 +951,7 @@ void ShopWindow::Update() {
         }
         break;
     case MODE_SELL:
-        if (func_0203133c(&mPlusButton)) {
+        if (SpriteButton_Update(&mPlusButton)) {
             int count = mCount + 1;
             if (mItem->mCount - count <= 99 && mItem->mUnknown0C - count >= 0) {
                 mCount = count;
@@ -960,7 +960,7 @@ void ShopWindow::Update() {
                 return;
             }
         }
-        if (func_0203133c(&mMinusButton)) {
+        if (SpriteButton_Update(&mMinusButton)) {
             int count = mCount - 1;
             if (count > 0) {
                 mCount = count;
@@ -981,8 +981,8 @@ void ShopWindow::Draw() {
         for (int i = 0; i < 3; i++) {
             mTextCanvases[i].Draw();
         }
-        func_02031d7c(&mPlusButton);
-        func_02031d7c(&mMinusButton);
+        SpriteButton_Draw(&mPlusButton);
+        SpriteButton_Draw(&mMinusButton);
     }
     MessageWindow_Draw(this);
 }
@@ -1833,10 +1833,10 @@ BOOL ShopCounter::IsStaffIdle() {
 void Shop_UnusedTabs(SpriteButton *buttons, int resource) {
     for (int i = 0; i < 5; i++) {
         Sprite_Init(&buttons[i], resource, sTabSequences[i], 0x80, 0x60, TRUE);
-        func_02031260(&buttons[i], sTabKinds[i]);
-        func_02031278(&buttons[i], sTabSequences[i], sTabPressedSequences[i]);
+        SpriteButton_SetKind(&buttons[i], sTabKinds[i]);
+        SpriteButton_SetSequences(&buttons[i], sTabSequences[i], sTabPressedSequences[i]);
         buttons[i].SetPosition(FxVec2(sTabPositions[i].x << FX32_SHIFT, sTabPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&buttons[i], sTabSize.x, sTabSize.y);
+        SpriteButton_SetTouchRect(&buttons[i], sTabSize.x, sTabSize.y);
     }
 }
 

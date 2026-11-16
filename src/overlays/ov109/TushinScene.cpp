@@ -308,23 +308,23 @@ void TushinScene::SetUpList(int *charOffset) {
 
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
-        func_02031260(&mButtons[i], 4);
-        func_02031278(&mButtons[i], sListButtonSequences[i], sListButtonSequences2[i]);
+        SpriteButton_SetKind(&mButtons[i], 4);
+        SpriteButton_SetSequences(&mButtons[i], sListButtonSequences[i], sListButtonSequences2[i]);
         mButtons[i].SetPosition(
             FxVec2(sListButtonPositions[i].x << FX32_SHIFT, sListButtonPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sListButtonTextPositions[i].x, sListButtonTextPositions[i].y);
+        SpriteButton_SetTouchRect(&mButtons[i], sListButtonTextPositions[i].x, sListButtonTextPositions[i].y);
         mButtons[i].mUnknownDC = 1;
-        func_02032158(&mButtons[i], &sListButtonStyles[i]);
-        func_0203119c(&mButtons[i]);
+        SpriteButton_SetSounds(&mButtons[i], &sListButtonStyles[i]);
+        SpriteButton_Reset(&mButtons[i]);
         mButtons[i].mUnknown5E = 1;
         if (sListButtonMessages[i] == (u32)-1) {
             mButtons[i].mText.mSprite.mVisible = FALSE;
         } else {
-            *charOffset += func_02031f58(&mButtons[i], &mMessageFiles[sListButtonFiles[i]], sListButtonMessages[i],
+            *charOffset += TextButton_SetMessage(&mButtons[i], &mMessageFiles[sListButtonFiles[i]], sListButtonMessages[i],
                                          &gFonts[sListButtonFonts[i]].mFont, 0x1000, *charOffset);
         }
     }
-    func_02031e88(&mButtons[2], 0);
+    SpriteButton_SetDisabled(&mButtons[2], 0);
 
     ScreenRect rect = sListWindowRect;
     MessageWindow_Init(&mListWindow, rect);
@@ -922,7 +922,7 @@ void TushinScene::UpdateListButtons() {
     mList.SetScrollUnknown(TRUE);
     int pressed = -1;
     for (int i = 0; i < 3; i++) {
-        if (func_0203133c(&mButtons[i])) {
+        if (SpriteButton_Update(&mButtons[i])) {
             pressed = i;
         }
     }
@@ -975,7 +975,7 @@ void TushinScene::UpdateListButtons() {
         return;
     }
     ShowNextCharacter();
-    func_02031e88(&mButtons[2], 0);
+    SpriteButton_SetDisabled(&mButtons[2], 0);
     mUnknown35924 = mList.mSelected;
 }
 
@@ -1081,13 +1081,13 @@ void TushinScene::UpdateConnection() {
                 mWindow.mTexts[i + 1].SetStringArg(mParentNames[i], 0);
                 ClearText(&mWindow.mTexts[i + 1]);
                 mWindow.mTexts[i + 1].DrawAll();
-                func_02031e88(&mWindow.mSprites[i], 0);
+                SpriteButton_SetDisabled(&mWindow.mSprites[i], 0);
             }
             if (--sParentTimers[i] == 0) {
                 mWindow.mTexts[i + 1].SetStringArg(L"", 0);
                 ClearText(&mWindow.mTexts[i + 1]);
                 mWindow.mTexts[i + 1].DrawAll();
-                func_02031e88(&mWindow.mSprites[i], 1);
+                SpriteButton_SetDisabled(&mWindow.mSprites[i], 1);
             }
         }
         return;
@@ -1187,13 +1187,13 @@ void TushinScene::UpdateWiiConnection() {
                 mWindow.mTexts[i + 1].SetStringArg(mParentNames[i], 0);
                 ClearText(&mWindow.mTexts[i + 1]);
                 mWindow.mTexts[i + 1].DrawAll();
-                func_02031e88(&mWindow.mSprites[i], 0);
+                SpriteButton_SetDisabled(&mWindow.mSprites[i], 0);
             }
             if (--sParentTimers[i] == 0) {
                 mWindow.mTexts[i + 1].SetStringArg(L"", 0);
                 ClearText(&mWindow.mTexts[i + 1]);
                 mWindow.mTexts[i + 1].DrawAll();
-                func_02031e88(&mWindow.mSprites[i], 1);
+                SpriteButton_SetDisabled(&mWindow.mSprites[i], 1);
             }
         }
         break;
@@ -2270,10 +2270,10 @@ void TushinScene::Update() {
                 if (nextLayout == 4) {
                     for (int i = 0; i < 3; i++) {
                         if (sParentTimers[i] > 0) {
-                            func_02031e88(&mWindow.mSprites[i], 0);
+                            SpriteButton_SetDisabled(&mWindow.mSprites[i], 0);
                             mWindow.mTexts[i + 1].SetStringArg(mParentNames[i], 0);
                         } else {
-                            func_02031e88(&mWindow.mSprites[i], 1);
+                            SpriteButton_SetDisabled(&mWindow.mSprites[i], 1);
                         }
                     }
                 }
@@ -2428,9 +2428,9 @@ void TushinScene::Update() {
                 if (nextLayout == 4) {
                     for (int i = 0; i < 3; i++) {
                         if (sParentTimers[i] > 0) {
-                            func_02031e88(&mWindow.mSprites[i], 0);
+                            SpriteButton_SetDisabled(&mWindow.mSprites[i], 0);
                         } else {
-                            func_02031e88(&mWindow.mSprites[i], 1);
+                            SpriteButton_SetDisabled(&mWindow.mSprites[i], 1);
                         }
                     }
                 }
@@ -2463,7 +2463,7 @@ void TushinScene::Draw() {
     Sprite_Draw(&mSprite);
     MessageWindow_Draw(&mWindow);
     for (int i = 0; i < 3; i++) {
-        func_0203206c(&mButtons[i]);
+        TextButton_Draw(&mButtons[i]);
     }
     MessageWindow_Draw(&mListWindow);
     mResidents.Draw();

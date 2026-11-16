@@ -155,11 +155,11 @@ void ItemTradeTabs::Init(int plane, MessageFile *file, int *charOffset) {
     mSelected = 0;
     for (int i = 0; i < 5; i++) {
         Sprite_Init(&mButtons[i], plane, sTabSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sTabSequences[i], sTabOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sTabSequences[i], sTabOnSequences[i]);
         mButtons[i].SetPosition(FxVec2(sTabPositions[i].x << FX32_SHIFT, sTabPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sTabTouchSize.x, sTabTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sTabTouchSize.x, sTabTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -179,25 +179,25 @@ void ItemTradeTabs::SetMasks(Inventory *inventory, ClothesList *costumes, Interi
 // @0x02149cdc
 void ItemTradeTabs::Update() {
     mPressed = 0;
-    if (func_0203133c(&mButtons[0])) {
+    if (SpriteButton_Update(&mButtons[0])) {
         mPressed = TAB_ITEMS;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 0;
-    } else if (func_0203133c(&mButtons[3])) {
+    } else if (SpriteButton_Update(&mButtons[3])) {
         mPressed = TAB_ITEMS_2;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 3;
-    } else if (func_0203133c(&mButtons[1])) {
+    } else if (SpriteButton_Update(&mButtons[1])) {
         mPressed = TAB_COSTUMES;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 1;
-    } else if (func_0203133c(&mButtons[2])) {
+    } else if (SpriteButton_Update(&mButtons[2])) {
         mPressed = TAB_INTERIORS;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 2;
-    } else if (func_0203133c(&mButtons[4])) {
+    } else if (SpriteButton_Update(&mButtons[4])) {
         mPressed = TAB_ITEMS_3;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 4;
     }
 }
@@ -205,7 +205,7 @@ void ItemTradeTabs::Update() {
 // @0x02149e18
 void ItemTradeTabs::Draw() {
     for (int i = 0; i < 5; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -221,43 +221,43 @@ void ItemTradeTabs::Select(int tab) {
     switch (tab) {
     case TAB_ITEMS:
         mSelected = 0;
-        func_02031e28(&mButtons[0], TRUE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], TRUE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_ITEMS_2:
         mSelected = 3;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], TRUE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], TRUE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_COSTUMES:
         mSelected = 1;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], TRUE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], TRUE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_INTERIORS:
         mSelected = 2;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], TRUE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], TRUE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_ITEMS_3:
         mSelected = 4;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], TRUE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], TRUE);
         break;
     }
 }
@@ -265,22 +265,22 @@ void ItemTradeTabs::Select(int tab) {
 // @0x0214a020
 void ItemTradeTabs::SetEnabled(int tabs) {
     for (int i = 0; i < 5; i++) {
-        func_02031e88(&mButtons[i], TRUE);
+        SpriteButton_SetDisabled(&mButtons[i], TRUE);
     }
     if (tabs & TAB_ITEMS) {
-        func_02031e88(&mButtons[0], FALSE);
+        SpriteButton_SetDisabled(&mButtons[0], FALSE);
     }
     if (tabs & TAB_ITEMS_2) {
-        func_02031e88(&mButtons[3], FALSE);
+        SpriteButton_SetDisabled(&mButtons[3], FALSE);
     }
     if (tabs & TAB_COSTUMES) {
-        func_02031e88(&mButtons[1], FALSE);
+        SpriteButton_SetDisabled(&mButtons[1], FALSE);
     }
     if (tabs & TAB_INTERIORS) {
-        func_02031e88(&mButtons[2], FALSE);
+        SpriteButton_SetDisabled(&mButtons[2], FALSE);
     }
     if (tabs & TAB_ITEMS_3) {
-        func_02031e88(&mButtons[4], FALSE);
+        SpriteButton_SetDisabled(&mButtons[4], FALSE);
     }
 }
 
@@ -295,12 +295,12 @@ void ItemTradeTabs::OnOpen() {
 void ItemTradeItemFilter::Init(int plane) {
     for (int i = 0; i < 4; i++) {
         Sprite_Init(&mButtons[i], plane, sItemFilterSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sItemFilterSequences[i], sItemFilterOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sItemFilterSequences[i], sItemFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sItemFilterPositions[i].x << FX32_SHIFT, sItemFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sItemFilterTouchSize.x, sItemFilterTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sItemFilterTouchSize.x, sItemFilterTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -313,8 +313,8 @@ void ItemTradeItemFilter::Init(int plane) {
 void ItemTradeItemFilter::Update() {
     mPressed = -1;
     for (int i = 0; i < 4; i++) {
-        if (func_0203133c(&mButtons[i])) {
-            func_02031e28(&mButtons[mSelected], FALSE);
+        if (SpriteButton_Update(&mButtons[i])) {
+            SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
             mSelected = i;
             mPressed = i;
         }
@@ -324,7 +324,7 @@ void ItemTradeItemFilter::Update() {
 // @0x0214a228
 void ItemTradeItemFilter::Draw() {
     for (int i = 0; i < 4; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -338,9 +338,9 @@ void ItemTradeItemFilter::SetVisible(BOOL visible) {
 // @0x0214a26c
 void ItemTradeItemFilter::Select(int button) {
     for (int i = 0; i < 4; i++) {
-        func_02031e28(&mButtons[i], FALSE);
+        SpriteButton_SetSelected(&mButtons[i], FALSE);
     }
-    func_02031e28(&mButtons[button], TRUE);
+    SpriteButton_SetSelected(&mButtons[button], TRUE);
     mSelected = button;
 }
 
@@ -355,12 +355,12 @@ int ItemTradeItemFilter::GetFilter() {
 void ItemTradeCostumeFilter::Init(int plane) {
     for (int i = 0; i < 5; i++) {
         Sprite_Init(&mButtons[i], plane, sCostumeFilterSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sCostumeFilterSequences[i], sCostumeFilterOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sCostumeFilterSequences[i], sCostumeFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sCostumeFilterPositions[i].x << FX32_SHIFT, sCostumeFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sCostumeFilterTouchSize.x, sCostumeFilterTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sCostumeFilterTouchSize.x, sCostumeFilterTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -373,8 +373,8 @@ void ItemTradeCostumeFilter::Init(int plane) {
 void ItemTradeCostumeFilter::Update() {
     mPressed = -1;
     for (int i = 0; i < 5; i++) {
-        if (func_0203133c(&mButtons[i])) {
-            func_02031e28(&mButtons[mSelected], FALSE);
+        if (SpriteButton_Update(&mButtons[i])) {
+            SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
             mSelected = i;
             mPressed = i;
         }
@@ -384,7 +384,7 @@ void ItemTradeCostumeFilter::Update() {
 // @0x0214a438
 void ItemTradeCostumeFilter::Draw() {
     for (int i = 0; i < 5; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -398,9 +398,9 @@ void ItemTradeCostumeFilter::SetVisible(BOOL visible) {
 // @0x0214a47c
 void ItemTradeCostumeFilter::Select(int button) {
     for (int i = 0; i < 5; i++) {
-        func_02031e28(&mButtons[i], FALSE);
+        SpriteButton_SetSelected(&mButtons[i], FALSE);
     }
-    func_02031e28(&mButtons[button], TRUE);
+    SpriteButton_SetSelected(&mButtons[button], TRUE);
     mSelected = button;
 }
 
@@ -444,24 +444,24 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     mCostumeFilter.Init(1);
 
     Sprite_Init(&mOkButton, 1, 10, 128, 96, TRUE);
-    func_02031278(&mOkButton, 10, 11);
+    SpriteButton_SetSequences(&mOkButton, 10, 11);
     mOkButton.SetPositionFromVec(sOkPosition.x << FX32_SHIFT, sOkPosition.y << FX32_SHIFT);
-    func_02031eb0(&mOkButton, sOkTouchSize.x, sOkTouchSize.y);
-    *charOffset += func_02031f58(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
-    func_0203119c(&mOkButton);
-    func_02031260(&mOkButton, 4);
+    SpriteButton_SetTouchRect(&mOkButton, sOkTouchSize.x, sOkTouchSize.y);
+    *charOffset += TextButton_SetMessage(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
+    SpriteButton_Reset(&mOkButton);
+    SpriteButton_SetKind(&mOkButton, 4);
     mOkButton.mUnknownDC = 1;
     mOkButton.mSounds.mSounds[0] = 10;
     mOkButton.mSounds.mSounds[2] = 0;
-    func_02032134(&mOkButton, 1);
+    TextButton_SetOverwritePalette(&mOkButton, 1);
     mOkButton.mVisible = FALSE;
 
     Sprite_Init(&mBackButton, 1, 0, 128, 96, TRUE);
-    func_02031278(&mBackButton, 0, 1);
+    SpriteButton_SetSequences(&mBackButton, 0, 1);
     mBackButton.SetPositionFromVec(sBackPosition.x << FX32_SHIFT, sBackPosition.y << FX32_SHIFT);
-    func_02031eb0(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
-    func_0203119c(&mBackButton);
-    func_02031260(&mBackButton, 4);
+    SpriteButton_SetTouchRect(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
+    SpriteButton_Reset(&mBackButton);
+    SpriteButton_SetKind(&mBackButton, 4);
     mBackButton.mUnknownDC = 1;
     mBackButton.mSounds.mSounds[0] = 12;
     mBackButton.mSounds.mSounds[2] = 0;
@@ -545,7 +545,7 @@ void ItemTradeList::Open() {
         mCostumeFilter.Select(0);
         mInventory->GetOwned(mItems, &mItemCount, 1, 1);
         mOkButton.mVisible = TRUE;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DC;
         mOkButton.mText.DrawAll();
@@ -563,7 +563,7 @@ void ItemTradeList::Open() {
         mCostumeFilter.SetVisible(TRUE);
         mCostumeFilter.Select(0);
         mOkButton.mVisible = TRUE;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DF;
         mOkButton.mText.DrawAll();
@@ -628,7 +628,7 @@ int ItemTradeList::Run() {
             break;
         }
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mItemFilter.Update();
@@ -636,7 +636,7 @@ int ItemTradeList::Run() {
         mInventory->GetOwned(mItems, &mItemCount, 1, mItemFilter.GetFilter());
         mList.SetItems(mItems, mItemCount);
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mCostumeFilter.Update();
@@ -652,14 +652,14 @@ int ItemTradeList::Run() {
             break;
         }
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mList.Update();
     if (mList.mTouched && mList.mSelected != -1) {
         Item *item = mList.mItems[mList.mSelected];
         int id = item->mId;
-        func_02031e88(&mOkButton, item->mCount <= 0);
+        SpriteButton_SetDisabled(&mOkButton, item->mCount <= 0);
         mPendingIndex = mList.mSelected;
         switch (mSelection.mKind) {
         case PREVIEW_ITEM:
@@ -695,7 +695,7 @@ int ItemTradeList::Run() {
         }
     }
 
-    if (func_0203133c(&mOkButton)) {
+    if (SpriteButton_Update(&mOkButton)) {
         if (mList.mSelected == -1) {
             mChosen = FALSE;
         } else {
@@ -704,7 +704,7 @@ int ItemTradeList::Run() {
             mChosen = TRUE;
         }
     }
-    if (func_0203133c(&mBackButton)) {
+    if (SpriteButton_Update(&mBackButton)) {
         result = RESULT_BACK;
         mChosen = FALSE;
     }
@@ -729,8 +729,8 @@ void ItemTradeList::Close() {
 // @0x0214b2bc
 void ItemTradeList::Draw() {
     mList.Draw();
-    func_0203206c(&mOkButton);
-    func_02031d7c(&mBackButton);
+    TextButton_Draw(&mOkButton);
+    SpriteButton_Draw(&mBackButton);
     mTabs.Draw();
     mItemFilter.Draw();
     mCostumeFilter.Draw();
@@ -771,7 +771,7 @@ void ItemTradeList::RemoveOne() {
     RefreshList();
     mList.Select(mPendingIndex);
     mList.ScrollToSelected();
-    func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+    SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
 // Gives one of the item chosen back
@@ -781,7 +781,7 @@ void ItemTradeList::AddOne() {
     RefreshList();
     mList.Select(mPendingIndex);
     mList.ScrollToSelected();
-    func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+    SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
 // Adds what came: FALSE when there are 99 of it already
@@ -820,7 +820,7 @@ BOOL ItemTradeList::Receive(int id) {
         mPendingIndex = mList.FindItem(selected);
         mList.Select(mPendingIndex);
         mList.ScrollToSelected();
-        func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+        SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
     }
     return received;
 }
@@ -1629,13 +1629,13 @@ void ItemTradeScene::UpdateWireless() {
                     mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
                     ClearText(&mWindow.mTexts[i + 1]);
                     mWindow.mTexts[i + 1].DrawAll();
-                    func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                    SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                 }
                 if (--sPartnerTimers[i] == 0) {
                     mWindow.mTexts[i + 1].SetStringArg(L"", 0);
                     ClearText(&mWindow.mTexts[i + 1]);
                     mWindow.mTexts[i + 1].DrawAll();
-                    func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                    SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                 }
             }
         }
@@ -1997,10 +1997,10 @@ void ItemTradeScene::Update() {
                 if (nextKind == 2) {
                     for (int i = 0; i < 3; i++) {
                         if (sPartnerTimers[i] > 0) {
-                            func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                             mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
                         } else {
-                            func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                         }
                     }
                 }
@@ -2091,9 +2091,9 @@ void ItemTradeScene::Update() {
                 if (nextKind == 2) {
                     for (int i = 0; i < 3; i++) {
                         if (sPartnerTimers[i] > 0) {
-                            func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                         } else {
-                            func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                         }
                     }
                 }

@@ -76,12 +76,12 @@ void InformationScene::Init() {
     for (i = 0; i < 1; i++) {
         u16 sequence = sButtonSequences[i];
         Sprite_Init(&mButtons[i], 1, sequence, 0x80, 0x60, 1);
-        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
-        func_02031278(&mButtons[i], sequence, sequence + 1);
-        func_02031260(&mButtons[i], 4);
+        SpriteButton_SetTouchRect(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        SpriteButton_SetSequences(&mButtons[i], sequence, sequence + 1);
+        SpriteButton_SetKind(&mButtons[i], 4);
         mButtons[i].SetPositionFromVec(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
-        func_02032158(&mButtons[i], &sButtonSounds[i]);
-        func_0203119c(&mButtons[i]);
+        SpriteButton_SetSounds(&mButtons[i], &sButtonSounds[i]);
+        SpriteButton_Reset(&mButtons[i]);
     }
 
     // The statistics over the saved characters
@@ -269,7 +269,7 @@ void InformationScene::Init() {
 }
 
 void InformationScene::Update() {
-    if (func_0203133c(&mButtons[0])) {
+    if (SpriteButton_Update(&mButtons[0])) {
         gSceneManager.RequestScene(0x11);
     }
 }
@@ -278,7 +278,7 @@ void InformationScene::Draw() {
     for (int i = 0; i < TEXT_COUNT; i++) {
         mTexts[i].Draw();
     }
-    func_02031d7c(&mButtons[0]);
+    SpriteButton_Draw(&mButtons[0]);
     for (int j = 0; j < STAR_COUNT; j++) {
         Sprite_Draw(&mStars[j]);
     }

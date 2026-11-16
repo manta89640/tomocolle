@@ -31,8 +31,8 @@ static inline void SetMannequinAnimation(Mannequin *mannequin, const char *name)
 // --- The main program's touch buttons (include/SpriteButton.h) ------------------------------------------------
 
 extern "C" {
-void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
-void func_02032134(TextButton *button, int palette);     // Sets the overwrite palette of the button and its text
+void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
+void TextButton_SetOverwritePalette(TextButton *button, int palette);     // Sets the overwrite palette of the button and its text
 }
 
 // --- Other main-program things --------------------------------------------------------------------------------

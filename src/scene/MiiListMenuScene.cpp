@@ -68,11 +68,11 @@ void MiiListMenuScene::Init() {
 
     for (int i = 0; i < 2; i++) {
         Sprite_Init(&mButtons[i], 0, sButtonSequences[i], 0x80, 0x60, TRUE);
-        func_02031260(&mButtons[i], 4);
-        func_02031278(&mButtons[i], sButtonSequences[i], sButtonPressedSequences[i]);
+        SpriteButton_SetKind(&mButtons[i], 4);
+        SpriteButton_SetSequences(&mButtons[i], sButtonSequences[i], sButtonPressedSequences[i]);
         mButtons[i].SetPosition(FxVec2(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
-        func_0203119c(&mButtons[i]);
+        SpriteButton_SetTouchRect(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        SpriteButton_Reset(&mButtons[i]);
         mButtons[i].mUnknown5E = 1;
     }
 
@@ -159,7 +159,7 @@ void MiiListMenuScene::Update() {
 
 void MiiListMenuScene::UpdateIdle() {
     for (int i = 0; i < 2; i++) {
-        func_0203133c(&mButtons[i]);
+        SpriteButton_Update(&mButtons[i]);
     }
     int pressed = -1;
     for (int i = 0; i < 2; i++) {
@@ -297,7 +297,7 @@ void MiiListMenuScene::Draw() {
         MessageWindow_Draw(&mWindows[i]);
     }
     for (int i = 0; i < 2; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 

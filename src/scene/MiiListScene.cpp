@@ -92,11 +92,11 @@ void MiiListScene::Init() {
     mList.Sort(mSortKey, TRUE);
 
     Sprite_Init(&mSortButton, 0, 0x74, 0x80, 0x60, TRUE);
-    func_02031260(&mSortButton, 4);
-    func_02031278(&mSortButton, 0x74, 0x75);
+    SpriteButton_SetKind(&mSortButton, 4);
+    SpriteButton_SetSequences(&mSortButton, 0x74, 0x75);
     mSortButton.SetPosition(FxVec2(0xD0 << FX32_SHIFT, 0x0D << FX32_SHIFT));
-    func_02031eb0(&mSortButton, 0x28, 0x16);
-    func_0203119c(&mSortButton);
+    SpriteButton_SetTouchRect(&mSortButton, 0x28, 0x16);
+    SpriteButton_Reset(&mSortButton);
     mSortButton.mUnknown5E = 1;
 
     ScreenRect rect = sSortMenuRect;
@@ -126,7 +126,7 @@ void MiiListScene::Update() {
 }
 
 void MiiListScene::UpdateIdle() {
-    func_0203133c(&mSortButton);
+    SpriteButton_Update(&mSortButton);
     if (func_02031ccc(&mSortButton)) {
         mState = STATE_SORT_MENU;
         MessageWindow_Open(&mSortMenu, 0x12, 1);
@@ -193,7 +193,7 @@ void MiiListScene::UpdateSortMenu() {
 }
 
 void MiiListScene::Draw() {
-    func_02031d7c(&mSortButton);
+    SpriteButton_Draw(&mSortButton);
     MessageWindow_Draw(&mSortMenu);
     mList.Draw();
 }

@@ -18,7 +18,7 @@ struct WindowPoint {
 struct MessageWindow;
 extern "C" void MessageWindow_SetTextPosition(MessageWindow *window, int text, int x, int y);
 
-// The main program's message window (virtual table data_021102e8, functions MessageWindow_Init to MessageWindow_SetTextsVAlign): a
+// The main program's message window (virtual table data_021102e8, functions 0x02032FB8 to 0x02034FC8): a
 // window on a background that slides in and out, with sprites, buttons and up to eight message texts. Not
 // decompiled: a stand-in with its size, as the constructors of the scenes that hold one show it, and the fields that
 // the scenes touch. Its constructor is inline: the scenes' constructors (main program, after CreateScene) store its
@@ -64,11 +64,11 @@ struct MessageWindow {
     // What the window's buttons did this frame, each as the number the button was added with (the arrays at
     // +0xAD68 for the sprite buttons, +0xAD98 for the text buttons), -1 for none. The update clears all three, then
     // sets each from the first button that reports it (func_02033f6c, func_0203404c, func_02034110):
-    /* 0xAF7C */ int mTouchedButton;        // The stylus came down on it (func_02031294 and gTouchInput.mTouched)
-    /* 0xAF80 */ int mResult;               // It was pressed: its update returned TRUE (func_0203133c). Opening the
+    /* 0xAF7C */ int mTouchedButton;        // The stylus came down on it (SpriteButton_IsTouched and gTouchInput.mTouched)
+    /* 0xAF80 */ int mResult;               // It was pressed: its update returned TRUE (SpriteButton_Update). Opening the
                                             // window (MessageWindow_Open) also sets it to -1
     /* 0xAF84 */ int mFinishedButton;       // Its press played out: its pressed sequence ended (func_02031ccc,
-                                            // set by its draw, func_02031d7c). The list scenes act on this one
+                                            // set by its draw, SpriteButton_Draw). The list scenes act on this one
     /* 0xAF88 */ BOOL mUnknownAF88;         // The scenes wait for it after opening a window without buttons
     /* 0xAF8C */ BOOL mTransitionDone;      // MessageWindow_Open clears it; set when the window has finished moving
     /* 0xAF90 */ int mUnknownAF90;

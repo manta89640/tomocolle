@@ -18,7 +18,7 @@ void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction)
 extern Light gLight1;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-BOOL func_02031294(SpriteButton *button);
+BOOL SpriteButton_IsTouched(SpriteButton *button);
 BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
@@ -436,12 +436,12 @@ void ReturnButton::Init(int sceneId, int plane, int resource) {
     ObjResourceManager_Load(&gObjResourceManager, "RET:/Obj_down.nce", "RET:/Obj_down.ncg", plane, resource, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "RET:/Obj_down.ncl", plane, 0xE0, 0xE0, 0x40);
     Sprite_Init(this, resource, 2, 0x80, 0x60, TRUE);
-    func_02031eb0(this, 24, 22);
-    func_02031278(this, 2, 3);
-    func_02031260(this, 4);
-    func_02032158(this, &sReturnButtonSounds);
+    SpriteButton_SetTouchRect(this, 24, 22);
+    SpriteButton_SetSequences(this, 2, 3);
+    SpriteButton_SetKind(this, 4);
+    SpriteButton_SetSounds(this, &sReturnButtonSounds);
     SetPositionFromVec(0xF2000, 0xD000);
-    func_0203119c(this);
+    SpriteButton_Reset(this);
     ScreenLoader_SetPriority(&gScreenLoader, plane, 0);
     gScreenControl.Show(plane);
     mHeld = FALSE;
@@ -451,19 +451,19 @@ void ReturnButton::Init(int sceneId, int plane, int resource) {
 void ReturnButton::Update() {
     mHeld = FALSE;
     mPressed = FALSE;
-    if (func_0203133c(this)) {
+    if (SpriteButton_Update(this)) {
         if (mSceneId != -1) {
             gSceneManager.RequestScene(mSceneId);
         }
         mPressed = TRUE;
     }
-    if (func_02031294(this)) {
+    if (SpriteButton_IsTouched(this)) {
         mHeld = TRUE;
     }
 }
 
 void ReturnButton::Draw() {
-    func_02031d7c(this);
+    SpriteButton_Draw(this);
 }
 
 void ReturnButton::UnmountArchive() {
@@ -559,12 +559,12 @@ void NewsButton::Init(int resource) {
     func_02028f24(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
     Sprite_Init(this, 1, 6, 0x80, 0x60, TRUE);
-    func_02031eb0(this, 116, 30);
-    func_02031278(this, 6, 7);
-    func_02031260(this, 4);
-    func_02032158(this, &sNewsButtonSounds);
+    SpriteButton_SetTouchRect(this, 116, 30);
+    SpriteButton_SetSequences(this, 6, 7);
+    SpriteButton_SetKind(this, 4);
+    SpriteButton_SetSounds(this, &sNewsButtonSounds);
     SetPositionFromVec(0x80000, 0x60000);
-    func_0203119c(this);
+    SpriteButton_Reset(this);
     ScreenLoader_SetPriority(&gScreenLoader, 8, 0);
     ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
     ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
@@ -574,7 +574,7 @@ void NewsButton::Init(int resource) {
 void NewsButton::Update(Scene *scene, BOOL leave) {
     mPressed = FALSE;
     ScreenControl_BlendFadeIn(&gScreenControl, 0x17, 1);
-    if (func_0203133c(this)) {
+    if (SpriteButton_Update(this)) {
         mPressed = TRUE;
         if (leave) {
             scene->mSkipFade = TRUE;
@@ -585,7 +585,7 @@ void NewsButton::Update(Scene *scene, BOOL leave) {
 }
 
 void NewsButton::Draw() {
-    func_02031d7c(this);
+    SpriteButton_Draw(this);
 }
 
 void NewsButton::Unload() {

@@ -269,7 +269,7 @@ BOOL func_0202cd54(GameData *game);
 
 // --- The sprite buttons (the rest are in SpriteButton.h) ---
 // Whether the stylus is on the button (the scene ignores touches elsewhere while one is)
-BOOL func_02031294(SpriteButton *button);
+BOOL SpriteButton_IsTouched(SpriteButton *button);
 
 // --- The message window ---
 

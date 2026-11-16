@@ -527,24 +527,24 @@ void MapScene::Init() {
 
     for (int i = 0; i < 1; i++) {
         Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
-        func_02031eb0(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
+        SpriteButton_SetTouchRect(&mBackButtons[i], sBackButtonSize.x, sBackButtonSize.y);
     }
     mBackButtons[0].SetPositionFromVec(sBackButtonPosition.x << FX32_SHIFT, sBackButtonPosition.y << FX32_SHIFT);
     for (int i = 0; i < 1; i++) {
-        func_02031260(&mBackButtons[i], backButtonKind);
-        func_02031278(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
-        func_02032158(&mBackButtons[i], &sBackButtonSounds);
-        func_0203119c(&mBackButtons[i]);
+        SpriteButton_SetKind(&mBackButtons[i], backButtonKind);
+        SpriteButton_SetSequences(&mBackButtons[i], sBackButtonSequences[i], sBackButtonSequences[i] + 1);
+        SpriteButton_SetSounds(&mBackButtons[i], &sBackButtonSounds);
+        SpriteButton_Reset(&mBackButtons[i]);
         mBackButtons[i].mVisible = FALSE;
     }
     for (int i = 0; i < 3; i++) {
         Sprite_Init(&mButtons[i], 1, 0, 128, 96, TRUE);
-        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        SpriteButton_SetTouchRect(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
         mButtons[i].SetPositionFromVec(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
-        func_02031260(&mButtons[i], sButtonKinds[i]);
-        func_02032158(&mButtons[i], &sButtonSounds[i]);
-        func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
-        func_0203119c(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], sButtonKinds[i]);
+        SpriteButton_SetSounds(&mButtons[i], &sButtonSounds[i]);
+        SpriteButton_SetSequences(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
+        SpriteButton_Reset(&mButtons[i]);
         mButtons[i].mVisible = FALSE;
     }
     mMessageFiles[0].Open("TCO:tmd_common_msg_JP.bmg");
@@ -552,7 +552,7 @@ void MapScene::Init() {
     int charOffset = 200;
     int titleCharOffset = 400;
     for (u16 i = 0; i < 3; i++) {
-        charOffset += func_02031f58(&mButtons[i], &mMessageFiles[1], sButtonMessages[i], &gFonts[sButtonFonts[i]].mFont,
+        charOffset += TextButton_SetMessage(&mButtons[i], &mMessageFiles[1], sButtonMessages[i], &gFonts[sButtonFonts[i]].mFont,
                                     0x10, charOffset);
     }
     MessageWindow_Init(&mMessageWindows[0], sTitleWindowRect);
@@ -689,7 +689,7 @@ void MapScene::Update() {
         case 17:
         case 20:
             for (int i = 0; i < 3; i++) {
-                if (func_0203133c(&mButtons[i]) && i == 0) {
+                if (SpriteButton_Update(&mButtons[i]) && i == 0) {
                     gSceneManager.RequestScene(0x69);
                 }
             }
@@ -924,7 +924,7 @@ void MapScene::Update() {
         }
         BOOL held = FALSE;
         for (int i = 0; i < 3; i++) {
-            if (func_0203133c(&mButtons[i])) {
+            if (SpriteButton_Update(&mButtons[i])) {
                 switch (i) {
                 case 0:
                     EnterBuilding(mSelected, mNewsDue, 0);
@@ -937,13 +937,13 @@ void MapScene::Update() {
                     break;
                 }
             }
-            if (mButtons[i].mVisible && func_02031294(&mButtons[i])) {
+            if (mButtons[i].mVisible && SpriteButton_IsTouched(&mButtons[i])) {
                 held = TRUE;
             }
         }
         if (!held) {
             for (int i = 0; i < 1; i++) {
-                if (func_0203133c(&mBackButtons[i])) {
+                if (SpriteButton_Update(&mBackButtons[i])) {
                     if (mCamera.IsAtHome()) {
                         gSceneMemory.mCharacters[0] = 0;
                         gSceneManager.RequestScene(0x11);
@@ -951,7 +951,7 @@ void MapScene::Update() {
                         Deselect(TRUE, 1);
                     }
                 }
-                if (mBackButtons[i].mVisible && func_02031294(&mBackButtons[i])) {
+                if (mBackButtons[i].mVisible && SpriteButton_IsTouched(&mBackButtons[i])) {
                     held = TRUE;
                 }
             }
@@ -1042,9 +1042,9 @@ void MapScene::Draw() {
     }
     mClockDisplay.Draw();
     mMoneyDisplay.Draw();
-    func_02031d7c(&mBackButtons[0]);
+    SpriteButton_Draw(&mBackButtons[0]);
     for (int i = 0; i < 3; i++) {
-        func_0203206c(&mButtons[i]);
+        TextButton_Draw(&mButtons[i]);
     }
     for (int i = 0; i < mWindowCount; i++) {
         func_0202b4a4(&mWindows[i]);
@@ -1252,7 +1252,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         }
     }
-    func_0203119c(&mBackButtons[0]);
+    SpriteButton_Reset(&mBackButtons[0]);
     mBackButtons[0].mVisible = TRUE;
     mButtons[0].mVisible = FALSE;
     mButtons[1].mVisible = FALSE;
