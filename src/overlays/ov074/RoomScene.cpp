@@ -10859,7 +10859,7 @@ extern "C" {
 // --- The main program's, not decompiled or not named yet ---
 
 // The offset (the plane's number shifted by 11) of a plane's screen in VRAM
-int func_020253d4(void *graphicsManager, int plane);
+int GraphicsManager_GetScreenOffset(void *graphicsManager, int plane);
 
 // Splits a 15-bit colour
 void SplitColor(int color, int *r, int *g, int *b);
@@ -12039,7 +12039,7 @@ void ApartmentFront::Init(int room) {
     for (u8 i = 0; i < sRoomCounts[mBuildingSize]; i++) {
         DrawWindow(i);
     }
-    mScreen = (u16 *)(func_020253d4(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
+    mScreen = (u16 *)(GraphicsManager_GetScreenOffset(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
     mSelectedRoom = room;
     int column;
     int floor;

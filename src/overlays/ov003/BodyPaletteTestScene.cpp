@@ -54,7 +54,7 @@ void BodyPaletteTestScene::Update() {
         palette[1] = GX_RGB(31, 0, 0);
         Model_QueuePalette(&mBody, palette, -1, -1);
     } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
-        func_02029758(gModelResources, RESOURCE_BMD0);
+        ResourceSet_ReleaseFile(gModelResources, RESOURCE_BMD0);
         ArchiveManager_Unmount(&gArchiveManager, "TG3");
         ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
         ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");

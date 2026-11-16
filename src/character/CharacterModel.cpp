@@ -18,7 +18,7 @@ void func_0202a25c(AnimModel *model, u32 resType, int id);                   // 
 void AnimModel_RemoveAnimation(AnimModel *model, u32 resType, int id);                   // Removes an animation
 void func_0202a3b0(AnimModel *model, u32 resType);                           // Removes the animations of a type
 void AnimModel_SetAnimationFrame(AnimModel *model, fx32 frame, u32 resType, int id); // Sets an animation's frame
-fx32 func_0202a5fc(AnimModel *model, u32 resType, int id);                   // An animation's frame
+fx32 AnimModel_GetAnimationFrame(AnimModel *model, u32 resType, int id);                   // An animation's frame
 void RotateMtx33ByAngles(MtxFx33 *rotation, u16 x, u16 y, u16 z);                  // Turns a rotation by angles
 BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);  // The line meets the sphere
 
@@ -143,7 +143,7 @@ void CharacterModel::SetAnimFlagsAndFrame(BOOL playOnce, fx32 frame, BOOL finish
 }
 
 void CharacterModel::MakeModel(int resourceId, int unk) {
-    fx32 frame = func_0202a5fc(&mAnim, RESOURCE_BCA0, mAnimId);
+    fx32 frame = AnimModel_GetAnimationFrame(&mAnim, RESOURCE_BCA0, mAnimId);
     NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj);
     mAnim.RemoveAnims();
     Model_BindResource(&mAnim, RESOURCE_BMD0, resourceId, unk);

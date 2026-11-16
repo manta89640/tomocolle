@@ -91,8 +91,8 @@ public:
 
 extern "C" {
 void Model_SetAlpha(Model *model, int alpha); // Sets a model's alpha (0 to 31)
-int func_02029d9c(Model *model);
-int func_02029dd0(Model *model);
+int Model_GetTexSize(Model *model);
+int Model_GetPlttSize(Model *model);
 }
 
 // What the room's models have in common: the archive they come from and where they are.
@@ -187,8 +187,8 @@ public:
     void Draw(const MtxFx33 *rotation, const MtxFx43 *matrix);
     void SetFlags(int flags);
     void SetModelAlpha(int alpha) { Model_SetAlpha(&mModel, alpha); }
-    int GetUnknown() { return func_02029d9c(&mModel); }
-    int GetUnknown2() { return func_02029dd0(&mModel); }
+    int GetUnknown() { return Model_GetTexSize(&mModel); }
+    int GetUnknown2() { return Model_GetPlttSize(&mModel); }
 
     /* 0x04C */ AnimModel mModel;
     /* 0x12C */ int mState;

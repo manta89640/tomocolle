@@ -111,7 +111,7 @@ void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
 void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive); // Gives a resource set the animations of an archive
-void *func_020295a4(void *resourceSet, u32 resType);
+void *ResourceSet_GetFile(void *resourceSet, u32 resType);
 
 // --- Characters ---
 }

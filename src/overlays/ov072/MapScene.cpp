@@ -893,11 +893,11 @@ void MapScene::Update() {
                 mNewsDue = IsNewsDue();
                 if (((SaveHeader *)&gIsland)->GetUnknown44(9) == 1 || ((SaveHeader *)&gIsland)->GetUnknown44(9) == 2) {
                     if (mNewsDue) {
-                        if (func_0202a1f8(&mModels[10], RESOURCE_BTP0, 0)) {
+                        if (AnimModel_GetAnimationId(&mModels[10], RESOURCE_BTP0, 0)) {
                             mModels[10].SetAnimation(RESOURCE_BTP0, 0);
                         }
                     } else {
-                        if (func_0202a1f8(&mModels[10], RESOURCE_BTP0, 0) != 1) {
+                        if (AnimModel_GetAnimationId(&mModels[10], RESOURCE_BTP0, 0) != 1) {
                             mModels[10].SetAnimation(RESOURCE_BTP0, 1);
                         }
                     }

@@ -22,7 +22,7 @@ BOOL func_02035aa4(void *clock);
 extern MATHRandContext16 gRandom;
 
 // The model library
-void *func_0202a5fc(Model *model, u32 resType, int unk);
+void *AnimModel_GetAnimationFrame(Model *model, u32 resType, int unk);
 void AnimModel_SetAnimationFrame(Model *model, void *anim, u32 resType, int unk);
 void Model_BindResource(Model *model, u32 resType, int resourceId, int unk);
 }
@@ -628,7 +628,7 @@ void ItemModel::LoadModel(int resourceId) {
 
 void ItemModel::LoadAnimation(int resourceId) {
     mBaseScale = FX32_ONE;
-    void *anim = func_0202a5fc(this, RESOURCE_BCA0, 0);
+    void *anim = AnimModel_GetAnimationFrame(this, RESOURCE_BCA0, 0);
     NNS_G3dRenderObjResetCallBack(&mRenderObj);
     RemoveAnims();
     Model_BindResource(this, RESOURCE_BMD0, resourceId, 0);

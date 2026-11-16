@@ -1282,7 +1282,7 @@ Measured:
 - `Update`, by the button pressed this frame: A gets the file "TG3:/body_c1.ntfp" (a palette), makes its colour 1
   red and gives it to `Model_QueuePalette` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
   X makes colour 1 of `mBody`'s own palette data (`mResTex->plttInfo.ofsPlttData`) cyan and transfers 4 bytes;
-  B releases the model resource (`func_02029758`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
+  B releases the model resource (`ResourceSet_ReleaseFile`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
   `body.imd` to resource 0 again and rebinds `mBody`'s model (`Model_BindResource`); Y walks the palette-to-material
   dictionary of `mBody`'s materials and looks each name up in its textures' palette dictionary
   (`NNS_G3dGetPlttDataByName`), with nothing done with the result. Otherwise the pad turns the camera, as in

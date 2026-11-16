@@ -90,7 +90,7 @@ void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, in
 // comes (a brightness, by the values)
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int mask, int value);
 // The offset (the plane's number shifted by 11) of a plane's screen in VRAM
-int func_020253d4(u32 *graphicsManager, int plane); // (gGraphicsManager is declared in text/TextCanvas.h)
+int GraphicsManager_GetScreenOffset(u32 *graphicsManager, int plane); // (gGraphicsManager is declared in text/TextCanvas.h)
 
 // --- Input ---
 extern PadInput gPadInput;

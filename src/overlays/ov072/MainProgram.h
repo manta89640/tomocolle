@@ -246,7 +246,7 @@ void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, i
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
-int func_0202a1f8(AnimModel *model, u32 resType, int slot);
+int AnimModel_GetAnimationId(AnimModel *model, u32 resType, int slot);
 void Camera_Reset(Camera *camera);
 void Light_Reset(Light *light);
 void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);

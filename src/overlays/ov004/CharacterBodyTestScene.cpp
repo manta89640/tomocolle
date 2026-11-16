@@ -76,7 +76,7 @@ void CharacterBodyTestScene::Update() {
                           -1, -1);
             break;
         case 2:
-            func_02029758(gModelResources, RESOURCE_BMD0);
+            ResourceSet_ReleaseFile(gModelResources, RESOURCE_BMD0);
             ArchiveManager_Unmount(&gArchiveManager, "TG3");
             ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
             ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");

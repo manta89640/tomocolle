@@ -2139,7 +2139,7 @@ void TutorialApartmentFront::Init(int room) {
     for (u8 i = 0; i < sRoomCounts[mBuildingSize]; i++) {
         DrawWindow(i);
     }
-    mScreen = (u16 *)(func_020253d4(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
+    mScreen = (u16 *)(GraphicsManager_GetScreenOffset(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
     mSelectedRoom = room;
     int column;
     int floor;

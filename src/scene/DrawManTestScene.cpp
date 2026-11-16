@@ -53,8 +53,8 @@ void DrawManTestScene::Update() {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         void *resourceSet = (void *)mModel.mUnknown04;
-        NNS_G3dReleaseMdlSet(NNS_G3dGetMdlSet(func_020295a4(resourceSet, RESOURCE_BMD0)));
-        func_02029758(resourceSet, RESOURCE_BTX0);
+        NNS_G3dReleaseMdlSet(NNS_G3dGetMdlSet(ResourceSet_GetFile(resourceSet, RESOURCE_BMD0)));
+        ResourceSet_ReleaseFile(resourceSet, RESOURCE_BTX0);
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         VramManagers_Reset(&gVramManagerWork);

@@ -111,7 +111,7 @@ void SavePlayScene::Init() {
     int count = 0;
     void *resourceSet = (void *)mCharacters[0].mAnim.mUnknown04;
     for (;;) {
-        if (NNS_G3dGetAnmByIdx(func_020295a4(resourceSet, RESOURCE_BCA0), count) == NULL) {
+        if (NNS_G3dGetAnmByIdx(ResourceSet_GetFile(resourceSet, RESOURCE_BCA0), count) == NULL) {
             break;
         }
         count++;

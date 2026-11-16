@@ -518,7 +518,7 @@ void RoomModels::SetAlpha(int alpha) {
 }
 
 int RoomModels::SumUnknown() {
-    int sum = func_02029d9c(&mDoor.mModel);
+    int sum = Model_GetTexSize(&mDoor.mModel);
     for (int i = 0; i < ROOM_PART_COUNT; i++) {
         if (mParts[i].mResourceId >= 0) {
             sum += mParts[i].GetUnknown();
@@ -528,7 +528,7 @@ int RoomModels::SumUnknown() {
 }
 
 int RoomModels::SumUnknown2() {
-    int sum = func_02029dd0(&mDoor.mModel);
+    int sum = Model_GetPlttSize(&mDoor.mModel);
     for (int i = 0; i < ROOM_PART_COUNT; i++) {
         if (mParts[i].mResourceId >= 0) {
             sum += mParts[i].GetUnknown2();
