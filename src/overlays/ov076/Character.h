@@ -78,14 +78,14 @@ struct CharacterRecord {
     /* 0x04F */ u8 mUnknown04F;
     /* 0x050 */ u32 mUnknown050Bit0 : 1;
     /*       */ u32 mUnknown050Bits1 : 16;
-    /*       */ u32 mUnknown050Bits17 : 12; // A number the Mii maker's profile page shows in four digits, 0xFFF for none
-    /*       */ u32 mUnknown050Bits29 : 3;  // The profile page shows etc message 0x5A plus it
+    /*       */ u32 mBirthYear : 12; // A number the Mii maker's profile page shows in four digits, 0xFFF for none
+    /*       */ u32 mBloodType : 3;  // The profile page shows etc message 0x5A plus it
     /* 0x054 */ u32 mUnknown054Bits0 : 4;
     /*       */ u32 mInterior : 7;        // As overlay 109 has it
     /*       */ u32 mUnknown054Bits11 : 9;
     /*       */ u32 mUnknown054Bits20 : 12;
     /* 0x058 */ wchar_t mName[11];          // As overlay 109 has it from here on: the record's implicit assignment
-    /* 0x06E */ wchar_t mUnknown06E[11];    // (MiiEditVoicePage::func_ov076_0215707c) copies these members one by one
+    /* 0x06E */ wchar_t mFamilyName[11];    // (MiiEditVoicePage::RememberForUndo) copies these members one by one
     /* 0x084 */ wchar_t mSpeechDefault[17];
     /* 0x0A6 */ wchar_t mSpeechByMood[4][9];
     /* 0x0EE */ s16 mVoice[6];              // The voice page's five sliders (func_02098d68 sets them) and its choice of four
@@ -128,7 +128,7 @@ struct CharacterRecord {
     /* 0x295 */ u8 mMood;
     /* 0x296 */ u8 mUnknown296;
     /* 0x297 */ u8 mUnknown297;
-    /* 0x298 */ u8 mUnknown298;
+    /* 0x298 */ u8 mRelationToPlayer;
     /* 0x299 */ u8 mUnknown299;
     /* 0x29A */ u8 mSongSlots[6];
     /* 0x2A0 */ u8 mUnknown2A0;

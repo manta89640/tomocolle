@@ -260,6 +260,9 @@ Other per-function settings found the same way (overlay 109):
   off` is one). Check a pragma on a small file with `-w all` first; the `opt_*` names it knows are in the
   executable's strings (`strings mwccarm.exe | grep ^opt_`).
 - Builds 137, 138 and 139 compile overlay 109's near-misses identically, so they are not a version question.
+- `#pragma opt_common_subs off` alone, at the default level, gave overlay 76's `MiiEditFacePage::SetParameter` its
+  clamp `CLAMP(get(p) + delta, min, max)` as the original's: the range's ends reloaded from the stack after each call
+  of the getter, where the default hoists one of them into a callee-saved register.
 
 ## How a file's data is laid out
 
@@ -362,6 +365,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - mwcc folds `&table[1]` and `table + 1` into the literal (`table+0x2`), but not after a pointer cast:
   `(const u16 *)wideTable + 1`, and the same for an address of a string literal (the keyboard's character tables,
   `KeyboardCore_UseEnglishLayout` and the four after it).
+  `func_02082b48` and the four after it).
+- The same for a member: `(u8 *)&mKeyboard.mButtons + 0x6B8` keeps the original's `ldr` of the member's offset and
+  `add 0x2b8; add 0x400`, where `&mKeyboard.mButtons[1]` folds the two (`MiiEditProfilePage::Update`).
 
 **Two literal-pool entries for one address**
 - One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
@@ -385,6 +391,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `hour * 3600 + minute * 60` computes the minutes first.
 - A parameter passed on through a local copy (`ld = num; ... __num2dec(&form, ld, &dec);`) is loaded before the
   function's first early return, where passing the parameter loads it after (`double2hex`, `wprintf.c`).
+- `x -= widths->charWidth >> 1; obj->field = x;` loads the object's pointer before the `ldrsb`, where
+  `obj->field = x - (w >> 1)` loads it after (`MiiEditProfilePage::Update`).
+- `value = get(); ... value += step;` gives `add r5, r0, r5` where both `get() + step` and `step + get()` give the
+  operands the other way (`MiiEditFacePage::StepParameter`).
 
 **Stack slots in the wrong order, or a frame too large**
 - A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
@@ -415,6 +425,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A value used once, taken straight off a call's result (`f().LengthSq()`) rather than through a local: its copies
   become temporaries below the function's locals, which let a later block's local take the slot above them
   (`RoomScene::StartMeeting`, overlay 74).
+- Not solved: `MiiEditProfilePage::SetState` (7 KB) keeps the WindowPoint copies passed by value to its windows'
+  buttons in six slots below every other local (two of them copies of one size, one never read). Fresh copies per
+  window move them to the bottom but in another order and without the unread one; reusing one copy across windows
+  gives it a slot among the function's own locals. A search over 128 combinations of fresh and reused copies and over
+  the declarations' places did not find the original's order.
 
 **Registers allocated differently**
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
@@ -483,6 +498,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   to the lower callee-saved registers; with `#pragma optimization_level 2` and `opt_common_subs off` it gave
   `func_0207183c` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is coloured
   as a new value: there the second pair of assignments had to keep the casts too.
+- A loop counter and a value it is compared with in the original's registers: `int i; int choice;` at the block's
+  top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
+  `MiiEditProfilePage::Update`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -524,6 +542,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A test whose second branch the original places first (`cmp #1; beq later; cmp #2; bne end; <case 2>`) is a
   switch with that case written first (overlay 76's voice page).
 - A loop of one iteration kept as a loop: `for (u16 i = 0; i <= 0; i++)`; `i < 1` is folded away.
+- A BOOL made of an `&&` chain of calls, with every failure branching to one `mov r0, #0` and the last test
+  `movne r0, #1`: `if (a && b && ...) ok = TRUE; else ok = FALSE;`. `ok = a && b && ...`, or an inline returning the
+  chain through a member pointer, materialise a flag per operand (`MiiEditProfilePage::SetState`).
 
 **Independent statements scheduled in another order**
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four

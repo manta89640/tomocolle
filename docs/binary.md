@@ -759,8 +759,8 @@ Measured:
   and build (0x16, 0x17, both read capped at 127), face, hair, eyebrows, eyes, nose, mouth, glasses, beard and
   mustache, mole (0x20 to 0x34), the creator's name (0x36). mwccarm allocates bit fields from the low bit, the
   reverse of the Wii's compiler, so they are declared in the reverse order of the Wii's.
-- **0x36 is the creator's name here too**: the Mii maker (`func_ov076_0214c2e4`) gives a new Mii the 0x36 of saved
-  character 0, or that character's name when `func_ov076_0214bf20` rejects it. (Overlay 109's source calls it a
+- **0x36 is the creator's name here too**: the Mii maker (`MiiEditSexPage::Update`) gives a new Mii the 0x36 of saved
+  character 0, or that character's name when `MiiEditScene::GetNameLength` rejects it. (Overlay 109's source calls it a
   nickname.)
 - `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
   passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`func_020743a0`):
@@ -1039,7 +1039,7 @@ Overlay 76, `SceneMiiEdit2`: 83 functions, `.text` `0x02149A40` to `0x02158748` 
 `src/overlays/ov076/MiiEditScene.cpp`, which claims every section. 24 of its 83 functions are written and match
 (the scene's StartLoading, Draw, Exit, camera functions and destructors, and the pages' Draw and Exit); the header
 holds the scene's layout and its seven pages (`mPage`, +0x150: 0 the sex choice, etc message 0x1A; 1 the face, 0x1C;
-2 the profile, 0x1D; 3 the voice, 0x21; 4 the personality, 0x22; 5 and 6 window pages not yet identified).
+2 the profile, 0x1D; 3 the voice, 0x21; 4 the personality, 0x22; 5 and 6 the questions of finishing).
 
 Measured:
 
@@ -1070,11 +1070,11 @@ Measured:
 
 Measured, from the last third of the file (`0x02153CF4` on):
 
-- **The pages' Init and Update.** The scene's page switch (`func_ov076_0214b1ec`) calls the old page's Exit and then
+- **The pages' Init and Update.** The scene's page switch (`MiiEditScene::SetPage`) calls the old page's Exit and then
   the new page's first function with the scene (pages 5 and 6 also get the page that was open). The scene's Update
   calls one function of the page shown. Each page keeps the scene in a member.
 - **Pages 5 and 6** are a question in a window with two buttons, common messages 2 and 3 ("はい", "いいえ"), under
-  etc message 0x2E (5) or 0x2D (6). The first button leaves the scene: page 6 first calls `func_ov076_0214b890` and
+  etc message 0x2E (5) or 0x2D (6). The first button leaves the scene: page 6 first calls `MiiEditScene::SaveCharacter` and
   passes the resident on in `data_0213ba74`+0x20 (scenes 0x74 or 0x69); page 5 asks for 0x1A or 0x5E. The second
   goes back to the page that was open.
 - **The personality page (4)** has five sliders of eight steps. They set the five bytes at +0x4A of the record
@@ -1086,7 +1086,7 @@ Measured, from the last third of the file (`0x02153CF4` on):
 - **The voice page (3)** has six voice presets (`data_020FBAAC`, six `s16` each), a random voice (`MATH_Rand16`
   over each value's range, `data_020FB940`), five sliders and a choice of four for +0xEE..+0xF9 of the record (six
   `s16`, `func_02098d68`). It keeps two copies of the record: one to undo a change, one to restore on cancel.
-- **The voice page speaks the profile** with the scene's `TtsPlayer`, one part at a time (`func_ov076_02157508`,
+- **The voice page speaks the profile** with the scene's `TtsPlayer`, one part at a time (`MiiEditVoicePage::SpeakProfile`,
   etc messages 0x2F to 0x36) through `CharacterSpeechTexts`, 0x294 bytes of texts that `func_0204E4B4` makes from a
   record. Each part goes on once the engine is idle.
 - **The star signs.** One part speaks the star sign of the birthday: `data_ov076_02158D34` holds the first day of
@@ -1098,21 +1098,21 @@ Measured, from the last third of the file (`0x02153CF4` on):
 
 Measured, from the first third of the file (to `0x0214EDB8`):
 
-- **The scene's own functions.** `func_ov076_0214b670` reads the saved character into the scene's character and
-  `func_ov076_0214b694` loads its model ("B0I"), by sex. `func_ov076_0214b890` writes the character back
+- **The scene's own functions.** `MiiEditScene::LoadCharacter` reads the saved character into the scene's character and
+  `MiiEditScene::LoadModel` loads its model ("B0I"), by sex. `MiiEditScene::SaveCharacter` writes the character back
   (`func_0202c28c` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
   at +0x54 (overlay 109's `mInterior`) from the personality's row (`data_020fba28`) and the sex, and for scenes 0x43,
-  0x44 and 0x6F resets some of the record's fields. The four functions beside `func_ov076_0214bbe4` show or hide the
+  0x44 and 0x6F resets some of the record's fields. The four functions beside `MiiEditScene::ShowControls` show or hide the
   scene's buttons and texts with one of the lower screen's backgrounds ("BG_down", "BG_down_editface",
   "BG_down_nobar").
 - **mSprite582C** is a pointer at one of five places along the lower screen (`sSpriteB0Places`, under the gaps
   between the scene's five page buttons). Init puts it at 4 for scene 0x42, 2 for 0x44 and 0 for 0x43 and 0x6F;
-  `func_ov076_0214bec8` only moves it to a higher place.
+  `MiiEditProgressSprite::AdvanceTo` only moves it to a higher place.
 - **Page 0** is the sex choice: two windows (etc messages 0x1A, 0x1B), with a third button for scene 0x43 and other
   button positions for 0x6F. Its Update sets the sex, the default colours of the sex (`data_020fbaac`), a blank
-  name, and the creator's name from saved character 0 (its name if `func_ov076_0214bf20` finds the creator's name
+  name, and the creator's name from saved character 0 (its name if `MiiEditScene::GetNameLength` finds the creator's name
   empty), and asks for scene 0x5E when the window's third answer is chosen.
-- **The face page** has eight parts (`func_ov076_0214de94`): 0 the body, with the two sliders for parameters 0x29 and
+- **The face page** has eight parts (`MiiEditFacePage::ShowPart`): 0 the body, with the two sliders for parameters 0x29 and
   0x2A (inferred: height and build; the camera is raised with 0x29); 1 the face (`MiiEditFaceTab`); 2 hair, 3 eyebrows, 4 eyes,
   5 nose and 6 mouth, each with its graphics ("E00:/Hair.nce" and so on), a colour palette and colour buttons where
   the part has a colour, and pages of twelve parts (6, 2, 4 and 2 pages for hair, eyebrows, eyes and mouth); 7 the
@@ -1121,6 +1121,34 @@ Measured, from the first third of the file (to `0x0214EDB8`):
   all parts but the body.
 - **The data.** All 122 objects of `.rodata` are written out and come out at their ROM addresses
   (`MiiEditScene.cpp`, between the BEGIN and END markers); see decompiling.md, "How a file's data is laid out".
+
+Measured, from the middle of the file (`0x0214EE7C` to `0x02153A8C`) and the etc messages (decoded from
+`Msg/TmdEtcMsgJP_LZ.bin`: LZ10, a NARC holding the BMG):
+
+- **The face page's parts.** `GetPartType` maps a part button to a Mii part type through one table per part
+  (`sHairTypes`, 72; `sEyebrowTypes`, 24; `sEyeTypes`, 48; `sNoseTypes`, 12; `sMouthTypes`, 24), and
+  `GetPartButton` is its inverse. `SetParameter` sets a Mii parameter through the main program's setter. For the eye
+  and eyebrow types it also turns the eyes (parameter 3) or eyebrows (9) by the difference of two entries of
+  `sEyeRotations` or `sEyebrowRotations`, then plays the particle effect at the head, raised by a height for the part.
+  It keeps the parameter's old value, and button 27 swaps it back and forth: undo and redo (`SetUndoMode`, the
+  button flipped for redo).
+- **Two tabs of the face page** are objects of their own at +0x3410 and +0x341C: the face (`MiiEditFaceTab`, Mii
+  parameters 0x23 to 0x25: type, colour, texture) and the other parts (`MiiEditEtcTab`: glasses 0x1F/0x20,
+  mustache 0x12/0x11, mole 0x15, beard 0x10/0x11).
+- **The profile page's states**: 1 the ten buttons, 3, 5, 7 and 9 the keyboard for the name (etc message 0x1F, the
+  record's +0x58), the family name (0x1E "苗字", +0x6E), the nickname (0x20, the Mii data's name) and the creator
+  (0x24). 10 to 16 open its six windows: blood type (+0x50 bits 29-31: Ａ, Ｂ, Ｏ, ＡＢ, 4 for none), favourite colour
+  (parameter 0x28, etc messages 0x44 on), the birth year (+0x50 bits 17-28, 1900 to 2099, 0xFFF for none; the voice
+  page speaks it as 0x32 "{n}ネンウマレ"), the birthday (0x26, 0x27), the relation to the player (+0x298: etc messages
+  0x54 + 0 other, 2 spouse, 3 parent, 4 child, 5 sibling; page 0 sets 1, 本人, for the player's own Mii) and the sex.
+  The windows' choices are read from +0xAF7C of the message window (`mUnknownAF7C`), and the original reads it and
+  `mResult` anew at each use.
+- **Pages 5 and 6** ask "保存しないで終了します。よろしいですか？" (0x2E, finish without saving) and
+  "登録します。よろしいですか？" (0x2D, register), hence `MiiEditQuitPage` and `MiiEditRegisterPage`. Page 0 is
+  `MiiEditSexPage` (0x1A "性別をえらんでください", then 0x1B "顔を作りますか？").
+
+Not done in the middle: `MiiEditProfilePage::SetState` (99.97%: six stack slots of the WindowPoints held across its
+windows' set-up).
 
 Not done in the first third: `MiiEditScene::Init` (95.8%: the registers of the index and the character offset in the
 loops over the buttons and the text boxes).
