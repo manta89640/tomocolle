@@ -1792,7 +1792,7 @@ _ZN7Scene2BC1Ei kind:function(arm,size=0x118) addr:0x02040e20
 _ZN13SavePlaySceneC1Ei kind:function(arm,size=0x11c) addr:0x02040f38
 _ZN17SavePlayCharacterC1Ev kind:function(arm,size=0x20) addr:0x02041054
 _ZN17SavePlayCharacterD1Ev kind:function(arm,size=0x60) addr:0x02041074
-func_020410d4 kind:function(arm,size=0x50) addr:0x020410d4
+_ZN17InteriorViewSceneC1Ei kind:function(arm,size=0x50) addr:0x020410d4
 func_02041124 kind:function(arm,size=0x40c) addr:0x02041124
 _ZN9ItemModelD1Ev kind:function(arm,size=0x3c) addr:0x02041530
 _ZN7Scene30C1Ei kind:function(arm,size=0x178) addr:0x0204156c
@@ -2107,7 +2107,7 @@ func_02051ea8 kind:function(arm,size=0x2ac) addr:0x02051ea8
 func_02052154 kind:function(arm,size=0x10) addr:0x02052154
 func_02052164 kind:function(arm,size=0x10) addr:0x02052164
 func_02052174 kind:function(arm,size=0x60) addr:0x02052174
-func_020521d4 kind:function(arm,size=0x10) addr:0x020521d4
+_ZN17InteriorViewScene8SetStateEi kind:function(arm,size=0x10) addr:0x020521d4
 func_020521e4 kind:function(arm,size=0x60) addr:0x020521e4
 func_02052244 kind:function(arm,size=0x68) addr:0x02052244
 NewsItem_Make kind:function(arm,size=0xd10) addr:0x020522ac
@@ -5408,7 +5408,7 @@ gStr_M02_apart_wait00_iva kind:data(any) addr:0x02111ce4
 gStr_M00_4 kind:data(any) addr:0x02111cfc
 gStr_M01_4 kind:data(any) addr:0x02111d00
 gStr_M02_2 kind:data(any) addr:0x02111d04
-data_02111d10 kind:data(any) addr:0x02111d10
+_ZTV17InteriorViewScene kind:data(any) addr:0x02111d08
 gStr_CO0_2 kind:data(any) addr:0x02111d2c
 gStr_RM_2 kind:data(any) addr:0x02111d30
 data_02111d34 kind:data(any) addr:0x02111d34

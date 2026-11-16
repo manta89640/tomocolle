@@ -32,6 +32,7 @@
 #include "../overlays/ov079/RankingScene.h"
 #include "../overlays/ov010/Scene2B.h"
 #include "../overlays/ov069/SavePlayScene.h"
+#include "InteriorViewScene.h"
 #include "../overlays/ov081/Scene30.h"
 #include "../overlays/ov011/Scene31.h"
 #include "../overlays/ov082/Scene33.h"
@@ -386,7 +387,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(69));
         return new SavePlayScene(sceneId);
     case 0x2E:
-        return new Scene2E(sceneId);
+        return new InteriorViewScene(sceneId);
     case 0x2F:
         SetSoundGroup(21);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(83));
@@ -842,6 +843,12 @@ SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
 SavePlayCharacter::SavePlayCharacter() {}
 
 SavePlayCharacter::~SavePlayCharacter() {}
+
+// Scene 0x2E
+InteriorViewScene::InteriorViewScene(int sceneId) : Scene(sceneId) {
+    mInterior = 0;
+    SetState(0);
+}
 
 // Scenes 0x30 and 0x70, overlay 81
 Scene30::Scene30(int sceneId) : Scene(sceneId) {}

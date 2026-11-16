@@ -79,8 +79,6 @@ SCENE_STAND_IN(MiiListScene, 0x2AA44); // func_020403e8
 
 SCENE_STAND_IN(TushinScene, 0x3F0B4); // _ZN11TushinSceneC1Ei
 
-SCENE_STAND_IN(Scene2E, 0x924); // func_020410d4
-
 SCENE_STAND_IN(Scene2F, 0x474B0); // func_02041124
 
 SCENE_STAND_IN(Scene35, 0x46D4C); // func_02041a04

@@ -6243,7 +6243,7 @@ from:0x020410d0 kind:load to:0x0210f640 add:0x8 module:main
 from:0x02041100 kind:arm_call to:0x020a5430 module:main
 from:0x02041110 kind:arm_call to:0x020521d4 module:main
 from:0x0204111c kind:load to:0x02110970 add:0x8 module:main
-from:0x02041120 kind:load to:0x02111d10 module:main
+from:0x02041120 kind:load to:0x02111d08 add:0x8 module:main
 from:0x02041164 kind:arm_call to:0x02022d2c module:main
 from:0x02041170 kind:arm_call to:0x02083e08 module:main
 from:0x02041188 kind:arm_call to:0x0202e770 module:main
