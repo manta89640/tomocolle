@@ -109,17 +109,9 @@ SCENE_STAND_IN(TestNg129Scene, 0x56F0); // func_020474c0
 
 SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ev
 
-SCENE_STAND_IN(SceneAF, 0x1BA80); // func_020489b4
-
 SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // func_02048b78
 
-SCENE_STAND_IN(SceneB2, 0x1BA84); // func_02048edc
-
-SCENE_STAND_IN(SceneB3, 0x1BBE8); // func_0204909c
-
 SCENE_STAND_IN(SceneB4, 0x202E8); // func_020492e0
-
-SCENE_STAND_IN(SceneB5, 0x1C390); // func_0204963c
 
 
 #endif // SCENE_SCENESTANDINS_H

@@ -40,7 +40,7 @@ data_ov102_0214cde0 kind:data(any) addr:0x0214cde0
 data_ov102_0214cdec kind:data(any) addr:0x0214cdec
 data_ov102_0214cdf8 kind:data(any) addr:0x0214cdf8
 data_ov102_0214ce04 kind:data(any) addr:0x0214ce04
-data_ov102_0214ce28 kind:data(any) addr:0x0214ce28 ambiguous
+_ZTV7SceneB2 kind:data(any) addr:0x0214ce20
 gStr_3H0_ov102 kind:data(any) addr:0x0214ce44
 gStr_3H1_ov102 kind:data(any) addr:0x0214ce48
 gStr_CO0_ov102 kind:data(any) addr:0x0214ce4c

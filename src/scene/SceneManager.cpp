@@ -93,6 +93,10 @@
 #include "../overlays/ov059/TestNg139Scene.h"
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
+#include "../overlays/ov101/SceneAF.h"
+#include "../overlays/ov102/SceneB2.h"
+#include "../overlays/ov103/SceneB3.h"
+#include "../overlays/ov104/SceneB5.h"
 #include "../overlays/ov060/SceneB7.h"
 #include "../overlays/ov061/TestNg143Scene.h"
 #include "../overlays/ov062/SceneB9.h"
@@ -1039,6 +1043,18 @@ OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xAE, overlay 99
 InformationScene::InformationScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xAF, overlay 101
+SceneAF::SceneAF(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB2, overlay 102
+SceneB2::SceneB2(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB3, overlay 103
+SceneB3::SceneB3(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB5, overlay 104
+SceneB5::SceneB5(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB7, overlay 60
 SceneB7::SceneB7(int sceneId) : Scene(sceneId) {}
