@@ -8,64 +8,15 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "FloorPos.h"
+#include "character/FloorPos.h"
 #include "Room.h"
 
 // Shared by the units of overlay 74 (it began as RoomObjects' RoomCamera.h).
 
 // The main program's camera (data_02122764; func_0202a640 resets it, func_0202a748 turns its position around
 // its target by its angles). Not decompiled: a stand-in with the fields the room camera uses.
-struct Camera {
-    void SetAngles(u16 x, u16 y, u16 z) {
-        mAngleX = x;
-        mAngleY = y;
-        mAngleZ = z;
-    }
+struct Camera; // The main program's camera (MainProgram.h)
 
-    /* 0x00 */ u8 mUnknown00[0x14];
-    /* 0x14 */ VecFx32 mPosition;
-    /* 0x20 */ VecFx32 mUnknown20;
-    /* 0x2C */ VecFx32 mTarget;
-    /* 0x38 */ u8 mUnknown38[0xC];
-    /* 0x44 */ u16 mAngleX;
-    /* 0x46 */ u16 mAngleY;
-    /* 0x48 */ u16 mAngleZ;
-};
-
-// What the camera's destructor leaves for the next scene (SceneMemory::mCamera)
-struct SavedCamera {
-    void SetOrbit(s16 x, s16 y, s16 z) {
-        mOrbitX = x;
-        mOrbitY = y;
-        mOrbitZ = z;
-    }
-
-    /* 0x00 */ VecFx32 mPosition;
-    /* 0x0C */ VecFx32 mTarget;
-    /* 0x18 */ s16 mOrbitX;
-    /* 0x1A */ s16 mOrbitY;
-    /* 0x1C */ s16 mOrbitZ;
-};
-
-extern "C" {
-extern Camera data_02122764;
-// What the scenes remember for each other (gSceneMemory): the camera, and the saved character whose room was
-// shown last
-struct SceneMemory {
-    /* 0x00 */ SavedCamera mCamera;
-    /* 0x20 */ u8 mCharacter;
-};
-extern SceneMemory gSceneMemory;
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-// The absolute value of each component
-void func_02028e0c(const VecFx32 *in, VecFx32 *out);
-}
-
-// The camera of the apartment room: it circles the room, a character or the middle between both, turning to a
-// new random angle now and then, and can be turned by hand.
-//
-// The name is descriptive, not the original: no name of this class survives in the ROM.
 class RoomCamera {
 public:
     enum State {
@@ -108,10 +59,7 @@ public:
         VecFx32 result = { v.x >> shift, v.y >> shift, v.z >> shift };
         return result;
     }
-    void ApplyToCamera() {
-        mCamera->mPosition = mPosition;
-        mCamera->mTarget = mTarget;
-    }
+    void ApplyToCamera(); // Inline, in MainProgram.h (where the main program's Camera is)
     // Where the camera is, on the floor: the characters turn to it
     FloorPos GetFloorPos() {
         FloorPos pos;

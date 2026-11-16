@@ -48,7 +48,6 @@ SCENE_STAND_IN(EmptyScene, 0x10); // 0x0203ea2c
 
 
 
-SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ei
 
 
 

@@ -31,6 +31,7 @@ struct PaletteLoader {
 #include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov006/Scene0F.h"
 #include "../overlays/ov077/Scene17.h"
+#include "../overlays/ov074/RoomScene.h"
 #include "../overlays/ov073/TutorialRoomScene.h"
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
@@ -864,6 +865,18 @@ Scene0F::Scene0F(int sceneId) : Scene(sceneId) {
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
 Scene18::Scene18(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x11 to 0x15, overlay 74
+RoomScene::RoomScene(int sceneId) : Scene(sceneId) {
+    mResidentCount = 0;
+    mScanIndex = 0;
+    mEventTimer = 0;
+    mIdleFrames = 0;
+    SetFadeState(1);
+    mEncounterPending = FALSE;
+    mEventFrames = 0;
+    MI_CpuFill8(mResidents, 0xFF, sizeof(mResidents));
+}
 
 // Scene 0x6B, overlay 73 (its constructor comes here, after RoomScene's: the tutorial's room is built from the
 // apartment's classes)

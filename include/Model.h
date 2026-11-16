@@ -55,6 +55,8 @@ public:
     virtual void LoadByName(int, const char *); // 0x02029bd4 (resource id, name): Load() with the index of the model of that name
     virtual void Draw();                        // func_02029df4
 
+    void AddPosition(const VecFx32 *); // 0x02029EDC: adds to mPosition
+
     void SetPosition(VecFx32 position) {
         mPosition.x = position.x;
         mPosition.y = position.y;

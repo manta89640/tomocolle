@@ -4,7 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "FloorPos.h"
+#include "character/FloorPos.h"
 #include "Model.h"
 
 // The model of a thing a character of the apartment room holds in a hand ("Mdl/Goods/gdNN_3D_LZ.bin", NN being
@@ -46,6 +46,18 @@ public:
     void StartPattern();
 
     // Where the item is, on the floor
+    // As the main program's Model has them (inline there in the overlay's own copy of the class)
+    void SetScale(VecFx32 scale) {
+        mScale.x = scale.x;
+        mScale.y = scale.y;
+        mScale.z = scale.z;
+    }
+    void SetRotation(u16 x, u16 y, u16 z) {
+        mRotX = x;
+        mRotY = y;
+        mRotZ = z;
+    }
+
     FloorPos GetFloorPos() {
         FloorPos pos;
         pos.x = mPosition.x;
