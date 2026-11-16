@@ -47,6 +47,8 @@ public:
 class Scene40CharacterPartB {
 public:
     void Draw();
+    void Switch(int which);                    // 0x02178d04
+    void SetPosition(VecFx32 pos, u16 angle);  // 0x02178e94
 
     /* 0x00 */ u8 mUnknown00[0x4];
     /* 0x04 */ AnimModel mModel;
@@ -73,6 +75,7 @@ public:
     void Speak(int file, u32 message, int mode);
     void ResetHeadTurn();
     void TurnHeadToCamera();
+    void ShowBalloon(int content);
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
@@ -109,9 +112,12 @@ public:
     /* 0x2E94 */ BOOL mEntered;  // The state has just been set
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
-    /* 0x2EA0 */ u8 mUnknown2EA0[0x24];
+    /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
+    /* 0x2EA8 */ u8 mUnknown2EA8[0x1C];
     /* 0x2EC4 */ BOOL mLipSync;         // Update moves the lips with the speech only while it is set
-    /* 0x2EC8 */ u8 mUnknown2EC8[0x230];
+    /* 0x2EC8 */ u8 mUnknown2EC8[0x1D8];
+    /* 0x30A0 */ BOOL mUnknown30A0;     // Set when it has changed into clothes it was given
+    /* 0x30A4 */ u8 mUnknown30A4[0x54];
 }; // 0x30F8
 
 #endif // OV075_SCENE40CHARACTER_H
