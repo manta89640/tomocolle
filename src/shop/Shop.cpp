@@ -448,3 +448,205 @@ void ShopItemListView::ClearRow(int row) {
     ItemListView::ClearRow(row);
     mMarks[row].mVisible = FALSE;
 }
+
+// --- The shop staff and the item panel ------------------------------------------------------------------------
+
+// The panel that shows an item's number owned ("所持数") and price ("売値", "円") beside the staff
+class ShopItemPanel {
+public:
+    void Init(int a, int b, u16 c, int d, int e); // 0x020ab09c
+    void Draw();
+    void Show(int kind, int item);
+    void SetItem(int item);
+    void Update();
+    void SetState(int state);
+    void SetUnknown(int value);
+    void SetY(int y);
+    void SetUnknown14(int value);
+
+    /* 0x000 */ int mKind;
+    /* 0x004 */ u32 mState;
+    /* 0x008 */ u8 mUnknown008[0xC];
+    /* 0x014 */ int mUnknown014;
+    /* 0x018 */ u8 mUnknown018[0xB0];
+    /* 0x0C8 */ fx32 mY0C8;
+    /* 0x0CC */ u8 mUnknown0CC[0x5E8];
+    /* 0x6B4 */ fx32 mY6B4;
+    /* 0x6B8 */ u8 mUnknown6B8[0x60];
+    /* 0x718 */ int mUnknown718;
+    /* 0x71C */ u8 mUnknown71C[0x44];
+    /* 0x760 */ fx32 mY760;
+    /* 0x764 */ u8 mUnknown764[0xAC];
+    /* 0x810 */ fx32 mY810;
+    /* 0x814 */ u8 mUnknown814[0x1B4];
+    /* 0x9C8 */ fx32 mY9C8;
+    /* 0x9CC */ u8 mUnknown9CC[0x1B4];
+    /* 0xB80 */ fx32 mYB80;
+    /* 0xB84 */ u8 mUnknownB84[0x1B4];
+    /* 0xD38 */ fx32 mYD38;
+};
+
+// The shop's staff: the head staff's model, or a resident who works in the shop, with its speech
+class ShopStaff {
+public:
+    void Mount();       // 0x020abc4c: mounts the head staff's archives ("3HM", "3CM", "3HA", "3CH")
+    void Unmount();     // 0x020abd04
+    void Load(int a);   // 0x020abd84
+    void Update();
+    void Draw();
+    int GetShopAnimation(int shop);
+    void UpdateResident(); // 0x020ac20c
+    void UpdateStaff();    // 0x020ac574
+    void SetState(int state);
+    BOOL IsIdle();
+
+    /* 0x00 */ int mShop;          // 0 to 3
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ BOOL mResident;     // A resident works in the shop instead of the head staff
+    /* 0x0C */ int mState;
+    /* 0x10 */ int mUnknown10;
+    /* 0x14 */ int mUnknown14;
+    /* 0x18 */ BOOL mTalking;
+    /* 0x1C */ int mUnknown1C;
+    /* 0x20 */ int mUnknown20;
+    /* 0x24 */ int mMessages[2];   // The two messages it says next
+};
+
+// The shop scenes' counter: the staff, its speech (speech player at 0xC, speech window at 0x14950) and the panel
+class ShopCounter {
+public:
+    void MountStaff();
+    void UnmountStaff();
+    void ShowPanel(int kind, int item);
+    void ClearPanelItem();
+    void SayMessagesCA();
+    void SayMessagesCE();
+    void SayMessagesD3();
+    void SayMessagesD5();
+    void SetStaffUnknown14();
+    BOOL IsStaffIdle();
+
+    /* 0x00000 */ BOOL mPanelShown;
+    /* 0x00004 */ int mUnknown00004;
+    /* 0x00008 */ BOOL mTalking;
+    /* 0x0000C */ u8 mUnknown0000C[0x14F5C - 0xC];
+    /* 0x14F5C */ ShopStaff mStaff;
+    /* 0x14F88 */ u8 mUnknown14F88[0x18178 - 0x14F88];
+    /* 0x18178 */ ShopItemPanel mPanel;
+};
+
+// The staff's animation for each of the four shops
+int ShopStaff::GetShopAnimation(int shop) {
+    int animation = 0;
+    switch (shop) {
+    case 0:
+        animation = 0x87;
+        break;
+    case 1:
+        animation = 0x73;
+        break;
+    case 2:
+        animation = 0x97;
+        break;
+    case 3:
+        animation = 0xC0;
+        break;
+    }
+    return animation;
+}
+
+void ShopStaff::SetState(int state) {
+    mState = state;
+    mUnknown10 = 0;
+    mUnknown1C = 0;
+    mUnknown20 = 0;
+}
+
+BOOL ShopStaff::IsIdle() {
+    BOOL idle = FALSE;
+    if (!mTalking) {
+        BOOL waiting = TRUE;
+        if (mState != 0 && mState != 1) {
+            waiting = FALSE;
+        }
+        if (waiting) {
+            idle = TRUE;
+        }
+    }
+    return idle;
+}
+
+void ShopItemPanel::SetY(int y) {
+    fx32 y0 = (y + 0xA0) << FX32_SHIFT;
+    fx32 y1 = (y + 0x60) << FX32_SHIFT;
+    fx32 y2 = (y + 0xAC) << FX32_SHIFT;
+    mY0C8 = y0;
+    mY6B4 = y1;
+    mY760 = y1;
+    mY810 = y2;
+    mYB80 = y0;
+    mY9C8 = y2;
+    mYD38 = y0;
+}
+
+void ShopItemPanel::SetUnknown14(int value) {
+    mUnknown014 = value;
+    if (mState <= 1) {
+        mUnknown718 = mUnknown014;
+    }
+}
+
+void ShopItemPanel::Show(int kind, int item) {
+    mKind = kind;
+    SetItem(item);
+}
+
+void ShopCounter::MountStaff() {
+    mStaff.Mount();
+}
+
+void ShopCounter::UnmountStaff() {
+    mStaff.Unmount();
+}
+
+void ShopCounter::ShowPanel(int kind, int item) {
+    mPanelShown = TRUE;
+    mPanel.Show(kind, item);
+}
+
+void ShopCounter::ClearPanelItem() {
+    mPanel.SetItem(-1);
+}
+
+void ShopCounter::SayMessagesCA() {
+    mStaff.mMessages[0] = 0xCA;
+    mStaff.mMessages[1] = 0xCB;
+    mStaff.mTalking = TRUE;
+    mTalking = TRUE;
+}
+
+void ShopCounter::SayMessagesCE() {
+    mStaff.mMessages[0] = 0xCE;
+    mStaff.mMessages[1] = 0xCF;
+    mStaff.mTalking = TRUE;
+}
+
+void ShopCounter::SayMessagesD3() {
+    mStaff.mMessages[0] = 0xD3;
+    mStaff.mMessages[1] = 0xD4;
+    mStaff.mTalking = TRUE;
+}
+
+void ShopCounter::SayMessagesD5() {
+    mStaff.mMessages[0] = 0xD5;
+    mStaff.mMessages[1] = 0xD6;
+    mStaff.mTalking = TRUE;
+}
+
+void ShopCounter::SetStaffUnknown14() {
+    mStaff.mUnknown14 = TRUE;
+}
+
+BOOL ShopCounter::IsStaffIdle() {
+    return mStaff.IsIdle();
+}
