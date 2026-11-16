@@ -136,7 +136,7 @@ void MiiListScene::UpdateIdle() {
 
 void MiiListScene::UpdateSortMenu() {
     func_020341d4(&mSortMenu);
-    switch (mSortMenu.mUnknownAF84) {
+    switch (mSortMenu.mFinishedButton) {
     case 0:
         mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);

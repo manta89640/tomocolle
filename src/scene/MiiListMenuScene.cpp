@@ -181,7 +181,7 @@ void MiiListMenuScene::UpdateIdle() {
 
 void MiiListMenuScene::UpdateMiiMenu() {
     func_020341d4(&mWindows[0]);
-    switch (mWindows[0].mUnknownAF84) {
+    switch (mWindows[0].mFinishedButton) {
     case 0: // Edit: not done here
         break;
     case 1: // Change clothes: not done here
@@ -216,7 +216,7 @@ void MiiListMenuScene::UpdateMiiMenu() {
 
 void MiiListMenuScene::UpdateSortMenu() {
     func_020341d4(&mWindows[1]);
-    switch (mWindows[1].mUnknownAF84) {
+    switch (mWindows[1].mFinishedButton) {
     case 0:
         mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
@@ -253,7 +253,7 @@ void MiiListMenuScene::UpdateSortMenu() {
 
 void MiiListMenuScene::UpdateConfirm() {
     func_020341d4(&mWindows[2]);
-    switch (mWindows[2].mUnknownAF84) {
+    switch (mWindows[2].mFinishedButton) {
     case 0:
         mWindows[2].mUnknownAF98 = 0;
         mWindows[2].mUnknownSetBeforeClose = 15;
@@ -283,7 +283,7 @@ void MiiListMenuScene::UpdateConfirm() {
 
 void MiiListMenuScene::UpdateMovedOut() {
     func_020341d4(&mWindows[3]);
-    if (mWindows[3].mUnknownAF84 != -1) {
+    if (mWindows[3].mFinishedButton != -1) {
         mWindows[3].mUnknownSetBeforeClose = 5;
         func_020349cc(&mWindows[3], 0x14);
     }
