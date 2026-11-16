@@ -1048,8 +1048,34 @@ Measured, from the last third of the file (`0x02153CF4` on):
   goes member by member and shows overlay 109's layout of `CharacterRecord` exactly, down to twelve single bytes at
   +0x244 and single bytes from +0x294.
 
-Not done: the other 59 functions (the scene's Init and Update, the pages' Init and Update, and the large edit
-functions), and the data.
+Measured, from the first third of the file (to `0x0214EDB8`):
+
+- **The scene's own functions.** `func_ov076_0214b670` reads the saved character into the scene's character and
+  `func_ov076_0214b694` loads its model ("B0I"), by sex. `func_ov076_0214b890` writes the character back
+  (`func_0202c28c` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
+  at +0x54 (overlay 109's `mInterior`) from the personality's row (`data_020fba28`) and the sex, and for scenes 0x43,
+  0x44 and 0x6F resets some of the record's fields. The four functions beside `func_ov076_0214bbe4` show or hide the
+  scene's buttons and texts with one of the lower screen's backgrounds ("BG_down", "BG_down_editface",
+  "BG_down_nobar").
+- **mSprite582C** is a pointer at one of five places along the lower screen (`sSpriteB0Places`, under the gaps
+  between the scene's five page buttons). Init puts it at 4 for scene 0x42, 2 for 0x44 and 0 for 0x43 and 0x6F;
+  `func_ov076_0214bec8` only moves it to a higher place.
+- **Page 0** is the sex choice: two windows (etc messages 0x1A, 0x1B), with a third button for scene 0x43 and other
+  button positions for 0x6F. Its Update sets the sex, the default colours of the sex (`data_020fbaac`), a blank
+  name, and the creator's name from saved character 0 (its name if `func_ov076_0214bf20` finds the creator's name
+  empty), and asks for scene 0x5E when the window's third answer is chosen.
+- **The face page** has eight parts (`func_ov076_0214de94`): 0 the body, with the two sliders for parameters 0x29 and
+  0x2A (inferred: height and build; the camera is raised with 0x29); 1 the face (`MiiEditFaceTab`); 2 hair, 3 eyebrows, 4 eyes,
+  5 nose and 6 mouth, each with its graphics ("E00:/Hair.nce" and so on), a colour palette and colour buttons where
+  the part has a colour, and pages of twelve parts (6, 2, 4 and 2 pages for hair, eyebrows, eyes and mouth); 7 the
+  other parts (`MiiEditEtcTab`). The type parameters are 0x19 (hair), 6 (eyebrows), 0 (eyes), 0x1C (nose), 0xC
+  (mouth), the colours 0x1A, 7, 1 and 0xD. The camera goes to a point raised by `(parameter 0x29 * 0x1130 >> 7) - 0x898` for
+  all parts but the body.
+- **The data.** All 122 objects of `.rodata` are written out and come out at their ROM addresses
+  (`MiiEditScene.cpp`, between the BEGIN and END markers); see decompiling.md, "How a file's data is laid out".
+
+Not done in the first third: `MiiEditScene::Init` (95.8%: the registers of the index and the character offset in the
+loops over the buttons and the text boxes).
 
 ## The Mii library (NFL), not cut yet
 

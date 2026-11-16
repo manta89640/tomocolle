@@ -287,6 +287,12 @@ Measured on overlay 76: because the list is one for all three sections, adding a
 object (a table of pointers to wide literals) moved 65 of the 122 `.rodata` pool objects. So a pool laid out
 while some functions are missing has to be laid out again as their statics come in.
 
+Measured on overlay 76, which put all 122 objects of its `.rodata` at their ROM addresses: an `int` scalar goes on
+the list where it is first referred to, not where it is declared (its slot followed the order of the references,
+and moving its declaration changed nothing), while arrays and structures go where they are declared. Declared as
+`int[1]`, the 4-byte scalars follow their declarations like the rest, and one round of the rank permutation below
+placed them, and the `u8[4]` that the ROM has before the pool, in the ROM's order.
+
 Not settled: overlay 109's agent found that this model does not reproduce its compiled `.data`/`.bss`, and the
 best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 60) short. Test files on overlay
 109's shape are the next step. Two other things the data showed:
@@ -377,7 +383,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); func_02028d88(&rect, &point);`,
   `OptionScene::Update`).
 - Two dead copies of a vector are the by-value `FxVec2` of `SetPosition(FxVec2(x, y))`; which of
-  `SetPosition`/`SetPositionFromVec` is called decides their order.
+  `SetPosition`/`SetPositionFromVec` is called decides their order. All three forms (`SetPosition(FxVec2(...))`,
+  `SetPosition(x, y)`, `SetPositionFromVec(x, y)`) give different store orders or slots, and overlay 76's face page
+  uses each in a different loop of one function: try all three.
+- A `static const` point read field by field is folded into immediates; the original loading it from the pool, with
+  three dead pairs, is the point passed by value to an inline that does the shift and `SetPosition`
+  (`SetCanvasPosition` in overlay 76's `MiiEditScene::Init`).
 - A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
   another (the main program's list scenes).
 - Spill slots of a function too large to keep its variables in registers (MSL's `__sformatter`, 3.4 KB) follow the
@@ -386,6 +397,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   script that permutes the declarations and counts the differing lines gets close fast; the rest took that split.
 
 **Registers allocated differently**
+- A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
+  `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's
+  `MiiEditFacePage::func_ov076_0214c6d0`). A member read at each use (`mScene->...`) instead of a local copy of the
+  pointer put the constant TRUE in the original's register (`func_ov076_0214de94`).
 - A loop that counts down a variable of its own and steps a second one (`for (k = n; k >= 1; k--, bit -= 4)`) gives
   the two the other pair of registers from `for (i = k, ...)` over a copy; and a byte swap
   (`t = cp[i]; cp[i] = cp[7 - i]; cp[7 - i] = t;`) through a `char *` declared in a block of its own keeps both
@@ -442,6 +457,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   does not (overlay 76's question pages).
 
 **Branches and switches laid out differently**
+- A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
+  if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
+  a range test (`MiiEditScene::Update`).
+- Which operand a comparison names first decides whether the shift of an unsigned division is folded into the
+  `cmp`: `if (page == mUnknown314C[0])` matched where `mUnknown314C[0] == page` folded it (overlay 76's face page
+  Update).
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
   (`if (i != n) x++; else ...`).
 - An if/else assigning a member stores at once; a ternary lets the store be scheduled later. An if/else also gave the
@@ -466,7 +487,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   statements matched NFL's `func_0206c2f8` exactly, where the others moved loads and kept a value the original
   leaves in r0.
 
+**A value read once where the original reads it twice**
+- A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
+  made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
+
 **Constants and arithmetic**
+- A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in
+  our declaration: write the cast at the call (`Sprite_Init(..., (u16)(i * 2), ...)`).
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
   original's registers.
 - A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
