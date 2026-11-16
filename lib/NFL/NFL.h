@@ -145,9 +145,23 @@ typedef struct NFLMakeCtx {
     const NFLCharData *unk1CC;
 } NFLMakeCtx;
 
+// What func_0206d984 sets the polygon attributes and material colours of an NFLObj's display lists to
+typedef struct NFLDrawParam {
+    int light;
+    GXPolygonMode polyMode;
+    int polygonID;
+    int alpha;
+    int misc;
+    GXRgb diffuse;
+    GXRgb ambient;
+    GXRgb specular;
+    GXRgb emission;
+} NFLDrawParam;
+
 // The work area the caller gives func_02072a58, which the library keeps in data_02145360
 typedef struct NFLWork {
-    u8 unk0[0x8];
+    u32 unk0; // A VRAM address that func_0206e38c and the four after it advance
+    u8 unk4[4];
     u32 unk8;
     u32 unkC;
     struct {

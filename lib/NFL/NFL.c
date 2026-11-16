@@ -791,6 +791,82 @@ int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
     return 0;
 }
 
+// Sets the polygon attributes of an object's display list (at the places its makers kept) and the material colours
+int func_0206d984(int index, const NFLDrawParam *param) {
+    NFLObj *obj;
+    GXDLInfo info;
+
+    if (param == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    G3_MaterialColorDiffAmb(param->diffuse, param->ambient, FALSE);
+    G3_MaterialColorSpecEmi(param->specular, param->emission, FALSE);
+    G3_PolygonAttr(param->light, param->polyMode, GX_CULL_FRONT, param->polygonID, param->alpha, param->misc);
+    if (obj->unk94[0].cmd != NULL && obj->unk94[0].param != NULL) {
+        info.curr_cmd = obj->unk94[0].cmd;
+        info.curr_param = obj->unk94[0].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[0].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[1].cmd != NULL && obj->unk94[1].param != NULL) {
+        info.curr_cmd = obj->unk94[1].cmd;
+        info.curr_param = obj->unk94[1].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[1].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[2].cmd != NULL && obj->unk94[2].param != NULL) {
+        info.curr_cmd = obj->unk94[2].cmd;
+        info.curr_param = obj->unk94[2].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[2].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[3].cmd != NULL && obj->unk94[3].param != NULL) {
+        info.curr_cmd = obj->unk94[3].cmd;
+        info.curr_param = obj->unk94[3].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, GX_CULL_NONE, param->polygonID, param->alpha,
+                         param->misc);
+    }
+    return 0;
+}
+
+// Sends an object's display lists to the geometry engine, under its matrices
+int func_0206db98(int index, BOOL withSecond) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (func_0206dc84(index) != 0) {
+        return 0xF;
+    }
+    G3_PushMtx();
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    G3_LoadMtx43(&obj->unk5C);
+    G3_MtxMode(GX_MTXMODE_POSITION);
+    G3_LoadMtx43(&obj->unk2C);
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    MI_WaitDma(GXi_DmaId);
+    if (withSecond && obj->unk4 != 0) {
+        MI_CpuSend32(obj->unk1D84, &reg_G3X_GXFIFO, obj->unk4);
+    }
+    if (obj->unk0 != 0) {
+        MI_CpuSend32(obj->unk2A4, &reg_G3X_GXFIFO, obj->unk0);
+    }
+    G3_PopMtx(1);
+    return 0;
+}
+
 int func_0206dc84(int index) {
     NFLObj *obj;
 
@@ -819,6 +895,170 @@ GXRgb func_0206dcd0(int index) {
 GXRgb func_0206dd1c(int index) {
     return data_020b6540[index] & 0x7FFF;
 }
+
+// Expands count 4-bit pixels into direct colours from palette, colour 0 transparent if asked
+void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL transparent) {
+    int i;
+
+    for (i = 0; i < count / 2; i++) {
+        u32 index;
+
+        if (i % 2 != 0) {
+            index = (u32)src[i / 2] >> 4;
+        } else {
+            index = src[i / 2];
+        }
+        index &= 0xF;
+        if (transparent && index == 0) {
+            dst[i] = 0;
+        } else {
+            dst[i] = palette[index] | 0x8000;
+        }
+    }
+}
+
+int func_0206e38c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[0].unk8 == 0) {
+        work->unk10[0].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[0].unk4 = obj->unk14;
+        }
+        data_02145360->unkA8[0].unk0 = 0;
+        work->unk10[0].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e3fc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[1].unk8 == 0) {
+        work->unk10[1].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[1].unk4 = obj->unk24;
+        }
+        data_02145360->unkA8[1].unk0 = 0;
+        work->unk10[1].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e46c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[2].unk8 == 0) {
+        work->unk10[2].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[2].unk4 = obj->unk14;
+        }
+        data_02145360->unkA8[2].unk0 = 0;
+        work->unk10[2].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e4dc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[3].unk8 == 0) {
+        work->unk10[3].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[3].unk4 = obj->unk14;
+        }
+        data_02145360->unkA8[3].unk0 = 0;
+        work->unk10[3].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e54c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[4].unk8 == 0) {
+        work->unk10[4].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[4].unk4 = obj->unk14;
+        }
+        data_02145360->unkA8[4].unk0 = 0;
+        work->unk10[4].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e5bc(NFLObj *obj, u32 *address) {
+    s16 *params = obj->unk180;
+    const NFLCharData *mii = obj->unkDC;
+
+    if (obj->unk16C & 0x10) {
+        if (obj->unk1A4[5].value != 0x31 || (obj->unk90 == 7 && params[8] != mii->eyeColor) ||
+            (obj->unk1A4[5].state >= 1 && obj->unk1A4[5].state <= 6)) {
+            obj->unk1A4[5].state = 0;
+            obj->unk1A4[5].value = 0x31;
+        }
+        if (obj->unk90 == 7) {
+            obj->unk18 = obj->unkD4 + 0x2080;
+        } else {
+            obj->unk18 = obj->unkD4 + 0x810;
+            obj->unk1C = obj->unk14;
+        }
+    }
+    return 0;
+}
+
+int func_0206e650(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    int result;
+
+    if (obj->unk16C & 0x20) {
+        result = func_0206e38c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x40) {
+        result = func_0206e3fc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x2) {
+        result = func_0206e46c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x4) {
+        result = func_0206e4dc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x8) {
+        result = func_0206e54c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    return func_0206e5bc(obj, &ctx->unk24);
+}
+
 
 BOOL func_02072c1c(void) {
     return data_02145360 != NULL;
