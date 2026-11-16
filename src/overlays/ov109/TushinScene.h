@@ -8,6 +8,8 @@
 #include "MessageWindow.h"
 #include "Scene.h"
 #include "Sprite.h"
+#include "island/IslandProgress.h"
+#include "song/Song.h"
 #include "sound/SoundManager.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
@@ -261,15 +263,8 @@ void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 }
 
-// The main program's object that decides the scene to go back to (0x2C bytes)
-struct SceneCheck {
-    /* 0x00 */ u8 mUnknown00[0x2C];
-};
 
 extern "C" {
-void func_020af224(SceneCheck *check, int a, int b);
-void func_020af260(SceneCheck *check);
-int func_020af4d8(SceneCheck *check, int a);
 void func_0203206c(void *button);
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
@@ -438,22 +433,12 @@ void func_0209e310(ClothesInventory *inventory); // Saves it
 
 // --- Songs (main program) ---
 
-// A song's object of the main program (func_020af058 sets it up)
-struct SongEntry {
-    /* 0x00 */ u32 mUnknown00[0x10];
-    /* 0x40 */ u8 mSong;
-}; // 0x44
-
 extern "C" {
 int func_0209c718(CharacterRecord *character, int slot);          // The saved song of a slot, 0xFF for none
 void func_0209c73c(CharacterRecord *character, int slot, int song);
 u8 func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
 void func_0202c920(GameData *game, int song, void *buffer);
 void func_0202c934(GameData *game, int song, void *buffer);
-void func_020af058(SongEntry *entry);
-void func_020af06c(SongEntry *entry, u8 a);
-void func_020af084(SongEntry *entry, u8 a);
-void func_020af0b8(SongEntry *entry, int a, int b);
 }
 
 // --- Saving ---

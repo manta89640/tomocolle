@@ -57,13 +57,6 @@ void func_0209b1d8(SavedCharacter *character);
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
 
-// What the clock means for all the saved characters
-void func_020ad568(s64 now);
-void func_020ad514(s64 now, RTCTime *time);
-void func_020ad294(s64 now, RTCTime *time);
-BOOL func_020ad348(int index, s64 now);
-int func_020adb44(int *force);  // How many characters could start a random event
-int func_020adc08(u16 *indices); // Lists them, and returns how many
 
 // The main program's character (CharacterBase)
 void func_02091048(CharacterBase *character, const char *archiveName); // Names its archive
@@ -265,9 +258,9 @@ void RoomScene::StartLoading() {
     gSoundManager.StartSeqIfNotPlaying(0, 11);
     gSoundManager.SetSeqTrackMuteOnly(0, 0x1C1, TRUE);
     gSoundManager.SetSeqTrackModDepth(0, 0xFFFF, 0);
-    func_020ad568(mClock.mSeconds);
-    func_020ad514(mClock.mSeconds, &mClock.mTime);
-    func_020ad294(mClock.mSeconds, &mClock.mTime);
+    LimitEventTimes(mClock.mSeconds);
+    UpdateResidents(mClock.mSeconds, &mClock.mTime);
+    StartNextEvents(mClock.mSeconds, &mClock.mTime);
 
     for (int i = 0; i < 100; i++) {
         if (func_0202c3dc(&gGameData, i)) {
@@ -1195,9 +1188,9 @@ int RoomScene::StartRandomEvent(s64 now) {
         events[i] = mCharacters[i].mEvent;
     }
 
-    if (func_020adb44(&force) > 0) {
+    if (GetRandomEventCount(&force) > 0) {
         u16 indices[100];
-        int count = func_020adc08(indices);
+        int count = ListRandomEventCandidates(indices);
         u16 index = indices[MATH_Rand16(&gRandom, count)];
         SavedCharacter *character;
         SavedCharacter *partner = NULL;
@@ -1388,7 +1381,7 @@ void RoomScene::UpdateEvent() {
                     if (partner >= 0) {
                         mFront.DrawWindow(func_0202c414(&gGameData, partner));
                     }
-                } else if (func_020ad348(mScanIndex, now)) {
+                } else if (IsOutingOver(mScanIndex, now)) {
                     UpdateAbsentCharacter(now);
                 }
                 mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
@@ -1428,7 +1421,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
@@ -1502,7 +1495,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
@@ -1577,7 +1570,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
@@ -10936,9 +10929,6 @@ struct Unknown02114d78Entry {
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // The time-of-day tracker
-void func_020a612c(DayPhase *phase, RTCDate *date, RTCTime *time);
-void func_020a61cc(DayPhase *phase, RTCDate *date, RTCTime *time);
-int func_020a6214(DayPhase *phase);
 
 // The current time with the game's offset applied, as seconds and as date and time
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
@@ -12378,7 +12368,7 @@ SkyBackground::SkyBackground() {
 // @0x0216c3cc
 void SkyBackground::Init(Clock *clock, int buildingSize) {
     mClock = clock;
-    func_020a612c(this, &clock->mDate, &clock->mTime);
+    DayPhase::Init(&clock->mDate, &clock->mTime);
     mBuildingSize = buildingSize;
     mArchivePath[11] = buildingSize + '0';
     UpdatePaths();
@@ -12391,7 +12381,7 @@ void SkyBackground::Refresh() {
 
 // @0x0216c410
 void SkyBackground::Update() {
-    func_020a61cc(this, &mClock->mDate, &mClock->mTime);
+    DayPhase::Update(&mClock->mDate, &mClock->mTime);
     UpdateState();
 }
 
@@ -12431,7 +12421,7 @@ void SkyBackground::UpdateState() {
 
 // @0x0216c584
 void SkyBackground::UpdatePaths() {
-    s8 digit = sSkyPictures[func_020a6214(this) & 0x1F] + '0';
+    s8 digit = sSkyPictures[DayPhase::GetPhase() & 0x1F] + '0';
     mArchivePath[17] = digit;
     mCharPath[10] = digit;
     mPalettePath[10] = digit;
@@ -12439,7 +12429,7 @@ void SkyBackground::UpdatePaths() {
 
 // @0x0216c5bc
 void SkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[func_020a6214(this)], 0x100);
+    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- NamePanel ---

@@ -901,3 +901,38 @@ lib/MiiData/MiiData.cpp:
     complete
     .text       start:0x02079fa0 end:0x0207a9c0
     .rodata     start:0x020b7e1c end:0x020b7ee4
+
+src/shop/ShopStock.cpp:
+    complete
+    .text       start:0x020a5cc4 end:0x020a6074
+
+src/island/Apartment.cpp:
+    complete
+    .text       start:0x020a6074 end:0x020a612c
+    .rodata     start:0x020fbffc end:0x020fc040
+
+src/island/Sky.cpp:
+    .text       start:0x020a612c end:0x020a80f0
+    .rodata     start:0x020fc040 end:0x020fc274
+    .data       start:0x02115140 end:0x02115364
+    .bss        start:0x02149a20 end:0x02149a40
+
+src/shop/Shop.cpp:
+    .text       start:0x020a80f0 end:0x020acfe4
+    .rodata     start:0x020fc274 end:0x020fc48c
+    .data       start:0x02115364 end:0x02115478
+
+src/resident/ResidentLife.cpp:
+    .text       start:0x020acfe4 end:0x020af058
+
+src/song/Song.cpp:
+    complete
+    .text       start:0x020af058 end:0x020af224
+
+src/island/IslandProgress.cpp:
+    complete
+    .text       start:0x020af224 end:0x020af9f0
+
+lib/DSProtect/DSProtect.c:
+    .text       start:0x020af9f0 end:0x020b04c8
+    .rodata     start:0x020fc48c end:0x020fc494

@@ -4,19 +4,9 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-class Clock;
+#include "island/Sky.h"
 
-// The main program's time-of-day tracker (func_020a612c sets it up from a date and time, func_020a61cc updates
-// it about every two minutes: it reloads its counter with 0x1C42 frames). Not decompiled: a stand-in with the
-// fields the sky uses.
-struct DayPhase {
-    /* 0x00 */ u32 mChanged; // Not 0 in the frame the phase changed
-    /* 0x04 */ u8 mUnknown04[0x10];
-    /* 0x14 */ int mFramesToCheck;
-    /* 0x18 */ int mPhase;       // func_020a6214 returns it, plus 16 when mUnknown1C is 0
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ u8 mUnknown20[8];
-}; // 0x28
+class Clock;
 
 // The sky behind the apartment building: its background picture and palette depend on the building's size and
 // on the time of day, and are loaded again when the time of day changes.

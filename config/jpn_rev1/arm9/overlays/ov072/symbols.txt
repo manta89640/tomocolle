@@ -57,7 +57,7 @@ _ZN12MoneyDisplay10SetVisibleEi kind:function(arm,size=0xc) addr:0x0214f674
 _ZN12MoneyDisplay7RefreshEv kind:function(arm,size=0x74) addr:0x0214f680
 _ZN8MapSceneD1Ev kind:function(arm,size=0x5c) addr:0x0214f6f4
 _ZN8MapSceneD0Ev kind:function(arm,size=0x64) addr:0x0214f750
-backButtonKind$13750 kind:data(any) addr:0x0214f7b4 local
+backButtonKind$13833 kind:data(any) addr:0x0214f7b4 local
 sBackButtonSequences kind:data(any) addr:0x0214f7b6 local
 titleTextCount$13752 kind:data(any) addr:0x0214f7b8 local
 titleMessage$13754 kind:data(any) addr:0x0214f7bc local

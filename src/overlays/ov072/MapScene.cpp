@@ -223,9 +223,9 @@ static inline void UpdateCharacterTimes() {
     RTCTime time;
     RTCDate date;
     s64 now = func_02035870(data_02123440[0], &date, &time);
-    func_020ad568(now);
-    func_020ad514(now, &time);
-    func_020ad294(now, &time);
+    LimitEventTimes(now);
+    UpdateResidents(now, &time);
+    StartNextEvents(now, &time);
 }
 
 static inline void ClearSceneCharacters() {
@@ -323,23 +323,23 @@ void MapScene::StartLoading() {
     switch (mSceneId) {
     case 0x62:
         mIslandStage = 0;
-        mWindowCount = func_020a60b8(0);
+        mWindowCount = GetApartmentStageRooms(0);
         break;
     case 0x63:
         mIslandStage = 1;
-        mWindowCount = func_020a60b8(1);
+        mWindowCount = GetApartmentStageRooms(1);
         break;
     case 0x64:
         mIslandStage = 2;
-        mWindowCount = func_020a60b8(2);
+        mWindowCount = GetApartmentStageRooms(2);
         break;
     case 0x65:
         mIslandStage = 3;
-        mWindowCount = func_020a60b8(3);
+        mWindowCount = GetApartmentStageRooms(3);
         break;
     case 0x66:
         mIslandStage = 4;
-        mWindowCount = func_020a60b8(4);
+        mWindowCount = GetApartmentStageRooms(4);
         break;
     default: {
         SavedCharacter character;
@@ -359,8 +359,8 @@ void MapScene::StartLoading() {
                 mRoomResidents[mResidentRooms[i]] = i;
             }
         }
-        func_020af224(&mFacilities, 0, 0);
-        mNewBuilding = func_020af4d8(&mFacilities, mSceneId == 0x6A);
+        mFacilities.Init(NULL, NULL);
+        mNewBuilding = mFacilities.GetNewFacility(mSceneId == 0x6A);
         if (mNewBuilding != -1) {
             func_02039c0c(&gIsland, mNewBuilding, 2);
         }
@@ -378,7 +378,7 @@ void MapScene::StartLoading() {
         mIslandStage = gGameData.mUnknown0C[0x40];
         break;
     }
-    mWindowCount = func_020a60a0();
+    mWindowCount = GetApartmentRooms();
     for (int i = 0; i < 14; i++) {
         if (i == 0) {
             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[i],
@@ -443,9 +443,9 @@ void MapScene::Init() {
     func_02027d7c(&data_02121834, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "SKY:/Obj_up.nce", 0x1000, 3);
-    func_020a679c(&mSky, "SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
-    func_020a6930(&mSky);
-    G3X_SetClearColor(mSky.mColors[1], 31, 0x7FFF, 63, FALSE);
+    mSky.Init("SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
+    mSky.Update();
+    G3X_SetClearColor(mSky.mBgPalette[1], 31, 0x7FFF, 63, FALSE);
     func_0202b4d8(&data_021232e4);
     func_0202b4dc(&data_021232e4, 0, "S00:/w_live.tga", 3, 32, 32);
     func_0202b4dc(&data_021232e4, 1, "S00:/w_pinch.tga", 3, 32, 32);
@@ -487,7 +487,7 @@ void MapScene::Init() {
         case 2:
             if (mNewBuilding == sModelBuildings[i]) {
                 if (i == MODEL_APARTMENT) {
-                    if (mFacilities.mApartmentSize == 1) {
+                    if (mFacilities.mResidents == 1) {
                         mModels[i].Load(1, 0);
                         for (int j = 0; j < mWindowCount; j++) {
                             mWindows[j].mVisible = FALSE;
@@ -519,9 +519,9 @@ void MapScene::Init() {
     func_0202a96c(mLights[1]);
     mLights[1]->mColor = sLightColors[0];
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
-    int phase = func_020a6214(&mSky);
-    mLights[0]->mColor = func_020a6574(phase);
-    GXRgb color = func_020a659c(phase);
+    int phase = mSky.GetPhase();
+    mLights[0]->mColor = GetSkyLightColor(phase);
+    GXRgb color = GetSkyLightColor2(phase);
     mLights[1]->mColor = color;
 
     for (int i = 0; i < 1; i++) {
@@ -615,9 +615,9 @@ void MapScene::Update() {
         func_020341d4(&mMessageWindows[i]);
     }
     if (mSky.mChanged) {
-        int phase = func_020a6214(&mSky);
-        mLights[0]->mColor = func_020a6574(phase);
-        mLights[1]->mColor = func_020a659c(phase);
+        int phase = mSky.GetPhase();
+        mLights[0]->mColor = GetSkyLightColor(phase);
+        mLights[1]->mColor = GetSkyLightColor2(phase);
     }
     switch (mState) {
     case STATE_TITLE:
@@ -731,12 +731,12 @@ void MapScene::Update() {
                 for (int i = 1; i < MODEL_COUNT; i++) {
                     if (mNewBuilding == sModelBuildings[i]) {
                         if (i == MODEL_APARTMENT) {
-                            int stages = func_020a6074(mFacilities.mApartmentSize);
+                            int stages = GetApartmentStage(mFacilities.mResidents);
                             if (mIslandStage < stages) {
                                 mIslandStage++;
                             }
                             gGameData.mUnknown0C[0x40] = mIslandStage;
-                            mWindowCount = func_020a60b8(mIslandStage);
+                            mWindowCount = GetApartmentStageRooms(mIslandStage);
                             const Point &mark = sApartmentMarkPositions[mIslandStage];
                             mNewMarks[MODEL_APARTMENT].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
@@ -907,9 +907,9 @@ void MapScene::Update() {
                 RTCDate date;
                 RTCTime time;
                 s64 now = func_02035870(data_02123440[0], &date, &time);
-                func_020ad568(now);
-                func_020ad514(now, &time);
-                func_020ad294(now, &time);
+                LimitEventTimes(now);
+                UpdateResidents(now, &time);
+                StartNextEvents(now, &time);
             } else if (mIdleFrames >= 60) {
                 UpdateWindows();
                 mIdleFrames = 0;
@@ -985,16 +985,16 @@ void MapScene::Update() {
                 if (!(state == 1 || state == 2)) {
                     continue;
                 }
-                if (mSelected == 3 && !func_020af9c0(&mFacilities)) {
+                if (mSelected == 3 && !mFacilities.HasTwoOfEachSex()) {
                     continue;
                 }
-                if (mSelected == 1 && !func_020af9ac(&mFacilities)) {
+                if (mSelected == 1 && !mFacilities.HasTwoWithBirthdays()) {
                     continue;
                 }
-                if (mSelected == 2 && !func_020af9dc(&mFacilities)) {
+                if (mSelected == 2 && !mFacilities.HasFourResidents()) {
                     continue;
                 }
-                if (mSelected == 10 && !func_020af988(&mFacilities)) {
+                if (mSelected == 10 && !mFacilities.HasSevenResidentsThreeOfEachSex()) {
                     continue;
                 }
                 EnterBuilding(mSelected, mNewsDue, 0);
@@ -1028,9 +1028,9 @@ void MapScene::Update() {
         }
         break;
     }
-    func_020a6930(&mSky);
+    mSky.Update();
     if (mSky.mChanged) {
-        G3X_SetClearColor(mSky.mColors[1], 31, 0x7FFF, 63, FALSE);
+        G3X_SetClearColor(mSky.mBgPalette[1], 31, 0x7FFF, 63, FALSE);
     }
     mSound.Update(&mClock);
 }
@@ -1056,7 +1056,7 @@ void MapScene::Draw() {
     }
     Sprite_Draw(&mTitleSprite);
     Sprite_Draw(&mSprite41BC);
-    func_020a6a6c(&mSky);
+    mSky.Draw();
     func_0202ad84(data_021223e4);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
@@ -1064,13 +1064,13 @@ void MapScene::Draw() {
 }
 
 void MapScene::Exit() {
-    GXRgb clearColor = mSky.mColors[1];
+    GXRgb clearColor = mSky.mBgPalette[1];
     // A pointer cast from the byte buffer is kept in a register across the calls; the buffer's address is not.
     GXRgb *colors = (GXRgb *)data_0213bab0;
-    int phase = func_020a6214(&mSky);
+    int phase = mSky.GetPhase();
     colors[0] = clearColor;
-    colors[1] = func_020a6574(phase);
-    colors[2] = func_020a659c(phase);
+    colors[1] = GetSkyLightColor(phase);
+    colors[2] = GetSkyLightColor2(phase);
     for (int i = 0; i < 14; i++) {
         func_0202aecc(data_021223e4, i);
         ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[i]);
@@ -1172,7 +1172,7 @@ void MapScene::SetState(int state) {
 }
 
 VecFx32 MapScene::GetWindowPosition(int window) {
-    WindowCell cell = func_020a60cc(window);
+    WindowCell cell = GetWindowCell(window);
     if (cell.mFloor == 12) {
         cell.mColumn += 2;
     }
@@ -1211,7 +1211,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 3:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9c0(&mFacilities)) {
+            if (!mFacilities.HasTwoOfEachSex()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9A);
                 mHasInfo = FALSE;
             } else {
@@ -1220,7 +1220,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 1:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9ac(&mFacilities)) {
+            if (!mFacilities.HasTwoWithBirthdays()) {
                 func_02034f38(&mMessageWindows[0], 0, 0xA6);
                 mHasInfo = FALSE;
             } else {
@@ -1229,7 +1229,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 2:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9dc(&mFacilities)) {
+            if (!mFacilities.HasFourResidents()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9D);
                 mHasInfo = FALSE;
             } else {
@@ -1238,7 +1238,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 10:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af988(&mFacilities)) {
+            if (!mFacilities.HasSevenResidentsThreeOfEachSex()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9F);
                 mHasInfo = FALSE;
             } else {
@@ -1693,8 +1693,8 @@ void MapSound::Init(MapClock *clock, int mode) {
 }
 
 void MapSound::SetMode(MapClock *clock, int mode) {
-    mDayStart = func_020a6390(clock->mDate.month, 0);
-    mNightStart = func_020a6480(clock->mDate.month, 0);
+    mDayStart = GetSunrise(clock->mDate.month, 0);
+    mNightStart = GetSunset(clock->mDate.month, 0);
     switch (mode) {
     case MODE_START:
     case MODE_CONTINUE:
@@ -2057,7 +2057,7 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
     case 5:
         if (!IsNewDay()) {
             ClearSceneCharacters();
-            if (mFacilities.mApartmentSize < 4) {
+            if (mFacilities.mResidents < 4) {
                 func_0203c02c(&gSceneManager, 0x57);
                 break;
             }

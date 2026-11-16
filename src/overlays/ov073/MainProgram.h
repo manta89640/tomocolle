@@ -6,6 +6,7 @@
 
 #include "GameData.h"
 #include "Sprite.h"
+#include "island/Sky.h"
 
 // STAND-INS and declarations for what the tutorial's apartment uses of the main program that is not decompiled
 // yet: its global objects with the fields the overlay touches, and its functions by the names symbols.txt has for
@@ -113,17 +114,6 @@ struct Light {
     /* 0x8 */ BOOL mEnabled;
 }; // 0xC
 
-// The main program's time-of-day tracker (func_020a612c sets it up from a date and time, func_020a61cc updates
-// it about every two minutes: it reloads its counter with 0x1C42 frames). A stand-in with the fields the sky uses.
-struct DayPhase {
-    /* 0x00 */ u32 mChanged; // Not 0 in the frame the phase changed
-    /* 0x04 */ u8 mUnknown04[0x10];
-    /* 0x14 */ int mFramesToCheck;
-    /* 0x18 */ int mPhase;       // func_020a6214 returns it, plus 16 when mUnknown1C is 0
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ u8 mUnknown20[8];
-}; // 0x28
-
 struct Unknown02114d78Entry {
     u32 mUnknown0 : 8;
     int mUnknown4;
@@ -209,9 +199,6 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 // The current time with the game's offset applied, as seconds and as date and time
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
 extern int data_02123440[];
-void func_020a612c(DayPhase *phase, RTCDate *date, RTCTime *time);
-void func_020a61cc(DayPhase *phase, RTCDate *date, RTCTime *time);
-int func_020a6214(DayPhase *phase);
 
 // --- Scenes ---
 extern SceneManager gSceneManager;
