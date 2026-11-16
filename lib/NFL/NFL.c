@@ -1913,6 +1913,41 @@ int func_0206e650(NFLMakeCtx *ctx) {
 }
 
 
+// Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (func_0206ebb0)
+typedef struct NFLPlane {
+    fx32 unk0;
+    fx32 unk4;
+    fx32 unk8;
+    fx32 unkC;
+} NFLPlane;
+
+extern const NFLPlane data_020b676c[2][2];
+
+// A part's place on the face, from the face's origin, its X and Y and the sine and cosine of its rotation; its
+// Z from the plane of its quadrant
+void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, fx32 scaleX, fx32 scaleY, fx16 sin,
+                   fx16 cos) {
+    int i;
+    int j;
+
+    if (kind <= 2) {
+        out->x = origin->x + (x * 2 - 1) * scaleX * 5 / 128;
+        out->y = origin->y + (y * 2 - 1) * scaleY * 5 / 128;
+    } else {
+        fx32 dx = x * scaleX * 5 / 64;
+        fx32 dy = (y * 2 - 1) * scaleY * 5 / 128;
+
+        out->x = origin->x + FX_Mul(sin, dx) + FX_Mul(cos, dy);
+        out->y = origin->y - FX_Mul(cos, dx) + FX_Mul(sin, dy);
+    }
+    i = out->x >= 0x1B33;
+    j = out->y <= 0x167B;
+    out->z = -FX_Div(data_020b676c[j][i].unkC + (FX_Mul(data_020b676c[j][i].unk0, out->x) +
+                                                  FX_Mul(data_020b676c[j][i].unk4, out->y)),
+                     data_020b676c[j][i].unk8) *
+             0x47 / 200;
+}
+
 BOOL func_02072c1c(void) {
     return data_02145360 != NULL;
 }

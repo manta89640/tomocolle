@@ -4375,9 +4375,6 @@ data_020b6630 kind:data(any) addr:0x020b6630
 data_020b6678 kind:data(any) addr:0x020b6678
 data_020b66d8 kind:data(any) addr:0x020b66d8
 data_020b676c kind:data(any) addr:0x020b676c
-data_020b6770 kind:data(any) addr:0x020b6770
-data_020b6774 kind:data(any) addr:0x020b6774
-data_020b6778 kind:data(any) addr:0x020b6778
 data_020b67ac kind:data(any) addr:0x020b67ac
 data_020b6818 kind:data(any) addr:0x020b6818
 data_020b6884 kind:data(any) addr:0x020b6884
