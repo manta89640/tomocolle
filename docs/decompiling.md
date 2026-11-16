@@ -561,6 +561,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   statements matched NFL's `NFLi_MakeGlassesMesh` exactly, where the others moved loads and kept a value the original
   leaves in r0.
 
+- The test scenes' light-0 block (x stored, reloaded and stored again, the colour loaded and stored back:
+  `G3dTestScene`, `HumanTestScene`, overlays 3, 4 and 5) gets the original's registers (the light in ip, the colour
+  in r3, 0 in r1 before the reload) only with `#pragma opt_propagation off` around `Init` (inside `#pragma push` /
+  `#pragma pop`). A store between the x store and its reload (`mEnabled = TRUE;` or y) is what keeps the reload;
+  `x = x` straight after it is dropped. In overlay 3 a `const char *path` local for `ModelResources_SetModel`'s path
+  gave the original's early `ldr r2` of it. Measured there too: what is left of such an `Init` is scheduling that
+  flips with unrelated code earlier in the function (removing the first call, `func_0202b0e8`, puts the virtual
+  `Load` calls' argument set-up in the original's order), so search the light statements' orders last, in the
+  file as it will stay.
+
 **A value read once where the original reads it twice**
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).

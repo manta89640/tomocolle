@@ -659,6 +659,37 @@ What it showed about the compiler, measured (see "Compiler"):
 - **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool and
   strings, which says nothing of the original's order but sizes.
 
+## The body palette test scene (overlay 3)
+
+Overlay 3 is scene 3, `BodyPaletteTestScene` (0x1BC bytes; its constructor is the main program's
+`_ZN20BodyPaletteTestSceneC1Ei`, 0x0203e0c4): one source file, `src/overlays/ov003/BodyPaletteTestScene.cpp`, with
+the whole `.text` (seven functions, the two destructors implicit) and `.data` (the virtual table at `0x02149EC0`,
+then the strings in the order of the code).
+
+Measured:
+
+- `StartLoading` mounts "Mdl/Body/body000_3D_LZ.bin" twice, as TG3 and as TG4 (the path is two strings in the
+  ROM: `-str noreuse`). `Init` binds TG3's `body.imd` to resource 0 and TG4's to resource 1 and loads them into two
+  plain `Model`s, `mBody` (+0x10) and `mSecondBody` (+0xC4, at x -2.0), clears to grey (`GX_RGB(15, 15, 15)`), and
+  points light 0 along x with the code of the main program's `G3dTestScene` and `HumanTestScene` (x stored,
+  reloaded and stored again, the colour loaded and stored back).
+- `Update`, by the button pressed this frame: A gets the file "TG3:/body_c1.ntfp" (a palette), makes its colour 1
+  red and gives it to `func_02029d40` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
+  X makes colour 1 of `mBody`'s own palette data (`mResTex->plttInfo.ofsPlttData`) cyan and transfers 4 bytes;
+  B releases the model resource (`func_02029758`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
+  `body.imd` to resource 0 again and rebinds `mBody`'s model (`func_02029c20`); Y walks the palette-to-material
+  dictionary of `mBody`'s materials and looks each name up in its textures' palette dictionary
+  (`NNS_G3dGetPlttDataByName`), with nothing done with the result. Otherwise the pad turns the camera, as in
+  `HumanTestScene`.
+- `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `func_02029d40` (0x02029d40, `Model*`, palette, offset,
+  size) takes the palette's VRAM address and size from its `plttInfo.vramKey` when offset or size is negative, and
+  queues the transfer with `func_0202b108(data_02123024, 1, ...)`, which passes it on to
+  `NNS_GfdRegisterNewVramTransferTask` (type 1, `NNS_GFD_DST_3D_TEX_PLTT`). `func_02060c1c` passes the linked VRAM managers'
+  state (`data_021423d8`) to `NNSi_GfdDumpLnkVramManFreeListInfo`.
+
+Inferred: a test of colouring the body's clothes by palette (the clothes colours of the game), with an untouched
+copy beside it to compare.
+
 ## The settings and the mansion information
 
 Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is

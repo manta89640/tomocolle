@@ -15,6 +15,12 @@ void BodyPaletteTestScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TG4", "Mdl/Body/body000_3D_LZ.bin", 0);
 }
 
+// Not matched yet (79%): opt_propagation off gives light 0's block the original's registers (the light in ip, the
+// colour in r3, 0 in r1 before the x reload), and the path through a local the first call's early `ldr r2`. What is
+// left is scheduling: the order of the light's stores after the reload, and the argument set-up of the two Load calls
+// and of the second SetModel, which change with unrelated code anywhere earlier in the function.
+#pragma push
+#pragma opt_propagation off
 void BodyPaletteTestScene::Init() {
     func_0202b0e8(&data_02122824);
     data_0211d604.Show(1);
@@ -25,13 +31,14 @@ void BodyPaletteTestScene::Init() {
     Light *light = &data_021227cc[0];
     u16 color = light->mColor;
     light->mDirection.x = 0xFFF;
-    fx16 x = light->mDirection.x;
-    light->mDirection.y = 0;
-    light->mDirection.x = x;
     light->mEnabled = TRUE;
-    light->mDirection.z = 0;
+    fx16 x = light->mDirection.x;
+    light->mDirection.x = x;
     light->mColor = color;
-    ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
+    light->mDirection.z = 0;
+    light->mDirection.y = 0;
+    const char *path = "TG3:/body.imd";
+    ModelResources_SetModel(data_021223e4, 0, path);
     mBody.Load(0, 0);
     ModelResources_SetModel(data_021223e4, 1, "TG4:/body.imd");
     mSecondBody.Load(1, 0);
@@ -39,6 +46,7 @@ void BodyPaletteTestScene::Init() {
     NNS_GfdDumpLnkTexVramManager();
     func_02060c1c();
 }
+#pragma pop
 
 void BodyPaletteTestScene::Update() {
     if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
