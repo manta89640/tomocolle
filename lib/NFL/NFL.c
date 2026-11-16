@@ -2305,8 +2305,6 @@ extern const VecFx32 sNFLFaceGridNormals[3][3];
 // transformed here (MTX_MultVec43, the normals by the rotation's 3x3 part) instead of by matrix commands, so the
 // expressions have no rotation to patch (patch->mtx is cleared). The mouth is a strip of two quads whose texture runs
 // from the right edge to the left, the mustache one whose texture is mirrored about its middle, the mole one quad.
-// Not matching yet: everything is the original's but the scheduling of the centre's plane lookup, where the original
-// stores center.y before the abs of cx and loads both of the lookup's constants first (7 instructions).
 void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state) {
     MtxFx43 mtx;
@@ -2386,14 +2384,17 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
         cx = -cx;
     }
     center.x = cx;
-    center.z = NFL_PLANE_Z(cx, center.y);
+    pi = cx >= 0x1B33 ? 1 : 0;
+    pj = center.y <= 0x167B ? 1 : 0;
+    center.z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, cx) + FX_Mul(sNFLFacePlanes[pj][pi].b, center.y)),
+                       sNFLFacePlanes[pj][pi].c) * 0x47 / 200;
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             grid[i][j].x = center.x + w * (i * 2 - 1) * 5 / 128;
             grid[i][j].y = center.y + h * (j * 2 - 1) * 5 / 128;
             px = NFLi_Abs(grid[i][j].x);
-            pi = px >= 0x1B33;
-            pj = grid[i][j].y <= 0x167B;
+            pi = px >= 0x1B33 ? 1 : 0;
+            pj = grid[i][j].y <= 0x167B ? 1 : 0;
             grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, px) +
                                                                   FX_Mul(sNFLFacePlanes[pj][pi].b, grid[i][j].y)),
                                    sNFLFacePlanes[pj][pi].c) *
