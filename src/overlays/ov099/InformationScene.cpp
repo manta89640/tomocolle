@@ -118,7 +118,7 @@ void InformationScene::Init() {
                 }
             }
             comfortSum += character.mUnknown0FB;
-            s8 personality = func_02098f2c(&character);
+            s8 personality = character.GetPersonality();
             typeX += sPersonalityX[personality];
             typeY += sPersonalityY[personality];
         }

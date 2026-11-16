@@ -114,7 +114,6 @@ void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a re
 void *func_020295a4(void *resourceSet, u32 resType);
 
 // --- Characters ---
-void func_020979e0(SavedCharacter *character);
 void func_02090fdc(Character *character, int slot, int param2, int param3);
 void func_02091048(Character *character, const char *archiveName);
 void func_020910a8(Character *character);
@@ -127,7 +126,6 @@ void func_0208fefc(Character *character);
 void func_02091a24(Character *character);
 void func_02091a6c(Character *character);
 void func_02091a88(Character *character);
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 }
 

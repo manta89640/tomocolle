@@ -116,8 +116,10 @@ public:
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
+    s8 GetPersonality(); // Its personality, 0 to 15
+
     /* 0x0000 */ u8 mUnknown0000[0x2BC];
-    /* 0x02BC */ s8 mPersonality; // What func_02098f2c computes
+    /* 0x02BC */ s8 mPersonality; // What GetPersonality computes
     /* 0x02BD */ u8 mUnknown02BD[3];
 }; // 0x2C0
 
@@ -139,7 +141,6 @@ public:
 }; // 0x2B18
 
 extern "C" {
-s8 func_02098f2c(SavedCharacter *character); // Its personality
 // The personalities' kinds (0 to 3), by personality
 extern const int data_020fba28[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);

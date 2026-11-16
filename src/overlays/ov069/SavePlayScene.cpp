@@ -53,7 +53,7 @@ void SavePlayScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TCM", "Msg/TmdCommonMsgJP_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "TEM", "Msg/TmdEtcMsgJP_LZ.bin", 0);
 
-    func_020979e0(&mCharacters[0]);
+    mCharacters[0].Reset();
     if (mResidentCount == 0) {
         mCharacters[0].mIndex = 0;
     } else {
@@ -100,7 +100,7 @@ void SavePlayScene::Init() {
     func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     mCharacters[0].CharacterBase::MakeFace();
     mCharacters[0].Character::UpdateBodyScale();
-    mCharacters[0].mPersonality = func_02098f2c(&mCharacters[0]);
+    mCharacters[0].mPersonality = mCharacters[0].GetPersonality();
     func_0209decc(&mCharacters[0]);
     mCharacters[0].Character::UpdateAnimSpeed();
     mCharacters[0].Character::UpdateSpeedScales();
