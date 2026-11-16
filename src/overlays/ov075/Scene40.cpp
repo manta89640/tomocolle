@@ -1,7 +1,49 @@
 #include "Scene40.h"
 
+extern "C" {
+void func_02080f00(ParticleSystem *particles, int unknown); // Draws the particles
+
+// Not decompiled yet
+void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
+void func_ov075_02161ce0(Scene40Character *character, int a); // Updates the character
+void func_ov075_02161d6c(Scene40Character *character);        // Draws it
+}
+
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
+
+// --- The scene -----------------------------------------------------------------------------------------------------
+
+// For the first nine frames the room and the character are updated from here as well
+void Scene40::Draw() {
+    func_020345d8(&mWindows[0]);
+    func_020345d8(&mWindows[1]);
+    func_ov075_0214fc00(mUnknown30B50);
+    Sprite_Draw(&mSprite013D0);
+
+    switch (mDrawState) {
+    case 0:
+        mRoom.Update();
+        func_ov075_02161ce0(&mCharacter, 0);
+        mDrawFrames++;
+        if (mDrawFrames >= 9) {
+            mDrawState = 1;
+        }
+        break;
+    case 1:
+        break;
+    }
+
+    func_02080f00(&mParticles, 0);
+    func_ov075_02161d6c(&mCharacter);
+    mFace.Draw();
+    mMannequin.Draw();
+    mRoom.RoomModels::Draw();
+    for (int i = 0; i < 3; i++) {
+        mItemModels[i].Draw();
+    }
+    mSpeechWindow.Draw();
+}
 
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------
 

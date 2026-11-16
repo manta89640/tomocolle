@@ -16,6 +16,7 @@
 #include "shop/Shop.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
+#include "text/SpeechWindow.h"
 #include "text/TextCanvas.h"
 #include "voice/TtsPlayer.h"
 
@@ -145,16 +146,17 @@ public:
     virtual void Draw();
     virtual void Exit();
 
-    /* 0x00010 */ u8 mUnknown00010[0x160];
+    /* 0x00010 */ u8 mUnknown00010[0x158];
+    /* 0x00168 */ int mDrawState;  // 0 while the room and the character are still updated from Draw, 1 after nine frames
+    /* 0x0016C */ int mDrawFrames;
     /* 0x00170 */ Mannequin mMannequin;
     /* 0x00828 */ Room mRoom;
     /* 0x01130 */ AnimModel mModels[3];
-    /* 0x013D0 */ u8 mUnknown013D0[0xAC];
+    /* 0x013D0 */ Sprite mSprite013D0;
     /* 0x0147C */ TtsPlayer mTtsPlayer;
     /* 0x15DC0 */ MessageText mText;
-    /* 0x163B0 */ u8 mUnknown163B0[0x8];
-    /* 0x163B8 */ MessageText mTexts[1];
-    /* 0x169A8 */ u8 mUnknown169A8[0x18];
+    /* 0x163B0 */ SpeechWindow mSpeechWindow;
+    /* 0x169BC */ u8 mUnknown169BC[0x4];
     /* 0x169C0 */ MessageWindow mWindows[2];
     /* 0x2C908 */ u8 mUnknown2C908[0x4C];
     /* 0x2C954 */ ParticleSystem mParticles;
@@ -166,7 +168,8 @@ public:
     /* 0x309B4 */ u8 mUnknown309B4[0x30];
     /* 0x309E4 */ MessageFile mMessageFiles[7];
     /* 0x30A8C */ Scene40Unknown30A8C mUnknown30A8C;
-    /* 0x30AB0 */ u8 mUnknown30AB0[0x1C4];
+    /* 0x30AB0 */ u8 mUnknown30AB0[0xA0];
+    /* 0x30B50 */ u8 mUnknown30B50[0x124]; // An object of the overlay's: func_ov075_0214fc00 draws it
     /* 0x30C74 */ Scene40Items mItems;
     /* 0x30CA0 */ u8 mUnknown30CA0[0x50];
     /* 0x30CF0 */ TextButton mTextButtons[4];
