@@ -13,4 +13,12 @@
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 
+#include "../overlays/ov069/SavePlayScene.h"
+
+// Scenes 0x2C and 0x2D, overlay 69
+SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
+    mAnimationCount = 0;
+    mResidentCount = 0;
+}
+
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-c) -------------------------------------------------

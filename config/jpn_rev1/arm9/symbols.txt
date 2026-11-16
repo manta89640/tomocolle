@@ -1437,8 +1437,8 @@ WH_SendData kind:function(arm,size=0xc) addr:0x02030f68
 WH_Reset kind:function(arm,size=0x48) addr:0x02030f74
 WH_Finalize kind:function(arm,size=0x144) addr:0x02030fbc
 WH_End kind:function(arm,size=0x5c) addr:0x02031100
-func_0203115c kind:function(arm,size=0x20) addr:0x0203115c
-func_0203117c kind:function(arm,size=0x20) addr:0x0203117c
+_ZN12SpriteButtonC2Ev kind:function(arm,size=0x20) addr:0x0203115c
+_ZN12SpriteButtonC1Ev kind:function(arm,size=0x20) addr:0x0203117c
 func_0203119c kind:function(arm,size=0x8c) addr:0x0203119c
 func_02031228 kind:function(arm,size=0x38) addr:0x02031228
 func_02031260 kind:function(arm,size=0x18) addr:0x02031260
@@ -1452,7 +1452,7 @@ func_02031d7c kind:function(arm,size=0xac) addr:0x02031d7c
 func_02031e28 kind:function(arm,size=0x60) addr:0x02031e28
 func_02031e88 kind:function(arm,size=0x28) addr:0x02031e88
 func_02031eb0 kind:function(arm,size=0x6c) addr:0x02031eb0
-func_02031f1c kind:function(arm,size=0x3c) addr:0x02031f1c
+_ZN10TextButtonC1Ev kind:function(arm,size=0x3c) addr:0x02031f1c
 func_02031f58 kind:function(arm,size=0xf8) addr:0x02031f58
 func_02032050 kind:function(arm,size=0x1c) addr:0x02032050
 func_0203206c kind:function(arm,size=0xc8) addr:0x0203206c
@@ -1512,7 +1512,7 @@ func_020346cc kind:function(arm,size=0x54) addr:0x020346cc
 func_02034720 kind:function(arm,size=0x2ac) addr:0x02034720
 func_020349cc kind:function(arm,size=0x70) addr:0x020349cc
 func_02034a3c kind:function(arm,size=0x58) addr:0x02034a3c
-func_02034a94 kind:function(arm,size=0x130) addr:0x02034a94
+_ZN13MessageWindow10SetVisibleEi kind:function(arm,size=0x130) addr:0x02034a94
 func_02034bc4 kind:function(arm,size=0x374) addr:0x02034bc4
 func_02034f38 kind:function(arm,size=0x14) addr:0x02034f38
 func_02034f4c kind:function(arm,size=0x34) addr:0x02034f4c
@@ -5074,7 +5074,7 @@ statenames$8555 kind:data(any) addr:0x0210fde8 local
 @10177 kind:data(any) addr:0x021102a0 local
 @10178 kind:data(any) addr:0x021102bc local
 data_021102d8 kind:data(any) addr:0x021102d8
-data_021102e8 kind:data(any) addr:0x021102e8
+_ZTV13MessageWindow kind:data(any) addr:0x021102e0
 data_021102f0 kind:data(any) addr:0x021102f0
 gText_Go kind:data(any) addr:0x021103a8
 gText_Ni kind:data(any) addr:0x02110408

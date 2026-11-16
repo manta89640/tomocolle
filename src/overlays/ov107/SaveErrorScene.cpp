@@ -119,7 +119,7 @@ BOOL SaveErrorScene::ShowMessage(u32 message) {
         func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         for (int i = 0; i < 3; i++) {
-            mWindow[0].mButtons[i].mSprite.mVisible = FALSE;
+            mWindow[0].mButtons[i].mVisible = FALSE;
         }
     } else if (mSubStep == 1) {
         if (mWindow[0].mUnknownAF88) {

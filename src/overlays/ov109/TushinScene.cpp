@@ -18,14 +18,14 @@ static const WindowPoint sYesNoSizes[2] = { { 94, 30 }, { 94, 30 } };
 static const ScreenRect sYesNoWindowRect = { 20, 20, 216, 152 };
 static const ScreenRect sListBarRect = { -8, -8, 16, 16 };
 static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
+static const ButtonSounds sButtonStyle = { 10, -1, 0, -1 };
 static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
 static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const WindowPoint sListButtonPositions[3] = { { 213, 19 }, { 242, 13 }, { 128, 173 } };
 static const WindowPoint sListButtonTextPositions[3] = { { 26, 34 }, { 24, 22 }, { 116, 30 } };
 static const WindowPoint sButtonPositions2[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
 static const WindowPoint sButtonPositions3[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
-static const WindowButtonStyle sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
+static const ButtonSounds sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
 
 static const WindowPoint sButtonSize2 = { 190, 26 };
 static const WindowPoint sListCursorPos = { 12, 47 };
@@ -51,7 +51,7 @@ static const WindowPoint sButtonTextPositions2[3] = { { 38, 68 }, { 38, 100 }, {
 static const WindowPoint sTextMargins[3] = { { 32, 33 }, { 32, 50 }, { 32, 33 } };
 static const int sListOrders[7] = { 0, 1, 2, 3, 4, 5, 6 }; // What the list is sorted by, by the button chosen
 static const u32 sListMessages[7] = { 127, 128, 129, 130, 131, 132, 133 };
-static const WindowButtonStyle sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
+static const ButtonSounds sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
 static const WindowPoint sListItemPositions[7] = {
     { 128, 30 }, { 128, 52 }, { 128, 74 }, { 128, 96 }, { 128, 118 }, { 128, 140 }, { 128, 162 },
 };
@@ -77,7 +77,7 @@ static const WindowLayout sLayouts[9] = {
     { { FALSE, FALSE, FALSE }, TRUE },
     { { FALSE, FALSE, FALSE }, TRUE },
 };
-static const WindowButtonStyle sBackButtonStyles[9] = {
+static const ButtonSounds sBackButtonStyles[9] = {
     { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 },
     { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 11, -1, 0, -1 },
 };
@@ -274,9 +274,9 @@ void TushinScene::SetUpWindow(int page) {
         func_02033bb4(&mWindow, 0, 0x7E, sFirstPageIconPositions[i]);
     }
     for (int i = 0; i < 3; i++) {
-        mWindow.mSprites[i].mSprite.mUnknown5E = 8;
+        mWindow.mSprites[i].mUnknown5E = 8;
     }
-    mWindow.mButtons[0].mSprite.mUnknown5E = 8;
+    mWindow.mButtons[0].mUnknown5E = 8;
 }
 
 // @0x0214a140
@@ -300,18 +300,18 @@ void TushinScene::SetUpList(int *charOffset) {
     mResidents.mUnknown1139C = 1;
 
     for (int i = 0; i < 3; i++) {
-        Sprite_Init(&mButtons[i].mSprite, 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
+        Sprite_Init(&mButtons[i], 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
         func_02031260(&mButtons[i], 4);
         func_02031278(&mButtons[i], sListButtonSequences[i], sListButtonSequences2[i]);
-        mButtons[i].mSprite.SetPosition(
+        mButtons[i].SetPosition(
             FxVec2(sListButtonPositions[i].x << FX32_SHIFT, sListButtonPositions[i].y << FX32_SHIFT));
         func_02031eb0(&mButtons[i], sListButtonTextPositions[i].x, sListButtonTextPositions[i].y);
-        mButtons[i].mUnknown0DC = 1;
+        mButtons[i].mUnknownDC = 1;
         func_02032158(&mButtons[i], &sListButtonStyles[i]);
         func_0203119c(&mButtons[i]);
-        mButtons[i].mSprite.mUnknown5E = 1;
+        mButtons[i].mUnknown5E = 1;
         if (sListButtonMessages[i] == (u32)-1) {
-            mButtons[i].mUnknown158 = 0;
+            mButtons[i].mText.mSprite.mVisible = FALSE;
         } else {
             *charOffset += func_02031f58(&mButtons[i], &mMessageFiles[sListButtonFiles[i]], sListButtonMessages[i],
                                          &gFonts[sListButtonFonts[i]].mFont, 0x1000, *charOffset);

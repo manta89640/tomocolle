@@ -3120,9 +3120,9 @@ void MiiEditProfilePage::Update() {
             }
             for (i = 0; i < 4; i++) {
                 if (i == choice) {
-                    Sprite_SetSequence(&mWindows[0].mSprites[i].mSprite, (u16)(sChoiceSequences[i] + 1), TRUE);
+                    Sprite_SetSequence(&mWindows[0].mSprites[i], (u16)(sChoiceSequences[i] + 1), TRUE);
                 } else {
-                    Sprite_SetSequence(&mWindows[0].mSprites[i].mSprite, sChoiceSequences[i], TRUE);
+                    Sprite_SetSequence(&mWindows[0].mSprites[i], sChoiceSequences[i], TRUE);
                 }
             }
             mWindows[0].mUnknownSetBeforeClose = 15;
@@ -3156,9 +3156,9 @@ void MiiEditProfilePage::Update() {
             }
             for (i = 0; i < 12; i++) {
                 if (i == choice) {
-                    Sprite_SetSequence(&mWindows[1].mSprites[i].mSprite, (u16)(sChoiceSequences[i + 4] + 1), TRUE);
+                    Sprite_SetSequence(&mWindows[1].mSprites[i], (u16)(sChoiceSequences[i + 4] + 1), TRUE);
                 } else {
-                    Sprite_SetSequence(&mWindows[1].mSprites[i].mSprite, sChoiceSequences[i + 4], TRUE);
+                    Sprite_SetSequence(&mWindows[1].mSprites[i], sChoiceSequences[i + 4], TRUE);
                 }
             }
             mWindows[1].mUnknownSetBeforeClose = 15;
@@ -3203,9 +3203,9 @@ void MiiEditProfilePage::Update() {
             }
             for (i = 0; i < 5; i++) {
                 if (i == choice) {
-                    Sprite_SetSequence(&mWindows[4].mButtons[i].mSprite, (u16)(sChoiceSequences[i + 24] + 1), TRUE);
+                    Sprite_SetSequence(&mWindows[4].mButtons[i], (u16)(sChoiceSequences[i + 24] + 1), TRUE);
                 } else {
-                    Sprite_SetSequence(&mWindows[4].mButtons[i].mSprite, sChoiceSequences[i + 24], TRUE);
+                    Sprite_SetSequence(&mWindows[4].mButtons[i], sChoiceSequences[i + 24], TRUE);
                 }
             }
             mWindows[4].mUnknownSetBeforeClose = 15;
@@ -3233,9 +3233,9 @@ void MiiEditProfilePage::Update() {
             }
             for (i = 0; i < 2; i++) {
                 if (i == choice) {
-                    Sprite_SetSequence(&mWindows[5].mSprites[i].mSprite, (u16)(sChoiceSequences[i + 16] + 1), TRUE);
+                    Sprite_SetSequence(&mWindows[5].mSprites[i], (u16)(sChoiceSequences[i + 16] + 1), TRUE);
                 } else {
-                    Sprite_SetSequence(&mWindows[5].mSprites[i].mSprite, sChoiceSequences[i + 16], TRUE);
+                    Sprite_SetSequence(&mWindows[5].mSprites[i], sChoiceSequences[i + 16], TRUE);
                 }
             }
             mWindows[5].mUnknownSetBeforeClose = 15;
@@ -3388,7 +3388,7 @@ void MiiEditProfilePage::SetState(int state) {
             func_02031260((SpriteButton *)&mWindows[2].mSprites[n], 1);
             mWindows[2].mSprites[n].mUnknownE0 = 6;
             func_0203119c((SpriteButton *)&mWindows[2].mSprites[n]);
-            mWindows[2].mSprites[n].mSprite.mVisible = FALSE;
+            mWindows[2].mSprites[n].mVisible = FALSE;
             n++;
         }
         WindowPoint okPosition2 = data_ov076_021587a8;
@@ -3413,7 +3413,7 @@ void MiiEditProfilePage::SetState(int state) {
             func_02031260((SpriteButton *)&mWindows[3].mSprites[n], 1);
             mWindows[3].mSprites[n].mUnknownE0 = 6;
             func_0203119c((SpriteButton *)&mWindows[3].mSprites[n]);
-            mWindows[3].mSprites[n].mSprite.mVisible = FALSE;
+            mWindows[3].mSprites[n].mVisible = FALSE;
             n++;
         }
         WindowPoint okPosition3 = data_ov076_021587a8;
@@ -3624,7 +3624,7 @@ void MiiEditProfilePage::SetState(int state) {
         func_02034720(&mWindows[0], 0x12, 1);
         int choice = mScene->mCharacter.mBloodType;
         if (choice >= 0 && choice <= 3) {
-            Sprite_SetSequence(&mWindows[0].mSprites[choice].mSprite, (u16)(sChoiceSequences[choice] + 1), TRUE);
+            Sprite_SetSequence(&mWindows[0].mSprites[choice], (u16)(sChoiceSequences[choice] + 1), TRUE);
         }
         break;
     }
@@ -3632,7 +3632,7 @@ void MiiEditProfilePage::SetState(int state) {
         func_02034720(&mWindows[1], 0x12, 1);
         int color = func_02098dac(&mScene->mCharacter, 0x28);
         if (color >= 0 && color <= 11) {
-            Sprite_SetSequence(&mWindows[1].mSprites[color].mSprite, (u16)(sChoiceSequences[color + 4] + 1), TRUE);
+            Sprite_SetSequence(&mWindows[1].mSprites[color], (u16)(sChoiceSequences[color + 4] + 1), TRUE);
         }
         break;
     }
@@ -3665,14 +3665,14 @@ void MiiEditProfilePage::SetState(int state) {
             choice = 4;
             break;
         }
-        Sprite_SetSequence(&mWindows[4].mButtons[choice].mSprite, (u16)(sChoiceSequences[choice + 24] + 1), TRUE);
+        Sprite_SetSequence(&mWindows[4].mButtons[choice], (u16)(sChoiceSequences[choice + 24] + 1), TRUE);
         break;
     }
     case 16: {
         func_02034720(&mWindows[5], 0x12, 1);
         int sex = MiiData_GetSex(&mScene->mCharacter);
         if (sex >= 0 && sex <= 1) {
-            Sprite_SetSequence(&mWindows[5].mSprites[sex].mSprite, (u16)(sChoiceSequences[sex + 16] + 1), TRUE);
+            Sprite_SetSequence(&mWindows[5].mSprites[sex], (u16)(sChoiceSequences[sex + 16] + 1), TRUE);
         }
         break;
     }

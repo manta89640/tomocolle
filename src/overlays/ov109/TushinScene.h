@@ -75,23 +75,15 @@ void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next sce
 
 // --- The message window's parts ---
 
-// A style of a window button (what the four numbers are is not known)
-struct WindowButtonStyle {
-    /* 0x0 */ int mUnknown0;
-    /* 0x4 */ int mUnknown4;
-    /* 0x8 */ int mUnknown8;
-    /* 0xC */ int mUnknownC;
-};
-
 extern "C" {
 // Adds a button with a text: (.., number, .., two sprite sequences, position, size, the text's message file and
 // message, font, plane, character offset, style, ..)
 void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                   int *charOffset, const WindowButtonStyle *style, int b);
+                   int *charOffset, const ButtonSounds *style, int b);
 // Adds a button without a text
 void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
-                   WindowPoint size, const WindowButtonStyle *style, int b);
+                   WindowPoint size, const ButtonSounds *style, int b);
 // Sets the window's message text up
 void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint position, WindowPoint margin, int *charOffset);
@@ -271,7 +263,6 @@ extern "C" {
 void func_020af224(SceneCheck *check, int a, int b);
 void func_020af260(SceneCheck *check);
 int func_020af4d8(SceneCheck *check, int a);
-void func_0203206c(void *button);
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
@@ -388,19 +379,11 @@ void func_020a27dc(ListView *view, int a, int b, int c);
 void func_020a380c(ListPages *pages, int a, int b);
 }
 
-// --- Window buttons ---
+// --- Window buttons (the others are in SpriteButton.h) ---
 
 extern "C" {
-void func_02031260(WindowButton *button, int a);
-void func_02031278(WindowButton *button, int a, int b);
-void func_02031eb0(WindowButton *button, int x, int y);
-void func_02032158(WindowButton *button, const WindowButtonStyle *style);
-void func_0203119c(WindowButton *button);
-int func_02031f58(WindowButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                  int charOffset);
 void func_02031e88(void *button, int a);
 void func_02031228(void *sprite);
-BOOL func_0203133c(void *button);
 }
 
 // --- Items (main program) ---
@@ -682,7 +665,7 @@ public:
     /* 0x2A97C */ MessageWindow mListWindow;
     /* 0x35920 */ u8 mSortKey;
     /* 0x35924 */ int mUnknown35924;
-    /* 0x35928 */ WindowButton mButtons[3];
+    /* 0x35928 */ TextButton mButtons[3];
     /* 0x36DF8 */ Sprite mSprite;
     /* 0x36EA4 */ int mCharOffset;
     /* 0x36EA8 */ int mUnknown36EA8;

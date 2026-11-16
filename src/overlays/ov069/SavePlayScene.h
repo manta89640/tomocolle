@@ -228,6 +228,7 @@ public:
 // archive, "Scn/Scene/SceneSavePlay_LZ.bin".
 class SavePlayScene : public Scene {
 public:
+    SavePlayScene(int sceneId); // The main program's (src/scene/SceneManager.cpp)
     // mState
     enum State {
         STATE_NONE,

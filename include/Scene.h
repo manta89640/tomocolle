@@ -20,6 +20,8 @@ public:
         PHASE_DONE,          // The scene manager deletes the scene
     };
 
+    Scene(int sceneId) : mSceneId(sceneId), mPhase(PHASE_START_LOADING), mSkipFade(FALSE) {}
+
     virtual void StartLoading() = 0;
     virtual void Init() = 0;
     virtual void Update() = 0;
