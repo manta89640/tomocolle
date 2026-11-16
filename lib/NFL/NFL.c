@@ -800,7 +800,7 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
         ((fx32 *)&translation)[obj->yAxis] = position.y;
         ((fx32 *)&translation)[obj->zAxis] = position.z;
         MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
-        G3C_LoadMtx43(&ctx->dl, &mtx);
+        G3C_MultMtx43(&ctx->dl, &mtx);
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
@@ -921,7 +921,7 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
         ((fx32 *)&translation)[obj->yAxis] = position.y;
         ((fx32 *)&translation)[obj->zAxis] = position.z;
         MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
-        G3C_LoadMtx43(&ctx->dl, &mtx);
+        G3C_MultMtx43(&ctx->dl, &mtx);
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
@@ -1026,7 +1026,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
         ((fx32 *)&translation)[obj->yAxis] = position.y;
         ((fx32 *)&translation)[obj->zAxis] = position.z;
         MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
-        G3C_LoadMtx43(&ctx->dl, &mtx);
+        G3C_MultMtx43(&ctx->dl, &mtx);
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
@@ -4541,8 +4541,8 @@ extern NFLSharedStreamSource sNFLSharedStreamSources[];
 // Not matching: register allocation only (the original has pal in r5 before stream, source, extra and size)
 BOOL NFLi_CopySharedTextures(u32 *pos) {
     NFLWork *work = (NFLWork *)sNFLWork;
-    NFLStream *stream = work->streams;
     NFLSharedStreamSource *source = sNFLSharedStreamSources;
+    NFLStream *stream = work->streams;
     int i;
     u16 palette[16];
 
