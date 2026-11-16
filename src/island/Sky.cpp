@@ -663,6 +663,11 @@ void SkyBirds::Draw() {
     }
 }
 
+// 97.9%: the loop's guard is tested once where the original tests mCount > 0 twice (cmp; ...; cmpgt; ble), and the
+// three pointers and vy are in a rotation of the original's r7/r8/r9. Tried: declarations at the top, while, i
+// initialised from x, a guarding if, a point local, the velocity stores first, pragma sets (level 2, common subs,
+// propagation, the eight passes, lifetimes, loop invariants, strength reduction). The y and the step of x are
+// computed before SetPosition: that is what chains the two Rand calls (one store of the state), as the original has.
 void SkyBirds::Start() {
     if (mFlying) {
         return;
@@ -679,11 +684,13 @@ void SkyBirds::Start() {
             Sprite_Init(&mSprites[i], mResource, 0x38, 0x80, 0x60, TRUE);
             Sprite_SetFrame(&mSprites[i], (u16)(Rand(69) + 1));
         }
-        mSprites[i].SetPosition(FxVec2((x + 264) << FX32_SHIFT, (Rand(128) + 32) << FX32_SHIFT));
+        int px = x + 264;
+        int py = Rand(128) + 32;
+        x += Rand(40) + 10;
+        mSprites[i].SetPosition(FxVec2(px << FX32_SHIFT, py << FX32_SHIFT));
         mSprites[i].mVisible = TRUE;
         mVelocities[i].x = vx;
         mVelocities[i].y = vy;
-        x += Rand(40) + 10;
     }
     if (mCount == 1) {
         gSoundManager.StartSeqArc(2, 3, 6);
