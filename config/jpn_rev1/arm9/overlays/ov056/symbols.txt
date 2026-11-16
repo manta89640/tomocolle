@@ -30,7 +30,7 @@ gStr_P01_ov056 kind:data(any) addr:0x0214c204
 gStr_P00_ov056 kind:data(any) addr:0x0214c208
 data_ov056_0214c20c kind:data(any) addr:0x0214c20c
 data_ov056_0214c218 kind:data(any) addr:0x0214c218
-data_ov056_0214c230 kind:data(any) addr:0x0214c230 ambiguous
+_ZTV14TestNg136Scene kind:data(any) addr:0x0214c228
 gStr_TBM_ov056 kind:data(any) addr:0x0214c24c
 gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov056 kind:data(any) addr:0x0214c250
 gStr_TBI_ov056 kind:data(any) addr:0x0214c270

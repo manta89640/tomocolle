@@ -52,7 +52,7 @@ data_ov028_0214acdc kind:data(any) addr:0x0214acdc ambiguous
 gStr_P08_item_imd_ov028 kind:data(any) addr:0x0214ace0
 gStr_P09_item_imd_ov028 kind:data(any) addr:0x0214acf0
 gStr_P17_item_imd_ov028 kind:data(any) addr:0x0214ad00
-data_ov028_0214ad18 kind:data(any) addr:0x0214ad18 ambiguous
+_ZTV7Scene50 kind:data(any) addr:0x0214ad10
 data_ov028_0214ad34 kind:data(any) addr:0x0214ad34
 data_ov028_0214ad84 kind:data(any) addr:0x0214ad84
 data_ov028_0214ada8 kind:data(any) addr:0x0214ada8 ambiguous
