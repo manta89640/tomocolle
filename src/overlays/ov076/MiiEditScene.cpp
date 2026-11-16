@@ -593,6 +593,122 @@ void MiiEditScene::func_ov076_0214bb24() {
 
 // --- Page 0 ---
 
+extern "C" {
+void func_020341d4(MessageWindow *window);
+void func_020349cc(MessageWindow *window, int flags);
+void func_02098cd0(CharacterRecord *character, int sex);
+void func_0208ff44(SceneCharacter *character, int a, int b);
+void func_02098d68(CharacterRecord *character, int index, s16 value);
+extern const s16 data_020fbaac[];
+void func_0209859c(CharacterRecord *character);
+void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
+void func_02098c40(CharacterRecord *character, int kind, int value);
+void func_02091a14(SceneCharacter *character, BOOL visible);
+void MiiData_GetName(CharacterRecord *character, wchar_t *name);
+void MiiData_SetName(CharacterRecord *character, const wchar_t *name);
+void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
+void MiiData_SetCreatorName(CharacterRecord *character, const wchar_t *name);
+}
+
+void MiiEditPage0::func_ov076_0214c2e4() {
+    switch (mState) {
+    case 0:
+        func_020341d4(&mWindows[0]);
+        // The original reads mResult again after this test, which only a volatile read gives here (making the
+        // field volatile in MessageWindow.h breaks PreStartScene::Ask)
+        if (*(volatile int *)&mWindows[0].mResult != -1) {
+            int result = mWindows[0].mResult;
+            if (result == 2) {
+                func_0203c02c(&gSceneManager, 0x5E);
+            } else {
+                mWindows[0].mUnknownSetBeforeClose = 15;
+                func_020349cc(&mWindows[0], 0x24);
+                func_02098cd0(&mScene->mCharacter, result);
+                switch (MiiData_GetSex(&mScene->mCharacter)) {
+                case 0:
+                    func_0208ff44(&mScene->mCharacter, 2, 1);
+                    for (int i = 0; i < 6; i++) {
+                        func_02098d68(&mScene->mCharacter, i, data_020fbaac[i + 12]);
+                    }
+                    break;
+                case 1:
+                    func_0208ff44(&mScene->mCharacter, 5, 1);
+                    for (int i = 0; i < 6; i++) {
+                        func_02098d68(&mScene->mCharacter, i, data_020fbaac[i + 18]);
+                    }
+                    mScene->mUnknown580C = TRUE;
+                    break;
+                }
+                func_0209859c(&mScene->mCharacter);
+                u8 a;
+                u8 b;
+                func_0209cbac(&mScene->mCharacter, &a, &b);
+                mScene->mCharacter.mUnknown290 = a;
+                mScene->mCharacter.mUnknown291 = b;
+                func_02098c40(&mScene->mCharacter, 0x28, 0);
+                func_02098c40(&mScene->mCharacter, 0x24, 0);
+                MiiData_SetName(&mScene->mCharacter, L"");
+                mScene->func_ov076_0214b694();
+                func_02091a14(&mScene->mCharacter, FALSE);
+                mScene->func_ov076_0214ba88(TRUE);
+                if (mScene->mUnknown5824 != 0) {
+                    wchar_t name[11];
+                    SavedCharacter first;
+                    MI_CpuClear16(name, sizeof(name));
+                    func_0202c264(&gGameData, 0, &first);
+                    MiiData_GetCreatorName(&first, name);
+                    if (mScene->func_ov076_0214bf20(name) == 0) {
+                        MI_CpuClear16(name, sizeof(name));
+                        MiiData_GetName(&first, name);
+                    }
+                    MiiData_SetCreatorName(&mScene->mCharacter, name);
+                } else {
+                    mScene->mCharacter.mUnknown298 = 1;
+                }
+            }
+        }
+        if (!mWindows[0].mTransitionDone) {
+            return;
+        }
+        func_02091a14(&mScene->mCharacter, TRUE);
+        mScene->func_ov076_0214b1ec(1);
+        break;
+    case 1:
+        func_020341d4(&mWindows[1]);
+        if (mWindows[1].mResult != -1) {
+            mWindows[1].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[1], 0x24);
+            switch (mWindows[1].mResult) {
+            case 0:
+                mNextPage = 1;
+                break;
+            case 1:
+                mNextPage = 2;
+                break;
+            }
+        }
+        if (!mWindows[1].mTransitionDone) {
+            return;
+        }
+        func_02091a14(&mScene->mCharacter, TRUE);
+        mScene->func_ov076_0214b1ec(mNextPage);
+        break;
+    }
+}
+
+void MiiEditPage0::func_ov076_0214c624(int state) {
+    switch (state) {
+    case 0:
+        func_02034720(&mWindows[0], 0x12, 1);
+        break;
+    case 1:
+        func_02034720(&mWindows[1], 0x12, 1);
+        break;
+    }
+    mState = state;
+    mUnknown00004 = 0;
+}
+
 void MiiEditPage0::Draw() {
     for (int i = 0; i < 2; i++) {
         func_020345d8(&mWindows[i]);
