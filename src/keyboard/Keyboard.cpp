@@ -72,9 +72,6 @@ extern "C" {
 void func_02083078(SoftKeyboard *keyboard, int plane, int palette);
 void func_020830bc(SoftKeyboard *keyboard, int plane);
 void func_02083128(SoftKeyboard *keyboard, KeyCallback callback, void *userData);
-void func_020831a4(SoftKeyboard *keyboard);
-void func_020831d8(SoftKeyboard *keyboard);
-void func_02083204(SoftKeyboard *keyboard, int palette);
 void func_02083244(SoftKeyboard *keyboard, int a, TPData tp);
 void func_02083288(SoftKeyboard *keyboard, int mode, BOOL b);
 void func_020832d0(KeyboardButton *button, s16 index);
@@ -83,10 +80,6 @@ void func_020837a8(SoftKeyboard *keyboard);
 void func_020837f4(SoftKeyboard *keyboard, s16 resource, int a, int palette);
 void func_0208382c(SoftKeyboard *keyboard, s16 resource, MessageFile *file, int charOffset, int a, s16 layout,
                    int palette);
-void func_02083868(SoftKeyboard *keyboard, s16 resource);
-void func_02083874(SoftKeyboard *keyboard, int a);
-void func_020838b4(SoftKeyboard *keyboard, int palette);
-void func_020838f4(SoftKeyboard *keyboard);
 void func_02083c30(SoftKeyboard *keyboard);
 void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code);
 void func_02083d58(SoftKeyboard *keyboard, int event);
@@ -139,9 +132,9 @@ void SoftKeyboard::SetArchiveName(const char *name) {
 void func_02083078(SoftKeyboard *keyboard, int plane, int palette) {
     func_020830bc(keyboard, plane);
     func_02083128(keyboard, (KeyCallback)func_02083d58, keyboard);
-    func_020831a4(keyboard);
-    func_020831d8(keyboard);
-    func_02083204(keyboard, palette);
+    keyboard->TransferCharData();
+    keyboard->TransferScreen();
+    keyboard->LoadBgPalette(palette);
 }
 
 void func_020830bc(SoftKeyboard *keyboard, int plane) {
@@ -160,17 +153,17 @@ void func_02083128(SoftKeyboard *keyboard, KeyCallback callback, void *userData)
     func_02028154(&data_02121834, plane, -59);
 }
 
-void func_020831a4(SoftKeyboard *keyboard) {
+void SoftKeyboard::TransferCharData() {
     void *data = func_0208265c();
-    VramTransferQueue_AddCharData(gVramTransferQueue, data, keyboard->mPlane, 0, func_02082680());
+    VramTransferQueue_AddCharData(gVramTransferQueue, data, mPlane, 0, func_02082680());
 }
 
-void func_020831d8(SoftKeyboard *keyboard) {
-    func_02027f3c(&data_02121834, keyboard->mScreen, keyboard->mPlane, 0, 0x800);
+void SoftKeyboard::TransferScreen() {
+    func_02027f3c(&data_02121834, mScreen, mPlane, 0, 0x800);
 }
 
-void func_02083204(SoftKeyboard *keyboard, int palette) {
-    func_02027534(&data_021213b8, keyboard->mBgPaletteFile, keyboard->mPlane, palette, keyboard->mPalette * 32, 32);
+void SoftKeyboard::LoadBgPalette(int a) {
+    func_02027534(&data_021213b8, mBgPaletteFile, mPlane, a, mPalette * 32, 32);
 }
 
 void func_02083244(SoftKeyboard *keyboard, int a, TPData tp) {
@@ -314,10 +307,10 @@ void func_020837a8(SoftKeyboard *keyboard) {
 }
 
 void func_020837f4(SoftKeyboard *keyboard, s16 resource, int a, int palette) {
-    func_02083868(keyboard, resource);
-    func_02083874(keyboard, a);
-    func_020838b4(keyboard, palette);
-    func_020838f4(keyboard);
+    keyboard->SetObjResource(resource);
+    keyboard->LoadObjCells(a);
+    keyboard->LoadObjPalette(palette);
+    keyboard->InitSprites();
 }
 
 void func_0208382c(SoftKeyboard *keyboard, s16 resource, MessageFile *file, int charOffset, int a, s16 layout,
@@ -327,43 +320,42 @@ void func_0208382c(SoftKeyboard *keyboard, s16 resource, MessageFile *file, int 
     keyboard->InitButtonTexts(file, charOffset);
 }
 
-void func_02083868(SoftKeyboard *keyboard, s16 resource) {
-    keyboard->mObjResource = resource;
+void SoftKeyboard::SetObjResource(s16 resource) {
+    mObjResource = resource;
 }
 
-void func_02083874(SoftKeyboard *keyboard, int a) {
-    ObjResourceManager_Load(&gObjResourceManager, keyboard->mObjCellFile, keyboard->mObjCharFile, 0x1000,
-                            keyboard->mObjResource, a);
+void SoftKeyboard::LoadObjCells(int a) {
+    ObjResourceManager_Load(&gObjResourceManager, mObjCellFile, mObjCharFile, 0x1000, mObjResource, a);
 }
 
-void func_020838b4(SoftKeyboard *keyboard, int palette) {
-    func_02027534(&data_021213b8, keyboard->mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
+void SoftKeyboard::LoadObjPalette(int palette) {
+    func_02027534(&data_021213b8, mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
 }
 
-void func_020838f4(SoftKeyboard *keyboard) {
-    Sprite_Init(&keyboard->mTabs[0], keyboard->mObjResource, 1, sTabAreas[0].x + 16, sTabAreas[0].y + 8, TRUE);
-    Sprite_Init(&keyboard->mTabs[1], keyboard->mObjResource, 0, sTabAreas[1].x + 16, sTabAreas[1].y + 8, TRUE);
-    Sprite_SetFrame(&keyboard->mTabs[0], 1);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mTabs[1].mAnim));
-    Sprite_Init(&keyboard->mTabs[2], keyboard->mObjResource, 2, sTabAreas[2].x + 16, sTabAreas[2].y + 8, TRUE);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mTabs[2].mAnim));
-    Sprite_Init(&keyboard->mTabs[3], keyboard->mObjResource, 3, sTabAreas[3].x + 16, sTabAreas[3].y + 8, TRUE);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mTabs[3].mAnim));
-    Sprite_Init(&keyboard->mTabs[4], keyboard->mObjResource, 4, sTabAreas[4].x + 16, sTabAreas[4].y + 8, TRUE);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mTabs[4].mAnim));
+void SoftKeyboard::InitSprites() {
+    Sprite_Init(&mTabs[0], mObjResource, 1, sTabAreas[0].x + 16, sTabAreas[0].y + 8, TRUE);
+    Sprite_Init(&mTabs[1], mObjResource, 0, sTabAreas[1].x + 16, sTabAreas[1].y + 8, TRUE);
+    Sprite_SetFrame(&mTabs[0], 1);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mTabs[1].mAnim));
+    Sprite_Init(&mTabs[2], mObjResource, 2, sTabAreas[2].x + 16, sTabAreas[2].y + 8, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mTabs[2].mAnim));
+    Sprite_Init(&mTabs[3], mObjResource, 3, sTabAreas[3].x + 16, sTabAreas[3].y + 8, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mTabs[3].mAnim));
+    Sprite_Init(&mTabs[4], mObjResource, 4, sTabAreas[4].x + 16, sTabAreas[4].y + 8, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mTabs[4].mAnim));
 
-    Sprite_Init(&keyboard->mButtons[0], keyboard->mObjResource, 5, 0x80, 0x60, TRUE);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mButtons[0].mAnim));
-    keyboard->mButtons[0].SetPositionFromVec(sButtonPositions[0].x << FX32_SHIFT, sButtonPositions[0].y << FX32_SHIFT);
-    func_020832d0(&keyboard->mButtons[0], 0);
-    Sprite_Init(&keyboard->mButtons[1], keyboard->mObjResource, 5, 0x80, 0x60, TRUE);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&keyboard->mButtons[1].mAnim));
-    keyboard->mButtons[1].SetPositionFromVec(sButtonPositions[1].x << FX32_SHIFT, sButtonPositions[1].y << FX32_SHIFT);
-    func_020832d0(&keyboard->mButtons[1], 1);
+    Sprite_Init(&mButtons[0], mObjResource, 5, 0x80, 0x60, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mButtons[0].mAnim));
+    mButtons[0].SetPositionFromVec(sButtonPositions[0].x << FX32_SHIFT, sButtonPositions[0].y << FX32_SHIFT);
+    func_020832d0(&mButtons[0], 0);
+    Sprite_Init(&mButtons[1], mObjResource, 5, 0x80, 0x60, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mButtons[1].mAnim));
+    mButtons[1].SetPositionFromVec(sButtonPositions[1].x << FX32_SHIFT, sButtonPositions[1].y << FX32_SHIFT);
+    func_020832d0(&mButtons[1], 1);
 
-    Sprite_Init(&keyboard->mSprite5EE8, keyboard->mObjResource, 7, 0x80, 0x60, TRUE);
-    const ScreenPoint &position = sLayoutPositions[keyboard->mLayout];
-    keyboard->mSprite5EE8.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    Sprite_Init(&mSprite5EE8, mObjResource, 7, 0x80, 0x60, TRUE);
+    const ScreenPoint &position = sLayoutPositions[mLayout];
+    mSprite5EE8.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
 
 void SoftKeyboard::Draw() {

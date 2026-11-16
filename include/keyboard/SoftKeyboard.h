@@ -55,6 +55,19 @@ public:
     int InitButtonTexts(MessageFile *file, int charOffset);
     // How many characters (tiles) the buttons' texts take
     int GetButtonCharCount();
+    // Queues the keys' character data (the core's buffer) to the plane's VRAM
+    void TransferCharData();
+    // Sends mScreen to the plane
+    void TransferScreen();
+    // Loads fs_keyboardColor.ncl for the plane
+    void LoadBgPalette(int a);
+    void SetObjResource(s16 resource);
+    // Loads obj_keyboard.nce and obj_chat_keyboard.ncg as sprite resource mObjResource
+    void LoadObjCells(int a);
+    // Loads keyboardColor.ncl as sprite palette 'palette'
+    void LoadObjPalette(int palette);
+    // Sets up the tabs, the buttons and mSprite5EE8
+    void InitSprites();
 
     /* 0x0000 */ int mPlane;        // The background plane the keyboard is on
     /* 0x0004 */ int mPalette;      // Its palette number

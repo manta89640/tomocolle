@@ -884,7 +884,7 @@ unit is linked from its object. It is the object a scene holds for the on-screen
   `func_02083c30` and `GetButtonCharCount`; the overlays call the same functions.
 - **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
   (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given
-  (`func_02081d68`; the second is what `func_020831a4` queues to VRAM), the six background paths (five of 0x30 bytes
+  (`func_02081d68`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
   and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite, its resource and layout, and the
   three sprite paths. Every path starts `xxx:/`, which `SetArchiveName` overwrites with the archive's mount name.
 - **The buttons** (`KeyboardButton`, `0x0208329C` to `0x02083740`) are a sprite with a `MessageText`: they show
