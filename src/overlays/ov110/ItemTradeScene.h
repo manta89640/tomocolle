@@ -366,6 +366,18 @@ public:
     virtual void Draw();
     virtual void SetVisible(BOOL visible);
 
+    void Init();
+    void SetBackground(int plane, int offset);
+    void SetUpScrollBar(int a, int b, int c);
+    void SetMessageFile(MessageFile *file); // Where the items' names are
+    void SetMode(int mode);
+    void SetItems(InventoryItem **items, int count);
+    void Select(int index);
+    void ScrollToSelected();
+    int FindItem(u16 id); // Where the item with that id is
+    void ResetArrowButtons();
+    void SetUnknown308(BOOL value);
+
     /* 0x004 */ u8 mUnknown004[8];
     /* 0x00C */ InventoryItem **mItems; // What func_020a9b40 gave it
     /* 0x010 */ int mItemCount;
@@ -378,23 +390,12 @@ public:
 }; // 0x13F64
 
 extern "C" {
-void func_020a8170(ItemListView *list);
-void func_020a8180(ItemListView *list, int unk1, int unk2);
 void func_020a842c(ItemListView *list, int unk1, int unk2, int unk3, int *charOffset);
 void func_020a8648(ItemListView *list, int *charOffset);
 void func_020a8864(ItemListView *list, int unk1, int unk2, int unk3);
 void func_020a8938(ItemListView *list, int unk1, int unk2, int unk3);
 void func_020a8a38(ItemListView *list, int unk1, int unk2, int unk3);
-void func_020a8ab0(ItemListView *list, int unk1, int unk2, int unk3);
 void func_020a8adc(ItemListView *list); // Updates it
-void func_020a9810(ItemListView *list, int unk);
-void func_020a9b10(ItemListView *list, MessageFile *file); // Where the items' names are
-void func_020a9b40(ItemListView *list, InventoryItem **items, int count);
-void func_020a9bf4(ItemListView *list, int index);
-void func_020a9de4(ItemListView *list);
-int func_020a9e28(ItemListView *list, u16 id); // Where the item with that id is
-void func_020a9e6c(ItemListView *list);
-void func_020a9e88(ItemListView *list, BOOL unk);
 }
 
 // --- Other main-program things --------------------------------------------------------------------------------

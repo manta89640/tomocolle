@@ -9,6 +9,8 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
+class MessageFile;
+
 // An item as the list shows it (the item files' InventoryItem)
 class InventoryItem {
 public:
@@ -29,7 +31,7 @@ struct ListButton {
 // A row's text (the main program's MessageText, 0x5F0 bytes)
 struct RowText {
     /* 0x000 */ u8 mUnknown000[0x154];
-    /* 0x154 */ int mUnknown154;
+    /* 0x154 */ MessageFile *mMessageFile;
     /* 0x158 */ u8 mUnknown158[0x5F0 - 0x158];
 }; // 0x5F0
 
@@ -48,7 +50,7 @@ public:
     void SetBackground(int plane, int offset);
     void SetUpScrollBar(int a, int b, int c);
     void SetMode(int mode);
-    void SetTextUnknown(int value);
+    void SetMessageFile(MessageFile *file);
     void DrawDirtyRows();
     void UpdateRows();
     void SetScroll(int scroll);
@@ -273,10 +275,10 @@ void ItemListView::UpdateRowCount(int row, int item) {
     }
 }
 
-// Sets the text of every row's message (field 0x154 of the row's text)
-void ItemListView::SetTextUnknown(int value) {
+// Sets the message file that the rows take the items' names from
+void ItemListView::SetMessageFile(MessageFile *file) {
     for (int i = 0; i < mRowCount; i++) {
-        mRowTexts[i].mUnknown154 = value;
+        mRowTexts[i].mMessageFile = file;
     }
 }
 

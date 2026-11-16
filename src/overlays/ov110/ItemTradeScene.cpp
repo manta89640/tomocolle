@@ -425,17 +425,17 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     mRoom = context->mRoom;
     mSelection.Set(0, 0);
 
-    func_020a8170(&mList);
-    func_020a8180(&mList, 0x100, 0x38);
+    mList.Init();
+    mList.SetBackground(0x100, 0x38);
     func_020278f8(&data_021213b8, 0x5FDF, 0x100);
     func_020a842c(&mList, 1, 8, 9, charOffset);
     func_020a8648(&mList, charOffset);
     func_020a8864(&mList, 1, 2, 3);
     func_020a8938(&mList, 1, 4, 5);
     func_020a8a38(&mList, 1, 6, 7);
-    func_020a8ab0(&mList, 2, 6, 7);
-    func_020a9b10(&mList, context->mItemMessages);
-    func_020a9810(&mList, 2);
+    mList.SetUpScrollBar(2, 6, 7);
+    mList.SetMessageFile(context->mItemMessages);
+    mList.SetMode(2);
     mList.SetVisible(FALSE);
 
     mTabs.Init(1, context->mCommonMessages, charOffset);
@@ -507,15 +507,15 @@ int ItemTradeList::Update() {
 // @0x0214a8cc
 void ItemTradeList::UpdateListMode() {
     if (*mContext->mSceneState == 7) {
-        func_020a9e88(&mList, TRUE);
+        mList.SetUnknown308(TRUE);
     } else {
-        func_020a9e88(&mList, FALSE);
+        mList.SetUnknown308(FALSE);
     }
 }
 
 // @0x0214a904
 void ItemTradeList::Hide() {
-    func_020a9e88(&mList, FALSE);
+    mList.SetUnknown308(FALSE);
     func_020a8adc(&mList);
 }
 
@@ -548,10 +548,10 @@ void ItemTradeList::Open() {
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DC;
         mOkButton.mText.DrawAll();
-        func_020a9810(&mList, 2);
-        func_020a9b10(&mList, mContext->mItemMessages);
+        mList.SetMode(2);
+        mList.SetMessageFile(mContext->mItemMessages);
         mList.SetVisible(TRUE);
-        func_020a9b40(&mList, mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mList.mUnknown024 = TRUE;
         mSelection.Set(0, 0);
         break;
@@ -566,10 +566,10 @@ void ItemTradeList::Open() {
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DF;
         mOkButton.mText.DrawAll();
-        func_020a9810(&mList, 0);
-        func_020a9b10(&mList, mContext->mCostumeMessages);
+        mList.SetMode(0);
+        mList.SetMessageFile(mContext->mCostumeMessages);
         mList.SetVisible(TRUE);
-        func_020a9b40(&mList, mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mList.mUnknown024 = TRUE;
         mSelection.Set(1, 0);
         break;
@@ -588,16 +588,16 @@ int ItemTradeList::Run() {
             mItemFilter.Select(0);
             mCostumeFilter.SetVisible(FALSE);
             func_0209f0f0(mInventory, mItems, &mItemCount, 1, 1);
-            func_020a9b10(&mList, mContext->mItemMessages);
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetMessageFile(mContext->mItemMessages);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         case ItemTradeTabs::TAB_ITEMS_2:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
             func_0209f208(mInventory, mItems, &mItemCount);
-            func_020a9b10(&mList, mContext->mItemMessages);
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetMessageFile(mContext->mItemMessages);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         case ItemTradeTabs::TAB_COSTUMES:
@@ -605,24 +605,24 @@ int ItemTradeList::Run() {
             mCostumeFilter.SetVisible(TRUE);
             mCostumeFilter.Select(0);
             func_0209e4ac(mCostumes, mItems, &mItemCount, 0);
-            func_020a9b10(&mList, mContext->mCostumeMessages);
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetMessageFile(mContext->mCostumeMessages);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(1, 0);
             break;
         case ItemTradeTabs::TAB_INTERIORS:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
             func_020a5174(mInteriors, mItems, &mItemCount);
-            func_020a9b10(&mList, mContext->mRoomMessages);
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetMessageFile(mContext->mRoomMessages);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(2, 0);
             break;
         case ItemTradeTabs::TAB_ITEMS_3:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
             func_0209f28c(mInventory, mItems, &mItemCount);
-            func_020a9b10(&mList, mContext->mItemMessages);
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetMessageFile(mContext->mItemMessages);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         }
@@ -633,7 +633,7 @@ int ItemTradeList::Run() {
     mItemFilter.Update();
     if (mItemFilter.mPressed != -1) {
         func_0209f0f0(mInventory, mItems, &mItemCount, 1, mItemFilter.GetFilter());
-        func_020a9b40(&mList, mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mPendingIndex = -1;
         func_02031e88(&mOkButton, TRUE);
     }
@@ -644,10 +644,10 @@ int ItemTradeList::Run() {
         case 0:
         case 1:
             func_0209e4ac(mCostumes, mItems, &mItemCount, mCostumeFilter.GetFilter());
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             break;
         case 2:
-            func_020a9b40(&mList, mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             break;
         }
         mPendingIndex = -1;
@@ -768,8 +768,8 @@ void ItemTradeList::Save() {
 void ItemTradeList::RemoveOne() {
     mList.mItems[mList.mSelected]->Add(-1);
     RefreshList();
-    func_020a9bf4(&mList, mPendingIndex);
-    func_020a9de4(&mList);
+    mList.Select(mPendingIndex);
+    mList.ScrollToSelected();
     func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
@@ -778,8 +778,8 @@ void ItemTradeList::RemoveOne() {
 void ItemTradeList::AddOne() {
     mList.mItems[mList.mSelected]->Add(1);
     RefreshList();
-    func_020a9bf4(&mList, mPendingIndex);
-    func_020a9de4(&mList);
+    mList.Select(mPendingIndex);
+    mList.ScrollToSelected();
     func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
@@ -816,9 +816,9 @@ BOOL ItemTradeList::Receive(int id) {
     }
     RefreshList();
     if (mPendingIndex != -1) {
-        mPendingIndex = func_020a9e28(&mList, selected);
-        func_020a9bf4(&mList, mPendingIndex);
-        func_020a9de4(&mList);
+        mPendingIndex = mList.FindItem(selected);
+        mList.Select(mPendingIndex);
+        mList.ScrollToSelected();
         func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
     }
     return received;
@@ -843,7 +843,7 @@ void ItemTradeList::RefreshList() {
         func_0209f28c(mInventory, mItems, &mItemCount);
         break;
     }
-    func_020a9b40(&mList, mItems, mItemCount);
+    mList.SetItems(mItems, mItemCount);
     mTabs.SetMasks(mInventory, mCostumes, mInteriors);
     mTabs.SetVisible(TRUE);
 }
@@ -957,7 +957,7 @@ void ItemTradeList::ResetLights() {
 // buttons at +0x3C and +0x130), when the partner starts sending
 // @0x0214bae8
 void ItemTradeList::ResetListButtons() {
-    func_020a9e6c(&mList);
+    mList.ResetArrowButtons();
 }
 
 static inline void SetTextVisible(MessageText *text, BOOL visible) {
@@ -1187,7 +1187,7 @@ void ItemTradeList::ShowPending() {
         func_020a4b74(&mRoom->mParts, TRUE);
         ShowRoom(mPendingId);
         UpdateRoom();
-        func_020a9bf4(&mList, mPendingIndex);
+        mList.Select(mPendingIndex);
         break;
     case PREVIEW_COSTUME:
         if (mPendingId == -1) {
@@ -1197,7 +1197,7 @@ void ItemTradeList::ShowPending() {
         func_020a03bc(mMannequin, TRUE);
         ShowCostume(mPendingId);
         LoadMannequinHead();
-        func_020a9bf4(&mList, mPendingIndex);
+        mList.Select(mPendingIndex);
         break;
     case PREVIEW_ITEM:
         if (mPendingId == -1) {
@@ -1206,7 +1206,7 @@ void ItemTradeList::ShowPending() {
         SetItemCamera();
         mItemModel->mVisible = TRUE;
         mItemModel->ChangeItem(mPendingId);
-        func_020a9bf4(&mList, mPendingIndex);
+        mList.Select(mPendingIndex);
         break;
     }
 }
