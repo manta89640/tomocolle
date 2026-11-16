@@ -95,8 +95,6 @@ static const u32 sPageMessages[68] = {
 };
 // The archive names of the three characters
 static const char *sCharacterArchives[3] = { "3HM", "BI1", "SRM" };
-// Where the list window's texts are: on its items, 32 pixels left of and 6 above each (set by the static
-// initialiser)
 // The words that a received character's texts must not be (IsNgWord compares each text with them, without its
 // trailing spaces and exclamation marks)
 static const wchar_t *sNgWords[41] = {
@@ -106,9 +104,8 @@ static const wchar_t *sNgWords[41] = {
     L"ヤラセロ", L"ヤリマン", L"リョウジョク", L"レイプ", L"ロリコン",
 };
 
-// NOT MATCHING (the static initialiser, __sinit_TushinScene.cpp): the compiler folds sListItemPositions into
-// immediates here, where the original loads them from the .rodata pool (pool+0x294) and subtracts; a const source
-// is folded by every compiler version tried (2.0 SP1p2 to SP2p3), and only a non-const one is loaded.
+// Where the list window's texts are: on its items, 32 pixels left of and 6 above each (set by the static
+// initialiser)
 static const WindowPoint sListTextOrigins[7] = {
     { sListItemPositions[0].x - 32, sListItemPositions[0].y - 6 },
     { sListItemPositions[1].x - 32, sListItemPositions[1].y - 6 },
@@ -2876,3 +2873,7 @@ extern "C" void TushinScene_UnusedClear() {
     data_ov109_021531fc = 0;
     data_ov109_021531fe = 0;
 }
+
+// The static initialiser is compiled with the settings in effect at the end of the file: the original's reads the
+// item positions from the .rodata pool instead of folding them, which constant folding turned off gives.
+#pragma opt_foldconstants off
