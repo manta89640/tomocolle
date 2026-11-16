@@ -606,7 +606,7 @@ void MapScene::Init() {
 // Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
 // rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
 // differs: the registers of &mCamera and of the division's constant in the touch loop, with the order of the
-// rectangle arithmetic, the registers of the camera's reset, and one pair of dead stores.
+// rectangle arithmetic, and the registers of the camera's reset.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();

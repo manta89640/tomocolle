@@ -302,6 +302,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `f(hour - tens * 10)` (`ClockDisplay::Refresh`, in overlays 72, 73 and 74).
 - Pass the value just stored in a member (`f(mLights[0])`) rather than recomputing it (`MapScene::Init`).
 - Declare a value before the call that might clobber it: `u8 t = others[i];` before `Rand` (`MakeDailyNews`).
+- The type of an inline's parameter: `Shift(const VecFx32 &v, u32 shift)` loads the shift before the vector's x,
+  where `int shift` loads it after (`WeddingCamera::Approach`, overlay 96).
+- A call's result through a local before it is stored, `GXRgb color = f(phase); light->mColor = color;`, moved an
+  unrelated address computation after the store, as the original has it (`MapScene::Init`).
 - `int next; BOOL go; go = FALSE; next = 0x44;` gives another order than the initialised declarations
   (`UpdateConnection`).
 - `hour * 3600 + minute * 60` computes the minutes first.
@@ -317,6 +321,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `SetPosition`/`SetPositionFromVec` is called decides their order.
 - A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
   another (the main program's list scenes).
+- A constant vector copied through a local and stored field by field (`VecFx32 target = sConst; mTarget.x =
+  target.x; ...`) where a by-value setter, or the same code in an inline, gave three vector copies one another's
+  slots (`WeddingCamera::Reset`, overlay 96).
 
 **Registers allocated differently**
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
@@ -324,6 +331,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- `#pragma opt_common_subs off` around the one function (and `#pragma opt_common_subs reset` after it: `#pragma
+  optimization_level reset` does not reset it) where two values swap registers whatever form the source takes (the
+  Mii transfer's `func_02077f48`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
+  know are ignored without a word under the build's `-w off`; the `opt_*` names it knows are in its executable
+  (`strings mwccarm.exe | grep '^opt_'`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -340,6 +352,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
   that is rotated at level 2 is a `do { } while`.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
+- Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
+  scheduled the else's code differently (`ItemTradeScene::Update`, overlay 110).
 
 **Constants and arithmetic**
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
@@ -370,6 +384,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   complete unit or to a header it includes, since the compiler's `@` numbers move.
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
   data; rename it when the code shows what it is.
+- For quick looks at code, a file compiles in about a second under `~/Projects/pokesxf/tools/wibo/wibo-macos-1.2.0`
+  with the build's own command, `sjiswrap.exe` and `-enc SJIS` left out, and metroskrew's copy of the same compiler
+  (`mwccarm-3.0-138.exe` for the game, `-3.0-137.exe` for the Mii transfer), against about twenty under wine. The
+  code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
+  one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
 
 ## A match is instructions and references
 
