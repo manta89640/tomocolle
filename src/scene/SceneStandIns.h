@@ -91,8 +91,6 @@ SCENE_STAND_IN(TestNg63Scene, 0x1CEA8); // func_02042634
 
 SCENE_STAND_IN(Scene40, 0x6F908); // func_020428e0
 
-SCENE_STAND_IN(MiiNewsScene, 0x3F258); // func_02043800
-
 SCENE_STAND_IN(WriteSongScene, 0x81224); // func_02044c80
 
 SCENE_STAND_IN(Scene67, 0x3D940); // func_02045504

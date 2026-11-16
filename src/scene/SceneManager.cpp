@@ -48,6 +48,7 @@
 #include "../overlays/ov021/TestNg69Scene.h"
 #include "../overlays/ov076/MiiEditScene.h"
 #include "../overlays/ov022/Scene45.h"
+#include "../overlays/ov087/MiiNewsScene.h"
 #include "../overlays/ov023/Scene4B.h"
 #include "../overlays/ov024/Scene4C.h"
 #include "../overlays/ov025/Scene4D.h"
@@ -907,6 +908,9 @@ MiiEditScene::MiiEditScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x45, overlay 22
 Scene45::Scene45(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x46, 0x47, 0x48, 0x49 and 0x4A, overlay 87
+MiiNewsScene::MiiNewsScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x4B, overlay 23
 Scene4B::Scene4B(int sceneId) : Scene(sceneId) {}

@@ -6730,7 +6730,7 @@ from:0x020439ac kind:arm_call to:0x0203117c module:main
 from:0x020439c8 kind:arm_call to:0x02031f1c module:main
 from:0x020439f0 kind:arm_call to:0x02036558 module:main
 from:0x02043a14 kind:load to:0x02110970 add:0x8 module:main
-from:0x02043a18 kind:load to:0x0214df70 module:overlays(87,90,103,104)
+from:0x02043a18 kind:load to:0x0214df68 add:0x8 module:overlay(87)
 from:0x02043a1c kind:load to:0x0203e188 module:main
 from:0x02043a24 kind:load to:0x0203e168 module:main
 from:0x02043a28 kind:load to:0x0208fd38 module:main
