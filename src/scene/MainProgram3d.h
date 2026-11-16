@@ -25,6 +25,10 @@ void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a re
 NNSG3dResFileHeader *func_020295a4(void *resourceSet, u32 resType); // The file of a type in a resource set
 void func_02029758(void *resourceSet, u32 resType);
 void func_0205ff40(void);
+// Transfers palette colours to the model's palette in VRAM: size bytes at offset bytes into it (each the whole of
+// the palette's VRAM key when negative)
+void func_02029d40(Model *model, const void *pltt, int offset, int size);
+void func_02060c1c(void); // Dumps the linked VRAM managers' free lists (NNSi_GfdDumpLnkVramManFreeListInfo)
 }
 
 // --- Characters: include/character/Character.h ---

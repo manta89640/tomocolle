@@ -90,6 +90,7 @@ extern "C" {
 extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
+void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 // --- The screens ---
 extern ScreenControl data_0211d604;

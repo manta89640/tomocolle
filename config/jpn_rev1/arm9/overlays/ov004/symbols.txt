@@ -1,14 +1,14 @@
-func_ov004_02149a40 kind:function(arm,size=0x44) addr:0x02149a40
-func_ov004_02149a84 kind:function(arm,size=0x110) addr:0x02149a84
-func_ov004_02149b94 kind:function(arm,size=0x510) addr:0x02149b94
-func_ov004_0214a0a4 kind:function(arm,size=0x10) addr:0x0214a0a4
-func_ov004_0214a0b4 kind:function(arm,size=0x3c) addr:0x0214a0b4
-func_ov004_0214a0f0 kind:function(arm,size=0xfc) addr:0x0214a0f0
-func_ov004_0214a1ec kind:function(arm,size=0x60) addr:0x0214a1ec
-func_ov004_0214a24c kind:function(arm,size=0x68) addr:0x0214a24c
+_ZN22CharacterBodyTestScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x02149a40
+_ZN22CharacterBodyTestScene4InitEv kind:function(arm,size=0x110) addr:0x02149a84
+_ZN22CharacterBodyTestScene6UpdateEv kind:function(arm,size=0x510) addr:0x02149b94
+_ZN22CharacterBodyTestScene4DrawEv kind:function(arm,size=0x10) addr:0x0214a0a4
+_ZN22CharacterBodyTestScene4ExitEv kind:function(arm,size=0x3c) addr:0x0214a0b4
+_ZN22CharacterBodyTestScene14UpdateTurnTestEv kind:function(arm,size=0xfc) addr:0x0214a0f0
+_ZN22CharacterBodyTestSceneD1Ev kind:function(arm,size=0x60) addr:0x0214a1ec
+_ZN22CharacterBodyTestSceneD0Ev kind:function(arm,size=0x68) addr:0x0214a24c
 data_ov004_0214a2b4 kind:data(any) addr:0x0214a2b4
 data_ov004_0214a2c0 kind:data(any) addr:0x0214a2c0
-data_ov004_0214a2cc kind:data(any) addr:0x0214a2cc ambiguous
+_ZTV22CharacterBodyTestScene kind:data(any) addr:0x0214a2c4
 gStr_CA3_ov004 kind:data(any) addr:0x0214a2e8
 gStr_Scn_Scene_SceneTestG3d_3_LZ_bin_ov004 kind:data(any) addr:0x0214a2ec
 gStr_TG3_ov004 kind:data(any) addr:0x0214a30c
