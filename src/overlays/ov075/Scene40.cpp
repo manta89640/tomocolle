@@ -11,8 +11,6 @@ void func_0202683c(void);
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161ce0(Scene40Character *character, int a); // Updates the character
-void func_ov075_02178700(void *object);                       // Draws the character's object at 0x2BE4
-void func_ov075_02178cf0(void *object);                       // Draws the one at 0x2CDC
 }
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
@@ -111,10 +109,21 @@ void Scene40::Exit() {
 
 // --- The scene's character ------------------------------------------------------------------------------------------
 
+// objdiff scores this 99.5% though its instructions and relocations equal the original's (checked with objdump
+// against the delinked object; check_relocs lists nothing): the two functions it calls are byte for byte the same,
+// and the report seems to pair one call with the other's.
 void Scene40Character::Draw() {
     Character::Draw();
-    func_ov075_02178700(&mUnknown2B18[0xCC]);
-    func_ov075_02178cf0(&mUnknown2CD4[8]);
+    mPartA.Draw();
+    mPartB.Draw();
+}
+
+void Scene40CharacterPartA::Draw() {
+    mModel.Draw();
+}
+
+void Scene40CharacterPartB::Draw() {
+    mModel.Draw();
 }
 
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------

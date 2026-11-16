@@ -122,15 +122,33 @@ public:
     /* 0x004 */ u8 mUnknown004[0x640];
 }; // 0x644
 
+// Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
+// show is not known: the names say only where they are.
+class Scene40CharacterPartA {
+public:
+    void Draw();
+
+    /* 0x00 */ u8 mUnknown00[0x10];
+    /* 0x10 */ AnimModel mModel;
+    /* 0xF0 */ u8 mUnknownF0[0x8];
+}; // 0xF8
+
+class Scene40CharacterPartB {
+public:
+    void Draw();
+
+    /* 0x00 */ u8 mUnknown00[0x4];
+    /* 0x04 */ AnimModel mModel;
+}; // 0xE4
+
 // A character with two models, the goods and clothes it holds and two head icons
 class Scene40Character : public Character {
 public:
     void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
 
-    /* 0x2B18 */ u8 mUnknown2B18[0xDC]; // From 0x2BE4, an object of the overlay's that holds mModel
-    /* 0x2BF4 */ AnimModel mModel;
-    /* 0x2CD4 */ u8 mUnknown2CD4[0xC];  // From 0x2CDC, a second object, which holds mModel2
-    /* 0x2CE0 */ AnimModel mModel2;
+    /* 0x2B18 */ u8 mUnknown2B18[0xCC];
+    /* 0x2BE4 */ Scene40CharacterPartA mPartA;
+    /* 0x2CDC */ Scene40CharacterPartB mPartB;
     /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
     /* 0x2DC4 */ Scene40Items mItems;
     /* 0x2DF0 */ u8 mUnknown2DF0[0xC];
