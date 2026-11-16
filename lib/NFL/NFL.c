@@ -4743,43 +4743,43 @@ typedef struct NFLTexBank {
 
 extern const NFLTexBank sNFLTexBankParts[];
 
-// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does (and in
-// its shape: the first part's base, the second's, the first's size, the copy split over the two parts)
-// Not matching: the instructions and callee-saved registers are the original's, but the original loads the fields'
-// addresses in the order second, first, size (its literal pool +2, +0, +4), which with any statement order that loads
-// them so gives the size and first base the other two registers; here the size is read first (pool +2, +4, +0).
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC: NitroSDK's GX_LoadTexEx line for
+// line (its three bases read in its order, the copy split over the two parts the same way), with CPU copies and
+// cache flushes where the SDK uses DMA
 int NFLi_CopyToTexBank(int bank, const void *src, u32 offset, u32 size) {
-    u32 szBlk1 = sNFLTexBankParts[bank].firstSize;
-    u32 blk2 = sNFLTexBankParts[bank].secondBase << 12;
-    u32 blk1 = sNFLTexBankParts[bank].firstBase;
-    u32 end = offset + size;
-    void *temp;
+    u32 base1, base2, szBlk1;
+    void *pLCDC;
     int result;
 
-    result = NFLi_CheckTexBank(bank, offset, end);
+    base1 = (u32)(sNFLTexBankParts[bank].firstBase << 12);
+    base2 = (u32)(sNFLTexBankParts[bank].secondBase << 12);
+    szBlk1 = (u32)(sNFLTexBankParts[bank].firstSize << 12);
+
+    result = NFLi_CheckTexBank(bank, offset, offset + size);
     if (result != 0) {
         return result;
     }
-    if (blk2 == 0) {
-        temp = (void *)(offset + (blk1 << 12));
-    } else if (end < szBlk1 << 12) {
-        temp = (void *)(offset + (blk1 << 12));
-    } else if (offset >= szBlk1 << 12) {
-        temp = (void *)(blk2 + offset - (szBlk1 << 12));
+    if (0 == base2) {
+        pLCDC = (void *)(base1 + offset);
     } else {
-        void *temp2 = (void *)blk2;
-        u32 temp1 = (szBlk1 << 12) - offset;
+        if (offset + size < szBlk1) {
+            pLCDC = (void *)(base1 + offset);
+        } else if (offset >= szBlk1) {
+            pLCDC = (void *)(base2 + offset - szBlk1);
+        } else {
+            void *pLCDC2 = (void *)base2;
+            u32 sz = szBlk1 - offset;
+            pLCDC = (void *)(base1 + offset);
 
-        temp = (void *)(offset + (blk1 << 12));
-        MIi_CpuCopy32(src, temp, temp1);
-        DC_FlushRange(temp, temp1);
-        size -= temp1;
-        MIi_CpuCopy32((const u8 *)src + temp1, temp2, size);
-        DC_FlushRange(temp2, size);
-        return 0;
+            MIi_CpuCopy32(src, pLCDC, sz);
+            DC_FlushRange(pLCDC, sz);
+            MIi_CpuCopy32((u8 *)src + sz, pLCDC2, size - sz);
+            DC_FlushRange(pLCDC2, size - sz);
+            return 0;
+        }
     }
-    MIi_CpuCopy32(src, temp, size);
-    DC_FlushRange(temp, size);
+    MIi_CpuCopy32(src, pLCDC, size);
+    DC_FlushRange(pLCDC, size);
     return 0;
 }
 
