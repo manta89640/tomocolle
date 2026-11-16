@@ -1321,6 +1321,522 @@ void MiiEditFacePage::func_ov076_0214c6d0(MiiEditScene *scene) {
 }
 
 extern "C" {
+void func_020321ec(MiiEditSprite100 *slider);
+int func_020324e0(MiiEditSprite100 *slider, int min, int max);
+BOOL func_02032414(MiiEditSprite100 *slider);
+void func_02032578(MiiEditSprite100 *slider, BOOL a);
+}
+
+void MiiEditFacePage::func_ov076_0214cc34() {
+    for (u16 i = 0; i < 36; i++) {
+        if (!func_0203133c(&mButtons[i])) {
+            continue;
+        }
+        int parameter;
+        switch (i) {
+        case 0:
+            func_ov076_0214de94(0, 0);
+            break;
+        case 1:
+            func_ov076_0214de94(1, 0);
+            break;
+        case 2:
+            func_ov076_0214de94(2, 0);
+            break;
+        case 3:
+            func_ov076_0214de94(3, 0);
+            break;
+        case 4:
+            func_ov076_0214de94(4, 0);
+            break;
+        case 5:
+            func_ov076_0214de94(5, 0);
+            break;
+        case 6:
+            func_ov076_0214de94(6, 0);
+            break;
+        case 7:
+            func_ov076_0214de94(7, 0);
+            break;
+        case 8:
+            mFaceTab.SelectTab(0, FALSE);
+            break;
+        case 9:
+            mFaceTab.SelectTab(1, FALSE);
+            break;
+        case 10:
+            mEtcTab.SelectTab(0, FALSE);
+            break;
+        case 11:
+            mEtcTab.SelectTab(1, FALSE);
+            break;
+        case 12:
+            mEtcTab.SelectTab(2, FALSE);
+            break;
+        case 13:
+            mEtcTab.SelectTab(3, FALSE);
+            break;
+        case 27:
+            switch (mUnknown340C) {
+            case 1:
+                SetParameter(mUnknown2DF0, mUnknown2DEC);
+                func_02091a24(&mScene->mCharacter);
+                func_02091a6c(&mScene->mCharacter);
+                func_ov076_0214de94(mCategory, 1);
+                func_ov076_0214fa14(2);
+                break;
+            case 2:
+                SetParameter(mUnknown2DF0, mUnknown2DEC);
+                func_02091a24(&mScene->mCharacter);
+                func_02091a6c(&mScene->mCharacter);
+                func_ov076_0214de94(mCategory, 1);
+                func_ov076_0214fa14(1);
+                break;
+            }
+            break;
+        case 25:
+        case 26:
+            switch (mCategory) {
+            case 2: {
+                if (i == 26) {
+                    if (++mUnknown314C[0] >= 6) {
+                        mUnknown314C[0] -= 6;
+                    }
+                } else if (--mUnknown314C[0] < 0) {
+                    mUnknown314C[0] += 6;
+                }
+                Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+                func_ov076_0214ef88(mUnknown314C[0], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[0]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 3: {
+                if (i == 26) {
+                    if (++mUnknown314C[1] >= 2) {
+                        mUnknown314C[1] -= 2;
+                    }
+                } else if (--mUnknown314C[1] < 0) {
+                    mUnknown314C[1] += 2;
+                }
+                Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+                func_ov076_0214ef88(mUnknown314C[1], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[1]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 4: {
+                if (i == 26) {
+                    if (++mUnknown314C[2] >= 4) {
+                        mUnknown314C[2] -= 4;
+                    }
+                } else if (--mUnknown314C[2] < 0) {
+                    mUnknown314C[2] += 4;
+                }
+                Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+                func_ov076_0214ef88(mUnknown314C[2], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[2]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 6: {
+                if (i == 26) {
+                    if (++mUnknown314C[3] >= 2) {
+                        mUnknown314C[3] -= 2;
+                    }
+                } else if (--mUnknown314C[3] < 0) {
+                    mUnknown314C[3] += 2;
+                }
+                Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+                func_ov076_0214ef88(mUnknown314C[3], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[3]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            }
+            break;
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 32:
+        case 33:
+        case 34:
+        case 35: {
+            int color = i - 28;
+            func_ov076_0214ee7c(color, mCategory, mFaceTab.mTab);
+            switch (mCategory) {
+            case 1:
+                parameter = 0x24;
+                break;
+            case 2:
+                parameter = 0x1A;
+                break;
+            case 3:
+                parameter = 7;
+                break;
+            case 4:
+                parameter = 1;
+                break;
+            case 6:
+                parameter = 0xD;
+                break;
+            case 7:
+                switch (mEtcTab.mTab) {
+                case 0:
+                    parameter = 0x20;
+                    break;
+                case 1:
+                    parameter = 0x11;
+                    break;
+                case 2:
+                    parameter = 0x11;
+                    break;
+                case 3:
+                    parameter = 0x11;
+                    break;
+                }
+                break;
+            }
+            SetParameter(parameter, color);
+            break;
+        }
+        }
+        if (i <= 7) {
+            for (int j = 0; j <= 7; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        if (i >= 8 && i <= 9) {
+            for (int j = 8; j <= 9; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        if (i >= 10 && i <= 13) {
+            for (int j = 10; j <= 13; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        BOOL limit = FALSE;
+        switch (mCategory) {
+        case 2:
+            if (i == 24) {
+                limit = func_ov076_0214f930(0x1B, 1, TRUE);
+            }
+            break;
+        case 3:
+            if (func_02098dac(&mScene->mCharacter, 6) == 0x17) {
+                limit = TRUE;
+                break;
+            }
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0xB, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0xB, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(8, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(8, -1, limit);
+                break;
+            case 4:
+                limit = func_ov076_0214f930(9, -1, limit);
+                break;
+            case 5:
+                limit = func_ov076_0214f930(9, 1, limit);
+                break;
+            case 6:
+                limit = func_ov076_0214f930(0xA, -1, limit);
+                break;
+            case 7:
+                limit = func_ov076_0214f930(0xA, 1, limit);
+                break;
+            }
+            break;
+        case 4:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(5, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(5, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(2, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(2, -1, limit);
+                break;
+            case 4:
+                limit = func_ov076_0214f930(3, -1, limit);
+                break;
+            case 5:
+                limit = func_ov076_0214f930(3, 1, limit);
+                break;
+            case 6:
+                limit = func_ov076_0214f930(4, -1, limit);
+                break;
+            case 7:
+                limit = func_ov076_0214f930(4, 1, limit);
+                break;
+            }
+            break;
+        case 5:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0x1E, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0x1E, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(0x1D, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(0x1D, -1, limit);
+                break;
+            }
+            break;
+        case 6:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0xF, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0xF, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(0xE, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(0xE, -1, limit);
+                break;
+            }
+            break;
+        case 7:
+            switch (mEtcTab.mTab) {
+            case 0:
+                if (func_02098dac(&mScene->mCharacter, 0x1F) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x22, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x22, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x21, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x21, -1, limit);
+                    break;
+                }
+                break;
+            case 1:
+                if (func_02098dac(&mScene->mCharacter, 0x12) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x14, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x14, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x13, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x13, -1, limit);
+                    break;
+                }
+                break;
+            case 2:
+                if (func_02098dac(&mScene->mCharacter, 0x15) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x18, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x18, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x16, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x16, -1, limit);
+                    break;
+                case 9:
+                    limit = func_ov076_0214f930(0x17, 1, limit);
+                    break;
+                case 8:
+                    limit = func_ov076_0214f930(0x17, -1, limit);
+                    break;
+                }
+                break;
+            case 3:
+                break;
+            }
+            break;
+        }
+        switch (i) {
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+        case 22:
+        case 23: {
+            int sound;
+            switch (i - 14) {
+            case 0:
+            case 2:
+            case 4:
+            case 6:
+            case 9:
+                sound = limit ? 0xB : 9;
+                break;
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+                sound = limit ? 0xA : 8;
+                break;
+            }
+            gSoundManager.StartSeqArc(1, 0xE, sound);
+            break;
+        }
+        }
+    }
+    for (u16 i = 0; i < 12; i++) {
+        if (!func_0203133c(&mButtons227C[i])) {
+            continue;
+        }
+        switch (mCategory) {
+        case 1:
+            switch (mFaceTab.mTab) {
+            case 0:
+                func_ov076_0214f264(0x23, i, 0, 8);
+                break;
+            case 1:
+                func_ov076_0214f264(0x25, i, 0, 12);
+                break;
+            }
+            break;
+        case 2:
+            func_ov076_0214f264(0x19, i, (u16)mUnknown314C[0], 12);
+            break;
+        case 3:
+            func_ov076_0214f264(6, i, (u16)mUnknown314C[1], 12);
+            break;
+        case 4:
+            func_ov076_0214f264(0, i, (u16)mUnknown314C[2], 12);
+            break;
+        case 5:
+            func_ov076_0214f264(0x1C, i, 0, 12);
+            break;
+        case 6:
+            func_ov076_0214f264(0xC, i, (u16)mUnknown314C[3], 12);
+            break;
+        case 7:
+            switch (mEtcTab.mTab) {
+            case 0:
+                func_ov076_0214f264(0x1F, i, 0, 9);
+                break;
+            case 1:
+                func_ov076_0214f264(0x12, i, 0, 4);
+                break;
+            case 2:
+                func_ov076_0214f264(0x15, i, 0, 2);
+                break;
+            case 3:
+                func_ov076_0214f264(0x10, i, 0, 4);
+                break;
+            }
+            break;
+        }
+    }
+    switch (mCategory) {
+    case 0:
+        for (int i = 0; i < 2; i++) {
+            func_020321ec(&mSprites2DF4[i]);
+            if (mSprites2DF4[i].mUnknownBC) {
+                switch (i) {
+                case 0: {
+                    int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
+                    func_02098dac(&mScene->mCharacter, 0x2A);
+                    func_02091a24(&mScene->mCharacter);
+                    func_02098c40(&mScene->mCharacter, 0x29, value);
+                    break;
+                }
+                case 1: {
+                    func_02098dac(&mScene->mCharacter, 0x29);
+                    int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
+                    func_02091a24(&mScene->mCharacter);
+                    func_02098c40(&mScene->mCharacter, 0x2A, value);
+                    break;
+                }
+                }
+            }
+            if (func_02032414(&mSprites2DF4[i])) {
+                for (int j = 0; j < 2; j++) {
+                    if (j != i) {
+                        func_02032578(&mSprites2DF4[j], FALSE);
+                    }
+                }
+            }
+        }
+        break;
+    case 1:
+        mFaceTab.func_ov076_0214faac();
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    }
+}
+
+extern "C" {
 void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
 void func_02031ca4(SpriteButton *button);
 }
