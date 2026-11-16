@@ -102,8 +102,8 @@ typedef struct NFLObj {
     u32 unk24;
     u32 unk28;
     MtxFx43 unk2C;
-    MtxFx43 unk5C;
-    u8 unk8C[0x90 - 0x8C];
+    MtxFx33 unk5C; // Loaded as the vector matrix with G3_LoadMtx43
+    s16 unk80[8];
     int unk90;
     NFLDLPatch unk94[4];
     VecFx32 unkC4;
@@ -140,7 +140,13 @@ typedef struct NFLMakeCtx {
         u32 unk4;
     } unk2C[7];
     GXDLInfo unk64;
-    u8 unk78[0x1C8 - 0x78];
+    struct {
+        fx32 unk0[8];
+        u32 unk20;
+        u32 unk24;
+        int unk28;
+        int unk2C;
+    } unk78[7];
     NFLObj *unk1C8;
     const NFLCharData *unk1CC;
 } NFLMakeCtx;
@@ -161,15 +167,15 @@ typedef struct NFLDrawParam {
 // The work area the caller gives func_02072a58, which the library keeps in data_02145360
 typedef struct NFLWork {
     u32 unk0; // A VRAM address that func_0206e38c and the four after it advance
-    u8 unk4[4];
+    u32 unk4; // Advanced with unk0, as a palette address
     u32 unk8;
     u32 unkC;
     struct {
         u32 unk0;
         u32 unk4;
         int unk8;
-    } unk10[5];
-    u8 unk4C[0x64 - 0x4C];
+    } unk10[6];
+    u8 unk58[0x64 - 0x58];
     void *unk64;
     int unk68;
     NFLObj *unk6C;
@@ -180,12 +186,15 @@ typedef struct NFLWork {
     void *unk78;
     u8 unk7C[0x8C - 0x7C];
     int unk8C;
-    u8 unk90[0xA0 - 0x90];
+    int unk90;
+    u8 unk94[0xA0 - 0x94];
     struct {
         u32 unk0;
         u32 unk4;
         int unk8;
     } unkA0[7];
+    u8 unkF4[0x12C - 0xF4];
+    int unk12C;
 } NFLWork;
 
 extern NFLWork *data_02145360;

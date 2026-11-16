@@ -1546,7 +1546,7 @@ int func_0206db98(int index, BOOL withSecond) {
     }
     G3_PushMtx();
     G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
-    G3_LoadMtx43(&obj->unk5C);
+    G3_LoadMtx43((const MtxFx43 *)&obj->unk5C);
     G3_MtxMode(GX_MTXMODE_POSITION);
     G3_LoadMtx43(&obj->unk2C);
     G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
@@ -1609,6 +1609,165 @@ void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL 
             dst[i] = palette[index] | 0x8000;
         }
     }
+}
+
+// The eyes, eyebrows, mouth, mustache and mole: their textures and states, by part
+int func_0206ddb8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int i;
+
+    obj->unk80[0] = mii->eyeColor;
+    obj->unk80[1] = mii->mouthColor;
+    obj->unk80[2] = mii->eyebrowY;
+    obj->unk80[3] = mii->eyeRotation;
+    obj->unk80[4] = mii->eyeType;
+    obj->unk80[5] = mii->faceType;
+    obj->unk80[7] = mii->eyebrowType;
+    obj->unk80[6] = mii->eyebrowRotation;
+    for (i = 0; i < 5; i++) {
+        switch (i) {
+        case 0:
+            ctx->unk78[0].unk28 = 2;
+            ctx->unk78[1].unk28 = 2;
+            ctx->unk78[0].unk2C = 2;
+            ctx->unk78[1].unk2C = 2;
+            if (params[7] != mii->eyeType || (obj->unk1A4[1].state >= 1 && obj->unk1A4[1].state <= 6)) {
+                obj->unk1A4[1].state = 0;
+                obj->unk1A4[1].value = mii->eyeType;
+            }
+            if (params[8] != mii->eyeColor || (obj->unk228[1].state >= 1 && obj->unk228[1].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[1].state = 0;
+                    obj->unk228[1].state = 7;
+                } else {
+                    obj->unk228[1].state = 0;
+                }
+                obj->unk228[1].value = mii->eyeColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[0].unk24 = obj->unkD8;
+                ctx->unk78[1].unk24 = obj->unkD8;
+                obj->unk10 = obj->unkD4 + 0x80;
+            } else {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[0].unk24 = obj->unkD8 + 0x10;
+                ctx->unk78[1].unk24 = obj->unkD8 + 0x10;
+                obj->unk10 = obj->unkD4 + 0x10;
+                obj->unk14 = obj->unkD8 + 0x10;
+            }
+            break;
+        case 1:
+            ctx->unk78[2].unk28 = 2;
+            ctx->unk78[3].unk28 = 2;
+            ctx->unk78[2].unk2C = 2;
+            ctx->unk78[3].unk2C = 2;
+            if (params[5] != mii->eyebrowType || (obj->unk1A4[2].state >= 1 && obj->unk1A4[2].state <= 6)) {
+                obj->unk1A4[2].state = 0;
+                obj->unk1A4[2].value = mii->eyebrowType;
+            }
+            if (params[6] != mii->eyebrowColor || (obj->unk228[2].state >= 1 && obj->unk228[2].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[2].state = 0;
+                    obj->unk228[2].state = 7;
+                } else {
+                    obj->unk228[2].state = 0;
+                }
+                obj->unk228[2].value = mii->eyebrowColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[2].unk24 = obj->unkD8;
+                ctx->unk78[3].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[2].unk24 = obj->unkD8 + 0x30;
+                ctx->unk78[3].unk24 = obj->unkD8 + 0x30;
+            }
+            break;
+        case 2:
+            ctx->unk78[4].unk28 = 2;
+            ctx->unk78[4].unk2C = 2;
+            if (params[11] != mii->mouthType || (obj->unk1A4[3].state >= 1 && obj->unk1A4[3].state <= 6)) {
+                obj->unk1A4[3].state = 0;
+                obj->unk1A4[3].value = mii->mouthType;
+            }
+            if (params[10] != mii->mouthColor || (obj->unk228[3].state >= 1 && obj->unk228[3].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[3].state = 0;
+                    obj->unk228[3].state = 7;
+                } else {
+                    obj->unk228[3].state = 0;
+                }
+                obj->unk228[3].value = mii->mouthColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x1080;
+                ctx->unk78[4].unk24 = obj->unkD8;
+                obj->unk20 = obj->unkD4 + 0x1080;
+            } else {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x410;
+                ctx->unk78[4].unk24 = obj->unkD8 + 0x50;
+                obj->unk20 = obj->unkD4 + 0x410;
+                obj->unk24 = obj->unkD8 + 0x50;
+            }
+            break;
+        case 3:
+            ctx->unk78[5].unk28 = 1;
+            ctx->unk78[5].unk2C = 3;
+            if (params[16] != mii->mustacheType || (obj->unk1A4[4].state >= 1 && obj->unk1A4[4].state <= 6)) {
+                obj->unk1A4[4].state = 0;
+                obj->unk1A4[4].value = mii->mustacheType;
+            }
+            if (params[14] != mii->beardColor || (obj->unk228[4].state >= 1 && obj->unk228[4].state <= 6)) {
+                if (obj->unk90 != 7) {
+                    obj->unk228[4].state = 0;
+                } else {
+                    obj->unk228[4].state = 7;
+                    obj->unk1A4[4].state = 0;
+                }
+                obj->unk228[4].value = mii->beardColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x1880;
+                ctx->unk78[5].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x610;
+                ctx->unk78[5].unk24 = obj->unkD8 + 0x70;
+            }
+            break;
+        case 4:
+            ctx->unk78[6].unk28 = 1;
+            ctx->unk78[6].unk2C = 1;
+            if (data_02145360->unk10[5].unk8 == 0) {
+                ctx->unk78[6].unk20 = data_02145360->unk0;
+                ctx->unk78[6].unk24 = data_02145360->unk4;
+                data_02145360->unk10[5].unk0 = data_02145360->unk0;
+                data_02145360->unk10[5].unk4 = data_02145360->unk4;
+                data_02145360->unk90 = 0;
+                data_02145360->unkA0[5].unk8 = 0;
+                if (obj->unk90 == 7) {
+                    data_02145360->unk0 += 0x200;
+                    data_02145360->unk12C = 7;
+                } else {
+                    data_02145360->unk0 += 0x80;
+                    data_02145360->unk4 += 0x20;
+                }
+                data_02145360->unk10[5].unk8 = 1;
+                return 0;
+            }
+            ctx->unk78[6].unk20 = data_02145360->unk10[5].unk0;
+            ctx->unk78[6].unk24 = data_02145360->unk10[5].unk4;
+            return 0;
+        }
+    }
+    return 0;
 }
 
 int func_0206e38c(NFLObj *obj, u32 *address) {
