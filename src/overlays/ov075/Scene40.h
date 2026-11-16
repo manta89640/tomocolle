@@ -72,15 +72,17 @@ public:
     /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
 }; // 0x14420
 
-// What the overlay's 0x02179728 constructs: a date and a time, cleared, and two ints.
+// The scene's clock (what the overlay's 0x02179728 constructs): the date and time last read and the same moment in
+// seconds, as overlay 74's Clock has them in another order.
 class Scene40Unknown30A8C {
 public:
     Scene40Unknown30A8C();
+    void Read();       // 0x02179764: reads the date and time now
+    void ReadIfIdle(); // 0x02179790: the same, but only while the archive manager is idle
 
     /* 0x00 */ RTCDate mDate; // Exit gives it to the character as the date they last met
     /* 0x10 */ RTCTime mTime;
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ int mUnknown20;
+    /* 0x1C */ s64 mSeconds; // The same moment in seconds, as the main program's func_02035870 returns it
 }; // 0x24
 
 // Three classes of the overlay whose constructors only store their tables (0x02182CA0, 0x02182CB8, 0x02182C88:

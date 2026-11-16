@@ -7,6 +7,9 @@ extern "C" {
 void func_02080f00(ParticleSystem *particles, int unknown); // Draws the particles
 void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes a saved character
 void func_0202683c(void);
+BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
+extern int data_02123440[];
+s64 func_02035870(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
@@ -190,11 +193,21 @@ void Scene40ListView::ClearRow(int row) {
     mMarks[row].mVisible = FALSE;
 }
 
-// --- The object at 0x30A8C of the scene --------------------------------------------------------------------------
+// --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
 
 Scene40Unknown30A8C::Scene40Unknown30A8C() {
     MI_CpuClear32(&mDate, sizeof(mDate));
     MI_CpuClear32(&mTime, sizeof(mTime));
-    mUnknown1C = 0;
-    mUnknown20 = 0;
+    mSeconds = 0;
+}
+
+void Scene40Unknown30A8C::Read() {
+    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+}
+
+void Scene40Unknown30A8C::ReadIfIdle() {
+    if (!ArchiveManager_IsIdle(&gArchiveManager)) {
+        return;
+    }
+    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
 }
