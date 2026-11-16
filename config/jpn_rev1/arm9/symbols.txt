@@ -783,8 +783,8 @@ __pformatter kind:function(arm,size=0x824) addr:0x02016cd8
 __StringWrite kind:function(arm,size=0x44) addr:0x020174fc
 vsnprintf kind:function(arm,size=0x68) addr:0x02017540
 snprintf kind:function(arm,size=0x28) addr:0x020175a8
-func_020175d0 kind:function(arm,size=0x4f8) addr:0x020175d0
-__sformatter kind:function(arm,size=0xd54) addr:0x02017ac8
+parse_format kind:function(arm,size=0x4f8) addr:0x020175d0 local
+__sformatter kind:function(arm,size=0xd54) addr:0x02017ac8 local
 __StringRead kind:function(arm,size=0x84) addr:0x0201881c
 vsscanf kind:function(arm,size=0x54) addr:0x020188a0
 sscanf kind:function(arm,size=0x28) addr:0x020188f4
@@ -850,7 +850,7 @@ scalbn kind:function(arm,size=0x2c) addr:0x0201f4dc
 func_0201f508 kind:function(arm,size=0x3c) addr:0x0201f508
 func_0201f544 kind:function(arm,size=0x4c) addr:0x0201f544
 _dadd kind:function(arm,size=0x318) addr:0x0201f590
-func_0201f8a8 kind:function(arm,size=0x104) addr:0x0201f8a8
+_d2f kind:function(arm,size=0x104) addr:0x0201f8a8
 _dfix kind:function(arm,size=0x4c) addr:0x0201f9ac
 func_0201f9f8 kind:function(arm,size=0x8c) addr:0x0201f9f8
 _dflt kind:function(arm,size=0x40) addr:0x0201fa84
@@ -4223,9 +4223,9 @@ gText_Abu kind:data(any) addr:0x020b5478
 data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
 data_020b5534 kind:data(any) addr:0x020b5534
-data_020b555c kind:data(any) addr:0x020b555c
+__upper_mapC kind:data(any) addr:0x020b555c
 __ctype_mapC kind:data(any) addr:0x020b55dc
-data_020b56dc kind:data(any) addr:0x020b56dc
+@635 kind:data(any) addr:0x020b56dc local
 gStr_NAN kind:data(any) addr:0x020b5704
 data_020b5709 kind:data(any) addr:0x020b5709
 data_020b5714 kind:data(any) addr:0x020b5714

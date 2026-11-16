@@ -677,7 +677,9 @@ lib/MSL_C/printf.c:
     .text       start:0x0201549c end:0x020175a8
 
 lib/MSL_C/scanf.c:
-    .text       start:0x020175d0 end:0x020188f4
+    complete
+    .text       start:0x020175d0 end:0x0201891c
+    .rodata     start:0x020b56dc end:0x020b5704
 
 lib/MSL_C/errno.c:
     complete
@@ -696,7 +698,8 @@ lib/MSL_C/strtold.c:
     .text       start:0x02018d84 end:0x02019fd0
 
 lib/MSL_C/strtoul.c:
-    .text       start:0x02019fd0 end:0x0201a8ec
+    complete
+    .text       start:0x02019fd0 end:0x0201a900
 
 lib/MSL_C/wchar_io.c:
     .text       start:0x0201a900 end:0x0201a980
