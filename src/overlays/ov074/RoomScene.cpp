@@ -2955,18 +2955,14 @@ void RoomScene::UpdateMeeting() {
     StartMeeting(0, 1);
 }
 
-// Not matching yet: same size (0x6a0), 75 instructions differ, of two kinds. (1) Stack: the original has the place
-// that the first loop clamps at sp+0x78, above posFirst (0x70) and posSecond (0x68); here it is below them (as the
-// local of ClampOwnPosToRect4E4, or as a local of the loop's body). Declared at the top of the function and assigned
-// in the loop, it is where it should be but costs a third copy (frame 0xa8). (2) Registers: the original has
-// first * 0x2d98 in r9 and the two characters in r7 and r8; mine r7, and r8 and r9.
+// The distances are taken straight off GetFloorPos's results, and the loop's place is a local of its body: with
+// the two places as locals of the function the loop's place sits below them, and with a `character` local the
+// registers differ.
 // @0x02151554
 void RoomScene::StartMeeting(int first, int second) {
     RoomCharacter *pair[2];
-    FloorPos posFirst = mCharacters[first].GetFloorPos();
-    FloorPos posSecond = mCharacters[second].GetFloorPos();
-    fx32 distanceFirst = posFirst.LengthSq();
-    fx32 distanceSecond = posSecond.LengthSq();
+    fx32 distanceFirst = mCharacters[first].GetFloorPos().LengthSq();
+    fx32 distanceSecond = mCharacters[second].GetFloorPos().LengthSq();
     if (distanceFirst - distanceSecond <= 0) {
         pair[0] = &mCharacters[first];
         pair[1] = &mCharacters[second];
@@ -2978,9 +2974,9 @@ void RoomScene::StartMeeting(int first, int second) {
         func_02091598(&mCharacters[first], mCharacters[second].GetFloorPos());
         func_02091598(&mCharacters[second], mCharacters[first].GetFloorPos());
         for (int i = 0; i < 2; i++) {
-            RoomCharacter *character = pair[i];
-            if (character->ClampOwnPosToRect4E4()) {
-                character->SetState(1);
+            FloorPos pos = pair[i]->GetFloorPos();
+            if (pair[i]->ClampToRect4E4(&pos)) {
+                pair[i]->SetState(1);
             }
         }
     } else if (mCharacters[first].mState == 10) {
@@ -10998,23 +10994,25 @@ u16 RoomCharacter::SnapAngle(u16 angle) {
     return angle;
 }
 
-// Not matching yet: 0x32c bytes against 0x348. The stack frame's 21 FloorPos slots are all where the original has
-// them (so the inline helpers and their order are right), and the arithmetic is the same; what differs is register
-// allocation after the call of FX_Atan2Idx: the original keeps offset.x and offset.z in r5/r4 across the call (and
-// spills the high words of the four sines and cosines to five more stack words), this reloads them from the
-// stack. Tried: Rotate taking a reference, a pointer, the value, two scalars, or the sine and cosine; the sines and
-// cosines as locals; offset.x/z as locals before the call (keeps z in a register, not x); the angle through an
-// inline; the two distances right after each point (this) or after both (0x340 bytes) or in the conditions. In the
-// single file, again: Rotate by value, by pointer, as two scalars, with the sine and cosine as locals.
+// Not matching yet (0x350 bytes against 0x348, 95%). The direction through Angle(offset) and the two points
+// assigned after their declarations give the original's arithmetic after FX_Atan2Idx, its spills of the high words
+// included (straight FX_Atan2Idx(offset.z, offset.x) gave 0x32c bytes and 67%). What differs: the original keeps
+// offset.x and offset.z in r5 and r4 across the call and has two copies of offset where this has three (Angle's
+// parameter), so the frame is 8 bytes larger and offset is read back from Rotate's copy. Tried on top of this:
+// Angle by reference or pointer, Rotate by value or pointer, offset as a reference or assigned, middle initialised,
+// the operators, member LengthSq; before: Rotate taking a reference, a pointer, the value, two scalars, or the
+// sine and cosine, the sines and cosines as locals, offset.x/z as locals before the call.
 // @0x02168dfc
 BOOL RoomCharacter::GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin) {
     FloorPos middle;
     middle = Half(Add(from, to));
     FloorPos offset = Sub(from, to);
-    u16 direction = FX_Atan2Idx(offset.z, offset.x);
-    FloorPos right = Add(Rotate(offset, 0x4000), middle);
+    u16 direction = Angle(offset);
+    FloorPos right;
+    right = Add(Rotate(offset, 0x4000), middle);
     fx32 rightDistance = LengthSq(right);
-    FloorPos left = Add(Rotate(offset, 0xC000), middle);
+    FloorPos left;
+    left = Add(Rotate(offset, 0xC000), middle);
     fx32 leftDistance = LengthSq(left);
     if (rightDistance == leftDistance || (middle.x == 0 && middle.z == 0)) {
         *angle = direction;
@@ -12451,20 +12449,23 @@ NamePanel::NamePanel() {
     SetState(STATE_IDLE);
 }
 
-// Not matching yet: 17 of 99 instructions differ, between the second InitObjForMessage and the first DrawAll: the
-// original computes the second text's character count with other registers and after loading the position's
-// constants, and orders the dead stores of SetPosition differently. The calls and their arguments are identical.
-// Tried: SetPosition on the sprite and on the canvas, the constants in locals, the count written out.
+// How many characters (tiles) of VRAM a sprite text canvas takes, with the canvas reached through a pointer, as in
+// overlay 73's copy of NamePanel::Init: read off the object, the second count is computed with other registers.
+static inline int GetObjCharCount(ObjTextCanvas &text) {
+    const NNSG2dCharCanvas *canvas = &text.mCanvas;
+    return ((canvas->areaWidth * canvas->areaHeight - 1) >> text.mVramMode) + 1;
+}
+
 // @0x0216c618
 int NamePanel::Init(int charOffset, MessageFile *file1, MessageFile *file2) {
     Sprite_Init(this, 1, 4, 128, 96, FALSE);
     mText1.InitObjForMessage(file1, 1, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
-    charOffset += mText1.GetCharCount();
+    charOffset += GetObjCharCount(mText1);
     mText2.InitObjForMessage(file2, 2, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
-    int count = mText2.GetCharCount();
-    mText1.SetPosition(FX32_CONST(38), FX32_CONST(8));
+    int count = GetObjCharCount(mText2);
+    mText1.SetPositionFromVec(FX32_CONST(38), FX32_CONST(8));
     mText1.DrawAll();
-    mText2.SetPosition(FX32_CONST(113), FX32_CONST(8));
+    mText2.SetPositionFromVec(FX32_CONST(113), FX32_CONST(8));
     mText2.DrawAll();
     SetState(STATE_SHOWN);
     return charOffset + count;

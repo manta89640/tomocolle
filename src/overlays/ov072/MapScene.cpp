@@ -307,7 +307,7 @@ BOOL MapCamera::IsAtHome() {
 
 inline void MapScene::ResetCamera() {
     mCamera.mCamera = &data_02122764;
-    func_0202a640(&data_02122764);
+    func_0202a640(mCamera.mCamera);
     mCamera.mCamera->mPosition = sCameraHome;
     mCamera.mCamera->mTarget = sCameraHomeTarget;
     mCamera.mCamera->mAngleX = 0;
@@ -399,8 +399,8 @@ void MapScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplMapEffect_LZ.bin", 0);
 }
 
-// Not matching yet (same length; one instruction placed differently): the back button's base, this + 0x268, is
-// computed one instruction earlier than in the original, before the store of the second light's colour.
+// The second light's colour goes through a local: stored straight from the call, the back button's base (this +
+// 0x268) is computed one instruction earlier than in the original.
 void MapScene::Init() {
     const int unknownE = 0xE;
     const u16 backButtonKind = 4;
@@ -521,7 +521,8 @@ void MapScene::Init() {
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
     int phase = func_020a6214(&mSky);
     mLights[0]->mColor = func_020a6574(phase);
-    mLights[1]->mColor = func_020a659c(phase);
+    GXRgb color = func_020a659c(phase);
+    mLights[1]->mColor = color;
 
     for (int i = 0; i < 1; i++) {
         Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
@@ -605,7 +606,7 @@ void MapScene::Init() {
 // Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
 // rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
 // differs: the registers of &mCamera and of the division's constant in the touch loop, with the order of the
-// rectangle arithmetic, the registers of the camera's reset, and one pair of dead stores.
+// rectangle arithmetic.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
@@ -737,7 +738,7 @@ void MapScene::Update() {
                             gGameData.mUnknown0C[0x40] = mIslandStage;
                             mWindowCount = func_020a60b8(mIslandStage);
                             const Point &mark = sApartmentMarkPositions[mIslandStage];
-                            mNewMarks[MODEL_APARTMENT].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
+                            mNewMarks[MODEL_APARTMENT].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
                             ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[9]);
                             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[9],

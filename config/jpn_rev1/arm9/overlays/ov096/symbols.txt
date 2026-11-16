@@ -35,55 +35,55 @@ _ZN16WeddingGiftModel4LoadEi kind:function(arm,size=0xc) addr:0x0214c59c
 _ZN16WeddingGiftModel10ChangeItemEi kind:function(arm,size=0x7c) addr:0x0214c5a8
 _ZN12WeddingSceneD1Ev kind:function(arm,size=0xf0) addr:0x0214c624
 _ZN12WeddingSceneD0Ev kind:function(arm,size=0xf8) addr:0x0214c714
-sCameraStartTarget kind:data(any) addr:0x0214c814
-sCameraTarget kind:data(any) addr:0x0214c820
-sFarAway kind:data(any) addr:0x0214c82c
-sCameraStartPosition kind:data(any) addr:0x0214c838
-sLightDirections kind:data(any) addr:0x0214c844
+data_ov096_0214c80c kind:data(any) addr:0x0214c80c local
+sCameraStartTarget kind:data(any) addr:0x0214c814 local
+sCameraTarget kind:data(any) addr:0x0214c820 local
+sFarAway kind:data(any) addr:0x0214c82c local
+sCameraStartPosition kind:data(any) addr:0x0214c838 local
+sLightDirections kind:data(any) addr:0x0214c844 local
 _ZTV12WeddingScene kind:data(any) addr:0x0214c860
-gStr_3H0_ov096 kind:data(any) addr:0x0214c884
-gStr_3H1_ov096 kind:data(any) addr:0x0214c888
-gStr_CO0_ov096 kind:data(any) addr:0x0214c88c
-gStr_RM_ov096 kind:data(any) addr:0x0214c890
-gStr_TCM_ov096 kind:data(any) addr:0x0214c894
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov096 kind:data(any) addr:0x0214c898
-gStr_TTM_ov096 kind:data(any) addr:0x0214c8b4
-gStr_Msg_TmdTroubleMsgJP_LZ_bin_ov096 kind:data(any) addr:0x0214c8b8
-gStr_TIM_ov096 kind:data(any) addr:0x0214c8d4
-gStr_Msg_TmdItemMsgJP_LZ_bin_ov096 kind:data(any) addr:0x0214c8d8
-gStr_TEM_ov096 kind:data(any) addr:0x0214c8f0
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov096 kind:data(any) addr:0x0214c8f4
-gStr_SMT_ov096 kind:data(any) addr:0x0214c90c
-gStr_Scn_Scene_SceneMiiTouch_LZ_bin_ov096 kind:data(any) addr:0x0214c910
-gStr_3HA_ov096 kind:data(any) addr:0x0214c930
-gStr_Mdl_Ica_ica_mii_mii_touch_LZ_bin kind:data(any) addr:0x0214c934
-data_ov096_0214c954 kind:data(any) addr:0x0214c954 ambiguous
-gStr_3IM_ov096 kind:data(any) addr:0x0214c958
-gStr_TCM_tmd_common_msg_JP_bmg_ov096 kind:data(any) addr:0x0214c95c
-gStr_TTM_tmd_trouble_msg_JP_bmg_ov096 kind:data(any) addr:0x0214c978
-gStr_TIM_tmd_item_msg_JP_bmg_ov096 kind:data(any) addr:0x0214c994
-gStr_TEM_tmd_etc_msg_JP_bmg_ov096 kind:data(any) addr:0x0214c9ac
-gStr_SMT_BG_up_ncl_ov096 kind:data(any) addr:0x0214c9c4
-gStr_SMT_BG_up_ncg_ov096 kind:data(any) addr:0x0214c9d4
-gStr_SMT_BG_common_nsc_ov096 kind:data(any) addr:0x0214c9e4
-gStr_SMT_Obj_up_nce_ov096 kind:data(any) addr:0x0214c9f8
-gStr_SMT_Obj_up_ncg_ov096 kind:data(any) addr:0x0214ca08
-gStr_SMT_Obj_up_ncl_ov096 kind:data(any) addr:0x0214ca18
-gStr_SMT_BG_down_ncl_ov096 kind:data(any) addr:0x0214ca28
-gStr_SMT_BG_down_ncg_ov096 kind:data(any) addr:0x0214ca3c
-gStr_SMT_Window_down_nsc_ov096 kind:data(any) addr:0x0214ca50
-gStr_SMT_BG_dialogue_nsc_ov096 kind:data(any) addr:0x0214ca68
-gStr_3HA_ov096_2 kind:data(any) addr:0x0214ca80
-gStr_idle00_ov096 kind:data(any) addr:0x0214ca84
-gStr_SMT_ov096_2 kind:data(any) addr:0x0214ca8c
-gStr_TCM_ov096_2 kind:data(any) addr:0x0214ca90
-gStr_TTM_ov096_2 kind:data(any) addr:0x0214ca94
-gStr_TIM_ov096_2 kind:data(any) addr:0x0214ca98
-gStr_TEM_ov096_2 kind:data(any) addr:0x0214ca9c
-gStr_3HA_ov096_3 kind:data(any) addr:0x0214caa0
-gStr_3H0_ov096_2 kind:data(any) addr:0x0214caa4
-gStr_3H1_ov096_2 kind:data(any) addr:0x0214caa8
-gStr_greet01_ov096 kind:data(any) addr:0x0214caac
-gStr_idle00_ov096_2 kind:data(any) addr:0x0214cab4
-gStr_i_give01_ov096 kind:data(any) addr:0x0214cabc
-gStr_i_give00_ov096 kind:data(any) addr:0x0214cac8
+@14352 kind:data(any) addr:0x0214c884 local
+@14353 kind:data(any) addr:0x0214c888 local
+@14354 kind:data(any) addr:0x0214c88c local
+@14355 kind:data(any) addr:0x0214c890 local
+@14356 kind:data(any) addr:0x0214c894 local
+@14357 kind:data(any) addr:0x0214c898 local
+@14358 kind:data(any) addr:0x0214c8b4 local
+@14359 kind:data(any) addr:0x0214c8b8 local
+@14360 kind:data(any) addr:0x0214c8d4 local
+@14361 kind:data(any) addr:0x0214c8d8 local
+@14362 kind:data(any) addr:0x0214c8f0 local
+@14363 kind:data(any) addr:0x0214c8f4 local
+@14364 kind:data(any) addr:0x0214c90c local
+@14365 kind:data(any) addr:0x0214c910 local
+@14366 kind:data(any) addr:0x0214c930 local
+@14367 kind:data(any) addr:0x0214c934 local
+@14368 kind:data(any) addr:0x0214c958 local
+@14374 kind:data(any) addr:0x0214c95c local
+@14375 kind:data(any) addr:0x0214c978 local
+@14376 kind:data(any) addr:0x0214c994 local
+@14377 kind:data(any) addr:0x0214c9ac local
+@14379 kind:data(any) addr:0x0214c9c4 local
+@14380 kind:data(any) addr:0x0214c9d4 local
+@14381 kind:data(any) addr:0x0214c9e4 local
+@14382 kind:data(any) addr:0x0214c9f8 local
+@14383 kind:data(any) addr:0x0214ca08 local
+@14384 kind:data(any) addr:0x0214ca18 local
+@14387 kind:data(any) addr:0x0214ca28 local
+@14388 kind:data(any) addr:0x0214ca3c local
+@14389 kind:data(any) addr:0x0214ca50 local
+@14390 kind:data(any) addr:0x0214ca68 local
+@14406 kind:data(any) addr:0x0214ca80 local
+@14407 kind:data(any) addr:0x0214ca84 local
+@14452 kind:data(any) addr:0x0214ca8c local
+@14453 kind:data(any) addr:0x0214ca90 local
+@14454 kind:data(any) addr:0x0214ca94 local
+@14455 kind:data(any) addr:0x0214ca98 local
+@14456 kind:data(any) addr:0x0214ca9c local
+@14457 kind:data(any) addr:0x0214caa0 local
+@14458 kind:data(any) addr:0x0214caa4 local
+@14459 kind:data(any) addr:0x0214caa8 local
+@14543 kind:data(any) addr:0x0214caac local
+@14544 kind:data(any) addr:0x0214cab4 local
+@14549 kind:data(any) addr:0x0214cabc local
+@14554 kind:data(any) addr:0x0214cac8 local

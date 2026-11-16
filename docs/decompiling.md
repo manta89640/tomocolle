@@ -210,6 +210,11 @@ The order that the code itself suggests:
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
   into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it).
+- **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
+  array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
+  with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
+  `.bss` blocks go; `static` functions are `local`. The linked module is then compared byte for byte, which finds
+  data the functions do not show: two local `const` scalars in the wrong order, a string with a `/` too many.
 
 ## Which compiler, which flags
 
@@ -369,6 +374,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `f(hour - tens * 10)` (`ClockDisplay::Refresh`, in overlays 72, 73 and 74).
 - Pass the value just stored in a member (`f(mLights[0])`) rather than recomputing it (`MapScene::Init`).
 - Declare a value before the call that might clobber it: `u8 t = others[i];` before `Rand` (`MakeDailyNews`).
+- The type of an inline's parameter: `Shift(const VecFx32 &v, u32 shift)` loads the shift before the vector's x,
+  where `int shift` loads it after (`WeddingCamera::Approach`, overlay 96).
+- A call's result through a local before it is stored, `GXRgb color = f(phase); light->mColor = color;`, moved an
+  unrelated address computation after the store, as the original has it (`MapScene::Init`).
 - `int next; BOOL go; go = FALSE; next = 0x44;` gives another order than the initialised declarations
   (`UpdateConnection`).
 - `hour * 3600 + minute * 60` computes the minutes first.
@@ -398,6 +407,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   order of their declarations, and a 64-bit variable can be given two slots apart. One variable that is saved in two
   unrelated places got two slots where the original had them elsewhere: two variables, one per place, matched. A
   script that permutes the declarations and counts the differing lines gets close fast; the rest took that split.
+- A constant vector copied through a local and stored field by field (`VecFx32 target = sConst; mTarget.x =
+  target.x; ...`) where a by-value setter, or the same code in an inline, gave three vector copies one another's
+  slots (`WeddingCamera::Reset`, overlay 96).
+- A value used once, taken straight off a call's result (`f().LengthSq()`) rather than through a local: its copies
+  become temporaries below the function's locals, which let a later block's local take the slot above them
+  (`RoomScene::StartMeeting`, overlay 74).
 
 **Registers allocated differently**
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
@@ -449,6 +464,17 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   value that holds that register earlier.
 - Index an array where the original walks it with a pointer, or the reverse: `nan_str[i] == toupper(c)` with the
   count `i`, instead of `*p` with `p` stepped beside it, put `__strtold`'s NaN state in the original's registers.
+- Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`). An array
+  element read again at each use (`pair[i]->...`) rather than through a local pointer gave the original's
+  callee-saved registers (`RoomScene::StartMeeting`).
+- A member set in an if/else rather than by a ternary, and constant tables indexed directly rather than through local
+  pointers (`sButtonPositions[i]`, not `positions = sButtonPositions; positions[i]`), gave the original's choice of
+  spilling `this` and keeping a table's address in a register for the loop (`ItemTradeScene::SetupWindow`).
+- `#pragma opt_common_subs off` around the one function (and `#pragma opt_common_subs reset` after it: `#pragma
+  optimization_level reset` does not reset it) where two values swap registers whatever form the source takes (the
+  Mii transfer's `func_02077f48`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
+  know are ignored without a word under the build's `-w off`; the `opt_*` names it knows are in its executable
+  (`strings mwccarm.exe | grep '^opt_'`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -499,6 +525,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **A value read once where the original reads it twice**
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
+- Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
+  scheduled the else's code differently (`ItemTradeScene::Update`, overlay 110).
 
 **Constants and arithmetic**
 - A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in
@@ -563,6 +591,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A loop that the original enters without testing its pointer is a `do`/`while` (`__flush_all`).
 - A bitfield struct copied to a local (`__file_modes mode = file->mode;`) is given a stack slot; reading the field
   through the pointer again reuses the loaded word, as the original does (`__get_char`).
+- For quick looks at code, a file compiles in about a second under `~/Projects/pokesxf/tools/wibo/wibo-macos-1.2.0`
+  with the build's own command, `sjiswrap.exe` and `-enc SJIS` left out, and metroskrew's copy of the same compiler
+  (`mwccarm-3.0-138.exe` for the game, `-3.0-137.exe` for the Mii transfer), against about twenty under wine. The
+  code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
+  one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
 
 ## A match is instructions and references
 

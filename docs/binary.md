@@ -318,7 +318,7 @@ initialisers), `.rodata`, `.data` and `.bss`.
 
 Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
 254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Decompiled in
-`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 247 functions match.
+`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 250 functions match.
 
 | Range | Holds |
 | --- | --- |
@@ -379,13 +379,13 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 7 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
-  `StartMeeting` (the callee-saved registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`; in overlay 73
+- 5 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the
+  callee-saved registers named differently), `StartPairEvent` (the offset of a pooled constant), `GetAngleAround`
+  (one copy and two registers of one vector, 95%) and `ApartmentFront::UpdateCursorTarget`; in overlay 73
   `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
-  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Overlay 73's
-  `NamePanel::Init` matches, and its fix (the character counts read through a pointer to the canvas, and both text
-  positions set with `SetPositionFromVec`) is still to be carried over to overlay 74's byte-identical copy.
+  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Both copies of
+  `NamePanel::Init` match: the character counts read through a pointer to the canvas, and both text positions set
+  with `SetPositionFromVec`. `StartMeeting` matches with the distances taken straight off `GetFloorPos`'s results.
 - The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
   `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
   order the compiler does give, by which its pool is reproduced.
@@ -396,7 +396,8 @@ Not done:
 
 ## The wedding announcement
 
-Overlay 96, `src/overlays/ov096/WeddingScene.cpp`: 35 of its 37 functions match.
+Overlay 96, `src/overlays/ov096/WeddingScene.cpp`: all 37 of its functions match, and its data is the ROM's:
+complete.
 
 Measured: the scene `WeddingScene` (0x1CEE0 bytes, constructed in the main program at `0x02048600` after
 `FS_LoadOverlay(0x60)`; its virtual table at `0x0214C860`) shows two characters in front of the camera. Its messages
@@ -414,12 +415,11 @@ of its functions are byte for byte the same there. The main program's classes it
 `Inventory` and `InventoryItem` (236 item counts read from and written back to the save data, at most 99 of each) and
 `ItemModel` (the model `Mdl/Item/item%03d_3D_LZ.bin` of an item, scaled by the item table's size).
 
-Not done:
-
-- `WeddingCamera::Reset` (the stack slots of three vector copies) and `WeddingCamera::Approach` (two loads in the
-  other order), each with a comment.
-- The data: `.rodata` starts with an 8-byte object `{25, 128}` that nothing refers to, which the source does not
-  give; the strings of `.data` are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
+The data: `.rodata` starts with an 8-byte object `{25, 128}` (0x0214C80C) that nothing in the ROM refers to; it is
+in the source as `data_ov096_0214c80c`, kept by an uncalled stand-in that the link strips, and the four 12-byte
+vectors are declared in the order that sorts them as the ROM has them. The scene's four message files are opened as
+`"TCM:tmd_common_msg_JP.bmg"` and so on, without the slash after the colon that the source had (the strings are
+the ROM's now, and with them the offsets of everything after them in `.data`).
 
 ## The save screens
 
@@ -671,13 +671,14 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Three functions differ, each with a comment saying how: `Init` (one instruction placed differently: the back
-  button's base address; the same length), `Update` (the frame is the original's since the touch loop reaches the camera
-  through a pointer; the stack slots of the clock's date and time and the order of the rectangle arithmetic
-  differ), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
-  buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
-  90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
-  kept in a register, the array's own address is loaded again before each store.
+- Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop
+  reaches the camera through a pointer, the apartment mark is set with `SetPositionFromVec`, which orders its dead
+  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `func_0202a640`; the registers and order of
+  the touch loop's rectangle arithmetic differ) and `MakeDailyNews` (the registers of the loop that picks the
+  month's kind of news). `Init` matches with the second light's colour through a local. `Exit` matches since
+  `data_0213bab0` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
+  `MI_CpuFill8`, overlays 31 and 90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast
+  from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
@@ -690,7 +691,7 @@ names are the project's own: none survives), all built with 2.0 SP2 patch 2 (see
 
 | File | Code | Data | Functions |
 | --- | --- | --- | --- |
-| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 52 of 54 match |
+| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 53 of 54 match |
 | `MiiTransferWH.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
 | `MiiTransferList.cpp`, the Mii records | `0x02079DFC`-`0x02079FA0` | .bss `0x02148680`-`0x02148688` | 7 of 7, complete |
 
@@ -725,9 +726,11 @@ Nintendo's DS games take Miis from the Wii with: it is built with another compil
 carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
 
 Not done: `func_02077858` (the session's update) differs only in five branch offsets of a jump table (the unlisted
-states of case 3 branch to the function's end, where the original branches to the inner switch's break), and
-`func_02077F48` in two registers the other way round, with comments above them, so `MiiTransfer.cpp` is not complete.
-Measured with the compiler: `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
+states of case 3 branch to the function's end, where the original branches to the inner switch's break), with a
+comment above it, so `MiiTransfer.cpp` is not complete. The same output comes from every build from 114 to 137
+and under every one of the 78 `opt_*` pragmas that build knows, each on or off. Measured with the compiler:
+`func_02077F48` is compiled with `#pragma opt_common_subs off` (with it on, sSeq and its low bit swap registers in
+every form of the source), and `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
 (its loops are neither rotated nor strength reduced, and the 0 it passes to `WH_StartScan` stays in r4); the
 address is copied from a local array's initialiser, the 6-byte compiler object at 0x020B7BE4, and the 28 names are
 another local array's initialiser that nothing uses, which the compiler keeps and puts in the same section right
@@ -779,8 +782,8 @@ Inferred:
 
 ## Wireless play with items
 
-Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 73 of
-its 75 functions match; not complete.
+Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: all 75
+of its functions match, and its data is the ROM's: complete.
 
 Measured:
 
@@ -832,12 +835,20 @@ Inferred: overlays 109 and 110 are the two halves of wireless play, written from
 WH, the save-and-send sequence), but each from its own source; overlay 110's list is the code of the scenes that
 list the player's things (75, 85, 100), copied in.
 
+How the last functions matched:
+
+- `SetupWindow` matches with the text's vertical alignment as an if/else and the buttons reading their tables
+  directly (with a ternary, or the positions through a local pointer, `this` stays in r11 where the original
+  spills it and keeps the positions there), `Update` with the lost connection's two ways as an if and its else.
+  `SetItemCamera` and `SetRoomCamera` match under `#pragma opt_propagation off` with the vectors as struct copies,
+  and `UpdateWireless` with its partner loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each
+  use). Marking the unit complete took three dsd symbols out of `symbols.txt` that are fields inside
+  `sWindowButtons` and `sWindowButtonMessages` (their references are now `add:` offsets in `relocs.txt`), the
+  placeholders of the `.bss` blocks and one inside a string, `local` on the three static WH callbacks, and the two
+  local constants of `ItemTradeList::UpdatePreviewStates` declared the other way round.
+
 Not done:
 
-- Two functions differ, each with a comment saying how: `SetupWindow` (the original keeps the button positions'
-  table in r11 and so spills `this`) and `Update` (one instruction's place). `SetItemCamera` and `SetRoomCamera`
-  match under `#pragma opt_propagation off` with the vectors as struct copies, and `UpdateWireless` with its partner
-  loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each use). The unit cannot be complete until they match.
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
   `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and
@@ -1218,7 +1229,7 @@ it is 2.0 SP2p2, the game SP2p3), and its function names.
   64 bytes and more at the pool's address plus an offset: `WH_SetGgid` stores at +0x88 (the GGID of the 0x40 bytes of
   parent parameters at +0x80, whose first two members `WH_Initialize` clears at +0x80 and +0x84), and the protocol
   reads the valid flags of its three 0x60-byte packets at +0x1B0, +0x210 and +0x270. With build 137 (2.0 SP2 patch 2)
-  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54; with 138 they drop to 40 and 43, the functions growing
+  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54 (53 since, with a pragma); with 138 they drop to 40 and 43, the functions growing
   by the loads of the statics' own addresses. The main WH (`lib/WH`), the same source, has its parent parameters on their own, as 138 does. So any build up to 137 fits, and patch 2 is the latest that does, not
   proven to be the one. `-ipa file` is part of it: without it (C++ alone) statics are not pooled at all and they drop
   to 40 and 9.

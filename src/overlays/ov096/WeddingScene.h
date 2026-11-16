@@ -497,7 +497,8 @@ static inline void CopyVec(VecFx32 *dst, const VecFx32 *src) {
     dst->z = src->z;
 }
 
-static inline VecFx32 Shift(const VecFx32 &v, int shift) {
+// The shift is unsigned: as an int, WeddingCamera::Approach loads it after the vector's x, not before
+static inline VecFx32 Shift(const VecFx32 &v, u32 shift) {
     VecFx32 result;
     result.x = v.x >> shift;
     result.y = v.y >> shift;
@@ -635,12 +636,6 @@ public:
         mTarget.x = target.x;
         mTarget.y = target.y;
         mTarget.z = target.z;
-    }
-    void SetDefaultTarget(); // Inline, in WeddingScene.cpp beside the constant
-    void Restore() {
-        SetPosition(gSceneMemory.mCameraPosition);
-        SetTarget(gSceneMemory.mCameraTarget);
-        VEC_Subtract(&mPosition, &mTarget, &mPosition);
     }
 
     /* 0x00 */ int mState;
