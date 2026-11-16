@@ -510,6 +510,36 @@ helpers are byte for byte the same (`ShowMessage` in all three, `ShowOk` and `As
 objdiff reports the data of all three a little under 100% although the ROM is identical: it counts the
 padding at the end of `.rodata` and `.data` that the delinked original has and the compiled object does not.
 
+## The Nintendo logo (overlay 105)
+
+Overlay 105, `src/overlays/ov105/NintendoLogoScene.cpp`: all 8 of its functions match, and its data is the ROM's
+(the virtual table and six strings): complete.
+
+Measured:
+
+- `NintendoLogoScene` (0x1C bytes; its constructor is the main program's, `0x0203DE78`) mounts
+  "Cmn/Nin/NintendoLogo_LZ.bin" as "MNU" and sets both screens' fade speed to 0x19C2 of 0x10000 a frame, so that
+  its fades take ten frames (`func_02023c54(&data_0211d604, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
+  +0x10, the steps `func_02023cd4` and `func_02023ddc` add to their brightness, +0x04 and +0x08, each frame). `Init`
+  loads `MNU:/Gray_White.nsc`, `.ncg` and `.ncl` into plane 2 (one of the main engine's, whose planes are 0x3F in
+  the screens' masks), shows that plane alone, and has `func_020278f8` set colour 0x7FFF with 0x101, as
+  `PreStartScene` does. `Update` counts frames in its one state and on the 61st asks for scene 0x39
+  (`PreStartScene`, overlay 106). `Exit` unmounts "MNU", `Draw` is empty, and the field at +0x14 is cleared by
+  `SetState` and read by nothing.
+- Scene ids 0x00, 0x0D, 0x28 and 0xB6 all construct it, and nothing differs between them: in `CreateScene` each case
+  sets sound group -1, loads overlay 105 and constructs the same class, `UnloadSceneOverlay` unloads overlay 105
+  for each, and the scene never reads `mSceneId`: whichever id started it, it goes on to 0x39. They differ only in
+  who asks for them:
+  - 0xB6: `SceneManager::Init` constructs it, as the game's first scene.
+  - 0x00: overlays 101 (`SceneAF`) and 103 (`SceneB3`) ask for it when they finish, unless the scene manager's
+    previous scene (`mPreviousSceneId`) is 0xAF (overlay 101) or 0x40 (overlay 103), when they ask for 0x40
+    instead. Overlay 90 (`RomanceScene`, 0x0214B5A4) calls `RequestScene(0)` too, but with an address in its own
+    `.rodata` (0x0214C478) as the scene manager.
+  - 0x0D and 0x28: no call of `RequestScene` in the delinked or compiled code passes either as a constant.
+
+Inferred: scene 0 is the way back to the start of the game, through the logo and `PreStartScene`'s check of the
+save data.
+
 ## The name sort test
 
 Overlay 1, `src/overlays/ov001/NameSortTestScene.cpp`: all 10 of its functions match, and its data is the ROM's:
