@@ -181,19 +181,19 @@ void MiiListMenuScene::UpdateIdle() {
 
 void MiiListMenuScene::UpdateMiiMenu() {
     func_020341d4(&mWindows[0]);
-    switch (mWindows[0].mResult) {
+    switch (mWindows[0].mUnknownAF84) {
     case 0: // Edit: not done here
         break;
     case 1: // Change clothes: not done here
         break;
     case 2:
         mWindows[0].mUnknownAF98 = NEXT_CONFIRM;
-        mWindows[0].mUnknownAF94 = 15;
+        mWindows[0].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[0], 0x1C);
         break;
     case 3:
         mWindows[0].mUnknownAF98 = NEXT_IDLE;
-        mWindows[0].mUnknownAF94 = 5;
+        mWindows[0].mUnknownSetBeforeClose = 5;
         func_020349cc(&mWindows[0], 0x24);
         break;
     }
@@ -216,33 +216,33 @@ void MiiListMenuScene::UpdateMiiMenu() {
 
 void MiiListMenuScene::UpdateSortMenu() {
     func_020341d4(&mWindows[1]);
-    switch (mWindows[1].mResult) {
+    switch (mWindows[1].mUnknownAF84) {
     case 0:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 1:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 2:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 3:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 4:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 5:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     case 6:
-        mWindows[1].mUnknownAF94 = 15;
+        mWindows[1].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[1], 0x24);
         break;
     }
@@ -253,15 +253,15 @@ void MiiListMenuScene::UpdateSortMenu() {
 
 void MiiListMenuScene::UpdateConfirm() {
     func_020341d4(&mWindows[2]);
-    switch (mWindows[2].mResult) {
+    switch (mWindows[2].mUnknownAF84) {
     case 0:
         mWindows[2].mUnknownAF98 = 0;
-        mWindows[2].mUnknownAF94 = 15;
+        mWindows[2].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[2], 0x1C);
         break;
     case 1:
         mWindows[2].mUnknownAF98 = 1;
-        mWindows[2].mUnknownAF94 = 15;
+        mWindows[2].mUnknownSetBeforeClose = 15;
         func_020349cc(&mWindows[2], 0x14);
         break;
     }
@@ -283,8 +283,8 @@ void MiiListMenuScene::UpdateConfirm() {
 
 void MiiListMenuScene::UpdateMovedOut() {
     func_020341d4(&mWindows[3]);
-    if (mWindows[3].mResult != -1) {
-        mWindows[3].mUnknownAF94 = 5;
+    if (mWindows[3].mUnknownAF84 != -1) {
+        mWindows[3].mUnknownSetBeforeClose = 5;
         func_020349cc(&mWindows[3], 0x14);
     }
     if (mWindows[3].mTransitionDone) {

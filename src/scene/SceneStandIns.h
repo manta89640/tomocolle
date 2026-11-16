@@ -66,11 +66,8 @@ SCENE_STAND_IN(Scene1E, 0x48F58); // func_0203f900
 
 SCENE_STAND_IN(VoteScene, 0x3CD5C); // func_020400f0
 
-SCENE_STAND_IN(MiiListMenuScene, 0x2C0C0); // func_02040288
 
-SCENE_STAND_IN(G3SpriteTestScene, 0x48B4); // func_0204036c
 
-SCENE_STAND_IN(MiiListScene, 0x2AA44); // func_020403e8
 
 SCENE_STAND_IN(TushinScene, 0x3F0B4); // _ZN11TushinSceneC1Ei
 

@@ -13,6 +13,8 @@
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class MiiListMenuScene : public Scene {
 public:
+    MiiListMenuScene(int sceneId);
+
     enum State {
         STATE_IDLE,         // Waits for one of the two buttons
         STATE_MII_MENU,     // The menu of what to do with a Mii (window 0)
