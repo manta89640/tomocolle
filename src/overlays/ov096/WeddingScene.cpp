@@ -20,8 +20,8 @@ void WeddingScene::StartLoading() {
     mCharacters[1].mIndex = GetCharacterIndex(1);
     func_02091048(&mCharacters[1], "3H1");
     mRoom.mStyle = mCharacters[0].mInterior;
-    func_020a54c4(&mRoom, "CO0", 0);
-    func_020a56bc(&mRoom, "RM?", 0);
+    mRoom.Mount("CO0", 0);
+    mRoom.MountAll("RM?", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[1].mArchiveName, mCharacters[1].mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "TCM", "Msg/TmdCommonMsgJP_LZ.bin", 0);
@@ -133,9 +133,9 @@ void WeddingScene::Init3d() {
     mCamera.Reset(gSceneManager.mPreviousSceneId);
     mCamera.GetStandingPoints(&points[0], &points[1]);
     mLights.Init(&data_02122764, &mRoom);
-    func_020a5514(&mRoom, 3);
-    func_020a5760(&mRoom, 4);
-    func_020a4ab8(&mRoom.mParts, 2);
+    mRoom.Load(3);
+    mRoom.LoadParts(4);
+    mRoom.mParts.SetState(2);
     ModelResources_SetModel(data_021223e4, 10, mGift.mModelPath);
     mGift.Load(10);
     mGift.SetPosition(sFarAway);
@@ -296,7 +296,7 @@ void WeddingScene::Draw() {
     mWindow.Draw();
     switch (mDrawState) {
     case 0:
-        func_020a5960(&mRoom);
+        mRoom.Update();
         mCharacters[0].Update();
         mCharacters[1].Update();
         mDrawFrames++;
@@ -309,7 +309,7 @@ void WeddingScene::Draw() {
     }
     func_02091968(&mCharacters[0]);
     func_02091968(&mCharacters[1]);
-    func_020a4a50(&mRoom.mParts);
+    mRoom.mParts.Draw();
     mGift.Draw();
 }
 
@@ -326,7 +326,7 @@ void WeddingScene::Exit() {
     func_0202aecc(data_021223e4, 1);
     func_0202aecc(data_021223e4, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
-    func_020a5948(&mRoom);
+    mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "3H0");
     ArchiveManager_Unmount(&gArchiveManager, "3H1");
     ArchiveManager_Unmount(&gArchiveManager, mGift.mArchiveName);
@@ -875,7 +875,7 @@ void WeddingLights::Update() {
         break;
     }
     case 1:
-        SetColor(func_020a4d90(mRoom));
+        SetColor(mRoom->GetLightColor());
         mState = 0;
         break;
     }

@@ -128,8 +128,13 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
+
     /* 0x000 */ u8 mUnknown000[0x4C];
     /* 0x04C */ RoomDoorModel mDoor;
     /* 0x1A4 */ RoomPart mParts[6];
@@ -143,26 +148,35 @@ struct RoomStyle {
     /* 0x0A */ u8 mUnknown0A[0x4A];
 }; // 0x54
 
-class Room {
+// The interior a room shows (include/room/Room.h has the main program's classes)
+class InteriorItem {
 public:
-    virtual u32 GetStyleUnknown0();
+    virtual u32 GetPrice();
+    GXRgb GetLightColor(); // The room's light colour now
 
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+}; // 0x14
+
+class Room : public InteriorItem {
+public:
+    void Mount(const char *archiveName, int unk);
+    void MountModel(int unk);
+    void Load(int resourceId);
+    void Reload(int resourceId);
+    void MountAll(const char *archiveName, int unk);
+    void MountPartModels(int unk);
+    void LoadParts(int resourceId);
+    void ReloadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+    void SetScale(fx32 scale);
+
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a4ab8(RoomParts *parts, int state);
-void func_020a4a50(RoomParts *parts); // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
-u16 func_020a4d90(Room *room); // The room's light colour now
 }
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------

@@ -238,6 +238,12 @@ public:
 // The player's room interiors, in the same way.
 class InteriorList {
 public:
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count);
+    BOOL HasAnyOwned();
+
     /* 0x000 */ int mCount;
     /* 0x004 */ InventoryItem mItems[78];
     /* 0x61C */ InventoryItem *mList[78];
@@ -255,13 +261,8 @@ struct ItemInfo {
 extern "C" {
 extern const ItemInfo data_020f5f0c[];
 // Each fills a list of the items owned (the list, its count) and returns nothing
-void func_020a5174(InteriorList *interiors, Item **list, int *count);
 // Each returns whether there is anything to show on one of the tabs
-int func_020a53c8(InteriorList *interiors);
 // Loading and saving
-void func_020a4f58(InteriorList *interiors);
-void func_020a5090(InteriorList *interiors);
-void func_020a5008(InteriorList *interiors); // Saves them
 }
 
 // The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
@@ -299,8 +300,13 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
+
     /* 0x000 */ u8 mUnknown000[4];
     /* 0x004 */ VecFx32 mPosition; // This scene moves the room up and down by its y
     /* 0x010 */ u8 mUnknown010[0x3C];
@@ -316,31 +322,35 @@ struct RoomStyle {
     /* 0x0A */ u8 mUnknown0A[0x4A];
 }; // 0x54
 
-class Room {
+// The interior a room shows (include/room/Room.h has the main program's classes)
+class InteriorItem {
 public:
-    virtual u32 GetStyleUnknown0();
+    virtual u32 GetPrice();
+    GXRgb GetLightColor(); // The room's light colour now
 
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+}; // 0x14
+
+class Room : public InteriorItem {
+public:
+    void Mount(const char *archiveName, int unk);
+    void MountModel(int unk);
+    void Load(int resourceId);
+    void Reload(int resourceId);
+    void MountAll(const char *archiveName, int unk);
+    void MountPartModels(int unk);
+    void LoadParts(int resourceId);
+    void ReloadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+    void SetScale(fx32 scale);
+
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a54e4(Room *room, int unk);
-void func_020a56dc(Room *room, int unk);
-void func_020a5530(Room *room, int unk);
-void func_020a5854(Room *room, int unk);
-void func_020a4b74(RoomParts *parts, BOOL visible);
-void func_020a4bc4(RoomParts *parts, int alpha); // Sets their alpha (0 to 31)
-void func_020a4a50(RoomParts *parts);            // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
-void func_020a5970(Room *room, int unk);
 }
 
 // --- The main program's touch buttons (include/SpriteButton.h) ------------------------------------------------

@@ -171,7 +171,7 @@ void ItemTradeTabs::SetMasks(Inventory *inventory, ClothesList *costumes, Interi
     mMasks[0] = inventory->HasAnyOwnedKind1();
     mMasks[3] = inventory->HasAnyOwnedKind3();
     mMasks[1] = costumes->HasAnyOwned();
-    mMasks[2] = func_020a53c8(interiors);
+    mMasks[2] = interiors->HasAnyOwned();
     mMasks[4] = inventory->HasAnyOwnedKinds4And5();
 }
 
@@ -612,7 +612,7 @@ int ItemTradeList::Run() {
         case ItemTradeTabs::TAB_INTERIORS:
             mItemFilter.SetVisible(FALSE);
             mCostumeFilter.SetVisible(FALSE);
-            func_020a5174(mInteriors, mItems, &mItemCount);
+            mInteriors->GetOwned(mItems, &mItemCount);
             func_020a9b10(&mList, mContext->mRoomMessages);
             func_020a9b40(&mList, mItems, mItemCount);
             mSelection.Set(2, 0);
@@ -667,7 +667,7 @@ int ItemTradeList::Run() {
             mItemModel->mVisible = TRUE;
             ShowName(mSelection.mKind, id);
             mMannequin->SetVisible(FALSE);
-            func_020a4b74(&mRoom->mParts, FALSE);
+            mRoom->mParts.SetVisible(FALSE);
             mSelection.Set(0, id);
             ResetLights();
             break;
@@ -678,7 +678,7 @@ int ItemTradeList::Run() {
             ShowName(mSelection.mKind, id);
             mMannequin->SetVisible(TRUE);
             mItemModel->mVisible = FALSE;
-            func_020a4b74(&mRoom->mParts, FALSE);
+            mRoom->mParts.SetVisible(FALSE);
             mSelection.Set(1, id);
             ResetLights();
             break;
@@ -686,7 +686,7 @@ int ItemTradeList::Run() {
             SetRoomCamera();
             mItemModel->mVisible = FALSE;
             mMannequin->SetVisible(FALSE);
-            func_020a4b74(&mRoom->mParts, FALSE);
+            mRoom->mParts.SetVisible(FALSE);
             ShowRoom(id);
             mSelection.Set(2, id);
             ShowName(mSelection.mKind, id);
@@ -715,7 +715,7 @@ void ItemTradeList::Close() {
     mItemModel->Reset();
     mItemModel = NULL;
     mMannequin->SetVisible(FALSE);
-    func_020a4b74(&mRoom->mParts, FALSE);
+    mRoom->mParts.SetVisible(FALSE);
     mOkButton.mVisible = FALSE;
     mBackButton.mVisible = FALSE;
     mTabs.SetVisible(FALSE);
@@ -760,7 +760,7 @@ void ItemTradeList::LoadMannequinHead() {
 void ItemTradeList::Save() {
     mInventory->Save();
     mCostumes->Save();
-    func_020a5008(mInteriors);
+    mInteriors->Save();
 }
 
 // Takes one of the item chosen away (it has been sent)
@@ -834,7 +834,7 @@ void ItemTradeList::RefreshList() {
         mCostumes->GetOwned(mItems, &mItemCount, mCostumeFilter.GetFilter());
         break;
     case 2:
-        func_020a5174(mInteriors, mItems, &mItemCount);
+        mInteriors->GetOwned(mItems, &mItemCount);
         break;
     case 3:
         mInventory->GetOwnedKind3(mItems, &mItemCount);
@@ -893,14 +893,14 @@ void ItemTradeList::UpdateRoom() {
         switch (mRoomStep) {
         case 0:
             mRoomStep++;
-            func_020a4b74(&mRoom->mParts, FALSE);
-            func_020a5948(mRoom);
+            mRoom->mParts.SetVisible(FALSE);
+            mRoom->ReleaseAll();
             break;
         case 1:
             mRoomStep++;
             mRoom->mStyle = mRoomStyle;
-            func_020a54e4(mRoom, 0);
-            func_020a56dc(mRoom, 0);
+            mRoom->MountModel(0);
+            mRoom->MountPartModels(0);
             break;
         case 2:
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
@@ -909,15 +909,15 @@ void ItemTradeList::UpdateRoom() {
             break;
         case 3:
             mRoomStep++;
-            func_020a5530(mRoom, 1);
+            mRoom->Reload(1);
             break;
         case 4:
             mRoomStep++;
-            func_020a5854(mRoom, 2);
+            mRoom->ReloadParts(2);
             break;
         case 5:
             SetRoomMode(0);
-            func_020a4b74(&mRoom->mParts, TRUE);
+            mRoom->mParts.SetVisible(TRUE);
             data_021226e4.mLights[0].mColor = data_020f72f8[mRoom->mStyle].mLightColor;
             data_021226e4.mLights[1].mColor = data_020f72f8[mRoom->mStyle].mLightColor;
             break;
@@ -1010,7 +1010,7 @@ void ItemTradeList::UpdatePreviewStates() {
     case 14:
         if (sItem >= 0x1000 && mPreviewStates[PREVIEW_ROOM] == 1) {
             SetRoomCamera();
-            func_020a4b74(&mRoom->mParts, TRUE);
+            mRoom->mParts.SetVisible(TRUE);
             mPreviewStates[PREVIEW_ROOM] = 3;
             mPreviewStates[PREVIEW_ITEM] = 2;
             mPreviewStates[PREVIEW_COSTUME] = 2;
@@ -1130,15 +1130,15 @@ void ItemTradeList::UpdatePreviewStates() {
                 mMannequin->SetAlpha(31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_ROOM:
-                func_020a4bc4(&mRoom->mParts, 31 - mPreviewTimers[i] * 2);
-                func_020a5960(mRoom);
+                mRoom->mParts.SetAlpha(31 - mPreviewTimers[i] * 2);
+                mRoom->Update();
                 break;
             }
             if (mPreviewTimers[i] >= 15) {
-                func_020a4b74(&mRoom->mParts, FALSE);
+                mRoom->mParts.SetVisible(FALSE);
                 mMannequin->SetVisible(FALSE);
                 mItemModel->SetVisible(FALSE);
-                func_020a4bc4(&mRoom->mParts, 31);
+                mRoom->mParts.SetAlpha(31);
                 mMannequin->SetAlpha(31);
                 func_02029f50(mItemModel, 31);
                 mPreviewStates[i] = 0;
@@ -1184,7 +1184,7 @@ void ItemTradeList::ShowPending() {
             return;
         }
         SetRoomCamera();
-        func_020a4b74(&mRoom->mParts, TRUE);
+        mRoom->mParts.SetVisible(TRUE);
         ShowRoom(mPendingId);
         UpdateRoom();
         func_020a9bf4(&mList, mPendingIndex);
@@ -1395,8 +1395,8 @@ void ItemTradeScene::StartLoading() {
     mItemModel.SetItem(archiveName, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mItemModel.mArchiveName, mItemModel.mArchivePath, 0);
     mRoom.mStyle = 0;
-    func_020a54c4(&mRoom, "CO0", 0);
-    func_020a56bc(&mRoom, "RM?", 0);
+    mRoom.Mount("CO0", 0);
+    mRoom.MountAll("RM?", 0);
 }
 
 // @0x0214ccf4
@@ -1479,8 +1479,8 @@ void ItemTradeScene::Init() {
     mCostumes.Sort();
     mInventory.Load();
     mInventory.Sort();
-    func_020a4f58(&mInteriors);
-    func_020a5090(&mInteriors);
+    mInteriors.Load();
+    mInteriors.Sort();
     mList.Init(&mContext, &mListCharOffset);
     mList.mMode = 0;
     mList.mState = ItemTradeList::STATE_OPEN;
@@ -1496,17 +1496,17 @@ void ItemTradeScene::Init() {
     sReceived = 0;
     sDisconnected = 0;
 
-    func_020a5514(&mRoom, 1);
-    func_020a5760(&mRoom, 2);
-    func_020a4b74(&mRoom.mParts, TRUE);
+    mRoom.Load(1);
+    mRoom.LoadParts(2);
+    mRoom.mParts.SetVisible(TRUE);
     VecFx32 roomPosition = sRoomPosition;
     mRoom.mParts.mPosition.x = roomPosition.x;
     mRoom.mParts.mPosition.y = roomPosition.y;
     mRoom.mParts.mPosition.z = roomPosition.z;
-    func_020a5970(&mRoom, 0x1C2);
+    mRoom.SetScale(0x1C2);
     mRoom.mParts.mDoor.mModel.mRotX = 0;
     mRoom.mParts.mDoor.mModel.mRotY = 0;
-    func_020a4b74(&mRoom.mParts, FALSE);
+    mRoom.mParts.SetVisible(FALSE);
     gSoundManager.LoadGroup(0x5D);
     WH_Initialize();
 }
@@ -2156,7 +2156,7 @@ void ItemTradeScene::Draw() {
     func_020345d8(&mWindow);
     mMannequin.Draw();
     mItemModel.Draw();
-    func_020a4a50(&mRoom.mParts);
+    mRoom.mParts.Draw();
     mScroll += 0x4CC;
     func_02028108(&data_02121834, 2, mScroll >> FX32_SHIFT);
 }
@@ -2169,7 +2169,7 @@ void ItemTradeScene::Exit() {
     }
     mCostumes.Save();
     mInventory.Save();
-    func_020a5948(&mRoom);
+    mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mItemModel.mArchiveName);
     func_0202aecc(data_021223e4, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
