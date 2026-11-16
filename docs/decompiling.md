@@ -376,6 +376,14 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `KeyboardCore_SetMode`). With the full set, one
   compile shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put
   all of KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
+- Function-local statics can be placed the same way, by solving on which function each slot's object belongs to
+  rather than on names: a size sequence is good when each slot of a size holds a declaration of the function that
+  the ROM's object there belongs to, and names are then swapped within each function. A random search over the
+  order of each function's statics (and over which tables are file statics) with the model found overlay 39's
+  whole `.rodata` and `.data` (31 statics, two local consts, 21 strings of initialisers), with every static in its
+  function but one table, which had to be the file's first static.
+- Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
+  at the end), in the order of their declarations: overlay 39's two message numbers.
 
 ## Matching techniques
 
@@ -413,6 +421,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `func_02082b48` and the four after it).
 - The same for a member: `(u8 *)&mKeyboard.mButtons + 0x6B8` keeps the original's `ldr` of the member's offset and
   `add 0x2b8; add 0x400`, where `&mKeyboard.mButtons[1]` folds the two (`MiiEditProfilePage::Update`).
+
+- A one-element member array used in a one-iteration loop (`for (int i = 0; i < 1; i++) f(&mButtons[i]);`) keeps
+  part of the member's offset in a register (`add r4, this, #0x348` then `add r0, r4, #0x1bc00` at each use); a
+  single member, or a pointer to it, does not (overlay 39's shutter button and caption, which the main program's
+  constructor shows as arrays of one). Static `const` arrays of one element read there with `[i]` are sometimes
+  folded (the shutter's position and size) and sometimes loaded (its `u16` sequence, the caption's font and
+  position), as the original has them.
+- An element after the first reached through an inline accessor (`GetSpeechTexts(1)->mName`, returning
+  `&mSpeechTexts[index]`) is formed as base, plus the element's size, plus the field (three `add`s), where
+  `mSpeechTexts[1].mName` folds the offset into one (`TravelScene::Init`).
 
 **Two literal-pool entries for one address**
 - One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
@@ -482,6 +500,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A value used once, taken straight off a call's result (`f().LengthSq()`) rather than through a local: its copies
   become temporaries below the function's locals, which let a later block's local take the slot above them
   (`RoomScene::StartMeeting`, overlay 74).
+- A point passed by value to an inline (`SetPixelPosition(Sprite *, ScreenPoint)`) puts its copy among the
+  temporaries in the order of the source, where a block-local copy (`ScreenPoint p = table[i];`) goes above the
+  temporaries of earlier blocks (`TravelScene::Init`, overlay 39). Searching the three position setters
+  (`SetPosition(FxVec2(...))`, `SetPosition(x, y)`, `SetPositionFromVec`) for each of the function's sprites by
+  script found the rest of its slots.
 - Not solved: `MiiEditProfilePage::SetState` (7 KB) keeps the WindowPoint copies passed by value to its windows'
   buttons in six slots below every other local (two of them copies of one size, one never read). Fresh copies per
   window move them to the bottom but in another order and without the unread one; reusing one copy across windows
@@ -575,6 +598,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - dsd gives each delinked unit's sections the module's alignment and takes no `align:` on a file's line: a unit (or
   the gap after one) whose `.rodata` starts at a two-aligned address moves everything after it. Look for a small
   object that lets the boundary be four-aligned (the room file's halfword at `0x020FBFD4`).
+- A call's result through a local before a field is set (`ModelAnimation *a = AnimModel_FindAnimation(...);
+  a->mFinished = FALSE;`) swapped two strength-reduced loop pointers into the original's registers, where the
+  chained `f(...)->mFinished = FALSE` gave them the other way (`TravelScene::SetState`).
+- A variable used in two cases of a switch, declared once at the top, got one callee-saved register; declared in
+  each case's block, the original's two (`TravelScene::SetState`).
+- In a shuffle, the element read before the random draw (`t = a[i]; j = Rand(n); a[i] = a[j]; a[j] = t;`) gave the
+  original's registers and load order (`TravelScene::StartLoading`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -666,6 +696,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   original's registers.
 - A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
   random number first: the generator's state is stored before the range is read (overlay 76's voice page).
+- `MATH_Rand16(&gRandom, max)` through an inline taking `int` (`Rand(int max)`) truncates a `u8` count to 16 bits
+  (`lsl #16; lsrs #16`) as the original does; a `u16` parameter or the call made directly drops the truncation
+  (overlay 39).
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - Read the literal pool's constants, not only the instructions: a tenth of fx32 written `FX32_ONE / 10` is 0x199,
   `FX32_CONST(0.1)` rounds to 0x19A (overlay 5's `TestDrawMiiCamera::SetRandomRadius`).

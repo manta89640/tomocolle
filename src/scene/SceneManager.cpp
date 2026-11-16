@@ -73,7 +73,7 @@
 #include "../overlays/ov094/Scene74.h"
 #include "../overlays/ov037/Scene75.h"
 #include "../overlays/ov038/TestNg111Scene.h"
-#include "../overlays/ov039/TestNg116Scene.h"
+#include "../overlays/ov039/TravelScene.h"
 #include "../overlays/ov040/Scene7A.h"
 #include "../overlays/ov041/Scene7B.h"
 #include "../overlays/ov042/TestNg119Scene.h"
@@ -622,7 +622,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x79:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(39));
-        return new TestNg116Scene(sceneId);
+        return new TravelScene(sceneId);
     case 0x7A:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(40));
@@ -986,7 +986,7 @@ Scene75::Scene75(int sceneId) : Scene(sceneId) {}
 TestNg111Scene::TestNg111Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x77, 0x78 and 0x79, overlay 39
-TestNg116Scene::TestNg116Scene(int sceneId) : Scene(sceneId) {}
+TravelScene::TravelScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x7A, overlay 40
 Scene7A::Scene7A(int sceneId) : Scene(sceneId) {}

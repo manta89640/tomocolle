@@ -843,6 +843,58 @@ What it showed about the compiler, measured (see "Compiler"):
 - **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool and
   strings, which says nothing of the original's order but sizes.
 
+## A Mii's trip, and the "Ng" scenes
+
+Overlay 39, `src/overlays/ov039/TravelScene.cpp`: all 11 functions and all of its data match (the data compared byte
+for byte, and the relocations of `.data`, with the original). The unit is not marked complete only because the
+main program's character functions it calls are still under their old names on main (see the end of this section).
+
+Measured:
+
+- **What it is.** Scenes 0x77, 0x78 and 0x79 construct `TravelScene` (0x1EE84 bytes; the main program's
+  constructor `0x020460B0`, virtual table `0x0214BA70`). Its message 0x4B5 of `Msg/TmdMiniContentsMsgJP_LZ.bin`
+  (archive "TBM", file `TBM:/tmd_minicontents_msg_JP.bmg`) introduces a Mii's trip on which the player photographs
+  the travellers at the sights. `StartLoading` draws one of nine destinations, whose archive
+  `Scn/Travel/<name>_LZ.bin` is mounted as "N01" (the table is in the order of the names: France, Hawaii, Hongkong,
+  Italia, Kyoto, Okinawa, Shanghai, Spain, Thai), and shuffles the destination's 4 to 8 sights to take three.
+  Sight n of a destination has its name at message `base + 2n` and its reading at `base + 2n + 1`, the bases from
+  0x4B6 (France) to 0x51A (Thai); 0x522 to 0x531 are the destinations' names and readings.
+- **The three scene ids** give two, one and two travellers (`SceneCast::Choose`). Scene 0x77 also loads the
+  `N00:/*_hm.*` graphics (the scene archive is `Scn/Scene/SceneTestNg116_LZ.bin`, "N00") and dresses the pair for
+  the destination: a table of nine pairs of clothes ids, the first for a man and the second for a woman, by the
+  first traveller's sex (`MiiData_GetSex`), stored in `CharacterRecord::mClothesId`. Its departure plays sequence
+  archive entry 14 where the others play 13.
+- **The flow** (`SetState`, `Update`, 21 states): a start button; the upper screen (`BG_airplane`) fades out; then for
+  each photograph the sight's picture (`N01:/BG_0<n>.ncg/.ncl/.nsc`, the digit put into a copy of the name) fades
+  in, the first traveller says "<sight> desu" (message 0x4AE, the sight's name in the speech window and its reading
+  in the spoken text), the shutter button appears and the player's "say cheese" (0x4B0) is spoken with the voice
+  of a resident drawn at random; when its frame comes (from that resident's `mVoice[4]`: `(v - 50) * 220 / 250 +
+  40`) the travellers blend into random poses ('BCA0' animations 1-4 and 10-13 together, or 5-9 each), and the
+  shutter plays sequence archive entry 15 and a white flash (`func_02023f4c` from 16 down), with faces 6 or 1. A
+  "next" button follows the first two photographs, a wait the third; then a return button, and the scene fades and
+  asks for scene 0x40. It also stores a per-destination halfword (0xB6, 0xC3, 0xD9, 0xC2, 0xC4 to 0xC8) at
+  `gSceneMemory` +0x2C (not identified): overlays 68, 75, 84 and 85 read that halfword (84 when the previous scene
+  was 0x40), and 28, 52, 53 and 75 write it too.
+- **The caption** (`Scn/Scene/NgCaption_LZ.bin`, archive "SFL", `SFL:/caption.ncg/.nsc`, loaded for plane mask 2) is a
+  MessageText centred at (128, 14) with message 0x4B2 ("<name>'s") or 0x4AD ("<name> and <name>'s"), the names from
+  `SceneCast`'s speech texts, with a shadow on four sides (0xAA).
+
+Inferred, for the other scenes that mount `NgCaption` and the mini-contents messages (about sixty overlays, 7 to
+63 among them): they share this shape, which the constructors in the main program show (overlay 40's has the
+same members in the same order): the characters (`SceneCharacter[n]`), a `SceneCast` right after them, a few ints
+and a `char[0x82]` Shift JIS buffer, the `TtsPlayer`, buttons, one `MessageFile`, a `SpeechWindow` with 0x84 bytes
+after it, a `MessageText` that only expands the spoken message, and the caption. Overlay 39's `Speak(speaker,
+message, mode)` (show the message in the speech window for 120 frames, set `SceneCast`'s speaker and face 1, give
+the speech engine the speaker's voice unless it is -1, expand the message, convert it to Shift JIS and speak it)
+and the `SetState`/`mState`/`mFrame` pair are likely to recur. Every caller of `SceneCast::UpdateCharacters`
+passes 1 (overlays 7, 20, 39, 40, 50 and 63 checked), so it takes an int.
+
+Not done: marking the unit complete. It calls `CharacterBase::SetFace`, `Character::SetAngle`, `SetAnimation`,
+`BlendToAnimation`, `Draw`, `Update`, `SetVisible`, `CharacterModel::GetJointMatrices`,
+`SpeechWindow::SetMessageArg` and `SceneManager::RequestScene` by the names gap66-a's and gap38-a's branches give
+them; main's `symbols.txt` still has `Character_SetFace` and the like, which complete overlays call. Once those
+renames are on main the unit can be marked `complete`; nothing else is missing.
+
 ## The settings and the mansion information
 
 Overlay 99, `src/overlays/ov099/InformationScene.cpp`: all 10 functions and its data match, and the unit is
