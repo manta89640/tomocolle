@@ -2411,7 +2411,7 @@ NNS_G2dAddRendererTargetSurface kind:function(arm,size=0x10) addr:0x0205b844
 NNS_G2dInitRenderSurface kind:function(arm,size=0x5c) addr:0x0205b854
 NNS_G2dBeginRendering kind:function(arm,size=0xa8) addr:0x0205b8b0
 NNS_G2dEndRendering kind:function(arm,size=0x6c) addr:0x0205b958
-NNS_G2dDrawCell kind:function(arm,size=0x68) addr:0x0205b9c4
+NNS_G2dDrawCellAnimation kind:function(arm,size=0x68) addr:0x0205b9c4
 NNS_G2dPushMtx kind:function(arm,size=0x224) addr:0x0205ba2c
 NNS_G2dPopMtx kind:function(arm,size=0x50) addr:0x0205bc50
 NNS_G2dTranslate kind:function(arm,size=0xfc) addr:0x0205bca0
@@ -5628,8 +5628,9 @@ gText_Gatsu kind:data(any) addr:0x02111dd4
 gText_Hi kind:data(any) addr:0x02111ddc
 data_02111de0 kind:data(any) addr:0x02111de0
 gText_Chi kind:data(any) addr:0x02111df4
-firstSRTransformedMtxIdx_ kind:data(any) addr:0x02111dfc
-mtxI_ kind:data(any) addr:0x02111e04
+firstSRTransformedMtxIdx_ kind:data(any) addr:0x02111dfc local
+currenVramTransferHandle_ kind:data(any) addr:0x02111e00 local
+mtxI_ kind:data(any) addr:0x02111e04 local
 zOffsetStep_ kind:data(any) addr:0x02111e1c
 NNS_GfdDefaultFuncAllocTexVram kind:data(word) addr:0x02111e20
 NNS_GfdDefaultFuncFreeTexVram kind:data(word) addr:0x02111e24
@@ -6611,18 +6612,17 @@ data_02140e54 kind:bss addr:0x02140e54
 data_02140e94 kind:bss addr:0x02140e94
 data_02140f94 kind:bss addr:0x02140f94
 data_02141394 kind:bss addr:0x02141394
-currentMtxCachePos_ kind:bss addr:0x021413d4
-fxZStack_ kind:bss addr:0x021413e4
-data_02141464 kind:bss addr:0x02141464
-data_02141468 kind:bss addr:0x02141468
-data_02141564 kind:bss addr:0x02141564
-data_02141574 kind:bss addr:0x02141574
-data_02141578 kind:bss addr:0x02141578
-mtxStackFor2DHW_ kind:bss addr:0x02141864
-mtxCacheBuffer_ kind:bss addr:0x02141b64
-data_02141ed4 kind:bss addr:0x02141ed4
-data_02141f64 kind:bss addr:0x02141f64
-data_02141f68 kind:bss addr:0x02141f68
+currentMtxCachePos_ kind:bss(size=0x2) addr:0x021413d4 local
+groupID_ kind:bss(size=0x2) addr:0x021413d6 local
+bDonotUseSRTransform kind:bss(size=0x4) addr:0x021413d8 local
+pCurrentInstance_ kind:bss(size=0x4) addr:0x021413dc local
+stackPos_ kind:bss(size=0x4) addr:0x021413e0 local
+fxZStack_ kind:bss(size=0x80) addr:0x021413e4 local
+mtxStateStack_ kind:bss(size=0x100) addr:0x02141464 local
+mtxStack_ kind:bss(size=0x300) addr:0x02141564 local
+mtxStackFor2DHW_ kind:bss(size=0x300) addr:0x02141864 local
+mtxCacheBuffer_ kind:bss(size=0x400) addr:0x02141b64 local
+mcRenderState_ kind:bss(size=0x408) addr:0x02141f64 local
 s_pTaskRegisterFunc kind:bss addr:0x0214236c
 s_pUVFlipCorrectFunc kind:bss addr:0x02142378
 NNSi_G2dBGAreaOver kind:bss addr:0x02142394

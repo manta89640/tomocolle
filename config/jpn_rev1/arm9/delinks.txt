@@ -647,7 +647,10 @@ lib/NitroSystem/libraries/g2d/src/g2d_CellAnimation.c:
     .text       start:0x0205aa5c end:0x0205abe0
 
 lib/NitroSystem/libraries/g2d/src/g2d_Renderer.c:
+    complete
     .text       start:0x0205abe0 end:0x0205c030
+    .data       start:0x02111dfc end:0x02111e1c
+    .bss        start:0x021413d4 end:0x0214236c
 
 lib/NitroSystem/libraries/g2d/src/internal/g2di_Mtx32.c:
     complete
