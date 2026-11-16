@@ -83,7 +83,7 @@ func_ov079_0214fba0 kind:function(arm,size=0x9c) addr:0x0214fba0
 func_ov079_0214fc3c kind:function(arm,size=0x98) addr:0x0214fc3c
 func_ov079_0214fcd4 kind:function(arm,size=0x1c) addr:0x0214fcd4
 func_ov079_0214fcf0 kind:function(arm,size=0x20c) addr:0x0214fcf0
-func_ov079_0214fefc kind:function(arm,size=0x3c) addr:0x0214fefc
+_ZN13RankingObjectC1Ev kind:function(arm,size=0x3c) addr:0x0214fefc
 func_ov079_0214ff38 kind:function(arm,size=0x28) addr:0x0214ff38
 func_ov079_0214ff60 kind:function(arm,size=0x3c) addr:0x0214ff60
 func_ov079_0214ff9c kind:function(arm,size=0x14c) addr:0x0214ff9c
@@ -122,9 +122,9 @@ gStr_SRK_Fw_condition_nsc kind:data(any) addr:0x02150700
 __sinit_ov079_021507e0 kind:function(arm,size=0xb4) addr:0x021507e0
 .p__sinit_ov079_021507e0 kind:data(word) addr:0x02150894
 data_ov079_021508a0 kind:data(any) addr:0x021508a0
-data_ov079_021508bc kind:data(any) addr:0x021508bc ambiguous
-data_ov079_021508e0 kind:data(any) addr:0x021508e0 ambiguous
-data_ov079_02150908 kind:data(any) addr:0x02150908 ambiguous
+_ZTV12RankingScene kind:data(any) addr:0x021508b4
+_ZTV13RankingPieceB kind:data(any) addr:0x021508d8
+_ZTV13RankingPieceA kind:data(any) addr:0x02150900
 data_ov079_02150928 kind:data(any) addr:0x02150928
 gStr_TTM_ov079 kind:data(any) addr:0x0215097c
 gStr_Msg_TmdContentsMsgJP_LZ_bin_ov079 kind:data(any) addr:0x02150980

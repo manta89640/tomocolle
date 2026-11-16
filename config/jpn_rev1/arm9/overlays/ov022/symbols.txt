@@ -8,7 +8,7 @@ func_ov022_02149f40 kind:function(arm,size=0x38) addr:0x02149f40
 func_ov022_02149f78 kind:function(arm,size=0x40) addr:0x02149f78
 data_ov022_02149fb8 kind:data(any) addr:0x02149fb8
 data_ov022_02149fd4 kind:data(any) addr:0x02149fd4
-data_ov022_0214a008 kind:data(any) addr:0x0214a008 ambiguous
+_ZTV7Scene45 kind:data(any) addr:0x0214a000
 gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov022 kind:data(any) addr:0x0214a024
 gText_Comma_ov022 kind:data(any) addr:0x0214a040
 gText_Tomoushimasu kind:data(any) addr:0x0214a050

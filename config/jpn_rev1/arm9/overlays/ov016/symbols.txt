@@ -13,8 +13,8 @@ data_ov016_0214a4c0 kind:data(any) addr:0x0214a4c0
 gStr_P01_ov016 kind:data(any) addr:0x0214a4cc
 gStr_P01_stomach_imd kind:data(any) addr:0x0214a4d0
 gStr_Mdl_Misc_stomach_3D_LZ_bin kind:data(any) addr:0x0214a4e4
+_ZTV7Scene3B kind:data(any) addr:0x0214a500
 data_ov016_0214a504 kind:data(any) addr:0x0214a504 ambiguous
-data_ov016_0214a508 kind:data(any) addr:0x0214a508 ambiguous
 gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov016 kind:data(any) addr:0x0214a524
 gStr_3IM_ov016 kind:data(any) addr:0x0214a540
 gStr_SBG_ov016 kind:data(any) addr:0x0214a544

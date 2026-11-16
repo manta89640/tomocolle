@@ -14,7 +14,7 @@ data_ov082_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
 gStr_M00_Window_common_nsc_ov082 kind:data(any) addr:0x0214a8cc
 data_ov082_0214a90c kind:data(any) addr:0x0214a90c ambiguous
 data_ov082_0214a914 kind:data(any) addr:0x0214a914
-data_ov082_0214a948 kind:data(any) addr:0x0214a948 ambiguous
+_ZTV7Scene33 kind:data(any) addr:0x0214a940
 gStr_M00_ov082 kind:data(any) addr:0x0214a964
 gStr_Scn_Scene_SceneCollectBills_LZ_bin_ov082 kind:data(any) addr:0x0214a968
 data_ov082_0214a988 kind:data(any) addr:0x0214a988 ambiguous

@@ -65,6 +65,8 @@ void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
 
 // The scene manager.
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -72,28 +74,19 @@ struct SceneManager {
 
 extern "C" {
 extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 }
 
 // --- The message window's parts ---
-
-// A style of a window button (what the four numbers are is not known)
-struct WindowButtonStyle {
-    /* 0x0 */ int mUnknown0;
-    /* 0x4 */ int mUnknown4;
-    /* 0x8 */ int mUnknown8;
-    /* 0xC */ int mUnknownC;
-};
 
 extern "C" {
 // Adds a button with a text: (.., number, .., two sprite sequences, position, size, the text's message file and
 // message, font, plane, character offset, style, ..)
 void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                   int *charOffset, const WindowButtonStyle *style, int b);
+                   int *charOffset, const ButtonSounds *style, int b);
 // Adds a button without a text
 void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
-                   WindowPoint size, const WindowButtonStyle *style, int b);
+                   WindowPoint size, const ButtonSounds *style, int b);
 // Sets the window's message text up
 void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint position, WindowPoint margin, int *charOffset);
@@ -178,6 +171,15 @@ struct CharacterRecord {
 
 // One saved character (a resident): the record and what the game keeps beside it.
 struct SavedCharacter : public CharacterRecord {
+    // The main program's functions (include/character/Character.h)
+    s8 GetPersonality();
+    u8 GetSongSlot(int slot); // The saved song of a slot, 0xFF for none
+    void SetSongSlot(int slot, u8 song);
+    BOOL IsMiiFromThisConsole();
+    void MakeVisitor();
+    void Register();
+    void Reset();
+
     SavedCharacter(); // func_020979c0
     u16 GetIndex() { return mIndex; }
 
@@ -202,6 +204,10 @@ struct ModelBase {
 }; // 0xE0
 
 struct CharacterModel : public ModelBase {
+    // The main program's functions (include/character/Character.h)
+    void MakeModel(int resourceId, int unk);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x18];
     /* 0x104 */ int mAnimId; // The current 'BCA0' animation
@@ -213,6 +219,9 @@ struct CharacterModel : public ModelBase {
 
 // The character as the main program draws it (func_0208fcf8 is its constructor).
 struct CharacterBase : public SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    void MakeFace();
+
     /* 0x02C0 */ u8 mUnknown02C0[8];
     /* 0x02C8 */ int mUnknown02C8;
     /* 0x02CC */ u8 mUnknown02CC[0x2318];
@@ -237,21 +246,7 @@ struct ModelAnimation {
     /* 0x14 */ BOOL mFinished;
 };
 ModelAnimation *AnimModel_FindAnimation(CharacterModel *model, u32 resType, int id);
-void func_02090fdc(SceneCharacter *character, int slot, int param2, int param3);
-void func_02091048(SceneCharacter *character, const char *archiveName);
-void func_02091968(SceneCharacter *character); // Draws it
-void Character_SetAnimation(SceneCharacter *character, u32 resType, int id); // Starts an animation
-void func_020919e8(SceneCharacter *character, u32 resType, int id);
-void func_020919a0(SceneCharacter *character, fx32 speed);
-void func_02091a14(SceneCharacter *character, BOOL visible);
-void func_0208fefc(SceneCharacter *character);
-void func_02091a24(SceneCharacter *character);
-void func_02091a88(SceneCharacter *character);
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(SceneCharacter *character);
-void func_0208ef00(CharacterModel *model, int a, int b);
-void func_0208ef5c(CharacterModel *model, int resourceId, int a);
-void func_020979e0(SavedCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
 struct MiiData;
@@ -265,7 +260,6 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 
 
 extern "C" {
-void func_0203206c(void *button);
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
@@ -274,10 +268,6 @@ void func_0201f508(wchar_t *text);
 void func_02036bb4(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
 int NFL_GetCharInfo(void *buffer);
-void func_02097c64(SavedCharacter *character);
-void Character_ResetSoundPhase(SceneCharacter *character, int slot);
-void Character_PlaySoundAtAnimPhase(SceneCharacter *character, int slot, int player, int seqArcNo, int index,
-                                    int phaseMask);
 }
 
 // --- 3D ---
@@ -334,22 +324,38 @@ void func_0202ad84(void *resources);
 
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---
 
-struct ListView {
+struct MiiListPanel {
+    void Init(int pageSize);
+    void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitTexts(int plane, WindowPoint position, int *charOffset);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void ResetScrollButtons();
+    void SetScrollUnknown(BOOL value);
+
     /* 0x0000 */ u8 mUnknown0000[0x9464];
     /* 0x9464 */ int mUnknown9464;
     /* 0x9468 */ u8 mUnknown9468[0x10];
 }; // 0x9478
+typedef MiiListPanel ListView; // include/list/MiiList.h has the main program's classes
 
 extern "C" {
-void func_020a3634(ListView *view);
-void func_020a3658(ListView *view, BOOL a);
 }
 
-struct ListPages {
+struct MiiListTabs {
+    void Init(int resource, int sequence);
+
     /* 0x0000 */ u8 mUnknown0000[0x5158];
 }; // 0x5158
+typedef MiiListTabs ListPages;
 
-struct ResidentList {
+struct MiiList {
+    void Update();
+    BOOL RemoveSelected();
+    void Init(MiiListPanel *panel, MiiListTabs *tabs);
+    void Draw();
+    void Load();
+    void Sort(int sortKey, BOOL selectFirst);
     SavedCharacter *GetSelected() { return &mResidents[mSelected]; }
 
     /* 0x00000 */ SavedCharacter mResidents[100];
@@ -362,45 +368,28 @@ struct ResidentList {
     /* 0x1139C */ int mUnknown1139C;
     /* 0x113A0 */ u8 mUnknown113A0[8];
 }; // 0x113A8
+typedef MiiList ResidentList;
 
 extern "C" {
-void func_020a03e8(ResidentList *list, ListView *view, ListPages *pages);
-void func_020a05dc(ResidentList *list);
-void func_020a0454(ResidentList *list);
-void func_020a05b8(ResidentList *list); // Draws it
-void func_020a123c(ResidentList *list, int a, int b);
-void func_020a1fe0(ListView *view, int a);
 void func_020a2104(ListView *view, int a, int b);
-void func_020a2118(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
 void func_020a23cc(ListView *view, int a, int b, WindowPoint c);
-void func_020a2280(ListView *view, int plane, WindowPoint a, int *charOffset);
-void func_020a258c(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
-void func_020a2644(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
 void func_020a26fc(ListView *view, int a, int b, int c, int d, int e, int f, WindowPoint g, ScreenRect h);
 void func_020a27dc(ListView *view, int a, int b, int c);
-void func_020a380c(ListPages *pages, int a, int b);
 }
 
-// --- Window buttons ---
+// --- Window buttons (the others are in SpriteButton.h) ---
 
 extern "C" {
-void func_02031260(WindowButton *button, int a);
-void func_02031278(WindowButton *button, int a, int b);
-void func_02031eb0(WindowButton *button, int x, int y);
-void func_02032158(WindowButton *button, const WindowButtonStyle *style);
-void func_0203119c(WindowButton *button);
-int func_02031f58(WindowButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                  int charOffset);
 void func_02031e88(void *button, int a);
 void func_02031228(void *sprite);
-BOOL func_0203133c(void *button);
 }
 
 // --- Items (main program) ---
 
-class InventoryItem {
+// What the player owns of an item (include/item/Item.h has the main program's classes)
+class Item {
 public:
-    BOOL Add(int count); // func_0209ed84
+    BOOL Add(int count);
 
     /* 0x00 */ void *mVtable;
     /* 0x04 */ u16 mId;
@@ -409,33 +398,29 @@ public:
     /* 0x10 */ int mCount;
 }; // 0x14
 
-// One kind of clothes the player owns or not (func_0209e168 constructs it). That these are the clothes is
-// inferred: the wireless scene gives item 0x113 or 0x114 with the messages "got a DS T-shirt" and "got a Wii
-// T-shirt" (etc messages 0x124 and 0x125).
-class ClothesItem : public InventoryItem {
+// One kind of clothes the player owns or not. The wireless scene gives item 0x113 or 0x114 with the messages "got
+// a DS T-shirt" and "got a Wii T-shirt" (etc messages 0x124 and 0x125).
+class ClothesItem : public Item {
 public:
-    ClothesItem(); // func_0209e168
+    ClothesItem();
 
     /* 0x14 */ int mUnknown14;
 }; // 0x18
 
-// The clothes, loaded from and saved to the save data together (func_0209e248 and func_0209e310).
-struct ClothesInventory {
+// The clothes, loaded from and saved to the save data together.
+class ClothesList {
+public:
+    void Load();
+    void Save();
+
     /* 0x0000 */ int mCount;
     /* 0x0004 */ ClothesItem mItems[300];
     /* 0x1C24 */ ClothesItem *mList[300];
 }; // 0x20D4
 
-extern "C" {
-void func_0209e248(ClothesInventory *inventory); // Loads it
-void func_0209e310(ClothesInventory *inventory); // Saves it
-}
-
 // --- Songs (main program) ---
 
 extern "C" {
-int func_0209c718(CharacterRecord *character, int slot);          // The saved song of a slot, 0xFF for none
-void func_0209c73c(CharacterRecord *character, int slot, int song);
 u8 func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
 void func_0202c920(GameData *game, int song, void *buffer);
 void func_0202c934(GameData *game, int song, void *buffer);
@@ -451,12 +436,9 @@ BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being writte
 BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
 int NFL_IsMiiCreateIdBit7Clear(CharacterRecord *character);
 int NFL_AreMiiCreateIdsEqual(CharacterRecord *a, CharacterRecord *b);
-int func_02098584(CharacterRecord *character);
 int MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
-void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
-void func_020a0664(ResidentList *list);
 void MiiTransfer_SendMii(int index);
 }
 
@@ -496,45 +478,16 @@ const u16 *MiiTransfer_GetParentUserGameInfo(int i);
 
 // --- Wireless (main program) ---
 
-struct WirelessManager {
-    /* 0x00 */ int mUnknown00;
-    /* 0x04 */ int mUnknown04;
-    /* 0x08 */ int mUnknown08;
-    /* 0x0C */ int mUnknown0C;
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ int mUnknown14;
-    /* 0x18 */ int mPageAfterSave;
-    /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
-};
+#include "wireless/WirelessSession.h"
+
 
 extern "C" {
-extern WirelessManager *data_0213b700;
-void func_0203b76c(WirelessManager *manager, int a);
-int func_0203b800(WirelessManager *manager);
-void func_0203b7e8(WirelessManager *manager);
-void func_0203b87c(WirelessManager *manager);
-void func_0203b900(WirelessManager *manager, int a);
-void func_0203b940(WirelessManager *manager, int a);
-void func_0203b968(WirelessManager *manager, int a);
-int func_0203b9c4(WirelessManager *manager);
-void func_0203bac4(WirelessManager *manager, int parent);
 void MiiTransfer_Start(void);
 void MiiTransfer_Cut(void);
 void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
-void func_0203b8b4(WirelessManager *manager, int a);
 void MiiTransfer_Update(void);
-void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
-void func_0203b7e0(WirelessManager *manager, void *buffer);
-void func_0203b898(WirelessManager *manager);
-void func_0203b908(WirelessManager *manager);
-void func_0203b948(WirelessManager *manager);
-BOOL func_0203b970(WirelessManager *manager);
-BOOL func_0203b9b4(WirelessManager *manager);
-void func_0203b9fc(WirelessManager *manager);
-int func_0203ba10(WirelessManager *manager);
-void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
 void MiiTransfer_Init(void *a, void *miiData, int count);
 void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));
@@ -665,7 +618,7 @@ public:
     /* 0x2A97C */ MessageWindow mListWindow;
     /* 0x35920 */ u8 mSortKey;
     /* 0x35924 */ int mUnknown35924;
-    /* 0x35928 */ WindowButton mButtons[3];
+    /* 0x35928 */ TextButton mButtons[3];
     /* 0x36DF8 */ Sprite mSprite;
     /* 0x36EA4 */ int mCharOffset;
     /* 0x36EA8 */ int mUnknown36EA8;

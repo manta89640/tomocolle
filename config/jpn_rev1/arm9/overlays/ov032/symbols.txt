@@ -6,7 +6,7 @@ func_ov032_02149fdc kind:function(arm,size=0x74) addr:0x02149fdc
 func_ov032_0214a050 kind:function(arm,size=0x344) addr:0x0214a050
 func_ov032_0214a394 kind:function(arm,size=0xe8) addr:0x0214a394
 func_ov032_0214a47c kind:function(arm,size=0xf0) addr:0x0214a47c
-data_ov032_0214a588 kind:data(any) addr:0x0214a588 ambiguous
+_ZTV7Scene54 kind:data(any) addr:0x0214a580
 data_ov032_0214a5a4 kind:data(any) addr:0x0214a5a4
 data_ov032_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
 gStr_FAN_ov032 kind:data(any) addr:0x0214a5c0

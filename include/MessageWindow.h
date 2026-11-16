@@ -5,41 +5,26 @@
 #include <nnsys.h>
 
 #include "Sprite.h"
+#include "SpriteButton.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
 
 // A size or a position in pixels, as the message window's functions take it (by value, in two registers).
-struct ButtonSounds; // SpriteButton.h
-
 struct WindowPoint {
     /* 0x0 */ int x;
     /* 0x4 */ int y;
 };
 
-// One of the message window's buttons. A stand-in: it starts with a sprite, which the scenes hide by its mVisible.
-struct WindowButton {
-    /* 0x000 */ Sprite mSprite;
-    /* 0x0AC */ u8 mUnknown0AC[0x30];
-    /* 0x0DC */ int mUnknown0DC;
-    /* 0x0E0 */ u8 mUnknown0E0[0x78];
-    /* 0x158 */ int mUnknown158;
-    /* 0x15C */ u8 mUnknown15C[0x590];
-    /* 0x6EC */ BOOL mMoveText; // As TextButton's (func_02031f1c constructs both)
-}; // 0x6F0
-
-// One of the message window's sprites (func_0203117c constructs it). A stand-in: it starts with a sprite.
-struct WindowSprite {
-    /* 0x000 */ Sprite mSprite;
-    /* 0x0AC */ u8 mUnknown0AC[0x34];
-    /* 0x0E0 */ int mUnknownE0; // As SpriteButton's (func_0203117c constructs both)
-    /* 0x0E4 */ u8 mUnknown0E4[0x10];
-}; // 0xF4
+struct MessageWindow;
+extern "C" void func_02034fc8(MessageWindow *window, int text, int x, int y);
 
 // The main program's message window (virtual table data_021102e8, functions func_02032fb8 to func_02034f94): a
 // window on a background that slides in and out, with sprites, buttons and up to eight message texts. Not
-// decompiled: a stand-in with its size, as the constructors of the scenes that hold one show it (they construct
-// its members in place: the window's constructor is inlined there), and the fields that the scenes touch. Overlay
-// 73's header has the same stand-in.
+// decompiled: a stand-in with its size, as the constructors of the scenes that hold one show it, and the fields that
+// the scenes touch. Its constructor is inline: the scenes' constructors (main program, after CreateScene) store its
+// table and construct its sprites, buttons and texts in place, in loops, as the one below compiles. It has no
+// destructor: arrays of windows are constructed by such loops, not by __cxa_vec_ctor. Overlay 73's header has
+// the same stand-in.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 struct MessageWindow {
@@ -59,9 +44,18 @@ struct MessageWindow {
         BUTTON_NO,  // "いいえ", common message 3
     };
 
-    /* 0x0000 */ void *mVtable;
-    /* 0x0004 */ WindowSprite mSprites[12];
-    /* 0x0B74 */ WindowButton mButtons[16]; // Constructed by func_02031f1c
+    MessageWindow() {}
+
+    // Where a text of the window is
+    void SetTextPosition(int text, WindowPoint position) { func_02034fc8(this, text, position.x, position.y); }
+
+    // Its table (0x021102E0) has these two
+    virtual void SetVisible(BOOL visible); // func_02034a94: of every sprite, button, text and plain sprite, and its planes
+    virtual void func_02034bc4();         // Not known: it takes more arguments than four
+
+    /* 0x0000 */ // The table
+    /* 0x0004 */ SpriteButton mSprites[12];
+    /* 0x0B74 */ TextButton mButtons[16];
     /* 0x7A74 */ MessageText mTexts[8];
     /* 0xA9F4 */ Sprite mPlainSprites[5];  // Sprites without a button: func_020345d8 draws as many as +0xAD64 says
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
@@ -73,7 +67,9 @@ struct MessageWindow {
     /* 0xAF8C */ BOOL mTransitionDone;      // func_02034720 clears it; set when the window has finished moving
     /* 0xAF90 */ int mUnknownAF90;
     /* 0xAF94 */ int mUnknownSetBeforeClose; // The scenes set it (5 or 15) before func_020349cc; the update reads it
-    /* 0xAF98 */ u8 mUnknownAF98[0xC];
+    /* 0xAF98 */ int mUnknownAF98;          // The main program's list scenes keep there what to do when it has closed
+    /* 0xAF9C */ int mUnknownAF9C;          // The island map sets it (0 or 1) as it opens its title window
+    /* 0xAFA0 */ int mUnknownAFA0;
 }; // 0xAFA4
 
 extern "C" {

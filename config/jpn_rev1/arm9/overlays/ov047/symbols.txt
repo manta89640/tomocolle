@@ -27,7 +27,7 @@ data_ov047_0214c030 kind:data(any) addr:0x0214c030
 data_ov047_0214c040 kind:data(any) addr:0x0214c040
 data_ov047_0214c050 kind:data(any) addr:0x0214c050
 data_ov047_0214c060 kind:data(any) addr:0x0214c060
-data_ov047_0214c088 kind:data(any) addr:0x0214c088 ambiguous
+_ZTV14TestNg125Scene kind:data(any) addr:0x0214c080
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov047 kind:data(any) addr:0x0214c0a4
 gStr_M00_ov047 kind:data(any) addr:0x0214c0cc
 gStr_Scn_Scene_SceneTestNg125_LZ_bin kind:data(any) addr:0x0214c0d0

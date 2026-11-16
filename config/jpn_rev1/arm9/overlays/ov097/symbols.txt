@@ -40,7 +40,7 @@ data_ov097_0214af98 kind:data(any) addr:0x0214af98 ambiguous
 data_ov097_0214b020 kind:data(any) addr:0x0214b020
 data_ov097_0214b024 kind:data(any) addr:0x0214b024
 data_ov097_0214b028 kind:data(any) addr:0x0214b028 ambiguous
-data_ov097_0214b044 kind:data(any) addr:0x0214b044 ambiguous
+_ZTV14Marriage2Scene kind:data(any) addr:0x0214b03c
 gStr_M00_ov097 kind:data(any) addr:0x0214b060
 gStr_Scn_Scene_SceneMarriage2_LZ_bin kind:data(any) addr:0x0214b064
 gStr_TBM_ov097 kind:data(any) addr:0x0214b084

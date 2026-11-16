@@ -128,8 +128,13 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
+
     /* 0x000 */ u8 mUnknown000[0x4C];
     /* 0x04C */ RoomDoorModel mDoor;
     /* 0x1A4 */ RoomPart mParts[6];
@@ -143,33 +148,43 @@ struct RoomStyle {
     /* 0x0A */ u8 mUnknown0A[0x4A];
 }; // 0x54
 
-class Room {
+// The interior a room shows (include/room/Room.h has the main program's classes)
+class InteriorItem {
 public:
-    virtual u32 GetStyleUnknown0();
+    virtual u32 GetPrice();
+    GXRgb GetLightColor(); // The room's light colour now
 
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+}; // 0x14
+
+class Room : public InteriorItem {
+public:
+    void Mount(const char *archiveName, int unk);
+    void MountModel(int unk);
+    void Load(int resourceId);
+    void Reload(int resourceId);
+    void MountAll(const char *archiveName, int unk);
+    void MountPartModels(int unk);
+    void LoadParts(int resourceId);
+    void ReloadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+    void SetScale(fx32 scale);
+
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a4ab8(RoomParts *parts, int state);
-void func_020a4a50(RoomParts *parts); // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
-u16 func_020a4d90(Room *room); // The room's light colour now
 }
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
-    SavedCharacter(); // func_020979c0
+    SavedCharacter();
+    s8 GetPersonality(); // Computes its personality (0 to 15) from its answers
 
     /* 0x0000 */ u8 mUnknown0000[0x54];
     /* 0x0054 */ u32 mUnknown0054Bits0 : 4;
@@ -185,11 +200,16 @@ struct SavedCharacter {
     /* 0x023B */ u8 mUnknown023B[0x69];
     /* 0x02A4 */ u16 mIndex;          // Which of the saved characters this is
     /* 0x02A6 */ u8 mUnknown02A6[0x16];
-    /* 0x02BC */ s8 mPersonality;     // What func_02098f2c computes
+    /* 0x02BC */ s8 mPersonality;     // What GetPersonality computes
 }; // 0x2C0
 
-// The character as the main program draws it (func_0208fcf8 is its constructor).
+// The character with its Mii face (include/character/Character.h has the class).
 struct CharacterBase : public SavedCharacter {
+    void MakeFace();
+    void SetFace(int kind);
+    void LipSync(const char *phoneme, int face); // Opens the mouth (face 7) while the phoneme is a vowel or 'w'
+    BOOL ClampHeadAngle(u16 *angle, int limit);  // Clamps an angle of the head to +-limit
+
     /* 0x02C0 */ u8 mUnknown02C0[0x2250];
     /* 0x2510 */ BOOL mHeadTurnActive; // The head is turning to mHeadPitch/mHeadYaw
     /* 0x2514 */ u8 mUnknown2514[0xC0];
@@ -205,6 +225,11 @@ struct CharacterBase : public SavedCharacter {
 // The model of a character with its animations and joints (func_0208eb18 constructs it).
 class CharacterModel : public AnimModel {
 public:
+    // The matrix of one of the model's joints, and its rotation
+    void GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation);
+    // The position of one of the model's joints (0 is the head, 1 and 2 the hands)
+    VecFx32 GetJointPosition(int joint);
+
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x18];
     /* 0x104 */ int mAnimId; // The current 'BCA0' animation
@@ -215,19 +240,26 @@ public:
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-extern "C" {
-// The position of one of the model's joints (0 is the head, 1 and 2 the hands)
-VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
-// The matrix of one of the model's joints, and its rotation
-void CharacterModel_GetJointMatrices(CharacterModel *model, int joint, MtxFx43 *matrix, MtxFx33 *rotation);
-}
 
-// The main program's character class that the scenes derive theirs from (0x2B18 bytes).
+// The main program's character class that the scenes derive theirs from (0x2B18 bytes; include/character/Character.h
+// has the class, whose second base, CharacterModel, is mModel here).
 class Character : public CharacterBase {
 public:
+    void Init(int resourceId, int unk, u32 defaultMii);
+    void SetArchive(const char *archiveName);
+    void Update();
+    void UpdateSpeedScales();
+    void Draw();
+    void SetAnimation(u32 resType, int id);
+    void BlendToAnimation(u32 resType, int id);
+    void SetAngle(u16 angle);
+    void UpdateBodyScale();
+    void UpdateAnimSpeed();
+    void UpdateBodyColors();
+
     /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];  // Name its archive is mounted under (func_02091048 sets both)
+    /* 0x2AAC */ char mArchiveName[4];  // Name its archive is mounted under (Character::SetArchive sets both)
     /* 0x2AB0 */ char mArchivePath[0x1C]; // and the archive's path
     /* 0x2ACC */ char mModelPath[0x20];   // The model in the archive
     /* 0x2AEC */ u8 mUnknown2AEC[0x1E];
@@ -236,22 +268,6 @@ public:
 }; // 0x2B18
 
 extern "C" {
-void Character_SetFace(Character *character, int face);
-void Character_SetAngle(Character *character, u16 angle);
-void func_02090a58(Character *character, const char *phoneme, int face); // Lip sync
-BOOL func_02090c78(Character *character, u16 *angle, int limit);        // Clamps an angle of the head
-void func_02090fdc(Character *character, int slot, int param2, int param3);
-void func_02091048(Character *character, const char *archiveName);
-void func_020910a8(Character *character);
-void func_020910d4(Character *character);
-void func_02091968(Character *character); // Draws it
-void Character_SetAnimation(Character *character, u32 resType, int id); // Starts an animation
-void func_020919e8(Character *character, u32 resType, int id); // Starts an animation
-void func_0208fefc(Character *character);
-void func_02091a24(Character *character);
-void func_02091a6c(Character *character);
-void func_02091a88(Character *character);
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
@@ -273,40 +289,37 @@ class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
+    BOOL Add(int count); // _ZN4Item3AddEi (include/item/Item.h has the main program's classes)
 
-class InventoryItem : public Item {
-public:
-    BOOL Add(int count); // func_0209ed84
-
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
 }; // 0x14
 
+class InventoryItem : public Item {}; // 0x14
+
 // The player's items: what the save data holds of each kind, loaded and saved together.
 class Inventory {
 public:
-    void Load(); // func_0209ee28
-    void Save(); // func_0209eef8
+    void Load();
+    void Save();
 
     /* 0x0000 */ int mCount;
     /* 0x0004 */ InventoryItem mItems[255];
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// The 3D model of an item (constructor func_0209f5f0)
+// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
 class ItemModel : public AnimModel {
 public:
-    void SetItem(const char *archiveName, int item); // func_0209f700
-    void LoadModel(int resourceId);                  // func_0209f770
-    void LoadAnimation(int resourceId);              // func_0209f790
-    void ResetScale();                               // func_0209f7fc
-    void SetScale(fx32 scale);                       // func_0209f84c
+    void SetItem(const char *archiveName, int item);
+    void LoadModel(int resourceId);                
+    void LoadAnimation(int resourceId);            
+    void ResetScale();        
+    void SetScale(fx32 scale);
 
     /* 0x0E0 */ Item mItem;
-    /* 0x0E8 */ u8 mUnknownE8[0xC];
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];
@@ -377,6 +390,8 @@ struct ScreenControl {
 };
 
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -419,7 +434,6 @@ void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 dire
 void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_0203c02c(SceneManager *manager, int sceneId);
 void func_0202b0e8(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
@@ -583,7 +597,7 @@ public:
     u16 GetHeadYawTo(VecFx32 *target);
 
     void PlayAnimation(const char *name, BOOL once) {
-        func_020919e8(this, RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mResourceSet, RESOURCE_BCA0, name));
+        Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mResourceSet, RESOURCE_BCA0, name));
         AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, mModel.mAnimId)->mPlayOnce = once;
     }
     VecFx32 GetPos() { return mModel.mPos; }

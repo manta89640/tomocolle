@@ -47,7 +47,7 @@ void DrawManTestScene::Update() {
         NNSG3dResMdl *mdl = mModel.mResMdl;
         NNS_G3D_DEFRESNAME(name, "human01_base_pl");
         NNS_G3dReleaseMdlPlttEx(mdl, &name.resName);
-        NNS_G3dForceBindMdlPltt(mdl, (NNSG3dResTex *)mModel.mUnknown10, 1, 7);
+        NNS_G3dForceBindMdlPltt(mdl, mModel.mResTex, 1, 7);
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
         NNS_GfdDumpFrmTexVramManager();
         func_0205ff40();

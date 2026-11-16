@@ -17,7 +17,7 @@ struct CharacterSpeechTexts {
     /* 0x0BA */ wchar_t mFamilyNameReading[41];  // CharacterRecord::mFamilyName, in the synthesizer's notation
     /* 0x10C */ wchar_t mGivenNameReading[41];   // CharacterRecord::mName, the same
     /* 0x15E */ char mPhraseReadingSjis[0x82];
-    /* 0x1E0 */ wchar_t mPhrase[17];             // CharacterRecord::mSpeechDefault, or "ミニュウリョク" when empty
+    /* 0x1E0 */ wchar_t mPhrase[17];             // CharacterRecord::mMotto, or "ミニュウリョク" when empty
     /* 0x202 */ wchar_t mPhraseReading[65];
     /* 0x284 */ u8 mUnknown284[0xC];
     /* 0x290 */ BOOL mHasPhrase;                 // Whether the character has a phrase of its own

@@ -7,7 +7,7 @@ func_ov049_02149f64 kind:function(arm,size=0x14) addr:0x02149f64
 func_ov049_02149f78 kind:function(arm,size=0xb8) addr:0x02149f78
 func_ov049_0214a030 kind:function(arm,size=0xc0) addr:0x0214a030
 data_ov049_0214a0f0 kind:data(any) addr:0x0214a0f0
-data_ov049_0214a128 kind:data(any) addr:0x0214a128 ambiguous
+_ZTV7Scene8C kind:data(any) addr:0x0214a120
 data_ov049_0214a144 kind:data(any) addr:0x0214a144
 data_ov049_0214a148 kind:data(any) addr:0x0214a148 ambiguous
 gStr_TBM_ov049 kind:data(any) addr:0x0214a16c

@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "MapScene.h"
+#include "MainProgram.h"
 
 // Overlay 72: the island map (MapScene). It is one source file: its small constants share one pool at the start of
 // .rodata that functions throughout the overlay read by offset, its tables of strings share one in .data, and the
@@ -565,7 +566,7 @@ void MapScene::Init() {
     func_02032fb8(&mMessageWindows[1], sTutorialWindowRect);
     func_02033174(&mMessageWindows[1], sWindowDownScreen, 2);
     func_020337b8(&mMessageWindows[1], 0, 1, 0x14, 0x15, sTutorialButtonPosition, sTutorialButtonSize,
-                  &mMessageFiles[0], 4, &gFonts[2].mFont, 0x10, &charOffset, sTutorialButtonUnknown);
+                  &mMessageFiles[0], 4, &gFonts[2].mFont, 0x10, &charOffset, (const ButtonSounds *)sTutorialButtonUnknown);
     func_02033a58(&mMessageWindows[1], &mMessageFiles[1], 0x152, &gFonts[0].mFont, 0x10, sTutorialTextPosition,
                   &charOffset);
     func_02034f94(&mMessageWindows[1], 1);
@@ -668,7 +669,7 @@ void MapScene::Update() {
                 func_020349cc(&mMessageWindows[1], 0x24);
             }
             if (mMessageWindows[1].mTransitionDone) {
-                func_0203c02c(&gSceneManager, 0x69);
+                gSceneManager.RequestScene(0x69);
             }
             break;
         case 0:
@@ -689,7 +690,7 @@ void MapScene::Update() {
         case 20:
             for (int i = 0; i < 3; i++) {
                 if (func_0203133c(&mButtons[i]) && i == 0) {
-                    func_0203c02c(&gSceneManager, 0x69);
+                    gSceneManager.RequestScene(0x69);
                 }
             }
             break;
@@ -805,7 +806,7 @@ void MapScene::Update() {
                 }
                 ClearSceneCharacters();
                 AddNews(news);
-                func_0203c02c(&gSceneManager, 0x46);
+                gSceneManager.RequestScene(0x46);
                 gSoundManager.StartSeqArc(2, 1, 11);
             }
         } else {
@@ -878,7 +879,7 @@ void MapScene::Update() {
                 }
                 ClearSceneCharacters();
                 AddNews(news);
-                func_0203c02c(&gSceneManager, 0x46);
+                gSceneManager.RequestScene(0x46);
                 gSoundManager.StartSeqArc(2, 1, 11);
             }
         }
@@ -919,7 +920,7 @@ void MapScene::Update() {
             break;
         }
         if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
-            func_0203c02c(&gSceneManager, 0x2C);
+            gSceneManager.RequestScene(0x2C);
         }
         BOOL held = FALSE;
         for (int i = 0; i < 3; i++) {
@@ -945,7 +946,7 @@ void MapScene::Update() {
                 if (func_0203133c(&mBackButtons[i])) {
                     if (mCamera.IsAtHome()) {
                         gSceneMemory.mCharacters[0] = 0;
-                        func_0203c02c(&gSceneManager, 0x11);
+                        gSceneManager.RequestScene(0x11);
                     } else {
                         Deselect(TRUE, 1);
                     }
@@ -1106,7 +1107,7 @@ void MapScene::SetState(int state) {
     case STATE_LEAVE_TITLE:
         gSoundManager.StartSeqArc(1, 3, 0);
         if (!func_0202cd54(&gGameData)) {
-            func_0203c02c(&gSceneManager, 0xC2);
+            gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_TUTORIAL:
@@ -1534,7 +1535,7 @@ void MapScene::MakeDailyNews() {
         if (func_0202c3dc(&gGameData, i)) {
             SavedCharacter character;
             func_0202c264(&gGameData, i, &character);
-            if (date.month == func_02098dac(&character, 0x26) && date.day == func_02098dac(&character, 0x27)) {
+            if (date.month == character.GetParameter(0x26) && date.day == character.GetParameter(0x27)) {
                 birthdays[birthdayCount] = i;
                 birthdayCount++;
             } else {
@@ -1634,7 +1635,7 @@ int MapScene::GetWindowTexture(int resident) {
     int row = func_0202c5b4(&gGameData, resident);
     int column = func_0202c58c(&gGameData, resident);
     int kind = data_02114d78[row][column].mUnknown0;
-    if (func_02099c94(event)) {
+    if (SavedCharacter::IsAwayState(event)) {
         return 3;
     }
     if (event == 0x12) {
@@ -1679,16 +1680,16 @@ void MapScene::UpdateWindows() {
 void MapSound::Init(MapClock *clock, int mode) {
     gSoundManager.StartSeqArcIfNotPlaying(0, 3, 4);
     for (int i = 0; i < 4; i++) {
-        mRamps.mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
+        mRamps[0].mRamps[i].mStep = sMusicRampSteps[i] << FX32_SHIFT;
         int value = sModelMusic[0][i] << FX32_SHIFT;
-        mRamps.mRamps[i].mValue = value;
-        mRamps.mRamps[i].mTarget = value;
-        mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[0].mRamps[i].mValue = value;
+        mRamps[0].mRamps[i].mTarget = value;
+        mRamps[0].mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
-    gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps.mRamps[1].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTempoRatio(0, mRamps.mRamps[2].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps.mRamps[3].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcVolume(0, mRamps[0].mRamps[0].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps[0].mRamps[1].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTempoRatio(0, mRamps[0].mRamps[2].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps[0].mRamps[3].mValue >> FX32_SHIFT);
     SetMode(clock, mode);
 }
 
@@ -1703,7 +1704,7 @@ void MapSound::SetMode(MapClock *clock, int mode) {
             gSoundManager.LoadGroup(sSeasonSoundGroups[mSeason]);
             mTimeOfDay = GetTimeOfDay(&clock->mTime);
             StartSurroundings(0, mSeason, mTimeOfDay);
-            mSurroundingRamps.mRamps[0].mValue = 0x7E900;
+            mRamps[1].mRamps[0].mValue = 0x7E900;
         }
         mDayOrNight = GetDayOrNight(&clock->mTime);
         switch (mDayOrNight) {
@@ -1722,7 +1723,7 @@ void MapSound::SetMode(MapClock *clock, int mode) {
         gSoundManager.LoadGroup(sSeasonSoundGroups[mSeason]);
         mTimeOfDay = GetTimeOfDay(&clock->mTime);
         StartSurroundings(0, mSeason, mTimeOfDay);
-        mSurroundingRamps.mRamps[0].mValue = 0x7E900;
+        mRamps[1].mRamps[0].mValue = 0x7E900;
         break;
     case MODE_TUTORIAL:
         mDayOrNight = GetDayOrNight(&clock->mTime);
@@ -1744,14 +1745,14 @@ void MapSound::SetMode(MapClock *clock, int mode) {
 }
 
 void MapSound::Update(MapClock *clock) {
-    mRamps.Update();
-    gSoundManager.SetSeqArcVolume(0, mRamps.mRamps[0].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps.mRamps[1].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTempoRatio(0, mRamps.mRamps[2].mValue >> FX32_SHIFT);
-    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps.mRamps[3].mValue >> FX32_SHIFT);
+    mRamps[0].Update();
+    gSoundManager.SetSeqArcVolume(0, mRamps[0].mRamps[0].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPitch(0, 0xFFFF, mRamps[0].mRamps[1].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTempoRatio(0, mRamps[0].mRamps[2].mValue >> FX32_SHIFT);
+    gSoundManager.SetSeqArcTrackPan(0, 0xFFFF, mRamps[0].mRamps[3].mValue >> FX32_SHIFT);
     if (!(mMode != MODE_START && mMode != MODE_RESTART && mMode != MODE_CONTINUE)) {
-        mSurroundingRamps.Update();
-        int volume = mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT;
+        mRamps[1].Update();
+        int volume = mRamps[1].mRamps[0].mValue >> FX32_SHIFT;
         switch (mSurroundingState) {
         case 0:
             gSoundManager.SetSeqArcVolume(5, volume);
@@ -1802,8 +1803,8 @@ void MapSound::Update(MapClock *clock) {
 
 void MapSound::SetBuilding(int model) {
     for (int i = 0; i < 4; i++) {
-        mRamps.mRamps[i].mTarget = sModelMusic[model][i] << FX32_SHIFT;
-        mRamps.mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[0].mRamps[i].mTarget = sModelMusic[model][i] << FX32_SHIFT;
+        mRamps[0].mRamps[i].SetMode(ValueRamp::MODE_TO_TARGET);
     }
 }
 
@@ -1814,10 +1815,10 @@ void MapSound::Stop() {
 void MapSound::StartSurroundings(int kind, int season, int timeOfDay) {
     switch (kind) {
     case 0: {
-        mSurroundingRamps.mRamps[0].mStep = 0x90;
-        mSurroundingRamps.mRamps[0].mValue = 0;
-        mSurroundingRamps.mRamps[0].mTarget = 0x7E900;
-        mSurroundingRamps.mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[1].mRamps[0].mStep = 0x90;
+        mRamps[1].mRamps[0].mValue = 0;
+        mRamps[1].mRamps[0].mTarget = 0x7E900;
+        mRamps[1].mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
         mLongSound = FALSE;
         gSoundManager.StopSeqArc(5, 0);
         gSoundManager.StopSeqArc(4, 0);
@@ -1825,16 +1826,16 @@ void MapSound::StartSurroundings(int kind, int season, int timeOfDay) {
         for (int i = 0; i < 3; i++) {
             StartSurroundingSound(*sounds++);
         }
-        gSoundManager.SetSeqArcVolume(5, mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT);
+        gSoundManager.SetSeqArcVolume(5, mRamps[1].mRamps[0].mValue >> FX32_SHIFT);
         break;
     }
     case 1: {
-        mSurroundingRamps.mRamps[0].mStep = 0x90;
-        mSurroundingRamps.mRamps[0].mValue = 0x7E900;
-        mSurroundingRamps.mRamps[0].mTarget = 0;
-        mSurroundingRamps.mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
+        mRamps[1].mRamps[0].mStep = 0x90;
+        mRamps[1].mRamps[0].mValue = 0x7E900;
+        mRamps[1].mRamps[0].mTarget = 0;
+        mRamps[1].mRamps[0].SetMode(ValueRamp::MODE_TO_TARGET);
         mLongSound = FALSE;
-        gSoundManager.SetSeqArcVolume(5, mSurroundingRamps.mRamps[0].mValue >> FX32_SHIFT);
+        gSoundManager.SetSeqArcVolume(5, mRamps[1].mRamps[0].mValue >> FX32_SHIFT);
         gSoundManager.StopSeqArc(4, 0x78);
         const u8 *sounds = &sSurroundingSounds[season][timeOfDay * 3];
         for (int i = 0; i < 3; i++) {
@@ -2020,45 +2021,45 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
         switch (button) {
         default:
             if (Rand(2) == 0) {
-                func_0203c02c(&gSceneManager, 0x23);
+                gSceneManager.RequestScene(0x23);
             } else {
-                func_0203c02c(&gSceneManager, 0x81);
+                gSceneManager.RequestScene(0x81);
             }
             break;
         case 1:
-            func_0203c02c(&gSceneManager, 0x23);
+            gSceneManager.RequestScene(0x23);
             break;
         case 2:
-            func_0203c02c(&gSceneManager, 0x81);
+            gSceneManager.RequestScene(0x81);
             break;
         }
         break;
     case 9:
-        func_0203c02c(&gSceneManager, 0x2F);
+        gSceneManager.RequestScene(0x2F);
         break;
     case 4:
-        func_0203c02c(&gSceneManager, 0x68);
+        gSceneManager.RequestScene(0x68);
         break;
     case 6:
-        func_0203c02c(&gSceneManager, 0x5E);
+        gSceneManager.RequestScene(0x5E);
         break;
     case 7:
-        func_0203c02c(&gSceneManager, 0x2A);
+        gSceneManager.RequestScene(0x2A);
         break;
     case 3:
-        func_0203c02c(&gSceneManager, 0x1F);
+        gSceneManager.RequestScene(0x1F);
         break;
     case 11:
-        func_0203c02c(&gSceneManager, 0x1E);
+        gSceneManager.RequestScene(0x1E);
         break;
     case 12:
-        func_0203c02c(&gSceneManager, 0x35);
+        gSceneManager.RequestScene(0x35);
         break;
     case 5:
         if (!IsNewDay()) {
             ClearSceneCharacters();
             if (mFacilities.mResidents < 4) {
-                func_0203c02c(&gSceneManager, 0x57);
+                gSceneManager.RequestScene(0x57);
                 break;
             }
             u32 minutes = mClock.mTime.hour * 60 + mClock.mTime.minute;
@@ -2071,43 +2072,43 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
             }
             switch (kind) {
             case 0:
-                func_0203c02c(&gSceneManager, 0x94);
+                gSceneManager.RequestScene(0x94);
                 break;
             case 1:
-                func_0203c02c(&gSceneManager, 0x3F);
+                gSceneManager.RequestScene(0x3F);
                 break;
             case 2:
-                func_0203c02c(&gSceneManager, 0x95);
+                gSceneManager.RequestScene(0x95);
                 break;
             case 3:
-                func_0203c02c(&gSceneManager, 0x57);
+                gSceneManager.RequestScene(0x57);
                 break;
             case 4: {
                 u32 tens = (u32)mClock.mTime.minute / 10;
                 if (!(tens & 1)) {
-                    func_0203c02c(&gSceneManager, tens + 0x9D);
+                    gSceneManager.RequestScene(tens + 0x9D);
                 } else {
-                    func_0203c02c(&gSceneManager, 0x57);
+                    gSceneManager.RequestScene(0x57);
                 }
                 break;
             }
             }
         } else {
-            func_0203c02c(&gSceneManager, 0x30);
+            gSceneManager.RequestScene(0x30);
         }
         break;
     case 1:
-        func_0203c02c(&gSceneManager, 0x80);
+        gSceneManager.RequestScene(0x80);
         break;
     case 10:
         if (newsDue) {
             MakeDailyNews();
         }
-        func_0203c02c(&gSceneManager, 0x46);
+        gSceneManager.RequestScene(0x46);
         break;
     case MODEL_APARTMENT:
         gSceneMemory.mCharacters[0] = 0;
-        func_0203c02c(&gSceneManager, 0x11);
+        gSceneManager.RequestScene(0x11);
         break;
     }
     int building = sModelBuildings[model];

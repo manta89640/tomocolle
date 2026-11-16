@@ -38,7 +38,7 @@ data_ov089_0214a988 kind:data(any) addr:0x0214a988 ambiguous
 data_ov089_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous
 data_ov089_0214aa28 kind:data(any) addr:0x0214aa28 ambiguous
 data_ov089_0214aac0 kind:data(any) addr:0x0214aac0
-data_ov089_0214aacc kind:data(any) addr:0x0214aacc ambiguous
+_ZTV7Scene56 kind:data(any) addr:0x0214aac4
 gStr_3H0_ov089 kind:data(any) addr:0x0214aae8
 gStr_3H1_ov089 kind:data(any) addr:0x0214aaec
 gStr_3H2_ov089 kind:data(any) addr:0x0214aaf0

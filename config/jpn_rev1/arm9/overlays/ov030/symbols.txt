@@ -11,7 +11,7 @@ gStr_Equals kind:data(any) addr:0x0214a58c
 data_ov030_0214a598 kind:data(any) addr:0x0214a598
 data_ov030_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
 data_ov030_0214a5bc kind:data(any) addr:0x0214a5bc
-data_ov030_0214a5e8 kind:data(any) addr:0x0214a5e8 ambiguous
+_ZTV13TestNg94Scene kind:data(any) addr:0x0214a5e0
 gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov030 kind:data(any) addr:0x0214a604
 gStr_RM0_ov030 kind:data(any) addr:0x0214a620
 gStr_Mdl_Misc_cosmos_3D_LZ_bin kind:data(any) addr:0x0214a624

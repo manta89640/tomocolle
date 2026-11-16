@@ -38,7 +38,7 @@ gStr_Mdl_Map_map2_ground0_3D_LZ_bin_ov093_2 kind:data(any) addr:0x0214b374
 gStr_Mdl_Map_map2_ground1_3D_LZ_bin kind:data(any) addr:0x0214b394
 gStr_Mdl_Map_map2_ground2_3D_LZ_bin_ov093 kind:data(any) addr:0x0214b3b4
 data_ov093_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
-data_ov093_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
+_ZTV7Scene72 kind:data(any) addr:0x0214b3d4
 gStr_KBD_ov093 kind:data(any) addr:0x0214b3f8
 gStr_Cmn_Kbd_SoftKeyboard_LZ_bin_ov093 kind:data(any) addr:0x0214b3fc
 gStr_TBM_ov093 kind:data(any) addr:0x0214b418

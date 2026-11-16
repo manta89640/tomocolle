@@ -30,7 +30,7 @@ gStr_P00_ov055 kind:data(any) addr:0x0214bd80
 gStr_P02_ov055 kind:data(any) addr:0x0214bd84
 gStr_P01_ov055 kind:data(any) addr:0x0214bd88
 data_ov055_0214bd8c kind:data(any) addr:0x0214bd8c
-data_ov055_0214bda0 kind:data(any) addr:0x0214bda0 ambiguous
+_ZTV14TestNg134Scene kind:data(any) addr:0x0214bd98
 data_ov055_0214bda8 kind:data(any) addr:0x0214bda8 ambiguous
 data_ov055_0214bdbc kind:data(any) addr:0x0214bdbc
 data_ov055_0214bdf0 kind:data(any) addr:0x0214bdf0 ambiguous

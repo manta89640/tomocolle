@@ -51,8 +51,8 @@ gStr_P03_ov037 kind:data(any) addr:0x0214c7a4
 gStr_P02_ov037 kind:data(any) addr:0x0214c7a8
 gStr_P00_ov037 kind:data(any) addr:0x0214c7ac
 data_ov037_0214c7b0 kind:data(any) addr:0x0214c7b0
-data_ov037_0214c7c8 kind:data(any) addr:0x0214c7c8 ambiguous
-data_ov037_0214c7e4 kind:data(any) addr:0x0214c7e4 ambiguous
+_ZTV12Scene75Model kind:data(any) addr:0x0214c7c0
+_ZTV7Scene75 kind:data(any) addr:0x0214c7dc
 gStr_Mdl_Ica_ica_mii_mini_contents_siri_LZ_bi kind:data(any) addr:0x0214c800
 gStr_TBM_ov037 kind:data(any) addr:0x0214c82c
 gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov037 kind:data(any) addr:0x0214c830

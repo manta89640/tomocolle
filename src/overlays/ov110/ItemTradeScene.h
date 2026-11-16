@@ -89,39 +89,37 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
-// The model of a character with its animations and joints (func_0208eb18 constructs it). The model is a member,
-// not a base: the scene's destructor resets the render callback and then runs AnimModel's destructor, without a
-// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel). Named
-// CharacterModelMember so as not to clash with the other overlays' stand-ins called CharacterModel, which have
-// AnimModel as a base.
-class CharacterModelMember {
+// The model of a character with its animations and joints (include/character/CharacterModel.h has the class).
+// AnimModel is a member, not a base: the scene's destructor resets the render callback and then runs AnimModel's
+// destructor, without a virtual table of the character model's own being stored in between.
+class CharacterModel {
 public:
-    ~CharacterModelMember() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+
+    // Names the archive and the body's model for a costume (name of the archive, costume, female)
+    void SetArchive(const char *archiveName, int clothes, BOOL female);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+    void MakeModel(int resourceId, int unk);
+    void SetPaletteColors(GXRgb color0, GXRgb color1);
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ VecFx32 mScale;    // The scene's Init gives the mannequin's data_020fbe0c * 4 / 10
+    /* 0x0EC */ VecFx32 mScale;    // The scene's Init gives the mannequin's gMannequinBodyScale * 4 / 10
     /* 0x0F8 */ VecFx32 mInvScale; // and its inverses
     /* 0x104 */ u8 mUnknown104[0x3A0];
     /* 0x4A4 */ BOOL mUnknown4A4;
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-extern "C" {
-// --- The character model's functions (0x0208eb18 to 0x0208fcf8), as this scene calls them ---
-// Fills the archive and model names of the model's owner for a costume (name of the archive, costume, unknown)
-void func_0208ee18(CharacterModelMember *model, const char *archiveName, int costume, int unk);
-void func_0208ef00(CharacterModelMember *model, BOOL playOnce, BOOL finished);
-void func_0208ef5c(CharacterModelMember *model, int unk1, int unk2);
-void func_0208f19c(CharacterModelMember *model, int unk, int color);
-}
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
+    s8 GetPersonality(); // Its personality, 0 to 15
+
     /* 0x0000 */ u8 mUnknown0000[0x2BC];
-    /* 0x02BC */ s8 mPersonality; // What func_02098f2c computes
+    /* 0x02BC */ s8 mPersonality; // What GetPersonality computes
     /* 0x02BD */ u8 mUnknown02BD[3];
 }; // 0x2C0
 
@@ -138,98 +136,111 @@ public:
 // The main program's character class that the scenes derive theirs from (0x2B18 bytes).
 class Character : public CharacterBase {
 public:
-    /* 0x25E4 */ CharacterModelMember mModel;
+    /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0x78];
 }; // 0x2B18
 
 extern "C" {
-s8 func_02098f2c(SavedCharacter *character); // Its personality
 // The personalities' kinds (0 to 3), by personality
 extern const int data_020fba28[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);
 int MiiData_GetSex(SavedCharacter *character);
-int NFL_GetFavoriteColor(int unk);
+GXRgb NFL_GetFavoriteColor(int index); // lib/NFL
 }
 
 // The model the scene dresses in a costume to show it: a body ("3MM") with a head ("3MH:/head.imd",
-// "Mdl/Misc/headManikin_3D_LZ.bin"). A main-program class (functions 0x020a02c0 to 0x020a03c8); the scene's
+// "Mdl/Misc/headManikin_3D_LZ.bin"). A main-program class (src/item/Mannequin.cpp); the scene's
 // constructor builds its members in place.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class Mannequin {
 public:
+    void Init(int bodyResourceId, int bodyUnk, int headResourceId, int headUnk);
+    void Draw();
+    void SetAnimation(u32 resType, int id);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
     void SetAnimation(const char *name);
 
     /* 0x000 */ AnimModel mHead;
     /* 0x0E0 */ u8 mUnknown0E0[0x60];
-    /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
+    /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it gMannequinHeadScale * 4 / 10
     /* 0x14C */ u8 mUnknown14C[0x5C];
-    /* 0x1A8 */ CharacterModelMember mModel;
+    /* 0x1A8 */ CharacterModel mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
-    /* 0x674 */ char mArchivePath[0x1C]; // What func_0208ee18 sets for the costume
+    /* 0x674 */ char mArchivePath[0x1C]; // What CharacterModel::SetArchive sets for the costume
     /* 0x690 */ char mModelPath[0x28];
 }; // 0x6B8
 
-extern "C" {
-void func_020a02c0(Mannequin *mannequin, int unk1, int unk2, int unk3, int unk4);
-void func_020a034c(Mannequin *mannequin);            // Draws it
-void func_020a037c(Mannequin *mannequin, u32 resType, int animation);
-void func_020a03bc(Mannequin *mannequin, BOOL visible);
-void func_020a03c8(Mannequin *mannequin, int alpha); // Sets its alpha (0 to 31)
-}
-
 inline void Mannequin::SetAnimation(const char *name) {
-    func_020a037c(this, RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mAnim.mResourceSet, RESOURCE_BCA0, name));
+    SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mAnim.mResourceSet, RESOURCE_BCA0, name));
 }
 
 // --- Items (main program 0x0209e140 to 0x0209f84c, 0x020a4d34 to 0x020a5ca0) ---------------------------------
 
-// An item: the base class of everything the player can own.
+// An item: the base class of everything the player can own (include/item/Item.h has the main program's classes).
 class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
+    BOOL Add(int count); // _ZN4Item3AddEi
 
-// One kind of thing the player owns, with how many.
-class InventoryItem : public Item {
-public:
-    BOOL Add(int count); // func_0209ed84
-
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
 }; // 0x14
 
-// A costume the player owns (func_0209e168 constructs one; the list holds 300).
-class CostumeItem : public InventoryItem {
+// One kind of goods the player owns, with how many.
+class InventoryItem : public Item {}; // 0x14
+
+// A kind of clothes the player owns (func_0209e168 constructs one; the list holds 300).
+class ClothesItem : public Item {
 public:
     /* 0x14 */ int mUnknown14;
 }; // 0x18
 
-// The player's items: what the save data holds of each kind, loaded and saved together.
+// The player's goods: what the save data holds of each kind, loaded and saved together.
 class Inventory {
 public:
-    void Load(); // func_0209ee28
-    void Save(); // func_0209eef8
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count, int kind, u32 flags);
+    void GetOwnedKind3(Item **list, int *count);
+    void GetOwnedKinds4And5Again(Item **list, int *count);
+    BOOL HasAnyOwnedKind1();
+    BOOL HasAnyOwnedKind3();
+    BOOL HasAnyOwnedKinds4And5();
 
     /* 0x0000 */ int mCount;
     /* 0x0004 */ InventoryItem mItems[255];
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// The player's costumes, in the same way.
-class CostumeList {
+// The player's clothes, in the same way.
+class ClothesList {
 public:
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count, int kind);
+    BOOL HasAnyOwned();
+
     /* 0x0000 */ int mCount;
-    /* 0x0004 */ CostumeItem mItems[300];
-    /* 0x1C24 */ CostumeItem *mList[300];
+    /* 0x0004 */ ClothesItem mItems[300];
+    /* 0x1C24 */ ClothesItem *mList[300];
 }; // 0x20D4
 
 // The player's room interiors, in the same way.
 class InteriorList {
 public:
+    void Load();
+    void Save();
+    void Sort();
+    void GetOwned(Item **list, int *count);
+    BOOL HasAnyOwned();
+
     /* 0x000 */ int mCount;
     /* 0x004 */ InventoryItem mItems[78];
     /* 0x61C */ InventoryItem *mList[78];
@@ -247,37 +258,19 @@ struct ItemInfo {
 extern "C" {
 extern const ItemInfo data_020f5f0c[];
 // Each fills a list of the items owned (the list, its count) and returns nothing
-void func_0209f0f0(Inventory *inventory, InventoryItem **list, int *count, int unk, int filter);
-void func_0209f208(Inventory *inventory, InventoryItem **list, int *count);
-void func_0209f28c(Inventory *inventory, InventoryItem **list, int *count);
-void func_0209e4ac(CostumeList *costumes, InventoryItem **list, int *count, int filter);
-void func_020a5174(InteriorList *interiors, InventoryItem **list, int *count);
 // Each returns whether there is anything to show on one of the tabs
-int func_0209f4b4(Inventory *inventory);
-int func_0209f51c(Inventory *inventory);
-int func_0209f584(Inventory *inventory);
-int func_0209e7dc(CostumeList *costumes);
-int func_020a53c8(InteriorList *interiors);
 // Loading and saving
-void func_0209ef8c(Inventory *inventory);
-void func_0209e248(CostumeList *costumes);
-void func_0209e3c8(CostumeList *costumes);
-void func_0209e310(CostumeList *costumes); // Saves them
-void func_020a4f58(InteriorList *interiors);
-void func_020a5090(InteriorList *interiors);
-void func_020a5008(InteriorList *interiors); // Saves them
 }
 
-// The 3D model of an item (constructor func_0209f5f0)
+// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
 class ItemModel : public AnimModel {
 public:
-    void SetItem(const char *archiveName, int item); // func_0209f700
-    void LoadModel(int resourceId);                  // func_0209f770
-    void LoadAnimation(int resourceId);              // func_0209f790
-    void ResetScale();                               // func_0209f7fc
+    void SetItem(const char *archiveName, int item); 
+    void LoadModel(int resourceId);                  
+    void LoadAnimation(int resourceId);              
+    void ResetScale();                               
 
     /* 0x0E0 */ Item mItem;
-    /* 0x0E8 */ u8 mUnknownE8[0xC];
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];
@@ -304,8 +297,13 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
+
     /* 0x000 */ u8 mUnknown000[4];
     /* 0x004 */ VecFx32 mPosition; // This scene moves the room up and down by its y
     /* 0x010 */ u8 mUnknown010[0x3C];
@@ -321,31 +319,35 @@ struct RoomStyle {
     /* 0x0A */ u8 mUnknown0A[0x4A];
 }; // 0x54
 
-class Room {
+// The interior a room shows (include/room/Room.h has the main program's classes)
+class InteriorItem {
 public:
-    virtual u32 GetStyleUnknown0();
+    virtual u32 GetPrice();
+    GXRgb GetLightColor(); // The room's light colour now
 
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+}; // 0x14
+
+class Room : public InteriorItem {
+public:
+    void Mount(const char *archiveName, int unk);
+    void MountModel(int unk);
+    void Load(int resourceId);
+    void Reload(int resourceId);
+    void MountAll(const char *archiveName, int unk);
+    void MountPartModels(int unk);
+    void LoadParts(int resourceId);
+    void ReloadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+    void SetScale(fx32 scale);
+
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a54e4(Room *room, int unk);
-void func_020a56dc(Room *room, int unk);
-void func_020a5530(Room *room, int unk);
-void func_020a5854(Room *room, int unk);
-void func_020a4b74(RoomParts *parts, BOOL visible);
-void func_020a4bc4(RoomParts *parts, int alpha); // Sets their alpha (0 to 31)
-void func_020a4a50(RoomParts *parts);            // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
-void func_020a5970(Room *room, int unk);
 }
 
 // --- The main program's touch buttons (include/SpriteButton.h) ------------------------------------------------
@@ -379,7 +381,7 @@ public:
     void SetUnknown308(BOOL value);
 
     /* 0x004 */ u8 mUnknown004[8];
-    /* 0x00C */ InventoryItem **mItems; // What func_020a9b40 gave it
+    /* 0x00C */ Item **mItems; // What func_020a9b40 gave it
     /* 0x010 */ int mItemCount;
     /* 0x014 */ int mUnknown014;
     /* 0x018 */ BOOL mTouched;           // An item was touched
@@ -441,6 +443,8 @@ struct ScreenControl {
 };
 
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -466,8 +470,8 @@ extern PaletteLoader data_021213b8;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
-extern const VecFx32 data_020fbe00;
-extern const VecFx32 data_020fbe0c;
+extern const VecFx32 gMannequinHeadScale;
+extern const VecFx32 gMannequinBodyScale;
 
 void func_0202a640(Camera *camera);
 void func_0202a748(Camera *camera);
@@ -476,7 +480,6 @@ void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx3
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 void func_0202b0e8(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
@@ -549,39 +552,8 @@ void WH_Reset(void);
 void WH_Finalize(void);
 }
 
-// The main program's layer over WH that finds and connects the other DS (functions 0x0203b748 to 0x0203bcd4; the
-// one instance is reached through data_0213b700). A stand-in.
-//
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-struct WirelessSession {
-    /* 0x00 */ BOOL mActive;
-    /* 0x04 */ u8 mUnknown04[0x18];
-    /* 0x1C */ int mPartner; // Which of the parents found was chosen
-};
-
-extern "C" {
-extern WirelessSession *data_0213b700;
-void func_0203b7d4(WirelessSession *session, void *parents, int count); // Where the parents found are kept
-void func_0203b7e0(WirelessSession *session, int *timers);
-void func_0203b76c(WirelessSession *session, int unk);
-void func_0203b7e8(WirelessSession *session);
-BOOL func_0203b800(WirelessSession *session); // Updates it: TRUE while it is ending
-void func_0203b87c(WirelessSession *session);
-void func_0203b898(WirelessSession *session);
-void func_0203b8b4(WirelessSession *session, BOOL active);
-void func_0203b900(WirelessSession *session, BOOL unk);
-void func_0203b908(WirelessSession *session);
-void func_0203b940(WirelessSession *session, BOOL unk);
-void func_0203b948(WirelessSession *session);
-void func_0203b968(WirelessSession *session, BOOL unk);
-BOOL func_0203b970(WirelessSession *session);
-BOOL func_0203b9b4(WirelessSession *session); // A parent has been found
-int func_0203b9c4(WirelessSession *session);  // How many parents are found
-void func_0203b9fc(WirelessSession *session);
-int func_0203ba10(WirelessSession *session);  // The parent found last
-void func_0203ba20(WirelessSession *session, wchar_t *name);
-void func_0203bac4(WirelessSession *session, int partner);
-}
+// The main program's layer over WH that finds and connects the other DS
+#include "wireless/WirelessSession.h"
 
 // --- This overlay's classes ----------------------------------------------------------------------------------------
 
@@ -591,7 +563,7 @@ class ItemTradeScene;
 // What the scene gives its list: the player's things, the message files and the scene's objects (0x3C bytes at
 // 0x1B1F0 of the scene).
 struct ItemTradeContext {
-    /* 0x00 */ CostumeList *mCostumes;
+    /* 0x00 */ ClothesList *mCostumes;
     /* 0x04 */ Inventory *mInventory;
     /* 0x08 */ InteriorList *mInteriors;
     /* 0x0C */ MessageFile *mCommonMessages;
@@ -609,7 +581,7 @@ struct ItemTradeContext {
 }; // 0x3C
 
 // What is chosen: the kind of thing, its number, and two values for it. Its first parts are an InventoryItem and a
-// CostumeItem of classes the main program defines (virtual tables data_02110b0c and data_02110b30, which the
+// ClothesItem of classes the main program defines (virtual tables data_02110b0c and data_02110b30, which the
 // scene's constructor stores).
 class ItemTradeSelection {
 public:
@@ -637,7 +609,7 @@ public:
     };
 
     void Init(int plane, MessageFile *file, int *charOffset);
-    void SetMasks(Inventory *inventory, CostumeList *costumes, InteriorList *interiors);
+    void SetMasks(Inventory *inventory, ClothesList *costumes, InteriorList *interiors);
     void Update();
     void Draw();
     void SetVisible(BOOL visible);
@@ -751,10 +723,10 @@ public:
     /* 0x00010 */ BOOL mChosen;
     /* 0x00014 */ int mUnknown14;
     /* 0x00018 */ ItemTradeSelection mSelection;
-    /* 0x00050 */ CostumeList *mCostumes;
+    /* 0x00050 */ ClothesList *mCostumes;
     /* 0x00054 */ Inventory *mInventory;
     /* 0x00058 */ InteriorList *mInteriors;
-    /* 0x0005C */ InventoryItem *mItems[300]; // What the list shows
+    /* 0x0005C */ Item *mItems[300]; // What the list shows
     /* 0x0050C */ int mItemCount;
     /* 0x00510 */ ItemListView mList;
     /* 0x14474 */ ItemTradeTabs mTabs;
@@ -852,7 +824,7 @@ public:
     /* 0x16B3C */ MessageText mNameText;
     /* 0x1712C */ int mNameCharOffset;
     /* 0x17130 */ int mListCharOffset;
-    /* 0x17134 */ CostumeList mCostumes;
+    /* 0x17134 */ ClothesList mCostumes;
     /* 0x19208 */ Inventory mInventory;
     /* 0x1A9F4 */ InteriorList mInteriors;
     /* 0x1B148 */ MessageFile mMessages[7]; // Common, trouble, item, costume, room, etc and explain messages

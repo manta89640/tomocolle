@@ -131,8 +131,11 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+
     /* 0x000 */ u8 mUnknown000[0x4C];
     /* 0x04C */ AnimModel mDoor;
     /* 0x12C */ u8 mUnknown12C[0x78];
@@ -154,22 +157,21 @@ struct RoomStyle {
 
 class Room {
 public:
+    void Mount(const char *archiveName, int unk);
+    void MountAll(const char *archiveName, int unk);
+    void Load(int resourceId);
+    void LoadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+
     /* 0x000 */ void *mVtable;
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a4ab8(RoomParts *parts, int state);
-void func_020a4a50(RoomParts *parts); // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
 }
 
 // A scene's room: the room with its archives ("CO0", "RM") and a short start.

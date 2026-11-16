@@ -7,7 +7,7 @@ func_ov017_0214a558 kind:function(arm,size=0x90) addr:0x0214a558
 func_ov017_0214a5e8 kind:function(arm,size=0x20) addr:0x0214a5e8
 func_ov017_0214a608 kind:function(arm,size=0x154) addr:0x0214a608
 func_ov017_0214a75c kind:function(arm,size=0xdc) addr:0x0214a75c
-func_ov017_0214a838 kind:function(arm,size=0x70) addr:0x0214a838
+_ZN12Scene3CModelC1Ev kind:function(arm,size=0x70) addr:0x0214a838
 func_ov017_0214a8a8 kind:function(arm,size=0x48) addr:0x0214a8a8
 func_ov017_0214a8f0 kind:function(arm,size=0x70) addr:0x0214a8f0
 func_ov017_0214a960 kind:function(arm,size=0x74) addr:0x0214a960
@@ -39,7 +39,7 @@ gStr_P05_ov017 kind:data(any) addr:0x0214af80
 gStr_P04_ov017 kind:data(any) addr:0x0214af84
 gStr_P03_ov017 kind:data(any) addr:0x0214af88
 gStr_P02_ov017 kind:data(any) addr:0x0214af8c
-data_ov017_0214af98 kind:data(any) addr:0x0214af98 ambiguous
+_ZTV7Scene3C kind:data(any) addr:0x0214af90
 data_ov017_0214afbc kind:data(any) addr:0x0214afbc
 data_ov017_0214afd8 kind:data(any) addr:0x0214afd8
 data_ov017_0214aff4 kind:data(any) addr:0x0214aff4

@@ -4,6 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+#include "CharacterCalls.h"
 #include "sound/SoundManager.h"
 
 #include "Character.h"
@@ -19,37 +20,6 @@ extern "C" {
 // --- Main program: functions of the character (0x0208fcf8 to 0x0209d898). All take the character as their
 // object. The declarations are overlay 74's. ---
 
-// Sets the face (expression) and restarts its animation
-void Character_SetFace(TutorialRoomCharacter *self, int face);
-// Clamps an angle to +-limit
-BOOL func_02090c78(TutorialRoomCharacter *self, u16 *angle, int limit);
-// A distance multiplied by the character's mUnknown2AF0
-fx32 func_02091174(TutorialRoomCharacter *self, fx32 distance);
-// Turns to the walk target and sets the speed; TRUE when the character is within reach of it
-BOOL func_02091194(TutorialRoomCharacter *self, fx32 reach, int speed, int turnShift);
-// Turns towards mTarget; TRUE when facing it
-BOOL Character_TurnToWalkTarget(TutorialRoomCharacter *self, int speed, int accel);
-// Turns mAngle towards mTargetAngle
-BOOL Character_TurnToTargetAngle(TutorialRoomCharacter *self, int speed, int accel);
-// Moves by mSpeed along mMoveAngle
-void Character_MoveAlongAngle(TutorialRoomCharacter *self);
-// Sets mAngle and mMoveAngle
-void Character_SetAngle(TutorialRoomCharacter *self, u16 angle);
-// Moves the character and its model for this frame
-void func_020910a8(TutorialRoomCharacter *self);
-// Draws the character
-void func_02091968(TutorialRoomCharacter *self);
-// Starts an animation of the model, at the speed mAnimSpeed (SetAnimation calls it)
-void func_020919e8(TutorialRoomCharacter *self, u32 resType, int id);
-// The point is nearer than the model's scale times the reach (and than maxReach, if that is positive)
-BOOL Character_IsPointWithinReach(TutorialRoomCharacter *self, fx32 x, fx32 z, fx32 reach, fx32 maxReach);
-// Restarts a slot's progress of Character_PlaySoundAtAnimPhase (mSoundPhase)
-void Character_ResetSoundPhase(TutorialRoomCharacter *self, int slot);
-// Starts sound `index` of sequence archive `seqArc` once per animation
-int func_02091fbc(TutorialRoomCharacter *self, int player, int seqArc, int index);
-// Starts sound `index` of sequence archive `seqArc` at given quarters (bit mask) of the current animation
-int Character_PlaySoundAtAnimPhase(TutorialRoomCharacter *self, int slot, int player, int seqArc, int index,
-                                   int quarters);
 
 // --- Data ---
 extern const int data_020fba28[16];   // By mPersonality: the row of the two tables below
@@ -112,7 +82,7 @@ public:
     u8 GetRelationToPartner() { return mRelation[mPartner->mIndex]; }
     BOOL IsWithinReach(TutorialRoomCharacter *other, fx32 reach, fx32 maxReach) {
         FloorPos pos = other->GetFloorPos();
-        return Character_IsPointWithinReach(this, pos.x, pos.z, reach, maxReach);
+        return ((Character *)(this))->IsPointWithinReach(pos.x, pos.z, reach, maxReach);
     }
     void SetWalkTarget(fx32 x, fx32 y, fx32 z) {
         mTarget.x = x;
@@ -128,7 +98,7 @@ public:
     // Overlay 74 has this as a function of its own (func_ov074_021694e8)
     void ResetSoundPhaseUnlessWalking() {
         if (!IsWalkAnim()) {
-            Character_ResetSoundPhase(this, 0);
+            ((Character *)(this))->ResetSoundPhase(0);
         }
     }
     // Defined in TutorialRoomCamera.h, which needs this class whole

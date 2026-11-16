@@ -26,7 +26,7 @@ __sinit_ov081_0214b324 kind:function(arm,size=0x70) addr:0x0214b324
 .p__sinit_ov081_0214b324 kind:data(word) addr:0x0214b394
 data_ov081_0214b3a0 kind:data(any) addr:0x0214b3a0
 data_ov081_0214b3a8 kind:data(any) addr:0x0214b3a8
-data_ov081_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
+_ZTV7Scene30 kind:data(any) addr:0x0214b3c8
 data_ov081_0214b3dc kind:data(any) addr:0x0214b3dc ambiguous
 gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov081 kind:data(any) addr:0x0214b3ec
 gStr_RM0_ov081 kind:data(any) addr:0x0214b40c

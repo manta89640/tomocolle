@@ -595,8 +595,59 @@ Two things the compiler does that these files needed:
 
 Not done:
 
-- The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
-  their addresses.
+- The constructors are in the scene factory's file (`src/scene/SceneManager.cpp`); see "The scene constructors".
+
+## The scene constructors (0x02040578 to 0x0204AF20)
+
+The constructors of scenes 0x27 to 0xC2, and the scene manager's `UnloadSceneOverlay` and `SetSoundGroup` after
+them, are the second half of `src/scene/SceneManager.cpp` (the scene factory's file, which gap38-a cut; see its
+header). The classes are declared in the overlays' directories (`src/overlays/ovNNN/<Class>.h`, with the layout the
+constructor shows) or, for scenes of the main program, in `src/scene/`.
+
+Measured:
+
+- **One file, constructors out of line in id order.** `CreateScene` calls every constructor, even 0x28-byte ones,
+  and they follow one another in the order of the scene ids, each followed by the implicit constructors and
+  destructors of the member classes it gives `__cxa_vec_ctor`. Defined out of line in the file
+  (`X::X(int sceneId) : Scene(sceneId) {...}`), they compile to the ROM's code; as inline constructors in the class
+  headers `CreateScene` inlines them. The C2 copies the compiler also emits are stripped by the link.
+- **What the code shows of a member.** An array of a class with a destructor is built by `__cxa_vec_ctor`; one
+  without (message windows, buttons, texts, saved characters) by a loop, and an array of one still by a loop,
+  so `MessageWindow mWindow[1]` and `MessageText mText[1]` where the ROM loops once. An inline constructor
+  (MessageWindow, AnimModel, a Character's) is expanded in place. A run of members that the constructor addresses
+  from the end pointer of the previous loop is a part of its own (`Scene74Part`, `RankingPart`): written as plain
+  members, the compiler addresses them from `this`.
+- **Model classes of the overlays.** Several scenes hold arrays of a class of their overlay that holds an
+  AnimModel (`TestNg69Model`, `Scene3CModel`, `Scene3EModel`: constructor in the overlay, destructor the main
+  program's copy) or derives from it (`Scene75Model`, `Scene91Model`: implicit constructor and D1 here, the table
+  and D0 in the overlay, which refers to this file's D1; the class needs its overlay key function declared, or
+  this file emits the table too). A model class with nothing virtual of its own (`TestNg134Model`) has its table
+  and D0 in this file (`0x0211091C`, `0x0204AE10`).
+- **Twins are C2 and C1.** `ParticleSystem`'s and `HeadIcon`'s constructors are each emitted twice, byte for
+  byte (`0x02080E80`/`0x02080E8C`, `0x02081034`/`0x02081074`); the C2 comes first, and a head icon that is a member
+  (scene 0xAF's character) is built with the second. Scene 0x76's icon calls both C2s: a class deriving from both.
+  CharacterModel's (`0x0208EB18`/`0x0208EBA0`) are alike; a `Character` builds it as its second base with C2.
+- **Sizes.** `CreateScene` allocates `sizeof` of each class, so a wrong size in a scene header shows in its
+  literal pool; the headers' sizes all match it.
+- `UnloadSceneOverlay` (0x02049F0C) unloads the overlay of each scene with an overlay, its 111 literal ids
+  `overlay_id` relocations as `CreateScene`'s are; `SetSoundGroup` (0x0204AB04) keeps the sound group loaded in
+  `SceneManager::mSoundGroup` (+0x360).
+- Shared classes these constructors needed, now one definition each: `MessageWindow` (its inline constructor,
+  two virtual functions: `SetVisible`, 0x02034A94, and one of more than four arguments), `G3Sprite`, `DayPhase`,
+  `HeadIcon` with `ParticleSystem`, `ShopWindow` and `HalfPriceShopWindow` (the shops' price window, a message
+  window with two buttons and three text canvases; tables `0x02115368`, `0x02115380`); and the shared
+  character, model, item, room and list headers of the main program's owners.
+
+Named classes of scenes whose overlay is not decompiled: after the scene's archive
+`Scn/Scene/Scene<Name>_LZ.bin` when no other overlay mounts it (`RankingScene`, `CityHallScene`, `RomanceScene`,
+`Marriage2Scene`, the `TestNg<n>Scene`s), otherwise after the lowest scene id (`Scene2B`, ...). Scene 0x27 of the
+main program mounts the island map's sky, vote and apartment models (`MapModelsScene`), scene 0x2E shows a room
+stepped through the 78 interiors (`InteriorViewScene`).
+
+Not done: the constructors of scenes 0x29 (TushinScene), 0x2F, 0x35, 0x68 (the shops), 0x38, 0x3A and 0x8E (a
+member of an unidentified class whose constructor twins are `0x02025A9C`/`0x02025B5C`), 0x40, 0x46, 0x5B, 0x67, 0x7F,
+0x80, 0xAB (WeddingScene), 0xB1 (ItemTradeScene) and 0xB4; the item classes' inline virtual functions and the
+deleting destructors at the file's end (0x0204ABAC to 0x0204AF20) come with the classes whose tables this file emits.
 
 ## The main program's test scenes and the scenes' helpers
 
@@ -1330,6 +1381,39 @@ windows' set-up).
 Not done in the first third: `MiiEditScene::Init` (95.8%: the registers of the index and the character offset in the
 loops over the buttons and the text boxes).
 
+## Items, the mannequin, the room and the Mii list
+
+Four files of the main program after the character code (`include/item/`, `include/room/`, `include/list/`):
+
+| File | Range | Holds |
+| --- | --- | --- |
+| `src/item/Item.cpp` | `0x0209E140`..`0x020A00BC` | the item classes, the clothes list, the inventory, ItemModel, the random choice of goods and clothes |
+| `src/item/Mannequin.cpp` | `0x020A00BC`..`0x020A03E8` | the mannequin that shows clothes |
+| `src/list/MiiList.cpp` | `0x020A03E8`..`0x020A3C68` | the list of saved characters, its panel and tabs |
+| `src/room/Room.cpp` | `0x020A3C68`..`0x020A5CC4` | a resident's room: door, furniture, interiors |
+
+Measured:
+- The character file ends at `0x0209E140`: `0x0209E0E8` and `0x0209E114` are one clamp template instantiated for
+  `s16` and `u8`, called only by `0x02097D8C`, and such instances follow the last function of the file that uses
+  them. The item file ends with ItemModel's implicit deleting destructor (`0x020A0078`, entry 1 of its table).
+- `Item` (virtual table `_ZTV4Item`, `0x02114F78`) has seven entries, all 0: pure virtual functions. Its three
+  kinds read their tables: `ClothesItem` the clothes (`data_020f3ff0`, 0x14 bytes a row, 300 rows), `InventoryItem`
+  the goods (`data_020f5f0c`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
+  (`data_020f72f8`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
+  (+8 for goods and clothes, +0xA for interiors) and four weights, one of which `gGameData+0x4E` selects; the random
+  choices of goods, clothes and interiors on offer sum those weights. The goods' and clothes' getters are emitted
+  at `0x0204ABAC`..`0x0204AD84` (in the scene constructors' file), the interiors' at the end of Room.cpp.
+- `ItemModel` derives from `AnimModel` and `InventoryItem`: its constructors build the item base after the model
+  and then store both halves of `_ZTV9ItemModel` (the second at `0x02115000`).
+- `Room` derives from `InteriorItem` and `RoomModels`, which holds the room's own model with its door (`RoomDoor`,
+  a node callback shows the node "entrance" while the door moves; node description 0 gives the matrix the
+  furniture is placed by) and six pieces of furniture (`RoomPart`, faded out between the camera and the room).
+- The list's `.rodata` ends at `0x020FBFD4`; the room's begins there with an unreferenced halfword `0xFFFF` (its
+  objects sort by size: 2, 0x10, 0x14 bytes) and ends at `0x020FBFFC`.
+
+Inferred: the classes' names are descriptive; none survives in the ROM. That the first virtual function is a price
+rests on the values (250, 480, 5800).
+
 ## The Mii library (NFL)
 
 Code of the main program from `0x02069BF4` (right after NitroSystem) to `0x020776E4` (the Mii transfer), 144
@@ -1625,6 +1709,66 @@ data cache and disables or enables the instruction cache around it. Only `main` 
 `0x020B0400`). They call `OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes
 of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
 linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+
+## The characters
+
+The main program's character code, `0x0208EB18` to `0x0209E140`, which every scene with a resident uses: four units
+under `src/character/`, with the classes in `include/character/Character.h`, `CharacterModel.h` and `FloorPos.h`.
+The class names are the project's own; the field names in quotes below are the game's.
+
+| Unit | Code | What |
+| --- | --- | --- |
+| `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
+| `Character.cpp` | to `0x02092178`, 73 functions, 68 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
+| `CharacterSort.cpp` | to `0x020979A0`, 23 functions, 15 matching | The resident list's orders: name normalization, collation, comparators |
+| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 85 matching | `SavedCharacter`: the record, its parameters, relations, long activities, troubles |
+
+Measured:
+
+- **The bounds.** `.rodata` `0x020FB768` to `0x020FB864` is one size-sorted list (a 12-byte vector, then twelve 20-byte
+  joint names) read only by the model's code; the 12-byte object at `0x020FB864` (read at `0x0209005C`) and the two
+  40-byte animation tables after it, which only overlays read, are the next file's. `0x020FB8C0` to `0x020FBCDC` is
+  one list read from `0x02098EF0` to `0x0209E00C`; `0x020FBCDC` begins the item file, whose `ClothesItem` constructor
+  is at `0x0209E140`. The functions `0x02092178` to `0x020979A0` call only each other and are called only by the
+  resident list (`0x020A1xxx`) and overlays. The strings `0x02114DA0` to `0x02114E3C` are the model's,
+  `0x02114E3C` to `0x02114F78` the saved character's. What lies between SHTTS and the model in `.rodata`
+  (`0x020F3FF0` to `0x020FB768`: the clothes table, the goods, room and trouble tables) and in `.data`
+  (`0x021135A0` to `0x02114DA0`) has no code: data-only files, not cut.
+- **`CharacterModel` (0x508 bytes)** holds an `AnimModel` as a member and has no virtual table of its own. It is the
+  second base of the 0x2B18-byte `Character` (`class Character : public CharacterBase, public CharacterModel`): the
+  scenes' constructors call `0x0208EB18`, the first of the two identical constructors the compiler emits, which is the
+  base constructor C2, while a model that is a member (the G3D test scene's) is built with `0x0208EBA0`, C1. It keeps
+  the matrices of ten joints, found by name with `NNS_G3D_GET_JNTID` in its render callbacks (neck, `L_hand1`,
+  `R_hand1`, body; with `mTrackLimbs` the elbows, knees and ankles), scales the body from the Mii's height and build,
+  turns joints by angles, and shows or places the shadow. It wears a `ClothesItem` (+0x4B0): the archive is
+  `Mdl/Body/body<model name>[F]_3D_LZ.bin`, `F` for a female Mii when the clothes table has a female body, and the
+  texture `body_c<colour>.ntfp`.
+- **`CharacterBase` (0x25E4)** is `SavedCharacter` with its Mii face: an `NFLFace` of the Mii library (+0x2DC), its
+  draw parameters (+0x2C0, NFL's `NFLDrawParam`), the head joint's matrices that the body leaves it, and the face's
+  moods: `UpdateFace` runs one of 26 kinds (show an expression once, blink, wink, alternate expressions on timers).
+  `LipSync` opens the mouth while the phoneme is a vowel or `w`.
+- **`CharacterHead` (0x2728)** is a `CharacterBase` with an `AnimModel` head instead of a body: overlays 2, 77 and 79.
+- **`Character`** adds walking (`WalkToTarget`, `TurnTo...`, `MoveAlongAngle`; its speeds scale with the Mii's height
+  and the animation speed), the point tests (`IsBeside`, `IsInFront`, `IsAhead`, `IsPointWithinReach`), and sounds at
+  quarters of an animation. `SetWalkTargetAwayFrom` is NitroSDK's `VEC_Normalize` written out in two dimensions.
+- **The record's fields** are named by `SavedCharacter::Validate`, which checks each field and passes its name to the
+  clamping template: "character" (the personality answers, +0x4A), "voice", "motto1" and "motto" (the texts),
+  "RelationMeter" (+0xFC, 0 to 200), "RelationRank" (+0x160, 0 to 10), "LongActState" (+0x224, 0 to 0x2E),
+  "TroubleState" (+0x23A, 0 to 5), "TroubleID", "TroubleCategory", "SatisfyMeter", "SatisfyLevel", "EatFullness",
+  "EatLastFood", "MeetYear"/"Month"/"Day", "PatYear"/"Month"/"Day", "TouchTalkMonth"/"Day"/"Hour", "RelationBlood".
+- **The Mii's parameters** (`GetParameter`, `SetParameter`) are numbered as the Mii data's getter and setter tables
+  (`MiiParameter`); for a Mii made on another console the birth month and day are the record's own.
+- **The long activities** (`mLongActState`): odd states 0x17 to 0x2D are done with a partner, the even ones after them
+  are the partner's side, 0x13 to 0x16 are away; `ChooseLongAct` draws one by weights for the personality's kind and
+  the mood (`data_020F8CC0`: minutes, weight, personality bits, mood bits).
+- **The collation**: `CharacterSort::GetCollationKey`, a switch of 522 characters (punctuation, Latin, Greek, kana,
+  ...) to ranks, times ten plus five for a full-width letter; names are compared after normalizing in up to five
+  rounds of decreasing strength.
+
+Inferred:
+
+- The `func_0209E0E8`/`func_0209E114` pair at the end of `SavedCharacter.cpp` is one template instantiated for `s16`
+  and `u8`: out-of-line template code is emitted after the file's last function.
 
 ## Compiler
 

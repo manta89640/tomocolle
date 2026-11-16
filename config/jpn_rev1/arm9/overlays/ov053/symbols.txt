@@ -25,8 +25,8 @@ data_ov053_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov053_0214aea0 kind:data(any) addr:0x0214aea0
 gStr_P00_ov053 kind:data(any) addr:0x0214aea8
 gStr_P00_item_imd_ov053 kind:data(any) addr:0x0214aeac
-data_ov053_0214aec4 kind:data(any) addr:0x0214aec4 ambiguous
-data_ov053_0214aee0 kind:data(any) addr:0x0214aee0 ambiguous
+_ZTV12Scene91Model kind:data(any) addr:0x0214aebc
+_ZTV7Scene91 kind:data(any) addr:0x0214aed8
 gStr_Mdl_Ica_ica_mii_mini_contents2_LZ_bin_ov053 kind:data(any) addr:0x0214aefc
 gStr_TBM_ov053 kind:data(any) addr:0x0214af24
 gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov053 kind:data(any) addr:0x0214af28

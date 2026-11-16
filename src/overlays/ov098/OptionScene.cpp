@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "OptionScene.h"
+#include "MainProgram.h"
 
 // Overlay 98: the settings (OptionScene). One source file: its constants are the .rodata (see the comment on
 // them), its strings the .data after the scene's virtual table.
@@ -210,7 +211,7 @@ void OptionScene::Update() {
                 if (mState == STATE_CLOCK || mState == STATE_SOUND) {
                     SetState(STATE_MENU);
                 } else {
-                    func_0203c02c(&gSceneManager, 0x5E);
+                    gSceneManager.RequestScene(0x5E);
                 }
                 break;
             case BUTTON_YEAR_UP:
@@ -488,7 +489,7 @@ void OptionScene::Update() {
         switch (mWindowResult) {
         case 0:
             if (mState == STATE_ASK_FIRST_CLOCK) {
-                func_0203c02c(&gSceneManager, 0x69);
+                gSceneManager.RequestScene(0x69);
             } else {
                 SetState(mState + 1);
             }
@@ -635,7 +636,7 @@ void OptionScene::SetState(int state) {
         func_02035460(data_02123440, &mDate, &mTime, FALSE);
         func_0202c8f8(&gGameData, 0);
         if (!func_0202cd48(&gGameData)) {
-            func_0203c02c(&gSceneManager, 0xC2);
+            gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_CLOCK_SAVED:
@@ -689,7 +690,7 @@ void OptionScene::SetState(int state) {
         OpenWindow(WINDOW_ERASING, mCharOffset);
         func_02034720(&mWindow, 0x12, 1);
         if (!func_0202cd94(&gGameData)) {
-            func_0203c02c(&gSceneManager, 0xC2);
+            gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_ERASED:

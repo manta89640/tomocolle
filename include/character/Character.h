@@ -20,71 +20,132 @@
 // CharacterModel (C2, 0x0208eb18: a model that is a member is built with C1, 0x0208eba0, as the G3D test scene's),
 // and their destructors CharacterModel's inline destructor and CharacterBase's D2. The names are the project's own.
 
+// The parameters of a Mii that SavedCharacter::GetParameter and SetParameter take: the Mii data's getters and setters
+// by number (data_020fbc2c and data_020fbb7c, lib/MiiData). For a Mii not made on this console the birth month and day
+// are the record's own (CharacterRecord::mOwnBirthMonth, mOwnBirthDay).
+enum MiiParameter {
+    PARAM_EYE_TYPE, // 0x00
+    PARAM_EYE_COLOR,
+    PARAM_EYE_SCALE,
+    PARAM_EYE_ROTATION,
+    PARAM_EYE_X, // 0x04
+    PARAM_EYE_Y,
+    PARAM_EYEBROW_TYPE,
+    PARAM_EYEBROW_COLOR,
+    PARAM_EYEBROW_SCALE, // 0x08
+    PARAM_EYEBROW_ROTATION,
+    PARAM_EYEBROW_X,
+    PARAM_EYEBROW_Y,
+    PARAM_MOUTH_TYPE, // 0x0C
+    PARAM_MOUTH_COLOR,
+    PARAM_MOUTH_SCALE,
+    PARAM_MOUTH_Y,
+    PARAM_BEARD_TYPE, // 0x10
+    PARAM_BEARD_COLOR,
+    PARAM_MUSTACHE_TYPE,
+    PARAM_BEARD_SCALE,
+    PARAM_BEARD_Y, // 0x14
+    PARAM_MOLE_TYPE,
+    PARAM_MOLE_SCALE,
+    PARAM_MOLE_X,
+    PARAM_MOLE_Y, // 0x18
+    PARAM_HAIR_TYPE,
+    PARAM_HAIR_COLOR,
+    PARAM_HAIR_FLIP,
+    PARAM_NOSE_TYPE, // 0x1C
+    PARAM_NOSE_SCALE,
+    PARAM_NOSE_Y,
+    PARAM_GLASSES_TYPE,
+    PARAM_GLASSES_COLOR, // 0x20
+    PARAM_GLASSES_SCALE,
+    PARAM_GLASSES_Y,
+    PARAM_FACE_TYPE,
+    PARAM_FACE_COLOR, // 0x24
+    PARAM_FACE_TEXTURE,
+    PARAM_BIRTH_MONTH,
+    PARAM_BIRTH_DAY,
+    PARAM_FAVORITE_COLOR, // 0x28
+    PARAM_HEIGHT,
+    PARAM_BUILD,
+    PARAM_DAYS_IN_BIRTH_MONTH,
+    PARAM_COUNT
+};
+
+// A Mii's create ID (lib/NFL's NFLCreateId)
+struct CreateId {
+    u8 data[8];
+};
+
 // What the save data holds of a character: the 0x2A4 bytes that func_0202c264 copies out. Overlay 109's implicit
-// copy assignment of it shows its members.
+// copy assignment of it shows its members. The names in quotes are the game's own: SavedCharacter::Validate gives
+// them with each field it checks.
 struct CharacterRecord {
     /* 0x000 */ u8 mMii[0x4A];           // The Mii's data (0x4A bytes, lib/MiiData)
-    /* 0x04A */ u8 mUnknown04A[5];       // The Mii maker's personality page sets them: 1 to 8, 0 while unset
-    /* 0x04F */ u8 mRoomNumber;          // Number of its room in the building
+    /* 0x04A */ u8 mAnswers[5];          // "character": the personality questions' answers, 1 to 8 (0 unset)
+    /* 0x04F */ u8 mRoomNumber;          // Number of its room in the building, 0xFF for none
     /* 0x050 */ u32 mUnknown050Bit0 : 1;
-    /*       */ u32 mUnknown050Bits1 : 16;
-    /*       */ u32 mBirthYear : 12;     // 0xFFF for none
-    /*       */ u32 mBloodType : 3;
-    /* 0x054 */ u32 mUnknown054Bits0 : 4;
-    /*       */ u32 mInterior : 7;       // Which interior its room has
-    /*       */ u32 mClothesId : 9;       // The clothes it wears (row of the clothes table)
-    /*       */ u32 mUnknown054Bits20 : 12;
+    /*       */ u32 mRegisteredYear : 7;  // The date it was registered: two-digit year, month and day
+    /*       */ u32 mRegisteredMonth : 4;
+    /*       */ u32 mRegisteredDay : 5;
+    /*       */ u32 mBirthYear : 12;     // 1900 to 2099, 0xFFF for none
+    /*       */ u32 mBloodType : 3;      // 0 to 4
+    /* 0x054 */ u32 mUnknown054Bits0 : 4; // 0 to 8
+    /*       */ u32 mInterior : 7;       // Which interior its room has (below 78)
+    /*       */ u32 mClothesId : 9;      // The clothes it wears (row of the clothes table, below 300)
+    /*       */ u32 mUnknown054Bit20 : 1;
+    /*       */ u32 mOwnBirthMonth : 4;  // The birthday of a Mii from another console (0 unset)
+    /*       */ u32 mOwnBirthDay : 5;
+    /*       */ u32 mUnknown054Bits30 : 2;
     /* 0x058 */ wchar_t mName[11];
     /* 0x06E */ wchar_t mFamilyName[11];
-    /* 0x084 */ wchar_t mSpeechDefault[17];
-    /* 0x0A6 */ wchar_t mSpeechByMood[4][9];
-    /* 0x0EE */ s16 mVoice[6];           // The voice: five parameters of the speech synthesizer and a choice of four
-    /* 0x0FA */ u8 mUnknown0FA;
-    /* 0x0FB */ u8 mUnknown0FB;
-    /* 0x0FC */ u8 mAffinity[100];       // For each other character by index
-    /* 0x160 */ u8 mRelation[100];       // For each other character by index
+    /* 0x084 */ wchar_t mMotto[17];      // "motto1": what it says (the speech texts)
+    /* 0x0A6 */ wchar_t mMottos[4][9];   // "motto": the same by mood
+    /* 0x0EE */ s16 mVoice[6];           // "voice": five parameters of the speech synthesizer and a choice of four
+    /* 0x0FA */ u8 mSatisfyMeter;        // "SatisfyMeter", 0 to 99
+    /* 0x0FB */ u8 mSatisfyLevel;        // "SatisfyLevel", 1 to 99
+    /* 0x0FC */ u8 mRelationMeter[100];  // "RelationMeter": for each other character by index, 0 to 200
+    /* 0x160 */ u8 mRelationRank[100];   // "RelationRank": for each other character by index, 0 to 10
     /* 0x1C4 */ u32 mUnknown1C4;
     /* 0x1C8 */ struct { u32 m[8]; } mUnknown1C8;
-    /* 0x1E8 */ struct { u32 m[10]; } mUnknown1E8;
+    /* 0x1E8 */ struct { u32 m[10]; } mOwnedClothes; // A bit for each row of the clothes table
     /* 0x210 */ u32 mUnknown210[3];      // Flags, a bit each
-    /* 0x21C */ s64 mEventEnd;           // A time in seconds, as the clock's
-    /* 0x224 */ u8 mEvent;               // What the character is doing: 0..18 alone, 0x17.. with a partner
-    /* 0x225 */ u8 mEventPartner;        // mIndex of the character it is doing it with
-    /* 0x226 */ u8 mUnknown226;
-    /* 0x227 */ u8 mUnknown227;
-    /* 0x228 */ s64 mUnknown228;
-    /* 0x230 */ s64 mAwayUntil;
-    /* 0x238 */ u16 mMoodPartner;
-    /* 0x23A */ u8 mMoodLocked;
-    /* 0x23B */ u8 mUnknown23B;
+    /* 0x21C */ s64 mLongActEnd;         // A time in seconds, as the clock's
+    /* 0x224 */ u8 mLongActState;        // "LongActState", 0 to 0x2E: what it is doing for a long while
+    /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
+    /* 0x226 */ u8 mTroubleId;           // "TroubleID", 0 to 0x6D
+    /* 0x227 */ u8 mTroubleCategory;     // "TroubleCategory", 0 to 9
+    /* 0x228 */ s64 mTroubleStart;       // When the trouble began (a time in seconds)
+    /* 0x230 */ s64 mTroubleEnd;         // When it ends (the wedding sets it to the honeymoon's end)
+    /* 0x238 */ u16 mTroublePartner;     // mIndex of the other character of the trouble
+    /* 0x23A */ u8 mTroubleState;        // "TroubleState", 0 to 5
+    /* 0x23B */ u8 mTroubleProgress;     // 0 to 200
     /* 0x23C */ s64 mUnknown23C;
-    /* 0x244 */ u8 mUnknown244;
-    /* 0x245 */ u8 mUnknown245;
+    /* 0x244 */ u8 mEatFullness;         // "EatFullness", 0 to 100
+    /* 0x245 */ u8 mEatLastFood;         // "EatLastFood"
     /* 0x246 */ u8 mUnknown246;
-    /* 0x247 */ u8 mUnknown247;
-    /* 0x248 */ u8 mUnknown248;
-    /* 0x249 */ u8 mUnknown249;
+    /* 0x247 */ u8 mMeetYear;            // "MeetYear", 0 to 99
+    /* 0x248 */ u8 mMeetMonth;           // "MeetMonth", 1 to 12
+    /* 0x249 */ u8 mMeetDay;             // "MeetDay", 1 to 31
     /* 0x24A */ u8 mUnknown24A;
-    /* 0x24B */ u8 mUnknown24B;
-    /* 0x24C */ u8 mUnknown24C;
-    /* 0x24D */ u8 mUnknown24D;
-    /* 0x24E */ u8 mUnknown24E;
+    /* 0x24B */ u8 mTouchTalkMonth;      // "TouchTalkMonth", 1 to 12
+    /* 0x24C */ u8 mTouchTalkDay;        // "TouchTalkDay", 1 to 31
+    /* 0x24D */ u8 mTouchTalkHour;       // "TouchTalkHour", 0 to 23
+    /* 0x24E */ u8 mUnknown24E;          // Below 6, or 0xFF
     /* 0x24F */ u8 mUnknown24F;
     /* 0x250 */ u16 mUnknown250[32];
-    /* 0x290 */ u8 mUnknown290;
-    /* 0x291 */ u8 mUnknown291;
-    /* 0x292 */ u8 mUnknown292[2];
-    /* 0x294 */ u8 mUnknown294;
-    /* 0x295 */ u8 mMood;                // 0..4
+    /* 0x290 */ u8 mFavoriteItem;        // GetLiking gives it the most liking, 0xFF for none
+    /* 0x291 */ u8 mDislikedItem;        // and this none
+    /* 0x292 */ u8 mUnknown292[3];
+    /* 0x295 */ u8 mMood;                // 0 to 4
     /* 0x296 */ u8 mUnknown296;
     /* 0x297 */ u8 mUnknown297;
-    /* 0x298 */ u8 mRelationToPlayer;
+    /* 0x298 */ u8 mRelationBlood;       // "RelationBlood", 0 to 5
     /* 0x299 */ u8 mUnknown299;
-    /* 0x29A */ u8 mSongSlots[6];        // Which of the saved songs each of the character's six is
-    /* 0x2A0 */ u8 mUnknown2A0;
-    /* 0x2A1 */ u8 mUnknown2A1;
-    /* 0x2A2 */ u8 mUnknown2A2;
-    /* 0x2A3 */ u8 mUnknown2A3;
+    /* 0x29A */ u8 mSongSlots[6];        // Which of the saved songs each of the character's six is (below 100, or 0xFF)
+    /* 0x2A0 */ u8 mPatYear;             // "PatYear", 0 to 99
+    /* 0x2A1 */ u8 mPatMonth;            // "PatMonth", 0 to 12
+    /* 0x2A2 */ u8 mPatDay;              // "PatDay", 0 to 31
+    /* 0x2A3 */ u8 mUnknown2A3;          // At most 99, or 0xFF
 }; // 0x2A4
 
 // A saved character and what the game keeps beside it.
@@ -92,14 +153,150 @@ class SavedCharacter : public CharacterRecord {
 public:
     SavedCharacter();
 
+    void Reset();
+    void MakeVisitor();
+    void Register();
+    BOOL Validate();
+    static BOOL TerminateString(wchar_t *str, int length, const char *name);
+    BOOL IsResident();
+    void SetRegisteredDate(int year, int month, int day);
+    void SetRegisteredDateToday();
+    void AddUnknown1C4(int value);
+    BOOL IsMiiFromThisConsole();
+    void AssignCreateId();
+    static void GetCreateId(CreateId *id, const CharacterRecord *character);
+    u32 GetCreateIdNumber();
+    void GetCreateIdParts(int *high, int *low);
+    void GetParameterRange(int param, int *min, int *max);
+    void CheckParameter(int param, int value);
     void SetParameter(int param, int value);
+    void SetRawParameter(int param, int value);
+    void SetSex(int sex);
+    void SetLocalOnly(int value);
+    void SetFavorite(int value);
+    void SetBirthYear(u16 year);
+    void SetOwnBirthMonth(int month);
+    void SetOwnBirthDay(int day);
+    void SetBloodType(int bloodType);
+    void SetAnswer(int index, u8 answer);
+    void SetVoice(int index, s16 value);
+    void ResetVoice();
     int GetParameter(int param);
+    int GetRawParameter(int param);
     GXRgb GetFaceColor();
+    int RandomFromCreateId(int max);
     int GetAnswerScore01();
+    int ScoreAnswers01(int answer0, int answer1);
+    int GetAnswerScore23();
+    int ScoreAnswers23(int answer2, int answer3);
+    s8 GetPersonality();
+    static BOOL Is0Or1(int value);
+    void SetMoodFromResult(int result, int detail);
+    void ResetMood();
+    void AddRelationMeter(int index, int change);
+    void SetRelation(int index, u8 rank, u8 meter);
+    void ResetRelations();
+    int FindOtherWithRank2478();
+    int FindOtherWithRank2Or4();
+    int FindOtherWithRank9();
+    BOOL IsRank2478(int rank);
+    BOOL IsRank2Or4(int rank);
+    static BOOL IsRank678(int rank);
+    static BOOL IsRank124(int rank);
+    BOOL IsRank1249Or678(int rank);
+    void SetLongAct(u8 state, u8 partner, s64 end);
+    void ClearLongActFrom(s64 now);
+    void ClearLongAct();
+    void EndLongAct(SavedCharacter *first, SavedCharacter *second);
+    void StartNextLongAct(s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    BOOL IsAway();
+    static BOOL IsAwayState(int state);
+    BOOL IsLongActPaired();
+    static BOOL IsLongActPairedState(int state);
+    BOOL IsLongActWithPartner();
+    static BOOL IsLongActWithPartnerState(int state);
+    BOOL IsLongActAsPartner();
+    static BOOL IsLongActAsPartnerState(int state);
+    static BOOL IsLongAct2BTo2E(int state);
+    BOOL IsLongActIdle();
+    static BOOL IsLongActIdleState(int state);
+    s64 GetLongActDuration(int state, int shift);
+    BOOL IsLongActAvailable(int state);
+    int GetLongActWeight(int state);
+    int GetTotalLongActWeight();
+    int ChooseLongAct();
+    bool IsInTrouble();
+    static bool IsTroubleStateActive(int state);
+    BOOL IsInTroubleWithoutUnknown4Bits8();
+    void SetTrouble(u8 state, u8 category, u8 id);
+    BOOL IsProgressingTrouble();
+    BOOL IsProgressingTroubleInState2();
+    void ResetTroubleProgress();
+    void AddTroubleProgress(int value);
+    static int GetTroubleTimeProgress(s64 now, s64 start);
+    static u32 GetTroubleProgressAt(s64 now, s64 start, int progress);
+    u32 GetTroubleProgress(s64 now);
+    static BOOL IsTroubleProgressFullAt(s64 now, s64 start, int progress);
+    BOOL IsTroubleProgressFull(s64 now);
+    BOOL IsTroubleOfCategory34OrKind20();
+    BOOL IsTroubleOfCategory3Kind8To10();
+    BOOL IsTroubleOfCategory34OrKind18();
+    BOOL IsTrouble3_4();
+    static BOOL IsTrouble3_4State(int state, int category, int id);
+    static int GetEncounterBonus(int base, int value);
+    void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    int ChooseTroubleCategory();
+    int GetTroubleCategoryWeight(int category);
+    int ChooseTrouble(int category);
+    void EndTrouble(s64 now);
+    void ClearTrouble();
+    BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
+    BOOL AddSatisfaction(int value);
+    void ResetSatisfaction();
+    int GetFullness(s64 now);
+    BOOL CanEat(s64 now, u16 item);
+    void Eat(s64 now, u16 item);
+    void ResetEating();
+    void ClearUnknown246();
+    void SetUnknown246ByChance();
+    void SetMeetDate(const RTCDate *date);
+    void GetMeetDate(RTCDate *date);
+    void ResetMeetDate();
+    void ResetTouchTalk();
+    void ClearUnknown1C8();
+    int CountOwnedClothes();
+    void ClearOwnedClothes();
+    u8 GetSongSlot(int slot);
+    void SetSongSlot(int slot, u8 song);
+    void ClearSongSlots();
+    int GetTaste(int item);
+    int GetLiking(int item);
+    void SetUnknown292(int index, u8 value);
+    u8 GetUnknown292(int index);
+    void ResetItemPreferences();
+    BOOL CheckUnknown292();
+    void AddUnknown296(int value);
+    void AddUnknown297(int value);
+    static int GetRelationBloodPairValue(int a, int b);
+    void ResetPatDate();
+    void ResetUnknown2A3();
+    void RandomizeUnknown24E();
+    void ResetUnknown24E();
+    int GetPersonalityPairValue(int a, int b);
+    // Not written yet
+    BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
+    void func_0209e01c();
+    BOOL func_0209ccf0();
+    void func_0209cda4();
+
+    // Marks a row of the clothes table as owned
+    void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }
 
     /* 0x2A4 */ u16 mIndex;              // Which of the saved characters this is
     /* 0x2A6 */ s16 mReaction;
-    /* 0x2A8 */ u8 mUnknown2A8[0x14];
+    /* 0x2A8 */ u32 mUnknown2A8[3];
+    /* 0x2B4 */ int mUnknown2B4;
+    /* 0x2B8 */ int mUnknown2B8;
     /* 0x2BC */ s8 mPersonality;         // 0..15
     /* 0x2BD */ u8 mUnknown2BD[3];
 }; // 0x2C0

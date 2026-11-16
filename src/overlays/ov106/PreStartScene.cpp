@@ -1,4 +1,5 @@
 #include "PreStartScene.h"
+#include "MainProgram.h"
 
 // Overlay 106: what comes before the game starts (PreStartScene). One source file: the scene, its clock and its
 // saving icon, with the scene's implicit destructor, which the compiler emits with the scene's virtual table, at the
@@ -149,7 +150,7 @@ void PreStartScene::Update() {
                 mSavingIcon.mVisible = TRUE;
                 func_0202c8f8(&gGameData, 0);
                 if (!func_0202cd48(&gGameData)) {
-                    func_0203c02c(&gSceneManager, 0xC2);
+                    gSceneManager.RequestScene(0xC2);
                 }
             }
         } else if (mStep == 2) {
@@ -178,7 +179,7 @@ void PreStartScene::Update() {
         }
         break;
     case STATE_LEAVE:
-        func_0203c02c(&gSceneManager, mNextSceneId);
+        gSceneManager.RequestScene(mNextSceneId);
         break;
     }
     UpdateWindow();
@@ -246,7 +247,7 @@ BOOL PreStartScene::ShowMessage(u32 message) {
         func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         for (int i = 0; i < 3; i++) {
-            mWindow[0].mButtons[i].mSprite.mVisible = FALSE;
+            mWindow[0].mButtons[i].mVisible = FALSE;
         }
     } else if (mSubStep == 1) {
         if (mWindow[0].mUnknownAF88) {
@@ -267,8 +268,8 @@ BOOL PreStartScene::ShowOk(u32 message) {
         mWindow[0].mTexts[0].mMessage = message;
         func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
-        mWindow[0].mButtons[MessageWindow::BUTTON_YES].mSprite.mVisible = FALSE;
-        mWindow[0].mButtons[MessageWindow::BUTTON_NO].mSprite.mVisible = FALSE;
+        mWindow[0].mButtons[MessageWindow::BUTTON_YES].mVisible = FALSE;
+        mWindow[0].mButtons[MessageWindow::BUTTON_NO].mVisible = FALSE;
     } else if (mSubStep == 1) {
         if (mWindow[0].mResult != -1) {
             mSubStep++;
@@ -295,7 +296,7 @@ BOOL PreStartScene::Ask(u32 message, int flags) {
         mAnswer = -1;
         func_02034f38(&mWindow[0], 0, message);
         func_02034720(&mWindow[0], flags, 0);
-        mWindow[0].mButtons[MessageWindow::BUTTON_OK].mSprite.mVisible = FALSE;
+        mWindow[0].mButtons[MessageWindow::BUTTON_OK].mVisible = FALSE;
     } else if (mSubStep == 1) {
         int result = mWindow[0].mResult;
         if (result == MessageWindow::BUTTON_YES || result == MessageWindow::BUTTON_NO) {

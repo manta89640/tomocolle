@@ -39,7 +39,7 @@ gStr_M00_body_imd kind:data(any) addr:0x0214a7c4
 gText_MataBaguDeSuka kind:data(any) addr:0x0214a7d4
 gStr_M00_anim00_itp kind:data(any) addr:0x0214a7e4
 gStr_M01_anim00_itp kind:data(any) addr:0x0214a7f4
-data_ov027_0214a80c kind:data(any) addr:0x0214a80c ambiguous
+_ZTV7Scene4F kind:data(any) addr:0x0214a804
 data_ov027_0214a828 kind:data(any) addr:0x0214a828
 data_ov027_0214a838 kind:data(any) addr:0x0214a838 ambiguous
 data_ov027_0214a848 kind:data(any) addr:0x0214a848 ambiguous

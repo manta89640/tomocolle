@@ -563,6 +563,19 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
   `MiiEditProfilePage::Update`).
 
+- A list filled in a loop with its count kept through a pointer (`*count`) and an index of its own: `list[n] =
+  item; (*count)++; n++;` gave the original's registers, where `list[n++] = item` swaps the two counters
+  (Item.cpp's list getters).
+- A row of furniture placed from a table, where the original computes the element's address from the counter at
+  each pass and ours strength-reduces it: an inline member taking the index (`SetPartPosition(i, pos)`) of the
+  class that holds the array (Room.cpp's `LoadParts`).
+- Two members set from one value without a reload: `mAngle = mTargetAngle = 0;` (Mannequin.cpp).
+- A constructor that stores its virtual table after a member's constructor call has that "member" as a second base
+  class (`ItemModel : public AnimModel, public InventoryItem`; `Room : public InteriorItem, public RoomModels`).
+- dsd gives each delinked unit's sections the module's alignment and takes no `align:` on a file's line: a unit (or
+  the gap after one) whose `.rodata` starts at a two-aligned address moves everything after it. Look for a small
+  object that lets the boundary be four-aligned (the room file's halfword at `0x020FBFD4`).
+
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
@@ -689,6 +702,21 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Pitfall: a zero-length padding array in a class (a `sizeof` that came out 0) made mwcc drop a member array's
   `__cxa_vec_cleanup` from the implicit destructor without a word (overlay 76).
 
+**Constructors**
+- Constructors called out of line from a function that would inline them are defined out of line (the scene
+  factory's constructors, `src/scene/SceneManager.cpp`): an inline constructor in the class gets inlined into the
+  caller, however many cases it has.
+- An array of a class with a destructor is constructed by `__cxa_vec_ctor`; without one, by a loop. A loop that runs
+  once is an array of one (`MessageWindow mWindow[1]`); a single member gets no loop.
+- Members that the original addresses from the end pointer of the loop before them (`add r0, r5, #0x174` with r5
+  the loop's end) are members of a part of their own that starts there; as plain members they are addressed from
+  `this` (`Scene74Part`, `RankingPart`).
+- A class whose table is another file's needs a non-inline virtual function declared (its key function), or a file
+  that constructs it emits its table too (`Scene75Model::Draw`). A class with nothing virtual of its own gets its
+  table emitted where it is constructed (`TestNg134Model`).
+- Two byte-identical constructors one after the other are C2 then C1: members and array elements use C1, a base
+  subobject C2 (`HeadIcon`, `ParticleSystem`, `CharacterModel`).
+
 **Scenes**
 - A scene's virtual table symbol goes at the table's start, and the main program's constructor's reference to it is
   `to:<table> add:0x8 module:overlay(<n>)`.
@@ -729,6 +757,30 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`mwccarm-3.0-138.exe` for the game, `-3.0-137.exe` for the Mii transfer), against about twenty under wine. The
   code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
   one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
+
+**Found on the character code (`src/character/`)**
+- A chain of assignments, `mMoveAngle = mAngle = mTargetAngle = mWalkAngle = 0;`, gives the original's order of the
+  stores and of the constants' registers where one statement per field schedules them otherwise (`Character::Init`,
+  `CharacterBase::ResetFace`, `CharacterHead::Init`: `mPrevAnimId = mAnimId = -1`).
+- Two dead copies of globals passed to a function by pointer are the by-value parameters of an inline overload:
+  `BOOL HitTestJoint(VecFx32 origin, VecFx32 dir, int joint) { return HitTestJoint(&origin, &dir, joint); }`.
+- `VEC_Set(&r->scale, s.x, s.y, s.z)` loads the three in reverse and stores them with one `stmib`, where a structure
+  copy or three assignments do not (the model's joint callback).
+- A template the file uses keeps an unused parameter only when it is not `static`: with `static` and `-ipa file`
+  the compiler drops the argument at every call (`ClampField` in `SavedCharacter::Validate`, whose name strings
+  otherwise vanish from the literal pools).
+- `FX32_CONST(variable)` is a floating-point conversion; shift instead.
+- A switch of hundreds of cases (`CharacterSort::GetCollationKey`) can be written from the original's compare tree
+  by running the tree for every input value (a small interpreter of its `cmp`/branch/jump-table code) and listing one
+  case per body in the bodies' address order; the compiler then rebuilds the same tree.
+- Functions whose body is a table of character conversions are best understood by running them in an emulator over
+  every character (unicorn, on `extract/.../arm9.bin`): that is how the normalization steps were named.
+- A unit whose constructor builds an `AnimModel` member after another member with an out-of-line constructor emits
+  `~AnimModel` (binding 13); it cannot be linked while the gap holds the global `0x0202AF98`, and marking that symbol
+  weak makes the linker keep the new copy instead (`CharacterModel.cpp`, matched but not complete).
+- The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
+  them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
+  the ROM's name) placed all twelve.
 
 ## A match is instructions and references
 

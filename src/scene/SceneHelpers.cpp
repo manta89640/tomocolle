@@ -1,6 +1,7 @@
 #include "SceneHelpers.h"
 
 #include "GameData.h"
+#include "SceneManager.h"
 #include "SceneMemory.h"
 
 #include <string.h>
@@ -8,8 +9,6 @@
 
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
-void func_0203c02c(void *manager, int sceneId); // Asks for the next scene
-extern u8 gSceneManager[];
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // Turns a text into the speech synthesizer's notation (readings), from src into dst, of size bytes
 void func_020372d0(wchar_t *dst, const wchar_t *src, int size);
@@ -45,11 +44,11 @@ void MakeCharacterSpeechTexts(CharacterSpeechTexts *texts, SavedCharacter *chara
     func_020372bc(texts->mNameReading, sizeof(texts->mNameReading));
     int length = sizeof(texts->mNameReadingSjis);
     STD_ConvertStringUnicodeToSjis(texts->mNameReadingSjis, &length, (const u16 *)texts->mNameReading, NULL, NULL);
-    if (wcslen(character->mSpeechDefault) == 0) {
+    if (wcslen(character->mMotto) == 0) {
         wcscpy(texts->mPhrase, L"ミニュウリョク");
         texts->mHasPhrase = FALSE;
     } else {
-        wcscpy(texts->mPhrase, character->mSpeechDefault);
+        wcscpy(texts->mPhrase, character->mMotto);
         texts->mHasPhrase = TRUE;
     }
     func_020372d0(texts->mPhraseReading, texts->mPhrase, sizeof(texts->mPhraseReading));
@@ -448,7 +447,7 @@ void ReturnButton::Update() {
     mPressed = FALSE;
     if (func_0203133c(this)) {
         if (mSceneId != -1) {
-            func_0203c02c(gSceneManager, mSceneId);
+            gSceneManager.RequestScene(mSceneId);
         }
         mPressed = TRUE;
     }
@@ -469,16 +468,16 @@ void ReturnButton::UnmountArchive() {
 
 void SceneRoom::Load(u16 style) {
     mStyle = style;
-    func_020a54c4(this, "CO0", 0);
-    func_020a56bc(this, "RM", 0);
+    Mount("CO0", 0);
+    MountAll("RM", 0);
 }
 
 void SceneRoom::Init(int slot, int slot2, BOOL doorTurned) {
     mState = 0;
     mFrame = 0;
-    func_020a5514(this, slot);
-    func_020a5760(this, slot2);
-    func_020a4ab8(&mParts, 0);
+    Room::Load(slot);
+    LoadParts(slot2);
+    mParts.SetState(0);
     if (doorTurned) {
         mParts.mDoor.mRotY = 0x8000;
     }
@@ -487,7 +486,7 @@ void SceneRoom::Init(int slot, int slot2, BOOL doorTurned) {
 void SceneRoom::Update() {
     switch (mState) {
     case 0:
-        func_020a5960(this);
+        Room::Update();
         if (++mFrame >= 2) {
             mState = 1;
         }
@@ -495,11 +494,11 @@ void SceneRoom::Update() {
     case 1:
         break;
     }
-    func_020a4a50(&mParts);
+    mParts.Draw();
 }
 
 void SceneRoom::Draw() {
-    func_020a5948(this);
+    ReleaseAll();
 }
 
 // Hides parts of the room: 0 those the style gives 0 or less, 1 those it gives 0 or more, 2 all; 3 sets the
@@ -524,7 +523,7 @@ void SceneRoom::ShowParts(int mode) {
             mParts.mParts[i].mModel.mVisible = FALSE;
             break;
         case 3:
-            func_020a4ab8(&mParts, 2);
+            mParts.SetState(2);
             break;
         }
     }
@@ -568,7 +567,7 @@ void NewsButton::Update(Scene *scene, BOOL leave) {
         if (leave) {
             scene->mSkipFade = TRUE;
             func_02023f4c(&data_0211d604, 0x3F, -16);
-            func_0203c02c(gSceneManager, 0x49);
+            gSceneManager.RequestScene(0x49);
         }
     }
 }

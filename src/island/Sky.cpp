@@ -18,7 +18,6 @@ void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and t
 void Clock_GetTime(void *clock, RTCTime *time);
 const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_020145d8(char *dst, const char *src); // Appends a string
 }
 
 static inline u16 Rand(u16 max) {
@@ -230,24 +229,24 @@ void SkyPalette::LoadPalette() {
     if (mDaytime) {
         if (mChanging) {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_DAY_Chg.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_DAY_Chg.ncl");
         } else if (mFine) {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_AM_Fine.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_AM_Fine.ncl");
         } else {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_AM_Cloud.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_AM_Cloud.ncl");
         }
     } else {
         if (mChanging) {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_NIGHT_Chg.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_NIGHT_Chg.ncl");
         } else if (mFine) {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_PM_Fine.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_PM_Fine.ncl");
         } else {
             STD_CopyString(path, mArchiveName);
-            func_020145d8(path, ":/Fw_BG_up_PM_Cloud.ncl");
+            STD_ConcatenateString(path, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
     mPalette = func_02027534(&data_021213b8, path, mPlane, mPhase * 32, 0, 0x20);
@@ -600,36 +599,36 @@ void Sky::LoadPalettes() {
     if (mDaytime) {
         if (mChanging) {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_DAY_Chg.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_DAY_Chg.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_DAY_Chg.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_DAY_Chg.ncl");
         } else if (mFine) {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_AM_Fine.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_AM_Fine.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_AM_Fine.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_AM_Fine.ncl");
         } else {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_AM_Cloud.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_AM_Cloud.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_AM_Cloud.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_AM_Cloud.ncl");
         }
     } else {
         if (mChanging) {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_NIGHT_Chg.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_NIGHT_Chg.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_NIGHT_Chg.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_NIGHT_Chg.ncl");
         } else if (mFine) {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_PM_Fine.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_PM_Fine.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_PM_Fine.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_PM_Fine.ncl");
         } else {
             STD_CopyString(objPath, mArchiveName);
-            func_020145d8(objPath, ":/Fw_Obj_up_PM_Cloud.ncl");
+            STD_ConcatenateString(objPath, ":/Fw_Obj_up_PM_Cloud.ncl");
             STD_CopyString(bgPath, mArchiveName);
-            func_020145d8(bgPath, ":/Fw_BG_up_PM_Cloud.ncl");
+            STD_ConcatenateString(bgPath, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
     mObjPalette = func_02027534(&data_021213b8, objPath, mObjPlane, mPhase * 32, 0, 0x20);
