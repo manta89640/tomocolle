@@ -674,8 +674,66 @@ int NFLi_MakeFaceMesh(NFLMakeCtx *ctx) {
     return 1;
 }
 
-// The hair's mesh
-#pragma optimization_level 2
+// Display-list commands through inline functions. The hair meshes and NFLi_DLScale were compiled without the IR
+// optimiser's passes (the pragmas around them), and there the arguments of an inlined call are bound to its
+// parameters from the last to the first: the original loads every argument of these commands last to first, which
+// a direct call does not give.
+static inline void NFLi_PutTranslate(GXDLInfo *dl, fx32 x, fx32 y, fx32 z) {
+    G3C_Translate(dl, x, y, z);
+}
+
+static inline void NFLi_PutScale(GXDLInfo *dl, fx32 x, fx32 y, fx32 z) {
+    G3C_Scale(dl, x, y, z);
+}
+
+static inline void NFLi_PutNormal(GXDLInfo *dl, fx16 x, fx16 y, fx16 z) {
+    G3C_Normal(dl, x, y, z);
+}
+
+static inline void NFLi_PutTexCoord(GXDLInfo *dl, fx32 s, fx32 t) {
+    G3C_TexCoord(dl, s, t);
+}
+
+static inline void NFLi_PutVtx(GXDLInfo *dl, fx16 x, fx16 y, fx16 z) {
+    G3C_Vtx(dl, x, y, z);
+}
+
+static inline void NFLi_PutVtxXY(GXDLInfo *dl, fx16 x, fx16 y) {
+    G3C_VtxXY(dl, x, y);
+}
+
+static inline void NFLi_PutVtxXZ(GXDLInfo *dl, fx16 x, fx16 z) {
+    G3C_VtxXZ(dl, x, z);
+}
+
+static inline void NFLi_PutVtxYZ(GXDLInfo *dl, fx16 y, fx16 z) {
+    G3C_VtxYZ(dl, y, z);
+}
+
+static inline void NFLi_PutPolygonAttr(GXDLInfo *dl, int light, GXPolygonMode polyMode, GXCull cullMode, int polygonID,
+                                       int alpha, int misc) {
+    G3C_PolygonAttr(dl, light, polyMode, cullMode, polygonID, alpha, misc);
+}
+
+static inline void NFLi_PutTexImageParam(GXDLInfo *dl, GXTexFmt texFmt, GXTexGen texGen, GXTexSizeS s, GXTexSizeT t,
+                                         GXTexRepeat repeat, GXTexFlip flip, GXTexPlttColor0 pltt0, u32 addr) {
+    G3C_TexImageParam(dl, texFmt, texGen, s, t, repeat, flip, pltt0, addr);
+}
+
+static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) {
+    G3C_TexPlttBase(dl, addr, texFmt);
+}
+
+// The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
+#pragma push
+#pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_loop_invariants off
+#pragma opt_strength_reduction off
+#pragma opt_rotateloops off
+#pragma opt_scalarize off
+#pragma opt_rebuildlogicals off
+#pragma opt_collapselogicalselectionintobittest off
 int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
@@ -688,10 +746,10 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     VecFx16 vertex;
     VecFx16 normal;
     int i;
-    int polygons;
+    u8 polygons;
     NFLFace *obj = ctx->face;
     const NFLCharData *mii = ctx->mii;
-    BOOL bald;
+    BOOL textured;
     GXTexSizeS s;
     GXTexSizeT t;
     GXTexFmt format;
@@ -702,9 +760,9 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     int tc;
 
     stream = NFLi_GetResourceItem(0x12, mii->hairType);
-    bald = mii->hairType == 0x22 || mii->hairType == 0x39;
-    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
-    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    textured = mii->hairType == 0x22 || mii->hairType == 0x39;
+    s = textured ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = textured ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
     obj->polyPatches[1].cmd = NULL;
     obj->polyPatches[1].param = NULL;
     obj->polyPatches[1].flip = 0;
@@ -717,23 +775,23 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     if (obj->texFmt == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
-        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+        format = textured ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
     }
     obj->polyPatches[1].cmd = ctx->dl.curr_cmd;
     obj->polyPatches[1].param = ctx->dl.curr_param;
     obj->polyPatches[1].flip = mii->hairFlip;
-    G3C_PolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
-    G3C_TexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_USE,
+    NFLi_PutPolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    NFLi_PutTexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_USE,
                       ctx->partAddr[5].texAddr);
     if (format != GX_TEXFMT_DIRECT) {
-        G3C_TexPlttBase(&ctx->dl, ctx->partAddr[5].plttAddr, format);
+        NFLi_PutTexPlttBase(&ctx->dl, ctx->partAddr[5].plttAddr, format);
     }
     G3C_PushMtx(&ctx->dl);
     position.x = ctx->anchors[2].x;
     position.y = ctx->anchors[2].y;
     position.z = ctx->anchors[2].z;
     NFLi_MapVecFx32(obj, &translation, &position);
-    G3C_Translate(&ctx->dl, translation.x, translation.y, translation.z);
+    NFLi_PutTranslate(&ctx->dl, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
         position.y = FX32_ONE;
@@ -747,43 +805,53 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
         func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
-        if (!bald) {
-            G3C_TexCoord(&ctx->dl, 0x8000, 0x8000);
+        if (!textured) {
+            NFLi_PutTexCoord(&ctx->dl, 0x8000, 0x8000);
         }
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
             n = NFLi_ReadU8(&stream) * 3;
             tc = NFLi_ReadU8(&stream) * 2;
-            if (bald) {
-                G3C_TexCoord(&ctx->dl, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            if (textured) {
+                NFLi_PutTexCoord(&ctx->dl, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
-            G3C_Normal(&ctx->dl, normal.x, normal.y, normal.z);
+            NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
             NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
-                    G3C_VtxYZ(&ctx->dl, vertex.y, vertex.z);
+                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
                 } else if (prev.y == vertex.y) {
-                    G3C_VtxXZ(&ctx->dl, vertex.x, vertex.z);
+                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
                 } else if (prev.z == vertex.z) {
-                    G3C_VtxXY(&ctx->dl, vertex.x, vertex.y);
+                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
                 } else {
-                    G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
                 }
             } else {
-                G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
             }
-            prev = vertex;
+            prev.x = vertex.x;
+            prev.y = vertex.y;
+            prev.z = vertex.z;
         }
         func_02005148(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
 }
-#pragma optimization_level reset
+#pragma pop
 
 // The hair's other mesh, for the types with a texture of their own
-#pragma optimization_level 2
+#pragma push
+#pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_loop_invariants off
+#pragma opt_strength_reduction off
+#pragma opt_rotateloops off
+#pragma opt_scalarize off
+#pragma opt_rebuildlogicals off
+#pragma opt_collapselogicalselectionintobittest off
 int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
@@ -796,11 +864,11 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     VecFx16 vertex;
     VecFx16 normal;
     int i;
-    int polygons;
+    u8 polygons;
     NFLFace *obj = ctx->face;
     const NFLCharData *mii = ctx->mii;
     int type;
-    BOOL bald;
+    BOOL textured;
     GXTexSizeS s;
     GXTexSizeT t;
     GXTexFmt format;
@@ -812,10 +880,10 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
 
     type = mii->hairType;
     stream = NFLi_GetResourceItem(9, type);
-    bald = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+    textured = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
            type == 0x45 || type == 0x47;
-    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
-    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    s = textured ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = textured ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
     obj->polyPatches[0].cmd = NULL;
     obj->polyPatches[0].param = NULL;
     obj->polyPatches[0].flip = 0;
@@ -828,23 +896,23 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     if (obj->texFmt == 7) {
         format = GX_TEXFMT_DIRECT;
     } else {
-        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+        format = textured ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
     }
     obj->polyPatches[0].cmd = ctx->dl.curr_cmd;
     obj->polyPatches[0].param = ctx->dl.curr_param;
     obj->polyPatches[0].flip = mii->hairFlip;
-    G3C_PolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
-    G3C_TexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_NONE,
+    NFLi_PutPolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    NFLi_PutTexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_NONE,
                       type == 0x1D ? GX_TEXPLTTCOLOR0_TRNS : GX_TEXPLTTCOLOR0_USE, ctx->partAddr[2].texAddr);
     if (obj->texFmt != 7) {
-        G3C_TexPlttBase(&ctx->dl, ctx->partAddr[2].plttAddr, format);
+        NFLi_PutTexPlttBase(&ctx->dl, ctx->partAddr[2].plttAddr, format);
     }
     G3C_PushMtx(&ctx->dl);
     position.x = ctx->anchors[2].x;
     position.y = ctx->anchors[2].y;
     position.z = ctx->anchors[2].z;
     NFLi_MapVecFx32(obj, &translation, &position);
-    G3C_Translate(&ctx->dl, translation.x, translation.y, translation.z);
+    NFLi_PutTranslate(&ctx->dl, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
         position.y = FX32_ONE;
@@ -858,43 +926,53 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
         func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
-        if (!bald) {
-            G3C_TexCoord(&ctx->dl, 0, 0);
+        if (!textured) {
+            NFLi_PutTexCoord(&ctx->dl, 0, 0);
         }
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
             n = NFLi_ReadU8(&stream) * 3;
             tc = NFLi_ReadU8(&stream) * 2;
-            if (bald) {
-                G3C_TexCoord(&ctx->dl, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            if (textured) {
+                NFLi_PutTexCoord(&ctx->dl, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
-            G3C_Normal(&ctx->dl, normal.x, normal.y, normal.z);
+            NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
             NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
-                    G3C_VtxYZ(&ctx->dl, vertex.y, vertex.z);
+                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
                 } else if (prev.y == vertex.y) {
-                    G3C_VtxXZ(&ctx->dl, vertex.x, vertex.z);
+                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
                 } else if (prev.z == vertex.z) {
-                    G3C_VtxXY(&ctx->dl, vertex.x, vertex.y);
+                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
                 } else {
-                    G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
                 }
             } else {
-                G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
             }
-            prev = vertex;
+            prev.x = vertex.x;
+            prev.y = vertex.y;
+            prev.z = vertex.z;
         }
         func_02005148(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
 }
-#pragma optimization_level reset
+#pragma pop
 
 // The hair's third mesh, untextured
-#pragma optimization_level 2
+#pragma push
+#pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_loop_invariants off
+#pragma opt_strength_reduction off
+#pragma opt_rotateloops off
+#pragma opt_scalarize off
+#pragma opt_rebuildlogicals off
+#pragma opt_collapselogicalselectionintobittest off
 int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
     s16 normals[0x5C4];
@@ -906,7 +984,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     VecFx16 vertex;
     VecFx16 normal;
     int i;
-    int polygons;
+    u8 polygons;
     NFLFace *obj = ctx->face;
     const NFLCharData *mii = ctx->mii;
     GXTexFmt format;
@@ -928,18 +1006,18 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     obj->polyPatches[2].cmd = ctx->dl.curr_cmd;
     obj->polyPatches[2].param = ctx->dl.curr_param;
     obj->polyPatches[2].flip = mii->hairFlip;
-    G3C_PolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
-    G3C_TexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+    NFLi_PutPolygonAttr(&ctx->dl, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    NFLi_PutTexImageParam(&ctx->dl, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
                       GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->colorTexAddr);
     if (obj->texFmt != 7) {
-        G3C_TexPlttBase(&ctx->dl, obj->colorPlttAddr, format);
+        NFLi_PutTexPlttBase(&ctx->dl, obj->colorPlttAddr, format);
     }
     G3C_PushMtx(&ctx->dl);
     position.x = ctx->anchors[2].x;
     position.y = ctx->anchors[2].y;
     position.z = ctx->anchors[2].z;
     NFLi_MapVecFx32(obj, &translation, &position);
-    G3C_Translate(&ctx->dl, translation.x, translation.y, translation.z);
+    NFLi_PutTranslate(&ctx->dl, translation.x, translation.y, translation.z);
     if (mii->hairFlip) {
         position.x = -FX32_ONE;
         position.y = FX32_ONE;
@@ -953,34 +1031,36 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
         func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
-        G3C_TexCoord(&ctx->dl, 0x8000, 0);
+        NFLi_PutTexCoord(&ctx->dl, 0x8000, 0);
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
             n = NFLi_ReadU8(&stream) * 3;
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
-            G3C_Normal(&ctx->dl, normal.x, normal.y, normal.z);
+            NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
             NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
                 if (prev.x == vertex.x) {
-                    G3C_VtxYZ(&ctx->dl, vertex.y, vertex.z);
+                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
                 } else if (prev.y == vertex.y) {
-                    G3C_VtxXZ(&ctx->dl, vertex.x, vertex.z);
+                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
                 } else if (prev.z == vertex.z) {
-                    G3C_VtxXY(&ctx->dl, vertex.x, vertex.y);
+                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
                 } else {
-                    G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
                 }
             } else {
-                G3C_Vtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
             }
-            prev = vertex;
+            prev.x = vertex.x;
+            prev.y = vertex.y;
+            prev.z = vertex.z;
         }
         func_02005148(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
 }
-#pragma optimization_level reset
+#pragma pop
 
 // The glasses' mesh
 int NFLi_MakeGlassesMesh(NFLMakeCtx *ctx) {
@@ -4156,21 +4236,30 @@ void NFLi_DLTranslate(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y,
     G3C_Translate(info, out.x, out.y, out.z);
 }
 
-// Not matching: the original loads G3C_Scale's arguments last to first (out[2], out[1], out[0]). The stores to in
-// are the original's too, which keeps them only while its address is taken: hence the index i
+// G3C_Scale. Compiled as the hair meshes, without the IR optimiser's passes: the stores to in stay, and the
+// arguments go through NFLi_PutScale last to first
+#pragma push
+#pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_loop_invariants off
+#pragma opt_strength_reduction off
+#pragma opt_rotateloops off
+#pragma opt_scalarize off
+#pragma opt_rebuildlogicals off
+#pragma opt_collapselogicalselectionintobittest off
 void NFLi_DLScale(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
     VecFx32 in;
     fx32 out[3];
-    int i = 0;
 
     in.x = x;
     in.y = y;
     in.z = z;
-    out[ctx->xAxis] = ((fx32 *)&in)[i];
-    out[ctx->yAxis] = ((fx32 *)&in)[i + 1];
-    out[ctx->zAxis] = ((fx32 *)&in)[i + 2];
-    G3C_Scale(info, out[0], out[1], out[2]);
+    out[ctx->xAxis] = in.x;
+    out[ctx->yAxis] = in.y;
+    out[ctx->zAxis] = in.z;
+    NFLi_PutScale(info, out[0], out[1], out[2]);
 }
+#pragma pop
 
 // G3C_Vtx
 void NFLi_DLVtx(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
