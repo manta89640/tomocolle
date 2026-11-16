@@ -175,8 +175,8 @@ data_ov076_02159990 kind:data(any) addr:0x02159990 local
 data_ov076_02159ab0 kind:data(any) addr:0x02159ab0 local
 data_ov076_02159c10 kind:data(any) addr:0x02159c10 local
 data_ov076_02159de0 kind:data(any) addr:0x02159de0 local
-__sinit_ov076_0215a020 kind:function(arm,size=0xc8) addr:0x0215a020
-.p__sinit_ov076_0215a020 kind:data(word) addr:0x0215a0e8
+__sinit_MiiEditScene.cpp kind:function(arm,size=0xc8) addr:0x0215a020 local
+.p__sinit_MiiEditScene.cpp kind:data(word) addr:0x0215a0e8 local
 data_ov076_0215a100 kind:data(any) addr:0x0215a100
 data_ov076_0215a102 kind:data(any) addr:0x0215a102
 data_ov076_0215a106 kind:data(any) addr:0x0215a106
