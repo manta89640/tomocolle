@@ -21,4 +21,8 @@ SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
     mResidentCount = 0;
 }
 
+SavePlayCharacter::SavePlayCharacter() {}
+
+SavePlayCharacter::~SavePlayCharacter() {}
+
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-c) -------------------------------------------------
