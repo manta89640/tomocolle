@@ -230,19 +230,19 @@ u8 CharacterSave::GetRoomNumber() {
 }
 
 u8 CharacterSave::GetAffinity(int index) {
-    return mBody.mRecord.mAffinity[index];
+    return mBody.mRecord.mRelationMeter[index];
 }
 
 u8 CharacterSave::GetEvent() {
-    return mBody.mRecord.mEvent;
+    return mBody.mRecord.mLongActState;
 }
 
 u8 CharacterSave::GetEventPartner() {
-    return mBody.mRecord.mEventPartner;
+    return mBody.mRecord.mLongActPartner;
 }
 
 s64 CharacterSave::GetEventEnd() {
-    return mBody.mRecord.mEventEnd;
+    return mBody.mRecord.mLongActEnd;
 }
 
 s64 CharacterSave::GetAwayUntil() {
@@ -254,7 +254,7 @@ s64 CharacterSave::GetUnknown228() {
 }
 
 u8 CharacterSave::GetMoodLocked() {
-    return mBody.mRecord.mMoodLocked;
+    return mBody.mRecord.mTroubleState;
 }
 
 u8 CharacterSave::GetUnknown23B() {
@@ -262,11 +262,11 @@ u8 CharacterSave::GetUnknown23B() {
 }
 
 u8 CharacterSave::GetUnknown226() {
-    return mBody.mRecord.mUnknown226;
+    return mBody.mRecord.mTroubleId;
 }
 
 u8 CharacterSave::GetUnknown227() {
-    return mBody.mRecord.mUnknown227;
+    return mBody.mRecord.mTroubleCategory;
 }
 
 u8 CharacterSave::GetMood() {
@@ -286,7 +286,7 @@ u8 CharacterSave::GetSongSlot(int index) {
 }
 
 u8 CharacterSave::GetRelationToPlayer() {
-    return mBody.mRecord.mRelationToPlayer;
+    return mBody.mRecord.mRelationBlood;
 }
 
 u32 CharacterSave::GetBirthYear() {
