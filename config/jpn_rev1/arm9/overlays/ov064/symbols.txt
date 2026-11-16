@@ -8,7 +8,7 @@ func_ov064_02149e84 kind:function(arm,size=0x30) addr:0x02149e84
 data_ov064_02149ec0 kind:data(any) addr:0x02149ec0
 data_ov064_02149ec4 kind:data(any) addr:0x02149ec4
 data_ov064_02149ec8 kind:data(any) addr:0x02149ec8 ambiguous
-data_ov064_02149ee0 kind:data(any) addr:0x02149ee0 ambiguous
+_ZTV14TestNg149Scene kind:data(any) addr:0x02149ed8
 gStr_3BG_ov064 kind:data(any) addr:0x02149efc
 gStr_M00_ov064 kind:data(any) addr:0x02149f00
 data_ov064_02149f04 kind:data(any) addr:0x02149f04

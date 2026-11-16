@@ -68,6 +68,9 @@
 #include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov056/TestNg136Scene.h"
 #include "../overlays/ov057/TestNg137Scene.h"
+#include "../overlays/ov063/SceneBA.h"
+#include "../overlays/ov064/TestNg149Scene.h"
+#include "../overlays/ov097/Marriage2Scene.h"
 // End of gap38-b's scene classes
 
 extern "C" {
@@ -760,11 +763,11 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xBF:
         SetSoundGroup(-2);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(64));
-        return new SceneBF(sceneId);
+        return new TestNg149Scene(sceneId);
     case 0xC0:
     case 0xC1:
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(97));
-        return new SceneC0(sceneId);
+        return new Marriage2Scene(sceneId);
     case 0xC2:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(107));
@@ -928,4 +931,13 @@ TestNg136Scene::TestNg136Scene(int sceneId) : Scene(sceneId) {}
 // Scenes 0x95, 0x96, 0x97, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1 and 0xA2, overlay 57
 TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
 
-// ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-c) -------------------------------------------------
+// ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-b, taken over from gap38-c) ---------------------
+
+// Scenes 0xBA, 0xBB, 0xBC, 0xBD and 0xBE, overlay 63
+SceneBA::SceneBA(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xBF, overlay 64
+TestNg149Scene::TestNg149Scene(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0xC0 and 0xC1, overlay 97
+Marriage2Scene::Marriage2Scene(int sceneId) : Scene(sceneId) {}

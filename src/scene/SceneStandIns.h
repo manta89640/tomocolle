@@ -175,12 +175,6 @@ SCENE_STAND_IN(SceneB8, 0x1A99C); // func_02049970
 
 SCENE_STAND_IN(SceneB9, 0x1A760); // func_02049a94
 
-SCENE_STAND_IN(SceneBA, 0x1A210); // func_02049b90
-
-SCENE_STAND_IN(SceneBF, 0x128); // func_02049ca8
-
-SCENE_STAND_IN(SceneC0, 0x35BF0); // func_02049d28
-
 SCENE_STAND_IN(SaveErrorScene, 0xAFEC); // _ZN14SaveErrorSceneC1Ei
 
 
