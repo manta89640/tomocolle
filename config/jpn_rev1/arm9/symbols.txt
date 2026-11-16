@@ -6101,11 +6101,11 @@ gStr_TouchTalkMonth kind:data(any) addr:0x02114f38
 gStr_TouchTalkDay kind:data(any) addr:0x02114f48
 gStr_TouchTalkHour kind:data(any) addr:0x02114f58
 gStr_RelationBlood kind:data(any) addr:0x02114f68
-data_02114f80 kind:data(any) addr:0x02114f80
-data_02114fa4 kind:data(any) addr:0x02114fa4
-data_02114fc8 kind:data(any) addr:0x02114fc8
-data_02114fec kind:data(any) addr:0x02114fec
-data_02115008 kind:data(any) addr:0x02115008
+_ZTV4Item kind:data(any) addr:0x02114f78
+_ZTV11ClothesItem kind:data(any) addr:0x02114f9c
+_ZTV13InventoryItem kind:data(any) addr:0x02114fc0
+_ZTV9ItemModel kind:data(any) addr:0x02114fe4
+data_02115000 kind:data(any) addr:0x02115000
 gStr_Mdl_Item_item000_3D_LZ_bin kind:data(any) addr:0x02115024
 gStr_XXX_item_imd kind:data(any) addr:0x02115040
 gStr_Mdl_Item_item000_3D_LZ_bin_2 kind:data(any) addr:0x02115050
@@ -6116,8 +6116,8 @@ data_02115098 kind:data(any) addr:0x02115098
 gText_QuestionQuestionQuestion kind:data(any) addr:0x021150ac
 gText_ kind:data(any) addr:0x021150b4
 gText_QuestionQuestionQuestion_2 kind:data(any) addr:0x021150b8
-data_021150c8 kind:data(any) addr:0x021150c8
-data_021150ec kind:data(any) addr:0x021150ec
+_ZTV4Room kind:data(any) addr:0x021150c0
+_ZTV12InteriorItem kind:data(any) addr:0x021150e4
 gStr_ColonSolidus_2 kind:data(any) addr:0x02115108
 gStr_ColonSolidus_3 kind:data(any) addr:0x0211510c
 gStr_Mdl_Room kind:data(any) addr:0x02115110
