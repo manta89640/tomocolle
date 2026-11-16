@@ -937,29 +937,45 @@ Not done:
 
 `src/keyboard/Keyboard.cpp` (`0x02082EAC` to `0x02083DC4`, 34 functions) is complete: every function matches and the
 unit is linked from its object. It is the object a scene holds for the on-screen keyboard (`SoftKeyboard`,
-`include/keyboard/SoftKeyboard.h`, 0x6014 bytes), and sets up and draws the keyboard's core
-(`KeyboardCore.cpp`) through it. Measured:
+`include/keyboard/SoftKeyboard.h`, 0x5FF8 bytes), and sets up and draws the keyboard's core
+(`KeyboardCore.cpp`) through it. Every function is a member of `SoftKeyboard` or `KeyboardButton`; the two that
+the core calls back are static members. Measured:
 
 - **Callers.** The main program's scene constructors construct it (`_ZN12SoftKeyboardC1Ev`, six calls), and
-  `func_0204ce88`/`func_0204d178` of the main program and overlays 43, 75, 76, 92 and 93 use it. The main program's
-  set-up is `SetArchiveName("KBD")`, `func_02083078` (the background plane 0x100 and a palette),
-  `func_02083288(0, 0)`, `func_0208382c` (the sprite resource, a message file, a character offset, the layout),
-  `func_02083c30` and `GetButtonCharCount`; the overlays call the same functions.
+  `func_0204ce88`/`func_0204d178` of the main program and overlays 43, 75, 76, 92 and 93 use it. The set-up, the
+  same in all six: `SetArchiveName("KBD")`, `InitBg(0x100, 0)` (the background plane, and the offset of the palette
+  in `fs_keyboardColor.ncl`), `SetMode(0, FALSE)`, `InitObj` (the sprite resource, a message file, a character
+  offset, an argument of `LoadObjCells`, the layout and the sprite palette: `0, file, n, -1, 0, 13` in the main
+  program, `0, file, n, 0x14000, 4, 13` in overlay 43), `EnableTabs` and `GetButtonCharCount`. Each frame they call
+  `Update` with a pad of 0 and `gTouchInput`'s touch data, then `KeyboardCore_GetChar`. `func_0204d178` loads the
+  `MNU:BG_down` background onto the plane when A is pressed (`data_0211f9d4`'s trigger), and when B is, the
+  keyboard's again with `InitBg` and `LoadObj`.
+- **Background.** `InitBg` is `InitBgGraphics` (the core's buffers and the five NCGR paths, `KeyboardCore_InitGraphics`;
+  the plane), `InitCore` (`KeyboardCore_Init` at the keys' origin (45, 59) with `PlayKeySound` as the sound
+  callback, the screen made by `KeyboardCore_MakeScreen`, the plane scrolled to the origin), then
+  `TransferCharData`, `TransferScreen` and `LoadBgPalette`.
 - **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
-  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given
-  (`func_02081d68`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
-  and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite, its resource and layout, and the
-  three sprite paths. Every path starts `xxx:/`, which `SetArchiveName` overwrites with the archive's mount name.
+  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given (`mBaseCharData`,
+  `mCharData`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
+  and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite (`mLayoutSprite`, cell 7, at
+  the one of five positions that `mLayout` selects: `PlaceLayoutSprite`), its resource and layout, and the three
+  sprite paths. Every path starts `xxx:/`, which `SetArchiveName` overwrites with the archive's mount name.
 - **The buttons** (`KeyboardButton`, `0x0208329C` to `0x02083740`) are a sprite with a `MessageText`: they show
-  messages 6 and 5 of the file passed to `func_0208382c`, at (0x80, 0xAD) and (0, 0xAD), and play a sound of
+  messages 6 and 5 of the file passed to `InitObj`, at (0x80, 0xAD) and (0, 0xAD), and play a sound of
   `gSoundManager` as they are touched and as they are released. `Update` returns TRUE when the stylus is lifted on the
-  button.
-- **The tabs.** The five areas of `sTabAreas` (`0x020B7F78`) are the core's key areas (`func_02082e70`): the core
-  calls `func_02083c54` when one is touched, which lights that tab and selects keyboard mode 0 to 4
-  (`func_02081ff0`). `func_02083128` registers only the first two at first.
+  button. `mPressed` is set as it is touched and `mHeld` while the stylus stays down; `Reset` (with the button's
+  index) and `Release` (which also shows frame 0) clear both. Overlay 43 calls `Release` before giving a button a new
+  message.
+- **The tabs.** The five areas of `sTabAreas` (`0x020B7F78`) are the core's extra touch areas
+  (`KeyboardCore_SetAreas`): `InitCore` registers only the first two, without a callback, and `EnableTabs` all five
+  with `OnTabArea`, which the core calls with an action (1 pressed, 3 lifted, 4 left), the code pressed and the code
+  under the pen. On a press it lights that tab and selects keyboard mode 0 to 4 (`KeyboardCore_SetMode`).
 - **Data.** `.rodata` is one pool, `sButtonPositions`, `sButtonRect`, the local table of the five modes,
   `sTabAreas`, `sLayoutPositions`; `.data` is the nine paths. The `gText_Yu` and `gStr_F` that the string tool had
-  named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`.
+  named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`. The object has
+  the nine paths twice, once for each of the two constructors the compiler emits (`C2`, then `C1`); the ROM keeps
+  `C1`'s, the second set, so `tools/name_unit_data.py`, which lays out every set, names the wrong ones and runs past
+  the range.
 
 Measured: the object is 0x5FF8 bytes. The Mii maker's profile page keeps a text of its own from +0x5FF8 of its
 keyboard (it clears 0x16 bytes there and counts the characters at +0x6010), and two scene constructors of the main
@@ -973,27 +989,39 @@ touch and pad handling, and the drawing of the key labels into character data. I
 all its data match, and the unit is linked from its object. Measured:
 
 - **State.** Every function works on one static of 0x50 bytes, `sKeyboard`: the key touched first and the key
-  under the pen (+0x0, +0x4), the layout (+0x8), a key-up callback and its argument (+0xC, +0x10), a sound callback
-  and its argument (+0x14, +0x18, called with sound numbers 0 to 10), the layout's characters (+0x1C), a key repeat
-  of the input code (+0x20, which `relocs.txt` refers to as `sKeyboard` + 0x20), the code of this frame's key
-  (+0x28) and the character it gives (+0x2A, which `func_02082560` returns to the callers), the kana modifier
-  (+0x2E: 0, 3 or 4), the layout number (+0x30), the pad cursor (+0x34), and the extra key areas with their
-  callback (+0x40 to +0x4C: `SoftKeyboard`'s tabs).
+  under the pen (`pressed`, `current`), the layout (+0x8), a drop callback and its argument (`dropCallback`,
+  `dropArg`: called as the pen is lifted after leaving a character key, with the character and the point; nothing
+  in the ROM sets it), a sound callback and its argument (+0x14, +0x18, called through `KeyboardCore_PlaySound` with
+  sound numbers 0 to 10), the layout's characters (+0x1C), a key repeat of the input code (+0x20, which `relocs.txt`
+  refers to as `sKeyboard` + 0x20), the code of this frame's key (+0x28) and the character it gives (`character`,
+  +0x2A, which `KeyboardCore_GetChar` returns to the callers), the character dragged off its key (`dragChar`,
+  `KeyboardCore_UpdateDrag`), the modifier (+0x2E: 0, 3 or 4, the code of the modifier key that is on), the layout
+  number (+0x30), the pad cursor (+0x34), a flag that makes the next update give the cursor's key
+  (`pressCursorKey`; nothing in the ROM sets it), the flag that makes `sExtraKeys` keys (`extraKeys`, which
+  `SoftKeyboard` passes as 0), and the extra touch areas with their callback (+0x40 to +0x4C: `SoftKeyboard`'s
+  tabs).
 - **The .bss pool**: `sCharData` (the buffer `SoftKeyboard::TransferCharData` sends), `sOriginX`, `sInitialized`,
   `sBaseCharData` (the layout's graphics with the labels drawn, copied over `sCharData` before the pressed key and
-  the modifier are lit), `sOriginY`, then 0x18 bytes no function in the ROM refers to.
+  the modifier are lit by `KeyboardCore_LightKeys`), `sOriginY`, then 0x18 bytes no function in the ROM refers to
+  (`data_021486d8`, unnamed for that reason).
 - **Keys** are 8 bytes: x, y, width and height as bytes, read as u16 bit fields (one `ldrh` for x and y), then a
   signed link to the next key of the same group (the keys lit together), then the code. Codes 1 to the layout's
-  count of special keys (+0xC of a layout) are special keys (1 delete, 2 space, 3 and 4 the modifiers, 20 enter);
-  above it, a code indexes the layout's characters; 0x100 and above are the extra areas'.
+  count of special keys (`numSpecialKeys`, +0xC of a layout) are special keys (1 delete, 2 space, 3 and 4 the
+  modifiers, 20 enter); above it, a code indexes the layout's characters (`KeyboardCore_CodeToChar`); 0x100 and above
+  are the extra areas'. `sExtraKeys` are two more keys of code 0 at the bottom, searched only with `extraKeys`, and
+  START puts the cursor on the first.
 - **Layouts**, `sLayouts`: five of 0x10 bytes (keys, NCGR file, a function called when a key gives a code, the count
-  of special keys, the count of keys). They are English, kana, European, signs and pictograms. Their files are
-  `SoftKeyboard`'s five background paths, in the order jp, English, euro, sign, picto.
+  of special keys, the count of keys). They are English, kana, European, signs and pictograms
+  (`KeyboardCore_UseEnglishLayout` to `KeyboardCore_UsePictoLayout`, chosen by `KeyboardCore_SetLayout`). Their
+  functions are `KeyboardCore_OnEnglishKey` (the modifiers choose lower case, symbols or upper case,
+  `KeyboardCore_ApplyModifier`), `KeyboardCore_OnKanaKey` (3 hiragana, 4 katakana) and three empty ones. Their files
+  are `SoftKeyboard`'s five background paths, in the order jp, English, euro, sign, picto. `KeyboardCore_SetMode`
+  takes the tabs' order (kana, English, euro, sign, picto) and maps it to a layout.
 - **Kana**: four tables of 60 characters (plain kana, then what dakuten, handakuten and the small form make of each,
   a full-width space for none) and three pairs (plain, other) that the static initialiser fills from
   `sKanaTables`. Nothing in the ROM reads the pairs. Inferred: code that read them was dropped by the link, as
   were the users of the 0x18 bytes of `.bss` and of two 20-byte local tables in `.rodata` (`{2,0,3,4,1}`,
-  `{2,3,1,4,0}`, after `func_02081ff0`'s `{0,2,1,3,4}`). The source keeps them through an uncalled function.
+  `{2,3,1,4,0}`, after `KeyboardCore_SetMode`'s `{0,2,1,3,4}`). The source keeps them through an uncalled function.
 
 The character and key tables of the layouts, `0x02112220` to `0x02112DC4`, are left out of the unit and stay in the
 gap (`KeyboardChars*`, `KeyboardKeys*`). Measured: their sizes in memory order are 0x5C 0x5C 0x5C 0x70 0x68 0x68

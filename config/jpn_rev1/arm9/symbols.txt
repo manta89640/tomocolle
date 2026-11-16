@@ -3226,17 +3226,17 @@ KeyboardCore_SetAreas kind:function(arm,size=0x1c) addr:0x02082e70
 KeyboardCore_PlaySound kind:function(arm,size=0x20) addr:0x02082e8c
 _ZN12SoftKeyboardC1Ev kind:function(arm,size=0x108) addr:0x02082eac
 _ZN12SoftKeyboard14SetArchiveNameEPKc kind:function(arm,size=0xc4) addr:0x02082fb4
-func_02083078 kind:function(arm,size=0x44) addr:0x02083078
-func_020830bc kind:function(arm,size=0x6c) addr:0x020830bc
-func_02083128 kind:function(arm,size=0x7c) addr:0x02083128
+_ZN12SoftKeyboard6InitBgEii kind:function(arm,size=0x44) addr:0x02083078
+_ZN12SoftKeyboard14InitBgGraphicsEi kind:function(arm,size=0x6c) addr:0x020830bc
+_ZN12SoftKeyboard8InitCoreEPFvPviES0_ kind:function(arm,size=0x7c) addr:0x02083128
 _ZN12SoftKeyboard16TransferCharDataEv kind:function(arm,size=0x34) addr:0x020831a4
 _ZN12SoftKeyboard14TransferScreenEv kind:function(arm,size=0x2c) addr:0x020831d8
 _ZN12SoftKeyboard13LoadBgPaletteEi kind:function(arm,size=0x40) addr:0x02083204
-func_02083244 kind:function(arm,size=0x44) addr:0x02083244
-func_02083288 kind:function(arm,size=0x14) addr:0x02083288
+_ZN12SoftKeyboard6UpdateEi6TPData kind:function(arm,size=0x44) addr:0x02083244
+_ZN12SoftKeyboard7SetModeEii kind:function(arm,size=0x14) addr:0x02083288
 _ZN14KeyboardButtonC1Ev kind:function(arm,size=0x34) addr:0x0208329c
-func_020832d0 kind:function(arm,size=0x14) addr:0x020832d0
-func_020832e4 kind:function(arm,size=0x24) addr:0x020832e4
+_ZN14KeyboardButton5ResetEs kind:function(arm,size=0x14) addr:0x020832d0
+_ZN14KeyboardButton7ReleaseEv kind:function(arm,size=0x24) addr:0x020832e4
 _ZN14KeyboardButton6UpdateEv kind:function(arm,size=0x170) addr:0x02083308
 _ZN14KeyboardButton4DrawEv kind:function(arm,size=0x7c) addr:0x02083478
 _ZN14KeyboardButton8InitTextEP11MessageFilei kind:function(arm,size=0x114) addr:0x020834f4
@@ -3247,17 +3247,17 @@ _ZN14KeyboardButton10SetMessageEm kind:function(arm,size=0x38) addr:0x02083698
 _ZN12SoftKeyboard15SetButtonSoundsEiiiii kind:function(arm,size=0x34) addr:0x020836d0
 _ZN12SoftKeyboard15InitButtonTextsEP11MessageFilei kind:function(arm,size=0x3c) addr:0x02083704
 _ZN12SoftKeyboard18GetButtonCharCountEv kind:function(arm,size=0x68) addr:0x02083740
-func_020837a8 kind:function(arm,size=0x4c) addr:0x020837a8
-func_020837f4 kind:function(arm,size=0x38) addr:0x020837f4
-func_0208382c kind:function(arm,size=0x3c) addr:0x0208382c
+_ZN12SoftKeyboard17PlaceLayoutSpriteEv kind:function(arm,size=0x4c) addr:0x020837a8
+_ZN12SoftKeyboard7LoadObjEsii kind:function(arm,size=0x38) addr:0x020837f4
+_ZN12SoftKeyboard7InitObjEsP11MessageFileiisi kind:function(arm,size=0x3c) addr:0x0208382c
 _ZN12SoftKeyboard14SetObjResourceEs kind:function(arm,size=0xc) addr:0x02083868
 _ZN12SoftKeyboard12LoadObjCellsEi kind:function(arm,size=0x40) addr:0x02083874
 _ZN12SoftKeyboard14LoadObjPaletteEi kind:function(arm,size=0x40) addr:0x020838b4
 _ZN12SoftKeyboard11InitSpritesEv kind:function(arm,size=0x2d8) addr:0x020838f4
 _ZN12SoftKeyboard4DrawEv kind:function(arm,size=0x64) addr:0x02083bcc
-func_02083c30 kind:function(arm,size=0x24) addr:0x02083c30
-func_02083c54 kind:function(arm,size=0x104) addr:0x02083c54
-func_02083d58 kind:function(arm,size=0x6c) addr:0x02083d58
+_ZN12SoftKeyboard10EnableTabsEv kind:function(arm,size=0x24) addr:0x02083c30
+_ZN12SoftKeyboard9OnTabAreaEPS_iii kind:function(arm,size=0x104) addr:0x02083c54
+_ZN12SoftKeyboard12PlayKeySoundEPS_i kind:function(arm,size=0x6c) addr:0x02083d58
 _ZN9TtsPlayerC2Ev kind:function(arm,size=0x44) addr:0x02083dc4
 _ZN9TtsPlayerC1Ev kind:function(arm,size=0x44) addr:0x02083e08
 _ZN9TtsPlayerD1Ev kind:function(arm,size=0x8c) addr:0x02083e4c
@@ -4414,7 +4414,7 @@ height$12802 kind:data(any) addr:0x020b7ef8 local
 @12849 kind:data(any) addr:0x020b7f30 local
 sButtonPositions kind:data(any) addr:0x020b7f44 local
 sButtonRect kind:data(any) addr:0x020b7f54 local
-@13399 kind:data(any) addr:0x020b7f64 local
+@13388 kind:data(any) addr:0x020b7f64 local
 sTabAreas kind:data(any) addr:0x020b7f78 local
 sLayoutPositions kind:data(any) addr:0x020b7fa0 local
 ShttsTextPresets kind:data(any) addr:0x020b7fc8
@@ -5512,15 +5512,15 @@ sKanaHandakuten kind:data(any) addr:0x02112e4c local
 sKanaSmall kind:data(any) addr:0x02112ec4 local
 sKanaPlain kind:data(any) addr:0x02112f3c local
 sKanaDakuten kind:data(any) addr:0x02112fb4 local
-@13621 kind:data(any) addr:0x0211302c local
-@13622 kind:data(any) addr:0x0211304c local
-@13623 kind:data(any) addr:0x02113068 local
-@13624 kind:data(any) addr:0x02113088 local
-@13625 kind:data(any) addr:0x021130a8 local
-@13626 kind:data(any) addr:0x021130cc local
-@13627 kind:data(any) addr:0x021130e8 local
-@13628 kind:data(any) addr:0x02113100 local
-@13629 kind:data(any) addr:0x0211311c local
+@13610 kind:data(any) addr:0x0211302c local
+@13611 kind:data(any) addr:0x0211304c local
+@13612 kind:data(any) addr:0x02113068 local
+@13613 kind:data(any) addr:0x02113088 local
+@13614 kind:data(any) addr:0x021130a8 local
+@13615 kind:data(any) addr:0x021130cc local
+@13616 kind:data(any) addr:0x021130e8 local
+@13617 kind:data(any) addr:0x02113100 local
+@13618 kind:data(any) addr:0x0211311c local
 @8870 kind:data(any) addr:0x02113134 local
 @8863 kind:data(any) addr:0x02113158 local
 gStr_N_2 kind:data(any) addr:0x02113360
