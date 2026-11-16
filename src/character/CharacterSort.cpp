@@ -1,4 +1,5 @@
 #include "character/Character.h"
+#include "text/TextUtil.h"
 
 #include <wchar.h>
 
@@ -8,9 +9,6 @@
 // sort orders (personality, birthday, sex, blood type), each falling back to the name.
 
 extern "C" {
-// The main program's character conversions (gap)
-wchar_t func_02037524(wchar_t c); // A full-width letter as its half-width one
-BOOL func_020374c0(wchar_t c);    // Whether it is a full-width letter
 void MiiData_GetName(const CharacterRecord *mii, wchar_t *name);
 int MiiData_GetSex(const CharacterRecord *mii);
 }
@@ -975,7 +973,7 @@ void CharacterSort::ToCollationKeys(wchar_t *str) {
 
 int CharacterSort::GetCollationKey(wchar_t c) {
     int rank;
-    switch (func_02037524(c)) {
+    switch (ToHalfWidth(c)) {
     case 0x0021:
         rank = 1;
         break;
@@ -2547,7 +2545,7 @@ int CharacterSort::GetCollationKey(wchar_t c) {
         break;
     }
     rank *= 10;
-    if (func_020374c0(c)) {
+    if (IsFullWidthAlphanumeric(c)) {
         rank += 5;
     }
     return rank;

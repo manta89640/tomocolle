@@ -34,7 +34,7 @@ struct SceneMemory {
     /* 0x1E */ u8 mTutorialStep;
     /* 0x1F */ u8 mUnknown1F;
     /* 0x20 */ u8 mCharacters[12]; // The characters (saved character indices) the next scene shows, 0xFF for none
-    /* 0x2C */ u8 mUnknown2C[16];  // 0xFF at the start
+    /* 0x2C */ u16 mUnknown2C[8];  // 0xFF at the start; overlay 39 stores a u16 at [0]
 }; // 0x3C
 
 extern SceneMemory gSceneMemory;

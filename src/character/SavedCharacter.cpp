@@ -1,6 +1,7 @@
 #include "character/Character.h"
 
 #include "GameData.h"
+#include "save/SaveBlocks.h"
 
 struct MiiIdSource;
 
@@ -45,7 +46,6 @@ void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Wri
 BOOL func_0202c468(GameData *game, int index);
 int func_0202c5dc(GameData *game, int index);
 int func_0202c43c(GameData *game, int index, int other);
-BOOL func_02039c00(void *flags, int flag);
 extern u8 data_0212348c[];
 extern const s8 gStr_AFKPUUA[24];  // By hour: the chance (of 100) that an idle character goes to sleep
 extern const s8 data_020f8ca8[24]; // By hour: how many hours it then sleeps on top of the activity's length
@@ -1486,19 +1486,19 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
     } else if (state == 0x14) {
         int choices[4];
         int count = 0;
-        if (func_02039c00(data_0212348c, 3)) {
+        if (((SaveHeader *)data_0212348c)->GetUnknown44(3)) {
             choices[count] = 0;
             count++;
         }
-        if (func_02039c00(data_0212348c, 10)) {
+        if (((SaveHeader *)data_0212348c)->GetUnknown44(10)) {
             choices[count] = 1;
             count++;
         }
-        if (func_02039c00(data_0212348c, 11)) {
+        if (((SaveHeader *)data_0212348c)->GetUnknown44(11)) {
             choices[count] = 2;
             count++;
         }
-        if (func_02039c00(data_0212348c, 8)) {
+        if (((SaveHeader *)data_0212348c)->GetUnknown44(8)) {
             choices[count] = 3;
             count++;
         }
@@ -1564,7 +1564,7 @@ int SavedCharacter::GetTroubleCategoryWeight(int category) {
         }
         break;
     case 2:
-        if (!func_02039c00(data_0212348c, 10)) {
+        if (!((SaveHeader *)data_0212348c)->GetUnknown44(10)) {
             weight = 0;
         }
         break;
@@ -1575,7 +1575,7 @@ int SavedCharacter::GetTroubleCategoryWeight(int category) {
     case 7:
         break;
     case 8:
-        if (!func_02039c00(data_0212348c, 11)) {
+        if (!((SaveHeader *)data_0212348c)->GetUnknown44(11)) {
             weight = 0;
         }
         break;

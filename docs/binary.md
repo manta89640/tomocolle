@@ -597,6 +597,66 @@ Not done:
 
 - The constructors are in the scene factory's file (`src/scene/SceneManager.cpp`); see "The scene constructors".
 
+## The main program from 0x0203671C to 0x02040578
+
+Cut into files by gap38-a. Measured, from the decompiled code and the delinked sections:
+
+| File | `.text` | Other sections | |
+| --- | --- | --- | --- |
+| `src/sound/ValueRamp.cpp` (end) | `0x0203671C` | `.init`, `.ctor`, `.bss` `0x0213B5C0` to `0x0213B6B0` | `gSoundManager` (0xE4 bytes) is defined in the file of `ValueRamp`: the static initialiser constructs it (`SoundSystem`'s inline constructor) and registers its destructor `0x0203671C` |
+| `src/text/TextUtil.cpp` | `0x0203673C` to `0x02039660` | `.data` `0x021102F0` to `0x0211085C` | Wide-string helpers (`include/text/TextUtil.h`): numbers in full-width digits, and text made ready for the speech engine |
+| `src/text/SpeechWindow.cpp` | `0x02039660` to `0x020398E4` | `.rodata` `0x020B5C54` (`sTextPosition`, {16, 162}) | The window of what a character says, on sprites, hidden when the speech engine is done or after a number of frames |
+| `src/save/SaveBlocks.cpp` | `0x020398E4` to `0x0203B748` | `.rodata` `0x020B5C5C` to `0x020B5CFC` | The blocks of the save data, members of `gGameData` |
+| `src/wireless/WirelessSession.cpp` | `0x0203B748` to `0x0203BCE0` | `.rodata` `0x020B5CFC` to `0x020B5D04`, `.bss` `0x0213B6B0` to `0x0213B700` | The game's layer over WH for finding a parent DS and connecting as a child (overlays 109 and 110) |
+| `src/scene/SceneManager.cpp` | `0x0203BCE0` to `0x0204AF20` | `.init` `0x020B06A0`, `.ctor` `0x020FC4E4`, `.data` `0x0211085C` to `0x02110B94`, `.bss` `0x0213B700` to `0x0213BA74` | The scene manager, the scene factory and every scene's constructor |
+
+- **Save blocks.** Each block is its data as it is in the card's backup memory (a 16-byte magic string first, a
+  checksum, `GameData::Checksum` at `0x0202CD00`, last), followed by two flags: read, and valid. Each has its place
+  in each of two slots of 0x40000 bytes. The ten magic strings are `.rodata` in an order that is not the order of
+  the functions that use them; the source declares them in the ROM's order. Two of them have hyphens:
+  "TOMODACHI-FAIRY" and "N-EAST-WEST-S". The card is locked around each access (`CARD_LockBackup`,
+  `CARD_UnlockBackup` at `0x02010594`, `0x020105A4`, with `gGameData.mCardLockId`).
+- **Wireless session.** A parent is one of this game only if its user game information (the owner's nickname, 15
+  characters) ends with the same 16-bit id as this DS's. The scene counts each parent's timer down: 600 when it is
+  found, 599 when it is seen again. `gWirelessSession` is defined in the scene manager's file: it is the first
+  object of that file's `.bss` (`0x0213B700`), before `gSceneManager`'s destructor record, and the scene
+  manager's static initialiser constructs it.
+- **The scene manager** (`gSceneManager`, 0x364 bytes, `include/SceneManager.h`): `Update` runs the scene; when it
+  is done, deletes it, unloads its overlay (`UnloadSceneOverlay`), constructs the next (`CreateScene`, which loads
+  the scene's overlay and sound group) and restores the graphics managers to the state `Init` recorded (three
+  buffers of 0x140, 0x140 and 0xD4 bytes). `RequestScene` (`0x0203C02C`) is what the overlays call. `CreateScene`'s
+  overlay ids are `overlay_id` relocations (`include/Overlay.h`).
+- **Scene constructors 0x00 to 0x26** follow `CreateScene` in id order, as those after them do (next section).
+  The class tables of `Scene` (`0x02110970`), `ObjTextBox` (VTT `0x02110864`, table `0x021108AC`) and `ObjCharBox`
+  (VTT `0x0211086C`, table `0x02110900`) are this file's, as are the main program's `TestDrawMiiAnimModel`'s
+  (`0x02110954`, D1 `0x0203E2E4`, D0 `0x0204AD88`).
+- Every scene's constructor takes the scene id (`r1`, stored at +4), including `RoomScene`, `TutorialRoomScene` and
+  `WeddingScene`'s, which the symbols had as taking nothing.
+
+Inferred: scene 0x04's overlay tests a character's body (`CharacterBodyTestScene`, the name overlay 4's agent gave
+from its code); scenes 0x1F to 0x22 are the right-job scenes after their archives `SceneRightJob` and
+`SceneRightJob2`.
+
+Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
+`FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
+`0x02037568` (8 KB, about 0x500 bytes of spilled constants), `Scene1E`'s constructor (97.7%: every instruction but
+for a rotation of three callee-saved registers), and the constructors of gap38-c's ten test scenes (`0x0203E320` to
+`0x0203EA2C`, `0x0203F654`; their headers are in main, not on this branch), `RoomScene` (`0x0203ED10`) and
+`TutorialRoomScene` (`0x0203EFC0`; their overlays' headers declare their own `Scene`, `Model` and `Character`
+classes) and `VoteScene` (`0x020400F0`: a member of the unnamed class of `0x02025B5C`, a 128 by 96 pixel 4-bit
+drawing surface with a brush, and an array of a class of two `G3Sprite`s whose destructor is empty, which needs
+`G3Sprite`'s destructor inline, and that the link refuses while `G3Sprite`'s own file is not decompiled).
+
+- **Text canvases of the scene constructors.** Three classes derived from `ObjTextCanvas` have their tables in
+  this file's data, told apart by where their `TextCanvas` virtual base is (measured, from their tables' first
+  words and the constructors): 0x150 (nothing of their own), 0x174 (0x24 bytes of their own), 0x16C (0x1C bytes,
+  the first cleared). Each table is a triple pointed at at its end (+0xC), each VTT passed from its second word
+  (+4) to `ObjTextCanvas`'s C2. Scene 0x0F holds all three (`Scene0FTextCanvas`, `Scene0FTextCanvas2`,
+  `Scene0FTextBox`).
+- **The mannequin's body is a base.** The shops' constructors build `Mannequin`'s `CharacterModel` with C2
+  (`0x0208EB18`), as `Character` builds its own; members are built with C1 (`0x0208EBA0`). Measured at
+  `0x0203F9D0`, `0x0203FA50`, `0x020411B0`, `0x02041AD4`, `0x020457F0`.
+
 ## The scene constructors (0x02040578 to 0x0204AF20)
 
 The constructors of scenes 0x27 to 0xC2, and the scene manager's `UnloadSceneOverlay` and `SetSoundGroup` after
@@ -750,6 +810,81 @@ Measured:
 
 Inferred: a test of the Mii face's placement on a head, from the same test archive as `G3dTestScene`.
 
+## The Mii drawing test scene (overlay 5)
+
+Overlay 5 is scene 5, `TestDrawMiiScene` (0x28F8 bytes; its constructor is the main program's
+`_ZN16TestDrawMiiSceneC1Ei`, 0x0203e1e8): one source file, `src/overlays/ov005/TestDrawMiiScene.cpp`.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x02149A40` to `0x0214A4A0` | The scene's five virtual functions and `UpdateModelFades`, `TestDrawMiiModel`'s constructor, `Init` and `Update`, the camera's five functions, then the implicit destructors (the model's D0, the scene's D1 and D0) |
+| `.rodata` | `0x0214A4A0` to `0x0214A4D0` | Four constants of `Init` and the camera's `Init`, sorted by size: the models' rotations (`u16[2]`), their model indices (`int[2]`), the camera's first angles, the models' places (`VecFx32[2]`) |
+| `.data` | `0x0214A4E0` to `0x0214A560` | `TestDrawMiiModel`'s table, the scene's table, the strings |
+
+Measured:
+
+- It mounts "Scn/Scene/SceneTestDrawMii_LZ.bin" as SME; resource 0 is `SME:/room.imd`. The room is model 0 of it,
+  drawn by a `TestDrawMiiAnimModel` at +0x27E4; two `TestDrawMiiModel`s at +0x25F4 (0xF8 bytes each, derived from
+  `AnimModel`, with their own table in the overlay) are models 1 and 2 of the same file, at (0x5000, 0, 0) and
+  (0, 0, -0x5000), turned 0 and 0x4000 about y. A `CharacterBase` at +0x10 is the Mii: `InitFace(1)` and then a
+  random Mii (`SetRandomMii(0, 0, 2, TRUE)`), drawn with `CharacterBase::Draw`.
+- `Init` also turns on antialiasing, toon shading and W buffering, clears to `GX_RGB(21, 21, 21)` and sets light 0
+  to (0xFFF, 0, 0) and white.
+- The camera at +0x28C4 (`TestDrawMiiCamera`, 0x34 bytes, no constructor) circles a point: its eye is the target
+  shifted right by 3, plus `radius.z * sin(yaw)` on x and `radius.x * cos(yaw)` on z, and `radius.y * sin(pitch)`
+  on y, the angles being sine table indices in fx32 (yaw 0x1600, pitch 0x1200 at first; radius (0x12800, 0x9000,
+  0x12800), target (0, 0x1CCC, 0)). The code is overlay 74's `RoomCamera::GetOrbitPosition`, instruction for instruction.
+  Left and right turn it by 0x100 a frame, up and down raise it by 0x30; with X held, right moves the target to a
+  random place (each of x and z from 0 to 3.9, either sign), left gives x and z of the radius random values from
+  9.0 to 17.9 and up a random yaw. The steps are `FX32_ONE / 10` (0x199), not `FX32_CONST(0.1)` (0x19A).
+- Each frame a model whose distance from the eye on the floor (x and z) is less than the eye's from the origin
+  fades out (its alpha down by 5 a frame to 0, `func_02029f50`), and the others fade back in to 31: the models
+  between the camera and the room's middle get out of the way.
+- `TestDrawMiiModel::Init` is empty; the scene calls it after `Load`. Its complete-object destructor is the main
+  program's copy (`0x0203E2A8`), which the scene's destructor and the model's table refer to; the overlay has only
+  its deleting destructor.
+
+Inferred: a test of how a Mii looks in a room under a moving camera.
+## The character body test scene (overlay 4)
+
+Overlay 4 is scene 4, `CharacterBodyTestScene` (0x2B38 bytes; its constructor is the main program's
+`_ZN22CharacterBodyTestSceneC1Ei`, 0x0203e11c): one source file, `src/overlays/ov004/CharacterBodyTestScene.cpp`.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x02149A40` to `0x0214A2B4` | The five scene functions, `UpdateTurnTest`, and the implicit destructor (D1, D0) |
+| `.rodata` | `0x0214A2B4` to `0x0214A2BC` | `sTurnTarget`, the point (1.0, 0) on the floor |
+| `.data` | `0x0214A2C0` to `0x0214A3E0` | `sLightColor` (a `GXRgb`, red 30), the virtual table, the strings in the order of use |
+
+Measured:
+
+- It mounts "Scn/Scene/SceneTestG3d_3_LZ.bin" as CA3, as the main program's `DrawManTestScene` (scene 6) does, and
+  "Mdl/Body/body000_3D_LZ.bin" as TG3. Resource 0 is TG3's `body.imd`, the body of one `SceneCharacter` at +0x10
+  (`Character::Init(0, 0, 0)`, its joints tracked and turnable: `mTrackLimbs`, `mTurnJoints`).
+- `Init` sets the clear colour to grey (15, 15, 15) with alpha 15, light 0 to point along x in `sLightColor`, and the
+  camera's y angle to 0x4000.
+- B steps +0x2B28 (`mBodyStep`) through four changes: TG3 mounted again with body000 and the model made again
+  (`CharacterModel::MakeModel`), the palette file `TG3:/body_c1.ntfp` sent to the body's palette in VRAM
+  (`func_02029d40`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
+  again.
+- With A held the pad rotates the body model about z and x (by 0x80) and turns the character (`Character::Turn`,
+  ±0x100); with X it scales the body in y and z (by 0x40, `mInvScale` kept as `FX_Inv` of `mScale`); with Y right
+  moves it along x, left along y, up and down scale it in x; with R held the pad moves the camera (`Camera_Translate`).
+  L starts the turn test (+0x2B34, `mTurnTest`): a frame later the character's `mTargetAngle` is set to the direction
+  of `sTurnTarget` from where it stands, and it turns towards it by `CharacterBase::StepAngle(mAngle, mTargetAngle,
+  3)` and `SetAngle` a step a frame until it faces it. Otherwise the pad turns the camera.
+- Touching the screen sets the touch line (`ModelResources_SetTouchLine`) and hit-tests two of the character's
+  joints, the body (`CharacterModel::HitTestJoint(int)`) and the left knee (`HitTestJoint` with the
+  camera's eye and the line's direction, `data_02122818`); both results are thrown away.
+- +0x2B2C is only cleared, in `Init`.
+
+Not done: `Init` (97%), the light-0 block of scenes 6, 7 and 16: with `#pragma opt_propagation off` every register
+matches and only the stores of x and `mEnabled` are in the other order (see decompiling.md, "Independent statements
+scheduled in another order"). Seven of the eight functions match; the unit is not complete.
+
+Inferred: a test of the character's body (its two models, its palette, its scale, its turning and its joints), from
+the same test archive as scene 6.
+
 ## WH, the wireless wrapper
 
 WH is the wireless code of the SDK's sample programs (`build/demos/wireless_shared/wh`), a state machine over the
@@ -806,6 +941,58 @@ What it showed about the compiler, measured (see "Compiler"):
   but the game's code, by address. `docs/notes/wh.md` has the details.
 - **The pool's order** follows from that sort: the statics are declared in an order that gives the ROM's pool and
   strings, which says nothing of the original's order but sizes.
+
+## A Mii's trip, and the "Ng" scenes
+
+Overlay 39, `src/overlays/ov039/TravelScene.cpp`: all 11 functions and all of its data match (the data compared byte
+for byte, and the relocations of `.data`, with the original). The unit is not marked complete only because the
+main program's character functions it calls are still under their old names on main (see the end of this section).
+
+Measured:
+
+- **What it is.** Scenes 0x77, 0x78 and 0x79 construct `TravelScene` (0x1EE84 bytes; the main program's
+  constructor `0x020460B0`, virtual table `0x0214BA70`). Its message 0x4B5 of `Msg/TmdMiniContentsMsgJP_LZ.bin`
+  (archive "TBM", file `TBM:/tmd_minicontents_msg_JP.bmg`) introduces a Mii's trip on which the player photographs
+  the travellers at the sights. `StartLoading` draws one of nine destinations, whose archive
+  `Scn/Travel/<name>_LZ.bin` is mounted as "N01" (the table is in the order of the names: France, Hawaii, Hongkong,
+  Italia, Kyoto, Okinawa, Shanghai, Spain, Thai), and shuffles the destination's 4 to 8 sights to take three.
+  Sight n of a destination has its name at message `base + 2n` and its reading at `base + 2n + 1`, the bases from
+  0x4B6 (France) to 0x51A (Thai); 0x522 to 0x531 are the destinations' names and readings.
+- **The three scene ids** give two, one and two travellers (`SceneCast::Choose`). Scene 0x77 also loads the
+  `N00:/*_hm.*` graphics (the scene archive is `Scn/Scene/SceneTestNg116_LZ.bin`, "N00") and dresses the pair for
+  the destination: a table of nine pairs of clothes ids, the first for a man and the second for a woman, by the
+  first traveller's sex (`MiiData_GetSex`), stored in `CharacterRecord::mClothesId`. Its departure plays sequence
+  archive entry 14 where the others play 13.
+- **The flow** (`SetState`, `Update`, 21 states): a start button; the upper screen (`BG_airplane`) fades out; then for
+  each photograph the sight's picture (`N01:/BG_0<n>.ncg/.ncl/.nsc`, the digit put into a copy of the name) fades
+  in, the first traveller says "<sight> desu" (message 0x4AE, the sight's name in the speech window and its reading
+  in the spoken text), the shutter button appears and the player's "say cheese" (0x4B0) is spoken with the voice
+  of a resident drawn at random; when its frame comes (from that resident's `mVoice[4]`: `(v - 50) * 220 / 250 +
+  40`) the travellers blend into random poses ('BCA0' animations 1-4 and 10-13 together, or 5-9 each), and the
+  shutter plays sequence archive entry 15 and a white flash (`func_02023f4c` from 16 down), with faces 6 or 1. A
+  "next" button follows the first two photographs, a wait the third; then a return button, and the scene fades and
+  asks for scene 0x40. It also stores a per-destination halfword (0xB6, 0xC3, 0xD9, 0xC2, 0xC4 to 0xC8) at
+  `gSceneMemory` +0x2C (not identified): overlays 68, 75, 84 and 85 read that halfword (84 when the previous scene
+  was 0x40), and 28, 52, 53 and 75 write it too.
+- **The caption** (`Scn/Scene/NgCaption_LZ.bin`, archive "SFL", `SFL:/caption.ncg/.nsc`, loaded for plane mask 2) is a
+  MessageText centred at (128, 14) with message 0x4B2 ("<name>'s") or 0x4AD ("<name> and <name>'s"), the names from
+  `SceneCast`'s speech texts, with a shadow on four sides (0xAA).
+
+Inferred, for the other scenes that mount `NgCaption` and the mini-contents messages (about sixty overlays, 7 to
+63 among them): they share this shape, which the constructors in the main program show (overlay 40's has the
+same members in the same order): the characters (`SceneCharacter[n]`), a `SceneCast` right after them, a few ints
+and a `char[0x82]` Shift JIS buffer, the `TtsPlayer`, buttons, one `MessageFile`, a `SpeechWindow` with 0x84 bytes
+after it, a `MessageText` that only expands the spoken message, and the caption. Overlay 39's `Speak(speaker,
+message, mode)` (show the message in the speech window for 120 frames, set `SceneCast`'s speaker and face 1, give
+the speech engine the speaker's voice unless it is -1, expand the message, convert it to Shift JIS and speak it)
+and the `SetState`/`mState`/`mFrame` pair are likely to recur. Every caller of `SceneCast::UpdateCharacters`
+passes 1 (overlays 7, 20, 39, 40, 50 and 63 checked), so it takes an int.
+
+Not done: marking the unit complete. It calls `CharacterBase::SetFace`, `Character::SetAngle`, `SetAnimation`,
+`BlendToAnimation`, `Draw`, `Update`, `SetVisible`, `CharacterModel::GetJointMatrices`,
+`SpeechWindow::SetMessageArg` and `SceneManager::RequestScene` by the names gap66-a's and gap38-a's branches give
+them; main's `symbols.txt` still has `Character_SetFace` and the like, which complete overlays call. Once those
+renames are on main the unit can be marked `complete`; nothing else is missing.
 
 ## The settings and the mansion information
 

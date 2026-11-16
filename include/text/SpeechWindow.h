@@ -34,7 +34,7 @@ public:
 
     /* 0x000 */ MessageFile *mMessageFile;
     /* 0x004 */ TtsPlayer *mTtsPlayer;
-    /* 0x008 */ MessageText mText;
+    /* 0x008 */ MessageText mText[1]; // An array of one: the scenes' constructors build it in a loop (0x020460B0)
     /* 0x5F8 */ int mMode;
     /* 0x5FC */ int mFrames;
     /* 0x600 */ int mFrame; // Frames since Show()

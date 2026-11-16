@@ -136,51 +136,51 @@ void MiiListScene::UpdateIdle() {
 
 void MiiListScene::UpdateSortMenu() {
     func_020341d4(&mSortMenu);
-    switch (mSortMenu.mResult) {
+    switch (mSortMenu.mUnknownAF84) {
     case 0:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 0) {
             mList.Sort(0, FALSE);
         }
         break;
     case 1:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 1) {
             mList.Sort(1, FALSE);
         }
         break;
     case 2:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 2) {
             mList.Sort(2, FALSE);
         }
         break;
     case 3:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 3) {
             mList.Sort(3, FALSE);
         }
         break;
     case 4:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 4) {
             mList.Sort(4, FALSE);
         }
         break;
     case 5:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 5) {
             mList.Sort(5, FALSE);
         }
         break;
     case 6:
-        mSortMenu.mUnknownAF94 = 15;
+        mSortMenu.mUnknownSetBeforeClose = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 6) {
             mList.Sort(6, FALSE);

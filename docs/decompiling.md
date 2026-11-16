@@ -376,6 +376,14 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `KeyboardCore_SetMode`). With the full set, one
   compile shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put
   all of KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
+- Function-local statics can be placed the same way, by solving on which function each slot's object belongs to
+  rather than on names: a size sequence is good when each slot of a size holds a declaration of the function that
+  the ROM's object there belongs to, and names are then swapped within each function. A random search over the
+  order of each function's statics (and over which tables are file statics) with the model found overlay 39's
+  whole `.rodata` and `.data` (31 statics, two local consts, 21 strings of initialisers), with every static in its
+  function but one table, which had to be the file's first static.
+- Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
+  at the end), in the order of their declarations: overlay 39's two message numbers.
 
 ## Matching techniques
 
@@ -413,6 +421,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `func_02082b48` and the four after it).
 - The same for a member: `(u8 *)&mKeyboard.mButtons + 0x6B8` keeps the original's `ldr` of the member's offset and
   `add 0x2b8; add 0x400`, where `&mKeyboard.mButtons[1]` folds the two (`MiiEditProfilePage::Update`).
+
+- A one-element member array used in a one-iteration loop (`for (int i = 0; i < 1; i++) f(&mButtons[i]);`) keeps
+  part of the member's offset in a register (`add r4, this, #0x348` then `add r0, r4, #0x1bc00` at each use); a
+  single member, or a pointer to it, does not (overlay 39's shutter button and caption, which the main program's
+  constructor shows as arrays of one). Static `const` arrays of one element read there with `[i]` are sometimes
+  folded (the shutter's position and size) and sometimes loaded (its `u16` sequence, the caption's font and
+  position), as the original has them.
+- An element after the first reached through an inline accessor (`GetSpeechTexts(1)->mName`, returning
+  `&mSpeechTexts[index]`) is formed as base, plus the element's size, plus the field (three `add`s), where
+  `mSpeechTexts[1].mName` folds the offset into one (`TravelScene::Init`).
 
 **Two literal-pool entries for one address**
 - One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
@@ -457,6 +475,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
   that builds it, went below the other arrays and gave the original's frame. A union holding a `long double` is
   8-aligned.
+- Dead copies of `FloorPos` points around an angle (`FX_Atan2Idx` of a target minus where a character stands): an
+  inline taking the target by value, `FloorPos delta = target - character->GetFloorPos(); return
+  FX_Atan2Idx(delta.z, delta.x);`, as overlays 74 and 96 have it (`AngleTo`); writing the same expression in the
+  function, with `Angle(...)`, `Sub` or named locals, put the four copies in other slots (overlay 4).
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
@@ -488,6 +510,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A value used once, taken straight off a call's result (`f().LengthSq()`) rather than through a local: its copies
   become temporaries below the function's locals, which let a later block's local take the slot above them
   (`RoomScene::StartMeeting`, overlay 74).
+- A point passed by value to an inline (`SetPixelPosition(Sprite *, ScreenPoint)`) puts its copy among the
+  temporaries in the order of the source, where a block-local copy (`ScreenPoint p = table[i];`) goes above the
+  temporaries of earlier blocks (`TravelScene::Init`, overlay 39). Searching the three position setters
+  (`SetPosition(FxVec2(...))`, `SetPosition(x, y)`, `SetPositionFromVec`) for each of the function's sprites by
+  script found the rest of its slots.
 - Not solved: `MiiEditProfilePage::SetState` (7 KB) keeps the WindowPoint copies passed by value to its windows'
   buttons in six slots below every other local (two of them copies of one size, one never read). Fresh copies per
   window move them to the bottom but in another order and without the unread one; reusing one copy across windows
@@ -581,6 +608,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - dsd gives each delinked unit's sections the module's alignment and takes no `align:` on a file's line: a unit (or
   the gap after one) whose `.rodata` starts at a two-aligned address moves everything after it. Look for a small
   object that lets the boundary be four-aligned (the room file's halfword at `0x020FBFD4`).
+- A call's result through a local before a field is set (`ModelAnimation *a = AnimModel_FindAnimation(...);
+  a->mFinished = FALSE;`) swapped two strength-reduced loop pointers into the original's registers, where the
+  chained `f(...)->mFinished = FALSE` gave them the other way (`TravelScene::SetState`).
+- A variable used in two cases of a switch, declared once at the top, got one callee-saved register; declared in
+  each case's block, the original's two (`TravelScene::SetState`).
+- In a shuffle, the element read before the random draw (`t = a[i]; j = Rand(n); a[i] = a[j]; a[j] = t;`) gave the
+  original's registers and load order (`TravelScene::StartLoading`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -656,8 +690,20 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   leaves in r0.
 - An array walked by a pointer whose increment comes before the loop's compare is incremented in the body
   (`...; character++; }`); in the `for` header (`i++, character++`) it comes after the compare (overlay 1).
+- The test scenes' light-0 block (x stored, reloaded into a local and stored again; scenes 6, 7, 16, overlays 3
+  and 4), measured with the quick compiler: the compiler forwards the stored x to the read when the read is an
+  inline's argument, `dir.x = dir.x`, or when y or z is stored between, and keeps the reload only for a local
+  `fx16 x = dir.x;`. `#pragma opt_propagation off` around `Init` (found by ov003) gives the original's registers
+  (0 materialised early in r1); overlay 4 then differs only by the stores of x and `mEnabled` swapped, and an
+  exhaustive search of the block's statement orders, inline setters, global or pointer accesses and local types
+  found no source with x's first.
 
 **A value read once where the original reads it twice**
+- Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
+  program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
+  z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
+  a volatile read or `#pragma opt_dead_assignments off` keeps both but gives the light's pointer and x other
+  registers. Statement orders, temporaries' types, inlines and struct copies did not do it.
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
 - Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
@@ -677,7 +723,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   original's registers.
 - A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
   random number first: the generator's state is stored before the range is read (overlay 76's voice page).
+- `MATH_Rand16(&gRandom, max)` through an inline taking `int` (`Rand(int max)`) truncates a `u8` count to 16 bits
+  (`lsl #16; lsrs #16`) as the original does; a `u16` parameter or the call made directly drops the truncation
+  (overlay 39).
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
+- Read the literal pool's constants, not only the instructions: a tenth of fx32 written `FX32_ONE / 10` is 0x199,
+  `FX32_CONST(0.1)` rounds to 0x19A (overlay 5's `TestDrawMiiCamera::SetRandomRadius`).
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
 - A `wchar_t` set from a choice of two wide constants (`fill = zero ? L'0' : L' ';`) and then compared is compared
   in its register; with `'0' : ' '` the compiler reloads it from the stack, where its address is taken
@@ -708,6 +759,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
   from it: deriving makes the compiler emit its own table and destructors (`RoomDoorModel` in overlay 74, the
   character models).
+- A `VecFx32` returned by value and stored in a member: `mEye = GetEye(...);` copies it field by field from the
+  call's return slot, where `VecFx32 eye = GetEye(...);` then the fields makes a second copy and a larger frame. A
+  vector member assigned through a pointer member, `mCamera->mPosition = mEye;`, loads the pointer once per vector;
+  three field assignments reload it after each store (overlay 5's `TestDrawMiiCamera::Update`).
 - Record copies: `(CharacterRecord &)dst = src` (overlay 109). A copy of a `WMBssDesc` is field by field; a struct
   wrapping one is copied with `ldm`/`stm`.
 - Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is

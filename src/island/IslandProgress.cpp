@@ -53,6 +53,13 @@ struct ItemInfo {
 
 struct IslandState;
 
+// The save data's header (include/save/SaveBlocks.h), as far as this file calls it: a declaration-only stand-in,
+// which the calls reach by a cast
+class SaveHeader {
+public:
+    u8 GetUnknown44(int index); // A facility's state: 0 not built, 1 built, 2 new, 3 not open yet
+};
+
 extern "C" {
 extern const ItemInfo data_020f5f0c[];
 extern IslandState data_0212348c; // The state of the island's buildings and features
@@ -61,7 +68,6 @@ BOOL func_0202c604(GameData *game, int index); // Its sex (MiiData_GetSex): 0 ma
 u32 func_0202c6a8(GameData *game, int index);  // Its year of birth, 0xFFF for none
 u32 func_0202c6d0(GameData *game, int index);  // Its month of birth
 u32 func_0202c6f8(GameData *game, int index);  // Its day of birth
-u8 func_02039c00(IslandState *island, int facility); // 0 not built, 1 built, 2 new, 3 not open yet
 }
 
 void IslandProgress::Init(Inventory *inventory, int *money) {
@@ -145,63 +151,63 @@ int IslandProgress::GetNewFacility(BOOL check20) {
     int facility = -1;
     if (check20 && *(int *)((u8 *)&gGameData + 0x2C) == 1) {
         facility = 0x20;
-    } else if (func_02039c00(&data_0212348c, 7) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(7) == 3) {
         facility = 7;
-    } else if (func_02039c00(&data_0212348c, 3) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(3) == 3) {
         facility = 3;
-    } else if (func_02039c00(&data_0212348c, 5) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(5) == 3) {
         facility = 5;
-    } else if (func_02039c00(&data_0212348c, 4) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(4) == 3) {
         facility = 4;
-    } else if (func_02039c00(&data_0212348c, 2) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 15) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(2) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 15) {
         facility = 2;
-    } else if (func_02039c00(&data_0212348c, 12) == 0 && mResidents >= 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(12) == 0 && mResidents >= 3) {
         facility = 12;
-    } else if (func_02039c00(&data_0212348c, 6) == 0 && mResidents >= 5 && mTroublesSolved >= 10) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(6) == 0 && mResidents >= 5 && mTroublesSolved >= 10) {
         facility = 6;
-    } else if (func_02039c00(&data_0212348c, 10) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 5) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(10) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 5) {
         facility = 10;
-    } else if (func_02039c00(&data_0212348c, 8) == 0 && mGoods >= 5) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(8) == 0 && mGoods >= 5) {
         facility = 8;
-    } else if (func_02039c00(&data_0212348c, 11) == 0 && mMoneyCount >= 20000) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(11) == 0 && mMoneyCount >= 20000) {
         facility = 11;
-    } else if (func_02039c00(&data_0212348c, 9) == 0 && mMen >= 3 && mWomen >= 3 && mResidents >= 7) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(9) == 0 && mMen >= 3 && mWomen >= 3 && mResidents >= 7) {
         facility = 9;
-    } else if (func_02039c00(&data_0212348c, 1) == 0 && mTroublesSolved >= 60 && mResidents >= 4) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(1) == 0 && mTroublesSolved >= 60 && mResidents >= 4) {
         facility = 1;
-    } else if (func_02039c00(&data_0212348c, 13) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(13) == 3) {
         facility = 13;
-    } else if (func_02039c00(&data_0212348c, 14) == 3) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(14) == 3) {
         facility = 14;
-    } else if (func_02039c00(&data_0212348c, 15) == 0 && func_02039c00(&data_0212348c, 6) != 0 && mResidents >= 10 &&
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(15) == 0 && ((SaveHeader *)&data_0212348c)->GetUnknown44(6) != 0 && mResidents >= 10 &&
                mTroublesSolved >= 40) {
         facility = 15;
-    } else if (func_02039c00(&data_0212348c, 0) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 30) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(0) == 0 && mMen >= 2 && mWomen >= 2 && mTroublesSolved >= 30) {
         facility = 0;
-    } else if (func_02039c00(&data_0212348c, 16) == 0 && func_02039c00(&data_0212348c, 6) != 0 && mEntriesA >= 10) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(16) == 0 && ((SaveHeader *)&data_0212348c)->GetUnknown44(6) != 0 && mEntriesA >= 10) {
         facility = 16;
-    } else if (func_02039c00(&data_0212348c, 17) == 0 && func_02039c00(&data_0212348c, 6) != 0 && mEntriesB >= 10) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(17) == 0 && ((SaveHeader *)&data_0212348c)->GetUnknown44(6) != 0 && mEntriesB >= 10) {
         facility = 17;
-    } else if (func_02039c00(&data_0212348c, 18) == 0 && func_02039c00(&data_0212348c, 6) != 0 &&
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(18) == 0 && ((SaveHeader *)&data_0212348c)->GetUnknown44(6) != 0 &&
                mTroublesSolved >= 90) {
         facility = 18;
-    } else if (func_02039c00(&data_0212348c, 20) == 0 && mTroublesSolved >= 100) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(20) == 0 && mTroublesSolved >= 100) {
         facility = 20;
-    } else if (func_02039c00(&data_0212348c, 21) == 0 && mTroublesSolved >= 200) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(21) == 0 && mTroublesSolved >= 200) {
         facility = 21;
-    } else if (func_02039c00(&data_0212348c, 22) == 0 && mTroublesSolved >= 400) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(22) == 0 && mTroublesSolved >= 400) {
         facility = 22;
-    } else if (func_02039c00(&data_0212348c, 23) == 0 && mTroublesSolved >= 700) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(23) == 0 && mTroublesSolved >= 700) {
         facility = 23;
-    } else if (func_02039c00(&data_0212348c, 24) == 0 && mTroublesSolved >= 1000) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(24) == 0 && mTroublesSolved >= 1000) {
         facility = 24;
-    } else if (func_02039c00(&data_0212348c, 25) == 0 && mResidents >= 10) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(25) == 0 && mResidents >= 10) {
         facility = 25;
-    } else if (func_02039c00(&data_0212348c, 26) == 0 && mResidents >= 30) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(26) == 0 && mResidents >= 30) {
         facility = 26;
-    } else if (func_02039c00(&data_0212348c, 27) == 0 && mResidents >= 50) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(27) == 0 && mResidents >= 50) {
         facility = 27;
-    } else if (func_02039c00(&data_0212348c, 28) == 0 && mResidents >= 100) {
+    } else if (((SaveHeader *)&data_0212348c)->GetUnknown44(28) == 0 && mResidents >= 100) {
         facility = 28;
     } else {
         int stage = gGameData.mApartmentStage;

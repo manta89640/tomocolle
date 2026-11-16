@@ -9,8 +9,12 @@
 class GameData {
 public:
     void SetCappedCounter(int value);
+    // The save blocks' checksum: all the 32-bit words of the block but the last (which holds it), subtracted from
+    // 0xFFFFFFFF (func_0202cd00)
+    u32 Checksum(const void *data, u32 size);
 
-    /* 0x00 */ u8 mUnknown00[8];
+    /* 0x00 */ u16 mCardLockId; // What the save blocks lock the card's backup with
+    /* 0x02 */ u8 mUnknown02[6];
     // SoundManager::Init sets the sound settings to their defaults when this is 3. Overlay 106 (PreStartScene) reads
     // it as the outcome of loading the save data: on 0 it goes on, on 1 it goes on as on a first start, on 2 it says
     // the data is broken and initialises it, on 3 and 4 it says the data could not be read.

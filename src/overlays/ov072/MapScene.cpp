@@ -363,7 +363,7 @@ void MapScene::StartLoading() {
         mFacilities.Init(NULL, NULL);
         mNewBuilding = mFacilities.GetNewFacility(mSceneId == 0x6A);
         if (mNewBuilding != -1) {
-            func_02039c0c(&gIsland, mNewBuilding, 2);
+            ((SaveHeader *)&gIsland)->SetUnknown44(mNewBuilding, 2);
         }
         break;
     }
@@ -480,7 +480,7 @@ void MapScene::Init() {
     mModels[0].SetAnimation(RESOURCE_BTA0, 0);
     mModels[0].SetAnimation(RESOURCE_BMA0, 0);
     for (int i = 1; i < MODEL_COUNT; i++) {
-        switch (func_02039c00(&gIsland, sModelBuildings[i])) {
+        switch (((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[i])) {
         case 0:
         case 3:
             mModels[i].Load(1, 0);
@@ -755,7 +755,7 @@ void MapScene::Update() {
             } else if (mFrames == 120) {
                 gSoundManager.StartSeqArc(1, 3, 11);
                 mSprite41BC.mVisible = TRUE;
-                if (func_02039c00(&gIsland, 9) == 1) {
+                if (((SaveHeader *)&gIsland)->GetUnknown44(9) == 1) {
                     StartEffect2(&sModelPositions[10]);
                 }
             } else if (mFrames > 280) {
@@ -813,7 +813,7 @@ void MapScene::Update() {
             if (mFrames == 1) {
                 gSoundManager.StartSeqArc(1, 3, 11);
                 mSprite41BC.mVisible = TRUE;
-                if (func_02039c00(&gIsland, 9) == 1) {
+                if (((SaveHeader *)&gIsland)->GetUnknown44(9) == 1) {
                     StartEffect2(&sModelPositions[10]);
                 }
             }
@@ -891,7 +891,7 @@ void MapScene::Update() {
         if (!mCamera.mMoving) {
             if (++mIdleFrames == 20) {
                 mNewsDue = IsNewsDue();
-                if (func_02039c00(&gIsland, 9) == 1 || func_02039c00(&gIsland, 9) == 2) {
+                if (((SaveHeader *)&gIsland)->GetUnknown44(9) == 1 || ((SaveHeader *)&gIsland)->GetUnknown44(9) == 2) {
                     if (mNewsDue) {
                         if (func_0202a1f8(&mModels[10], RESOURCE_BTP0, 0)) {
                             mModels[10].SetAnimation(RESOURCE_BTP0, 0);
@@ -982,7 +982,7 @@ void MapScene::Update() {
                 continue;
             }
             if (i == mSelected) {
-                u8 state = func_02039c00(&gIsland, sModelBuildings[mSelected]);
+                u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[mSelected]);
                 if (!(state == 1 || state == 2)) {
                     continue;
                 }
@@ -1121,12 +1121,12 @@ void MapScene::SetState(int state) {
         case 4:
             Deselect(FALSE, 1);
             SetTutorialStep(3);
-            func_02039c0c(&gIsland, 7, 3);
+            ((SaveHeader *)&gIsland)->SetUnknown44(7, 3);
             break;
         case 7:
             Deselect(FALSE, 1);
             SetTutorialStep(6);
-            func_02039c0c(&gIsland, 7, 1);
+            ((SaveHeader *)&gIsland)->SetUnknown44(7, 1);
             break;
         case 15: {
             SavedCharacter first;
@@ -1139,12 +1139,12 @@ void MapScene::SetState(int state) {
             func_0202c28c(&gGameData, 1, &second);
             UpdateWindows();
             SetTutorialStep(11);
-            func_02039c0c(&gIsland, 3, 3);
+            ((SaveHeader *)&gIsland)->SetUnknown44(3, 3);
             break;
         }
         case 18:
             SetTutorialStep(14);
-            func_02039c0c(&gIsland, 3, 1);
+            ((SaveHeader *)&gIsland)->SetUnknown44(3, 1);
             break;
         case 20:
             SetTutorialStep(18);
@@ -1193,7 +1193,7 @@ void MapScene::SelectBuilding(int model) {
     func_020349cc(&mMessageWindows[0], 0x1C);
     ArchiveManager_Unmount(&gArchiveManager, "S01");
     int building = sModelBuildings[model];
-    u8 state = func_02039c00(&gIsland, building);
+    u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(building);
     if (state == 0 || state == 3) {
         ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBoardWindowArchive, 1);
         func_02034f38(&mMessageWindows[0], 0, sBoardMessages[building]);
@@ -1269,7 +1269,7 @@ void MapScene::OpenWindow() {
     mWindowState = WINDOW_OPEN;
     mWindowFrames = 0;
     mLastBuilding = mSelected;
-    u8 state = func_02039c00(&gIsland, sModelBuildings[mSelected]);
+    u8 state = ((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[mSelected]);
     if (state == 0 || state == 3) {
         func_02028f24(&gVramTransferQueue, sBoardChars, 0x2F00, 0, 0, 0x6000, -1);
         func_02027534(&data_021213b8, sBoardPalette, 0x100, 0x20, 0x20, 0x40);
@@ -1469,7 +1469,7 @@ void MapScene::SetTutorialStep(int step) {
     case 24:
         func_02034f38(&mMessageWindows[1], 0, 0x17A);
         func_02034720(&mMessageWindows[1], 0x12, 1);
-        func_02039c0c(&gIsland, 5, 3);
+        ((SaveHeader *)&gIsland)->SetUnknown44(5, 3);
         break;
     }
     mTutorialStep = step;
@@ -2112,22 +2112,22 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
         break;
     }
     int building = sModelBuildings[model];
-    if (func_02039c00(&gIsland, building) == 2) {
-        func_02039c0c(&gIsland, building, 1);
+    if (((SaveHeader *)&gIsland)->GetUnknown44(building) == 2) {
+        ((SaveHeader *)&gIsland)->SetUnknown44(building, 1);
     }
     if (model == 6) {
         for (int i = 0; i < 2; i++) {
             int feature = sCityHallFeatures[i];
-            if (func_02039c00(&gIsland, feature) == 2) {
-                func_02039c0c(&gIsland, feature, 1);
+            if (((SaveHeader *)&gIsland)->GetUnknown44(feature) == 2) {
+                ((SaveHeader *)&gIsland)->SetUnknown44(feature, 1);
             }
         }
     }
     if (model == 7) {
         for (int i = 0; i < 7; i++) {
             int feature = sRankingFeatures[i];
-            if (func_02039c00(&gIsland, feature) == 2) {
-                func_02039c0c(&gIsland, feature, 1);
+            if (((SaveHeader *)&gIsland)->GetUnknown44(feature) == 2) {
+                ((SaveHeader *)&gIsland)->SetUnknown44(feature, 1);
             }
         }
     }
@@ -2245,19 +2245,19 @@ void MapClockDisplay::SetVisible(BOOL visible) {
 
 void MapScene::UpdateNewMarks() {
     for (int i = 1; i < MODEL_COUNT; i++) {
-        if (func_02039c00(&gIsland, sModelBuildings[i]) == 2) {
+        if (((SaveHeader *)&gIsland)->GetUnknown44(sModelBuildings[i]) == 2) {
             mNewMarks[i].mVisible = TRUE;
         } else {
             mNewMarks[i].mVisible = FALSE;
         }
     }
     for (int i = 0; i < 2; i++) {
-        if (func_02039c00(&gIsland, sCityHallFeatures[i]) == 2) {
+        if (((SaveHeader *)&gIsland)->GetUnknown44(sCityHallFeatures[i]) == 2) {
             mNewMarks[6].mVisible = TRUE;
         }
     }
     for (int i = 0; i < 7; i++) {
-        if (func_02039c00(&gIsland, sRankingFeatures[i]) == 2) {
+        if (((SaveHeader *)&gIsland)->GetUnknown44(sRankingFeatures[i]) == 2) {
             mNewMarks[7].mVisible = TRUE;
         }
     }
@@ -2328,7 +2328,7 @@ void MoneyDisplay::SetVisible(BOOL visible) {
 
 void MoneyDisplay::Refresh() {
     wchar_t text[10];
-    func_02036874(mShown, text, 20, 0, 0);
+    FormatNumberWithCommas(mShown, text, 20, 0, 0);
     mText.mText = (const NNSG2dChar *)text;
     NNS_G2dCharCanvasClear(&mText.mCanvas, 0);
     mText.DrawText();

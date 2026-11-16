@@ -1,92 +1,90 @@
-func_ov039_02149a40 kind:function(arm,size=0x2f4) addr:0x02149a40
-func_ov039_02149d34 kind:function(arm,size=0xb64) addr:0x02149d34
-func_ov039_0214a898 kind:function(arm,size=0x468) addr:0x0214a898
-func_ov039_0214ad00 kind:function(arm,size=0x84) addr:0x0214ad00
-func_ov039_0214ad84 kind:function(arm,size=0x58) addr:0x0214ad84
-func_ov039_0214addc kind:function(arm,size=0x74c) addr:0x0214addc
-func_ov039_0214b528 kind:function(arm,size=0xd8) addr:0x0214b528
-func_ov039_0214b600 kind:function(arm,size=0x14) addr:0x0214b600
-func_ov039_0214b614 kind:function(arm,size=0x10) addr:0x0214b614
-func_ov039_0214b624 kind:function(arm,size=0x54) addr:0x0214b624
-func_ov039_0214b678 kind:function(arm,size=0x5c) addr:0x0214b678
-data_ov039_0214b6d4 kind:data(any) addr:0x0214b6d4
-data_ov039_0214b6d6 kind:data(any) addr:0x0214b6d6
-data_ov039_0214b6d8 kind:data(any) addr:0x0214b6d8
-data_ov039_0214b6e4 kind:data(any) addr:0x0214b6e4
-data_ov039_0214b6e8 kind:data(any) addr:0x0214b6e8 ambiguous
-data_ov039_0214b6ec kind:data(any) addr:0x0214b6ec
-data_ov039_0214b6fc kind:data(any) addr:0x0214b6fc
-data_ov039_0214b704 kind:data(any) addr:0x0214b704
-gStr_CommercialAt_ov039 kind:data(any) addr:0x0214b714
-data_ov039_0214b734 kind:data(any) addr:0x0214b734
-data_ov039_0214b744 kind:data(any) addr:0x0214b744
-data_ov039_0214b754 kind:data(any) addr:0x0214b754
-gStr_Dollar_ov039 kind:data(any) addr:0x0214b764
-data_ov039_0214b774 kind:data(any) addr:0x0214b774
-data_ov039_0214b788 kind:data(any) addr:0x0214b788
-data_ov039_0214b7a0 kind:data(any) addr:0x0214b7a0
-gStr_GraveAccent_ov039 kind:data(any) addr:0x0214b7c0
-data_ov039_0214b7e0 kind:data(any) addr:0x0214b7e0
-gText_Ka_ov039 kind:data(any) addr:0x0214b804
-gStr_Colon_ov039 kind:data(any) addr:0x0214b828
-data_ov039_0214b82a kind:data(any) addr:0x0214b82a
-gStr_GreaterThan_ov039 kind:data(any) addr:0x0214b84c
-gStr_o_ov039 kind:data(any) addr:0x0214b870
-data_ov039_0214b894 kind:data(any) addr:0x0214b894
-data_ov039_0214b8c4 kind:data(any) addr:0x0214b8c4
-gStr__ov039 kind:data(any) addr:0x0214b8d0
-data_ov039_0214b908 kind:data(any) addr:0x0214b908 ambiguous
-data_ov039_0214b920 kind:data(any) addr:0x0214b920
-data_ov039_0214b92c kind:data(any) addr:0x0214b92c
-data_ov039_0214b934 kind:data(any) addr:0x0214b934 ambiguous
-gStr_N01_BG_00_ncl kind:data(any) addr:0x0214b950
-gStr_N01_BG_00_ncg kind:data(any) addr:0x0214b960
-gStr_N01_BG_00_nsc kind:data(any) addr:0x0214b970
-gStr_Scn_Travel_Thai_LZ_bin kind:data(any) addr:0x0214b980
-gStr_Scn_Travel_Kyoto_LZ_bin kind:data(any) addr:0x0214b998
-gStr_Scn_Travel_Spain_LZ_bin kind:data(any) addr:0x0214b9b0
-gStr_Scn_Travel_France_LZ_bin kind:data(any) addr:0x0214b9c8
-gStr_Scn_Travel_Hawaii_LZ_bin kind:data(any) addr:0x0214b9e4
-gStr_Scn_Travel_Italia_LZ_bin kind:data(any) addr:0x0214ba00
-data_ov039_0214ba18 kind:data(any) addr:0x0214ba18 ambiguous
-gStr_Scn_Travel_Okinawa_LZ_bin kind:data(any) addr:0x0214ba1c
-gStr_Scn_Travel_Hongkong_LZ_bin kind:data(any) addr:0x0214ba38
-data_ov039_0214ba54 kind:data(any) addr:0x0214ba54
-data_ov039_0214ba68 kind:data(any) addr:0x0214ba68 ambiguous
-_ZTV14TestNg116Scene kind:data(any) addr:0x0214ba70
-data_ov039_0214ba8c kind:data(any) addr:0x0214ba8c ambiguous
-data_ov039_0214ba94 kind:data(any) addr:0x0214ba94
-data_ov039_0214baa8 kind:data(any) addr:0x0214baa8 ambiguous
-gStr_TBM_ov039 kind:data(any) addr:0x0214bac0
-gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov039 kind:data(any) addr:0x0214bac4
-gStr_N00_ov039 kind:data(any) addr:0x0214bae4
-gStr_Scn_Scene_SceneTestNg116_LZ_bin kind:data(any) addr:0x0214bae8
-gStr_N01_ov039 kind:data(any) addr:0x0214bb08
-gStr_SFL_ov039 kind:data(any) addr:0x0214bb0c
-gStr_Scn_Scene_NgCaption_LZ_bin_ov039 kind:data(any) addr:0x0214bb10
-gStr_N00_Obj_up_hm_nce kind:data(any) addr:0x0214bb2c
-gStr_N00_Obj_up_hm_ncg kind:data(any) addr:0x0214bb40
-gStr_N00_Obj_up_hm_ncl kind:data(any) addr:0x0214bb54
-gStr_N00_BG_airplane_hm_nsc kind:data(any) addr:0x0214bb68
-gStr_N00_BG_down_hm_nsc kind:data(any) addr:0x0214bb80
-gStr_N00_Obj_up_nce kind:data(any) addr:0x0214bb94
-gStr_N00_Obj_up_ncg kind:data(any) addr:0x0214bba4
-gStr_N00_Obj_up_ncl kind:data(any) addr:0x0214bbb4
-gStr_N00_BG_airplane_nsc kind:data(any) addr:0x0214bbc4
-gStr_N00_BG_down_nsc kind:data(any) addr:0x0214bbdc
-gStr_N00_Obj_down_nce_ov039 kind:data(any) addr:0x0214bbf0
-gStr_N00_Obj_down_ncg_ov039 kind:data(any) addr:0x0214bc04
-gStr_N00_Obj_down_ncl_ov039 kind:data(any) addr:0x0214bc18
-data_ov039_0214bc28 kind:data(any) addr:0x0214bc28 ambiguous
-gStr_N00_BG_up_ncl_ov039 kind:data(any) addr:0x0214bc2c
-gStr_N00_BG_up_ncg_ov039 kind:data(any) addr:0x0214bc3c
-gStr_N00_BG_pictureframe_nsc kind:data(any) addr:0x0214bc4c
-gStr_N00_BG_down_ncl kind:data(any) addr:0x0214bc68
-gStr_N00_BG_down_ncg kind:data(any) addr:0x0214bc7c
-gStr_TBM_tmd_minicontents_msg_JP_bmg_ov039 kind:data(any) addr:0x0214bc90
-gStr_SFL_caption_ncg_ov039 kind:data(any) addr:0x0214bcb4
-gStr_SFL_caption_nsc_ov039 kind:data(any) addr:0x0214bcc8
-gStr_N00_ov039_2 kind:data(any) addr:0x0214bcdc
-gStr_N01_ov039_2 kind:data(any) addr:0x0214bce0
-gStr_TBM_ov039_2 kind:data(any) addr:0x0214bce4
-gStr_SFL_ov039_2 kind:data(any) addr:0x0214bce8
+_ZN11TravelScene12StartLoadingEv kind:function(arm,size=0x2f4) addr:0x02149a40
+_ZN11TravelScene4InitEv kind:function(arm,size=0xb64) addr:0x02149d34
+_ZN11TravelScene6UpdateEv kind:function(arm,size=0x468) addr:0x0214a898
+_ZN11TravelScene4DrawEv kind:function(arm,size=0x84) addr:0x0214ad00
+_ZN11TravelScene4ExitEv kind:function(arm,size=0x58) addr:0x0214ad84
+_ZN11TravelScene8SetStateEi kind:function(arm,size=0x74c) addr:0x0214addc
+_ZN11TravelScene5SpeakEimi kind:function(arm,size=0xd8) addr:0x0214b528
+_ZN11TravelScene12GetSightNameEii kind:function(arm,size=0x14) addr:0x0214b600
+_ZN11TravelScene15GetSightReadingEii kind:function(arm,size=0x10) addr:0x0214b614
+_ZN11TravelSceneD1Ev kind:function(arm,size=0x54) addr:0x0214b624
+_ZN11TravelSceneD0Ev kind:function(arm,size=0x5c) addr:0x0214b678
+sShutterSequences$13925 kind:data(any) addr:0x0214b6d4 local
+sSoloAnimations$13922 kind:data(any) addr:0x0214b6d6 local
+sPairAngles$14097 kind:data(any) addr:0x0214b6d8 local
+pairCaption$13960 kind:data(any) addr:0x0214b6dc local
+soloCaption$13962 kind:data(any) addr:0x0214b6e0 local
+sPairAnimations$13914 kind:data(any) addr:0x0214b6e4 local
+sCaptionFonts$13916 kind:data(any) addr:0x0214b6e8 local
+sSoloAngles$14095 kind:data(any) addr:0x0214b6ec local
+sShutterPositions$13920 kind:data(any) addr:0x0214b6f4 local
+sButtonSequences$13910 kind:data(any) addr:0x0214b6fc local
+sCaptionPositions$13917 kind:data(any) addr:0x0214b704 local
+sShutterSizes$13919 kind:data(any) addr:0x0214b70c local
+sSoloScreenPoints$13926 kind:data(any) addr:0x0214b714 local
+sCameraPosition$13918 kind:data(any) addr:0x0214b71c local
+sCameraTarget$13908 kind:data(any) addr:0x0214b728 local
+sShutterSounds$13909 kind:data(any) addr:0x0214b734 local
+sButtonKinds$13911 kind:data(any) addr:0x0214b744 local
+sButtonMessages$13913 kind:data(any) addr:0x0214b754 local
+sPairScreenPoints$13915 kind:data(any) addr:0x0214b764 local
+sDestinationSequences$13921 kind:data(any) addr:0x0214b774 local
+sPairSpots$14094 kind:data(any) addr:0x0214b788 local
+sButtonPositions$13924 kind:data(any) addr:0x0214b7a0 local
+sButtonSizes$13927 kind:data(any) addr:0x0214b7c0 local
+sSightMessages kind:data(any) addr:0x0214b7e0 local
+sSceneMemoryValues$13869 kind:data(any) addr:0x0214b804 local
+sClothes$13870 kind:data(any) addr:0x0214b828 local
+sSoundGroups$13871 kind:data(any) addr:0x0214b84c local
+sSequences$13923 kind:data(any) addr:0x0214b870 local
+sSoloSpots$14096 kind:data(any) addr:0x0214b894 local
+sSightCounts$13868 kind:data(any) addr:0x0214b8c4 local
+sButtonSounds$13912 kind:data(any) addr:0x0214b8d0 local
+sSightPictureFiles$14098 kind:data(any) addr:0x0214b920 local
+sDestinationArchives$13858 kind:data(any) addr:0x0214b92c local
+@14100 kind:data(any) addr:0x0214b950 local
+@14099 kind:data(any) addr:0x0214b960 local
+@14101 kind:data(any) addr:0x0214b970 local
+@13867 kind:data(any) addr:0x0214b980 local
+@13863 kind:data(any) addr:0x0214b998 local
+@13866 kind:data(any) addr:0x0214b9b0 local
+@13859 kind:data(any) addr:0x0214b9c8 local
+@13860 kind:data(any) addr:0x0214b9e4 local
+@13862 kind:data(any) addr:0x0214ba00 local
+@13864 kind:data(any) addr:0x0214ba1c local
+@13861 kind:data(any) addr:0x0214ba38 local
+@13865 kind:data(any) addr:0x0214ba54 local
+_ZTV11TravelScene kind:data(any) addr:0x0214ba70
+@14590 kind:data(any) addr:0x0214ba94 local
+@14591 kind:data(any) addr:0x0214bac0 local
+@14592 kind:data(any) addr:0x0214bac4 local
+@14593 kind:data(any) addr:0x0214bae4 local
+@14594 kind:data(any) addr:0x0214bae8 local
+@14595 kind:data(any) addr:0x0214bb08 local
+@14596 kind:data(any) addr:0x0214bb0c local
+@14597 kind:data(any) addr:0x0214bb10 local
+@14711 kind:data(any) addr:0x0214bb2c local
+@14712 kind:data(any) addr:0x0214bb40 local
+@14713 kind:data(any) addr:0x0214bb54 local
+@14714 kind:data(any) addr:0x0214bb68 local
+@14715 kind:data(any) addr:0x0214bb80 local
+@14716 kind:data(any) addr:0x0214bb94 local
+@14717 kind:data(any) addr:0x0214bba4 local
+@14718 kind:data(any) addr:0x0214bbb4 local
+@14719 kind:data(any) addr:0x0214bbc4 local
+@14720 kind:data(any) addr:0x0214bbdc local
+@14721 kind:data(any) addr:0x0214bbf0 local
+@14722 kind:data(any) addr:0x0214bc04 local
+@14723 kind:data(any) addr:0x0214bc18 local
+@14724 kind:data(any) addr:0x0214bc2c local
+@14725 kind:data(any) addr:0x0214bc3c local
+@14726 kind:data(any) addr:0x0214bc4c local
+@14727 kind:data(any) addr:0x0214bc68 local
+@14728 kind:data(any) addr:0x0214bc7c local
+@14729 kind:data(any) addr:0x0214bc90 local
+@14730 kind:data(any) addr:0x0214bcb4 local
+@14731 kind:data(any) addr:0x0214bcc8 local
+@14814 kind:data(any) addr:0x0214bcdc local
+@14815 kind:data(any) addr:0x0214bce0 local
+@14816 kind:data(any) addr:0x0214bce4 local
+@14817 kind:data(any) addr:0x0214bce8 local

@@ -3,6 +3,7 @@
 
 #include "MainProgram3d.h"
 #include "character/CharacterSpeechTexts.h"
+#include "SceneCast.h"
 
 // The main program's helpers that the scene overlays share (src/scene/SceneHelpers.cpp, 0x0204E4B4 to 0x0204FC74):
 // the speech texts of a character, numbers read out, the characters a scene shows with their bodies (SceneCast,
@@ -11,15 +12,6 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
-// The sounds a button plays (include/SpriteButton.h has the same stand-in)
-struct ButtonSounds {
-    /* 0x0 */ int mSounds[4];
-}; // 0x10
-
-extern "C" {
-void func_02032158(SpriteButton *button, const ButtonSounds *sounds); // Copies its sounds in
-}
-
 // Fills text with the reading of a number from 0 to 9999 in the synthesizer's notation ("レイ" for 0)
 void MakeNumberReading(wchar_t *text, int number);
 // Fills text with a number as digits (at most 9999)
@@ -27,35 +19,7 @@ void MakeNumberText(wchar_t *text, int number);
 
 // --- The characters a scene shows ---
 
-class GameData;
-
-// Up to ten characters with their bodies, chosen among the saved ones: those of gSceneMemory.mCharacters first, the
-// rest at random. Each has its archive ("B0I" to "B9I"), and the room animations ("BIC") as resource 31.
-class SceneCast {
-public:
-    enum { MAX = 10 };
-
-    BOOL Choose(int count);
-    void SetCharacters(Character *characters);
-    void MountArchives(const char *animationArchive);
-    void InitCharacters();
-    void LipSync(const char *phoneme);
-    void UpdateCharacters();
-    void DrawCharacters();
-    void Release();
-    void ReloadCharacter(int index);
-    void RereadCharacter(int index);
-
-    /* 0x0000 */ int mCount;
-    /* 0x0004 */ Character *mCharacters[MAX];
-    /* 0x002C */ CharacterSpeechTexts mSpeechTexts[MAX];
-    /* 0x19F4 */ int mResidents[100];    // The saved characters there are, by index
-    /* 0x1B84 */ int mResidentCount;
-    /* 0x1B88 */ int mChosen[MAX];       // The saved characters shown, by index
-    /* 0x1BB0 */ int mSpeaker;           // The character whose lips follow the speech, -1 for none
-    /* 0x1BB4 */ int mSpeakerFace;
-    /* 0x1BB8 */ Camera *mCamera;
-}; // 0x1BBC
+// SceneCast: src/scene/SceneCast.h
 
 // Where one of a FaceCast's faces is, and how it is turned and scaled
 struct FaceTransform {

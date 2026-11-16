@@ -15,16 +15,33 @@
 
 #include "SceneStandIns.h"
 
+// The palette loader, as far as the scene manager touches it (MainProgram.h declares it, and the scenes' headers)
+struct PaletteLoader {
+    /* 0x000 */ u8 mUnknown000[0x41C];
+    /* 0x41C */ int mUnknown41C;
+};
+
 // The scene classes of the constructors 0x0203de78..0x02040578 (gap38-a)
 #include "../overlays/ov000/TextTestScene.h"
 #include "../overlays/ov105/NintendoLogoScene.h"
 #include "../overlays/ov002/FaceTestScene.h"
-#include "../overlays/ov003/Scene03.h"
-#include "../overlays/ov004/Scene04.h"
+#include "../overlays/ov003/BodyPaletteTestScene.h"
+#include "../overlays/ov004/CharacterBodyTestScene.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
 #include "../overlays/ov001/NameSortTestScene.h"
+#include "../overlays/ov006/Scene0F.h"
 #include "../overlays/ov077/Scene17.h"
 #include "../overlays/ov007/Scene18.h"
+#include "../overlays/ov008/Scene19.h"
+#include "../overlays/ov009/TestNg20Scene.h"
+#include "../overlays/ov078/FriendListScene.h"
+#include "../overlays/ov067/ChangeClothesScene.h"
+#include "../overlays/ov068/Scene1E.h"
+#include "../overlays/ov070/RightJobScene.h"
+#include "../overlays/ov071/RightJob2Scene.h"
+#include "MiiListMenuScene.h"
+#include "G3SpriteTestScene.h"
+#include "MiiListScene.h"
 // End of gap38-a's scene classes
 
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
@@ -73,7 +90,7 @@
 #include "../overlays/ov094/Scene74.h"
 #include "../overlays/ov037/Scene75.h"
 #include "../overlays/ov038/TestNg111Scene.h"
-#include "../overlays/ov039/TestNg116Scene.h"
+#include "../overlays/ov039/TravelScene.h"
 #include "../overlays/ov040/Scene7A.h"
 #include "../overlays/ov041/Scene7B.h"
 #include "../overlays/ov042/TestNg119Scene.h"
@@ -112,18 +129,11 @@
 extern "C" {
 // --- The graphics managers, not decompiled: each records its state into a buffer and restores it from one ---
 extern u32 gGraphicsManager[];
-extern u8 data_02121834[]; // The backgrounds' screens
-extern u8 gObjResourceManager[];
 struct Unknown02120a10 {
     /* 0x000 */ u8 mUnknown000[0x99C];
     /* 0x99C */ int mUnknown99C;
 };
 extern Unknown02120a10 data_02120a10;
-struct Unknown021213b8 {
-    /* 0x000 */ u8 mUnknown000[0x41C];
-    /* 0x41C */ int mUnknown41C;
-};
-extern Unknown021213b8 data_021213b8;
 extern u8 data_02123434[];
 void func_02024b10(void *manager, void *state, u32 flags);
 void func_02024c14(void *manager, void *state, u32 flags);
@@ -131,7 +141,6 @@ void func_02027ad0(void *manager, void *state, u32 flags);
 void func_02027c0c(void *manager, void *state, u32 flags);
 void func_02023848(ScreenControl *screens, void *state, u32 flags);
 void func_02023a00(ScreenControl *screens, void *state, u32 flags);
-void func_02028280(void *screens, int plane, int priority); // A background's priority
 void func_02027270(void *manager);
 void func_020279f4(void *manager);
 void func_0202683c(void);
@@ -188,21 +197,21 @@ void SceneManager::Init() {
     gSoundManager.SaveHeapState(1);
     data_0211d604.mUnknown44 = 1;
     data_0211d604.mUnknown44Changed = TRUE;
-    func_02028280(data_02121834, 0x100, 0);
-    func_02028280(data_02121834, 0x800, 1);
-    func_02028280(data_02121834, 0x200, 2);
-    func_02028280(data_02121834, 0x400, 3);
-    func_02028280(data_02121834, 0x2, 0);
-    func_02028280(data_02121834, 0x1, 1);
-    func_02028280(data_02121834, 0x8, 2);
-    func_02028280(data_02121834, 0x4, 3);
-    func_02027270(gObjResourceManager);
+    func_02028280(&data_02121834, 0x100, 0);
+    func_02028280(&data_02121834, 0x800, 1);
+    func_02028280(&data_02121834, 0x200, 2);
+    func_02028280(&data_02121834, 0x400, 3);
+    func_02028280(&data_02121834, 0x2, 0);
+    func_02028280(&data_02121834, 0x1, 1);
+    func_02028280(&data_02121834, 0x8, 2);
+    func_02028280(&data_02121834, 0x4, 3);
+    func_02027270(&gObjResourceManager);
     data_02120a10.mUnknown99C = 1;
     func_020279f4(&data_021213b8);
     data_021213b8.mUnknown41C = 0x1E0;
     data_0211f9d4.mEnabled = TRUE;
     func_02024b10(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
-    func_02027ad0(data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+    func_02027ad0(&data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
     func_02023848(&data_0211d604, mScreenControlState, GRAPHICS_STATE_ALL);
     mScene = CreateScene(0xB6);
     mPreviousSceneId = 0;
@@ -222,9 +231,9 @@ void SceneManager::Update() {
         UnloadSceneOverlay(mPreviousSceneId);
         mScene = CreateScene(mNextSceneId);
         func_02024c14(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
-        func_02027c0c(data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+        func_02027c0c(&data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
         func_02023a00(&data_0211d604, mScreenControlState, GRAPHICS_STATE_ALL);
-        func_02027270(gObjResourceManager);
+        func_02027270(&gObjResourceManager);
         data_02120a10.mUnknown99C = 1;
         func_020279f4(&data_021213b8);
         data_021213b8.mUnknown41C = 0x1E0;
@@ -260,11 +269,11 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x03:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(3));
-        return new Scene03(sceneId);
+        return new BodyPaletteTestScene(sceneId);
     case 0x04:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(4));
-        return new Scene04(sceneId);
+        return new CharacterBodyTestScene(sceneId);
     case 0x05:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(5));
@@ -622,7 +631,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x79:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(39));
-        return new TestNg116Scene(sceneId);
+        return new TravelScene(sceneId);
     case 0x7A:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(40));
@@ -820,9 +829,9 @@ TextTestScene::TextTestScene(int sceneId) : Scene(sceneId) {}
 
 FaceTestScene::FaceTestScene(int sceneId) : Scene(sceneId) {}
 
-Scene03::Scene03(int sceneId) : Scene(sceneId) {}
+BodyPaletteTestScene::BodyPaletteTestScene(int sceneId) : Scene(sceneId) {}
 
-Scene04::Scene04(int sceneId) : Scene(sceneId) {}
+CharacterBodyTestScene::CharacterBodyTestScene(int sceneId) : Scene(sceneId) {}
 
 TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
@@ -830,11 +839,45 @@ TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
 NameSortTestScene::NameSortTestScene(int sceneId) : Scene(sceneId) {}
 
-// (Scene 0x0F; scenes 0x0E and 0x16: gap38-c's test scenes)
+Scene0F::Scene0F(int sceneId) : Scene(sceneId) {
+    mUnknown62C8[0] = 0;
+    mUnknown62C8[1] = 0;
+    mUnknown62C8[2] = 0;
+    mUnknown62C8[3] = 0;
+    mUnknown62C4 = 0;
+}
+
+// (Scenes 0x0E and 0x16: gap38-c's test scenes)
 
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
 Scene18::Scene18(int sceneId) : Scene(sceneId) {}
+
+// (RoomScene, TutorialRoomScene)
+
+Scene19::Scene19(int sceneId) : Scene(sceneId) {}
+
+FriendListScene::FriendListScene(int sceneId) : Scene(sceneId) {}
+
+// (Scene 0x1B: gap38-c's test scene)
+
+TestNg20Scene::TestNg20Scene(int sceneId) : Scene(sceneId) {}
+
+ChangeClothesScene::ChangeClothesScene(int sceneId) : Scene(sceneId) {}
+
+Scene1E::Scene1E(int sceneId) : Scene(sceneId) {}
+
+RightJobScene::RightJobScene(int sceneId) : Scene(sceneId) {}
+
+RightJob2Scene::RightJob2Scene(int sceneId) : Scene(sceneId) {}
+
+// (VoteScene)
+
+MiiListMenuScene::MiiListMenuScene(int sceneId) : Scene(sceneId) {}
+
+G3SpriteTestScene::G3SpriteTestScene(int sceneId) : Scene(sceneId) {}
+
+MiiListScene::MiiListScene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 
@@ -986,7 +1029,7 @@ Scene75::Scene75(int sceneId) : Scene(sceneId) {}
 TestNg111Scene::TestNg111Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x77, 0x78 and 0x79, overlay 39
-TestNg116Scene::TestNg116Scene(int sceneId) : Scene(sceneId) {}
+TravelScene::TravelScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x7A, overlay 40
 Scene7A::Scene7A(int sceneId) : Scene(sceneId) {}

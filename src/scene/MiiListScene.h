@@ -2,6 +2,7 @@
 #define SCENE_MIILISTSCENE_H
 
 #include "MainProgram.h"
+#include "list/MiiList.h"
 
 // Scene 0x26 (main program, no overlay): the list of Miis with its sort menu. The list (main program 0x020a03e8
 // to 0x020a3b00) shows the saved characters on five tabs, and a button at the top right of the touch screen opens
@@ -12,43 +13,6 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the
 // rest of the main program are STAND-INS: their sizes and the fields this scene touches.
-
-// The tabs of the list (0x5158 bytes): five of 0x1044 bytes, each with seventeen buttons.
-struct MiiListTabs {
-    void InitTabs();
-    // The animation sequences of a tab's buttons, released and pressed (data_020fbe28 has how many there are)
-    void AddButtons(int tab, int resource, const u8 *sequences, const u8 *pressedSequences);
-    void Reset();
-
-    /* 0x0000 */ int mUnknown0000;
-    /* 0x0004 */ u8 mTabs[5][0x1044];
-}; // 0x5158
-
-// The panel of the list's controls (0x9478 bytes): buttons, texts and scroll arrows.
-struct MiiListPanel {
-    void Init(int pageSize);
-    void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
-    void InitTexts(int plane, WindowPoint position, int *charOffset);
-    void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
-    void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
-
-    /* 0x0000 */ u8 mUnknown0000[0x9478];
-}; // 0x9478
-
-// The list (0x113A8 bytes): the saved characters it shows, and the order it shows them in.
-struct MiiList {
-    void Update();
-    BOOL RemoveSelected();
-    void Init(MiiListPanel *panel, MiiListTabs *tabs);
-    void Draw();
-    void Load();
-    void Sort(int sortKey, BOOL selectFirst);
-
-    /* 0x00000 */ u8 mCharacters[100][0x2C0]; // SavedCharacter, constructed by func_020979c0
-    /* 0x11300 */ u8 mUnknown11300[6];
-    /* 0x11306 */ u16 mSortKey;                // 0 to 6, what Sort set
-    /* 0x11308 */ u8 mUnknown11308[0xA0];
-}; // 0x113A8
 
 extern "C" {
 
@@ -61,6 +25,8 @@ void func_020a26fc(MiiListPanel *panel, int a, int b, int c, int d, int e, int f
 // The scene.
 class MiiListScene : public Scene {
 public:
+    MiiListScene(int sceneId);
+
     enum State {
         STATE_IDLE,      // The list, and the sort button
         STATE_SORT_MENU, // The sort menu
