@@ -320,7 +320,7 @@ lib/NitroSDK/libraries/math/src/math.c:
 
 lib/NitroSDK/libraries/std/src/std_string.c:
     complete
-    .text       start:0x0201457c end:0x020145d8
+    .text       start:0x0201457c end:0x020145fc
 
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
@@ -788,7 +788,27 @@ src/character/CharacterSort.cpp:
 src/character/SavedCharacter.cpp:
     .text       start:0x020979a0 end:0x0209e140
     .rodata     start:0x020fb8c0 end:0x020fbcdc
-    .data       start:0x02114e3c end:0x02114f80
+    .data       start:0x02114e3c end:0x02114f78
+
+src/item/Item.cpp:
+    .text       start:0x0209e140 end:0x020a00bc
+    .rodata     start:0x020fbcdc end:0x020fbddc
+    .data       start:0x02114f78 end:0x02115098
+
+src/item/Mannequin.cpp:
+    complete
+    .text       start:0x020a00bc end:0x020a03e8
+    .rodata     start:0x020fbddc end:0x020fbe18
+
+src/list/MiiList.cpp:
+    .text       start:0x020a03e8 end:0x020a3c68
+    .rodata     start:0x020fbe18 end:0x020fbfd4
+    .data       start:0x02115098 end:0x021150c0
+
+src/room/Room.cpp:
+    .text       start:0x020a3c68 end:0x020a5cc4
+    .rodata     start:0x020fbfd4 end:0x020fbffc
+    .data       start:0x021150c0 end:0x02115140
 
 lib/MSL_C/abort_exit_arm.c:
     complete

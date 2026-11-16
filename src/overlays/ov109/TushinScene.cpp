@@ -282,22 +282,22 @@ void TushinScene::SetUpWindow(int page) {
 
 // @0x0214a140
 void TushinScene::SetUpList(int *charOffset) {
-    func_020a1fe0(&mList, 6);
+    mList.Init(6);
     func_020a2104(&mList, 0x100, 0x26);
     func_020278f8(&data_021213b8, 0x5FDF, 0x100);
-    func_020a2118(&mList, 0, 0x68, 0x69, sListTitlePos, sListTitleSize);
+    mList.InitButtons(0, 0x68, 0x69, sListTitlePos, sListTitleSize);
     func_020a23cc(&mList, 0, 0x7A, sListCursorPos);
-    func_020a2280(&mList, 0x1000, sListTitleTextPos, charOffset);
-    func_020a258c(&mList, 0, 2, 3, sListScrollDownPos, sListScrollBarSize);
-    func_020a2644(&mList, 0, 4, 5, sListScrollUpPos, sListScrollDownSize);
+    mList.InitTexts(0x1000, sListTitleTextPos, charOffset);
+    mList.InitUpButton(0, 2, 3, sListScrollDownPos, sListScrollBarSize);
+    mList.InitDownButton(0, 4, 5, sListScrollUpPos, sListScrollDownSize);
     func_020a26fc(&mList, 0, 6, 7, 0x61, 0x4A, 1, sListBarPos, sListBarRect);
     func_020a27dc(&mList, 3, 6, 7);
-    func_020a380c(&mPages, 0, 8);
-    func_020a03e8(&mResidents, &mList, &mPages);
-    func_020a05dc(&mResidents);
+    mPages.Init(0, 8);
+    mResidents.Init(&mList, &mPages);
+    mResidents.Load();
     mUnknown35924 = mList.mUnknown9464;
     mSortKey = gGameData.mMiiListSortKey;
-    func_020a123c(&mResidents, mSortKey, 1);
+    mResidents.Sort(mSortKey, 1);
     mResidents.mUnknown1139C = 1;
 
     for (int i = 0; i < 3; i++) {
@@ -604,7 +604,7 @@ void TushinScene::SendSongs() {
     int n = 0;
     MI_CpuClear16(sSongs, sizeof(sSongs));
     for (int i = 0; i < 6; i++) {
-        int song = func_0209c718((SavedCharacter *)(residents + offset), i);
+        int song = ((SavedCharacter *)(residents + offset))->GetSongSlot(i);
         if (song != 0xFF) {
             func_0202c920(&gGameData, song, sSongs[n++]);
         }
@@ -678,7 +678,7 @@ void TushinScene::UpdateSending() {
             case 5:
                 sSendSongChunk = 0;
                 if (NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
-                    func_020a0664(&mResidents);
+                    mResidents.RemoveSelected();
                 }
                 break;
             case 6:
@@ -834,7 +834,7 @@ int TushinScene::ReceiveCharacter() {
             record.mUnknown299 = sTransfer.mUnknown299 | record.mUnknown299;
             int n = 0;
             for (int i = 0; i < 6; i++) {
-                if (func_0209c718(&sTransfer, i) == 0xFF) {
+                if (sTransfer.GetSongSlot(i) == 0xFF) {
                     continue;
                 }
                 u8 song = record.mSongSlots[i];
@@ -844,17 +844,17 @@ int TushinScene::ReceiveCharacter() {
                         mSongStoreFull = 1;
                     }
                 }
-                func_0209c73c(&sTransfer, i, song);
+                sTransfer.SetSongSlot(i, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, func_0209c718(&sTransfer, i), sSongs[n]);
+                    func_0202c934(&gGameData, sTransfer.GetSongSlot(i), sSongs[n]);
                     SongEntry entry;
-                    entry.mSong = func_0209c718(&sTransfer, i);
+                    entry.mSong = sTransfer.GetSongSlot(i);
                     entry.Load(entry.mSong);
                     entry.SetNotesFromSlot(-1, i);
                     entry.Save(entry.mSong);
                 }
                 n++;
-                record.mSongSlots[i] = func_0209c718(&sTransfer, i);
+                record.mSongSlots[i] = sTransfer.GetSongSlot(i);
                 func_0202c28c(&gGameData, sReceivedResident, &record);
             }
         }
@@ -871,18 +871,18 @@ int TushinScene::ReceiveCharacter() {
             ((SavedCharacter *)(&sTransfer))->Register();
             int n = 0;
             for (int j = 0; j < 6; j++) {
-                if (func_0209c718(&sTransfer, j) == 0xFF) {
+                if (sTransfer.GetSongSlot(j) == 0xFF) {
                     continue;
                 }
                 u8 song = func_0202ca70(&gGameData);
                 if (song == 0xFF) {
                     mSongStoreFull = 1;
                 }
-                func_0209c73c(&sTransfer, j, song);
+                sTransfer.SetSongSlot(j, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, func_0209c718(&sTransfer, j), sSongs[n]);
+                    func_0202c934(&gGameData, sTransfer.GetSongSlot(j), sSongs[n]);
                     SongEntry entry;
-                    entry.mSong = func_0209c718(&sTransfer, j);
+                    entry.mSong = sTransfer.GetSongSlot(j);
                     entry.Load(entry.mSong);
                     entry.SetNotesFromSlot(-1, j);
                     entry.Save(entry.mSong);
@@ -904,7 +904,7 @@ received:
 
 // @0x0214df0c
 void TushinScene::UpdateListButtons() {
-    func_020a3658(&mList, TRUE);
+    mList.SetScrollUnknown(TRUE);
     int pressed = -1;
     for (int i = 0; i < 3; i++) {
         if (func_0203133c(&mButtons[i])) {
@@ -945,7 +945,7 @@ void TushinScene::UpdateListButtons() {
         } else {
             mPage = NextPageAfterReceive();
             ResetList();
-            func_020a3634(&mList);
+            mList.ResetScrollButtons();
             func_02031228(&mButtons[0]);
         }
         sSongsReceived = 0;
@@ -955,7 +955,7 @@ void TushinScene::UpdateListButtons() {
         func_02034720(&mWindow, 0x12, 1);
         break;
     }
-    func_020a0454(&mResidents);
+    mResidents.Update();
     if (mResidents.mUnknown11398 == 0) {
         return;
     }
@@ -1020,7 +1020,7 @@ void TushinScene::UpdateListWindow() {
     func_020349cc(&mListWindow, 0x24);
     int order = sListOrders[result];
     if (order != mResidents.mUnknown11306) {
-        func_020a123c(&mResidents, order, 0);
+        mResidents.Sort(order, 0);
     }
 }
 
@@ -1407,8 +1407,8 @@ void TushinScene::UpdateMusic() {
 
 // @0x0214f374
 void TushinScene::ResetList() {
-    func_020a3658(&mList, FALSE);
-    func_020a0454(&mResidents);
+    mList.SetScrollUnknown(FALSE);
+    mResidents.Update();
 }
 
 // @0x0214f39c
@@ -1602,7 +1602,7 @@ void TushinScene::Update() {
             mPage = 0xF;
         }
         ResetList();
-        func_020a3634(&mList);
+        mList.ResetScrollButtons();
         func_02031228(&mButtons[0]);
         mPartnerSending = 0;
         Send(4);
@@ -1650,7 +1650,7 @@ void TushinScene::Update() {
                 if (!NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
                     return;
                 }
-                func_020a0664(&mResidents);
+                mResidents.RemoveSelected();
                 return;
             }
             if (mPage == 0x2B) {
@@ -1681,7 +1681,7 @@ void TushinScene::Update() {
             PlaySound(0xC);
         }
         ResetList();
-        func_020a3634(&mList);
+        mList.ResetScrollButtons();
         func_02031228(&mButtons[0]);
         mLostInList = 0;
         return;
@@ -2000,8 +2000,8 @@ void TushinScene::Update() {
                 }
                 sReceivedCommand = 0;
                 CloseWindow();
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 break;
             case 14:
             case 15: {
@@ -2015,8 +2015,8 @@ void TushinScene::Update() {
                 if (sSongsReceived == 1) {
                     sSongsReceived = 0;
                     mReceiveResult = ReceiveCharacter();
-                    func_020a05dc(&mResidents);
-                    func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                    mResidents.Load();
+                    mResidents.Sort(mResidents.mUnknown11306, 0);
                     mNextPage = 0x17;
                     if (mReceiveResult != 0) {
                         sReceiveCount = 0;
@@ -2165,7 +2165,7 @@ void TushinScene::Update() {
                 switch (sWiiSendResult) {
                 case 1:
                     if (sent) {
-                        func_020a0664(&mResidents);
+                        mResidents.RemoveSelected();
                     }
                     break;
                 case 2:
@@ -2213,16 +2213,16 @@ void TushinScene::Update() {
                 mNextPage = mPageAfterSave;
                 CloseWindow();
                 sWiiSendDone = 0;
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
                 if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
                     break;
                 }
                 sReceiveCount = 0;
-                func_020a05dc(&mResidents);
-                func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
+                mResidents.Load();
+                mResidents.Sort(mResidents.mUnknown11306, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
                     mWiiShirtDue = 1;
@@ -2427,7 +2427,7 @@ void TushinScene::Draw() {
         func_0203206c(&mButtons[i]);
     }
     func_020345d8(&mListWindow);
-    func_020a05b8(&mResidents);
+    mResidents.Draw();
     DrawParticles();
     DrawCharacters();
     mBgScroll += 0x4CC;
@@ -2584,7 +2584,7 @@ BOOL TushinScene::HasNgSong(CharacterRecord *record) {
     }
     wchar_t lyrics[32];
     for (int i = 0; i < 6; i++) {
-        int song = func_0209c718(record, i);
+        int song = ((SavedCharacter *)(record))->GetSongSlot(i);
         if (song != 0xFF) {
             func_0202c920(&gGameData, song, lyrics);
             if (IsNgWord(lyrics) == TRUE) {
@@ -2639,15 +2639,15 @@ BOOL TushinScene::CannotSend(CharacterRecord *record) {
 
 // @0x02151dac
 BOOL TushinScene::GiveItem(int item) {
-    ClothesInventory inventory;
+    ClothesList inventory;
     BOOL given = FALSE;
-    func_0209e248(&inventory);
+    inventory.Load();
     ClothesItem *clothes = &inventory.mItems[item];
     if (clothes->mOwned == FALSE) {
         clothes->Add(1);
         given = TRUE;
     }
-    func_0209e310(&inventory);
+    inventory.Save();
     return given;
 }
 

@@ -152,17 +152,17 @@ class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
-
-class InventoryItem : public Item {
-public:
-    InventoryItem();       // func_0209ee00
     BOOL Add(int count);
 
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
+}; // 0x14
+
+class InventoryItem : public Item {
+public:
+    InventoryItem();
 }; // 0x14
 
 // The player's items, loaded from and saved to the saved game together

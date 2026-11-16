@@ -128,8 +128,13 @@ public:
     /* 0x12C */ u8 mUnknown12C[8];
 }; // 0x134
 
-class RoomParts {
+class RoomModels {
 public:
+    void Draw();
+    void SetState(int state);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
+
     /* 0x000 */ u8 mUnknown000[0x4C];
     /* 0x04C */ RoomDoorModel mDoor;
     /* 0x1A4 */ RoomPart mParts[6];
@@ -143,26 +148,35 @@ struct RoomStyle {
     /* 0x0A */ u8 mUnknown0A[0x4A];
 }; // 0x54
 
-class Room {
+// The interior a room shows (include/room/Room.h has the main program's classes)
+class InteriorItem {
 public:
-    virtual u32 GetStyleUnknown0();
+    virtual u32 GetPrice();
+    GXRgb GetLightColor(); // The room's light colour now
 
     /* 0x004 */ u16 mStyle; // Index into data_020f72f8
     /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ RoomParts mParts;
+}; // 0x14
+
+class Room : public InteriorItem {
+public:
+    void Mount(const char *archiveName, int unk);
+    void MountModel(int unk);
+    void Load(int resourceId);
+    void Reload(int resourceId);
+    void MountAll(const char *archiveName, int unk);
+    void MountPartModels(int unk);
+    void LoadParts(int resourceId);
+    void ReloadParts(int resourceId);
+    void ReleaseAll();
+    void Update();
+    void SetScale(fx32 scale);
+
+    /* 0x014 */ RoomModels mParts;
 }; // 0x908
 
 extern "C" {
 extern const RoomStyle data_020f72f8[];
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a4ab8(RoomParts *parts, int state);
-void func_020a4a50(RoomParts *parts); // Draws them
-void func_020a5948(Room *room);
-void func_020a5960(Room *room);
-u16 func_020a4d90(Room *room); // The room's light colour now
 }
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
@@ -275,40 +289,37 @@ class Item {
 public:
     virtual void UnknownVirtual0();
 
-    /* 0x4 */ u16 mId;
-}; // 0x8
+    BOOL Add(int count); // _ZN4Item3AddEi (include/item/Item.h has the main program's classes)
 
-class InventoryItem : public Item {
-public:
-    BOOL Add(int count); // func_0209ed84
-
+    /* 0x04 */ u16 mId;
     /* 0x08 */ BOOL mOwned;
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mCount;
 }; // 0x14
 
+class InventoryItem : public Item {}; // 0x14
+
 // The player's items: what the save data holds of each kind, loaded and saved together.
 class Inventory {
 public:
-    void Load(); // func_0209ee28
-    void Save(); // func_0209eef8
+    void Load();
+    void Save();
 
     /* 0x0000 */ int mCount;
     /* 0x0004 */ InventoryItem mItems[255];
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// The 3D model of an item (constructor func_0209f5f0)
+// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
 class ItemModel : public AnimModel {
 public:
-    void SetItem(const char *archiveName, int item); // func_0209f700
-    void LoadModel(int resourceId);                  // func_0209f770
-    void LoadAnimation(int resourceId);              // func_0209f790
-    void ResetScale();                               // func_0209f7fc
-    void SetScale(fx32 scale);                       // func_0209f84c
+    void SetItem(const char *archiveName, int item);
+    void LoadModel(int resourceId);                
+    void LoadAnimation(int resourceId);            
+    void ResetScale();        
+    void SetScale(fx32 scale);
 
     /* 0x0E0 */ Item mItem;
-    /* 0x0E8 */ u8 mUnknownE8[0xC];
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];

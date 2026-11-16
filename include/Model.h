@@ -43,7 +43,7 @@ public:
     Model() {
         mUnknown04 = 0;
         mResMdl = NULL;
-        mUnknown10 = 0;
+        mResTex = NULL;
         mResource = NULL;
     }
     virtual ~Model() {
@@ -69,7 +69,7 @@ public:
     /* 0x04 */ int mUnknown04;
     /* 0x08 */ int mUnknown08;
     /* 0x0C */ NNSG3dResMdl *mResMdl;
-    /* 0x10 */ int mUnknown10;
+    /* 0x10 */ NNSG3dResTex *mResTex; // Its textures and palettes (func_02029d40 finds the palette's VRAM key here)
     /* 0x14 */ NNSG3dRenderObj mRenderObj;
     /* 0x68 */ MtxFx33 mRotation;
     /* 0x8C */ VecFx32 mScale;

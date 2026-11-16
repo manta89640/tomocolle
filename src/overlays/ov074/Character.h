@@ -17,6 +17,9 @@ struct SavedCharacter {
     // The main program's functions (include/character/Character.h)
     void AddRelationMeter(int index, int change);
     void ClearLongActFrom(s64 now);
+    void ClearTrouble();
+    void EndTrouble(s64 now);
+    BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
     int GetAnswerScore01();
     s8 GetPersonality();
     BOOL IsAway();

@@ -73,23 +73,23 @@ void MiiListScene::Init() {
     data_0211d604.Set(0x1700);
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 
-    func_020a1fe0(&mPanel, 6);
+    mPanel.Init(6);
     func_020a2104(&mPanel, 0x100, 0);
-    func_020a2118(&mPanel, 0, 0x68, 0x68, sPanelPosition, sPanelSize);
-    func_020a2280(&mPanel, 0x1000, sPanelTextPosition, &mCharOffset);
-    func_020a258c(&mPanel, 0, 2, 3, sPanelPosition0, sPanelSize0);
-    func_020a2644(&mPanel, 0, 4, 5, sPanelPosition2, sPanelSize2);
+    mPanel.InitButtons(0, 0x68, 0x68, sPanelPosition, sPanelSize);
+    mPanel.InitTexts(0x1000, sPanelTextPosition, &mCharOffset);
+    mPanel.InitUpButton(0, 2, 3, sPanelPosition0, sPanelSize0);
+    mPanel.InitDownButton(0, 4, 5, sPanelPosition2, sPanelSize2);
     func_020a26fc(&mPanel, 0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
 
-    func_020a36ec(&mTabs);
+    mTabs.InitTabs();
     for (int i = 0; i < 5; i++) {
-        func_020a371c(&mTabs, i, 0, sTabSequences[i], sTabPressedSequences[i]);
+        mTabs.AddButtons(i, 0, sTabSequences[i], sTabPressedSequences[i]);
     }
-    func_020a37cc(&mTabs);
-    func_020a03e8(&mList, &mPanel, &mTabs);
-    func_020a05dc(&mList);
+    mTabs.Reset();
+    mList.Init(&mPanel, &mTabs);
+    mList.Load();
     mSortKey = gGameData.mMiiListSortKey;
-    func_020a123c(&mList, mSortKey, TRUE);
+    mList.Sort(mSortKey, TRUE);
 
     Sprite_Init(&mSortButton, 0, 0x74, 0x80, 0x60, TRUE);
     func_02031260(&mSortButton, 4);
@@ -131,7 +131,7 @@ void MiiListScene::UpdateIdle() {
         mState = STATE_SORT_MENU;
         func_02034720(&mSortMenu, 0x12, 1);
     }
-    func_020a0454(&mList);
+    mList.Update();
 }
 
 void MiiListScene::UpdateSortMenu() {
@@ -141,49 +141,49 @@ void MiiListScene::UpdateSortMenu() {
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 0) {
-            func_020a123c(&mList, 0, FALSE);
+            mList.Sort(0, FALSE);
         }
         break;
     case 1:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 1) {
-            func_020a123c(&mList, 1, FALSE);
+            mList.Sort(1, FALSE);
         }
         break;
     case 2:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 2) {
-            func_020a123c(&mList, 2, FALSE);
+            mList.Sort(2, FALSE);
         }
         break;
     case 3:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 3) {
-            func_020a123c(&mList, 3, FALSE);
+            mList.Sort(3, FALSE);
         }
         break;
     case 4:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 4) {
-            func_020a123c(&mList, 4, FALSE);
+            mList.Sort(4, FALSE);
         }
         break;
     case 5:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 5) {
-            func_020a123c(&mList, 5, FALSE);
+            mList.Sort(5, FALSE);
         }
         break;
     case 6:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 6) {
-            func_020a123c(&mList, 6, FALSE);
+            mList.Sort(6, FALSE);
         }
         break;
     }
@@ -195,7 +195,7 @@ void MiiListScene::UpdateSortMenu() {
 void MiiListScene::Draw() {
     func_02031d7c(&mSortButton);
     func_020345d8(&mSortMenu);
-    func_020a05b8(&mList);
+    mList.Draw();
 }
 
 void MiiListScene::Exit() {

@@ -152,8 +152,8 @@ void TutorialRoomScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "ASP", "Scn/AFwBG/FwBgSkyPlt_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "APX", mFront.mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "ASX", mSky.mArchivePath, 0);
-    func_020a54c4(&mRoom, "CO0", 0);
-    func_020a56bc(&mRoom, "RM?", 0);
+    mRoom.Mount("CO0", 0);
+    mRoom.MountAll("RM?", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[1].mArchiveName, mCharacters[1].mArchivePath, 0);
 }
@@ -205,9 +205,9 @@ void TutorialRoomScene::Init() {
     mCommonMessages.Open("TCM:/tmd_common_msg_JP.bmg");
     mRoomMessages.Open("TMM:/tmd_mainroom_msg_JP.bmg");
     mRoom.Refresh();
-    func_020a5514(&mRoom, 3);
-    func_020a5760(&mRoom, 4);
-    func_020a4acc(&mRoom.mParts, 10);
+    mRoom.Load(3);
+    mRoom.LoadParts(4);
+    mRoom.mParts.SetUnknown(10);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
     func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
@@ -308,7 +308,7 @@ void TutorialRoomScene::Update() {
 // @0x0214a814
 void TutorialRoomScene::Draw() {
     UpdateFade();
-    func_020a4a50(&mRoom.mParts);
+    mRoom.mParts.Draw();
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Draw();
     }
@@ -331,7 +331,7 @@ void TutorialRoomScene::Exit() {
     func_0202aecc(data_021223e4, 0);
     func_0202aecc(data_021223e4, 1);
     func_0202aecc(data_021223e4, 2);
-    func_020a5948(&mRoom);
+    mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
     ArchiveManager_Unmount(&gArchiveManager, "TCM");
@@ -1204,7 +1204,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             }
         } else if (mStep == 1) {
             mStep++;
-            func_020a4144(&mApartmentRoom->mParts, 1);
+            mApartmentRoom->mParts.GetDoor()->SetMotion(1);
             FloorPos target = sInsideDoor;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
@@ -1213,7 +1213,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             }
         } else if (mStep == 3) {
             mStep++;
-            func_020a4144(&mApartmentRoom->mParts, 2);
+            mApartmentRoom->mParts.GetDoor()->SetMotion(2);
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
             FloorPos target = sRoomFront;
             SetWalkTargetOnFloor(target);
@@ -1257,7 +1257,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             }
         } else if (mStep == 1) {
             mStep++;
-            func_020a4144(&mApartmentRoom->mParts, 1);
+            mApartmentRoom->mParts.GetDoor()->SetMotion(1);
             FloorPos target = sDoorstep;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
@@ -1271,7 +1271,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
                 SetWalkTargetOnFloor(mPartner->GetFloorPos());
-                func_020a4144(&mApartmentRoom->mParts, 2);
+                mApartmentRoom->mParts.GetDoor()->SetMotion(2);
                 mHeadTurnFrames = 3;
             }
             SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnFrames);
@@ -1661,7 +1661,7 @@ void TutorialRoomCharacter::StartSound0UnlessGroupA() {
 // @0x0214e1fc
 TutorialApartmentRoom::TutorialApartmentRoom() {
     SetState(STATE_IDLE);
-    func_020a4ab8(&mParts, 3);
+    mParts.SetState(3);
     MI_CpuClear16(mNumberText, sizeof(mNumberText));
 }
 
@@ -1687,7 +1687,7 @@ void TutorialApartmentRoom::UpdateNumberText() {
 void TutorialApartmentRoom::Update() {
     UpdateState();
     if (mState == STATE_IDLE) {
-        func_020a5960(this);
+        Room::Update();
     }
 }
 
@@ -1704,21 +1704,21 @@ void TutorialApartmentRoom::UpdateState() {
         break;
     case STATE_RESET:
         SetState(STATE_IDLE);
-        func_020a4ab8(&mParts, 0);
-        func_020a4144(&mParts, 0);
-        func_020a4b74(&mParts, 0);
-        func_020a5948(this);
+        mParts.SetState(0);
+        mParts.GetDoor()->SetMotion(0);
+        mParts.SetVisible(0);
+        ReleaseAll();
         UpdateNumberText();
         break;
     case STATE_CHANGE_STYLE:
         if (mStep == 0) {
             mStep++;
             mStyle = mNextStyle;
-            func_020a54e4(this, 0);
+            MountModel(0);
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 mStep++;
-                func_020a56dc(this, 0);
+                MountPartModels(0);
             }
         } else if (mStep == 2) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
@@ -1729,10 +1729,10 @@ void TutorialApartmentRoom::UpdateState() {
     case STATE_UNKNOWN3:
         if (mStep == 0) {
             mStep++;
-            func_020a5530(this, 3);
+            Reload(3);
         } else if (mStep == 1) {
             SetState(STATE_IDLE);
-            func_020a5854(this, 4);
+            ReloadParts(4);
         }
         break;
     }
@@ -1986,7 +1986,7 @@ void TutorialRoomLight::Update() {
         }
         break;
     case STATE_SET_ROOM_COLOR:
-        SetColor(func_020a4d90(mRoom));
+        SetColor(mRoom->GetLightColor());
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_ROOM_COLOR:
@@ -1998,7 +1998,7 @@ void TutorialRoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x40;
-            func_020a4dcc(mRoom, &targetR, &targetG, &targetB);
+            mRoom->GetLightRGB(&targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r <= targetR || g <= targetG || b <= targetB) {
                 color = targetR | (targetG << 5) | (targetB << 10);

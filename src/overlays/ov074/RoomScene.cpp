@@ -35,9 +35,6 @@ s64 func_0202c4b8(SavedGame *game, int index);  // The time its next event start
 s64 func_0202c4e4(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
 
 void func_0209a588(SavedCharacter *character, s64 now, SavedCharacter *partner); // Ends its event
-void func_0209b14c(SavedCharacter *character, s64 now);
-BOOL func_0209b208(SavedCharacter *character, s64 now, int force, SavedCharacter *partner, int unused);
-void func_0209b1d8(SavedCharacter *character);
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
 
@@ -148,12 +145,6 @@ void func_02080f00(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                          // Updates
 
 // The room (Room.h has the others)
-void func_020a54c4(Room *room, const char *archiveName, int unknown);
-void func_020a56bc(Room *room, const char *archiveName, int unknown);
-void func_020a5514(Room *room, int slot);
-void func_020a5760(Room *room, int slot);
-void func_020a4acc(RoomParts *parts, int slot);
-void func_020a4a50(RoomParts *parts); // Draws them
 
 // The scene manager
 struct SceneManager {
@@ -262,8 +253,8 @@ void RoomScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "ASP", "Scn/AFwBG/FwBgSkyPlt_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "APX", mFront.mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "ASX", mSky.mArchivePath, 0);
-    func_020a54c4(&mRoom, "CO0", 0);
-    func_020a56bc(&mRoom, "RM?", 0);
+    mRoom.Mount("CO0", 0);
+    mRoom.MountAll("RM?", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[1].mArchiveName, mCharacters[1].mArchivePath, 0);
 
@@ -401,9 +392,9 @@ void RoomScene::Init() {
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
     mRoom.Refresh();
-    func_020a5514(&mRoom, 7);
-    func_020a5760(&mRoom, 8);
-    func_020a4acc(&mRoom.mParts, 10);
+    mRoom.Load(7);
+    mRoom.LoadParts(8);
+    mRoom.mParts.SetUnknown(10);
     mRoom.mParts.mDoor.mUnknown13C = 2;
     for (i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
@@ -546,7 +537,7 @@ void RoomScene::Draw() {
         break;
     }
 
-    func_020a4a50(&mRoom.mParts);
+    mRoom.mParts.Draw();
     for (int i = 0; i < 2; i++) {
         mCharacters[i].UpdateBodyIfPresent();
     }
@@ -576,7 +567,7 @@ void RoomScene::Exit() {
     func_0202aecc(data_021223e4, 4);
     func_0202aecc(data_021223e4, 5);
     func_0202aecc(data_021223e4, 6);
-    func_020a5948(&mRoom);
+    mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mArchiveName);
     ArchiveManager_Unmount(&gArchiveManager, "MNU");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
@@ -1130,7 +1121,7 @@ void RoomScene::UpdateAbsentCharacter(s64 now) {
         LoadCharacter((RoomCharacter *)character);
         temp.mPersonality = ((SavedCharacter *)(character))->GetPersonality();
     }
-    func_0209b14c(character, now);
+    character->EndTrouble(now);
 
     for (int i = 0; i < 2; i++) {
         mCharacters[i].mPrevEvent = events[i];
@@ -1185,7 +1176,7 @@ int RoomScene::StartRandomEvent(s64 now) {
             }
         }
 
-        if (func_0209b208(character, now, force, partner, 0)) {
+        if (character->StartRandomTrouble(now, force, partner, 0)) {
             SaveCharacter((RoomCharacter *)character);
             if (partner != NULL) {
                 SaveCharacter((RoomCharacter *)partner);
@@ -1285,7 +1276,7 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             ((Character *)(&mCharacters[0]))->SetVisible(1);
             ((Character *)(&mCharacters[1]))->SetVisible(1);
-            func_020a4b74(&mRoom.mParts, 1);
+            mRoom.mParts.SetVisible(1);
             if (resident != 0xFF) {
                 mCharacters[0].SetState(1);
                 mCharacters[0].mWait = 0;
@@ -1298,7 +1289,7 @@ void RoomScene::UpdateEvent() {
         } else if (mEventStep == 3) {
             mEventStep++;
             mEventTimer = 4;
-            func_020a4ab8(&mRoom.mParts, 3);
+            mRoom.mParts.SetState(3);
             mCamera.SetState(1, 0);
         } else if (mEventStep == 4) {
             if (!IsTransitionDone()) {
@@ -1883,7 +1874,7 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             mEventTimer = 60;
             ((SavedCharacter *)(&mCharacters[0]))->ClearLongActFrom(mClock.mSeconds);
-            func_0209b1d8(&mCharacters[0]);
+            ((SavedCharacter *)(&mCharacters[0]))->ClearTrouble();
             SaveCharacter(&mCharacters[0]);
             mFront.DrawWindow(mCharacters[0].mRoomNumber);
             mLight.SetState(2);
@@ -9772,7 +9763,7 @@ void RoomCharacter::UpdateStates106To10B() {
             }
         } else if (mStep == 4) {
             mStep++;
-            func_020a4144(&mRoom->mParts, 1);
+            mRoom->mParts.GetDoor()->SetMotion(1);
         } else if (mStep == 5) {
             if (mRoom->mParts.mDoor.mMotion == 0 && mModel.mBlendFrames <= 0) {
                 mStep++;
@@ -9787,7 +9778,7 @@ void RoomCharacter::UpdateStates106To10B() {
             }
         } else if (mStep == 7) {
             mStep++;
-            func_020a4144(&mRoom->mParts, 2);
+            mRoom->mParts.GetDoor()->SetMotion(2);
         } else {
             StepWalkLooking(0x8000, 0, 0x28F, 0x28, 6);
             if (mRoom->mParts.mDoor.mMotion == 0) {
@@ -9880,7 +9871,7 @@ void RoomCharacter::UpdateStates106To10B() {
         } else if (mStep == 6) {
             mStep++;
             SetAnimation(RESOURCE_BCA0, GetIdleAnim());
-            func_020a4144(&mRoom->mParts, 1);
+            mRoom->mParts.GetDoor()->SetMotion(1);
         } else if (mStep == 7) {
             if (mRoom->mParts.mDoor.mMotion == 0 && mModel.mBlendFrames <= 0) {
                 mStep++;
@@ -9896,7 +9887,7 @@ void RoomCharacter::UpdateStates106To10B() {
         } else if (mStep == 9) {
             mStep++;
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
-            func_020a4144(&mRoom->mParts, 2);
+            mRoom->mParts.GetDoor()->SetMotion(2);
         } else {
             StepWalkLooking(0x8000, 0, 0x28F, 0x28, 6);
             if (mRoom->mParts.mDoor.mMotion == 0) {
@@ -10033,13 +10024,13 @@ void RoomCharacter::UpdateStates10CTo112() {
             }
         } else if (mStep == 1) {
             mStep++;
-            func_020a4144(&mRoom->mParts, 1);
+            mRoom->mParts.GetDoor()->SetMotion(1);
             SetTargetFloorPos(gRoomPoints[8]);
             ShowHeadIcon();
         } else if (mStep == 2) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x28, 6)) {
                 mStep++;
-                func_020a4144(&mRoom->mParts, 2);
+                mRoom->mParts.GetDoor()->SetMotion(2);
             }
         } else if (mStep == 3) {
             mStep++;
@@ -10091,7 +10082,7 @@ void RoomCharacter::UpdateStates10CTo112() {
             }
         } else if (mStep == 1) {
             mStep++;
-            func_020a4144(&mRoom->mParts, 1);
+            mRoom->mParts.GetDoor()->SetMotion(1);
             SetTargetFloorPos(gRoomPoints[9]);
             ShowHeadIcon();
         } else if (mStep == 2) {
@@ -10104,7 +10095,7 @@ void RoomCharacter::UpdateStates10CTo112() {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
                 SetTargetFloorPos(mPartner->GetFloorPos());
-                func_020a4144(&mRoom->mParts, 2);
+                mRoom->mParts.GetDoor()->SetMotion(2);
                 mHeadTurnFrames = 3;
             }
             SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnFrames);
@@ -11481,7 +11472,7 @@ void HeldItem::StartPattern() {
 // @0x0216a278
 ApartmentRoom::ApartmentRoom() {
     SetState(STATE_IDLE);
-    func_020a4ab8(&mParts, 3);
+    mParts.SetState(3);
     MI_CpuClear16(mNumberText, sizeof(mNumberText));
 }
 
@@ -11512,7 +11503,7 @@ void ApartmentRoom::UpdateNumberText() {
 void ApartmentRoom::Update() {
     UpdateState();
     if (mState == STATE_IDLE) {
-        func_020a5960(this);
+        Room::Update();
     }
 }
 
@@ -11529,21 +11520,21 @@ void ApartmentRoom::UpdateState() {
         break;
     case STATE_RESET:
         SetState(STATE_IDLE);
-        func_020a4ab8(&mParts, 0);
-        func_020a4144(&mParts, 0);
-        func_020a4b74(&mParts, 0);
-        func_020a5948(this);
+        mParts.SetState(0);
+        mParts.GetDoor()->SetMotion(0);
+        mParts.SetVisible(0);
+        ReleaseAll();
         UpdateNumberText();
         break;
     case STATE_CHANGE_STYLE:
         if (mStep == 0) {
             mStep++;
             mStyle = mNextStyle;
-            func_020a54e4(this, 0);
+            MountModel(0);
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 mStep++;
-                func_020a56dc(this, 0);
+                MountPartModels(0);
             }
         } else if (mStep == 2) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
@@ -11554,10 +11545,10 @@ void ApartmentRoom::UpdateState() {
     case STATE_UNKNOWN3:
         if (mStep == 0) {
             mStep++;
-            func_020a5530(this, 7);
+            Reload(7);
         } else if (mStep == 1) {
             SetState(STATE_IDLE);
-            func_020a5854(this, 8);
+            ReloadParts(8);
         }
         break;
     }
@@ -11653,7 +11644,7 @@ void RoomCamera::Update() {
         if (mOrbit.x > 0x3000000) {
             mOrbit.x = 0x3000000;
         }
-        func_020a4ab8(&mRoom->mParts, mRoom->mParts.mState);
+        mRoom->mParts.SetState(mRoom->mParts.mState);
         break;
     case STATE_TURNED:
         SetState(STATE_WAIT, 1140);
@@ -11883,7 +11874,7 @@ void RoomLight::Update() {
         }
         break;
     case STATE_SET_ROOM_COLOR:
-        SetColor(func_020a4d90(mRoom));
+        SetColor(mRoom->GetLightColor());
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_ROOM_COLOR:
@@ -11895,7 +11886,7 @@ void RoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x40;
-            func_020a4dcc(mRoom, &targetR, &targetG, &targetB);
+            mRoom->GetLightRGB(&targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r <= targetR || g <= targetG || b <= targetB) {
                 color = targetR | (targetG << 5) | (targetB << 10);

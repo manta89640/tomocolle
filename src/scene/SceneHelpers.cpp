@@ -468,16 +468,16 @@ void ReturnButton::UnmountArchive() {
 
 void SceneRoom::Load(u16 style) {
     mStyle = style;
-    func_020a54c4(this, "CO0", 0);
-    func_020a56bc(this, "RM", 0);
+    Mount("CO0", 0);
+    MountAll("RM", 0);
 }
 
 void SceneRoom::Init(int slot, int slot2, BOOL doorTurned) {
     mState = 0;
     mFrame = 0;
-    func_020a5514(this, slot);
-    func_020a5760(this, slot2);
-    func_020a4ab8(&mParts, 0);
+    Room::Load(slot);
+    LoadParts(slot2);
+    mParts.SetState(0);
     if (doorTurned) {
         mParts.mDoor.mRotY = 0x8000;
     }
@@ -486,7 +486,7 @@ void SceneRoom::Init(int slot, int slot2, BOOL doorTurned) {
 void SceneRoom::Update() {
     switch (mState) {
     case 0:
-        func_020a5960(this);
+        Room::Update();
         if (++mFrame >= 2) {
             mState = 1;
         }
@@ -494,11 +494,11 @@ void SceneRoom::Update() {
     case 1:
         break;
     }
-    func_020a4a50(&mParts);
+    mParts.Draw();
 }
 
 void SceneRoom::Draw() {
-    func_020a5948(this);
+    ReleaseAll();
 }
 
 // Hides parts of the room: 0 those the style gives 0 or less, 1 those it gives 0 or more, 2 all; 3 sets the
@@ -523,7 +523,7 @@ void SceneRoom::ShowParts(int mode) {
             mParts.mParts[i].mModel.mVisible = FALSE;
             break;
         case 3:
-            func_020a4ab8(&mParts, 2);
+            mParts.SetState(2);
             break;
         }
     }

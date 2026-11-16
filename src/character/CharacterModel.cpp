@@ -6,7 +6,6 @@ struct ArchiveLoader;
 
 extern "C" {
 // STD_ConcatenateString's body, outside std_string.c (whose own copy the library unit links)
-char *func_020145d8(char *str1, const char *str2);
 
 extern ArchiveLoader gArchiveManager;
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
@@ -103,7 +102,7 @@ void CharacterModel::Reload(int resourceId, int unk) {
 
 void CharacterModel::MakeBodyArchivePath() {
     STD_CopyString(mArchivePath, "Mdl/Body/body");
-    func_020145d8(mArchivePath, mClothes.GetModelName());
+    STD_ConcatenateString(mArchivePath, mClothes.GetModelName());
     mTexturePath[11] = '0' + data_020f3ff0[mClothes.mId].mBodyColor;
 }
 
@@ -120,7 +119,7 @@ void CharacterModel::SetClothes(int clothes, BOOL female) {
     mClothes.mId = clothes;
     MakeBodyArchivePath();
     UseFemaleBody(female);
-    func_020145d8(mArchivePath, "_3D_LZ.bin");
+    STD_ConcatenateString(mArchivePath, "_3D_LZ.bin");
 }
 
 void CharacterModel::UseFemaleBody(BOOL female) {
@@ -208,7 +207,7 @@ void CharacterModel::RemoveAnimation(u32 resType) {
 }
 
 void CharacterModel::SetPaletteColor1(GXRgb color) {
-    NNSG3dResTex *tex = (NNSG3dResTex *)mAnim.mUnknown10;
+    NNSG3dResTex *tex = mAnim.mResTex;
     GXRgb *pltt = (GXRgb *)((u8 *)tex + tex->plttInfo.ofsPlttData);
     pltt[1] = color;
     func_02029d40(&mAnim, pltt, -1, 4);
