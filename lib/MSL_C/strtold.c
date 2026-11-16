@@ -2,6 +2,16 @@
 // project's own decompilation of the game's code, written against that MSL's headers. The game links only __strtold,
 // the scanner that strtod, strtof, atof and scanf's %f share: it reads the text through ReadProc one character at a
 // time, as a state machine, and hands the decimal digits to __dec2num, or builds a hexadecimal number's bits itself.
+//
+// Measured against the archive's strtold.o:
+// - The limit on hexadecimal digits is a variable set to 14 when "0x" is read, not a literal: only then does the
+//   compiler compare against a register (`mov r0,#14; cmp r2,r0`), and only then are the zeroing stores at the top
+//   the original's.
+// - The mantissa is cleared with memset (inlined as byte stores), and the result's bytes are a union declared in
+//   the block that builds them, which puts it, 8-aligned, below the other arrays as in the original's frame.
+// Not matching yet: 64 of 1171 instructions, all register choices: j and p of the NaN state swap r6 and r7, and in
+// the hexadecimal tail the result pointer and the mantissa's address swap r3 and r4, the bit loop's counter and
+// byte index r2 and r7.
 
 #include <ansi_fp.h>
 #include <ctype.h>
@@ -75,6 +85,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 	int expsign = 0;
 	unsigned intdigits = 0;
 	int nibble;
+	unsigned max_digits;
 
 	*overflow = 0;
 	c = fetch();
@@ -288,6 +299,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 				chptr = mantissa;
 				memset(chptr, 0, 8);
 				intdigits = 0;
+				max_digits = 14;
 				nibble = 0;
 				hex_scan_state = hex_leading_zeroes;
 				c = fetch();
@@ -310,7 +322,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 						hex_scan_state = hex_exp_mark;
 					break;
 				}
-				if (intdigits < 14) {
+				if (intdigits < max_digits) {
 					unsigned char uch, digit;
 					int ui;
 					intdigits++;
@@ -336,7 +348,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 					hex_scan_state = hex_exp_mark;
 					break;
 				}
-				if (intdigits < 14) {
+				if (intdigits < max_digits) {
 					unsigned char uch, digit;
 					int ui;
 					uch = chptr[nibble / 2];
