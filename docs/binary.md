@@ -941,8 +941,49 @@ unit is linked from its object. It is the object a scene holds for the on-screen
   `sTabAreas`, `sLayoutPositions`; `.data` is the nine paths. The `gText_Yu` and `gStr_F` that the string tool had
   named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`.
 
-Inferred: the 0x1C bytes from +0x5FF8 to the end are part of the object (the Mii maker's next member starts there),
-but nothing in this file touches them.
+Measured: the object is 0x5FF8 bytes. The Mii maker's profile page keeps a text of its own from +0x5FF8 of its
+keyboard (it clears 0x16 bytes there and counts the characters at +0x6010), and two scene constructors of the main
+program construct their next member at +0x5FFC from the keyboard's start. Nothing in this file touches anything
+past +0x5FF8.
+
+## The keyboard's core
+
+`src/keyboard/KeyboardCore.cpp` (`0x0208179C` to `0x02082EAC`, 35 functions and a static initialiser): the keys, the
+touch and pad handling, and the drawing of the key labels into character data. It is complete: every function and
+all its data match, and the unit is linked from its object. Measured:
+
+- **State.** Every function works on one static of 0x50 bytes, `sKeyboard`: the key touched first and the key
+  under the pen (+0x0, +0x4), the layout (+0x8), a key-up callback and its argument (+0xC, +0x10), a sound callback
+  and its argument (+0x14, +0x18, called with sound numbers 0 to 10), the layout's characters (+0x1C), a key repeat
+  of the input code (+0x20, which `relocs.txt` refers to as `sKeyboard` + 0x20), the code of this frame's key
+  (+0x28) and the character it gives (+0x2A, which `func_02082560` returns to the callers), the kana modifier
+  (+0x2E: 0, 3 or 4), the layout number (+0x30), the pad cursor (+0x34), and the extra key areas with their
+  callback (+0x40 to +0x4C: `SoftKeyboard`'s tabs).
+- **The .bss pool**: `sCharData` (the buffer `SoftKeyboard::TransferCharData` sends), `sOriginX`, `sInitialized`,
+  `sBaseCharData` (the layout's graphics with the labels drawn, copied over `sCharData` before the pressed key and
+  the modifier are lit), `sOriginY`, then 0x18 bytes no function in the ROM refers to.
+- **Keys** are 8 bytes: x, y, width and height as bytes, read as u16 bit fields (one `ldrh` for x and y), then a
+  signed link to the next key of the same group (the keys lit together), then the code. Codes 1 to the layout's
+  count of special keys (+0xC of a layout) are special keys (1 delete, 2 space, 3 and 4 the modifiers, 20 enter);
+  above it, a code indexes the layout's characters; 0x100 and above are the extra areas'.
+- **Layouts**, `sLayouts`: five of 0x10 bytes (keys, NCGR file, a function called when a key gives a code, the count
+  of special keys, the count of keys). They are English, kana, European, signs and pictograms. Their files are
+  `SoftKeyboard`'s five background paths, in the order jp, English, euro, sign, picto.
+- **Kana**: four tables of 60 characters (plain kana, then what dakuten, handakuten and the small form make of each,
+  a full-width space for none) and three pairs (plain, other) that the static initialiser fills from
+  `sKanaTables`. Nothing in the ROM reads the pairs. Inferred: code that read them was dropped by the link, as
+  were the users of the 0x18 bytes of `.bss` and of two 20-byte local tables in `.rodata` (`{2,0,3,4,1}`,
+  `{2,3,1,4,0}`, after `func_02081ff0`'s `{0,2,1,3,4}`). The source keeps them through an uncalled function.
+
+The character and key tables of the layouts, `0x02112220` to `0x02112DC4`, are left out of the unit and stay in the
+gap (`KeyboardChars*`, `KeyboardKeys*`). Measured: their sizes in memory order are 0x5C 0x5C 0x5C 0x70 0x68 0x68
+0x70 0x68, then 0x188 0x1B0 0x1D0 0x1A8 0x1C8. That is not the size order the compiler gives one file's data,
+measured for C and C++, with and without `-ipa file`. The code takes a key table's count as the bytes between its
+start and its end (two literals per table, the end being the next table's address). It reads a character table
+through a pointer cast with a separate `add` (mwcc folds `&table[1]` into the literal for an object of its own
+file, and does not fold it after a cast). The character tables are UTF-16 text with a byte-order mark (`0xFEFF`,
+skipped) and no terminator. Inferred: they are binary files linked as objects of their own, between NFL's data and
+this file's.
 
 ## The Mii maker
 
@@ -978,6 +1019,34 @@ Measured:
   overlay's disassembly, the overlays' own symbols masked).
 - `.data` holds a 0x120-byte `const` table at `0x0215A13C` that is zero in the ROM. The static initialiser fills it
   from two pairs of words of the `.rodata` pool (offsets 0xBC and 0x74), as overlay 109's text origins are filled.
+
+Measured, from the last third of the file (`0x02153CF4` on):
+
+- **The pages' Init and Update.** The scene's page switch (`func_ov076_0214b1ec`) calls the old page's Exit and then
+  the new page's first function with the scene (pages 5 and 6 also get the page that was open). The scene's Update
+  calls one function of the page shown. Each page keeps the scene in a member.
+- **Pages 5 and 6** are a question in a window with two buttons, common messages 2 and 3 ("はい", "いいえ"), under
+  etc message 0x2E (5) or 0x2D (6). The first button leaves the scene: page 6 first calls `func_ov076_0214b890` and
+  passes the resident on in `data_0213ba74`+0x20 (scenes 0x74 or 0x69); page 5 asks for 0x1A or 0x5E. The second
+  goes back to the page that was open.
+- **The personality page (4)** has five sliders of eight steps. They set the five bytes at +0x4A of the record
+  (`func_02098d5c`), 1 to 8, 0 while unset.
+- **The profile page (2)** keeps its own text (11 `wchar_t` and a count) right after its keyboard. The keyboard
+  object is therefore 0x5FF8 bytes. Its helpers show the birthday and a four-digit number with a window's plain
+  sprites (MessageWindow +0xA9F4, five sprites that `func_020345d8` draws), and the profile in the scene's nine text
+  boxes. That number is bits 17-28 of the record's +0x50, 0xFFF for none.
+- **The voice page (3)** has six voice presets (`data_020FBAAC`, six `s16` each), a random voice (`MATH_Rand16`
+  over each value's range, `data_020FB940`), five sliders and a choice of four for +0xEE..+0xF9 of the record (six
+  `s16`, `func_02098d68`). It keeps two copies of the record: one to undo a change, one to restore on cancel.
+- **The voice page speaks the profile** with the scene's `TtsPlayer`, one part at a time (`func_ov076_02157508`,
+  etc messages 0x2F to 0x36) through `CharacterSpeechTexts`, 0x294 bytes of texts that `func_0204E4B4` makes from a
+  record. Each part goes on once the engine is idle.
+- **The star signs.** One part speaks the star sign of the birthday: `data_ov076_02158D34` holds the first day of
+  each sign in its month, from January's (21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22), and etc message 0x38 is
+  the sign that begins in January.
+- **The record's members.** The voice page copies the 0x2A4-byte record with its implicit assignment. That copy
+  goes member by member and shows overlay 109's layout of `CharacterRecord` exactly, down to twelve single bytes at
+  +0x244 and single bytes from +0x294.
 
 Not done: the other 59 functions (the scene's Init and Update, the pages' Init and Update, and the large edit
 functions), and the data.
@@ -1050,6 +1119,33 @@ Measured on the compiler: `func_0206d4f8` matches only under `#pragma optimizati
 `#pragma opt_common_subs off`, and the three hair meshes (`func_0206b740`, `func_0206bb24`, `func_0206bfa4`) have
 level 2's unrotated loops but evaluate their calls' arguments from the last to the first, which nothing tried
 reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build, other `-proc`).
+
+The last third, `0x02073514` to `0x020776E4`, measured from its code (in `lib/NFL/NFL.c`; names are still
+addresses):
+
+- **A random Mii.** `func_020737b0` fills a Mii's data from the library's LCG (`func_020743a0`, state at +0x58 of
+  the work area, the constants at +0x5C/+0x60): each part from a picker (`func_02073eac` to `func_02074378`) that
+  takes one of the choices of row `sex * 9 + b * 3 + c` of a table (`data_020b69c0`, `data_020b6c00`, ..., and
+  tables that are local arrays copied to the stack), the face's parts set lower by up to 4, a beard on one man in
+  five; height and build 64, names, create ID and birthday cleared, favourite colour random. `func_02073664`
+  checks its arguments (it tests the first one where the second and third are meant), `func_020736ec` picks 2
+  (sex) and 3 (b, c) at random. `func_0207361c` copies one of six default Miis (`data_020b70c8`, 0x4A bytes each).
+- **Streams into VRAM.** The work area holds a ring buffer (+0x78, +0x7C bytes; write offset +0x84, read offset
+  +0x80, bytes pending +0x88) and seven streams of 12 bytes at +0xA0 (buffer offset, VRAM address, state 0 to 7).
+  Every frame `func_020749e4` copies resources into the buffer (`func_02074b68`: six from the table `data_0211216c`,
+  then `func_0207516c`, the seventh, then the objects' streams, `func_02075528` and `func_02075f50`, eleven each at
+  +0x1A4 and +0x228 of an object, with palettes made from the object's parameters at +0x180); after the interrupt
+  `func_02076448` loads them into texture and palette VRAM (`func_02076680`, `func_02076a98`, `func_02076e1c`,
+  `func_02077300`) through the LCDC (`func_02074814`, `func_02074904`, which check the bank's size first), up to
+  the budget main passes (0x4000). A copy that wraps around the buffer is made in two parts, and one cut short by
+  the budget is resumed the next time (states 3 to 5). Mode 7 (+0x68) converts 4-bit images through a palette
+  (`func_0206dd44`), so its sizes are four times the others'.
+- The coordinate helpers `func_020743e4` to `func_02074688` map x, y and z to the axes of the drawing context
+  (indices at +0xD0..+0xD2, negations at +0xC4..+0xCC) before `G3C_Translate`, `G3C_Scale`, `G3C_Vtx`,
+  `G3C_Normal` and `MTX_RotAxis43`.
+- Two disagreements in the original: `func_02077300` loads ten of the eleven palette streams that
+  `func_02075f50` fills, and the eleventh entry of the array at +0x228 lies over the pointer at +0x2A0 that
+  `func_02072c5c` links its list through.
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after

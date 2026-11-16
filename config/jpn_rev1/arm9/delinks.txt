@@ -590,11 +590,12 @@ lib/NitroSystem/libraries/g3d/src/cgtool/xsi.c:
     .text       start:0x0206958c end:0x02069bf4
 
 src/keyboard/KeyboardCore.cpp:
+    complete
     .text       start:0x0208179c end:0x02082eac
     .init       start:0x020b07e0 end:0x020b0810
     .ctor       start:0x020fc4f8 end:0x020fc4fc
     .rodata     start:0x020b7eec end:0x020b7f44
-    .data       start:0x02112220 end:0x0211302c
+    .data       start:0x02112dc4 end:0x0211302c
     .bss        start:0x021486c4 end:0x02148740
 
 src/keyboard/Keyboard.cpp:

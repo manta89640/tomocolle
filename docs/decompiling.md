@@ -283,6 +283,10 @@ notes ([ov072](notes/ov072.md), [ov098](notes/ov098.md), [wh](notes/wh.md)) have
 6. The strings of the code (literals in function bodies) are not on the list: they follow it in `.data`, in the
    order the code uses them.
 
+Measured on overlay 76: because the list is one for all three sections, adding a reference to one `.data`
+object (a table of pointers to wide literals) moved 65 of the 122 `.rodata` pool objects. So a pool laid out
+while some functions are missing has to be laid out again as their statics come in.
+
 Not settled: overlay 109's agent found that this model does not reproduce its compiled `.data`/`.bss`, and the
 best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 60) short. Test files on overlay
 109's shape are the next step. Two other things the data showed:
@@ -302,6 +306,15 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   declaration whose ROM address has that rank among its size, and compile once more.
 - The same compiler run under wibo instead of wine (with the source converted to Shift JIS) gives the same code but
   another order of same-size objects: judge data layout only with the build's own compile.
+- A pool that looks out of size order is often made of smaller objects than it seems. The 0x28 bytes at
+  `0x02112DC4` that the static initialiser fills (0x18 of pairs, then a 0x10 table, then a 0x10 key array) are three
+  8-byte objects, not one 0x18 array, and then sort as the model says (`KeyboardCore.cpp`). Data that is in no
+  size order at all may not be the file's: see binary.md, "The keyboard's core".
+- Every object of the original has to be on the list before the same-size slots come out right: also the ones that
+  only code the link dropped referred to. The source keeps them through an uncalled function, and an unused local
+  `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `func_02081ff0`). With the full set, one compile
+  shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put all of
+  KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
 
 ## Matching techniques
 
@@ -325,6 +338,23 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A local `char` buffer filled backwards: `p = buff + size; *--p = 0;` makes the compiler reload a local struct's
   fields after each store through `p`, as the original does, where `p = buff + size - 1; *p = 0;` lets it keep them
   in registers (`float2str`, `wprintf.c`).
+- A loop count the original reads again at the end of every pass but not for the first test (`cmp r3,#0; ble`
+  on the value just tested by the `if` before the loop, then `ldrh` at the bottom): write the first test out and
+  read the count through a volatile cast at the end only,
+  `i = 0; if (i < kb->unk_4c) { do { ... } while (i < *(volatile u16 *)&kb->unk_4c); }` (`func_020817f0`). Loop
+  forms, inlines, pragmas and other compiler builds kept the count in a register. `#pragma opt_common_subs off` gives
+  the reload but reallocates the rest of the function.
+
+**An address loaded and then offset by an `add`, where ours has the offset in the literal**
+- mwcc folds `&table[1]` and `table + 1` into the literal (`table+0x2`), but not after a pointer cast:
+  `(const u16 *)wideTable + 1`, and the same for an address of a string literal (the keyboard's character tables,
+  `func_02082b48` and the four after it).
+
+**Two literal-pool entries for one address**
+- One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
+  another literal. In `relocs.txt` such a reference is `to:<object> add:<size>`, so that `check_relocs.py` names
+  both alike (`func_02081df0`'s key counts, `((const u8 *)end - (const u8 *)start) / sizeof(KeyRect)`, which is
+  also what gives the original's `lsr #3`).
 
 **Two operands loaded in the other order**
 - How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
@@ -374,6 +404,27 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   instead (`SoftKeyboard::GetButtonCharCount`).
 - A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
   declared after it, after (`func_02083c54`, `Keyboard.cpp`).
+- In C (lib/NFL, measured on functions whose instructions were already the original's): a pointer initialised
+  from a global with a cast to its own type, `NFLWork *work = (NFLWork *)data_02145360;`, takes r4 where the plain
+  initialiser leaves it last (`func_0207516c`, `func_02076680`, `func_02077300`). An uninitialised local declared
+  above the initialised pointers takes a lower register than they (`u32 dest;` before `stream = work->unkA0` in
+  `func_02076680`), and initialised declarations take registers in their order (`func_02075f50`). A variable used
+  in two exclusive paths is one register for both: giving the second path a variable of its own block moved two
+  registers into place (`func_0207516c`). The type of a block local counts: `u32 over, n` where `int` gave other
+  registers (`func_02076a98`). So does how a value is returned: `if (result != 0) return result; return 1;`, not
+  `if (result == 0) result = 1;` (`func_02076448`), and `result = f(); return result;` kept a tail call out of the
+  shared epilogue (`func_02076e1c`).
+- The order of independent statements in a case decides the scheduling of their loads: `func_02076e1c` and
+  `func_02077300` matched only with one of the six orders of their three assignments, found by trying them all.
+- Brute-force the order of the C-style declarations at the top, the loop counters included: a script that splices each
+  permutation into a copy of the file, compiles it and counts the differing lines of the one function. It took
+  `func_02082914` from 153 differing lines to 0 (`int x, endY, endX, dy, dx, px, y;`), and an `int i;` declared
+  first fixed `func_020819e8`.
+- A row pointer that the original recomputes from the outer counter each pass (`add r0, base, y, lsl #6`), where
+  ours strength-reduces it: index as a two-dimensional array, `((u16 (*)[32])screen)[y][x]` (`func_02081cf8`).
+- A value the inner loop does not change, which the original computes after the inner loop's guard, where ours
+  hoists it and tests the guard twice: write the expression again at each use instead of keeping it in a local
+  (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `func_02082738`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -385,6 +436,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
   order alone in a test function, and in the other once a switch that reassigns a local follows it. Neither
   temporaries, inlines, parameter types nor `opt_*` pragmas change it. Not solved.
+**Two registers holding one counter**
+- A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
+  i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
+  does not (overlay 76's question pages).
 
 **Branches and switches laid out differently**
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
@@ -402,6 +457,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
   that is rotated at level 2 is a `do { } while`.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
+- A test whose second branch the original places first (`cmp #1; beq later; cmp #2; bne end; <case 2>`) is a
+  switch with that case written first (overlay 76's voice page).
+- A loop of one iteration kept as a loop: `for (u16 i = 0; i <= 0; i++)`; `i < 1` is folded away.
 
 **Independent statements scheduled in another order**
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
@@ -411,6 +469,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **Constants and arithmetic**
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
   original's registers.
+- A random value in a range as an inline taking ints, `return MATH_Rand16(&gRandom, max - min) + min;`, with the
+  random number first: the generator's state is stored before the range is read (overlay 76's voice page).
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
 - A `wchar_t` set from a choice of two wide constants (`fill = zero ? L'0' : L' ';`) and then compared is compared

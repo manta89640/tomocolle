@@ -60,7 +60,7 @@ struct MessageWindow {
     /* 0x0004 */ WindowSprite mSprites[12];
     /* 0x0B74 */ WindowButton mButtons[16]; // Constructed by func_02031f1c
     /* 0x7A74 */ MessageText mTexts[8];
-    /* 0xA9F4 */ u8 mUnknownA9F4[0x35C];
+    /* 0xA9F4 */ Sprite mPlainSprites[5];  // Sprites without a button: func_020345d8 draws as many as +0xAD64 says
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
     /* 0xAD54 */ u8 mUnknownAD54[0x22C];
     /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the button pressed, when one is
