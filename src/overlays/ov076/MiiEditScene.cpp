@@ -3792,7 +3792,12 @@ static inline void SetTextBoxPosition(ObjTextBox *box, WindowPoint point) {
 #define NAME_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B330[0x00])
 #define CREATOR_NAME_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B330[0x16])
 
-// Writes the character's profile into the scene's nine text boxes, each centred on its place
+// Writes the character's profile into the scene's nine text boxes, each centred on its place.
+// 99.0%: the original loads the scene into r0 before reading mRelationBlood (ours r1), and holds the two tables of
+// the last loop in each other's registers. Tried: the relation through a local (int, u32), a MessageFile pointer,
+// the operands swapped; the index or the position through locals, the tables indexed at each use (which gives the
+// registers but moves -width before the position's address, and scores lower), the point through an inline,
+// -width / 2 in other forms; pragma sets (propagation, common subs, lifetimes, level 2).
 void MiiEditProfilePage::UpdateTexts() {
     u32 number = mScene->mCharacter.mBirthYear;
     if (number == 0xFFF) {
@@ -3803,7 +3808,7 @@ void MiiEditProfilePage::UpdateTexts() {
     }
     int month = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x26);
     int day = ((SavedCharacter *)(&mScene->mCharacter))->GetParameter(0x27);
-    if (month > 0 && month <= 12 && day > 0 && day <= 31) {
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"%d/%d", month, day);
         ToFullWidthDigits(BIRTHDAY_TEXT(mScene));
     } else {
