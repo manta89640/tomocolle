@@ -1,4 +1,5 @@
 #include "ItemTradeScene.h"
+#include "MainProgram.h"
 
 // Overlay 110: wireless play with items (ItemTradeScene). One source file: the list of the player's things with its
 // tabs and buttons, the scene, and the scene's implicit destructor, which the compiler emits with the scene's
@@ -107,10 +108,10 @@ void ItemTradeSelection::Set(int kind, int id) {
     mKind = kind;
     switch (kind) {
     case 0:
-        mId = id;
+        InventoryItem::mId = id;
         mValue = id;
         {
-            u16 item = mId;
+            u16 item = InventoryItem::mId;
             int itemKind = data_020f5f0c[item].mKind;
             if (itemKind == 1) {
                 mCategory = 0;
@@ -124,22 +125,22 @@ void ItemTradeSelection::Set(int kind, int id) {
         }
         break;
     case 1:
-        mId = id;
+        InventoryItem::mId = id;
         mCategory = 1;
         mValue = 0xF7;
         break;
     case 2:
-        mId = id;
+        InventoryItem::mId = id;
         mCategory = 2;
         mValue = 0xF9;
         break;
     case 3:
-        mId = id;
+        InventoryItem::mId = id;
         mCategory = 3;
         mValue = 0xF4;
         break;
     case 4:
-        mId = id;
+        InventoryItem::mId = id;
         mCategory = 5;
         mValue = 0xF5;
         break;
@@ -552,7 +553,7 @@ void ItemTradeList::Open() {
         mList.SetMessageFile(mContext->mItemMessages);
         mList.SetVisible(TRUE);
         mList.SetItems(mItems, mItemCount);
-        mList.mUnknown024 = TRUE;
+        mList.mTouchable = TRUE;
         mSelection.Set(0, 0);
         break;
     case 2:
@@ -570,7 +571,7 @@ void ItemTradeList::Open() {
         mList.SetMessageFile(mContext->mCostumeMessages);
         mList.SetVisible(TRUE);
         mList.SetItems(mItems, mItemCount);
-        mList.mUnknown024 = TRUE;
+        mList.mTouchable = TRUE;
         mSelection.Set(1, 0);
         break;
     }
@@ -667,7 +668,7 @@ int ItemTradeList::Run() {
             mItemModel->mVisible = TRUE;
             ShowName(mSelection.mKind, id);
             mMannequin->SetVisible(FALSE);
-            mRoom->mParts.SetVisible(FALSE);
+            mRoom->RoomModels::SetVisible(FALSE);
             mSelection.Set(0, id);
             ResetLights();
             break;
@@ -678,7 +679,7 @@ int ItemTradeList::Run() {
             ShowName(mSelection.mKind, id);
             mMannequin->SetVisible(TRUE);
             mItemModel->mVisible = FALSE;
-            mRoom->mParts.SetVisible(FALSE);
+            mRoom->RoomModels::SetVisible(FALSE);
             mSelection.Set(1, id);
             ResetLights();
             break;
@@ -686,7 +687,7 @@ int ItemTradeList::Run() {
             SetRoomCamera();
             mItemModel->mVisible = FALSE;
             mMannequin->SetVisible(FALSE);
-            mRoom->mParts.SetVisible(FALSE);
+            mRoom->RoomModels::SetVisible(FALSE);
             ShowRoom(id);
             mSelection.Set(2, id);
             ShowName(mSelection.mKind, id);
@@ -715,7 +716,7 @@ void ItemTradeList::Close() {
     mItemModel->Reset();
     mItemModel = NULL;
     mMannequin->SetVisible(FALSE);
-    mRoom->mParts.SetVisible(FALSE);
+    mRoom->RoomModels::SetVisible(FALSE);
     mOkButton.mVisible = FALSE;
     mBackButton.mVisible = FALSE;
     mTabs.SetVisible(FALSE);
@@ -740,12 +741,12 @@ void ItemTradeList::Draw() {
 void ItemTradeList::ShowCostume(int costume) {
     func_0202aecc(data_021223e4, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
-    mMannequin->mModel.SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
+    mMannequin->SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
     ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
-    mMannequin->mModel.MakeModel(0, 0);
-    mMannequin->mModel.SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
-    mMannequin->mModel.SetAnimFlags(TRUE, TRUE);
+    mMannequin->MakeModel(0, 0);
+    mMannequin->SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
+    mMannequin->SetAnimFlags(TRUE, TRUE);
 }
 
 // @0x0214b414
@@ -886,19 +887,19 @@ void ItemTradeList::UpdateRoom() {
     switch (mRoomMode) {
     case 0:
         mRoomAngle += 0x6D;
-        mRoom->mParts.mDoor.mModel.mRotX = 0;
-        mRoom->mParts.mDoor.mModel.mRotY = mRoomAngle;
+        mRoom->mDoor.mModel.mRotX = 0;
+        mRoom->mDoor.mModel.mRotY = mRoomAngle;
         break;
     case 1:
         switch (mRoomStep) {
         case 0:
             mRoomStep++;
-            mRoom->mParts.SetVisible(FALSE);
+            mRoom->RoomModels::SetVisible(FALSE);
             mRoom->ReleaseAll();
             break;
         case 1:
             mRoomStep++;
-            mRoom->mStyle = mRoomStyle;
+            mRoom->mId = mRoomStyle;
             mRoom->MountModel(0);
             mRoom->MountPartModels(0);
             break;
@@ -917,9 +918,9 @@ void ItemTradeList::UpdateRoom() {
             break;
         case 5:
             SetRoomMode(0);
-            mRoom->mParts.SetVisible(TRUE);
-            data_021226e4.mLights[0].mColor = data_020f72f8[mRoom->mStyle].mLightColor;
-            data_021226e4.mLights[1].mColor = data_020f72f8[mRoom->mStyle].mLightColor;
+            mRoom->RoomModels::SetVisible(TRUE);
+            data_021226e4.mLights[0].mColor = data_020f72f8[mRoom->mId].mLightColor;
+            data_021226e4.mLights[1].mColor = data_020f72f8[mRoom->mId].mLightColor;
             break;
         }
         break;
@@ -1010,7 +1011,7 @@ void ItemTradeList::UpdatePreviewStates() {
     case 14:
         if (sItem >= 0x1000 && mPreviewStates[PREVIEW_ROOM] == 1) {
             SetRoomCamera();
-            mRoom->mParts.SetVisible(TRUE);
+            mRoom->RoomModels::SetVisible(TRUE);
             mPreviewStates[PREVIEW_ROOM] = 3;
             mPreviewStates[PREVIEW_ITEM] = 2;
             mPreviewStates[PREVIEW_COSTUME] = 2;
@@ -1130,15 +1131,15 @@ void ItemTradeList::UpdatePreviewStates() {
                 mMannequin->SetAlpha(31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_ROOM:
-                mRoom->mParts.SetAlpha(31 - mPreviewTimers[i] * 2);
+                mRoom->RoomModels::SetAlpha(31 - mPreviewTimers[i] * 2);
                 mRoom->Update();
                 break;
             }
             if (mPreviewTimers[i] >= 15) {
-                mRoom->mParts.SetVisible(FALSE);
+                mRoom->RoomModels::SetVisible(FALSE);
                 mMannequin->SetVisible(FALSE);
                 mItemModel->SetVisible(FALSE);
-                mRoom->mParts.SetAlpha(31);
+                mRoom->RoomModels::SetAlpha(31);
                 mMannequin->SetAlpha(31);
                 func_02029f50(mItemModel, 31);
                 mPreviewStates[i] = 0;
@@ -1171,8 +1172,8 @@ void ItemTradeList::UpdatePreviewStates() {
     }
 
     mItemModel->mPosition.y = mPreviewOffsets[PREVIEW_ITEM];
-    mMannequin->mModel.mPos.y = mPreviewOffsets[PREVIEW_COSTUME] - 0x599;
-    mRoom->mParts.mPosition.y = mPreviewOffsets[PREVIEW_ROOM] + 0xCC;
+    mMannequin->mPos.y = mPreviewOffsets[PREVIEW_COSTUME] - 0x599;
+    mRoom->mDoor.mPosition.y = mPreviewOffsets[PREVIEW_ROOM] + 0xCC;
 }
 
 // Shows what was chosen while the views were busy
@@ -1184,7 +1185,7 @@ void ItemTradeList::ShowPending() {
             return;
         }
         SetRoomCamera();
-        mRoom->mParts.SetVisible(TRUE);
+        mRoom->RoomModels::SetVisible(TRUE);
         ShowRoom(mPendingId);
         UpdateRoom();
         mList.Select(mPendingIndex);
@@ -1371,7 +1372,7 @@ void ItemTradeScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "STS", "Scn/Scene/SceneTushin_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "LTL", "Scn/List/List_TushinItemList_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MH", "Mdl/Misc/headManikin_3D_LZ.bin", 0);
-    mMannequin.mModel.SetArchive("3MM", 0, 0);
+    mMannequin.SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
 
     func_0202c264(&gGameData, 0, &mPlayer);
@@ -1394,7 +1395,7 @@ void ItemTradeScene::StartLoading() {
     char archiveName[] = "IM0";
     mItemModel.SetItem(archiveName, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mItemModel.mArchiveName, mItemModel.mArchivePath, 0);
-    mRoom.mStyle = 0;
+    mRoom.mId = 0;
     mRoom.Mount("CO0", 0);
     mRoom.MountAll("RM?", 0);
 }
@@ -1498,15 +1499,15 @@ void ItemTradeScene::Init() {
 
     mRoom.Load(1);
     mRoom.LoadParts(2);
-    mRoom.mParts.SetVisible(TRUE);
+    mRoom.RoomModels::SetVisible(TRUE);
     VecFx32 roomPosition = sRoomPosition;
-    mRoom.mParts.mPosition.x = roomPosition.x;
-    mRoom.mParts.mPosition.y = roomPosition.y;
-    mRoom.mParts.mPosition.z = roomPosition.z;
+    mRoom.mDoor.mPosition.x = roomPosition.x;
+    mRoom.mDoor.mPosition.y = roomPosition.y;
+    mRoom.mDoor.mPosition.z = roomPosition.z;
     mRoom.SetScale(0x1C2);
-    mRoom.mParts.mDoor.mModel.mRotX = 0;
-    mRoom.mParts.mDoor.mModel.mRotY = 0;
-    mRoom.mParts.SetVisible(FALSE);
+    mRoom.mDoor.mModel.mRotX = 0;
+    mRoom.mDoor.mModel.mRotY = 0;
+    mRoom.RoomModels::SetVisible(FALSE);
     gSoundManager.LoadGroup(0x5D);
     WH_Initialize();
 }
@@ -1515,7 +1516,7 @@ void ItemTradeScene::Init() {
 void ItemTradeScene::Init3d() {
     func_0202b0e8(&data_02122824);
     data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    data_0211d604.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     func_02028280(&data_02121834, 1, 0);
     func_02028280(&data_02121834, 2, 1);
@@ -1533,26 +1534,26 @@ void ItemTradeScene::Init3d() {
     ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
     mMannequin.Init(0, 0, 1, 0);
     void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
-    func_02029660(mMannequin.mModel.mAnim.mResourceSet, RESOURCE_BCA0, animations);
-    mMannequin.SetAnimation("idle00");
-    mMannequin.mModel.SetAnimFlags(TRUE, TRUE);
-    mMannequin.mModel.mUnknown4A4 = FALSE;
+    func_02029660((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    SetMannequinAnimation(&mMannequin, "idle00");
+    mMannequin.SetAnimFlags(TRUE, TRUE);
+    mMannequin.mShadowVisible = FALSE;
     mMannequin.SetVisible(FALSE);
 
     VecFx32 zero = sZero;
     VecFx32 position = zero;
-    mMannequin.mModel.mPos.x = position.x;
-    mMannequin.mModel.mPos.y = position.y;
-    mMannequin.mModel.mPos.z = position.z;
-    mMannequin.mModel.mScale.x = gMannequinBodyScale.x * 4 / 10;
-    mMannequin.mModel.mInvScale.x = FX_Inv(mMannequin.mModel.mScale.x);
-    mMannequin.mModel.mScale.y = gMannequinBodyScale.y * 4 / 10;
-    mMannequin.mModel.mInvScale.y = FX_Inv(mMannequin.mModel.mScale.y);
-    mMannequin.mModel.mScale.z = gMannequinBodyScale.z * 4 / 10;
-    mMannequin.mModel.mInvScale.z = FX_Inv(mMannequin.mModel.mScale.z);
-    mMannequin.mUnknown140.x = gMannequinHeadScale.x * 4 / 10;
-    mMannequin.mUnknown140.y = gMannequinHeadScale.y * 4 / 10;
-    mMannequin.mUnknown140.z = gMannequinHeadScale.z * 4 / 10;
+    mMannequin.mPos.x = position.x;
+    mMannequin.mPos.y = position.y;
+    mMannequin.mPos.z = position.z;
+    mMannequin.mScale.x = gMannequinBodyScale.x * 4 / 10;
+    mMannequin.mInvScale.x = FX_Inv(mMannequin.mScale.x);
+    mMannequin.mScale.y = gMannequinBodyScale.y * 4 / 10;
+    mMannequin.mInvScale.y = FX_Inv(mMannequin.mScale.y);
+    mMannequin.mScale.z = gMannequinBodyScale.z * 4 / 10;
+    mMannequin.mInvScale.z = FX_Inv(mMannequin.mScale.z);
+    mMannequin.mHeadScale.x = gMannequinHeadScale.x * 4 / 10;
+    mMannequin.mHeadScale.y = gMannequinHeadScale.y * 4 / 10;
+    mMannequin.mHeadScale.z = gMannequinHeadScale.z * 4 / 10;
 
     ModelResources_SetModel(data_021223e4, 2, mItemModel.mModelPath);
     mItemModel.Load(2);
@@ -2156,7 +2157,7 @@ void ItemTradeScene::Draw() {
     func_020345d8(&mWindow);
     mMannequin.Draw();
     mItemModel.Draw();
-    mRoom.mParts.Draw();
+    mRoom.RoomModels::Draw();
     mScroll += 0x4CC;
     func_02028108(&data_02121834, 2, mScroll >> FX32_SHIFT);
 }

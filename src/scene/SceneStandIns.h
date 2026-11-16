@@ -65,7 +65,6 @@
 
 
 
-SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // 0x02048b78
 
 
 
