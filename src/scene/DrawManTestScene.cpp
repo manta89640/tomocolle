@@ -27,7 +27,7 @@ void DrawManTestScene::Init() {
     mModel.Load(0, 0);
     func_02029c20(&mModel, RESOURCE_BTX0, 0, 1);
     NNS_GfdDumpFrmTexVramManager();
-    func_0205ff40();
+    NNS_GfdDumpFrmPlttVramManager();
     NNS_G3dRenderObjSetCallBack(&mModel.mRenderObj, HeadCallback, NULL, NNS_G3D_SBC_NODEDESC,
                                 NNS_G3D_SBC_CALLBACK_TIMING_C);
     NNS_G3dRenderObjSetUserPtr(&mModel.mRenderObj, this);
@@ -43,23 +43,23 @@ void DrawManTestScene::Update() {
         }
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
         NNS_GfdDumpFrmTexVramManager();
-        func_0205ff40();
+        NNS_GfdDumpFrmPlttVramManager();
         NNSG3dResMdl *mdl = mModel.mResMdl;
         NNS_G3D_DEFRESNAME(name, "human01_base_pl");
         NNS_G3dReleaseMdlPlttEx(mdl, &name.resName);
         NNS_G3dForceBindMdlPltt(mdl, mModel.mResTex, 1, 7);
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
         NNS_GfdDumpFrmTexVramManager();
-        func_0205ff40();
+        NNS_GfdDumpFrmPlttVramManager();
         void *resourceSet = (void *)mModel.mUnknown04;
         NNS_G3dReleaseMdlSet(NNS_G3dGetMdlSet(func_020295a4(resourceSet, RESOURCE_BMD0)));
         func_02029758(resourceSet, RESOURCE_BTX0);
         NNS_GfdDumpFrmTexVramManager();
-        func_0205ff40();
+        NNS_GfdDumpFrmPlttVramManager();
         func_0202b0e8(&data_02122824);
         ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
         NNS_GfdDumpFrmTexVramManager();
-        func_0205ff40();
+        NNS_GfdDumpFrmPlttVramManager();
     } else {
         if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;

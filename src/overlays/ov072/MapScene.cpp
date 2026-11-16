@@ -600,7 +600,7 @@ void MapScene::Init() {
         break;
     }
     NNS_GfdDumpLnkTexVramManager();
-    func_02060c1c();
+    NNS_GfdDumpLnkPlttVramManager();
     mIdleFrames = 0;
 }
 

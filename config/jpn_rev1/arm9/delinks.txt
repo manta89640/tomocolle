@@ -573,11 +573,14 @@ lib/NitroSystem/libraries/fnd/src/archive.c:
 
 lib/NitroSystem/libraries/g2d/src/load/g2d_NAN_load.c:
     complete
-    .text       start:0x020591fc end:0x02059394
+    .text       start:0x020591fc end:0x020593ac
 
 lib/NitroSystem/libraries/g2d/src/load/g2d_NOB_load.c:
     complete
     .text       start:0x020593ac end:0x020594dc
+
+lib/NitroSystem/libraries/g2d/src/load/g2d_NCG_load.c:
+    .text       start:0x020594dc end:0x02059528
 
 lib/NitroSystem/libraries/g2d/src/load/g2d_NCL_load.c:
     complete
@@ -596,7 +599,7 @@ lib/NitroSystem/libraries/g2d/src/g2d_Animation.c:
     .text       start:0x02059638 end:0x02059a50
 
 lib/NitroSystem/libraries/g2d/src/g2d_OAM.c:
-    .text       start:0x02059a74 end:0x0205a150
+    .text       start:0x02059a50 end:0x0205a150
 
 lib/NitroSystem/libraries/g2d/src/g2d_OAMEx.c:
     .text       start:0x0205a150 end:0x0205a7e8
@@ -607,17 +610,18 @@ lib/NitroSystem/libraries/g2d/src/g2d_PaletteTable.c:
 
 lib/NitroSystem/libraries/g2d/src/g2d_Image.c:
     complete
-    .text       start:0x0205a810 end:0x0205a9c0
+    .text       start:0x0205a7f4 end:0x0205a9c0
 
 lib/NitroSystem/libraries/g2d/src/g2d_SRTControl.c:
     complete
     .text       start:0x0205a9c0 end:0x0205aa5c
 
 lib/NitroSystem/libraries/g2d/src/g2d_CellAnimation.c:
-    .text       start:0x0205aa5c end:0x0205aba0
+    complete
+    .text       start:0x0205aa5c end:0x0205abe0
 
 lib/NitroSystem/libraries/g2d/src/g2d_Renderer.c:
-    .text       start:0x0205abe0 end:0x0205c024
+    .text       start:0x0205abe0 end:0x0205c030
 
 lib/NitroSystem/libraries/g2d/src/internal/g2di_Mtx32.c:
     complete
@@ -653,11 +657,30 @@ lib/NitroSystem/libraries/g2d/src/internal/g2di_BitReader.c:
     complete
     .text       start:0x0205fd44 end:0x0205fda4
 
+lib/NitroSystem/libraries/g2d/src/internal/g2di_SplitChar.c:
+    complete
+    .text       start:0x0205fda4 end:0x0205fdb8
+
 lib/NitroSystem/libraries/g2d/src/internal/g2di_BGManipulator.c:
     .text       start:0x0205fdb8 end:0x0205fe50
 
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_TexVramMan.c:
+    complete
+    .text       start:0x0205fe50 end:0x0205fe60
+    .data       start:0x02111e20 end:0x02111e28
+
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_PlttVramMan.c:
+    complete
+    .text       start:0x0205fe60 end:0x0205fe70
+    .data       start:0x02111e28 end:0x02111e30
+
 lib/NitroSystem/libraries/gfd/src/VramManager/gfd_FrameTexVramMan.c:
     .text       start:0x0205fe70 end:0x0205ff3c
+
+lib/NitroSystem/libraries/gfd/src/VramManager/gfd_FramePlttVramMan.c:
+    complete
+    .text       start:0x0205ff3c end:0x0205ff74
+    .bss        start:0x0214239c end:0x021423a8
 
 lib/NitroSystem/libraries/gfd/src/VramTransferMan/gfd_VramTransferManager.c:
     complete
@@ -670,10 +693,15 @@ lib/NitroSystem/libraries/gfd/src/VramManager/gfdi_LinkedListVramMan_Common.c:
     .text       start:0x0206042c end:0x02060890
 
 lib/NitroSystem/libraries/gfd/src/VramManager/gfd_LinkedListTexVramMan.c:
+    complete
     .text       start:0x02060890 end:0x02060c1c
+    .rodata     start:0x020b6488 end:0x020b64b8
+    .bss        start:0x021423bc end:0x021423d8
 
 lib/NitroSystem/libraries/gfd/src/VramManager/gfd_LinkedListPlttVramMan.c:
-    .text       start:0x02060c38 end:0x02060df8
+    complete
+    .text       start:0x02060c1c end:0x02060df8
+    .bss        start:0x021423d8 end:0x021423ec
 
 lib/NitroSystem/libraries/g3d/src/kernel.c:
     complete

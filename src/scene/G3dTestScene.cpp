@@ -15,7 +15,7 @@ void G3dTestScene::Init() {
     func_0202ad04(data_021223e4, 0, "BIC", 0);
     ModelResources_SetModel(data_021223e4, 1, "TG3:/Glass6.imd");
     NNS_GfdDumpFrmTexVramManager();
-    func_0205ff40();
+    NNS_GfdDumpFrmPlttVramManager();
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
     data_0211d604.Show(1);
     G3X_EdgeMarking(TRUE);
@@ -79,7 +79,7 @@ void G3dTestScene::Update() {
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
         mCharacter.SetDefaultMii(MATH_Rand16(&gRandom, 6), TRUE);
         NNS_GfdDumpFrmTexVramManager();
-        func_0205ff40();
+        NNS_GfdDumpFrmPlttVramManager();
     } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
         if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;

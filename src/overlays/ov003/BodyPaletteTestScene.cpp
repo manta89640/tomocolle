@@ -44,7 +44,7 @@ void BodyPaletteTestScene::Init() {
     mSecondBody.Load(1, 0);
     mSecondBody.mPosition.x = -0x2000;
     NNS_GfdDumpLnkTexVramManager();
-    func_02060c1c();
+    NNS_GfdDumpLnkPlttVramManager();
 }
 #pragma pop
 
@@ -60,7 +60,7 @@ void BodyPaletteTestScene::Update() {
         ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
         func_02029c20(&mBody, RESOURCE_BMD0, 0, 0);
         NNS_GfdDumpLnkTexVramManager();
-        func_02060c1c();
+        NNS_GfdDumpLnkPlttVramManager();
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
         NNSG3dResDict *dict;
         int i;

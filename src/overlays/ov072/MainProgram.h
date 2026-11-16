@@ -279,7 +279,7 @@ void Clock_GetDate(int offset, RTCDate *date);
 void Clock_GetTime(int offset, RTCTime *time);
 
 void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
-void func_02060c1c();
+void NNS_GfdDumpLnkPlttVramManager();
 
 // --- Particles ---
 ParticleManager *func_0207ab20(void (*alloc)(), int a, int b, int c, int d, int e);
