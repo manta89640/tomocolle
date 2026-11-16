@@ -4,24 +4,7 @@
 #include <nitro.h>
 
 #include "Model.h"
-
-// STAND-IN for the character model (gap66-a's include/character/CharacterModel.h defines it), with what the
-// mannequin uses. To be replaced by that header.
-class CharacterModel {
-public:
-    CharacterModel();
-
-    void Load(int resourceId, int unk);
-    void Draw();
-    void SetAnimation(u32 resType, int id);
-    void BlendToAnimation(u32 resType, int id);
-
-    /* 0x000 */ AnimModel mAnim;
-    /* 0x0E0 */ u8 mUnknown0E0[0x34];
-    /* 0x114 */ MtxFx33 mJointRotations[10]; // The neck's first
-    /* 0x27C */ MtxFx43 mJointMatrices[10];
-    /* 0x45C */ u8 mUnknown45C[0xAC];
-}; // 0x508
+#include "character/CharacterModel.h"
 
 // A body that can wear clothes, with a head placed on its neck: the clothes trade and the shops show clothes on
 // it. The name is descriptive. The head is a model of its own with no class around it (the scenes' constructors

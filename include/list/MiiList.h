@@ -24,16 +24,26 @@ struct WindowPoint; // A point or a size in pixels, by value (MessageWindow.h)
 // The panel of the list's buttons (0x9478 bytes): a page of buttons with the characters' names, scroll buttons and
 // a scroll bar.
 struct MiiListPanel {
+    void SetEntries(SavedCharacter *entries, int count);
+    void SetMode(int mode);
+    void Select(int entry);
+    void ScrollTo(int scroll);
+    void ScrollToSelection();
+    void Draw();
+    void ClearSelection();
+    void ResetScrollButtons();
+    void SetScrollUnknown(int value);
+
     /* 0x0000 */ int mUnknown0000;
-    /* 0x0004 */ int mUnknown0004;
-    /* 0x0008 */ int mUnknown0008;
-    /* 0x000C */ int mUnknown000C;
+    /* 0x0004 */ int mMode;            // 1 when the list is sorted by nickname
+    /* 0x0008 */ SavedCharacter *mEntries; // What the panel shows
+    /* 0x000C */ int mEntryCount;
     /* 0x0010 */ int mButtonCount;
-    /* 0x0014 */ int mUnknown0014;
+    /* 0x0014 */ int mPageSize;        // How many entries a page shows
     /* 0x0018 */ int mUnknown0018;
     /* 0x001C */ int mUnknown001C;
     /* 0x0020 */ BOOL mUnknown0020;
-    /* 0x0024 */ BOOL mTextReady[MII_LIST_PAGE];
+    /* 0x0024 */ BOOL mTextDirty[MII_LIST_PAGE]; // The button's text is to be written again
     /* 0x0044 */ int mButtonEntries[MII_LIST_PAGE]; // -1 when a button shows nothing
     /* 0x0064 */ SpriteButton mButtons[MII_LIST_PAGE];
     /* 0x0804 */ Sprite mIcons[MII_LIST_PAGE];
@@ -46,10 +56,10 @@ struct MiiListPanel {
     /* 0x93C8 */ u8 mUnknown93C8[0x5C];
     /* 0x9424 */ int mUnknown9424[8];
     /* 0x9444 */ int mUnknown9444[7];
-    /* 0x9460 */ int mUnknown9460;
-    /* 0x9464 */ int mPressed; // The button pressed, -1 for none
+    /* 0x9460 */ int mSelectedButton; // -1 for none
+    /* 0x9464 */ int mSelected; // The entry selected, -1 for none
     /* 0x9468 */ BOOL mUnknown9468;
-    /* 0x946C */ int mUnknown946C;
+    /* 0x946C */ int mScroll;   // The first entry shown
     /* 0x9470 */ int mUnknown9470;
     /* 0x9474 */ int mUnknown9474;
 }; // 0x9478
@@ -88,6 +98,21 @@ struct MiiListTabs {
 
 // The list (0x113A8 bytes): the saved characters, in the order of mSortKey, and in groups of that order.
 struct MiiList {
+    void Init(MiiListPanel *panel, MiiListTabs *tabs);
+    void Draw();
+    void Load();
+    BOOL SelectIndex(u16 index);
+    void ClearSelection();
+    void ShowTabs(int sortKey, int group);
+    void Sort(int sortKey, BOOL selectFirst);
+    void SortByName();
+    void SortByNickname();
+    void SortByPersonality();
+    void SortByBirthYear();
+    void SortByBirthday();
+    void SortBySex();
+    void SortByBloodType();
+
     /* 0x00000 */ SavedCharacter mResidents[MII_LIST_SIZE];
     /* 0x11300 */ int mCount;
     /* 0x11304 */ u16 mSelectedIndex; // The selected character's mIndex, 0xFFFF for none

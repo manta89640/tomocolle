@@ -147,3 +147,383 @@ void MiiListTab::Select(int button) {
     func_02031e28(&mButtons[mSelected], TRUE);
     mButtons[mSelected].mUnknown5E = 1;
 }
+
+extern "C" {
+BOOL func_0202c354(GameData *game, int index);                          // Whether there is a saved character
+void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
+}
+
+void MiiList::Init(MiiListPanel *panel, MiiListTabs *tabs) {
+    mCount = 0;
+    mSelectedIndex = 0xFFFF;
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    mSelected = -1;
+    mGroup = 0;
+    mChanged = FALSE;
+    mUnknown1139C = TRUE;
+    mPanel = panel;
+    mTabs = tabs;
+}
+
+void MiiList::Draw() {
+    mTabs->Draw();
+    mPanel->Draw();
+}
+
+void MiiList::Load() {
+    mCount = 0;
+    for (u16 i = 0; i < MII_LIST_SIZE; i++) {
+        if (func_0202c354(&gGameData, i)) {
+            func_0202c264(&gGameData, i, &mResidents[mCount]);
+            mResidents[mCount].mIndex = i;
+            mCount++;
+        }
+    }
+}
+
+BOOL MiiList::SelectIndex(u16 index) {
+    for (int i = 0; i < mCount; i++) {
+        if (index == mResidents[i].mIndex) {
+            mSelected = i;
+            mSelectedIndex = index;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+void MiiList::ClearSelection() {
+    mSelectedIndex = 0xFFFF;
+    mSelected = -1;
+    mPanel->ClearSelection();
+}
+
+void MiiListPanel::Draw() {
+    for (int i = 0; i < mButtonCount; i++) {
+        if (mUnknown9444[4]) {
+            Sprite_Draw(&mIcons[i]);
+        }
+        if (mUnknown9444[5]) {
+            Sprite_Draw(&mIcons2[i]);
+        }
+        mTexts[i].Draw();
+        func_02031d7c(&mButtons[i]);
+    }
+    func_02031d7c(&mUpButton);
+    func_02031d7c(&mDownButton);
+    Sprite_Draw((Sprite *)mScrollBar);
+}
+
+void MiiListPanel::ClearSelection() {
+    func_02031e28(&mButtons[mSelectedButton], FALSE);
+    mSelectedButton = -1;
+    mSelected = -1;
+}
+
+void MiiListPanel::ResetScrollButtons() {
+    func_02031228(&mUpButton);
+    func_02031228(&mDownButton);
+}
+
+void MiiListPanel::SetScrollUnknown(int value) {
+    *(int *)(mScrollBar + 0xE4) = value;
+    *(int *)(mUnknown93C8 + 0x24) = value;
+}
+
+extern "C" {
+int MiiData_GetSex(const CharacterRecord *character);
+void func_020a31cc(MiiListPanel *panel);
+void func_020a2d38(MiiListPanel *panel);
+void func_02032a0c(void *scrollBar, int unk, int range, int position);
+}
+
+#define SORT_BUFFER_SIZE 200
+
+void MiiList::ShowTabs(int sortKey, int group) {
+    switch (sortKey) {
+    case 0:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(0);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 1:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(0);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 2:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(3);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 3:
+        mTabs->SetVisible(FALSE);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 4:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(2);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 5:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(4);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    case 6:
+        mTabs->SetVisible(TRUE);
+        mTabs->SetTab(1);
+        mTabs->mTabs[mTabs->mCurrent].Select(group);
+        break;
+    }
+}
+
+void MiiList::Sort(int sortKey, BOOL selectFirst) {
+    int selected;
+    switch (sortKey) {
+    case 0:
+        SortByName();
+        break;
+    case 1:
+        SortByNickname();
+        break;
+    case 2:
+        SortBySex();
+        break;
+    case 3:
+        SortByBirthYear();
+        break;
+    case 4:
+        SortByBirthday();
+        break;
+    case 5:
+        SortByBloodType();
+        break;
+    case 6:
+        SortByPersonality();
+        break;
+    }
+    if (sortKey != 1) {
+        mPanel->SetMode(0);
+    } else {
+        mPanel->SetMode(1);
+    }
+    if (selectFirst) {
+        goto first;
+    }
+    selectFirst = FALSE;
+    if (mSelectedIndex != 0xFFFF && mSelected != -1) {
+        selectFirst = TRUE;
+    }
+    if (!selectFirst) {
+    first:
+        mSelectedIndex = mResidents[0].mIndex;
+        selected = 0;
+    } else {
+        for (int i = 0; i < mCount; i++) {
+            if (mSelectedIndex == mResidents[i].mIndex) {
+                selected = i;
+                break;
+            }
+        }
+    }
+    int group = 0;
+    while (mGroupStarts[group] > selected || selected > mGroupStarts[group] + mGroupCounts[group] - 1) {
+        group++;
+    }
+    mGroup = group;
+    mPanel->SetEntries(&mResidents[mGroupStarts[group]], mGroupCounts[group]);
+    if (mUnknown1139C) {
+        mSelected = selected;
+        mSelectedIndex = mResidents[selected].mIndex;
+        mPanel->Select(selected - mGroupStarts[group]);
+        mPanel->ScrollToSelection();
+    }
+    ShowTabs(sortKey, mGroup);
+}
+
+void MiiList::SortByPersonality() {
+    u32 buffer[SORT_BUFFER_SIZE];
+    mSortKey = 6;
+    MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByPersonality, buffer);
+    int group = 0;
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    for (int i = 0; i < mCount; i++) {
+        int key = mResidents[i].GetPersonality();
+        if (mResidents[i].mUnknown050Bit0) {
+            key = 16;
+        }
+        while (group < key) {
+            group++;
+            mGroupStarts[group] = i;
+        }
+        mGroupCounts[group]++;
+    }
+}
+
+void MiiList::SortByBirthYear() {
+    u32 buffer[SORT_BUFFER_SIZE];
+    mSortKey = 3;
+    MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByBirthday, buffer);
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    mGroupCounts[0] = mCount;
+    mGroupStarts[0] = 0;
+}
+
+void MiiList::SortByBirthday() {
+    u32 buffer[SORT_BUFFER_SIZE];
+    mSortKey = 4;
+    MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByBirthdayInYear, buffer);
+    u32 group = 0;
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    for (int i = 0; i < mCount; i++) {
+        u32 month = mResidents[i].GetParameter(0x26);
+        u32 key;
+        if (month >= 1 && month <= 12) {
+            key = month - 1;
+        } else {
+            key = 12;
+        }
+        while (group < key) {
+            group++;
+            mGroupStarts[group] = i;
+        }
+        mGroupCounts[group]++;
+    }
+}
+
+void MiiList::SortBySex() {
+    u32 buffer[SORT_BUFFER_SIZE];
+    mSortKey = 2;
+    MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareBySex, buffer);
+    int group = 0;
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    for (int i = 0; i < mCount; i++) {
+        int key = MiiData_GetSex(&mResidents[i]);
+        while (group < key) {
+            group++;
+            mGroupStarts[group] = i;
+        }
+        mGroupCounts[group]++;
+    }
+}
+
+void MiiList::SortByBloodType() {
+    u32 buffer[SORT_BUFFER_SIZE];
+    mSortKey = 5;
+    MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByBloodType, buffer);
+    u32 group = 0;
+    for (int i = 0; i < MII_LIST_GROUPS; i++) {
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    for (int i = 0; i < mCount; i++) {
+        u32 key = mResidents[i].mBloodType;
+        while (group < key) {
+            group++;
+            mGroupStarts[group] = i;
+        }
+        mGroupCounts[group]++;
+    }
+}
+
+void MiiListPanel::SetEntries(SavedCharacter *entries, int count) {
+    mSelectedButton = -1;
+    mSelected = -1;
+    mUnknown9468 = FALSE;
+    mScroll = 0;
+    mUnknown9470 = 0;
+    if (count != 0) {
+        mEntries = entries;
+        mEntryCount = count;
+    } else {
+        mEntries = NULL;
+        mEntryCount = 0;
+    }
+    if (mEntryCount <= mPageSize) {
+        mUpButton.mVisible = FALSE;
+        mDownButton.mVisible = FALSE;
+        ((Sprite *)mScrollBar)->mVisible = FALSE;
+    } else {
+        mUpButton.mVisible = TRUE;
+        mDownButton.mVisible = TRUE;
+        ((Sprite *)mScrollBar)->mVisible = TRUE;
+        func_02032a0c(mScrollBar, 0, (mEntryCount - mPageSize) * 20, 0);
+    }
+    func_020a31cc(this);
+    func_020a2d38(this);
+}
+
+void MiiListPanel::SetMode(int mode) {
+    if (mMode == mode) {
+        return;
+    }
+    mMode = mode;
+    for (int i = 0; i < mButtonCount; i++) {
+        mTextDirty[i] = TRUE;
+    }
+}
+
+void MiiListPanel::Select(int entry) {
+    if (mEntryCount <= 0) {
+        return;
+    }
+    if (entry < 0) {
+        mSelected = -1;
+        return;
+    }
+    if (entry > mEntryCount - 1) {
+        entry = mEntryCount - 1;
+    }
+    mSelected = entry;
+    for (int i = 0; i < mButtonCount; i++) {
+        func_02031e28(&mButtons[i], FALSE);
+    }
+    if (mScroll <= entry && entry < mScroll + mButtonCount) {
+        mSelectedButton = entry % mButtonCount;
+        func_02031e28(&mButtons[mSelectedButton], TRUE);
+        return;
+    }
+    mSelectedButton = -1;
+}
+
+void MiiListPanel::ScrollTo(int scroll) {
+    if (mEntryCount - mPageSize < scroll) {
+        scroll = mEntryCount - mPageSize;
+    }
+    if (scroll < 0) {
+        scroll = 0;
+    }
+    mScroll = scroll;
+    func_02032a0c(mScrollBar, 0, (mEntryCount - mPageSize) * 20, scroll * 20);
+    func_020a2d38(this);
+    func_020a31cc(this);
+}
+
+void MiiListPanel::ScrollToSelection() {
+    if (mEntryCount <= mPageSize) {
+        mScroll = 0;
+    } else if (mSelected + mPageSize <= mEntryCount) {
+        mScroll = mSelected;
+    } else {
+        mScroll = mEntryCount - mPageSize;
+    }
+    func_02032a0c(mScrollBar, 0, (mEntryCount - mPageSize) * 20, mScroll * 20);
+    func_020a31cc(this);
+    func_020a2d38(this);
+}

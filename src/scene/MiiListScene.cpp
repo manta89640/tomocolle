@@ -86,10 +86,10 @@ void MiiListScene::Init() {
         mTabs.AddButtons(i, 0, sTabSequences[i], sTabPressedSequences[i]);
     }
     mTabs.Reset();
-    func_020a03e8(&mList, &mPanel, &mTabs);
-    func_020a05dc(&mList);
+    mList.Init(&mPanel, &mTabs);
+    mList.Load();
     mSortKey = gGameData.mMiiListSortKey;
-    func_020a123c(&mList, mSortKey, TRUE);
+    mList.Sort(mSortKey, TRUE);
 
     Sprite_Init(&mSortButton, 0, 0x74, 0x80, 0x60, TRUE);
     func_02031260(&mSortButton, 4);
@@ -141,49 +141,49 @@ void MiiListScene::UpdateSortMenu() {
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 0) {
-            func_020a123c(&mList, 0, FALSE);
+            mList.Sort(0, FALSE);
         }
         break;
     case 1:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 1) {
-            func_020a123c(&mList, 1, FALSE);
+            mList.Sort(1, FALSE);
         }
         break;
     case 2:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 2) {
-            func_020a123c(&mList, 2, FALSE);
+            mList.Sort(2, FALSE);
         }
         break;
     case 3:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 3) {
-            func_020a123c(&mList, 3, FALSE);
+            mList.Sort(3, FALSE);
         }
         break;
     case 4:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 4) {
-            func_020a123c(&mList, 4, FALSE);
+            mList.Sort(4, FALSE);
         }
         break;
     case 5:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 5) {
-            func_020a123c(&mList, 5, FALSE);
+            mList.Sort(5, FALSE);
         }
         break;
     case 6:
         mSortMenu.mUnknownAF94 = 15;
         func_020349cc(&mSortMenu, 0x24);
         if (mList.mSortKey != 6) {
-            func_020a123c(&mList, 6, FALSE);
+            mList.Sort(6, FALSE);
         }
         break;
     }
@@ -195,7 +195,7 @@ void MiiListScene::UpdateSortMenu() {
 void MiiListScene::Draw() {
     func_02031d7c(&mSortButton);
     func_020345d8(&mSortMenu);
-    func_020a05b8(&mList);
+    mList.Draw();
 }
 
 void MiiListScene::Exit() {

@@ -31,18 +31,19 @@ struct MiiListPanel {
 
 // The list (0x113A8 bytes): the saved characters it shows, and the order it shows them in.
 struct MiiList {
+    void Init(MiiListPanel *panel, MiiListTabs *tabs);
+    void Draw();
+    void Load();
+    void Sort(int sortKey, BOOL selectFirst);
+
     /* 0x00000 */ u8 mCharacters[100][0x2C0]; // SavedCharacter, constructed by func_020979c0
     /* 0x11300 */ u8 mUnknown11300[6];
-    /* 0x11306 */ u16 mSortKey;                // 0 to 6, what func_020a123c set
+    /* 0x11306 */ u16 mSortKey;                // 0 to 6, what Sort set
     /* 0x11308 */ u8 mUnknown11308[0xA0];
 }; // 0x113A8
 
 extern "C" {
-void func_020a03e8(MiiList *list, MiiListPanel *panel, MiiListTabs *tabs);
 void func_020a0454(MiiList *list); // Updates it
-void func_020a05b8(MiiList *list); // Draws it
-void func_020a05dc(MiiList *list);
-void func_020a123c(MiiList *list, int sortKey, BOOL unknown); // Sorts it
 
 void func_020a1fe0(MiiListPanel *panel, int unknown);
 void func_020a2104(MiiListPanel *panel, int plane, int unknown);
