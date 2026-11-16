@@ -1,9 +1,9 @@
-func_ov108_02149a40 kind:function(arm,size=0x344) addr:0x02149a40
-func_ov108_02149d84 kind:function(arm,size=0x4) addr:0x02149d84
-func_ov108_02149d88 kind:function(arm,size=0x4) addr:0x02149d88
-func_ov108_02149d8c kind:function(arm,size=0x4) addr:0x02149d8c
-func_ov108_02149d90 kind:function(arm,size=0x4) addr:0x02149d90
-func_ov108_02149d94 kind:function(arm,size=0x4) addr:0x02149d94
-func_ov108_02149d98 kind:function(arm,size=0x14) addr:0x02149d98
+_ZN17TutorialStepScene12StartLoadingEv kind:function(arm,size=0x344) addr:0x02149a40
+_ZN17TutorialStepScene4InitEv kind:function(arm,size=0x4) addr:0x02149d84
+_ZN17TutorialStepScene6UpdateEv kind:function(arm,size=0x4) addr:0x02149d88
+_ZN17TutorialStepScene4DrawEv kind:function(arm,size=0x4) addr:0x02149d8c
+_ZN17TutorialStepScene4ExitEv kind:function(arm,size=0x4) addr:0x02149d90
+_ZN17TutorialStepSceneD1Ev kind:function(arm,size=0x4) addr:0x02149d94
+_ZN17TutorialStepSceneD0Ev kind:function(arm,size=0x14) addr:0x02149d98
 
-_ZTV7Scene69 kind:data(any) addr:0x02149dc0
+_ZTV17TutorialStepScene kind:data(any) addr:0x02149dc0

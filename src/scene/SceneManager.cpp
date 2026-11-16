@@ -85,7 +85,7 @@ struct PaletteLoader {
 #include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
-#include "../overlays/ov108/Scene69.h"
+#include "../overlays/ov108/TutorialStepScene.h"
 #include "../overlays/ov093/Scene72.h"
 #include "../overlays/ov094/Scene74.h"
 #include "../overlays/ov037/Scene75.h"
@@ -609,7 +609,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
         return new Scene68(sceneId);
     case 0x69:
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(108));
-        return new Scene69(sceneId);
+        return new TutorialStepScene(sceneId);
     case 0x72:
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(93));
         return new Scene72(sceneId);
@@ -1014,7 +1014,7 @@ CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x69, overlay 108
-Scene69::Scene69(int sceneId) : Scene(sceneId) {}
+TutorialStepScene::TutorialStepScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x72, overlay 93
 Scene72::Scene72(int sceneId) : Scene(sceneId) {}
