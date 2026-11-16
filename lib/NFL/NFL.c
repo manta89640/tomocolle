@@ -508,11 +508,11 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
     int polygons;
     int j;
     int count;
+    int v;
+    int n;
     fx16 x;
     fx16 y;
     fx16 z;
-    int v;
-    int n;
     int tc;
 
     stream = func_0206cf6c(0, type);
@@ -550,7 +550,6 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
             v = func_02069bf4(&stream) * 3;
             n = func_02069bf4(&stream) * 3;
             tc = func_02069bf4(&stream) * 2;
-
             if (type > 1) {
                 G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
             }
@@ -579,6 +578,204 @@ int func_0206b0d8(NFLMakeCtx *ctx) {
     G3C_PopMtx(&ctx->unk64, 1);
     return 1;
 }
+
+// The face's mesh, and the three positions the other meshes are placed at
+int func_0206b3f4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(4, mii->faceType);
+    s = mii->faceTexture != 0 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = mii->faceTexture != 0 ? GX_TEXSIZE_T64 : GX_TEXSIZE_T8;
+    ctx->unk0[0].x = func_02069c9c(&stream);
+    ctx->unk0[0].y = func_02069c9c(&stream);
+    ctx->unk0[0].z = func_02069c9c(&stream);
+    ctx->unk0[1].x = func_02069c9c(&stream);
+    ctx->unk0[1].y = func_02069c9c(&stream);
+    ctx->unk0[1].z = func_02069c9c(&stream);
+    ctx->unk0[2].x = func_02069c9c(&stream);
+    ctx->unk0[2].y = func_02069c9c(&stream);
+    ctx->unk0[2].z = func_02069c9c(&stream);
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = mii->faceTexture != 0 ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[1].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[1].unk4, format);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (mii->faceTexture == 0) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (mii->faceTexture != 0) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    return 1;
+}
+
+// The hair's mesh
+#pragma optimization_level 2
+int func_0206b740(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    stream = func_0206cf6c(0x12, mii->hairType);
+    bald = mii->hairType == 0x22 || mii->hairType == 0x39;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[1].cmd = NULL;
+    obj->unk94[1].param = NULL;
+    obj->unk94[1].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[1].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[1].param = ctx->unk64.curr_param;
+    obj->unk94[1].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[5].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[5].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
 
 extern const u16 data_020b6524[];
 extern const u16 data_020b6530[];
