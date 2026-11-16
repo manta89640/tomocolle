@@ -748,7 +748,7 @@ STD_GetStringLength kind:function(arm,size=0x28) addr:0x020145b0
 func_020145d8 kind:function(arm,size=0x24) addr:0x020145d8
 STD_ConvertStringSjisToUnicode kind:function(arm,size=0x238) addr:0x020145fc
 STD_ConvertStringUnicodeToSjis kind:function(arm,size=0x24c) addr:0x02014834
-func_02014a80 kind:function(arm,size=0x24) addr:0x02014a80
+abort kind:function(arm,size=0x24) addr:0x02014a80
 exit kind:function(arm,size=0x4c) addr:0x02014aa4
 __exit kind:function(arm,size=0x128) addr:0x02014af0
 nan kind:function(arm,size=0x18) addr:0x02014c18
@@ -773,18 +773,18 @@ memset kind:function(arm,size=0x14) addr:0x0201536c
 memchr kind:function(arm,size=0x2c) addr:0x02015380
 memcmp kind:function(arm,size=0x40) addr:0x020153ac
 __fill_mem kind:function(arm,size=0xb0) addr:0x020153ec
-func_0201549c kind:function(arm,size=0x590) addr:0x0201549c
-func_02015a2c kind:function(arm,size=0x24c) addr:0x02015a2c
-func_02015c78 kind:function(arm,size=0x2fc) addr:0x02015c78
-func_02015f74 kind:function(arm,size=0x4dc) addr:0x02015f74
-func_02016450 kind:function(arm,size=0x124) addr:0x02016450
-func_02016574 kind:function(arm,size=0x764) addr:0x02016574
-__pformatter kind:function(arm,size=0x824) addr:0x02016cd8
+parse_format kind:function(arm,size=0x590) addr:0x0201549c local
+long2str kind:function(arm,size=0x24c) addr:0x02015a2c local
+longlong2str kind:function(arm,size=0x2fc) addr:0x02015c78 local
+double2hex kind:function(arm,size=0x4dc) addr:0x02015f74 local
+round_decimal kind:function(arm,size=0x124) addr:0x02016450 local
+float2str kind:function(arm,size=0x764) addr:0x02016574 local
+__pformatter kind:function(arm,size=0x824) addr:0x02016cd8 local
 __StringWrite kind:function(arm,size=0x44) addr:0x020174fc
 vsnprintf kind:function(arm,size=0x68) addr:0x02017540
-func_020175a8 kind:function(arm,size=0x28) addr:0x020175a8
-func_020175d0 kind:function(arm,size=0x4f8) addr:0x020175d0
-__sformatter kind:function(arm,size=0xd54) addr:0x02017ac8
+snprintf kind:function(arm,size=0x28) addr:0x020175a8
+parse_format kind:function(arm,size=0x4f8) addr:0x020175d0 local
+__sformatter kind:function(arm,size=0xd54) addr:0x02017ac8 local
 __StringRead kind:function(arm,size=0x84) addr:0x0201881c
 vsscanf kind:function(arm,size=0x54) addr:0x020188a0
 sscanf kind:function(arm,size=0x28) addr:0x020188f4
@@ -806,13 +806,13 @@ __fwide kind:function(arm,size=0xc) addr:0x0201a900
 fwide kind:function(arm,size=0x74) addr:0x0201a90c
 wmemcpy kind:function(arm,size=0x10) addr:0x0201a980
 wmemchr kind:function(arm,size=0x28) addr:0x0201a990
-func_0201a9b8 kind:function(arm,size=0x578) addr:0x0201a9b8
-func_0201af30 kind:function(arm,size=0x250) addr:0x0201af30
-func_0201b180 kind:function(arm,size=0x300) addr:0x0201b180
-func_0201b480 kind:function(arm,size=0x398) addr:0x0201b480
-func_0201b818 kind:function(arm,size=0x124) addr:0x0201b818
-func_0201b93c kind:function(arm,size=0x64c) addr:0x0201b93c
-__wpformatter kind:function(arm,size=0x8f0) addr:0x0201bf88
+parse_format kind:function(arm,size=0x578) addr:0x0201a9b8 local
+long2str kind:function(arm,size=0x250) addr:0x0201af30 local
+longlong2str kind:function(arm,size=0x300) addr:0x0201b180 local
+double2hex kind:function(arm,size=0x398) addr:0x0201b480 local
+round_decimal kind:function(arm,size=0x124) addr:0x0201b818 local
+float2str kind:function(arm,size=0x64c) addr:0x0201b93c local
+__wpformatter kind:function(arm,size=0x8f0) addr:0x0201bf88 local
 __wStringWrite kind:function(arm,size=0x40) addr:0x0201c878
 swprintf kind:function(arm,size=0x28) addr:0x0201c8b8
 vswprintf kind:function(arm,size=0x70) addr:0x0201c8e0
@@ -850,7 +850,7 @@ scalbn kind:function(arm,size=0x2c) addr:0x0201f4dc
 func_0201f508 kind:function(arm,size=0x3c) addr:0x0201f508
 func_0201f544 kind:function(arm,size=0x4c) addr:0x0201f544
 _dadd kind:function(arm,size=0x318) addr:0x0201f590
-func_0201f8a8 kind:function(arm,size=0x104) addr:0x0201f8a8
+_d2f kind:function(arm,size=0x104) addr:0x0201f8a8
 _dfix kind:function(arm,size=0x4c) addr:0x0201f9ac
 func_0201f9f8 kind:function(arm,size=0x8c) addr:0x0201f9f8
 _dflt kind:function(arm,size=0x40) addr:0x0201fa84
@@ -862,15 +862,15 @@ func_020203cc kind:function(arm,size=0x21c) addr:0x020203cc
 func_020205e8 kind:function(arm,size=0x8) addr:0x020205e8
 _dgr kind:function(arm,size=0x98) addr:0x020205f0
 _dleq kind:function(arm,size=0xa4) addr:0x02020688
-func_0202072c kind:function(arm,size=0x9c) addr:0x0202072c
-func_020207c8 kind:function(arm,size=0x8c) addr:0x020207c8
+_dls kind:function(arm,size=0x9c) addr:0x0202072c
+_deq kind:function(arm,size=0x8c) addr:0x020207c8
 func_02020854 kind:function(arm,size=0x8c) addr:0x02020854
 _f2d kind:function(arm,size=0x84) addr:0x020208e0
 func_02020970 kind:function(arm,size=0x278) addr:0x02020970
 _ll_mod kind:function(arm,size=0x1c0) addr:0x02020be8
 .L_02020bf8 kind:label(arm) addr:0x02020bf8
 _ll_udiv kind:function(arm,size=0x48) addr:0x02020da8
-.L_02020db4 kind:label(arm) addr:0x02020db4
+_ull_mod kind:label(arm) addr:0x02020db4
 _s32_div_f kind:function(arm,size=0x20c) addr:0x02020df0
 _u32_div_f kind:function(arm,size=0x1e4) addr:0x02020ffc
 .L_02021004 kind:label(arm) addr:0x02021004
@@ -879,9 +879,9 @@ func_0202173c kind:function(arm,size=0x4) addr:0x0202173c
 func_02021740 kind:function(arm,size=0x14) addr:0x02021740
 func_02021754 kind:function(arm,size=0x14) addr:0x02021754
 func_02021768 kind:function(arm,size=0x10) addr:0x02021768
-func_02021778 kind:function(arm,size=0x50) addr:0x02021778
-func_020217c8 kind:function(arm,size=0x34) addr:0x020217c8
-func_020217fc kind:function(arm,size=0x8) addr:0x020217fc
+__read_console kind:function(arm,size=0x50) addr:0x02021778
+__write_console kind:function(arm,size=0x34) addr:0x020217c8
+__close_console kind:function(arm,size=0x8) addr:0x020217fc
 func_02021804 kind:function(arm,size=0x8c) addr:0x02021804
 func_02021890 kind:function(arm,size=0x8c) addr:0x02021890
 func_0202191c kind:function(arm,size=0x64) addr:0x0202191c
@@ -898,7 +898,7 @@ func_02022af0 kind:function(arm,size=0x5c) addr:0x02022af0
 func_02022b4c kind:function(arm,size=0xec) addr:0x02022b4c
 func_02022c38 kind:function(arm,size=0x28) addr:0x02022c38
 func_02022c60 kind:function(arm,size=0x2c) addr:0x02022c60
-func_02022c8c kind:function(arm,size=0x44) addr:0x02022c8c
+__destroy_global_chain kind:function(arm,size=0x44) addr:0x02022c8c
 func_02022cd0 kind:function(arm,size=0x48) addr:0x02022cd0
 func_02022d18 kind:function(arm,size=0x14) addr:0x02022d18
 __cxa_vec_ctor kind:function(arm,size=0xb0) addr:0x02022d2c
@@ -915,7 +915,7 @@ __FindExceptionTable kind:function(arm,size=0x20) addr:0x02023134
 func_02023154 kind:function(arm,size=0x30) addr:0x02023154
 func_02023184 kind:function(arm,size=0x30) addr:0x02023184
 func_020231b4 kind:function(arm,size=0x4c) addr:0x020231b4
-func_02023200 kind:function(arm,size=0xc) addr:0x02023200
+_ExitProcess kind:function(arm,size=0xc) addr:0x02023200
 func_0202320c kind:function(arm,size=0x70) addr:0x0202320c
 func_0202327c kind:function(arm,size=0x5cc) addr:0x0202327c
 func_02023848 kind:function(arm,size=0x1b8) addr:0x02023848
@@ -3225,37 +3225,37 @@ func_02082d78 kind:function(arm,size=0xa0) addr:0x02082d78
 func_02082e18 kind:function(arm,size=0x58) addr:0x02082e18
 func_02082e70 kind:function(arm,size=0x1c) addr:0x02082e70
 func_02082e8c kind:function(arm,size=0x20) addr:0x02082e8c
-func_02082eac kind:function(arm,size=0x108) addr:0x02082eac
-func_02082fb4 kind:function(arm,size=0xc4) addr:0x02082fb4
+_ZN12SoftKeyboardC1Ev kind:function(arm,size=0x108) addr:0x02082eac
+_ZN12SoftKeyboard14SetArchiveNameEPKc kind:function(arm,size=0xc4) addr:0x02082fb4
 func_02083078 kind:function(arm,size=0x44) addr:0x02083078
 func_020830bc kind:function(arm,size=0x6c) addr:0x020830bc
 func_02083128 kind:function(arm,size=0x7c) addr:0x02083128
-func_020831a4 kind:function(arm,size=0x34) addr:0x020831a4
-func_020831d8 kind:function(arm,size=0x2c) addr:0x020831d8
-func_02083204 kind:function(arm,size=0x40) addr:0x02083204
+_ZN12SoftKeyboard16TransferCharDataEv kind:function(arm,size=0x34) addr:0x020831a4
+_ZN12SoftKeyboard14TransferScreenEv kind:function(arm,size=0x2c) addr:0x020831d8
+_ZN12SoftKeyboard13LoadBgPaletteEi kind:function(arm,size=0x40) addr:0x02083204
 func_02083244 kind:function(arm,size=0x44) addr:0x02083244
 func_02083288 kind:function(arm,size=0x14) addr:0x02083288
-func_0208329c kind:function(arm,size=0x34) addr:0x0208329c
+_ZN14KeyboardButtonC1Ev kind:function(arm,size=0x34) addr:0x0208329c
 func_020832d0 kind:function(arm,size=0x14) addr:0x020832d0
 func_020832e4 kind:function(arm,size=0x24) addr:0x020832e4
-func_02083308 kind:function(arm,size=0x170) addr:0x02083308
-func_02083478 kind:function(arm,size=0x7c) addr:0x02083478
-func_020834f4 kind:function(arm,size=0x114) addr:0x020834f4
-func_02083608 kind:function(arm,size=0xc) addr:0x02083608
-func_02083614 kind:function(arm,size=0x6c) addr:0x02083614
-func_02083680 kind:function(arm,size=0x18) addr:0x02083680
-func_02083698 kind:function(arm,size=0x38) addr:0x02083698
-func_020836d0 kind:function(arm,size=0x34) addr:0x020836d0
-func_02083704 kind:function(arm,size=0x3c) addr:0x02083704
-func_02083740 kind:function(arm,size=0x68) addr:0x02083740
+_ZN14KeyboardButton6UpdateEv kind:function(arm,size=0x170) addr:0x02083308
+_ZN14KeyboardButton4DrawEv kind:function(arm,size=0x7c) addr:0x02083478
+_ZN14KeyboardButton8InitTextEP11MessageFilei kind:function(arm,size=0x114) addr:0x020834f4
+_ZN14KeyboardButton10SetVisibleEi kind:function(arm,size=0xc) addr:0x02083608
+_ZN14KeyboardButton8ContainsE11ScreenPoint kind:function(arm,size=0x6c) addr:0x02083614
+_ZN14KeyboardButton9SetSoundsEiiii kind:function(arm,size=0x18) addr:0x02083680
+_ZN14KeyboardButton10SetMessageEm kind:function(arm,size=0x38) addr:0x02083698
+_ZN12SoftKeyboard15SetButtonSoundsEiiiii kind:function(arm,size=0x34) addr:0x020836d0
+_ZN12SoftKeyboard15InitButtonTextsEP11MessageFilei kind:function(arm,size=0x3c) addr:0x02083704
+_ZN12SoftKeyboard18GetButtonCharCountEv kind:function(arm,size=0x68) addr:0x02083740
 func_020837a8 kind:function(arm,size=0x4c) addr:0x020837a8
 func_020837f4 kind:function(arm,size=0x38) addr:0x020837f4
 func_0208382c kind:function(arm,size=0x3c) addr:0x0208382c
-func_02083868 kind:function(arm,size=0xc) addr:0x02083868
-func_02083874 kind:function(arm,size=0x40) addr:0x02083874
-func_020838b4 kind:function(arm,size=0x40) addr:0x020838b4
-func_020838f4 kind:function(arm,size=0x2d8) addr:0x020838f4
-func_02083bcc kind:function(arm,size=0x64) addr:0x02083bcc
+_ZN12SoftKeyboard14SetObjResourceEs kind:function(arm,size=0xc) addr:0x02083868
+_ZN12SoftKeyboard12LoadObjCellsEi kind:function(arm,size=0x40) addr:0x02083874
+_ZN12SoftKeyboard14LoadObjPaletteEi kind:function(arm,size=0x40) addr:0x020838b4
+_ZN12SoftKeyboard11InitSpritesEv kind:function(arm,size=0x2d8) addr:0x020838f4
+_ZN12SoftKeyboard4DrawEv kind:function(arm,size=0x64) addr:0x02083bcc
 func_02083c30 kind:function(arm,size=0x24) addr:0x02083c30
 func_02083c54 kind:function(arm,size=0x104) addr:0x02083c54
 func_02083d58 kind:function(arm,size=0x6c) addr:0x02083d58
@@ -4206,7 +4206,7 @@ __sinit_020b06cc kind:function(arm,size=0x14) addr:0x020b06cc
 __sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
 __sinit_MiiListMenuScene.cpp kind:function(arm,size=0x88) addr:0x020b06f4 local
 __sinit_MiiListScene.cpp kind:function(arm,size=0x64) addr:0x020b077c local
-__sinit_020b07e0 kind:function(arm,size=0x30) addr:0x020b07e0
+__sinit_KeyboardCore.cpp kind:function(arm,size=0x30) addr:0x020b07e0 local
 FX_SinCosTable_ kind:data(any) addr:0x020b0810
 data_020b1410 kind:data(any) addr:0x020b1410
 data_020b1810 kind:data(any) addr:0x020b1810
@@ -4223,13 +4223,13 @@ gText_Abu kind:data(any) addr:0x020b5478
 data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
 data_020b5534 kind:data(any) addr:0x020b5534
-data_020b555c kind:data(any) addr:0x020b555c
+__upper_mapC kind:data(any) addr:0x020b555c
 __ctype_mapC kind:data(any) addr:0x020b55dc
-data_020b56dc kind:data(any) addr:0x020b56dc
+@635 kind:data(any) addr:0x020b56dc local
 gStr_NAN kind:data(any) addr:0x020b5704
 data_020b5709 kind:data(any) addr:0x020b5709
 data_020b5714 kind:data(any) addr:0x020b5714
-data_020b5814 kind:data(any) addr:0x020b5814
+__wctype_mapC kind:data(any) addr:0x020b5814
 dp_h kind:data(any) addr:0x020b5914 local
 bp kind:data(any) addr:0x020b5924 local
 dp_l kind:data(any) addr:0x020b5934 local
@@ -4369,27 +4369,12 @@ data_020b6524 kind:data(any) addr:0x020b6524
 data_020b6530 kind:data(any) addr:0x020b6530
 data_020b6540 kind:data(any) addr:0x020b6540
 data_020b6558 kind:data(any) addr:0x020b6558
-data_020b655c kind:data(any) addr:0x020b655c
-data_020b6560 kind:data(any) addr:0x020b6560
 data_020b65a0 kind:data(any) addr:0x020b65a0
-gText_Ri kind:data(any) addr:0x020b65a4
-gText_Ku kind:data(any) addr:0x020b65a8
 data_020b65e8 kind:data(any) addr:0x020b65e8
-data_020b65ec kind:data(any) addr:0x020b65ec
-data_020b65f0 kind:data(any) addr:0x020b65f0
-gStr_x kind:data(any) addr:0x020b6630
-gStr_0 kind:data(any) addr:0x020b6634
-data_020b6638 kind:data(any) addr:0x020b6638
+data_020b6630 kind:data(any) addr:0x020b6630
 data_020b6678 kind:data(any) addr:0x020b6678
-data_020b667c kind:data(any) addr:0x020b667c
-data_020b6680 kind:data(any) addr:0x020b6680
-gText_Ku_2 kind:data(any) addr:0x020b66d8
-gStr_CommercialAt kind:data(any) addr:0x020b66dc
-gStr_0_2 kind:data(any) addr:0x020b66e0
+data_020b66d8 kind:data(any) addr:0x020b66d8
 data_020b676c kind:data(any) addr:0x020b676c
-data_020b6770 kind:data(any) addr:0x020b6770
-data_020b6774 kind:data(any) addr:0x020b6774
-data_020b6778 kind:data(any) addr:0x020b6778
 data_020b67ac kind:data(any) addr:0x020b67ac
 data_020b6818 kind:data(any) addr:0x020b6818
 data_020b6884 kind:data(any) addr:0x020b6884
@@ -4414,23 +4399,25 @@ data_020b7284 kind:data(any) addr:0x020b7284
 data_020b75e4 kind:data(any) addr:0x020b75e4
 data_020b7af4 kind:data(any) addr:0x020b7af4
 data_020b7b04 kind:data(any) addr:0x020b7b04
-data_020b7b06 kind:data(any) addr:0x020b7b06
-data_020b7b08 kind:data(any) addr:0x020b7b08
 data_020b7b64 kind:data(any) addr:0x020b7b64
 data_020b7b8c kind:data(any) addr:0x020b7b8c
 data_020b7be4 kind:data(any) addr:0x020b7be4 local
 sDaysInMonth kind:data(any) addr:0x020b7e1c local
 sDefaultMiis kind:data(any) addr:0x020b7e50 local
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
-data_020b7eec kind:data(any) addr:0x020b7eec
-data_020b7efc kind:data(any) addr:0x020b7efc
-data_020b7f08 kind:data(any) addr:0x020b7f08
-data_020b7f44 kind:data(any) addr:0x020b7f44
-gText_Yu kind:data(any) addr:0x020b7f48
-data_020b7f54 kind:data(any) addr:0x020b7f54
-data_020b7f64 kind:data(any) addr:0x020b7f64
-data_020b7f78 kind:data(any) addr:0x020b7f78
-gStr_F kind:data(any) addr:0x020b7fa0
+space$12976 kind:data(any) addr:0x020b7eec local
+blank$12800 kind:data(any) addr:0x020b7ef0 local
+width$12798 kind:data(any) addr:0x020b7ef4 local
+height$12802 kind:data(any) addr:0x020b7ef8 local
+@13178 kind:data(any) addr:0x020b7efc local
+@12851 kind:data(any) addr:0x020b7f08 local
+@12853 kind:data(any) addr:0x020b7f1c local
+@12849 kind:data(any) addr:0x020b7f30 local
+sButtonPositions kind:data(any) addr:0x020b7f44 local
+sButtonRect kind:data(any) addr:0x020b7f54 local
+@13399 kind:data(any) addr:0x020b7f64 local
+sTabAreas kind:data(any) addr:0x020b7f78 local
+sLayoutPositions kind:data(any) addr:0x020b7fa0 local
 ShttsTextPresets kind:data(any) addr:0x020b7fc8
 data_020b98a0 kind:data(any) addr:0x020b98a0
 ShttsPitchPeriodCoarse kind:data(any) addr:0x020b9aa0
@@ -4839,7 +4826,7 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
 .p__sinit_MiiListMenuScene.cpp kind:data(word) addr:0x020fc4f0 local
 .p__sinit_MiiListScene.cpp kind:data(word) addr:0x020fc4f4 local
-.p__sinit_020b07e0 kind:data(word) addr:0x020fc4f8
+.p__sinit_KeyboardCore.cpp kind:data(word) addr:0x020fc4f8 local
 data_020fc500 kind:data(any) addr:0x020fc500
 data_020fc504 kind:data(any) addr:0x020fc504
 gStr_NFL kind:data(any) addr:0x020fc510
@@ -4884,8 +4871,6 @@ data_020fc7cc kind:data(any) addr:0x020fc7cc
 sjis2unicode_array kind:data(any) addr:0x020fc7d0
 unicode2sjis_array kind:data(any) addr:0x021021d0
 __files kind:data(any) addr:0x0210f09c
-data_0210f0e8 kind:data(any) addr:0x0210f0e8
-data_0210f134 kind:data(any) addr:0x0210f134
 data_0210f180 kind:data(any) addr:0x0210f180
 __float_nan kind:data(any) addr:0x0210f184
 data_0210f188 kind:data(any) addr:0x0210f188
@@ -4896,34 +4881,34 @@ data_0210f1a0 kind:data(any) addr:0x0210f1a0
 gStr__3 kind:data(any) addr:0x0210f1a8
 data_0210f1b8 kind:data(any) addr:0x0210f1b8
 gStr_m_d_y kind:data(any) addr:0x0210f1d8
-data_0210f1e4 kind:data(any) addr:0x0210f1e4
+_current_locale kind:data(any) addr:0x0210f1e4
 gStr_I_M_S_p kind:data(any) addr:0x0210f1f0
 gStr_a_b_e_T_Y kind:data(any) addr:0x0210f1fc
 gStr_Sun_Sunday_Mon_Monday_Tue_Tuesday_Wed_We kind:data(any) addr:0x0210f20c
 gStr_Jan_January_Feb_February_Mar_March_Apr_A kind:data(any) addr:0x0210f264
 data_0210f2ec kind:data(any) addr:0x0210f2ec
-gStr_0x0p0 kind:data(any) addr:0x0210f3ac
-gStr_INF kind:data(any) addr:0x0210f3b4
-gStr_inf kind:data(any) addr:0x0210f3bc
-gStr_INF_2 kind:data(any) addr:0x0210f3c4
-gStr_inf_2 kind:data(any) addr:0x0210f3c8
-gStr_NAN_2 kind:data(any) addr:0x0210f3cc
-gStr_nan kind:data(any) addr:0x0210f3d4
-gStr_NAN_3 kind:data(any) addr:0x0210f3dc
-gStr_nan_2 kind:data(any) addr:0x0210f3e0
-data_0210f3e4 kind:data(any) addr:0x0210f3e4
-data_0210f3e8 kind:data(any) addr:0x0210f3e8
-gStr_0_4 kind:data(any) addr:0x0210f3ec
-gStr_HyphenMinus kind:data(any) addr:0x0210f3f8
-gStr_HyphenMinus_2 kind:data(any) addr:0x0210f404
-gStr_I kind:data(any) addr:0x0210f410
-gStr_i kind:data(any) addr:0x0210f418
-gStr_HyphenMinus_3 kind:data(any) addr:0x0210f420
-gStr_HyphenMinus_4 kind:data(any) addr:0x0210f42c
-gStr_N kind:data(any) addr:0x0210f438
-gStr_n kind:data(any) addr:0x0210f440
-data_0210f448 kind:data(any) addr:0x0210f448
-data_0210f44c kind:data(any) addr:0x0210f44c
+@2363 kind:data(any) addr:0x0210f3ac local
+@2364 kind:data(any) addr:0x0210f3b4 local
+@2365 kind:data(any) addr:0x0210f3bc local
+@2366 kind:data(any) addr:0x0210f3c4 local
+@2367 kind:data(any) addr:0x0210f3c8 local
+@2368 kind:data(any) addr:0x0210f3cc local
+@2369 kind:data(any) addr:0x0210f3d4 local
+@2370 kind:data(any) addr:0x0210f3dc local
+@2371 kind:data(any) addr:0x0210f3e0 local
+@2768 kind:data(any) addr:0x0210f3e4 local
+@2769 kind:data(any) addr:0x0210f3e8 local
+@1921 kind:data(any) addr:0x0210f3ec local
+@1922 kind:data(any) addr:0x0210f3f8 local
+@1923 kind:data(any) addr:0x0210f404 local
+@1924 kind:data(any) addr:0x0210f410 local
+@1925 kind:data(any) addr:0x0210f418 local
+@1926 kind:data(any) addr:0x0210f420 local
+@1927 kind:data(any) addr:0x0210f42c local
+@1928 kind:data(any) addr:0x0210f438 local
+@1929 kind:data(any) addr:0x0210f440 local
+@2320 kind:data(any) addr:0x0210f448 local
+@2321 kind:data(any) addr:0x0210f44c local
 data_0210f450 kind:data(any) addr:0x0210f450
 gStr_5421010862427522170037264004349708557128 kind:data(any) addr:0x0210f490
 gStr_11102230246251565404236316680908203125 kind:data(any) addr:0x0210f4c0
@@ -5505,39 +5490,38 @@ data_0211216c kind:data(any) addr:0x0211216c
 data_021121b4 kind:data(any) addr:0x021121b4
 data_0211220c kind:data(any) addr:0x0211220c
 data_02112214 kind:data(any) addr:0x02112214
-data_02112220 kind:data(any) addr:0x02112220
-data_0211227c kind:data(any) addr:0x0211227c
-data_021122d8 kind:data(any) addr:0x021122d8
-data_02112334 kind:data(any) addr:0x02112334
-data_021123a4 kind:data(any) addr:0x021123a4
-data_0211240c kind:data(any) addr:0x0211240c
-data_02112474 kind:data(any) addr:0x02112474
-data_021124e4 kind:data(any) addr:0x021124e4
-data_0211254c kind:data(any) addr:0x0211254c
-data_021126d4 kind:data(any) addr:0x021126d4
-data_02112884 kind:data(any) addr:0x02112884
-data_02112a54 kind:data(any) addr:0x02112a54
-data_02112bfc kind:data(any) addr:0x02112bfc
-data_02112dc4 kind:data(any) addr:0x02112dc4
-gStr_hY kind:data(any) addr:0x02112dec
-data_02112dfc kind:data(any) addr:0x02112dfc
-data_02112e0c kind:data(any) addr:0x02112e0c
-data_02112e1c kind:data(any) addr:0x02112e1c
-data_02112e2c kind:data(any) addr:0x02112e2c
-data_02112e3c kind:data(any) addr:0x02112e3c
-gText_PaPiPuPePoPapipupepo kind:data(any) addr:0x02112e4c
-gStr_A0C0E0G0I0 kind:data(any) addr:0x02112ec4
-gText_AiUeOkakiKukeKoSaShiSuSeSoTachiTsuteToHa kind:data(any) addr:0x02112f3c
-gText_GaGiGuGeGozaJiZuZeZoDaDjiDzuDeDobaBiBuBe kind:data(any) addr:0x02112fb4
-gStr_xxx_fs_chat_keyboard_jp_NCGR kind:data(any) addr:0x0211302c
-gStr_xxx_fs_chat_keyboard_NCGR kind:data(any) addr:0x0211304c
-gStr_xxx_fs_chat_keyboard_euro_NCGR kind:data(any) addr:0x02113068
-gStr_xxx_fs_chat_keyboard_sign_NCGR kind:data(any) addr:0x02113088
-gStr_xxx_fs_chat_keyboard_picto_NCGR kind:data(any) addr:0x021130a8
-gStr_xxx_fs_keyboardColor_ncl kind:data(any) addr:0x021130cc
-gStr_xxx_obj_keyboard_nce kind:data(any) addr:0x021130e8
-gStr_xxx_obj_chat_keyboard_ncg kind:data(any) addr:0x02113100
-gStr_xxx_keyboardColor_ncl kind:data(any) addr:0x0211311c
+KeyboardCharsQwertyUpper kind:data(any) addr:0x02112220
+KeyboardCharsQwertyLower kind:data(any) addr:0x0211227c
+KeyboardCharsQwertySymbols kind:data(any) addr:0x021122d8
+KeyboardCharsEuro kind:data(any) addr:0x02112334
+KeyboardCharsHiragana kind:data(any) addr:0x021123a4
+KeyboardCharsKatakana kind:data(any) addr:0x0211240c
+KeyboardCharsPicto kind:data(any) addr:0x02112474
+KeyboardCharsSign kind:data(any) addr:0x021124e4
+KeyboardKeysEnglish kind:data(any) addr:0x0211254c
+KeyboardKeysEuro kind:data(any) addr:0x021126d4
+KeyboardKeysKana kind:data(any) addr:0x02112884
+KeyboardKeysSign kind:data(any) addr:0x02112a54
+KeyboardKeysPicto kind:data(any) addr:0x02112bfc
+sKanaPairDakuten kind:data(any) addr:0x02112dc4 local
+sKanaPairHandakuten kind:data(any) addr:0x02112dcc local
+sKanaPairSmall kind:data(any) addr:0x02112dd4 local
+sKanaTables kind:data(any) addr:0x02112ddc local
+data_02112dec kind:data(any) addr:0x02112dec local
+sLayouts kind:data(any) addr:0x02112dfc local
+sKanaHandakuten kind:data(any) addr:0x02112e4c local
+sKanaSmall kind:data(any) addr:0x02112ec4 local
+sKanaPlain kind:data(any) addr:0x02112f3c local
+sKanaDakuten kind:data(any) addr:0x02112fb4 local
+@13621 kind:data(any) addr:0x0211302c local
+@13622 kind:data(any) addr:0x0211304c local
+@13623 kind:data(any) addr:0x02113068 local
+@13624 kind:data(any) addr:0x02113088 local
+@13625 kind:data(any) addr:0x021130a8 local
+@13626 kind:data(any) addr:0x021130cc local
+@13627 kind:data(any) addr:0x021130e8 local
+@13628 kind:data(any) addr:0x02113100 local
+@13629 kind:data(any) addr:0x0211311c local
 @8870 kind:data(any) addr:0x02113134 local
 @8863 kind:data(any) addr:0x02113158 local
 gStr_N_2 kind:data(any) addr:0x02113360
@@ -6283,17 +6267,20 @@ data_0211cae4 kind:bss addr:0x0211cae4
 data_0211cba0 kind:bss addr:0x0211cba0
 ctrdgi_task_work kind:bss addr:0x0211cc88
 ctrdgi_task_list kind:bss addr:0x0211cc8c
-ctrdg_task_stack kind:bss addr:0x0211d0b0
-data_0211d0c0 kind:bss addr:0x0211d0c0
-data_0211d1c0 kind:bss addr:0x0211d1c0
-data_0211d1e4 kind:bss addr:0x0211d1e4
-data_0211d208 kind:bss addr:0x0211d208
-data_0211d2b0 kind:bss addr:0x0211d2b0
-data_0211d2e0 kind:bss addr:0x0211d2e0
-data_0211d3e0 kind:bss addr:0x0211d3e0
-data_0211d4e0 kind:bss addr:0x0211d4e0
+ctrdg_task_stack kind:bss addr:0x0211ccb0
+__console_exit kind:bss addr:0x0211d0b0
+__stdio_exit kind:bss addr:0x0211d0b4
+__atexit_curr_func kind:bss addr:0x0211d0b8 local
+__aborting kind:bss addr:0x0211d0bc
+__atexit_funcs kind:bss addr:0x0211d0c0 local
+__cs_id kind:bss addr:0x0211d1c0
+__cs_ref kind:bss addr:0x0211d1e4
+__cs kind:bss addr:0x0211d208
+stderr_buff kind:bss addr:0x0211d2e0 local
+stdout_buff kind:bss addr:0x0211d3e0 local
+stdin_buff kind:bss addr:0x0211d4e0 local
 errno kind:bss addr:0x0211d5e0
-data_0211d5e4 kind:bss addr:0x0211d5e4
+signal_funcs kind:bss addr:0x0211d5e4
 __global_destructor_chain kind:bss addr:0x0211d600
 data_0211d604 kind:bss addr:0x0211d604
 data_0211d6fc kind:bss addr:0x0211d6fc
@@ -6564,9 +6551,13 @@ data_02148688 kind:bss addr:0x02148688
 data_0214868c kind:bss addr:0x0214868c
 data_02148690 kind:bss addr:0x02148690
 data_021486b8 kind:bss addr:0x021486b8
-data_021486c4 kind:bss addr:0x021486c4
-data_021486f0 kind:bss addr:0x021486f0
-data_02148710 kind:bss addr:0x02148710
+sCharData kind:bss addr:0x021486c4 local
+sOriginX kind:bss addr:0x021486c8 local
+sInitialized kind:bss addr:0x021486cc local
+sBaseCharData kind:bss addr:0x021486d0 local
+sOriginY kind:bss addr:0x021486d4 local
+data_021486d8 kind:bss addr:0x021486d8 local
+sKeyboard kind:bss addr:0x021486f0 local
 sInstance kind:bss(size=0x4) addr:0x02148740 local
 sStreamBuffer kind:bss(size=0x12c0) addr:0x02148760 local
 data_02149a20 kind:bss addr:0x02149a20

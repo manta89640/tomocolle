@@ -72,8 +72,8 @@ _ZN11TushinScene20NextPageAfterReceiveEv kind:function(arm,size=0x30) addr:0x021
 _ZN11TushinScene13ReceiveWiiMiiEv kind:function(arm,size=0x390) addr:0x02152014
 func_ov109_021523a4 kind:function(arm,size=0xb8) addr:0x021523a4
 func_ov109_0215245c kind:function(arm,size=0x4) addr:0x0215245c
-func_ov109_02152460 kind:function(arm,size=0x48) addr:0x02152460
-func_ov109_021524a8 kind:function(arm,size=0x50) addr:0x021524a8
+_ZN11TushinSceneD1Ev kind:function(arm,size=0x48) addr:0x02152460
+_ZN11TushinSceneD0Ev kind:function(arm,size=0x50) addr:0x021524a8
 sYesNoSequences kind:data(any) addr:0x021524f8 local
 sYesNoSequences2 kind:data(any) addr:0x021524fc local
 sListButtonSequences2 kind:data(any) addr:0x02152500 local

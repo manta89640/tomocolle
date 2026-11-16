@@ -278,6 +278,1960 @@ void func_0206a99c(u16 *palette, int index) {
     palette[15] = 0;
 }
 
+// The glasses
+int func_0206aaec(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->glassesType;
+    int color = mii->glassesColor;
+
+    if (params[13] != type || (obj->unk1A4[6].state >= 1 && obj->unk1A4[6].state <= 6)) {
+        obj->unk1A4[6].state = 0;
+        obj->unk1A4[6].value = type;
+    }
+    if (color != params[12] || (obj->unk228[5].state >= 1 && obj->unk228[5].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[5].value = color;
+            obj->unk228[5].state = 0;
+        } else {
+            obj->unk1A4[6].state = 0;
+            obj->unk1A4[6].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0x2880;
+    } else {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0xA10;
+        ctx->unk2C[4].unk4 = obj->unkD8 + 0x90;
+    }
+    return 0;
+}
+
+// The beard
+int func_0206abb4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->beardType;
+    int color = mii->beardColor;
+
+    if (params[15] != type || (obj->unk1A4[7].state >= 1 && obj->unk1A4[7].state <= 6)) {
+        if (type < 2) {
+            ctx->unk2C[3].unk0 = obj->unk8;
+            obj->unk1A4[7].state = 7;
+        } else {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (color != params[14] || (obj->unk228[6].state >= 1 && obj->unk228[6].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[6].value = color;
+            obj->unk228[6].state = 0;
+        } else if (type >= 2) {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (type < 2) {
+        ctx->unk2C[3].unk0 = obj->unk8;
+        ctx->unk2C[3].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0x3880;
+    } else {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0xE10;
+        ctx->unk2C[3].unk4 = obj->unkD8 + 0xB0;
+    }
+    return 0;
+}
+
+// The hair
+int func_0206acc0(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->hairColor;
+
+    if ((params[3] != type || color != params[4]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+        (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+        if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+            type == 0x45 || type == 0x47) {
+            obj->unk1A4[9].state = 0;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = color;
+            }
+        } else if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].state = 7;
+            obj->unk228[8].state = 7;
+        }
+        if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].value = color;
+            }
+        }
+    }
+    if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+        type == 0x45 || type == 0x47) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x5080;
+            ctx->unk2C[2].unk4 = obj->unkC;
+        } else {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[2].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else {
+        ctx->unk2C[2].unk0 = obj->unk8;
+        ctx->unk2C[2].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The hair again, for the two types (0x22 and 0x39) that the other leaves alone
+int func_0206ae14(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->favoriteColor;
+
+    if (type == 0x22 || type == 0x39) {
+        if ((type != params[3] || color != params[0]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+            (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+            obj->unk1A4[9].state = 0;
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 == 7) {
+                obj->unk228[8].state = 7;
+            } else {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = type;
+            }
+        }
+    }
+    if (type == 0x22 || type == 0x39) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x5080;
+        } else {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[5].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[5].unk0 = obj->unk8;
+    } else {
+        ctx->unk2C[5].unk0 = obj->unk8;
+        ctx->unk2C[5].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The face's texture
+int func_0206af1c(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int texture = mii->faceTexture;
+    int color = mii->faceColor;
+
+    if (params[1] != texture || (obj->unk1A4[8].state >= 1 && obj->unk1A4[8].state <= 6)) {
+        obj->unk1A4[8].state = texture == 0 ? 7 : 0;
+        obj->unk1A4[8].value = texture;
+    }
+    if (color != params[2] || (obj->unk228[7].state >= 1 && obj->unk228[7].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[7].value = color;
+            obj->unk228[7].state = 0;
+        } else if (texture != 0) {
+            obj->unk1A4[8].state = 0;
+            obj->unk1A4[8].value = texture;
+        }
+    }
+    if (texture == 0) {
+        ctx->unk2C[1].unk0 = obj->unk8;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x4080;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x1010;
+        ctx->unk2C[1].unk4 = obj->unkD8 + 0xD0;
+    }
+    return 0;
+}
+
+// The nose
+int func_0206b024(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->noseType;
+
+    if (params[9] != type || (obj->unk1A4[10].state >= 1 && obj->unk1A4[10].state <= 6) ||
+        (obj->unk228[9].state >= 1 && obj->unk228[9].state <= 6)) {
+        obj->unk1A4[10].state = 0;
+        obj->unk1A4[10].value = type;
+        if (obj->unk90 == 7) {
+            obj->unk228[9].state = 7;
+        } else {
+            obj->unk228[9].state = 0;
+            obj->unk228[9].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x5880;
+        ctx->unk2C[6].unk4 = obj->unkD8;
+    } else {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x1610;
+        ctx->unk2C[6].unk4 = obj->unkD8 + 0x110;
+    }
+    return 0;
+}
+
+// The beard's mesh
+int func_0206b0d8(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    u32 type = ctx->unk1CC->beardType;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(0, type);
+    s = type > 1 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = type > 1 ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = type == 1 ? GX_TEXFMT_PLTT4 : GX_TEXFMT_PLTT16;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_TRNS,
+                      ctx->unk2C[3].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[3].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[1].x;
+    position.y = ctx->unk0[1].y;
+    position.z = ctx->unk0[1].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (type < 2) {
+            G3C_TexCoord(&ctx->unk64, 0, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (type > 1) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The face's mesh, and the three positions the other meshes are placed at
+int func_0206b3f4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(4, mii->faceType);
+    s = mii->faceTexture != 0 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = mii->faceTexture != 0 ? GX_TEXSIZE_T64 : GX_TEXSIZE_T8;
+    ctx->unk0[0].x = func_02069c9c(&stream);
+    ctx->unk0[0].y = func_02069c9c(&stream);
+    ctx->unk0[0].z = func_02069c9c(&stream);
+    ctx->unk0[1].x = func_02069c9c(&stream);
+    ctx->unk0[1].y = func_02069c9c(&stream);
+    ctx->unk0[1].z = func_02069c9c(&stream);
+    ctx->unk0[2].x = func_02069c9c(&stream);
+    ctx->unk0[2].y = func_02069c9c(&stream);
+    ctx->unk0[2].z = func_02069c9c(&stream);
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = mii->faceTexture != 0 ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[1].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[1].unk4, format);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (mii->faceTexture == 0) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (mii->faceTexture != 0) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            }
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    return 1;
+}
+
+// The hair's mesh
+#pragma optimization_level 2
+int func_0206b740(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    stream = func_0206cf6c(0x12, mii->hairType);
+    bald = mii->hairType == 0x22 || mii->hairType == 0x39;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[1].cmd = NULL;
+    obj->unk94[1].param = NULL;
+    obj->unk94[1].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[1].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[1].param = ctx->unk64.curr_param;
+    obj->unk94[1].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[5].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[5].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The hair's other mesh, for the types with a texture of their own
+#pragma optimization_level 2
+int func_0206bb24(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    int type;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    type = mii->hairType;
+    stream = func_0206cf6c(9, type);
+    bald = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+           type == 0x45 || type == 0x47;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[0].cmd = NULL;
+    obj->unk94[0].param = NULL;
+    obj->unk94[0].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[0].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[0].param = ctx->unk64.curr_param;
+    obj->unk94[0].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_NONE,
+                      type == 0x1D ? GX_TEXPLTTCOLOR0_TRNS : GX_TEXPLTTCOLOR0_USE, ctx->unk2C[2].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[2].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The hair's third mesh, untextured
+#pragma optimization_level 2
+int func_0206bfa4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+
+    stream = func_0206cf6c(6, mii->hairType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
+    obj->unk94[2].cmd = NULL;
+    obj->unk94[2].param = NULL;
+    obj->unk94[2].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    polygons = func_02069bf4(&stream);
+    obj->unk94[2].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[2].param = ctx->unk64.curr_param;
+    obj->unk94[2].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+                      GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, obj->unkC, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The glasses' mesh
+int func_0206c2f8(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(7, 0);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
+    y0 = (11 - mii->glassesY) * 114 + 387;
+    scale = (mii->glassesScale - 4) * 633 + 3987;
+    obj->unk94[3].cmd = NULL;
+    obj->unk94[3].param = NULL;
+    obj->unk94[3].unk8 = 0;
+    if (mii->glassesType == 0) {
+        return 0;
+    }
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    obj->unk94[3].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[3].param = ctx->unk64.curr_param;
+    obj->unk94[3].unk8 = 0;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, GX_CULL_NONE, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S32, GX_TEXSIZE_T64, GX_TEXREPEAT_S, GX_TEXFLIP_S,
+                      GX_TEXPLTTCOLOR0_TRNS, ctx->unk2C[4].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[4].unk4, GX_TEXFMT_PLTT16);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z + 0xA3;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The nose's mesh
+int func_0206c65c(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(0x10, mii->noseType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
+    y0 = (mii->noseY - 8) * -114 + 32;
+    scale = (mii->noseScale - 4) * 685 + 4377;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S32, GX_TEXSIZE_T64, GX_TEXREPEAT_S, GX_TEXFLIP_S,
+                      GX_TEXPLTTCOLOR0_TRNS, ctx->unk2C[6].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[6].unk4, GX_TEXFMT_PLTT16);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The nose's other mesh, untextured
+int func_0206c964(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+
+    stream = func_0206cf6c(0xF, mii->noseType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
+    y0 = (mii->noseY - 8) * -114 + 32;
+    scale = (mii->noseScale - 4) * 685 + 4377;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    polygons = func_02069bf4(&stream);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+                      GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, obj->unkC, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            func_020743e4(obj, &normal, (const VecFx16 *)&normals[func_02069bf4(&stream) * 3]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+extern const u16 data_020b6524[];
+extern const u16 data_020b6530[];
+extern const u16 data_020b6540[];
+
+void func_0206cc30(u16 *palette) {
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        palette[i] = 0x5500;
+        palette[i + 4] = 0xFFAA;
+    }
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cc6c(u16 *palette, const s16 *params) {
+    palette[0] = data_020b6530[params[4]];
+    palette[1] = data_020b6524[params[2]];
+    palette[2] = data_020b6530[params[14]];
+    palette[3] = data_020b6540[params[0]];
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cd9c(u16 *palette, const s16 *params) {
+    int i;
+    int j;
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[4]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6524[params[2]];
+        }
+    }
+    for (i = 4; i < 8; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[14]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6540[params[0]];
+        }
+    }
+    DC_FlushRange(palette, 0x80);
+}
+
+int func_0206ccd4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6) ||
+        (obj->unk228[0].state >= 1 && obj->unk228[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+        obj->unk228[0].state = 0;
+        obj->unk228[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unkC = obj->unkD8;
+    return 0;
+}
+
+int func_0206cea8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unk228[0].state = 7;
+    return 0;
+}
+
+int func_0206cf48(NFLMakeCtx *ctx) {
+    if (ctx->unk1C8->unk90 == 7) {
+        return func_0206cea8(ctx);
+    }
+    return func_0206ccd4(ctx);
+}
+
+// The stream of item index of category in the library's resource
+const u8 *func_0206cf6c(int category, u32 index) {
+    const u8 *header = data_02145360->unk64;
+    const u8 *items;
+    u32 offsets[20];
+    int i;
+    u16 count;
+    u32 offset;
+
+    func_02069c08(&header);
+    func_02069c08(&header);
+    for (i = 0; i < 20; i++) {
+        offsets[i] = func_02069c58(&header);
+    }
+    items = data_02145360->unk64 + offsets[category];
+    count = func_02069c08(&items);
+    func_02069c08(&items);
+    offset = 0;
+    if (count < index) {
+        return NULL;
+    }
+    for (i = 0; i < count; i++) {
+        u32 value = func_02069c58(&items);
+        if (i == index) {
+            offset = value;
+        }
+    }
+    return items + offset;
+}
+
+// Whether every field of a Mii's data is in its range
+BOOL func_0206d040(const NFLCharData *mii) {
+    if (mii->faceType > 7) {
+        return FALSE;
+    }
+    if (mii->faceColor > 5) {
+        return FALSE;
+    }
+    if (mii->faceTexture > 11) {
+        return FALSE;
+    }
+    if (mii->hairType > 71) {
+        return FALSE;
+    }
+    if (mii->hairColor > 7) {
+        return FALSE;
+    }
+    if (mii->hairFlip > 1) {
+        return FALSE;
+    }
+    if (mii->eyeType > 47) {
+        return FALSE;
+    }
+    if (mii->eyeColor > 5) {
+        return FALSE;
+    }
+    if (mii->eyeScale > 7) {
+        return FALSE;
+    }
+    if (mii->eyeRotation > 7) {
+        return FALSE;
+    }
+    if (mii->eyeX > 12) {
+        return FALSE;
+    }
+    if (mii->eyeY > 18) {
+        return FALSE;
+    }
+    if (mii->eyebrowType > 23) {
+        return FALSE;
+    }
+    if (mii->eyebrowColor > 7) {
+        return FALSE;
+    }
+    if (mii->eyebrowScale > 8) {
+        return FALSE;
+    }
+    if (mii->eyebrowRotation > 11) {
+        return FALSE;
+    }
+    if (mii->eyebrowX > 12) {
+        return FALSE;
+    }
+    if (mii->eyebrowY < 3) {
+        return FALSE;
+    }
+    if (mii->eyebrowY > 18) {
+        return FALSE;
+    }
+    if (mii->noseType > 11) {
+        return FALSE;
+    }
+    if (mii->noseScale > 8) {
+        return FALSE;
+    }
+    if (mii->noseY > 18) {
+        return FALSE;
+    }
+    if (mii->mouthType > 23) {
+        return FALSE;
+    }
+    if (mii->mouthColor > 2) {
+        return FALSE;
+    }
+    if (mii->mouthScale > 8) {
+        return FALSE;
+    }
+    if (mii->mouthY > 18) {
+        return FALSE;
+    }
+    if (mii->mustacheType > 3) {
+        return FALSE;
+    }
+    if (mii->beardType > 3) {
+        return FALSE;
+    }
+    if (mii->beardColor > 7) {
+        return FALSE;
+    }
+    if (mii->beardScale > 8) {
+        return FALSE;
+    }
+    if (mii->beardY > 16) {
+        return FALSE;
+    }
+    if (mii->glassesType > 8) {
+        return FALSE;
+    }
+    if (mii->glassesColor > 5) {
+        return FALSE;
+    }
+    if (mii->glassesScale > 7) {
+        return FALSE;
+    }
+    if (mii->glassesY > 20) {
+        return FALSE;
+    }
+    if (mii->moleType > 1) {
+        return FALSE;
+    }
+    if (mii->moleScale > 8) {
+        return FALSE;
+    }
+    if (mii->moleX > 16) {
+        return FALSE;
+    }
+    if (mii->moleY > 30) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void func_0206d374(NFLObj *obj) {
+    s16 *params = obj->unk180;
+
+    params[0] = -1;
+    params[1] = -1;
+    params[2] = -1;
+    params[3] = -1;
+    params[4] = -1;
+    params[5] = -1;
+    params[6] = -1;
+    params[7] = -1;
+    params[8] = -1;
+    params[9] = -1;
+    params[10] = -1;
+    params[11] = -1;
+    params[12] = -1;
+    params[13] = -1;
+    params[14] = -1;
+    params[15] = -1;
+    params[16] = -1;
+    params[17] = -1;
+}
+
+// Keeps the fields of the Mii's data that its display lists were made from
+void func_0206d3cc(NFLObj *obj, const NFLCharData *mii) {
+    s16 *params = obj->unk180;
+
+    params[0] = mii->favoriteColor;
+    params[1] = mii->faceTexture;
+    params[2] = mii->faceColor;
+    params[3] = mii->hairType;
+    params[4] = mii->hairColor;
+    params[5] = mii->eyebrowType;
+    params[6] = mii->eyebrowColor;
+    params[7] = mii->eyeType;
+    params[8] = mii->eyeColor;
+    params[9] = mii->noseType;
+    params[10] = mii->mouthColor;
+    params[11] = mii->mouthType;
+    params[12] = mii->glassesColor;
+    params[13] = mii->glassesType;
+    params[14] = mii->beardColor;
+    params[15] = mii->beardType;
+    params[16] = mii->mustacheType;
+    params[17] = mii->moleType;
+}
+
+// The axes of the library's coordinates (0x0211215C), which NFLObj copies at 0xC4
+typedef struct NFLAxes {
+    VecFx32 unk0;
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+} NFLAxes;
+
+extern int (*const data_02112140[])(NFLMakeCtx *ctx);
+extern const NFLAxes data_0211215c;
+
+// Makes object index's display lists from a Mii's data
+#pragma optimization_level 2
+#pragma opt_common_subs off
+int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
+    OSIntrMode enabled;
+    NFLMakeCtx ctx;
+    NFLObj *obj;
+    NFLObjEntry *entries;
+    NFLObjEntry *entries2;
+    BOOL found = FALSE;
+    int i;
+    int result;
+
+    if (mii == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    if (!func_020735dc() || !func_020735fc()) {
+        return 4;
+    }
+    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+        return 6;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    entries = obj->unk1A4;
+    entries2 = obj->unk228;
+    if (!func_0206d040(mii) || !func_020731e0(mii)) {
+        return 7;
+    }
+    ctx.unk1C8 = obj;
+    ctx.unk1CC = mii;
+    obj->unk90 = data_02145360->unk68;
+    obj->unk168 = 0;
+    obj->unk16C = data_02145360->unk71;
+    obj->unk0 = 0;
+    obj->unk4 = 0;
+    obj->unk28 = unk;
+    obj->unkDC = mii;
+    obj->unk174 = 0;
+    obj->unk178 = 0;
+    if (obj->unk170 == 4) {
+        if (obj->unk90 == 7) {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x6880;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC;
+        } else {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x1A10;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC + index * 0x130;
+        }
+        for (i = 0; i < 11; i++) {
+            entries[i].value = -1;
+            entries[i].state = 7;
+        }
+        for (i = 0; i < 10; i++) {
+            entries2[i].value = -1;
+            entries2[i].state = 7;
+        }
+        func_0206d374(obj);
+    } else {
+        ctx.unk24 = obj->unkD4;
+        ctx.unk28 = obj->unkD8;
+    }
+    obj->unkD0 = data_0211215c.unkC;
+    obj->unkD1 = data_0211215c.unkD;
+    obj->unkD2 = data_0211215c.unkE;
+    obj->unkC4.x = data_0211215c.unk0.x;
+    obj->unkC4.y = data_0211215c.unk0.y;
+    obj->unkC4.z = data_0211215c.unk0.z;
+    enabled = OS_DisableInterrupts();
+    func_0206cf48(&ctx);
+    for (i = 0; i < 7; i++) {
+        result = data_02112140[i](&ctx);
+        if (result != 0) {
+            return result;
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        if (entries[i].state == 0) {
+            obj->unk170 = 0;
+            found = TRUE;
+            break;
+        }
+    }
+    if (!found) {
+        for (i = 0; i < 10; i++) {
+            if (entries2[i].state == 0) {
+                found = TRUE;
+                obj->unk170 = found;
+                break;
+            }
+        }
+    }
+    if (found == TRUE) {
+        NFLObj *p;
+
+        if (data_02145360->unk74 == obj) {
+            data_02145360->unk74 = obj->unk17C;
+        }
+        p = data_02145360->unk74;
+        if (p == NULL) {
+            data_02145360->unk74 = obj;
+        } else {
+            while (p->unk17C != NULL) {
+                if (p->unk17C == obj) {
+                    p->unk17C = obj->unk17C;
+                    if (p->unk17C == NULL) {
+                        break;
+                    }
+                }
+                p = p->unk17C;
+            }
+            p->unk17C = obj;
+        }
+    } else {
+        obj->unk170 = 2;
+    }
+    obj->unk17C = NULL;
+    if (data_02145360->unk8C == 4) {
+        data_02145360->unk8C = 0;
+    }
+    OS_RestoreInterrupts(enabled);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk2A4, sizeof(obj->unk2A4));
+    func_0206b3f4(&ctx);
+    func_0206b0d8(&ctx);
+    func_0206c964(&ctx);
+    func_0206c65c(&ctx);
+    func_0206b740(&ctx);
+    func_0206bb24(&ctx);
+    func_0206bfa4(&ctx);
+    func_0206c2f8(&ctx);
+    obj->unk0 = G3_EndMakeDL(&ctx.unk64);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk1D84, sizeof(obj->unk1D84));
+    func_020715ac(&ctx);
+    obj->unk4 = G3_EndMakeDL(&ctx.unk64);
+    func_0206d3cc(obj, mii);
+    func_020728fc(index, 0);
+    return 0;
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
+    NFLObj *obj;
+
+    if (mtx33 == NULL || mtx43 == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    MI_Copy48B(mtx43, &obj->unk2C);
+    MI_Copy36B(mtx33, &obj->unk5C);
+    return 0;
+}
+
+// Sets the polygon attributes of an object's display list (at the places its makers kept) and the material colours
+int func_0206d984(int index, const NFLDrawParam *param) {
+    NFLObj *obj;
+    GXDLInfo info;
+
+    if (param == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    G3_MaterialColorDiffAmb(param->diffuse, param->ambient, FALSE);
+    G3_MaterialColorSpecEmi(param->specular, param->emission, FALSE);
+    G3_PolygonAttr(param->light, param->polyMode, GX_CULL_FRONT, param->polygonID, param->alpha, param->misc);
+    if (obj->unk94[0].cmd != NULL && obj->unk94[0].param != NULL) {
+        info.curr_cmd = obj->unk94[0].cmd;
+        info.curr_param = obj->unk94[0].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[0].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[1].cmd != NULL && obj->unk94[1].param != NULL) {
+        info.curr_cmd = obj->unk94[1].cmd;
+        info.curr_param = obj->unk94[1].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[1].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[2].cmd != NULL && obj->unk94[2].param != NULL) {
+        info.curr_cmd = obj->unk94[2].cmd;
+        info.curr_param = obj->unk94[2].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[2].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[3].cmd != NULL && obj->unk94[3].param != NULL) {
+        info.curr_cmd = obj->unk94[3].cmd;
+        info.curr_param = obj->unk94[3].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, GX_CULL_NONE, param->polygonID, param->alpha,
+                         param->misc);
+    }
+    return 0;
+}
+
+// Sends an object's display lists to the geometry engine, under its matrices
+int func_0206db98(int index, BOOL withSecond) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (func_0206dc84(index) != 0) {
+        return 0xF;
+    }
+    G3_PushMtx();
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    G3_LoadMtx43((const MtxFx43 *)&obj->unk5C);
+    G3_MtxMode(GX_MTXMODE_POSITION);
+    G3_LoadMtx43(&obj->unk2C);
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    MI_WaitDma(GXi_DmaId);
+    if (withSecond && obj->unk4 != 0) {
+        MI_CpuSend32(obj->unk1D84, &reg_G3X_GXFIFO, obj->unk4);
+    }
+    if (obj->unk0 != 0) {
+        MI_CpuSend32(obj->unk2A4, &reg_G3X_GXFIFO, obj->unk0);
+    }
+    G3_PopMtx(1);
+    return 0;
+}
+
+int func_0206dc84(int index) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (obj->unk170 == 3) {
+        return 0xA;
+    }
+    if (obj->unk170 != 2) {
+        return 0xF;
+    }
+    return 0;
+}
+
+extern const NFLColor data_020b65a0[];
+
+GXRgb func_0206dcd0(int index) {
+    return GX_RGB(data_020b65a0[index].r >> 3, data_020b65a0[index].g >> 3, data_020b65a0[index].b >> 3);
+}
+
+GXRgb func_0206dd1c(int index) {
+    return data_020b6540[index] & 0x7FFF;
+}
+
+// Expands count 4-bit pixels into direct colours from palette, colour 0 transparent if asked
+void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL transparent) {
+    int i;
+
+    for (i = 0; i < count / 2; i++) {
+        u32 index;
+
+        if (i % 2 != 0) {
+            index = (u32)src[i / 2] >> 4;
+        } else {
+            index = src[i / 2];
+        }
+        index &= 0xF;
+        if (transparent && index == 0) {
+            dst[i] = 0;
+        } else {
+            dst[i] = palette[index] | 0x8000;
+        }
+    }
+}
+
+// The eyes, eyebrows, mouth, mustache and mole: their textures and states, by part
+int func_0206ddb8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int i;
+
+    obj->unk80[0] = mii->eyeColor;
+    obj->unk80[1] = mii->mouthColor;
+    obj->unk80[2] = mii->eyebrowY;
+    obj->unk80[3] = mii->eyeRotation;
+    obj->unk80[4] = mii->eyeType;
+    obj->unk80[5] = mii->faceType;
+    obj->unk80[7] = mii->eyebrowType;
+    obj->unk80[6] = mii->eyebrowRotation;
+    for (i = 0; i < 5; i++) {
+        switch (i) {
+        case 0:
+            ctx->unk78[0].unk28 = 2;
+            ctx->unk78[1].unk28 = 2;
+            ctx->unk78[0].unk2C = 2;
+            ctx->unk78[1].unk2C = 2;
+            if (params[7] != mii->eyeType || (obj->unk1A4[1].state >= 1 && obj->unk1A4[1].state <= 6)) {
+                obj->unk1A4[1].state = 0;
+                obj->unk1A4[1].value = mii->eyeType;
+            }
+            if (params[8] != mii->eyeColor || (obj->unk228[1].state >= 1 && obj->unk228[1].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[1].state = 0;
+                    obj->unk228[1].state = 7;
+                } else {
+                    obj->unk228[1].state = 0;
+                }
+                obj->unk228[1].value = mii->eyeColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[0].unk24 = obj->unkD8;
+                ctx->unk78[1].unk24 = obj->unkD8;
+                obj->unk10 = obj->unkD4 + 0x80;
+            } else {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[0].unk24 = obj->unkD8 + 0x10;
+                ctx->unk78[1].unk24 = obj->unkD8 + 0x10;
+                obj->unk10 = obj->unkD4 + 0x10;
+                obj->unk14 = obj->unkD8 + 0x10;
+            }
+            break;
+        case 1:
+            ctx->unk78[2].unk28 = 2;
+            ctx->unk78[3].unk28 = 2;
+            ctx->unk78[2].unk2C = 2;
+            ctx->unk78[3].unk2C = 2;
+            if (params[5] != mii->eyebrowType || (obj->unk1A4[2].state >= 1 && obj->unk1A4[2].state <= 6)) {
+                obj->unk1A4[2].state = 0;
+                obj->unk1A4[2].value = mii->eyebrowType;
+            }
+            if (params[6] != mii->eyebrowColor || (obj->unk228[2].state >= 1 && obj->unk228[2].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[2].state = 0;
+                    obj->unk228[2].state = 7;
+                } else {
+                    obj->unk228[2].state = 0;
+                }
+                obj->unk228[2].value = mii->eyebrowColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[2].unk24 = obj->unkD8;
+                ctx->unk78[3].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[2].unk24 = obj->unkD8 + 0x30;
+                ctx->unk78[3].unk24 = obj->unkD8 + 0x30;
+            }
+            break;
+        case 2:
+            ctx->unk78[4].unk28 = 2;
+            ctx->unk78[4].unk2C = 2;
+            if (params[11] != mii->mouthType || (obj->unk1A4[3].state >= 1 && obj->unk1A4[3].state <= 6)) {
+                obj->unk1A4[3].state = 0;
+                obj->unk1A4[3].value = mii->mouthType;
+            }
+            if (params[10] != mii->mouthColor || (obj->unk228[3].state >= 1 && obj->unk228[3].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[3].state = 0;
+                    obj->unk228[3].state = 7;
+                } else {
+                    obj->unk228[3].state = 0;
+                }
+                obj->unk228[3].value = mii->mouthColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x1080;
+                ctx->unk78[4].unk24 = obj->unkD8;
+                obj->unk20 = obj->unkD4 + 0x1080;
+            } else {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x410;
+                ctx->unk78[4].unk24 = obj->unkD8 + 0x50;
+                obj->unk20 = obj->unkD4 + 0x410;
+                obj->unk24 = obj->unkD8 + 0x50;
+            }
+            break;
+        case 3:
+            ctx->unk78[5].unk28 = 1;
+            ctx->unk78[5].unk2C = 3;
+            if (params[16] != mii->mustacheType || (obj->unk1A4[4].state >= 1 && obj->unk1A4[4].state <= 6)) {
+                obj->unk1A4[4].state = 0;
+                obj->unk1A4[4].value = mii->mustacheType;
+            }
+            if (params[14] != mii->beardColor || (obj->unk228[4].state >= 1 && obj->unk228[4].state <= 6)) {
+                if (obj->unk90 != 7) {
+                    obj->unk228[4].state = 0;
+                } else {
+                    obj->unk228[4].state = 7;
+                    obj->unk1A4[4].state = 0;
+                }
+                obj->unk228[4].value = mii->beardColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x1880;
+                ctx->unk78[5].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x610;
+                ctx->unk78[5].unk24 = obj->unkD8 + 0x70;
+            }
+            break;
+        case 4:
+            ctx->unk78[6].unk28 = 1;
+            ctx->unk78[6].unk2C = 1;
+            if (data_02145360->unk10[5].unk8 == 0) {
+                ctx->unk78[6].unk20 = data_02145360->unk0;
+                ctx->unk78[6].unk24 = data_02145360->unk4;
+                data_02145360->unk10[5].unk0 = data_02145360->unk0;
+                data_02145360->unk10[5].unk4 = data_02145360->unk4;
+                data_02145360->unk90 = 0;
+                data_02145360->unkA0[5].unk8 = 0;
+                if (obj->unk90 == 7) {
+                    data_02145360->unk0 += 0x200;
+                    data_02145360->unk12C = 7;
+                } else {
+                    data_02145360->unk0 += 0x80;
+                    data_02145360->unk4 += 0x20;
+                }
+                data_02145360->unk10[5].unk8 = 1;
+                return 0;
+            }
+            ctx->unk78[6].unk20 = data_02145360->unk10[5].unk0;
+            ctx->unk78[6].unk24 = data_02145360->unk10[5].unk4;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int func_0206e38c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[0].unk8 == 0) {
+        work->unk10[0].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[0].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[0].unk8 = 0;
+        work->unk10[0].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e3fc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[1].unk8 == 0) {
+        work->unk10[1].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[1].unk4 = obj->unk24;
+        }
+        data_02145360->unkA0[1].unk8 = 0;
+        work->unk10[1].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e46c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[2].unk8 == 0) {
+        work->unk10[2].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[2].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[2].unk8 = 0;
+        work->unk10[2].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e4dc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[3].unk8 == 0) {
+        work->unk10[3].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[3].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[3].unk8 = 0;
+        work->unk10[3].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e54c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[4].unk8 == 0) {
+        work->unk10[4].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[4].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[4].unk8 = 0;
+        work->unk10[4].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e5bc(NFLObj *obj, u32 *address) {
+    s16 *params = obj->unk180;
+    const NFLCharData *mii = obj->unkDC;
+
+    if (obj->unk16C & 0x10) {
+        if (obj->unk1A4[5].value != 0x31 || (obj->unk90 == 7 && params[8] != mii->eyeColor) ||
+            (obj->unk1A4[5].state >= 1 && obj->unk1A4[5].state <= 6)) {
+            obj->unk1A4[5].state = 0;
+            obj->unk1A4[5].value = 0x31;
+        }
+        if (obj->unk90 == 7) {
+            obj->unk18 = obj->unkD4 + 0x2080;
+        } else {
+            obj->unk18 = obj->unkD4 + 0x810;
+            obj->unk1C = obj->unk14;
+        }
+    }
+    return 0;
+}
+
+int func_0206e650(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    int result;
+
+    if (obj->unk16C & 0x20) {
+        result = func_0206e38c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x40) {
+        result = func_0206e3fc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x2) {
+        result = func_0206e46c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x4) {
+        result = func_0206e4dc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x8) {
+        result = func_0206e54c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    return func_0206e5bc(obj, &ctx->unk24);
+}
+
+
+extern const u8 data_020b6884[];
+extern const u8 data_020b689c[];
+
+// The places, sizes and rotations of the seven parts (NFLMakeCtx 0x78), from the Mii's data
+void func_0206e724(NFLMakeCtx *ctx) {
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 eyeX = mii->eyeX * 0xE95 - 0x280;
+    fx32 eyeY = -(mii->eyeY * 0x11A1 - 0x21149);
+    fx32 eyeScale = FX_Mul(mii->eyeScale * 0x700 + 0x1000, 0x4C00);
+    int eyeRotation = data_020b689c[mii->eyeType] + mii->eyeRotation - 0x20;
+    fx32 eyebrowX = mii->eyebrowX * 0xE95 - 0x2E0;
+    fx32 eyebrowY = -(mii->eyebrowY * 0x10E1 - 0x22490);
+    fx32 eyebrowScale = FX_Mul(mii->eyebrowScale * 0x680 + 0x1000, 0x4C40);
+    int eyebrowRotation = data_020b6884[mii->eyebrowType] + mii->eyebrowRotation - 0x20;
+    fx32 mouthY = -(mii->mouthY * 0x10A1 - 0x161BA);
+    fx32 mouthScale = mii->mouthScale * 0x6E0 + 0x1000;
+    fx32 beardY = -(mii->beardY * 0x10E1 - 0x13DB7);
+    fx32 beardScale = mii->beardScale * 0x740 + 0x1000;
+    fx32 moleX = (mii->moleX - 8) * 0x1BCA;
+    fx32 moleY = -(mii->moleY * 0x10A1 - 0x20CE9);
+    fx32 moleScale = mii->moleScale * 0x540 + 0x1000;
+    fx32 eyeHeight = 0xD100;
+    fx32 eyebrowHeight = 0xC828;
+    fx32 beardHeight = 0x147A8;
+    fx32 moleHeight = 0x25DE;
+
+    ctx->unk78[0].unk0[0] = eyeX;
+    ctx->unk78[0].unk0[1] = eyeY;
+    ctx->unk78[0].unk0[2] = eyeScale;
+    ctx->unk78[0].unk0[3] = -eyeScale;
+    ctx->unk78[0].unk0[4] = eyeHeight;
+    ctx->unk78[0].unk0[5] = -eyeHeight;
+    ctx->unk78[0].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[0].unk0[7] = 4;
+    ctx->unk78[1].unk0[0] = eyeX;
+    ctx->unk78[1].unk0[1] = eyeY;
+    ctx->unk78[1].unk0[2] = eyeScale;
+    ctx->unk78[1].unk0[3] = -eyeScale;
+    ctx->unk78[1].unk0[4] = eyeHeight;
+    ctx->unk78[1].unk0[5] = -eyeHeight;
+    ctx->unk78[1].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[1].unk0[7] = 3;
+    ctx->unk78[2].unk0[0] = eyebrowX;
+    ctx->unk78[2].unk0[1] = eyebrowY;
+    ctx->unk78[2].unk0[2] = eyebrowScale;
+    ctx->unk78[2].unk0[3] = -eyebrowScale;
+    ctx->unk78[2].unk0[4] = eyebrowHeight;
+    ctx->unk78[2].unk0[5] = -eyebrowHeight;
+    ctx->unk78[2].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[2].unk0[7] = 4;
+    ctx->unk78[3].unk0[0] = eyebrowX;
+    ctx->unk78[3].unk0[1] = eyebrowY;
+    ctx->unk78[3].unk0[2] = eyebrowScale;
+    ctx->unk78[3].unk0[3] = -eyebrowScale;
+    ctx->unk78[3].unk0[4] = eyebrowHeight;
+    ctx->unk78[3].unk0[5] = -eyebrowHeight;
+    ctx->unk78[3].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[3].unk0[7] = 3;
+    ctx->unk78[4].unk0[0] = 0;
+    ctx->unk78[4].unk0[1] = mouthY;
+    ctx->unk78[4].unk0[2] = FX_Mul(mouthScale, 0x5180);
+    ctx->unk78[4].unk0[3] = -FX_Mul(mouthScale, 0x28C0);
+    ctx->unk78[4].unk0[4] = 0xDD94;
+    ctx->unk78[4].unk0[5] = -0x6ECA;
+    ctx->unk78[4].unk0[6] = 0;
+    ctx->unk78[4].unk0[7] = 1;
+    ctx->unk78[5].unk0[0] = 0;
+    ctx->unk78[5].unk0[1] = beardY;
+    ctx->unk78[5].unk0[2] = FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[3] = -FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[4] = beardHeight;
+    ctx->unk78[5].unk0[5] = -beardHeight;
+    ctx->unk78[5].unk0[6] = 0;
+    ctx->unk78[5].unk0[7] = 2;
+    ctx->unk78[6].unk0[0] = moleX;
+    ctx->unk78[6].unk0[1] = moleY;
+    ctx->unk78[6].unk0[2] = FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[3] = -FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[4] = moleHeight;
+    ctx->unk78[6].unk0[5] = -moleHeight;
+    ctx->unk78[6].unk0[6] = 0;
+    ctx->unk78[6].unk0[7] = 0;
+}
+
+// Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (func_0206ebb0)
+typedef struct NFLPlane {
+    fx32 unk0;
+    fx32 unk4;
+    fx32 unk8;
+    fx32 unkC;
+} NFLPlane;
+
+extern const NFLPlane data_020b676c[2][2];
+
+// A part's place on the face, from the face's origin, its X and Y and the sine and cosine of its rotation; its
+// Z from the plane of its quadrant
+void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, fx32 scaleX, fx32 scaleY, fx16 sin,
+                   fx16 cos) {
+    int i;
+    int j;
+
+    if (kind <= 2) {
+        out->x = origin->x + (x * 2 - 1) * scaleX * 5 / 128;
+        out->y = origin->y + (y * 2 - 1) * scaleY * 5 / 128;
+    } else {
+        fx32 dx = x * scaleX * 5 / 64;
+        fx32 dy = (y * 2 - 1) * scaleY * 5 / 128;
+
+        out->x = origin->x + FX_Mul(sin, dx) + FX_Mul(cos, dy);
+        out->y = origin->y - FX_Mul(cos, dx) + FX_Mul(sin, dy);
+    }
+    i = out->x >= 0x1B33;
+    j = out->y <= 0x167B;
+    out->z = -FX_Div(data_020b676c[j][i].unkC + (FX_Mul(data_020b676c[j][i].unk0, out->x) +
+                                                  FX_Mul(data_020b676c[j][i].unk4, out->y)),
+                     data_020b676c[j][i].unk8) *
+             0x47 / 200;
+}
+
 BOOL func_02072c1c(void) {
     return data_02145360 != NULL;
 }
@@ -413,6 +2367,37 @@ void func_02073394(NFLCreateId *id) {
     *(u32 *)&id->data[4] = 0;
 }
 
+u16 func_0206dd1c(int index);
+
+u16 func_02073514(int index) {
+    return func_0206dd1c(index);
+}
+
+// The create-ID helpers above, on a Mii's data
+BOOL func_02073520(const NFLCharData *data) {
+    return func_02073264(&data->createId);
+}
+
+u32 func_02073530(const NFLCharData *data) {
+    return func_02073278(&data->createId);
+}
+
+BOOL func_02073540(const NFLCreateId *a, const NFLCharData *b) {
+    return func_020732a0(a, &b->createId);
+}
+
+BOOL func_02073550(const NFLCharData *data) {
+    return func_0207331c(&data->createId);
+}
+
+BOOL func_02073560(const NFLCharData *a, const NFLCharData *b) {
+    return func_02073330(&a->createId, &b->createId);
+}
+
+void func_02073574(NFLCharData *data) {
+    func_02073394(&data->createId);
+}
+
 int func_02073584(void *p) {
     OSIntrMode enabled = OS_DisableInterrupts();
     NFLWork *work = data_02145360;
@@ -436,4 +2421,2413 @@ BOOL func_020735dc(void) {
 
 BOOL func_020735fc(void) {
     return data_02145360->unk78 != NULL;
+}
+
+extern const NFLCharData data_020b70c8[];
+
+// Copies Mii index (0 to 5) of the library's table into data, and gives it a blank create ID
+int func_0207361c(NFLCharData *data, u32 index) {
+    if (index > 5) {
+        return 8;
+    }
+    if (data == NULL) {
+        return 8;
+    }
+    MI_CpuCopy8(&data_020b70c8[index], data, sizeof(NFLCharData));
+    func_020731b8((u8 *)data);
+    return 0;
+}
+
+void func_020736ec(NFLCharData *data, int sex, int b, int c);
+
+int func_02073664(NFLCharData *data, int sex, int b, int c) {
+    if (data_02145360 == NULL) {
+        return 4;
+    }
+    if (data == NULL) {
+        return 8;
+    }
+    if (sex < 0 || sex > 2) {
+        return 8;
+    }
+    // The original tests sex again where b and c would be meant
+    if (b < 0 || sex > 3) {
+        return 8;
+    }
+    if (c < 0 || sex > 3) {
+        return 8;
+    }
+    func_020736ec(data, sex, b, c);
+    func_020731b8((u8 *)data);
+    return 0;
+}
+
+u16 func_020743a0(u16 max);
+void func_020737b0(NFLCharData *data, int sex, int b, int c);
+
+// Picks at random what is 2 (sex) or 3 (b and c) on entry, then makes the Mii
+void func_020736ec(NFLCharData *data, int sex, int b, int c) {
+    int d;
+    u16 r;
+
+    if (sex == 2) {
+        if (func_020743a0(2) == 0) {
+            sex = 0;
+        } else {
+            sex = 1;
+        }
+    }
+    if (b == 3) {
+        r = func_020743a0(10);
+        if (r < 4) {
+            b = 0;
+        } else if (r < 8) {
+            b = 1;
+        } else {
+            b = 2;
+        }
+    }
+    switch (c) {
+    case 0:
+        d = 0;
+        break;
+    case 1:
+        d = 1;
+        break;
+    case 2:
+        d = 2;
+        break;
+    case 3:
+        r = func_020743a0(10);
+        if (r < 4) {
+            d = 2;
+        } else if (r < 8) {
+            d = 1;
+        } else {
+            d = 0;
+        }
+        break;
+    }
+    func_020737b0(data, sex, b, d);
+}
+
+
+u8 func_02073eac(int sex, int b, int c);
+u8 func_02073eec(int sex, int b, int c);
+u8 func_02073f94(int sex, int b, int c);
+u8 func_02074034(int sex, int b, int c);
+u8 func_020740a8(int sex, int b, int c);
+u8 func_02074148(int sex, int b, int c);
+u8 func_020741e8(int sex, int b, int c);
+u8 func_02074228(int b);
+u8 func_02074310(int sex, int c);
+u8 func_02074344(int b, int c);
+u8 func_02074378(int c);
+
+extern const u8 data_020b689c[];
+extern const u8 data_020b6884[];
+
+// Makes a Mii's data at random, for sex, b and c: the parts from the tables of the functions after it, the face's
+// parts placed lower by up to 4 for sex 1 and for b 0, a beard on one man in 5 of b 1 and 2
+void func_020737b0(NFLCharData *data, int sex, int b, int c) {
+    u8 offset = 0;
+    int i;
+
+    if (sex == 1) {
+        offset += func_020743a0(3);
+    }
+    if (b == 0) {
+        offset += func_020743a0(3);
+    }
+    data->faceType = func_02073eac(sex, b, c);
+    data->faceColor = func_02074310(sex, c);
+    data->faceTexture = func_020741e8(sex, b, c);
+    data->hairType = func_02073eec(sex, b, c);
+    data->hairColor = func_02074344(b, c);
+    data->hairFlip = func_020743a0(2);
+    data->eyeType = func_02073f94(sex, b, c);
+    data->eyeColor = func_02074378(c);
+    data->eyeScale = 4;
+    if (sex == 0) {
+        data->eyeRotation = 4;
+        data->eyeRotation += data_020b689c[2] - data_020b689c[data->eyeType];
+    } else {
+        data->eyeRotation = 3;
+        data->eyeRotation += data_020b689c[4] - data_020b689c[data->eyeType];
+    }
+    data->eyeX = 2;
+    data->eyeY = offset + 12;
+    data->eyebrowType = func_02074034(sex, b, c);
+    data->eyebrowColor = data->hairColor;
+    data->eyebrowScale = 4;
+    data->eyebrowRotation = 6;
+    data->eyebrowX = 2;
+    if (c == 2) {
+        data->eyebrowY = offset + 9;
+        data->eyebrowRotation += data_020b6884[6] - data_020b6884[data->eyebrowType];
+    } else {
+        data->eyebrowY = offset + 10;
+        data->eyebrowRotation += data_020b6884[0] - data_020b6884[data->eyebrowType];
+    }
+    data->noseType = func_020740a8(sex, b, c);
+    if (sex == 0) {
+        data->noseScale = 4;
+    } else {
+        data->noseScale = 3;
+    }
+    data->noseY = offset + 9;
+    data->mouthType = func_02074148(sex, b, c);
+    if (sex == 0) {
+        data->mouthColor = 0;
+    } else {
+        data->mouthColor = func_020743a0(3);
+    }
+    data->mouthScale = 4;
+    data->mouthY = offset + 13;
+    if (sex == 0 && (b == 1 || b == 2) && func_020743a0(10) < 2) {
+        u16 r = func_020743a0(3);
+
+        if (r == 0) {
+            data->mustacheType = 0;
+            data->beardType = func_020743a0(3) + 1;
+        } else if (r == 1) {
+            data->mustacheType = func_020743a0(3) + 1;
+            data->beardType = 0;
+        } else if (r == 2) {
+            data->mustacheType = func_020743a0(3) + 1;
+            data->beardType = func_020743a0(3) + 1;
+        }
+        data->beardColor = data->hairColor;
+        data->beardScale = 4;
+        data->beardY = 10;
+    } else {
+        data->mustacheType = 0;
+        data->beardType = 0;
+        data->beardColor = data->hairColor;
+        data->beardScale = 4;
+        data->beardY = offset + 10;
+    }
+    data->glassesType = func_02074228(b);
+    data->glassesColor = 0;
+    data->glassesScale = 4;
+    data->glassesY = offset + 10;
+    data->moleType = 0;
+    data->moleScale = 4;
+    data->moleX = 2;
+    data->moleY = 20;
+    data->height = 64;
+    data->build = 64;
+    for (i = 0; i < 10; i++) {
+        data->name[i] = 0;
+    }
+    for (i = 0; i < 10; i++) {
+        data->creatorName[i] = 0;
+    }
+    for (i = 0; i < 8; i++) {
+        data->createId.data[i] = 0;
+    }
+    data->sex = sex;
+    data->birthMonth = 0;
+    data->birthDay = 0;
+    data->favoriteColor = func_020743a0(12);
+    data->unk00Bit0 = 0;
+    data->unk20Bit2 = 0;
+}
+
+extern const u8 data_020b69c0[][10];
+
+u8 func_02073eac(int sex, int b, int c) {
+    return data_020b69c0[sex * 9 + b * 3 + c][func_020743a0(10)];
+}
+
+// The hair type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
+u8 func_02073eec(int sex, int b, int c) {
+    u8 choices[18][72] = {
+        {13, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 54, 56, 57, 64, 66},
+        {13, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 54, 56, 57, 64, 66},
+        {13, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 54, 56, 57, 64, 66},
+        {13, 23, 30, 31, 32, 33, 34, 36, 37, 38, 40, 42, 43, 44, 45, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 58, 59, 60, 64, 65, 66, 67, 68, 70},
+        {13, 23, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 58, 59, 60, 64, 65, 66, 67, 68, 70},
+        {13, 23, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 43, 44, 45, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 58, 59, 60, 64, 65, 66, 67, 68, 70},
+        {13, 23, 30, 36, 37, 41, 45, 47, 51, 53, 54, 55, 58, 59, 65, 67},
+        {13, 23, 30, 36, 37, 39, 41, 45, 47, 51, 53, 54, 55, 58, 59, 65, 67},
+        {13, 23, 30, 36, 37, 39, 41, 45, 47, 51, 53, 54, 55, 58, 59, 65, 67},
+        {0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 28, 46, 50, 61, 62, 63, 64, 69},
+        {0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 28, 46, 50, 61, 62, 63, 64, 69},
+        {0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 28, 46, 50, 61, 62, 63, 64, 69},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 29, 42, 50, 58, 60, 62, 63, 64, 69, 71},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 29, 50, 58, 60, 62, 63, 64, 69, 71},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 29, 50, 58, 60, 62, 63, 64, 69, 71},
+        {0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 20, 21, 24, 25, 58, 62, 69},
+        {0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 20, 21, 24, 25, 58, 62, 69},
+        {0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 20, 21, 24, 25, 58, 62, 69},
+    };
+    u8 counts[18] = {26, 26, 26, 34, 34, 34, 16, 17, 17, 33, 33, 33, 37, 36, 36, 22, 22, 22};
+    u8 index = sex * 9 + b * 3 + c;
+
+    return choices[index][func_020743a0(counts[index])];
+}
+
+// The eye type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
+u8 func_02073f94(int sex, int b, int c) {
+    u8 choices[18][48] = {
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 16, 18, 27, 29, 32, 34, 36, 38, 39, 41, 43, 47},
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 16, 18, 27, 29, 32, 34, 36, 38, 39, 41, 43, 47},
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 16, 18, 26, 27, 29, 32, 34, 36, 38, 39, 41, 43, 47},
+        {2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15, 16, 17, 18, 21, 22, 27, 29, 31, 32, 34, 36, 37, 38, 39, 41, 43, 44, 47},
+        {2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15, 16, 17, 18, 21, 22, 27, 29, 31, 32, 34, 36, 37, 38, 39, 41, 43, 44, 47},
+        {2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15, 16, 18, 21, 22, 26, 27, 29, 31, 32, 34, 36, 37, 38, 39, 41, 43, 44, 47},
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 31, 32, 34, 36, 37, 39, 41, 44},
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 31, 32, 34, 36, 37, 39, 41, 44},
+        {2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 18, 21, 22, 26, 31, 32, 34, 36, 37, 39, 41, 44},
+        {0, 1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18, 19, 23, 24, 25, 27, 28, 29, 32, 33, 34, 35, 38, 39, 40, 41, 42, 45, 46, 47},
+        {0, 1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18, 19, 23, 24, 25, 27, 28, 29, 32, 33, 34, 35, 38, 39, 40, 41, 42, 45, 46, 47},
+        {0, 1, 2, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18, 19, 23, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 38, 39, 40, 41, 42, 45, 46, 47},
+        {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 27, 28, 29, 30, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 45, 46, 47},
+        {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 27, 28, 29, 30, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 45, 46, 47},
+        {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 45, 46, 47},
+        {1, 2, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 21, 32, 34, 37, 39, 41},
+        {1, 2, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 21, 32, 34, 37, 39, 41},
+        {1, 2, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 18, 21, 26, 32, 34, 37, 39, 41},
+    };
+    u8 counts[18] = {22, 22, 23, 29, 29, 29, 24, 24, 24, 34, 34, 35, 40, 40, 40, 20, 20, 20};
+    u8 index = sex * 9 + b * 3 + c;
+
+    return choices[index][func_020743a0(counts[index])];
+}
+
+extern const u8 data_020b6f18[][24];
+
+// The eyebrow type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
+u8 func_02074034(int sex, int b, int c) {
+    u8 counts[18] = {18, 18, 18, 23, 23, 23, 21, 21, 21, 9, 9, 9, 11, 11, 11, 9, 9, 9};
+    u8 index = sex * 9 + b * 3 + c;
+
+    return data_020b6f18[index][func_020743a0(counts[index])];
+}
+
+// The nose type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
+u8 func_020740a8(int sex, int b, int c) {
+    u8 choices[18][12] = {
+        {0, 1, 2, 3, 4, 5, 7, 8, 10},
+        {0, 1, 2, 3, 4, 5, 7, 8, 10},
+        {0, 1, 2, 3, 4, 5, 7, 8, 10},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11},
+        {0, 1, 3, 4, 8, 10},
+        {0, 1, 3, 4, 8, 10},
+        {0, 1, 3, 4, 8, 10},
+        {0, 1, 3, 4, 6, 8, 9, 10, 11},
+        {0, 1, 3, 4, 6, 8, 9, 10, 11},
+        {0, 1, 3, 4, 6, 8, 10, 11},
+        {0, 1, 3, 4, 6, 8, 9, 10, 11},
+        {0, 1, 3, 4, 6, 8, 9, 10, 11},
+        {0, 1, 3, 4, 6, 8, 10, 11},
+    };
+    u8 counts[18] = {9, 9, 9, 12, 12, 11, 12, 12, 11, 6, 6, 6, 9, 9, 8, 9, 9, 8};
+    u8 index = sex * 9 + b * 3 + c;
+
+    return choices[index][func_020743a0(counts[index])];
+}
+
+// The mouth type of a random Mii: one of the choices of row sex * 9 + b * 3 + c
+u8 func_02074148(int sex, int b, int c) {
+    u8 choices[18][24] = {
+        {0, 2, 3, 6, 7, 8, 9, 10, 12, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 15, 16, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23},
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23},
+    };
+    u8 counts[18] = {17, 19, 19, 19, 21, 21, 19, 21, 21, 19, 20, 20, 19, 20, 20, 20, 21, 21};
+    u8 index = sex * 9 + b * 3 + c;
+
+    return choices[index][func_020743a0(counts[index])];
+}
+
+extern const u8 data_020b6c00[][20];
+
+u8 func_020741e8(int sex, int b, int c) {
+    return data_020b6c00[sex * 9 + b * 3 + c][func_020743a0(20)];
+}
+
+u8 func_02074228(int b) {
+    u16 r = func_020743a0(100);
+
+    switch (b) {
+    case 0:
+        if (r < 90) {
+            return 0;
+        }
+        if (r < 94) {
+            return 1;
+        }
+        if (r < 96) {
+            return 2;
+        }
+        return 3;
+    case 1:
+        if (r < 83) {
+            return 0;
+        }
+        if (r < 86) {
+            return 1;
+        }
+        if (r < 90) {
+            return 2;
+        }
+        if (r < 93) {
+            return 3;
+        }
+        if (r < 94) {
+            return 4;
+        }
+        if (r < 96) {
+            return 5;
+        }
+        if (r < 98) {
+            return 6;
+        }
+        return 7;
+    case 2:
+        if (r < 78) {
+            return 0;
+        }
+        if (r < 83) {
+            return 1;
+        }
+        if (r < 93) {
+            return 3;
+        }
+        if (r < 98) {
+            return 6;
+        }
+        return 7;
+    }
+    return 0;
+}
+
+extern const u8 data_020b6984[][10];
+
+u8 func_02074310(int sex, int c) {
+    return data_020b6984[sex * 3 + c][func_020743a0(10)];
+}
+
+extern const u8 data_020b6a74[][20];
+
+u8 func_02074344(int b, int c) {
+    return data_020b6a74[c * 3 + b][func_020743a0(20)];
+}
+
+extern const u8 data_020b6966[][10];
+
+u8 func_02074378(int c) {
+    return data_020b6966[c][func_020743a0(10)];
+}
+
+// A random number below max (a 16-bit one when max is 0), from the LCG in the work area
+u16 func_020743a0(u16 max) {
+    NFLWork *work = data_02145360;
+
+    u32 r;
+
+    work->unk58 = work->unk5C * work->unk58 + work->unk60;
+    if (max == 0) {
+        r = work->unk58;
+    } else {
+        r = (work->unk58 >> 16) * max;
+    }
+    return r >> 16;
+}
+
+// The coordinate helpers: a vector in the library's axes to the drawing context's, each component to the axis its
+// index says, negated where its flag says
+void func_020743e4(const NFLDrawContext *ctx, VecFx16 *out, const VecFx16 *in) {
+    ((fx16 *)out)[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
+    ((fx16 *)out)[ctx->unkD0] = ctx->unkC4.x ? -in->y : in->y;
+    ((fx16 *)out)[ctx->unkD1] = ctx->unkC4.y ? -in->z : in->z;
+}
+
+void func_02074444(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    ((fx32 *)out)[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
+    ((fx32 *)out)[ctx->unkD0] = ctx->unkC4.x ? -in->y : in->y;
+    ((fx32 *)out)[ctx->unkD1] = ctx->unkC4.y ? -in->z : in->z;
+}
+
+void func_02074498(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    ((fx32 *)out)[ctx->unkD2] = in->x;
+    ((fx32 *)out)[ctx->unkD0] = in->y;
+    ((fx32 *)out)[ctx->unkD1] = in->z;
+}
+
+void func_020744c0(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    fx32 v[3];
+
+    v[ctx->unkD2] = ctx->unkC4.z ? -in->x : in->x;
+    v[ctx->unkD0] = ctx->unkC4.x ? -in->y : in->y;
+    v[ctx->unkD1] = ctx->unkC4.y ? -in->z : in->z;
+    out->x = v[0];
+    out->y = v[1];
+    out->z = v[2];
+}
+
+// Rotation about the context's z axis
+void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal) {
+    fx32 a[3];
+    VecFx32 axis;
+
+    a[ctx->unkD2] = 0;
+    a[ctx->unkD0] = 0;
+    a[ctx->unkD1] = ctx->unkC4.y ? -FX32_ONE : FX32_ONE;
+    axis.x = a[0];
+    axis.y = a[1];
+    axis.z = a[2];
+    MTX_RotAxis43(mtx, &axis, sinVal, cosVal);
+}
+
+void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+    VecFx32 in;
+    VecFx32 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_02074444(ctx, &out, &in);
+    G3C_Translate(info, out.x, out.y, out.z);
+}
+
+// Not matching: the original loads G3C_Scale's arguments last to first (out[2], out[1], out[0]). The stores to in
+// are the original's too, which keeps them only while its address is taken: hence the index i
+void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+    VecFx32 in;
+    fx32 out[3];
+    int i = 0;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    out[ctx->unkD2] = ((fx32 *)&in)[i];
+    out[ctx->unkD0] = ((fx32 *)&in)[i + 1];
+    out[ctx->unkD1] = ((fx32 *)&in)[i + 2];
+    G3C_Scale(info, out[0], out[1], out[2]);
+}
+
+void func_02074644(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+    VecFx16 in;
+    VecFx16 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_020743e4(ctx, &out, &in);
+    G3C_Vtx(info, out.x, out.y, out.z);
+}
+
+void func_02074688(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+    VecFx16 in;
+    VecFx16 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_020743e4(ctx, &out, &in);
+    G3C_Normal(info, out.x, out.y, out.z);
+}
+
+// Whether end bytes fit in the texture palette slots of a GXVRamTexPltt: 14 an unknown one, 13 too many
+int func_020746cc(int bank, u32 offset, u32 end) {
+    switch (bank) {
+    case 0x20:
+    case 0x40:
+        if (end > 0x4000) {
+            return 13;
+        }
+        break;
+    case 0x60:
+        if (end > 0x8000) {
+            return 13;
+        }
+        break;
+    case 0x10:
+        if (end > 0x10000) {
+            return 13;
+        }
+        break;
+    case 0x30:
+        if (end > 0x14000) {
+            return 13;
+        }
+        break;
+    case 0x70:
+        if (end > 0x18000) {
+            return 13;
+        }
+        break;
+    default:
+        return 14;
+    }
+    return 0;
+}
+
+// Whether end bytes fit in the texture slots of a GXVRamTex: 12 none, 11 too many
+int func_02074778(int bank, u32 offset, u32 end) {
+    switch (bank) {
+    case 1:
+    case 2:
+    case 4:
+    case 8:
+        if (end > 0x20000) {
+            return 11;
+        }
+        break;
+    case 3:
+    case 5:
+    case 6:
+    case 9:
+    case 10:
+    case 12:
+        if (end > 0x40000) {
+            return 11;
+        }
+        break;
+    case 7:
+    case 11:
+    case 13:
+    case 14:
+        if (end > 0x60000) {
+            return 11;
+        }
+        break;
+    case 15:
+        if (end > 0x80000) {
+            return 11;
+        }
+        break;
+    case 0:
+    default:
+        return 12;
+    }
+    return 0;
+}
+
+// Where each GXVRamTex's texture slots are in the LCDC's memory, in 4 KB: the first part, the second part, and the
+// size of the first
+typedef struct NFLTexBank {
+    u16 unk0;
+    u16 unk2;
+    u16 unk4;
+} NFLTexBank;
+
+extern const NFLTexBank data_020b7b04[];
+
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
+// Not matching: register allocation only (the original keeps the second part's address in r4, which becomes dest)
+int func_02074814(int bank, const void *src, u32 offset, u32 size) {
+    u32 n;
+    void *dest;
+    int result;
+    u32 second = data_020b7b04[bank].unk2 << 12;
+    u32 first = data_020b7b04[bank].unk0;
+    u32 split = data_020b7b04[bank].unk4;
+    u32 end = offset + size;
+
+    result = func_02074778(bank, offset, end);
+    if (result != 0) {
+        return result;
+    }
+    if (second == 0) {
+        dest = (void *)(offset + (first << 12));
+    } else if (end < split << 12) {
+        dest = (void *)(offset + (first << 12));
+    } else if (offset >= split << 12) {
+        dest = (void *)(second + offset - (split << 12));
+    } else {
+        n = (split << 12) - offset;
+        dest = (void *)(offset + (first << 12));
+        MIi_CpuCopy32(src, dest, n);
+        DC_FlushRange(dest, n);
+        size -= n;
+        MIi_CpuCopy32((const u8 *)src + n, (void *)second, size);
+        DC_FlushRange((void *)second, size);
+        return 0;
+    }
+    MIi_CpuCopy32(src, dest, size);
+    DC_FlushRange(dest, size);
+    return 0;
+}
+
+extern const u16 data_020b7af4[];
+
+// Copies size bytes of palettes to offset of the texture palette slots, through the LCDC, as GX_LoadTexPltt does
+int func_02074904(int bank, const void *src, u32 offset, u32 size) {
+    u32 base = data_020b7af4[bank >> 4] << 12;
+    int result = func_020746cc(bank, offset, offset + size);
+    void *dest;
+
+    if (result != 0) {
+        return result;
+    }
+    dest = (void *)(offset + base);
+    MIi_CpuCopy32(src, dest, size);
+    DC_FlushRange(dest, size);
+    return 0;
+}
+
+int func_0200473c(void);
+int func_0200474c(void);
+
+int func_02074964(const void *src, u32 offset, u32 size) {
+    int bank = func_0200473c();
+    int result;
+
+    GX_BeginLoadTex();
+    result = func_02074814(bank, src, offset, size);
+    GX_EndLoadTex();
+    return result;
+}
+
+int func_020749a4(const void *src, u32 offset, u32 size) {
+    int bank = func_0200474c();
+    int result;
+
+    GX_BeginLoadTexPltt();
+    result = func_02074904(bank, src, offset, size);
+    GX_EndLoadTexPltt();
+    return result;
+}
+
+BOOL func_02074b68(u32 *arg);
+BOOL func_0207516c(u32 *arg);
+BOOL func_02075528(NFLObj *obj, u32 *arg);
+BOOL func_02075f50(NFLObj *obj, u32 *arg);
+void func_020763e0(NFLObj *obj);
+
+// The library's work of a frame, which main calls every frame: 4 not set up, 0x14 and 0x13 busy, 3 nothing to do
+int func_020749e4(void) {
+    NFLWork *work = data_02145360;
+    u32 arg;
+
+    if (work == NULL) {
+        return 4;
+    }
+    arg = work->unk88;
+    if (work->unk8C == 3) {
+        return 0x14;
+    }
+    if (work->unk8C == 1) {
+        return 0x13;
+    }
+    if (work->unk8C == 4) {
+        return 3;
+    }
+    work->unk8C = 1;
+    work->unk9C = 0;
+    switch (work->unk90) {
+    case 0:
+        func_02074b68(&arg);
+        work->unk8C = 2;
+        break;
+    case 1:
+        func_0207516c(&arg);
+        work->unk8C = 2;
+        break;
+    case 2:
+        if (work->unk74 == NULL) {
+            work->unk8C = 4;
+            work->unk88 = 0;
+            work->unk80 = 0;
+            work->unk84 = 0;
+            return 3;
+        }
+        switch (work->unk74->unk170) {
+        case 0:
+            func_02075528(work->unk74, &arg);
+            work->unk8C = 2;
+            break;
+        case 1:
+            func_02075f50(work->unk74, &arg);
+            work->unk8C = 2;
+            break;
+        case 2:
+        case 4:
+            func_020763e0(work->unk74);
+            work->unk8C = 0;
+            break;
+        }
+        break;
+    }
+    work->unk88 = arg;
+    return 0;
+}
+
+
+
+// Copies size bytes, or converts them through palette when there is one
+void func_02074b34(const void *src, void *dest, const u16 *palette, u32 size, BOOL arg4) {
+    if (palette != NULL) {
+        func_0206dd44(dest, src, palette, size, arg4);
+    } else {
+        MIi_CpuCopy32(src, dest, size);
+    }
+}
+
+// What func_02074b68 copies to each of its six streams: a resource (func_0206cf6c's kind and index) and its size
+typedef struct NFLStreamSource {
+    int unk0;
+    int unk4;
+    u32 unk8;
+} NFLStreamSource;
+
+extern NFLStreamSource data_0211216c[];
+
+
+
+// Not matching: register allocation only (the original has pal in r5 before stream, source, extra and size)
+BOOL func_02074b68(u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    NFLWorkUnkA0 *stream = work->unkA0;
+    NFLStreamSource *source = data_0211216c;
+    int i;
+    u16 palette[16];
+
+    for (i = 0; i < 6; stream++, source++, i++) {
+        u32 extra;
+        u16 *pal;
+        u8 *src;
+        int size;
+        BOOL overflowB;
+        BOOL overflowA;
+
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (stream->unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+        extra = 0;
+        overflowB = FALSE;
+        overflowA = FALSE;
+        if (data_02145360->unk68 == 7) {
+            size = source->unk8 * 4;
+            if (source->unk0 == 2) {
+                func_0206a014(palette, 0);
+                pal = palette;
+            } else if (source->unk0 == 13) {
+                func_0206a1b4(palette, 0);
+                pal = palette;
+            } else {
+                pal = func_0206cf6c(12, 0);
+            }
+        } else {
+            size = source->unk8;
+            pal = NULL;
+        }
+        if (stream->unk8 == 0) {
+            u32 offset;
+
+            if (*pos + size > work->unk7C) {
+                overflowA = TRUE;
+                size = work->unk7C - *pos;
+            }
+            offset = work->unk84;
+            if (offset + size > work->unk7C) {
+                overflowB = TRUE;
+            }
+            if (!overflowB) {
+                src = func_0206cf6c(source->unk0, source->unk4);
+                func_02074b34(src, work->unk78 + offset, pal, size, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, size);
+            } else {
+                int over = work->unk84 + size - work->unk7C;
+                int n;
+
+                src = func_0206cf6c(source->unk0, source->unk4);
+                n = size - over;
+                func_02074b34(src, work->unk78 + work->unk84, pal, n, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, n);
+                if (data_02145360->unk68 == 7) {
+                    src += n / 4;
+                } else {
+                    src += n;
+                }
+                func_02074b34(src, work->unk78, pal, over, TRUE);
+                DC_FlushRange(work->unk78, over);
+            }
+            if (!overflowA) {
+                stream->unk8 = 2;
+            } else {
+                work->unk98 = size;
+                stream->unk8 = 3;
+            }
+            stream->unk0 = work->unk84;
+        } else {
+            u8 *p = func_0206cf6c(source->unk0, source->unk4);
+
+            switch (stream->unk8) {
+            case 3:
+                if (data_02145360->unk68 == 7) {
+                    p += (int)work->unk98 / 4;
+                } else {
+                    p += work->unk98;
+                }
+                size -= work->unk98;
+                extra = 0;
+                break;
+            case 4:
+                if (data_02145360->unk68 == 7) {
+                    p += (int)work->unk98 / 4;
+                } else {
+                    p += work->unk98;
+                }
+                size -= work->unk98;
+                extra = work->unk94;
+                break;
+            case 1:
+                extra = work->unk94;
+                if (data_02145360->unk68 == 7) {
+                    p += (int)extra / 4;
+                } else {
+                    p += extra;
+                }
+                size -= extra;
+                stream->unk0 = work->unk84;
+                break;
+            }
+            if (*pos + size > work->unk7C) {
+                overflowA = TRUE;
+                size = work->unk7C - *pos;
+            }
+            if (work->unk84 + size > work->unk7C) {
+                overflowB = TRUE;
+            }
+            if (!overflowA) {
+                stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                work->unk98 = 0;
+            } else {
+                switch (stream->unk8) {
+                case 3:
+                case 4:
+                    work->unk98 += size;
+                    break;
+                case 1:
+                    work->unk98 = work->unk94 + size;
+                    stream->unk8 = 4;
+                    break;
+                }
+            }
+            if (!overflowB) {
+                func_02074b34(p, work->unk78 + work->unk84, palette, size, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, size);
+            } else {
+                int over = work->unk84 + size - work->unk7C;
+                int n = size - over;
+
+                func_02074b34(p, work->unk78 + work->unk84, palette, n, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, n);
+                if (data_02145360->unk68 == 7) {
+                    p += n / 4;
+                } else {
+                    p += n;
+                }
+                func_02074b34(p, work->unk78, palette, over, TRUE);
+                DC_FlushRange(work->unk78, over);
+            }
+        }
+        switch (i) {
+        case 0:
+            stream->unk4 = data_02145360->unk10[0].unk0 + extra;
+            break;
+        case 1:
+            stream->unk4 = data_02145360->unk10[1].unk0 + extra;
+            break;
+        case 2:
+            stream->unk4 = data_02145360->unk10[2].unk0 + extra;
+            break;
+        case 3:
+            stream->unk4 = data_02145360->unk10[3].unk0 + extra;
+            break;
+        case 4:
+            stream->unk4 = data_02145360->unk10[4].unk0 + extra;
+            break;
+        case 5:
+            stream->unk4 = data_02145360->unk10[5].unk0 + extra;
+            break;
+        }
+        work->unk84 = (work->unk84 + size) % work->unk7C;
+        *pos += size;
+        }
+    }
+    if (data_02145360->unk68 != 7) {
+        func_0207516c(pos);
+    } else {
+        if (work->unk74 == NULL) {
+            return TRUE;
+        }
+        switch (work->unk74->unk170) {
+        case 0:
+            func_02075528(work->unk74, pos);
+            break;
+        case 1:
+            func_02075f50(work->unk74, pos);
+            break;
+        }
+    }
+    return TRUE;
+}
+
+// The seventh stream of the work area: 32 bytes of resource 12, 0 (the palette func_02074b68 uses)
+BOOL func_0207516c(u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+
+    if (work->unk68 != 7) {
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (work->unkA0[6].unk8 >= 2 && work->unkA0[6].unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (work->unkA0[6].unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (work->unkA0[6].unk8 == 0 || work->unkA0[6].unk8 == 1 || work->unkA0[6].unk8 == 3 ||
+            work->unkA0[6].unk8 == 4) {
+            u32 extra = 0;
+            BOOL overflowB = FALSE;
+            BOOL overflowA = FALSE;
+            int size = 32;
+            u8 *src;
+
+            if (work->unkA0[6].unk8 == 0) {
+                u32 offset;
+
+                if (*pos + size > work->unk7C) {
+                    size = work->unk7C - *pos;
+                    overflowA = TRUE;
+                }
+                offset = work->unk84;
+                if (offset + size > work->unk7C) {
+                    overflowB = TRUE;
+                }
+                if (!overflowB) {
+                    u8 *buf = work->unk78;
+
+                    src = func_0206cf6c(12, 0);
+                    MIi_CpuCopy32(src, buf + offset, size);
+                    DC_FlushRange(work->unk78 + work->unk84, size);
+                } else {
+                    int over = offset + size - work->unk7C;
+                    int n;
+
+                    src = func_0206cf6c(12, 0);
+                    n = size - over;
+                    MIi_CpuCopy32(src, work->unk78 + work->unk84, n);
+                    DC_FlushRange(work->unk78 + work->unk84, n);
+                    MIi_CpuCopy32(src + n, work->unk78, over);
+                    DC_FlushRange(work->unk78, over);
+                }
+                if (!overflowA) {
+                    work->unkA0[6].unk8 = 2;
+                } else {
+                    work->unk98 = size;
+                    work->unkA0[6].unk8 = 3;
+                }
+                work->unkA0[6].unk0 = work->unk84;
+            } else {
+                u8 *p = func_0206cf6c(12, 0);
+
+                switch (work->unkA0[6].unk8) {
+                case 3:
+                    p += work->unk98;
+                    size -= work->unk98;
+                    break;
+                case 4:
+                    p += work->unk98;
+                    extra = work->unk94;
+                    size -= work->unk98;
+                    break;
+                case 1:
+                    extra = work->unk94;
+                    work->unkA0[6].unk0 = work->unk84;
+                    p += extra;
+                    size -= extra;
+                    break;
+                }
+                if (*pos + size > work->unk7C) {
+                    size = work->unk7C - *pos;
+                    overflowA = TRUE;
+                }
+                if (work->unk84 + size > work->unk7C) {
+                    overflowB = TRUE;
+                }
+                if (!overflowA) {
+                    work->unkA0[6].unk8 = work->unkA0[6].unk8 == 3 ? 2 : 5;
+                    work->unk98 = 0;
+                } else {
+                    switch (work->unkA0[6].unk8) {
+                    case 3:
+                    case 4:
+                        work->unk98 += size;
+                        break;
+                    case 1:
+                        work->unk98 = work->unk94 + size;
+                        work->unkA0[6].unk8 = 4;
+                        break;
+                    }
+                }
+                if (!overflowB) {
+                    MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
+                    DC_FlushRange(work->unk78 + work->unk84, size);
+                } else {
+                    int over = work->unk84 + size - work->unk7C;
+                    int n = size - over;
+
+                    MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
+                    DC_FlushRange(work->unk78 + work->unk84, n);
+                    if (data_02145360->unk68 == 7) {
+                        p += n / 4;
+                    } else {
+                        p += n;
+                    }
+                    MIi_CpuCopy32(p, work->unk78, over);
+                    DC_FlushRange(work->unk78, over);
+                }
+            }
+            work->unk84 = (work->unk84 + size) % work->unk7C;
+            work->unkA0[6].unk4 = data_02145360->unk10[5].unk4 + extra;
+            *pos += size;
+        }
+    }
+    if (*pos >= work->unk7C) {
+        return TRUE;
+    }
+    if (work->unk74 == NULL) {
+        return TRUE;
+    }
+    switch (work->unk74->unk170) {
+    case 0:
+        func_02075528(work->unk74, pos);
+        break;
+    case 1:
+        func_02075f50(work->unk74, pos);
+        break;
+    }
+    return TRUE;
+}
+
+// What func_02075528 copies to each of an object's eleven streams: a resource kind (func_0206cf6c's) and its size
+typedef struct NFLObjSource {
+    int unk0;
+    u32 unk4;
+} NFLObjSource;
+
+extern NFLObjSource data_021121b4[];
+
+void func_0206cd9c(u16 *palette, const s16 *params);
+void func_0206cc30(u16 *palette);
+
+// Not matching: register allocation only (the original has stream in r4, then size, pal, obj, work)
+BOOL func_02075528(NFLObj *obj, u32 *pos) {
+    NFLWorkUnkA0 *stream;
+    NFLWork *work = data_02145360;
+    s16 *params = obj->unk180;
+    int i;
+    u16 palette[64];
+
+    stream = obj->unk1A4;
+
+    for (i = 0; i < 11; stream++, i++) {
+        int kind;
+        int index;
+        u16 *pal;
+        u8 *src;
+        int size;
+        BOOL overflowB;
+        BOOL overflowA;
+        BOOL arg4;
+
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (stream->unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+            kind = data_021121b4[i].unk0;
+            index = stream->unk4;
+            overflowB = FALSE;
+            overflowA = FALSE;
+            arg4 = TRUE;
+            pal = data_02145360->unk68 == 7 ? palette : NULL;
+            if (data_02145360->unk68 == 7) {
+                if (kind == 21) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+            } else {
+                size = data_021121b4[i].unk4;
+            }
+            switch (kind) {
+            case 21:
+                if (data_02145360->unk68 == 7) {
+                    func_0206cd9c(palette, params);
+                } else {
+                    func_0206cc30(palette);
+                }
+                if (stream->unk8 == 0) {
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(palette, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(palette, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32((u8 *)palette + over, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                    stream->unk0 = work->unk84;
+                } else {
+                    u8 *p = (u8 *)palette;
+
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        size -= obj->unk178;
+                        p += obj->unk178;
+                        break;
+                    case 1:
+                        p += obj->unk174;
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 4;
+                            break;
+                        }
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32(p + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+                break;
+            case 2:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a014(pal, params[8]);
+                }
+                break;
+            case 3:
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[6]);
+                }
+                break;
+            case 13:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a1b4(pal, params[10]);
+                }
+                break;
+            case 14:
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[14]);
+                }
+                break;
+            case 8:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a99c(pal, params[12]);
+                }
+                break;
+            case 1:
+                switch (index) {
+                case 2:
+                    index = 0;
+                    break;
+                case 3:
+                    index = 1;
+                    break;
+                }
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[14]);
+                }
+                break;
+            case 5:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a2e4(pal, params[2]);
+                }
+                arg4 = FALSE;
+                break;
+            case 10:
+                if (index == 34 || index == 57) {
+                    switch (index) {
+                    case 34:
+                        index = 0;
+                        break;
+                    case 57:
+                        index = 1;
+                        break;
+                    }
+                    if (data_02145360->unk68 == 7) {
+                        func_0206a894(pal, params[0]);
+                    }
+                    kind = 19;
+                    arg4 = FALSE;
+                } else {
+                    switch (index) {
+                    case 5:
+                        index = 0;
+                        break;
+                    case 7:
+                        index = 1;
+                        break;
+                    case 24:
+                        index = 2;
+                        break;
+                    case 29:
+                        index = 3;
+                        break;
+                    case 42:
+                        index = 4;
+                        break;
+                    case 53:
+                        index = 5;
+                        break;
+                    case 58:
+                        index = 6;
+                        break;
+                    case 69:
+                        index = 7;
+                        break;
+                    case 71:
+                        index = 8;
+                        break;
+                    }
+                    if (data_02145360->unk68 == 7) {
+                        func_02069de4(pal, params[4]);
+                    }
+                    if (params[3] == 29) {
+                        arg4 = TRUE;
+                    } else {
+                        arg4 = FALSE;
+                    }
+                }
+                break;
+            case 17:
+                if (data_02145360->unk68 == 7) {
+                    pal = func_0206cf6c(12, 0);
+                }
+                break;
+            }
+            if (kind != 21) {
+                if (stream->unk8 == 0) {
+                    u32 offset;
+
+                    stream->unk0 = work->unk84;
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    offset = work->unk84;
+                    if (offset + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        src = func_0206cf6c(kind, index);
+                        func_02074b34(src, work->unk78 + offset, pal, size, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n;
+
+                        src = func_0206cf6c(kind, index);
+                        n = size - over;
+                        func_02074b34(src, work->unk78 + work->unk84, pal, n, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        if (data_02145360->unk68 == 7) {
+                            src += n / 4;
+                        } else {
+                            src += n;
+                        }
+                        func_02074b34(src, work->unk78, pal, over, arg4);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                } else {
+                    u8 *p2 = func_0206cf6c(kind, index);
+
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        if (data_02145360->unk68 == 7) {
+                            p2 += (int)obj->unk178 / 4;
+                        } else {
+                            p2 += obj->unk178;
+                        }
+                        size -= obj->unk178;
+                        break;
+                    case 1:
+                        if (data_02145360->unk68 == 7) {
+                            p2 += (int)obj->unk174 / 4;
+                        } else {
+                            p2 += obj->unk174;
+                        }
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        func_02074b34(p2, work->unk78 + work->unk84, pal, size, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        func_02074b34(p2, work->unk78 + work->unk84, pal, n, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        if (data_02145360->unk68 == 7) {
+                            p2 += n / 4;
+                        } else {
+                            p2 += n;
+                        }
+                        func_02074b34(p2, work->unk78, pal, over, arg4);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 4;
+                            break;
+                        }
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+            }
+        }
+    }
+    if (data_02145360->unk68 == 7) {
+        if (obj->unk17C != NULL) {
+            func_02075528(obj->unk17C, pos);
+        }
+    } else {
+        func_02075f50(obj, pos);
+    }
+    return TRUE;
+}
+
+void func_0206cc6c(u16 *palette, const s16 *params);
+
+// The palettes of an object's eleven palette streams (unk228), made from its parameters at unk180
+BOOL func_02075f50(NFLObj *obj, u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    s16 *params = obj->unk180;
+
+    if (work->unk68 != 7) {
+        u16 palette[16];
+        NFLWorkUnkA0 *stream = obj->unk228;
+        u16 *pal = palette;
+        int i;
+
+        for (i = 0; i < 11; stream++, i++) {
+            int size;
+            BOOL overflowB;
+            BOOL overflowA;
+            u8 *p;
+
+            if (*pos >= work->unk7C) {
+                return TRUE;
+            }
+            if (!work->unk9C) {
+                if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                    work->unk9C = TRUE;
+                } else if (stream->unk8 <= 1) {
+                    work->unk88 = 0;
+                    work->unk80 = 0;
+                    work->unk84 = 0;
+                    *pos = 0;
+                    work->unk9C = TRUE;
+                }
+            }
+            if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+                overflowB = FALSE;
+                overflowA = FALSE;
+                if (i == 0) {
+                    size = 16;
+                } else {
+                    size = 32;
+                }
+                switch (i) {
+                case 0:
+                    func_0206cc6c(pal, params);
+                    break;
+                case 1:
+                    func_0206a014(pal, params[8]);
+                    break;
+                case 2:
+                    func_02069de4(pal, params[6]);
+                    break;
+                case 3:
+                    func_0206a1b4(pal, params[10]);
+                    break;
+                case 4:
+                    func_02069de4(pal, params[14]);
+                    break;
+                case 5:
+                    func_0206a99c(pal, params[12]);
+                    break;
+                case 6:
+                    func_02069de4(pal, params[14]);
+                    break;
+                case 7:
+                    func_0206a2e4(pal, params[2]);
+                    break;
+                case 8:
+                    if (params[3] == 34 || params[3] == 57) {
+                        func_0206a894(pal, params[0]);
+                    } else {
+                        func_02069de4(pal, params[4]);
+                    }
+                    break;
+                case 9:
+                    MIi_CpuCopy32(func_0206cf6c(12, 0), pal, size);
+                    DC_FlushRange(pal, size);
+                    break;
+                }
+                if (stream->unk8 == 0) {
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(pal, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(pal, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32((u8 *)pal + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                    stream->unk0 = work->unk84;
+                } else {
+                    p = (u8 *)pal;
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        p += obj->unk178;
+                        size -= obj->unk178;
+                        break;
+                    case 1:
+                        p = (u8 *)pal + obj->unk174;
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 5;
+                            break;
+                        }
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32(p + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+            }
+        }
+    }
+    if (obj->unk17C != NULL) {
+        func_02075528(obj->unk17C, pos);
+    }
+    return TRUE;
+}
+
+// Takes obj out of the list at unk74 of the work area
+void func_020763e0(NFLObj *obj) {
+    NFLWork *work = data_02145360;
+    NFLObj *prev = work->unk74;
+    NFLObj *cur;
+
+    if (prev == obj) {
+        work->unk74 = obj->unk17C;
+        obj->unk17C = NULL;
+        return;
+    }
+    for (cur = prev->unk17C; cur != NULL; cur = cur->unk17C) {
+        if (cur == obj) {
+            prev->unk17C = obj->unk17C;
+            obj->unk17C = NULL;
+            return;
+        }
+        prev = cur;
+    }
+}
+
+int func_02076680(u32 *size);
+int func_02076a98(u32 *size);
+int func_02076e1c(NFLObj *obj, u32 *size);
+int func_02077300(NFLObj *obj, u32 *size);
+
+// The library's work after the frame's interrupt, which main calls with 0x4000: 8 a size not a multiple of 4, 4 not
+// set up, 0x13 and 0x14 busy, 2 and 3 nothing to do
+int func_02076448(u32 size) {
+    u32 rest = size;
+    NFLWork *work;
+    NFLObj *obj;
+    int result;
+
+    if (rest & 3) {
+        return 8;
+    }
+    work = data_02145360;
+    if (work == NULL) {
+        return 4;
+    }
+    if (work->unk8C == 1) {
+        return 0x13;
+    }
+    if (work->unk8C == 3) {
+        return 0x14;
+    }
+    if (work->unk8C == 0) {
+        return 2;
+    }
+    if (work->unk8C == 4) {
+        return 3;
+    }
+    work->unk8C = 3;
+    switch (work->unk90) {
+    case 0:
+        result = func_02076680(&rest);
+        if (result != 0 && result != 2) {
+            work->unk90 = 3;
+            work->unk8C = 4;
+            return result;
+        }
+        if (result == 2) {
+            work->unk8C = 0;
+        } else {
+            work->unk8C = 2;
+        }
+        break;
+    case 1:
+        result = func_02076a98(&rest);
+        if (result != 0 && result != 2) {
+            work->unk90 = 3;
+            work->unk8C = 4;
+            return result;
+        }
+        if (result == 2) {
+            work->unk8C = 0;
+        } else {
+            work->unk8C = 2;
+        }
+        break;
+    case 2:
+        obj = work->unk74;
+        if (obj == NULL) {
+            work->unk8C = 4;
+            return 2;
+        }
+        switch (obj->unk170) {
+        case 0:
+            result = func_02076e1c(obj, &rest);
+            if (result != 0 && result != 2) {
+                obj->unk170 = 3;
+                func_020763e0(work->unk74);
+                work->unk8C = 0;
+                return result;
+            }
+            if (result == 2) {
+                work->unk8C = 0;
+            } else {
+                work->unk8C = 2;
+            }
+            break;
+        case 1:
+            result = func_02077300(obj, &rest);
+            if (result != 0 && result != 2) {
+                obj->unk170 = 3;
+                func_020763e0(work->unk74);
+                work->unk8C = 0;
+                return result;
+            }
+            if (result == 2) {
+                work->unk8C = 0;
+            } else {
+                work->unk8C = 2;
+            }
+            break;
+        case 2:
+        case 4:
+            func_020763e0(obj);
+            work->unk8C = 0;
+            break;
+        }
+        break;
+    }
+    if (result != 0) {
+        return result;
+    }
+    return 1;
+}
+
+// The VRAM side of func_02074b68's streams, after the frame's interrupt: loads up to *rest bytes of what the six
+// streams have put in the ring buffer into texture VRAM (func_02074964), then hands on to the object streams
+// (func_02076e1c) or the seventh stream (func_02076a98)
+int func_02076680(u32 *rest) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    u32 dest;
+    NFLWorkUnkA0 *stream = work->unkA0;
+    NFLStreamSource *source = data_0211216c;
+    int i;
+
+    for (i = 0; i < 6; stream++, source++, i++) {
+        BOOL go = FALSE;
+        u8 *src;
+        u32 size;
+        int result;
+
+        switch (stream->unk8) {
+        case 2:
+            if (data_02145360->unk68 == 7) {
+                size = source->unk8 * 4;
+            } else {
+                size = source->unk8;
+            }
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 3:
+            size = work->unk98;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 4:
+            size = work->unk98 - work->unk94;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 5:
+            if (data_02145360->unk68 == 7) {
+                size = source->unk8 * 4;
+            } else {
+                size = source->unk8;
+            }
+            size -= work->unk94;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 0:
+        case 1:
+            work->unk88 = 0;
+            work->unk80 = 0;
+            work->unk84 = 0;
+            return 2;
+        }
+        if (*rest == 0) {
+            return 0;
+        }
+        if (go == TRUE) {
+            if (*rest >= size) {
+                if (stream->unk0 + size <= work->unk7C) {
+                    result = func_02074964(src, dest, size);
+                } else {
+                    int over = stream->unk0 + size - work->unk7C;
+                    int n = size - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + size) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 2) {
+                    stream->unk8 = 7;
+                } else if (stream->unk8 == 5) {
+                    stream->unk8 = 7;
+                    work->unk94 = 0;
+                } else {
+                    stream->unk8 = 1;
+                    work->unk94 = work->unk98;
+                    work->unk98 = 0;
+                }
+                *rest -= size;
+            } else {
+                if (stream->unk0 + *rest <= work->unk7C) {
+                    result = func_02074964(src, dest, *rest);
+                } else {
+                    int over = stream->unk0 + *rest - work->unk7C;
+                    int n = *rest - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 3 || stream->unk8 == 4) {
+                    stream->unk8 = 4;
+                } else {
+                    stream->unk8 = 5;
+                }
+                work->unk94 += *rest;
+                stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                stream->unk4 += *rest;
+                *rest = 0;
+                return 0;
+            }
+        }
+    }
+    if (data_02145360->unk68 == 7) {
+        work->unk90 = 2;
+        if (*rest == 0) {
+            return 2;
+        }
+        if (work->unk74 != NULL) {
+            switch (work->unk74->unk170) {
+            case 0:
+                return func_02076e1c(work->unk74, rest);
+            case 2:
+            case 4:
+                func_020763e0(work->unk74);
+                break;
+            }
+        }
+    } else {
+        work->unk90 = 1;
+        if (*rest == 0) {
+            return 2;
+        }
+        return func_02076a98(rest);
+    }
+    return 2;
+}
+
+// The VRAM side of the seventh stream (func_0207516c): loads it into texture palette VRAM (func_020749a4), then
+// hands on to the object streams
+int func_02076a98(u32 *rest) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    BOOL go = FALSE;
+    u32 dest;
+    int size;
+    u8 *src;
+    int result;
+
+    if (work->unk68 == 7) {
+        return 0;
+    }
+    switch (work->unkA0[6].unk8) {
+    case 2:
+        dest = work->unkA0[6].unk4;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        size = 32;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 3:
+        dest = work->unkA0[6].unk4;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        size = work->unk98;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 4:
+        size = work->unk98 - work->unk94;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        dest = work->unkA0[6].unk4;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 5:
+        size = 32 - work->unk94;
+        src = (u8 *)work->unkA0[6].unk0 + (u32)work->unk78;
+        dest = work->unkA0[6].unk4;
+        DC_FlushRange(src, size);
+        go = TRUE;
+        break;
+    case 0:
+    case 1:
+        work->unk88 = go;
+        work->unk80 = go;
+        work->unk84 = go;
+        return 2;
+    }
+    if (*rest == 0) {
+        return 0;
+    }
+    if (go == TRUE) {
+        if (*rest >= size) {
+            if (work->unkA0[6].unk0 + size <= work->unk7C) {
+                result = func_020749a4(src, dest, size);
+            } else {
+                u32 over = work->unkA0[6].unk0 + size - work->unk7C;
+                u32 n = size - over;
+
+                result = func_020749a4(src, dest, n);
+                if (result == 0) {
+                    result = func_020749a4(work->unk78, dest + n, over);
+                }
+            }
+            if (result != 0) {
+                work->unkA0[6].unk8 = 6;
+                return result;
+            }
+            work->unk80 = (work->unkA0[6].unk0 + size) % work->unk7C;
+            if (work->unk84 >= work->unk80) {
+                work->unk88 = work->unk84 - work->unk80;
+            } else {
+                work->unk88 = work->unk7C + work->unk84 - work->unk80;
+            }
+            if (work->unkA0[6].unk8 == 2) {
+                work->unkA0[6].unk8 = 7;
+            } else if (work->unkA0[6].unk8 == 5) {
+                work->unkA0[6].unk8 = 7;
+                work->unk94 = 0;
+            } else {
+                work->unkA0[6].unk8 = 1;
+                work->unk94 = work->unk98;
+                work->unk98 = 0;
+            }
+            *rest -= size;
+        } else {
+            if (work->unkA0[6].unk0 + *rest <= (u32)(work->unk78 + work->unk7C)) {
+                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, *rest);
+            } else {
+                u32 over = work->unkA0[6].unk0 + *rest - work->unk7C;
+                u32 n = *rest - over;
+
+                result = func_020749a4(work->unk78 + work->unkA0[6].unk0, work->unkA0[6].unk4, n);
+                if (result == 0) {
+                    result = func_020749a4(work->unk78, work->unkA0[6].unk4 + n, over);
+                }
+            }
+            if (result != 0) {
+                work->unkA0[6].unk8 = 6;
+                return result;
+            }
+            work->unk80 = (work->unkA0[6].unk0 + *rest) % work->unk7C;
+            if (work->unk84 >= work->unk80) {
+                work->unk88 = work->unk84 - work->unk80;
+            } else {
+                work->unk88 = work->unk7C + work->unk84 - work->unk80;
+            }
+            if (work->unkA0[6].unk8 == 3 || work->unkA0[6].unk8 == 4) {
+                work->unkA0[6].unk8 = 4;
+            } else {
+                work->unkA0[6].unk8 = 5;
+            }
+            work->unk94 += *rest;
+            work->unkA0[6].unk0 = (work->unkA0[6].unk0 + *rest) % work->unk7C;
+            work->unkA0[6].unk4 += *rest;
+            *rest = 0;
+            return 0;
+        }
+    }
+    work->unk90 = 2;
+    if (*rest == 0) {
+        return 2;
+    }
+    if (work->unk74 != NULL) {
+        switch (work->unk74->unk170) {
+        case 0:
+            return func_02076e1c(work->unk74, rest);
+        case 1:
+            return func_02077300(work->unk74, rest);
+        case 2:
+        case 4:
+            func_020763e0(work->unk74);
+            break;
+        }
+    }
+    return 2;
+}
+
+// Where each of an object's eleven streams goes in texture VRAM, from the object's base (unkD4): the first offset in
+// the other modes, the second in mode 7
+typedef struct NFLObjDest {
+    u32 unk0;
+    u32 unk4;
+} NFLObjDest;
+
+extern const NFLObjDest data_020b7b8c[];
+
+// The VRAM side of an object's eleven streams (func_02075528)
+int func_02076e1c(NFLObj *obj, u32 *rest) {
+    NFLWork *work = data_02145360;
+    int i;
+    u32 dest;
+    NFLWorkUnkA0 *stream = obj->unk1A4;
+    int result;
+
+    for (i = 0; i < 11; stream++, i++) {
+        BOOL go = FALSE;
+        u8 *src;
+        u32 size;
+
+        switch (stream->unk8) {
+        case 2:
+            if (data_02145360->unk68 == 7) {
+                if (i == 0) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+            } else {
+                size = data_021121b4[i].unk4;
+                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+            }
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            go = TRUE;
+            break;
+        case 3:
+            size = obj->unk178;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            if (data_02145360->unk68 == 7) {
+                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+            } else {
+                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+            }
+            go = TRUE;
+            break;
+        case 4:
+            size = obj->unk178 - obj->unk174;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            if (data_02145360->unk68 == 7) {
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+            } else {
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+            }
+            go = TRUE;
+            break;
+        case 5:
+            if (data_02145360->unk68 == 7) {
+                if (i == 0) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk4);
+            } else {
+                size = data_021121b4[i].unk4;
+                dest = obj->unk174 + (obj->unkD4 + data_020b7b8c[i].unk0);
+            }
+            size -= obj->unk174;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            go = TRUE;
+            break;
+        case 0:
+        case 1:
+            work->unk88 = go;
+            work->unk80 = go;
+            work->unk84 = go;
+            return 2;
+        }
+        if (*rest == 0) {
+            return 0;
+        }
+        if (go == TRUE) {
+            if (*rest >= size) {
+                if (stream->unk0 + size <= work->unk7C) {
+                    result = func_02074964(src, dest, size);
+                } else {
+                    int over = stream->unk0 + size - work->unk7C;
+                    int n = size - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + size) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 2) {
+                    stream->unk8 = 7;
+                } else if (stream->unk8 == 5) {
+                    stream->unk8 = 7;
+                    obj->unk174 = 0;
+                } else {
+                    stream->unk8 = 1;
+                    obj->unk174 = obj->unk178;
+                    obj->unk178 = 0;
+                    *rest -= size;
+                    return 2;
+                }
+                *rest -= size;
+            } else {
+                if (stream->unk0 + *rest <= work->unk7C) {
+                    result = func_02074964(src, dest, *rest);
+                } else {
+                    int over = stream->unk0 + *rest - work->unk7C;
+                    int n = *rest - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 3 || stream->unk8 == 4) {
+                    stream->unk8 = 4;
+                } else {
+                    stream->unk8 = 5;
+                }
+                obj->unk174 += *rest;
+                stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                *rest = 0;
+                return 0;
+            }
+        }
+    }
+    result = 2;
+    if (data_02145360->unk68 == 7) {
+        if (obj->unk17C != NULL && *rest != 0) {
+            result = func_02076e1c(obj->unk17C, rest);
+            if (result != 0 && result != 2) {
+                return result;
+            }
+        }
+        if (obj->unk170 != 4) {
+            obj->unk170 = 2;
+        }
+        func_020763e0(obj);
+    } else {
+        obj->unk170 = 1;
+        if (*rest == 0) {
+            return result;
+        }
+        result = func_02077300(obj, rest);
+        return result;
+    }
+    return result;
+}
+
+// Where each of an object's palette streams goes in texture palette VRAM, from the object's base (unkD8)
+extern const u32 data_020b7b64[];
+
+// The VRAM side of an object's palette streams (func_02075f50): ten of them here, where func_02075f50 fills eleven
+int func_02077300(NFLObj *obj, u32 *rest) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    int result;
+
+    if (work->unk68 != 7) {
+        int i;
+        u8 *src;
+        NFLWorkUnkA0 *stream = obj->unk228;
+
+        for (i = 0; i < 10; stream++, i++) {
+            BOOL go = FALSE;
+            u32 dest;
+            u32 size;
+
+            switch (stream->unk8) {
+            case 2:
+                dest = obj->unkD8 + data_020b7b64[i];
+                if (i == 0) {
+                    size = 16;
+                } else {
+                    size = 32;
+                }
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 3:
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                size = obj->unk178;
+                dest = obj->unkD8 + data_020b7b64[i];
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 4:
+                size = obj->unk178 - obj->unk174;
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 5:
+                if (i == 0) {
+                    size = 16 - obj->unk174;
+                } else {
+                    size = 32 - obj->unk174;
+                }
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
+                dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
+                DC_FlushRange(src, size);
+                go = TRUE;
+                break;
+            case 0:
+            case 1:
+                work->unk88 = go;
+                work->unk80 = go;
+                work->unk84 = go;
+                return 2;
+            }
+            if (*rest == 0) {
+                return 0;
+            }
+            if (go == TRUE) {
+                if (*rest >= size) {
+                    if (stream->unk0 + size <= work->unk7C) {
+                        result = func_020749a4(src, dest, size);
+                    } else {
+                        int over = stream->unk0 + size - work->unk7C;
+                        int n = size - over;
+
+                        result = func_020749a4(src, dest, n);
+                        if (result == 0) {
+                            result = func_020749a4(work->unk78, dest + n, over);
+                        }
+                    }
+                    if (result != 0) {
+                        stream->unk8 = 6;
+                        return result;
+                    }
+                    work->unk80 = (stream->unk0 + size) % work->unk7C;
+                    if (work->unk84 >= work->unk80) {
+                        work->unk88 = work->unk84 - work->unk80;
+                    } else {
+                        work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                    }
+                    if (stream->unk8 == 2) {
+                        stream->unk8 = 7;
+                    } else if (stream->unk8 == 5) {
+                        stream->unk8 = 7;
+                        obj->unk174 = 0;
+                    } else {
+                        stream->unk8 = 1;
+                        obj->unk174 = obj->unk178;
+                        obj->unk178 = 0;
+                    }
+                    *rest -= size;
+                } else {
+                    if (stream->unk0 + *rest <= work->unk7C) {
+                        result = func_020749a4(src, dest, *rest);
+                    } else {
+                        int over = stream->unk0 + *rest - work->unk7C;
+                        int n = *rest - over;
+
+                        result = func_020749a4(src, dest, n);
+                        if (result == 0) {
+                            result = func_020749a4(work->unk78, dest + n, over);
+                        }
+                    }
+                    if (result != 0) {
+                        stream->unk8 = 6;
+                        return result;
+                    }
+                    work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                    if (work->unk84 >= work->unk80) {
+                        work->unk88 = work->unk84 - work->unk80;
+                    } else {
+                        work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                    }
+                    if (stream->unk8 == 3 || stream->unk8 == 4) {
+                        stream->unk8 = 4;
+                    } else {
+                        stream->unk8 = 5;
+                    }
+                    obj->unk174 += *rest;
+                    stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                    *rest = 0;
+                    return 0;
+                }
+            }
+        }
+    }
+    result = 2;
+    if (obj->unk17C != NULL && *rest != 0) {
+        result = func_02076e1c(obj->unk17C, rest);
+        if (result != 0 && result != 2) {
+            return result;
+        }
+    }
+    if (obj->unk170 != 4) {
+        obj->unk170 = 2;
+    }
+    func_020763e0(obj);
+    return result;
 }
