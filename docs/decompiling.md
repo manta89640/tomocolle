@@ -183,6 +183,16 @@ the coordinator's design of round 3, kept for the user to approve or replace. It
 function the fetched release lacks), `spi/src/pm.c` (a later release, see binary.md, "Libraries") and
 `card/src/card_spi.c` (one function of a later release).
 
+Before writing an override, look for the game's release among later commits of the fetched repository: its history
+is small (`git clone --filter=blob:none` of it, then `git log -- <path>`). Where one has the file as the game has it,
+nothing is written here: `FETCHED_FILES` in `configure.py` names the file, the commit and the file's SHA-256, and
+`configure.py` downloads that one file at that commit into `lib/fetched/<repository>/<commit>/` (ignored), checks the
+hash, and compiles it in place of the repository's file, with the same compiler, flags and include directories (the
+repository's directory of the file is searched first, as for an override, and an override of the file applies to the
+fetched one). The repository's own pin stays: a later commit changes many other files, so moving it is a decision for
+all of them. `math/src/qsort.c` is built so, from `ccbbcc8`, the commit that writes `MATH_QSort`'s conditional
+instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries").
+
 The fetched file's other definitions stay. A static that only a removed or replaced function used is no longer
 emitted, which matters: with `-ipa file` the statics are pooled, so the file's pool is only right once every function
 that uses one of them is the game's. Remove what the game's release does not have.
