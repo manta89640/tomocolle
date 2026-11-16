@@ -3086,11 +3086,13 @@ void NFLi_ApplyExpression0(NFLFace *obj) {
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
-// Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own.
-// Not matching yet: the original keeps the compare and branch of this clamp, whose result nothing uses (the eye's
-// rotation goes in unclamped); here the compiler drops the whole clamp.
+// Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own: the rotation moved by
+// sNFLEyeTypeRotations as in kinds 1 and 4 and kept to 0..7 goes unused, and the eyes take the Mii's rotation.
+// The original keeps that clamp's compares and drops only its moves, which is what opt_dead_assignments off gives
+// with the clamp written on a copy (newRot) and the else adding d again.
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression5(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3099,18 +3101,24 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     u16 idx;
     fx32 v;
     int rot;
+    int d;
+    int newRot;
 
-    idx = (u16)(((obj->exprFields[3] + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
-    rot = obj->exprFields[3] + (sNFLEyeTypeRotations[obj->exprFields[3]] - sNFLEyeTypeRotations[26]);
-    if (rot < 0) {
-        rot = 0;
-    } else if (rot > 7) {
-        rot = 7;
-    }
-    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
-    type = obj->exprFields[5];
+    rot = obj->exprFields[3];
+    d = sNFLEyeTypeRotations[rot] - sNFLEyeTypeRotations[26];
+    newRot = rot;
+    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
+    y = -(obj->exprFields[2] * 0x10E1 - 0x22490);
     cos = (fx16)FX_CosIdx(idx);
+    type = obj->exprFields[5];
+    if (rot + d < 0) {
+        newRot = 0;
+    } else if (rot + d > 7) {
+        newRot = 7;
+    } else {
+        newRot += d;
+    }
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[0].texAddr, obj->eyePlttAddr);
     NFLi_PatchFacePart(obj, &obj->eyeMirrorPatch, -sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[0].texAddr, obj->eyePlttAddr);
     idx = (u16)((obj->exprFields[6] + sNFLEyebrowTypeRotations[obj->exprFields[7]] - 0x20) << 11);
@@ -3136,6 +3144,7 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
+#pragma opt_dead_assignments reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
