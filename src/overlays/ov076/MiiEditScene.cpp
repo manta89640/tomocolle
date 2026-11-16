@@ -269,6 +269,7 @@ void MiiEditProfilePage::Exit() {
 // What the profile page uses of the main program (stand-ins)
 extern "C" {
 void func_02037478(wchar_t *text); // Applied to the texts of numbers before they are shown
+void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
 int func_02098dac(SavedCharacter *character, int param);  // A parameter of the character (0x26, 0x27: birth month, day)
 BOOL func_02098e50(SavedCharacter *character, int param);
@@ -278,6 +279,9 @@ void MiiData_GetName(SavedCharacter *mii, wchar_t *name);
 void MiiData_GetCreatorName(SavedCharacter *mii, wchar_t *name);
 int MiiData_GetSex(SavedCharacter *mii);
 }
+
+// Where the voice and personality pages move the camera to
+static const VecFx32 sPageCameraGoal = { 0, 0x1C50, 0x19BF0 };
 
 // Where the profile page's texts go: the place of each of mTextBoxes[0..8] in sProfileTextPositions
 static const int sProfileTextSlots[9] = { 0, 1, 4, 2, 3, 6, 7, 8, 9 };
@@ -401,14 +405,14 @@ void MiiEditProfilePage::UpdateTexts() {
     }
     int month = func_02098dac(&mScene->mCharacter, 0x26);
     int day = func_02098dac(&mScene->mCharacter, 0x27);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+    if (month > 0 && month <= 12 && day > 0 && day <= 31) {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"%d/%d", month, day);
         func_02037478(BIRTHDAY_TEXT(mScene));
     } else {
         swprintf(BIRTHDAY_TEXT(mScene), 6, L"");
     }
-    mScene->mTextBoxes[0].SetText((const NNSG2dChar *)&mScene->mCharacter.mUnknown058[0x16]);
-    mScene->mTextBoxes[1].SetText((const NNSG2dChar *)mScene->mCharacter.mUnknown058);
+    mScene->mTextBoxes[0].SetText((const NNSG2dChar *)mScene->mCharacter.mUnknown06E);
+    mScene->mTextBoxes[1].SetText((const NNSG2dChar *)mScene->mCharacter.mName);
     MiiData_GetName(&mScene->mCharacter, NAME_TEXT(mScene));
     mScene->mTextBoxes[2].SetText((const NNSG2dChar *)NAME_TEXT(mScene));
     mScene->mTextBoxes[8].SetText((const NNSG2dChar *)sSexMarks[MiiData_GetSex(&mScene->mCharacter)]);
@@ -475,6 +479,218 @@ void MiiEditProfilePage::UpdateKeyboardKey(int state) {
 
 // --- The voice page ---
 
+// What the voice page uses of the main program (stand-ins)
+struct VoiceParamRange {
+    /* 0x0 */ s16 mUnknown0;
+    /* 0x2 */ s16 mMin;
+    /* 0x4 */ s16 mMax;
+    /* 0x6 */ s16 mUnknown6;
+};
+
+extern "C" {
+extern const VoiceParamRange data_020fb940[]; // Of the five values of CharacterRecord::mVoice
+void func_0203217c(MiiEditSprite100 *slider, int x, int a, int b, int left, int top, int width, int height);
+void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressedSequence);
+void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
+void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
+BOOL func_02031d00(SpriteButton *button);
+void func_0204e4b4(CharacterSpeechTexts *texts, SavedCharacter *character); // Fills them from the character
+void func_0204e62c(wchar_t *text, int value);                               // Writes a number
+void func_0209d898(SceneCharacter *character, TtsPlayer *player);
+void Character_SetFace(SceneCharacter *character, int face);
+void func_020372bc(wchar_t *text, int size);
+void func_02098d68(SavedCharacter *character, int index, s16 value); // Sets mVoice[index]
+}
+
+// The scene's buffer of the text to speak, in Shift JIS (0x102 bytes)
+#define SPEECH_TEXT(scene) ((char *)&(scene)->mUnknownAfterTts[0x1A264 - 0x5920 - sizeof(TtsPlayer)])
+
+// The voice page's buttons
+static const u16 sVoiceButtonSequences[22] = {
+    0, 2, 4, 6, 8, 10, 12, 14, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 40, 42, 44, 46,
+};
+static const WindowPoint sVoiceButtonSizes[22] = {
+    { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 },
+    { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 },
+    { 30, 24 }, { 30, 24 }, { 16, 16 }, { 16, 16 }, { 16, 16 }, { 16, 16 },
+};
+static const int sVoiceButtonKinds[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3 };
+static const ButtonSounds sVoiceButtonSounds[22] = {
+    { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 },
+    { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 14, -1, 0, -1 }, { 1, -1, 0, -1 },
+    { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 },
+    { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 },
+    { 2, -1, -1, -1 }, { 2, -1, -1, -1 },
+};
+static const WindowPoint sVoiceButtonPositions[22] = {
+    { 68, 52 }, { 92, 52 }, { 116, 52 }, { 140, 52 }, { 164, 52 }, { 188, 52 }, { 68, 92 }, { 68, 132 },
+    { 206, 134 }, { 237, 134 }, { 237, 134 }, { 206, 20 }, { 237, 20 }, { 206, 45 }, { 237, 45 }, { 206, 70 },
+    { 237, 70 }, { 206, 95 }, { 99, 138 }, { 118, 138 }, { 137, 138 }, { 156, 138 },
+};
+static const u16 sVoiceTextButtonSequences[3] = { 16, 107, 107 };
+static const int sVoiceTextButtonResources[3] = { 1, 0, 0 };
+static const WindowPoint sVoiceTextButtonSizes[3] = { { 62, 22 }, { 116, 30 }, { 116, 30 } };
+static const int sVoiceTextButtonKinds[3] = { 4, 4, 4 };
+static const ButtonSounds sVoiceTextButtonSounds[3] = { { 20, -1, 0, -1 }, { 22, -1, 0, -1 }, { 20, -1, 0, -1 } };
+static const WindowPoint sVoiceTextButtonPositions[3] = { { 136, 132 }, { 62, 175 }, { 194, 175 } };
+static const u32 sVoiceTextButtonMessages[3] = { 41, 5, 6 };
+static const int sVoiceTextButtonFiles[3] = { 0, 1, 1 };
+static const int sVoiceTextButtonFonts[3] = { 0, 2, 2 };
+static const u16 sVoiceSpriteSequences[2] = { 48, 49 };
+static const WindowPoint sVoiceSpritePositions[2] = { { 128, 96 }, { 128, 96 } };
+// The five sliders: where each is, and the size of its knob
+static const u16 sVoiceSliderSequences[5] = { 38, 38, 38, 38, 38 };
+static const WindowPoint sVoiceSliderPositions[5] = { { 128, 112 }, { 128, 88 }, { 128, 64 }, { 128, 16 }, { 128, 40 } };
+static const WindowPoint sVoiceSliderKnobSizes[5] = { { 8, 20 }, { 8, 20 }, { 8, 20 }, { 8, 20 }, { 8, 20 } };
+// The first day of each star sign in its month, from January's (Aquarius from the 21st)
+static const int sStarSignFirstDays[12] = { 21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22 };
+
+void MiiEditVoicePage::func_ov076_02154690(MiiEditScene *scene) {
+    mState = -1;
+    mScene = scene;
+    func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
+    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+    mScene->func_ov076_0214bbe4();
+    ObjResourceManager_Load(&gObjResourceManager, "E00:/Voice.nce", "E00:/Voice.ncg", 0x1000, 1, 0x10000);
+    for (u16 i = 0; i < 22; i++) {
+        u16 sequence = sVoiceButtonSequences[i];
+        Sprite_Init(&mButtons[i], 1, sequence, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], sVoiceButtonSizes[i].x, sVoiceButtonSizes[i].y);
+        func_02031278(&mButtons[i], sequence, sequence + 1);
+        func_02031260(&mButtons[i], sVoiceButtonKinds[i]);
+        func_02032158(&mButtons[i], &sVoiceButtonSounds[i]);
+        mButtons[i].mUnknownDC = 14;
+        mButtons[i].SetPositionFromVec(sVoiceButtonPositions[i].x << FX32_SHIFT,
+                                       sVoiceButtonPositions[i].y << FX32_SHIFT);
+        func_0203119c(&mButtons[i]);
+        mButtons[i].mVisible = FALSE;
+    }
+    for (u16 i = 0; i < 3; i++) {
+        u16 sequence = sVoiceTextButtonSequences[i];
+        Sprite_Init(&mTextButtons[i], sVoiceTextButtonResources[i], sequence, 0x80, 0x60, TRUE);
+        func_02031eb0(&mTextButtons[i], sVoiceTextButtonSizes[i].x, sVoiceTextButtonSizes[i].y);
+        func_02031278(&mTextButtons[i], sequence, sequence + 1);
+        func_02031260(&mTextButtons[i], sVoiceTextButtonKinds[i]);
+        func_02032158(&mTextButtons[i], &sVoiceTextButtonSounds[i]);
+        mTextButtons[i].mUnknownDC = 14;
+        mTextButtons[i].SetPositionFromVec(sVoiceTextButtonPositions[i].x << FX32_SHIFT,
+                                           sVoiceTextButtonPositions[i].y << FX32_SHIFT);
+        func_0203119c(&mTextButtons[i]);
+        mTextButtons[i].mVisible = FALSE;
+    }
+    for (u16 i = 0; i < 3; i++) {
+        mTextButtons[i].mText.mSprite.mVisible = FALSE;
+    }
+    for (u16 i = 0; i < 2; i++) {
+        Sprite_Init(&mSprites29D4[i], 1, sVoiceSpriteSequences[i], 0x80, 0x60, TRUE);
+        mSprites29D4[i].SetPositionFromVec(sVoiceSpritePositions[i].x << FX32_SHIFT,
+                                           sVoiceSpritePositions[i].y << FX32_SHIFT);
+    }
+    for (int i = 0; i < 5; i++) {
+        u16 sequence = sVoiceSliderSequences[i];
+        Sprite_Init(&mSprites2B2C[i].mSprite, 1, sequence, 0x80, 0x60, TRUE);
+        func_0203217c(&mSprites2B2C[i], sVoiceSliderPositions[i].x, 0x50, 1, -sVoiceSliderKnobSizes[i].x / 2,
+                      -sVoiceSliderKnobSizes[i].y / 2, sVoiceSliderKnobSizes[i].x, sVoiceSliderKnobSizes[i].y);
+        mSprites2B2C[i].mUnknownD8 = 1;
+        func_020325a8(&mSprites2B2C[i], sequence, sequence + 1);
+        func_020325c4(&mSprites2B2C[i], -1, 6, 7, 10);
+        mSprites2B2C[i].mUnknownF4 = 14;
+        mSprites2B2C[i].mSprite.mPosition.y = sVoiceSliderPositions[i].y << FX32_SHIFT;
+    }
+    mUnknown3B5C = mScene->mCharacter;
+    mScene->MoveCameraTo(sPageCameraGoal);
+    func_0204e4b4(&mSpeechTexts, &mScene->mCharacter);
+    mText.mMessageFile = &mScene->mMessageFiles[0];
+    int voice = mScene->mCharacter.mUnknown054Bits0;
+    if (voice >= 0 && voice <= 7) {
+        func_ov076_02157b94();
+    }
+    SetState(1);
+}
+
+// FUNC_02155094
+
+// Shows the page's controls for a state: 1 the first, 2 the second, 4 the sliders
+void MiiEditVoicePage::SetState(int state) {
+    switch (state) {
+    case 1: {
+        mScene->func_ov076_0214bbe4();
+        for (int i = 0; i < 22; i++) {
+            mButtons[i].mVisible = FALSE;
+        }
+        for (u16 i = 0; i < 3; i++) {
+            mTextButtons[i].mVisible = FALSE;
+        }
+        mSprites29D4[0].mVisible = FALSE;
+        mSprites29D4[1].mVisible = FALSE;
+        for (int i = 0; i < 5; i++) {
+            mSprites2B2C[i].mSprite.mVisible = FALSE;
+        }
+        int voice = mScene->mCharacter.mUnknown054Bits0;
+        if (voice >= 0 && voice <= 7) {
+            func_02031e28(&mButtons[voice], TRUE);
+        }
+        break;
+    }
+    case 2: {
+        for (int i = 0; i <= 7; i++) {
+            mButtons[i].mVisible = TRUE;
+        }
+        for (int i = 8; i <= 21; i++) {
+            mButtons[i].mVisible = FALSE;
+        }
+        mSprites29D4[0].mVisible = TRUE;
+        mSprites29D4[1].mVisible = FALSE;
+        int charOffset = 0x320;
+        for (u16 i = 0; i < 3; i++) {
+            mTextButtons[i].mText.mSprite.mVisible = TRUE;
+            charOffset += func_02031f58(&mTextButtons[i], &mScene->mMessageFiles[sVoiceTextButtonFiles[i]],
+                                        sVoiceTextButtonMessages[i], &gFonts[sVoiceTextButtonFonts[i]].mFont,
+                                        0x1000, charOffset);
+        }
+        if (mScene->mCharacter.mUnknown054Bits0 == 7) {
+            mTextButtons[0].mVisible = TRUE;
+        } else {
+            mTextButtons[0].mVisible = FALSE;
+        }
+        break;
+    }
+    case 4:
+        mScene->func_ov076_0214bdd8();
+        for (int i = 0; i <= 7; i++) {
+            mButtons[i].mVisible = FALSE;
+        }
+        for (int i = 8; i <= 21; i++) {
+            mButtons[i].mVisible = TRUE;
+        }
+        for (u16 i = 0; i <= 0; i++) {
+            mTextButtons[i].mVisible = FALSE;
+        }
+        for (u16 i = 1; i < 3; i++) {
+            mTextButtons[i].mVisible = TRUE;
+        }
+        mSprites29D4[0].mVisible = FALSE;
+        mSprites29D4[1].mVisible = TRUE;
+        for (int i = 0; i < 5; i++) {
+            mSprites2B2C[i].mSprite.mVisible = TRUE;
+        }
+        ShowVoiceSettings();
+        mButtons[9].mVisible = FALSE;
+        mButtons[10].mVisible = FALSE;
+        func_0203119c(&mButtons[9]);
+        func_0203119c(&mButtons[10]);
+        mButtons[8].mVisible = FALSE;
+        break;
+    }
+    mState = state;
+    mUnknown0004 = 0;
+}
+
+
 void MiiEditVoicePage::Draw() {
     for (u16 i = 0; i < 22; i++) {
         func_02031d7c(&mButtons[i]);
@@ -502,8 +718,169 @@ void MiiEditVoicePage::Exit() {
     mScene->func_ov076_0214bbe4();
 }
 
+// Puts the sliders at the character's voice values, and selects the button of its voice type
+void MiiEditVoicePage::ShowVoiceSettings() {
+    for (int i = 0; i < 5; i++) {
+        if (i == 4) {
+            func_02032514(&mSprites2B2C[i], data_020fb940[i].mMax, data_020fb940[i].mMin,
+                          mScene->mCharacter.mVoice[i]);
+        } else {
+            func_02032514(&mSprites2B2C[i], data_020fb940[i].mMin, data_020fb940[i].mMax,
+                          mScene->mCharacter.mVoice[i]);
+        }
+    }
+    for (u16 i = 18; i <= 21; i++) {
+        if (i - 18 == mScene->mCharacter.mVoice[5]) {
+            if (!func_02031d00(&mButtons[i])) {
+                func_02031e28(&mButtons[i], TRUE);
+            }
+        } else {
+            func_02031e28(&mButtons[i], FALSE);
+        }
+    }
+}
+
+void MiiEditVoicePage::func_ov076_0215707c() {
+    mUnknown302C = mScene->mCharacter;
+    mButtons[8].mVisible = TRUE;
+}
+
+// Speaks a part of the character's profile with the scene's speech player, from the given step on: 0 stops, 1 the
+// two texts, 2 the name, 3 the number and birthday, 4 the creator's name, 5 and 6 two messages. A step with nothing
+// to say goes on to the next.
+void MiiEditVoicePage::func_ov076_02157508(int step) {
+    int length = 0x102;
+    switch (step) {
+    case 0:
+        mScene->mTtsPlayer.StopEngine();
+        Character_SetFace(&mScene->mCharacter, 8);
+        break;
+    case 1:
+        if (wcslen(mSpeechTexts.mUnknown0BA) + wcslen(mSpeechTexts.mUnknown10C) == 0) {
+            func_ov076_02157508(step + 1);
+            return;
+        }
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        mText.SetStringArg(mSpeechTexts.mUnknown0BA, 0);
+        mText.SetStringArg(mSpeechTexts.mUnknown10C, 1);
+        mText.mMessage = 0x2F;
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    case 2:
+        if (!mScene->func_ov076_0214bf20(mSpeechTexts.mUnknown068)) {
+            func_ov076_02157508(step + 1);
+            return;
+        }
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        mText.SetStringArg(mSpeechTexts.mUnknown068, 0);
+        mText.mMessage = 0x36;
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    case 3: {
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        u32 number = mScene->mCharacter.mUnknown050Bits17;
+        int month = func_02098dac(&mScene->mCharacter, 0x26);
+        int day = func_02098dac(&mScene->mCharacter, 0x27);
+        wchar_t numberText[32];
+        wchar_t monthText[32];
+        wchar_t dayText[32];
+        func_0204e62c(numberText, number);
+        func_0204e62c(monthText, month);
+        func_0204e62c(dayText, day);
+        if (number != 0xFFF && month > 0 && month <= 12 && day > 0 && day <= 31) {
+            mText.SetStringArg(numberText, 0);
+            mText.SetStringArg(monthText, 1);
+            mText.SetStringArg(dayText, 2);
+            mText.SetMessageArg(mScene->mMessageFiles[0].GetText(GetStarSignMessage(month, day)), 0);
+            mText.mMessage = 0x30;
+        } else if (month > 0 && month <= 12 && day > 0 && day <= 31) {
+            mText.SetStringArg(monthText, 0);
+            mText.SetStringArg(dayText, 1);
+            mText.SetMessageArg(mScene->mMessageFiles[0].GetText(GetStarSignMessage(month, day)), 0);
+            mText.mMessage = 0x31;
+        } else if (number != 0xFFF) {
+            mText.SetStringArg(numberText, 0);
+            mText.mMessage = 0x32;
+        } else {
+            func_ov076_02157508(step + 1);
+            return;
+        }
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    }
+    case 4: {
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        wchar_t creatorName[41];
+        MI_CpuClear16(creatorName, sizeof(creatorName));
+        MiiData_GetCreatorName(&mScene->mCharacter, creatorName);
+        func_020372bc(creatorName, sizeof(creatorName));
+        if (!mScene->func_ov076_0214bf20(creatorName)) {
+            func_ov076_02157508(step + 1);
+            return;
+        }
+        mText.SetStringArg(creatorName, 0);
+        mText.mMessage = 0x33;
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    }
+    case 5: {
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        u32 value = mScene->mCharacter.mUnknown050Bits29;
+        if (value == 4) {
+            func_ov076_02157508(step + 1);
+            return;
+        }
+        mText.SetMessageArg(mScene->mMessageFiles[0].GetText(value + 0x50), 0);
+        mText.mMessage = 0x34;
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    }
+    case 6:
+        MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
+        mText.SetMessageArg(mScene->mMessageFiles[0].GetText(func_02098dac(&mScene->mCharacter, 0x28) + 0x44), 0);
+        mText.mMessage = 0x35;
+        mText.ExpandMessage();
+        STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
+        mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
+        break;
+    }
+    mSpeakStep = step;
+}
+
+void MiiEditVoicePage::func_ov076_02157b94() {
+    func_0209d898(&mScene->mCharacter, &mScene->mTtsPlayer);
+    func_ov076_02157508(1);
+}
+
 void MiiEditVoicePage::func_ov076_02157bc0() {
     func_ov076_02157508(0);
+}
+
+// The etc message of the star sign of a birthday (0x38 for the sign that begins in January, Aquarius)
+int MiiEditVoicePage::GetStarSignMessage(int month, int day) {
+    int sign;
+    if (day >= sStarSignFirstDays[month - 1]) {
+        sign = month - 1;
+        if (sign < 0) {
+            sign += 12;
+        }
+    } else {
+        sign = month - 2;
+        if (sign < 0) {
+            sign += 12;
+        }
+    }
+    return sign + 0x38;
 }
 
 // --- The personality page ---
@@ -522,7 +899,6 @@ struct TouchInput {
 
 extern "C" {
 extern TouchInput gTouchInput;
-void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mUnknown04A[index]
 void func_02091a6c(SceneCharacter *character);
 }
@@ -534,7 +910,6 @@ static const WindowPoint sCharacterKnobSizes[5] = { { 12, 12 }, { 12, 12 }, { 12
 static const int sCharacterKnobKinds[5] = { 4, 4, 4, 4, 4 };
 static const WindowPoint sCharacterKnobPositions[5] = { { 128, 26 }, { 128, 59 }, { 128, 92 }, { 128, 125 }, { 128, 158 } };
 static const WindowPoint sCharacterLabelPositions[5] = { { 128, 26 }, { 128, 59 }, { 128, 92 }, { 128, 125 }, { 128, 158 } };
-static const VecFx32 sCharacterCameraGoal = { 0, 0x1C50, 0x19BF0 };
 // Where each of the eight values of a slider takes a touch, relative to the slider's row
 static const ScreenRect sCharacterValueRects[8] = {
     { 73, -6, 12, 12 }, { 87, -6, 12, 12 }, { 101, -6, 12, 12 }, { 115, -6, 12, 12 },
@@ -571,7 +946,7 @@ void MiiEditCharacterPage::func_ov076_02157c04(MiiEditScene *scene) {
         mSprites[i].SetPositionFromVec(sCharacterLabelPositions[i].x << FX32_SHIFT,
                                        sCharacterLabelPositions[i].y << FX32_SHIFT);
     }
-    mScene->MoveCameraTo(sCharacterCameraGoal);
+    mScene->MoveCameraTo(sPageCameraGoal);
 }
 
 // Whether all five values are set

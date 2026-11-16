@@ -86,8 +86,26 @@ struct MiiEditSpriteB0 : public Sprite {
 // A sprite with something after it, 0x100 bytes (the face page and the voice page draw arrays of them)
 struct MiiEditSprite100 {
     /* 0x00 */ Sprite mSprite;
-    /* 0xAC */ u8 mUnknownAC[0x54];
+    /* 0xAC */ u8 mUnknownAC[0x2C];
+    /* 0xD8 */ int mUnknownD8;  // The voice page sets it to 1
+    /* 0xDC */ u8 mUnknownDC[0x18];
+    /* 0xF4 */ int mUnknownF4;  // The voice page sets it to 14
+    /* 0xF8 */ u8 mUnknownF8[8];
 }; // 0x100
+
+// The texts of a character that the voice page speaks: func_0204e4b4 fills them from a record (the main program's)
+struct CharacterSpeechTexts {
+    /* 0x000 */ char mUnknown000[0x52];      // mUnknown068 in Shift JIS
+    /* 0x052 */ wchar_t mUnknown052[11];     // The Mii's name (MiiData_GetName)
+    /* 0x068 */ wchar_t mUnknown068[41];     // The same, through func_020372bc
+    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mUnknown06E, through func_020372d0
+    /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through func_020372d0
+    /* 0x15E */ char mUnknown15E[0x82];      // mUnknown202 in Shift JIS
+    /* 0x1E0 */ wchar_t mUnknown1E0[17];     // CharacterRecord::mSpeechDefault, or gText_MiNyuuRyoku when empty
+    /* 0x202 */ wchar_t mUnknown202[65];     // mUnknown1E0 through func_020372d0
+    /* 0x284 */ u8 mUnknown284[0xC];
+    /* 0x290 */ BOOL mUnknown290;            // Whether mSpeechDefault was set
+}; // 0x294
 
 class MiiEditPage0 {
 public:
@@ -160,10 +178,15 @@ class MiiEditVoicePage {
 public:
     void func_ov076_02154690(MiiEditScene *scene);
     void func_ov076_02155094();
+    void SetState(int state);
     void Draw();
     void Exit();
+    void ShowVoiceSettings();
+    void func_ov076_0215707c();
     void func_ov076_02157508(int a);
+    void func_ov076_02157b94();
     void func_ov076_02157bc0();
+    int GetStarSignMessage(int month, int day);
 
     /* 0x0000 */ int mState;
     /* 0x0004 */ int mUnknown0004;
@@ -171,10 +194,13 @@ public:
     /* 0x000C */ SpriteButton mButtons[22];
     /* 0x1504 */ TextButton mTextButtons[3];
     /* 0x29D4 */ Sprite mSprites29D4[2];
-    /* 0x2B2C */ MiiEditSprite100 mSprites2B2C[5];
-    /* 0x302C */ u8 mUnknown302C[0x53C];
+    /* 0x2B2C */ MiiEditSprite100 mSprites2B2C[5]; // The sliders of the five values of CharacterRecord::mVoice
+    /* 0x302C */ CharacterRecord mUnknown302C;      // func_ov076_0215707c copies the character's record in
+    /* 0x32D0 */ int mSpeakStep;                    // Which part of the profile func_ov076_02157508 speaks
+    /* 0x32D4 */ CharacterSpeechTexts mSpeechTexts;
     /* 0x3568 */ MessageText mText;
-    /* 0x3B58 */ u8 mUnknown3B58[0x2A8];
+    /* 0x3B58 */ u8 mUnknown3B58[4];
+    /* 0x3B5C */ CharacterRecord mUnknown3B5C;      // The character's record as Init found it
 }; // 0x3E00
 
 // The page of the character's personality ("Character" graphics)

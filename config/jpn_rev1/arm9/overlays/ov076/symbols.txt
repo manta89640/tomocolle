@@ -16,7 +16,7 @@ func_ov076_0214bb24 kind:function(arm,size=0xc0) addr:0x0214bb24
 _ZN12MiiEditScene19func_ov076_0214bbe4Ev kind:function(arm,size=0xc0) addr:0x0214bbe4
 func_ov076_0214bca4 kind:function(arm,size=0xc0) addr:0x0214bca4
 func_ov076_0214bd64 kind:function(arm,size=0x74) addr:0x0214bd64
-func_ov076_0214bdd8 kind:function(arm,size=0xa8) addr:0x0214bdd8
+_ZN12MiiEditScene19func_ov076_0214bdd8Ev kind:function(arm,size=0xa8) addr:0x0214bdd8
 func_ov076_0214be80 kind:function(arm,size=0x48) addr:0x0214be80
 _ZN15MiiEditSpriteB019func_ov076_0214bec8Ei kind:function(arm,size=0x58) addr:0x0214bec8
 _ZN12MiiEditScene19func_ov076_0214bf20EPKw kind:function(arm,size=0x2c) addr:0x0214bf20
@@ -57,15 +57,15 @@ _ZN18MiiEditProfilePage15UpdateDayButtonEv kind:function(arm,size=0x68) addr:0x0
 _ZN18MiiEditProfilePage17UpdateKeyboardKeyEi kind:function(arm,size=0xb4) addr:0x021545dc
 _ZN16MiiEditVoicePage19func_ov076_02154690EP12MiiEditScene kind:function(arm,size=0xa04) addr:0x02154690
 _ZN16MiiEditVoicePage19func_ov076_02155094Ev kind:function(arm,size=0x1a84) addr:0x02155094
-func_ov076_02156b18 kind:function(arm,size=0x2f4) addr:0x02156b18
+_ZN16MiiEditVoicePage8SetStateEi kind:function(arm,size=0x2f4) addr:0x02156b18
 _ZN16MiiEditVoicePage4DrawEv kind:function(arm,size=0xa8) addr:0x02156e0c
 _ZN16MiiEditVoicePage4ExitEv kind:function(arm,size=0xd8) addr:0x02156eb4
-func_ov076_02156f8c kind:function(arm,size=0xf0) addr:0x02156f8c
-func_ov076_0215707c kind:function(arm,size=0x48c) addr:0x0215707c
+_ZN16MiiEditVoicePage17ShowVoiceSettingsEv kind:function(arm,size=0xf0) addr:0x02156f8c
+_ZN16MiiEditVoicePage19func_ov076_0215707cEv kind:function(arm,size=0x48c) addr:0x0215707c
 _ZN16MiiEditVoicePage19func_ov076_02157508Ei kind:function(arm,size=0x68c) addr:0x02157508
-func_ov076_02157b94 kind:function(arm,size=0x2c) addr:0x02157b94
+_ZN16MiiEditVoicePage19func_ov076_02157b94Ev kind:function(arm,size=0x2c) addr:0x02157b94
 _ZN16MiiEditVoicePage19func_ov076_02157bc0Ev kind:function(arm,size=0x10) addr:0x02157bc0
-func_ov076_02157bd0 kind:function(arm,size=0x34) addr:0x02157bd0
+_ZN16MiiEditVoicePage18GetStarSignMessageEii kind:function(arm,size=0x34) addr:0x02157bd0
 _ZN20MiiEditCharacterPage19func_ov076_02157c04EP12MiiEditScene kind:function(arm,size=0x238) addr:0x02157c04
 _ZN20MiiEditCharacterPage19func_ov076_02157e3cEv kind:function(arm,size=0x1b0) addr:0x02157e3c
 _ZN20MiiEditCharacterPage4DrawEv kind:function(arm,size=0x58) addr:0x02157fec
@@ -98,7 +98,7 @@ sCharacterLabelSequences kind:data(any) addr:0x02158822 local
 sCharacterKnobSequences kind:data(any) addr:0x0215882c local
 data_ov076_02158844 kind:data(any) addr:0x02158844
 data_ov076_02158850 kind:data(any) addr:0x02158850
-sCharacterCameraGoal kind:data(any) addr:0x0215885c local
+sPageCameraGoal kind:data(any) addr:0x0215885c local
 gStr_Parenthesis_ov076 kind:data(any) addr:0x02158868
 data_ov076_02158874 kind:data(any) addr:0x02158874
 gStr_X_ov076 kind:data(any) addr:0x02158880

@@ -74,7 +74,8 @@ public:
 // What the save data holds of a character: the 0x2A4 bytes that func_0202c264 copies out (overlay 109's layout).
 struct CharacterRecord {
     /* 0x000 */ u8 mMii[0x4A];        // The Mii's data (0x4A bytes, as the Mii exchange sends it)
-    /* 0x04A */ u8 mUnknown04A[6];
+    /* 0x04A */ u8 mUnknown04A[5];       // The Mii maker's personality page sets them: 1 to 8, 0 while unset
+    /* 0x04F */ u8 mUnknown04F;
     /* 0x050 */ u32 mUnknown050Bit0 : 1;
     /*       */ u32 mUnknown050Bits1 : 16;
     /*       */ u32 mUnknown050Bits17 : 12; // A number the Mii maker's profile page shows in four digits, 0xFFF for none
@@ -83,21 +84,57 @@ struct CharacterRecord {
     /*       */ u32 mInterior : 7;        // As overlay 109 has it
     /*       */ u32 mUnknown054Bits11 : 9;
     /*       */ u32 mUnknown054Bits20 : 12;
-    /* 0x058 */ u8 mUnknown058[0x1B8];
+    /* 0x058 */ wchar_t mName[11];          // As overlay 109 has it from here on: the record's implicit assignment
+    /* 0x06E */ wchar_t mUnknown06E[11];    // (MiiEditVoicePage::func_ov076_0215707c) copies these members one by one
+    /* 0x084 */ wchar_t mSpeechDefault[17];
+    /* 0x0A6 */ wchar_t mSpeechByMood[4][9];
+    /* 0x0EE */ s16 mVoice[6];              // The voice page's five sliders (func_02098d68 sets them) and its choice of four
+    /* 0x0FA */ u8 mUnknown0FA;
+    /* 0x0FB */ u8 mUnknown0FB;
+    /* 0x0FC */ u8 mAffinity[100];
+    /* 0x160 */ u8 mRelation[100];
+    /* 0x1C4 */ u32 mUnknown1C4;
+    /* 0x1C8 */ struct { u32 m[8]; } mUnknown1C8;
+    /* 0x1E8 */ struct { u32 m[10]; } mUnknown1E8;
     /* 0x210 */ u32 mUnknown210[3];   // Flags, a bit each
-    /* 0x21C */ u8 mUnknown21C[0xA];
+    /* 0x21C */ s64 mUnknown21C;
+    /* 0x224 */ u8 mUnknown224;
+    /* 0x225 */ u8 mUnknown225;
     /* 0x226 */ u8 mUnknown226;
     /* 0x227 */ u8 mUnknown227;
-    /* 0x228 */ u8 mUnknown228[8];
+    /* 0x228 */ s64 mUnknown228;
     /* 0x230 */ s64 mUnknown230;
     /* 0x238 */ u16 mUnknown238;
     /* 0x23A */ u8 mUnknown23A;
-    /* 0x23B */ u8 mUnknown23B[0x55];
+    /* 0x23B */ u8 mUnknown23B;
+    /* 0x23C */ s64 mUnknown23C;
+    /* 0x244 */ u8 mUnknown244;
+    /* 0x245 */ u8 mUnknown245;
+    /* 0x246 */ u8 mUnknown246;
+    /* 0x247 */ u8 mUnknown247;
+    /* 0x248 */ u8 mUnknown248;
+    /* 0x249 */ u8 mUnknown249;
+    /* 0x24A */ u8 mUnknown24A;
+    /* 0x24B */ u8 mUnknown24B;
+    /* 0x24C */ u8 mUnknown24C;
+    /* 0x24D */ u8 mUnknown24D;
+    /* 0x24E */ u8 mUnknown24E;
+    /* 0x24F */ u8 mUnknown24F;
+    /* 0x250 */ u16 mUnknown250[32];
     /* 0x290 */ u8 mUnknown290;
     /* 0x291 */ u8 mUnknown291;
-    /* 0x292 */ u8 mUnknown292[6];
+    /* 0x292 */ u8 mUnknown292[2];
+    /* 0x294 */ u8 mUnknown294;
+    /* 0x295 */ u8 mMood;
+    /* 0x296 */ u8 mUnknown296;
+    /* 0x297 */ u8 mUnknown297;
     /* 0x298 */ u8 mUnknown298;
-    /* 0x299 */ u8 mUnknown299[0xB];
+    /* 0x299 */ u8 mUnknown299;
+    /* 0x29A */ u8 mSongSlots[6];
+    /* 0x2A0 */ u8 mUnknown2A0;
+    /* 0x2A1 */ u8 mUnknown2A1;
+    /* 0x2A2 */ u8 mUnknown2A2;
+    /* 0x2A3 */ u8 mUnknown2A3;
 }; // 0x2A4
 
 // A saved character and what the game keeps beside it. 0x2C0 bytes.
