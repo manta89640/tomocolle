@@ -23,11 +23,12 @@ void TestDrawMiiScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SME", "Scn/Scene/SceneTestDrawMii_LZ.bin", 0);
 }
 
-void TestDrawMiiScene::Init() {
-    static const u16 sModelRotY[2] = {0, 0x4000};
-    static const int sModelIndices[2] = {1, 2};
-    static const VecFx32 sModelHomes[2] = {{0x5000, 0, 0}, {0, 0, -0x5000}};
+// The two models: their rotations about y, which models of SME:/room.imd they are, and where they stand
+static const u16 sModelRotY[2] = {0, 0x4000};
+static const int sModelIndices[2] = {1, 2};
+static const VecFx32 sModelHomes[2] = {{0x5000, 0, 0}, {0, 0, -0x5000}};
 
+void TestDrawMiiScene::Init() {
     func_0202b0e8(&data_02122824);
     data_0211d604.Show(1);
     data_0211d604.mUnknown48 = 1;
@@ -168,13 +169,15 @@ static inline void SetCameraAngles(Camera *camera, u16 x, u16 y, u16 z) {
     camera->mAngleZ = z;
 }
 
+// The camera's first angles: pitch, yaw
+static const VecFx32 sCameraAngles = {0x1200 << FX32_SHIFT, 0x1600 << FX32_SHIFT, 0};
+
 void TestDrawMiiCamera::Init() {
-    static const VecFx32 sAngles = {0x1200 << FX32_SHIFT, 0x1600 << FX32_SHIFT, 0};
 
     mCamera = &data_02122764;
     func_0202a640(mCamera);
     SetCameraAngles(mCamera, 0, 0, 0);
-    VecFx32 angles = sAngles;
+    VecFx32 angles = sCameraAngles;
     mAngles.x = angles.x;
     mAngles.y = angles.y;
     mAngles.z = angles.z;
