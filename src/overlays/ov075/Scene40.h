@@ -72,13 +72,13 @@ public:
     /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
 }; // 0x14420
 
-// What the overlay's 0x02179728 constructs: 0x10 and 0xC bytes cleared and two ints.
+// What the overlay's 0x02179728 constructs: a date and a time, cleared, and two ints.
 class Scene40Unknown30A8C {
 public:
     Scene40Unknown30A8C();
 
-    /* 0x00 */ u8 mUnknown00[0x10];
-    /* 0x10 */ u8 mUnknown10[0xC];
+    /* 0x00 */ RTCDate mDate; // Exit gives it to the character as the date they last met
+    /* 0x10 */ RTCTime mTime;
     /* 0x1C */ int mUnknown1C;
     /* 0x20 */ int mUnknown20;
 }; // 0x24
@@ -165,7 +165,8 @@ public:
     /* 0x2C9A0 */ ClothesList mClothesList;
     /* 0x2EA74 */ Inventory mInventory;
     /* 0x30260 */ InteriorList mInteriors;
-    /* 0x309B4 */ u8 mUnknown309B4[0x30];
+    /* 0x309B4 */ int mUnknown309B4;       // Exit gives it to GameData::SetCappedCounter
+    /* 0x309B8 */ u8 mUnknown309B8[0x2C];
     /* 0x309E4 */ MessageFile mMessageFiles[7];
     /* 0x30A8C */ Scene40Unknown30A8C mUnknown30A8C;
     /* 0x30AB0 */ u8 mUnknown30AB0[0xA0];

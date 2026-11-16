@@ -1,7 +1,12 @@
 #include "Scene40.h"
+#include "../../scene/MainProgram3d.h"
+#include "GameData.h"
+#include "SceneMemory.h"
 
 extern "C" {
 void func_02080f00(ParticleSystem *particles, int unknown); // Draws the particles
+void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes a saved character
+void func_0202683c(void);
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
@@ -43,6 +48,64 @@ void Scene40::Draw() {
         mItemModels[i].Draw();
     }
     mSpeechWindow.Draw();
+}
+
+// NOT MATCHING (the copy of the camera's eye and target only): the original keeps the camera's address in r5 and
+// loads the words in pairs before storing them (x, y; store x; z, target x; store y and z together; ...), where
+// this loads and stores one at a time through r1. Whole-vector and field-by-field assignments compile alike; a
+// local pointer to the camera is worse.
+// Saves what the scene changed (the character, with the date of this meeting, and the lists of clothes, goods and
+// interiors), keeps the camera for the next scene, and unmounts the scene's archives
+void Scene40::Exit() {
+    RTCDate date;
+    date.year = mUnknown30A8C.mDate.year;
+    date.month = mUnknown30A8C.mDate.month;
+    date.day = mUnknown30A8C.mDate.day;
+    date.week = mUnknown30A8C.mDate.week;
+    mCharacter.SetMeetDate(&date);
+    func_0202c28c(&gGameData, mCharacter.mIndex, &mCharacter);
+    if ((int)gGameData.mUnknownB2[0] < (int)mCharacter.mSatisfyLevel) {
+        gGameData.mUnknownB2[0] = mCharacter.mSatisfyLevel;
+    }
+    mClothesList.Save();
+    mInventory.Save();
+    mInteriors.Save();
+    gGameData.SetCappedCounter(mUnknown309B4);
+
+    gSceneMemory.mCameraPosition = data_02122764.mEye;
+    gSceneMemory.mCameraTarget = data_02122764.mTarget;
+
+    func_0202683c();
+    ArchiveManager_Unmount(&gArchiveManager, "KBD");
+    ArchiveManager_Unmount(&gArchiveManager, "SMT");
+    ArchiveManager_Unmount(&gArchiveManager, "LTL");
+    ArchiveManager_Unmount(&gArchiveManager, "TCM");
+    ArchiveManager_Unmount(&gArchiveManager, "TTM");
+    ArchiveManager_Unmount(&gArchiveManager, "TLM");
+    ArchiveManager_Unmount(&gArchiveManager, "TIM");
+    ArchiveManager_Unmount(&gArchiveManager, "TDM");
+    ArchiveManager_Unmount(&gArchiveManager, "TRM");
+    ArchiveManager_Unmount(&gArchiveManager, "TEM");
+    func_0202aecc(data_021223e4, 0);
+    func_0202aecc(data_021223e4, 1);
+    func_0202aecc(data_021223e4, 2);
+    func_0202aecc(data_021223e4, 4);
+    ArchiveManager_Unmount(&gArchiveManager, "3HA");
+    ArchiveManager_Unmount(&gArchiveManager, "3HB");
+    ArchiveManager_Unmount(&gArchiveManager, "3HT");
+    ArchiveManager_Unmount(&gArchiveManager, "EFT");
+    func_0202aecc(data_021223e4, 12);
+    func_0202aecc(data_021223e4, 13);
+    ArchiveManager_Unmount(&gArchiveManager, "3MM");
+    ArchiveManager_Unmount(&gArchiveManager, "3MH");
+    func_0202aecc(data_021223e4, 17);
+    ArchiveManager_Unmount(&gArchiveManager, "3PM");
+    mRoom.ReleaseAll();
+    ArchiveManager_Unmount(&gArchiveManager, "3HM");
+    for (int i = 0; i < 3; i++) {
+        ArchiveManager_Unmount(&gArchiveManager, mItemModels[i].mArchiveName);
+        func_0202aecc(data_021223e4, i + 14);
+    }
 }
 
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------
@@ -90,8 +153,8 @@ void Scene40ListView::ClearRow(int row) {
 // --- The object at 0x30A8C of the scene --------------------------------------------------------------------------
 
 Scene40Unknown30A8C::Scene40Unknown30A8C() {
-    MI_CpuClear32(mUnknown00, sizeof(mUnknown00));
-    MI_CpuClear32(mUnknown10, sizeof(mUnknown10));
+    MI_CpuClear32(&mDate, sizeof(mDate));
+    MI_CpuClear32(&mTime, sizeof(mTime));
     mUnknown1C = 0;
     mUnknown20 = 0;
 }
