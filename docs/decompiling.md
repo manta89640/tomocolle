@@ -209,7 +209,9 @@ The order that the code itself suggests:
   `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
-  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it).
+  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). A constructor's string
+  literals come twice, once for each constructor the compiler emits (`C2`, then `C1`); the ROM keeps only `C1`'s,
+  the second set, which the tool does not know: name those by hand (`Keyboard.cpp`).
 - **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
   array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
   with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
@@ -323,9 +325,9 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   size order at all may not be the file's: see binary.md, "The keyboard's core".
 - Every object of the original has to be on the list before the same-size slots come out right: also the ones that
   only code the link dropped referred to. The source keeps them through an uncalled function, and an unused local
-  `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `func_02081ff0`). With the full set, one compile
-  shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put all of
-  KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
+  `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `KeyboardCore_SetMode`). With the full set, one
+  compile shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put
+  all of KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
 
 ## Matching techniques
 
@@ -352,19 +354,19 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A loop count the original reads again at the end of every pass but not for the first test (`cmp r3,#0; ble`
   on the value just tested by the `if` before the loop, then `ldrh` at the bottom): write the first test out and
   read the count through a volatile cast at the end only,
-  `i = 0; if (i < kb->unk_4c) { do { ... } while (i < *(volatile u16 *)&kb->unk_4c); }` (`func_020817f0`). Loop
-  forms, inlines, pragmas and other compiler builds kept the count in a register. `#pragma opt_common_subs off` gives
-  the reload but reallocates the rest of the function.
+  `i = 0; if (i < kb->numAreas) { do { ... } while (i < *(volatile u16 *)&kb->numAreas); }`
+  (`KeyboardCore_FindKeyAt`). Loop forms, inlines, pragmas and other compiler builds kept the count in a register.
+  `#pragma opt_common_subs off` gives the reload but reallocates the rest of the function.
 
 **An address loaded and then offset by an `add`, where ours has the offset in the literal**
 - mwcc folds `&table[1]` and `table + 1` into the literal (`table+0x2`), but not after a pointer cast:
   `(const u16 *)wideTable + 1`, and the same for an address of a string literal (the keyboard's character tables,
-  `func_02082b48` and the four after it).
+  `KeyboardCore_UseEnglishLayout` and the four after it).
 
 **Two literal-pool entries for one address**
 - One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
   another literal. In `relocs.txt` such a reference is `to:<object> add:<size>`, so that `check_relocs.py` names
-  both alike (`func_02081df0`'s key counts, `((const u8 *)end - (const u8 *)start) / sizeof(KeyRect)`, which is
+  both alike (`KeyboardCore_Init`'s key counts, `((const u8 *)end - (const u8 *)start) / sizeof(KeyRect)`, which is
   also what gives the original's `lsr #3`).
 
 **Two operands loaded in the other order**
@@ -436,7 +438,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   element's class, keeps a pointer to the element; `mButtons[i].mText.GetCharCount()` keeps one to the member
   instead (`SoftKeyboard::GetButtonCharCount`).
 - A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
-  declared after it, after (`func_02083c54`, `Keyboard.cpp`).
+  declared after it, after (`SoftKeyboard::OnTabArea`, `Keyboard.cpp`).
 - In C (lib/NFL, measured on functions whose instructions were already the original's): a pointer initialised
   from a global with a cast to its own type, `NFLWork *work = (NFLWork *)data_02145360;`, takes r4 where the plain
   initialiser leaves it last (`func_0207516c`, `func_02076680`, `func_02077300`). An uninitialised local declared
@@ -451,13 +453,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `func_02077300` matched only with one of the six orders of their three assignments, found by trying them all.
 - Brute-force the order of the C-style declarations at the top, the loop counters included: a script that splices each
   permutation into a copy of the file, compiles it and counts the differing lines of the one function. It took
-  `func_02082914` from 153 differing lines to 0 (`int x, endY, endX, dy, dx, px, y;`), and an `int i;` declared
-  first fixed `func_020819e8`.
+  `KeyboardCore_MoveCursor` from 153 differing lines to 0 (`int x, endY, endX, dy, dx, px, y;`), and an `int i;`
+  declared first fixed `KeyboardCore_DrawKeyLabels`.
 - A row pointer that the original recomputes from the outer counter each pass (`add r0, base, y, lsl #6`), where
-  ours strength-reduces it: index as a two-dimensional array, `((u16 (*)[32])screen)[y][x]` (`func_02081cf8`).
+  ours strength-reduces it: index as a two-dimensional array, `((u16 (*)[32])screen)[y][x]`
+  (`KeyboardCore_MakeScreen`).
 - A value the inner loop does not change, which the original computes after the inner loop's guard, where ours
   hoists it and tests the guard twice: write the expression again at each use instead of keeping it in a local
-  (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `func_02082738`).
+  (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `KeyboardCore_LightRect`).
 - How the colours are given (measured with MSL's compiler, 2.0/sp2, in C, on test files): per live range, the value
   defined last first, each taking the lowest register free of its neighbours. Declaration order, number of uses
   and length of the range change nothing. So to move a value to a lower register, define it later, or define the

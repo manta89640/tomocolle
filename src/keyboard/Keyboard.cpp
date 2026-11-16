@@ -48,41 +48,21 @@ struct KeyArea {
     u16 y : 8;
     /* 0x2 */ u16 width : 8;
     u16 height : 8;
-    /* 0x4 */ u16 mUnknown4;
+    /* 0x4 */ u16 link; // The next key of the same group (none for the tabs)
     /* 0x6 */ u16 code;
 };
 
-typedef void (*KeyCallback)(void *userData, int event);
-typedef void (*AreaCallback)(void *userData, int event, int a, int code);
+typedef void (*AreaCallback)(void *userData, int action, int pressedCode, int touchedCode);
 
 extern "C" {
-void func_02081cf8(u16 *screen, int palette, int charOffset);
-void func_02081d68(void *a, void *charData, char (*files)[0x30]);
-void func_02081df0(int x, int y, int a, KeyCallback callback, void *userData);
-void func_02081ff0(int mode, BOOL b);
-void func_02082068(int a, TPData tp);
-void *func_0208265c();
-int func_02082680();
-void func_02082e70(const KeyArea *areas, int count, AreaCallback callback, void *userData);
-}
-
-// --- This file ----------------------------------------------------------------------------------------------------
-
-extern "C" {
-void func_02083078(SoftKeyboard *keyboard, int plane, int palette);
-void func_020830bc(SoftKeyboard *keyboard, int plane);
-void func_02083128(SoftKeyboard *keyboard, KeyCallback callback, void *userData);
-void func_02083244(SoftKeyboard *keyboard, int a, TPData tp);
-void func_02083288(SoftKeyboard *keyboard, int mode, BOOL b);
-void func_020832d0(KeyboardButton *button, s16 index);
-void func_020832e4(KeyboardButton *button);
-void func_020837a8(SoftKeyboard *keyboard);
-void func_020837f4(SoftKeyboard *keyboard, s16 resource, int a, int palette);
-void func_0208382c(SoftKeyboard *keyboard, s16 resource, MessageFile *file, int charOffset, int a, s16 layout,
-                   int palette);
-void func_02083c30(SoftKeyboard *keyboard);
-void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code);
-void func_02083d58(SoftKeyboard *keyboard, int event);
+void KeyboardCore_MakeScreen(u16 *screen, int palette, int charOffset);
+void KeyboardCore_InitGraphics(void *baseCharData, void *charData, char (*files)[0x30]);
+void KeyboardCore_Init(int x, int y, BOOL extraKeys, KeyboardSoundCallback callback, void *userData);
+void KeyboardCore_SetMode(int mode, BOOL playSound);
+void KeyboardCore_Update(int pad, TPData tp);
+void *KeyboardCore_GetCharData();
+int KeyboardCore_GetCharDataSize();
+void KeyboardCore_SetAreas(const KeyArea *areas, int count, AreaCallback callback, void *userData);
 }
 
 // (The two 16-byte tables are declared in the reverse of their order in the ROM: the compiler's sort by size
@@ -99,7 +79,7 @@ static const KeyArea sTabAreas[5] = {
     {0x0B, 0x73, 0x21, 0x10, 0, 0x400},
     {0x0B, 0x83, 0x21, 0x10, 0, 0x500},
 };
-// Where mSprite5EE8 is, by mLayout
+// Where mLayoutSprite is, by mLayout
 static const ScreenPoint sLayoutPositions[5] = {{0x46, 0x32}, {0x17, 0x32}, {0x60, 0x32}, {0x53, 0x32}, {0x1A, 0x36}};
 
 SoftKeyboard::SoftKeyboard() {
@@ -129,49 +109,49 @@ void SoftKeyboard::SetArchiveName(const char *name) {
     MI_CpuCopy8(name, mObjPaletteFile, 3);
 }
 
-void func_02083078(SoftKeyboard *keyboard, int plane, int palette) {
-    func_020830bc(keyboard, plane);
-    func_02083128(keyboard, (KeyCallback)func_02083d58, keyboard);
-    keyboard->TransferCharData();
-    keyboard->TransferScreen();
-    keyboard->LoadBgPalette(palette);
+void SoftKeyboard::InitBg(int plane, int paletteOffset) {
+    InitBgGraphics(plane);
+    InitCore((KeyboardSoundCallback)PlayKeySound, this);
+    TransferCharData();
+    TransferScreen();
+    LoadBgPalette(paletteOffset);
 }
 
-void func_020830bc(SoftKeyboard *keyboard, int plane) {
-    func_02081d68(keyboard->mUnknown080C, keyboard->mCharData, keyboard->mBgFiles);
-    keyboard->mPlane = plane;
+void SoftKeyboard::InitBgGraphics(int plane) {
+    KeyboardCore_InitGraphics(mBaseCharData, mCharData, mBgFiles);
+    mPlane = plane;
     gGraphicsManager[6] |= plane;
     func_0202543c(gGraphicsManager, plane, -1, 0, 0, 0, 0, 0);
 }
 
-void func_02083128(SoftKeyboard *keyboard, KeyCallback callback, void *userData) {
-    func_02081df0(45, 59, 0, callback, userData);
-    func_02081cf8(keyboard->mScreen, keyboard->mPalette, 0);
-    func_02082e70(sTabAreas, 2, NULL, NULL);
-    int plane = keyboard->mPlane;
+void SoftKeyboard::InitCore(KeyboardSoundCallback callback, void *userData) {
+    KeyboardCore_Init(45, 59, 0, callback, userData);
+    KeyboardCore_MakeScreen(mScreen, mPalette, 0);
+    KeyboardCore_SetAreas(sTabAreas, 2, NULL, NULL);
+    int plane = mPlane;
     func_02028108(&data_02121834, plane, -45);
     func_02028154(&data_02121834, plane, -59);
 }
 
 void SoftKeyboard::TransferCharData() {
-    void *data = func_0208265c();
-    VramTransferQueue_AddCharData(gVramTransferQueue, data, mPlane, 0, func_02082680());
+    void *data = KeyboardCore_GetCharData();
+    VramTransferQueue_AddCharData(gVramTransferQueue, data, mPlane, 0, KeyboardCore_GetCharDataSize());
 }
 
 void SoftKeyboard::TransferScreen() {
     func_02027f3c(&data_02121834, mScreen, mPlane, 0, 0x800);
 }
 
-void SoftKeyboard::LoadBgPalette(int a) {
-    func_02027534(&data_021213b8, mBgPaletteFile, mPlane, a, mPalette * 32, 32);
+void SoftKeyboard::LoadBgPalette(int offset) {
+    func_02027534(&data_021213b8, mBgPaletteFile, mPlane, offset, mPalette * 32, 32);
 }
 
-void func_02083244(SoftKeyboard *keyboard, int a, TPData tp) {
-    func_02082068(a, tp);
+void SoftKeyboard::Update(int pad, TPData tp) {
+    KeyboardCore_Update(pad, tp);
 }
 
-void func_02083288(SoftKeyboard *keyboard, int mode, BOOL b) {
-    func_02081ff0(mode, b);
+void SoftKeyboard::SetMode(int mode, BOOL playSound) {
+    KeyboardCore_SetMode(mode, playSound);
 }
 
 KeyboardButton::KeyboardButton() {
@@ -182,34 +162,34 @@ KeyboardButton::KeyboardButton() {
     mIndex = 0;
 }
 
-void func_020832d0(KeyboardButton *button, s16 index) {
-    button->mUnknownAC = FALSE;
-    button->mUnknownB0 = FALSE;
-    button->mIndex = index;
+void KeyboardButton::Reset(s16 index) {
+    mHeld = FALSE;
+    mPressed = FALSE;
+    mIndex = index;
 }
 
-void func_020832e4(KeyboardButton *button) {
-    button->mUnknownAC = FALSE;
-    button->mUnknownB0 = FALSE;
-    Sprite_SetFrame(button, 0);
-    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&button->mAnim));
+void KeyboardButton::Release() {
+    mHeld = FALSE;
+    mPressed = FALSE;
+    Sprite_SetFrame(this, 0);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mAnim));
 }
 
 BOOL KeyboardButton::Update() {
     if (!mVisible) {
         return FALSE;
     }
-    if (gTouchInput.mTouched && !mUnknownB0) {
+    if (gTouchInput.mTouched && !mPressed) {
         if (Contains(gTouchInput.mPoint)) {
-            mUnknownAC = TRUE;
-            mUnknownB0 = TRUE;
+            mHeld = TRUE;
+            mPressed = TRUE;
             Sprite_SetPlaying(this, TRUE);
             if (mTouchSound != -1) {
                 gSoundManager.StartSeqArc(mSoundHandle, mSoundSeqArc, mTouchSound);
             }
         }
-    } else if (gTouchInput.mUnknown4C && mUnknownB0) {
-        mUnknownAC = FALSE;
+    } else if (gTouchInput.mUnknown4C && mPressed) {
+        mHeld = FALSE;
         if (Contains(gTouchInput.mLastPoint)) {
             NNS_G2dSetAnimCtrlPlayModeOverridden(NNS_G2dGetCellAnimationAnimCtrl(&mAnim),
                                                  NNS_G2D_ANIMATIONPLAYMODE_FORWARD);
@@ -219,8 +199,8 @@ BOOL KeyboardButton::Update() {
             }
             return TRUE;
         }
-        func_020832d0(this, mIndex);
-    } else if (gTouchInput.mTouching && mUnknownB0 && mUnknownAC) {
+        Reset(mIndex);
+    } else if (gTouchInput.mTouching && mPressed && mHeld) {
         if (Contains(gTouchInput.mPoint)) {
             Sprite_SetPlaying(this, TRUE);
         } else {
@@ -301,23 +281,22 @@ int SoftKeyboard::GetButtonCharCount() {
     return count;
 }
 
-void func_020837a8(SoftKeyboard *keyboard) {
-    const ScreenPoint &position = sLayoutPositions[keyboard->mLayout];
-    keyboard->mSprite5EE8.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+void SoftKeyboard::PlaceLayoutSprite() {
+    const ScreenPoint &position = sLayoutPositions[mLayout];
+    mLayoutSprite.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
 
-void func_020837f4(SoftKeyboard *keyboard, s16 resource, int a, int palette) {
-    keyboard->SetObjResource(resource);
-    keyboard->LoadObjCells(a);
-    keyboard->LoadObjPalette(palette);
-    keyboard->InitSprites();
+void SoftKeyboard::LoadObj(s16 resource, int a, int palette) {
+    SetObjResource(resource);
+    LoadObjCells(a);
+    LoadObjPalette(palette);
+    InitSprites();
 }
 
-void func_0208382c(SoftKeyboard *keyboard, s16 resource, MessageFile *file, int charOffset, int a, s16 layout,
-                   int palette) {
-    keyboard->mLayout = layout;
-    func_020837f4(keyboard, resource, a, palette);
-    keyboard->InitButtonTexts(file, charOffset);
+void SoftKeyboard::InitObj(s16 resource, MessageFile *file, int charOffset, int a, s16 layout, int palette) {
+    mLayout = layout;
+    LoadObj(resource, a, palette);
+    InitButtonTexts(file, charOffset);
 }
 
 void SoftKeyboard::SetObjResource(s16 resource) {
@@ -347,15 +326,15 @@ void SoftKeyboard::InitSprites() {
     Sprite_Init(&mButtons[0], mObjResource, 5, 0x80, 0x60, TRUE);
     NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mButtons[0].mAnim));
     mButtons[0].SetPositionFromVec(sButtonPositions[0].x << FX32_SHIFT, sButtonPositions[0].y << FX32_SHIFT);
-    func_020832d0(&mButtons[0], 0);
+    mButtons[0].Reset(0);
     Sprite_Init(&mButtons[1], mObjResource, 5, 0x80, 0x60, TRUE);
     NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mButtons[1].mAnim));
     mButtons[1].SetPositionFromVec(sButtonPositions[1].x << FX32_SHIFT, sButtonPositions[1].y << FX32_SHIFT);
-    func_020832d0(&mButtons[1], 1);
+    mButtons[1].Reset(1);
 
-    Sprite_Init(&mSprite5EE8, mObjResource, 7, 0x80, 0x60, TRUE);
+    Sprite_Init(&mLayoutSprite, mObjResource, 7, 0x80, 0x60, TRUE);
     const ScreenPoint &position = sLayoutPositions[mLayout];
-    mSprite5EE8.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    mLayoutSprite.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
 
 void SoftKeyboard::Draw() {
@@ -365,17 +344,18 @@ void SoftKeyboard::Draw() {
     for (int i = 0; i < 2; i++) {
         mButtons[i].Draw();
     }
-    Sprite_Draw(&mSprite5EE8);
+    Sprite_Draw(&mLayoutSprite);
 }
 
-void func_02083c30(SoftKeyboard *keyboard) {
-    func_02082e70(sTabAreas, 5, (AreaCallback)func_02083c54, keyboard);
+void SoftKeyboard::EnableTabs() {
+    KeyboardCore_SetAreas(sTabAreas, 5, (AreaCallback)OnTabArea, this);
 }
 
-void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code) {
+// action: 1 an area is pressed, 3 the pen is lifted, 4 the pen left the pressed area
+void SoftKeyboard::OnTabArea(SoftKeyboard *keyboard, int action, int pressedCode, int touchedCode) {
     Sprite *tabs = keyboard->mTabs;
     const int modes[5] = {0, 1, 2, 3, 4};
-    switch (event) {
+    switch (action) {
     case 0:
     case 2:
     case 3:
@@ -387,15 +367,15 @@ void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code) {
             NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&tabs[i].mAnim));
         }
         int tab = -1;
-        if (code == 0x100) {
+        if (touchedCode == 0x100) {
             tab = 0;
-        } else if (code == 0x200) {
+        } else if (touchedCode == 0x200) {
             tab = 1;
-        } else if (code == 0x300) {
+        } else if (touchedCode == 0x300) {
             tab = 2;
-        } else if (code == 0x400) {
+        } else if (touchedCode == 0x400) {
             tab = 3;
-        } else if (code == 0x500) {
+        } else if (touchedCode == 0x500) {
             tab = 4;
         }
         if (tab < 0) {
@@ -403,14 +383,14 @@ void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code) {
         }
         Sprite_SetFrame(&tabs[tab], 1);
         Sprite_SetPlaying(&tabs[tab], TRUE);
-        func_02081ff0(modes[tab], TRUE);
+        KeyboardCore_SetMode(modes[tab], TRUE);
         break;
     }
     }
 }
 
-void func_02083d58(SoftKeyboard *keyboard, int event) {
-    switch (event) {
+void SoftKeyboard::PlayKeySound(SoftKeyboard *keyboard, int sound) {
+    switch (sound) {
     case 0:
         gSoundManager.StartSeqArc(keyboard->mSoundHandle, 2, 1);
         break;

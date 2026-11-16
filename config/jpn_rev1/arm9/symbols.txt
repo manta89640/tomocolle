@@ -3189,54 +3189,54 @@ func_02081688 kind:function(arm,size=0x2c) addr:0x02081688
 func_020816b4 kind:function(arm,size=0x7c) addr:0x020816b4
 func_02081730 kind:function(arm,size=0x38) addr:0x02081730
 func_02081768 kind:function(arm,size=0x34) addr:0x02081768
-func_0208179c kind:function(arm,size=0x54) addr:0x0208179c
-func_020817f0 kind:function(arm,size=0x1b4) addr:0x020817f0
-func_020819a4 kind:function(arm,size=0x44) addr:0x020819a4
-func_020819e8 kind:function(arm,size=0x188) addr:0x020819e8
-func_02081b70 kind:function(arm,size=0x148) addr:0x02081b70
-func_02081cb8 kind:function(arm,size=0x40) addr:0x02081cb8
-func_02081cf8 kind:function(arm,size=0x70) addr:0x02081cf8
-func_02081d68 kind:function(arm,size=0x88) addr:0x02081d68
-func_02081df0 kind:function(arm,size=0x148) addr:0x02081df0
-func_02081f38 kind:function(arm,size=0xb8) addr:0x02081f38
-func_02081ff0 kind:function(arm,size=0x78) addr:0x02081ff0
-func_02082068 kind:function(arm,size=0x4f8) addr:0x02082068
-func_02082560 kind:function(arm,size=0x10) addr:0x02082560
-func_02082570 kind:function(arm,size=0xec) addr:0x02082570
-func_0208265c kind:function(arm,size=0x24) addr:0x0208265c
-func_02082680 kind:function(arm,size=0x8) addr:0x02082680
-func_02082688 kind:function(arm,size=0xb0) addr:0x02082688
-func_02082738 kind:function(arm,size=0x154) addr:0x02082738
-func_0208288c kind:function(arm,size=0x88) addr:0x0208288c
-func_02082914 kind:function(arm,size=0x234) addr:0x02082914
-func_02082b48 kind:function(arm,size=0x20) addr:0x02082b48
-func_02082b68 kind:function(arm,size=0x28) addr:0x02082b68
-func_02082b90 kind:function(arm,size=0x20) addr:0x02082b90
-func_02082bb0 kind:function(arm,size=0x20) addr:0x02082bb0
-func_02082bd0 kind:function(arm,size=0x20) addr:0x02082bd0
-func_02082bf0 kind:function(arm,size=0x68) addr:0x02082bf0
-func_02082c58 kind:function(arm,size=0x34) addr:0x02082c58
-func_02082c8c kind:function(arm,size=0x4) addr:0x02082c8c
-func_02082c90 kind:function(arm,size=0xe0) addr:0x02082c90
-func_02082d70 kind:function(arm,size=0x4) addr:0x02082d70
-func_02082d74 kind:function(arm,size=0x4) addr:0x02082d74
-func_02082d78 kind:function(arm,size=0xa0) addr:0x02082d78
-func_02082e18 kind:function(arm,size=0x58) addr:0x02082e18
-func_02082e70 kind:function(arm,size=0x1c) addr:0x02082e70
-func_02082e8c kind:function(arm,size=0x20) addr:0x02082e8c
+KeyboardCore_FindFirstCharKey kind:function(arm,size=0x54) addr:0x0208179c
+KeyboardCore_FindKeyAt kind:function(arm,size=0x1b4) addr:0x020817f0
+KeyboardCore_GetUnpackedCharData kind:function(arm,size=0x44) addr:0x020819a4
+KeyboardCore_DrawKeyLabels kind:function(arm,size=0x188) addr:0x020819e8
+KeyboardCore_LightKeys kind:function(arm,size=0x148) addr:0x02081b70
+KeyboardCore_IsPenOnPressedKey kind:function(arm,size=0x40) addr:0x02081cb8
+KeyboardCore_MakeScreen kind:function(arm,size=0x70) addr:0x02081cf8
+KeyboardCore_InitGraphics kind:function(arm,size=0x88) addr:0x02081d68
+KeyboardCore_Init kind:function(arm,size=0x148) addr:0x02081df0
+KeyboardCore_SetLayout kind:function(arm,size=0xb8) addr:0x02081f38
+KeyboardCore_SetMode kind:function(arm,size=0x78) addr:0x02081ff0
+KeyboardCore_Update kind:function(arm,size=0x4f8) addr:0x02082068
+KeyboardCore_GetChar kind:function(arm,size=0x10) addr:0x02082560
+KeyboardCore_CodeToChar kind:function(arm,size=0xec) addr:0x02082570
+KeyboardCore_GetCharData kind:function(arm,size=0x24) addr:0x0208265c
+KeyboardCore_GetCharDataSize kind:function(arm,size=0x8) addr:0x02082680
+KeyboardCore_LightTileRect kind:function(arm,size=0xb0) addr:0x02082688
+KeyboardCore_LightRect kind:function(arm,size=0x154) addr:0x02082738
+KeyboardCore_PlaceCursor kind:function(arm,size=0x88) addr:0x0208288c
+KeyboardCore_MoveCursor kind:function(arm,size=0x234) addr:0x02082914
+KeyboardCore_UseEnglishLayout kind:function(arm,size=0x20) addr:0x02082b48
+KeyboardCore_UseKanaLayout kind:function(arm,size=0x28) addr:0x02082b68
+KeyboardCore_UseEuroLayout kind:function(arm,size=0x20) addr:0x02082b90
+KeyboardCore_UseSignLayout kind:function(arm,size=0x20) addr:0x02082bb0
+KeyboardCore_UsePictoLayout kind:function(arm,size=0x20) addr:0x02082bd0
+KeyboardCore_OnKanaKey kind:function(arm,size=0x68) addr:0x02082bf0
+KeyboardCore_OnEnglishKey kind:function(arm,size=0x34) addr:0x02082c58
+KeyboardCore_OnEuroKey kind:function(arm,size=0x4) addr:0x02082c8c
+KeyboardCore_ApplyModifier kind:function(arm,size=0xe0) addr:0x02082c90
+KeyboardCore_OnSignKey kind:function(arm,size=0x4) addr:0x02082d70
+KeyboardCore_OnPictoKey kind:function(arm,size=0x4) addr:0x02082d74
+KeyboardCore_PlayKeySound kind:function(arm,size=0xa0) addr:0x02082d78
+KeyboardCore_UpdateDrag kind:function(arm,size=0x58) addr:0x02082e18
+KeyboardCore_SetAreas kind:function(arm,size=0x1c) addr:0x02082e70
+KeyboardCore_PlaySound kind:function(arm,size=0x20) addr:0x02082e8c
 _ZN12SoftKeyboardC1Ev kind:function(arm,size=0x108) addr:0x02082eac
 _ZN12SoftKeyboard14SetArchiveNameEPKc kind:function(arm,size=0xc4) addr:0x02082fb4
-func_02083078 kind:function(arm,size=0x44) addr:0x02083078
-func_020830bc kind:function(arm,size=0x6c) addr:0x020830bc
-func_02083128 kind:function(arm,size=0x7c) addr:0x02083128
+_ZN12SoftKeyboard6InitBgEii kind:function(arm,size=0x44) addr:0x02083078
+_ZN12SoftKeyboard14InitBgGraphicsEi kind:function(arm,size=0x6c) addr:0x020830bc
+_ZN12SoftKeyboard8InitCoreEPFvPviES0_ kind:function(arm,size=0x7c) addr:0x02083128
 _ZN12SoftKeyboard16TransferCharDataEv kind:function(arm,size=0x34) addr:0x020831a4
 _ZN12SoftKeyboard14TransferScreenEv kind:function(arm,size=0x2c) addr:0x020831d8
 _ZN12SoftKeyboard13LoadBgPaletteEi kind:function(arm,size=0x40) addr:0x02083204
-func_02083244 kind:function(arm,size=0x44) addr:0x02083244
-func_02083288 kind:function(arm,size=0x14) addr:0x02083288
+_ZN12SoftKeyboard6UpdateEi6TPData kind:function(arm,size=0x44) addr:0x02083244
+_ZN12SoftKeyboard7SetModeEii kind:function(arm,size=0x14) addr:0x02083288
 _ZN14KeyboardButtonC1Ev kind:function(arm,size=0x34) addr:0x0208329c
-func_020832d0 kind:function(arm,size=0x14) addr:0x020832d0
-func_020832e4 kind:function(arm,size=0x24) addr:0x020832e4
+_ZN14KeyboardButton5ResetEs kind:function(arm,size=0x14) addr:0x020832d0
+_ZN14KeyboardButton7ReleaseEv kind:function(arm,size=0x24) addr:0x020832e4
 _ZN14KeyboardButton6UpdateEv kind:function(arm,size=0x170) addr:0x02083308
 _ZN14KeyboardButton4DrawEv kind:function(arm,size=0x7c) addr:0x02083478
 _ZN14KeyboardButton8InitTextEP11MessageFilei kind:function(arm,size=0x114) addr:0x020834f4
@@ -3247,17 +3247,17 @@ _ZN14KeyboardButton10SetMessageEm kind:function(arm,size=0x38) addr:0x02083698
 _ZN12SoftKeyboard15SetButtonSoundsEiiiii kind:function(arm,size=0x34) addr:0x020836d0
 _ZN12SoftKeyboard15InitButtonTextsEP11MessageFilei kind:function(arm,size=0x3c) addr:0x02083704
 _ZN12SoftKeyboard18GetButtonCharCountEv kind:function(arm,size=0x68) addr:0x02083740
-func_020837a8 kind:function(arm,size=0x4c) addr:0x020837a8
-func_020837f4 kind:function(arm,size=0x38) addr:0x020837f4
-func_0208382c kind:function(arm,size=0x3c) addr:0x0208382c
+_ZN12SoftKeyboard17PlaceLayoutSpriteEv kind:function(arm,size=0x4c) addr:0x020837a8
+_ZN12SoftKeyboard7LoadObjEsii kind:function(arm,size=0x38) addr:0x020837f4
+_ZN12SoftKeyboard7InitObjEsP11MessageFileiisi kind:function(arm,size=0x3c) addr:0x0208382c
 _ZN12SoftKeyboard14SetObjResourceEs kind:function(arm,size=0xc) addr:0x02083868
 _ZN12SoftKeyboard12LoadObjCellsEi kind:function(arm,size=0x40) addr:0x02083874
 _ZN12SoftKeyboard14LoadObjPaletteEi kind:function(arm,size=0x40) addr:0x020838b4
 _ZN12SoftKeyboard11InitSpritesEv kind:function(arm,size=0x2d8) addr:0x020838f4
 _ZN12SoftKeyboard4DrawEv kind:function(arm,size=0x64) addr:0x02083bcc
-func_02083c30 kind:function(arm,size=0x24) addr:0x02083c30
-func_02083c54 kind:function(arm,size=0x104) addr:0x02083c54
-func_02083d58 kind:function(arm,size=0x6c) addr:0x02083d58
+_ZN12SoftKeyboard10EnableTabsEv kind:function(arm,size=0x24) addr:0x02083c30
+_ZN12SoftKeyboard9OnTabAreaEPS_iii kind:function(arm,size=0x104) addr:0x02083c54
+_ZN12SoftKeyboard12PlayKeySoundEPS_i kind:function(arm,size=0x6c) addr:0x02083d58
 _ZN9TtsPlayerC2Ev kind:function(arm,size=0x44) addr:0x02083dc4
 _ZN9TtsPlayerC1Ev kind:function(arm,size=0x44) addr:0x02083e08
 _ZN9TtsPlayerD1Ev kind:function(arm,size=0x8c) addr:0x02083e4c
@@ -4414,7 +4414,7 @@ height$12802 kind:data(any) addr:0x020b7ef8 local
 @12849 kind:data(any) addr:0x020b7f30 local
 sButtonPositions kind:data(any) addr:0x020b7f44 local
 sButtonRect kind:data(any) addr:0x020b7f54 local
-@13399 kind:data(any) addr:0x020b7f64 local
+@13388 kind:data(any) addr:0x020b7f64 local
 sTabAreas kind:data(any) addr:0x020b7f78 local
 sLayoutPositions kind:data(any) addr:0x020b7fa0 local
 ShttsTextPresets kind:data(any) addr:0x020b7fc8
@@ -5506,21 +5506,21 @@ sKanaPairDakuten kind:data(any) addr:0x02112dc4 local
 sKanaPairHandakuten kind:data(any) addr:0x02112dcc local
 sKanaPairSmall kind:data(any) addr:0x02112dd4 local
 sKanaTables kind:data(any) addr:0x02112ddc local
-data_02112dec kind:data(any) addr:0x02112dec local
+sExtraKeys kind:data(any) addr:0x02112dec local
 sLayouts kind:data(any) addr:0x02112dfc local
 sKanaHandakuten kind:data(any) addr:0x02112e4c local
 sKanaSmall kind:data(any) addr:0x02112ec4 local
 sKanaPlain kind:data(any) addr:0x02112f3c local
 sKanaDakuten kind:data(any) addr:0x02112fb4 local
-@13621 kind:data(any) addr:0x0211302c local
-@13622 kind:data(any) addr:0x0211304c local
-@13623 kind:data(any) addr:0x02113068 local
-@13624 kind:data(any) addr:0x02113088 local
-@13625 kind:data(any) addr:0x021130a8 local
-@13626 kind:data(any) addr:0x021130cc local
-@13627 kind:data(any) addr:0x021130e8 local
-@13628 kind:data(any) addr:0x02113100 local
-@13629 kind:data(any) addr:0x0211311c local
+@13610 kind:data(any) addr:0x0211302c local
+@13611 kind:data(any) addr:0x0211304c local
+@13612 kind:data(any) addr:0x02113068 local
+@13613 kind:data(any) addr:0x02113088 local
+@13614 kind:data(any) addr:0x021130a8 local
+@13615 kind:data(any) addr:0x021130cc local
+@13616 kind:data(any) addr:0x021130e8 local
+@13617 kind:data(any) addr:0x02113100 local
+@13618 kind:data(any) addr:0x0211311c local
 @8870 kind:data(any) addr:0x02113134 local
 @8863 kind:data(any) addr:0x02113158 local
 gStr_N_2 kind:data(any) addr:0x02113360
