@@ -156,7 +156,7 @@ from:0x0214a6d4 kind:arm_call to:0x0207b258 module:main
 from:0x0214a6e0 kind:arm_call to:0x0207b138 module:main
 from:0x0214a6ec kind:arm_call to:0x020a6a6c module:main
 from:0x0214a6f4 kind:load to:0x021223e4 module:main
-from:0x0214a6f8 kind:load to:0x02142438 module:main
+from:0x0214a6f8 kind:load to:0x021423ec add:0x4c module:main
 from:0x0214a70c kind:arm_call to:0x0204ec44 module:main
 from:0x0214a718 kind:arm_call to:0x02024790 module:main
 from:0x0214a724 kind:arm_call to:0x02024790 module:main

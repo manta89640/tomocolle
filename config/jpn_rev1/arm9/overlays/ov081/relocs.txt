@@ -165,7 +165,7 @@ from:0x0214aab8 kind:arm_call to:0x02061c38 module:main
 from:0x0214aac8 kind:arm_call to:0x0207b258 module:main
 from:0x0214aad4 kind:arm_call to:0x0207b138 module:main
 from:0x0214aadc kind:load to:0x021223e4 module:main
-from:0x0214aae0 kind:load to:0x02142438 module:main
+from:0x0214aae0 kind:load to:0x021423ec add:0x4c module:main
 from:0x0214aaf8 kind:arm_call to:0x02028108 module:main
 from:0x0214ab08 kind:arm_call to:0x02035d80 module:main
 from:0x0214ab10 kind:arm_call to:0x0204ec44 module:main

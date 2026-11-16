@@ -335,7 +335,6 @@ void func_0207b364(ParticleSystem *system, ParticleEmitter *emitter);
 void func_0207b258(ParticleSystem *system, void *a);
 void func_0207b138(ParticleSystem *system);
 void func_0202ad84(void *resources);
-extern u8 data_02142438[];
 }
 
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---

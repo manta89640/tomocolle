@@ -228,7 +228,7 @@ from:0x0214aea4 kind:arm_call to:0x020aaba4 module:main
 from:0x0214aeb0 kind:arm_call to:0x020345d8 module:main
 from:0x0214aebc kind:arm_call to:0x0203206c module:main
 from:0x0214aec4 kind:load to:0x021223e4 module:main
-from:0x0214aec8 kind:load to:0x02142438 module:main
+from:0x0214aec8 kind:load to:0x021423ec add:0x4c module:main
 from:0x0214aedc kind:arm_call to:0x0204ec44 module:main
 from:0x0214aee8 kind:arm_call to:0x0204f7a0 module:main
 from:0x0214aef4 kind:arm_call to:0x02024790 module:main

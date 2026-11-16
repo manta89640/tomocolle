@@ -467,7 +467,7 @@ from:0x0214d9ac kind:arm_call to:0x02083bcc module:main
 from:0x0214d9b8 kind:arm_call to:0x02031d7c module:main
 from:0x0214d9c4 kind:arm_call to:0x0202e0bc module:main
 from:0x0214d9cc kind:load to:0x021223e4 module:main
-from:0x0214d9d0 kind:load to:0x02142438 module:main
+from:0x0214d9d0 kind:load to:0x021423ec add:0x4c module:main
 from:0x0214da00 kind:arm_call to:0x020a5948 module:main
 from:0x0214da0c kind:arm_call to:0x021506a4 module:overlay(92)
 from:0x0214da18 kind:arm_call to:0x02150f9c module:overlay(92)

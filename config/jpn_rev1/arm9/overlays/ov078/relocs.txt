@@ -455,7 +455,7 @@ from:0x0214cd08 kind:arm_call to:0x0202ad84 module:main
 from:0x0214cd0c kind:arm_call to:0x02061c38 module:main
 from:0x0214cd1c kind:arm_call to:0x0207b258 module:main
 from:0x0214cd24 kind:load to:0x021223e4 module:main
-from:0x0214cd28 kind:load to:0x02142438 module:main
+from:0x0214cd28 kind:load to:0x021423ec add:0x4c module:main
 from:0x0214cd48 kind:arm_call to:0x0207b3dc module:main
 from:0x0214cd70 kind:arm_call to:0x0208f21c module:main
 from:0x0214cda0 kind:arm_call to:0x0207b2fc module:main

@@ -160,6 +160,48 @@ keeps ten of the archive's sixteen functions of `printf.o`, the conversion helpe
 ROM. The object calls the runtime's `_dls`, `_deq` and `_ull_mod`; `_ull_mod` is a second entry point inside
 `_ll_udiv`, at `0x02020DB4`.
 
+### What differs from the fetched release
+
+Most of the SDK and NitroSystem files the build compiles come out identical to the game's; where a function seemed
+not to, the cause was mostly the configuration, not the code. Measured, function by function, by comparing the
+compiled object with the delinked one in object order, size and bytes outside relocations:
+
+- **Names.** 104 functions matched already and only lacked their names: static functions that dsd had given address
+  names (the eight `texmtxCalc_flag*_` builders of each of `cgtool/3dsmax.c`, `maya.c` and `xsi.c`, gfd's 36
+  `DoTransfer*`, snd's `BeginSleep`/`EndSleep`/`StrmCallback`/..., fnd's `AllocFromHead`/`AllocFromTail`,
+  `updateHintVec_`), and a few that dsd's signatures had named otherwise (`FS_LoadOverlayImage` and
+  `FS_UnloadOverlayImage` were `FS_LoadOverlayFile` and `FS_StopOverlay`; crt0's `_start` was `Entry`). crt0's
+  `_start_AutoloadDoneCallback` keeps dsd's name `AutoloadCallback`: `dsd rom config` finds it by that name.
+- **Ranges.** `3dsmax.c` and `maya.c` ended two functions early in `delinks.txt` (`texmtxCalc_flagTRS_` and
+  `NNSi_G3dSendTexSRT3dsMax`/`Maya` were in the gap), and `os_system.c` one (`OS_WaitVBlankIntr`, `0x02008E10`).
+- **Relocations.** Three that dsd made wrong: the constants `0x01FF8000` (`CARDi_TryReadCardDma`) and `0x027E0021`
+  (`init_cp15`) are numbers that look like addresses, not references; and `OSi_DisplayExContext`'s call of
+  `OS_DisableProtectionUnit` after the `bx` to the user's handler, and its load of that call's address as the
+  handler's return address, had none.
+- **Structures cut into fields.** dsd puts a symbol on every address the code loads, so `NNS_G3dGlb`, `gGXState`,
+  `NNS_G3dRSOnGlb`, sbc's command statics and nsbca's `pivotUtil_` were each several symbols. They are one again,
+  referred to with an offset (the scenes' `data_02142438` is `&NNS_G3dGlb.cameraMtx`).
+
+Two files are another release than the fetched one, in code:
+
+- **`mi/src/mi_dma.c`** has `MI_StopAllDma` (`0x02009400`, `MI_StopDma` of channels 0 to 3) after `MI_StopDma`,
+  which the fetched file lacks. Its name is the one later SDKs document for it.
+- **`spi/src/pm.c`** (`0x0200ECA8` to `0x0200F668`) is later than the fetched release. Measured: the busy wait is
+  called through a pointer (`.data` `0x020FC794`, formerly named `gText_Mushiro` as if it were text) that holds one of
+  three waits: in an IRQ handler, with IRQs or IME off, or either (`PM_ForceToPowerOffAsync` and the synchronous
+  power-off choose them, so power-off works with interrupts disabled); the utility commands go through one function
+  that takes a 16-bit parameter and a result buffer, sent as PXI command 0x61 (the fetched header's numbers are
+  0x63); `PM_Init` sets up no register buffers and no mutex; `PMi_SetLCDPower` sends utility command 0x10 around
+  turning the LCDs off and on, and waits two frames when the LCDs go off within two frames of `PM_Init`;
+  `PM_ForceToPowerOff` retries until it succeeds, then disables interrupts, stops all DMA and halts; and before
+  powering off, a function at `0x0200F5DC`, the file's last, turns the LCDs on with their backlights off. The file's
+  `.bss` pool is 0x2C bytes (`PMi_IsInit` at `0x0211B68C`, the LCD frame counts, a flag the ARM7's command 0x63 sets,
+  utility 0x10's parameter, the two sleep callback lists, `PMi_Work` at +0x1C).
+  Inferred: the flag is the sleep-end flag, whose command number changed with the others. The functions the fetched
+  file does not have, and the statics, have the project's names for what their code does.
+
+Both are built as `lib/overrides/` describes (decompiling.md, "Where the game's release of a file differs").
+
 ## Voice synthesis
 
 The Miis' voices come from Sharp's text-to-speech engine, SHTTS 1.2.0 (the version is in the SDK's list of library
