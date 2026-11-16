@@ -5,6 +5,145 @@
 
 #include <wchar.h>
 
+// --- BEGIN of the file's .rodata (in an order that the compiler sorts into the ROM's) ---
+static const u8 data_ov076_02158748[2] = { 0x6a, 0x6a };
+static const u8 data_ov076_0215874c[2] = { 0x69, 0x69 };
+static const int data_ov076_0215878c = 107;
+static const u8 data_ov076_02158750[4] = { 0x20, 0x22, 0x24, 0x26 };
+static const int data_ov076_0215876c = 28;
+static const u16 data_ov076_02158788[2] = { 0x10, 0x6b };
+static const int data_ov076_02158754 = 76;
+static const int data_ov076_02158768 = 2;
+static const int data_ov076_02158770 = 2;
+static const int data_ov076_0215877c = 2;
+static const u16 data_ov076_02158774[2] = { 0x4d, 0x4e };
+static const int data_ov076_02158778 = 6;
+static const int data_ov076_02158780 = 0;
+static const u16 data_ov076_02158784[2] = { 0x2, 0x4 };
+static const u16 data_ov076_02158764[2] = { 0x30, 0x31 };
+static const int data_ov076_0215875c = 4;
+static const int data_ov076_02158760 = 4;
+static const int data_ov076_02158758 = 32;
+static const WindowPoint data_ov076_021587b0 = { 16, 7 };
+static const WindowPoint data_ov076_021587e0 = { 36, 40 };
+static const WindowPoint data_ov076_021587f8 = { 65, 38 };
+static const WindowPoint data_ov076_021587a8 = { 75, 149 };
+static const WindowPoint data_ov076_021587c8 = { 32, 24 };
+static const WindowPoint data_ov076_02158798 = { 42, 36 };
+static const WindowPoint data_ov076_021587d0 = { 128, 76 };
+static const WindowPoint data_ov076_021587e8 = { 8, 7 };
+static const WindowPoint data_ov076_02158790 = { 181, 149 };
+static const WindowPoint data_ov076_021587a0 = { 75, 149 };
+static const WindowPoint data_ov076_021587b8 = { 128, 76 };
+static const WindowPoint data_ov076_02158800 = { 38, 33 };
+static const WindowPoint data_ov076_02158810 = { 30, 20 };
+static const WindowPoint data_ov076_021587c0 = { 94, 30 };
+static const WindowPoint data_ov076_02158808 = { 94, 30 };
+static const WindowPoint data_ov076_021587d8 = { 36, 40 };
+static const u32 data_ov076_021587f0[2] = { 2, 3 };
+static const u16 data_ov076_02158822[5] = { 0x1, 0x2, 0x3, 0x4, 0x5 };
+static const u16 data_ov076_02158818[5] = { 0x26, 0x26, 0x26, 0x26, 0x26 };
+static const VecFx32 data_ov076_02158844 = { 1, 0, 0 };
+static const VecFx32 data_ov076_02158868 = { 41, 5, 6 };
+static const VecFx32 data_ov076_02158850 = { 0, 7844, 58762 };
+static const VecFx32 data_ov076_021588b0 = { 4, 4, 4 };
+static const VecFx32 data_ov076_0215882c = { 0, 0, 0 };
+static const VecFx32 data_ov076_02158874 = { 0, 2, 2 };
+static const u16 data_ov076_02158880[6] = { 0x58, 0x5a, 0x5c, 0x5e, 0x28, 0x2a };
+static const VecFx32 data_ov076_0215885c = { 0, 7248, 105456 };
+static const VecFx32 data_ov076_0215888c = { 0, 1, 1 };
+static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
+static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
+static const VecFx32 data_ov076_02158838 = { 0, 0, -32768 };
+static const int data_ov076_021588cc[4] = { 128, 96, 128, 96 };
+static const int data_ov076_021588dc[4] = { 20, 20, 216, 152 };
+static const int data_ov076_021588ec[4] = { 16, -1, 0, -1 };
+static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
+static const int data_ov076_021588fc[4] = { 75, 149, 181, 149 };
+static const int data_ov076_0215890c[4] = { 145, 65, 145, 119 };
+static const int data_ov076_0215891c[4] = { 5, -1, 19, -1 };
+static const int data_ov076_0215894c[4] = { 94, 30, 94, 30 };
+static const int data_ov076_0215892c[4] = { 80, 77, 123, 77 };
+static const int data_ov076_0215893c[4] = { 14, 15, 16, 17 };
+static const u16 data_ov076_0215895c[10] = { 0x0, 0x2, 0x4, 0x6, 0xa, 0xc, 0x10, 0x14, 0x16, 0xe };
+static const int data_ov076_02158970[5] = { 4, 4, 4, 4, 4 };
+static const int data_ov076_02158984[6] = { 62, 22, 116, 30, 116, 30 };
+static const int data_ov076_0215899c[6] = { 14, 14, 14, 14, 14, 1 };
+static const int data_ov076_021589b4[6] = { 3, 3, 3, 3, 4, 4 };
+static const int data_ov076_021589cc[6] = { 136, 132, 62, 175, 194, 175 };
+static const int data_ov076_021589e4[6] = { 14, 15, 16, 17, 22, 23 };
+static const int data_ov076_02158a7c[8] = { 80, 102, 176, 102, 80, 90, 176, 90 };
+static const int data_ov076_02158a9c[8] = { 58, 54, 58, 54, 58, 54, 58, 54 };
+static const int data_ov076_02158abc[8] = { 158, 76, 138, 76, 118, 76, 98, 76 };
+static const int data_ov076_02158adc[8] = { 170, 76, 150, 76, 90, 76, 70, 76 };
+static const int data_ov076_02158afc[8] = { 80, 77, 123, 77, 80, 114, 123, 114 };
+static const int data_ov076_02158b1c[8] = { 14, 15, 16, 17, 18, 19, 20, 21 };
+static const int data_ov076_021589fc[8] = { 207, 48, 239, 48, 207, 74, 239, 74 };
+static const int data_ov076_02158a1c[8] = { 14, -1, 0, -1, 16, -1, 0, -1 };
+static const int data_ov076_02158a3c[8] = { 15, -1, 0, -1, 16, -1, 0, -1 };
+static const int data_ov076_02158a5c[8] = { 80, 90, 176, 90, 80, 90, 176, 90 };
+static const int data_ov076_02158b3c[9] = { 0, 1, 4, 2, 3, 6, 7, 8, 9 };
+static const int data_ov076_02158b60[10] = { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+static const ScreenPoint sSpriteB0Places[5] = { { 55, 182 }, { 55, 182 }, { 103, 182 }, { 151, 182 }, { 199, 182 } };
+static const int data_ov076_02158bb0[10] = { 128, 26, 128, 59, 128, 92, 128, 125, 128, 158 };
+static const int data_ov076_02158bd8[10] = { 128, 112, 128, 88, 128, 64, 128, 16, 128, 40 };
+static const int data_ov076_02158c00[10] = { 8, 20, 8, 20, 8, 20, 8, 20, 8, 20 };
+static const int data_ov076_02158c28[10] = { 128, 26, 128, 59, 128, 92, 128, 125, 128, 158 };
+static const int data_ov076_02158c50[10] = { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 };
+static const u16 data_ov076_02158c78[22] = { 0x0, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22, 0x24, 0x28, 0x2a, 0x2c, 0x2e };
+static const int data_ov076_02158ca4[12] = { 40, 18, 40, 18, 40, 18, 40, 18, 40, 18, 24, 22 };
+static const int data_ov076_02158cd4[12] = { 20, -1, 0, -1, 22, -1, 0, -1, 20, -1, 0, -1 };
+static const int data_ov076_02158d04[12] = { 1, 10, 2, 3, 6, 0, 5, 4, 8, 9, 7, 11 };
+static const int data_ov076_02158d34[12] = { 21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22 };
+static const int data_ov076_02158d64[12] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100 };
+static const int data_ov076_02158d94[12] = { 20, -1, 0, -1, 21, -1, 0, -1, 22, -1, 0, -1 };
+static const int data_ov076_02158dc4[12] = { 32, 181, 80, 181, 128, 181, 176, 181, 224, 181, 242, 13 };
+static const u16 data_ov076_02158df4[30] = { 0x18, 0x1a, 0x1c, 0x1e, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x20, 0x22, 0x3c, 0x3e, 0x3c, 0x3e, 0x40, 0x42, 0x4f, 0x4f, 0x4f, 0x4f, 0x4f, 0x0 };
+static const char data_ov076_02158e30[] = "E00:/Window_down.nsc";
+static const u8 data_ov076_02158e48[24] = { 0x1a, 0x1a, 0x1b, 0x19, 0x1a, 0x19, 0x1a, 0x19, 0x1c, 0x19, 0x1a, 0x18, 0x1b, 0x1b, 0x1a, 0x1a, 0x19, 0x19, 0x1a, 0x1a, 0x1b, 0x1a, 0x19, 0x1b };
+static const u8 data_ov076_02158e60[50] = { 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c };
+static const int data_ov076_02158e94[16] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const int data_ov076_02158ed4[16] = { 80, 40, 123, 40, 80, 77, 123, 77, 80, 114, 123, 114, 80, 151, 123, 151 };
+static const int data_ov076_02158f14[16] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100, 207, 126, 239, 126 };
+static const u16 data_ov076_02158f54[36] = { 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x0, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56 };
+static const int data_ov076_02158f9c[18] = { 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
+static const int data_ov076_02158fe4[20] = { 70, 40, 186, 40, 128, 112, 160, 76, 68, 76, 202, 112, 216, 76, 68, 149, 192, 149, 54, 112 };
+static const int data_ov076_02159034[20] = { 116, 18, 116, 18, 32, 18, 56, 18, 112, 18, 32, 18, 56, 18, 112, 18, 48, 18, 48, 18 };
+static const int data_ov076_02159084[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3 };
+static const int data_ov076_021590dc[24] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 20, -1, 0, -1, 16, -1, 0, -1 };
+static const int data_ov076_0215913c[24] = { 6, 0, 12, 1, 9, 19, 7, 21, 8, 17, 5, 4, 11, 10, 2, 3, 14, 20, 15, 13, 22, 18, 16, 23 };
+static const int data_ov076_0215919c[24] = { 23, 1, 19, 21, 22, 5, 0, 8, 10, 16, 6, 13, 7, 9, 2, 17, 3, 4, 15, 11, 20, 18, 14, 12 };
+static const int data_ov076_021591fc[24] = { 59, 40, 102, 40, 145, 40, 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
+static const int data_ov076_0215925c[29] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5 };
+static const int data_ov076_021592d0[32] = { 73, -6, 12, 12, 87, -6, 12, 12, 101, -6, 12, 12, 115, -6, 12, 12, 129, -6, 12, 12, 143, -6, 12, 12, 157, -6, 12, 12, 171, -6, 12, 12 };
+static const int data_ov076_02159350[36] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3 };
+static const int data_ov076_021593e0[40] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const int data_ov076_02159480[44] = { 68, 52, 92, 52, 116, 52, 140, 52, 164, 52, 188, 52, 68, 92, 68, 132, 206, 134, 237, 134, 237, 134, 206, 20, 237, 20, 206, 45, 237, 45, 206, 70, 237, 70, 206, 95, 99, 138, 118, 138, 137, 138, 156, 138 };
+static const int data_ov076_02159530[44] = { 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 16, 16, 16, 16, 16, 16, 16, 16 };
+static const int data_ov076_021595e0[48] = { 2, 4, 0, 8, 39, 17, 1, 26, 16, 15, 27, 20, 33, 11, 19, 32, 9, 12, 23, 34, 21, 25, 40, 35, 5, 41, 13, 36, 37, 6, 24, 30, 31, 18, 28, 46, 7, 44, 38, 42, 45, 29, 3, 43, 22, 10, 14, 47 };
+static const int data_ov076_021596a0[58] = { 58, 80, 105, 80, 152, 80, 199, 80, 48, 64, 80, 64, 112, 64, 144, 64, 176, 64, 208, 64, 48, 96, 80, 96, 112, 96, 144, 96, 176, 96, 208, 96, 80, 80, 176, 80, 128, 41, 128, 111, 80, 41, 80, 111, 160, 41, 160, 111, 128, 48, 128, 72, 128, 96, 128, 120, 128, 144 };
+static const int data_ov076_02159788[58] = { 42, 36, 42, 36, 42, 36, 42, 36, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 58, 54, 58, 54, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 126, 20, 126, 20, 126, 20, 126, 20, 126, 20 };
+static const int data_ov076_02159870[72] = { 33, 40, 51, 44, 39, 70, 45, 49, 59, 56, 68, 31, 32, 47, 37, 48, 66, 52, 58, 50, 55, 64, 60, 62, 43, 38, 42, 23, 67, 54, 36, 41, 65, 30, 57, 34, 12, 13, 69, 26, 4, 25, 1, 19, 5, 8, 27, 7, 14, 3, 22, 10, 6, 20, 11, 63, 17, 35, 21, 0, 61, 16, 46, 9, 18, 2, 28, 53, 71, 24, 15, 29 };
+static const int data_ov076_02159990[72] = { 17, 159, 17, 12, 17, 33, 17, 54, 17, 75, 17, 96, 17, 117, 17, 138, 77, 11, 127, 11, 77, 11, 127, 11, 77, 30, 127, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 223, 74, 68, 11, 136, 11, 223, 155, 179, 30, 179, 48, 179, 66, 179, 84, 179, 102, 179, 120, 179, 138, 179, 156 };
+static const int data_ov076_02159ab0[88] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 14, -1, 0, -1, 1, -1, 0, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1 };
+static const int data_ov076_02159c10[116] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const int data_ov076_02159de0[144] = { 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1, 13, -1, -1, -1, 13, -1, -1, -1, -1, -1, -1, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1 };
+// --- END of the file's .rodata ---
+
+// --- BEGIN of the file's .data ---
+static const wchar_t *data_ov076_0215a10c[5] = { L"♂", L"♀", L"" };
+// Filled in by the static initialiser, as its initialiser reads other constants
+static const WindowPoint data_ov076_0215a13c[36] = {
+    data_ov076_02158810, data_ov076_02158810, data_ov076_02158810, data_ov076_02158810,
+    data_ov076_02158810, data_ov076_02158810, data_ov076_02158810, data_ov076_02158810,
+    { 48, 18 }, { 48, 18 }, { 48, 18 }, { 48, 18 }, { 48, 18 }, { 48, 18 },
+    data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8,
+    data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8, data_ov076_021587c8,
+    { 62, 24 }, { 16, 18 }, { 16, 18 }, { 62, 24 }, { 16, 16 }, { 16, 16 },
+    { 16, 16 }, { 16, 16 }, { 16, 16 }, { 16, 16 }, { 16, 16 }, { 16, 16 },
+};
+// --- END of the file's .data ---
+
 // --- The main program (stand-ins, not decompiled) ---
 struct ArchiveLoader;
 struct ScreenControl;
@@ -128,10 +267,6 @@ void func_02029f30(CharacterModel *model, GXRgb color);
 void func_02029f40(CharacterModel *model, GXRgb color);
 void func_02092178(wchar_t *name);
 }
-
-// The lights' directions
-static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
-static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
 
 void MiiEditScene::Update() {
     if (mUnknown1B32C) {
@@ -780,9 +915,6 @@ void MiiEditScene::func_ov076_0214bdd8() {
     data_0211d604.mPlanesChanged = TRUE;
 }
 
-// The five places of mSprite582C
-static const ScreenPoint sSpriteB0Places[5] = { { 55, 182 }, { 55, 182 }, { 103, 182 }, { 151, 182 }, { 199, 182 } };
-
 void MiiEditSpriteB0::func_ov076_0214be80(int place) {
     SetPosition(FxVec2(sSpriteB0Places[place].x << FX32_SHIFT, sSpriteB0Places[place].y << FX32_SHIFT));
     mPlace = place;
@@ -934,4 +1066,131 @@ void MiiEditPage5::Draw() {
 
 void MiiEditPage5::Exit() {
     func_020346cc(&mWindow);
+}
+
+// TEMPORARY: refers to every object of .rodata, so that the compiler keeps the ones that only functions not
+// written yet use (an unreferenced static is dropped, and the pool would close up). Remove it when they are.
+extern "C" void func_ov076_KeepData(const void **p) {
+    p[0] = &data_ov076_02158748;
+    p[1] = &data_ov076_0215874c;
+    p[2] = &data_ov076_02158750;
+    p[3] = &data_ov076_02158754;
+    p[4] = &data_ov076_02158770;
+    p[5] = &data_ov076_0215878c;
+    p[6] = &data_ov076_02158758;
+    p[7] = &data_ov076_02158764;
+    p[8] = &data_ov076_02158774;
+    p[9] = &data_ov076_02158780;
+    p[10] = &data_ov076_02158778;
+    p[11] = &data_ov076_0215877c;
+    p[12] = &data_ov076_02158784;
+    p[13] = &data_ov076_02158788;
+    p[14] = &data_ov076_02158768;
+    p[15] = &data_ov076_02158760;
+    p[16] = &data_ov076_0215876c;
+    p[17] = &data_ov076_0215875c;
+    p[18] = &data_ov076_02158790;
+    p[19] = &data_ov076_02158798;
+    p[20] = &data_ov076_021587a0;
+    p[21] = &data_ov076_021587a8;
+    p[22] = &data_ov076_021587b0;
+    p[23] = &data_ov076_021587b8;
+    p[24] = &data_ov076_021587c0;
+    p[25] = &data_ov076_021587c8;
+    p[26] = &data_ov076_021587d0;
+    p[27] = &data_ov076_021587d8;
+    p[28] = &data_ov076_021587e0;
+    p[29] = &data_ov076_021587e8;
+    p[30] = &data_ov076_021587f0;
+    p[31] = &data_ov076_021587f8;
+    p[32] = &data_ov076_02158800;
+    p[33] = &data_ov076_02158808;
+    p[34] = &data_ov076_02158810;
+    p[35] = &data_ov076_02158818;
+    p[36] = &data_ov076_02158822;
+    p[37] = &data_ov076_0215882c;
+    p[38] = &data_ov076_02158838;
+    p[39] = &data_ov076_02158844;
+    p[40] = &data_ov076_02158850;
+    p[41] = &data_ov076_0215885c;
+    p[42] = &data_ov076_02158868;
+    p[43] = &data_ov076_02158874;
+    p[44] = &data_ov076_02158880;
+    p[45] = &data_ov076_0215888c;
+    p[46] = &sLightDirection1;
+    p[47] = &sLightDirection0;
+    p[48] = &data_ov076_021588b0;
+    p[49] = &data_ov076_021588bc;
+    p[50] = &data_ov076_021588cc;
+    p[51] = &data_ov076_021588dc;
+    p[52] = &data_ov076_021588ec;
+    p[53] = &data_ov076_021588fc;
+    p[54] = &data_ov076_0215890c;
+    p[55] = &data_ov076_0215891c;
+    p[56] = &data_ov076_0215892c;
+    p[57] = &data_ov076_0215893c;
+    p[58] = &data_ov076_0215894c;
+    p[59] = &data_ov076_0215895c;
+    p[60] = &data_ov076_02158970;
+    p[61] = &data_ov076_02158984;
+    p[62] = &data_ov076_0215899c;
+    p[63] = &data_ov076_021589b4;
+    p[64] = &data_ov076_021589cc;
+    p[65] = &data_ov076_021589e4;
+    p[66] = &data_ov076_021589fc;
+    p[67] = &data_ov076_02158a1c;
+    p[68] = &data_ov076_02158a3c;
+    p[69] = &data_ov076_02158a5c;
+    p[70] = &data_ov076_02158a7c;
+    p[71] = &data_ov076_02158a9c;
+    p[72] = &data_ov076_02158abc;
+    p[73] = &data_ov076_02158adc;
+    p[74] = &data_ov076_02158afc;
+    p[75] = &data_ov076_02158b1c;
+    p[76] = &data_ov076_02158b3c;
+    p[77] = &data_ov076_02158b60;
+    p[78] = &sSpriteB0Places;
+    p[79] = &data_ov076_02158bb0;
+    p[80] = &data_ov076_02158bd8;
+    p[81] = &data_ov076_02158c00;
+    p[82] = &data_ov076_02158c28;
+    p[83] = &data_ov076_02158c50;
+    p[84] = &data_ov076_02158c78;
+    p[85] = &data_ov076_02158ca4;
+    p[86] = &data_ov076_02158cd4;
+    p[87] = &data_ov076_02158d04;
+    p[88] = &data_ov076_02158d34;
+    p[89] = &data_ov076_02158d64;
+    p[90] = &data_ov076_02158d94;
+    p[91] = &data_ov076_02158dc4;
+    p[92] = &data_ov076_02158df4;
+    p[93] = &data_ov076_02158e30;
+    p[94] = &data_ov076_02158e48;
+    p[95] = &data_ov076_02158e60;
+    p[96] = &data_ov076_02158e94;
+    p[97] = &data_ov076_02158ed4;
+    p[98] = &data_ov076_02158f14;
+    p[99] = &data_ov076_02158f54;
+    p[100] = &data_ov076_02158f9c;
+    p[101] = &data_ov076_02158fe4;
+    p[102] = &data_ov076_02159034;
+    p[103] = &data_ov076_02159084;
+    p[104] = &data_ov076_021590dc;
+    p[105] = &data_ov076_0215913c;
+    p[106] = &data_ov076_0215919c;
+    p[107] = &data_ov076_021591fc;
+    p[108] = &data_ov076_0215925c;
+    p[109] = &data_ov076_021592d0;
+    p[110] = &data_ov076_02159350;
+    p[111] = &data_ov076_021593e0;
+    p[112] = &data_ov076_02159480;
+    p[113] = &data_ov076_02159530;
+    p[114] = &data_ov076_021595e0;
+    p[115] = &data_ov076_021596a0;
+    p[116] = &data_ov076_02159788;
+    p[117] = &data_ov076_02159870;
+    p[118] = &data_ov076_02159990;
+    p[119] = &data_ov076_02159ab0;
+    p[120] = &data_ov076_02159c10;
+    p[121] = &data_ov076_02159de0;
 }
