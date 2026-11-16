@@ -384,6 +384,16 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   function but one table, which had to be the file's first static.
 - Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
   at the end), in the order of their declarations: overlay 39's two message numbers.
+- When a same-size group cannot be solved by swapping names (a local `const` array, or virtual tables, sit at fixed
+  places in the list), change the size sequence instead. `src/shop/Shop.cpp` declares all its statics in one block;
+  the model that reproduced its compiled layout is the list *reversed* (newest first) with the virtual tables and the
+  local array after the block, heap-sorted as above. A few compiles narrowed the tables' order to candidates, a random
+  search over one or two moved declarations found a sequence that put `SetKind`'s local array last among the 16-byte
+  objects and `ShopItemListView`'s table before `ItemListView`'s, and swapping names within each size did the rest.
+  `u16` arrays are pooled too, at 2-byte alignment, between the 8- and 12-byte objects. A point read only field by
+  field (folded into immediates) is still an object of the pool, so the ROM's pool has every folded static too.
+- Mind the build: when a quick `ninja <object>` fails (compile error), the old object stays and a layout read from it
+  is stale.
 
 ## Matching techniques
 
@@ -492,6 +502,18 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A `static const` point read field by field is folded into immediates; the original loading it from the pool, with
   three dead pairs, is the point passed by value to an inline that does the shift and `SetPosition`
   (`SetCanvasPosition` in overlay 76's `MiiEditScene::Init`).
+- A point plus an offset put on a sprite with six dead pairs per sprite (the point, the offset, the sum twice, the
+  shifted pair twice): `SetSpritePosition(&sprite, AddPoints(position, sOffset))` with
+  `template <class A, class B> static inline A AddPoints(A a, B b) { A p; p.x = a.x + b.x; ...; return p; }`, the
+  sprite helper taking the point by `const &` (its temporary then sits above the inline's copies, among the caller's
+  locals) and calling `SetPosition(x, y)`; a canvas helper taking it by value. That matched `ShopWindow::SetPosition`
+  (`src/shop/Shop.cpp`); a template lets one helper take both `WindowPoint` and `ScreenPoint`. The forms of the
+  setters differ between functions of one file and even between sprites of one function: `Shop.cpp` has all three
+  (search each call's form by script, one at a time, keeping the best).
+- Not solved: the item list's two `Refresh` functions (`Shop.cpp`), with the same helpers per row, keep 2 more points
+  of the original's frame; the original zeroes a point through a pointer inside the loop (`add r1, sp, #264;
+  str r2, [r1, #4]; str r2, [r1]`, y first) and adds its x as `add fp, r3, #0`. An inline returning a zeroed point
+  gets the zeroing, but hoisted out of the loop.
 - A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
   another (the main program's list scenes).
 - Spill slots of a function too large to keep its variables in registers (MSL's `__sformatter`, 3.4 KB) follow the

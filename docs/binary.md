@@ -1855,10 +1855,46 @@ their data is the last of each section: `.rodata` from `0x020FBFFC`, `.data` fro
 How the bounds were found: the apartment's `.rodata` must start at `0x020FBFFC` (a section of its own at
 `0x020FC002` is aligned to 4 by dsd, which moves every symbol after it; and the three `u16` there are the stage
 thresholds its code compares with); the sky's `.rodata` objects interleave the time of day's tables with the sky's
-own, so the two are one file; the shop file's 0x24-byte layout table at `0x020FC27C` is read by the list, the window
-and the staff code alike, and its `.data` holds a static of the staff code before the four virtual tables, then the
-list's and the staff's strings. The other boundaries are where the callers and the subject change: the residents'
-functions, the songs' and the island's progress have no data of their own to tell them apart (inferred).
+own, so the two are one file; the shop file's `.rodata` pool at `0x020FC27C` (see below) is read by the list, the
+window and the staff code alike, and its `.data` holds a static of the counter's code before the four virtual
+tables, then the list's and the staff's strings. The other boundaries are where the callers and the subject change:
+the residents' functions, the songs' and the island's progress have no data of their own to tell them apart
+(inferred).
+
+### The item list, the price window and the shop counter
+
+Measured, `src/shop/Shop.cpp` (95 of its 98 functions match; classes in `include/shop/Shop.h` and `ShopWindow.h`):
+
+- `ItemListView` (0x13F64 bytes, table `0x021153B4`): the scrolling list of the lower screen that the shops, the
+  change room (overlay 86), the album and the item trade (overlay 110) use. Up to seven rows (one more than shown),
+  each a button with the item's name (`MessageText`), a price with an icon, and a count canvas; arrow buttons, a
+  scroll bar and a touch area scroll it 4 pixels a frame or by dragging, and a row is 20 pixels. The rows are reused
+  round (`GetRowItem`), and only rows whose item, palette, value or count changed are drawn again. `mMode` says what
+  a row shows beside the name: nothing (0), the price, greyed when `*mMoney` is less (1), "ｘ" and the count (2), or
+  `mUnknown0C` " / " the count (3), greyed in 2 and 3 when `mUnknown0C` is 0. `ShopItemListView` (table
+  `0x02115398`) adds a mark beside each row whose item was never owned (`Item::mOwned`).
+- `ShopWindow` (0xB6C8 bytes, table `0x02115368`) is a `MessageWindow` that asks how many to buy (message 0xC3) or
+  sell (0xC7): its plus and minus buttons change `mCount` within the money, the 99 an item can be owned and, when
+  selling, what is had; it shows the count, the total and the money. Totals are `GetBuyTotal`/`GetSellTotal`, its
+  third and fourth virtual functions: the price (Item's first virtual) or the second price (its second) times the
+  count; `HalfPriceShopWindow` (`0x02115380`, overlay 56) buys at half and sells at 11/10. MessageWindow's second
+  virtual, `0x02034BC4`, is `SetPosition(WindowPoint)`: the window and what is on it move there.
+- `ShopCounter` (0x18FBC bytes) holds the speech player, the speech window, the staff and an item panel, and sets up
+  the 3D view (camera, two white lights, clear colour 0x3DEF). The panel (`ShopItemPanel`, 0xE44 bytes) shows an
+  item's name and either the number owned ("所持数") or the price ("売値", "円"), slides in and out, and hides while
+  the speech window is shown. Its kind gives the first name's message: 0 for goods, 0xFF for clothes, 0x22B for
+  interiors (TmdItemMsgJP has the goods, then the 300 clothes, then the interiors).
+- `ShopStaff` (0x321C bytes) is a resident whose event (0x14) takes place at the shop, if there is one
+  (`FindResidentAt`), or else the head staff: a `Mannequin` with the head staff's head ("3CH:/head.imd") and the
+  shop's uniform, clothes 0x87, 0x73, 0x97 or 0xC0 by shop (`GetUniform`). It greets (a bow, animation 0x22, 0x2A in
+  shop 3, and a turn), says two messages (the speech window shows the first, the voice speaks the second, animation
+  29) and turns back; `mHeldModel` is put in its right hand every frame.
+
+The `.rodata` is two `u8[2]` and one pool of 4-aligned statics sorted by size: an int, 31 points, two `u16[5]`,
+three 12-byte, five 16-byte (the last a local array of `SetKind`), an `int[5]`, two `ScreenPoint[3]`, two
+`ButtonSounds` and a `ScreenPoint[5]`. Five of the points are only read folded, and a set of five tab buttons
+(sequences 0x17 to 0x20 in pairs, kinds 1 to 16, positions 0x2E apart, size 42×24) is read by no linked code
+(inferred: by a function the link stripped).
 
 ### The shops' stock
 
