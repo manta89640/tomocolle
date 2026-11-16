@@ -7,6 +7,10 @@
 #include "GameData.h"
 #include "Sprite.h"
 #include "island/Sky.h"
+#include "SceneManager.h"
+#include "SceneMemory.h"
+#include "ScreenControl.h"
+#include "TutorialRoomScene.h"
 
 // STAND-INS and declarations for what the tutorial's apartment uses of the main program that is not decompiled
 // yet: its global objects with the fields the overlay touches, and its functions by the names symbols.txt has for
@@ -16,30 +20,6 @@
 struct ArchiveLoader;
 
 // The screens: which planes are shown, and their brightness.
-struct ScreenControl {
-    void Set(u32 planes) {
-        mPlanes = planes;
-        mPlanesChanged = TRUE;
-    }
-    void Show(u32 planes) {
-        mPlanes |= planes;
-        mPlanesChanged = TRUE;
-    }
-    void Hide(u32 planes) {
-        mPlanes &= ~planes;
-        mPlanesChanged = TRUE;
-    }
-
-    /* 0x00 */ u32 mPlanes; // Of the main screen; bit 1 is set while a TutorialTimedMessage is shown
-    /* 0x04 */ u8 mUnknown04[0x44];
-    /* 0x48 */ int mUnknown48;
-    /* 0x4C */ u8 mUnknown4C[0x88];
-    /* 0xD4 */ BOOL mPlanesChanged;
-    /* 0xD8 */ u8 mUnknownD8[0x14];
-    /* 0xEC */ int mUnknownEC;
-};
-
-// The buttons.
 struct PadInput {
     /* 0x00 */ u32 mUnknown00;
     /* 0x04 */ u32 mHeld;
@@ -64,34 +44,6 @@ struct CharLoader;
 struct Renderer3d;
 
 // The scene manager.
-class Scene;
-struct SceneManager {
-    void RequestScene(int sceneId); // Asks for the next scene
-
-    /* 0x0 */ Scene *mScene;
-    /* 0x4 */ int mNextSceneId;
-    /* 0x8 */ int mPreviousSceneId;
-};
-
-// What the scenes leave for each other (gSceneMemory): the camera as the last room camera left it, and how far
-// the tutorial is.
-struct SceneMemory {
-    void SetOrbit(s16 x, s16 y, s16 z) {
-        mOrbitX = x;
-        mOrbitY = y;
-        mOrbitZ = z;
-    }
-
-    /* 0x00 */ VecFx32 mPosition;
-    /* 0x0C */ VecFx32 mTarget;
-    /* 0x18 */ s16 mOrbitX;
-    /* 0x1A */ s16 mOrbitY;
-    /* 0x1C */ s16 mOrbitZ;
-    /* 0x1E */ u8 mTutorialStep; // The tutorial's scene copies it into its mTutorialStep
-};
-
-// The main program's camera (data_02122764; func_0202a640 resets it, func_0202a748 turns its position around
-// its target by its angles). A stand-in with the fields the room camera uses.
 struct Camera {
     void SetAngles(u16 x, u16 y, u16 z) {
         mAngleX = x;
@@ -132,7 +84,6 @@ void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader); // Whether no archive is being loaded
 
 // --- The screens ---
-extern ScreenControl data_0211d604;
 void func_02023eac(ScreenControl *screens, int mask);
 void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
 // Something of the planes in the mask that the scene sets to -10 before a part and to 0 when the message window
@@ -202,9 +153,47 @@ s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
 extern int data_02123440[];
 
 // --- Scenes ---
-extern SceneManager gSceneManager;
-extern SceneMemory gSceneMemory;
 
 } // extern "C"
+
+extern "C" {
+
+
+// Copies the saved character's name out as a string
+void MiiData_GetName(SavedCharacter *character, wchar_t *name);
+// For each kind of relation, how much each reaction changes the affinity by, halved
+extern const s8 *data_021135c8[];
+// Binds the joint animations of an archive to a model's resource
+void func_02029660(void *resource, u32 resType, void *archive);
+
+// --- The particle system and the head icon (0x02080e80 to 0x020810e4) ---
+void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void func_02080ee4(ParticleSystem *particles);
+void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void func_0207b138(void *manager);                          // Updates
+int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon
+
+} // extern "C"
+
+// The screens: hides planes (as ScreenControl's Set and Show)
+static inline void HideScreens(ScreenControl *screens, u32 planes) {
+    screens->mPlanes &= ~planes;
+    screens->mPlanesChanged = TRUE;
+}
+
+inline void TutorialRoomCamera::ApplyToCamera() {
+    mCamera->mPosition = mPosition;
+    mCamera->mTarget = mTarget;
+}
+
+// A joint's matrix of a character's body (as the stand-in CharacterModel had it, an inline)
+static inline MtxFx43 *GetJointMatrix(CharacterModel &model, int joint) { return &model.mJointMatrices[joint]; }
+
+// The scene memory's camera angles
+static inline void SetMemoryOrbit(SceneMemory *memory, s16 x, s16 y, s16 z) {
+    memory->mOrbitX = x;
+    memory->mOrbitY = y;
+    memory->mOrbitZ = z;
+}
 
 #endif // OV073_MAINPROGRAM_H

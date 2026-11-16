@@ -4,7 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "MainProgram.h"
+struct Light; // The main program's lights (MainProgram.h)
 
 class TutorialRoomCamera;
 class TutorialApartmentRoom;

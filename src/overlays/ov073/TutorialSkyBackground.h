@@ -4,7 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "MainProgram.h"
+#include "island/Sky.h"
 
 class TutorialClock;
 

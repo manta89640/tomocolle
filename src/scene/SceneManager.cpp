@@ -31,6 +31,7 @@ struct PaletteLoader {
 #include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov006/Scene0F.h"
 #include "../overlays/ov077/Scene17.h"
+#include "../overlays/ov073/TutorialRoomScene.h"
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
 #include "../overlays/ov009/TestNg20Scene.h"
@@ -863,6 +864,14 @@ Scene0F::Scene0F(int sceneId) : Scene(sceneId) {
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
 Scene18::Scene18(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x6B, overlay 73 (its constructor comes here, after RoomScene's: the tutorial's room is built from the
+// apartment's classes)
+TutorialRoomScene::TutorialRoomScene(int sceneId) : Scene(sceneId) {
+    mResidentCount = 0;
+    SetFadeState(1);
+    mTouchStep = 0;
+}
 
 // (RoomScene, TutorialRoomScene)
 

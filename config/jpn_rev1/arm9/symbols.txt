@@ -5103,7 +5103,7 @@ _ZTV17Scene0FTextCanvas kind:data(any) addr:0x021108dc
 _ZTV13ObjTextCanvas__10TextCanvas_at_340 kind:data(any) addr:0x021108e8
 _ZTV17Scene7FTextCanvas kind:data(any) addr:0x021108f4
 _ZTV10ObjCharBox kind:data(any) addr:0x02110900
-data_02110914 kind:data(any) addr:0x02110914
+_ZTV21TutorialMessageWindow kind:data(any) addr:0x0211090c
 _ZTV14TestNg134Model kind:data(any) addr:0x0211091c
 _ZTV13AlbumListView kind:data(any) addr:0x02110938
 _ZTV20TestDrawMiiAnimModel kind:data(any) addr:0x02110954
@@ -6338,7 +6338,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@15104 kind:bss addr:0x0213b704 local
+@15340 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
