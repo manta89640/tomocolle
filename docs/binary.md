@@ -730,8 +730,8 @@ Inferred:
 
 ## Wireless play with items
 
-Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 74 of
-its 75 functions match; not complete.
+Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: all 75
+of its functions match, and its data is the ROM's: complete.
 
 Measured:
 
@@ -783,13 +783,20 @@ Inferred: overlays 109 and 110 are the two halves of wireless play, written from
 WH, the save-and-send sequence), but each from its own source; overlay 110's list is the code of the scenes that
 list the player's things (75, 85, 100), copied in.
 
+How the last functions matched:
+
+- `SetupWindow` matches with the text's vertical alignment as an if/else and the buttons reading their tables
+  directly (with a ternary, or the positions through a local pointer, `this` stays in r11 where the original
+  spills it and keeps the positions there), `Update` with the lost connection's two ways as an if and its else.
+  `SetItemCamera` and `SetRoomCamera` match under `#pragma opt_propagation off` with the vectors as struct copies,
+  and `UpdateWireless` with its partner loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each
+  use). Marking the unit complete took three dsd symbols out of `symbols.txt` that are fields inside
+  `sWindowButtons` and `sWindowButtonMessages` (their references are now `add:` offsets in `relocs.txt`), the
+  placeholders of the `.bss` blocks and one inside a string, `local` on the three static WH callbacks, and the two
+  local constants of `ItemTradeList::UpdatePreviewStates` declared the other way round.
+
 Not done:
 
-- One function differs, with a comment saying how: `SetupWindow` (the original keeps the button positions' table
-  in r11 and so spills `this`). `Update` matches with the lost connection's two ways as an if and its else.
-  `SetItemCamera` and `SetRoomCamera`
-  match under `#pragma opt_propagation off` with the vectors as struct copies, and `UpdateWireless` with its partner
-  loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each use). The unit cannot be complete until it matches.
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
   `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and

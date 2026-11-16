@@ -968,8 +968,9 @@ static inline BOOL HasSelection(ItemListView *list) {
 // The three views of the upper screen: each slides in when it is chosen, bounces, and fades out when another is
 // @0x0214baf8
 void ItemTradeList::UpdatePreviewStates() {
-    const fx32 unknown1 = 0x3000;
+    // Emitted as objects though every use is folded; declared in this order they come out in the ROM's
     const fx32 unknown2 = 0x4000;
+    const fx32 unknown1 = 0x3000;
     int i;
     switch (*mContext->mSceneState) {
     case 0:
@@ -1294,12 +1295,9 @@ void ItemTradeScene::SetupQuestion(int *charOffset, MessageFile *file, u32 messa
     mWindow.mTexts[2].mHAlign = mWindow.mTexts[2].mMessageFile->GetAlignment(mWindow.mTexts[2].mMessage);
 }
 
-// Sets the window up for a state
-// NOT MATCHING: the original keeps the base of the button positions (sThreeButtonPositions, sButtonPositions) in
-// r11 through each loop and so keeps this and kind on the stack for the whole function; this reloads the
-// table's address each time and keeps this in r11 (0x20 bytes shorter). The calls and their arguments are the
-// same. Tried: a local pointer to the table, the loops as one inline helper, the button and message rows as
-// locals.
+// Sets the window up for a state. The text's vertical alignment is an if/else and the buttons read their tables
+// directly: with a ternary, or the positions through a local pointer, the compiler keeps `this` in r11 and loads
+// the positions' address at each use, where the original spills `this` and keeps the positions in r11.
 // @0x0214c5b8
 void ItemTradeScene::SetupWindow(int state) {
     int i;
@@ -1327,24 +1325,25 @@ void ItemTradeScene::SetupWindow(int state) {
     func_020338d0(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
-    mWindow.mTexts[0].mVAlign = buttons == 0 ? 1 : 0;
+    if (buttons == 0) {
+        mWindow.mTexts[0].mVAlign = 1;
+    } else {
+        mWindow.mTexts[0].mVAlign = 0;
+    }
 
     if (sWindowButtons[kind].mButtons[2]) {
-        WindowPoint size = sThreeButtonSize;
-        const WindowPoint *positions = sThreeButtonPositions;
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x37, 0x38, positions[i], size, sButtonSounds, 1);
+                func_02033448(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], sThreeButtonSize, sButtonSounds,
+                              1);
                 func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sThreeButtonTextPositions[i], &charOffset);
             }
         }
     } else {
-        WindowPoint size = sButtonSize;
-        const WindowPoint *positions = sButtonPositions;
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x35, 0x36, positions[i], size, sButtonSounds, 1);
+                func_02033448(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], sButtonSize, sButtonSounds, 1);
                 func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sButtonTextPositions[i], &charOffset);
             }
