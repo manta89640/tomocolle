@@ -23,3 +23,5 @@ _ZN11ClothesItem9GetPrice2Ev            # 0x0204ad3c, src/scene/SceneManager.cpp
 _ZN11ClothesItem8GetPriceEv             # 0x0204ad60, src/scene/SceneManager.cpp
 _ZN8G3SpriteD1Ev                        # 0x0202b6cc, the 3D sprites' file
 _ZN8G3SpriteD0Ev                        # 0x0202b6b8, the 3D sprites' file
+_ZN16WeddingCharacterD1Ev               # 0x02048748, src/scene/SceneManager.cpp
+_ZN8RoomPartD1Ev                        # 0x0203ef80, src/scene/SceneManager.cpp

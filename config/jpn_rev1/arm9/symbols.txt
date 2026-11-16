@@ -1887,7 +1887,7 @@ _ZN14TestNg139SceneC1Ei kind:function(arm,size=0x194) addr:0x0204846c
 _ZN12WeddingSceneC1Ei kind:function(arm,size=0x128) addr:0x02048600
 _ZN16WeddingCharacterC1Ev kind:function(arm,size=0x20) addr:0x02048728
 _ZN16WeddingCharacterD1Ev kind:function(arm,size=0x60) addr:0x02048748
-func_020487a8 kind:function(arm,size=0x3c) addr:0x020487a8
+_ZN16WeddingGiftModelD1Ev kind:function(arm,size=0x3c) addr:0x020487a8
 _ZN11OptionSceneC1Ei kind:function(arm,size=0x134) addr:0x020487e4
 _ZN16InformationSceneC1Ei kind:function(arm,size=0x9c) addr:0x02048918
 _ZN7SceneAFC1Ei kind:function(arm,size=0x138) addr:0x020489b4
@@ -1933,7 +1933,7 @@ func_0204ad84 kind:function(arm,size=0x4) addr:0x0204ad84
 _ZN20TestDrawMiiAnimModelD0Ev kind:function(arm,size=0x44) addr:0x0204ad88
 _ZN16Scene40ItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204adcc
 _ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
-func_0204ae54 kind:function(arm,size=0x44) addr:0x0204ae54
+_ZN16WeddingGiftModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae54
 func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
 _ZN14AlbumItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204aedc
 _ZN5Scene3RunEv kind:function(arm,size=0x170) addr:0x0204af20
@@ -5112,8 +5112,7 @@ _ZTV12RankingPiece kind:data(any) addr:0x02110994
 _ZTV14AlbumItemModel kind:data(any) addr:0x021109bc
 data_02110a04 kind:data(any) addr:0x02110a04
 data_02110a20 kind:data(any) addr:0x02110a20
-data_02110a44 kind:data(any) addr:0x02110a44
-data_02110a60 kind:data(any) addr:0x02110a60
+_ZTV16WeddingGiftModel kind:data(any) addr:0x02110a3c
 _ZTV16Scene40ItemModel kind:data(any) addr:0x02110a7c
 _ZTV10AlbumItems kind:data(any) addr:0x02110abc
 data_02110b0c kind:data(any) addr:0x02110b0c
@@ -6339,7 +6338,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@15011 kind:bss addr:0x0213b704 local
+@15104 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0

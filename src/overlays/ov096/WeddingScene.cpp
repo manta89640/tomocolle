@@ -1,4 +1,5 @@
 #include "WeddingScene.h"
+#include "MainProgram.h"
 
 // The item the wedding gives: the wedding album ("kekkon arubamu" in the item messages)
 #define ITEM_WEDDING_ALBUM 0xAA
@@ -19,7 +20,7 @@ void WeddingScene::StartLoading() {
     func_0202c264(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
     mCharacters[1].mIndex = GetCharacterIndex(1);
     mCharacters[1].Character::SetArchive("3H1");
-    mRoom.mStyle = mCharacters[0].mInterior;
+    mRoom.mId = mCharacters[0].mInterior;
     mRoom.Mount("CO0", 0);
     mRoom.MountAll("RM?", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
@@ -65,7 +66,7 @@ void WeddingScene::Init() {
     mTtsPlayer.InitEngine();
     mSpeechText.mMessageFile = &mMessageFiles[1];
     mCharOffset += mWindow.Init(mCharOffset, &mMessageFiles[1], 4, 0x10, &mTtsPlayer, FALSE);
-    mWindow.mText.mHAlign = mWindow.mText.mVAlign = 1;
+    mWindow.mText[0].mHAlign = mWindow.mText[0].mVAlign = 1;
     mWindow.Hide();
     InitLowerScreen();
     Init3d();
@@ -135,7 +136,7 @@ void WeddingScene::Init3d() {
     mLights.Init(&data_02122764, &mRoom);
     mRoom.Load(3);
     mRoom.LoadParts(4);
-    mRoom.mParts.SetState(2);
+    mRoom.SetState(2);
     ModelResources_SetModel(data_021223e4, 10, mGift.mModelPath);
     mGift.Load(10);
     mGift.SetPosition(sFarAway);
@@ -155,10 +156,10 @@ void WeddingScene::Init3d() {
         mCharacters[i].mPersonality = character->GetPersonality();
         func_0209decc(character);
         character->Character::UpdateSpeedScales();
-        func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
-        mCharacters[i].mModel.mUnknown4A4 = TRUE;
+        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        mCharacters[i].mShadowVisible = TRUE;
         character->CharacterBase::SetFace(10);
-        character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, "idle00"));
+        character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, "idle00"));
         mCharacters[i].SetPos(points[i]);
         character->FaceCamera();
         character->TurnHeadToCamera();
@@ -200,7 +201,7 @@ void WeddingScene::Update() {
             MI_CpuClear16(second, sizeof(second));
             MiiData_GetName(&mCharacters[0], first);
             MiiData_GetName(&mCharacters[1], second);
-            mWindow.mText.mHAlign = 1;
+            mWindow.mText[0].mHAlign = 1;
             mWindow.SetStringArg(first, 0);
             mWindow.SetStringArg(second, 1);
             // "<first> and <second> got married!"
@@ -212,7 +213,7 @@ void WeddingScene::Update() {
         break;
     case STATE_SHOW_MARRIED:
         if (mFrame >= 260) {
-            mWindow.mText.mHAlign = 0;
+            mWindow.mText[0].mHAlign = 0;
             SetSpeaker(1);
             mCharacters[1].SetState(WeddingCharacter::STATE_GIVE);
             mState++;
@@ -277,10 +278,10 @@ void WeddingScene::Update() {
     case STATE_LEAVE:
         if (mFrame >= 52) {
             s64 now = Clock_GetSeconds(data_02123440);
-            mCharacters[0].mAwayUntil = now + GetHoneymoonMinutes(&mCharacters[0]) * 60;
-            mCharacters[1].mAwayUntil = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
-            mCharacters[0].mMoodLocked = 3;
-            mCharacters[1].mMoodLocked = 3;
+            mCharacters[0].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[0]) * 60;
+            mCharacters[1].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
+            mCharacters[0].mTroubleState = 3;
+            mCharacters[1].mTroubleState = 3;
             gSceneManager.RequestScene(0x77);
             gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
             gSceneMemory.mCharacters[1] = mCharacters[1].mIndex;
@@ -308,7 +309,7 @@ void WeddingScene::Draw() {
     }
     mCharacters[0].Character::Draw();
     mCharacters[1].Character::Draw();
-    mRoom.mParts.Draw();
+    mRoom.Draw();
     mGift.Draw();
 }
 
@@ -503,7 +504,7 @@ void WeddingCharacter::UpdateState() {
             // the hands
             if (!GetAnimation()->mFinished) {
                 ModelAnimation *animation = GetAnimation();
-                int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / animation->mSpeed + 1;
+                int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
                 int quarter = frames / 4;
                 int half = frames / 2;
                 if (mFrame == quarter) {
@@ -604,7 +605,7 @@ void WeddingCharacter::Speak(int file, u32 message, int count, int *types, int *
         break;
     }
     mContext->mWindow->mMessageFile = messages;
-    mContext->mWindow->mText.mHAlign = 0;
+    mContext->mWindow->mText[0].mHAlign = 0;
     mContext->mSpeechText->mMessageFile = messages;
     mContext->mSpeechText->mMessage = message + 1;
     switch (file) {
@@ -662,11 +663,11 @@ void WeddingCharacter::HoldOutGift() {
     if (mContext->mGift == NULL) {
         return;
     }
-    mModel.mUnknown45C = TRUE;
-    rightHand = mModel.GetJointPosition(2);
-    rightArm = mModel.GetJointPosition(9);
-    leftHand = mModel.GetJointPosition(1);
-    leftArm = mModel.GetJointPosition(8);
+    mTrackLimbs = TRUE;
+    rightHand = GetJointPosition(2);
+    rightArm = GetJointPosition(9);
+    leftHand = GetJointPosition(1);
+    leftArm = GetJointPosition(8);
 
     VEC_Subtract(&rightHand, &rightArm, &rightOffset);
     VEC_Normalize(&rightOffset, &rightReach);
@@ -699,7 +700,7 @@ void WeddingCharacter::HoldOutGift() {
 void WeddingCharacter::LookAt(VecFx32 *target, int pitchLimit, int yawLimit) {
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
-    mHeadTurnActive = TRUE;
+    mHeadTurn = TRUE;
     CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
     CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
@@ -710,7 +711,7 @@ void WeddingCharacter::LookAt(VecFx32 *target, int pitchLimit, int yawLimit) {
 void WeddingCharacter::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit) {
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
-    mHeadTurnActive = TRUE;
+    mHeadTurn = TRUE;
     CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
     CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
@@ -729,7 +730,7 @@ void WeddingCharacter::TurnHeadToCamera() {
 
 void WeddingCharacter::LookAtPartner() {
     VecFx32 target;
-    const VecFx32 &head = mPartner->mModel.GetJointPosition(0);
+    const VecFx32 &head = mPartner->GetJointPosition(0);
     target.x = head.x;
     target.z = head.z;
     target.y = head.y + 0xB33;
@@ -739,15 +740,15 @@ void WeddingCharacter::LookAtPartner() {
 u16 WeddingCharacter::GetHeadPitchTo(VecFx32 *target) {
     MtxFx43 matrix;
     MtxFx33 rotation;
-    mModel.GetJointMatrices(0, &matrix, &rotation);
-    fx32 dz = target->z - mModel.mPos.z;
-    fx32 dx = target->x - mModel.mPos.x;
+    GetJointMatrices(0, &matrix, &rotation);
+    fx32 dz = target->z - mPos.z;
+    fx32 dx = target->x - mPos.x;
     fx32 eyes = matrix._31 + 0xCCC;
     return -FX_Atan2Idx(target->y - eyes, SqrtXZ(dx, dz));
 }
 
 u16 WeddingCharacter::GetHeadYawTo(VecFx32 *target) {
-    return mAngle - FX_Atan2Idx(target->z - mModel.mPos.z, target->x - mModel.mPos.x);
+    return mAngle - FX_Atan2Idx(target->z - mPos.z, target->x - mPos.x);
 }
 
 // --- The camera -------------------------------------------------------------------------------------------------
@@ -857,7 +858,7 @@ void WeddingLights::Init(Camera *camera, Room *room) {
     for (int i = 0; i < 2; i++) {
         mLights[i] = &data_021227cc[i];
         func_0202a96c(&data_021227cc[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mStyle].mLightColor;
+        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
         Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
     }
 }

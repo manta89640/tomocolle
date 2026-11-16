@@ -120,6 +120,7 @@ struct PaletteLoader {
 #include "../overlays/ov057/TestNg137Scene.h"
 #include "../overlays/ov058/TestNg138Scene.h"
 #include "../overlays/ov059/TestNg139Scene.h"
+#include "../overlays/ov096/WeddingScene.h"
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov101/SceneAF.h"
@@ -1133,6 +1134,9 @@ TestNg138Scene::TestNg138Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xAA, overlay 59
 TestNg139Scene::TestNg139Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xAB, overlay 96
+WeddingScene::WeddingScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0xAC and 0xAD, overlay 98
 OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}
