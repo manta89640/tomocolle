@@ -1,15 +1,15 @@
-func_ov051_02149a40 kind:function(arm,size=0xec) addr:0x02149a40
-func_ov051_02149b2c kind:function(arm,size=0x608) addr:0x02149b2c
-func_ov051_0214a134 kind:function(arm,size=0x2a0) addr:0x0214a134
-func_ov051_0214a3d4 kind:function(arm,size=0x74) addr:0x0214a3d4
-func_ov051_0214a448 kind:function(arm,size=0xac) addr:0x0214a448
+_ZN14TestNg129Scene12StartLoadingEv kind:function(arm,size=0xec) addr:0x02149a40
+_ZN14TestNg129Scene4InitEv kind:function(arm,size=0x608) addr:0x02149b2c
+_ZN14TestNg129Scene6UpdateEv kind:function(arm,size=0x2a0) addr:0x0214a134
+_ZN14TestNg129Scene4DrawEv kind:function(arm,size=0x74) addr:0x0214a3d4
+_ZN14TestNg129Scene4ExitEv kind:function(arm,size=0xac) addr:0x0214a448
 func_ov051_0214a4f4 kind:function(arm,size=0x3c) addr:0x0214a4f4
 func_ov051_0214a530 kind:function(arm,size=0x44) addr:0x0214a530
 func_ov051_0214a574 kind:function(arm,size=0x50) addr:0x0214a574
 func_ov051_0214a5c4 kind:function(arm,size=0x150) addr:0x0214a5c4
 func_ov051_0214a714 kind:function(arm,size=0x20) addr:0x0214a714
-func_ov051_0214a734 kind:function(arm,size=0xdc) addr:0x0214a734
-func_ov051_0214a810 kind:function(arm,size=0xe4) addr:0x0214a810
+_ZN14TestNg129SceneD1Ev kind:function(arm,size=0xdc) addr:0x0214a734
+_ZN14TestNg129SceneD0Ev kind:function(arm,size=0xe4) addr:0x0214a810
 data_ov051_0214a8f4 kind:data(any) addr:0x0214a8f4
 data_ov051_0214a90c kind:data(any) addr:0x0214a90c ambiguous
 data_ov051_0214a91c kind:data(any) addr:0x0214a91c
@@ -19,7 +19,7 @@ data_ov051_0214a948 kind:data(any) addr:0x0214a948 ambiguous
 data_ov051_0214a968 kind:data(any) addr:0x0214a968
 data_ov051_0214a978 kind:data(any) addr:0x0214a978
 data_ov051_0214a9a0 kind:data(any) addr:0x0214a9a0
-data_ov051_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous
+_ZTV14TestNg129Scene kind:data(any) addr:0x0214a9a4
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov051 kind:data(any) addr:0x0214a9c8
 gStr_3HT_ov051 kind:data(any) addr:0x0214a9f0
 gStr_Mdl_Goods_gd10_3D_LZ_bin_ov051 kind:data(any) addr:0x0214a9f4

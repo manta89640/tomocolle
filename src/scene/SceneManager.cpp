@@ -57,6 +57,7 @@ struct PaletteLoader {
 #include "../overlays/ov013/TestNg48Scene.h"
 #include "../overlays/ov014/TestNg50Scene.h"
 #include "../overlays/ov106/PreStartScene.h"
+#include "../overlays/ov015/TestNg55Scene.h"
 #include "../overlays/ov016/Scene3B.h"
 #include "../overlays/ov017/Scene3C.h"
 #include "../overlays/ov018/TestNg62Scene.h"
@@ -103,6 +104,7 @@ struct PaletteLoader {
 #include "../overlays/ov048/Scene8B.h"
 #include "../overlays/ov049/Scene8C.h"
 #include "../overlays/ov050/Scene8D.h"
+#include "../overlays/ov051/TestNg129Scene.h"
 #include "../overlays/ov052/Scene8F.h"
 #include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov054/TestNg133Scene.h"
@@ -929,6 +931,9 @@ PreStartScene::PreStartScene(int sceneId) : Scene(sceneId) {
     mResidentCount = 0;
 }
 
+// Scene 0x3A, overlay 15
+TestNg55Scene::TestNg55Scene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x3B, overlay 16
 Scene3B::Scene3B(int sceneId) : Scene(sceneId) {}
 
@@ -1066,6 +1071,9 @@ Scene8C::Scene8C(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x8D, overlay 50
 Scene8D::Scene8D(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x8E, overlay 51
+TestNg129Scene::TestNg129Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x8F and 0x90, overlay 52
 Scene8F::Scene8F(int sceneId) : Scene(sceneId) {}

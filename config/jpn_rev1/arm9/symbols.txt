@@ -986,13 +986,13 @@ func_020257d0 kind:function(arm,size=0x1bc) addr:0x020257d0
 func_0202598c kind:function(arm,size=0x6c) addr:0x0202598c
 func_020259f8 kind:function(arm,size=0x70) addr:0x020259f8
 func_02025a68 kind:function(arm,size=0x34) addr:0x02025a68
-func_02025a9c kind:function(arm,size=0xc0) addr:0x02025a9c
-func_02025b5c kind:function(arm,size=0xc0) addr:0x02025b5c
+_ZN13DrawingCanvasC2Ev kind:function(arm,size=0xc0) addr:0x02025a9c
+_ZN13DrawingCanvasC1Ev kind:function(arm,size=0xc0) addr:0x02025b5c
 func_02025c1c kind:function(arm,size=0x70) addr:0x02025c1c
-func_02025c8c kind:function(arm,size=0x50) addr:0x02025c8c
+_ZN13DrawingCanvas6UpdateEv kind:function(arm,size=0x50) addr:0x02025c8c
 func_02025cdc kind:function(arm,size=0x24) addr:0x02025cdc
-func_02025d00 kind:function(arm,size=0xc0) addr:0x02025d00
-func_02025dc0 kind:function(arm,size=0x50) addr:0x02025dc0
+_ZN13DrawingCanvas12SetBrushSizeEi kind:function(arm,size=0xc0) addr:0x02025d00
+_ZN13DrawingCanvas8SetColorEi kind:function(arm,size=0x50) addr:0x02025dc0
 func_02025e10 kind:function(arm,size=0x1b8) addr:0x02025e10
 func_02025fc8 kind:function(arm,size=0x1a8) addr:0x02025fc8
 func_02026170 kind:function(arm,size=0x14c) addr:0x02026170
@@ -6346,7 +6346,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14873 kind:bss addr:0x0213b704 local
+@14875 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
