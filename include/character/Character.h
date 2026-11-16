@@ -122,7 +122,7 @@ struct CharacterRecord {
     /* 0x1C4 */ u32 mUnknown1C4;
     /* 0x1C8 */ struct { u32 m[8]; } mUnknown1C8;
     /* 0x1E8 */ struct { u32 m[10]; } mOwnedClothes; // A bit for each row of the clothes table
-    /* 0x210 */ u32 mUnknown210[3];      // Flags, a bit each
+    /* 0x210 */ u32 mOwnedInteriors[3];  // A bit for each row of the interiors table
     /* 0x21C */ s64 mLongActEnd;         // A time in seconds, as the clock's
     /* 0x224 */ u8 mLongActState;        // "LongActState", 0 to 0x2E: what it is doing for a long while
     /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
@@ -163,6 +163,8 @@ struct CharacterRecord {
 }; // 0x2A4
 
 // A saved character and what the game keeps beside it.
+class TtsPlayer;
+
 class SavedCharacter : public CharacterRecord {
 public:
     SavedCharacter();
@@ -297,6 +299,37 @@ public:
     void RandomizeUnknown24E();
     void ResetUnknown24E();
     int GetPersonalityPairValue(int a, int b);
+    int GetClothesLiking(int clothes);
+    int GetInteriorLiking(int interior);
+    void ChooseFoodPreferences(u8 *favorite, u8 *disliked);
+    BOOL AreFoodPreferencesValid();
+    void ChooseNewFoodPreferences();
+    int ScaleTalkWeightByAnswers(int kind, int weight);
+    int ScaleTalkWeightByPersonalities(int kind, int weight, SavedCharacter *partner);
+    int GetTalkReactionWeight(s8 relation, s8 partnerReaction, s8 reaction, SavedCharacter *partner);
+    int GetTotalTalkReactionWeight(s8 relation, s8 partnerReaction, SavedCharacter *partner);
+    int ChooseTalkReaction(s8 relation, s8 partnerReaction, SavedCharacter *partner);
+    int ScaleReactionWeightByAnswers(int kind, int weight);
+    int GetReactionWeight(s8 previous, s8 reaction);
+    int GetTotalReactionWeight(s8 previous);
+    int ChooseNextReaction(s8 previous);
+    void SetVoiceOf(TtsPlayer *player);
+    static int CompareRecords(const CharacterRecord *a, const CharacterRecord *b);
+    BOOL IsLeapYear(int year);
+    int GetDaysInYear(int year);
+    int GetDaysInMonth(int month, int year);
+    int GetDaysBetweenInYear(int month1, int day1, int month2, int day2, int year);
+    int GetDaysBetween(int month1, int day1, int year1, int month2, int day2, int year2);
+    int GetDaysBetween(RTCDate from, RTCDate to);
+    void GetBirthday(RTCDate *date);
+    int GetAgeInDays();
+    int GetBiorhythm(int day);
+    int GetBirthDayCycle();
+    int GetPersonalityColumnValue(int row, const u8 *table);
+    int GetPersonalityColumnOffset(int row);
+    void UpdateBiorhythm();
+    void AssignFreeRoom();
+    u32 CountOwnedInteriors();
     void ExpireTrouble(s64 now, SavedCharacter *partner);
     void FailTrouble(s64 now, SavedCharacter *target);
     void EatRandomFood();
@@ -316,11 +349,6 @@ public:
     void BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner);
     int ChooseLoveInterest();
     int ChooseCharacterByRelation();
-    // Not written yet
-    void func_0209e01c();
-    BOOL func_0209ccf0();
-    void func_0209cda4();
-    u32 CountOwnedInteriors();
 
     // The steps the trouble functions share
     void FinishTroubleUnsolved();
@@ -333,9 +361,9 @@ public:
 
     /* 0x2A4 */ u16 mIndex;              // Which of the saved characters this is
     /* 0x2A6 */ s16 mReaction;
-    /* 0x2A8 */ u32 mUnknown2A8[3];
-    /* 0x2B4 */ int mUnknown2B4;
-    /* 0x2B8 */ int mUnknown2B8;
+    /* 0x2A8 */ int mBiorhythmCycles[3]; // Today's physical, intellectual and emotional cycles, 0 to 255
+    /* 0x2B4 */ int mBiorhythm;          // Today's biorhythm, 0 to 1000 (UpdateBiorhythm)
+    /* 0x2B8 */ int mBiorhythmYesterday;
     /* 0x2BC */ s8 mPersonality;         // 0..15
     /* 0x2BD */ u8 mUnknown2BD[3];
 }; // 0x2C0

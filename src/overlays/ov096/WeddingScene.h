@@ -186,6 +186,8 @@ extern const RoomStyle data_020f72f8[];
 struct SavedCharacter {
     SavedCharacter();
     s8 GetPersonality(); // Computes its personality (0 to 15) from its answers
+    void SetVoiceOf(TtsPlayer *player); // Gives the speech engine the character's voice
+    void UpdateBiorhythm();
 
     /* 0x0000 */ u8 mUnknown0000[0x54];
     /* 0x0054 */ u32 mUnknown0054Bits0 : 4;
@@ -269,8 +271,6 @@ public:
 }; // 0x2B18
 
 extern "C" {
-void func_0209decc(Character *character);
-void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
 }
 

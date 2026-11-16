@@ -13,8 +13,14 @@
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each (func_0202c264 copies one
 // out by index, func_0202c28c back in). func_020979c0 is its constructor. The scene makes temporary ones on the
 // stack for the residents that are not in the room.
+class TtsPlayer;
+
 struct SavedCharacter {
     // The main program's functions (include/character/Character.h)
+    void ExpireTrouble(s64 now, SavedCharacter *partner);
+    int ChooseTalkReaction(s8 relation, s8 partnerReaction, SavedCharacter *partner);
+    int ChooseNextReaction(s8 previous);
+    void SetVoiceOf(TtsPlayer *player);
     void AddRelationMeter(int index, int change);
     void ClearLongActFrom(s64 now);
     void ClearTrouble();
@@ -79,7 +85,7 @@ struct SavedCharacter {
     /* 0x0296 */ u8 mUnknown0296[0xE];
     /* 0x02A4 */ u16 mIndex;             // Which of the saved characters this is (the save data is asked by this)
     /* 0x02A6 */ s16 mReaction;          // What the character chose to do next (RoomCharacter::PickReaction,
-                                         // func_0209d5ac); cleared when the two are done
+                                         // ChooseTalkReaction); cleared when the two are done
     /* 0x02A8 */ u8 mUnknown02A8[0x14];
     /* 0x02BC */ s8 mPersonality;        // What func_02098f2c computes (0..15); data_020fba28 turns it into the
                                          // row (0..3) of the animation tables

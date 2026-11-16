@@ -180,6 +180,8 @@ struct SavedCharacter : public CharacterRecord {
     void MakeVisitor();
     void Register();
     void Reset();
+    void UpdateBiorhythm();
+    void AssignFreeRoom();
 
     SavedCharacter(); // func_020979c0
     u16 GetIndex() { return mIndex; }
@@ -247,7 +249,6 @@ struct ModelAnimation {
     /* 0x14 */ BOOL mFinished;
 };
 ModelAnimation *AnimModel_FindAnimation(CharacterModel *model, u32 resType, int id);
-void func_0209decc(SceneCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
 struct MiiData;
@@ -438,7 +439,6 @@ int NFL_IsMiiCreateIdBit7Clear(CharacterRecord *character);
 int NFL_AreMiiCreateIdsEqual(CharacterRecord *a, CharacterRecord *b);
 int MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
-void func_0209e01c(SavedCharacter *character);
 void MiiTransfer_SendMii(int index);
 }
 

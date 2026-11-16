@@ -1,7 +1,12 @@
 #include "character/Character.h"
 
+#include <string.h>
+
 #include "GameData.h"
 #include "save/SaveBlocks.h"
+#include "island/Apartment.h"
+#include "room/Room.h"
+#include "voice/TtsPlayer.h"
 
 struct MiiIdSource;
 
@@ -51,8 +56,34 @@ int func_0202c604(GameData *game, int index); // Its sex
 int func_0202c680(GameData *game, int index); // Its mRelationBlood
 int MiiData_GetSex(const CharacterRecord *mii);
 extern const u8 data_020f8d7c[6]; // ChooseCharacterByRelation's weights of its groups
+BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+int func_0202c414(GameData *game, int index);  // Its mRoomNumber
+
+// The reactions in a talk (ChooseTalkReaction) and by themselves (ChooseNextReaction)
+struct TalkReactionInfo {
+    u8 answerScaling;  // ScaleTalkWeightByAnswers's kind
+    u8 personalities;  // A bit for each kind of personality that may react so
+    u8 moods;          // A bit for each mood that may
+    u8 pairScaling;    // ScaleTalkWeightByPersonalities's kind
+};
+struct ReactionInfo {
+    u8 answerScaling;
+    u8 personalities;
+    u8 moods;
+};
+extern const TalkReactionInfo data_020f5828[12];
+extern const s8 *const data_021135f0[];    // By relation: the weights of the reactions by the partner's reaction
+extern const ReactionInfo data_020f5df8[15];
+extern const u8 data_020f5e28[][15];       // By the reaction before: the weights of the next
+extern const int data_020fb970[13];        // The days of each month (1 to 12)
+extern const int data_020fb9a4[13];        // and in a leap year
+extern const s16 data_020fb912[23];        // The biorhythm's cycles by day: physical,
+extern const s16 data_020fba68[33];        // intellectual
+extern const s16 data_020fb9d8[28];        // and emotional
+extern const int data_020fb8c4[4];         // By kind of personality: a column of four (GetPersonalityColumnValue)
+extern const int data_020fb8d4[4];
 int func_0202c5dc(GameData *game, int index);
-int func_0202c43c(GameData *game, int index, int other);
+u8 func_0202c43c(GameData *game, int index, int other); // Its mRelationMeter for another
 extern u8 data_0212348c[];
 extern const s8 gStr_AFKPUUA[24];  // By hour: the chance (of 100) that an idle character goes to sleep
 extern const s8 data_020f8ca8[24]; // By hour: how many hours it then sleeps on top of the activity's length
@@ -91,7 +122,7 @@ extern const LongActInfo data_020f8cc0[];
 
 // The voice parameters' ranges and defaults (VoiceParam::defaultValue is what ResetVoice sets)
 struct VoiceParam {
-    /* 0x0 */ s16 unk0;
+    /* 0x0 */ s16 param; // The speech engine's parameter (TtsPlayer::SetEngineParam)
     /* 0x2 */ s16 min;
     /* 0x4 */ s16 max;
     /* 0x6 */ s16 defaultValue;
@@ -109,13 +140,12 @@ static const s8 sScoresAnswer3[9] = {50, 5, 15, 25, 35, 65, 75, 85, 95};
 template <typename T> BOOL ClampField(T *value, int min, int max, const char *name) {
     if (*value > max) {
         *value = max;
-        return FALSE;
-    }
-    if (*value < min) {
+    } else if (*value < min) {
         *value = min;
-        return FALSE;
+    } else {
+        return TRUE;
     }
-    return TRUE;
+    return FALSE;
 }
 
 // A random number from 0 to max - 1
@@ -160,7 +190,7 @@ void SavedCharacter::Reset() {
     mClothesId = 0;
     mInterior = 0;
     mRoomNumber = 0xFF;
-    MI_CpuClear32(mUnknown210, sizeof(mUnknown210));
+    MI_CpuClear32(mOwnedInteriors, sizeof(mOwnedInteriors));
     ResetRelations();
     ResetMood();
     ClearLongAct();
@@ -182,9 +212,9 @@ void SavedCharacter::Reset() {
     ResetUnknown2A3();
     ResetMeetDate();
     ResetUnknown24E();
-    MI_CpuClear32(mUnknown2A8, sizeof(mUnknown2A8));
-    mUnknown2B4 = 0;
-    mUnknown2B8 = 0;
+    MI_CpuClear32(mBiorhythmCycles, sizeof(mBiorhythmCycles));
+    mBiorhythm = 0;
+    mBiorhythmYesterday = 0;
     mReaction = 0;
     mPersonality = 0;
 }
@@ -206,7 +236,7 @@ void SavedCharacter::Register() {
     if (mUnknown050Bit0) {
         mRoomNumber = 0xFF;
     } else {
-        func_0209e01c();
+        AssignFreeRoom();
     }
     ResetRelations();
     ResetMood();
@@ -387,8 +417,8 @@ BOOL SavedCharacter::Validate() {
             valid = FALSE;
         }
     }
-    if (!func_0209ccf0()) {
-        func_0209cda4();
+    if (!AreFoodPreferencesValid()) {
+        ChooseNewFoodPreferences();
         valid = FALSE;
     }
     valid &= CheckUnknown292();
@@ -1214,7 +1244,7 @@ int SavedCharacter::GetTotalLongActWeight() {
 
 int SavedCharacter::ChooseLongAct() {
     mPersonality = GetPersonality();
-    int random = MATH_Rand16(&gRandom, GetTotalLongActWeight());
+    int random = Rand(GetTotalLongActWeight());
     int sum = 0;
     u32 i;
     for (i = 0; i < 47; i++) {
@@ -1238,7 +1268,7 @@ bool SavedCharacter::IsTroubleStateActive(int state) {
 }
 
 BOOL SavedCharacter::IsInTroubleWithoutUnknown4Bits8() {
-    BOOL inTrouble = IsInTrouble();
+    BOOL inTrouble = IsInTrouble() & 1;
     return inTrouble & (data_02114d78[mTroubleCategory][mTroubleId].mood == 0);
 }
 
@@ -1251,14 +1281,8 @@ void SavedCharacter::SetTrouble(u8 state, u8 category, u8 id) {
 BOOL SavedCharacter::IsProgressingTrouble() {
     BOOL result = FALSE;
     if (data_02114d78[mTroubleCategory][mTroubleId].kind == 11) {
-        BOOL active = FALSE;
-        switch (mTroubleState) {
-        case 1:
-        case 2:
-        case 4:
-            active = TRUE;
-            break;
-        }
+        int state = mTroubleState;
+        BOOL active = state == 1 || state == 2 || state == 4;
         if (active) {
             result = TRUE;
         }
@@ -1271,10 +1295,10 @@ BOOL SavedCharacter::IsProgressingTroubleInState2() {
 }
 
 void SavedCharacter::ResetTroubleProgress() {
-    if (!IsProgressingTrouble()) {
-        mTroubleProgress = 0;
-    } else {
+    if (IsProgressingTrouble()) {
         mTroubleProgress = gStr_Parenthesis_2[mTroubleId];
+    } else {
+        mTroubleProgress = 0;
     }
 }
 
@@ -1393,6 +1417,10 @@ int SavedCharacter::GetEncounterBonus(int base, int value) {
         bonus = 0;
     }
     return bonus;
+}
+
+inline int SavedCharacter::GetDaysBetween(RTCDate from, RTCDate to) {
+    return GetDaysBetween(from.month, from.day, from.year, to.month, to.day, to.year);
 }
 
 inline void SavedCharacter::FinishTroubleUnsolved() {
@@ -1599,9 +1627,8 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
     if (IsLongActAsPartnerState(state)) {
         u16 special[2];
         u16 candidates[100];
-        int count;
+        int count = 0;
         MI_CpuFill16(special, 0xFFFF, sizeof(special));
-        count = 0;
         for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
             if (func_0202c3dc(&gGameData, i) && !func_0202c468(&gGameData, i) && i != mIndex &&
                 Is0Or1(func_0202c5dc(&gGameData, i))) {
@@ -1622,7 +1649,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
             int partner = -1;
             int j;
             for (j = 0; j < 2; j++) {
-                if (special[j] != 0xFFFF && 75 - j * 25 > MATH_Rand16(&gRandom, 100)) {
+                if (special[j] != 0xFFFF && MATH_Rand16(&gRandom, 100) < 75 - j * 25) {
                     partner = special[j];
                     if (j == 0 && mRelationMeter[partner] > 50 && func_0202c43c(&gGameData, partner, mIndex) > 50) {
                         int random = MATH_Rand16(&gRandom, 100);
@@ -1649,7 +1676,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
                     first = &other;
                 }
             }
-            int partnerState;
+            u8 partnerState;
             if (state == 0x18) {
                 partnerState = 0x17;
             } else if (state == 0x1A) {
@@ -1711,9 +1738,9 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
     } else if (state == 0x15 || state == 0x16) {
         SetLongAct(state, 0, now + GetLongActDuration(state, 4));
     } else if (state == 0 || state == 0x17) {
-        if (time->hour < 24 && gStr_AFKPUUA[time->hour] > MATH_Rand16(&gRandom, 100)) {
+        if (time->hour < 24 && MATH_Rand16(&gRandom, 100) < gStr_AFKPUUA[time->hour]) {
             s64 end = now + GetLongActDuration(0x12, 3);
-            SetLongAct(0x12, 0, end + data_020f8ca8[time->hour] * 3600);
+            SetLongAct(0x12, 0, end + (s64)data_020f8ca8[time->hour] * 3600);
             SetUnknown246ByChance();
         } else {
             SetLongAct(0, 0, now + GetLongActDuration(0, 3));
@@ -1783,17 +1810,21 @@ int SavedCharacter::GetTroubleCategoryWeight(int category) {
     return weight;
 }
 
+static inline const TroubleInfo *GetTroubleInfo(int category, int id) {
+    return &data_02114d78[category][id];
+}
+
 int SavedCharacter::ChooseTrouble(int category) {
     int total = 0;
     u32 count = gStr_LessThan_2[category];
     for (u32 i = 0; i < count; i++) {
-        total += data_02114d78[category][i].weight;
+        total += GetTroubleInfo(category, i)->weight;
     }
     int random = MATH_Rand16(&gRandom, total);
     u8 id = 0;
     int sum = 0;
     for (; id < gStr_LessThan_2[category]; id++) {
-        sum += data_02114d78[category][id].weight;
+        sum += GetTroubleInfo(category, id)->weight;
         if (random < sum) {
             break;
         }
@@ -2531,6 +2562,75 @@ int SavedCharacter::GetLiking(int item) {
     return liking;
 }
 
+// How much the character likes clothes, 0 to 15: their taste for its kind of personality, give or take three by the
+// create ID, halved for a man in women's clothes and two less for a woman in men's
+int SavedCharacter::GetClothesLiking(int clothes) {
+    int high;
+    int low;
+    int liking;
+    GetCreateIdParts(&high, &low);
+    switch (data_020fba28[mPersonality]) {
+    case 3:
+        liking = data_020f3ff0[clothes].mTaste3;
+        break;
+    case 1:
+        liking = data_020f3ff0[clothes].mTaste1;
+        break;
+    case 2:
+        liking = data_020f3ff0[clothes].mTaste2;
+        break;
+    case 0:
+        liking = data_020f3ff0[clothes].mTaste0;
+        break;
+    }
+    liking += (u32)(clothes + low) % 7 - 3;
+    if (MiiData_GetSex(this) == 0 && data_020f3ff0[clothes].mSex == 2) {
+        liking >>= 1;
+    } else if (MiiData_GetSex(this) == 1 && data_020f3ff0[clothes].mSex == 1) {
+        liking -= 2;
+    }
+    if (liking > 15) {
+        liking = 15;
+    } else if (liking < 0) {
+        liking = 0;
+    }
+    return liking;
+}
+
+// The same for a room's interior
+int SavedCharacter::GetInteriorLiking(int interior) {
+    int high;
+    int low;
+    int liking;
+    GetCreateIdParts(&high, &low);
+    switch (data_020fba28[mPersonality]) {
+    case 3:
+        liking = data_020f72f8[interior].mTaste3;
+        break;
+    case 1:
+        liking = data_020f72f8[interior].mTaste1;
+        break;
+    case 2:
+        liking = data_020f72f8[interior].mTaste2;
+        break;
+    case 0:
+        liking = data_020f72f8[interior].mTaste0;
+        break;
+    }
+    liking += (u32)(interior + low) % 7 - 3;
+    if (MiiData_GetSex(this) == 0 && data_020f72f8[interior].mSex == 2) {
+        liking >>= 1;
+    } else if (MiiData_GetSex(this) == 1 && data_020f72f8[interior].mSex == 1) {
+        liking -= 2;
+    }
+    if (liking > 15) {
+        liking = 15;
+    } else if (liking < 0) {
+        liking = 0;
+    }
+    return liking;
+}
+
 void SavedCharacter::SetUnknown292(int index, u8 value) {
     mUnknown292[index] = value;
 }
@@ -2542,6 +2642,71 @@ u8 SavedCharacter::GetUnknown292(int index) {
 void SavedCharacter::ResetItemPreferences() {
     mFavoriteItem = 0xFF;
     mDislikedItem = 0xFF;
+    MI_CpuFill8(mUnknown292, 0xFF, sizeof(mUnknown292));
+}
+
+// A favourite food among the foods it finds tasty (7 or more) and a disliked one among all foods, at random; bad food
+// and five particular foods are left out
+void SavedCharacter::ChooseFoodPreferences(u8 *favorite, u8 *disliked) {
+    u8 tasty[255];
+    u8 foods[255];
+    int tastyCount = 0;
+    u8 *nextFood = foods;
+    u8 *nextTasty = tasty;
+    int foodCount = 0;
+    for (int i = 0; i < 255; i++) {
+        const ItemInfo *item = &data_020f5f0c[(u16)i];
+        if (item->mKind != 1 || item->mFlags & ITEM_BAD_FOOD) {
+            continue;
+        }
+        int kind = item->mUnknown04Bits24;
+        if (kind == 66 || kind == 125 || kind == 54 || kind == 23 || kind == 53) {
+            continue;
+        }
+        *nextFood++ = i;
+        foodCount++;
+        if (GetTaste(i) >= 7) {
+            *nextTasty++ = i;
+            tastyCount++;
+        }
+    }
+    u8 favorite_ = tasty[MATH_Rand16(&gRandom, tastyCount)];
+    u8 disliked_;
+    do {
+        disliked_ = foods[MATH_Rand16(&gRandom, foodCount)];
+    } while (disliked_ == favorite_);
+    *favorite = favorite_;
+    *disliked = disliked_;
+}
+
+// Whether the favourite and disliked foods are two foods, and the recent ones foods
+BOOL SavedCharacter::AreFoodPreferencesValid() {
+    BOOL valid = TRUE;
+    if (mFavoriteItem == 0xFF || mDislikedItem == 0xFF) {
+        valid = FALSE;
+    } else if (data_020f5f0c[mFavoriteItem].mKind != 1 || data_020f5f0c[mDislikedItem].mKind != 1 ||
+               mFavoriteItem == mDislikedItem) {
+        valid = FALSE;
+    }
+    for (int i = 0; i < 3; i++) {
+        u8 item = mUnknown292[i];
+        if (item != 0xFF && data_020f5f0c[item].mKind != 1) {
+            valid = FALSE;
+            break;
+        }
+    }
+    return valid;
+}
+
+// New favourite and disliked foods (chosen on a copy of the record)
+void SavedCharacter::ChooseNewFoodPreferences() {
+    SavedCharacter copy;
+    (CharacterRecord &)copy = *this;
+    u8 favorite;
+    u8 disliked;
+    copy.ChooseFoodPreferences(&favorite, &disliked);
+    mFavoriteItem = favorite;
+    mDislikedItem = disliked;
     MI_CpuFill8(mUnknown292, 0xFF, sizeof(mUnknown292));
 }
 
@@ -2617,4 +2782,360 @@ int SavedCharacter::GetPersonalityPairValue(int a, int b) {
         b = t;
     }
     return data_020fbaf4[a + b * 16 - ((b * (b + 1)) >> 1)];
+}
+
+// A reaction's weight scaled by the personality answers (kind 1 to 4: the first two answers' score, its complement,
+// the last two answers' score, its complement), in 128ths
+int SavedCharacter::ScaleTalkWeightByAnswers(int kind, int weight) {
+    switch (kind) {
+    case 0:
+        weight = 0;
+        break;
+    case 1:
+        weight = weight * GetAnswerScore01() >> 7;
+        break;
+    case 2:
+        weight = weight * (ScoreAnswers01(8, 8) + ScoreAnswers01(1, 1) - GetAnswerScore01()) >> 7;
+        break;
+    case 3:
+        weight = weight * GetAnswerScore23() >> 7;
+        break;
+    case 4:
+        weight = weight * (ScoreAnswers23(8, 8) + ScoreAnswers23(1, 1) - GetAnswerScore23()) >> 7;
+        break;
+    default:
+        weight = 0;
+        break;
+    }
+    return weight;
+}
+
+// The same by how well the two personalities go together (kind 1) or not (kind 2)
+int SavedCharacter::ScaleTalkWeightByPersonalities(int kind, int weight, SavedCharacter *partner) {
+    switch (kind) {
+    case 0:
+        weight = 0;
+        break;
+    case 1:
+        weight = weight * GetPersonalityPairValue(partner->mPersonality, mPersonality) >> 7;
+        break;
+    case 2:
+        weight = weight * (120 - GetPersonalityPairValue(partner->mPersonality, mPersonality)) >> 7;
+        break;
+    default:
+        weight = 0;
+        break;
+    }
+    return weight;
+}
+
+// The weight of one of the twelve reactions to what the partner did in a talk: by the relation and the partner's
+// reaction, for the character's kind of personality and mood only, plus its scalings
+int SavedCharacter::GetTalkReactionWeight(s8 relation, s8 partnerReaction, s8 reaction, SavedCharacter *partner) {
+    const TalkReactionInfo *info = &data_020f5828[reaction];
+    int weight = data_021135f0[relation][partnerReaction * 12 + reaction];
+    if ((info->personalities & (1 << data_020fba28[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
+        int byAnswers = ScaleTalkWeightByAnswers(info->answerScaling, weight);
+        weight += byAnswers + ScaleTalkWeightByPersonalities(info->pairScaling, weight, partner);
+    } else {
+        weight = 0;
+    }
+    return weight;
+}
+
+int SavedCharacter::GetTotalTalkReactionWeight(s8 relation, s8 partnerReaction, SavedCharacter *partner) {
+    int total = 0;
+    for (s8 i = 0; i < 12; i++) {
+        total += GetTalkReactionWeight(relation, partnerReaction, i, partner);
+    }
+    return total;
+}
+
+// How the character reacts in a talk (overlay 74), 0 to 11, by the weights
+int SavedCharacter::ChooseTalkReaction(s8 relation, s8 partnerReaction, SavedCharacter *partner) {
+    mPersonality = GetPersonality();
+    int random = Rand(GetTotalTalkReactionWeight(relation, partnerReaction, partner));
+    int sum = 0;
+    int i;
+    for (i = 0; i < 12; i++) {
+        sum += GetTalkReactionWeight(relation, partnerReaction, i, partner);
+        if (sum > random) {
+            break;
+        }
+    }
+    if (i >= 12) {
+        i = 0;
+    }
+    return i;
+}
+
+// As ScaleTalkWeightByAnswers, for the reactions by themselves
+int SavedCharacter::ScaleReactionWeightByAnswers(int kind, int weight) {
+    switch (kind) {
+    case 0:
+        weight = 0;
+        break;
+    case 1:
+        weight = weight * GetAnswerScore01() >> 7;
+        break;
+    case 2:
+        weight = weight * (ScoreAnswers01(8, 8) + ScoreAnswers01(1, 1) - GetAnswerScore01()) >> 7;
+        break;
+    case 3:
+        weight = weight * GetAnswerScore23() >> 7;
+        break;
+    case 4:
+        weight = weight * (ScoreAnswers23(8, 8) + ScoreAnswers23(1, 1) - GetAnswerScore23()) >> 7;
+        break;
+    default:
+        weight = 0;
+        break;
+    }
+    return weight;
+}
+
+// The weight of one of the fifteen reactions that follow the one before
+int SavedCharacter::GetReactionWeight(s8 previous, s8 reaction) {
+    int weight = data_020f5e28[previous][reaction];
+    const ReactionInfo *info = &data_020f5df8[reaction];
+    if ((info->personalities & (1 << data_020fba28[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
+        weight += ScaleReactionWeightByAnswers(info->answerScaling, weight);
+    } else {
+        weight = 0;
+    }
+    return weight;
+}
+
+int SavedCharacter::GetTotalReactionWeight(s8 previous) {
+    int total = 0;
+    for (s8 i = 0; i < 15; i++) {
+        total += GetReactionWeight(previous, i);
+    }
+    return total;
+}
+
+// The reaction that follows the one before (overlay 74's characters), 0 to 14, by the weights
+int SavedCharacter::ChooseNextReaction(s8 previous) {
+    mPersonality = GetPersonality();
+    int random = Rand(GetTotalReactionWeight(previous));
+    int sum = 0;
+    int i;
+    for (i = 0; i < 15; i++) {
+        sum += GetReactionWeight(previous, i);
+        if (sum > random) {
+            break;
+        }
+    }
+    if (i >= 15) {
+        i = 0;
+    }
+    return i;
+}
+
+// Gives the speech synthesizer the character's voice, each parameter within its range
+void SavedCharacter::SetVoiceOf(TtsPlayer *player) {
+    player->StopEngine();
+    for (int i = 0; i < 6; i++) {
+        int value = mVoice[i];
+        if (value < data_020fb940[i].min) {
+            value = data_020fb940[i].min;
+        }
+        if (value > data_020fb940[i].max) {
+            value = data_020fb940[i].max;
+        }
+        player->SetEngineParam(data_020fb940[i].param, value);
+    }
+}
+
+// 0 when the two records are the same
+int SavedCharacter::CompareRecords(const CharacterRecord *a, const CharacterRecord *b) {
+    return memcmp(a, b, sizeof(CharacterRecord));
+}
+
+BOOL SavedCharacter::IsLeapYear(int year) {
+    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+int SavedCharacter::GetDaysInYear(int year) {
+    return IsLeapYear(year) ? 366 : 365;
+}
+
+int SavedCharacter::GetDaysInMonth(int month, int year) {
+    return IsLeapYear(year) ? data_020fb9a4[month] : data_020fb970[month];
+}
+
+// The days from one date to a later one of the same year, 0 if it is earlier
+int SavedCharacter::GetDaysBetweenInYear(int month1, int day1, int month2, int day2, int year) {
+    int days;
+    if (month2 - month1 < 0) {
+        return 0;
+    }
+    if (month2 - month1 == 0) {
+        days = day2 - day1;
+        if (days < 0) {
+            days = 0;
+        }
+        return days;
+    }
+    days = GetDaysInMonth(month1, year) - day1;
+    for (int month = month1 + 1; month < month2; month++) {
+        days += GetDaysInMonth(month, year);
+    }
+    return days + day2;
+}
+
+// The days from one date to a later one, 0 if it is earlier
+int SavedCharacter::GetDaysBetween(int month1, int day1, int year1, int month2, int day2, int year2) {
+    int year;
+    int days;
+    if (year1 > year2) {
+        return 0;
+    }
+    if (year1 == year2) {
+        if (month2 - month1 < 0) {
+            return 0;
+        }
+        return GetDaysBetweenInYear(month1, day1, month2, day2, year1);
+    }
+    days = GetDaysBetweenInYear(month1, day1, 12, 31, year1);
+    for (year = year1 + 1; year < year2; year++) {
+        days += GetDaysInYear(year);
+    }
+    return days + (GetDaysBetweenInYear(1, 1, month2, day2, year2) + 1);
+}
+
+// The birthday; without a year of birth, a date of the 20th century made from the create ID
+void SavedCharacter::GetBirthday(RTCDate *date) {
+    date->year = mBirthYear;
+    if (date->year == 0xFFF) {
+        CharInfo info;
+        NFL_GetCharInfo(&info, this);
+        CreateId id = info.createId;
+        date->year = id.data[0] % 99 + 1900;
+        date->month = id.data[1] % 12 + 1;
+        date->day = id.data[2] % 28 + 1;
+    } else {
+        date->month = GetParameter(PARAM_BIRTH_MONTH);
+        date->day = GetParameter(PARAM_BIRTH_DAY);
+    }
+}
+
+// The character's age in days
+int SavedCharacter::GetAgeInDays() {
+    RTCDate birthday;
+    GetBirthday(&birthday);
+    RTCDate today;
+    Clock_GetDate(data_02123440, &today);
+    today.year += 2000;
+    return GetDaysBetween(birthday, today);
+}
+
+// The biorhythm on a day of life: the physical (23 days), intellectual (33) and emotional (28) cycles added up, 0 to
+// 1000
+int SavedCharacter::GetBiorhythm(int day) {
+    if (day < 0) {
+        day = 0;
+    }
+    int cycles[3];
+    cycles[0] = data_020fb912[day % 23];
+    cycles[1] = data_020fba68[day % 33];
+    cycles[2] = data_020fb9d8[day % 28];
+    int sum = 0;
+    for (int i = 0; i < 3; i++) {
+        sum += cycles[i];
+    }
+    sum *= 1000;
+    sum /= 32767 * 3;
+    if (sum < 0) {
+        sum = 0;
+    }
+    if (sum > 1000) {
+        sum = 1000;
+    }
+    return sum;
+}
+
+// The day of the 60-day cycle of the calendar the character was born on, times two, plus one for a woman
+int SavedCharacter::GetBirthDayCycle() {
+    RTCDate birthday;
+    GetBirthday(&birthday);
+    RTCDate origin;
+    origin.year = 1900;
+    origin.month = 1;
+    origin.day = 1;
+    int days = GetDaysBetween(origin, birthday);
+    int cycle = (days + 10) % 60 * 2;
+    if (MiiData_GetSex(this) == 1) {
+        cycle++;
+    }
+    return cycle;
+}
+
+// A value of the row of a table of four columns that is the column of the character's kind of personality
+int SavedCharacter::GetPersonalityColumnValue(int row, const u8 *table) {
+    return (table + row * 4)[data_020fb8c4[data_020fba28[GetPersonality()]]];
+}
+
+// The offset of that value
+int SavedCharacter::GetPersonalityColumnOffset(int row) {
+    return row * 4 + data_020fb8d4[data_020fba28[GetPersonality()]];
+}
+
+// Today's biorhythm, its three cycles (0 to 255) and yesterday's
+void SavedCharacter::UpdateBiorhythm() {
+    int day = GetAgeInDays();
+    mBiorhythmYesterday = GetBiorhythm(day - 1);
+    mBiorhythmCycles[0] = data_020fb912[day % 23];
+    mBiorhythmCycles[1] = data_020fba68[day % 33];
+    mBiorhythmCycles[2] = data_020fb9d8[day % 28];
+    mBiorhythm = 0;
+    for (int i = 0; i < 3; i++) {
+        mBiorhythm += mBiorhythmCycles[i];
+        if (mBiorhythmCycles[i] < 0) {
+            mBiorhythmCycles[i] = 0;
+        }
+        mBiorhythmCycles[i] >>= 7;
+        if (mBiorhythmCycles[i] > 255) {
+            mBiorhythmCycles[i] = 255;
+        }
+    }
+    mBiorhythm *= 1000;
+    mBiorhythm /= 32767 * 3;
+    if (mBiorhythm < 0) {
+        mBiorhythm = 0;
+    }
+    if (mBiorhythm > 1000) {
+        mBiorhythm = 1000;
+    }
+}
+
+// The first room of the building no saved character lives in
+void SavedCharacter::AssignFreeRoom() {
+    u8 rooms[100];
+    MI_CpuFill8(rooms, 0xFF, sizeof(rooms));
+    for (int i = 0; i < 100; i++) {
+        if (func_0202c354(&gGameData, i)) {
+            rooms[func_0202c414(&gGameData, i)] = i;
+        }
+    }
+    GetApartmentRooms();
+    u8 room = 0xFF;
+    for (int i = 0; i < 100; i++) {
+        if (rooms[i] == 0xFF) {
+            room = i;
+            break;
+        }
+    }
+    mRoomNumber = room;
+}
+
+u32 SavedCharacter::CountOwnedInteriors() {
+    int count = 0;
+    for (u32 i = 0; i < 3; i++) {
+        count += MATH_CountPopulation(mOwnedInteriors[i]);
+    }
+    return count;
 }

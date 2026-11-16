@@ -35,7 +35,6 @@ int func_0202c490(SavedGame *game, int index);  // Its event's partner (SavedCha
 s64 func_0202c4b8(SavedGame *game, int index);  // The time its next event starts at
 s64 func_0202c4e4(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
 
-void func_0209a588(SavedCharacter *character, s64 now, SavedCharacter *partner); // Ends its event
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
 
@@ -165,7 +164,6 @@ extern "C" {
 // --- Main program, not named yet ---
 
 // Chooses the character's reaction (0..11) to its partner
-int func_0209d5ac(SavedCharacter *character, s8 relationKind, s8 partnerReaction, SavedCharacter *partner);
 
 
 // The saved game's characters, by index
@@ -1092,7 +1090,7 @@ int RoomScene::EndDueEvent() {
             partner = &mCharacters[1];
         }
     }
-    func_0209a588(character, mClock.mSeconds, partner);
+    character->ExpireTrouble(mClock.mSeconds, partner);
 
     for (int i = 0; i < 2; i++) {
         mCharacters[i].mPrevEvent = events[i];
@@ -2354,7 +2352,7 @@ void RoomScene::ChooseTalkReaction(int index) {
     RoomCharacter *partner = mCharacters[index].mPartner;
     partnerIndex = partner->mIndex;
     u8 relation = mCharacters[index].mRelation[partnerIndex];
-    int reaction = func_0209d5ac(&mCharacters[index], relation, partner->mReaction, partner);
+    int reaction = mCharacters[index].ChooseTalkReaction(relation, partner->mReaction, partner);
     int patience = (200 - ((SavedCharacter *)(&mCharacters[index]))->GetAnswerScore01()) >> 2;
     mCharacters[index].mReaction = reaction;
     mCharacters[index].mWait = patience + 160;
@@ -3373,7 +3371,7 @@ void RoomCharacter::UpdateTalkStates() {
         } else if (mStep == 1) {
             if (mSpeechParam[mMood] && mTtsPlayer->IsEngineIdle()) {
                 mStep++;
-                func_0209d898(this, mTtsPlayer);
+                SetVoiceOf(mTtsPlayer);
                 mTtsPlayer->Speak(mSpeechText[mMood], 0);
             } else {
                 SetState(0);
@@ -10657,7 +10655,7 @@ void RoomCharacter::UpdateBodyIfPresent() {
 }
 
 int RoomCharacter::PickReaction() {
-    return func_0209d804(this, mReaction);
+    return ChooseNextReaction(mReaction);
 }
 
 void RoomCharacter::ResetBody() {

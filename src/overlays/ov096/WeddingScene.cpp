@@ -153,7 +153,7 @@ void WeddingScene::Init3d() {
         character->Character::UpdateBodyScale();
         character->Character::UpdateAnimSpeed();
         mCharacters[i].mPersonality = character->GetPersonality();
-        func_0209decc(character);
+        character->UpdateBiorhythm();
         character->Character::UpdateSpeedScales();
         func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
         mCharacters[i].mModel.mUnknown4A4 = TRUE;
@@ -345,11 +345,11 @@ u8 WeddingScene::GetCharacterIndex(int slot) {
 // Gives the speech engine one character's voice, and moves that character's mouth with it
 void WeddingScene::SetSpeaker(int slot) {
     if (slot == 0) {
-        func_0209d898(&mCharacters[0], &mTtsPlayer);
+        mCharacters[0].SetVoiceOf(&mTtsPlayer);
         mCharacters[0].mLipSync = TRUE;
         mCharacters[1].mLipSync = FALSE;
     } else {
-        func_0209d898(&mCharacters[1], &mTtsPlayer);
+        mCharacters[1].SetVoiceOf(&mTtsPlayer);
         mCharacters[0].mLipSync = FALSE;
         mCharacters[1].mLipSync = TRUE;
     }

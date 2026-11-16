@@ -31,9 +31,6 @@ extern "C" {
 // --- Main program, not named yet (or named in symbols.txt): functions of the character (0x0208fcf8 to
 // 0x0209d898). All take the character as their object. ---
 
-int func_0209d804(RoomCharacter *self, s8 value);
-// Applies the character's voice to the speech engine
-void func_0209d898(RoomCharacter *self, TtsPlayer *player);
 int MiiData_GetFavoriteColor(RoomCharacter *self);
 
 // --- Main program, not named yet: others ---

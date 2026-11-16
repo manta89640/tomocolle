@@ -238,7 +238,6 @@ void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
 void func_0207b138(ParticleSystem *system);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Writes one
-BOOL func_0209d900(CharacterRecord *record, SceneCharacter *character);
 void func_02031e88(SpriteButton *button, BOOL a);
 void func_0207b3dc(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
@@ -247,7 +246,6 @@ void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
-void func_0209e01c(CharacterRecord *character);
 extern const int data_020fba28[];
 void func_02029f10(CharacterModel *model, GXRgb color);
 void func_02029f20(CharacterModel *model, GXRgb color);
@@ -259,7 +257,6 @@ struct Renderer3d;
 extern "C" {
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
-void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
 BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
 extern void *data_02123440[];
 void Clock_GetDate(void *clock, RTCDate *date);
@@ -309,7 +306,7 @@ void MiiEditScene::Init() {
         LoadCharacter(mUnknown5824);
         u8 a;
         u8 b;
-        func_0209cbac(&mCharacter, &a, &b);
+        mCharacter.ChooseFoodPreferences(&a, &b);
         mCharacter.mFavoriteItem = a;
         mCharacter.mDislikedItem = b;
         break;
@@ -333,7 +330,7 @@ void MiiEditScene::Init() {
             OS_Terminate();
         }
         ((SavedCharacter *)(&mCharacter))->Reset();
-        func_0209e01c(&mCharacter);
+        mCharacter.AssignFreeRoom();
         RTCDate date;
         Clock_GetDate(data_02123440[0], &date);
         ((SavedCharacter *)(&mCharacter))->SetRegisteredDate(date.year, date.month, date.day);
@@ -604,7 +601,7 @@ void MiiEditScene::Update() {
             if (mSceneId == 0x42) {
                 CharacterRecord record;
                 func_0202c264(&gGameData, (u16)mUnknown5824, &record);
-                if (!func_0209d900(&record, &mCharacter)) {
+                if (!SavedCharacter::CompareRecords(&record, &mCharacter)) {
                     gSceneManager.RequestScene(0x1A);
                 } else {
                     SetPage(5);
@@ -875,7 +872,7 @@ static inline void ClearFlag(u32 *flags, u8 flag) {
 void MiiEditScene::SaveCharacter() {
     if (mCharacter.mUnknown050Bit0) {
         mCharacter.mUnknown050Bit0 = 0;
-        func_0209e01c(&mCharacter);
+        mCharacter.AssignFreeRoom();
     }
     int kind = data_020fba28[((SavedCharacter *)(&mCharacter))->GetPersonality()];
     int style = 8;
@@ -899,9 +896,9 @@ void MiiEditScene::SaveCharacter() {
     }
     for (int i = 0; i < 8; i++) {
         if (i == style) {
-            SetFlag(mCharacter.mUnknown210, i);
+            SetFlag(mCharacter.mOwnedInteriors, i);
         } else {
-            ClearFlag(mCharacter.mUnknown210, i);
+            ClearFlag(mCharacter.mOwnedInteriors, i);
         }
     }
     if (mCharacter.mInterior <= 7) {
@@ -1015,7 +1012,6 @@ extern "C" {
 void func_020341d4(MessageWindow *window);
 void func_020349cc(MessageWindow *window, int flags);
 extern const s16 data_020fbaac[];
-void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_SetName(CharacterRecord *character, const wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
@@ -1054,7 +1050,7 @@ void MiiEditSexPage::Update() {
                 ((SavedCharacter *)(&mScene->mCharacter))->AssignCreateId();
                 u8 a;
                 u8 b;
-                func_0209cbac(&mScene->mCharacter, &a, &b);
+                mScene->mCharacter.ChooseFoodPreferences(&a, &b);
                 mScene->mCharacter.mFavoriteItem = a;
                 mScene->mCharacter.mDislikedItem = b;
                 ((SavedCharacter *)(&mScene->mCharacter))->SetParameter(0x28, 0);
@@ -3892,7 +3888,6 @@ void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressedSequence);
 void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
 void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
 BOOL func_02031d00(SpriteButton *button);
-void func_0209d898(SceneCharacter *character, TtsPlayer *player);
 }
 // The reading of a number, in the synthesizer's notation (src/scene/SceneHelpers.cpp)
 void MakeNumberReading(wchar_t *text, int number);
@@ -4162,7 +4157,7 @@ void MiiEditVoicePage::Update() {
                 (CharacterRecord &)mScene->mCharacter = mUnknown3B5C;
                 mScene->mCharacter.mUnknown054Bits0 = 7;
                 mScene->mTtsPlayer.StopEngine();
-                func_0209d898(&mScene->mCharacter, &mScene->mTtsPlayer);
+                mScene->mCharacter.SetVoiceOf(&mScene->mTtsPlayer);
                 SetState(0);
                 break;
             }
@@ -4456,7 +4451,7 @@ void MiiEditVoicePage::SpeakProfile(int step) {
 }
 
 void MiiEditVoicePage::StartSpeaking() {
-    func_0209d898(&mScene->mCharacter, &mScene->mTtsPlayer);
+    mScene->mCharacter.SetVoiceOf(&mScene->mTtsPlayer);
     SpeakProfile(1);
 }
 

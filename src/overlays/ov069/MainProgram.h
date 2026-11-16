@@ -114,7 +114,6 @@ void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a re
 void *func_020295a4(void *resourceSet, u32 resType);
 
 // --- Characters ---
-void func_0209decc(Character *character);
 }
 
 
