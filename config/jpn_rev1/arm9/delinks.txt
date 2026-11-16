@@ -358,6 +358,7 @@ src/text/TextUtil.cpp:
     .data       start:0x021102f0 end:0x02110860
 
 src/text/SpeechWindow.cpp:
+    complete
     .text       start:0x02039660 end:0x020398e4
     .rodata     start:0x020b5c54 end:0x020b5c5c
 

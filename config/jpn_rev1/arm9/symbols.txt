@@ -1607,7 +1607,7 @@ _ZN12SpeechWindow4ShowEmii kind:function(arm,size=0x80) addr:0x0203977c
 _ZN12SpeechWindow4HideEv kind:function(arm,size=0x34) addr:0x020397fc
 _ZN12SpeechWindow6UpdateEv kind:function(arm,size=0x84) addr:0x02039830
 _ZN12SpeechWindow12SetStringArgEPKwi kind:function(arm,size=0x10) addr:0x020398b4
-func_020398c4 kind:function(arm,size=0x10) addr:0x020398c4
+_ZN12SpeechWindow13SetMessageArgEPKwi kind:function(arm,size=0x10) addr:0x020398c4
 _ZN12SpeechWindow4DrawEv kind:function(arm,size=0x10) addr:0x020398d4
 func_020398e4 kind:function(arm,size=0xc) addr:0x020398e4
 func_020398f0 kind:function(arm,size=0xc8) addr:0x020398f0
@@ -4263,7 +4263,7 @@ gStr_MLT_Window_common_nsc_2 kind:data(any) addr:0x020b5c2c
 sVolumeScaleBySetting kind:data(any) addr:0x020b5c44 local
 sVolumeBySetting kind:data(any) addr:0x020b5c48 local
 sStrmVolumeBySetting kind:data(any) addr:0x020b5c4c local
-data_020b5c54 kind:data(any) addr:0x020b5c54
+sTextPosition kind:data(any) addr:0x020b5c54 local
 gStr_N_EAST_WEST_S kind:data(any) addr:0x020b5c5c
 gStr_KyotoOsakaNara kind:data(any) addr:0x020b5c6c
 gStr_akstnhmyrwgzdbp kind:data(any) addr:0x020b5c7c
