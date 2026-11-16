@@ -796,7 +796,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   that constructs it emits its table too (`Scene75Model::Draw`). A class with nothing virtual of its own gets its
   table emitted where it is constructed (`TestNg134Model`).
 - Two byte-identical constructors one after the other are C2 then C1: members and array elements use C1, a base
-  subobject C2 (`HeadIcon`, `ParticleSystem`, `CharacterModel`).
+  subobject C2 (`HeadIcon`, `ParticleSystem`, `CharacterModel`). Measured on test files: members, array elements,
+  locals, `new` and static objects always call C1. So a C2 call where the layout has a member is a member of a class
+  derived from that one with an implicit constructor (the derived class's constructor is inlined and calls the
+  base's C2): the room scenes' head icons are `RoomHeadIcon : HeadIcon` (overlays 73, 74), and the main program's
+  RoomScene constructor builds its particle system and speech player the same way. A C2 call at offset 0 of a part
+  that has fields before it in the class is a second base (`Mannequin : MannequinHead, CharacterModel`).
+- A stand-in that derives from a polymorphic class where the real one holds it as a member makes the file emit a
+  weak virtual table the original does not have, and that object is on the data list: the size sort then puts the
+  file's other data in another order. Overlay 73's `.rodata` constants had been ordered around such a table and had
+  to be ordered again when `CharacterModel` got its real shape.
 
 **Scenes**
 - A scene's virtual table symbol goes at the table's start, and the main program's constructor's reference to it is
@@ -805,6 +814,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   link keeps the one called, so the unit can still be complete.
 
 **Tools to mind**
+- A `.bss` object named `kind:data(...)` in `symbols.txt` (what `name_unit_data.py --apply` writes) makes `dsd dis`
+  read bytes the module does not have and panic (`dis.rs:222`, `Option::unwrap()` on `None`; overlay 110's
+  `sPartners`): `.bss` symbols are `kind:bss`.
 - `tools/name_unit_data.py` reads only what `readelf` lists as OBJECT or NOTYPE: run it after any change to a
   complete unit or to a header it includes, since the compiler's `@` numbers move.
 - A constructor emitted as C1 and C2 (no virtual base) has its string literals twice, the C2 copy first; the link
