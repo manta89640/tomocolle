@@ -109,6 +109,9 @@ MSL's own files are compiled with 2.0/sp2 (measured: its objects say "Metrowerks
 what that compiler writes) and the headers of that MSL, internal ones included. `lib/MSL_C/wstring.c` is the first:
 its seven functions match and it is linked from source. `lib/MSL_C/e_pow.c`, fdlibm's `pow` as MSL changed it (see its
 header), has its data matching and its one function at 99.88%: three values are given registers in another order.
+The other fdlibm and math files the game links (`s_copysign`, `s_fabs`, `s_frexp`, `s_ldexp`, `w_pow`, `math_arm`,
+`math_sun`, `math_api`) match and are linked from source; `strtold.c`'s `__strtold` is at 99.1%, one pointer of its
+hexadecimal tail in another register (see its header).
 Measured from the original objects (in the compiler's MSL archive): MSL was compiled with exception tables, which the
 game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
 `_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
