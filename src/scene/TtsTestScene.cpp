@@ -9,7 +9,7 @@ struct TtsTestTexts {
     const char *mCapture;
 };
 
-static const TtsTestTexts sTexts = {
+static TtsTestTexts sTexts = {
     L"ナラ’ケンノ＿アスノ／テ’ンキワ＿ハレ＿＿トコロニヨ’リ＿ニワカア’メガ／フ’ルデショー．\t<\\Echo>コレワ_テ'ストデス．アイウエオカキクケコサシスセソタチツテト.",
     "ナラ’ケンノ＿アスノ／テ’ンキワ＿ハレ＿＿トコロニヨ’リ＿ニワカア’メガ／フ’ルデショー．",
     "<\\Echo>コレワ_テ'ストデス.",

@@ -5216,10 +5216,10 @@ gStr_KBD_3 kind:data(any) addr:0x02111150
 gStr_MNU_2 kind:data(any) addr:0x02111154
 gStr_TBM_4 kind:data(any) addr:0x02111158
 sTexts kind:data(any) addr:0x0211115c local
-gText_LessThanReverseSolidusEchoGreaterThan kind:data(any) addr:0x02111168
+@13798 kind:data(any) addr:0x02111168 local
 _ZTV12TtsTestScene kind:data(any) addr:0x02111184
-gText_NaraSingleQuotationKenNoLowLineAsuNo kind:data(any) addr:0x021111a8
-gText_NaraSingleQuotationKenNoLowLineAsuNo_2 kind:data(any) addr:0x02111204
+@13797 kind:data(any) addr:0x021111a8 local
+@13796 kind:data(any) addr:0x02111204 local
 _ZTV10EmptyScene kind:data(any) addr:0x021112b0
 sRoleNames kind:data(any) addr:0x021112d4 local
 gText_SoushinChuu kind:data(any) addr:0x021112dc
