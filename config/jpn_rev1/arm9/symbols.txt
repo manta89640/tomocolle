@@ -4759,21 +4759,21 @@ sMidnight kind:data(any) addr:0x020fc080 local
 sLightColors kind:data(any) addr:0x020fc08c local
 sLightColors2 kind:data(any) addr:0x020fc0cc local
 sCloudSettings kind:data(any) addr:0x020fc10c local
-data_020fc274 kind:data(any) addr:0x020fc274
-data_020fc278 kind:data(any) addr:0x020fc278
-gText_Te kind:data(any) addr:0x020fc27c
-data_020fc2a0 kind:data(any) addr:0x020fc2a0
-data_020fc38c kind:data(any) addr:0x020fc38c
-data_020fc398 kind:data(any) addr:0x020fc398
-data_020fc3a4 kind:data(any) addr:0x020fc3a4
-data_020fc3b0 kind:data(any) addr:0x020fc3b0
-data_020fc3c0 kind:data(any) addr:0x020fc3c0
-gText_O_2 kind:data(any) addr:0x020fc3d0
-gStr_CircumflexAccent_2 kind:data(any) addr:0x020fc3e0
+sWindowButtonA kind:data(any) addr:0x020fc274
+sWindowButtonB kind:data(any) addr:0x020fc278
+sTextMessage kind:data(any) addr:0x020fc27c
+sWindowButtonMessages kind:data(any) addr:0x020fc2a0
+sCanvasColors kind:data(any) addr:0x020fc38c
+sCounterLightDirection0 kind:data(any) addr:0x020fc398
+sCounterLightDirection1 kind:data(any) addr:0x020fc3a4
+sShopWindowRect kind:data(any) addr:0x020fc3b0
+sScrollKnobRect kind:data(any) addr:0x020fc3c0
+sWindowButtonPositions kind:data(any) addr:0x020fc3d0
+sWindowButtonSizes kind:data(any) addr:0x020fc3e0
 data_020fc3f0 kind:data(any) addr:0x020fc3f0
-gStr_FullStop kind:data(any) addr:0x020fc414
-data_020fc42c kind:data(any) addr:0x020fc42c
-data_020fc444 kind:data(any) addr:0x020fc444
+sCanvasPositions kind:data(any) addr:0x020fc414
+sCanvasSizes kind:data(any) addr:0x020fc42c
+sWindowButtonSounds kind:data(any) addr:0x020fc444
 data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b04c8 kind:data(word) addr:0x020fc494
 .p__sinit_020b04cc kind:data(word) addr:0x020fc498
@@ -6106,7 +6106,7 @@ gStr_Fw_Obj_up_PM_Fine_ncl kind:data(any) addr:0x02115300
 gStr_Fw_BG_up_PM_Fine_ncl_2 kind:data(any) addr:0x02115318
 gStr_Fw_Obj_up_PM_Cloud_ncl kind:data(any) addr:0x02115330
 gStr_Fw_BG_up_PM_Cloud_ncl_2 kind:data(any) addr:0x0211534c
-data_02115364 kind:data(any) addr:0x02115364
+sCounterLightColors kind:data(any) addr:0x02115364
 _ZTV10ShopWindow kind:data(any) addr:0x02115368
 _ZTV19HalfPriceShopWindow kind:data(any) addr:0x02115380
 _ZTV16ShopItemListView kind:data(any) addr:0x02115398

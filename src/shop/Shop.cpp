@@ -109,6 +109,25 @@ template <class P> static inline void SetSpritePosition(Sprite *sprite, const P 
     sprite->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
 
+// A point that starts at the origin
+struct ZeroPoint {
+    ZeroPoint() {
+        x = 0;
+        y = 0;
+    }
+    int x;
+    int y;
+};
+
+struct ZeroPoint2 {
+    ZeroPoint2() {
+        y = 0;
+        x = 0;
+    }
+    int x;
+    int y;
+};
+
 // --- The file's tables ---------------------------------------------------------------------------------------------
 
 static const ScreenPoint sNamePosition = {0xC, 0xA0};
@@ -117,26 +136,26 @@ static const ScreenPoint sShopPriceOffset = {0x34, -2};
 static const ScreenPoint sTabSize = {0x2A, 0x18};
 static const WindowPoint sTextPosition = {0xC, 2};
 static const ScreenPoint sPriceLabelPosition = {0xC7, 0xA0};
-static const WindowPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
+static const WindowPoint sWindowButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
 static const ScreenPoint sUpButtonSize = {14, 12};
-static const int sButtonMessages[2] = {6, 5};
+static const int sWindowButtonMessages[2] = {6, 5};
 static const ScreenPoint sRowTouchSize = {0xE5, 18};
 static const ScreenPoint sScrollBarPosition = {0xF4, 0x69};
 static const ScreenPoint sUpButtonPosition = {0xF4, 0x3E};
 static const ScreenPoint sShopPriceIconOffset = {0x66, 1};
 static const ScreenPoint sPriceOffset = {0x34, -2};
-static const WindowPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
+static const WindowPoint sWindowButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
 static const ScreenPoint sDownButtonPosition = {0xF4, 0x94};
 static const ScreenPoint sShopCountOffset = {0x2A, -2};
 static const int sCanvasColors[3] = {8, 8, 1};
 static const ScreenPoint sCanvasPositions[3] = {{0x2E, 0x42}, {0x7F, 0x42}, {0x43, 0x70}};
 static const ScreenPoint sCanvasSizes[3] = {{4, 2}, {8, 2}, {8, 4}};
 static const ScreenPoint sRowsPosition = {0x77, 0x41};
-static const u8 sButtonB[2] = {0x13, 0x13};
-static const u8 sButtonA[2] = {0x14, 0x14};
-static const ScreenRect sWindowRect = {0x14, 0x14, 0xD8, 0x98};
+static const u8 sWindowButtonB[2] = {0x13, 0x13};
+static const u8 sWindowButtonA[2] = {0x14, 0x14};
+static const ScreenRect sShopWindowRect = {0x14, 0x14, 0xD8, 0x98};
 static const WindowPoint sMinusButtonOffset = {0x38, 0x5D};
-static const ButtonSounds sButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
+static const ButtonSounds sWindowButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
 static const WindowPoint sPlusButtonOffset = {0x38, 0x33};
 static const ScreenPoint sIconPosition2 = {0x80, 0x60};
 static const ScreenPoint sCountPosition = {0xCD, 0xAC};
@@ -146,9 +165,9 @@ static const ScreenPoint sTextOffset = {-0x69, -6};
 static const ScreenPoint sDownButtonSize = {14, 12};
 static const ScreenPoint sPricePosition = {0xB2, 0xAC};
 static const ScreenPoint sShopMarkOffset = {-0x6B, 0};
-static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
-static const VecFx32 sLightDirection0 = {0x640, -0x258, -0xFA0};
-static const VecFx32 sLightDirection1 = {0, -0xFA0, 0x5DC};
+static GXRgb sCounterLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
+static const VecFx32 sCounterLightDirection0 = {0x640, -0x258, -0xFA0};
+static const VecFx32 sCounterLightDirection1 = {0, -0xFA0, 0x5DC};
 static const int sTextMessage[1] = {0xC3}; // The window's question
 static const ScreenPoint sPlusTouchSize = {18, 16};
 static const ScreenPoint sMinusTouchSize = {14, 13};
@@ -420,18 +439,21 @@ void ItemListView::Draw() {
     }
 }
 
+static inline void PlaceRow(ItemListView *list, int i, ScreenPoint row) {
+    SetSpritePosition(&list->mRowButtons[i], row);
+    SetCanvasPosition(&list->mRowTexts[i], AddPoints(row, sTextOffset));
+    SetCanvasPosition(&list->mRowPrices[i], AddPoints(row, sPriceOffset));
+    SetSpritePosition(&list->mRowPriceIcons[i], AddPoints(row, sPriceIconOffset));
+    SetCanvasPosition(&list->mRowCounts2[i], AddPoints(row, sCountOffset));
+}
+
 // Puts each row where its item is at the scroll position, and scrolls the background with them
 void ItemListView::Refresh() {
     for (int i = 0; i < mRowCount; i++) {
         ScreenPoint offset;
         offset.x = 0;
         offset.y = GetRowItem(i) * 20 - mScroll;
-        ScreenPoint row = AddPoints(mPosition, offset);
-        SetSpritePosition(&mRowButtons[i], row);
-        SetCanvasPosition(&mRowTexts[i], AddPoints(row, sTextOffset));
-        SetCanvasPosition(&mRowPrices[i], AddPoints(row, sPriceOffset));
-        SetSpritePosition(&mRowPriceIcons[i], AddPoints(row, sPriceIconOffset));
-        SetCanvasPosition(&mRowCounts2[i], AddPoints(row, sCountOffset));
+        PlaceRow(this, i, AddPoints(mPosition, offset));
     }
     func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
 }
@@ -910,14 +932,14 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
 
 void ShopWindow::Init(const char *screenName, int plane, int resource, int *charOffset, MessageFile *file,
                       MessageFile *buttonFile, int *money) {
-    ScreenRect rect = sWindowRect;
+    ScreenRect rect = sShopWindowRect;
     Init(rect);
     func_02033174(this, screenName, plane);
     func_020331bc(this, 0x3F00, rect);
     InitButtons(resource, charOffset, file);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(this, i, resource, sButtonB[i], sButtonA[i], sButtonPositions[i], sButtonSizes[i], buttonFile,
-                      sButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sButtonSounds[i], 1);
+        func_02033844(this, i, resource, sWindowButtonB[i], sWindowButtonA[i], sWindowButtonPositions[i], sWindowButtonSizes[i], buttonFile,
+                      sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sWindowButtonSounds[i], 1);
     }
     func_020338d0(this, file, sTextMessage[0], &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
     func_02034f80(this, 0, 1);
@@ -1702,16 +1724,6 @@ void ShopStaff::UpdateHeldModel() {
 
 // --- The counter --------------------------------------------------------------------------------------------------
 
-static inline void SetUpLight(Light *light, Camera *camera, GXRgb color, VecFx32 direction) {
-    light->mColor = color;
-    func_0202aa28(light, camera, direction);
-}
-
-static inline void SetUpLight2(Light *light, Camera *camera, GXRgb color, const VecFx32 &direction) {
-    light->mColor = color;
-    func_0202aa28(light, camera, direction);
-}
-
 void ShopCounter::MountStaff() {
     mStaff.Mount();
 }
@@ -1739,12 +1751,12 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     camera->mUnknown10 = 0x50000;
     camera->mPosition = cameraPosition;
     camera->mTarget = cameraTarget;
-    Light *light0 = &data_021227cc[0];
-    light0->mColor = sLightColors[1];
-    func_0202aa28(light0, camera, sLightDirection0);
+    Light *light0 = (Light *)data_021227cc;
+    light0->mColor = sCounterLightColors[1];
+    func_0202aa28(light0, camera, sCounterLightDirection0);
     Light *light1 = &data_021227cc[1];
-    light1->mColor = sLightColors[0];
-    func_0202aa28(light1, camera, sLightDirection1);
+    light1->mColor = sCounterLightColors[0];
+    func_0202aa28(light1, camera, sCounterLightDirection1);
     func_02028280(&data_02121834, 1, 1);
 }
 
