@@ -399,8 +399,8 @@ void MapScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplMapEffect_LZ.bin", 0);
 }
 
-// Not matching yet (same length; one instruction placed differently): the back button's base, this + 0x268, is
-// computed one instruction earlier than in the original, before the store of the second light's colour.
+// The second light's colour goes through a local: stored straight from the call, the back button's base (this +
+// 0x268) is computed one instruction earlier than in the original.
 void MapScene::Init() {
     const int unknownE = 0xE;
     const u16 backButtonKind = 4;
@@ -521,7 +521,8 @@ void MapScene::Init() {
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
     int phase = func_020a6214(&mSky);
     mLights[0]->mColor = func_020a6574(phase);
-    mLights[1]->mColor = func_020a659c(phase);
+    GXRgb color = func_020a659c(phase);
+    mLights[1]->mColor = color;
 
     for (int i = 0; i < 1; i++) {
         Sprite_Init(&mBackButtons[i], 1, 0, 128, 96, TRUE);
