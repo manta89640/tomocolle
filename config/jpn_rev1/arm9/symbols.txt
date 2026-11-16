@@ -3792,10 +3792,10 @@ _ZN9Mannequin16BlendToAnimationEmi kind:function(arm,size=0x20) addr:0x020a039c
 _ZN9Mannequin10SetVisibleEi kind:function(arm,size=0xc) addr:0x020a03bc
 _ZN9Mannequin8SetAlphaEi kind:function(arm,size=0x20) addr:0x020a03c8
 _ZN7MiiList4InitEP12MiiListPanelP11MiiListTabs kind:function(arm,size=0x6c) addr:0x020a03e8
-func_020a0454 kind:function(arm,size=0x164) addr:0x020a0454
+_ZN7MiiList6UpdateEv kind:function(arm,size=0x164) addr:0x020a0454
 _ZN7MiiList4DrawEv kind:function(arm,size=0x24) addr:0x020a05b8
 _ZN7MiiList4LoadEv kind:function(arm,size=0x88) addr:0x020a05dc
-func_020a0664 kind:function(arm,size=0x2a4) addr:0x020a0664
+_ZN7MiiList14RemoveSelectedEv kind:function(arm,size=0x2a4) addr:0x020a0664
 func_020a0908 kind:function(arm,size=0x30) addr:0x020a0908
 func_020a0938 kind:function(arm,size=0x25c) addr:0x020a0938
 func_020a0b94 kind:function(arm,size=0x130) addr:0x020a0b94
@@ -3814,17 +3814,17 @@ _ZN7MiiList15SortByBloodTypeEv kind:function(arm,size=0xd0) addr:0x020a1aa4
 func_020a1b74 kind:function(arm,size=0x3dc) addr:0x020a1b74
 _ZN7MiiList11SelectIndexEt kind:function(arm,size=0x60) addr:0x020a1f50
 _ZN7MiiList14ClearSelectionEv kind:function(arm,size=0x30) addr:0x020a1fb0
-func_020a1fe0 kind:function(arm,size=0x124) addr:0x020a1fe0
+_ZN12MiiListPanel4InitEi kind:function(arm,size=0x124) addr:0x020a1fe0
 func_020a2104 kind:function(arm,size=0x14) addr:0x020a2104
-func_020a2118 kind:function(arm,size=0x168) addr:0x020a2118
-func_020a2280 kind:function(arm,size=0x14c) addr:0x020a2280
+_ZN12MiiListPanel11InitButtonsEitt11WindowPointS0_ kind:function(arm,size=0x168) addr:0x020a2118
+_ZN12MiiListPanel9InitTextsEi11WindowPointPi kind:function(arm,size=0x14c) addr:0x020a2280
 _ZN12MiiListPanel9InitIconsEii11WindowPoint kind:function(arm,size=0xe0) addr:0x020a23cc
 _ZN12MiiListPanel10InitIcons2Eii11WindowPoint kind:function(arm,size=0xe0) addr:0x020a24ac
 _ZN12MiiListPanel12InitUpButtonEitt11WindowPointS0_ kind:function(arm,size=0xb8) addr:0x020a258c
 _ZN12MiiListPanel14InitDownButtonEitt11WindowPointS0_ kind:function(arm,size=0xb8) addr:0x020a2644
 func_020a26fc kind:function(arm,size=0xe0) addr:0x020a26fc
 func_020a27dc kind:function(arm,size=0x34) addr:0x020a27dc
-func_020a2810 kind:function(arm,size=0x528) addr:0x020a2810
+_ZN12MiiListPanel6UpdateEv kind:function(arm,size=0x528) addr:0x020a2810
 func_020a2d38 kind:function(arm,size=0x160) addr:0x020a2d38
 func_020a2e98 kind:function(arm,size=0x334) addr:0x020a2e98
 func_020a31cc kind:function(arm,size=0x48) addr:0x020a31cc
@@ -5381,21 +5381,21 @@ sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
 _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
-@13181 kind:data(any) addr:0x02111b04 local
-@13182 kind:data(any) addr:0x02111b08 local
-@13183 kind:data(any) addr:0x02111b20 local
-@13184 kind:data(any) addr:0x02111b24 local
-@13214 kind:data(any) addr:0x02111b3c local
-@13215 kind:data(any) addr:0x02111b50 local
-@13216 kind:data(any) addr:0x02111b64 local
-@13217 kind:data(any) addr:0x02111b78 local
-@13218 kind:data(any) addr:0x02111b8c local
-@13219 kind:data(any) addr:0x02111ba4 local
-@13220 kind:data(any) addr:0x02111bb8 local
-@13221 kind:data(any) addr:0x02111bcc local
-@13222 kind:data(any) addr:0x02111be0 local
-@13250 kind:data(any) addr:0x02111bf8 local
-@13251 kind:data(any) addr:0x02111bfc local
+@13177 kind:data(any) addr:0x02111b04 local
+@13178 kind:data(any) addr:0x02111b08 local
+@13179 kind:data(any) addr:0x02111b20 local
+@13180 kind:data(any) addr:0x02111b24 local
+@13210 kind:data(any) addr:0x02111b3c local
+@13211 kind:data(any) addr:0x02111b50 local
+@13212 kind:data(any) addr:0x02111b64 local
+@13213 kind:data(any) addr:0x02111b78 local
+@13214 kind:data(any) addr:0x02111b8c local
+@13215 kind:data(any) addr:0x02111ba4 local
+@13216 kind:data(any) addr:0x02111bb8 local
+@13217 kind:data(any) addr:0x02111bcc local
+@13218 kind:data(any) addr:0x02111be0 local
+@13246 kind:data(any) addr:0x02111bf8 local
+@13247 kind:data(any) addr:0x02111bfc local
 data_02111c00 kind:data(any) addr:0x02111c00
 data_02111c08 kind:data(any) addr:0x02111c08
 gStr_M00_3 kind:data(any) addr:0x02111c24

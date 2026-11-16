@@ -281,12 +281,12 @@ void TushinScene::SetUpWindow(int page) {
 
 // @0x0214a140
 void TushinScene::SetUpList(int *charOffset) {
-    func_020a1fe0(&mList, 6);
+    mList.Init(6);
     func_020a2104(&mList, 0x100, 0x26);
     func_020278f8(&data_021213b8, 0x5FDF, 0x100);
-    func_020a2118(&mList, 0, 0x68, 0x69, sListTitlePos, sListTitleSize);
+    mList.InitButtons(0, 0x68, 0x69, sListTitlePos, sListTitleSize);
     func_020a23cc(&mList, 0, 0x7A, sListCursorPos);
-    func_020a2280(&mList, 0x1000, sListTitleTextPos, charOffset);
+    mList.InitTexts(0x1000, sListTitleTextPos, charOffset);
     mList.InitUpButton(0, 2, 3, sListScrollDownPos, sListScrollBarSize);
     mList.InitDownButton(0, 4, 5, sListScrollUpPos, sListScrollDownSize);
     func_020a26fc(&mList, 0, 6, 7, 0x61, 0x4A, 1, sListBarPos, sListBarRect);
@@ -677,7 +677,7 @@ void TushinScene::UpdateSending() {
             case 5:
                 sSendSongChunk = 0;
                 if (NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
-                    func_020a0664(&mResidents);
+                    mResidents.RemoveSelected();
                 }
                 break;
             case 6:
@@ -956,7 +956,7 @@ void TushinScene::UpdateListButtons() {
         func_02034720(&mWindow, 0x12, 1);
         break;
     }
-    func_020a0454(&mResidents);
+    mResidents.Update();
     if (mResidents.mUnknown11398 == 0) {
         return;
     }
@@ -1409,7 +1409,7 @@ void TushinScene::UpdateMusic() {
 // @0x0214f374
 void TushinScene::ResetList() {
     mList.SetScrollUnknown(FALSE);
-    func_020a0454(&mResidents);
+    mResidents.Update();
 }
 
 // @0x0214f39c
@@ -1651,7 +1651,7 @@ void TushinScene::Update() {
                 if (!NFL_IsMiiCreateIdBit7Clear(GetSelectedResident())) {
                     return;
                 }
-                func_020a0664(&mResidents);
+                mResidents.RemoveSelected();
                 return;
             }
             if (mPage == 0x2B) {
@@ -2166,7 +2166,7 @@ void TushinScene::Update() {
                 switch (sWiiSendResult) {
                 case 1:
                     if (sent) {
-                        func_020a0664(&mResidents);
+                        mResidents.RemoveSelected();
                     }
                     break;
                 case 2:

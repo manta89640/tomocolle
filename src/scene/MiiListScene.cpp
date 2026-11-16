@@ -73,10 +73,10 @@ void MiiListScene::Init() {
     data_0211d604.Set(0x1700);
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 
-    func_020a1fe0(&mPanel, 6);
+    mPanel.Init(6);
     func_020a2104(&mPanel, 0x100, 0);
-    func_020a2118(&mPanel, 0, 0x68, 0x68, sPanelPosition, sPanelSize);
-    func_020a2280(&mPanel, 0x1000, sPanelTextPosition, &mCharOffset);
+    mPanel.InitButtons(0, 0x68, 0x68, sPanelPosition, sPanelSize);
+    mPanel.InitTexts(0x1000, sPanelTextPosition, &mCharOffset);
     mPanel.InitUpButton(0, 2, 3, sPanelPosition0, sPanelSize0);
     mPanel.InitDownButton(0, 4, 5, sPanelPosition2, sPanelSize2);
     func_020a26fc(&mPanel, 0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
@@ -131,7 +131,7 @@ void MiiListScene::UpdateIdle() {
         mState = STATE_SORT_MENU;
         func_02034720(&mSortMenu, 0x12, 1);
     }
-    func_020a0454(&mList);
+    mList.Update();
 }
 
 void MiiListScene::UpdateSortMenu() {

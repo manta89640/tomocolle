@@ -342,6 +342,9 @@ extern u8 data_02142438[];
 // --- The resident list (main program 0x020a03e8 to 0x020a380c) ---
 
 struct MiiListPanel {
+    void Init(int pageSize);
+    void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitTexts(int plane, WindowPoint position, int *charOffset);
     void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void ResetScrollButtons();
@@ -364,6 +367,8 @@ struct MiiListTabs {
 typedef MiiListTabs ListPages;
 
 struct MiiList {
+    void Update();
+    BOOL RemoveSelected();
     void Init(MiiListPanel *panel, MiiListTabs *tabs);
     void Draw();
     void Load();
@@ -383,12 +388,8 @@ struct MiiList {
 typedef MiiList ResidentList;
 
 extern "C" {
-void func_020a0454(ResidentList *list);
-void func_020a1fe0(ListView *view, int a);
 void func_020a2104(ListView *view, int a, int b);
-void func_020a2118(ListView *view, int a, int b, int c, WindowPoint d, WindowPoint e);
 void func_020a23cc(ListView *view, int a, int b, WindowPoint c);
-void func_020a2280(ListView *view, int plane, WindowPoint a, int *charOffset);
 void func_020a26fc(ListView *view, int a, int b, int c, int d, int e, int f, WindowPoint g, ScreenRect h);
 void func_020a27dc(ListView *view, int a, int b, int c);
 }
@@ -477,7 +478,6 @@ int MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
 void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
-void func_020a0664(ResidentList *list);
 void MiiTransfer_SendMii(int index);
 }
 

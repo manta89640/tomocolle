@@ -26,6 +26,9 @@ struct MiiListTabs {
 
 // The panel of the list's controls (0x9478 bytes): buttons, texts and scroll arrows.
 struct MiiListPanel {
+    void Init(int pageSize);
+    void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitTexts(int plane, WindowPoint position, int *charOffset);
     void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
     void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
 
@@ -34,6 +37,8 @@ struct MiiListPanel {
 
 // The list (0x113A8 bytes): the saved characters it shows, and the order it shows them in.
 struct MiiList {
+    void Update();
+    BOOL RemoveSelected();
     void Init(MiiListPanel *panel, MiiListTabs *tabs);
     void Draw();
     void Load();
@@ -46,12 +51,8 @@ struct MiiList {
 }; // 0x113A8
 
 extern "C" {
-void func_020a0454(MiiList *list); // Updates it
 
-void func_020a1fe0(MiiListPanel *panel, int unknown);
 void func_020a2104(MiiListPanel *panel, int plane, int unknown);
-void func_020a2118(MiiListPanel *panel, int a, int b, int c, WindowPoint position, WindowPoint size);
-void func_020a2280(MiiListPanel *panel, int plane, WindowPoint position, int *charOffset);
 void func_020a26fc(MiiListPanel *panel, int a, int b, int c, int d, int e, int f, WindowPoint position,
                    ScreenRect rect);
 

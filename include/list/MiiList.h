@@ -24,6 +24,10 @@ struct WindowPoint; // A point or a size in pixels, by value (MessageWindow.h)
 // The panel of the list's buttons (0x9478 bytes): a page of buttons with the characters' names, scroll buttons and
 // a scroll bar.
 struct MiiListPanel {
+    void Init(int pageSize);
+    void InitButtons(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitTexts(int plane, WindowPoint position, int *charOffset);
+    void Update();
     void InitIcons(int resource, int sequence, WindowPoint position);
     void InitIcons2(int resource, int sequence, WindowPoint position);
     void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
@@ -108,6 +112,8 @@ struct MiiListTabs {
 // The list (0x113A8 bytes): the saved characters, in the order of mSortKey, and in groups of that order.
 struct MiiList {
     void Init(MiiListPanel *panel, MiiListTabs *tabs);
+    void Update();
+    BOOL RemoveSelected();
     void Draw();
     void Load();
     BOOL SelectIndex(u16 index);
