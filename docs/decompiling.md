@@ -384,6 +384,13 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   function but one table, which had to be the file's first static.
 - Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
   at the end), in the order of their declarations: overlay 39's two message numbers.
+- A function-local static with a dynamic initialiser goes on the list where its declaration is parsed, not where the
+  function is compiled: its table, then its guard (`.bss`). So file statics declared after the function come after
+  it on the list, and the declarations' order *across* functions moves it. `Sky.cpp`'s two seconds tables
+  (`GetSunrise`, `GetSunset`, 48 bytes each, with 4-byte guards) came out reversed in `.data` with any order of the
+  seven file statics at the top that keeps the guards right, and both came right with `sSunsetTimes` declared between
+  the two colour tables. The heap-sort model with the locals placed so (table, guard) reproduced every compile tried
+  and found that order at once (`scratchpad` search over placements before, between and after the functions).
 
 ## Matching techniques
 

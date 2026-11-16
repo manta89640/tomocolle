@@ -27,11 +27,19 @@ static inline u16 Rand(u16 max) {
 // Midnight, from which the time of day is counted
 static const RTCTime sMidnight = {0, 0, 0};
 
-// The colours of the 3D scenes' two lights through the day: the 16 phases of the dawn, then the 16 of the dusk
+// The colours of the 3D scenes' two lights through the day: the 16 phases of the dawn, then the 16 of the dusk.
+// The tables are declared in this order (sunset between the two colour tables) because it puts GetSunrise's and
+// GetSunset's local seconds tables and their guards in the ROM's order (see decompiling.md, "How a file's data is
+// laid out").
 static const GXRgb sLightColors[32] = {
     0x7DEC, 0x7DEC, 0x7DEC, 0x7DEC, 0x6A92, 0x6A92, 0x6A92, 0x4B18, 0x4B18, 0x4B18, 0x4B18, 0x4B18,
     0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7F3B, 0x7F3B, 0x7F3B, 0x7F3B,
     0x7EB7, 0x7EB7, 0x7EB7, 0x7EB7, 0x7E52, 0x7E52, 0x6A92, 0x7DEC,
+};
+// Sunset and sunrise in each month
+static const RTCTime sSunsetTimes[12] = {
+    {17, 20, 0}, {17, 40, 0}, {18, 0, 0},  {18, 20, 0}, {18, 40, 0}, {19, 0, 0},
+    {18, 40, 0}, {18, 20, 0}, {18, 0, 0},  {17, 40, 0}, {17, 20, 0}, {17, 0, 0},
 };
 static const GXRgb sLightColors2[32] = {
     0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94, 0x7E94,
@@ -39,11 +47,6 @@ static const GXRgb sLightColors2[32] = {
     0x3EBF, 0x3EBF, 0x3EBF, 0x3EBF, 0x629A, 0x629A, 0x7E94, 0x7E94,
 };
 
-// Sunrise and sunset in each month
-static const RTCTime sSunsetTimes[12] = {
-    {17, 20, 0}, {17, 40, 0}, {18, 0, 0},  {18, 20, 0}, {18, 40, 0}, {19, 0, 0},
-    {18, 40, 0}, {18, 20, 0}, {18, 0, 0},  {17, 40, 0}, {17, 20, 0}, {17, 0, 0},
-};
 static const RTCTime sSunriseTimes[12] = {
     {6, 40, 0}, {6, 20, 0}, {6, 0, 0}, {5, 40, 0}, {5, 20, 0}, {5, 0, 0},
     {5, 20, 0}, {5, 40, 0}, {6, 0, 0}, {6, 20, 0}, {6, 40, 0}, {7, 0, 0},
