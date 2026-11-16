@@ -4741,13 +4741,13 @@ sHeadModelScale kind:data(any) addr:0x020fbde8 local
 sUnknownOffset kind:data(any) addr:0x020fbdf4 local
 gMannequinHeadScale kind:data(any) addr:0x020fbe00
 gMannequinBodyScale kind:data(any) addr:0x020fbe0c
-sTab3Positions kind:data(any) addr:0x020fbe18
-sTabButtonCounts kind:data(any) addr:0x020fbe28
-sTabButtonSizes kind:data(any) addr:0x020fbe3c
-sTab4Positions kind:data(any) addr:0x020fbe64
-sTab0Positions kind:data(any) addr:0x020fbe8c
-sTab2Positions kind:data(any) addr:0x020fbee4
-sTab1Positions kind:data(any) addr:0x020fbf4c
+sTab3Positions kind:data(any) addr:0x020fbe18 local
+sTabButtonCounts kind:data(any) addr:0x020fbe28 local
+sTabButtonSizes kind:data(any) addr:0x020fbe3c local
+sTab4Positions kind:data(any) addr:0x020fbe64 local
+sTab0Positions kind:data(any) addr:0x020fbe8c local
+sTab2Positions kind:data(any) addr:0x020fbee4 local
+sTab1Positions kind:data(any) addr:0x020fbf4c local
 data_020fbfd4 kind:data(any) addr:0x020fbfd4
 sDoorSounds kind:data(any) addr:0x020fbfd6
 sEntranceName kind:data(any) addr:0x020fbfe8
@@ -6075,10 +6075,10 @@ gStr_Mdl_Item_item000_3D_LZ_bin_2 kind:data(any) addr:0x02115050
 gStr_XXX_item_imd_2 kind:data(any) addr:0x0211506c
 gStr_Mdl_Item_item kind:data(any) addr:0x0211507c
 gStr_3D_LZ_bin_2 kind:data(any) addr:0x0211508c
-sTabButtonPositions kind:data(any) addr:0x02115098
-gText_QuestionQuestionQuestion kind:data(any) addr:0x021150ac
-gText_ kind:data(any) addr:0x021150b4
-gText_QuestionQuestionQuestion_2 kind:data(any) addr:0x021150b8
+sTabButtonPositions kind:data(any) addr:0x02115098 local
+@16830 kind:data(any) addr:0x021150ac local
+@16831 kind:data(any) addr:0x021150b4 local
+@16832 kind:data(any) addr:0x021150b8 local
 _ZTV4Room kind:data(any) addr:0x021150c0
 _ZTV12InteriorItem kind:data(any) addr:0x021150e4
 gStr_ColonSolidus_2 kind:data(any) addr:0x02115108

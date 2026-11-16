@@ -558,17 +558,17 @@ void MiiList::SortByName() {
     }
     MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByFamilyName, buffer);
     // The names that start with no kana (group 10) sort before the kana: move them after
-    int otherCount = 0;
     int otherStart = -1;
+    int otherCount = 0;
     int kanaStart = -1;
     int kanaCount = 0;
     for (int i = 0; i < mCount; i++) {
         int initial = CharacterSort::GetNameInitialGroup(mResidents[i].mFamilyName);
         if (initial == 10) {
-            otherCount++;
             if (otherStart == -1) {
                 otherStart = i;
             }
+            otherCount++;
         } else if (initial >= 0 && initial <= 9) {
             kanaCount++;
             if (kanaStart == -1) {
@@ -600,8 +600,8 @@ void MiiList::SortByNickname() {
         mGroupStarts[i] = 0;
     }
     MATH_QSort(mResidents, mCount, sizeof(SavedCharacter), (MATHCompareFunc)CharacterSort::CompareByMiiName, buffer);
-    int otherCount = 0;
     int otherStart = -1;
+    int otherCount = 0;
     int kanaStart = -1;
     int kanaCount = 0;
     for (int i = 0; i < mCount; i++) {
@@ -609,10 +609,10 @@ void MiiList::SortByNickname() {
         MiiData_GetName(&mResidents[i], name);
         int initial = CharacterSort::GetNameInitialGroup(name);
         if (initial == 10) {
-            otherCount++;
             if (otherStart == -1) {
                 otherStart = i;
             }
+            otherCount++;
         } else if (initial >= 0 && initial <= 9) {
             kanaCount++;
             if (kanaStart == -1) {
