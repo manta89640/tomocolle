@@ -468,6 +468,32 @@ helpers are byte for byte the same (`ShowMessage` in all three, `ShowOk` and `As
 objdiff reports the data of all three a little under 100% although the ROM is identical: it counts the
 padding at the end of `.rodata` and `.data` that the delinked original has and the compiled object does not.
 
+## The name sort test
+
+Overlay 1, `src/overlays/ov001/NameSortTestScene.cpp`: all 10 of its functions match, and its data is the ROM's:
+complete.
+
+Measured: scene 0x0C, `NameSortTestScene` (0x2434 bytes, constructed in the main program at `0x0203E6F0`; its
+virtual table at `0x02149F00`), is a test of the resident list's name orders (`CharacterSort`, main program). It
+loads nothing and draws nothing. In `Init` it copies the string "かー～ヴヶa　" (the only other thing in `.data`,
+after the table) into the scene and gives its eight `SavedCharacter`s empty Mii names. Then:
+
+- A: `CharacterSort::ToUpperCase` on the string.
+- Y: each character gets a random name and family name (ten characters 0..255 from `gRandom`, the name starting
+  "あ!" or, for odd characters, just "あ"), and `MATH_QSort` sorts them with `CharacterSort::CompareByName`, its
+  stack in the scene (`+0x1654`, 0x320 bytes).
+- B: each character gets a random Mii name (`MiiData_SetName`) and its `mIndex`, and a thread of the scene's own
+  (stack 0xA00 bytes, priority 26) sorts them with `CharacterSort::CompareByMiiName` and no stack buffer; `Update`
+  waits until the thread has terminated.
+
+Everything it would show goes to two member functions that are empty in this build (one keeps a `wcslen` of its
+string): what is left of debug prints, called with a line (0, 1), a name and 10. `Init` also keeps the `clz` of an
+unused `MATH_QSortStackSize(8)`, which the compiler does not remove because the SDK writes it as inline assembly.
+
+Inferred: the 0x320-byte sort stack is far more than `MATH_QSortStackSize(8)` (32 bytes); its size is what the
+layout leaves between the characters and the thread's stack, assuming the stack ends at the thread as in
+`TtsPlayer`.
+
 ## Three scenes of the main program
 
 Not every scene is an overlay. Three are in the main program, `0x0204FC74` to `0x02051640`, between a family of
