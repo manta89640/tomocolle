@@ -71,12 +71,37 @@ public:
     /* 0xDC */ int mUnknownDC;
 }; // 0xE0
 
-// What the save data holds of a character, and the game beside it (overlay 109's layout). 0x2C0 bytes.
-struct SavedCharacter {
+// What the save data holds of a character: the 0x2A4 bytes that func_0202c264 copies out (overlay 109's layout).
+struct CharacterRecord {
+    /* 0x000 */ u8 mMii[0x4A];        // The Mii's data (0x4A bytes, as the Mii exchange sends it)
+    /* 0x04A */ u8 mUnknown04A[6];
+    /* 0x050 */ u32 mUnknown050Bit0 : 1;
+    /*       */ u32 mUnknown050Bits1 : 31;
+    /* 0x054 */ u32 mUnknown054Bits0 : 4;
+    /*       */ u32 mInterior : 7;        // As overlay 109 has it
+    /*       */ u32 mUnknown054Bits11 : 9;
+    /*       */ u32 mUnknown054Bits20 : 12;
+    /* 0x058 */ u8 mUnknown058[0x1B8];
+    /* 0x210 */ u32 mUnknown210[3];   // Flags, a bit each
+    /* 0x21C */ u8 mUnknown21C[0xA];
+    /* 0x226 */ u8 mUnknown226;
+    /* 0x227 */ u8 mUnknown227;
+    /* 0x228 */ u8 mUnknown228[8];
+    /* 0x230 */ s64 mUnknown230;
+    /* 0x238 */ u16 mUnknown238;
+    /* 0x23A */ u8 mUnknown23A;
+    /* 0x23B */ u8 mUnknown23B[0x55];
+    /* 0x290 */ u8 mUnknown290;
+    /* 0x291 */ u8 mUnknown291;
+    /* 0x292 */ u8 mUnknown292[6];
+    /* 0x298 */ u8 mUnknown298;
+    /* 0x299 */ u8 mUnknown299[0xB];
+}; // 0x2A4
+
+// A saved character and what the game keeps beside it. 0x2C0 bytes.
+struct SavedCharacter : public CharacterRecord {
     SavedCharacter(); // _ZN14SavedCharacterC1Ev
 
-    /* 0x000 */ u8 mMii[0x4A];        // The Mii's data (0x4A bytes, as the Mii exchange sends it)
-    /* 0x04A */ u8 mUnknown04A[0x25A];
     /* 0x2A4 */ u16 mIndex;           // Which of the saved characters this is
     /* 0x2A6 */ u8 mUnknown2A6[0x1A];
 }; // 0x2C0
@@ -86,7 +111,10 @@ struct CharacterBase : public SavedCharacter {
     CharacterBase();  // _ZN13CharacterBaseC1Ev, C2Ev
     ~CharacterBase(); // _ZN13CharacterBaseD1Ev, D2Ev
 
-    /* 0x02C0 */ u8 mUnknown02C0[0x2238];
+    /* 0x02C0 */ u8 mUnknown02C0[0x14];
+    /* 0x02D4 */ u16 mUnknown02D4;
+    /* 0x02D6 */ u16 mUnknown02D6;
+    /* 0x02D8 */ u8 mUnknown02D8[0x2220];
     BOOL IsUnknown24F8Clear() { return !func_0206dc84(mUnknown24F8); }
 
     /* 0x24F8 */ void *mUnknown24F8;     // Given to func_0206dc84, of the Mii library
@@ -113,7 +141,9 @@ public:
     /* 0x0EC */ u8 mUnknown0EC[0x3DC];
     /* 0x4C8 */ char mArchiveName[4];    // Name its archive is mounted under
     /* 0x4CC */ char mArchivePath[0x1C]; // and the archive's path
-    /* 0x4E8 */ u8 mUnknown4E8[0x4C];
+    /* 0x4E8 */ char mUnknown4E8[0x3E];  // A model's path: ModelResources_SetModel is given it
+    /* 0x526 */ u16 mUnknown526;         // Its angle? Overlay 76 turns the character until it is 0x4000
+    /* 0x528 */ u8 mUnknown528[0xC];
 }; // 0x534
 
 // A character with its model.

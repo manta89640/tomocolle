@@ -360,9 +360,9 @@ from:0x0214be70 kind:load to:0x02121834 module:main
 from:0x0214be74 kind:load to:0x0215a4dc module:overlay(76)
 from:0x0214be7c kind:load to:0x0211d604 module:main
 from:0x0214bec0 kind:load to:0x02158b88 module:overlay(76)
-from:0x0214bec4 kind:load to:0x02158b8c module:overlay(76)
+from:0x0214bec4 kind:load to:0x02158b88 add:0x4 module:overlay(76)
 from:0x0214bf18 kind:load to:0x02158b88 module:overlay(76)
-from:0x0214bf1c kind:load to:0x02158b8c module:overlay(76)
+from:0x0214bf1c kind:load to:0x02158b88 add:0x4 module:overlay(76)
 from:0x0214bf30 kind:arm_call to:0x0201c98c module:main
 from:0x0214bf38 kind:arm_call to:0x02092178 module:main
 from:0x0214bf40 kind:arm_call to:0x0201c950 module:main

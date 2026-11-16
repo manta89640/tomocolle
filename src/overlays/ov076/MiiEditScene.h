@@ -66,6 +66,7 @@ void func_02083bcc(SoftKeyboard *keyboard); // Draws it
 
 // The particle system of the main program (0x0207ab20 to 0x0207b364)
 struct ParticleSystem;
+struct ParticleEmitter;
 
 // A Mii's data: the first 0x4A bytes of a saved character, copied as a structure
 struct MiiData {
@@ -81,6 +82,15 @@ struct MiiData {
 
 class MiiEditScene;
 
+// A sprite that is put at one of five places in a row on the lower screen, by their number (the scene's
+// mSprite582C; func_ov076_0214bec8 only moves it on to a higher number)
+struct MiiEditSpriteB0 : public Sprite {
+    void func_ov076_0214be80(int place);
+    void func_ov076_0214bec8(int place);
+
+    /* 0xAC */ int mPlace;
+}; // 0xB0
+
 // A sprite with something after it, 0x100 bytes (the face page and the voice page draw arrays of them)
 struct MiiEditSprite100 {
     /* 0x00 */ Sprite mSprite;
@@ -89,10 +99,16 @@ struct MiiEditSprite100 {
 
 class MiiEditPage0 {
 public:
+    void func_ov076_0214bf4c(MiiEditScene *scene);
+    void func_ov076_0214c2e4();
+    void func_ov076_0214c624(int state);
     void Draw();
     void Exit();
 
-    /* 0x00000 */ u8 mUnknown00000[0x10];
+    /* 0x00000 */ int mState;
+    /* 0x00004 */ int mUnknown00004;
+    /* 0x00008 */ MiiEditScene *mScene;
+    /* 0x0000C */ int mNextPage;            // The page func_ov076_0214c2e4 goes on to
     /* 0x00010 */ MessageWindow mWindows[2];
 }; // 0x15F58
 
@@ -100,6 +116,8 @@ public:
 // Mouth, Etc, with the colour palettes Fw_color and Fw_parts)
 class MiiEditFacePage {
 public:
+    void func_ov076_0214c6d0(MiiEditScene *scene);
+    void func_ov076_0214cc34();
     void Draw();
     void Exit();
 
@@ -120,6 +138,8 @@ public:
 // The profile page, with the on-screen keyboard ("Profile" graphics)
 class MiiEditProfilePage {
 public:
+    void func_ov076_02150874(MiiEditScene *scene);
+    void func_ov076_021508ac();
     void Draw();
     void Exit();
 
@@ -136,6 +156,8 @@ public:
 // The voice page ("Voice" graphics)
 class MiiEditVoicePage {
 public:
+    void func_ov076_02154690(MiiEditScene *scene);
+    void func_ov076_02155094();
     void Draw();
     void Exit();
     void func_ov076_02157508(int a);
@@ -156,6 +178,8 @@ public:
 // The page of the character's personality ("Character" graphics)
 class MiiEditCharacterPage {
 public:
+    void func_ov076_02157c04(MiiEditScene *scene);
+    void func_ov076_02157e3c();
     void Draw();
     void Exit();
 
@@ -167,6 +191,8 @@ public:
 
 class MiiEditPage5 {
 public:
+    void func_ov076_0215835c(MiiEditScene *scene, int previousPage);
+    void func_ov076_0215852c();
     void Draw();
     void Exit();
 
@@ -176,6 +202,8 @@ public:
 
 class MiiEditPage6 {
 public:
+    void func_ov076_02158048(MiiEditScene *scene, int previousPage);
+    void func_ov076_0215821c();
     void Draw();
     void Exit();
 
@@ -204,11 +232,22 @@ public:
     void ResetCameraGoal();
     void UpdateCamera();
     void MoveCameraTo(VecFx32 goal);
+    void func_ov076_0214b1ec(int page); // Leaves the page shown (its Exit) and shows another
+    void func_ov076_0214b5dc(int resource, fx32 offsetY);
+    void func_ov076_0214b670(int index);
+    void func_ov076_0214b694();
+    void func_ov076_0214b890();
+    void func_ov076_0214ba88(BOOL a);
+    void func_ov076_0214bb24();
     void func_ov076_0214bbe4();
+    void func_ov076_0214bca4();
+    void func_ov076_0214bd64();
+    void func_ov076_0214bdd8();
+    int func_ov076_0214bf20(const wchar_t *name);
 
     /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to func_02024b10
     /* 0x00150 */ int mPage;                    // Which page Draw and Exit pass on to (0 to 6); Init sets -1
-    /* 0x00154 */ u8 mUnknown00154[4];
+    /* 0x00154 */ int mUnknown00154;           // func_ov076_0214b1ec clears it
     /* 0x00158 */ SpriteButton mButtons[6];
     /* 0x00710 */ SceneCharacter mCharacter;    // The Mii shown
     /* 0x03228 */ CharacterBase mEditedCharacter;
@@ -216,21 +255,24 @@ public:
     /* 0x05810 */ Camera *mCamera;              // data_02122764
     /* 0x05814 */ int mCameraFrame;             // UpdateCamera moves the camera while it is under 40
     /* 0x05818 */ VecFx32 mCameraGoal;
-    /* 0x05824 */ u8 mUnknown5824[8];
-    /* 0x0582C */ Sprite mSprite582C;
-    /* 0x058D8 */ u8 mUnknown58D8[4];
+    /* 0x05824 */ int mUnknown5824;            // The saved character's index (func_0202c264, func_0202c28c)
+    /* 0x05828 */ BOOL mUnknown5828;           // While set, Update turns the character until its angle is 0x4000
+    /* 0x0582C */ MiiEditSpriteB0 mSprite582C;
     /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mSprite582C while these two are set and 58E4 is not
     /* 0x058E0 */ BOOL mUnknown58E0;
     /* 0x058E4 */ BOOL mUnknown58E4;
-    /* 0x058E8 */ u8 mUnknown58E8[0x20];
+    /* 0x058E8 */ BOOL mUnknown58E8[7];        // Set for each page as func_ov076_0214b1ec shows it
+    /* 0x05904 */ fx32 mUnknown5904;           // Update scrolls the lower screen's plane 4 by it
     /* 0x05908 */ ParticleSystem *mParticles;   // func_0207ab20 makes it, from "SPL:/SplEditEffect.spa"
-    /* 0x0590C */ u8 mUnknown590C[4];
+    /* 0x0590C */ ParticleEmitter *mUnknown590C;
     /* 0x05910 */ void *mParticleFile;
-    /* 0x05914 */ u8 mUnknown5914[0xC];
+    /* 0x05914 */ VecFx32 mUnknown5914;
     /* 0x05920 */ TtsPlayer mTtsPlayer;         // The voice is tried out with it
     /*         */ u8 mUnknownAfterTts[0x1A368 - 0x5920 - sizeof(TtsPlayer)];
     /* 0x1A368 */ ObjTextBox mTextBoxes[9];
-    /* 0x1B304 */ u8 mUnknown1B304[0x58];
+    /* 0x1B304 */ u8 mUnknown1B304[0x28];
+    /* 0x1B32C */ BOOL mUnknown1B32C;          // When set, Update redraws mTextBoxes and shows them
+    /* 0x1B330 */ u8 mUnknown1B330[0x2C];
     /* 0x1B35C */ MessageText mText1B35C;
     /* 0x1B94C */ MessageText mText1B94C;
     /* 0x1BF3C */ ObjCharBox mCharBox;
