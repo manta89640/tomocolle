@@ -738,7 +738,7 @@ void MapScene::Update() {
                             gGameData.mUnknown0C[0x40] = mIslandStage;
                             mWindowCount = func_020a60b8(mIslandStage);
                             const Point &mark = sApartmentMarkPositions[mIslandStage];
-                            mNewMarks[MODEL_APARTMENT].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
+                            mNewMarks[MODEL_APARTMENT].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
                             ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[9]);
                             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[9],

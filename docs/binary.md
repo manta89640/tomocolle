@@ -623,7 +623,7 @@ Not done:
 
 - Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop reaches the camera
   through a pointer; the stack slots of the clock's date and time and the order of the rectangle arithmetic
-  differ), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
+  differ; the apartment mark is set with `SetPositionFromVec`, which orders its dead copies as the ROM does), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
   buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
   90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
   kept in a register, the array's own address is loaded again before each store.
@@ -639,7 +639,7 @@ names are the project's own: none survives), all built with 2.0 SP2 patch 2 (see
 
 | File | Code | Data | Functions |
 | --- | --- | --- | --- |
-| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 52 of 54 match |
+| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 53 of 54 match |
 | `MiiTransferWH.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
 | `MiiTransferList.cpp`, the Mii records | `0x02079DFC`-`0x02079FA0` | .bss `0x02148680`-`0x02148688` | 7 of 7, complete |
 
@@ -674,9 +674,11 @@ Nintendo's DS games take Miis from the Wii with: it is built with another compil
 carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
 
 Not done: `func_02077858` (the session's update) differs only in five branch offsets of a jump table (the unlisted
-states of case 3 branch to the function's end, where the original branches to the inner switch's break), and
-`func_02077F48` in two registers the other way round, with comments above them, so `MiiTransfer.cpp` is not complete.
-Measured with the compiler: `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
+states of case 3 branch to the function's end, where the original branches to the inner switch's break), with a
+comment above it, so `MiiTransfer.cpp` is not complete. The same output comes from every build from 114 to 137
+and under every one of the 78 `opt_*` pragmas that build knows, each on or off. Measured with the compiler:
+`func_02077F48` is compiled with `#pragma opt_common_subs off` (with it on, sSeq and its low bit swap registers in
+every form of the source), and `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
 (its loops are neither rotated nor strength reduced, and the 0 it passes to `WH_StartScan` stays in r4); the
 address is copied from a local array's initialiser, the 6-byte compiler object at 0x020B7BE4, and the 28 names are
 another local array's initialiser that nothing uses, which the compiler keeps and puts in the same section right
@@ -981,7 +983,7 @@ it is 2.0 SP2p2, the game SP2p3), and its function names.
   64 bytes and more at the pool's address plus an offset: `WH_SetGgid` stores at +0x88 (the GGID of the 0x40 bytes of
   parent parameters at +0x80, whose first two members `WH_Initialize` clears at +0x80 and +0x84), and the protocol
   reads the valid flags of its three 0x60-byte packets at +0x1B0, +0x210 and +0x270. With build 137 (2.0 SP2 patch 2)
-  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54; with 138 they drop to 40 and 43, the functions growing
+  `MiiTransferWH.cpp` matches 45 of 45 and `MiiTransfer.cpp` 52 of 54 (53 since, with a pragma); with 138 they drop to 40 and 43, the functions growing
   by the loads of the statics' own addresses. The main WH (`lib/WH`), the same source, has its parent parameters on their own, as 138 does. So any build up to 137 fits, and patch 2 is the latest that does, not
   proven to be the one. `-ipa file` is part of it: without it (C++ alone) statics are not pooled at all and they drop
   to 40 and 9.
