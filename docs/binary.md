@@ -95,6 +95,14 @@ Every object's functions come out in the game in the order they have in the obje
 what a correct match looks like and a coincidence does not. The names the matcher gave agree with the ten assigned by
 hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
 
+MSL's wide-character files the game links are written and complete: `wprintf.c` (`swprintf`, `vswprintf` and the
+formatter, ten functions, and its wide string literals at `0x0210F3EC`), `mbstring.c` (6), `wchar_io.c` (`fwide`,
+`__fwide`) and `wmem.c` (`wmemcpy`, `wmemchr`). Measured: the game links of them only what `swprintf` needs, and
+`mbtowc`/`wctomb` convert through `_current_locale` (`0x0210F1E4`), whose "C" locale passes a byte through unchanged.
+`wprintf.o`'s formatter is `printf.o`'s with wide characters, except that `float2str` converts in a `char` buffer and
+widens the result with `mbstowcs`, `__wStringWrite` returns `wmemcpy`'s result where `__StringWrite` returns 1, and a
+narrow `%#s` reads its length through the wide buffer pointer instead of the string.
+
 So 1,293 of the main program's 4,205 functions are library code with known names, and 181 library files are cut
 out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`; `math_api.c`
 and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have).
@@ -105,10 +113,39 @@ its seven functions match and it is linked from source. `lib/MSL_C/e_pow.c`, fdl
 header), has its data matching and its one function at 99.88%: three values are given registers in another order.
 Measured from the original objects (in the compiler's MSL archive): MSL was compiled with exception tables, which the
 game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
-`_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+`_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt`, `_f2d` and `_d2f`, now named. MSL's files are built here without
+exception tables (`-Cpp_exceptions off`): measured, the code of `strtoul.c` and `scanf.c` is the same either way, and
+the link keeps every `.exceptix` it is given, so a complete unit with tables fails every module's check.
+`strtoul.c` and `scanf.c` are complete; measured, each ended one function short of the archive's object in
+`delinks.txt` (`atoi`, `sscanf`), which the matcher had left in the gap. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
 matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
 middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.
+
+How MSL was built, measured on the archive's objects and confirmed by files of it that match and link: each object
+pools its 4-byte statics and globals into one section (`abort_exit_arm.o`'s `.bss` holds `__console_exit`,
+`__stdio_exit`, `__atexit_curr_func`, `__aborting` and the 256-byte `__atexit_funcs` at 0, 4, 8, 12 and 16), which
+the compiler does only with `-ipa file`; the stdio, exit and signal code calls `OS_TryLockMutex` and `OS_LockMutex` for
+its critical regions, so the library was built thread-safe, which only MSL's prefix file `PREFIX_NITRO.h` sets (and
+`critical_regions.NITRO.h` includes the SDK's thread and mutex headers); and the console is buffered
+(`_MSL_BUFFERED_CONSOLE`): `ansi_files.o` has three 256-byte buffers, with stdin and stdout line buffered and stderr
+unbuffered in the FILE table. The build of `lib/MSL_C/` does all three, and leaves out the exception tables.
+
+The MSL files the game links whole are written and complete: `string.c` (8 functions), `mem.c` (4), `mem_funcs.c`
+(1), `buffer_io.c` (5), `char_io.c` (2), `file_io.c` (1), `ansi_files.c` (1, and the FILE table at `0x0210F09C`),
+`signal.c` (1, and its handlers), `abort_exit_arm.c` (3: it begins at `abort`, `0x02014A80`), `arith.c` (`abs`), and
+two files of data only, the archive's `critical_regions` member (`__cs_id`, `__cs_ref`, `__cs`, `0x0211D1C0`) and
+`errno.c`. Measured: `abs` is byte for byte `labs` too, so which of the two the game links is not known; and `atoi`
+(`0x0201A8EC`) is `atol` too. `snprintf` (`0x020175A8`), `sscanf` (`0x020188F4`) and `atoi` end `printf.o`,
+`scanf.o` and `strtoul.o`'s stretches in the game, each the next function of its object after the one before it and
+calling `vsnprintf`, `vsscanf` and `strtol`. `__read_console`, `__write_console` and `__close_console` are at
+`0x02021778`, `0x020217C8` and `0x020217FC`, outside MSL: the FILE table refers to them.
+
+`lib/MSL_C/printf.c` (`0x0201549C` to `0x020175D0`, data `0x0210F3AC` to `0x0210F3EC`) is complete. Measured: the game
+keeps ten of the archive's sixteen functions of `printf.o`, the conversion helpers, `__pformatter`, `__StringWrite`,
+`vsnprintf` and `snprintf`; `printf`, `vprintf`, `vfprintf`, `vsprintf`, `sprintf` and `__FileWrite` are not in the
+ROM. The object calls the runtime's `_dls`, `_deq` and `_ull_mod`; `_ull_mod` is a second entry point inside
+`_ll_udiv`, at `0x02020DB4`.
 
 ## Voice synthesis
 
@@ -799,7 +836,7 @@ Not done:
 
 ## Wireless play: the Mii exchange
 
-Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 68 of its 77 functions match, and every section of the
+Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 71 of its 77 functions match, and every section of the
 overlay is claimed by the one file. The unit is not complete. `docs/notes/ov109.md` has the working notes.
 
 Measured:
@@ -849,26 +886,63 @@ Measured, about the compiler:
   file of their own. `ReceiveCharacter`, `UpdateCharacters` and `Update` are compiled the same way here.
 - **A `const` object initialised from another constant** is filled in by the static initialiser and stays in
   `.data` as zeros (the list's text origins, from the item positions). The original's initialiser loads the item
-  positions from the `.rodata` pool; ours folds them into immediates, and every compiler version tried does, so
-  `__sinit_TushinScene.cpp` does not match.
+  positions from the `.rodata` pool instead of folding them; it matches with `#pragma opt_foldconstants off` in
+  effect at the end of the file (inferred: the original set it somewhere and left it on).
+- **`UpdateCharacters`** matches its hoisting and registers only without common subexpression elimination
+  (`opt_common_subs off` at level 2), to one block.
 - **`.rodata`**: the objects under 64 bytes are one pool sorted by size (8 to 56 bytes), the arrays of `u8` and the
   strings before and after it, and the 0x90- and 0x110-byte tables on their own after it. The compiled `.rodata` is
   in the ROM's order: same-size declarations were permuted until it was. Two of the pool's constants are folded
   wherever they are used and kept anyway (`sCameraPosition`, `sCameraTarget`, and the signal sprite's
   `sSignalPosition`).
 
+- **The destructors** at `0x02152460` and `0x021524A8`, after the file's last function, are `TushinScene`'s `D1` and
+  `D0`: the implicit destructor compiles to them, and the scene's virtual table refers to both.
+- **`.bss`** is a pool of separate statics sorted by size (a `u8`, 20 `u16`, ten `int`, then `sParentTimers` and
+  `sReceivedName`), which the code reaches from the pool's start; the source declares them so, named by address.
+  13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the overlay. Inferred: functions that
+  used them were stripped by the link, which keeps the pooled statics they used; a stand-in function keeps them
+  in the compiled object.
+
 Not done:
 
-- 9 entries differ: 6 functions and the static initialiser, each with a comment saying how, plus the two
-  destructors at `0x02152460` and `0x021524A8`, which are still under their address names in `symbols.txt` (ours
-  are `D1`/`D0`). Most of the 6 differ in the register choice or scheduling of one or two instructions; `Update`, `UpdateSending` and `UpdateCharacters` also read the selected resident's `mIndex` and a
-  model's `mVisible` with folded offsets, where the original goes through the element's or the model's address.
+- 6 functions differ, each with a comment saying how: `Update` (99.9%), `UpdateCharacters` (99.3%),
+  `ReceiveCharacter` (one `orr`'s operand order), `UpdateListWindow` (one register copy), `ReceiveWiiMii` (a -1
+  derived from a register holding 0) and `InitParticles` (registers of the last block). All are register choice
+  or order; no `opt_*` pragma or compiler build changes them.
 - `.data`: the three 4-byte strings of `sCharacterArchives` and the 12-byte group of its pool come out in another
   order than the ROM's.
-- `.bss`: the state of the exchange is a structure (`sWireless`) in the source. In the ROM it is a pool of separate
-  statics sorted by size (a `u8`, 20 `u16`, ten `int`, then `sParentTimers` and `sReceivedName`), which the code
-  reaches from the pool's start. 13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the
-  overlay. Inferred: functions that used them were stripped by the link, which keeps the pooled statics they used.
+
+## The keyboard's object
+
+`src/keyboard/Keyboard.cpp` (`0x02082EAC` to `0x02083DC4`, 34 functions) is complete: every function matches and the
+unit is linked from its object. It is the object a scene holds for the on-screen keyboard (`SoftKeyboard`,
+`include/keyboard/SoftKeyboard.h`, 0x6014 bytes), and sets up and draws the keyboard's core
+(`KeyboardCore.cpp`) through it. Measured:
+
+- **Callers.** The main program's scene constructors construct it (`_ZN12SoftKeyboardC1Ev`, six calls), and
+  `func_0204ce88`/`func_0204d178` of the main program and overlays 43, 75, 76, 92 and 93 use it. The main program's
+  set-up is `SetArchiveName("KBD")`, `func_02083078` (the background plane 0x100 and a palette),
+  `func_02083288(0, 0)`, `func_0208382c` (the sprite resource, a message file, a character offset, the layout),
+  `func_02083c30` and `GetButtonCharCount`; the overlays call the same functions.
+- **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
+  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given
+  (`func_02081d68`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
+  and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite, its resource and layout, and the
+  three sprite paths. Every path starts `xxx:/`, which `SetArchiveName` overwrites with the archive's mount name.
+- **The buttons** (`KeyboardButton`, `0x0208329C` to `0x02083740`) are a sprite with a `MessageText`: they show
+  messages 6 and 5 of the file passed to `func_0208382c`, at (0x80, 0xAD) and (0, 0xAD), and play a sound of
+  `gSoundManager` as they are touched and as they are released. `Update` returns TRUE when the stylus is lifted on the
+  button.
+- **The tabs.** The five areas of `sTabAreas` (`0x020B7F78`) are the core's key areas (`func_02082e70`): the core
+  calls `func_02083c54` when one is touched, which lights that tab and selects keyboard mode 0 to 4
+  (`func_02081ff0`). `func_02083128` registers only the first two at first.
+- **Data.** `.rodata` is one pool, `sButtonPositions`, `sButtonRect`, the local table of the five modes,
+  `sTabAreas`, `sLayoutPositions`; `.data` is the nine paths. The `gText_Yu` and `gStr_F` that the string tool had
+  named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`.
+
+Inferred: the 0x1C bytes from +0x5FF8 to the end are part of the object (the Mii maker's next member starts there),
+but nothing in this file touches them.
 
 ## The Mii maker
 
@@ -948,6 +1022,34 @@ code compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, as C and as C++, so
 records it reads have the Wii's layout: the birthday check `func_020731e0` reads the month from bits 10-13 and the day
 from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
 bits 1-4 against 11, as `RFLCharData` places them.
+
+Measured from the functions of `0x0206AAEC`-`0x0206EBB0` (the display-list builder, matched but for four):
+
+- **`func_0206d4f8(index, mii, unk)` builds a face's two display lists.** It rejects a Mii whose fields are out of
+  range (`func_0206d040`, a bound for each of 37 fields) or whose birthday is invalid, takes the object of `index`
+  (`func_02073060`), gives it VRAM from the work area's bases at 0x8 and 0xC (0x1A10 bytes of texture and 0x130 of
+  palette per index, 0x6880 of texture in mode 7, the mode being the work area's 0x68), runs the seven part functions
+  of the table at `0x02112140` on a context on its stack, and makes the display list at 0x2A4 of the object (0x1AE0
+  bytes) from eight mesh functions and the one at 0x1D84 (0x494 bytes) from `func_020715ac`. `func_0206db98` sends
+  them to the geometry FIFO under the object's matrices (0x2C, a 4x3, and 0x5C, a 3x3 loaded as the vector matrix).
+- **The resource is a table of 20 categories** (`func_0206cf6c(category, index)`: two halfwords, 20 offsets, then in
+  a category a count, a halfword and the offsets of its items). A mesh item is vertices and normals (three halfwords
+  each), texture coordinates (two), then strips of index triples. The meshes read are: 0 the beard (by its type), 4
+  the face (by the face type; it also holds the three points the other meshes are placed at), 6, 9 and 0x12 the hair
+  (by the hair type), 7 the glasses, 0xF and 0x10 the nose.
+- **An object keeps the fields it was built from** (0x180, 18 halfwords) and a value and a state for each of 21
+  textures (0x1A4 and 0x228, 12 bytes each): the part functions compare the Mii with the kept fields and set a state
+  of 0 where a texture must be redrawn, 7 where there is none; 1 to 6 are states in progress.
+- **Hair types** 5, 7, 0x18, 0x1D, 0x2A, 0x35, 0x3A, 0x45 and 0x47 have a texture of their own, and 0x22 and 0x39 are
+  drawn in the favourite colour; hair flip mirrors the hair meshes with a scale of -1 on the X axis.
+- **The colour tables** at `0x020B6558`, `0x020B65A0`, `0x020B65E8`, `0x020B6630`, `0x020B6678` and `0x020B66D8` are
+  arrays of {r, g, b} words, and `0x020B676C` four planes of {a, b, c, d} (`func_0206ebb0` takes a part's Z from the
+  plane of its quadrant). The symbols that sat on their inner words were fields, now addends in `relocs.txt`.
+
+Measured on the compiler: `func_0206d4f8` matches only under `#pragma optimization_level 2` with
+`#pragma opt_common_subs off`, and the three hair meshes (`func_0206b740`, `func_0206bb24`, `func_0206bfa4`) have
+level 2's unrotated loops but evaluate their calls' arguments from the last to the first, which nothing tried
+reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build, other `-proc`).
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after

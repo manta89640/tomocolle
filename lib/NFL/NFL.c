@@ -278,6 +278,1960 @@ void func_0206a99c(u16 *palette, int index) {
     palette[15] = 0;
 }
 
+// The glasses
+int func_0206aaec(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->glassesType;
+    int color = mii->glassesColor;
+
+    if (params[13] != type || (obj->unk1A4[6].state >= 1 && obj->unk1A4[6].state <= 6)) {
+        obj->unk1A4[6].state = 0;
+        obj->unk1A4[6].value = type;
+    }
+    if (color != params[12] || (obj->unk228[5].state >= 1 && obj->unk228[5].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[5].value = color;
+            obj->unk228[5].state = 0;
+        } else {
+            obj->unk1A4[6].state = 0;
+            obj->unk1A4[6].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0x2880;
+    } else {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0xA10;
+        ctx->unk2C[4].unk4 = obj->unkD8 + 0x90;
+    }
+    return 0;
+}
+
+// The beard
+int func_0206abb4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->beardType;
+    int color = mii->beardColor;
+
+    if (params[15] != type || (obj->unk1A4[7].state >= 1 && obj->unk1A4[7].state <= 6)) {
+        if (type < 2) {
+            ctx->unk2C[3].unk0 = obj->unk8;
+            obj->unk1A4[7].state = 7;
+        } else {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (color != params[14] || (obj->unk228[6].state >= 1 && obj->unk228[6].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[6].value = color;
+            obj->unk228[6].state = 0;
+        } else if (type >= 2) {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (type < 2) {
+        ctx->unk2C[3].unk0 = obj->unk8;
+        ctx->unk2C[3].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0x3880;
+    } else {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0xE10;
+        ctx->unk2C[3].unk4 = obj->unkD8 + 0xB0;
+    }
+    return 0;
+}
+
+// The hair
+int func_0206acc0(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->hairColor;
+
+    if ((params[3] != type || color != params[4]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+        (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+        if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+            type == 0x45 || type == 0x47) {
+            obj->unk1A4[9].state = 0;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = color;
+            }
+        } else if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].state = 7;
+            obj->unk228[8].state = 7;
+        }
+        if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].value = color;
+            }
+        }
+    }
+    if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+        type == 0x45 || type == 0x47) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x5080;
+            ctx->unk2C[2].unk4 = obj->unkC;
+        } else {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[2].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else {
+        ctx->unk2C[2].unk0 = obj->unk8;
+        ctx->unk2C[2].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The hair again, for the two types (0x22 and 0x39) that the other leaves alone
+int func_0206ae14(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->favoriteColor;
+
+    if (type == 0x22 || type == 0x39) {
+        if ((type != params[3] || color != params[0]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+            (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+            obj->unk1A4[9].state = 0;
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 == 7) {
+                obj->unk228[8].state = 7;
+            } else {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = type;
+            }
+        }
+    }
+    if (type == 0x22 || type == 0x39) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x5080;
+        } else {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[5].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[5].unk0 = obj->unk8;
+    } else {
+        ctx->unk2C[5].unk0 = obj->unk8;
+        ctx->unk2C[5].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The face's texture
+int func_0206af1c(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int texture = mii->faceTexture;
+    int color = mii->faceColor;
+
+    if (params[1] != texture || (obj->unk1A4[8].state >= 1 && obj->unk1A4[8].state <= 6)) {
+        obj->unk1A4[8].state = texture == 0 ? 7 : 0;
+        obj->unk1A4[8].value = texture;
+    }
+    if (color != params[2] || (obj->unk228[7].state >= 1 && obj->unk228[7].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[7].value = color;
+            obj->unk228[7].state = 0;
+        } else if (texture != 0) {
+            obj->unk1A4[8].state = 0;
+            obj->unk1A4[8].value = texture;
+        }
+    }
+    if (texture == 0) {
+        ctx->unk2C[1].unk0 = obj->unk8;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x4080;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x1010;
+        ctx->unk2C[1].unk4 = obj->unkD8 + 0xD0;
+    }
+    return 0;
+}
+
+// The nose
+int func_0206b024(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->noseType;
+
+    if (params[9] != type || (obj->unk1A4[10].state >= 1 && obj->unk1A4[10].state <= 6) ||
+        (obj->unk228[9].state >= 1 && obj->unk228[9].state <= 6)) {
+        obj->unk1A4[10].state = 0;
+        obj->unk1A4[10].value = type;
+        if (obj->unk90 == 7) {
+            obj->unk228[9].state = 7;
+        } else {
+            obj->unk228[9].state = 0;
+            obj->unk228[9].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x5880;
+        ctx->unk2C[6].unk4 = obj->unkD8;
+    } else {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x1610;
+        ctx->unk2C[6].unk4 = obj->unkD8 + 0x110;
+    }
+    return 0;
+}
+
+// The beard's mesh
+int func_0206b0d8(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    u32 type = ctx->unk1CC->beardType;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(0, type);
+    s = type > 1 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = type > 1 ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = type == 1 ? GX_TEXFMT_PLTT4 : GX_TEXFMT_PLTT16;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_TRNS,
+                      ctx->unk2C[3].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[3].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[1].x;
+    position.y = ctx->unk0[1].y;
+    position.z = ctx->unk0[1].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (type < 2) {
+            G3C_TexCoord(&ctx->unk64, 0, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (type > 1) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The face's mesh, and the three positions the other meshes are placed at
+int func_0206b3f4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(4, mii->faceType);
+    s = mii->faceTexture != 0 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = mii->faceTexture != 0 ? GX_TEXSIZE_T64 : GX_TEXSIZE_T8;
+    ctx->unk0[0].x = func_02069c9c(&stream);
+    ctx->unk0[0].y = func_02069c9c(&stream);
+    ctx->unk0[0].z = func_02069c9c(&stream);
+    ctx->unk0[1].x = func_02069c9c(&stream);
+    ctx->unk0[1].y = func_02069c9c(&stream);
+    ctx->unk0[1].z = func_02069c9c(&stream);
+    ctx->unk0[2].x = func_02069c9c(&stream);
+    ctx->unk0[2].y = func_02069c9c(&stream);
+    ctx->unk0[2].z = func_02069c9c(&stream);
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = mii->faceTexture != 0 ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[1].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[1].unk4, format);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (mii->faceTexture == 0) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (mii->faceTexture != 0) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    return 1;
+}
+
+// The hair's mesh
+#pragma optimization_level 2
+int func_0206b740(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    stream = func_0206cf6c(0x12, mii->hairType);
+    bald = mii->hairType == 0x22 || mii->hairType == 0x39;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[1].cmd = NULL;
+    obj->unk94[1].param = NULL;
+    obj->unk94[1].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[1].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[1].param = ctx->unk64.curr_param;
+    obj->unk94[1].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_USE,
+                      ctx->unk2C[5].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[5].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0x8000, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The hair's other mesh, for the types with a texture of their own
+#pragma optimization_level 2
+int func_0206bb24(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    int type;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    type = mii->hairType;
+    stream = func_0206cf6c(9, type);
+    bald = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+           type == 0x45 || type == 0x47;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[0].cmd = NULL;
+    obj->unk94[0].param = NULL;
+    obj->unk94[0].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[0].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[0].param = ctx->unk64.curr_param;
+    obj->unk94[0].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_NONE,
+                      type == 0x1D ? GX_TEXPLTTCOLOR0_TRNS : GX_TEXPLTTCOLOR0_USE, ctx->unk2C[2].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[2].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The hair's third mesh, untextured
+#pragma optimization_level 2
+int func_0206bfa4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+
+    stream = func_0206cf6c(6, mii->hairType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
+    obj->unk94[2].cmd = NULL;
+    obj->unk94[2].param = NULL;
+    obj->unk94[2].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    polygons = func_02069bf4(&stream);
+    obj->unk94[2].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[2].param = ctx->unk64.curr_param;
+    obj->unk94[2].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+                      GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, obj->unkC, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The glasses' mesh
+int func_0206c2f8(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(7, 0);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
+    y0 = (11 - mii->glassesY) * 114 + 387;
+    scale = (mii->glassesScale - 4) * 633 + 3987;
+    obj->unk94[3].cmd = NULL;
+    obj->unk94[3].param = NULL;
+    obj->unk94[3].unk8 = 0;
+    if (mii->glassesType == 0) {
+        return 0;
+    }
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    obj->unk94[3].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[3].param = ctx->unk64.curr_param;
+    obj->unk94[3].unk8 = 0;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, GX_CULL_NONE, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S32, GX_TEXSIZE_T64, GX_TEXREPEAT_S, GX_TEXFLIP_S,
+                      GX_TEXPLTTCOLOR0_TRNS, ctx->unk2C[4].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[4].unk4, GX_TEXFMT_PLTT16);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z + 0xA3;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The nose's mesh
+int func_0206c65c(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x17C];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    int n;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int tc;
+
+    stream = func_0206cf6c(0x10, mii->noseType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT16;
+    y0 = (mii->noseY - 8) * -114 + 32;
+    scale = (mii->noseScale - 4) * 685 + 4377;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S32, GX_TEXSIZE_T64, GX_TEXREPEAT_S, GX_TEXFLIP_S,
+                      GX_TEXPLTTCOLOR0_TRNS, ctx->unk2C[6].unk0);
+    if (format != GX_TEXFMT_DIRECT) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[6].unk4, GX_TEXFMT_PLTT16);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 6);
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+// The nose's other mesh, untextured
+int func_0206c964(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 y0;
+    fx32 scale;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    int v;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+
+    stream = func_0206cf6c(0xF, mii->noseType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
+    y0 = (mii->noseY - 8) * -114 + 32;
+    scale = (mii->noseScale - 4) * 685 + 4377;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    polygons = func_02069bf4(&stream);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+                      GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, obj->unkC, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[0].x;
+    position.y = ctx->unk0[0].y + y0;
+    position.z = ctx->unk0[0].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    G3C_Scale(&ctx->unk64, scale, scale, scale);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            func_020743e4(obj, &normal, &normals[func_02069bf4(&stream) * 3]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
+extern const u16 data_020b6524[];
+extern const u16 data_020b6530[];
+extern const u16 data_020b6540[];
+
+void func_0206cc30(u16 *palette) {
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        palette[i] = 0x5500;
+        palette[i + 4] = 0xFFAA;
+    }
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cc6c(u16 *palette, const s16 *params) {
+    palette[0] = data_020b6530[params[4]];
+    palette[1] = data_020b6524[params[2]];
+    palette[2] = data_020b6530[params[14]];
+    palette[3] = data_020b6540[params[0]];
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cd9c(u16 *palette, const s16 *params) {
+    int i;
+    int j;
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[4]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6524[params[2]];
+        }
+    }
+    for (i = 4; i < 8; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[14]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6540[params[0]];
+        }
+    }
+    DC_FlushRange(palette, 0x80);
+}
+
+int func_0206ccd4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6) ||
+        (obj->unk228[0].state >= 1 && obj->unk228[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+        obj->unk228[0].state = 0;
+        obj->unk228[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unkC = obj->unkD8;
+    return 0;
+}
+
+int func_0206cea8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unk228[0].state = 7;
+    return 0;
+}
+
+int func_0206cf48(NFLMakeCtx *ctx) {
+    if (ctx->unk1C8->unk90 == 7) {
+        return func_0206cea8(ctx);
+    }
+    return func_0206ccd4(ctx);
+}
+
+// The stream of item index of category in the library's resource
+const u8 *func_0206cf6c(int category, u32 index) {
+    const u8 *header = data_02145360->unk64;
+    const u8 *items;
+    u32 offsets[20];
+    int i;
+    u16 count;
+    u32 offset;
+
+    func_02069c08(&header);
+    func_02069c08(&header);
+    for (i = 0; i < 20; i++) {
+        offsets[i] = func_02069c58(&header);
+    }
+    items = data_02145360->unk64 + offsets[category];
+    count = func_02069c08(&items);
+    func_02069c08(&items);
+    offset = 0;
+    if (count < index) {
+        return NULL;
+    }
+    for (i = 0; i < count; i++) {
+        u32 value = func_02069c58(&items);
+        if (i == index) {
+            offset = value;
+        }
+    }
+    return items + offset;
+}
+
+// Whether every field of a Mii's data is in its range
+BOOL func_0206d040(const NFLCharData *mii) {
+    if (mii->faceType > 7) {
+        return FALSE;
+    }
+    if (mii->faceColor > 5) {
+        return FALSE;
+    }
+    if (mii->faceTexture > 11) {
+        return FALSE;
+    }
+    if (mii->hairType > 71) {
+        return FALSE;
+    }
+    if (mii->hairColor > 7) {
+        return FALSE;
+    }
+    if (mii->hairFlip > 1) {
+        return FALSE;
+    }
+    if (mii->eyeType > 47) {
+        return FALSE;
+    }
+    if (mii->eyeColor > 5) {
+        return FALSE;
+    }
+    if (mii->eyeScale > 7) {
+        return FALSE;
+    }
+    if (mii->eyeRotation > 7) {
+        return FALSE;
+    }
+    if (mii->eyeX > 12) {
+        return FALSE;
+    }
+    if (mii->eyeY > 18) {
+        return FALSE;
+    }
+    if (mii->eyebrowType > 23) {
+        return FALSE;
+    }
+    if (mii->eyebrowColor > 7) {
+        return FALSE;
+    }
+    if (mii->eyebrowScale > 8) {
+        return FALSE;
+    }
+    if (mii->eyebrowRotation > 11) {
+        return FALSE;
+    }
+    if (mii->eyebrowX > 12) {
+        return FALSE;
+    }
+    if (mii->eyebrowY < 3) {
+        return FALSE;
+    }
+    if (mii->eyebrowY > 18) {
+        return FALSE;
+    }
+    if (mii->noseType > 11) {
+        return FALSE;
+    }
+    if (mii->noseScale > 8) {
+        return FALSE;
+    }
+    if (mii->noseY > 18) {
+        return FALSE;
+    }
+    if (mii->mouthType > 23) {
+        return FALSE;
+    }
+    if (mii->mouthColor > 2) {
+        return FALSE;
+    }
+    if (mii->mouthScale > 8) {
+        return FALSE;
+    }
+    if (mii->mouthY > 18) {
+        return FALSE;
+    }
+    if (mii->mustacheType > 3) {
+        return FALSE;
+    }
+    if (mii->beardType > 3) {
+        return FALSE;
+    }
+    if (mii->beardColor > 7) {
+        return FALSE;
+    }
+    if (mii->beardScale > 8) {
+        return FALSE;
+    }
+    if (mii->beardY > 16) {
+        return FALSE;
+    }
+    if (mii->glassesType > 8) {
+        return FALSE;
+    }
+    if (mii->glassesColor > 5) {
+        return FALSE;
+    }
+    if (mii->glassesScale > 7) {
+        return FALSE;
+    }
+    if (mii->glassesY > 20) {
+        return FALSE;
+    }
+    if (mii->moleType > 1) {
+        return FALSE;
+    }
+    if (mii->moleScale > 8) {
+        return FALSE;
+    }
+    if (mii->moleX > 16) {
+        return FALSE;
+    }
+    if (mii->moleY > 30) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void func_0206d374(NFLObj *obj) {
+    s16 *params = obj->unk180;
+
+    params[0] = -1;
+    params[1] = -1;
+    params[2] = -1;
+    params[3] = -1;
+    params[4] = -1;
+    params[5] = -1;
+    params[6] = -1;
+    params[7] = -1;
+    params[8] = -1;
+    params[9] = -1;
+    params[10] = -1;
+    params[11] = -1;
+    params[12] = -1;
+    params[13] = -1;
+    params[14] = -1;
+    params[15] = -1;
+    params[16] = -1;
+    params[17] = -1;
+}
+
+// Keeps the fields of the Mii's data that its display lists were made from
+void func_0206d3cc(NFLObj *obj, const NFLCharData *mii) {
+    s16 *params = obj->unk180;
+
+    params[0] = mii->favoriteColor;
+    params[1] = mii->faceTexture;
+    params[2] = mii->faceColor;
+    params[3] = mii->hairType;
+    params[4] = mii->hairColor;
+    params[5] = mii->eyebrowType;
+    params[6] = mii->eyebrowColor;
+    params[7] = mii->eyeType;
+    params[8] = mii->eyeColor;
+    params[9] = mii->noseType;
+    params[10] = mii->mouthColor;
+    params[11] = mii->mouthType;
+    params[12] = mii->glassesColor;
+    params[13] = mii->glassesType;
+    params[14] = mii->beardColor;
+    params[15] = mii->beardType;
+    params[16] = mii->mustacheType;
+    params[17] = mii->moleType;
+}
+
+// The axes of the library's coordinates (0x0211215C), which NFLObj copies at 0xC4
+typedef struct NFLAxes {
+    VecFx32 unk0;
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+} NFLAxes;
+
+extern int (*const data_02112140[])(NFLMakeCtx *ctx);
+extern const NFLAxes data_0211215c;
+
+// Makes object index's display lists from a Mii's data
+#pragma optimization_level 2
+#pragma opt_common_subs off
+int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
+    OSIntrMode enabled;
+    NFLMakeCtx ctx;
+    NFLObj *obj;
+    NFLObjEntry *entries;
+    NFLObjEntry *entries2;
+    BOOL found = FALSE;
+    int i;
+    int result;
+
+    if (mii == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    if (!func_020735dc() || !func_020735fc()) {
+        return 4;
+    }
+    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+        return 6;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    entries = obj->unk1A4;
+    entries2 = obj->unk228;
+    if (!func_0206d040(mii) || !func_020731e0(mii)) {
+        return 7;
+    }
+    ctx.unk1C8 = obj;
+    ctx.unk1CC = mii;
+    obj->unk90 = data_02145360->unk68;
+    obj->unk168 = 0;
+    obj->unk16C = data_02145360->unk71;
+    obj->unk0 = 0;
+    obj->unk4 = 0;
+    obj->unk28 = unk;
+    obj->unkDC = mii;
+    obj->unk174 = 0;
+    obj->unk178 = 0;
+    if (obj->unk170 == 4) {
+        if (obj->unk90 == 7) {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x6880;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC;
+        } else {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x1A10;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC + index * 0x130;
+        }
+        for (i = 0; i < 11; i++) {
+            entries[i].value = -1;
+            entries[i].state = 7;
+        }
+        for (i = 0; i < 10; i++) {
+            entries2[i].value = -1;
+            entries2[i].state = 7;
+        }
+        func_0206d374(obj);
+    } else {
+        ctx.unk24 = obj->unkD4;
+        ctx.unk28 = obj->unkD8;
+    }
+    obj->unkD0 = data_0211215c.unkC;
+    obj->unkD1 = data_0211215c.unkD;
+    obj->unkD2 = data_0211215c.unkE;
+    obj->unkC4.x = data_0211215c.unk0.x;
+    obj->unkC4.y = data_0211215c.unk0.y;
+    obj->unkC4.z = data_0211215c.unk0.z;
+    enabled = OS_DisableInterrupts();
+    func_0206cf48(&ctx);
+    for (i = 0; i < 7; i++) {
+        result = data_02112140[i](&ctx);
+        if (result != 0) {
+            return result;
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        if (entries[i].state == 0) {
+            obj->unk170 = 0;
+            found = TRUE;
+            break;
+        }
+    }
+    if (!found) {
+        for (i = 0; i < 10; i++) {
+            if (entries2[i].state == 0) {
+                found = TRUE;
+                obj->unk170 = found;
+                break;
+            }
+        }
+    }
+    if (found == TRUE) {
+        NFLObj *p;
+
+        if (data_02145360->unk74 == obj) {
+            data_02145360->unk74 = obj->unk17C;
+        }
+        p = data_02145360->unk74;
+        if (p == NULL) {
+            data_02145360->unk74 = obj;
+        } else {
+            while (p->unk17C != NULL) {
+                if (p->unk17C == obj) {
+                    p->unk17C = obj->unk17C;
+                    if (p->unk17C == NULL) {
+                        break;
+                    }
+                }
+                p = p->unk17C;
+            }
+            p->unk17C = obj;
+        }
+    } else {
+        obj->unk170 = 2;
+    }
+    obj->unk17C = NULL;
+    if (data_02145360->unk8C == 4) {
+        data_02145360->unk8C = 0;
+    }
+    OS_RestoreInterrupts(enabled);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk2A4, sizeof(obj->unk2A4));
+    func_0206b3f4(&ctx);
+    func_0206b0d8(&ctx);
+    func_0206c964(&ctx);
+    func_0206c65c(&ctx);
+    func_0206b740(&ctx);
+    func_0206bb24(&ctx);
+    func_0206bfa4(&ctx);
+    func_0206c2f8(&ctx);
+    obj->unk0 = G3_EndMakeDL(&ctx.unk64);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk1D84, sizeof(obj->unk1D84));
+    func_020715ac(&ctx);
+    obj->unk4 = G3_EndMakeDL(&ctx.unk64);
+    func_0206d3cc(obj, mii);
+    func_020728fc(index, 0);
+    return 0;
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
+    NFLObj *obj;
+
+    if (mtx33 == NULL || mtx43 == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    MI_Copy48B(mtx43, &obj->unk2C);
+    MI_Copy36B(mtx33, &obj->unk5C);
+    return 0;
+}
+
+// Sets the polygon attributes of an object's display list (at the places its makers kept) and the material colours
+int func_0206d984(int index, const NFLDrawParam *param) {
+    NFLObj *obj;
+    GXDLInfo info;
+
+    if (param == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    G3_MaterialColorDiffAmb(param->diffuse, param->ambient, FALSE);
+    G3_MaterialColorSpecEmi(param->specular, param->emission, FALSE);
+    G3_PolygonAttr(param->light, param->polyMode, GX_CULL_FRONT, param->polygonID, param->alpha, param->misc);
+    if (obj->unk94[0].cmd != NULL && obj->unk94[0].param != NULL) {
+        info.curr_cmd = obj->unk94[0].cmd;
+        info.curr_param = obj->unk94[0].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[0].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[1].cmd != NULL && obj->unk94[1].param != NULL) {
+        info.curr_cmd = obj->unk94[1].cmd;
+        info.curr_param = obj->unk94[1].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[1].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[2].cmd != NULL && obj->unk94[2].param != NULL) {
+        info.curr_cmd = obj->unk94[2].cmd;
+        info.curr_param = obj->unk94[2].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, obj->unk94[2].unk8 ? GX_CULL_BACK : GX_CULL_FRONT,
+                         param->polygonID, param->alpha, param->misc);
+    }
+    if (obj->unk94[3].cmd != NULL && obj->unk94[3].param != NULL) {
+        info.curr_cmd = obj->unk94[3].cmd;
+        info.curr_param = obj->unk94[3].param;
+        G3CS_PolygonAttr(&info, param->light, param->polyMode, GX_CULL_NONE, param->polygonID, param->alpha,
+                         param->misc);
+    }
+    return 0;
+}
+
+// Sends an object's display lists to the geometry engine, under its matrices
+int func_0206db98(int index, BOOL withSecond) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (func_0206dc84(index) != 0) {
+        return 0xF;
+    }
+    G3_PushMtx();
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    G3_LoadMtx43((const MtxFx43 *)&obj->unk5C);
+    G3_MtxMode(GX_MTXMODE_POSITION);
+    G3_LoadMtx43(&obj->unk2C);
+    G3_MtxMode(GX_MTXMODE_POSITION_VECTOR);
+    MI_WaitDma(GXi_DmaId);
+    if (withSecond && obj->unk4 != 0) {
+        MI_CpuSend32(obj->unk1D84, &reg_G3X_GXFIFO, obj->unk4);
+    }
+    if (obj->unk0 != 0) {
+        MI_CpuSend32(obj->unk2A4, &reg_G3X_GXFIFO, obj->unk0);
+    }
+    G3_PopMtx(1);
+    return 0;
+}
+
+int func_0206dc84(int index) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (obj->unk170 == 3) {
+        return 0xA;
+    }
+    if (obj->unk170 != 2) {
+        return 0xF;
+    }
+    return 0;
+}
+
+extern const NFLColor data_020b65a0[];
+
+GXRgb func_0206dcd0(int index) {
+    return GX_RGB(data_020b65a0[index].r >> 3, data_020b65a0[index].g >> 3, data_020b65a0[index].b >> 3);
+}
+
+GXRgb func_0206dd1c(int index) {
+    return data_020b6540[index] & 0x7FFF;
+}
+
+// Expands count 4-bit pixels into direct colours from palette, colour 0 transparent if asked
+void func_0206dd44(u16 *dst, const u8 *src, const u16 *palette, u32 count, BOOL transparent) {
+    int i;
+
+    for (i = 0; i < count / 2; i++) {
+        u32 index;
+
+        if (i % 2 != 0) {
+            index = (u32)src[i / 2] >> 4;
+        } else {
+            index = src[i / 2];
+        }
+        index &= 0xF;
+        if (transparent && index == 0) {
+            dst[i] = 0;
+        } else {
+            dst[i] = palette[index] | 0x8000;
+        }
+    }
+}
+
+// The eyes, eyebrows, mouth, mustache and mole: their textures and states, by part
+int func_0206ddb8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int i;
+
+    obj->unk80[0] = mii->eyeColor;
+    obj->unk80[1] = mii->mouthColor;
+    obj->unk80[2] = mii->eyebrowY;
+    obj->unk80[3] = mii->eyeRotation;
+    obj->unk80[4] = mii->eyeType;
+    obj->unk80[5] = mii->faceType;
+    obj->unk80[7] = mii->eyebrowType;
+    obj->unk80[6] = mii->eyebrowRotation;
+    for (i = 0; i < 5; i++) {
+        switch (i) {
+        case 0:
+            ctx->unk78[0].unk28 = 2;
+            ctx->unk78[1].unk28 = 2;
+            ctx->unk78[0].unk2C = 2;
+            ctx->unk78[1].unk2C = 2;
+            if (params[7] != mii->eyeType || (obj->unk1A4[1].state >= 1 && obj->unk1A4[1].state <= 6)) {
+                obj->unk1A4[1].state = 0;
+                obj->unk1A4[1].value = mii->eyeType;
+            }
+            if (params[8] != mii->eyeColor || (obj->unk228[1].state >= 1 && obj->unk228[1].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[1].state = 0;
+                    obj->unk228[1].state = 7;
+                } else {
+                    obj->unk228[1].state = 0;
+                }
+                obj->unk228[1].value = mii->eyeColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x80;
+                ctx->unk78[0].unk24 = obj->unkD8;
+                ctx->unk78[1].unk24 = obj->unkD8;
+                obj->unk10 = obj->unkD4 + 0x80;
+            } else {
+                ctx->unk78[0].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[1].unk20 = obj->unkD4 + 0x10;
+                ctx->unk78[0].unk24 = obj->unkD8 + 0x10;
+                ctx->unk78[1].unk24 = obj->unkD8 + 0x10;
+                obj->unk10 = obj->unkD4 + 0x10;
+                obj->unk14 = obj->unkD8 + 0x10;
+            }
+            break;
+        case 1:
+            ctx->unk78[2].unk28 = 2;
+            ctx->unk78[3].unk28 = 2;
+            ctx->unk78[2].unk2C = 2;
+            ctx->unk78[3].unk2C = 2;
+            if (params[5] != mii->eyebrowType || (obj->unk1A4[2].state >= 1 && obj->unk1A4[2].state <= 6)) {
+                obj->unk1A4[2].state = 0;
+                obj->unk1A4[2].value = mii->eyebrowType;
+            }
+            if (params[6] != mii->eyebrowColor || (obj->unk228[2].state >= 1 && obj->unk228[2].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[2].state = 0;
+                    obj->unk228[2].state = 7;
+                } else {
+                    obj->unk228[2].state = 0;
+                }
+                obj->unk228[2].value = mii->eyebrowColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x880;
+                ctx->unk78[2].unk24 = obj->unkD8;
+                ctx->unk78[3].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[2].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[3].unk20 = obj->unkD4 + 0x210;
+                ctx->unk78[2].unk24 = obj->unkD8 + 0x30;
+                ctx->unk78[3].unk24 = obj->unkD8 + 0x30;
+            }
+            break;
+        case 2:
+            ctx->unk78[4].unk28 = 2;
+            ctx->unk78[4].unk2C = 2;
+            if (params[11] != mii->mouthType || (obj->unk1A4[3].state >= 1 && obj->unk1A4[3].state <= 6)) {
+                obj->unk1A4[3].state = 0;
+                obj->unk1A4[3].value = mii->mouthType;
+            }
+            if (params[10] != mii->mouthColor || (obj->unk228[3].state >= 1 && obj->unk228[3].state <= 6)) {
+                if (obj->unk90 == 7) {
+                    obj->unk1A4[3].state = 0;
+                    obj->unk228[3].state = 7;
+                } else {
+                    obj->unk228[3].state = 0;
+                }
+                obj->unk228[3].value = mii->mouthColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x1080;
+                ctx->unk78[4].unk24 = obj->unkD8;
+                obj->unk20 = obj->unkD4 + 0x1080;
+            } else {
+                ctx->unk78[4].unk20 = obj->unkD4 + 0x410;
+                ctx->unk78[4].unk24 = obj->unkD8 + 0x50;
+                obj->unk20 = obj->unkD4 + 0x410;
+                obj->unk24 = obj->unkD8 + 0x50;
+            }
+            break;
+        case 3:
+            ctx->unk78[5].unk28 = 1;
+            ctx->unk78[5].unk2C = 3;
+            if (params[16] != mii->mustacheType || (obj->unk1A4[4].state >= 1 && obj->unk1A4[4].state <= 6)) {
+                obj->unk1A4[4].state = 0;
+                obj->unk1A4[4].value = mii->mustacheType;
+            }
+            if (params[14] != mii->beardColor || (obj->unk228[4].state >= 1 && obj->unk228[4].state <= 6)) {
+                if (obj->unk90 != 7) {
+                    obj->unk228[4].state = 0;
+                } else {
+                    obj->unk228[4].state = 7;
+                    obj->unk1A4[4].state = 0;
+                }
+                obj->unk228[4].value = mii->beardColor;
+            }
+            if (obj->unk90 == 7) {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x1880;
+                ctx->unk78[5].unk24 = obj->unkD8;
+            } else {
+                ctx->unk78[5].unk20 = obj->unkD4 + 0x610;
+                ctx->unk78[5].unk24 = obj->unkD8 + 0x70;
+            }
+            break;
+        case 4:
+            ctx->unk78[6].unk28 = 1;
+            ctx->unk78[6].unk2C = 1;
+            if (data_02145360->unk10[5].unk8 == 0) {
+                ctx->unk78[6].unk20 = data_02145360->unk0;
+                ctx->unk78[6].unk24 = data_02145360->unk4;
+                data_02145360->unk10[5].unk0 = data_02145360->unk0;
+                data_02145360->unk10[5].unk4 = data_02145360->unk4;
+                data_02145360->unk90 = 0;
+                data_02145360->unkA0[5].unk8 = 0;
+                if (obj->unk90 == 7) {
+                    data_02145360->unk0 += 0x200;
+                    data_02145360->unk12C = 7;
+                } else {
+                    data_02145360->unk0 += 0x80;
+                    data_02145360->unk4 += 0x20;
+                }
+                data_02145360->unk10[5].unk8 = 1;
+                return 0;
+            }
+            ctx->unk78[6].unk20 = data_02145360->unk10[5].unk0;
+            ctx->unk78[6].unk24 = data_02145360->unk10[5].unk4;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int func_0206e38c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[0].unk8 == 0) {
+        work->unk10[0].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[0].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[0].unk8 = 0;
+        work->unk10[0].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e3fc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[1].unk8 == 0) {
+        work->unk10[1].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[1].unk4 = obj->unk24;
+        }
+        data_02145360->unkA0[1].unk8 = 0;
+        work->unk10[1].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e46c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[2].unk8 == 0) {
+        work->unk10[2].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[2].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[2].unk8 = 0;
+        work->unk10[2].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e4dc(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[3].unk8 == 0) {
+        work->unk10[3].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[3].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[3].unk8 = 0;
+        work->unk10[3].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e54c(NFLObj *obj, u32 *address) {
+    NFLWork *work = data_02145360;
+
+    if (work->unk10[4].unk8 == 0) {
+        work->unk10[4].unk0 = *address;
+        if (obj->unk90 == 7) {
+            *address += 0x800;
+        } else {
+            *address += 0x200;
+            work->unk10[4].unk4 = obj->unk14;
+        }
+        data_02145360->unkA0[4].unk8 = 0;
+        work->unk10[4].unk8 = 1;
+    }
+    return 0;
+}
+
+int func_0206e5bc(NFLObj *obj, u32 *address) {
+    s16 *params = obj->unk180;
+    const NFLCharData *mii = obj->unkDC;
+
+    if (obj->unk16C & 0x10) {
+        if (obj->unk1A4[5].value != 0x31 || (obj->unk90 == 7 && params[8] != mii->eyeColor) ||
+            (obj->unk1A4[5].state >= 1 && obj->unk1A4[5].state <= 6)) {
+            obj->unk1A4[5].state = 0;
+            obj->unk1A4[5].value = 0x31;
+        }
+        if (obj->unk90 == 7) {
+            obj->unk18 = obj->unkD4 + 0x2080;
+        } else {
+            obj->unk18 = obj->unkD4 + 0x810;
+            obj->unk1C = obj->unk14;
+        }
+    }
+    return 0;
+}
+
+int func_0206e650(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    int result;
+
+    if (obj->unk16C & 0x20) {
+        result = func_0206e38c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x40) {
+        result = func_0206e3fc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x2) {
+        result = func_0206e46c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x4) {
+        result = func_0206e4dc(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (obj->unk16C & 0x8) {
+        result = func_0206e54c(obj, &data_02145360->unk0);
+        if (result != 0) {
+            return result;
+        }
+    }
+    return func_0206e5bc(obj, &ctx->unk24);
+}
+
+
+extern const u8 data_020b6884[];
+extern const u8 data_020b689c[];
+
+// The places, sizes and rotations of the seven parts (NFLMakeCtx 0x78), from the Mii's data
+void func_0206e724(NFLMakeCtx *ctx) {
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 eyeX = mii->eyeX * 0xE95 - 0x280;
+    fx32 eyeY = -(mii->eyeY * 0x11A1 - 0x21149);
+    fx32 eyeScale = FX_Mul(mii->eyeScale * 0x700 + 0x1000, 0x4C00);
+    int eyeRotation = data_020b689c[mii->eyeType] + mii->eyeRotation - 0x20;
+    fx32 eyebrowX = mii->eyebrowX * 0xE95 - 0x2E0;
+    fx32 eyebrowY = -(mii->eyebrowY * 0x10E1 - 0x22490);
+    fx32 eyebrowScale = FX_Mul(mii->eyebrowScale * 0x680 + 0x1000, 0x4C40);
+    int eyebrowRotation = data_020b6884[mii->eyebrowType] + mii->eyebrowRotation - 0x20;
+    fx32 mouthY = -(mii->mouthY * 0x10A1 - 0x161BA);
+    fx32 mouthScale = mii->mouthScale * 0x6E0 + 0x1000;
+    fx32 beardY = -(mii->beardY * 0x10E1 - 0x13DB7);
+    fx32 beardScale = mii->beardScale * 0x740 + 0x1000;
+    fx32 moleX = (mii->moleX - 8) * 0x1BCA;
+    fx32 moleY = -(mii->moleY * 0x10A1 - 0x20CE9);
+    fx32 moleScale = mii->moleScale * 0x540 + 0x1000;
+    fx32 eyeHeight = 0xD100;
+    fx32 eyebrowHeight = 0xC828;
+    fx32 beardHeight = 0x147A8;
+    fx32 moleHeight = 0x25DE;
+
+    ctx->unk78[0].unk0[0] = eyeX;
+    ctx->unk78[0].unk0[1] = eyeY;
+    ctx->unk78[0].unk0[2] = eyeScale;
+    ctx->unk78[0].unk0[3] = -eyeScale;
+    ctx->unk78[0].unk0[4] = eyeHeight;
+    ctx->unk78[0].unk0[5] = -eyeHeight;
+    ctx->unk78[0].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[0].unk0[7] = 4;
+    ctx->unk78[1].unk0[0] = eyeX;
+    ctx->unk78[1].unk0[1] = eyeY;
+    ctx->unk78[1].unk0[2] = eyeScale;
+    ctx->unk78[1].unk0[3] = -eyeScale;
+    ctx->unk78[1].unk0[4] = eyeHeight;
+    ctx->unk78[1].unk0[5] = -eyeHeight;
+    ctx->unk78[1].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[1].unk0[7] = 3;
+    ctx->unk78[2].unk0[0] = eyebrowX;
+    ctx->unk78[2].unk0[1] = eyebrowY;
+    ctx->unk78[2].unk0[2] = eyebrowScale;
+    ctx->unk78[2].unk0[3] = -eyebrowScale;
+    ctx->unk78[2].unk0[4] = eyebrowHeight;
+    ctx->unk78[2].unk0[5] = -eyebrowHeight;
+    ctx->unk78[2].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[2].unk0[7] = 4;
+    ctx->unk78[3].unk0[0] = eyebrowX;
+    ctx->unk78[3].unk0[1] = eyebrowY;
+    ctx->unk78[3].unk0[2] = eyebrowScale;
+    ctx->unk78[3].unk0[3] = -eyebrowScale;
+    ctx->unk78[3].unk0[4] = eyebrowHeight;
+    ctx->unk78[3].unk0[5] = -eyebrowHeight;
+    ctx->unk78[3].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[3].unk0[7] = 3;
+    ctx->unk78[4].unk0[0] = 0;
+    ctx->unk78[4].unk0[1] = mouthY;
+    ctx->unk78[4].unk0[2] = FX_Mul(mouthScale, 0x5180);
+    ctx->unk78[4].unk0[3] = -FX_Mul(mouthScale, 0x28C0);
+    ctx->unk78[4].unk0[4] = 0xDD94;
+    ctx->unk78[4].unk0[5] = -0x6ECA;
+    ctx->unk78[4].unk0[6] = 0;
+    ctx->unk78[4].unk0[7] = 1;
+    ctx->unk78[5].unk0[0] = 0;
+    ctx->unk78[5].unk0[1] = beardY;
+    ctx->unk78[5].unk0[2] = FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[3] = -FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[4] = beardHeight;
+    ctx->unk78[5].unk0[5] = -beardHeight;
+    ctx->unk78[5].unk0[6] = 0;
+    ctx->unk78[5].unk0[7] = 2;
+    ctx->unk78[6].unk0[0] = moleX;
+    ctx->unk78[6].unk0[1] = moleY;
+    ctx->unk78[6].unk0[2] = FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[3] = -FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[4] = moleHeight;
+    ctx->unk78[6].unk0[5] = -moleHeight;
+    ctx->unk78[6].unk0[6] = 0;
+    ctx->unk78[6].unk0[7] = 0;
+}
+
+// Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (func_0206ebb0)
+typedef struct NFLPlane {
+    fx32 unk0;
+    fx32 unk4;
+    fx32 unk8;
+    fx32 unkC;
+} NFLPlane;
+
+extern const NFLPlane data_020b676c[2][2];
+
+// A part's place on the face, from the face's origin, its X and Y and the sine and cosine of its rotation; its
+// Z from the plane of its quadrant
+void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, fx32 scaleX, fx32 scaleY, fx16 sin,
+                   fx16 cos) {
+    int i;
+    int j;
+
+    if (kind <= 2) {
+        out->x = origin->x + (x * 2 - 1) * scaleX * 5 / 128;
+        out->y = origin->y + (y * 2 - 1) * scaleY * 5 / 128;
+    } else {
+        fx32 dx = x * scaleX * 5 / 64;
+        fx32 dy = (y * 2 - 1) * scaleY * 5 / 128;
+
+        out->x = origin->x + FX_Mul(sin, dx) + FX_Mul(cos, dy);
+        out->y = origin->y - FX_Mul(cos, dx) + FX_Mul(sin, dy);
+    }
+    i = out->x >= 0x1B33;
+    j = out->y <= 0x167B;
+    out->z = -FX_Div(data_020b676c[j][i].unkC + (FX_Mul(data_020b676c[j][i].unk0, out->x) +
+                                                  FX_Mul(data_020b676c[j][i].unk4, out->y)),
+                     data_020b676c[j][i].unk8) *
+             0x47 / 200;
+}
+
 // The state that func_0206ed94 and func_020705d4 share across calls (func_020715ac clears unk20 between pairs)
 typedef struct NFLMakeState {
     u8 unk0[0x20];
@@ -352,14 +2306,14 @@ void func_0207183c(NFLObj *obj) {
     u16 idx;
     fx32 v;
 
-    idx = (u16)(((obj->unk86 + data_020b689c[obj->unk88] - 0x20) << 16) / 32);
+    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    y = -(obj->unk84 * 0x10E1 - 0x22490);
-    type = obj->unk8A;
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
     func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
     func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    idx = (u16)((obj->unk8C + data_020b6884[obj->unk8E] - 0x20) << 11);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
@@ -395,14 +2349,14 @@ void func_02071cdc(NFLObj *obj) {
     u16 idx;
     fx32 v;
 
-    idx = (u16)(((obj->unk86 + data_020b689c[obj->unk88] - 0x20) << 16) / 32);
+    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
-    y = -(obj->unk84 * 0x10E1 - 0x22490);
-    type = obj->unk8A;
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
     func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
     func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
-    idx = (u16)((obj->unk8C + data_020b6884[obj->unk8E] - 0x20) << 11);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
@@ -892,7 +2846,7 @@ BOOL func_020731e0(const NFLCharData *data) {
     if (data->birthDay > data_020b68d8[data->birthMonth]) {
         return FALSE;
     }
-    return !func_02073284(&data->createId);
+    return !func_02073284((const NFLCreateId *)data->createId);
 }
 
 BOOL func_02073264(const NFLCreateId *id) {
@@ -982,7 +2936,7 @@ int func_020733a4(NFLCharInfo *info, const NFLCharData *data) {
     MI_CpuClear16(info->creatorName, sizeof(info->creatorName));
     MI_CpuCopy16(data->name, info->name, sizeof(data->name));
     MI_CpuCopy16(data->creatorName, info->creatorName, sizeof(data->creatorName));
-    MI_CpuCopy8(&data->createId, &info->createId, sizeof(NFLCreateId));
+    MI_CpuCopy8(data->createId, &info->createId, sizeof(NFLCreateId));
     height = data->height;
     build = data->build;
     if (height > 0x7F) {
@@ -995,7 +2949,7 @@ int func_020733a4(NFLCharInfo *info, const NFLCharData *data) {
     info->birthMonth = data->birthMonth;
     info->birthDay = data->birthDay;
     info->favoriteColor = data->favoriteColor;
-    info->unknown00Bit0 = data->unknown00Bit0;
+    info->unknown00Bit0 = data->unk00Bit0;
     info->height = height;
     info->build = build;
     info->unk34Bits29 = (*(const u32 *)&data->createId & 0x80000000) ? 0 : 3;

@@ -228,6 +228,9 @@ each library):
 So when a file will not match, try the other build before the source (CLAUDE.md says as much). Every mwccarm build
 is at `~/Projects/pokesxf/subprojects/metroskrew/bin/mwccarm-<version>.exe` (2.0 builds 72 to 87, 3.0 builds 114 to
 139, 4.0 builds 1018 to 1051) for testing; they run under `~/Projects/pokesxf/tools/wibo/wibo`, without `-enc SJIS`.
+Judge a match by the build, not by such a run: the project's own `mwccarm.exe` of 2.0/sp2, run under wibo, divided
+MSL's `__pformatter` switch into jump tables differently from the same compiler in the build (which runs it under
+wine), where metroskrew's `mwccarm-3.0-136.exe` under wibo agreed with the build.
 The project itself fetches its compilers from the archive in `configure.py`.
 
 Within a file, the original also set the optimisation per function: overlay 109's and the Mii transfer's functions
@@ -235,6 +238,21 @@ with loops that are neither rotated nor strength-reduced sit between ordinary on
 `#pragma optimization_level 2` around the function (then `#pragma optimization_level reset`). Nothing at the
 default level gives that shape: not `volatile`, narrower or unsigned counters, other loop forms, or the `opt_*`
 pragmas.
+NFL's `func_0206d4f8` has that shape and also reloads a list link that level 2 alone keeps in a register: it matches
+with `#pragma opt_common_subs off` added (reset it after the function too: `optimization_level reset` does not).
+
+Other per-function settings found the same way (overlay 109):
+
+- `#pragma opt_common_subs off` at level 2 (then `#pragma opt_common_subs reset`) gave `UpdateCharacters` the
+  original's hoisting and registers (72% to 99.3%), where level 2 alone hoists more and level 1 does not schedule.
+- The static initialiser is compiled with the settings in effect at the end of the file. Overlay 109's original
+  reads a `const` table from the `.rodata` pool instead of folding it, and matches with `#pragma opt_foldconstants
+  off` as the file's last line; at the definition the pragma has no effect, and for the whole file it breaks other
+  functions.
+- The build passes `-w off`, so a pragma the compiler does not know is ignored without a word (`#pragma scheduling
+  off` is one). Check a pragma on a small file with `-w all` first; the `opt_*` names it knows are in the
+  executable's strings (`strings mwccarm.exe | grep ^opt_`).
+- Builds 137, 138 and 139 compile overlay 109's near-misses identically, so they are not a version question.
 
 ## How a file's data is laid out
 
@@ -274,6 +292,16 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   (the main program's list scenes, overlays 76 and 109).
 - Comparing a compiled object's data with the ROM's before completing a unit finds wrong table values in the source,
   which no function shows (overlay 109's `sLayouts`).
+- A `.bss` pool of small scalars sorted by size (overlay 109: a `u8`, 20 `u16`, ten `int`, then two arrays) is the
+  compiler's pool of separate statics, not a structure: declared as statics in the right order it matches, and the
+  code reads them all off the pool's base. Statics nothing in the file uses are kept by an uncalled stand-in
+  function that the link strips (`TushinScene_UnusedClear`).
+- Adding or removing objects changes the sort's permutation of every size, `.rodata` included, so the same-size
+  declarations have to be permuted again after any change to the file's statics. The permutation of a compile is
+  fixed, so this is mechanical: read where each declaration landed in the compiled object, give each position the
+  declaration whose ROM address has that rank among its size, and compile once more.
+- The same compiler run under wibo instead of wine (with the source converted to Shift JIS) gives the same code but
+  another order of same-size objects: judge data layout only with the build's own compile.
 
 ## Matching techniques
 
@@ -294,6 +322,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **An address kept in a register, where the original reloads it**
 - Reach the member through a local pointer in the loop body (`MapCamera *camera = &mCamera;`): it stopped the
   compiler holding a table's address for the whole loop and spilling (`MapScene::Update`).
+- A local `char` buffer filled backwards: `p = buff + size; *--p = 0;` makes the compiler reload a local struct's
+  fields after each store through `p`, as the original does, where `p = buff + size - 1; *p = 0;` lets it keep them
+  in registers (`float2str`, `wprintf.c`).
 
 **Two operands loaded in the other order**
 - How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
@@ -305,6 +336,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `int next; BOOL go; go = FALSE; next = 0x44;` gives another order than the initialised declarations
   (`UpdateConnection`).
 - `hour * 3600 + minute * 60` computes the minutes first.
+- A parameter passed on through a local copy (`ld = num; ... __num2dec(&form, ld, &dec);`) is loaded before the
+  function's first early return, where passing the parameter loads it after (`double2hex`, `wprintf.c`).
 
 **Stack slots in the wrong order, or a frame too large**
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
@@ -317,22 +350,51 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `SetPosition`/`SetPositionFromVec` is called decides their order.
 - A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
   another (the main program's list scenes).
+- Spill slots of a function too large to keep its variables in registers (MSL's `__sformatter`, 3.4 KB) follow the
+  order of their declarations, and a 64-bit variable can be given two slots apart. One variable that is saved in two
+  unrelated places got two slots where the original had them elsewhere: two variables, one per place, matched. A
+  script that permutes the declarations and counts the differing lines gets close fast; the rest took that split.
 
 **Registers allocated differently**
+- A loop that counts down a variable of its own and steps a second one (`for (k = n; k >= 1; k--, bit -= 4)`) gives
+  the two the other pair of registers from `for (i = k, ...)` over a copy; and a byte swap
+  (`t = cp[i]; cp[i] = cp[7 - i]; cp[7 - i] = t;`) through a `char *` declared in a block of its own keeps both
+  accesses indexed, where one through `(char *)&num` is turned into a post-incremented pointer (`double2hex`).
+- Search the declaration order by script rather than by hand: move one declaration line at a time to every other
+  place, keep the best, repeat. NFL's mesh functions (`func_0206b0d8`) went from 18 differing instructions to none
+  in four rounds; what mattered was declaring the inner loop's index variables at function scope, in an order no
+  guess had tried. Keep arrays and address-taken structures where they are: they decide the stack slots.
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
   original spills them.
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- A loop over an array of objects that reads a member's member: `mButtons[i].GetCharCount()`, an inline of the
+  element's class, keeps a pointer to the element; `mButtons[i].mText.GetCharCount()` keeps one to the member
+  instead (`SoftKeyboard::GetButtonCharCount`).
+- A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
+  declared after it, after (`func_02083c54`, `Keyboard.cpp`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
+**Arguments evaluated in another order**
+- At a call whose argument is a load and whose other argument an address, mwcc sometimes forms the load first and
+  sometimes the address, and which depends on the code around the call, not on the call: overlay 109's
+  `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
+  order alone in a test function, and in the other once a switch that reassigns a local follows it. Neither
+  temporaries, inlines, parameter types nor `opt_*` pragmas change it. Not solved.
+
 **Branches and switches laid out differently**
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
   (`if (i != n) x++; else ...`).
-- An if/else assigning a member stores at once; a ternary lets the store be scheduled later.
+- An if/else assigning a member stores at once; a ternary lets the store be scheduled later. An if/else also gave the
+  original's result register where the ternary took another (overlay 109's `Update`, the next page after a send).
+- The same member assigned in both branches (`if (...) y = A << 12; else y = (A + 2) << 12;`) where a local set in
+  each branch and stored after them schedules the shift and store differently (`KeyboardButton::Draw`).
+- At level 2, `lost = TRUE; next = c ? a : b;` puts the `mov` of the flag between the two conditional moves, as the
+  original has it; the flag after the ternary puts it after both.
 - A switch with the cases in the order of the original's code: `default` first puts its code after the compare
   chain; a jump table's values that only go to the default must be written out as cases; the tutorial's cases
   first gave `MapScene::Init`'s compare chain. `case 0: case 9: case 10:` gives `cmp; cmpne; cmpne` where `||`
@@ -341,11 +403,24 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   that is rotated at level 2 is a `do { } while`.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
 
+**Independent statements scheduled in another order**
+- Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
+  statements matched NFL's `func_0206c2f8` exactly, where the others moved loads and kept a value the original
+  leaves in r0.
+
 **Constants and arithmetic**
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
   original's registers.
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
+- A `wchar_t` set from a choice of two wide constants (`fill = zero ? L'0' : L' ';`) and then compared is compared
+  in its register; with `'0' : ' '` the compiler reloads it from the stack, where its address is taken
+  (`__wpformatter`, `wprintf.c`).
+- A step assigned back to its own variable (`snum = (snum >> 21) & mask; exp = snum - 1023;`) keeps the
+  intermediate in the original's register; computed straight into `exp`, the same instructions get other registers
+  and another order (MSL's `double2hex`).
+- A parameter loaded before an early return, though used only after it, is a copy made first (`ld = num;` at the
+  top, and `ld` passed on) (`double2hex`).
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
@@ -356,6 +431,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is
   declared in reverse (`lib/MiiData`).
 - `NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(...))` rather than writing the field directly.
+- A literal copied byte by byte (`ldrb`/`strb` pairs) is `memcpy(p, "inf", 4)`; `strcpy` stays a call (MSL's
+  `double2hex`, `float2str`).
 - Pitfall: a zero-length padding array in a class (a `sizeof` that came out 0) made mwcc drop a member array's
   `__cxa_vec_cleanup` from the implicit destructor without a word (overlay 76).
 
@@ -368,8 +445,25 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **Tools to mind**
 - `tools/name_unit_data.py` reads only what `readelf` lists as OBJECT or NOTYPE: run it after any change to a
   complete unit or to a header it includes, since the compiler's `@` numbers move.
+- A constructor emitted as C1 and C2 (no virtual base) has its string literals twice, the C2 copy first; the link
+  strips C2 and its strings. `name_unit_data.py` lays both copies out, so name the strings of the C1 copy
+  (`Keyboard.cpp`: the second nine `@` numbers).
+- dsd puts a symbol on every address the code loads, so a table whose fields' addresses are formed apart (NFL's
+  colour tables and planes, `data_020b676c[j][i].unkC`) shows as one object per field, and a source that indexes the
+  table refers to the first with an addend. Remove the inner symbols from `symbols.txt` and write the references in
+  `relocs.txt` as `to:<table> add:<offset>`; `check_relocs.py` is then clean.
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
   data; rename it when the code shows what it is.
+- MSL's files are best checked against the archive's own object: `tools/compare_object.py build/.../x.o
+  <member>.o` compares the functions of the same names, and `readelf` shows its data and relocations. A checkout
+  configured before the fix in `download_msl` has the archive under `tools/bin/msl/` with every byte from 0x80 up
+  turned into `?`, unreadable; delete `tools/bin/msl` and run `configure.py` again. Two members are both named
+  `critical_regions` (names are cut to sixteen characters): extract by position, not by name.
+
+**MSL**
+- A loop that the original enters without testing its pointer is a `do`/`while` (`__flush_all`).
+- A bitfield struct copied to a local (`__file_modes mode = file->mode;`) is given a stack slot; reading the field
+  through the pointer again reuses the loaded word, as the original does (`__get_char`).
 
 ## A match is instructions and references
 
