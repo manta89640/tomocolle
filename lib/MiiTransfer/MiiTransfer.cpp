@@ -431,9 +431,9 @@ extern "C" void func_02077e10(WMBssDesc *bssDesc) {
     sParentCount++;
 }
 
-// WH's receiver: takes a packet from the parent. DOES NOT MATCH: the original loads sSeq into r0 and its low bit into
-// r1, this gives the other way round (two instructions); the rest is the same. Not reproduced with other forms of the
-// test (!= 0, % 2, a local copy, an inline helper, the packet's own type).
+// WH's receiver: takes a packet from the parent. Compiled without common subexpression elimination, as the ROM has
+// it: with it, the value of sSeq and its low bit swap registers (r0 and r1), and no form of the test changes that.
+#pragma opt_common_subs off
 extern "C" void func_02077f48(u16 aid, u16 *data, u16 size) {
     if (data == NULL) {
         sSessionState = 5;
@@ -450,6 +450,7 @@ extern "C" void func_02077f48(u16 aid, u16 *data, u16 size) {
     }
     OS_UnlockMutex(&sMutex);
 }
+#pragma opt_common_subs reset
 
 extern "C" void func_02077fe0(BOOL result) {
     OS_LockMutex(&sMutex);
