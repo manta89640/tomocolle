@@ -20,7 +20,7 @@ const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 }
 
-static inline u16 Rand(u16 max) {
+static inline u16 Rand(int max) {
     return MATH_Rand16(&gRandom, max);
 }
 
@@ -65,12 +65,6 @@ static inline void Swap(u16 &a, u16 &b) {
     u16 t = a;
     a = b;
     b = t;
-}
-
-static inline void Swap(u16 *a, u16 *b) {
-    u16 t = *a;
-    *a = *b;
-    *b = t;
 }
 
 static inline u32 ToSeconds(const RTCTime &time) {
@@ -485,13 +479,8 @@ void Sky::ShuffleCloudFrames() {
     for (int i = 0; i < mClouds.mFrameCount; i++) {
         mCloudFrames[i] = mClouds.mFirstFrame + i;
     }
-    u16 *frames = mCloudFrames;
     for (int i = 0; i < mClouds.mFrameCount * 2; i++) {
-        u16 a = Rand(mClouds.mFrameCount);
-        u16 b = Rand(mClouds.mFrameCount);
-        u16 frame = frames[a];
-        frames[a] = frames[b];
-        frames[b] = frame;
+        Swap(mCloudFrames[Rand(mClouds.mFrameCount)], mCloudFrames[Rand(mClouds.mFrameCount)]);
     }
 }
 
