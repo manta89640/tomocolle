@@ -11,6 +11,7 @@
 #include "island/Apartment.h"
 #include "island/IslandProgress.h"
 #include "island/Sky.h"
+#include "resident/ResidentLife.h"
 #include "sound/SoundManager.h"
 #include "sound/ValueRamp.h"
 #include "text/MessageFile.h"
@@ -473,9 +474,6 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The island ---
 
-void func_020ad294(s64 now, RTCTime *time);
-void func_020ad514(s64 now, RTCTime *time);
-void func_020ad568(s64 now);
 }
 
 #define gSceneMemory data_0213ba74

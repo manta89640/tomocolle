@@ -224,17 +224,17 @@ void PreStartScene::UpdateResidents() {
             mResidentCount++;
         }
     }
-    func_020ad7e8(seconds);
-    func_020ad568(seconds);
+    ShiftEventTimes(seconds);
+    LimitEventTimes(seconds);
     if (unknown2C == 0) {
-        func_020ae9f8(&mJudge, mResidentCount, mResidents);
+        mJudge.MeetWhileAway(mResidentCount, mResidents);
     }
-    func_020ad514(seconds, &time);
-    func_020ad294(seconds, &time);
-    func_020aea3c(&mJudge, mResidentCount, mResidents, seconds);
-    func_020aecb0(&mJudge, mResidentCount, mResidents);
-    func_020aeef4(&mJudge);
-    func_020aef80(&mJudge, mResidentCount, mResidents);
+    ::UpdateResidents(seconds, &time);
+    StartNextEvents(seconds, &time);
+    mJudge.PickItemsWhileAway(mResidentCount, mResidents, seconds);
+    mJudge.ChangeClothesWhileAway(mResidentCount, mResidents);
+    mJudge.ClearUnknown24E();
+    mJudge.SetRandomUnknown24E(mResidentCount, mResidents);
 }
 
 // Opens the window with a message and no buttons, and returns TRUE once it is shown

@@ -223,9 +223,9 @@ static inline void UpdateCharacterTimes() {
     RTCTime time;
     RTCDate date;
     s64 now = func_02035870(data_02123440[0], &date, &time);
-    func_020ad568(now);
-    func_020ad514(now, &time);
-    func_020ad294(now, &time);
+    LimitEventTimes(now);
+    UpdateResidents(now, &time);
+    StartNextEvents(now, &time);
 }
 
 static inline void ClearSceneCharacters() {
@@ -907,9 +907,9 @@ void MapScene::Update() {
                 RTCDate date;
                 RTCTime time;
                 s64 now = func_02035870(data_02123440[0], &date, &time);
-                func_020ad568(now);
-                func_020ad514(now, &time);
-                func_020ad294(now, &time);
+                LimitEventTimes(now);
+                UpdateResidents(now, &time);
+                StartNextEvents(now, &time);
             } else if (mIdleFrames >= 60) {
                 UpdateWindows();
                 mIdleFrames = 0;

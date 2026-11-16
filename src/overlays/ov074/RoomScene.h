@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "sound/SoundManager.h"
+#include "resident/ResidentLife.h"
 #include "voice/TtsPlayer.h"
 
 #include "text/MessageFile.h"
@@ -63,15 +64,6 @@ struct ParticleSystem {
     /* 0x0 */ void *mManager; // func_0207b138 updates it
 }; // 0x4
 
-// What the main program's functions that decide what comes of two characters meeting work on. It has no data.
-struct EncounterJudge {
-    int Judge(RoomCharacter *first, RoomCharacter *second);                // 0x020adfbc: 10 when nothing comes of it
-    int JudgeEnd(RoomCharacter *first, RoomCharacter *second, BOOL param); // 0x020ae1f8
-    void Apply(RoomCharacter *first, RoomCharacter *second, int relation, s64 time);            // 0x020ae75c
-    void ApplyEnd(RoomCharacter *first, RoomCharacter *second, int relation, s64 time, int param); // 0x020ae80c
-
-    u8 mUnknown[4];
-};
 
 // The scene's speech player: a class of its own derived from TtsPlayer, with nothing added. Measured: the scene's
 // constructor (main program, 0x0203ed10) constructs the member with TtsPlayer's base-object constructor (C2) where

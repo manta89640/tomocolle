@@ -4,6 +4,8 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+#include "resident/ResidentLife.h"
+
 #include "GameData.h"
 #include "MessageWindow.h"
 #include "Scene.h"
@@ -80,12 +82,6 @@ struct GameClock {
     /* 0x34 */ BOOL mUnknown34;
 };
 
-// What the main program's functions that work out what the residents did while the game was off work on (the
-// object has no data). Overlay 74's scene holds one at 0x8DF8, as EncounterJudge, whose functions are these
-// ones' neighbours (0x020adfbc to 0x020ae80c).
-struct EncounterJudge {
-    u8 mUnknown[4];
-};
 
 extern "C" {
 extern SceneManager gSceneManager;
@@ -103,16 +99,6 @@ s64 func_02035870(GameClock *clock, RTCDate *date, RTCTime *time); // The curren
 s64 func_02035ae0(GameClock *clock);
 int func_02035aa4(GameClock *clock);
 
-// --- What the residents did while the game was off ---
-void func_020ad7e8(s64 time);
-void func_020ad568(s64 time);
-void func_020ad514(s64 time, RTCTime *timeOfDay);
-void func_020ad294(s64 time, RTCTime *timeOfDay);
-void func_020ae9f8(EncounterJudge *judge, int count, u8 *residents);
-void func_020aea3c(EncounterJudge *judge, int count, u8 *residents, s64 time);
-void func_020aecb0(EncounterJudge *judge, int count, u8 *residents);
-void func_020aeef4(EncounterJudge *judge);
-void func_020aef80(EncounterJudge *judge, int count, u8 *residents);
 }
 
 // --- The scene's objects ----------------------------------------------------------------------------------------

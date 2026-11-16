@@ -57,13 +57,6 @@ void func_0209b1d8(SavedCharacter *character);
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
 
-// What the clock means for all the saved characters
-void func_020ad568(s64 now);
-void func_020ad514(s64 now, RTCTime *time);
-void func_020ad294(s64 now, RTCTime *time);
-BOOL func_020ad348(int index, s64 now);
-int func_020adb44(int *force);  // How many characters could start a random event
-int func_020adc08(u16 *indices); // Lists them, and returns how many
 
 // The main program's character (CharacterBase)
 void func_02091048(CharacterBase *character, const char *archiveName); // Names its archive
@@ -265,9 +258,9 @@ void RoomScene::StartLoading() {
     gSoundManager.StartSeqIfNotPlaying(0, 11);
     gSoundManager.SetSeqTrackMuteOnly(0, 0x1C1, TRUE);
     gSoundManager.SetSeqTrackModDepth(0, 0xFFFF, 0);
-    func_020ad568(mClock.mSeconds);
-    func_020ad514(mClock.mSeconds, &mClock.mTime);
-    func_020ad294(mClock.mSeconds, &mClock.mTime);
+    LimitEventTimes(mClock.mSeconds);
+    UpdateResidents(mClock.mSeconds, &mClock.mTime);
+    StartNextEvents(mClock.mSeconds, &mClock.mTime);
 
     for (int i = 0; i < 100; i++) {
         if (func_0202c3dc(&gGameData, i)) {
@@ -1195,9 +1188,9 @@ int RoomScene::StartRandomEvent(s64 now) {
         events[i] = mCharacters[i].mEvent;
     }
 
-    if (func_020adb44(&force) > 0) {
+    if (GetRandomEventCount(&force) > 0) {
         u16 indices[100];
-        int count = func_020adc08(indices);
+        int count = ListRandomEventCandidates(indices);
         u16 index = indices[MATH_Rand16(&gRandom, count)];
         SavedCharacter *character;
         SavedCharacter *partner = NULL;
@@ -1388,7 +1381,7 @@ void RoomScene::UpdateEvent() {
                     if (partner >= 0) {
                         mFront.DrawWindow(func_0202c414(&gGameData, partner));
                     }
-                } else if (func_020ad348(mScanIndex, now)) {
+                } else if (IsOutingOver(mScanIndex, now)) {
                     UpdateAbsentCharacter(now);
                 }
                 mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
@@ -1428,7 +1421,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
@@ -1502,7 +1495,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
@@ -1577,7 +1570,7 @@ void RoomScene::UpdateEvent() {
                         if (partner >= 0) {
                             mFront.DrawWindow(func_0202c414(&gGameData, partner));
                         }
-                    } else if (func_020ad348(mScanIndex, now)) {
+                    } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
