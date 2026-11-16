@@ -49,15 +49,15 @@ static const VecFx32 data_ov076_02158850 = { 0, 7844, 58762 };
 static const VecFx32 data_ov076_021588b0 = { 4, 4, 4 };
 static const VecFx32 data_ov076_0215882c = { 0, 0, 0 };
 static const VecFx32 data_ov076_02158874 = { 0, 2, 2 };
-static const u16 data_ov076_02158880[6] = { 0x58, 0x5a, 0x5c, 0x5e, 0x28, 0x2a };
+static const u16 sButtonSequences[6] = { 0x58, 0x5a, 0x5c, 0x5e, 0x28, 0x2a };
 static const VecFx32 data_ov076_0215885c = { 0, 7248, 105456 };
 static const VecFx32 data_ov076_0215888c = { 0, 1, 1 };
 static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
 static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
 static const VecFx32 data_ov076_02158838 = { 0, 0, -32768 };
 static const int data_ov076_021588cc[4] = { 128, 96, 128, 96 };
-static const int data_ov076_021588dc[4] = { 20, 20, 216, 152 };
-static const int data_ov076_021588ec[4] = { 16, -1, 0, -1 };
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
+static const ButtonSounds data_ov076_021588ec = { { 16, -1, 0, -1 } };
 static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
 static const int data_ov076_021588fc[4] = { 75, 149, 181, 149 };
 static const int data_ov076_0215890c[4] = { 145, 65, 145, 119 };
@@ -69,11 +69,11 @@ static const u16 data_ov076_0215895c[10] = { 0x0, 0x2, 0x4, 0x6, 0xa, 0xc, 0x10,
 static const int data_ov076_02158970[5] = { 4, 4, 4, 4, 4 };
 static const int data_ov076_02158984[6] = { 62, 22, 116, 30, 116, 30 };
 static const int data_ov076_0215899c[6] = { 14, 14, 14, 14, 14, 1 };
-static const int data_ov076_021589b4[6] = { 3, 3, 3, 3, 4, 4 };
+static const int sButtonKinds[6] = { 3, 3, 3, 3, 4, 4 };
 static const int data_ov076_021589cc[6] = { 136, 132, 62, 175, 194, 175 };
 static const int data_ov076_021589e4[6] = { 14, 15, 16, 17, 22, 23 };
-static const int data_ov076_02158a7c[8] = { 80, 102, 176, 102, 80, 90, 176, 90 };
-static const int data_ov076_02158a9c[8] = { 58, 54, 58, 54, 58, 54, 58, 54 };
+static const WindowPoint data_ov076_02158a7c[4] = { { 80, 102 }, { 176, 102 }, { 80, 90 }, { 176, 90 } };
+static const WindowPoint data_ov076_02158a9c[4] = { { 58, 54 }, { 58, 54 }, { 58, 54 }, { 58, 54 } };
 static const int data_ov076_02158abc[8] = { 158, 76, 138, 76, 118, 76, 98, 76 };
 static const int data_ov076_02158adc[8] = { 170, 76, 150, 76, 90, 76, 70, 76 };
 static const int data_ov076_02158afc[8] = { 80, 77, 123, 77, 80, 114, 123, 114 };
@@ -81,7 +81,7 @@ static const int data_ov076_02158b1c[8] = { 14, 15, 16, 17, 18, 19, 20, 21 };
 static const int data_ov076_021589fc[8] = { 207, 48, 239, 48, 207, 74, 239, 74 };
 static const int data_ov076_02158a1c[8] = { 14, -1, 0, -1, 16, -1, 0, -1 };
 static const int data_ov076_02158a3c[8] = { 15, -1, 0, -1, 16, -1, 0, -1 };
-static const int data_ov076_02158a5c[8] = { 80, 90, 176, 90, 80, 90, 176, 90 };
+static const WindowPoint data_ov076_02158a5c[4] = { { 80, 90 }, { 176, 90 }, { 80, 90 }, { 176, 90 } };
 static const int data_ov076_02158b3c[9] = { 0, 1, 4, 2, 3, 6, 7, 8, 9 };
 static const int data_ov076_02158b60[10] = { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
 static const ScreenPoint sSpriteB0Places[5] = { { 55, 182 }, { 55, 182 }, { 103, 182 }, { 151, 182 }, { 199, 182 } };
@@ -91,26 +91,26 @@ static const int data_ov076_02158c00[10] = { 8, 20, 8, 20, 8, 20, 8, 20, 8, 20 }
 static const int data_ov076_02158c28[10] = { 128, 26, 128, 59, 128, 92, 128, 125, 128, 158 };
 static const int data_ov076_02158c50[10] = { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 };
 static const u16 data_ov076_02158c78[22] = { 0x0, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22, 0x24, 0x28, 0x2a, 0x2c, 0x2e };
-static const int data_ov076_02158ca4[12] = { 40, 18, 40, 18, 40, 18, 40, 18, 40, 18, 24, 22 };
+static const WindowPoint sButtonSizes[6] = { { 40, 18 }, { 40, 18 }, { 40, 18 }, { 40, 18 }, { 40, 18 }, { 24, 22 } };
 static const int data_ov076_02158cd4[12] = { 20, -1, 0, -1, 22, -1, 0, -1, 20, -1, 0, -1 };
 static const int data_ov076_02158d04[12] = { 1, 10, 2, 3, 6, 0, 5, 4, 8, 9, 7, 11 };
 static const int data_ov076_02158d34[12] = { 21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22 };
 static const int data_ov076_02158d64[12] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100 };
 static const int data_ov076_02158d94[12] = { 20, -1, 0, -1, 21, -1, 0, -1, 22, -1, 0, -1 };
-static const int data_ov076_02158dc4[12] = { 32, 181, 80, 181, 128, 181, 176, 181, 224, 181, 242, 13 };
+static const WindowPoint sButtonPositions[6] = { { 32, 181 }, { 80, 181 }, { 128, 181 }, { 176, 181 }, { 224, 181 }, { 242, 13 } };
 static const u16 data_ov076_02158df4[30] = { 0x18, 0x1a, 0x1c, 0x1e, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x20, 0x22, 0x3c, 0x3e, 0x3c, 0x3e, 0x40, 0x42, 0x4f, 0x4f, 0x4f, 0x4f, 0x4f, 0x0 };
-static const char data_ov076_02158e30[] = "E00:/Window_down.nsc";
+static const char sWindowScreenName[] = "E00:/Window_down.nsc";
 static const u8 data_ov076_02158e48[24] = { 0x1a, 0x1a, 0x1b, 0x19, 0x1a, 0x19, 0x1a, 0x19, 0x1c, 0x19, 0x1a, 0x18, 0x1b, 0x1b, 0x1a, 0x1a, 0x19, 0x19, 0x1a, 0x1a, 0x1b, 0x1a, 0x19, 0x1b };
 static const u8 data_ov076_02158e60[50] = { 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c };
-static const int data_ov076_02158e94[16] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const ButtonSounds data_ov076_02158e94[4] = { { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } } };
 static const int data_ov076_02158ed4[16] = { 80, 40, 123, 40, 80, 77, 123, 77, 80, 114, 123, 114, 80, 151, 123, 151 };
 static const int data_ov076_02158f14[16] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100, 207, 126, 239, 126 };
 static const u16 data_ov076_02158f54[36] = { 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x0, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56 };
 static const int data_ov076_02158f9c[18] = { 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
-static const int data_ov076_02158fe4[20] = { 70, 40, 186, 40, 128, 112, 160, 76, 68, 76, 202, 112, 216, 76, 68, 149, 192, 149, 54, 112 };
+static const WindowPoint data_ov076_02158fe4[10] = { { 70, 40 }, { 186, 40 }, { 128, 112 }, { 160, 76 }, { 68, 76 }, { 202, 112 }, { 216, 76 }, { 68, 149 }, { 192, 149 }, { 54, 112 } };
 static const int data_ov076_02159034[20] = { 116, 18, 116, 18, 32, 18, 56, 18, 112, 18, 32, 18, 56, 18, 112, 18, 48, 18, 48, 18 };
 static const int data_ov076_02159084[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3 };
-static const int data_ov076_021590dc[24] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 20, -1, 0, -1, 16, -1, 0, -1 };
+static const ButtonSounds sButtonSounds[6] = { { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 20, -1, 0, -1 } }, { { 16, -1, 0, -1 } } };
 static const int data_ov076_0215913c[24] = { 6, 0, 12, 1, 9, 19, 7, 21, 8, 17, 5, 4, 11, 10, 2, 3, 14, 20, 15, 13, 22, 18, 16, 23 };
 static const int data_ov076_0215919c[24] = { 23, 1, 19, 21, 22, 5, 0, 8, 10, 16, 6, 13, 7, 9, 2, 17, 3, 4, 15, 11, 20, 18, 14, 12 };
 static const int data_ov076_021591fc[24] = { 59, 40, 102, 40, 145, 40, 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
@@ -266,6 +266,259 @@ void func_02029f20(CharacterModel *model, GXRgb color);
 void func_02029f30(CharacterModel *model, GXRgb color);
 void func_02029f40(CharacterModel *model, GXRgb color);
 void func_02092178(wchar_t *name);
+}
+
+struct Renderer3d;
+extern "C" {
+extern Renderer3d data_02122824;
+void func_0202b0e8(Renderer3d *renderer);
+void func_02090fdc(SceneCharacter *character, int slot, int a, int b);
+void Character_SetFace(SceneCharacter *character, int face);
+void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
+void func_02091a14(SceneCharacter *character, BOOL visible);
+BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+void func_020979e0(CharacterRecord *character);
+extern void *data_02123440[];
+void Clock_GetDate(void *clock, RTCDate *date);
+void func_020984e0(CharacterRecord *character, int year, int month, int day);
+void func_0208fd90(CharacterBase *character, int a);
+u32 func_02098dac(CharacterRecord *character, int property);
+void func_0202a640(Camera *camera);
+extern Camera data_02122764;
+void func_0202a96c(Light *light);
+void func_02024b10(u32 *manager, void *a, int planes);
+int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void *func_0202680c(int size);
+void *func_02026824(int size); // An allocator the particle system is given
+ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
+void func_0207ac78(ParticleSystem *system, void *file);
+void func_0207b110(ParticleSystem *system);
+void func_0207b124(ParticleSystem *system);
+BOOL func_02098584(CharacterRecord *character);
+}
+
+static inline void SetCanvasPosition(ObjTextCanvas &canvas, WindowPoint position) {
+    canvas.mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+// Puts a text canvas at a position in pixels
+static inline void SetCanvasPosition(ObjTextCanvas *canvas, WindowPoint position) {
+    canvas->mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+void MiiEditScene::Init() {
+    mPage = -1;
+    mUnknown1B32C = FALSE;
+    func_0202b0e8(&data_02122824);
+    data_0211d604.SetUnknown44(1);
+    data_0211d604.Show(1);
+    data_0211d604.SetUnknown48(1);
+    G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
+    gSoundManager.LoadGroup(1);
+    gSoundManager.StartSeq(0, 2);
+    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+    func_02090fdc(&mCharacter, 0, 0, 2);
+    Character_SetFace(&mCharacter, 8);
+    switch (mSceneId) {
+    case 0x42:
+        mUnknown5824 = data_0213ba74.mCharacters[0];
+        func_ov076_0214b670(mUnknown5824);
+        break;
+    case 0x44: {
+        mUnknown5824 = data_0213ba74.mCharacters[0];
+        func_ov076_0214b670(mUnknown5824);
+        u8 a;
+        u8 b;
+        func_0209cbac(&mCharacter, &a, &b);
+        mCharacter.mUnknown290 = a;
+        mCharacter.mUnknown291 = b;
+        break;
+    }
+    case 0x43:
+    case 0x6F: {
+        void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
+        func_02029660((void *)mCharacter.mModel.mUnknown04, RESOURCE_BCA0, animations);
+        Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
+        Character_SetAngle(&mCharacter, 0x4000);
+        func_02091a14(&mCharacter, FALSE);
+        int i;
+        for (i = 0; i < 100; i++) {
+            if (!func_0202c354(&gGameData, i)) {
+                break;
+            }
+        }
+        if (i < 100) {
+            mUnknown5824 = i;
+        } else {
+            OS_Terminate();
+        }
+        func_020979e0(&mCharacter);
+        func_0209e01c(&mCharacter);
+        RTCDate date;
+        Clock_GetDate(data_02123440[0], &date);
+        func_020984e0(&mCharacter, date.year, date.month, date.day);
+        break;
+    }
+    }
+    func_02091a24(&mCharacter);
+    mUnknown5828 = FALSE;
+    func_02091a6c(&mCharacter);
+    func_0208fd90(&mEditedCharacter, 0);
+    *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
+    func_0208fefc(&mEditedCharacter);
+    VecFx32 v = mCharacter.mUnknown2568;
+    mEditedCharacter.mUnknown2568 = v;
+    mEditedCharacter.mUnknown25D4 = mCharacter.mUnknown25D4;
+    mEditedCharacter.mUnknown25D6 = mCharacter.mUnknown25D6;
+    mEditedCharacter.mUnknown25D8 = mCharacter.mUnknown25D8;
+    mEditedCharacter.mUnknown25E0 = mCharacter.mUnknown25E0;
+    func_0208ff94(&mEditedCharacter, mCharacter.mUnknown2538, mCharacter.mUnknown2514);
+    mUnknown580C = TRUE;
+    mCamera = &data_02122764;
+    func_0202a640(mCamera);
+    mCamera->mUnknown00 = 0x11E;
+    mCamera->mUnknown04 = 0xFF6;
+    VEC_Set(&mCamera->mPosition, 0, 0x1EA4, 0xE58A);
+    mCamera->mPosition.y += (func_02098dac(&mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+    mCamera->mTarget.x = mCamera->mPosition.x;
+    mCamera->mTarget.y = mCamera->mPosition.y;
+    mCamera->mTarget.z = mCamera->mPosition.z - FX32_CONST(8);
+    ResetCameraGoal();
+    func_0202a96c(&data_021227cc);
+    func_0202a96c(&data_021227d8);
+    mTtsPlayer.InitEngine();
+    func_02024b10(gGraphicsManager, mUnknown00010, 0x3F00);
+    func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
+    func_02028f24(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+    func_02028f24(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
+    func_02028280(&data_02121834, 1, 1);
+    func_02028280(&data_02121834, 2, 2);
+    func_02028280(&data_02121834, 4, 3);
+    func_02028280(&data_02121834, 0x10, 0);
+    func_02028280(&data_02121834, 0x100, 0);
+    func_02028280(&data_02121834, 0x200, 1);
+    func_02028280(&data_02121834, 0x1000, 0);
+    func_02023ee0(&data_0211d604, 1, 4, 8, 8);
+    func_ov076_0214bbe4();
+    for (u16 i = 0; i < 6; i++) {
+        Sprite_Init(&mButtons[i], 0, 0, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
+        func_02031260(&mButtons[i], sButtonKinds[i]);
+        func_02032158(&mButtons[i], &sButtonSounds[i]);
+        mButtons[i].mUnknownDC = data_ov076_0215899c[i];
+        mButtons[i].SetPosition(FxVec2(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT));
+        func_0203119c(&mButtons[i]);
+    }
+    Sprite_Init(&mSprite582C, 0, 0x6D, 0x80, 0x60, TRUE);
+    mUnknown58E0 = TRUE;
+    mUnknown58E4 = FALSE;
+    mUnknown58DC = FALSE;
+    func_0202680c(0x4000);
+    mParticles = func_0207ab20(func_02026824, 1, 100, 0, 1, 30);
+    mParticleFile = ArchiveManager_GetFileByName(&gArchiveManager, "SPL:/SplEditEffect.spa");
+    func_0207ac78(mParticles, mParticleFile);
+    func_0207b110(mParticles);
+    func_0207b124(mParticles);
+    int charOffset = 800;
+    mMessageFiles[0].Open("TBM:/tmd_etc_msg_JP.bmg");
+    mMessageFiles[1].Open("T02:/tmd_common_msg_JP.bmg");
+    for (u16 i = 0; i < 9; i++) {
+        int width;
+        switch (i) {
+        case 0:
+        case 1:
+        case 2:
+            width = 0x18;
+            break;
+        case 3:
+            width = 4;
+            break;
+        case 4:
+            width = 6;
+            break;
+        case 5:
+            width = 6;
+            break;
+        case 6:
+            width = 0x10;
+            break;
+        case 7:
+            width = 8;
+            break;
+        case 8:
+            width = 4;
+            break;
+        }
+        mTextBoxes[i].Init(0x1000, width, 2, charOffset, 0, 0, 0, 0, NULL);
+        charOffset += mTextBoxes[i].GetCharCount();
+        WindowPoint position = data_ov076_02158fe4[data_ov076_02158b3c[i]];
+        position.x += -position.x / 2 + 8;
+        position.y -= 7;
+        mTextBoxes[i].mSprite.mOverwritePalette = 1;
+        mTextBoxes[i].mColor = 8;
+        SetCanvasPosition(&mTextBoxes[i], position);
+        mTextBoxes[i].Update(TRUE);
+    }
+    mCharBox.Init(0x1000, 0x20, 2, charOffset, 0, 0, NULL);
+    mCharBox.mColor = 8;
+    SetCanvasPosition(&mCharBox, data_ov076_021587f8);
+    MessageText *text = &mText1B35C;
+    text->InitObjForMessage(&mMessageFiles[0], 0x20, &gFonts[0].mFont, 0x1000,
+                                 charOffset + mCharBox.GetCharCount(), 0, 1, 0, 0, 0xF, NULL);
+    SetCanvasPosition(&mText1B35C, data_ov076_021587b0);
+    text->DrawAll();
+    mText1B35C.mSprite.mOverwritePalette = 0;
+    mText1B35C.mHAlign = 1;
+    text = &mText1B94C;
+    text->InitObjForMessage(&mMessageFiles[0], 0x1C, &gFonts[0].mFont, 0x10, 200, 0, 1, 0, 0, 0xF, NULL);
+    SetCanvasPosition(&mText1B94C, data_ov076_021587e8);
+    text->DrawAll();
+    mText1B94C.mSprite.mOverwritePalette = 2;
+    mUnknown5904 = 0;
+    for (int i = 0; i < 7; i++) {
+        mUnknown58E8[i] = FALSE;
+    }
+    switch (mSceneId) {
+    case 0x42:
+        mSprite582C.func_ov076_0214be80(4);
+        mUnknown58E0 = FALSE;
+        func_ov076_0214b1ec(2);
+        if (!func_02098584(&mCharacter)) {
+            func_02031e88(&mButtons[0], TRUE);
+        }
+        break;
+    case 0x44:
+        func_02031e88(&mButtons[0], TRUE);
+        mSprite582C.func_ov076_0214be80(2);
+        func_ov076_0214b1ec(2);
+        break;
+    case 0x43:
+        func_02031e88(&mButtons[2], TRUE);
+        func_02031e88(&mButtons[3], TRUE);
+        func_02031e88(&mButtons[4], TRUE);
+        mSprite582C.func_ov076_0214be80(0);
+        func_ov076_0214b1ec(0);
+        break;
+    case 0x6F:
+        mButtons[5].mVisible = FALSE;
+        func_02031e88(&mButtons[2], TRUE);
+        func_02031e88(&mButtons[3], TRUE);
+        func_02031e88(&mButtons[4], TRUE);
+        mSprite582C.func_ov076_0214be80(0);
+        func_ov076_0214b1ec(0);
+        break;
+    }
+    gSoundManager.LoadGroup(0x52);
 }
 
 void MiiEditScene::Update() {
@@ -729,6 +982,57 @@ void MiiEditScene::func_ov076_0214bb24() {
 // --- Page 0 ---
 
 extern "C" {
+void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
+                   WindowPoint size, const ButtonSounds *sounds, int b);
+void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
+                   WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const ButtonSounds *sounds, int b);
+}
+
+void MiiEditPage0::func_ov076_0214bf4c(MiiEditScene *scene) {
+    mState = -1;
+    mScene = scene;
+    int charOffset = 900;
+    mScene->func_ov076_0214bb24();
+    ScreenRect rect = sWindowRect;
+    for (int i = 0; i < 2; i++) {
+        func_02032fb8(&mWindows[i], rect);
+        func_02033174(&mWindows[i], sWindowScreenName, 0x100);
+        func_020331bc(&mWindows[i], 0x3F00, rect);
+        func_02034f4c(&mWindows[i], 1);
+    }
+    int number = 0;
+    for (int i = 0; i <= 1; i++) {
+        if (mScene->mSceneId == 0x6F) {
+            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                          data_ov076_02158a7c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        } else {
+            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                          data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        }
+        number++;
+    }
+    if (mScene->mSceneId == 0x43) {
+        func_02033844(&mWindows[0], number, 0, 0x69, 0x6A, data_ov076_021587a0, data_ov076_02158808,
+                      &mScene->mMessageFiles[1], 5, &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_021588ec, 1);
+    }
+    charOffset = func_02033a58(&mWindows[0], &mScene->mMessageFiles[0], 0x1A, &gFonts[0].mFont, 0x1000,
+                               data_ov076_021587e0, &charOffset);
+    func_02034f4c(&mWindows[0], 1);
+    func_02034f94(&mWindows[0], 1);
+    number = 0;
+    for (int i = 2; i <= 3; i++) {
+        func_02033448(&mWindows[1], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                      data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        number++;
+    }
+    charOffset = func_02033a58(&mWindows[1], &mScene->mMessageFiles[0], 0x1B, &gFonts[0].mFont, 0x1000,
+                               data_ov076_021587d8, &charOffset);
+    func_02034f4c(&mWindows[1], 1);
+    func_ov076_0214c624(0);
+}
+
+extern "C" {
 void func_020341d4(MessageWindow *window);
 void func_020349cc(MessageWindow *window, int flags);
 void func_02098cd0(CharacterRecord *character, int sex);
@@ -1115,14 +1419,14 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[41] = &data_ov076_0215885c;
     p[42] = &data_ov076_02158868;
     p[43] = &data_ov076_02158874;
-    p[44] = &data_ov076_02158880;
+    p[44] = &sButtonSequences;
     p[45] = &data_ov076_0215888c;
     p[46] = &sLightDirection1;
     p[47] = &sLightDirection0;
     p[48] = &data_ov076_021588b0;
     p[49] = &data_ov076_021588bc;
     p[50] = &data_ov076_021588cc;
-    p[51] = &data_ov076_021588dc;
+    p[51] = &sWindowRect;
     p[52] = &data_ov076_021588ec;
     p[53] = &data_ov076_021588fc;
     p[54] = &data_ov076_0215890c;
@@ -1134,7 +1438,7 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[60] = &data_ov076_02158970;
     p[61] = &data_ov076_02158984;
     p[62] = &data_ov076_0215899c;
-    p[63] = &data_ov076_021589b4;
+    p[63] = &sButtonKinds;
     p[64] = &data_ov076_021589cc;
     p[65] = &data_ov076_021589e4;
     p[66] = &data_ov076_021589fc;
@@ -1156,15 +1460,15 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[82] = &data_ov076_02158c28;
     p[83] = &data_ov076_02158c50;
     p[84] = &data_ov076_02158c78;
-    p[85] = &data_ov076_02158ca4;
+    p[85] = &sButtonSizes;
     p[86] = &data_ov076_02158cd4;
     p[87] = &data_ov076_02158d04;
     p[88] = &data_ov076_02158d34;
     p[89] = &data_ov076_02158d64;
     p[90] = &data_ov076_02158d94;
-    p[91] = &data_ov076_02158dc4;
+    p[91] = &sButtonPositions;
     p[92] = &data_ov076_02158df4;
-    p[93] = &data_ov076_02158e30;
+    p[93] = &sWindowScreenName;
     p[94] = &data_ov076_02158e48;
     p[95] = &data_ov076_02158e60;
     p[96] = &data_ov076_02158e94;
@@ -1175,7 +1479,7 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[101] = &data_ov076_02158fe4;
     p[102] = &data_ov076_02159034;
     p[103] = &data_ov076_02159084;
-    p[104] = &data_ov076_021590dc;
+    p[104] = &sButtonSounds;
     p[105] = &data_ov076_0215913c;
     p[106] = &data_ov076_0215919c;
     p[107] = &data_ov076_021591fc;

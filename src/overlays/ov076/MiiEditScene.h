@@ -18,7 +18,9 @@
 
 // The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
 struct Camera {
-    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ u8 mUnknown08[0xC];
     /* 0x14 */ VecFx32 mPosition;
     /* 0x20 */ VecFx32 mUnknown20;
     /* 0x2C */ VecFx32 mTarget;
@@ -26,9 +28,28 @@ struct Camera {
 
 // The screens: which planes are shown (data_0211d604).
 struct ScreenControl {
+    void Show(u32 planes) {
+        mPlanes |= planes;
+        mPlanesChanged = TRUE;
+    }
+    void SetUnknown44(int value) {
+        mUnknown44 = value;
+        mUnknown44Changed = TRUE;
+    }
+    void SetUnknown48(int value) {
+        mUnknown48 = value;
+        mUnknown48Changed = TRUE;
+    }
+
     /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0xD0];
+    /* 0x04 */ u8 mUnknown04[0x40];
+    /* 0x44 */ int mUnknown44;
+    /* 0x48 */ int mUnknown48;
+    /* 0x4C */ u8 mUnknown4C[0x88];
     /* 0xD4 */ BOOL mPlanesChanged;
+    /* 0xD8 */ u8 mUnknownD8[0x10];
+    /* 0xE8 */ BOOL mUnknown44Changed;
+    /* 0xEC */ BOOL mUnknown48Changed;
 };
 
 // Graphics resources, loaded by file name into VRAM.
