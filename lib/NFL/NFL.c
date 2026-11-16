@@ -1595,7 +1595,7 @@ void func_0206cd9c(u16 *palette, const s16 *params);
 void func_0206cc30(u16 *palette);
 
 BOOL func_02075528(NFLObj *obj, u32 *pos) {
-    NFLWork *work = (NFLWork *)data_02145360;
+    NFLWork *work = data_02145360;
     s16 *params = obj->unk180;
     NFLWorkUnkA0 *stream = obj->unk1A4;
     int i;
@@ -2242,4 +2242,162 @@ int func_02076448(u32 size) {
         return result;
     }
     return 1;
+}
+
+// The VRAM side of func_02074b68's streams, after the frame's interrupt: loads up to *rest bytes of what the six
+// streams have put in the ring buffer into texture VRAM (func_02074964), then hands on to the object streams
+// (func_02076e1c) or the seventh stream (func_02076a98)
+int func_02076680(u32 *rest) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    u32 dest;
+    NFLWorkUnkA0 *stream = work->unkA0;
+    NFLStreamSource *source = data_0211216c;
+    int i;
+
+    for (i = 0; i < 6; stream++, source++, i++) {
+        BOOL go = FALSE;
+        u8 *src;
+        u32 size;
+        int result;
+
+        switch (stream->unk8) {
+        case 2:
+            if (data_02145360->unk68 == 7) {
+                size = source->unk8 * 4;
+            } else {
+                size = source->unk8;
+            }
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 3:
+            size = work->unk98;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 4:
+            size = work->unk98 - work->unk94;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 5:
+            if (data_02145360->unk68 == 7) {
+                size = source->unk8 * 4;
+            } else {
+                size = source->unk8;
+            }
+            size -= work->unk94;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            dest = stream->unk4;
+            DC_FlushRange(src, size);
+            go = TRUE;
+            break;
+        case 0:
+        case 1:
+            work->unk88 = 0;
+            work->unk80 = 0;
+            work->unk84 = 0;
+            return 2;
+        }
+        if (*rest == 0) {
+            return 0;
+        }
+        if (go == TRUE) {
+            if (*rest >= size) {
+                if (stream->unk0 + size <= work->unk7C) {
+                    result = func_02074964(src, dest, size);
+                } else {
+                    int over = stream->unk0 + size - work->unk7C;
+                    int n = size - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + size) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 2) {
+                    stream->unk8 = 7;
+                } else if (stream->unk8 == 5) {
+                    stream->unk8 = 7;
+                    work->unk94 = 0;
+                } else {
+                    stream->unk8 = 1;
+                    work->unk94 = work->unk98;
+                    work->unk98 = 0;
+                }
+                *rest -= size;
+            } else {
+                if (stream->unk0 + *rest <= work->unk7C) {
+                    result = func_02074964(src, dest, *rest);
+                } else {
+                    int over = stream->unk0 + *rest - work->unk7C;
+                    int n = *rest - over;
+
+                    result = func_02074964(src, dest, n);
+                    if (result == 0) {
+                        result = func_02074964(work->unk78, dest + n, over);
+                    }
+                }
+                if (result != 0) {
+                    stream->unk8 = 6;
+                    return result;
+                }
+                work->unk80 = (stream->unk0 + *rest) % work->unk7C;
+                if (work->unk84 >= work->unk80) {
+                    work->unk88 = work->unk84 - work->unk80;
+                } else {
+                    work->unk88 = work->unk7C + work->unk84 - work->unk80;
+                }
+                if (stream->unk8 == 3 || stream->unk8 == 4) {
+                    stream->unk8 = 4;
+                } else {
+                    stream->unk8 = 5;
+                }
+                work->unk94 += *rest;
+                stream->unk0 = (stream->unk0 + *rest) % work->unk7C;
+                stream->unk4 += *rest;
+                *rest = 0;
+                return 0;
+            }
+        }
+    }
+    if (data_02145360->unk68 == 7) {
+        work->unk90 = 2;
+        if (*rest == 0) {
+            return 2;
+        }
+        if (work->unk74 != NULL) {
+            switch (work->unk74->unk170) {
+            case 0:
+                return func_02076e1c(work->unk74, rest);
+            case 2:
+            case 4:
+                func_020763e0(work->unk74);
+                break;
+            }
+        }
+    } else {
+        work->unk90 = 1;
+        if (*rest == 0) {
+            return 2;
+        }
+        return func_02076a98(rest);
+    }
+    return 2;
 }
