@@ -656,6 +656,21 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   (`SceneRoom::ShowParts`). `#pragma opt_strength_reduction off` gave the same `mla` but no longer reduced the
   loop's other pointer, which the original does reduce.
 
+**Overlay 109's last register and argument-order near-misses (round 4)**
+- `#pragma opt_dead_assignments off` (inside `#pragma push`/`pop`) is a setting the original used per function. With
+  it, a local assigned 0 is kept rather than folded, so `int zero = 0; s = zero - 1; ...; t = zero;` gives the
+  original's `mov r2, #0; sub r1, r2, #1` (`ReceiveWiiMii`); and an inline forwarder's arguments are bound last to
+  first, as with the eight passes off: `FindAnimationOf(model, BCA0, model->mAnimId)` forms the id before the
+  model's address (`UpdateCharacters`), `SetEmitterFlag(e, 2)` twice leaves the function's last `mov r0, #0` after
+  the two `orr`s (`InitParticles`). Neither the forwarder nor the pragma alone does it.
+- `#pragma opt_propagation off` with an inline forwarder does the same for a member call (`SortBy(&list, key, 0)`
+  in overlay 109's `Update`: the key's offset in r0, the list's address formed through r2); a parent index read
+  into a local before indexing the names gave the mla's registers there.
+- A value the original loads into one register and copies into another (`ldr r1; mov r4, r1; cmp r1`): test it
+  through a volatile read of the field and keep a plain local for the later use (`UpdateListWindow`). A load the
+  original does first whose value is the second operand of an `orr`: read it through a volatile cast into a local,
+  then `own | received` (`ReceiveCharacter`).
+
 **Two registers holding one counter**
 - A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
