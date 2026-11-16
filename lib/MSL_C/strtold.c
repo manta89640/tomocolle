@@ -11,8 +11,11 @@
 //   the block that builds them, which puts it, 8-aligned, below the other arrays as in the original's frame.
 // - The NaN and infinity states index their copies of "NAN(" and "INFINITY" with the count; a pointer walked over
 //   them gives the NaN state's registers in another order.
-// Not matching yet: 47 instructions of the hexadecimal tail, all register choices: the result's pointer and the
-// mantissa's address swap r3 and r4, the bit loop's counter and byte index r2 and r7.
+// - The loop that packs the mantissa into the result counts bits with one variable and indexes the result's bytes
+//   with another (k and i), and the byte swap after it has a signed counter of its own.
+// Not matching yet: 40 instructions of the hexadecimal tail, all register choices: the pointer to the result's bytes
+// is in r3 where the original has r4, and the values the original keeps in r3 (the mantissa's first byte and
+// address, the bit position, the swap's counter) are in r4.
 
 #include <ansi_fp.h>
 #include <ctype.h>
@@ -473,7 +476,8 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 		} uld;
 		unsigned i;
 		unsigned shift;
-		int k;
+		unsigned k;
+		int m;
 		unsigned char *p = uld.uc;
 		unsigned char carry;
 
@@ -495,17 +499,15 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 		}
 
 		memset(p, 0, 8);
-
 		{
-			unsigned bitpos = 12;
-			k = 1;
-			for (i = 0; i < 52; i += 8) {
-				unsigned char uch = mantissa[i / 8];
-				if (i + 8 > 52)
-					uch &= 0xff << (52 - i);
-				p[k] |= (unsigned char)(uch >> (bitpos % 8));
-				k++;
-				p[k] |= (unsigned char)(uch << (8 - bitpos % 8));
+			unsigned bitpos;
+			for (k = 0, i = 1, bitpos = 12; k < 52; k += 8) {
+				unsigned char uch = mantissa[k / 8];
+				if (k + 8 > 52)
+					uch &= 0xff << (52 - k);
+				p[i] |= (unsigned char)(uch >> (bitpos % 8));
+				i++;
+				p[i] |= (unsigned char)(uch << (8 - bitpos % 8));
 				bitpos += 8;
 			}
 		}
@@ -520,10 +522,10 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 		if (sig_negative)
 			p[0] |= 0x80;
 
-		for (k = 0; k < 4; k++) {
-			unsigned char t = p[k];
-			p[k] = p[7 - k];
-			p[7 - k] = t;
+		for (m = 0; m < 4; m++) {
+			unsigned char t = p[m];
+			p[m] = p[7 - m];
+			p[7 - m] = t;
 		}
 		return *(long double *)p;
 	}

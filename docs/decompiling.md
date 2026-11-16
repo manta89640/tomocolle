@@ -307,6 +307,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `hour * 3600 + minute * 60` computes the minutes first.
 
 **Stack slots in the wrong order, or a frame too large**
+- A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
+  that builds it, went below the other arrays and gave the original's frame. A union holding a `long double` is
+  8-aligned.
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
@@ -324,6 +327,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- How the colours are given (measured with MSL's compiler, 2.0/sp2, in C, on test files): per live range, the value
+  defined last first, each taking the lowest register free of its neighbours. Declaration order, number of uses
+  and length of the range change nothing. So to move a value to a lower register, define it later, or define the
+  value that holds that register earlier.
+- Index an array where the original walks it with a pointer, or the reverse: `nan_str[i] == toupper(c)` with the
+  count `i`, instead of `*p` with `p` stepped beside it, put `__strtold`'s NaN state in the original's registers.
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -346,6 +355,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   original's registers.
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
+- A constant compared from a register (`mov r0,#14; cmp r2,r0`) is a variable assigned the constant elsewhere,
+  here in one state of a loop (`max_digits = 14;` when `__strtold` reads "0x"). A literal, a `const`, a
+  `static const` or an initialised local all give `cmp r2,#14`.
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
