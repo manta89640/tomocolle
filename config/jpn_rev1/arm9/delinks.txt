@@ -371,9 +371,45 @@ lib/NitroSDK/libraries/std/src/std_string.c:
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
 
+src/MainHeap.cpp:
+    complete
+    .text       start:0x0202678c end:0x02026a1c
+    .init       start:0x020b04d4 end:0x020b04ec
+    .ctor       start:0x020fc4a0 end:0x020fc4a4
+    .bss        start:0x0211f998 end:0x0211f9d4
+
+src/PadInput.cpp:
+    complete
+    .text       start:0x02026a1c end:0x02026b48
+    .init       start:0x020b04ec end:0x020b04f0
+    .ctor       start:0x020fc4a4 end:0x020fc4a8
+    .bss        start:0x0211f9d4 end:0x0211f9f8
+
+src/PaletteLoader.cpp:
+    .text       start:0x02027528 end:0x02027a08
+    .init       start:0x020b0504 end:0x020b0518
+    .ctor       start:0x020fc4ac end:0x020fc4b0
+    .rodata     start:0x020b599c end:0x020b59ec
+    .data       start:0x0210f628 end:0x0210f630
+    .bss        start:0x021213b8 end:0x021217d8
+
+src/OwnerInfo.cpp:
+    complete
+    .text       start:0x02027a08 end:0x02027a7c
+    .init       start:0x020b0518 end:0x020b051c
+    .ctor       start:0x020fc4b0 end:0x020fc4b4
+    .bss        start:0x021217d8 end:0x02121834
+
 src/sound/SoundSystem.cpp:
     complete
     .text       start:0x02028630 end:0x020287f8
+
+src/LcdPower.cpp:
+    complete
+    .text       start:0x0202b6d0 end:0x0202b840
+    .init       start:0x020b05d0 end:0x020b05d4
+    .ctor       start:0x020fc4c8 end:0x020fc4cc
+    .bss        start:0x02123434 end:0x02123440
 
 src/text/Font.cpp:
     complete

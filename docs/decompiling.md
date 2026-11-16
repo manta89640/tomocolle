@@ -724,6 +724,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
   does not (overlay 76's question pages).
 
+**A member loaded once where ours loads it again, or late**
+- If the original loads a member early, stores it in another member, and uses the loaded value after the store, read
+  it back from the member it was stored in. The compiler forwards the stored value and does not reload it:
+  `mPrevHeld = mHeld; mTrigger = (mPrevHeld ^ held) & held;`. Using `mHeld` twice loads it again after the store.
+  A local (`u32 prev = mHeld;`) loads it late, after the volatile reads (`PadInput::Update`).
+
 **A function inlined where the original calls it**
 - An inline constructor that the original's static initialiser calls out of line, emitted after the file's
   implicit destructors: `__attribute__((never_inline))` on the inline definition (`SceneMemory`, `EmptyScene.cpp`).

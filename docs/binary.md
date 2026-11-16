@@ -400,6 +400,95 @@ initialisers), `.rodata`, `.data` and `.bss`.
 - The fonts are in a file of their own: `gFonts` comes before `gTextObjResource` in memory, and the compiler puts it
   after when both are defined in one file.
 
+## The main program's static initialisers
+
+`.init` (`0x020B04C8` to `0x020B0810`) holds 26 static initialisers. `.ctor` (`0x020FC494` to `0x020FC4FC`) holds
+26 pointers to them, in the same order: the n-th initialiser's pointer is at `0x020FC494 + 4n`. Measured: the
+initialisers of the decompiled files are in the order of those files' `.text` and `.bss`. No file after
+`KeyboardCore.cpp` has one. So an initialiser lies between those of its neighbours, and a file's place in the code
+is bounded by theirs. "Measured" in the table below means the initialiser's code shows the object. "Inferred" means
+the file is placed by that order, and by which object of that part of `.bss` has an `Init` that `NitroMain` or
+`NitroStartUp` calls. A lone `bx lr` is a global whose class has a constructor that does nothing, as
+`gCardPullOutMonitor` shows. No code shows which object such an initialiser belongs to.
+
+| `.init` | Size | File (code) | What it constructs | |
+| --- | --- | --- | --- | --- |
+| `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `data_0211D604` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
+| `0x020B04CC` | 4 | The archive manager's (`0x02024370` to `0x020249FC`) | `bx lr`: `gArchiveManager` (`ArchiveManager_Init` from `NitroStartUp`) | inferred |
+| `0x020B04D0` | 4 | The graphics manager's (`0x020249FC` on) | `bx lr`: `gGraphicsManager` (0x10A4 bytes: `GraphicsManager_Init` clears 0x140, 0xC0, 0xEA0 = 0x48 entries of 0x34 from 0x204) | inferred |
+| `0x020B04D4` | 0x18 | `src/MainHeap.cpp` (`0x0202678C`, `operator new`, to `0x02026A1C`) | `gMainHeap` (0x3C bytes): stores 0 at 0x1C and 0x20, the frame heap and its memory (`MainHeap::CreateFrameHeap` sets them, `MainHeap::DestroyFrameHeap` clears them) | measured |
+| `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `data_0211F9D4` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
+| `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
+| `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `data_021213B8` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
+| `0x020B0518` | 4 | `src/OwnerInfo.cpp` (`0x02027A08` to `0x02027A7C`) | `bx lr`: `gOwnerInfo` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56), whose constructor is empty | measured: the file compiles to it |
+| `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `data_02121834` (0x624 bytes): stores 0 at 0x480 | measured |
+| `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
+| `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
+| `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `data_021223E4` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `func_0202a640` on the camera at +0x380 (`data_02122764`), `func_0202a96c` on four lights of 0xC at +0x3E8 (`data_021227CC`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
+| `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `data_021232E4` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
+| `0x020B05D0` | 4 | `src/LcdPower.cpp` (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `gLcdPower` (0xC bytes: `LcdPower::Update` turns the LCDs off after 20 frames of the lid closed and on after 10 open), whose constructor is empty | measured: the file compiles to it |
+| `0x020B05D4` | 4 | `GameData`'s (`0x0202B840` to `Font.cpp`, `0x0202D5A4`) | `bx lr`: `gGameData` (`func_0202b840` from `NitroMain`) | inferred |
+| `0x020B05D8` | 0x2C | `src/text/Font.cpp` | `gFonts`: three `Font`s through `__cxa_vec_ctor` | measured |
+| `0x020B0604` | 4 | `src/CardPullOutMonitor.cpp` | `bx lr`: `gCardPullOutMonitor` | measured |
+| `0x020B0608` | 0x48 | `src/text/MessageText.cpp` | `gMessageFiles` (an array of one `MessageFile`), destructor registered | measured |
+| `0x020B0650` | 0x24 | MessageWindow's (at least `0x02032FB8` to `0x02034F94`) | A `const` pair at `data_021102D8` (`.data`, zero in the ROM) copied from words 0x30 and 0x34 of `data_020B5AF4`, a table of the file's `.rodata` | measured |
+| `0x020B0674` | 0x2C | `src/sound/ValueRamp.cpp` | `gSoundManager`, destructor registered | measured |
+| `0x020B06A0` | 0x2C | `src/scene/SceneManager.cpp` | `gSceneManager`, destructor registered | measured |
+| `0x020B06CC` | 0x14 | `src/scene/EmptyScene.cpp` | `gSceneMemory` (`SceneMemory`'s constructor) | measured |
+| `0x020B06E0` | 0x14 | `src/scene/WirelessTestScene.cpp` | `sCharacter` (`SavedCharacter`'s constructor) | measured |
+| `0x020B06F4` | 0x88 | `src/scene/MiiListMenuScene.cpp` | `const` positions filled from other constants (`sMiiMenuTextPositions`) | measured |
+| `0x020B077C` | 0x64 | `src/scene/MiiListScene.cpp` | `const` tables filled from other constants (`sTabSequences`) | measured |
+| `0x020B07E0` | 0x30 | `src/keyboard/KeyboardCore.cpp` | `const` kana pairs filled from other constants (`sKanaPairDakuten`) | measured |
+
+The first fifteen initialisers are the files of `0x0202320C` to `0x0202D5A4`. That is the gap after the run-time
+library (`_ExitProcess`, `0x02023200`, is the library's last function) and before `Font.cpp`. Each of those files
+except `SoundSystem.cpp` has its own part of `.bss`, in the same order (measured, from the addresses the code
+uses):
+
+| `.bss` | Size | Used by | |
+| --- | --- | --- | --- |
+| `0x0211D604` | 0xF8 | `ScreenControl_Init` (`0x0202320C`) and the functions up to `0x02024370`, which take it as `this` | ScreenControl |
+| `0x0211D6FC` to `0x0211E8F4` | | `0x02024370` to `0x020249FC` (`data_0211D6FC`, `data_0211DFF4`, ..., and `gArchiveManager` as `this`) | Archives |
+| `0x0211E8F4` | 0x10A4 | `GraphicsManager_Init`. The sprites use its 0x34-byte entries at their own addresses (`data_0211EAF8`, ...) | Graphics |
+| `0x0211F998` | 0x3C | `0x0202678C` to `0x02026A1C`: an expanded heap at 0, a mutex at 4, a frame heap and its memory at 0x1C and 0x20, a mutex at 0x24 | Main heap |
+| `0x0211F9D4` | 0x24 | `PadInput::Init`, `PadInput::Update`; +0x1C is the lid's state | `PadInput.cpp` |
+| `0x0211F9F8`, `0x0211FA10` | 0x18, 0x19A8 | The OAM functions (`0x02026EEC` to `0x02027518`); `gObjResourceManager` (`func_02027480` uses +0x198C), with `data_02120948`, `data_02120A10` and `data_021212A8` inside it | Sprites and OAM |
+| `0x021213B8` | 0x420 | `PaletteLoader_Init` (`0x02027528`, clears 0x414 to 0x41C) | `PaletteLoader.cpp` (also `.rodata` `0x020B599C` to `0x020B59EC`, the table of 20 loaders, and `.data` `0x0210F628` to `0x0210F630`, `".NCLR"`) |
+| `0x021217D8` | 0x5C | `gOwnerInfo` (`OwnerInfo::Init`) | `OwnerInfo.cpp` |
+| `0x02121834` | 0x624 | `ScreenLoader_Init` (clears 0x484 and 0x5C4, and eight 0x1C entries at 0x4F8) | Screens |
+| `0x02121E58`, `0x02121EAC`, `0x02121EB8` | 0x54, 0xC, 0x2C | `gTouchInput` (`TouchInput_Init`, `0x02028880`); `gRandom`; the path buffer of `func_02028af4` | Touch, random numbers, paths (two or three files) |
+| `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
+| `0x021223D8` to `0x021232E4` | | The destructor record, `data_021223E4` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `data_02123024` (`0x020299E8`, `0x02029D40`) | Models |
+| `0x021232E4` | 0x150 | `func_0202b2e8`, `func_0202b4dc` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
+| `0x02123434` | 0xC | `gLcdPower` (`LcdPower::Init`, `LcdPower::Update`) | `LcdPower.cpp` |
+| `0x02123440` to `0x02138E1C` | | `data_02123440`, `data_02123444`, `gGameData` | GameData |
+
+Inferred from this:
+
+- Twelve file boundaries in that gap. The game code begins at `0x0202320C`. The archive manager is `0x02024370` to
+  `0x020249FC`. The graphics code ends at `0x0202678C`: its last two functions, `0x02026754` and `0x02026770`, are
+  deleting destructors, which come at the end of a file. The heap is `0x0202678C` to `0x02026A1C` (cut and decompiled: `src/MainHeap.cpp`). The pad is
+  `0x02026A1C` to `0x02026B48` (cut and decompiled: `src/PadInput.cpp`). The sprites and OAM are `0x02026B48` to `0x02027528`. The palettes are `0x02027528`
+  to `0x02027A08` (cut and decompiled: `src/PaletteLoader.cpp`). The owner information is `0x02027A08` to `0x02027A7C` (cut and decompiled: `src/OwnerInfo.cpp`). The screens are `0x02027A7C` to
+  `0x02028630`. Touch starts at `0x020287F8`. The characters start at `0x02028F20`. The models end at `0x0202B0A8`:
+  its last functions are the destructors and the constructor that the initialiser uses, and the implicit destructor
+  `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840` (cut and decompiled: `src/LcdPower.cpp`).
+  GameData is `0x0202B840` to `0x0202D5A4`. The graphics code between `0x020249FC` and `0x0202678C` may be more than
+  one file: only one part of `.bss` belongs to it.
+- `data_021223E4` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the
+  camera at +0x380 and four lights at +0x3E8. The initialiser computes the lights' end from `data_021223E4`, and
+  `ModelResources_Init` writes +0x418 and +0x41C. The registered destructor destroys only the array, because the
+  camera and the lights have trivial destructors. `func_0202a640` and `func_0202a96c` set a camera's and a light's
+  defaults: either they are the constructors, out of line, or inline constructors call them.
+- MessageWindow's file has `.init` `0x020B0650` to `0x020B0674`, `.ctor` `0x020FC4DC` to `0x020FC4E0`, `.rodata`
+  `0x020B5AEC` to `0x020B5C44` (every object there is used by `func_02032fb8` to `func_020341d4`), `.data`
+  `0x021102D8` to `0x021102F0` (the pair, then `MessageWindow`'s virtual table at `0x021102E0`, whose two functions
+  are `0x02034A94` and `0x02034BC4`), and no `.bss`. `wh.cpp`'s `.data` ends at `0x021102D8` and `TextUtil.cpp`'s
+  begins at `0x021102F0`. Its initialiser is the pattern of `MiiListMenuScene.cpp`: a `const` aggregate initialised
+  from another constant, `{data_020B5AF4[k].a, data_020B5AF4[k].b}` or similar.
+- When one of these files is cut, its `.init` and `.ctor` ranges are in the table above, and the initialiser's name
+  becomes `__sinit_<File>.cpp`. Until then the initialisers keep their addresses as names.
+
 ## The apartment scene
 
 Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
