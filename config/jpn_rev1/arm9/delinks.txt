@@ -655,7 +655,9 @@ lib/MSL_C/mem_funcs.c:
     .text       start:0x020153ec end:0x0201549c
 
 lib/MSL_C/printf.c:
-    .text       start:0x0201549c end:0x020175a8
+    complete
+    .text       start:0x0201549c end:0x020175d0
+    .data       start:0x0210f3ac end:0x0210f3ec
 
 lib/MSL_C/scanf.c:
     .text       start:0x020175d0 end:0x020188f4
