@@ -2955,11 +2955,12 @@ void RoomScene::UpdateMeeting() {
     StartMeeting(0, 1);
 }
 
-// Not matching yet: same size (0x6a0), 75 instructions differ, of two kinds. (1) Stack: the original has the place
-// that the first loop clamps at sp+0x78, above posFirst (0x70) and posSecond (0x68); here it is below them (as the
-// local of ClampOwnPosToRect4E4, or as a local of the loop's body). Declared at the top of the function and assigned
-// in the loop, it is where it should be but costs a third copy (frame 0xa8). (2) Registers: the original has
-// first * 0x2d98 in r9 and the two characters in r7 and r8; mine r7, and r8 and r9.
+// Not matching yet: same size (0x6a0) and the same registers (the loop reads pair[i] at each use: with a
+// `character` local, first * 0x2d98 and the two characters took other registers); 19 instructions differ, in the
+// stack offsets only. The original has the place that the first loop clamps at sp+0x78, above posFirst (0x70) and
+// posSecond (0x68), and GetFloorPos's copy for it at sp+0x40; here the place is ClampOwnPosToRect4E4's local, below
+// them. Declared at the top of the function and assigned in the loop it is where it should be, but the assignment
+// from GetFloorPos costs a third copy (frame 0xa8), whether written directly or through an inline.
 // @0x02151554
 void RoomScene::StartMeeting(int first, int second) {
     RoomCharacter *pair[2];
@@ -2978,9 +2979,8 @@ void RoomScene::StartMeeting(int first, int second) {
         func_02091598(&mCharacters[first], mCharacters[second].GetFloorPos());
         func_02091598(&mCharacters[second], mCharacters[first].GetFloorPos());
         for (int i = 0; i < 2; i++) {
-            RoomCharacter *character = pair[i];
-            if (character->ClampOwnPosToRect4E4()) {
-                character->SetState(1);
+            if (pair[i]->ClampOwnPosToRect4E4()) {
+                pair[i]->SetState(1);
             }
         }
     } else if (mCharacters[first].mState == 10) {
