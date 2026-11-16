@@ -1,13 +1,13 @@
-_ZN7Scene0C12StartLoadingEv kind:function(arm,size=0x4) addr:0x02149a40
-_ZN7Scene0C4InitEv kind:function(arm,size=0xa4) addr:0x02149a44
-_ZN7Scene0C6UpdateEv kind:function(arm,size=0x37c) addr:0x02149ae8
-_ZN7Scene0C4DrawEv kind:function(arm,size=0x4) addr:0x02149e64
-_ZN7Scene0C4ExitEv kind:function(arm,size=0x2c) addr:0x02149e68
+_ZN17NameSortTestScene12StartLoadingEv kind:function(arm,size=0x4) addr:0x02149a40
+_ZN17NameSortTestScene4InitEv kind:function(arm,size=0xa4) addr:0x02149a44
+_ZN17NameSortTestScene6UpdateEv kind:function(arm,size=0x37c) addr:0x02149ae8
+_ZN17NameSortTestScene4DrawEv kind:function(arm,size=0x4) addr:0x02149e64
+_ZN17NameSortTestScene4ExitEv kind:function(arm,size=0x2c) addr:0x02149e68
 func_ov001_02149e94 kind:function(arm,size=0x28) addr:0x02149e94
 func_ov001_02149ebc kind:function(arm,size=0x18) addr:0x02149ebc
 func_ov001_02149ed4 kind:function(arm,size=0x4) addr:0x02149ed4
-_ZN7Scene0CD1Ev kind:function(arm,size=0x4) addr:0x02149ed8
-_ZN7Scene0CD0Ev kind:function(arm,size=0x14) addr:0x02149edc
-_ZTV7Scene0C kind:data(any) addr:0x02149f00
+_ZN17NameSortTestSceneD1Ev kind:function(arm,size=0x4) addr:0x02149ed8
+_ZN17NameSortTestSceneD0Ev kind:function(arm,size=0x14) addr:0x02149edc
+_ZTV17NameSortTestScene kind:data(any) addr:0x02149f00
 data_ov001_02149f10 kind:data(any) addr:0x02149f10 ambiguous
 gText_KaTildeVuKeE kind:data(any) addr:0x02149f24

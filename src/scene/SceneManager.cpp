@@ -18,11 +18,11 @@
 // The scene classes of the constructors 0x0203de78..0x02040578 (gap38-a)
 #include "../overlays/ov000/TextTestScene.h"
 #include "../overlays/ov105/NintendoLogoScene.h"
-#include "../overlays/ov002/Scene02.h"
+#include "../overlays/ov002/FaceTestScene.h"
 #include "../overlays/ov003/Scene03.h"
 #include "../overlays/ov004/Scene04.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
-#include "../overlays/ov001/Scene0C.h"
+#include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov077/Scene17.h"
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
@@ -259,7 +259,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x02:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(2));
-        return new Scene02(sceneId);
+        return new FaceTestScene(sceneId);
     case 0x03:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(3));
@@ -296,7 +296,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x0C:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(1));
-        return new Scene0C(sceneId);
+        return new NameSortTestScene(sceneId);
     case 0x0F:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(6));
@@ -821,7 +821,7 @@ NintendoLogoScene::NintendoLogoScene(int sceneId) : Scene(sceneId) {}
 
 TextTestScene::TextTestScene(int sceneId) : Scene(sceneId) {}
 
-Scene02::Scene02(int sceneId) : Scene(sceneId) {}
+FaceTestScene::FaceTestScene(int sceneId) : Scene(sceneId) {}
 
 Scene03::Scene03(int sceneId) : Scene(sceneId) {}
 
@@ -831,7 +831,7 @@ TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
 // (Scenes 0x06 to 0x08, 0x10, 0x09 to 0x0B: gap38-c's test scenes)
 
-Scene0C::Scene0C(int sceneId) : Scene(sceneId) {}
+NameSortTestScene::NameSortTestScene(int sceneId) : Scene(sceneId) {}
 
 // (Scene 0x0F; scenes 0x0E and 0x16: gap38-c's test scenes)
 
