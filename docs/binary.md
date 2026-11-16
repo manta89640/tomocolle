@@ -1193,6 +1193,48 @@ addresses):
   `func_02075f50` fills, and the eleventh entry of the array at +0x228 lies over the pointer at +0x2A0 that
   `func_02072c5c` links its list through.
 
+The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/NFL/NFL.c`):
+
+- **The work area is 0xF4 bytes.** `main` calls `func_02072a58(work, resource, buffer, 0x4000, desc, 0x7F, 0)` with
+  the work area at `data_02115480` and the buffer at `data_02115574`, right after it. The function copies the
+  three words of `desc` (`data_020fc504`) to +0x0, +0x4 and +0x68 (the mode), keeps the buffer and its size at +0x78
+  and +0x7C, sets the state of each of the first five streams at +0xA0 to 0 or 7 by the bits 2, 4, 8, 0x20, 0x40 of
+  the flags (`data_020b68d0`), then the first's to 0 and the seventh's to 7 in mode 7 (else 0), and the texture base
+  at +0x8 to `desc[0] + 0x200 + 0x800` per enabled stream (a quarter of that in mode 3, where the palette base at
+  +0xC gets 0x20 more).
+- **Its objects.** `func_02072c5c` appends an object to the list at +0x6C, at most +0x70 of them (which
+  `func_02072d8c` counts up and `func_02072dc0` down); `func_02072dc0` also takes the last one off that list and off
+  the second list at +0x74 (linked through +0x17C of the objects). `func_02073060` returns the n-th, `func_02072f34`
+  sets its +0x170 to 4 and `func_02072fc4` finds the first that has 4 there.
+- **Expressions.** `func_020728fc(index, kind)` gives the n-th object one of seven expressions: kind 0 is
+  `func_0207183c`, 1 to 6 `func_02071f24`, `func_0207219c`, `func_02072418`, `func_02072694`, `func_02071a78` and
+  `func_02071cdc`, each only if its bit of +0x16C is set (kinds 1 to 6: 0x2, 0x4, 0x8, 0x10, 0x20, 0x40); the kind
+  is kept at +0x168 (`func_02072a28`). Each turns the eyes (the patches at 0x110 and 0x128 of the object) and the
+  eyebrows (0xE0, 0xF8) through `func_02071730`, which rewrites the matrix, texture and palette commands that the
+  display list was built with places for, and writes the eyebrows' height into the two translation commands at
+  0x158 and 0x160. The angles are `rotation + table[type] - 32` in 32nds of a turn, with `data_020b689c` for the
+  eyes and `data_020b6884` for the eyebrows, from the object's halfwords at 0x80 (eyebrow Y, eye rotation, eye
+  type, face type, eyebrow rotation, eyebrow type, as `func_0206ddb8` stores them); face types 2, 6 and 7 move the
+  eyebrows by 0x1E60. The other expressions change the rotations by up to two steps (clamped to 0..7 and 0..11)
+  and take some textures from the work area's six slots at +0x10. `data_020b689c` is also indexed by the eye
+  rotation in three of them, so what it is per index is not settled.
+- `func_020730fc` makes a create ID: bytes 0 and 1 zero, byte 2 a random number below 4 times 4 with bits 16-17
+  of the RTC time in seconds shifted down 5, bytes 3 and 4 that value's bits 8-15 and 0-7, bytes 5 to 7 the last
+  three of the MAC address. `func_020733a4` copies a valid Mii's names (as strings of 11 halfwords), create ID and
+  fields into another record, with height and build capped at 127 and the skin colour of `func_0206dcd0`.
+- **The second display list.** `func_020715ac` builds it from the seven 0x30-byte records of the context
+  (0x78..0x1C8): `func_0206ed94` for records 4 and 5, and 6 when the Mii has a mole; `func_020705d4` for 0 to 3.
+  Those two (6 KB and 4 KB, not written) place a part as a quad on the face: a 2x2 grid of points whose Z is taken
+  from the planes at `0x020B676C`, normals interpolated bilinearly over the 3x3 grids of points (`0x020B6818`) and
+  normals (`0x020B67AC`), their sum normalised and the quad rotated onto it (`MTX_RotAxis43` about the cross
+  product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`) whose +0x20 says the first of a pair
+  has set it.
+
+On the compiler: `func_0207183c` and `func_02071cdc` match only under `#pragma optimization_level 2` with
+`#pragma opt_common_subs off`, as `func_0206d4f8` does, and with each sine and cosine assigned through an `(fx16)`
+cast; without them the instructions are the same and the callee-saved registers are rotated. The five other
+expressions have the right instructions but for a clamp each (see the comments in the source).
+
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
 it is 2.0 SP2p2, the game SP2p3), and its function names.

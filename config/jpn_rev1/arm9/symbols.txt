@@ -4379,7 +4379,7 @@ data_020b6818 kind:data(any) addr:0x020b6818
 data_020b6884 kind:data(any) addr:0x020b6884
 data_020b689c kind:data(any) addr:0x020b689c
 data_020b68d0 kind:data(any) addr:0x020b68d0
-data_020b68d8 kind:data(any) addr:0x020b68d8
+sNFLDaysInMonth kind:data(any) addr:0x020b68d8
 data_020b690c kind:data(any) addr:0x020b690c
 data_020b691e kind:data(any) addr:0x020b691e
 data_020b6930 kind:data(any) addr:0x020b6930
