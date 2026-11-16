@@ -86,7 +86,11 @@ struct MiiEditSpriteB0 : public Sprite {
 // A sprite with something after it, 0x100 bytes (the face page and the voice page draw arrays of them)
 struct MiiEditSprite100 {
     /* 0x00 */ Sprite mSprite;
-    /* 0xAC */ u8 mUnknownAC[0x2C];
+    /* 0xAC */ u8 mUnknownAC[0x10];
+    /* 0xBC */ BOOL mUnknownBC; // The voice page reads the slider's value while it is set (func_020324e0)
+    /* 0xC0 */ u8 mUnknownC0[8];
+    /* 0xC8 */ BOOL mUnknownC8; // The voice page backs the record up while it is set
+    /* 0xCC */ u8 mUnknownCC[0xC];
     /* 0xD8 */ int mUnknownD8;  // The voice page sets it to 1
     /* 0xDC */ u8 mUnknownDC[0x18];
     /* 0xF4 */ int mUnknownF4;  // The voice page sets it to 14

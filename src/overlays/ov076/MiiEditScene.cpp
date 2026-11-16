@@ -1297,7 +1297,250 @@ void MiiEditVoicePage::func_ov076_02154690(MiiEditScene *scene) {
     SetState(1);
 }
 
-// FUNC_02155094
+extern "C" {
+BOOL func_02024004(ScreenControl *screens, int planes, int level); // The screens' fades (as overlay 72 calls them)
+BOOL func_02024118(ScreenControl *screens, int planes, int level);
+extern MATHRandContext16 gRandom;
+void func_020321ec(MiiEditSprite100 *slider);                // Updates it
+int func_020324e0(MiiEditSprite100 *slider, int min, int max); // Its value in the range
+BOOL func_02032414(MiiEditSprite100 *slider);
+void func_02032578(MiiEditSprite100 *slider, BOOL a);
+}
+
+// A random number from min to max (max not included)
+static inline s16 RandomInRange(int min, int max) {
+    return MATH_Rand16(&gRandom, max - min) + min;
+}
+
+// The voice presets: the six values of CharacterRecord::mVoice for each
+#define VOICE_PRESETS ((const s16(*)[6])data_020fbaac)
+
+void MiiEditVoicePage::func_ov076_02155094() {
+    switch (mState) {
+    case 0:
+    case 3:
+        if (func_02024118(&data_0211d604, 0x3F00, 2)) {
+            SetState(mState + 1);
+        }
+        break;
+    case 1:
+    case 2:
+        if (mState == 1) {
+            SetState(2);
+        }
+        if (func_02024004(&data_0211d604, 0x3F00, -2)) {
+            for (int i = 0; i < 22; i++) {
+                if (!func_0203133c(&mButtons[i])) {
+                    continue;
+                }
+                switch (i) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    for (int k = 0; k < 6; k++) {
+                        func_02098d68(&mScene->mCharacter, k, VOICE_PRESETS[i][k]);
+                    }
+                    ShowVoiceSettings();
+                    func_ov076_02157b94();
+                    mScene->mCharacter.mUnknown054Bits0 = i;
+                    for (int k = 0; k <= 7; k++) {
+                        if (i != k) {
+                            func_02031e28(&mButtons[k], FALSE);
+                        }
+                    }
+                    mTextButtons[0].mVisible = FALSE;
+                    break;
+                case 6:
+                    for (int k = 0; k < 5; k++) {
+                        func_02098d68(&mScene->mCharacter, k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                    }
+                    ShowVoiceSettings();
+                    func_ov076_02157b94();
+                    mScene->mCharacter.mUnknown054Bits0 = i;
+                    for (int k = 0; k <= 7; k++) {
+                        if (i != k) {
+                            func_02031e28(&mButtons[k], FALSE);
+                        }
+                    }
+                    mTextButtons[0].mVisible = FALSE;
+                    break;
+                case 7:
+                    (CharacterRecord &)mScene->mCharacter = mUnknown3B5C;
+                    func_ov076_02157b94();
+                    mScene->mCharacter.mUnknown054Bits0 = i;
+                    for (int k = 0; k <= 7; k++) {
+                        if (i != k) {
+                            func_02031e28(&mButtons[k], FALSE);
+                        }
+                    }
+                    mTextButtons[0].mVisible = TRUE;
+                    break;
+                }
+            }
+        }
+        if (func_0203133c(&mTextButtons[0])) {
+            func_ov076_02157b94();
+            func_02031e28(&mButtons[7], TRUE);
+            mScene->mCharacter.mUnknown054Bits0 = 7;
+            for (int k = 0; k <= 7; k++) {
+                if (k != 7) {
+                    func_02031e28(&mButtons[k], FALSE);
+                }
+            }
+            SetState(3);
+        }
+        {
+            int voice = mScene->mCharacter.mUnknown054Bits0;
+            if (voice >= 0 && voice <= 7) {
+                func_02031e28(&mButtons[voice], TRUE);
+            }
+        }
+        if (mScene->mButtons[3].mUnknownB8) {
+            BOOL selected = FALSE;
+            for (int k = 0; k <= 7; k++) {
+                if (func_02031d00(&mButtons[k])) {
+                    selected = TRUE;
+                    break;
+                }
+            }
+            if (selected) {
+                func_02031e88(&mScene->mButtons[3], FALSE);
+                mScene->mUnknown58DC = TRUE;
+                mScene->mSprite582C.func_ov076_0214bec8(3);
+            }
+        }
+        break;
+    case 4:
+        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+            break;
+        }
+        for (int i = 0; i < 22; i++) {
+            if (!func_0203133c(&mButtons[i])) {
+                continue;
+            }
+            switch (i) {
+            case 8:
+                mButtons[8].mVisible = FALSE;
+                (CharacterRecord &)mScene->mCharacter = mUnknown302C;
+                ShowVoiceSettings();
+                func_ov076_02157b94();
+                break;
+            case 9:
+                func_ov076_02157b94();
+                mButtons[9].mVisible = FALSE;
+                mButtons[10].mVisible = TRUE;
+                func_0203119c(&mButtons[9]);
+                func_0203119c(&mButtons[10]);
+                break;
+            case 10:
+                func_ov076_02157bc0();
+                mButtons[9].mVisible = TRUE;
+                mButtons[10].mVisible = FALSE;
+                func_0203119c(&mButtons[9]);
+                func_0203119c(&mButtons[10]);
+                break;
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+                func_ov076_0215707c();
+                for (int k = 0; k < 6; k++) {
+                    func_02098d68(&mScene->mCharacter, k, VOICE_PRESETS[i - 11][k]);
+                }
+                ShowVoiceSettings();
+                func_ov076_02157b94();
+                break;
+            case 17:
+                func_ov076_0215707c();
+                for (int k = 0; k < 5; k++) {
+                    func_02098d68(&mScene->mCharacter, k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                }
+                func_02098d68(&mScene->mCharacter, 5, MATH_Rand16(&gRandom, 4));
+                ShowVoiceSettings();
+                func_ov076_02157b94();
+                break;
+            case 18:
+            case 19:
+            case 20:
+            case 21:
+                func_ov076_0215707c();
+                func_02098d68(&mScene->mCharacter, 5, i - 18);
+                for (int k = 18; k <= 21; k++) {
+                    if (i != k) {
+                        func_02031e28(&mButtons[k], FALSE);
+                    }
+                }
+                func_ov076_02157b94();
+                break;
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (!func_0203133c(&mTextButtons[i])) {
+                continue;
+            }
+            switch (i) {
+            case 2:
+                mUnknown3B5C = mScene->mCharacter;
+                SetState(0);
+                break;
+            case 1:
+                (CharacterRecord &)mScene->mCharacter = mUnknown3B5C;
+                mScene->mCharacter.mUnknown054Bits0 = 7;
+                mScene->mTtsPlayer.StopEngine();
+                func_0209d898(&mScene->mCharacter, &mScene->mTtsPlayer);
+                SetState(0);
+                break;
+            }
+        }
+        for (int i = 0; i < 5; i++) {
+            func_020321ec(&mSprites2B2C[i]);
+            if (mSprites2B2C[i].mUnknownBC) {
+                int value;
+                if (i == 4) {
+                    value = func_020324e0(&mSprites2B2C[i], data_020fb940[i].mMax, data_020fb940[i].mMin);
+                } else {
+                    value = func_020324e0(&mSprites2B2C[i], data_020fb940[i].mMin, data_020fb940[i].mMax);
+                }
+                func_02098d68(&mScene->mCharacter, i, value);
+                func_ov076_02157b94();
+            }
+            if (func_02032414(&mSprites2B2C[i])) {
+                for (int k = 0; k < 5; k++) {
+                    if (k != i) {
+                        func_02032578(&mSprites2B2C[k], FALSE);
+                    }
+                }
+            }
+            if (mSprites2B2C[i].mUnknownC8) {
+                func_ov076_0215707c();
+            }
+        }
+        break;
+    }
+    switch (mSpeakStep) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        if (mScene->mTtsPlayer.IsEngineIdle() != TRUE) {
+            return;
+        }
+        func_ov076_02157508(mSpeakStep + 1);
+        return;
+    case 6:
+        if (mScene->mTtsPlayer.IsEngineIdle() != TRUE) {
+            return;
+        }
+        func_ov076_02157508(1);
+        break;
+    }
+}
 
 // Shows the page's controls for a state: 1 the first, 2 the second, 4 the sliders
 void MiiEditVoicePage::SetState(int state) {
