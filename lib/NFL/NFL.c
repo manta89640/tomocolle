@@ -1154,8 +1154,8 @@ int func_020749a4(const void *src, u32 offset, u32 size) {
 
 BOOL func_02074b68(u32 *arg);
 BOOL func_0207516c(u32 *arg);
-void func_02075528(NFLObj *obj, u32 *arg);
-void func_02075f50(NFLObj *obj, u32 *arg);
+BOOL func_02075528(NFLObj *obj, u32 *arg);
+BOOL func_02075f50(NFLObj *obj, u32 *arg);
 void func_020763e0(NFLObj *obj);
 
 // The library's work of a frame, which main calls every frame: 4 not set up, 0x14 and 0x13 busy, 3 nothing to do
@@ -1225,6 +1225,728 @@ void func_02074b34(const void *src, void *dest, const u16 *palette, u32 size, BO
     } else {
         MIi_CpuCopy32(src, dest, size);
     }
+}
+
+// What func_02074b68 copies to each of its six streams: a resource (func_0206cf6c's kind and index) and its size
+typedef struct NFLStreamSource {
+    int unk0;
+    int unk4;
+    u32 unk8;
+} NFLStreamSource;
+
+extern NFLStreamSource data_0211216c[];
+
+void *func_0206cf6c(int kind, int index);
+
+BOOL func_02074b68(u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    NFLWorkUnkA0 *stream = work->unkA0;
+    NFLStreamSource *source = data_0211216c;
+    int i;
+    u16 palette[16];
+
+    for (i = 0; i < 6; stream++, source++, i++) {
+        u32 extra;
+        u16 *pal;
+        u8 *src;
+        int size;
+        BOOL overflowB;
+        BOOL overflowA;
+
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (stream->unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+        extra = 0;
+        overflowB = FALSE;
+        overflowA = FALSE;
+        if (data_02145360->unk68 == 7) {
+            size = source->unk8 * 4;
+            if (source->unk0 == 2) {
+                func_0206a014(palette, 0);
+                pal = palette;
+            } else if (source->unk0 == 13) {
+                func_0206a1b4(palette, 0);
+                pal = palette;
+            } else {
+                pal = func_0206cf6c(12, 0);
+            }
+        } else {
+            size = source->unk8;
+            pal = NULL;
+        }
+        if (stream->unk8 == 0) {
+            u32 offset;
+
+            if (*pos + size > work->unk7C) {
+                overflowA = TRUE;
+                size = work->unk7C - *pos;
+            }
+            offset = work->unk84;
+            if (offset + size > work->unk7C) {
+                overflowB = TRUE;
+            }
+            if (!overflowB) {
+                src = func_0206cf6c(source->unk0, source->unk4);
+                func_02074b34(src, work->unk78 + offset, pal, size, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, size);
+            } else {
+                int over = work->unk84 + size - work->unk7C;
+                int n;
+
+                src = func_0206cf6c(source->unk0, source->unk4);
+                n = size - over;
+                func_02074b34(src, work->unk78 + work->unk84, pal, n, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, n);
+                if (data_02145360->unk68 == 7) {
+                    src += n / 4;
+                } else {
+                    src += n;
+                }
+                func_02074b34(src, work->unk78, pal, over, TRUE);
+                DC_FlushRange(work->unk78, over);
+            }
+            if (!overflowA) {
+                stream->unk8 = 2;
+            } else {
+                work->unk98 = size;
+                stream->unk8 = 3;
+            }
+            stream->unk0 = work->unk84;
+        } else {
+            src = func_0206cf6c(source->unk0, source->unk4);
+            switch (stream->unk8) {
+            case 3:
+                if (data_02145360->unk68 == 7) {
+                    src += (int)work->unk98 / 4;
+                } else {
+                    src += work->unk98;
+                }
+                size -= work->unk98;
+                extra = 0;
+                break;
+            case 4:
+                if (data_02145360->unk68 == 7) {
+                    src += (int)work->unk98 / 4;
+                } else {
+                    src += work->unk98;
+                }
+                size -= work->unk98;
+                extra = work->unk94;
+                break;
+            case 1:
+                extra = work->unk94;
+                if (data_02145360->unk68 == 7) {
+                    src += (int)extra / 4;
+                } else {
+                    src += extra;
+                }
+                size -= extra;
+                stream->unk0 = work->unk84;
+                break;
+            }
+            if (*pos + size > work->unk7C) {
+                overflowA = TRUE;
+                size = work->unk7C - *pos;
+            }
+            if (work->unk84 + size > work->unk7C) {
+                overflowB = TRUE;
+            }
+            if (!overflowA) {
+                stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                work->unk98 = 0;
+            } else {
+                switch (stream->unk8) {
+                case 3:
+                case 4:
+                    work->unk98 += size;
+                    break;
+                case 1:
+                    work->unk98 = work->unk94 + size;
+                    stream->unk8 = 4;
+                    break;
+                }
+            }
+            if (!overflowB) {
+                func_02074b34(src, work->unk78 + work->unk84, palette, size, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, size);
+            } else {
+                int over = work->unk84 + size - work->unk7C;
+                int n = size - over;
+
+                func_02074b34(src, work->unk78 + work->unk84, palette, n, TRUE);
+                DC_FlushRange(work->unk78 + work->unk84, n);
+                if (data_02145360->unk68 == 7) {
+                    src += n / 4;
+                } else {
+                    src += n;
+                }
+                func_02074b34(src, work->unk78, palette, over, TRUE);
+                DC_FlushRange(work->unk78, over);
+            }
+        }
+        switch (i) {
+        case 0:
+            stream->unk4 = data_02145360->unk10[0].unk0 + extra;
+            break;
+        case 1:
+            stream->unk4 = data_02145360->unk10[1].unk0 + extra;
+            break;
+        case 2:
+            stream->unk4 = data_02145360->unk10[2].unk0 + extra;
+            break;
+        case 3:
+            stream->unk4 = data_02145360->unk10[3].unk0 + extra;
+            break;
+        case 4:
+            stream->unk4 = data_02145360->unk10[4].unk0 + extra;
+            break;
+        case 5:
+            stream->unk4 = data_02145360->unk10[5].unk0 + extra;
+            break;
+        }
+        work->unk84 = (work->unk84 + size) % work->unk7C;
+        *pos += size;
+        }
+    }
+    if (data_02145360->unk68 != 7) {
+        func_0207516c(pos);
+    } else {
+        if (work->unk74 == NULL) {
+            return TRUE;
+        }
+        switch (work->unk74->unk170) {
+        case 0:
+            func_02075528(work->unk74, pos);
+            break;
+        case 1:
+            func_02075f50(work->unk74, pos);
+            break;
+        }
+    }
+    return TRUE;
+}
+
+// The seventh stream of the work area: 32 bytes of resource 12, 0 (the palette func_02074b68 uses)
+BOOL func_0207516c(u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+
+    if (work->unk68 != 7) {
+        NFLWorkUnkA0 *stream;
+
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (work->unkA0[6].unk8 >= 2 && work->unkA0[6].unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (work->unkA0[6].unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (work->unkA0[6].unk8 == 0 || work->unkA0[6].unk8 == 1 || work->unkA0[6].unk8 == 3 ||
+            work->unkA0[6].unk8 == 4) {
+            u32 extra = 0;
+            BOOL overflowB = FALSE;
+            BOOL overflowA = FALSE;
+            int size = 32;
+            u8 *src;
+
+            if (work->unkA0[6].unk8 == 0) {
+                u32 offset;
+
+                if (*pos + size > work->unk7C) {
+                    size = work->unk7C - *pos;
+                    overflowA = TRUE;
+                }
+                offset = work->unk84;
+                if (offset + size > work->unk7C) {
+                    overflowB = TRUE;
+                }
+                if (!overflowB) {
+                    u8 *buf = work->unk78;
+
+                    src = func_0206cf6c(12, 0);
+                    MIi_CpuCopy32(src, buf + offset, size);
+                    DC_FlushRange(work->unk78 + work->unk84, size);
+                } else {
+                    int over = offset + size - work->unk7C;
+                    int n;
+
+                    src = func_0206cf6c(12, 0);
+                    n = size - over;
+                    MIi_CpuCopy32(src, work->unk78 + work->unk84, n);
+                    DC_FlushRange(work->unk78 + work->unk84, n);
+                    MIi_CpuCopy32(src + n, work->unk78, over);
+                    DC_FlushRange(work->unk78, over);
+                }
+                if (!overflowA) {
+                    work->unkA0[6].unk8 = 2;
+                } else {
+                    work->unk98 = size;
+                    work->unkA0[6].unk8 = 3;
+                }
+                work->unkA0[6].unk0 = work->unk84;
+            } else {
+                src = func_0206cf6c(12, 0);
+                switch (work->unkA0[6].unk8) {
+                case 3:
+                    src += work->unk98;
+                    size -= work->unk98;
+                    break;
+                case 4:
+                    src += work->unk98;
+                    extra = work->unk94;
+                    size -= work->unk98;
+                    break;
+                case 1:
+                    extra = work->unk94;
+                    work->unkA0[6].unk0 = work->unk84;
+                    src += extra;
+                    size -= extra;
+                    break;
+                }
+                if (*pos + size > work->unk7C) {
+                    size = work->unk7C - *pos;
+                    overflowA = TRUE;
+                }
+                if (work->unk84 + size > work->unk7C) {
+                    overflowB = TRUE;
+                }
+                if (!overflowA) {
+                    work->unkA0[6].unk8 = work->unkA0[6].unk8 == 3 ? 2 : 5;
+                    work->unk98 = 0;
+                } else {
+                    switch (work->unkA0[6].unk8) {
+                    case 3:
+                    case 4:
+                        work->unk98 += size;
+                        break;
+                    case 1:
+                        work->unk98 = work->unk94 + size;
+                        work->unkA0[6].unk8 = 4;
+                        break;
+                    }
+                }
+                if (!overflowB) {
+                    MIi_CpuCopy32(src, work->unk78 + work->unk84, size);
+                    DC_FlushRange(work->unk78 + work->unk84, size);
+                } else {
+                    int over = work->unk84 + size - work->unk7C;
+                    int n = size - over;
+
+                    MIi_CpuCopy32(src, work->unk78 + work->unk84, n);
+                    DC_FlushRange(work->unk78 + work->unk84, n);
+                    if (data_02145360->unk68 == 7) {
+                        src += n / 4;
+                    } else {
+                        src += n;
+                    }
+                    MIi_CpuCopy32(src, work->unk78, over);
+                    DC_FlushRange(work->unk78, over);
+                }
+            }
+            work->unk84 = (work->unk84 + size) % work->unk7C;
+            work->unkA0[6].unk4 = data_02145360->unk10[5].unk4 + extra;
+            *pos += size;
+        }
+    }
+    if (*pos >= work->unk7C) {
+        return TRUE;
+    }
+    if (work->unk74 == NULL) {
+        return TRUE;
+    }
+    switch (work->unk74->unk170) {
+    case 0:
+        func_02075528(work->unk74, pos);
+        break;
+    case 1:
+        func_02075f50(work->unk74, pos);
+        break;
+    }
+    return TRUE;
+}
+
+// What func_02075528 copies to each of an object's eleven streams: a resource kind (func_0206cf6c's) and its size
+typedef struct NFLObjSource {
+    int unk0;
+    u32 unk4;
+} NFLObjSource;
+
+extern NFLObjSource data_021121b4[];
+
+void func_0206cd9c(u16 *palette, const s16 *params);
+void func_0206cc30(u16 *palette);
+
+BOOL func_02075528(NFLObj *obj, u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    s16 *params = obj->unk180;
+    NFLWorkUnkA0 *stream = obj->unk1A4;
+    int i;
+    u16 palette[64];
+
+    for (i = 0; i < 11; stream++, i++) {
+        int kind;
+        int index;
+        u16 *pal;
+        u8 *src;
+        int size;
+        BOOL overflowB;
+        BOOL overflowA;
+        BOOL arg4;
+
+        if (*pos >= work->unk7C) {
+            return TRUE;
+        }
+        if (!work->unk9C) {
+            if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                work->unk9C = TRUE;
+            } else if (stream->unk8 <= 1) {
+                work->unk88 = 0;
+                work->unk80 = 0;
+                work->unk84 = 0;
+                *pos = 0;
+                work->unk9C = TRUE;
+            }
+        }
+        if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+            kind = data_021121b4[i].unk0;
+            index = stream->unk4;
+            overflowB = FALSE;
+            overflowA = FALSE;
+            arg4 = TRUE;
+            pal = data_02145360->unk68 == 7 ? palette : NULL;
+            if (data_02145360->unk68 == 7) {
+                if (kind == 21) {
+                    size = 0x80;
+                } else {
+                    size = data_021121b4[i].unk4 * 4;
+                }
+            } else {
+                size = data_021121b4[i].unk4;
+            }
+            switch (kind) {
+            case 21:
+                if (data_02145360->unk68 == 7) {
+                    func_0206cd9c(palette, params);
+                } else {
+                    func_0206cc30(palette);
+                }
+                if (stream->unk8 == 0) {
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(palette, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(palette, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32((u8 *)palette + over, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                    stream->unk0 = work->unk84;
+                } else {
+                    u8 *p = (u8 *)palette;
+
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        size -= obj->unk178;
+                        p += obj->unk178;
+                        break;
+                    case 1:
+                        p += obj->unk174;
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 4;
+                            break;
+                        }
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32(p + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+                break;
+            case 2:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a014(pal, params[8]);
+                }
+                break;
+            case 3:
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[6]);
+                }
+                break;
+            case 13:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a1b4(pal, params[10]);
+                }
+                break;
+            case 14:
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[14]);
+                }
+                break;
+            case 8:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a99c(pal, params[12]);
+                }
+                break;
+            case 1:
+                switch (index) {
+                case 2:
+                    index = 0;
+                    break;
+                case 3:
+                    index = 1;
+                    break;
+                }
+                if (data_02145360->unk68 == 7) {
+                    func_02069de4(pal, params[14]);
+                }
+                break;
+            case 5:
+                if (data_02145360->unk68 == 7) {
+                    func_0206a2e4(pal, params[2]);
+                }
+                arg4 = FALSE;
+                break;
+            case 10:
+                if (index == 34 || index == 57) {
+                    switch (index) {
+                    case 34:
+                        index = 0;
+                        break;
+                    case 57:
+                        index = 1;
+                        break;
+                    }
+                    if (data_02145360->unk68 == 7) {
+                        func_0206a894(pal, params[0]);
+                    }
+                    kind = 19;
+                    arg4 = FALSE;
+                } else {
+                    switch (index) {
+                    case 5:
+                        index = 0;
+                        break;
+                    case 7:
+                        index = 1;
+                        break;
+                    case 24:
+                        index = 2;
+                        break;
+                    case 29:
+                        index = 3;
+                        break;
+                    case 42:
+                        index = 4;
+                        break;
+                    case 53:
+                        index = 5;
+                        break;
+                    case 58:
+                        index = 6;
+                        break;
+                    case 69:
+                        index = 7;
+                        break;
+                    case 71:
+                        index = 8;
+                        break;
+                    }
+                    if (data_02145360->unk68 == 7) {
+                        func_02069de4(pal, params[4]);
+                    }
+                    if (params[3] == 29) {
+                        arg4 = TRUE;
+                    } else {
+                        arg4 = FALSE;
+                    }
+                }
+                break;
+            case 17:
+                if (data_02145360->unk68 == 7) {
+                    pal = func_0206cf6c(12, 0);
+                }
+                break;
+            }
+            if (kind != 21) {
+                if (stream->unk8 == 0) {
+                    u32 offset;
+
+                    stream->unk0 = work->unk84;
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    offset = work->unk84;
+                    if (offset + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        src = func_0206cf6c(kind, index);
+                        func_02074b34(src, work->unk78 + offset, pal, size, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n;
+
+                        src = func_0206cf6c(kind, index);
+                        n = size - over;
+                        func_02074b34(src, work->unk78 + work->unk84, pal, n, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        if (data_02145360->unk68 == 7) {
+                            src += n / 4;
+                        } else {
+                            src += n;
+                        }
+                        func_02074b34(src, work->unk78, pal, over, arg4);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                } else {
+                    src = func_0206cf6c(kind, index);
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        if (data_02145360->unk68 == 7) {
+                            src += (int)obj->unk178 / 4;
+                        } else {
+                            src += obj->unk178;
+                        }
+                        size -= obj->unk178;
+                        break;
+                    case 1:
+                        if (data_02145360->unk68 == 7) {
+                            src += (int)obj->unk174 / 4;
+                        } else {
+                            src += obj->unk174;
+                        }
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        func_02074b34(src, work->unk78 + work->unk84, pal, size, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        func_02074b34(src, work->unk78 + work->unk84, pal, n, arg4);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        if (data_02145360->unk68 == 7) {
+                            src += n / 4;
+                        } else {
+                            src += n;
+                        }
+                        func_02074b34(src, work->unk78, pal, over, arg4);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 4;
+                            break;
+                        }
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+            }
+        }
+    }
+    if (data_02145360->unk68 == 7) {
+        if (obj->unk17C != NULL) {
+            func_02075528(obj->unk17C, pos);
+        }
+    } else {
+        func_02075f50(obj, pos);
+    }
+    return TRUE;
 }
 
 // Takes obj out of the list at unk74 of the work area

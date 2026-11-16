@@ -13,26 +13,31 @@ typedef struct NFLCreateId {
 
 // Something the library keeps in a list from its work area (func_02072c5c): linked through unk2A0. The objects in
 // the list at unk74 of the work area are linked through unk17C, with a state at unk170 (func_020749e4).
-typedef struct NFLObj {
-    u8 unk0[0x170];
-    int unk170;
-    u8 unk174[0x17C - 0x174];
-    struct NFLObj *unk17C;
-    u8 unk180[0x2A0 - 0x180];
-    struct NFLObj *next;
-} NFLObj;
-
 typedef struct NFLWorkUnk10 {
     u32 unk0;
     u32 unk4;
     u32 unk8;
 } NFLWorkUnk10;
 
+// A stream of func_02074b68 and the like: where it is in the work area's buffer, a resource index or an address, and
+// its state (0 to 5)
 typedef struct NFLWorkUnkA0 {
     u32 unk0;
     u32 unk4;
     int unk8;
 } NFLWorkUnkA0;
+
+typedef struct NFLObj {
+    u8 unk0[0x170];
+    int unk170;
+    u32 unk174;
+    u32 unk178;
+    struct NFLObj *unk17C;
+    s16 unk180[0x12]; // The parameters func_02075528 makes its palettes from
+    NFLWorkUnkA0 unk1A4[11];
+    u8 unk228[0x2A0 - 0x228];
+    struct NFLObj *next;
+} NFLObj;
 
 // The work area the caller gives func_02072a58, which the library keeps in data_02145360
 typedef struct NFLWork {
