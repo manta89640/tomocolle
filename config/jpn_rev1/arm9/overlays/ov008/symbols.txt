@@ -1,15 +1,15 @@
-func_ov008_02149a40 kind:function(arm,size=0xac) addr:0x02149a40
-func_ov008_02149aec kind:function(arm,size=0x3dc) addr:0x02149aec
-func_ov008_02149ec8 kind:function(arm,size=0x154) addr:0x02149ec8
-func_ov008_0214a01c kind:function(arm,size=0x44) addr:0x0214a01c
-func_ov008_0214a060 kind:function(arm,size=0x68) addr:0x0214a060
+_ZN7Scene1912StartLoadingEv kind:function(arm,size=0xac) addr:0x02149a40
+_ZN7Scene194InitEv kind:function(arm,size=0x3dc) addr:0x02149aec
+_ZN7Scene196UpdateEv kind:function(arm,size=0x154) addr:0x02149ec8
+_ZN7Scene194DrawEv kind:function(arm,size=0x44) addr:0x0214a01c
+_ZN7Scene194ExitEv kind:function(arm,size=0x68) addr:0x0214a060
 func_ov008_0214a0c8 kind:function(arm,size=0x444) addr:0x0214a0c8
 func_ov008_0214a50c kind:function(arm,size=0x614) addr:0x0214a50c
 func_ov008_0214ab20 kind:function(arm,size=0x60) addr:0x0214ab20
-func_ov008_0214ab80 kind:function(arm,size=0x90) addr:0x0214ab80
-func_ov008_0214ac10 kind:function(arm,size=0x98) addr:0x0214ac10
+_ZN7Scene19D1Ev kind:function(arm,size=0x90) addr:0x0214ab80
+_ZN7Scene19D0Ev kind:function(arm,size=0x98) addr:0x0214ac10
 data_ov008_0214acc0 kind:data(any) addr:0x0214acc0
-data_ov008_0214acdc kind:data(any) addr:0x0214acdc ambiguous
+_ZTV7Scene19 kind:data(any) addr:0x0214acd4
 data_ov008_0214acf8 kind:data(any) addr:0x0214acf8
 data_ov008_0214ad18 kind:data(any) addr:0x0214ad18 ambiguous
 data_ov008_0214ad60 kind:data(any) addr:0x0214ad60

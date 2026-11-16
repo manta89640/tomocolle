@@ -1,9 +1,9 @@
 func_ov067_02149a40 kind:function(arm,size=0x1c) addr:0x02149a40
-func_ov067_02149a5c kind:function(arm,size=0xd4) addr:0x02149a5c
-func_ov067_02149b30 kind:function(arm,size=0x624) addr:0x02149b30
-func_ov067_0214a154 kind:function(arm,size=0x13c) addr:0x0214a154
-func_ov067_0214a290 kind:function(arm,size=0x78) addr:0x0214a290
-func_ov067_0214a308 kind:function(arm,size=0xc8) addr:0x0214a308
+_ZN18ChangeClothesScene12StartLoadingEv kind:function(arm,size=0xd4) addr:0x02149a5c
+_ZN18ChangeClothesScene4InitEv kind:function(arm,size=0x624) addr:0x02149b30
+_ZN18ChangeClothesScene6UpdateEv kind:function(arm,size=0x13c) addr:0x0214a154
+_ZN18ChangeClothesScene4DrawEv kind:function(arm,size=0x78) addr:0x0214a290
+_ZN18ChangeClothesScene4ExitEv kind:function(arm,size=0xc8) addr:0x0214a308
 func_ov067_0214a3d0 kind:function(arm,size=0x78) addr:0x0214a3d0
 func_ov067_0214a448 kind:function(arm,size=0x194) addr:0x0214a448
 func_ov067_0214a5dc kind:function(arm,size=0x3c) addr:0x0214a5dc
@@ -55,8 +55,8 @@ func_ov067_0214d044 kind:function(arm,size=0x44) addr:0x0214d044
 func_ov067_0214d088 kind:function(arm,size=0x24) addr:0x0214d088
 func_ov067_0214d0ac kind:function(arm,size=0x2c) addr:0x0214d0ac
 func_ov067_0214d0d8 kind:function(arm,size=0x30) addr:0x0214d0d8
-func_ov067_0214d108 kind:function(arm,size=0x78) addr:0x0214d108
-func_ov067_0214d180 kind:function(arm,size=0x80) addr:0x0214d180
+_ZN18ChangeClothesSceneD1Ev kind:function(arm,size=0x78) addr:0x0214d108
+_ZN18ChangeClothesSceneD0Ev kind:function(arm,size=0x80) addr:0x0214d180
 data_ov067_0214d200 kind:data(any) addr:0x0214d200
 data_ov067_0214d204 kind:data(any) addr:0x0214d204
 data_ov067_0214d208 kind:data(any) addr:0x0214d208
@@ -74,7 +74,7 @@ __sinit_ov067_0214d364 kind:function(arm,size=0xe4) addr:0x0214d364
 data_ov067_0214d460 kind:data(any) addr:0x0214d460
 data_ov067_0214d49c kind:data(any) addr:0x0214d49c
 data_ov067_0214d4c4 kind:data(any) addr:0x0214d4c4
-data_ov067_0214d4fc kind:data(any) addr:0x0214d4fc ambiguous
+_ZTV18ChangeClothesScene kind:data(any) addr:0x0214d4f4
 gStr_SCC_ov067 kind:data(any) addr:0x0214d518
 gStr_Scn_Scene_SceneChangeClothes_LZ_bin kind:data(any) addr:0x0214d51c
 gStr_TCM_ov067 kind:data(any) addr:0x0214d540

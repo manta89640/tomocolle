@@ -53,15 +53,12 @@ SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ev
 
 SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ev
 
-SCENE_STAND_IN(Scene19, 0x1F7A8); // func_0203f220
 
 SCENE_STAND_IN(FriendListScene, 0x7A3B8); // func_0203f350
 
 SCENE_STAND_IN(WirelessTestScene, 0xCC); // func_0203f654
 
-SCENE_STAND_IN(TestNg20Scene, 0x19FF8); // func_0203f694
 
-SCENE_STAND_IN(ChangeClothesScene, 0xD070); // func_0203f784
 
 SCENE_STAND_IN(Scene1E, 0x48F58); // func_0203f900
 

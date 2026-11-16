@@ -25,6 +25,9 @@
 #include "../overlays/ov001/Scene0C.h"
 #include "../overlays/ov077/Scene17.h"
 #include "../overlays/ov007/Scene18.h"
+#include "../overlays/ov008/Scene19.h"
+#include "../overlays/ov009/TestNg20Scene.h"
+#include "../overlays/ov067/ChangeClothesScene.h"
 // End of gap38-a's scene classes
 
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
@@ -835,6 +838,16 @@ Scene0C::Scene0C(int sceneId) : Scene(sceneId) {}
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
 Scene18::Scene18(int sceneId) : Scene(sceneId) {}
+
+// (RoomScene, TutorialRoomScene)
+
+Scene19::Scene19(int sceneId) : Scene(sceneId) {}
+
+// (FriendListScene; scene 0x1B: gap38-c's test scene)
+
+TestNg20Scene::TestNg20Scene(int sceneId) : Scene(sceneId) {}
+
+ChangeClothesScene::ChangeClothesScene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 
