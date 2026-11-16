@@ -589,7 +589,11 @@ def main():
     if result.returncode != 0:
         sys.exit(f"dsd json delinks failed:\n{result.stderr.strip()}")
     delinks = json.loads(result.stdout)
-    files = delinks["files"]
+    # Less the ITCM's gap once files of the main program claim all of its code (see tools/migrated_gaps.py)
+    sys.path.insert(0, "tools")
+    from migrated_gaps import migrated_gaps
+    migrated = migrated_gaps(arm9_config)
+    files = [f for f in delinks["files"] if f["name"] not in migrated]
     lcf_file = Path(delinks["arm9_lcf_file"])
     objects_file = Path(delinks["arm9_objects_file"])
     delink_outputs = sorted({f["delink_file"] for f in files})

@@ -96,6 +96,7 @@ lib/NitroSDK/libraries/gx/src/gxasm.c:
 
 lib/NitroSDK/libraries/os/src/os_irqHandler.c:
     .text       start:0x020068d8 end:0x0200694c
+    .itcm       start:0x01ff8000 end:0x01ff81e4
 
 lib/NitroSDK/libraries/os/src/os_irqTable.c:
     .text       start:0x0200694c end:0x02006a58
@@ -171,7 +172,9 @@ lib/NitroSDK/libraries/os/src/os_reset.c:
     .text       start:0x02008e2c end:0x02008eb4
 
 lib/NitroSDK/libraries/os/src/os_ownerInfo.c:
+    complete
     .text       start:0x02008eb4 end:0x02008f74
+    .rodata     start:0x020b4984 end:0x020b49a4
 
 lib/NitroSDK/libraries/os/src/os_vramExclusive.c:
     .text       start:0x02008f74 end:0x02009038
@@ -184,7 +187,9 @@ lib/NitroSDK/libraries/mi/src/mi_wram.c:
     .text       start:0x02009054 end:0x02009064
 
 lib/NitroSDK/libraries/mi/src/mi_dma.c:
+    complete
     .text       start:0x02009064 end:0x02009500
+    .itcm       start:0x01ff81e4 end:0x01ff831c
 
 lib/NitroSDK/libraries/mi/src/mi_dma_gxcommand.c:
     .text       start:0x02009500 end:0x020097e8

@@ -4213,7 +4213,7 @@ data_020b3810 kind:data(any) addr:0x020b3810
 FX_AtanIdxTable_ kind:data(any) addr:0x020b4810
 sTexPlttStartAddrTable kind:data(any) addr:0x020b4914 local
 sTexStartAddrTable kind:data(any) addr:0x020b4924 local
-data_020b4984 kind:data(any) addr:0x020b4984
+col_table$8275 kind:data(short[16]) addr:0x020b4984 local
 SNDi_DecibelTable kind:data(any) addr:0x020b4aa4
 VolumeTable kind:data(any) addr:0x020b51a4
 gText_Abu kind:data(any) addr:0x020b5478
