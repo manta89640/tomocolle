@@ -5607,7 +5607,7 @@ from:0x0203de64 kind:overlay_id to:64
 from:0x0203de68 kind:overlay_id to:97
 from:0x0203de70 kind:overlay_id to:107
 from:0x0203de98 kind:load to:0x02110970 add:0x8 module:main
-from:0x0203de9c kind:load to:0x02149be8 module:overlay(105)
+from:0x0203de9c kind:load to:0x02149be0 add:0x8 module:overlay(105)
 from:0x0203ded4 kind:arm_call to:0x0202da7c module:main
 from:0x0203dee8 kind:arm_call to:0x0202dd74 module:main
 from:0x0203def0 kind:arm_call to:0x0202d870 module:main
