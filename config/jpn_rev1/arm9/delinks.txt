@@ -353,6 +353,30 @@ src/sound/ValueRamp.cpp:
     complete
     .text       start:0x02036558 end:0x0203671c
 
+src/text/TextUtil.cpp:
+    .text       start:0x0203673c end:0x02039660
+    .data       start:0x021102f0 end:0x02110860
+
+src/text/SpeechWindow.cpp:
+    .text       start:0x02039660 end:0x020398e4
+    .rodata     start:0x020b5c54 end:0x020b5c5c
+
+src/save/SaveBlocks.cpp:
+    .text       start:0x020398e4 end:0x0203b748
+    .rodata     start:0x020b5c5c end:0x020b5cfc
+
+src/wireless/WirelessScanner.cpp:
+    .text       start:0x0203b748 end:0x0203bce0
+    .rodata     start:0x020b5cfc end:0x020b5d04
+    .bss        start:0x0213b6c0 end:0x0213b704
+
+src/scene/SceneManager.cpp:
+    .text       start:0x0203bce0 end:0x0204af20
+    .init       start:0x020b06a0 end:0x020b06cc
+    .ctor       start:0x020fc4e4 end:0x020fc4e8
+    .data       start:0x02110860 end:0x02110b94
+    .bss        start:0x0213b704 end:0x0213ba74
+
 src/scene/MiiListMenuScene.cpp:
     complete
     .text       start:0x0204fc74 end:0x02050884

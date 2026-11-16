@@ -5075,6 +5075,7 @@ statenames$8555 kind:data(any) addr:0x0210fde8 local
 @10178 kind:data(any) addr:0x021102bc local
 data_021102d8 kind:data(any) addr:0x021102d8
 data_021102e8 kind:data(any) addr:0x021102e8
+data_021102f0 kind:data(any) addr:0x021102f0
 gText_Go kind:data(any) addr:0x021103a8
 gText_Ni kind:data(any) addr:0x02110408
 gText_Ji kind:data(any) addr:0x02110564
@@ -5151,6 +5152,7 @@ data_02110b0c kind:data(any) addr:0x02110b0c
 data_02110b30 kind:data(any) addr:0x02110b30
 data_02110b54 kind:data(any) addr:0x02110b54
 data_02110b78 kind:data(any) addr:0x02110b78
+data_02110b94 kind:data(any) addr:0x02110b94
 data_02110b9c kind:data(any) addr:0x02110b9c
 gStr_DMN kind:data(any) addr:0x02110bb8
 gStr_Scn_Scene_SceneTestDrawMan_LZ_bin kind:data(any) addr:0x02110bbc
