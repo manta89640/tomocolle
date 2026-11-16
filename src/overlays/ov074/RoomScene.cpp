@@ -12451,20 +12451,23 @@ NamePanel::NamePanel() {
     SetState(STATE_IDLE);
 }
 
-// Not matching yet: 17 of 99 instructions differ, between the second InitObjForMessage and the first DrawAll: the
-// original computes the second text's character count with other registers and after loading the position's
-// constants, and orders the dead stores of SetPosition differently. The calls and their arguments are identical.
-// Tried: SetPosition on the sprite and on the canvas, the constants in locals, the count written out.
+// How many characters (tiles) of VRAM a sprite text canvas takes, with the canvas reached through a pointer, as in
+// overlay 73's copy of NamePanel::Init: read off the object, the second count is computed with other registers.
+static inline int GetObjCharCount(ObjTextCanvas &text) {
+    const NNSG2dCharCanvas *canvas = &text.mCanvas;
+    return ((canvas->areaWidth * canvas->areaHeight - 1) >> text.mVramMode) + 1;
+}
+
 // @0x0216c618
 int NamePanel::Init(int charOffset, MessageFile *file1, MessageFile *file2) {
     Sprite_Init(this, 1, 4, 128, 96, FALSE);
     mText1.InitObjForMessage(file1, 1, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
-    charOffset += mText1.GetCharCount();
+    charOffset += GetObjCharCount(mText1);
     mText2.InitObjForMessage(file2, 2, &gFonts[0].mFont, 0x10, charOffset, 0, 1, 0, 0, 15, NULL);
-    int count = mText2.GetCharCount();
-    mText1.SetPosition(FX32_CONST(38), FX32_CONST(8));
+    int count = GetObjCharCount(mText2);
+    mText1.SetPositionFromVec(FX32_CONST(38), FX32_CONST(8));
     mText1.DrawAll();
-    mText2.SetPosition(FX32_CONST(113), FX32_CONST(8));
+    mText2.SetPositionFromVec(FX32_CONST(113), FX32_CONST(8));
     mText2.DrawAll();
     SetState(STATE_SHOWN);
     return charOffset + count;

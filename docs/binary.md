@@ -272,7 +272,7 @@ initialisers), `.rodata`, `.data` and `.bss`.
 
 Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
 254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Decompiled in
-`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 247 functions match.
+`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 249 functions match.
 
 | Range | Holds |
 | --- | --- |
@@ -333,13 +333,13 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 7 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
+- 6 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` and
   `StartMeeting` (the callee-saved registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`, `NamePanel::Init`; in overlay 73
+  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`; in overlay 73
   `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
-  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Overlay 73's
-  `NamePanel::Init` matches, and its fix (the character counts read through a pointer to the canvas, and both text
-  positions set with `SetPositionFromVec`) is still to be carried over to overlay 74's byte-identical copy.
+  digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Both copies of
+  `NamePanel::Init` match: the character counts read through a pointer to the canvas, and both text positions set
+  with `SetPositionFromVec`.
 - The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
   `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
   order the compiler does give, by which its pool is reproduced.
