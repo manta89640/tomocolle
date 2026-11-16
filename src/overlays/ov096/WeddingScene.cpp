@@ -768,16 +768,18 @@ void WeddingCamera::Init(WeddingCharacter *first, WeddingCharacter *second) {
 }
 
 // Puts the camera 14 in front of the target, in the direction it was (or, coming back from another scene, in the
-// direction that scene left it)
-inline void WeddingCamera::SetDefaultTarget() {
-    SetTarget(sCameraTarget);
-}
-
+// direction that scene left it). The target is copied through a local and stored field by field: through
+// SetTarget, or with Restore as an inline, the three copies of vectors take one another's stack slots.
 void WeddingCamera::Reset(BOOL restore) {
     if (restore) {
-        Restore();
+        SetPosition(gSceneMemory.mCameraPosition);
+        SetTarget(gSceneMemory.mCameraTarget);
+        VEC_Subtract(&mPosition, &mTarget, &mPosition);
     }
-    SetDefaultTarget();
+    VecFx32 target = sCameraTarget;
+    mTarget.x = target.x;
+    mTarget.y = target.y;
+    mTarget.z = target.z;
     FloorPos direction = NormalizeXZ(mPosition.x - mTarget.x, mPosition.z - mTarget.z);
     mPosition.x = mTarget.x + direction.x * 14;
     mPosition.z = mTarget.z + direction.z * 14;
