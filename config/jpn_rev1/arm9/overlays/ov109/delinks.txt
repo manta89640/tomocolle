@@ -6,6 +6,7 @@
     .bss        start:0x021531e0 end:0x021556c0 kind:bss align:32
 
 src/overlays/ov109/TushinScene.cpp:
+    complete
     .text       start:0x02149a40 end:0x021524f8
     .rodata     start:0x021524f8 end:0x02152c10
     .init       start:0x02152c10 end:0x02152cdc

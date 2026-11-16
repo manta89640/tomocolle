@@ -1642,14 +1642,21 @@ Measured, about the compiler:
   used them were stripped by the link, which keeps the pooled statics they used; a stand-in function keeps them
   in the compiled object.
 
-Not done:
+Complete (round 4): all 77 functions match and the data is placed.
 
-- 6 functions differ, each with a comment saying how: `Update` (99.9%), `UpdateCharacters` (99.3%),
-  `ReceiveCharacter` (one `orr`'s operand order), `UpdateListWindow` (one register copy), `ReceiveWiiMii` (a -1
-  derived from a register holding 0) and `InitParticles` (registers of the last block). All are register choice
-  or order; no `opt_*` pragma or compiler build changes them.
-- `.data`: the three 4-byte strings of `sCharacterArchives` and the 12-byte group of its pool come out in another
-  order than the ROM's.
+- The last six functions were settings and forms of the source, not registers alone: `ReceiveWiiMii` and
+  `InitParticles` with `opt_dead_assignments off`, `UpdateCharacters` with it too and its animation lookup through
+  an inline forwarder, `Update` with `opt_propagation off` and its re-sorts through a forwarder, `UpdateListWindow`
+  and `ReceiveCharacter` with a volatile read (see decompiling.md).
+- Measured: the `.bss` has room the code does not use. `sSongs` starts 32-aligned (`ATTRIBUTE_ALIGN(32)` on it, the
+  only one of the large objects whose alignment leaves the code alone), `sTransfer` has 0x340 bytes (the 0x2C0 of
+  the character and 0x80 more; the static initialiser constructs the character with `SavedCharacter`'s C1, so it is
+  a member of a larger structure, not its base) and `sMiiData` 0x1D32 (room for 101 Miis; the overlay's `.bss` ends
+  at the next 32 bytes). Inferred: one spare 0x80-byte chunk for the transfer and one spare Mii.
+- The strings of `sCharacterArchives` and `sNgWords` are named arrays (`sArchive3HM`, `sNgWord00`...): only so can
+  their declarations be permuted into the ROM's order of each size, as the model of the data list says.
+- dsd's `data_ov109_02153201`, `0x02154e6c` and `0x02154f5c` were addresses that other modules' relocations only
+  seemed to share with overlay 109 (the main program's `0x020FA224`, now `module:overlay(90)`); they are gone.
 
 ## The keyboard's object
 

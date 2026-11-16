@@ -101,14 +101,59 @@ static const u32 sPageMessages[68] = {
     0x119, 0x11F, 0x11A, 0x11A, 0x122, 0x125, 0x112, 0x112, 0x111, 0x11E, 0x11D, 0x112,
 };
 // The archive names of the three characters
-static const char *sCharacterArchives[3] = { "3HM", "BI1", "SRM" };
+static char sArchiveSRM[] = "SRM";
+static char sArchive3HM[] = "3HM";
+static char sArchiveBI1[] = "BI1";
+static wchar_t sNgWord28[] = L"ニンピニン";
 // The words that a received character's texts must not be (IsNgWord compares each text with them, without its
 // trailing spaces and exclamation marks)
+static wchar_t sNgWord00[] = L"シネ";
+static wchar_t sNgWord36[] = L"ヤラセロ";
+static wchar_t sNgWord37[] = L"ヤリマン";
+static wchar_t sNgWord40[] = L"ロリコン";
+static wchar_t sNgWord06[] = L"インバイ";
+static const char *sCharacterArchives[3] = { sArchive3HM, sArchiveBI1, sArchiveSRM };
+static wchar_t sNgWord01[] = L"アイエキ";
+static wchar_t sNgWord17[] = L"シナジン";
+static wchar_t sNgWord35[] = L"メクラ";
+static wchar_t sNgWord10[] = L"オメコ";
+static wchar_t sNgWord25[] = L"ドカタ";
+static wchar_t sNgWord31[] = L"ブラク";
+static wchar_t sNgWord03[] = L"adhd";
+static wchar_t sNgWord02[] = L"セイエキ";
+static wchar_t sNgWord09[] = L"ウンチ";
+static wchar_t sNgWord34[] = L"オマンコ";
+static wchar_t sNgWord38[] = L"リョウジョク";
+static wchar_t sNgWord12[] = L"キチガイ";
+static wchar_t sNgWord04[] = L"fuck";
+static wchar_t sNgWord05[] = L"イヌゴロシ";
+static wchar_t sNgWord22[] = L"チンポ";
+static wchar_t sNgWord07[] = L"インモウ";
+static wchar_t sNgWord08[] = L"ウンコ";
+static wchar_t sNgWord29[] = L"ビッコ";
+static wchar_t sNgWord26[] = L"ドモリ";
+static wchar_t sNgWord11[] = L"カタワ";
+static wchar_t sNgWord33[] = L"マンコ";
+static wchar_t sNgWord30[] = L"フェラ";
+static wchar_t sNgWord19[] = L"チャンコロ";
+static wchar_t sNgWord27[] = L"ニグロ";
+static wchar_t sNgWord32[] = L"ペニス";
+static wchar_t sNgWord39[] = L"レイプ";
+static wchar_t sNgWord23[] = L"チンバ";
+static wchar_t sNgWord20[] = L"チンコ";
+static wchar_t sNgWord13[] = L"クロンボ";
+static wchar_t sNgWord14[] = L"コロス";
+static wchar_t sNgWord15[] = L"ゴウカン";
+static wchar_t sNgWord18[] = L"セックス";
+static wchar_t sNgWord16[] = L"サンゴクジン";
+static wchar_t sNgWord24[] = L"ツンボ";
+static wchar_t sNgWord21[] = L"チンチン";
 static const wchar_t *sNgWords[41] = {
-    L"シネ", L"アイエキ", L"セイエキ", L"adhd", L"fuck", L"イヌゴロシ", L"インバイ", L"インモウ", L"ウンコ", L"ウンチ", L"オメコ", L"カタワ",
-    L"キチガイ", L"クロンボ", L"コロス", L"ゴウカン", L"サンゴクジン", L"シナジン", L"セックス", L"チャンコロ", L"チンコ", L"チンチン", L"チンポ", L"チンバ",
-    L"ツンボ", L"ドカタ", L"ドモリ", L"ニグロ", L"ニンピニン", L"ビッコ", L"フェラ", L"ブラク", L"ペニス", L"マンコ", L"オマンコ", L"メクラ",
-    L"ヤラセロ", L"ヤリマン", L"リョウジョク", L"レイプ", L"ロリコン",
+    sNgWord00, sNgWord01, sNgWord02, sNgWord03, sNgWord04, sNgWord05, sNgWord06, sNgWord07, sNgWord08, sNgWord09,
+    sNgWord10, sNgWord11, sNgWord12, sNgWord13, sNgWord14, sNgWord15, sNgWord16, sNgWord17, sNgWord18, sNgWord19,
+    sNgWord20, sNgWord21, sNgWord22, sNgWord23, sNgWord24, sNgWord25, sNgWord26, sNgWord27, sNgWord28, sNgWord29,
+    sNgWord30, sNgWord31, sNgWord32, sNgWord33, sNgWord34, sNgWord35, sNgWord36, sNgWord37, sNgWord38, sNgWord39,
+    sNgWord40,
 };
 
 // Where the list window's texts are: on its items, 32 pixels left of and 6 above each (set by the static
@@ -128,10 +173,17 @@ static const int sPageLayouts[68] = {
     7, 5, 6, 7, 3, 4, 6, 7, -1, -1, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 6, 7,
 };
 
-// The Mii data of the residents, as they are sent (all 100 saved characters, empty ones cleared)
-static MiiData sMiiData[100];
-// The character sent or received
-static SavedCharacter sTransfer;
+// The Mii data of the residents, as they are sent (all 100 saved characters, empty ones cleared). The ROM's .bss
+// holds room for 101 (inferred: one more for a received Mii; nothing in the code addresses it).
+static MiiData sMiiData[101];
+// The character sent or received, with room for one more 0x80-byte chunk than the 0x2C0 bytes it is sent in (the
+// ROM's .bss has 0x340 bytes for it). The character is a member: the static initialiser constructs it with
+// SavedCharacter's complete-object constructor (C1), which a derived class would not.
+struct TransferBuffer {
+    SavedCharacter mCharacter;
+    u8 mSpare[0x80];
+};
+static TransferBuffer sTransfer;
 
 // The state of the wireless exchange: separate statics, which the compiler pools by size (a u8, the u16s, the
 // ints, then sParentTimers and sReceivedName). Those still named by address are used by nothing in the ROM but
@@ -169,7 +221,7 @@ static int sWiiSendResult;
 static int sSongsReceived;
 static int sParentTimers[3]; // Frames for which each found partner is still shown (600 when it is new)
 static wchar_t sReceivedName[21];
-static u8 sSongs[6][0x40]; // The songs sent with a character
+static u8 sSongs[6][0x40] ATTRIBUTE_ALIGN(32); // The songs sent with a character
 static WMBssDesc sParents[3]; // The partners found
 
 static inline void ClearText(MessageText *text) {
@@ -601,7 +653,7 @@ void TushinScene::ReloadCharacterFromResident(int i) {
 // @0x0214c3d0
 void TushinScene::ReloadCharacterFromReceived(int i) {
     CharacterRecord *record = &mCharacters[i];
-    *record = sTransfer;
+    *record = sTransfer.mCharacter;
     ReloadCharacter(i);
     SetUpCharacter(i);
 }
@@ -648,9 +700,9 @@ void TushinScene::Send(int kind) {
             return;
         }
         sSendChunk = 1;
-        ((SavedCharacter *)(&sTransfer))->Reset();
-        (CharacterRecord &)sTransfer = mResidents.mResidents[mResidents.mSelected];
-        WH_SendData(&sTransfer, 0x80, TushinScene_SendCallback);
+        ((SavedCharacter *)(&sTransfer.mCharacter))->Reset();
+        (CharacterRecord &)sTransfer.mCharacter = mResidents.mResidents[mResidents.mSelected];
+        WH_SendData(&sTransfer.mCharacter, 0x80, TushinScene_SendCallback);
         sSent = 0;
         return;
     case 1:
@@ -723,7 +775,7 @@ void TushinScene::UpdateSending() {
             sSendChunk = 0;
             Send(1);
         } else {
-            WH_SendData((u8 *)&sTransfer + sSendChunk * 0x80, 0x80, TushinScene_SendCallback);
+            WH_SendData((u8 *)&sTransfer.mCharacter + sSendChunk * 0x80, 0x80, TushinScene_SendCallback);
             sSendChunk++;
             sSent = 0;
         }
@@ -787,69 +839,69 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 // in the `orr`, as the original has it (every plain form loads the record's byte first).
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
-    if (IsInvalid(&sTransfer)) {
+    if (IsInvalid(&sTransfer.mCharacter)) {
         return 7;
     }
-    if (HasNgWord(&sTransfer) == TRUE) {
+    if (HasNgWord(&sTransfer.mCharacter) == TRUE) {
         return 7;
     }
     if (HasNgSongReceived() == TRUE) {
         return 7;
     }
-    sReceivedResident = FindResident(&sTransfer);
+    sReceivedResident = FindResident(&sTransfer.mCharacter);
     if (sReceivedResident != -1) {
-        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer)) {
+        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer.mCharacter)) {
             return 5;
         }
-        if (((SavedCharacter *)(&sTransfer))->IsMiiFromThisConsole()) {
+        if (((SavedCharacter *)(&sTransfer.mCharacter))->IsMiiFromThisConsole()) {
             return 3;
         }
-        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, sReceivedResident)) {
+        if (MiiData_GetSex(&sTransfer.mCharacter) != func_0202c604(&gGameData, sReceivedResident)) {
             return 6;
         }
         CharacterRecord record;
         func_0202c264(&gGameData, sReceivedResident, &record);
-        record.mMii = sTransfer.mMii;
-        if (sTransfer.mUnknown050Bit0 == 0) {
+        record.mMii = sTransfer.mCharacter.mMii;
+        if (sTransfer.mCharacter.mUnknown050Bit0 == 0) {
             if (record.mUnknown050Bit0 == 1) {
                 RefreshRecord(&record);
             }
             record.mUnknown050Bit0 = 0;
             for (int i = 0; i < 5; i++) {
-                record.mAnswers[i] = sTransfer.mAnswers[i];
+                record.mAnswers[i] = sTransfer.mCharacter.mAnswers[i];
             }
-            u32 bits = sTransfer.mBloodType;
+            u32 bits = sTransfer.mCharacter.mBloodType;
             if (bits != 4) {
                 record.mBloodType = bits;
             }
-            bits = sTransfer.mUnknown054Bits0;
+            bits = sTransfer.mCharacter.mUnknown054Bits0;
             record.mUnknown054Bits0 = bits;
-            bits = sTransfer.mOwnBirthMonth;
+            bits = sTransfer.mCharacter.mOwnBirthMonth;
             if (bits != 0) {
                 record.mOwnBirthMonth = bits;
             }
-            bits = sTransfer.mOwnBirthDay;
+            bits = sTransfer.mCharacter.mOwnBirthDay;
             if (bits != 0) {
                 record.mOwnBirthDay = bits;
             }
-            if (sTransfer.mName != NULL) {
-                MI_CpuCopy8(sTransfer.mName, record.mName, sizeof(record.mName));
+            if (sTransfer.mCharacter.mName != NULL) {
+                MI_CpuCopy8(sTransfer.mCharacter.mName, record.mName, sizeof(record.mName));
             }
-            if (sTransfer.mFamilyName != NULL) {
-                MI_CpuCopy8(sTransfer.mFamilyName, record.mFamilyName, sizeof(record.mFamilyName));
+            if (sTransfer.mCharacter.mFamilyName != NULL) {
+                MI_CpuCopy8(sTransfer.mCharacter.mFamilyName, record.mFamilyName, sizeof(record.mFamilyName));
             }
-            MI_CpuCopy8(sTransfer.mMotto, record.mMotto, sizeof(record.mMotto));
+            MI_CpuCopy8(sTransfer.mCharacter.mMotto, record.mMotto, sizeof(record.mMotto));
             for (int i = 0; i < 4; i++) {
-                MI_CpuCopy8(sTransfer.mMottos[i], record.mMottos[i], sizeof(record.mMottos[i]));
+                MI_CpuCopy8(sTransfer.mCharacter.mMottos[i], record.mMottos[i], sizeof(record.mMottos[i]));
             }
             for (int i = 0; i < 6; i++) {
-                record.mVoice[i] = sTransfer.mVoice[i];
+                record.mVoice[i] = sTransfer.mCharacter.mVoice[i];
             }
-            u8 received = *(volatile u8 *)&sTransfer.mUnknown299;
+            u8 received = *(volatile u8 *)&sTransfer.mCharacter.mUnknown299;
             record.mUnknown299 = record.mUnknown299 | received;
             int n = 0;
             for (int i = 0; i < 6; i++) {
-                if (sTransfer.GetSongSlot(i) == 0xFF) {
+                if (sTransfer.mCharacter.GetSongSlot(i) == 0xFF) {
                     continue;
                 }
                 u8 song = record.mSongSlots[i];
@@ -859,17 +911,17 @@ int TushinScene::ReceiveCharacter() {
                         mSongStoreFull = 1;
                     }
                 }
-                sTransfer.SetSongSlot(i, song);
+                sTransfer.mCharacter.SetSongSlot(i, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, sTransfer.GetSongSlot(i), sSongs[n]);
+                    func_0202c934(&gGameData, sTransfer.mCharacter.GetSongSlot(i), sSongs[n]);
                     SongEntry entry;
-                    entry.mSong = sTransfer.GetSongSlot(i);
+                    entry.mSong = sTransfer.mCharacter.GetSongSlot(i);
                     entry.Load(entry.mSong);
                     entry.SetNotesFromSlot(-1, i);
                     entry.Save(entry.mSong);
                 }
                 n++;
-                record.mSongSlots[i] = sTransfer.GetSongSlot(i);
+                record.mSongSlots[i] = sTransfer.mCharacter.GetSongSlot(i);
                 func_0202c28c(&gGameData, sReceivedResident, &record);
             }
         }
@@ -883,35 +935,35 @@ int TushinScene::ReceiveCharacter() {
     do {
         if (!func_0202c354(&gGameData, i)) {
             sReceivedResident = i;
-            ((SavedCharacter *)(&sTransfer))->Register();
+            ((SavedCharacter *)(&sTransfer.mCharacter))->Register();
             int n = 0;
             for (int j = 0; j < 6; j++) {
-                if (sTransfer.GetSongSlot(j) == 0xFF) {
+                if (sTransfer.mCharacter.GetSongSlot(j) == 0xFF) {
                     continue;
                 }
                 u8 song = func_0202ca70(&gGameData);
                 if (song == 0xFF) {
                     mSongStoreFull = 1;
                 }
-                sTransfer.SetSongSlot(j, song);
+                sTransfer.mCharacter.SetSongSlot(j, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, sTransfer.GetSongSlot(j), sSongs[n]);
+                    func_0202c934(&gGameData, sTransfer.mCharacter.GetSongSlot(j), sSongs[n]);
                     SongEntry entry;
-                    entry.mSong = sTransfer.GetSongSlot(j);
+                    entry.mSong = sTransfer.mCharacter.GetSongSlot(j);
                     entry.Load(entry.mSong);
                     entry.SetNotesFromSlot(-1, j);
                     entry.Save(entry.mSong);
                 }
                 n++;
-                func_0202c28c(&gGameData, i, &sTransfer);
+                func_0202c28c(&gGameData, i, &sTransfer.mCharacter);
             }
-            func_0202c28c(&gGameData, i, &sTransfer);
-            MiiData_GetName(&sTransfer, sReceivedName);
+            func_0202c28c(&gGameData, i, &sTransfer.mCharacter);
+            MiiData_GetName(&sTransfer.mCharacter, sReceivedName);
             goto received;
         }
         i++;
     } while (i < 100);
-    return NFL_IsMiiCreateIdBit7Clear(&sTransfer) ? 2 : 1;
+    return NFL_IsMiiCreateIdBit7Clear(&sTransfer.mCharacter) ? 2 : 1;
 received:
     return 0;
 }
@@ -1309,7 +1361,7 @@ void TushinScene::UpdateCharacters() {
     if (sent != TRUE) {
         return;
     }
-    if (FindResident(&sTransfer) != FindResident(GetSelectedResident())) {
+    if (FindResident(&sTransfer.mCharacter) != FindResident(GetSelectedResident())) {
         return;
     }
     BOOL show = FALSE;
@@ -2092,13 +2144,13 @@ void TushinScene::Update() {
                         if (done != TRUE) {
                             break;
                         }
-                        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer) != TRUE) {
+                        if (NFL_IsMiiCreateIdBit7Clear(&sTransfer.mCharacter) != TRUE) {
                             break;
                         }
                     }
                     mShirtDue = 1;
                     ShowReceived();
-                    if (NFL_IsMiiCreateIdBit7Clear(&sTransfer) == TRUE) {
+                    if (NFL_IsMiiCreateIdBit7Clear(&sTransfer.mCharacter) == TRUE) {
                         mPageAfterSave = mNextPage;
                         mNextPage = 0x10;
                         CloseWindow();
@@ -2748,7 +2800,7 @@ extern "C" void TushinScene_Receive(u16 aid, u16 *data, u16 size) {
         return;
     }
     if (sReceiveCount == 0) {
-        ((SavedCharacter *)(&sTransfer))->Reset();
+        ((SavedCharacter *)(&sTransfer.mCharacter))->Reset();
     }
     if (sReceiveCount >= 6) {
         MI_CpuCopy8(data, (u8 *)sSongs + sReceivedSongChunks * 0x80, 0x80);
@@ -2759,7 +2811,7 @@ extern "C" void TushinScene_Receive(u16 aid, u16 *data, u16 size) {
             sSongsReceived = 1;
         }
     } else {
-        MI_CpuCopy8(data, (u8 *)&sTransfer + sReceiveCount * 0x80, 0x80);
+        MI_CpuCopy8(data, (u8 *)&sTransfer.mCharacter + sReceiveCount * 0x80, 0x80);
         if (sReceiveCount < 5) {
             ++sReceiveCount;
         } else {
@@ -2811,7 +2863,7 @@ int TushinScene::ReceiveWiiMii() {
         PlayResultSound(0xD);
         return 0x3E;
     }
-    MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &sTransfer, sizeof(MiiData));
+    MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &sTransfer.mCharacter, sizeof(MiiData));
     if (IsInvalid((CharacterRecord *)&sMiiData[sWiiReceivedIndex])) {
         UpdateMiiData();
         PlayResultSound(0xD);
