@@ -95,11 +95,11 @@ struct MiiData {
 
 class MiiEditScene;
 
-// A sprite that is put at one of five places in a row on the lower screen, by their number (the scene's
-// mSprite582C; func_ov076_0214bec8 only moves it on to a higher number)
-struct MiiEditSpriteB0 : public Sprite {
-    void func_ov076_0214be80(int place);
-    void func_ov076_0214bec8(int place);
+// A sprite that is put at one of five places in a row on the lower screen, under the gaps between the page buttons
+// (the scene's mProgressSprite): it shows how far the making has come, as AdvanceTo only moves it on to a higher place
+struct MiiEditProgressSprite : public Sprite {
+    void SetPlace(int place);
+    void AdvanceTo(int place);
 
     /* 0xAC */ int mPlace;
 }; // 0xB0
@@ -123,7 +123,7 @@ struct CharacterSpeechTexts {
     /* 0x000 */ char mUnknown000[0x52];      // mUnknown068 in Shift JIS
     /* 0x052 */ wchar_t mUnknown052[11];     // The Mii's name (MiiData_GetName)
     /* 0x068 */ wchar_t mUnknown068[41];     // The same, through func_020372bc
-    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mUnknown06E, through func_020372d0
+    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mFamilyName, through func_020372d0
     /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through func_020372d0
     /* 0x15E */ char mUnknown15E[0x82];      // mUnknown202 in Shift JIS
     /* 0x1E0 */ wchar_t mUnknown1E0[17];     // CharacterRecord::mSpeechDefault, or gText_MiNyuuRyoku when empty
@@ -132,18 +132,19 @@ struct CharacterSpeechTexts {
     /* 0x290 */ BOOL mUnknown290;            // Whether mSpeechDefault was set
 }; // 0x294
 
-class MiiEditPage0 {
+// Page 0: the sex choice (etc message 0x1A, "性別をえらんでください"), then whether to make the face (0x1B)
+class MiiEditSexPage {
 public:
-    void func_ov076_0214bf4c(MiiEditScene *scene);
-    void func_ov076_0214c2e4();
-    void func_ov076_0214c624(int state);
+    void Init(MiiEditScene *scene);
+    void Update();
+    void SetState(int state);
     void Draw();
     void Exit();
 
     /* 0x00000 */ int mState;
     /* 0x00004 */ int mUnknown00004;
     /* 0x00008 */ MiiEditScene *mScene;
-    /* 0x0000C */ int mNextPage;            // The page func_ov076_0214c2e4 goes on to
+    /* 0x0000C */ int mNextPage;            // The page Update goes on to
     /* 0x00010 */ MessageWindow mWindows[2];
 }; // 0x15F58
 
@@ -156,7 +157,7 @@ class MiiEditFacePage;
 class MiiEditFaceTab {
 public:
     void Init(MiiEditFacePage *page);
-    void func_ov076_0214faac();
+    void Update();
     void SelectTab(int tab, BOOL pressed);
 
     /* 0x0 */ int mTab;
@@ -178,28 +179,28 @@ public:
 // Mouth, Etc, with the colour palettes Fw_color and Fw_parts)
 class MiiEditFacePage {
 public:
-    void func_ov076_0214c6d0(MiiEditScene *scene);
-    void func_ov076_0214cc34();
-    void func_ov076_0214de94(int part, int a);
+    void Init(MiiEditScene *scene);
+    void Update();
+    void ShowPart(int part, int a);
     void Draw();
     void Exit();
-    void func_ov076_0214ee7c(int selected, int category, int tab);
-    void func_ov076_0214ef88(int page, u32 count, int category);
+    void SelectColorButton(int selected, int category, int tab);
+    void ShowPartButtons(int page, u32 count, int category);
     int GetPartType(int button, int category);
     int GetPartButton(int type, int category);
-    void func_ov076_0214f264(int parameter, int selected, int page, u16 count);
+    void ChoosePart(int parameter, int selected, int page, u16 count);
     void SetParameter(int parameter, int value);
-    BOOL func_ov076_0214f930(int parameter, int step, BOOL wrap);
-    void func_ov076_0214fa14(int mode);
+    BOOL StepParameter(int parameter, int step, BOOL wrap);
+    void SetUndoMode(int mode);
 
-    /* 0x0000 */ BOOL mUnknown0000[8]; // Set for each part as func_ov076_0214de94 shows it
+    /* 0x0000 */ BOOL mUnknown0000[8]; // Set for each part as ShowPart shows it
     /* 0x0020 */ int mCategory; // Which part the parts' buttons show (GetPartType's category)
     /* 0x0024 */ int mUnknown0024;
     /* 0x0028 */ MiiEditScene *mScene;
     /* 0x002C */ SpriteButton mButtons[36];
     /* 0x227C */ SpriteButton mButtons227C[12]; // The parts to choose from
-    /* 0x2DEC */ int mUnknown2DEC;              // SetParameter keeps the value a part's type had before it
-    /* 0x2DF0 */ int mUnknown2DF0;              // and which parameter it was
+    /* 0x2DEC */ int mUndoValue;              // SetParameter keeps the value a part's type had before it
+    /* 0x2DF0 */ int mUndoParameter;              // and which parameter it was
     /* 0x2DF4 */ MiiEditSprite100 mSprites2DF4[2];
     /* 0x2FF4 */ Sprite mSprites2FF4[2];
     /* 0x314C */ int mUnknown314C[4]; // Which page of parts 2, 3, 4 and 6 is shown (mSprite315C, 3208, 32B4, 3360 show it)
@@ -207,7 +208,7 @@ public:
     /* 0x3208 */ Sprite mSprite3208;
     /* 0x32B4 */ Sprite mSprite32B4;
     /* 0x3360 */ Sprite mSprite3360;
-    /* 0x340C */ int mUnknown340C; // func_ov076_0214fa14's mode
+    /* 0x340C */ int mUndoMode; // SetUndoMode's mode
     /* 0x3410 */ MiiEditFaceTab mFaceTab;
     /* 0x341C */ MiiEditEtcTab mEtcTab;
 }; // 0x3428
@@ -215,8 +216,8 @@ public:
 // The profile page, with the on-screen keyboard ("Profile" graphics)
 class MiiEditProfilePage {
 public:
-    void func_ov076_02150874(MiiEditScene *scene);
-    void func_ov076_021508ac();
+    void Init(MiiEditScene *scene);
+    void Update();
     void Draw();
     void Exit();
     void SetText(const wchar_t *text);
@@ -226,7 +227,7 @@ public:
     void UpdateTexts();
     void UpdateDayButton();
     void UpdateKeyboardKey(int state);
-    void func_ov076_02151f0c(int state);
+    void SetState(int state);
 
     /* 0x00000 */ int mState;
     /* 0x00004 */ int mUnknown00004;
@@ -244,16 +245,16 @@ public:
 // The voice page ("Voice" graphics)
 class MiiEditVoicePage {
 public:
-    void func_ov076_02154690(MiiEditScene *scene);
-    void func_ov076_02155094();
+    void Init(MiiEditScene *scene);
+    void Update();
     void SetState(int state);
     void Draw();
     void Exit();
     void ShowVoiceSettings();
-    void func_ov076_0215707c();
-    void func_ov076_02157508(int a);
-    void func_ov076_02157b94();
-    void func_ov076_02157bc0();
+    void RememberForUndo();
+    void SpeakProfile(int a);
+    void StartSpeaking();
+    void StopSpeaking();
     int GetStarSignMessage(int month, int day);
 
     /* 0x0000 */ int mState;
@@ -263,8 +264,8 @@ public:
     /* 0x1504 */ TextButton mTextButtons[3];
     /* 0x29D4 */ Sprite mSprites29D4[2];
     /* 0x2B2C */ MiiEditSprite100 mSprites2B2C[5]; // The sliders of the five values of CharacterRecord::mVoice
-    /* 0x302C */ CharacterRecord mUnknown302C;      // func_ov076_0215707c copies the character's record in
-    /* 0x32D0 */ int mSpeakStep;                    // Which part of the profile func_ov076_02157508 speaks
+    /* 0x302C */ CharacterRecord mUndoRecord;      // RememberForUndo copies the character's record in
+    /* 0x32D0 */ int mSpeakStep;                    // Which part of the profile SpeakProfile speaks
     /* 0x32D4 */ CharacterSpeechTexts mSpeechTexts;
     /* 0x3568 */ MessageText mText;
     /* 0x3B58 */ u8 mUnknown3B58[4];
@@ -274,8 +275,8 @@ public:
 // The page of the character's personality ("Character" graphics)
 class MiiEditCharacterPage {
 public:
-    void func_ov076_02157c04(MiiEditScene *scene);
-    void func_ov076_02157e3c();
+    void Init(MiiEditScene *scene);
+    void Update();
     void Draw();
     void Exit();
 
@@ -285,10 +286,11 @@ public:
     /* 0x824 */
 }; // 0x824
 
-class MiiEditPage5 {
+// Page 5: "保存しないで終了します。よろしいですか？" (etc message 0x2E: finish without saving?)
+class MiiEditQuitPage {
 public:
-    void func_ov076_0215835c(MiiEditScene *scene, int previousPage);
-    void func_ov076_0215852c();
+    void Init(MiiEditScene *scene, int previousPage);
+    void Update();
     void Draw();
     void Exit();
 
@@ -298,10 +300,11 @@ public:
     /* 0x000C */ MessageWindow mWindow;
 }; // 0xAFB0
 
-class MiiEditPage6 {
+// Page 6: "登録します。よろしいですか？" (etc message 0x2D: register the Mii?); yes saves it (SaveCharacter)
+class MiiEditRegisterPage {
 public:
-    void func_ov076_02158048(MiiEditScene *scene, int previousPage);
-    void func_ov076_0215821c();
+    void Init(MiiEditScene *scene, int previousPage);
+    void Update();
     void Draw();
     void Exit();
 
@@ -332,22 +335,22 @@ public:
     void ResetCameraGoal();
     void UpdateCamera();
     void MoveCameraTo(VecFx32 goal);
-    void func_ov076_0214b1ec(int page); // Leaves the page shown (its Exit) and shows another
-    void func_ov076_0214b5dc(int resource, fx32 offsetY);
-    void func_ov076_0214b670(int index);
-    void func_ov076_0214b694();
-    void func_ov076_0214b890();
-    void func_ov076_0214ba88(BOOL a);
-    void func_ov076_0214bb24();
-    void func_ov076_0214bbe4();
-    void func_ov076_0214bca4();
-    void func_ov076_0214bd64();
-    void func_ov076_0214bdd8();
-    int func_ov076_0214bf20(const wchar_t *name);
+    void SetPage(int page); // Leaves the page shown (its Exit) and shows another
+    void PlayEffectAtHead(int resource, fx32 offsetY);
+    void LoadCharacter(int index);
+    void LoadModel();
+    void SaveCharacter();
+    void SetCharacterColors(BOOL a);
+    void ShowControlsWithWindow();
+    void ShowControls();
+    void ShowControlsEditFace();
+    void HideControls();
+    void HideControlsNoBar();
+    int GetNameLength(const wchar_t *name);
 
     /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to func_02024b10
     /* 0x00150 */ int mPage;                    // Which page Draw and Exit pass on to (0 to 6); Init sets -1
-    /* 0x00154 */ int mUnknown00154;           // func_ov076_0214b1ec clears it
+    /* 0x00154 */ int mUnknown00154;           // SetPage clears it
     /* 0x00158 */ SpriteButton mButtons[6];
     /* 0x00710 */ SceneCharacter mCharacter;    // The Mii shown
     /* 0x03228 */ CharacterBase mEditedCharacter;
@@ -357,11 +360,11 @@ public:
     /* 0x05818 */ VecFx32 mCameraGoal;
     /* 0x05824 */ int mUnknown5824;            // The saved character's index (func_0202c264, func_0202c28c)
     /* 0x05828 */ BOOL mUnknown5828;           // While set, Update turns the character until its angle is 0x4000
-    /* 0x0582C */ MiiEditSpriteB0 mSprite582C;
-    /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mSprite582C while these two are set and 58E4 is not
+    /* 0x0582C */ MiiEditProgressSprite mProgressSprite;
+    /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mProgressSprite while these two are set and 58E4 is not
     /* 0x058E0 */ BOOL mUnknown58E0;
     /* 0x058E4 */ BOOL mUnknown58E4;
-    /* 0x058E8 */ BOOL mUnknown58E8[7];        // Set for each page as func_ov076_0214b1ec shows it
+    /* 0x058E8 */ BOOL mUnknown58E8[7];        // Set for each page as SetPage shows it
     /* 0x05904 */ fx32 mUnknown5904;           // Update scrolls the lower screen's plane 4 by it
     /* 0x05908 */ ParticleSystem *mParticles;   // func_0207ab20 makes it, from "SPL:/SplEditEffect.spa"
     /* 0x0590C */ ParticleEmitter *mUnknown590C;
@@ -377,13 +380,13 @@ public:
     /* 0x1B94C */ MessageText mText1B94C;
     /* 0x1BF3C */ ObjCharBox mCharBox;
     /* 0x1C0F8 */ MessageFile mMessageFiles[2]; // Etc messages ("TBM"), common messages ("T02")
-    /* 0x1C128 */ MiiEditPage0 mPage0;
+    /* 0x1C128 */ MiiEditSexPage mSexPage;
     /* 0x32080 */ MiiEditFacePage mFacePage;
     /* 0x354A8 */ MiiEditProfilePage mProfilePage;
     /* 0x7DE74 */ MiiEditVoicePage mVoicePage;
     /* 0x81C74 */ MiiEditCharacterPage mCharacterPage;
-    /* 0x82498 */ MiiEditPage6 mPage6;
-    /* 0x8D448 */ MiiEditPage5 mPage5;
+    /* 0x82498 */ MiiEditRegisterPage mRegisterPage;
+    /* 0x8D448 */ MiiEditQuitPage mQuitPage;
 }; // 0x983F8
 
 #endif // OV076_MIIEDITSCENE_H
