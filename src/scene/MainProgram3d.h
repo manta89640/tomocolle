@@ -27,18 +27,7 @@ void func_02029758(void *resourceSet, u32 resType);
 void func_0205ff40(void);
 }
 
-// --- Characters (include/character/Character.h) ---
-
-extern "C" {
-void func_0208fd90(CharacterBase *character, int unknown);
-void func_0208ff44(CharacterBase *character, u16 a, int b);
-void func_0208ff94(CharacterBase *character, MtxFx43 *matrix, MtxFx33 *rotation);
-void func_02090214(CharacterBase *character); // Draws it
-void func_02090fdc(Character *character, int slot, int param2, int param3);
-void Character_SetAnimation(Character *character, u32 resType, int id);
-void func_020919e8(Character *character, u32 resType, int id);
-void func_02091968(Character *character); // Draws it
-}
+// --- Characters: include/character/Character.h ---
 
 // --- The camera and the lights ---
 

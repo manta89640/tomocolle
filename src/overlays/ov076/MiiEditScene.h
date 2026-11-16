@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "Character.h"
+#include "character/CharacterSpeechTexts.h"
 #include "keyboard/SoftKeyboard.h"
 #include "MessageWindow.h"
 #include "Scene.h"
@@ -117,20 +118,6 @@ struct MiiEditSprite100 {
     /* 0xF4 */ int mUnknownF4;  // The voice page sets it to 14
     /* 0xF8 */ u8 mUnknownF8[8];
 }; // 0x100
-
-// The texts of a character that the voice page speaks: func_0204e4b4 fills them from a record (the main program's)
-struct CharacterSpeechTexts {
-    /* 0x000 */ char mUnknown000[0x52];      // mUnknown068 in Shift JIS
-    /* 0x052 */ wchar_t mUnknown052[11];     // The Mii's name (MiiData_GetName)
-    /* 0x068 */ wchar_t mUnknown068[41];     // The same, through func_020372bc
-    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mFamilyName, through func_020372d0
-    /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through func_020372d0
-    /* 0x15E */ char mUnknown15E[0x82];      // mUnknown202 in Shift JIS
-    /* 0x1E0 */ wchar_t mUnknown1E0[17];     // CharacterRecord::mSpeechDefault, or gText_MiNyuuRyoku when empty
-    /* 0x202 */ wchar_t mUnknown202[65];     // mUnknown1E0 through func_020372d0
-    /* 0x284 */ u8 mUnknown284[0xC];
-    /* 0x290 */ BOOL mUnknown290;            // Whether mSpeechDefault was set
-}; // 0x294
 
 // Page 0: the sex choice (etc message 0x1A, "性別をえらんでください"), then whether to make the face (0x1B)
 class MiiEditSexPage {

@@ -8771,7 +8771,7 @@ from:0x0204ef44 kind:load to:0x021227cc module:main
 from:0x0204ef48 kind:load to:0x021223e4 module:main
 from:0x0204ef4c kind:load to:0x020b5d74 module:main
 from:0x0204ef50 kind:load to:0x021227d8 module:main
-from:0x0204ef54 kind:load to:0x020b5d80 module:main
+from:0x0204ef54 kind:load to:0x020b5d74 add:0xc module:main
 from:0x0204ef78 kind:arm_call to:0x02090598 module:main
 from:0x0204f080 kind:arm_call to:0x0204f400 module:main
 from:0x0204f08c kind:load to:0x02121e58 module:main

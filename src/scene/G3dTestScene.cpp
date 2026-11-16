@@ -3,11 +3,6 @@
 // The edge marking colours: red, green and blue for polygon ids 8 to 31
 static const GXRgb sEdgeColors[8] = {0, GX_RGB(31, 0, 0), GX_RGB(0, 31, 0), GX_RGB(0, 0, 31)};
 
-// The polygon id that the Mii library draws a character's face with (NFLDrawParam's polygonID)
-static inline void SetFacePolygonId(CharacterBase *character, int id) {
-    *(int *)&character->mFaceDrawParam[8] = id;
-}
-
 void G3dTestScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "BIC", "Mdl/Ica/ica_mii_room_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "THM", "Mdl/Body/body000_3D_LZ.bin", 0);
@@ -35,17 +30,17 @@ void G3dTestScene::Init() {
     light->mDirection.z = 0;
     light->mDirection.x = x;
     light->mColor = color;
-    func_02090fdc(&mCharacter, 0, 0, 0);
-    Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
-    mCharacter.mModel.mScale.x = 0x1800;
-    mCharacter.mModel.mInvScale.x = FX_Inv(0x1800);
-    SetFacePolygonId(&mCharacter, 10);
-    NNS_G3dMdlSetMdlPolygonIDAll(mCharacter.mModel.mAnim.mResMdl, 3);
-    func_02090fdc(&mSecondCharacter, 0, 0, 4);
-    Character_SetAnimation(&mSecondCharacter, RESOURCE_BCA0, 1);
-    mSecondCharacter.mModel.mPos.y = -0x2E00;
-    SetFacePolygonId(&mSecondCharacter, 11);
-    mSecondCharacter.mModel.mShadowAlpha = 0;
+    mCharacter.Init(0, 0, 0);
+    mCharacter.SetAnimation(RESOURCE_BCA0, 0);
+    mCharacter.mScale.x = 0x1800;
+    mCharacter.mInvScale.x = FX_Inv(0x1800);
+    mCharacter.mFaceDrawParam.polygonID = 10;
+    NNS_G3dMdlSetMdlPolygonIDAll(mCharacter.mAnim.mResMdl, 3);
+    mSecondCharacter.Init(0, 0, 4);
+    mSecondCharacter.SetAnimation(RESOURCE_BCA0, 1);
+    mSecondCharacter.mPos.y = -0x2E00;
+    mSecondCharacter.mFaceDrawParam.polygonID = 11;
+    mSecondCharacter.mShadowVisible = FALSE;
     mGlasses.Load(1, 1);
     NNSG3dResMdl *glasses = mGlasses.mResMdl;
     NNS_G3dMdlSetMdlPolygonID(glasses, 0, 9);
@@ -61,13 +56,13 @@ void G3dTestScene::Update() {
     }
     if (data_0211f9d4.mHeld & PAD_BUTTON_B) {
         if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
-            mCharacter.mModel.mAnim.mRotZ += 0x200;
+            mCharacter.mAnim.mRotZ += 0x200;
         } else if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
-            mCharacter.mModel.mAnim.mRotZ += 0xFE00; // Written so: "-= 0x200" compiles to a sub
+            mCharacter.mAnim.mRotZ += 0xFE00; // Written so: "-= 0x200" compiles to a sub
         } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
-            mCharacter.mModel.mAnim.mRotY += 0x200;
+            mCharacter.mAnim.mRotY += 0x200;
         } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
-            mCharacter.mModel.mAnim.mRotY += 0xFE00; // Written so: "-= 0x200" compiles to a sub
+            mCharacter.mAnim.mRotY += 0xFE00; // Written so: "-= 0x200" compiles to a sub
         }
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_X) {
         u16 anim = MATH_Rand16(&gRandom, 3);
@@ -80,9 +75,9 @@ void G3dTestScene::Update() {
         } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
             anim = 1;
         }
-        func_020919e8(&mCharacter, RESOURCE_BCA0, anim);
+        mCharacter.BlendToAnimation(RESOURCE_BCA0, anim);
     } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
-        func_0208ff44(&mCharacter, MATH_Rand16(&gRandom, 6), 1);
+        mCharacter.SetDefaultMii(MATH_Rand16(&gRandom, 6), TRUE);
         NNS_GfdDumpFrmTexVramManager();
         func_0205ff40();
     } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
@@ -100,11 +95,11 @@ void G3dTestScene::Update() {
 }
 
 void G3dTestScene::Draw() {
-    func_02091968(&mCharacter);
-    func_02091968(&mSecondCharacter);
+    mCharacter.Draw();
+    mSecondCharacter.Draw();
     MtxFx43 matrix;
     MtxFx33 rotation;
-    mCharacter.mModel.GetJointMatrices(CharacterModel::JOINT_L_HAND, &matrix, &rotation);
+    mCharacter.GetJointMatrices(CharacterModel::JOINT_L_HAND, &matrix, &rotation);
     MI_Copy36B(&rotation, &mGlasses.mRotation);
     mGlasses.mPosition.x = matrix._30;
     mGlasses.mPosition.y = matrix._31;

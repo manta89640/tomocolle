@@ -31,7 +31,7 @@ void DrawManTestScene::Init() {
     NNS_G3dRenderObjSetCallBack(&mModel.mRenderObj, HeadCallback, NULL, NNS_G3D_SBC_NODEDESC,
                                 NNS_G3D_SBC_CALLBACK_TIMING_C);
     NNS_G3dRenderObjSetUserPtr(&mModel.mRenderObj, this);
-    func_0208fd90(&mCharacter, 0);
+    mCharacter.InitFace(0);
 }
 
 void DrawManTestScene::Update() {
@@ -76,8 +76,8 @@ void DrawManTestScene::Update() {
 
 void DrawManTestScene::Draw() {
     mModel.Draw();
-    func_0208ff94(&mCharacter, &mHeadMatrix, &mHeadRotation);
-    func_02090214(&mCharacter);
+    mCharacter.SetHeadMatrices(&mHeadMatrix, &mHeadRotation);
+    mCharacter.Draw();
 }
 
 void DrawManTestScene::Exit() {

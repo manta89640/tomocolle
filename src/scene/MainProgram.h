@@ -122,7 +122,7 @@ extern MATHRandContext16 gRandom;
 void func_0203119c(SpriteButton *button);
 void func_02031260(SpriteButton *button, int mode);
 void func_02031278(SpriteButton *button, u16 sequence, u16 pressedSequence);
-void func_0203133c(SpriteButton *button); // Updates it
+BOOL func_0203133c(SpriteButton *button); // Updates it: whether it was pressed
 BOOL func_02031ccc(SpriteButton *button); // Whether it was pressed
 void func_02031d7c(SpriteButton *button); // Draws it
 void func_02031eb0(SpriteButton *button, int width, int height); // The rectangle that can be touched

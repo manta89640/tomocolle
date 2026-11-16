@@ -3939,12 +3939,12 @@ void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressedSequence);
 void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
 void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
 BOOL func_02031d00(SpriteButton *button);
-void func_0204e4b4(CharacterSpeechTexts *texts, SavedCharacter *character); // Fills them from the character
-void func_0204e62c(wchar_t *text, int value);                               // Writes a number
 void func_0209d898(SceneCharacter *character, TtsPlayer *player);
 void Character_SetFace(SceneCharacter *character, int face);
 void func_020372bc(wchar_t *text, int size);
 }
+// The reading of a number, in the synthesizer's notation (src/scene/SceneHelpers.cpp)
+void MakeNumberReading(wchar_t *text, int number);
 
 // The scene's buffer of the text to speak, in Shift JIS (0x102 bytes)
 #define SPEECH_TEXT(scene) ((char *)&(scene)->mUnknownAfterTts[0x1A264 - 0x5920 - sizeof(TtsPlayer)])
@@ -4007,7 +4007,7 @@ void MiiEditVoicePage::Init(MiiEditScene *scene) {
     }
     mUnknown3B5C = mScene->mCharacter;
     mScene->MoveCameraTo(sProfileCameraGoal);
-    func_0204e4b4(&mSpeechTexts, &mScene->mCharacter);
+    MakeCharacterSpeechTexts(&mSpeechTexts, &mScene->mCharacter);
     mText.mMessageFile = &mScene->mMessageFiles[0];
     int voice = mScene->mCharacter.mUnknown054Bits0;
     if (voice >= 0 && voice <= 7) {
@@ -4403,25 +4403,25 @@ void MiiEditVoicePage::SpeakProfile(int step) {
         Character_SetFace(&mScene->mCharacter, 8);
         break;
     case 1:
-        if (wcslen(mSpeechTexts.mUnknown0BA) + wcslen(mSpeechTexts.mUnknown10C) == 0) {
+        if (wcslen(mSpeechTexts.mFamilyNameReading) + wcslen(mSpeechTexts.mGivenNameReading) == 0) {
             SpeakProfile(step + 1);
             return;
         }
         MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
-        mText.SetStringArg(mSpeechTexts.mUnknown0BA, 0);
-        mText.SetStringArg(mSpeechTexts.mUnknown10C, 1);
+        mText.SetStringArg(mSpeechTexts.mFamilyNameReading, 0);
+        mText.SetStringArg(mSpeechTexts.mGivenNameReading, 1);
         mText.mMessage = 0x2F;
         mText.ExpandMessage();
         STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
         mScene->mTtsPlayer.Speak(SPEECH_TEXT(mScene), 0);
         break;
     case 2:
-        if (!mScene->GetNameLength(mSpeechTexts.mUnknown068)) {
+        if (!mScene->GetNameLength(mSpeechTexts.mNameReading)) {
             SpeakProfile(step + 1);
             return;
         }
         MI_CpuFill8(SPEECH_TEXT(mScene), 0, 0x102);
-        mText.SetStringArg(mSpeechTexts.mUnknown068, 0);
+        mText.SetStringArg(mSpeechTexts.mNameReading, 0);
         mText.mMessage = 0x36;
         mText.ExpandMessage();
         STD_ConvertStringUnicodeToSjis(SPEECH_TEXT(mScene), &length, (const u16 *)mText.mText, NULL, NULL);
@@ -4435,9 +4435,9 @@ void MiiEditVoicePage::SpeakProfile(int step) {
         wchar_t numberText[32];
         wchar_t monthText[32];
         wchar_t dayText[32];
-        func_0204e62c(numberText, number);
-        func_0204e62c(monthText, month);
-        func_0204e62c(dayText, day);
+        MakeNumberReading(numberText, number);
+        MakeNumberReading(monthText, month);
+        MakeNumberReading(dayText, day);
         if (number != 0xFFF && month > 0 && month <= 12 && day > 0 && day <= 31) {
             mText.SetStringArg(numberText, 0);
             mText.SetStringArg(monthText, 1);

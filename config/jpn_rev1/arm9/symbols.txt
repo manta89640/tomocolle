@@ -2016,48 +2016,48 @@ _ZN17WirelessTestScene9OnReceiveEtPtt kind:function(arm,size=0xa8) addr:0x0204e2
 _ZN17WirelessTestScene13OnParentFoundEP9WMBssDesc kind:function(arm,size=0x160) addr:0x0204e33c
 _ZN17WirelessTestSceneD1Ev kind:function(arm,size=0x4) addr:0x0204e49c
 _ZN17WirelessTestSceneD0Ev kind:function(arm,size=0x14) addr:0x0204e4a0
-func_0204e4b4 kind:function(arm,size=0x178) addr:0x0204e4b4
-func_0204e62c kind:function(arm,size=0x140) addr:0x0204e62c
-func_0204e76c kind:function(arm,size=0x48) addr:0x0204e76c
-func_0204e7b4 kind:function(arm,size=0x188) addr:0x0204e7b4
-func_0204e93c kind:function(arm,size=0x90) addr:0x0204e93c
-func_0204e9cc kind:function(arm,size=0x8c) addr:0x0204e9cc
-func_0204ea58 kind:function(arm,size=0x150) addr:0x0204ea58
-func_0204eba8 kind:function(arm,size=0x2c) addr:0x0204eba8
-func_0204ebd4 kind:function(arm,size=0x38) addr:0x0204ebd4
-func_0204ec0c kind:function(arm,size=0x38) addr:0x0204ec0c
-func_0204ec44 kind:function(arm,size=0x78) addr:0x0204ec44
-func_0204ecbc kind:function(arm,size=0xc8) addr:0x0204ecbc
-func_0204ed84 kind:function(arm,size=0x64) addr:0x0204ed84
-func_0204ede8 kind:function(arm,size=0x4) addr:0x0204ede8
-func_0204edec kind:function(arm,size=0xd0) addr:0x0204edec
-func_0204eebc kind:function(arm,size=0x9c) addr:0x0204eebc
-func_0204ef58 kind:function(arm,size=0x40) addr:0x0204ef58
-func_0204ef98 kind:function(arm,size=0x100) addr:0x0204ef98
-func_0204f098 kind:function(arm,size=0x48) addr:0x0204f098
-func_0204f0e0 kind:function(arm,size=0x24) addr:0x0204f0e0
-func_0204f104 kind:function(arm,size=0x170) addr:0x0204f104
-func_0204f274 kind:function(arm,size=0x84) addr:0x0204f274
-func_0204f2f8 kind:function(arm,size=0x64) addr:0x0204f2f8
-func_0204f35c kind:function(arm,size=0xa4) addr:0x0204f35c
-func_0204f400 kind:function(arm,size=0x160) addr:0x0204f400
-func_0204f560 kind:function(arm,size=0x48) addr:0x0204f560
-func_0204f5a8 kind:function(arm,size=0x30) addr:0x0204f5a8
-func_0204f5d8 kind:function(arm,size=0x28) addr:0x0204f5d8
-func_0204f600 kind:function(arm,size=0x138) addr:0x0204f600
-func_0204f738 kind:function(arm,size=0x5c) addr:0x0204f738
-func_0204f794 kind:function(arm,size=0xc) addr:0x0204f794
-func_0204f7a0 kind:function(arm,size=0x1c) addr:0x0204f7a0
-func_0204f7bc kind:function(arm,size=0x34) addr:0x0204f7bc
-func_0204f7f0 kind:function(arm,size=0x4c) addr:0x0204f7f0
-func_0204f83c kind:function(arm,size=0x44) addr:0x0204f83c
-func_0204f880 kind:function(arm,size=0xc) addr:0x0204f880
-func_0204f88c kind:function(arm,size=0xc0) addr:0x0204f88c
-func_0204f94c kind:function(arm,size=0x12c) addr:0x0204f94c
-func_0204fa78 kind:function(arm,size=0x14c) addr:0x0204fa78
-func_0204fbc4 kind:function(arm,size=0x70) addr:0x0204fbc4
-func_0204fc34 kind:function(arm,size=0xc) addr:0x0204fc34
-func_0204fc40 kind:function(arm,size=0x34) addr:0x0204fc40
+_Z24MakeCharacterSpeechTextsP20CharacterSpeechTextsP14SavedCharacter kind:function(arm,size=0x178) addr:0x0204e4b4
+_Z17MakeNumberReadingPwi kind:function(arm,size=0x140) addr:0x0204e62c
+_Z14MakeNumberTextPwi kind:function(arm,size=0x48) addr:0x0204e76c
+_ZN9SceneCast6ChooseEi kind:function(arm,size=0x188) addr:0x0204e7b4
+_ZN9SceneCast13SetCharactersEP9Character kind:function(arm,size=0x90) addr:0x0204e93c
+_ZN9SceneCast13MountArchivesEPKc kind:function(arm,size=0x8c) addr:0x0204e9cc
+_ZN9SceneCast14InitCharactersEv kind:function(arm,size=0x150) addr:0x0204ea58
+_ZN9SceneCast7LipSyncEPKc kind:function(arm,size=0x2c) addr:0x0204eba8
+_ZN9SceneCast16UpdateCharactersEv kind:function(arm,size=0x38) addr:0x0204ebd4
+_ZN9SceneCast14DrawCharactersEv kind:function(arm,size=0x38) addr:0x0204ec0c
+_ZN9SceneCast7ReleaseEv kind:function(arm,size=0x78) addr:0x0204ec44
+_ZN9SceneCast15ReloadCharacterEi kind:function(arm,size=0xc8) addr:0x0204ecbc
+_ZN9SceneCast15RereadCharacterEi kind:function(arm,size=0x64) addr:0x0204ed84
+_ZN8FaceCast12StartLoadingEv kind:function(arm,size=0x4) addr:0x0204ede8
+_ZN8FaceCast4InitEi kind:function(arm,size=0xd0) addr:0x0204edec
+_ZN8FaceCast11SetupCameraEv kind:function(arm,size=0x9c) addr:0x0204eebc
+_ZN8FaceCast11UpdateFacesEv kind:function(arm,size=0x40) addr:0x0204ef58
+_ZN8FaceCast10UpdateDragEv kind:function(arm,size=0x100) addr:0x0204ef98
+_ZN8FaceCast9DrawFacesEv kind:function(arm,size=0x48) addr:0x0204f098
+_ZN8FaceCast11ResetCameraEv kind:function(arm,size=0x24) addr:0x0204f0e0
+_ZN8FaceCast6ChooseEv kind:function(arm,size=0x170) addr:0x0204f104
+_ZN8FaceCast14ReadCharactersEv kind:function(arm,size=0x84) addr:0x0204f274
+_ZN8FaceCast12SetTransformEi7VecFx32ttt kind:function(arm,size=0x64) addr:0x0204f2f8
+_ZN8FaceCast12SetTransformEitiahhhh kind:function(arm,size=0xa4) addr:0x0204f35c
+_ZN8FaceCast14ApplyTransformEi kind:function(arm,size=0x160) addr:0x0204f400
+_ZN8FaceCast12SetTransformEi13FaceTransform kind:function(arm,size=0x48) addr:0x0204f560
+_ZN8FaceCast7LipSyncEPKc kind:function(arm,size=0x30) addr:0x0204f5a8
+_ZN12ReturnButton12MountArchiveEv kind:function(arm,size=0x28) addr:0x0204f5d8
+_ZN12ReturnButton4InitEiii kind:function(arm,size=0x138) addr:0x0204f600
+_ZN12ReturnButton6UpdateEv kind:function(arm,size=0x5c) addr:0x0204f738
+_ZN12ReturnButton4DrawEv kind:function(arm,size=0xc) addr:0x0204f794
+_ZN12ReturnButton14UnmountArchiveEv kind:function(arm,size=0x1c) addr:0x0204f7a0
+_ZN9SceneRoom4LoadEt kind:function(arm,size=0x34) addr:0x0204f7bc
+_ZN9SceneRoom4InitEiii kind:function(arm,size=0x4c) addr:0x0204f7f0
+_ZN9SceneRoom6UpdateEv kind:function(arm,size=0x44) addr:0x0204f83c
+_ZN9SceneRoom4DrawEv kind:function(arm,size=0xc) addr:0x0204f880
+_ZN9SceneRoom9ShowPartsEi kind:function(arm,size=0xc0) addr:0x0204f88c
+_ZN10NewsButton14LoadBackgroundEv kind:function(arm,size=0x12c) addr:0x0204f94c
+_ZN10NewsButton4InitEi kind:function(arm,size=0x14c) addr:0x0204fa78
+_ZN10NewsButton6UpdateEP5Scenei kind:function(arm,size=0x70) addr:0x0204fbc4
+_ZN10NewsButton4DrawEv kind:function(arm,size=0xc) addr:0x0204fc34
+_ZN10NewsButton6UnloadEv kind:function(arm,size=0x34) addr:0x0204fc40
 _ZN16MiiListMenuScene12StartLoadingEv kind:function(arm,size=0x60) addr:0x0204fc74
 _ZN16MiiListMenuScene4InitEv kind:function(arm,size=0x640) addr:0x0204fcd4
 _ZN16MiiListMenuScene6UpdateEv kind:function(arm,size=0x50) addr:0x02050314
@@ -4280,10 +4280,9 @@ gStr_human01_base_pl kind:data(any) addr:0x020b5d18
 sEdgeColors kind:data(any) addr:0x020b5d2c local
 sAnyParent kind:data(any) addr:0x020b5d3c local
 data_020b5d44 kind:data(any) addr:0x020b5d44
-data_020b5d74 kind:data(any) addr:0x020b5d74
-data_020b5d80 kind:data(any) addr:0x020b5d80
-data_020b5d8c kind:data(any) addr:0x020b5d8c
-gStr_ kind:data(any) addr:0x020b5d9c
+sLightDirections kind:data(any) addr:0x020b5d74 local
+sReturnButtonSounds kind:data(any) addr:0x020b5d8c local
+sNewsButtonSounds kind:data(any) addr:0x020b5d9c local
 sButtonSequences kind:data(any) addr:0x020b5dac local
 sButtonPressedSequences kind:data(any) addr:0x020b5db0 local
 sMiiMenuSequencesB kind:data(any) addr:0x020b5db4 local
@@ -5318,11 +5317,11 @@ gText_Solidus_10 kind:data(any) addr:0x02111608
 gText_AkatsukiSolidus_2 kind:data(any) addr:0x02111618
 gText_KyuSingleQuotationSignHyakuSolidus kind:data(any) addr:0x02111628
 gText_KyuSingleQuotationSignJuSolidus kind:data(any) addr:0x02111638
-data_02111648 kind:data(any) addr:0x02111648
-data_02111670 kind:data(any) addr:0x02111670
-data_02111698 kind:data(any) addr:0x02111698
-data_021116c0 kind:data(any) addr:0x021116c0
-data_021116e8 kind:data(any) addr:0x021116e8
+sThousands kind:data(any) addr:0x02111648 local
+sArchiveNames kind:data(any) addr:0x02111670 local
+sOnes kind:data(any) addr:0x02111698 local
+sHundreds kind:data(any) addr:0x021116c0 local
+sTens kind:data(any) addr:0x021116e8 local
 gText_MiNyuuRyoku kind:data(any) addr:0x02111710
 gText_Rei kind:data(any) addr:0x02111720
 gStr_BIC_4 kind:data(any) addr:0x02111728
