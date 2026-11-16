@@ -728,7 +728,7 @@ Inferred:
 
 ## Wireless play with items
 
-Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 73 of
+Overlay 110, `src/overlays/ov110/ItemTradeScene.cpp`, one unit with `.text`, `.rodata`, `.data` and `.bss`: 74 of
 its 75 functions match; not complete.
 
 Measured:
@@ -783,10 +783,11 @@ list the player's things (75, 85, 100), copied in.
 
 Not done:
 
-- Two functions differ, each with a comment saying how: `SetupWindow` (the original keeps the button positions'
-  table in r11 and so spills `this`) and `Update` (one instruction's place). `SetItemCamera` and `SetRoomCamera`
+- One function differs, with a comment saying how: `SetupWindow` (the original keeps the button positions' table
+  in r11 and so spills `this`). `Update` matches with the lost connection's two ways as an if and its else.
+  `SetItemCamera` and `SetRoomCamera`
   match under `#pragma opt_propagation off` with the vectors as struct copies, and `UpdateWireless` with its partner
-  loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each use). The unit cannot be complete until they match.
+  loop written as overlay 109's (`continue`, `mWindow.mTexts[i + 1]` at each use). The unit cannot be complete until it matches.
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
   `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and

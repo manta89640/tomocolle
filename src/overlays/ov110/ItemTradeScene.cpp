@@ -1721,8 +1721,8 @@ void ItemTradeScene::InitWirelessWhenIdle() {
     }
 }
 
-// NOT MATCHING, by one instruction's place: where the connection is lost and there is no window, the original
-// computes the window's address (add r0, r9, #500) before it loads mState for sStateMessages, this after.
+// Where the connection is lost, the two ways (with a window and without) are an if and its else that return
+// after: with a return in each, the window's address is computed after mState is loaded, not before.
 // @0x0214dc20
 void ItemTradeScene::Update() {
     func_0203b800(data_0213b700);
@@ -1784,13 +1784,13 @@ void ItemTradeScene::Update() {
             mWindow.mUnknownSetBeforeClose = 15;
             func_020349cc(&mWindow, 0x1C);
             PlaySound(13);
-            return;
+        } else {
+            mState = next;
+            SetupWindow(mState);
+            func_02034f38(&mWindow, 0, sStateMessages[mState]);
+            func_02034720(&mWindow, 0x12, 1);
+            PlaySound(12);
         }
-        mState = next;
-        SetupWindow(mState);
-        func_02034f38(&mWindow, 0, sStateMessages[mState]);
-        func_02034720(&mWindow, 0x12, 1);
-        PlaySound(12);
         return;
     }
 
