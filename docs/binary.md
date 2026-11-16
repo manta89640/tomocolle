@@ -1342,7 +1342,15 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
 On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
 with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
 cast; without them the instructions are the same and the callee-saved registers are rotated. The five other expressions
-have the right instructions but for a clamp each (see the comments in the source).
+have the right instructions but for a clamp each (see the comments in the source). Measured on
+`NFLi_ApplyExpression5`, whose original keeps the compares of a clamp whose result nothing uses: under
+`#pragma optimization_level 1` it gets the original's callee-saved registers and keeps those compares (with no
+moves), but loses the scheduling, the if-conversion and the folding of the compare into `adds` that the original has.
+No combination tried gives both: every `opt_*` pragma off at levels 2 to 4, `#pragma global_optimizer off` (accepted,
+no effect), the `-opt no...` switches, and every 2.0, 3.0 and 4.0 build. In `NFLi_ApplyExpression2` and `3` the
+original adds `d` again in the else of the clamp; every level from 1 up, every source form tried and every `opt_*`
+pragma reuse the compare's sum instead (only level 0 computes it three times).
+`NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they match at the file's level.
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
