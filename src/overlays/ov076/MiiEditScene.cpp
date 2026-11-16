@@ -167,7 +167,6 @@ void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_0208ee18(CharacterModel *model, const char *archiveName, int a, int b);
 void func_02091968(SceneCharacter *character); // Draws it
 void func_0208fefc(CharacterBase *character);
 void func_0208ff94(CharacterBase *character, void *a, void *b);
@@ -183,8 +182,8 @@ void MiiEditScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "T02", "Msg/TmdCommonMsgJP_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplEditEffect_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "BIC", "Mdl/Ica/ica_mii_edit_LZ.bin", 0);
-    func_0208ee18(&mCharacter.mModel, "B0I", 0, 0);
-    ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 0);
+    mCharacter.SetArchive("B0I", 0, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 0);
 }
 
 // The camera's moves last this many frames
@@ -250,14 +249,12 @@ BOOL func_0209d900(CharacterRecord *record, SceneCharacter *character);
 void func_02031e88(SpriteButton *button, BOOL a);
 void func_0207b3dc(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
-void CharacterModel_GetJointMatrices(CharacterModel *model, int joint, MtxFx43 *matrix, MtxFx33 *rotation);
 void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
 void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
 void func_02091048(SceneCharacter *character, const char *archiveName);
-void func_0208ef5c(CharacterModel *model, int resourceId, int a);
 void Character_SetAnimation(SceneCharacter *character, u32 resType, int id); // Starts an animation
 void Character_SetAngle(SceneCharacter *character, u16 angle);
 void func_02091a88(SceneCharacter *character);
@@ -324,7 +321,7 @@ void MiiEditScene::Init() {
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     gSoundManager.LoadGroup(1);
     gSoundManager.StartSeq(0, 2);
-    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
+    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
     func_02090fdc(&mCharacter, 0, 0, 2);
     Character_SetFace(&mCharacter, 8);
     switch (mSceneId) {
@@ -345,7 +342,7 @@ void MiiEditScene::Init() {
     case 0x43:
     case 0x6F: {
         void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
-        func_02029660((void *)mCharacter.mModel.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
         Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
         Character_SetAngle(&mCharacter, 0x4000);
         func_02091a14(&mCharacter, FALSE);
@@ -839,7 +836,7 @@ void MiiEditScene::PlayEffectAtHead(int resource, fx32 offsetY) {
     func_0207b3dc(mParticles);
     MtxFx43 matrix;
     MtxFx33 rotation;
-    CharacterModel_GetJointMatrices(&mCharacter.mModel, 0, &matrix, &rotation);
+    mCharacter.GetJointMatrices(0, &matrix, &rotation);
     mUnknown5914.x = matrix.m[3][0];
     mUnknown5914.y = matrix.m[3][1];
     mUnknown5914.z = matrix.m[3][2];
@@ -861,29 +858,29 @@ void MiiEditScene::LoadModel() {
             func_0202aecc(data_021223e4, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             func_02091048(&mCharacter, "B0I");
-            ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
-            func_0208ef5c(&mCharacter.mModel, 0, 0);
+            ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
+            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+            mCharacter.MakeModel(0, 0);
             break;
         case 1:
             func_0202aecc(data_021223e4, 0);
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             func_02091048(&mCharacter, "B0I");
-            ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
-            func_0208ef5c(&mCharacter.mModel, 0, 0);
+            ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
+            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+            mCharacter.MakeModel(0, 0);
             break;
         }
     } else {
         func_0202aecc(data_021223e4, 0);
         ArchiveManager_Unmount(&gArchiveManager, "B0I");
         func_02091048(&mCharacter, "B0I");
-        ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
-        func_0208ef5c(&mCharacter.mModel, 0, 0);
+        ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 1);
+        ModelResources_SetModel(data_021223e4, 0, mCharacter.mModelPath);
+        mCharacter.MakeModel(0, 0);
     }
     void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
-    func_02029660((void *)mCharacter.mModel.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    func_02029660((void *)mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
     Character_SetAngle(&mCharacter, 0x4000);
     func_0208fefc(&mCharacter);
@@ -956,17 +953,17 @@ void MiiEditScene::SaveCharacter() {
 
 void MiiEditScene::SetCharacterColors(BOOL a) {
     if (a) {
-        ((u16 *)mCharacter.mFaceDrawParam)[10] = 0;
-        ((u16 *)mCharacter.mFaceDrawParam)[11] = 0;
-        func_02029f10(&mCharacter.mModel, 0);
-        func_02029f20(&mCharacter.mModel, 0);
-        func_02029f30(&mCharacter.mModel, 0);
-        func_02029f40(&mCharacter.mModel, 0);
+        mCharacter.mFaceDrawParam.diffuse = 0;
+        mCharacter.mFaceDrawParam.ambient = 0;
+        func_02029f10(&mCharacter, 0);
+        func_02029f20(&mCharacter, 0);
+        func_02029f30(&mCharacter, 0);
+        func_02029f40(&mCharacter, 0);
     } else {
-        ((u16 *)mCharacter.mFaceDrawParam)[10] = GX_RGB(31, 31, 31);
-        ((u16 *)mCharacter.mFaceDrawParam)[11] = GX_RGB(8, 8, 8);
-        func_02029f10(&mCharacter.mModel, GX_RGB(31, 31, 31));
-        func_02029f20(&mCharacter.mModel, GX_RGB(8, 8, 8));
+        mCharacter.mFaceDrawParam.diffuse = GX_RGB(31, 31, 31);
+        mCharacter.mFaceDrawParam.ambient = GX_RGB(8, 8, 8);
+        func_02029f10(&mCharacter, GX_RGB(31, 31, 31));
+        func_02029f20(&mCharacter, GX_RGB(8, 8, 8));
     }
 }
 

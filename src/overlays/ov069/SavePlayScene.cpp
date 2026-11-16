@@ -61,7 +61,7 @@ void SavePlayScene::StartLoading() {
         func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     }
     func_02091048(&mCharacters[0], "MT0");
-    ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mModel.mArchiveName, mCharacters[0].mModel.mArchivePath, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
 }
 
 // @0x02149c4c
@@ -94,7 +94,7 @@ void SavePlayScene::Init() {
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mModel.mArchiveName, 0);
+    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
     func_02090fdc(&mCharacters[0], 0, 0, 0);
     void *animations = func_0202ad04(data_021223e4, 1, "BIC", 0);
     func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
@@ -105,11 +105,11 @@ void SavePlayScene::Init() {
     func_02091a6c(&mCharacters[0]);
     func_020910d4(&mCharacters[0]);
     func_02091a88(&mCharacters[0]);
-    func_02029660((void *)mCharacters[0].mModel.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    func_02029660((void *)mCharacters[0].mAnim.mUnknown04, RESOURCE_BCA0, animations);
     Character_SetAngle(&mCharacters[0], 0x4000);
 
     int count = 0;
-    void *resourceSet = (void *)mCharacters[0].mModel.mAnim.mUnknown04;
+    void *resourceSet = (void *)mCharacters[0].mAnim.mUnknown04;
     for (;;) {
         if (NNS_G3dGetAnmByIdx(func_020295a4(resourceSet, RESOURCE_BCA0), count) == NULL) {
             break;
@@ -119,7 +119,7 @@ void SavePlayScene::Init() {
     mAnimationCount = count;
     Character_SetAnimation(&mCharacters[0], RESOURCE_BCA0, Rand(mAnimationCount));
     func_02091a14(&mCharacters[0], 0);
-    mCharacters[0].mModel.mShadowVisible = FALSE;
+    mCharacters[0].mShadowVisible = FALSE;
     mCamera.Init();
     mLights.Init(&mCamera);
 
@@ -169,7 +169,7 @@ void SavePlayScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "MLT");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
     ArchiveManager_Unmount(&gArchiveManager, "TCM");
-    ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mModel.mArchiveName);
+    ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mArchiveName);
 }
 
 // @0x0214a294
