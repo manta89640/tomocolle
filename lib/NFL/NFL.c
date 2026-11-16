@@ -4903,8 +4903,7 @@ void NFLi_MakeColorTexture(u16 *palette);
 
 // Stage 2 of NFL_FillBuffer, a face in state 0: its eleven texture streams, then its palettes or, in mode 7, the next
 // face of the load list.
-// Not matching: the registers are the original's, but transparent's spill slot is the original's lowest (sp + 4), above
-// the outgoing argument, where ours puts it above the others
+// transparent is a u32: as a BOOL it took the highest of the spill slots where the original has it in the lowest
 BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
     NFLStream *stream;
     NFLWork *work = sNFLWork;
@@ -4920,7 +4919,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
         int size;
         BOOL overflowB;
         BOOL overflowA;
-        BOOL transparent;
+        u32 transparent;
 
         stream = &obj->texStreams[i];
         if (*pos >= work->bufSize) {
