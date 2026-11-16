@@ -57,7 +57,7 @@ _ZN11TushinScene11IsMiiBrokenEP15CharacterRecord kind:function(arm,size=0x24) ad
 _ZN11TushinScene11IsNameBlankEP15CharacterRecord kind:function(arm,size=0x4c) addr:0x02151c8c
 _ZN11TushinScene15IsNicknameBlankEP15CharacterRecord kind:function(arm,size=0x4c) addr:0x02151cd8
 _ZN11TushinScene9IsInvalidEP15CharacterRecord kind:function(arm,size=0x50) addr:0x02151d24
-_ZN11TushinScene19func_ov109_02151d74EP15CharacterRecord kind:function(arm,size=0x38) addr:0x02151d74
+_ZN11TushinScene10CannotSendEP15CharacterRecord kind:function(arm,size=0x38) addr:0x02151d74
 _ZN11TushinScene8GiveItemEi kind:function(arm,size=0x78) addr:0x02151dac
 _ZN11TushinScene9GiveShirtEv kind:function(arm,size=0x14) addr:0x02151e24
 _ZN11TushinScene12GiveWiiShirtEv kind:function(arm,size=0x10) addr:0x02151e38
@@ -65,13 +65,13 @@ _ZN11TushinScene8SetEntryEi kind:function(arm,size=0x14) addr:0x02151e48
 _ZN11TushinScene16ClearParentNamesEv kind:function(arm,size=0x1c) addr:0x02151e5c
 _ZN11TushinScene4SaveEv kind:function(arm,size=0x2c) addr:0x02151e78
 _ZN11TushinScene15SetUnknown3F098Ev kind:function(arm,size=0x10) addr:0x02151ea4
-func_ov109_02151eb4 kind:function(arm,size=0x2c) addr:0x02151eb4
-func_ov109_02151ee0 kind:function(arm,size=0xec) addr:0x02151ee0
-func_ov109_02151fcc kind:function(arm,size=0x18) addr:0x02151fcc
+TushinScene_SendCallback kind:function(arm,size=0x2c) addr:0x02151eb4
+TushinScene_Receive kind:function(arm,size=0xec) addr:0x02151ee0
+TushinScene_OnWiiSendResult kind:function(arm,size=0x18) addr:0x02151fcc
 _ZN11TushinScene20NextPageAfterReceiveEv kind:function(arm,size=0x30) addr:0x02151fe4
 _ZN11TushinScene13ReceiveWiiMiiEv kind:function(arm,size=0x390) addr:0x02152014
-func_ov109_021523a4 kind:function(arm,size=0xb8) addr:0x021523a4
-func_ov109_0215245c kind:function(arm,size=0x4) addr:0x0215245c
+TushinScene_OnWiiMiiReceived kind:function(arm,size=0xb8) addr:0x021523a4
+TushinScene_EntryCallback kind:function(arm,size=0x4) addr:0x0215245c
 _ZN11TushinSceneD1Ev kind:function(arm,size=0x48) addr:0x02152460
 _ZN11TushinSceneD0Ev kind:function(arm,size=0x50) addr:0x021524a8
 sYesNoSequences kind:data(any) addr:0x021524f8 local
@@ -220,8 +220,8 @@ gStr_TBM_ov109_2 kind:data(any) addr:0x021531c0
 gStr_MLT_ov109_2 kind:data(any) addr:0x021531c4
 gStr_STS_ov109_2 kind:data(any) addr:0x021531c8
 gStr_BIC_ov109_3 kind:data(any) addr:0x021531cc
-data_ov109_021531e0 kind:bss addr:0x021531e0
-data_ov109_02153200 kind:bss addr:0x02153200
+sDisconnected kind:bss addr:0x021531e0
+sCommand kind:bss addr:0x02153200
 data_ov109_02153201 kind:bss addr:0x02153201 ambiguous
 sParentTimers kind:bss addr:0x02153234 local
 sReceivedName kind:bss addr:0x02153240 local

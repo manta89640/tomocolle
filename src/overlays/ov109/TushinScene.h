@@ -562,11 +562,11 @@ extern u16 gWHChildSsid[12]; // WH copies the connecting child's SSID here: the 
 
 class TushinScene;
 extern "C" {
-void func_ov109_02151fcc(int, int);
-void func_ov109_021523a4(int, int);
-void func_ov109_02151eb4(BOOL result);
-void func_ov109_0215245c(void *arg);
-void func_ov109_02151ee0(u16 aid, u16 *data, u16 size);
+void TushinScene_OnWiiSendResult(int, int);
+void TushinScene_OnWiiMiiReceived(int, int);
+void TushinScene_SendCallback(BOOL result);
+void TushinScene_EntryCallback(void *arg);
+void TushinScene_Receive(u16 aid, u16 *data, u16 size);
 }
 
 // --- The scene ----------------------------------------------------------------------------------------------------
@@ -584,7 +584,7 @@ struct WindowLayout {
 // a DS whether to recruit a partner (the parent) or to find one (a child). A resident is chosen in the list on the
 // lower screen and sent: the 0x2C0-byte character (sTransfer) in 0x80-byte chunks, then the songs of its six slots
 // (sSongs); the receiver checks it (IsInvalid, the NG words of HasNgWord, a resident with the same Mii), stores it
-// as a new resident or updates the one it has, and answers with a 2-byte code (data_ov109_02153200). The Wii sends Miis
+// as a new resident or updates the one it has, and answers with a 2-byte code (sCommand). The Wii sends Miis
 // only: ReceiveWiiMii adds one from sMiiData. A DS or Wii T-shirt is given the first time (GiveShirt,
 // GiveWiiShirt). The scene factory (main CreateScene, case 41) loads overlay 109 and allocates 0x3F0B4 bytes; the
 // constructor is the main program's (func_02040644).
@@ -656,7 +656,7 @@ public:
     void StartEmitter(int i);
     void CountFrame();
     void DrawParticles();
-    BOOL func_ov109_02151d74(CharacterRecord *record);
+    BOOL CannotSend(CharacterRecord *record);
     BOOL GiveItem(int item);
     BOOL GiveShirt();
     BOOL GiveWiiShirt();
