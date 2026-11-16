@@ -125,9 +125,11 @@ public:
 // A character with two models, the goods and clothes it holds and two head icons
 class Scene40Character : public Character {
 public:
-    /* 0x2B18 */ u8 mUnknown2B18[0xDC];
+    void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
+
+    /* 0x2B18 */ u8 mUnknown2B18[0xDC]; // From 0x2BE4, an object of the overlay's that holds mModel
     /* 0x2BF4 */ AnimModel mModel;
-    /* 0x2CD4 */ u8 mUnknown2CD4[0xC];
+    /* 0x2CD4 */ u8 mUnknown2CD4[0xC];  // From 0x2CDC, a second object, which holds mModel2
     /* 0x2CE0 */ AnimModel mModel2;
     /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
     /* 0x2DC4 */ Scene40Items mItems;
