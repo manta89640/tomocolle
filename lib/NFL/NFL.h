@@ -180,18 +180,39 @@ typedef struct NFLWork {
     void *unk78;
     u8 unk7C[0x8C - 0x7C];
     int unk8C;
-    u8 unk90[0xA8 - 0x90];
+    u8 unk90[0xA0 - 0x90];
     struct {
-        int unk0;
-        u8 unk4[8];
-    } unkA8[5];
+        u32 unk0;
+        u32 unk4;
+        int unk8;
+    } unkA0[7];
 } NFLWork;
 
 extern NFLWork *data_02145360;
 
+int func_0206b0d8(NFLMakeCtx *ctx);
+int func_0206b3f4(NFLMakeCtx *ctx);
+int func_0206b740(NFLMakeCtx *ctx);
+int func_0206bb24(NFLMakeCtx *ctx);
+int func_0206bfa4(NFLMakeCtx *ctx);
+int func_0206c2f8(NFLMakeCtx *ctx);
+int func_0206c65c(NFLMakeCtx *ctx);
+int func_0206c964(NFLMakeCtx *ctx);
+const u8 *func_0206cf6c(int category, u32 index);
 BOOL func_02072c1c(void);
 BOOL func_02073284(const NFLCreateId *id);
 BOOL func_0207331c(const NFLCreateId *id);
 NFLObj *func_02073060(int index);
+BOOL func_020731e0(const NFLCharData *mii);
+BOOL func_020735dc(void);
+BOOL func_020735fc(void);
+int func_020715ac(NFLMakeCtx *ctx);
+int func_020728fc(int index, int unk);
+void func_020743e4(NFLObj *obj, VecFx16 *out, const s16 *in);
+void func_02074444(NFLObj *obj, VecFx32 *out, const VecFx32 *in);
+
+// G3C_Begin and G3C_End, by their code: not part of g3c.c's unit (0x02005124, 0x02005148)
+void func_02005124(GXDLInfo *info, GXBegin primitive);
+void func_02005148(GXDLInfo *info);
 
 #endif

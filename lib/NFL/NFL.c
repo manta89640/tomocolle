@@ -489,6 +489,97 @@ int func_0206b024(NFLMakeCtx *ctx) {
     return 0;
 }
 
+// The beard's mesh
+int func_0206b0d8(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    const u8 *stream;
+    VecFx16 vertex;
+    VecFx16 normal;
+    NFLObj *obj = ctx->unk1C8;
+    u32 type = ctx->unk1CC->beardType;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int i;
+    int polygons;
+    int j;
+    int count;
+    fx16 x;
+    fx16 y;
+    fx16 z;
+    int v;
+    int n;
+    int tc;
+
+    stream = func_0206cf6c(0, type);
+    s = type > 1 ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = type > 1 ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = type == 1 ? GX_TEXFMT_PLTT4 : GX_TEXFMT_PLTT16;
+    }
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_S, GX_TEXFLIP_S, GX_TEXPLTTCOLOR0_TRNS,
+                      ctx->unk2C[3].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[3].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[1].x;
+    position.y = ctx->unk0[1].y;
+    position.z = ctx->unk0[1].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (type < 2) {
+            G3C_TexCoord(&ctx->unk64, 0, 0x8000);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+
+            if (type > 1) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            x = vertex.x;
+            y = vertex.y;
+            z = vertex.z;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+
 extern const u16 data_020b6524[];
 extern const u16 data_020b6530[];
 extern const u16 data_020b6540[];
@@ -773,6 +864,162 @@ void func_0206d3cc(NFLObj *obj, const NFLCharData *mii) {
     params[17] = mii->moleType;
 }
 
+// The axes of the library's coordinates (0x0211215C), which NFLObj copies at 0xC4
+typedef struct NFLAxes {
+    VecFx32 unk0;
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+} NFLAxes;
+
+extern int (*const data_02112140[])(NFLMakeCtx *ctx);
+extern const NFLAxes data_0211215c;
+
+// Makes object index's display lists from a Mii's data
+#pragma optimization_level 2
+#pragma opt_common_subs off
+int func_0206d4f8(int index, const NFLCharData *mii, u32 unk) {
+    OSIntrMode enabled;
+    NFLMakeCtx ctx;
+    NFLObj *obj;
+    NFLObjEntry *entries;
+    NFLObjEntry *entries2;
+    BOOL found = FALSE;
+    int i;
+    int result;
+
+    if (mii == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    if (!func_020735dc() || !func_020735fc()) {
+        return 4;
+    }
+    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+        return 6;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    entries = obj->unk1A4;
+    entries2 = obj->unk228;
+    if (!func_0206d040(mii) || !func_020731e0(mii)) {
+        return 7;
+    }
+    ctx.unk1C8 = obj;
+    ctx.unk1CC = mii;
+    obj->unk90 = data_02145360->unk68;
+    obj->unk168 = 0;
+    obj->unk16C = data_02145360->unk71;
+    obj->unk0 = 0;
+    obj->unk4 = 0;
+    obj->unk28 = unk;
+    obj->unkDC = mii;
+    obj->unk174 = 0;
+    obj->unk178 = 0;
+    if (obj->unk170 == 4) {
+        if (obj->unk90 == 7) {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x6880;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC;
+        } else {
+            obj->unkD4 = ctx.unk24 = data_02145360->unk8 + index * 0x1A10;
+            obj->unkD8 = ctx.unk28 = data_02145360->unkC + index * 0x130;
+        }
+        for (i = 0; i < 11; i++) {
+            entries[i].value = -1;
+            entries[i].state = 7;
+        }
+        for (i = 0; i < 10; i++) {
+            entries2[i].value = -1;
+            entries2[i].state = 7;
+        }
+        func_0206d374(obj);
+    } else {
+        ctx.unk24 = obj->unkD4;
+        ctx.unk28 = obj->unkD8;
+    }
+    obj->unkD0 = data_0211215c.unkC;
+    obj->unkD1 = data_0211215c.unkD;
+    obj->unkD2 = data_0211215c.unkE;
+    obj->unkC4.x = data_0211215c.unk0.x;
+    obj->unkC4.y = data_0211215c.unk0.y;
+    obj->unkC4.z = data_0211215c.unk0.z;
+    enabled = OS_DisableInterrupts();
+    func_0206cf48(&ctx);
+    for (i = 0; i < 7; i++) {
+        result = data_02112140[i](&ctx);
+        if (result != 0) {
+            return result;
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        if (entries[i].state == 0) {
+            obj->unk170 = 0;
+            found = TRUE;
+            break;
+        }
+    }
+    if (!found) {
+        for (i = 0; i < 10; i++) {
+            if (entries2[i].state == 0) {
+                found = TRUE;
+                obj->unk170 = found;
+                break;
+            }
+        }
+    }
+    if (found == TRUE) {
+        NFLObj *p;
+
+        if (data_02145360->unk74 == obj) {
+            data_02145360->unk74 = obj->unk17C;
+        }
+        p = data_02145360->unk74;
+        if (p == NULL) {
+            data_02145360->unk74 = obj;
+        } else {
+            while (p->unk17C != NULL) {
+                if (p->unk17C == obj) {
+                    p->unk17C = obj->unk17C;
+                    if (p->unk17C == NULL) {
+                        break;
+                    }
+                }
+                p = p->unk17C;
+            }
+            p->unk17C = obj;
+        }
+    } else {
+        obj->unk170 = 2;
+    }
+    obj->unk17C = NULL;
+    if (data_02145360->unk8C == 4) {
+        data_02145360->unk8C = 0;
+    }
+    OS_RestoreInterrupts(enabled);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk2A4, sizeof(obj->unk2A4));
+    func_0206b3f4(&ctx);
+    func_0206b0d8(&ctx);
+    func_0206c964(&ctx);
+    func_0206c65c(&ctx);
+    func_0206b740(&ctx);
+    func_0206bb24(&ctx);
+    func_0206bfa4(&ctx);
+    func_0206c2f8(&ctx);
+    obj->unk0 = G3_EndMakeDL(&ctx.unk64);
+    G3_BeginMakeDL(&ctx.unk64, obj->unk1D84, sizeof(obj->unk1D84));
+    func_020715ac(&ctx);
+    obj->unk4 = G3_EndMakeDL(&ctx.unk64);
+    func_0206d3cc(obj, mii);
+    func_020728fc(index, 0);
+    return 0;
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
 int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
     NFLObj *obj;
 
@@ -928,7 +1175,7 @@ int func_0206e38c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[0].unk4 = obj->unk14;
         }
-        data_02145360->unkA8[0].unk0 = 0;
+        data_02145360->unkA0[0].unk8 = 0;
         work->unk10[0].unk8 = 1;
     }
     return 0;
@@ -945,7 +1192,7 @@ int func_0206e3fc(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[1].unk4 = obj->unk24;
         }
-        data_02145360->unkA8[1].unk0 = 0;
+        data_02145360->unkA0[1].unk8 = 0;
         work->unk10[1].unk8 = 1;
     }
     return 0;
@@ -962,7 +1209,7 @@ int func_0206e46c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[2].unk4 = obj->unk14;
         }
-        data_02145360->unkA8[2].unk0 = 0;
+        data_02145360->unkA0[2].unk8 = 0;
         work->unk10[2].unk8 = 1;
     }
     return 0;
@@ -979,7 +1226,7 @@ int func_0206e4dc(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[3].unk4 = obj->unk14;
         }
-        data_02145360->unkA8[3].unk0 = 0;
+        data_02145360->unkA0[3].unk8 = 0;
         work->unk10[3].unk8 = 1;
     }
     return 0;
@@ -996,7 +1243,7 @@ int func_0206e54c(NFLObj *obj, u32 *address) {
             *address += 0x200;
             work->unk10[4].unk4 = obj->unk14;
         }
-        data_02145360->unkA8[4].unk0 = 0;
+        data_02145360->unkA0[4].unk8 = 0;
         work->unk10[4].unk8 = 1;
     }
     return 0;
