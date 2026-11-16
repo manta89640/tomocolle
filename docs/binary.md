@@ -523,8 +523,59 @@ Two things the compiler does that these files needed:
 
 Not done:
 
-- The constructors are in the main program's file of scene constructors, which is not cut, and are named only by
-  their addresses.
+- The constructors are in the scene factory's file (`src/scene/SceneManager.cpp`); see "The scene constructors".
+
+## The scene constructors (0x02040578 to 0x0204AF20)
+
+The constructors of scenes 0x27 to 0xC2, and the scene manager's `UnloadSceneOverlay` and `SetSoundGroup` after
+them, are the second half of `src/scene/SceneManager.cpp` (the scene factory's file, which gap38-a cut; see its
+header). The classes are declared in the overlays' directories (`src/overlays/ovNNN/<Class>.h`, with the layout the
+constructor shows) or, for scenes of the main program, in `src/scene/`.
+
+Measured:
+
+- **One file, constructors out of line in id order.** `CreateScene` calls every constructor, even 0x28-byte ones,
+  and they follow one another in the order of the scene ids, each followed by the implicit constructors and
+  destructors of the member classes it gives `__cxa_vec_ctor`. Defined out of line in the file
+  (`X::X(int sceneId) : Scene(sceneId) {...}`), they compile to the ROM's code; as inline constructors in the class
+  headers `CreateScene` inlines them. The C2 copies the compiler also emits are stripped by the link.
+- **What the code shows of a member.** An array of a class with a destructor is built by `__cxa_vec_ctor`; one
+  without (message windows, buttons, texts, saved characters) by a loop, and an array of one still by a loop,
+  so `MessageWindow mWindow[1]` and `MessageText mText[1]` where the ROM loops once. An inline constructor
+  (MessageWindow, AnimModel, a Character's) is expanded in place. A run of members that the constructor addresses
+  from the end pointer of the previous loop is a part of its own (`Scene74Part`, `RankingPart`): written as plain
+  members, the compiler addresses them from `this`.
+- **Model classes of the overlays.** Several scenes hold arrays of a class of their overlay that holds an
+  AnimModel (`TestNg69Model`, `Scene3CModel`, `Scene3EModel`: constructor in the overlay, destructor the main
+  program's copy) or derives from it (`Scene75Model`, `Scene91Model`: implicit constructor and D1 here, the table
+  and D0 in the overlay, which refers to this file's D1; the class needs its overlay key function declared, or
+  this file emits the table too). A model class with nothing virtual of its own (`TestNg134Model`) has its table
+  and D0 in this file (`0x0211091C`, `0x0204AE10`).
+- **Twins are C2 and C1.** `ParticleSystem`'s and `HeadIcon`'s constructors are each emitted twice, byte for
+  byte (`0x02080E80`/`0x02080E8C`, `0x02081034`/`0x02081074`); the C2 comes first, and a head icon that is a member
+  (scene 0xAF's character) is built with the second. Scene 0x76's icon calls both C2s: a class deriving from both.
+  CharacterModel's (`0x0208EB18`/`0x0208EBA0`) are alike; a `Character` builds it as its second base with C2.
+- **Sizes.** `CreateScene` allocates `sizeof` of each class, so a wrong size in a scene header shows in its
+  literal pool; the headers' sizes all match it.
+- `UnloadSceneOverlay` (0x02049F0C) unloads the overlay of each scene with an overlay, its 111 literal ids
+  `overlay_id` relocations as `CreateScene`'s are; `SetSoundGroup` (0x0204AB04) keeps the sound group loaded in
+  `SceneManager::mSoundGroup` (+0x360).
+- Shared classes these constructors needed, now one definition each: `MessageWindow` (its inline constructor,
+  two virtual functions: `SetVisible`, 0x02034A94, and one of more than four arguments), `G3Sprite`, `DayPhase`,
+  `HeadIcon` with `ParticleSystem`, `ShopWindow` and `HalfPriceShopWindow` (the shops' price window, a message
+  window with two buttons and three text canvases; tables `0x02115368`, `0x02115380`); and the shared
+  character, model, item, room and list headers of the main program's owners.
+
+Named classes of scenes whose overlay is not decompiled: after the scene's archive
+`Scn/Scene/Scene<Name>_LZ.bin` when no other overlay mounts it (`RankingScene`, `CityHallScene`, `RomanceScene`,
+`Marriage2Scene`, the `TestNg<n>Scene`s), otherwise after the lowest scene id (`Scene2B`, ...). Scene 0x27 of the
+main program mounts the island map's sky, vote and apartment models (`MapModelsScene`), scene 0x2E shows a room
+stepped through the 78 interiors (`InteriorViewScene`).
+
+Not done: the constructors of scenes 0x29 (TushinScene), 0x2F, 0x35, 0x68 (the shops), 0x38, 0x3A and 0x8E (a
+member of an unidentified class whose constructor twins are `0x02025A9C`/`0x02025B5C`), 0x40, 0x46, 0x5B, 0x67, 0x7F,
+0x80, 0xAB (WeddingScene), 0xB1 (ItemTradeScene) and 0xB4; the item classes' inline virtual functions and the
+deleting destructors at the file's end (0x0204ABAC to 0x0204AF20) come with the classes whose tables this file emits.
 
 ## WH, the wireless wrapper
 
