@@ -76,7 +76,8 @@ struct SavedCharacter {
     SavedCharacter(); // _ZN14SavedCharacterC1Ev
 
     /* 0x000 */ u8 mMii[0x4A];        // The Mii's data (0x4A bytes, as the Mii exchange sends it)
-    /* 0x04A */ u8 mUnknown04A[0x25A];
+    /* 0x04A */ u8 mPersonality[5];   // The Mii maker's page 4 sets them with five sliders: 1 to 8, 0 while unset
+    /* 0x04F */ u8 mUnknown04F[0x255];
     /* 0x2A4 */ u16 mIndex;           // Which of the saved characters this is
     /* 0x2A6 */ u8 mUnknown2A6[0x1A];
 }; // 0x2C0

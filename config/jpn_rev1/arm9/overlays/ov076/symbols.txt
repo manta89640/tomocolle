@@ -66,8 +66,8 @@ _ZN16MiiEditVoicePage19func_ov076_02157508Ei kind:function(arm,size=0x68c) addr:
 func_ov076_02157b94 kind:function(arm,size=0x2c) addr:0x02157b94
 _ZN16MiiEditVoicePage19func_ov076_02157bc0Ev kind:function(arm,size=0x10) addr:0x02157bc0
 func_ov076_02157bd0 kind:function(arm,size=0x34) addr:0x02157bd0
-func_ov076_02157c04 kind:function(arm,size=0x238) addr:0x02157c04
-func_ov076_02157e3c kind:function(arm,size=0x1b0) addr:0x02157e3c
+_ZN20MiiEditCharacterPage4InitEP12MiiEditScene kind:function(arm,size=0x238) addr:0x02157c04
+_ZN20MiiEditCharacterPage6UpdateEv kind:function(arm,size=0x1b0) addr:0x02157e3c
 _ZN20MiiEditCharacterPage4DrawEv kind:function(arm,size=0x58) addr:0x02157fec
 _ZN20MiiEditCharacterPage4ExitEv kind:function(arm,size=0x4) addr:0x02158044
 func_ov076_02158048 kind:function(arm,size=0x1d4) addr:0x02158048
@@ -91,11 +91,11 @@ data_ov076_02158784 kind:data(any) addr:0x02158784
 data_ov076_02158788 kind:data(any) addr:0x02158788
 data_ov076_021587f0 kind:data(any) addr:0x021587f0
 gStr_Ampersand_ov076 kind:data(any) addr:0x02158818
-data_ov076_02158822 kind:data(any) addr:0x02158822
-data_ov076_0215882c kind:data(any) addr:0x0215882c
+sCharacterLabelSequences kind:data(any) addr:0x02158822 local
+sCharacterKnobSequences kind:data(any) addr:0x0215882c local
 data_ov076_02158844 kind:data(any) addr:0x02158844
 data_ov076_02158850 kind:data(any) addr:0x02158850
-data_ov076_0215885c kind:data(any) addr:0x0215885c
+sCharacterCameraGoal kind:data(any) addr:0x0215885c local
 gStr_Parenthesis_ov076 kind:data(any) addr:0x02158868
 data_ov076_02158874 kind:data(any) addr:0x02158874
 gStr_X_ov076 kind:data(any) addr:0x02158880
@@ -114,7 +114,7 @@ gStr_P_ov076 kind:data(any) addr:0x0215892c
 data_ov076_0215893c kind:data(any) addr:0x0215893c
 gStr_CircumflexAccent_ov076 kind:data(any) addr:0x0215894c
 data_ov076_0215895c kind:data(any) addr:0x0215895c
-data_ov076_02158970 kind:data(any) addr:0x02158970
+sCharacterKnobKinds kind:data(any) addr:0x02158970 local
 gStr_GreaterThan_ov076 kind:data(any) addr:0x02158984
 data_ov076_0215899c kind:data(any) addr:0x0215899c
 data_ov076_021589b4 kind:data(any) addr:0x021589b4
@@ -134,11 +134,11 @@ data_ov076_02158b3c kind:data(any) addr:0x02158b3c
 data_ov076_02158b60 kind:data(any) addr:0x02158b60
 gStr_7 kind:data(any) addr:0x02158b88
 gText_Ka_ov076 kind:data(any) addr:0x02158b8c
-data_ov076_02158bb0 kind:data(any) addr:0x02158bb0
+sCharacterLabelPositions kind:data(any) addr:0x02158bb0 local
 data_ov076_02158bd8 kind:data(any) addr:0x02158bd8
 data_ov076_02158c00 kind:data(any) addr:0x02158c00
-data_ov076_02158c28 kind:data(any) addr:0x02158c28
-data_ov076_02158c50 kind:data(any) addr:0x02158c50
+sCharacterKnobPositions kind:data(any) addr:0x02158c28 local
+sCharacterKnobSizes kind:data(any) addr:0x02158c50 local
 data_ov076_02158c78 kind:data(any) addr:0x02158c78
 gStr_Parenthesis_ov076_2 kind:data(any) addr:0x02158ca4
 data_ov076_02158cd4 kind:data(any) addr:0x02158cd4
@@ -166,7 +166,7 @@ data_ov076_0215913c kind:data(any) addr:0x0215913c
 data_ov076_0215919c kind:data(any) addr:0x0215919c
 gStr_Semicolon_ov076_2 kind:data(any) addr:0x021591fc
 data_ov076_0215925c kind:data(any) addr:0x0215925c
-gStr_I_ov076 kind:data(any) addr:0x021592d0
+sCharacterValueRects kind:data(any) addr:0x021592d0 local
 data_ov076_02159350 kind:data(any) addr:0x02159350
 data_ov076_021593e0 kind:data(any) addr:0x021593e0
 gStr_D_ov076 kind:data(any) addr:0x02159480

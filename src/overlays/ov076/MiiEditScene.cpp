@@ -1,4 +1,5 @@
 #include "MiiEditScene.h"
+#include "sound/SoundManager.h"
 
 // --- The main program (stand-ins, not decompiled) ---
 struct ArchiveLoader;
@@ -297,6 +298,123 @@ void MiiEditVoicePage::func_ov076_02157bc0() {
 }
 
 // --- The personality page ---
+
+// What this page uses of the main program (stand-ins)
+struct TouchInput {
+    /* 0x00 */ u8 mUnknown00[0x2C];
+    /* 0x2C */ u16 mTouching;
+    /* 0x2E */ u8 mUnknown2E[2];
+    /* 0x30 */ ScreenPoint mLastPoint; // Where it was touched last
+    /* 0x38 */ ScreenPoint mPoint;     // Where it is touched
+    /* 0x40 */ u8 mUnknown40[8];
+    /* 0x48 */ BOOL mTouched;          // The stylus went down this frame
+    /* 0x4C */ BOOL mUnknown4C;        // Which of the two points to test
+};
+
+extern "C" {
+extern TouchInput gTouchInput;
+void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
+void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
+void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mPersonality[index]
+void func_02091a6c(SceneCharacter *character);
+void func_ov076_0214bec8(Sprite *sprite, int a);
+}
+
+// The sliders: a knob for each of the five values, and its label
+static const u16 sCharacterKnobSequences[5] = { 0, 0, 0, 0, 0 };
+static const u16 sCharacterLabelSequences[5] = { 1, 2, 3, 4, 5 };
+static const WindowPoint sCharacterKnobSizes[5] = { { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 } };
+static const int sCharacterKnobKinds[5] = { 4, 4, 4, 4, 4 };
+static const WindowPoint sCharacterKnobPositions[5] = { { 128, 26 }, { 128, 59 }, { 128, 92 }, { 128, 125 }, { 128, 158 } };
+static const WindowPoint sCharacterLabelPositions[5] = { { 128, 26 }, { 128, 59 }, { 128, 92 }, { 128, 125 }, { 128, 158 } };
+static const VecFx32 sCharacterCameraGoal = { 0, 0x1C50, 0x19BF0 };
+// Where each of the eight values of a slider takes a touch, relative to the slider's row
+static const ScreenRect sCharacterValueRects[8] = {
+    { 73, -6, 12, 12 }, { 87, -6, 12, 12 }, { 101, -6, 12, 12 }, { 115, -6, 12, 12 },
+    { 129, -6, 12, 12 }, { 143, -6, 12, 12 }, { 157, -6, 12, 12 }, { 171, -6, 12, 12 },
+};
+
+void MiiEditCharacterPage::Init(MiiEditScene *scene) {
+    mScene = scene;
+    scene->func_ov076_0214bbe4();
+    ObjResourceManager_Load(&gObjResourceManager, "E00:/Character.nce", "E00:/Character.ncg", 0x1000, 1, 0x10000);
+    for (u16 i = 0; i < 5; i++) {
+        u16 sequence = sCharacterKnobSequences[i];
+        Sprite_Init(&mButtons[i], 1, sequence, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], sCharacterKnobSizes[i].x, sCharacterKnobSizes[i].y);
+        func_02031278(&mButtons[i], sequence, sequence + 1);
+        func_02031260(&mButtons[i], sCharacterKnobKinds[i]);
+        mButtons[i].SetPositionFromVec(sCharacterKnobPositions[i].x << FX32_SHIFT,
+                                       sCharacterKnobPositions[i].y << FX32_SHIFT);
+        func_0203119c(&mButtons[i]);
+        mButtons[i].mVisible = FALSE;
+    }
+    for (int i = 0; i < 5; i++) {
+        u8 value = mScene->mCharacter.mPersonality[i];
+        if (value == 0) {
+            mButtons[i].mVisible = FALSE;
+        } else {
+            u8 index = value - 1;
+            mButtons[i].mVisible = TRUE;
+            mButtons[i].mPosition.x = (0x87 - (4 - index) * 14) << FX32_SHIFT;
+        }
+    }
+    for (u16 i = 0; i < 5; i++) {
+        Sprite_Init(&mSprites[i], 1, sCharacterLabelSequences[i], 0x80, 0x60, TRUE);
+        mSprites[i].SetPositionFromVec(sCharacterLabelPositions[i].x << FX32_SHIFT,
+                                       sCharacterLabelPositions[i].y << FX32_SHIFT);
+    }
+    mScene->MoveCameraTo(sCharacterCameraGoal);
+}
+
+// Whether all five values are set
+static inline BOOL IsPersonalitySet(MiiEditScene *scene) {
+    BOOL set = TRUE;
+    for (int i = 0; i < 5; i++) {
+        if (scene->mCharacter.mPersonality[i] == 0) {
+            set = FALSE;
+            break;
+        }
+    }
+    return set;
+}
+
+void MiiEditCharacterPage::Update() {
+    if (gTouchInput.mTouching == 0) {
+        return;
+    }
+    ScreenPoint point = *(gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint);
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 8; j++) {
+            ScreenRect rect = sCharacterValueRects[j];
+            rect.y += sCharacterKnobPositions[i].y;
+            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mPersonality[i]) {
+                func_02098d5c(&mScene->mCharacter, i, j + 1);
+                func_02091a6c(&mScene->mCharacter);
+                mButtons[i].mVisible = TRUE;
+                mButtons[i].mPosition.x = (0x87 - (4 - j) * 14) << FX32_SHIFT;
+                gSoundManager.StartSeqArc(1, 14, 1);
+            }
+        }
+    }
+    if (mScene->mButtons[4].mUnknownB8 == 0) {
+        return;
+    }
+    BOOL set = TRUE;
+    for (int i = 0; i < 5; i++) {
+        if (mScene->mCharacter.mPersonality[i] == 0) {
+            set = FALSE;
+            break;
+        }
+    }
+    if (!set) {
+        return;
+    }
+    func_02031e88(&mScene->mButtons[4], FALSE);
+    mScene->mUnknown58DC = TRUE;
+    func_ov076_0214bec8(&mScene->mSprite582C, 4);
+}
+
 
 void MiiEditCharacterPage::Draw() {
     for (u16 i = 0; i < 5; i++) {

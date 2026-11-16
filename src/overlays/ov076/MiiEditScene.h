@@ -156,11 +156,13 @@ public:
 // The page of the character's personality ("Character" graphics)
 class MiiEditCharacterPage {
 public:
+    void Init(MiiEditScene *scene);
+    void Update();
     void Draw();
     void Exit();
 
-    /* 0x000 */ u8 mUnknown000[0x4];
-    /* 0x004 */ SpriteButton mButtons[5];
+    /* 0x000 */ MiiEditScene *mScene;
+    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value (SavedCharacter::mPersonality)
     /* 0x4C8 */ Sprite mSprites[5];
     /* 0x824 */
 }; // 0x824
