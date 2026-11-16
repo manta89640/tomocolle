@@ -239,6 +239,19 @@ with loops that are neither rotated nor strength-reduced sit between ordinary on
 default level gives that shape: not `volatile`, narrower or unsigned counters, other loop forms, or the `opt_*`
 pragmas.
 
+Other per-function settings found the same way (overlay 109):
+
+- `#pragma opt_common_subs off` at level 2 (then `#pragma opt_common_subs reset`) gave `UpdateCharacters` the
+  original's hoisting and registers (72% to 99.3%), where level 2 alone hoists more and level 1 does not schedule.
+- The static initialiser is compiled with the settings in effect at the end of the file. Overlay 109's original
+  reads a `const` table from the `.rodata` pool instead of folding it, and matches with `#pragma opt_foldconstants
+  off` as the file's last line; at the definition the pragma has no effect, and for the whole file it breaks other
+  functions.
+- The build passes `-w off`, so a pragma the compiler does not know is ignored without a word (`#pragma scheduling
+  off` is one). Check a pragma on a small file with `-w all` first; the `opt_*` names it knows are in the
+  executable's strings (`strings mwccarm.exe | grep ^opt_`).
+- Builds 137, 138 and 139 compile overlay 109's near-misses identically, so they are not a version question.
+
 ## How a file's data is laid out
 
 Measured by compiling test files and checked against whole compiled files (overlays 72, 98 and 99, WH); the
@@ -277,6 +290,16 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   (the main program's list scenes, overlays 76 and 109).
 - Comparing a compiled object's data with the ROM's before completing a unit finds wrong table values in the source,
   which no function shows (overlay 109's `sLayouts`).
+- A `.bss` pool of small scalars sorted by size (overlay 109: a `u8`, 20 `u16`, ten `int`, then two arrays) is the
+  compiler's pool of separate statics, not a structure: declared as statics in the right order it matches, and the
+  code reads them all off the pool's base. Statics nothing in the file uses are kept by an uncalled stand-in
+  function that the link strips (`TushinScene_UnusedClear`).
+- Adding or removing objects changes the sort's permutation of every size, `.rodata` included, so the same-size
+  declarations have to be permuted again after any change to the file's statics. The permutation of a compile is
+  fixed, so this is mechanical: read where each declaration landed in the compiled object, give each position the
+  declaration whose ROM address has that rank among its size, and compile once more.
+- The same compiler run under wibo instead of wine (with the source converted to Shift JIS) gives the same code but
+  another order of same-size objects: judge data layout only with the build's own compile.
 
 ## Matching techniques
 
@@ -350,12 +373,22 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
+**Arguments evaluated in another order**
+- At a call whose argument is a load and whose other argument an address, mwcc sometimes forms the load first and
+  sometimes the address, and which depends on the code around the call, not on the call: overlay 109's
+  `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
+  order alone in a test function, and in the other once a switch that reassigns a local follows it. Neither
+  temporaries, inlines, parameter types nor `opt_*` pragmas change it. Not solved.
+
 **Branches and switches laid out differently**
 - An if/else the original compiles as "then predicated, branch over else" is written the other way round
   (`if (i != n) x++; else ...`).
-- An if/else assigning a member stores at once; a ternary lets the store be scheduled later.
+- An if/else assigning a member stores at once; a ternary lets the store be scheduled later. An if/else also gave the
+  original's result register where the ternary took another (overlay 109's `Update`, the next page after a send).
 - The same member assigned in both branches (`if (...) y = A << 12; else y = (A + 2) << 12;`) where a local set in
   each branch and stored after them schedules the shift and store differently (`KeyboardButton::Draw`).
+- At level 2, `lost = TRUE; next = c ? a : b;` puts the `mov` of the flag between the two conditional moves, as the
+  original has it; the flag after the ternary puts it after both.
 - A switch with the cases in the order of the original's code: `default` first puts its code after the compare
   chain; a jump table's values that only go to the default must be written out as cases; the tutorial's cases
   first gave `MapScene::Init`'s compare chain. `case 0: case 9: case 10:` gives `cmp; cmpne; cmpne` where `||`

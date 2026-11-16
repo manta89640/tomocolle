@@ -836,7 +836,7 @@ Not done:
 
 ## Wireless play: the Mii exchange
 
-Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 68 of its 77 functions match, and every section of the
+Overlay 109, `src/overlays/ov109/TushinScene.cpp`: 71 of its 77 functions match, and every section of the
 overlay is claimed by the one file. The unit is not complete. `docs/notes/ov109.md` has the working notes.
 
 Measured:
@@ -886,26 +886,32 @@ Measured, about the compiler:
   file of their own. `ReceiveCharacter`, `UpdateCharacters` and `Update` are compiled the same way here.
 - **A `const` object initialised from another constant** is filled in by the static initialiser and stays in
   `.data` as zeros (the list's text origins, from the item positions). The original's initialiser loads the item
-  positions from the `.rodata` pool; ours folds them into immediates, and every compiler version tried does, so
-  `__sinit_TushinScene.cpp` does not match.
+  positions from the `.rodata` pool instead of folding them; it matches with `#pragma opt_foldconstants off` in
+  effect at the end of the file (inferred: the original set it somewhere and left it on).
+- **`UpdateCharacters`** matches its hoisting and registers only without common subexpression elimination
+  (`opt_common_subs off` at level 2), to one block.
 - **`.rodata`**: the objects under 64 bytes are one pool sorted by size (8 to 56 bytes), the arrays of `u8` and the
   strings before and after it, and the 0x90- and 0x110-byte tables on their own after it. The compiled `.rodata` is
   in the ROM's order: same-size declarations were permuted until it was. Two of the pool's constants are folded
   wherever they are used and kept anyway (`sCameraPosition`, `sCameraTarget`, and the signal sprite's
   `sSignalPosition`).
 
+- **The destructors** at `0x02152460` and `0x021524A8`, after the file's last function, are `TushinScene`'s `D1` and
+  `D0`: the implicit destructor compiles to them, and the scene's virtual table refers to both.
+- **`.bss`** is a pool of separate statics sorted by size (a `u8`, 20 `u16`, ten `int`, then `sParentTimers` and
+  `sReceivedName`), which the code reaches from the pool's start; the source declares them so, named by address.
+  13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the overlay. Inferred: functions that
+  used them were stripped by the link, which keeps the pooled statics they used; a stand-in function keeps them
+  in the compiled object.
+
 Not done:
 
-- 9 entries differ: 6 functions and the static initialiser, each with a comment saying how, plus the two
-  destructors at `0x02152460` and `0x021524A8`, which are still under their address names in `symbols.txt` (ours
-  are `D1`/`D0`). Most of the 6 differ in the register choice or scheduling of one or two instructions; `Update`, `UpdateSending` and `UpdateCharacters` also read the selected resident's `mIndex` and a
-  model's `mVisible` with folded offsets, where the original goes through the element's or the model's address.
+- 6 functions differ, each with a comment saying how: `Update` (99.9%), `UpdateCharacters` (99.3%),
+  `ReceiveCharacter` (one `orr`'s operand order), `UpdateListWindow` (one register copy), `ReceiveWiiMii` (a -1
+  derived from a register holding 0) and `InitParticles` (registers of the last block). All are register choice
+  or order; no `opt_*` pragma or compiler build changes them.
 - `.data`: the three 4-byte strings of `sCharacterArchives` and the 12-byte group of its pool come out in another
   order than the ROM's.
-- `.bss`: the state of the exchange is a structure (`sWireless`) in the source. In the ROM it is a pool of separate
-  statics sorted by size (a `u8`, 20 `u16`, ten `int`, then `sParentTimers` and `sReceivedName`), which the code
-  reaches from the pool's start. 13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the
-  overlay. Inferred: functions that used them were stripped by the link, which keeps the pooled statics they used.
 
 ## The keyboard's object
 
