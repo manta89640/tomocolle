@@ -826,6 +826,600 @@ void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
 
 // --- The profile page ---
 
+// The touch screen as the main program keeps it (gTouchInput)
+struct TouchInput {
+    /* 0x00 */ u8 mUnknown00[0x28];
+    /* 0x28 */ TPData mTp;
+    /* 0x30 */ ScreenPoint mLastPoint;
+    /* 0x38 */ ScreenPoint mPoint;
+    /* 0x40 */ u8 mUnknown40[8];
+    /* 0x48 */ BOOL mTouched; // The stylus went down this frame
+    /* 0x4C */ BOOL mUnknown4C;
+};
+
+// The buttons of the pad (data_0211f9d4)
+struct PadInput {
+    /* 0x00 */ u8 mUnknown00[0x20];
+    /* 0x20 */ u32 mUnknown20;
+};
+
+// The word at 0x50 of the saved character: bits 17 to 28 are a year, 1900 to 2099 (0xFFF: none), which the
+// profile page's year window changes (func_02098cf4 sets it). A STAND-IN until the record's members are known.
+struct CharacterYear {
+    u32 mUnknown : 17;
+    u32 mYear : 12;
+};
+
+extern "C" {
+extern TouchInput gTouchInput;
+extern PadInput data_0211f9d4;
+BOOL func_02024004(ScreenControl *screens, int planes, int level);
+BOOL func_02024118(ScreenControl *screens, int planes, int level);
+// The keyboard: its update with the touch screen, ...
+void func_02083244(SoftKeyboard *keyboard, int a, TPData tp);
+void func_020831a4(SoftKeyboard *keyboard);
+BOOL func_02083614(void *key, ScreenPoint point);
+BOOL func_02083308(void *key);
+u16 func_02082560(void); // The character typed (8 erases, 7 and 9 add the voicing marks, 11 makes it small)
+BOOL func_02031294(SpriteButton *button);
+void func_02098c40(CharacterBase *character, int parameter, int value); // Sets a Mii parameter
+void func_02098cf4(CharacterBase *character, u16 year);
+void func_02098d44(CharacterBase *character, int a);
+void func_02098cd0(CharacterBase *character, int a);
+void MiiData_SetName(CharacterBase *character, const wchar_t *name);
+void MiiData_SetCreatorName(CharacterBase *character, const wchar_t *name);
+wchar_t *wcscpy(wchar_t *dst, const wchar_t *src);
+// Of the scene and of the profile page, after this
+void func_ov076_0214b694(MiiEditScene *scene);
+void func_ov076_02153cf4(MiiEditProfilePage *page, const wchar_t *text);
+void func_ov076_02153e54(MiiEditProfilePage *page, int year);
+void func_ov076_02153fb8(MiiEditProfilePage *page, int day);
+void func_ov076_021540a4(MiiEditProfilePage *page, int month);
+void func_ov076_02154574(MiiEditProfilePage *page);
+void func_ov076_021545dc(MiiEditProfilePage *page, int state);
+}
+
+static const VecFx32 data_ov076_0215885c = { 0, 0x1C50, 0x19BF0 };
+// The sequences of the windows' choices (each choice shows the next sequence while it is chosen)
+static const u16 data_ov076_02158df4[29] = {
+    0x18, 0x1A, 0x1C, 0x1E, 0x24, 0x26, 0x28, 0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36, 0x38,
+    0x3A, 0x20, 0x22, 0x3C, 0x3E, 0x3C, 0x3E, 0x40, 0x42, 0x4F, 0x4F, 0x4F, 0x4F, 0x4F,
+};
+
+void MiiEditProfilePage::func_ov076_02150874(MiiEditScene *scene) {
+    mState = -1;
+    mScene = scene;
+    scene->MoveCameraTo(data_ov076_0215885c);
+    func_ov076_02151f0c(1);
+}
+
+// The original reads the windows' choice and result (MessageWindow::mUnknownAF7C, mResult) anew at each use here,
+// as it would a volatile. Declaring them volatile in MessageWindow.h does the same, but costs overlay 106's
+// PreStartScene::Ask its match, so the volatile is in this file's reads only (a STAND-IN for whatever the
+// original's declaration was).
+#define READ(x) (*(volatile int *)&(x))
+
+void MiiEditProfilePage::func_ov076_021508ac() {
+    switch (mState) {
+    case 0:
+        if (mUnknown00004++ <= 2) {
+            return;
+        }
+        func_ov076_02151f0c(mState + 1);
+        return;
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+        if (!func_02024118(&data_0211d604, 0x3F00, 2)) {
+            return;
+        }
+        func_ov076_02151f0c(mState + 1);
+        return;
+    case 1:
+        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+            return;
+        }
+        for (int i = 0; i < 10; i++) {
+            if (func_0203133c(&mButtons[i])) {
+                switch (i) {
+                case 0:
+                    func_ov076_02151f0c(4);
+                    break;
+                case 1:
+                    func_ov076_02151f0c(2);
+                    break;
+                case 2:
+                    func_ov076_02151f0c(13);
+                    break;
+                case 3:
+                    func_ov076_02151f0c(11);
+                    break;
+                case 4:
+                    func_ov076_02151f0c(6);
+                    break;
+                case 5:
+                    func_ov076_02151f0c(14);
+                    break;
+                case 6:
+                    func_ov076_02151f0c(12);
+                    break;
+                case 7:
+                    func_ov076_02151f0c(8);
+                    break;
+                case 8:
+                    func_ov076_02151f0c(10);
+                    break;
+                case 9:
+                    func_ov076_02151f0c(16);
+                    break;
+                }
+            }
+        }
+        return;
+    case 3:
+    case 5:
+    case 7:
+    case 9: {
+        func_02083244(&mKeyboard, 0, gTouchInput.mTp);
+        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+            return;
+        }
+        if (func_0203133c(&mButton)) {
+            func_ov076_02151f0c(0);
+        } else if (gTouchInput.mTp.touch != 0 || gTouchInput.mUnknown4C != 0 || data_0211f9d4.mUnknown20 == 0) {
+            func_020831a4(&mKeyboard);
+        }
+        if (!func_02031294(&mButton) && gTouchInput.mUnknown4C) {
+            func_ov076_021545dc(this, mState);
+        }
+        if (gTouchInput.mTouched) {
+            ScreenPoint point = gTouchInput.mPoint;
+
+            // The second is reached from the first by a cast, which the original's address computation shows
+            if (!func_02083614(&mKeyboard.mUnknown5178, point) &&
+                !func_02083614((u8 *)&mKeyboard.mUnknown5178 + 0x6B8, point)) {
+                int x;
+                u16 c = func_02082560();
+                if (c >= 0x20) {
+                    if (mKeyboard.mLength >= 10) {
+                        return;
+                    }
+                    mKeyboard.mText[mKeyboard.mLength] = c;
+                    x = mKeyboard.mLength * 13 + 5;
+                    const NNSG2dFont *font = mScene->mCharBox.mFont;
+                    const NNSG2dCharWidths *widths = NNS_G2dFontGetCharWidths(font, c);
+                    x -= widths->charWidth >> 1;
+                    mScene->mCharBox.mCharX = x;
+                    mScene->mCharBox.SetChar(c);
+                    mScene->mCharBox.Redraw();
+                    mKeyboard.mLength++;
+                    if (mKeyboard.mLength >= 10) {
+                        return;
+                    }
+                    mKeyboard.mUnknown5F8C += 0xD000;
+                } else if (c == 8) {
+                    if (mKeyboard.mLength <= 0) {
+                        return;
+                    }
+                    if (mKeyboard.mLength < 10) {
+                        mKeyboard.mUnknown5F8C -= 0xD000;
+                    }
+                    mKeyboard.mLength--;
+                    mKeyboard.mText[mKeyboard.mLength] = 0;
+                    wchar_t text[10];
+                    wcscpy(text, mKeyboard.mText);
+                    func_ov076_02153cf4(this, text);
+                } else if (c == 7) {
+                    int last = mKeyboard.mLength - 1;
+                    if (last < 0) {
+                        return;
+                    }
+                    u16 ch = mKeyboard.mText[last];
+                    BOOL changed = FALSE;
+                    // ka ki ku ke ko, KA to KO, sa to so, SA to SO, ta chi tsu te to, TA to TO, ha to ho, HA to HO
+                    if (ch == 0x304B || ch == 0x304D || ch == 0x304F || ch == 0x3051 || ch == 0x3053 || ch == 0x30AB ||
+                        ch == 0x30AD || ch == 0x30AF || ch == 0x30B1 || ch == 0x30B3 || ch == 0x3055 || ch == 0x3057 ||
+                        ch == 0x3059 || ch == 0x305B || ch == 0x305D || ch == 0x30B5 || ch == 0x30B7 || ch == 0x30B9 ||
+                        ch == 0x30BB || ch == 0x30BD || ch == 0x305F || ch == 0x3061 || ch == 0x3064 || ch == 0x3066 ||
+                        ch == 0x3068 || ch == 0x30BF || ch == 0x30C1 || ch == 0x30C4 || ch == 0x30C6 || ch == 0x30C8 ||
+                        ch == 0x306F || ch == 0x3072 || ch == 0x3075 || ch == 0x3078 || ch == 0x307B || ch == 0x30CF ||
+                        ch == 0x30D2 || ch == 0x30D5 || ch == 0x30D8 || ch == 0x30DB) {
+                        mKeyboard.mText[last] = ch + 1;
+                        changed = TRUE;
+                    } else if (ch == 0x304C || ch == 0x304E || ch == 0x3050 || ch == 0x3052 || ch == 0x3054 ||
+                               ch == 0x30AC || ch == 0x30AE || ch == 0x30B0 || ch == 0x30B2 || ch == 0x30B4 ||
+                               ch == 0x3056 || ch == 0x3058 || ch == 0x305A || ch == 0x305C || ch == 0x305E ||
+                               ch == 0x30B6 || ch == 0x30B8 || ch == 0x30BA || ch == 0x30BC || ch == 0x30BE ||
+                               ch == 0x3060 || ch == 0x3062 || ch == 0x3065 || ch == 0x3067 || ch == 0x3069 ||
+                               ch == 0x30C0 || ch == 0x30C2 || ch == 0x30C5 || ch == 0x30C7 || ch == 0x30C9 ||
+                               ch == 0x3070 || ch == 0x3073 || ch == 0x3076 || ch == 0x3079 || ch == 0x307C ||
+                               ch == 0x30D0 || ch == 0x30D3 || ch == 0x30D6 || ch == 0x30D9 || ch == 0x30DC) {
+                        mKeyboard.mText[last] = ch - 1;
+                        changed = TRUE;
+                    } else if (ch == 0x30A6) { // U, VU
+                        mKeyboard.mText[last] = 0x30F4;
+                        changed = TRUE;
+                    } else if (ch == 0x30F4) {
+                        mKeyboard.mText[last] = 0x30A6;
+                        changed = TRUE;
+                    }
+                    if (!changed) {
+                        return;
+                    }
+                    wchar_t text[10];
+                    wcscpy(text, mKeyboard.mText);
+                    func_ov076_02153cf4(this, text);
+                } else if (c == 9) {
+                    int last = mKeyboard.mLength - 1;
+                    if (last < 0) {
+                        return;
+                    }
+                    u16 ch = mKeyboard.mText[last];
+                    BOOL changed = FALSE;
+                    // ha hi fu he ho, HA to HO
+                    if (ch == 0x306F || ch == 0x3072 || ch == 0x3075 || ch == 0x3078 || ch == 0x307B || ch == 0x30CF ||
+                        ch == 0x30D2 || ch == 0x30D5 || ch == 0x30D8 || ch == 0x30DB) {
+                        mKeyboard.mText[last] = ch + 2;
+                        changed = TRUE;
+                    } else if (ch == 0x3071 || ch == 0x3074 || ch == 0x3077 || ch == 0x307A || ch == 0x307D ||
+                               ch == 0x30D1 || ch == 0x30D4 || ch == 0x30D7 || ch == 0x30DA || ch == 0x30DD) {
+                        mKeyboard.mText[last] = ch - 2;
+                        changed = TRUE;
+                    }
+                    if (!changed) {
+                        return;
+                    }
+                    wchar_t text[10];
+                    wcscpy(text, mKeyboard.mText);
+                    func_ov076_02153cf4(this, text);
+                } else if (c == 11) {
+                    int last = mKeyboard.mLength - 1;
+                    if (last < 0) {
+                        return;
+                    }
+                    u16 ch = mKeyboard.mText[last];
+                    BOOL changed = FALSE;
+                    // a i u e o, A to O, tsu, TSU, ya, YA, yu, YU, yo, YO, wa, WA
+                    if (ch == 0x3042 || ch == 0x3044 || ch == 0x3046 || ch == 0x3048 || ch == 0x304A || ch == 0x30A2 ||
+                        ch == 0x30A4 || ch == 0x30A6 || ch == 0x30A8 || ch == 0x30AA || ch == 0x3064 || ch == 0x30C4 ||
+                        ch == 0x3084 || ch == 0x30E4 || ch == 0x3086 || ch == 0x30E6 || ch == 0x3088 || ch == 0x30E8 ||
+                        ch == 0x308F || ch == 0x30EF) {
+                        mKeyboard.mText[last] = ch - 1;
+                        changed = TRUE;
+                    } else if (ch == 0x3041 || ch == 0x3043 || ch == 0x3045 || ch == 0x3047 || ch == 0x3049 ||
+                               ch == 0x30A1 || ch == 0x30A3 || ch == 0x30A5 || ch == 0x30A7 || ch == 0x30A9 ||
+                               ch == 0x3063 || ch == 0x30C3 || ch == 0x3083 || ch == 0x30E3 || ch == 0x3085 ||
+                               ch == 0x30E5 || ch == 0x3087 || ch == 0x30E7 || ch == 0x308E || ch == 0x30EE) {
+                        mKeyboard.mText[last] = ch + 1;
+                        changed = TRUE;
+                    } else if (ch == 0x30F5) { // Small KA, KA
+                        mKeyboard.mText[last] = 0x30AB;
+                        changed = TRUE;
+                    } else if (ch == 0x30AB) {
+                        mKeyboard.mText[last] = 0x30F5;
+                        changed = TRUE;
+                    } else if (ch == 0x30F6) { // Small KE, KE
+                        mKeyboard.mText[last] = 0x30B1;
+                        changed = TRUE;
+                    } else if (ch == 0x30B1) {
+                        mKeyboard.mText[last] = 0x30F6;
+                        changed = TRUE;
+                    }
+                    if (!changed) {
+                        return;
+                    }
+                    wchar_t text[10];
+                    wcscpy(text, mKeyboard.mText);
+                    func_ov076_02153cf4(this, text);
+                }
+                return;
+            }
+        }
+        if (!func_02083308(mKeyboard.mUnknown5178[0])) {
+            return;
+        }
+        switch (mState) {
+        case 7:
+            MiiData_SetName(&mScene->mCharacter, mKeyboard.mText);
+            break;
+        case 3:
+            wcscpy((wchar_t *)&mScene->mCharacter.mUnknown04A[0xE], mKeyboard.mText);
+            break;
+        case 5:
+            wcscpy((wchar_t *)&mScene->mCharacter.mUnknown04A[0x24], mKeyboard.mText);
+            break;
+        case 9:
+            MiiData_SetCreatorName(&mScene->mCharacter, mKeyboard.mText);
+            break;
+        }
+        func_ov076_02151f0c(0);
+        return;
+    }
+    case 11: {
+        func_020341d4(&mWindows[2]);
+        int result = READ(mWindows[2].mResult);
+        if (result != -1) {
+            switch (result) {
+            case 0: {
+                int year = ((CharacterYear *)&mScene->mCharacter.mUnknown04A[6])->mYear + 1;
+                if (year > 2099) {
+                    year = 1900;
+                }
+                func_ov076_02153e54(this, year);
+                func_02098cf4(&mScene->mCharacter, year);
+                func_ov076_02154574(this);
+                break;
+            }
+            case 1: {
+                int year = ((CharacterYear *)&mScene->mCharacter.mUnknown04A[6])->mYear - 1;
+                if (year < 1900) {
+                    year = 2099;
+                }
+                func_ov076_02153e54(this, year);
+                func_02098cf4(&mScene->mCharacter, year);
+                func_ov076_02154574(this);
+                break;
+            }
+            }
+        }
+        if (READ(mWindows[2].mResult) != -1) {
+            switch (READ(mWindows[2].mResult)) {
+            case 2:
+                func_02098cf4(&mScene->mCharacter, 0xFFF);
+                mWindows[2].mUnknownSetBeforeClose = 15;
+                func_020349cc(&mWindows[2], 0x24);
+                break;
+            case 3:
+                mWindows[2].mUnknownSetBeforeClose = 15;
+                func_020349cc(&mWindows[2], 0x24);
+                break;
+            }
+        }
+        if (mWindows[2].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    case 12: {
+        func_020341d4(&mWindows[3]);
+        int result = READ(mWindows[3].mResult);
+        if (result != -1) {
+            switch (result) {
+            case 0: {
+                int month = func_02098dac(&mScene->mCharacter, 0x26) + 1;
+                if (month > 12) {
+                    month = 1;
+                }
+                func_ov076_021540a4(this, month);
+                func_02098c40(&mScene->mCharacter, 0x26, month);
+                int min, max;
+                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
+                int day = func_02098dac(&mScene->mCharacter, 0x27);
+                if (day > max) {
+                    day = max;
+                }
+                func_ov076_02153fb8(this, day);
+                func_02098c40(&mScene->mCharacter, 0x27, day);
+                break;
+            }
+            case 1: {
+                int month = func_02098dac(&mScene->mCharacter, 0x26) - 1;
+                if (month < 1) {
+                    month = 12;
+                }
+                func_ov076_021540a4(this, month);
+                func_02098c40(&mScene->mCharacter, 0x26, month);
+                int min, max;
+                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
+                int day = func_02098dac(&mScene->mCharacter, 0x27);
+                if (day > max) {
+                    day = max;
+                }
+                func_ov076_02153fb8(this, day);
+                func_02098c40(&mScene->mCharacter, 0x27, day);
+                break;
+            }
+            case 2: {
+                int min, max;
+                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
+                int day = func_02098dac(&mScene->mCharacter, 0x27) + 1;
+                if (day > max) {
+                    day = 1;
+                }
+                func_ov076_02153fb8(this, day);
+                func_02098c40(&mScene->mCharacter, 0x27, day);
+                break;
+            }
+            case 3: {
+                int min, max;
+                func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
+                int day = func_02098dac(&mScene->mCharacter, 0x27) - 1;
+                if (day < 1) {
+                    day = max;
+                }
+                func_ov076_02153fb8(this, day);
+                func_02098c40(&mScene->mCharacter, 0x27, day);
+                break;
+            }
+            }
+        }
+        if (READ(mWindows[3].mResult) != -1) {
+            switch (READ(mWindows[3].mResult)) {
+            case 4:
+                func_02098c40(&mScene->mCharacter, 0x26, 0);
+                func_02098c40(&mScene->mCharacter, 0x27, 0);
+                mWindows[3].mUnknownSetBeforeClose = 15;
+                func_020349cc(&mWindows[3], 0x24);
+                break;
+            case 5:
+                mWindows[3].mUnknownSetBeforeClose = 15;
+                func_020349cc(&mWindows[3], 0x24);
+                break;
+            }
+        }
+        if (mWindows[3].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    case 13: {
+        func_020341d4(&mWindows[0]);
+        int i;
+        int choice;
+        if (READ(mWindows[0].mUnknownAF7C) != -1 && (choice = READ(mWindows[0].mUnknownAF7C)) != 4) {
+            switch (choice) {
+            case 0:
+                func_02098d44(&mScene->mCharacter, 0);
+                break;
+            case 1:
+                func_02098d44(&mScene->mCharacter, 1);
+                break;
+            case 2:
+                func_02098d44(&mScene->mCharacter, 2);
+                break;
+            case 3:
+                func_02098d44(&mScene->mCharacter, 3);
+                break;
+            case 4:
+                func_02098d44(&mScene->mCharacter, 4);
+                break;
+            }
+            for (i = 0; i < 4; i++) {
+                if (i == choice) {
+                    Sprite_SetSequence(&mWindows[0].mSprites[i].mSprite, (u16)(data_ov076_02158df4[i] + 1), TRUE);
+                } else {
+                    Sprite_SetSequence(&mWindows[0].mSprites[i].mSprite, data_ov076_02158df4[i], TRUE);
+                }
+            }
+            mWindows[0].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[0], 0x24);
+        }
+        if (READ(mWindows[0].mResult) != -1 && READ(mWindows[0].mResult) == 4) {
+            func_02098d44(&mScene->mCharacter, 4);
+            mWindows[0].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[0], 0x24);
+        }
+        if (mWindows[0].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    case 14:
+        func_020341d4(&mWindows[1]);
+        if (mWindows[1].mUnknownAF88) {
+            func_ov076_02151f0c(15);
+        }
+        return;
+    case 15: {
+        func_020341d4(&mWindows[1]);
+        int i;
+        int choice;
+        if (READ(mWindows[1].mUnknownAF7C) != -1 && (choice = READ(mWindows[1].mUnknownAF7C)) < 12) {
+            if (choice >= 0 && choice < 12) {
+                func_02098c40(&mScene->mCharacter, 0x28, choice);
+                func_02091a88(&mScene->mCharacter);
+                func_ov076_0214b694(mScene);
+            }
+            for (i = 0; i < 12; i++) {
+                if (i == choice) {
+                    Sprite_SetSequence(&mWindows[1].mSprites[i].mSprite, (u16)(data_ov076_02158df4[i + 4] + 1), TRUE);
+                } else {
+                    Sprite_SetSequence(&mWindows[1].mSprites[i].mSprite, data_ov076_02158df4[i + 4], TRUE);
+                }
+            }
+            mWindows[1].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[1], 0x24);
+            for (int i = 0; i < 9; i++) {
+                mScene->mTextBoxes[i].mSprite.mVisible = TRUE;
+            }
+        }
+        if (READ(mWindows[1].mResult) != -1 && READ(mWindows[1].mResult) == 12) {
+            mWindows[1].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[1], 0x24);
+            for (int i = 0; i < 9; i++) {
+                mScene->mTextBoxes[i].mSprite.mVisible = TRUE;
+            }
+        }
+        if (mWindows[1].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    case 10: {
+        func_020341d4(&mWindows[4]);
+        if (READ(mWindows[4].mUnknownAF7C) != -1) {
+            int i;
+            int choice = READ(mWindows[4].mUnknownAF7C);
+            switch (choice) {
+            case 0:
+                mScene->mCharacter.mUnknown04A[0x24E] = 2;
+                break;
+            case 1:
+                mScene->mCharacter.mUnknown04A[0x24E] = 3;
+                break;
+            case 2:
+                mScene->mCharacter.mUnknown04A[0x24E] = 4;
+                break;
+            case 3:
+                mScene->mCharacter.mUnknown04A[0x24E] = 5;
+                break;
+            case 4:
+                mScene->mCharacter.mUnknown04A[0x24E] = 0;
+                break;
+            }
+            for (i = 0; i < 5; i++) {
+                if (i == choice) {
+                    Sprite_SetSequence(&mWindows[4].mButtons[i].mSprite, (u16)(data_ov076_02158df4[i + 24] + 1), TRUE);
+                } else {
+                    Sprite_SetSequence(&mWindows[4].mButtons[i].mSprite, data_ov076_02158df4[i + 24], TRUE);
+                }
+            }
+            mWindows[4].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[4], 0x24);
+        }
+        if (mWindows[4].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    case 16: {
+        func_020341d4(&mWindows[5]);
+        int i;
+        int choice;
+        if (READ(mWindows[5].mUnknownAF7C) != -1 && (choice = READ(mWindows[5].mUnknownAF7C)) < 2) {
+            switch (choice) {
+            case 0:
+                func_02098cd0(&mScene->mCharacter, 0);
+                func_ov076_0214b694(mScene);
+                break;
+            case 1:
+                func_02098cd0(&mScene->mCharacter, 1);
+                func_ov076_0214b694(mScene);
+                break;
+            }
+            for (i = 0; i < 2; i++) {
+                if (i == choice) {
+                    Sprite_SetSequence(&mWindows[5].mSprites[i].mSprite, (u16)(data_ov076_02158df4[i + 16] + 1), TRUE);
+                } else {
+                    Sprite_SetSequence(&mWindows[5].mSprites[i].mSprite, data_ov076_02158df4[i + 16], TRUE);
+                }
+            }
+            mWindows[5].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[5], 0x24);
+        }
+        if (READ(mWindows[5].mResult) != -1 && READ(mWindows[5].mResult) == 2) {
+            mWindows[5].mUnknownSetBeforeClose = 15;
+            func_020349cc(&mWindows[5], 0x24);
+        }
+        if (mWindows[5].mTransitionDone) {
+            func_ov076_02151f0c(1);
+        }
+        return;
+    }
+    }
+}
+
 void MiiEditProfilePage::Draw() {
     for (u16 i = 0; i < 2; i++) {
         Sprite_Draw(&mSprites[i]);

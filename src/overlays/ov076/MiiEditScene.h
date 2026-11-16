@@ -57,7 +57,13 @@ void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b
 
 // The on-screen keyboard of the main program (func_02082eac constructs it, 0x6014 bytes)
 struct SoftKeyboard {
-    /* 0x0000 */ u8 mUnknown0000[0x6014];
+    /* 0x0000 */ u8 mUnknown0000[0x5178];
+    /* 0x5178 */ u8 mUnknown5178[2][0x6B8]; // Given to func_02083614 with the point touched
+    /* 0x5EE8 */ u8 mUnknown5EE8[0xA4];
+    /* 0x5F8C */ fx32 mUnknown5F8C;          // Moves 13 pixels (0xD000) with each character typed
+    /* 0x5F90 */ u8 mUnknown5F90[0x68];
+    /* 0x5FF8 */ wchar_t mText[12];          // What is typed (the profile page writes it into the character)
+    /* 0x6010 */ int mLength;                // and how many characters, up to 10
 };
 
 extern "C" {
@@ -163,6 +169,9 @@ class MiiEditProfilePage {
 public:
     void Draw();
     void Exit();
+    void func_ov076_02150874(MiiEditScene *scene);
+    void func_ov076_021508ac();
+    void func_ov076_02151f0c(int state);
 
     /* 0x00000 */ int mState;
     /* 0x00004 */ int mUnknown00004;
