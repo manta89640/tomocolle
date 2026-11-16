@@ -47,7 +47,7 @@ data_ov065_0214bb9c kind:data(any) addr:0x0214bb9c
 data_ov065_0214bba4 kind:data(any) addr:0x0214bba4 ambiguous
 data_ov065_0214bba8 kind:data(any) addr:0x0214bba8
 data_ov065_0214bbb4 kind:data(any) addr:0x0214bbb4
-data_ov065_0214bc28 kind:data(any) addr:0x0214bc28 ambiguous
+_ZTV7Scene5D kind:data(any) addr:0x0214bc20
 gStr_WLS_ov065 kind:data(any) addr:0x0214bc44
 gStr_Msg_TmdSongMsgJP_LZ_bin_ov065 kind:data(any) addr:0x0214bc48
 gStr_WLI_ov065 kind:data(any) addr:0x0214bc60

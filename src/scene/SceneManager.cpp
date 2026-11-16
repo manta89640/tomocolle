@@ -64,6 +64,7 @@
 #include "../overlays/ov035/Scene58.h"
 #include "../overlays/ov036/TestNg107Scene.h"
 #include "../overlays/ov090/RomanceScene.h"
+#include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
 #include "../overlays/ov108/Scene69.h"
@@ -954,6 +955,9 @@ TestNg107Scene::TestNg107Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5A, overlay 90
 RomanceScene::RomanceScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x5D, overlay 65
+Scene5D::Scene5D(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5E, overlay 91
 CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
