@@ -7334,7 +7334,7 @@ from:0x02046a34 kind:arm_call to:0x02022d2c module:main
 from:0x02046a54 kind:arm_call to:0x02022d2c module:main
 from:0x02046a6c kind:arm_call to:0x0202e770 module:main
 from:0x02046a84 kind:load to:0x02110970 add:0x8 module:main
-from:0x02046a88 kind:load to:0x0214f900 module:overlays(90,95,110)
+from:0x02046a88 kind:load to:0x0214f8f8 add:0x8 module:overlay(95)
 from:0x02046a8c kind:load to:0x0202e46c module:main
 from:0x02046a90 kind:load to:0x0202e44c module:main
 from:0x02046a94 kind:load to:0x02110864 add:0x4 module:main

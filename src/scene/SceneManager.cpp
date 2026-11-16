@@ -77,6 +77,7 @@
 #include "../overlays/ov040/Scene7A.h"
 #include "../overlays/ov041/Scene7B.h"
 #include "../overlays/ov042/TestNg119Scene.h"
+#include "../overlays/ov095/AffinityScene.h"
 #include "../overlays/ov043/Scene81.h"
 #include "../overlays/ov044/TestNg121Scene.h"
 #include "../overlays/ov045/Scene88.h"
@@ -995,6 +996,9 @@ Scene7B::Scene7B(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x7C, overlay 42
 TestNg119Scene::TestNg119Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x80, overlay 95
+AffinityScene::AffinityScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x81, overlay 43
 Scene81::Scene81(int sceneId) : Scene(sceneId) {}
