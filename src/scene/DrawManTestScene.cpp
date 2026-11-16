@@ -36,20 +36,20 @@ void DrawManTestScene::Init() {
 }
 
 void DrawManTestScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_A) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mModel.mPosition.x += 0x100;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mModel.mPosition.x -= 0x100;
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         NNSG3dResMdl *mdl = mModel.mResMdl;
         NNS_G3D_DEFRESNAME(name, "human01_base_pl");
         NNS_G3dReleaseMdlPlttEx(mdl, &name.resName);
         NNS_G3dForceBindMdlPltt(mdl, mModel.mResTex, 1, 7);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         void *resourceSet = (void *)mModel.mUnknown04;
@@ -62,14 +62,14 @@ void DrawManTestScene::Update() {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }

@@ -47,7 +47,7 @@ struct ArchiveLoader;
 extern "C" {
 void func_02031228(SpriteButton *button);
 extern TouchInput gTouchInput;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern ArchiveLoader gArchiveManager;
 extern u8 gScreenControl[];
 extern u8 data_02122824[];
@@ -68,8 +68,8 @@ void func_020338d0(MessageWindow *window, MessageFile *file, int message, const 
 void func_02033bb4(MessageWindow *window, int resource, int sequence, WindowPoint position);
 void func_02034f80(MessageWindow *window, int a, int b);
 
-void func_02028154(ScreenLoader *loader, int plane, int y); // Scrolls a background
-void func_02028280(ScreenLoader *loader, int a, int b);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y); // Scrolls a background
+void ScreenLoader_SetPriority(ScreenLoader *loader, int a, int b);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
@@ -440,7 +440,7 @@ void ItemListView::Refresh() {
     for (int i = 0; i < mRowCount; i++) {
         PlaceRow(this, i, AddPoints(mPosition, MakePoint(0, GetRowItem(i) * 20 - mScroll)));
     }
-    func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
+    ScreenLoader_SetScrollY(&gScreenLoader, mBgPlane, mScroll % 20 - mBgOffset);
 }
 
 // Takes the palette, value and count of the rows that show an item again, and draws those that changed
@@ -847,7 +847,7 @@ void ShopItemListView::Refresh() {
         SetCanvasPosition(&mRowCounts2[i], AddPoints(row, sShopCountOffset));
         SetSpritePosition(&mMarks[i], AddPoints(row, sShopMarkOffset));
     }
-    func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
+    ScreenLoader_SetScrollY(&gScreenLoader, mBgPlane, mScroll % 20 - mBgOffset);
 }
 
 void ShopItemListView::DrawRow(int row, int item) {
@@ -1734,7 +1734,7 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     Light *light1 = &data_021227cc[1];
     light1->mColor = sCounterLightColors[0];
     func_0202aa28(light1, camera, sCounterLightDirection1);
-    func_02028280(&data_02121834, 1, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 1);
 }
 
 void ShopCounter::LoadStaff(int shop, VecFx32 position, u16 angle, u16 greetingAngle) {

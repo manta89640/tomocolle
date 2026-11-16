@@ -16,7 +16,7 @@ void LcdPower::Update() {
         return;
     }
     if (!mLcdOff) {
-        if (data_0211f9d4.mFolded) {
+        if (gPadInput.mFolded) {
             mFrames++;
             if (mFrames > 20 && TurnOff()) {
                 mLcdOff = TRUE;
@@ -26,7 +26,7 @@ void LcdPower::Update() {
             mFrames = 0;
         }
     } else {
-        if (!data_0211f9d4.mFolded) {
+        if (!gPadInput.mFolded) {
             mFrames++;
             if (mFrames > 10 && TurnOn()) {
                 mLcdOff = FALSE;

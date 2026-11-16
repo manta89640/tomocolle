@@ -436,12 +436,12 @@ void MapScene::Init() {
     mSprite41BC.mVisible = FALSE;
     func_02028f24(&gVramTransferQueue, "S00:/BG_down.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "S00:/BG_down.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "S00:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "S00:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, sTitleChars, 0x2F00, 0, 0, 0x6000, -1);
-    func_02027d7c(&data_02121834, sTitleScreen, 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sTitleScreen, 0x100, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, sTitlePalette, 0x100, 0x20, 0x20, 0x40);
     func_02028f24(&gVramTransferQueue, "SKY:/BG_up.ncg", 0x2F00, 0x6000, 0x6000, 0x2000, -1);
-    func_02027d7c(&data_02121834, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "SKY:/Obj_up.nce", 0x1000, 3);
     mSky.Init("SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
@@ -572,12 +572,12 @@ void MapScene::Init() {
     func_02034f94(&mMessageWindows[1], 1);
     mMoney = gGameData.mCappedCounter;
     mMoneyDisplay.Init(&mMoney, &charOffset);
-    func_02028280(&data_02121834, 0x10, 0);
-    func_02028280(&data_02121834, 1, 2);
-    func_02028280(&data_02121834, 2, 1);
-    func_02028280(&data_02121834, 0x100, 0);
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x200, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x10, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 3);
     gScreenControl.Set(0x1211);
     switch (mSceneId) {
     case 0x6D:
@@ -919,7 +919,7 @@ void MapScene::Update() {
         if (!ScreenControl_BlendFadeIn(&gScreenControl, 0x3F3F, -1)) {
             break;
         }
-        if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
+        if (gPadInput.mTrigger & PAD_BUTTON_START) {
             gSceneManager.RequestScene(0x2C);
         }
         BOOL held = FALSE;

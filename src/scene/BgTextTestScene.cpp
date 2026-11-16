@@ -18,7 +18,7 @@ void BgTextTestScene::Init() {
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x8000);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
     gScreenControl.Show(4);
-    func_02028280(&data_02121834, 4, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 4, 0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     PaletteLoader_QueueColors(&gPaletteLoader, data_020b5abc, 4, 0x1E0, 0x20, 0);
     mCanvas.InitText(&gFonts[2].mFont, 4, 25, 2, 2, 1, 1, 0, 1, 15, NULL, NNS_G2D_TEXT_BG_WIDTH_256,

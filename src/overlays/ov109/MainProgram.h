@@ -27,16 +27,16 @@ void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
 int ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);

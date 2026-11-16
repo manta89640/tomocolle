@@ -181,15 +181,15 @@ void TravelScene::Init() {
     case SCENE_PAIR_DRESSED:
         ObjResourceManager_Load(&gObjResourceManager, "N00:/Obj_up_hm.nce", "N00:/Obj_up_hm.ncg", 0x10, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "N00:/Obj_up_hm.ncl", 0x10, -1, -1, -1);
-        func_02027d7c(&data_02121834, "N00:/BG_airplane_hm.nsc", 4, 0, 0, 0, 0, -1);
-        func_02027d7c(&data_02121834, "N00:/BG_down_hm.nsc", 0x200, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_airplane_hm.nsc", 4, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_down_hm.nsc", 0x200, 0, 0, 0, 0, -1);
         break;
     case SCENE_SOLO:
     case SCENE_PAIR:
         ObjResourceManager_Load(&gObjResourceManager, "N00:/Obj_up.nce", "N00:/Obj_up.ncg", 0x10, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "N00:/Obj_up.ncl", 0x10, -1, -1, -1);
-        func_02027d7c(&data_02121834, "N00:/BG_airplane.nsc", 4, 0, 0, 0, 0, -1);
-        func_02027d7c(&data_02121834, "N00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_airplane.nsc", 4, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
         break;
     }
 
@@ -217,14 +217,14 @@ void TravelScene::Init() {
 
     PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_up.ncl", 0x2F, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "N00:/BG_up.ncg", 0xC, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "N00:/BG_pictureframe.nsc", 8, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N00:/BG_pictureframe.nsc", 8, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N00:/BG_down.ncl", 0x200, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "N00:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     mMessageFiles[0].Open("TBM:/tmd_minicontents_msg_JP.bmg");
     mText.mMessageFile = &mMessageFiles[0];
     ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x1D, 8, 8);
     func_02028f24(&gVramTransferQueue, "SFL:/caption.ncg", 2, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SFL:/caption.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SFL:/caption.nsc", 2, 0, 0, 0, 0, -1);
 
     const u32 pairCaption = 0x4AD; // "<name> and <name>'s"
     const u32 soloCaption = 0x4B2; // "<name>'s"
@@ -272,13 +272,13 @@ void TravelScene::Init() {
                                           0x1000, buttonCharOffset);
     }
 
-    func_02028280(&data_02121834, 0x10, 0);
-    func_02028280(&data_02121834, 1, 1);
-    func_02028280(&data_02121834, 8, 0);
-    func_02028280(&data_02121834, 2, 0);
-    func_02028280(&data_02121834, 4, 2);
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x200, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x10, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 8, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 4, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 1);
     gScreenControl.Set(0x1217);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     mTtsPlayer.InitEngine();
@@ -508,7 +508,7 @@ void TravelScene::SetState(int state) {
         screen[9] = digit;
         chars[9] = digit;
         PaletteLoader_LoadFile(&gPaletteLoader, palette, 0x2F, -1, -1, -1);
-        func_02027d7c(&data_02121834, screen, 4, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, screen, 4, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, chars, 0xC, 0, 0, 0, -1);
         gScreenControl.Set(0x1217);
         mSpeechWindow.Hide();

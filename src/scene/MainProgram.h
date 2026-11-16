@@ -51,15 +51,15 @@ extern ScreenControl gScreenControl;
 // --- Graphics resources ---
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 // --- 3D ---

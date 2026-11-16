@@ -41,7 +41,7 @@ extern "C" {
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 extern Light data_021227cc[]; // The lights (as overlay 110 declares them)
@@ -53,8 +53,8 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void func_0202b0e8(Renderer3d *renderer);
 void func_0202a640(Camera *camera); // Resets it

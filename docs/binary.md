@@ -421,7 +421,7 @@ the file is placed by that order, and by which object of that part of `.bss` has
 | `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
 | `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `data_021213B8` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
 | `0x020B0518` | 4 | `src/OwnerInfo.cpp` (`0x02027A08` to `0x02027A7C`) | `bx lr`: `gOwnerInfo` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56), whose constructor is empty | measured: the file compiles to it |
-| `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `data_02121834` (0x624 bytes): stores 0 at 0x480 | measured |
+| `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `gScreenLoader` (0x624 bytes): stores 0 at 0x480 | measured |
 | `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
 | `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `data_021223E4` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `func_0202a640` on the camera at +0x380 (`data_02122764`), `func_0202a96c` on four lights of 0xC at +0x3E8 (`data_021227CC`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
@@ -1656,14 +1656,14 @@ the core calls back are static members. Measured:
   offset, an argument of `LoadObjCells`, the layout and the sprite palette: `0, file, n, -1, 0, 13` in the main
   program, `0, file, n, 0x14000, 4, 13` in overlay 43), `EnableTabs` and `GetButtonCharCount`. Each frame they call
   `Update` with a pad of 0 and `gTouchInput`'s touch data, then `KeyboardCore_GetChar`. `func_0204d178` loads the
-  `MNU:BG_down` background onto the plane when A is pressed (`data_0211f9d4`'s trigger), and when B is, the
+  `MNU:BG_down` background onto the plane when A is pressed (`gPadInput`'s trigger), and when B is, the
   keyboard's again with `InitBg` and `LoadObj`.
 - **Background.** `InitBg` is `InitBgGraphics` (the core's buffers and the five NCGR paths, `KeyboardCore_InitGraphics`;
   the plane), `InitCore` (`KeyboardCore_Init` at the keys' origin (45, 59) with `PlayKeySound` as the sound
   callback, the screen made by `KeyboardCore_MakeScreen`, the plane scrolled to the origin), then
   `TransferCharData`, `TransferScreen` and `LoadBgPalette`.
 - **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
-  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given (`mBaseCharData`,
+  (0x800 bytes, which `ScreenLoader_QueueScreen` sends) and two buffers of 0x2280 bytes that the core is given (`mBaseCharData`,
   `mCharData`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
   and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite (`mLayoutSprite`, cell 7, at
   the one of five positions that `mLayout` selects: `PlaceLayoutSprite`), its resource and layout, and the three

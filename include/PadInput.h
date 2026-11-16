@@ -26,8 +26,7 @@ public:
     /* 0x20 */ BOOL mActive;     // The buttons were read this frame
 }; // 0x24
 
-// main() initialises it and updates it every frame. It keeps its address as its name: the overlays' sources refer
-// to it by that name.
-extern PadInput data_0211f9d4;
+// main() initialises it and updates it every frame.
+extern PadInput gPadInput;
 
 #endif // PADINPUT_H

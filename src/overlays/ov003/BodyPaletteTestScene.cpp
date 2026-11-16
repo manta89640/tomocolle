@@ -49,11 +49,11 @@ void BodyPaletteTestScene::Init() {
 #pragma pop
 
 void BodyPaletteTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         GXRgb *palette = (GXRgb *)ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp");
         palette[1] = GX_RGB(31, 0, 0);
         func_02029d40(&mBody, palette, -1, -1);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
         func_02029758(data_021223e4, RESOURCE_BMD0);
         ArchiveManager_Unmount(&gArchiveManager, "TG3");
         ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
@@ -61,7 +61,7 @@ void BodyPaletteTestScene::Update() {
         func_02029c20(&mBody, RESOURCE_BMD0, 0, 0);
         NNS_GfdDumpLnkTexVramManager();
         NNS_GfdDumpLnkPlttVramManager();
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         NNSG3dResDict *dict;
         int i;
         NNSG3dResTex *textures = mBody.mResTex;
@@ -70,20 +70,20 @@ void BodyPaletteTestScene::Update() {
         for (i = 0; i < dict->numEntry; i++) {
             NNS_G3dGetPlttDataByName(textures, NNS_G3dGetResNameByIdx(dict, i));
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_X) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_X) {
         NNSG3dResTex *textures = mBody.mResTex;
         GXRgb *palette = (GXRgb *)((u8 *)textures + textures->plttInfo.ofsPlttData);
         palette[1] = GX_RGB(0, 31, 31);
         func_02029d40(&mBody, palette, -1, 4);
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }

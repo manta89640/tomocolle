@@ -1412,16 +1412,16 @@ void ItemTradeScene::Init() {
 
     func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02028108(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x100, -0x38);
+    ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x100, -0x38);
     gScreenControl.Set(0x1313);
     gScreenControl.Set(0x1313);
     ScreenControl_SetBlendAlpha(&gScreenControl, 1, 0x12, 8, 8);
@@ -1518,8 +1518,8 @@ void ItemTradeScene::Init3d() {
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    func_02028280(&data_02121834, 1, 0);
-    func_02028280(&data_02121834, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
 
     mCamera = &data_02122764;
     func_0202a640(mCamera);
@@ -2159,7 +2159,7 @@ void ItemTradeScene::Draw() {
     mItemModel.Draw();
     mRoom.RoomModels::Draw();
     mScroll += 0x4CC;
-    func_02028108(&data_02121834, 2, mScroll >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, 2, mScroll >> FX32_SHIFT);
 }
 
 // @0x0214ebe8

@@ -67,7 +67,7 @@ struct SavedCharacterCopy {
 extern "C" {
 extern TouchInput gTouchInput;
 extern const NewsKind data_020fa1d0[];
-extern u8 data_02121834[]; // The background screens' loader
+extern u8 gScreenLoader[]; // The background screens' loader
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is a saved character
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one back
@@ -76,7 +76,7 @@ BOOL func_0202c3dc(GameData *game, int index);                          // Wheth
 void func_0202c8a8(GameData *game, int index, NewsItem *item);
 void func_0202c8bc(GameData *game, int index, NewsItem *item);
 int func_0202ca34(GameData *game, int song, int *slot);
-void func_02028154(void *screens, int plane, int offset); // Scrolls a background
+void ScreenLoader_SetScrollY(void *screens, int plane, int offset); // Scrolls a background
 int MiiData_GetSex(const CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
@@ -1056,7 +1056,7 @@ void MiiListPanel::PlaceButtons() {
         mTexts[i].SetPositionFromVec(mTextPosition.x << FX32_SHIFT, textY << FX32_SHIFT);
     }
     if (mBgScrolls) {
-        func_02028154(data_02121834, mBgPlane, mScrollOffset - mBgOffset);
+        ScreenLoader_SetScrollY(gScreenLoader, mBgPlane, mScrollOffset - mBgOffset);
     }
 }
 

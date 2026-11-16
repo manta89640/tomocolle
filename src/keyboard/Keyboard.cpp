@@ -27,13 +27,13 @@ struct TouchInput {
 extern "C" {
 extern TouchInput gTouchInput;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CellLoader gObjResourceManager;
 extern u8 gVramTransferQueue[];
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-void func_02027f3c(ScreenLoader *loader, const void *screen, int plane, int a, int size);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02028154(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_QueueScreen(ScreenLoader *loader, const void *screen, int plane, int a, int size);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int offset);
 void func_0202543c(u32 *graphicsManager, int plane, int a, int b, int c, int d, int e, int f);
 void VramTransferQueue_AddCharData(void *queue, void *source, int plane, int offset, int size);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellPath, const char *charPath, int plane,
@@ -129,8 +129,8 @@ void SoftKeyboard::InitCore(KeyboardSoundCallback callback, void *userData) {
     KeyboardCore_MakeScreen(mScreen, mPalette, 0);
     KeyboardCore_SetAreas(sTabAreas, 2, NULL, NULL);
     int plane = mPlane;
-    func_02028108(&data_02121834, plane, -45);
-    func_02028154(&data_02121834, plane, -59);
+    ScreenLoader_SetScrollX(&gScreenLoader, plane, -45);
+    ScreenLoader_SetScrollY(&gScreenLoader, plane, -59);
 }
 
 void SoftKeyboard::TransferCharData() {
@@ -139,7 +139,7 @@ void SoftKeyboard::TransferCharData() {
 }
 
 void SoftKeyboard::TransferScreen() {
-    func_02027f3c(&data_02121834, mScreen, mPlane, 0, 0x800);
+    ScreenLoader_QueueScreen(&gScreenLoader, mScreen, mPlane, 0, 0x800);
 }
 
 void SoftKeyboard::LoadBgPalette(int offset) {

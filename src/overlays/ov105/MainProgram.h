@@ -28,11 +28,11 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void ScreenControl_SetFadeSpeed(ScreenControl *screens, int mask, fx32 speed);
 
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }

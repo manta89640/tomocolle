@@ -62,11 +62,11 @@ void MiiListScene::Init() {
     mCharOffset = 0x258;
     func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02027d7c(&data_02121834, "MLT:/BG_frame_L.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02027d7c(&data_02121834, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_frame_L.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);

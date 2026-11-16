@@ -62,7 +62,7 @@ static inline int SetTouchLine(ScreenPoint point) {
 }
 
 void CharacterBodyTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+    if (gPadInput.mTrigger & PAD_BUTTON_B) {
         switch (++mBodyStep % 4) {
         case 0:
             func_0202aecc(data_021223e4, 0);
@@ -87,67 +87,67 @@ void CharacterBodyTestScene::Update() {
                           -1, -1);
             break;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_A) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCharacter.mAnim.mRotZ += 0x80;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCharacter.mAnim.mRotX += 0x80;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mCharacter.Character::Turn(0x100);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCharacter.Character::Turn(0xFF00);
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCharacter.mScale.y += 0x40;
             mCharacter.mInvScale.y = FX_Inv(mCharacter.mScale.y);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCharacter.mScale.y -= 0x40;
             mCharacter.mInvScale.y = FX_Inv(mCharacter.mScale.y);
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mCharacter.mScale.z += 0x40;
             mCharacter.mInvScale.z = FX_Inv(mCharacter.mScale.z);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCharacter.mScale.z -= 0x40;
             mCharacter.mInvScale.z = FX_Inv(mCharacter.mScale.z);
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_Y) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_Y) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCharacter.mPos.x += 0x40;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCharacter.mPos.y += 0x40;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mCharacter.mScale.x += 0x40;
             mCharacter.mInvScale.x = FX_Inv(mCharacter.mScale.x);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCharacter.mScale.x -= 0x40;
             mCharacter.mInvScale.x = FX_Inv(mCharacter.mScale.x);
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_R) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             Camera_Translate(mCamera, 0x200, 0, 0);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             Camera_Translate(mCamera, -0x200, 0, 0);
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             Camera_Translate(mCamera, 0, 0x200, 0);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             Camera_Translate(mCamera, 0, -0x200, 0);
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_L) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_L) {
         mTurnTest = TURN_TEST_START;
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }

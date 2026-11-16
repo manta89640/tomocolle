@@ -65,23 +65,23 @@ void TestDrawMiiScene::Init() {
 }
 
 void TestDrawMiiScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
             mCamera.SetRandomTarget();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_LEFT) {
             mCamera.SetRandomRadius();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+        } else if (gPadInput.mTrigger & PAD_KEY_UP) {
             mCamera.mAngles.y += MATH_Rand16(&gRandom, 0) << FX32_SHIFT;
         }
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera.mAngles.y += 0x100 << FX32_SHIFT;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera.mAngles.y -= 0x100 << FX32_SHIFT;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera.mAngles.x += 0x30 << FX32_SHIFT;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera.mAngles.x -= 0x30 << FX32_SHIFT;
         }
     }

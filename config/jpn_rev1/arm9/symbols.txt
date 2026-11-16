@@ -952,8 +952,8 @@ func_020249a0 kind:function(arm,size=0x28) addr:0x020249a0
 func_020249c8 kind:function(arm,size=0x34) addr:0x020249c8
 GraphicsManager_Init kind:function(arm,size=0x64) addr:0x020249fc
 func_02024a60 kind:function(arm,size=0xb0) addr:0x02024a60
-func_02024b10 kind:function(arm,size=0x104) addr:0x02024b10
-func_02024c14 kind:function(arm,size=0x168) addr:0x02024c14
+GraphicsManager_SaveState kind:function(arm,size=0x104) addr:0x02024b10
+GraphicsManager_RestoreState kind:function(arm,size=0x168) addr:0x02024c14
 func_02024d7c kind:function(arm,size=0x50) addr:0x02024d7c
 func_02024dcc kind:function(arm,size=0x1c8) addr:0x02024dcc
 func_02024f94 kind:function(arm,size=0x2ac) addr:0x02024f94
@@ -1063,13 +1063,13 @@ PaletteLoader_ClearDefaults kind:function(arm,size=0x14) addr:0x020279f4
 _ZN9OwnerInfo4InitEv kind:function(arm,size=0x38) addr:0x02027a08
 _ZN9OwnerInfo7GetTimeEPiS0_S0_ kind:function(arm,size=0x3c) addr:0x02027a40
 ScreenLoader_Init kind:function(arm,size=0x54) addr:0x02027a7c
-func_02027ad0 kind:function(arm,size=0x13c) addr:0x02027ad0
-func_02027c0c kind:function(arm,size=0x170) addr:0x02027c0c
-func_02027d7c kind:function(arm,size=0x80) addr:0x02027d7c
+ScreenLoader_SaveState kind:function(arm,size=0x13c) addr:0x02027ad0
+ScreenLoader_RestoreState kind:function(arm,size=0x170) addr:0x02027c0c
+ScreenLoader_LoadFile kind:function(arm,size=0x80) addr:0x02027d7c
 func_02027dfc kind:function(arm,size=0x9c) addr:0x02027dfc
-func_02027e98 kind:function(arm,size=0x38) addr:0x02027e98
+ScreenLoader_ReadFile kind:function(arm,size=0x38) addr:0x02027e98
 func_02027ed0 kind:function(arm,size=0x6c) addr:0x02027ed0
-func_02027f3c kind:function(arm,size=0x8c) addr:0x02027f3c
+ScreenLoader_QueueScreen kind:function(arm,size=0x8c) addr:0x02027f3c
 func_02027fc8 kind:function(arm,size=0x28) addr:0x02027fc8
 func_02027ff0 kind:function(arm,size=0x28) addr:0x02027ff0
 func_02028018 kind:function(arm,size=0x28) addr:0x02028018
@@ -1078,8 +1078,8 @@ func_02028068 kind:function(arm,size=0x28) addr:0x02028068
 func_02028090 kind:function(arm,size=0x28) addr:0x02028090
 func_020280b8 kind:function(arm,size=0x28) addr:0x020280b8
 func_020280e0 kind:function(arm,size=0x28) addr:0x020280e0
-func_02028108 kind:function(arm,size=0x4c) addr:0x02028108
-func_02028154 kind:function(arm,size=0x4c) addr:0x02028154
+ScreenLoader_SetScrollX kind:function(arm,size=0x4c) addr:0x02028108
+ScreenLoader_SetScrollY kind:function(arm,size=0x4c) addr:0x02028154
 func_020281a0 kind:function(arm,size=0x1c) addr:0x020281a0
 func_020281bc kind:function(arm,size=0x1c) addr:0x020281bc
 func_020281d8 kind:function(arm,size=0x1c) addr:0x020281d8
@@ -1088,7 +1088,7 @@ func_02028210 kind:function(arm,size=0x1c) addr:0x02028210
 func_0202822c kind:function(arm,size=0x1c) addr:0x0202822c
 func_02028248 kind:function(arm,size=0x1c) addr:0x02028248
 func_02028264 kind:function(arm,size=0x1c) addr:0x02028264
-func_02028280 kind:function(arm,size=0x44) addr:0x02028280
+ScreenLoader_SetPriority kind:function(arm,size=0x44) addr:0x02028280
 func_020282c4 kind:function(arm,size=0x40) addr:0x020282c4
 func_02028304 kind:function(arm,size=0x40) addr:0x02028304
 func_02028344 kind:function(arm,size=0x40) addr:0x02028344
@@ -6454,7 +6454,7 @@ data_0211eafc kind:bss addr:0x0211eafc
 data_0211eb00 kind:bss addr:0x0211eb00
 data_0211eb28 kind:bss addr:0x0211eb28
 gMainHeap kind:bss addr:0x0211f998
-data_0211f9d4 kind:bss addr:0x0211f9d4
+gPadInput kind:bss addr:0x0211f9d4
 data_0211f9f8 kind:bss addr:0x0211f9f8
 gObjResourceManager kind:bss addr:0x0211fa10
 data_02120948 kind:bss addr:0x02120948
@@ -6462,7 +6462,7 @@ data_02120a10 kind:bss addr:0x02120a10
 data_021212a8 kind:bss addr:0x021212a8
 gPaletteLoader kind:bss addr:0x021213b8
 gOwnerInfo kind:bss addr:0x021217d8
-data_02121834 kind:bss addr:0x02121834
+gScreenLoader kind:bss addr:0x02121834
 gTouchInput kind:bss addr:0x02121e58
 gRandom kind:bss addr:0x02121eac
 data_02121eb8 kind:bss addr:0x02121eb8

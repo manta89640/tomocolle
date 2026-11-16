@@ -66,7 +66,7 @@ void MessageTestScene::Init() {
 #pragma opt_propagation reset
 
 void MessageTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         mObjTexts[0].mMessage = mMessage;
         NNS_G2dCharCanvasClear(&mObjTexts[0].mCanvas, 6);
         mObjTexts[0].mDrawMode = 2;
@@ -82,7 +82,7 @@ void MessageTestScene::Update() {
         mBgTexts[1].mDrawMode = 2;
         mBgTexts[1].mStarted = FALSE;
         mMessage++;
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         mBgTexts[1].mDrawMode = 4;
         mBgTexts[1].mStarted = FALSE;
     }

@@ -201,7 +201,7 @@ struct IslandState {
 extern "C" {
 // --- Main-program functions, by their address names ---
 extern ScreenControl gScreenControl;
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
 extern SceneMemory gSceneMemory;
@@ -225,7 +225,7 @@ struct Renderer3d;
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 
@@ -242,8 +242,8 @@ void DestroyMainFrameHeap();
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 int func_0202a1f8(AnimModel *model, u32 resType, int slot);

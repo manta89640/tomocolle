@@ -438,12 +438,12 @@ void TushinScene::Init() {
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02027d7c(&data_02121834, "MLT:/BG_Tushin_frame.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 2, 3);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_Tushin_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_LoadFile(&gScreenLoader, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 3);
     ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_Mii_list.nce", "MLT:/Obj_list.ncg", 0x1000, 0, -1);
     mPalette = PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "STS:/Obj_up.nce", "STS:/Obj_up.ncg", 0x10, 1, -1);
@@ -2470,7 +2470,7 @@ void TushinScene::Draw() {
     DrawParticles();
     DrawCharacters();
     mBgScroll += 0x4CC;
-    func_02028108(&data_02121834, 2, mBgScroll >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, 2, mBgScroll >> FX32_SHIFT);
 }
 
 // @0x02151620

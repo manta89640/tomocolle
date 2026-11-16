@@ -115,10 +115,10 @@ void OptionScene::Init() {
     mScroll = 0;
 
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
@@ -174,9 +174,9 @@ void OptionScene::Init() {
         charOffset += mTexts[f].GetCharCount();
     }
 
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x100, 1);
-    func_02028280(&data_02121834, 0x200, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
     gScreenControl.Set(0x1302);
     mCharOffset = charOffset;
     func_02032fb8(&mWindow, sScreenRect);
@@ -193,7 +193,7 @@ void OptionScene::Init() {
 void OptionScene::Update() {
     mTtsPlayer.Update();
     mScroll += 0x4CC;
-    func_02028108(&data_02121834, 0x202, mScroll >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x202, mScroll >> FX32_SHIFT);
     func_020341d4(&mWindow);
 
     switch (mState) {
@@ -565,7 +565,7 @@ void OptionScene::Exit() {
     (void)sUnknown2;
     (void)sUnknown3;
     (void)sUnknown4;
-    func_02028108(&data_02121834, 1, 0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 1, 0);
     func_020346cc(&mWindow);
     ArchiveManager_Unmount(&gArchiveManager, "N83");
     ArchiveManager_Unmount(&gArchiveManager, "TET");
@@ -609,7 +609,7 @@ void OptionScene::SetState(int state) {
         for (int b = 0; b <= SPRITE_AM_PM; b++) {
             mSprites[b].mVisible = TRUE;
         }
-        func_02027d7c(&data_02121834, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
         gScreenControl.Set(0x1302);
         Clock_GetDate(data_02123440, &mDate);
         Clock_GetTime(data_02123440, &mTime);
@@ -659,7 +659,7 @@ void OptionScene::SetState(int state) {
         for (int f = 0; f <= 3; f++) {
             mTexts[f].mSprite.mVisible = TRUE;
         }
-        func_02027d7c(&data_02121834, "N83:/BG_down_sframe.nsc", 0x100, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down_sframe.nsc", 0x100, 0, 0, 0, 0, -1);
         gScreenControl.Set(0x1302);
         if (gGameData.mStereo == TRUE) {
             func_02031e28(&mTextButtons[TEXT_BUTTON_STEREO], TRUE);

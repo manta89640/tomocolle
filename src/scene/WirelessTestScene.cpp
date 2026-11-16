@@ -84,7 +84,7 @@ void WirelessTestScene::Init() {
 }
 
 void WirelessTestScene::UpdateIdle() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
+    if (gPadInput.mTrigger & PAD_BUTTON_START) {
         WH_SetReceiver(OnReceive);
         mState = STATE_CONNECTING;
         Redraw();
@@ -145,20 +145,20 @@ void WirelessTestScene::Update() {
             Redraw();
         }
         if (mRole == 0) {
-            if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+            if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
                 mCharacter++;
                 if (mCharacter >= 100) {
                     mCharacter = 0;
                 }
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+            if (gPadInput.mTrigger & PAD_KEY_LEFT) {
                 mCharacter += 150;
                 mCharacter--;
                 mCharacter %= 150;
                 Redraw();
             }
-            if ((data_0211f9d4.mTrigger & PAD_BUTTON_START) && sChunk == 0) {
+            if ((gPadInput.mTrigger & PAD_BUTTON_START) && sChunk == 0) {
                 sChunk = 1;
                 mState = STATE_SENDING;
                 func_0202c264(&gGameData, mCharacter, &sCharacter);
@@ -188,21 +188,21 @@ void WirelessTestScene::Update() {
             sShownParentCount = sParentCount;
         }
         if (sParentCount > 0) {
-            if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+            if (gPadInput.mTrigger & PAD_KEY_UP) {
                 mSelectedParent = (mSelectedParent + (sParentCount - 1)) % sParentCount;
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+            if (gPadInput.mTrigger & PAD_KEY_DOWN) {
                 mSelectedParent = (mSelectedParent + (sParentCount + 1)) % sParentCount;
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
+            if (gPadInput.mTrigger & PAD_BUTTON_START) {
                 WH_EndScan();
             }
         }
         break;
     }
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
     }
 }
 

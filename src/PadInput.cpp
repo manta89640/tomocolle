@@ -1,7 +1,7 @@
 #include "PadInput.h"
 #include "LcdPower.h"
 
-PadInput data_0211f9d4;
+PadInput gPadInput;
 
 void PadInput::Init() {
     mFolded = FALSE;

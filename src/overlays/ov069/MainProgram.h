@@ -54,15 +54,15 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 extern ScreenControl gScreenControl;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }

@@ -94,7 +94,7 @@ struct PadInput {
     /* 0x08 */ u8 mUnknown08[0x18];
     /* 0x20 */ BOOL mUnknown20; // Has to be set for a let-go on a button to count
 };
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 
 // The touch screen
 struct TouchInput {
@@ -121,7 +121,7 @@ struct CharLoader;
 struct Renderer3d;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 void func_0202b0e8(Renderer3d *renderer);
@@ -129,10 +129,10 @@ void func_0202ae38(void *resources); // Of the models' resource table, data_0212
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
 void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028154(ScreenLoader *loader, int plane, int y);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void CreateMainFrameHeap(int size);
 void DestroyMainFrameHeap();
@@ -362,25 +362,25 @@ void RoomScene::Init() {
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_up.nce", "MNU:/Obj_up.ncg", 0x10, 1, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
-    mFront.mScreen = (u16 *)func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
+    mFront.mScreen = (u16 *)ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
     mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
     func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
     mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 1);
-    func_02028280(&data_02121834, 1, 2);
-    func_02028280(&data_02121834, 2, 1);
-    func_02028108(&data_02121834, 2, 0);
-    func_02028154(&data_02121834, 2, 0);
-    func_02028108(&data_02121834, 0x200, 0);
-    func_02028154(&data_02121834, 0x200, -0xC0);
-    func_02028108(&data_02121834, 0x400, 0);
-    func_02028154(&data_02121834, 0x400, -0xC0);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    ScreenLoader_SetScrollX(&gScreenLoader, 2, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 2, 0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x200, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, -0xC0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x400, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, -0xC0);
     gScreenControl.Set(0x1600);
     gScreenControl.Show(0x11);
     ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
@@ -485,18 +485,18 @@ void RoomScene::Init() {
 }
 
 void RoomScene::Update() {
-    if ((data_0211f9d4.mHeld & 0x2FFF) != 0 || gTouchInput.mTouching != 0) {
+    if ((gPadInput.mHeld & 0x2FFF) != 0 || gTouchInput.mTouching != 0) {
         mIdleFrames = 0;
         mCamera.SetState(4, 0x474);
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_KEY_RIGHT) {
         mCamera.mInput.y = 0x10000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+    } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
         mCamera.mInput.y = -0x10000;
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+    if (gPadInput.mHeld & PAD_KEY_UP) {
         mCamera.mInput.x = 0xE000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+    } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
         mCamera.mInput.x = -0xE000;
     }
     UpdateInput();
@@ -845,7 +845,7 @@ void RoomScene::UpdateInput() {
             }
         } else {
             if (mButtons[mPressedButton].Contains(gTouchInput.mLastPoint) &&
-                data_0211f9d4.mUnknown20) {
+                gPadInput.mUnknown20) {
                 mButtons[mPressedButton].mState = 3;
                 PressButton(mPressedButton);
             } else {
@@ -863,7 +863,7 @@ void RoomScene::UpdateInput() {
                 mFront.mButton.SetState(2);
             }
         } else {
-            if (mFront.mButton.Contains(gTouchInput.mLastPoint) && data_0211f9d4.mUnknown20) {
+            if (mFront.mButton.Contains(gTouchInput.mLastPoint) && gPadInput.mUnknown20) {
                 mFront.mButton.SetState(3);
                 GoToInformation();
             } else {
@@ -12079,8 +12079,8 @@ void ApartmentFront::Update() {
     }
     }
     int y = 320 - (mScroll >> FX32_SHIFT);
-    func_02028154(&data_02121834, 0x200, y);
-    func_02028154(&data_02121834, 0x400, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, y);
     mCursor.Update();
     mButton.Update();
     UpdateButtonPosition();

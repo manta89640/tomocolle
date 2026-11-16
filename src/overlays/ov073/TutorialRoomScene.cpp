@@ -181,14 +181,14 @@ void TutorialRoomScene::Init() {
 
     func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
-    func_02027d7c(&data_02121834, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
-    mFront.mScreen = func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
+    mFront.mScreen = ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
     func_02028f24(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
@@ -198,8 +198,8 @@ void TutorialRoomScene::Init() {
     func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
     mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
-    func_02028280(&data_02121834, 1, 2);
-    func_02028280(&data_02121834, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
     gScreenControl.Set(0x1600);
     gScreenControl.Show(0x11);
     ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
@@ -256,7 +256,7 @@ void TutorialRoomScene::Init() {
     func_02033a58(&mWindow[0], &mEtcMessages, 0x159, &gFonts[0].mFont, 0x1000, sWindowTextPosition, &charOffset);
     func_02034f94(&mWindow[0], 1);
     func_02034f4c(&mWindow[0], 1);
-    func_02028280(&data_02121834, 0x100, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
     mWindow[0].mTexts[0].SetStringArg(mCharacters[0].mNameText, 0);
 
     mButtonLabel[0].InitObjForMessage(&mEtcMessages, 0xB3, &gFonts[0].mFont, 0x1000, charOffset, 0, 1, 0, 0, 15,
@@ -294,14 +294,14 @@ void TutorialRoomScene::Init() {
 
 // @0x0214a784
 void TutorialRoomScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_KEY_RIGHT) {
         mCamera.mInput.y = 0x10000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+    } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
         mCamera.mInput.y = -0x10000;
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+    if (gPadInput.mHeld & PAD_KEY_UP) {
         mCamera.mInput.x = 0xE000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+    } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
         mCamera.mInput.x = -0xE000;
     }
     UpdateState();
@@ -2174,8 +2174,8 @@ void TutorialApartmentFront::Update() {
     }
     }
     int y = 320 - (mScroll >> FX32_SHIFT);
-    func_02028154(&data_02121834, 0x200, y);
-    func_02028154(&data_02121834, 0x400, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, y);
     mCursor.Update();
     mButton.Update();
     UpdateButtonPosition();

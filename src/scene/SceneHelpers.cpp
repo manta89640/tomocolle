@@ -442,7 +442,7 @@ void ReturnButton::Init(int sceneId, int plane, int resource) {
     func_02032158(this, &sReturnButtonSounds);
     SetPositionFromVec(0xF2000, 0xD000);
     func_0203119c(this);
-    func_02028280(&data_02121834, plane, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, plane, 0);
     gScreenControl.Show(plane);
     mHeld = FALSE;
     mPressed = FALSE;
@@ -545,10 +545,10 @@ void SceneRoom::ShowParts(int mode) {
 
 void NewsButton::LoadBackground() {
     ArchiveManager_MountCompressed(&gArchiveManager, "NEW", "Scn/Scene/SceneMiiNews_LZ.bin", 1);
-    func_02027d7c(&data_02121834, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
-    func_02027d7c(&data_02121834, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
     ScreenControl_SetBlendBrightness(&gScreenControl, 0x17, -16);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
@@ -565,9 +565,9 @@ void NewsButton::Init(int resource) {
     func_02032158(this, &sNewsButtonSounds);
     SetPositionFromVec(0x80000, 0x60000);
     func_0203119c(this);
-    func_02028280(&data_02121834, 8, 0);
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x100, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 8, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 

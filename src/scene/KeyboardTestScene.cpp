@@ -3,10 +3,10 @@
 
 extern "C" {
 // The graphics manager: saves and restores the graphics state of planes
-void func_02024b10(u32 *manager, void *state, int planes);
-void func_02024c14(u32 *manager, void *state, int planes);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02028154(ScreenLoader *loader, int plane, int offset);
+void GraphicsManager_SaveState(u32 *manager, void *state, int planes);
+void GraphicsManager_RestoreState(u32 *manager, void *state, int planes);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int offset);
 u16 KeyboardCore_GetChar(void);
 }
 
@@ -35,8 +35,8 @@ void KeyboardTestScene::Init() {
     mCharBox.mColor = 8;
     mCharBox.SetPositionFromVec(0x28000, 0x28000);
     charOffset += mTextBox.GetCharCount();
-    func_02024b10(gGraphicsManager, mSavedGraphics, 0x3F00);
-    func_02027d7c(&data_02121834, "KBD:/bg_keyboard_10.nsc", 0x400, 0, 0, 0, 0, -1);
+    GraphicsManager_SaveState(gGraphicsManager, mSavedGraphics, 0x3F00);
+    ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_10.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x400, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
     gScreenControl.Show(0x400);
@@ -85,18 +85,18 @@ void KeyboardTestScene::Update() {
     if (gTouchInput.mTp.touch != 0 || gTouchInput.mUnknown4C != 0) {
         mKeyboard.TransferCharData();
     }
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
-        func_02024c14(gGraphicsManager, mSavedGraphics, 0x3F00);
-        func_02028108(&data_02121834, 0x100, 0);
-        func_02028154(&data_02121834, 0x100, 0);
-        func_02027d7c(&data_02121834, "MNU:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x100, 0);
+        ScreenLoader_LoadFile(&gScreenLoader, "MNU:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "MNU:/BG_down.ncg", 0x100, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_down.ncl", 0x100, -1, -1, -1);
         gScreenControl.mPlanes &= ~0x400;
         gScreenControl.mPlanesChanged = TRUE;
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
-        func_02024c14(gGraphicsManager, mSavedGraphics, 0x3F00);
-        func_02027d7c(&data_02121834, "KBD:/bg_keyboard0.nsc", 0x400, 0, 0, 0, 0, -1);
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard0.nsc", 0x400, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x400, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x3F00, -1, -1, -1);
         gScreenControl.Show(0x400);

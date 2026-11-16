@@ -80,7 +80,7 @@ struct TouchInput {
 };
 
 extern "C" {
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern TouchInput gTouchInput;
 }
 

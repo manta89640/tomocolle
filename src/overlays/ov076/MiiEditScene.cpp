@@ -163,11 +163,11 @@ void func_0202aecc(void *resources, int resourceId);
 void func_0202ad84(void *resources);
 void DestroyMainFrameHeap(void);
 extern ScreenControl gScreenControl;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 void func_02024234(ScreenControl *screens, int planes, int a);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
 void ScreenControl_ClearBlend(ScreenControl *screens, int planes);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
 void func_0207b258(ParticleSystem *system, void *a);
 }
 
@@ -228,7 +228,7 @@ struct SceneMemory {
 };
 struct Light;
 extern "C" {
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern SceneManager gSceneManager;
 extern SceneMemory gSceneMemory;
 extern Light data_021227cc;
@@ -263,7 +263,7 @@ void Clock_GetDate(void *clock, RTCDate *date);
 void func_0202a640(Camera *camera);
 extern Camera data_02122764;
 void func_0202a96c(Light *light);
-void func_02024b10(u32 *manager, void *a, int planes);
+void GraphicsManager_SaveState(u32 *manager, void *a, int planes);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void *CreateMainFrameHeap(int size);
@@ -370,25 +370,25 @@ void MiiEditScene::Init() {
     func_0202a96c(&data_021227cc);
     func_0202a96c(&data_021227d8);
     mTtsPlayer.InitEngine();
-    func_02024b10(gGraphicsManager, mUnknown00010, 0x3F00);
+    GraphicsManager_SaveState(gGraphicsManager, mUnknown00010, 0x3F00);
     func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
-    func_02027d7c(&data_02121834, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 1, 1);
-    func_02028280(&data_02121834, 2, 2);
-    func_02028280(&data_02121834, 4, 3);
-    func_02028280(&data_02121834, 0x10, 0);
-    func_02028280(&data_02121834, 0x100, 0);
-    func_02028280(&data_02121834, 0x200, 1);
-    func_02028280(&data_02121834, 0x1000, 0);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 4, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x10, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
     ScreenControl_SetBlendAlpha(&gScreenControl, 1, 4, 8, 8);
     ShowControls();
     for (u16 i = 0; i < 6; i++) {
@@ -521,7 +521,7 @@ void MiiEditScene::Update() {
     case 4:
     case 5:
     case 6:
-        if (data_0211f9d4.mTrigger & (PAD_BUTTON_R | PAD_BUTTON_L)) {
+        if (gPadInput.mTrigger & (PAD_BUTTON_R | PAD_BUTTON_L)) {
             if (mUnknown5828) {
                 mUnknown5828 = FALSE;
             } else {
@@ -544,7 +544,7 @@ void MiiEditScene::Update() {
     func_0202aa28(&data_021227cc, mCamera, sLightDirection0);
     func_0202aa28(&data_021227d8, mCamera, sLightDirection1);
     mUnknown5904 += 0x4CC;
-    func_02028108(&data_02121834, 4, mUnknown5904 >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, 4, mUnknown5904 >> FX32_SHIFT);
     switch (mPage) {
     case 0:
         mSexPage.Update();
@@ -694,7 +694,7 @@ void MiiEditScene::Exit() {
     func_02024234(&gScreenControl, 0x3F00, 0);
     ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
     ScreenControl_ClearBlend(&gScreenControl, 0x3F00);
-    func_02028108(&data_02121834, 4, 0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 4, 0);
     switch (mPage) {
     case 0:
         mSexPage.Exit();
@@ -956,7 +956,7 @@ void MiiEditScene::ShowControlsWithWindow() {
     if (mSceneId == 0x6F) {
         mButtons[5].mVisible = FALSE;
     }
-    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     gScreenControl.mPlanes = 0x1317;
     gScreenControl.mPlanesChanged = TRUE;
 }
@@ -1148,7 +1148,7 @@ void MiiEditScene::ShowControls() {
     if (mSceneId == 0x6F) {
         mButtons[5].mVisible = FALSE;
     }
-    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
     gScreenControl.mPlanes = 0x1217;
     gScreenControl.mPlanesChanged = TRUE;
 }
@@ -1164,7 +1164,7 @@ void MiiEditScene::ShowControlsEditFace() {
     if (mSceneId == 0x6F) {
         mButtons[5].mVisible = FALSE;
     }
-    func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
     gScreenControl.mPlanes = 0x1217;
     gScreenControl.mPlanesChanged = TRUE;
 }
@@ -1189,7 +1189,7 @@ void MiiEditScene::HideControlsNoBar() {
     for (int i = 0; i < 6; i++) {
         mButtons[i].mVisible = FALSE;
     }
-    func_02027d7c(&data_02121834, "E00:/BG_down_nobar.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_nobar.nsc", 0x200, 0, 0, 0, 0, -1);
     gScreenControl.mPlanes = 0x1217;
     gScreenControl.mPlanesChanged = TRUE;
 }
@@ -2762,7 +2762,7 @@ void MiiEditProfilePage::Update() {
         }
         if (func_0203133c(&mButton)) {
             SetState(0);
-        } else if (gTouchInput.mTp.touch != 0 || gTouchInput.mUnknown4C != 0 || data_0211f9d4.mUnknown20 == 0) {
+        } else if (gTouchInput.mTp.touch != 0 || gTouchInput.mUnknown4C != 0 || gPadInput.mUnknown20 == 0) {
             mKeyboard.TransferCharData();
         }
         if (!func_02031294(&mButton) && gTouchInput.mUnknown4C) {
@@ -3216,7 +3216,7 @@ void MiiEditProfilePage::Update() {
 }
 
 extern "C" {
-void func_02024c14(u32 *manager, void *a, int planes);
+void GraphicsManager_RestoreState(u32 *manager, void *a, int planes);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
 void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
 void func_02032140(SpriteButton *button, int a, int b, int c, int d); // Its four sounds
@@ -3252,10 +3252,10 @@ void MiiEditProfilePage::SetState(int state) {
     }
     switch (state) {
     case 0:
-        func_02024c14(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
-        func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
-        func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
-        func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
+        GraphicsManager_RestoreState(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
+        ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
         gScreenControl.mPlanes = 0x17;
@@ -3495,10 +3495,10 @@ void MiiEditProfilePage::SetState(int state) {
         for (u16 i = 0; i < 2; i++) {
             mSprites[i].mVisible = FALSE;
         }
-        func_02024c14(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
+        GraphicsManager_RestoreState(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
         func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x200, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
-        func_02027d7c(&data_02121834, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
         G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000, GX_BG_CHARBASE_0x08000,
                           GX_BG_EXTPLTT_01);
         mKeyboard.SetArchiveName("KBD");
@@ -3677,8 +3677,8 @@ void MiiEditProfilePage::Exit() {
     case 5:
     case 7:
     case 9:
-        func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
-        func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
         PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
         mScene->ShowControls();
@@ -3910,9 +3910,9 @@ void MiiEditVoicePage::Init(MiiEditScene *scene) {
     mState = -1;
     mScene = scene;
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
     mScene->ShowControls();
@@ -4315,8 +4315,8 @@ void MiiEditVoicePage::Exit() {
     if (mState != 4) {
         return;
     }
-    func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x200, 0, 0, 0, 0);
     PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x200, -1, -1, -1);
     mScene->ShowControls();

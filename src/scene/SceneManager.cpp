@@ -165,10 +165,10 @@ struct Unknown02120a10 {
     /* 0x99C */ int mUnknown99C;
 };
 extern Unknown02120a10 data_02120a10;
-void func_02024b10(void *manager, void *state, u32 flags);
-void func_02024c14(void *manager, void *state, u32 flags);
-void func_02027ad0(void *manager, void *state, u32 flags);
-void func_02027c0c(void *manager, void *state, u32 flags);
+void GraphicsManager_SaveState(void *manager, void *state, u32 flags);
+void GraphicsManager_RestoreState(void *manager, void *state, u32 flags);
+void ScreenLoader_SaveState(void *manager, void *state, u32 flags);
+void ScreenLoader_RestoreState(void *manager, void *state, u32 flags);
 void ScreenControl_SaveState(ScreenControl *screens, void *state, u32 flags);
 void ScreenControl_RestoreState(ScreenControl *screens, void *state, u32 flags);
 void func_02027270(void *manager);
@@ -179,7 +179,7 @@ struct PadInputState {
     /* 0x00 */ u8 mUnknown00[0x14];
     /* 0x14 */ BOOL mEnabled;
 };
-extern PadInputState data_0211f9d4;
+extern PadInputState gPadInput;
 }
 
 // ---- The scene manager and CreateScene (gap38-a) ----------------------------------------------------------------
@@ -226,21 +226,21 @@ void SceneManager::Init() {
     gSoundManager.SaveHeapState(1);
     gScreenControl.mUnknown44 = 1;
     gScreenControl.mUnknown44Changed = TRUE;
-    func_02028280(&data_02121834, 0x100, 0);
-    func_02028280(&data_02121834, 0x800, 1);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02028280(&data_02121834, 0x400, 3);
-    func_02028280(&data_02121834, 0x2, 0);
-    func_02028280(&data_02121834, 0x1, 1);
-    func_02028280(&data_02121834, 0x8, 2);
-    func_02028280(&data_02121834, 0x4, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x800, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x400, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x2, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x8, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x4, 3);
     func_02027270(&gObjResourceManager);
     data_02120a10.mUnknown99C = 1;
     PaletteLoader_ClearDefaults(&gPaletteLoader);
     gPaletteLoader.mUnknown41C = 0x1E0;
-    data_0211f9d4.mEnabled = TRUE;
-    func_02024b10(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
-    func_02027ad0(&data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+    gPadInput.mEnabled = TRUE;
+    GraphicsManager_SaveState(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
+    ScreenLoader_SaveState(&gScreenLoader, mScreenLoaderState, GRAPHICS_STATE_ALL);
     ScreenControl_SaveState(&gScreenControl, mScreenControlState, GRAPHICS_STATE_ALL);
     mScene = CreateScene(0xB6);
     mPreviousSceneId = 0;
@@ -259,8 +259,8 @@ void SceneManager::Update() {
         delete mScene;
         UnloadSceneOverlay(mPreviousSceneId);
         mScene = CreateScene(mNextSceneId);
-        func_02024c14(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
-        func_02027c0c(&data_02121834, mScreenLoaderState, GRAPHICS_STATE_ALL);
+        GraphicsManager_RestoreState(gGraphicsManager, mGraphicsState, GRAPHICS_STATE_ALL);
+        ScreenLoader_RestoreState(&gScreenLoader, mScreenLoaderState, GRAPHICS_STATE_ALL);
         ScreenControl_RestoreState(&gScreenControl, mScreenControlState, GRAPHICS_STATE_ALL);
         func_02027270(&gObjResourceManager);
         data_02120a10.mUnknown99C = 1;

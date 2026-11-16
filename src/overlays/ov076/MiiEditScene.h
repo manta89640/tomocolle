@@ -272,7 +272,7 @@ public:
     void HideControlsNoBar();
     int GetNameLength(const wchar_t *name);
 
-    /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to func_02024b10
+    /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to GraphicsManager_SaveState
     /* 0x00150 */ int mPage;                    // Which page Draw and Exit pass on to (0 to 6); Init sets -1
     /* 0x00154 */ int mUnknown00154;           // SetPage clears it
     /* 0x00158 */ SpriteButton mButtons[6];

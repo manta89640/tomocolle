@@ -73,11 +73,11 @@ void WeddingScene::Init() {
 
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
     gScreenControl.Set(0x1111);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02028108(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x2F00, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
     func_02027290(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
     func_02028f24(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
@@ -111,11 +111,11 @@ void WeddingScene::Init() {
 void WeddingScene::InitLowerScreen() {
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 4, 0);
-    func_02028280(&data_02121834, 2, 1);
-    func_02028280(&data_02121834, 1, 3);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 4, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 3);
     ScreenControl_SetBlendAlpha(&gScreenControl, 4, 0x11, 8, 8);
 }
 
@@ -128,7 +128,7 @@ void WeddingScene::Init3d() {
     gScreenControl.mUnknown48 = 1;
     gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    func_02028280(&data_02121834, 1, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 3);
     func_0202a640(&data_02122764);
     mCamera.Init(&mCharacters[0], &mCharacters[1]);
     mCamera.Reset(gSceneManager.mPreviousSceneId);

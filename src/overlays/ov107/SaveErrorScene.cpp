@@ -38,7 +38,7 @@ void SaveErrorScene::Init() {
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
 
     func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, sScreenName, 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sScreenName, 0x200, 0, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
     func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
@@ -66,7 +66,7 @@ void SaveErrorScene::Init() {
     func_02033a58(&mWindow[0], etc, 0x1A2, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
     func_02034f94(&mWindow[0], 1);
     func_02034f4c(&mWindow[0], 1);
-    func_02028280(&data_02121834, 0x200, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 0);
     SetState(0);
 }
 

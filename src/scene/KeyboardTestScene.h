@@ -36,7 +36,7 @@ public:
     /* 0x6384 */ u8 mCharBuffer[0x600];     // The text box's
     /* 0x6984 */ int mLength;               // How many characters are typed
     /* 0x6988 */ wchar_t mName[NAME_LENGTH + 1];
-    /* 0x69A0 */ u32 mSavedGraphics[0x50];  // The graphics state of the lower screen, as func_02024b10 saved it
+    /* 0x69A0 */ u32 mSavedGraphics[0x50];  // The graphics state of the lower screen, as GraphicsManager_SaveState saved it
     /* 0x6AE0 */ MessageFile mFiles[1];
 }; // 0x6AF8
 

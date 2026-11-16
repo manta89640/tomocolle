@@ -13,11 +13,11 @@ extern "C" {
 extern void *data_02123440; // The game's clock
 extern MATHRandContext16 gRandom;
 extern PaletteLoader gPaletteLoader;
-extern ScreenLoader data_02121834;
+extern ScreenLoader gScreenLoader;
 void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
 void Clock_GetTime(void *clock, RTCTime *time);
 const GXRgb *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
 }
 
 static inline u16 Rand(int max) {
@@ -305,7 +305,7 @@ void Sky::UpdateObjects() {
     if (mChanged && mPalettesOn) {
         LoadPalettes();
     }
-    func_02028108(&data_02121834, mBgPlane, mScrollY >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, mBgPlane, mScrollY >> FX32_SHIFT);
     if (mBirdsOn) {
         mBirds.Update();
     }

@@ -25,23 +25,23 @@ void TtsTestScene::Init() {
 }
 
 void TtsTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         mPlayer.Speak((const u16 *)sTexts.mWide, 0);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
         mPlayer.StopEngine();
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_Y) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_Y) {
+        if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
             mPlayer.StopEngine();
             mPlayer.mCaptureText = sTexts.mCapture;
             mPlayer.Synthesize(NULL);
             mPlayer.PlayCapture();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_LEFT) {
             mPlayer.StopCapture();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+        } else if (gPadInput.mTrigger & PAD_KEY_UP) {
             mPlayer.StopEngine();
             mPlayer.mCaptureText = sTexts.mCapture;
             mPlayer.StartSynthesizeThread();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             if (OS_IsThreadTerminated(&mPlayer.mThread)) {
                 mPlayer.PlayCapture();
             }

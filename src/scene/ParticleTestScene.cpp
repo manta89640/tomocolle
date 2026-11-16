@@ -50,43 +50,43 @@ void ParticleTestScene::Init() {
 }
 
 void ParticleTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         if (mEmitter != NULL) {
             func_0207b364(mParticles, mEmitter);
         }
         mEffectCount++;
         mEmitter = func_0207b2fc(mParticles, 0, &mEmitterPosition);
         mRunning = TRUE;
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_B) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_B) {
+        if (gPadInput.mTrigger & PAD_KEY_UP) {
             mRunning ^= TRUE;
             mEmitter->mPaused = mRunning ? FALSE : TRUE;
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             func_0207b40c(mParticles, mEmitter);
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
             mEmitter = func_0207b2fc(mParticles, 0, &mEmitterPosition);
-        } else if ((data_0211f9d4.mTrigger & PAD_KEY_LEFT) && mEmitter != NULL) {
+        } else if ((gPadInput.mTrigger & PAD_KEY_LEFT) && mEmitter != NULL) {
             func_0207b364(mParticles, mEmitter);
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         mEmitter->mEmissionInterval = 10;
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mEmitter->SetZ(FX32_ONE);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mEmitter->SetZ(0);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mEmitter->mEmissionPaused = TRUE;
         }
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }

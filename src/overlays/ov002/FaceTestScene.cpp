@@ -51,67 +51,67 @@ static inline int SetTouchLine(ScreenPoint point) {
 }
 
 void FaceTestScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_A) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mFaceOffset.x += 0x40;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mFaceOffset.x -= 0x40;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mFace.mFaceOffset.y += 0x40;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mFace.mFaceOffset.y -= 0x40;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_B) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_B) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mHeadRollNow += 0xFF50;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mHeadRollNow += 0xB0;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mFace.mHeadPitchNow += 0xFF50;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mFace.mHeadPitchNow += 0xB0;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_Y) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_Y) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mHeadYawNow += 0xFF60;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mHeadYawNow += 0xA0;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mTrigger & PAD_KEY_UP) {
             if (++mFaceKind >= 27) {
                 mFaceKind = 0;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             if (--mFaceKind < 0) {
                 mFaceKind = 26;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT || data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_RIGHT || gPadInput.mTrigger & PAD_KEY_LEFT) {
             mFace.SetFace(mFaceKind);
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_L) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_L) {
+        if (gPadInput.mTrigger & PAD_KEY_UP) {
             if (++mHeadTurn >= 8) {
                 mHeadTurn = 0;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             if (--mHeadTurn < 0) {
                 mHeadTurn = 7;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT || data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_RIGHT || gPadInput.mTrigger & PAD_KEY_LEFT) {
             mFace.mHeadTurn = mHeadTurn;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_R) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             Camera_Translate(mCamera, 0, 0, 0x200);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             Camera_Translate(mCamera, 0, 0, -0x200);
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             Camera_Translate(mCamera, 0, 0x200, 0);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             Camera_Translate(mCamera, 0, -0x200, 0);
         }
     }
