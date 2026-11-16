@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "Sprite.h"
 #include "SpriteButton.h"
+#include "island/Apartment.h"
 #include "sound/SoundManager.h"
 #include "sound/ValueRamp.h"
 #include "text/MessageFile.h"
@@ -493,14 +494,6 @@ struct Unknown02114d78Entry {
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The island ---
-int func_020a6074(u16 size);
-int func_020a60a0();
-int func_020a60b8(int stage);
-struct WindowCell {
-    /* 0x0 */ int mColumn;
-    /* 0x4 */ int mFloor;
-};
-WindowCell func_020a60cc(int window);
 int func_020a6214(DayPhase *phase);
 u32 func_020a6390(int month, int a);
 u32 func_020a6480(int month, int a);

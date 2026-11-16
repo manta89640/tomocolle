@@ -323,23 +323,23 @@ void MapScene::StartLoading() {
     switch (mSceneId) {
     case 0x62:
         mIslandStage = 0;
-        mWindowCount = func_020a60b8(0);
+        mWindowCount = GetApartmentStageRooms(0);
         break;
     case 0x63:
         mIslandStage = 1;
-        mWindowCount = func_020a60b8(1);
+        mWindowCount = GetApartmentStageRooms(1);
         break;
     case 0x64:
         mIslandStage = 2;
-        mWindowCount = func_020a60b8(2);
+        mWindowCount = GetApartmentStageRooms(2);
         break;
     case 0x65:
         mIslandStage = 3;
-        mWindowCount = func_020a60b8(3);
+        mWindowCount = GetApartmentStageRooms(3);
         break;
     case 0x66:
         mIslandStage = 4;
-        mWindowCount = func_020a60b8(4);
+        mWindowCount = GetApartmentStageRooms(4);
         break;
     default: {
         SavedCharacter character;
@@ -378,7 +378,7 @@ void MapScene::StartLoading() {
         mIslandStage = gGameData.mUnknown0C[0x40];
         break;
     }
-    mWindowCount = func_020a60a0();
+    mWindowCount = GetApartmentRooms();
     for (int i = 0; i < 14; i++) {
         if (i == 0) {
             ArchiveManager_MountCompressed(&gArchiveManager, sResourceArchives[i],
@@ -731,12 +731,12 @@ void MapScene::Update() {
                 for (int i = 1; i < MODEL_COUNT; i++) {
                     if (mNewBuilding == sModelBuildings[i]) {
                         if (i == MODEL_APARTMENT) {
-                            int stages = func_020a6074(mFacilities.mApartmentSize);
+                            int stages = GetApartmentStage(mFacilities.mApartmentSize);
                             if (mIslandStage < stages) {
                                 mIslandStage++;
                             }
                             gGameData.mUnknown0C[0x40] = mIslandStage;
-                            mWindowCount = func_020a60b8(mIslandStage);
+                            mWindowCount = GetApartmentStageRooms(mIslandStage);
                             const Point &mark = sApartmentMarkPositions[mIslandStage];
                             mNewMarks[MODEL_APARTMENT].SetPositionFromVec(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
                             func_0202aecc(data_021223e4, 9);
@@ -1172,7 +1172,7 @@ void MapScene::SetState(int state) {
 }
 
 VecFx32 MapScene::GetWindowPosition(int window) {
-    WindowCell cell = func_020a60cc(window);
+    WindowCell cell = GetWindowCell(window);
     if (cell.mFloor == 12) {
         cell.mColumn += 2;
     }

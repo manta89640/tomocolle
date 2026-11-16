@@ -1,14 +1,9 @@
 #include <nitro.h>
 
 #include "GameData.h"
+#include "island/Apartment.h"
 
 // The apartment building: how large it is, by the number of residents, and where its rooms are.
-
-// Where a window of the building's front is: its column and its floor from the bottom
-struct WindowCell {
-    /* 0x0 */ int mColumn;
-    /* 0x4 */ int mFloor;
-};
 
 // The number of residents from which the building has its second, third and fourth stage
 static const u16 sStageResidents[3] = {20, 45, 70};
