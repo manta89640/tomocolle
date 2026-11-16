@@ -1,6 +1,8 @@
 #include "MiiEditScene.h"
 #include "sound/SoundManager.h"
 
+#include <wchar.h>
+
 // --- The main program (stand-ins, not decompiled) ---
 struct ArchiveLoader;
 struct ScreenControl;
@@ -264,6 +266,213 @@ void MiiEditProfilePage::Exit() {
     }
 }
 
+// What the profile page uses of the main program (stand-ins)
+extern "C" {
+void func_02037478(wchar_t *text); // Applied to the texts of numbers before they are shown
+void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
+int func_02098dac(SavedCharacter *character, int param);  // A parameter of the character (0x26, 0x27: birth month, day)
+BOOL func_02098e50(SavedCharacter *character, int param);
+void func_020986c4(SavedCharacter *character, int param, int *min, int *max); // The range of a parameter
+BOOL func_02098584(SavedCharacter *character);
+void MiiData_GetName(SavedCharacter *mii, wchar_t *name);
+void MiiData_GetCreatorName(SavedCharacter *mii, wchar_t *name);
+int MiiData_GetSex(SavedCharacter *mii);
+}
+
+// Where the profile page's texts go: the place of each of mTextBoxes[0..8] in sProfileTextPositions
+static const int sProfileTextSlots[9] = { 0, 1, 4, 2, 3, 6, 7, 8, 9 };
+static const WindowPoint sProfileTextPositions[10] = {
+    { 70, 40 }, { 186, 40 }, { 128, 112 }, { 160, 76 }, { 68, 76 },
+    { 202, 112 }, { 216, 76 }, { 68, 149 }, { 192, 149 }, { 54, 112 },
+};
+// By MiiData_GetSex
+static const wchar_t *sSexMarks[2] = { L"♂", L"♀" };
+
+// Puts a text in mText (up to 10 characters) and shows it in the scene's character box, 13 pixels a character
+void MiiEditProfilePage::SetText(const wchar_t *text) {
+    MI_CpuClear16(mText, sizeof(mText));
+    mTextLength = 0;
+    NNS_G2dCharCanvasClear(&mScene->mCharBox.mCanvas, 0);
+    while (mTextLength < 10) {
+        u16 c = text[mTextLength];
+        if (c == 0) {
+            return;
+        }
+        mText[mTextLength] = c;
+        int x = mTextLength * 13 + 5;
+        x -= NNS_G2dFontGetCharWidths(mScene->mCharBox.mFont, c)->charWidth >> 1;
+        mScene->mCharBox.mCharX = x;
+        mScene->mCharBox.SetChar(c);
+        mScene->mCharBox.Redraw();
+        mScene->mCharBox.Transfer();
+        mTextLength++;
+    }
+}
+
+// Shows a number of up to four digits with the sprites of the third window, without its leading zeros
+void MiiEditProfilePage::SetNumberDigits(int value) {
+    int ones = value % 10;
+    int tens = value % 100 / 10;
+    int hundreds = value % 1000 / 100;
+    int thousands = value % 10000 / 1000;
+    Sprite_SetFrame(&mWindows[2].mPlainSprites[0], ones);
+    Sprite_SetFrame(&mWindows[2].mPlainSprites[1], tens);
+    Sprite_SetFrame(&mWindows[2].mPlainSprites[2], hundreds);
+    Sprite_SetFrame(&mWindows[2].mPlainSprites[3], thousands);
+    BOOL visible[4];
+    for (int i = 0; i < 4; i++) {
+        visible[i] = TRUE;
+    }
+    if (value / 10000 <= 0 && thousands == 0) {
+        visible[3] = FALSE;
+        if (hundreds == 0) {
+            visible[2] = FALSE;
+            if (tens == 0) {
+                visible[1] = FALSE;
+            }
+        }
+    }
+    for (int i = 0; i < 4; i++) {
+        mWindows[2].mPlainSprites[i].mVisible = visible[i];
+    }
+}
+
+// Shows the birth day in two digits with the first two sprites of the fourth window
+void MiiEditProfilePage::SetDayDigits(int day) {
+    int ones = day % 10;
+    int tens = day % 100 / 10;
+    Sprite_SetFrame(&mWindows[3].mPlainSprites[0], ones);
+    Sprite_SetFrame(&mWindows[3].mPlainSprites[1], tens);
+    BOOL visible[2];
+    for (int i = 0; i < 2; i++) {
+        visible[i] = TRUE;
+    }
+    if (day / 100 <= 0 && tens == 0) {
+        visible[1] = FALSE;
+        if (ones == 0) {
+            visible[0] = FALSE;
+        }
+    }
+    for (int i = 0; i < 2; i++) {
+        mWindows[3].mPlainSprites[i].mVisible = visible[i];
+    }
+}
+
+// Shows the birth month in two digits with the next two sprites of the fourth window
+void MiiEditProfilePage::SetMonthDigits(int month) {
+    int ones = month % 10;
+    int tens = month % 100 / 10;
+    Sprite_SetFrame(&mWindows[3].mPlainSprites[2], ones);
+    Sprite_SetFrame(&mWindows[3].mPlainSprites[3], tens);
+    BOOL visible[2];
+    for (int i = 0; i < 2; i++) {
+        visible[i] = TRUE;
+    }
+    if (month / 100 <= 0 && tens == 0) {
+        visible[1] = FALSE;
+        if (ones == 0) {
+            visible[0] = FALSE;
+        }
+    }
+    for (int i = 0; i < 2; i++) {
+        mWindows[3].mPlainSprites[i + 2].mVisible = visible[i];
+    }
+}
+
+// Puts a text box at a place in pixels
+static inline void SetTextBoxPosition(ObjTextBox *box, WindowPoint point) {
+    box->SetPosition(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+}
+
+// The scene's buffers for the texts that UpdateTexts writes
+#define NUMBER_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B304[0x00])
+#define BIRTHDAY_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B304[0x14])
+#define NAME_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B330[0x00])
+#define CREATOR_NAME_TEXT(scene) ((wchar_t *)&(scene)->mUnknown1B330[0x16])
+
+// Writes the character's profile into the scene's nine text boxes, each centred on its place
+void MiiEditProfilePage::UpdateTexts() {
+    u32 number = mScene->mCharacter.mUnknown050Bits17;
+    if (number == 0xFFF) {
+        swprintf(NUMBER_TEXT(mScene), 5, L"", number);
+    } else {
+        swprintf(NUMBER_TEXT(mScene), 5, L"%d", number);
+        func_02037478(NUMBER_TEXT(mScene));
+    }
+    int month = func_02098dac(&mScene->mCharacter, 0x26);
+    int day = func_02098dac(&mScene->mCharacter, 0x27);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        swprintf(BIRTHDAY_TEXT(mScene), 6, L"%d/%d", month, day);
+        func_02037478(BIRTHDAY_TEXT(mScene));
+    } else {
+        swprintf(BIRTHDAY_TEXT(mScene), 6, L"");
+    }
+    mScene->mTextBoxes[0].SetText((const NNSG2dChar *)&mScene->mCharacter.mUnknown058[0x16]);
+    mScene->mTextBoxes[1].SetText((const NNSG2dChar *)mScene->mCharacter.mUnknown058);
+    MiiData_GetName(&mScene->mCharacter, NAME_TEXT(mScene));
+    mScene->mTextBoxes[2].SetText((const NNSG2dChar *)NAME_TEXT(mScene));
+    mScene->mTextBoxes[8].SetText((const NNSG2dChar *)sSexMarks[MiiData_GetSex(&mScene->mCharacter)]);
+    mScene->mTextBoxes[3].SetText(
+        (const NNSG2dChar *)mScene->mMessageFiles[0].GetText(mScene->mCharacter.mUnknown050Bits29 + 0x5A));
+    mScene->mTextBoxes[4].SetText((const NNSG2dChar *)NUMBER_TEXT(mScene));
+    mScene->mTextBoxes[5].SetText((const NNSG2dChar *)BIRTHDAY_TEXT(mScene));
+    MiiData_GetCreatorName(&mScene->mCharacter, CREATOR_NAME_TEXT(mScene));
+    mScene->mTextBoxes[6].SetText((const NNSG2dChar *)CREATOR_NAME_TEXT(mScene));
+    mScene->mTextBoxes[7].SetText(
+        (const NNSG2dChar *)mScene->mMessageFiles[0].GetText(mScene->mCharacter.mUnknown298 + 0x54));
+    if (!func_02098584(&mScene->mCharacter)) {
+        mScene->mTextBoxes[2].mColor = 9;
+        mScene->mTextBoxes[6].mColor = 9;
+        BOOL monthSet = func_02098e50(&mScene->mCharacter, 0x26);
+        BOOL daySet = func_02098e50(&mScene->mCharacter, 0x27);
+        if (monthSet && daySet) {
+            mScene->mTextBoxes[5].mColor = 9;
+        }
+    }
+    for (u16 i = 0; i < 9; i++) {
+        mScene->mUnknown1B32C = 1;
+        int width = NNS_G2dTextCanvasGetTextWidth(&mScene->mTextBoxes[i].mTextCanvas, mScene->mTextBoxes[i].mText);
+        const WindowPoint *position = &sProfileTextPositions[sProfileTextSlots[i]];
+        WindowPoint point;
+        point.x = position->x + -width / 2;
+        point.y = position->y - 7;
+        SetTextBoxPosition(&mScene->mTextBoxes[i], point);
+    }
+    Sprite_SetFrame(&mSprites[0], func_02098dac(&mScene->mCharacter, 0x28));
+}
+
+// Darkens the second button of the third window while the birth day is past the last day the month has
+void MiiEditProfilePage::UpdateDayButton() {
+    int min, max;
+    func_020986c4(&mScene->mCharacter, 0x27, &min, &max);
+    if (func_02098dac(&mScene->mCharacter, 0x27) > max) {
+        func_02031e88((SpriteButton *)&mWindows[2].mButtons[1], TRUE);
+    } else {
+        func_02031e88((SpriteButton *)&mWindows[2].mButtons[1], FALSE);
+    }
+}
+
+// Enables the keyboard's first key in the states that type a text, when func_ov076_0214bf20 accepts the text
+// (state 9 also with no text at all)
+void MiiEditProfilePage::UpdateKeyboardKey(int state) {
+    BOOL enabled = FALSE;
+    switch (state) {
+    case 3:
+    case 5:
+    case 7:
+        enabled = mScene->func_ov076_0214bf20(mText) ? TRUE : FALSE;
+        break;
+    case 9:
+        if (wcslen(mText) == 0 || mScene->func_ov076_0214bf20(mText)) {
+            enabled = TRUE;
+        } else {
+            enabled = FALSE;
+        }
+        break;
+    }
+    func_02083608(mKeyboard.mKeys[0], enabled);
+}
+
 // --- The voice page ---
 
 void MiiEditVoicePage::Draw() {
@@ -314,10 +523,8 @@ struct TouchInput {
 extern "C" {
 extern TouchInput gTouchInput;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
-void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mPersonality[index]
+void func_02098d5c(SavedCharacter *character, int index, u8 value); // Sets mUnknown04A[index]
 void func_02091a6c(SceneCharacter *character);
-void func_ov076_0214bec8(Sprite *sprite, int a);
 }
 
 // The sliders: a knob for each of the five values, and its label
@@ -334,7 +541,7 @@ static const ScreenRect sCharacterValueRects[8] = {
     { 129, -6, 12, 12 }, { 143, -6, 12, 12 }, { 157, -6, 12, 12 }, { 171, -6, 12, 12 },
 };
 
-void MiiEditCharacterPage::Init(MiiEditScene *scene) {
+void MiiEditCharacterPage::func_ov076_02157c04(MiiEditScene *scene) {
     mScene = scene;
     scene->func_ov076_0214bbe4();
     ObjResourceManager_Load(&gObjResourceManager, "E00:/Character.nce", "E00:/Character.ncg", 0x1000, 1, 0x10000);
@@ -350,7 +557,7 @@ void MiiEditCharacterPage::Init(MiiEditScene *scene) {
         mButtons[i].mVisible = FALSE;
     }
     for (int i = 0; i < 5; i++) {
-        u8 value = mScene->mCharacter.mPersonality[i];
+        u8 value = mScene->mCharacter.mUnknown04A[i];
         if (value == 0) {
             mButtons[i].mVisible = FALSE;
         } else {
@@ -371,7 +578,7 @@ void MiiEditCharacterPage::Init(MiiEditScene *scene) {
 static inline BOOL IsPersonalitySet(MiiEditScene *scene) {
     BOOL set = TRUE;
     for (int i = 0; i < 5; i++) {
-        if (scene->mCharacter.mPersonality[i] == 0) {
+        if (scene->mCharacter.mUnknown04A[i] == 0) {
             set = FALSE;
             break;
         }
@@ -379,7 +586,7 @@ static inline BOOL IsPersonalitySet(MiiEditScene *scene) {
     return set;
 }
 
-void MiiEditCharacterPage::Update() {
+void MiiEditCharacterPage::func_ov076_02157e3c() {
     if (gTouchInput.mTouching == 0) {
         return;
     }
@@ -388,7 +595,7 @@ void MiiEditCharacterPage::Update() {
         for (int j = 0; j < 8; j++) {
             ScreenRect rect = sCharacterValueRects[j];
             rect.y += sCharacterKnobPositions[i].y;
-            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mPersonality[i]) {
+            if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mUnknown04A[i]) {
                 func_02098d5c(&mScene->mCharacter, i, j + 1);
                 func_02091a6c(&mScene->mCharacter);
                 mButtons[i].mVisible = TRUE;
@@ -402,7 +609,7 @@ void MiiEditCharacterPage::Update() {
     }
     BOOL set = TRUE;
     for (int i = 0; i < 5; i++) {
-        if (mScene->mCharacter.mPersonality[i] == 0) {
+        if (mScene->mCharacter.mUnknown04A[i] == 0) {
             set = FALSE;
             break;
         }
@@ -412,7 +619,7 @@ void MiiEditCharacterPage::Update() {
     }
     func_02031e88(&mScene->mButtons[4], FALSE);
     mScene->mUnknown58DC = TRUE;
-    func_ov076_0214bec8(&mScene->mSprite582C, 4);
+    mScene->mSprite582C.func_ov076_0214bec8(4);
 }
 
 
@@ -449,8 +656,6 @@ void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next sce
 void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 pressedSequence, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const ButtonSounds *sounds, int b);
-void func_ov076_0214b1ec(MiiEditScene *scene, int page); // Opens a page
-void func_ov076_0214b890(MiiEditScene *scene);
 }
 
 // The two pages are windows with two buttons, common messages 2 and 3 ("はい", "いいえ")
@@ -464,7 +669,7 @@ static const WindowPoint sQuestionTextPosition = { 38, 33 };
 static const ButtonSounds sPage6ButtonSounds[2] = { { 15, -1, 0, -1 }, { 16, -1, 0, -1 } };
 static const ButtonSounds sPage5ButtonSounds[2] = { { 14, -1, 0, -1 }, { 16, -1, 0, -1 } };
 
-void MiiEditPage6::Init(MiiEditScene *scene, int previousPage) {
+void MiiEditPage6::func_ov076_02158048(MiiEditScene *scene, int previousPage) {
     mScene = scene;
     mPreviousPage = previousPage;
     ScreenRect rect = sQuestionWindowRect;
@@ -487,7 +692,7 @@ void MiiEditPage6::Init(MiiEditScene *scene, int previousPage) {
     func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
-void MiiEditPage6::Update() {
+void MiiEditPage6::func_ov076_0215821c() {
     func_020341d4(&mWindow);
     if (mWindow.mResult != -1) {
         mWindow.mUnknownSetBeforeClose = 15;
@@ -505,7 +710,7 @@ void MiiEditPage6::Update() {
         return;
     }
     if (mNextPage == -1) {
-        func_ov076_0214b890(mScene);
+        mScene->func_ov076_0214b890();
         switch (mScene->mSceneId) {
         case 0x42:
             func_0203c02c(&gSceneManager, 0x1A);
@@ -521,7 +726,7 @@ void MiiEditPage6::Update() {
             break;
         }
     } else {
-        func_ov076_0214b1ec(mScene, mNextPage);
+        mScene->func_ov076_0214b1ec(mNextPage);
     }
 }
 
@@ -533,7 +738,7 @@ void MiiEditPage6::Exit() {
     func_020346cc(&mWindow);
 }
 
-void MiiEditPage5::Init(MiiEditScene *scene, int previousPage) {
+void MiiEditPage5::func_ov076_0215835c(MiiEditScene *scene, int previousPage) {
     mScene = scene;
     mPreviousPage = previousPage;
     ScreenRect rect = sQuestionWindowRect;
@@ -556,7 +761,7 @@ void MiiEditPage5::Init(MiiEditScene *scene, int previousPage) {
     func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
-void MiiEditPage5::Update() {
+void MiiEditPage5::func_ov076_0215852c() {
     func_020341d4(&mWindow);
     if (mWindow.mResult != -1) {
         mWindow.mUnknownSetBeforeClose = 15;
@@ -584,7 +789,7 @@ void MiiEditPage5::Update() {
             break;
         }
     } else {
-        func_ov076_0214b1ec(mScene, mNextPage);
+        mScene->func_ov076_0214b1ec(mNextPage);
     }
 }
 
