@@ -373,10 +373,10 @@ public:
     void SetUpScrollBar(int a, int b, int c);
     void SetMessageFile(MessageFile *file); // Where the items' names are
     void SetMode(int mode);
-    void InitRows(int resource, int sequence, int pressedSequence, int *charOffset);
+    void InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset);
     void InitCounts(int *charOffset);
-    void InitUpButton(int resource, int sequence, int pressedSequence);
-    void InitDownButton(int resource, int sequence, int pressedSequence);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence);
     void InitScrollBar(int resource, int sequence, int knobSequence);
     void Update();
     void SetItems(Item **items, int count);

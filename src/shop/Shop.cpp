@@ -51,18 +51,20 @@ extern ScreenLoader data_02121834;
 extern ArchiveLoader gArchiveManager;
 extern u8 data_0211d604[];
 extern u8 data_02122824[];
-extern Camera data_02122764;
-extern Light data_021227cc;
-extern Light data_021227d8;
+extern u8 data_02122764[];
+extern Light data_021227cc[];
 extern GameData gGameData;
 extern MATHRandContext16 gRandom;
 
 // The message window's other functions
-void func_02033844(MessageWindow *window, int number, int resource, int a, int b, int x, int y, int width,
-                   int height, MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset,
-                   const ButtonSounds *sounds, int c);
-void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane, int x,
-                   int y, int width, int height, int *charOffset);
+// Adds a button with a text: (number, resource, .., .., position, size, the text's message file and message, font,
+// plane, character offset, the button's sounds, ..)
+void func_02033844(MessageWindow *window, int number, int resource, u8 a, u8 b, WindowPoint position,
+                   WindowPoint size, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const ButtonSounds *sounds, int c);
+// Adds a message text: (message file, message, font, plane, position, size, character offset)
+void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+                   WindowPoint position, WindowPoint size, int *charOffset);
 void func_02033bb4(MessageWindow *window, int resource, int sequence, WindowPoint position);
 void func_02034f80(MessageWindow *window, int a, int b);
 
@@ -87,7 +89,25 @@ u8 func_0202c490(GameData *game, int index); // The place of its event
 
 #define RESOURCE_BCA0 0x30414342 // Joint animations
 
-static inline void ClearCanvas(TextCanvas *canvas, int color) { NNS_G2dCharCanvasClear(&canvas->mCanvas, color); }
+static inline void ClearCanvas(TextCanvas &canvas, int color) { NNS_G2dCharCanvasClear(&canvas.mCanvas, color); }
+
+// The sum of two points
+template <class A, class B> static inline A AddPoints(A a, B b) {
+    A p;
+    p.x = a.x + b.x;
+    p.y = a.y + b.y;
+    return p;
+}
+
+// Puts a canvas at a point in pixels
+template <class P> static inline void SetCanvasPosition(ObjTextCanvas *canvas, P position) {
+    canvas->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+}
+
+// Puts a sprite at a point in pixels
+template <class P> static inline void SetSpritePosition(Sprite *sprite, const P &position) {
+    sprite->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+}
 
 // --- The list -----------------------------------------------------------------------------------------------------
 
@@ -125,7 +145,7 @@ void ItemListView::SetBackground(int plane, int offset) {
 }
 
 // The rows: their buttons and the texts of the items' names
-void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int *charOffset, ScreenPoint position) {
+void ItemListView::InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset, ScreenPoint position) {
     for (int i = 0; i < mRowCount; i++) {
         mRowDirty[i] = TRUE;
         mRowItemIds[i] = -1;
@@ -136,7 +156,7 @@ void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int
         Sprite_Init(&mRowButtons[i], resource, sequence, 0x80, 0x60, TRUE);
         func_02031260(&mRowButtons[i], 3);
         func_02031278(&mRowButtons[i], sequence, pressedSequence);
-        mRowButtons[i].SetPosition(sRowsPosition.x << FX32_SHIFT, (sRowsPosition.y + i * 20) << FX32_SHIFT);
+        mRowButtons[i].SetPosition(FxVec2(sRowsPosition.x << FX32_SHIFT, (sRowsPosition.y + i * 20) << FX32_SHIFT));
         func_02031eb0(&mRowButtons[i], 0xE5, 18);
         func_0203119c(&mRowButtons[i]);
         mRowButtons[i].mOverwritePalette = 3;
@@ -144,7 +164,7 @@ void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int
         mRowButtons[i].mUnknownDC = TRUE;
         mRowButtons[i].mSounds.mSounds[0] = 2;
         mRowTexts[i].InitObj(&gFonts[0].mFont, 0x1000, 16, 2, *charOffset, 0, 1, 0, 0, 15, mRowTextBuffers[i]);
-        mRowTexts[i].SetPosition(0, 0);
+        mRowTexts[i].SetPositionFromVec(0, 0);
         mRowTexts[i].mMessageFile = NULL;
         mRowTexts[i].mColor = 8;
         mRowTexts[i].mSprite.mOverwritePalette = 3;
@@ -158,7 +178,7 @@ void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int
     mTouchArea.mUnknown44 = TRUE;
 }
 
-void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int *charOffset) {
+void ItemListView::InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset) {
     InitRows(resource, sequence, pressedSequence, charOffset, sRowsPosition);
 }
 
@@ -168,12 +188,12 @@ void ItemListView::InitPrices(int resource, int sequence, int *charOffset) {
         mRowPrices[i].InitText(&gFonts[1].mFont, 0x1000, 8, 1, *charOffset, -2, 1, 0, 0, 15, mRowPriceBuffers[i], 2,
                                NNS_G2D_CHARA_COLORMODE_16);
         mRowPrices[i].mColor = 8;
-        ClearCanvas(&mRowPrices[i], 0);
-        mRowPrices[i].SetPosition(0, 0);
+        ClearCanvas(mRowPrices[i], 0);
+        mRowPrices[i].SetPositionFromVec(0, 0);
         mRowPrices[i].mSprite.mOverwritePalette = 3;
         *charOffset += mRowPrices[i].GetCharCount();
         Sprite_Init(&mRowPriceIcons[i], resource, sequence, 0x80, 0x60, TRUE);
-        mRowPriceIcons[i].SetPosition(0, 0);
+        mRowPriceIcons[i].SetPositionFromVec(0, 0);
         mRowPriceIcons[i].mOverwritePalette = 3;
     }
 }
@@ -181,14 +201,13 @@ void ItemListView::InitPrices(int resource, int sequence, int *charOffset) {
 // The rows' counts, right-aligned
 void ItemListView::InitCounts(int *charOffset) {
     for (int i = 0; i < mRowCount; i++) {
-        mRowCounts2[i].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
-                                    NNS_G2D_HORIZONTALALIGN_RIGHT;
+        mRowCounts2[i].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
         mRowCounts2[i].mTextX = 0x40;
         mRowCounts2[i].InitText(&gFonts[1].mFont, 0x1000, 8, 1, *charOffset, -2, 1, 0, 0, 15,
                                 mRowCountBuffers[i], 2, NNS_G2D_CHARA_COLORMODE_16);
         mRowCounts2[i].mColor = 8;
-        ClearCanvas(&mRowCounts2[i], 0);
-        mRowCounts2[i].SetPosition(0, 0);
+        ClearCanvas(mRowCounts2[i], 0);
+        mRowCounts2[i].SetPositionFromVec(0, 0);
         mRowCounts2[i].mSprite.mOverwritePalette = 3;
         *charOffset += mRowCounts2[i].GetCharCount();
     }
@@ -197,36 +216,36 @@ void ItemListView::InitCounts(int *charOffset) {
 static const ScreenPoint sUpButtonPosition = {0xF4, 0x3E};
 static const ScreenPoint sUpButtonSize = {14, 12};
 
-void ItemListView::InitUpButton(int resource, int sequence, int pressedSequence, ScreenPoint position,
+void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                 ScreenPoint size) {
     Sprite_Init(&mUpButton, resource, sequence, 0x80, 0x60, TRUE);
     func_02031260(&mUpButton, 1);
     func_02031278(&mUpButton, sequence, pressedSequence);
-    mUpButton.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    mUpButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
     func_02031eb0(&mUpButton, size.x, size.y);
     func_0203119c(&mUpButton);
     mUpButton.mOverwritePalette = 2;
 }
 
-void ItemListView::InitUpButton(int resource, int sequence, int pressedSequence) {
+void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence) {
     InitUpButton(resource, sequence, pressedSequence, sUpButtonPosition, sUpButtonSize);
 }
 
 static const ScreenPoint sDownButtonPosition = {0xF4, 0x94};
 static const ScreenPoint sDownButtonSize = {14, 12};
 
-void ItemListView::InitDownButton(int resource, int sequence, int pressedSequence, ScreenPoint position,
+void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                   ScreenPoint size) {
     Sprite_Init(&mDownButton, resource, sequence, 0x80, 0x60, TRUE);
     func_02031260(&mDownButton, 1);
     func_02031278(&mDownButton, sequence, pressedSequence);
-    mDownButton.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    mDownButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
     func_02031eb0(&mDownButton, size.x, size.y);
     func_0203119c(&mDownButton);
     mDownButton.mOverwritePalette = 2;
 }
 
-void ItemListView::InitDownButton(int resource, int sequence, int pressedSequence) {
+void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequence) {
     InitDownButton(resource, sequence, pressedSequence, sDownButtonPosition, sDownButtonSize);
 }
 
@@ -237,7 +256,7 @@ void ItemListView::InitScrollBar(int resource, int sequence, int knobSequence, i
                                  ScreenPoint position, ScreenRect knob) {
     Sprite_Init(&mScrollBar, resource, sequence, 0x80, 0x60, TRUE);
     func_020325dc(&mScrollBar, a, b, c, knob.x, knob.y, knob.width, knob.height);
-    mScrollBar.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    mScrollBar.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
     func_02032aa4(&mScrollBar, sequence, knobSequence);
     mScrollBar.mOverwritePalette = 2;
     mScrollBar.mUnknownE0 = TRUE;
@@ -365,12 +384,6 @@ static const ScreenPoint sPriceIconOffset = {0x66, 1};
 static const ScreenPoint sPriceOffset = {0x34, -2};
 static const ScreenPoint sTextOffset = {-0x69, -6};
 
-static inline ScreenPoint AddPoints(ScreenPoint a, ScreenPoint b) {
-    ScreenPoint p;
-    p.x = a.x + b.x;
-    p.y = a.y + b.y;
-    return p;
-}
 
 // Puts each row where its item is at the scroll position, and scrolls the background with them
 void ItemListView::Refresh() {
@@ -379,15 +392,11 @@ void ItemListView::Refresh() {
         offset.x = 0;
         offset.y = GetRowItem(i) * 20 - mScroll;
         ScreenPoint row = AddPoints(mPosition, offset);
-        mRowButtons[i].SetPosition(row.x << FX32_SHIFT, row.y << FX32_SHIFT);
-        ScreenPoint text = AddPoints(row, sTextOffset);
-        mRowTexts[i].SetPosition(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
-        ScreenPoint price = AddPoints(row, sPriceOffset);
-        mRowPrices[i].SetPosition(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
-        ScreenPoint icon = AddPoints(row, sPriceIconOffset);
-        mRowPriceIcons[i].SetPosition(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT);
-        ScreenPoint count = AddPoints(row, sCountOffset);
-        mRowCounts2[i].SetPosition(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
+        SetSpritePosition(&mRowButtons[i], row);
+        SetCanvasPosition(&mRowTexts[i], AddPoints(row, sTextOffset));
+        SetCanvasPosition(&mRowPrices[i], AddPoints(row, sPriceOffset));
+        SetSpritePosition(&mRowPriceIcons[i], AddPoints(row, sPriceIconOffset));
+        SetCanvasPosition(&mRowCounts2[i], AddPoints(row, sCountOffset));
     }
     func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
 }
@@ -427,7 +436,7 @@ void ItemListView::DrawRow(int row, int item) {
     } else {
         func_02031e28(&mRowButtons[row], FALSE);
     }
-    ClearCanvas(&mRowTexts[row], 0);
+    ClearCanvas(mRowTexts[row], 0);
     mRowTexts[row].mColor = mRowPalettes[row];
     mRowTexts[row].mMessage = mRowItemIds[row];
     mRowTexts[row].DrawAll();
@@ -439,7 +448,7 @@ void ItemListView::DrawRow(int row, int item) {
         wchar_t price[8];
         FormatNumber(mItems[item]->GetPrice(), price, sizeof(price), 7, FALSE);
         mRowPrices[row].mText = (const NNSG2dChar *)price;
-        ClearCanvas(&mRowPrices[row], 0);
+        ClearCanvas(mRowPrices[row], 0);
         mRowPrices[row].DrawText();
         mRowPrices[row].Transfer();
         mRowPriceIcons[row].mVisible = TRUE;
@@ -452,7 +461,7 @@ void ItemListView::DrawRow(int row, int item) {
         wcscpy(text, L"ｘ ");
         wcsncat(text, count, 2);
         mRowCounts2[row].mText = (const NNSG2dChar *)text;
-        ClearCanvas(&mRowCounts2[row], 0);
+        ClearCanvas(mRowCounts2[row], 0);
         mRowCounts2[row].DrawText();
         mRowCounts2[row].Transfer();
         break;
@@ -462,13 +471,13 @@ void ItemListView::DrawRow(int row, int item) {
         wchar_t value[3];
         wchar_t count[3];
         MI_CpuClear16(text, sizeof(text));
-        FormatNumber(mRowValues[row], value, sizeof(value), 2, FALSE);
-        FormatNumber(mRowCounts[row], count, sizeof(count), 2, FALSE);
+        FormatNumber(mRowValues[row], value, sizeof(value), 0, FALSE);
+        FormatNumber(mRowCounts[row], count, sizeof(count), 0, FALSE);
         wcsncpy(text, value, 2);
         wcscat(text, L" / ");
         wcsncat(text, count, 2);
         mRowCounts2[row].mText = (const NNSG2dChar *)text;
-        ClearCanvas(&mRowCounts2[row], 0);
+        ClearCanvas(mRowCounts2[row], 0);
         mRowCounts2[row].DrawText();
         mRowCounts2[row].Transfer();
         break;
@@ -477,20 +486,20 @@ void ItemListView::DrawRow(int row, int item) {
 }
 
 void ItemListView::ClearRow(int row) {
-    ClearCanvas(&mRowTexts[row], 0);
+    ClearCanvas(mRowTexts[row], 0);
     mRowTexts[row].ObjTextCanvas::Transfer();
     mRowButtons[row].mVisible = FALSE;
     switch (mMode) {
     case MODE_NAME:
         break;
     case MODE_PRICE:
-        ClearCanvas(&mRowPrices[row], 0);
+        ClearCanvas(mRowPrices[row], 0);
         mRowPrices[row].Transfer();
         mRowPriceIcons[row].mVisible = FALSE;
         break;
     case MODE_COUNT:
     case MODE_BOTH:
-        ClearCanvas(&mRowCounts2[row], 0);
+        ClearCanvas(mRowCounts2[row], 0);
         mRowCounts2[row].Transfer();
         break;
     }
@@ -767,7 +776,7 @@ BOOL ItemListView::CanScrollDown() {
 void ShopItemListView::InitMarks(int resource, int sequence) {
     for (int i = 0; i < mRowCount; i++) {
         Sprite_Init(&mMarks[i], resource, sequence, 0x80, 0x60, TRUE);
-        mMarks[i].SetPosition(0, 0);
+        mMarks[i].SetPosition(FxVec2(0, 0));
         mMarks[i].mOverwritePalette = 3;
     }
 }
@@ -798,17 +807,17 @@ void ShopItemListView::Refresh() {
         offset.x = 0;
         offset.y = GetRowItem(i) * 20 - mScroll;
         ScreenPoint row = AddPoints(mPosition, offset);
-        mRowButtons[i].SetPosition(row.x << FX32_SHIFT, row.y << FX32_SHIFT);
+        mRowButtons[i].SetPosition(FxVec2(row.x << FX32_SHIFT, row.y << FX32_SHIFT));
         ScreenPoint text = AddPoints(row, sShopTextOffset);
-        mRowTexts[i].SetPosition(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
+        mRowTexts[i].SetPositionFromVec(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
         ScreenPoint price = AddPoints(row, sShopPriceOffset);
-        mRowPrices[i].SetPosition(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
+        mRowPrices[i].SetPositionFromVec(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
         ScreenPoint icon = AddPoints(row, sShopPriceIconOffset);
-        mRowPriceIcons[i].SetPosition(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT);
+        mRowPriceIcons[i].SetPosition(FxVec2(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT));
         ScreenPoint count = AddPoints(row, sShopCountOffset);
-        mRowCounts2[i].SetPosition(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
+        mRowCounts2[i].SetPositionFromVec(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
         ScreenPoint mark = AddPoints(row, sShopMarkOffset);
-        mMarks[i].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
+        mMarks[i].SetPosition(FxVec2(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT));
     }
     func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
 }
@@ -841,7 +850,7 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     Sprite_Init(&mPlusButton, resource, 6, 0x80, 0x60, TRUE);
     func_02031260(&mPlusButton, 1);
     func_02031278(&mPlusButton, 6, 7);
-    mPlusButton.SetPosition(56 << FX32_SHIFT, 51 << FX32_SHIFT);
+    mPlusButton.SetPosition(FxVec2(56 << FX32_SHIFT, 51 << FX32_SHIFT));
     func_02031eb0(&mPlusButton, 18, 16);
     mPlusButton.mUnknownE0 = 6;
     func_0203119c(&mPlusButton);
@@ -851,25 +860,23 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     Sprite_Init(&mMinusButton, resource, 8, 0x80, 0x60, TRUE);
     func_02031260(&mMinusButton, 1);
     func_02031278(&mMinusButton, 8, 9);
-    mMinusButton.SetPosition(56 << FX32_SHIFT, 93 << FX32_SHIFT);
+    mMinusButton.SetPositionFromVec(56 << FX32_SHIFT, 93 << FX32_SHIFT);
     func_02031eb0(&mMinusButton, 14, 13);
     mMinusButton.mUnknownE0 = 6;
     func_0203119c(&mMinusButton);
     mMinusButton.mOverwritePalette = 0;
     mMinusButton.mVisible = FALSE;
     mMinusButton.mUnknownDC = TRUE;
-    mTextCanvases[1].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
-                                  NNS_G2D_HORIZONTALALIGN_RIGHT;
-    mTextCanvases[2].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
-                                  NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mTextCanvases[1].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
+    mTextCanvases[2].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
     mTextCanvases[1].mTextX = 0x40;
     mTextCanvases[2].mTextX = 0x40;
     for (int i = 0; i < 3; i++) {
         mTextCanvases[i].InitText(&gFonts[0].mFont, 0x1000, sCanvasSizes[i].x, sCanvasSizes[i].y, *charOffset, -2,
                                   1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
         mTextCanvases[i].mColor = sCanvasColors[i];
-        ClearCanvas(&mTextCanvases[i], 0);
-        mTextCanvases[i].SetPosition(sCanvasPositions[i].x << FX32_SHIFT, sCanvasPositions[i].y << FX32_SHIFT);
+        ClearCanvas(mTextCanvases[i], 0);
+        SetCanvasPosition(&mTextCanvases[i], sCanvasPositions[i]);
         mTextCanvases[i].mSprite.mOverwritePalette = 0;
         *charOffset += mTextCanvases[i].GetCharCount();
     }
@@ -880,8 +887,8 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
 static const ScreenRect sWindowRect = {0x14, 0x14, 0xD8, 0x98};
 static const u8 sButtonA[2] = {0x14, 0x14};
 static const u8 sButtonB[2] = {0x13, 0x13};
-static const ScreenPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
-static const ScreenPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
+static const WindowPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
+static const WindowPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
 static const int sButtonMessages[2] = {6, 5};
 static const ButtonSounds sButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
 static const WindowPoint sTextPosition = {0xC, 2};
@@ -895,12 +902,10 @@ void ShopWindow::Init(const char *screenName, int plane, int resource, int *char
     func_020331bc(this, 0x3F00, rect);
     InitButtons(resource, charOffset, file);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(this, i, resource, sButtonB[i], sButtonA[i], sButtonPositions[i].x, sButtonPositions[i].y,
-                      sButtonSizes[i].x, sButtonSizes[i].y, buttonFile, sButtonMessages[i], &gFonts[2].mFont,
-                      0x1000, charOffset, &sButtonSounds[i], 1);
+        func_02033844(this, i, resource, sButtonB[i], sButtonA[i], sButtonPositions[i], sButtonSizes[i], buttonFile,
+                      sButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sButtonSounds[i], 1);
     }
-    func_020338d0(this, file, 0xC3, &gFonts[0].mFont, 0x1000, sTextPosition.x, sTextPosition.y, sTextSize.x,
-                  sTextSize.y, charOffset);
+    func_020338d0(this, file, 0xC3, &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
     func_02034f80(this, 0, 1);
     mMoney = money;
 }
@@ -959,7 +964,7 @@ int ShopWindow::GetBuyTotal(Item *item, int count) {
 }
 
 void ShopWindow::Draw() {
-    if (mUnknownAD54[0]) {
+    if (mUnknownAD54) {
         for (int i = 0; i < 3; i++) {
             mTextCanvases[i].Draw();
         }
@@ -976,13 +981,13 @@ void ShopWindow::Open(int flags, int mode) {
     case MODE_BUY:
         mMode = MODE_BUY;
         mTexts[0].mMessage = 0xC3;
-        ClearCanvas(&mTexts[0], 0);
+        ClearCanvas(mTexts[0], 0);
         mTexts[0].DrawAll();
         break;
     case MODE_SELL:
         mMode = MODE_SELL;
         mTexts[0].mMessage = 0xC7;
-        ClearCanvas(&mTexts[0], 0);
+        ClearCanvas(mTexts[0], 0);
         mTexts[0].DrawAll();
         break;
     }
@@ -1004,19 +1009,19 @@ int ShopWindow::GetSellTotal(Item *item, int count) {
 // Draws the count, the total and the money
 void ShopWindow::DrawCounts() {
     wchar_t count[3];
-    wchar_t money[10];
     wchar_t total[10];
+    wchar_t money[10];
     FormatNumber(mCount, count, sizeof(count), 2, FALSE);
     mTextCanvases[0].mText = (const NNSG2dChar *)count;
-    ClearCanvas(&mTextCanvases[0], 0);
+    ClearCanvas(mTextCanvases[0], 0);
     mTextCanvases[0].DrawText();
     FormatNumberWithCommas(GetTotal(), total, sizeof(total), 0, FALSE);
     mTextCanvases[1].mText = (const NNSG2dChar *)total;
-    ClearCanvas(&mTextCanvases[1], 0);
+    ClearCanvas(mTextCanvases[1], 0);
     mTextCanvases[1].DrawText();
     FormatNumberWithCommas(*mMoney, money, sizeof(money), 0, FALSE);
     mTextCanvases[2].mText = (const NNSG2dChar *)money;
-    ClearCanvas(&mTextCanvases[2], 0);
+    ClearCanvas(mTextCanvases[2], 0);
     mTextCanvases[2].DrawText();
 }
 
@@ -1025,13 +1030,10 @@ static const WindowPoint sMinusButtonOffset = {0x38, 0x5D};
 
 void ShopWindow::SetPosition(WindowPoint position) {
     MessageWindow::SetPosition(position);
-    mPlusButton.SetPosition((position.x + sPlusButtonOffset.x) << FX32_SHIFT,
-                            (position.y + sPlusButtonOffset.y) << FX32_SHIFT);
-    mMinusButton.SetPosition((position.x + sMinusButtonOffset.x) << FX32_SHIFT,
-                             (position.y + sMinusButtonOffset.y) << FX32_SHIFT);
+    SetSpritePosition(&mPlusButton, AddPoints(position, sPlusButtonOffset));
+    SetSpritePosition(&mMinusButton, AddPoints(position, sMinusButtonOffset));
     for (int i = 0; i < 3; i++) {
-        mTextCanvases[i].SetPosition((position.x + sCanvasPositions[i].x) << FX32_SHIFT,
-                                     (position.y + sCanvasPositions[i].y) << FX32_SHIFT);
+        SetCanvasPosition(&mTextCanvases[i], AddPoints(position, sCanvasPositions[i]));
     }
 }
 
@@ -1068,40 +1070,40 @@ void ShopItemPanel::Init(int resource, int sequence, u16 frame, MessageFile *fil
     mShowSecondIcon = FALSE;
     mName.InitObj(&gFonts[0].mFont, 0x10, 20, 4, *charOffset, 0, 1, 0, 0, 15, NULL);
     mName.mMessageFile = file;
-    mName.SetPosition(sNamePosition.x << FX32_SHIFT, sNamePosition.y << FX32_SHIFT);
+    SetCanvasPosition(&mName, sNamePosition);
     mName.mSprite.mOverwritePalette = 0;
     *charOffset += mName.GetCharCount();
     Sprite_Init(&mIcon, resource, sequence, 0x80, 0x60, TRUE);
     NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mIcon.mAnim));
     Sprite_SetFrame(&mIcon, frame);
-    mIcon.SetPosition(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mIcon.SetPositionFromVec(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
     mIcon.mOverwritePalette = 1;
     Sprite_Init(&mSecondIcon, resource, (u16)(sequence + 1), 0x80, 0x60, TRUE);
-    mSecondIcon.SetPosition(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mSecondIcon.SetPositionFromVec(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
     mSecondIcon.mOverwritePalette = 1;
     mSecondIcon.mVisible = FALSE;
-    mCount.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_LEFT | NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mCount.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_LEFT | NNS_G2D_HORIZONTALALIGN_LEFT;
     mCount.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, -1, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
     mCount.mColor = 8;
-    ClearCanvas(&mCount, 0);
-    mCount.SetPosition(sCountPosition.x << FX32_SHIFT, sCountPosition.y << FX32_SHIFT);
+    ClearCanvas(mCount, 0);
+    SetCanvasPosition(&mCount, sCountPosition);
     mCount.mSprite.mOverwritePalette = 0;
     mCount.mSprite.mVisible = FALSE;
     *charOffset += mCount.GetCharCount();
-    mPrice.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mPrice.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
     mPrice.mTextX = 0x40;
     mPrice.InitText(&gFonts[0].mFont, 0x10, 8, 2, *charOffset, -2, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
     mPrice.mColor = 8;
-    ClearCanvas(&mPrice, 2);
-    mPrice.SetPosition(sPricePosition.x << FX32_SHIFT, sPricePosition.y << FX32_SHIFT);
+    ClearCanvas(mPrice, 2);
+    SetCanvasPosition(&mPrice, sPricePosition);
     mPrice.mSprite.mOverwritePalette = 0;
     mPrice.mSprite.mVisible = FALSE;
     *charOffset += mPrice.GetCharCount();
     mCountLabel.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, 0, 1, 0, 0, 15, NULL, 2,
                          NNS_G2D_CHARA_COLORMODE_16);
     mCountLabel.mColor = 8;
-    ClearCanvas(&mCountLabel, 0);
-    mCountLabel.SetPosition(sCountLabelPosition.x << FX32_SHIFT, sCountLabelPosition.y << FX32_SHIFT);
+    ClearCanvas(mCountLabel, 0);
+    SetCanvasPosition(&mCountLabel, sCountLabelPosition);
     mCountLabel.mSprite.mOverwritePalette = 0;
     mCountLabel.mSprite.mVisible = FALSE;
     *charOffset += mCountLabel.GetCharCount();
@@ -1110,8 +1112,8 @@ void ShopItemPanel::Init(int resource, int sequence, u16 frame, MessageFile *fil
     mPriceLabel.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, 0, 1, 0, 0, 15, NULL, 2,
                          NNS_G2D_CHARA_COLORMODE_16);
     mPriceLabel.mColor = 8;
-    ClearCanvas(&mPriceLabel, 0);
-    mPriceLabel.SetPosition(sPriceLabelPosition.x << FX32_SHIFT, sPriceLabelPosition.y << FX32_SHIFT);
+    ClearCanvas(mPriceLabel, 0);
+    SetCanvasPosition(&mPriceLabel, sPriceLabelPosition);
     mPriceLabel.mSprite.mOverwritePalette = 0;
     mPriceLabel.mSprite.mVisible = FALSE;
     *charOffset += mPriceLabel.GetCharCount();
@@ -1139,12 +1141,12 @@ void ShopItemPanel::SetItem(int count) {
     if (count == -1) {
         mName.mSprite.mVisible = TRUE;
         mName.mMessage = mMessageBase + mItem->mId;
-        ClearCanvas(&mName, 0);
+        ClearCanvas(mName, 0);
         mName.DrawAll();
     } else {
         mName.mSprite.mVisible = TRUE;
         mName.mMessage = GetCountMessage(count);
-        ClearCanvas(&mName, 0);
+        ClearCanvas(mName, 0);
         mName.DrawAll();
     }
     switch (mKind) {
@@ -1155,7 +1157,7 @@ void ShopItemPanel::SetItem(int count) {
         MI_CpuClear16(text, sizeof(text));
         FormatNumber(mItem->mCount, text, sizeof(text), 2, FALSE);
         mCount.mText = (const NNSG2dChar *)text;
-        ClearCanvas(&mCount, 0);
+        ClearCanvas(mCount, 0);
         mCount.DrawText();
         break;
     }
@@ -1167,7 +1169,7 @@ void ShopItemPanel::SetItem(int count) {
         wcsncpy(text, price, 16);
         wcscat(text, L"円");
         mPrice.mText = (const NNSG2dChar *)text;
-        ClearCanvas(&mPrice, 0);
+        ClearCanvas(mPrice, 0);
         mPrice.DrawText();
         break;
     }
@@ -1177,6 +1179,8 @@ void ShopItemPanel::SetItem(int count) {
 // Slides the panel in and out
 void ShopItemPanel::Update() {
     switch (mState) {
+    case STATE_SHOWN:
+        break;
     case STATE_SLIDING_IN: {
         int y = (mFrame - 10) * 8;
         if (y > 56) {
@@ -1205,6 +1209,8 @@ void ShopItemPanel::Update() {
         mFrame++;
         break;
     }
+    case STATE_HIDDEN:
+        break;
     }
 }
 
@@ -1212,6 +1218,8 @@ void ShopItemPanel::SetState(int state) {
     mState = state;
     mFrame = 0;
     switch (state) {
+    case STATE_SHOWN:
+        break;
     case STATE_SLIDING_IN:
         mName.mSprite.mVisible = TRUE;
         mIcon.mVisible = TRUE;
@@ -1230,6 +1238,8 @@ void ShopItemPanel::SetState(int state) {
         }
         SetY(56);
         break;
+    case STATE_SLIDING_OUT:
+        break;
     case STATE_HIDDEN:
         mName.mSprite.mVisible = FALSE;
         mIcon.mVisible = FALSE;
@@ -1245,7 +1255,6 @@ void ShopItemPanel::SetState(int state) {
 
 // What the panel shows: the number owned (kinds 0, 2 and 3) or the price (1), and where the names are
 void ShopItemPanel::SetKind(int kind) {
-    const int messageBases[4] = {0, 0, 0xFF, 0x22B};
     mKind = kind;
     switch (kind) {
     case 0:
@@ -1263,6 +1272,7 @@ void ShopItemPanel::SetKind(int kind) {
         mPriceLabel.mSprite.mVisible = TRUE;
         break;
     }
+    const int messageBases[4] = {0, 0, 0xFF, 0x22B};
     mMessageBase = messageBases[mKind];
 }
 
@@ -1669,23 +1679,33 @@ void ShopStaff::UpdateHeldModel() {
         return;
     }
     if (mResident) {
-        MtxFx43 *hand = &mCharacter.mJointMatrices[CharacterModel::JOINT_R_HAND];
-        mHeldModel->mPosition.x = hand->_30;
-        mHeldModel->mPosition.y = hand->_31;
-        mHeldModel->mPosition.z = hand->_32;
-        MI_Copy36B(&mCharacter.mJointRotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
+        MtxFx43 *matrices = mCharacter.mJointMatrices;
+        mHeldModel->SetPosition(matrices[CharacterModel::JOINT_R_HAND]._30, matrices[CharacterModel::JOINT_R_HAND]._31,
+                                matrices[CharacterModel::JOINT_R_HAND]._32);
+        MtxFx33 *rotations = mCharacter.mJointRotations;
+        MI_Copy36B(&rotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
         mHeldModel->mRotY = 0x4000;
     } else {
-        MtxFx43 *hand = &mMannequin.mBody.mJointMatrices[CharacterModel::JOINT_R_HAND];
-        mHeldModel->mPosition.x = hand->_30;
-        mHeldModel->mPosition.y = hand->_31;
-        mHeldModel->mPosition.z = hand->_32;
-        MI_Copy36B(&mMannequin.mBody.mJointRotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
+        MtxFx43 *matrices = mMannequin.mBody.mJointMatrices;
+        mHeldModel->SetPosition(matrices[CharacterModel::JOINT_R_HAND]._30, matrices[CharacterModel::JOINT_R_HAND]._31,
+                                matrices[CharacterModel::JOINT_R_HAND]._32);
+        MtxFx33 *rotations = mMannequin.mBody.mJointRotations;
+        MI_Copy36B(&rotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
         mHeldModel->mRotY = 0x4000;
     }
 }
 
 // --- The counter --------------------------------------------------------------------------------------------------
+
+static inline void SetUpLight(Light *light, Camera *camera, GXRgb color, VecFx32 direction) {
+    light->mColor = color;
+    func_0202aa28(light, camera, direction);
+}
+
+static inline void SetUpLight2(Light *light, Camera *camera, GXRgb color, const VecFx32 &direction) {
+    light->mColor = color;
+    func_0202aa28(light, camera, direction);
+}
 
 static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
 static const VecFx32 sLightDirection0 = {0x640, -0x258, -0xFA0};
@@ -1709,7 +1729,7 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     *(BOOL *)(data_0211d604 + 0x48) = TRUE;
     *(BOOL *)(data_0211d604 + 0xEC) = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    Camera *camera = &data_02122764;
+    Camera *camera = (Camera *)data_02122764;
     func_0202a640(camera);
     camera->mUnknown00 = 0x281;
     camera->mUnknown04 = 0xFCE;
@@ -1718,10 +1738,12 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     camera->mUnknown10 = 0x50000;
     camera->mPosition = cameraPosition;
     camera->mTarget = cameraTarget;
-    data_021227cc.mColor = sLightColors[1];
-    func_0202aa28(&data_021227cc, camera, sLightDirection0);
-    data_021227d8.mColor = sLightColors[0];
-    func_0202aa28(&data_021227d8, camera, sLightDirection1);
+    Light *light0 = &data_021227cc[0];
+    light0->mColor = sLightColors[1];
+    func_0202aa28(light0, camera, sLightDirection0);
+    Light *light1 = &data_021227cc[1];
+    light1->mColor = sLightColors[0];
+    func_0202aa28(light1, camera, sLightDirection1);
     func_02028280(&data_02121834, 1, 1);
 }
 
@@ -1729,8 +1751,8 @@ void ShopCounter::LoadStaff(int shop, VecFx32 position, u16 angle, u16 greetingA
     mStaff.Load(shop, position, angle, greetingAngle, &mTtsPlayer, &mSpeechWindow, mMessageFile);
 }
 
-void ShopCounter::InitPanel(int kind, int resource, int sequence, u16 frame, int *charOffset) {
-    mPanel.Init(resource, sequence, frame, mMessageFile, charOffset);
+void ShopCounter::InitPanel(int kind, int resource, int sequence, u16 frame, int *charOffset, MessageFile *file) {
+    mPanel.Init(resource, sequence, frame, file, charOffset);
     mPanel.SetState(ShopItemPanel::STATE_HIDDEN);
     mPanel.SetKind(kind);
 }

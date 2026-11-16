@@ -50,14 +50,14 @@ public:
     void Init(int rows);
     void Init();
     void SetBackground(int plane, int offset);
-    void InitRows(int resource, int sequence, int pressedSequence, int *charOffset, ScreenPoint position);
-    void InitRows(int resource, int sequence, int pressedSequence, int *charOffset);
+    void InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset, ScreenPoint position);
+    void InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset);
     void InitPrices(int resource, int sequence, int *charOffset);
     void InitCounts(int *charOffset);
-    void InitUpButton(int resource, int sequence, int pressedSequence, ScreenPoint position, ScreenPoint size);
-    void InitUpButton(int resource, int sequence, int pressedSequence);
-    void InitDownButton(int resource, int sequence, int pressedSequence, ScreenPoint position, ScreenPoint size);
-    void InitDownButton(int resource, int sequence, int pressedSequence);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position, ScreenPoint size);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position, ScreenPoint size);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence);
     void InitScrollBar(int resource, int sequence, int knobSequence, int a, int b, int c, ScreenPoint position,
                        ScreenRect knob);
     void InitScrollBar(int resource, int sequence, int knobSequence);
@@ -230,7 +230,7 @@ class ShopCounter {
 public:
     void Init(int *charOffset, MessageFile *file, VecFx32 cameraPosition, VecFx32 cameraTarget);
     void LoadStaff(int shop, VecFx32 position, u16 angle, u16 greetingAngle);
-    void InitPanel(int kind, int resource, int sequence, u16 frame, int *charOffset);
+    void InitPanel(int kind, int resource, int sequence, u16 frame, int *charOffset, MessageFile *file);
     void Update();
     void Draw();
     void MountStaff();

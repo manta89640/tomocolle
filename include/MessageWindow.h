@@ -59,7 +59,8 @@ struct MessageWindow {
     /* 0x7A74 */ MessageText mTexts[8];
     /* 0xA9F4 */ Sprite mPlainSprites[5];  // Sprites without a button: func_020345d8 draws as many as +0xAD64 says
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
-    /* 0xAD54 */ u8 mUnknownAD54[0x228];
+    /* 0xAD54 */ BOOL mUnknownAD54;         // ShopWindow draws its own buttons and canvases only while it is set
+    /* 0xAD58 */ u8 mUnknownAD58[0x224];
     /* 0xAF7C */ int mUnknownAF7C;          // Overlay 76 reads the choice made from it (-1: none yet)
     /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the button pressed, when one is
     /* 0xAF84 */ int mUnknownAF84;
