@@ -380,7 +380,7 @@ the file is placed by that order, and by which object of that part of `.bss` has
 | `0x020B04EC` | 4 | The pad's (`0x02026A1C` to `0x02026B48`) | `bx lr`: `data_0211F9D4` (the keys, 0x24 bytes; `Pad_Init`, `Pad_Update`) | inferred |
 | `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
 | `0x020B0504` | 0x14 | The palette loader's (`0x02027528` to `0x02027A08`) | `data_021213B8` (0x420 bytes): stores 0 at 0x400 | measured |
-| `0x020B0518` | 4 | The owner information's (`0x02027A08` to `0x02027A7C`, two functions) | `bx lr`: `data_021217D8` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56; `OwnerInfo_Init`) | inferred |
+| `0x020B0518` | 4 | `src/OwnerInfo.cpp` (`0x02027A08` to `0x02027A7C`) | `bx lr`: `gOwnerInfo` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56), whose constructor is empty | measured: the file compiles to it |
 | `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `data_02121834` (0x624 bytes): stores 0 at 0x480 | measured |
 | `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
@@ -414,7 +414,7 @@ uses):
 | `0x0211F9D4` | 0x24 | `Pad_Init`, `Pad_Update`; +0x1C is the lid's state | Pad |
 | `0x0211F9F8`, `0x0211FA10` | 0x18, 0x19A8 | The OAM functions (`0x02026EEC` to `0x02027518`); `gObjResourceManager` (`func_02027480` uses +0x198C), with `data_02120948`, `data_02120A10` and `data_021212A8` inside it | Sprites and OAM |
 | `0x021213B8` | 0x420 | `PaletteLoader_Init` (`0x02027528`, clears 0x414 to 0x41C) | Palettes |
-| `0x021217D8` | 0x5C | `OwnerInfo_Init` | Owner information |
+| `0x021217D8` | 0x5C | `gOwnerInfo` (`OwnerInfo::Init`) | `OwnerInfo.cpp` |
 | `0x02121834` | 0x624 | `ScreenLoader_Init` (clears 0x484 and 0x5C4, and eight 0x1C entries at 0x4F8) | Screens |
 | `0x02121E58`, `0x02121EAC`, `0x02121EB8` | 0x54, 0xC, 0x2C | `gTouchInput` (`TouchInput_Init`, `0x02028880`); `gRandom`; the path buffer of `func_02028af4` | Touch, random numbers, paths (two or three files) |
 | `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
@@ -429,7 +429,7 @@ Inferred from this:
   `0x020249FC`. The graphics code ends at `0x0202678C`: its last two functions, `0x02026754` and `0x02026770`, are
   deleting destructors, which come at the end of a file. The heap is `0x0202678C` to `0x02026A1C`. The pad is
   `0x02026A1C` to `0x02026B48`. The sprites and OAM are `0x02026B48` to `0x02027528`. The palettes are `0x02027528`
-  to `0x02027A08`. The owner information is `0x02027A08` to `0x02027A7C`. The screens are `0x02027A7C` to
+  to `0x02027A08`. The owner information is `0x02027A08` to `0x02027A7C` (cut and decompiled: `src/OwnerInfo.cpp`). The screens are `0x02027A7C` to
   `0x02028630`. Touch starts at `0x020287F8`. The characters start at `0x02028F20`. The models end at `0x0202B0A8`:
   its last functions are the destructors and the constructor that the initialiser uses, and the implicit destructor
   `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840`.

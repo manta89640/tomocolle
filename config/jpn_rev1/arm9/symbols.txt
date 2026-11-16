@@ -372,7 +372,7 @@ OSi_CommonCallback kind:function(arm,size=0x34) addr:0x02008e80 local
 OS_GetMacAddress kind:function(arm,size=0x1c) addr:0x02008eb4
 OS_GetOwnerInfo kind:function(arm,size=0x84) addr:0x02008ed0
 func_02008f54 kind:function(arm,size=0x14) addr:0x02008f54
-func_02008f68 kind:function(arm,size=0xc) addr:0x02008f68
+OS_GetFavoriteColorTable kind:function(arm,size=0xc) addr:0x02008f68
 OsCountZeroBits kind:function(arm,size=0x8) addr:0x02008f74 local
 OSi_InitVramExclusive kind:function(arm,size=0x34) addr:0x02008f7c
 OSi_UnlockVram kind:function(arm,size=0x88) addr:0x02008fb0
@@ -1060,8 +1060,8 @@ func_020277dc kind:function(arm,size=0x11c) addr:0x020277dc
 func_020278f8 kind:function(arm,size=0x34) addr:0x020278f8
 func_0202792c kind:function(arm,size=0xc8) addr:0x0202792c
 func_020279f4 kind:function(arm,size=0x14) addr:0x020279f4
-OwnerInfo_Init kind:function(arm,size=0x38) addr:0x02027a08
-func_02027a40 kind:function(arm,size=0x3c) addr:0x02027a40
+_ZN9OwnerInfo4InitEv kind:function(arm,size=0x38) addr:0x02027a08
+_ZN9OwnerInfo7GetTimeEPiS0_S0_ kind:function(arm,size=0x3c) addr:0x02027a40
 ScreenLoader_Init kind:function(arm,size=0x54) addr:0x02027a7c
 func_02027ad0 kind:function(arm,size=0x13c) addr:0x02027ad0
 func_02027c0c kind:function(arm,size=0x170) addr:0x02027c0c
@@ -4187,7 +4187,7 @@ __sinit_020b04d4 kind:function(arm,size=0x18) addr:0x020b04d4
 __sinit_020b04ec kind:function(arm,size=0x4) addr:0x020b04ec
 __sinit_020b04f0 kind:function(arm,size=0x14) addr:0x020b04f0
 __sinit_020b0504 kind:function(arm,size=0x14) addr:0x020b0504
-__sinit_020b0518 kind:function(arm,size=0x4) addr:0x020b0518
+__sinit_OwnerInfo.cpp kind:function(arm,size=0x4) addr:0x020b0518 local
 __sinit_020b051c kind:function(arm,size=0x14) addr:0x020b051c
 __sinit_020b0530 kind:function(arm,size=0x4) addr:0x020b0530
 __sinit_020b0534 kind:function(arm,size=0x14) addr:0x020b0534
@@ -4782,7 +4782,7 @@ sMacAddress kind:data(any) addr:0x020fc48c local
 .p__sinit_020b04ec kind:data(word) addr:0x020fc4a4
 .p__sinit_020b04f0 kind:data(word) addr:0x020fc4a8
 .p__sinit_020b0504 kind:data(word) addr:0x020fc4ac
-.p__sinit_020b0518 kind:data(word) addr:0x020fc4b0
+.p__sinit_OwnerInfo.cpp kind:data(word) addr:0x020fc4b0 local
 .p__sinit_020b051c kind:data(word) addr:0x020fc4b4
 .p__sinit_020b0530 kind:data(word) addr:0x020fc4b8
 .p__sinit_020b0534 kind:data(word) addr:0x020fc4bc
@@ -6484,7 +6484,7 @@ data_02120948 kind:bss addr:0x02120948
 data_02120a10 kind:bss addr:0x02120a10
 data_021212a8 kind:bss addr:0x021212a8
 data_021213b8 kind:bss addr:0x021213b8
-data_021217d8 kind:bss addr:0x021217d8
+gOwnerInfo kind:bss addr:0x021217d8
 data_02121834 kind:bss addr:0x02121834
 gTouchInput kind:bss addr:0x02121e58
 gRandom kind:bss addr:0x02121eac

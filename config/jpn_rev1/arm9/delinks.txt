@@ -325,6 +325,13 @@ lib/NitroSDK/libraries/std/src/std_string.c:
 lib/NitroSDK/libraries/std/src/std_unicode.c:
     .text       start:0x020145fc end:0x02014a80
 
+src/OwnerInfo.cpp:
+    complete
+    .text       start:0x02027a08 end:0x02027a7c
+    .init       start:0x020b0518 end:0x020b051c
+    .ctor       start:0x020fc4b0 end:0x020fc4b4
+    .bss        start:0x021217d8 end:0x02121834
+
 src/sound/SoundSystem.cpp:
     complete
     .text       start:0x02028630 end:0x020287f8
