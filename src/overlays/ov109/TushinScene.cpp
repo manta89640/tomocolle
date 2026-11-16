@@ -768,9 +768,9 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2, as the original's loops are): one instruction, the `orr` of 0x299, whose
-// operands are the other way round (`orr r0, r0, r1`: the record's byte first, the received one loaded first);
-// `record | received`, `|=`, a local, casts and a pointer all load the record's byte first.
+// Compiled at optimization level 2, as the original's loops are. The received byte 0x299 is read through a volatile
+// cast into a local before it is or-ed into the record's: that loads it first and still puts the record's byte first
+// in the `orr`, as the original has it (every plain form loads the record's byte first).
 // @0x0214d978
 int TushinScene::ReceiveCharacter() {
     if (IsInvalid(&sTransfer)) {
@@ -831,7 +831,8 @@ int TushinScene::ReceiveCharacter() {
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
             }
-            record.mUnknown299 = sTransfer.mUnknown299 | record.mUnknown299;
+            u8 received = *(volatile u8 *)&sTransfer.mUnknown299;
+            record.mUnknown299 = record.mUnknown299 | received;
             int n = 0;
             for (int i = 0; i < 6; i++) {
                 if (sTransfer.GetSongSlot(i) == 0xFF) {
