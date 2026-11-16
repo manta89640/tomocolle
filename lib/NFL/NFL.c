@@ -4516,9 +4516,9 @@ int NFL_FillBuffer(void) {
 
 
 // Copies size bytes, or converts them through palette when there is one
-void NFLi_CopyTexData(const void *src, void *dest, const u16 *palette, u32 size, BOOL arg4) {
+void NFLi_CopyTexData(const void *src, void *dest, const u16 *palette, u32 size, BOOL transparent) {
     if (palette != NULL) {
-        NFLi_Convert4BitToDirect(dest, src, palette, size, arg4);
+        NFLi_Convert4BitToDirect(dest, src, palette, size, transparent);
     } else {
         MIi_CpuCopy32(src, dest, size);
     }
@@ -4538,7 +4538,7 @@ extern NFLSharedStreamSource sNFLSharedStreamSources[];
 
 // Stage 0 of NFL_FillBuffer: the six shared streams (sNFLSharedStreamSources) into the ring buffer, converted to direct
 // colours in mode 7, then on to the shared palette or, in mode 7, the faces.
-// Not matching: register allocation only (the original has pal in r5 before stream, source, extra and size)
+// Not matching: register allocation only (the original has pal in r5, source in r7 and the zero of extra in r8)
 BOOL NFLi_CopySharedTextures(u32 *pos) {
     NFLWork *work = (NFLWork *)sNFLWork;
     NFLSharedStreamSource *source = sNFLSharedStreamSources;
@@ -4899,7 +4899,8 @@ void NFLi_MakeColorTexture(u16 *palette);
 
 // Stage 2 of NFL_FillBuffer, a face in state 0: its eleven texture streams, then its palettes or, in mode 7, the next
 // face of the load list.
-// Not matching: register allocation only (the original has stream in r4, then size, pal, obj, work)
+// Not matching: the registers are the original's, but transparent's spill slot is the original's lowest (sp + 4), above
+// the outgoing argument, where ours puts it above the others
 BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
     NFLStream *stream;
     NFLWork *work = sNFLWork;
@@ -4907,9 +4908,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
     int i;
     u16 palette[64];
 
-    stream = obj->texStreams;
-
-    for (i = 0; i < 11; stream++, i++) {
+    for (i = 0; i < 11; i++) {
         int kind;
         int index;
         u16 *pal;
@@ -4917,8 +4916,9 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
         int size;
         BOOL overflowB;
         BOOL overflowA;
-        BOOL arg4;
+        BOOL transparent;
 
+        stream = &obj->texStreams[i];
         if (*pos >= work->bufSize) {
             return TRUE;
         }
@@ -4938,7 +4938,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
             index = stream->vramAddr;
             overflowB = FALSE;
             overflowA = FALSE;
-            arg4 = TRUE;
+            transparent = TRUE;
             pal = sNFLWork->texFmt == 7 ? palette : NULL;
             if (sNFLWork->texFmt == 7) {
                 if (kind == 21) {
@@ -5078,7 +5078,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
                 if (sNFLWork->texFmt == 7) {
                     NFLi_MakeFacePltt(pal, params[2]);
                 }
-                arg4 = FALSE;
+                transparent = FALSE;
                 break;
             case 10:
                 if (index == 34 || index == 57) {
@@ -5094,7 +5094,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
                         NFLi_MakeFavoriteColorPltt(pal, params[0]);
                     }
                     kind = 19;
-                    arg4 = FALSE;
+                    transparent = FALSE;
                 } else {
                     switch (index) {
                     case 5:
@@ -5129,9 +5129,9 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
                         NFLi_MakeHairPltt(pal, params[4]);
                     }
                     if (params[3] == 29) {
-                        arg4 = TRUE;
+                        transparent = TRUE;
                     } else {
-                        arg4 = FALSE;
+                        transparent = FALSE;
                     }
                 }
                 break;
@@ -5156,7 +5156,7 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
                     }
                     if (!overflowB) {
                         src = NFLi_GetResourceItem(kind, index);
-                        NFLi_CopyTexData(src, work->buf + offset, pal, size, arg4);
+                        NFLi_CopyTexData(src, work->buf + offset, pal, size, transparent);
                         DC_FlushRange(work->buf + work->writeOffset, size);
                     } else {
                         int over = work->writeOffset + size - work->bufSize;
@@ -5164,14 +5164,14 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
 
                         src = NFLi_GetResourceItem(kind, index);
                         n = size - over;
-                        NFLi_CopyTexData(src, work->buf + work->writeOffset, pal, n, arg4);
+                        NFLi_CopyTexData(src, work->buf + work->writeOffset, pal, n, transparent);
                         DC_FlushRange(work->buf + work->writeOffset, n);
                         if (sNFLWork->texFmt == 7) {
                             src += n / 4;
                         } else {
                             src += n;
                         }
-                        NFLi_CopyTexData(src, work->buf, pal, over, arg4);
+                        NFLi_CopyTexData(src, work->buf, pal, over, transparent);
                         DC_FlushRange(work->buf, over);
                     }
                     if (!overflowA) {
@@ -5211,20 +5211,20 @@ BOOL NFLi_CopyFaceTextures(NFLFace *obj, u32 *pos) {
                         overflowB = TRUE;
                     }
                     if (!overflowB) {
-                        NFLi_CopyTexData(p2, work->buf + work->writeOffset, pal, size, arg4);
+                        NFLi_CopyTexData(p2, work->buf + work->writeOffset, pal, size, transparent);
                         DC_FlushRange(work->buf + work->writeOffset, size);
                     } else {
                         int over = work->writeOffset + size - work->bufSize;
                         int n = size - over;
 
-                        NFLi_CopyTexData(p2, work->buf + work->writeOffset, pal, n, arg4);
+                        NFLi_CopyTexData(p2, work->buf + work->writeOffset, pal, n, transparent);
                         DC_FlushRange(work->buf + work->writeOffset, n);
                         if (sNFLWork->texFmt == 7) {
                             p2 += n / 4;
                         } else {
                             p2 += n;
                         }
-                        NFLi_CopyTexData(p2, work->buf, pal, over, arg4);
+                        NFLi_CopyTexData(p2, work->buf, pal, over, transparent);
                         DC_FlushRange(work->buf, over);
                     }
                     if (!overflowA) {
