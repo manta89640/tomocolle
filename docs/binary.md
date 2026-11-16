@@ -1337,6 +1337,114 @@ Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (t
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
 it is 2.0 SP2p2, the game SP2p3), and Nintendo's names for its functions.
 
+## The end of the main program's code
+
+Measured: the main program's code from `0x020a5cc4` to its end at `0x020B04C8` is seven files of the game and, last,
+the anti-piracy code. None of them has a static initialiser (the `.init` entries end with `KeyboardCore.cpp`'s), and
+their data is the last of each section: `.rodata` from `0x020FBFFC`, `.data` from `0x02115140`, `.bss` from
+`0x02149A20`.
+
+| File | Code | What it is |
+| --- | --- | --- |
+| `src/shop/ShopStock.cpp` | `0x020A5CC4` | The shops' stock of the day |
+| `src/island/Apartment.cpp` | `0x020A6074` | The apartment building's stage, rooms and windows |
+| `src/island/Sky.cpp` | `0x020A612C` | The time of day and the upper screen's sky |
+| `src/shop/Shop.cpp` | `0x020A80F0` | The scrolling item list, the shop's window, the shop staff |
+| `src/resident/ResidentLife.cpp` | `0x020ACFE4` | What the residents do by themselves, and their encounters |
+| `src/song/Song.cpp` | `0x020AF058` | The saved songs |
+| `src/island/IslandProgress.cpp` | `0x020AF224` | What decides the island's next facility |
+| `lib/DSProtect/DSProtect.c` | `0x020AF9F0` | DS Protect |
+
+How the bounds were found: the apartment's `.rodata` must start at `0x020FBFFC` (a section of its own at
+`0x020FC002` is aligned to 4 by dsd, which moves every symbol after it; and the three `u16` there are the stage
+thresholds its code compares with); the sky's `.rodata` objects interleave the time of day's tables with the sky's
+own, so the two are one file; the shop file's 0x24-byte layout table at `0x020FC27C` is read by the list, the window
+and the staff code alike, and its `.data` holds a static of the staff code before the four virtual tables, then the
+list's and the staff's strings. The other boundaries are where the callers and the subject change: the residents'
+functions, the songs' and the island's progress have no data of their own to tell them apart (inferred).
+
+### The shops' stock
+
+Measured: the saved game holds two records of 0x34 bytes (func_0202c864 reads one, func_0202c878 writes one): a
+date, then five clothes, five goods of kind 1, five of kind 4, three interiors and one more good, which the item
+files' pickers choose (gap66-b's ChooseClothes, ChooseItemsNot1000, ChooseItems, and 0x020A5A28 for the interiors;
+on the very first day the first five goods are a fixed list). `UpdateShopStocks`, called only by the shop scenes
+(overlays 56, 68, 83, 84 and 85), moves record 1 into record 0 and makes a new record 1 when the game's day has
+changed, not when the clock went back one day (the turn of 2099 into 2000 included), and not while func_02035aa4
+says so. **Inferred:** record 0 is today's stock and record 1 tomorrow's. A game day starts at 5 in the morning
+(`GetGameDate`).
+
+### The apartment building
+
+Measured: the building has stage 1, 2 and 3 from 20, 45 and 70 residents (`GetApartmentStage`), 24, 48, 72 or 100
+rooms by stage (`GetApartmentStageRooms`; gGameData's byte 0x4C is the saved stage), and its front has twelve floors
+of eight windows and a thirteenth of four (`GetWindowCell` gives a room's column and floor). Overlay 72 uses them.
+
+### The time of day and the sky
+
+Measured, `DayPhase` (0x28 bytes): sunrise and sunset come from two tables by month (`GetSunrise`, `GetSunset`:
+sunrise from 5:00 in June to 7:00 in December, sunset from 17:00 in December to 19:00 in June), in seconds since
+midnight. The phase is worked out again every 0x1C42 frames (about two minutes): within 64 minutes of sunrise or
+sunset it steps from 0 to 15 every 512 seconds, in between it is 15, with `mDaytime` telling day from night;
+`GetPhase` gives 0 to 31, the night's 16 higher. `GetSkyLightColor` and `GetSkyLightColor2` turn it into the colours
+of the 3D scenes' two lights (overlay 72). The seconds tables are function-local statics with dynamic initialisers,
+filled on first use (their guards are the `.bss` at `0x02149A20`), which leaves them as zeros in `.data`.
+
+`SkyPalette` (overlays 84, 85, 90, 103) is a DayPhase that loads one palette, `XXX:/Fw_BG_up_<when>.ncl`, where
+`<when>` is `DAY_Chg`, `AM_Fine`, `AM_Cloud` by day and `NIGHT_Chg`, `PM_Fine`, `PM_Cloud` by night, chosen by the
+flags at 0x24 (`Chg`; nothing in the main program sets it) and 0x20 (`Fine`; 1 from the start), at the phase's 32
+bytes of the palette. `Sky` (0xEF8 bytes; overlays 20, 34, 57, 72, 79) loads the `Fw_Obj_up` and `Fw_BG_up`
+palettes alike and moves its objects, each turned on by an argument of `Sky::Init`: eight clouds in eight rows,
+drifting left at speeds and with gaps that the one `CloudSettings` entry (`0x020FC10C`) gives; a flock of one to four
+birds (`SkyBirds`) every 1200 to 2400 frames, with sequence archive 3 entry 6 or 7 on handle 2 as its sound, which
+fades as the flock crosses; an aeroplane every 18000 to 36000 frames (sometimes much sooner at the start), with entry
+8 on handle 3; and the moon, whose picture is its age (`((year + 10) % 19 * 11 + month + day) % 30`, two more in
+January and February) and whose x follows the time of day.
+
+### What decides the island's next facility
+
+Measured, `IslandProgress` (0x2C bytes): `Count` counts the saved characters by sex (func_0202c604 is the
+character's `MiiData_GetSex`), those with a full date of birth, the residents in all, the items of kinds 4 to 6 the
+player owns, the money (gGameData's capped counter, which this settles as the money), the used entries of two lists
+of ten in the saved game and the troubles solved. `GetNewFacility` goes through the island's state bytes
+(func_02039c00) in a fixed order: one in state 3 opens at once, one in state 0 when its counts are reached (for
+facility 2 two men, two women and 15 troubles solved; for 11 20000 in money; for 20 to 24 100, 200, 400, 700 and
+1000 troubles; for 25 to 28 10, 30, 50 and 100 residents), and the apartment building (7) when the residents call for
+a stage above the saved one. Overlay 72's map asks the four `Has*` tests before a building can be entered.
+
+### The saved songs
+
+Measured: `SongEntry` is a song of 0x40 bytes as the saved game keeps it, with the number it is kept under;
+func_0202c934 stores one (`Save`), func_0202c920 copies one out (`Load`). Its 21 notes at 0x16 are 16 bits each, a
+kind in the low three bits and a 9-bit value; `SetNotesFromSlot` (overlay 109, for songs received over the air)
+replaces the values of the notes of kinds 1 to 4 from the table of the song's slot (`0x020F9414`, 0xE0 bytes a
+slot) through `data_020f9408`.
+
+### The residents' life
+
+Measured: overlay 106's `PreStartScene::UpdateResidents` calls, in this order, `ShiftEventTimes` (the change of the
+clock's offset, func_02035ae0, brought into range by steps of 100 years of 365.25 days, moves every event end and
+outing; on another console they are reset), `LimitEventTimes`, `EncounterJudge::MeetWhileAway` (unless the clock says
+otherwise), `UpdateResidents`, `StartNextEvents` (which first calls `StartRandomEvents`), `PickItemsWhileAway`,
+`ChangeClothesWhileAway`, `ClearUnknown24E` and `SetRandomUnknown24E`; overlays 72 and 74 call the middle ones when
+they load. While the game was off, two residents meet every `3000 / pairs` minutes (at most 500 meetings); each
+meeting changes both affinities by a random entry of the relation's row of `data_021135a0`, doubled, and
+`EncounterJudge::Judge` (when both like each other, affinity 200) or `JudgeEnd` (when neither does) may change their
+relation, by their relation and by how many of the others are in which relation to them (`CountAcquaintances`).
+`ChangeClothes` gives a resident one of the clothes it has seen, three times as likely when it likes them most
+(func_0209c89c at least 13), twice at 10 and once at 6. **Inferred:** the result codes of Judge (1, 2, 4, 9) and the
+relations GetRelationAfter maps them to are steps in friendship and love; what each number means is not established.
+
+### DS Protect
+
+Measured: the last 2,776 bytes of code, `0x020AF9F0` to `0x020B04C8`, hold sixteen functions of which seven contain
+ranges that the ROM keeps encrypted (dsd's `dsprot_range`; it decrypts them on extraction and encrypts them again
+when building, `enable_dsprot: true`); two helpers before them flush the data cache and invalidate the instruction
+cache around the decryption. Only `main` calls into them (three entry points, `0x020B0250`, `0x020B0328`,
+`0x020B0400`). They call `OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes
+of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
+linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+
 ## Compiler
 
 **The game's code: mwccarm 2.0 SP2 patch 3 ("Version 3.0 build 138"), or patch 4 (build 139).** Measured:
