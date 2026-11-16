@@ -714,6 +714,24 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
   a volatile read or `#pragma opt_dead_assignments off` keeps both but gives the light's pointer and x other
   registers. Statement orders, temporaries' types, inlines and struct copies did not do it.
+  Measured later (fix-light, round 4, about 4,000 variants compiled; still not solved):
+  - The read and the second store go only when nothing is stored between them: `x = p->x; p->x = x;` back to back,
+    or `p->Set(p->x, ...)` with the x store first in the setter, is deleted. With any store between (the colour,
+    `mEnabled`), both stay. This holds without any pragma.
+  - The original is not a struct copy. A by-value `VecFx16` or `Light` (copy, getter, temporary or by-value parameter)
+    always goes through the stack.
+  - `#pragma opt_propagation off` matters only for the light pointer. Inside the pragma, writing the global directly
+    loses the registers again. Outside it, passing the pointer once as `this` to an inline member
+    (`light->Set(x, 0, 0, color)` on a struct derived from `Light`) gives the same registers with no pragma.
+  - Every non-volatile form stops at the same place. Those forms include every setter body order with and without
+    `mEnabled`, every caller order, pointer and global access per statement, `VEC_Fx16Set`, and the assignment as an
+    argument (`Set(p->x = 0xFFF, ...)`). Overlay 4 always comes out `mov r0,#1; str r0,[r3,#8]; strh r2,[r3]`, against
+    the original's x store first. No single `opt_*` pragma, `scheduling` or `peephole` moves it.
+  - Volatile accesses keep their source order. Making the colour, x and `mEnabled` stores volatile gives overlay 4
+    the original's store order. The call's first argument (`ldr r0,=data_021223e4`) then moves above them, so 1
+    goes to r2. In DrawManTestScene, volatile reads of x and stores of y and z leave only the x store and the
+    constants 0 and 0xFFF out of place. Both look like the scheduler/allocator interplay that fix-nfl also left
+    open (call arguments loaded before or after a value's last use).
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
 - Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
