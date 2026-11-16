@@ -6,4 +6,4 @@ _ZN13TextTestScene4ExitEv kind:function(arm,size=0x4) addr:0x02149c34
 _ZN13TextTestSceneD1Ev kind:function(arm,size=0x4) addr:0x02149c38
 _ZN13TextTestSceneD0Ev kind:function(arm,size=0x14) addr:0x02149c3c
 _ZTV13TextTestScene kind:data(any) addr:0x02149c60
-data_ov000_02149c84 kind:data(any) addr:0x02149c84
+@12933 kind:data(any) addr:0x02149c84 local
