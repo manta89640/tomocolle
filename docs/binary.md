@@ -105,7 +105,11 @@ its seven functions match and it is linked from source. `lib/MSL_C/e_pow.c`, fdl
 header), has its data matching and its one function at 99.88%: three values are given registers in another order.
 Measured from the original objects (in the compiler's MSL archive): MSL was compiled with exception tables, which the
 game's link leaves out (its `.exceptix` is empty), and the soft floating-point helpers it calls are `_dadd`, `_dsub`,
-`_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt` and `_f2d`, now named. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
+`_dmul`, `_ddiv`, `_dsqrt`, `_dgr`, `_dleq`, `_dflt`, `_f2d` and `_d2f`, now named. MSL's files are built here without
+exception tables (`-Cpp_exceptions off`): measured, the code of `strtoul.c` and `scanf.c` is the same either way, and
+the link keeps every `.exceptix` it is given, so a complete unit with tables fails every module's check.
+`strtoul.c` and `scanf.c` are complete; measured, each ended one function short of the archive's object in
+`delinks.txt` (`atoi`, `sscanf`), which the matcher had left in the gap. What is left in the main program is two stretches: `0x0201F4DC` to `0x02053C64`, and from
 the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the game's own code and the libraries not
 matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
 middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.

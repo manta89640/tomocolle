@@ -317,6 +317,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `SetPosition`/`SetPositionFromVec` is called decides their order.
 - A local copied inside a loop is hoisted before it and takes the original's slot; declared before the loop it gets
   another (the main program's list scenes).
+- Spill slots of a function too large to keep its variables in registers (MSL's `__sformatter`, 3.4 KB) follow the
+  order of their declarations, and a 64-bit variable can be given two slots apart. One variable that is saved in two
+  unrelated places got two slots where the original had them elsewhere: two variables, one per place, matched. A
+  script that permutes the declarations and counts the differing lines gets close fast; the rest took that split.
 
 **Registers allocated differently**
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
