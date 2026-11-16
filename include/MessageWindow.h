@@ -51,7 +51,7 @@ struct MessageWindow {
 
     // Its table (0x021102E0) has these two
     virtual void SetVisible(BOOL visible); // func_02034a94: of every sprite, button, text and plain sprite, and its planes
-    virtual void func_02034bc4();         // Not known: it takes more arguments than four
+    virtual void SetPosition(WindowPoint position); // func_02034bc4: moves the window and what is on it there
 
     /* 0x0000 */ // The table
     /* 0x0004 */ SpriteButton mSprites[12];

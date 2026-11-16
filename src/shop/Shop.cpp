@@ -1,135 +1,117 @@
 #include <nitro.h>
 #include <nnsys.h>
+#include <wchar.h>
 
-#include "Sprite.h"
+#include "GameData.h"
+#include "shop/Shop.h"
+#include "shop/ShopWindow.h"
+#include "sound/SoundManager.h"
+#include "text/TextUtil.h"
 
-// The shops' shared code: the scrolling item list of the lower screen ("LSL:/BG_list", "LTL:/Obj_list", ...), which
-// the shops (overlays 56, 68, 83 to 85) and other scenes with lists of items (75, 86, 100, 110) use, the shops'
-// price window, and the shop staff's model and speech.
+// The shops' shared code: the scrolling item list of the lower screen, which the shops (overlays 56, 68, 83 to 85)
+// and other scenes with lists of items (75, 86, 100, 110) use, the shops' price window, and the shop counter: the
+// staff with its speech and the panel of the item talked about.
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
-class MessageFile;
+// The touch screen
+struct TouchInput {
+    /* 0x00 */ u8 mUnknown00[0x2C];
+    /* 0x2C */ u16 mTouching;
+    /* 0x2E */ u8 mUnknown2E[2];
+    /* 0x30 */ ScreenPoint mLastPoint; // Where it was touched last
+    /* 0x38 */ ScreenPoint mPoint;     // Where it is touched
+};
 
-// An item as the list shows it (the item files' InventoryItem)
-class InventoryItem {
-public:
-    virtual int GetPrice();
-    virtual int GetSellPrice();
+// The main program's camera and lights
+struct Camera {
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ int mUnknown08;
+    /* 0x0C */ fx32 mUnknown0C;
+    /* 0x10 */ fx32 mUnknown10;
+    /* 0x14 */ VecFx32 mPosition;
+    /* 0x20 */ VecFx32 mEye;
+    /* 0x2C */ VecFx32 mTarget;
+};
 
-    /* 0x04 */ u16 mId;
-    /* 0x08 */ BOOL mOwned;
-    /* 0x0C */ int mUnknown0C;  // Shown in a row's first number
-    /* 0x10 */ int mCount;      // Shown in a row's second number
-}; // 0x14
+struct Light {
+    /* 0x0 */ VecFx16 mDirection;
+    /* 0x6 */ u16 mColor;
+    /* 0x8 */ BOOL mEnabled;
+}; // 0xC
 
-// A touch button of the main program (include/SpriteButton.h); only its size matters here
-struct ListButton {
-    /* 0x00 */ u8 mUnknown00[0xF4];
-}; // 0xF4
-
-// A row's text (the main program's MessageText, 0x5F0 bytes)
-struct RowText {
-    /* 0x000 */ u8 mUnknown000[0x154];
-    /* 0x154 */ MessageFile *mMessageFile;
-    /* 0x158 */ u8 mUnknown158[0x5F0 - 0x158];
-}; // 0x5F0
-
-// The scrolling list. Each of its rows shows the item at the scroll position plus the row; the rows' cached state
-// tells which need to be drawn again.
-class ItemListView {
-public:
-    virtual void Draw();
-    virtual void SetVisible(BOOL visible);
-    virtual void Refresh();
-    virtual void DrawRow(int row, int item);
-    virtual void ClearRow(int row);
-
-    void Init(int rows);
-    void Init();
-    void SetBackground(int plane, int offset);
-    void SetUpScrollBar(int a, int b, int c);
-    void SetMode(int mode);
-    void SetMessageFile(MessageFile *file);
-    void DrawDirtyRows();
-    void UpdateRows();
-    void SetScroll(int scroll);
-    void UpdateRowPalette(int row, int item);
-    void UpdateRowValue(int row, int item);
-    void UpdateRowCount(int row, int item);
-    void SetItems(InventoryItem **items, int count);
-    void Select(int index);
-    void ScrollTo(int top);
-    void ScrollToSelected();
-    int FindItem(u16 id);
-    void ResetArrowButtons();
-    void SetUnknown308(BOOL value);
-    int GetRowItem(int row);
-    BOOL CanScrollUp();
-    BOOL CanScrollDown();
-
-    /* 0x0000 */ int mUnknown0004;
-    /* 0x0008 */ int mMode;            // 1: rows the money cannot pay for are greyed; 2, 3: rows of items not had
-    /* 0x000C */ InventoryItem **mItems;
-    /* 0x0010 */ int mItemCount;
-    /* 0x0014 */ int *mMoney;
-    /* 0x0018 */ BOOL mTouched;        // An item was touched
-    /* 0x001C */ int mTouchedRow;
-    /* 0x0020 */ int mSelected;        // The item touched, or -1
-    /* 0x0024 */ BOOL mUnknown0024;
-    /* 0x0028 */ int mScroll;          // In pixels; a row is 20
-    /* 0x002C */ int mRectX;
-    /* 0x0030 */ int mRectY;
-    /* 0x0034 */ int mRectWidth;
-    /* 0x0038 */ int mRectHeight;
-    /* 0x003C */ ListButton mUpButton;
-    /* 0x0130 */ ListButton mDownButton;
-    /* 0x0224 */ u8 mScrollBar[0x13C];
-    /* 0x0360 */ u8 mTouchArea[0x5C];
-    /* 0x03BC */ BOOL mRowDirty[7];
-    /* 0x03D8 */ int mRowCount;        // The rows drawn: one more than the visible ones
-    /* 0x03DC */ int mVisibleRows;
-    /* 0x03E0 */ int mBgPlane;         // The background that scrolls with the list
-    /* 0x03E4 */ int mBgOffset;
-    /* 0x03E8 */ int mUnknown03E8;
-    /* 0x03EC */ int mUnknown03EC;
-    /* 0x03F0 */ int mRowItemIds[7];   // The id of the item a row shows, -1 for none
-    /* 0x040C */ int mRowPalettes[7];  // 8, or 9 when greyed
-    /* 0x0428 */ int mRowValues[7];
-    /* 0x0444 */ int mRowCounts[7];
-    /* 0x0460 */ ListButton mRowButtons[7];
-    /* 0x0B0C */ RowText mRowTexts[7];
-    /* 0x349C */ u8 mUnknown349C[0x13F60 - 0x349C];
-    /* 0x13F60 */ int mUnknown13F60;
-}; // 0x13F64
+struct ScreenLoader;
+struct ArchiveLoader;
 
 extern "C" {
-void func_02031228(ListButton *button);
-void func_02031e28(ListButton *button, BOOL pressed);
-void func_02032a0c(void *scrollBar, int a, int range, int b);
-void func_02032acc(void *scrollBar, int a, int b, int c);
-void func_02032f60(void *area, int a, int b);
+void func_02031228(SpriteButton *button);
+extern TouchInput gTouchInput;
+extern ScreenLoader data_02121834;
+extern ArchiveLoader gArchiveManager;
+extern u8 data_0211d604[];
+extern u8 data_02122824[];
+extern Camera data_02122764;
+extern Light data_021227cc;
+extern Light data_021227d8;
+extern GameData gGameData;
+extern MATHRandContext16 gRandom;
+
+// The message window's other functions
+void func_02033844(MessageWindow *window, int number, int resource, int a, int b, int x, int y, int width,
+                   int height, MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset,
+                   const ButtonSounds *sounds, int c);
+void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane, int x,
+                   int y, int width, int height, int *charOffset);
+void func_02033bb4(MessageWindow *window, int resource, int sequence, WindowPoint position);
+void func_02034f80(MessageWindow *window, int a, int b);
+
+void func_02028154(ScreenLoader *loader, int plane, int y); // Scrolls a background
+void func_02028280(ScreenLoader *loader, int a, int b);
+void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
+void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
+void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
+void func_02029660(int resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
+void func_0202c264(GameData *game, int index, Character *character); // Reads a saved character
+int MiiData_GetSex(Character *character);
+void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
+void func_02023ee0(void *a, int b, int c, int d, int e);
+void func_0202b0e8(void *a);
+void func_0202a640(Camera *camera);
+void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+
+BOOL func_0202c354(GameData *game, int index);
+u8 func_0202c468(GameData *game, int index); // The character's event
+u8 func_0202c490(GameData *game, int index); // The place of its event
 }
 
+#define RESOURCE_BCA0 0x30414342 // Joint animations
+
+static inline void ClearCanvas(TextCanvas *canvas, int color) { NNS_G2dCharCanvasClear(&canvas->mCanvas, color); }
+
+// --- The list -----------------------------------------------------------------------------------------------------
+
+static const ScreenPoint sRowsPosition = {0x77, 0x41};
+
 void ItemListView::Init(int rows) {
-    mUnknown0004 = 0;
-    mMode = 1;
+    mScrolling = 0;
+    mMode = MODE_PRICE;
     mItems = NULL;
     mItemCount = 0;
     mMoney = NULL;
     mTouched = FALSE;
     mTouchedRow = -1;
     mSelected = -1;
-    mUnknown0024 = FALSE;
+    mTouchable = FALSE;
     mScroll = 0;
     mRowCount = rows + 1;
     mVisibleRows = rows;
     mBgPlane = 0x100;
     mBgOffset = 0;
-    mRectX = 5;
-    mRectY = 0x37;
-    mRectWidth = 0xE5;
-    mRectHeight = mVisibleRows * 20;
+    mRect.x = 5;
+    mRect.y = 0x37;
+    mRect.width = 0xE5;
+    mRect.height = mVisibleRows * 20;
     mUnknown13F60 = 0;
 }
 
@@ -142,14 +124,286 @@ void ItemListView::SetBackground(int plane, int offset) {
     mBgOffset = offset;
 }
 
-// -- 0x020a818c to 0x020a8adc: the setting up of the rows, buttons and texts, and the update (not decompiled) --
-
-void ItemListView::SetUpScrollBar(int a, int b, int c) {
-    func_02032acc(mScrollBar, a, b, c);
-    func_02032f60(mTouchArea, a, c);
+// The rows: their buttons and the texts of the items' names
+void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int *charOffset, ScreenPoint position) {
+    for (int i = 0; i < mRowCount; i++) {
+        mRowDirty[i] = TRUE;
+        mRowItemIds[i] = -1;
+        mRowPalettes[i] = 8;
+        mRowValues[i] = 0x4D;
+        mRowCounts[i] = 0x4D;
+        mPosition = position;
+        Sprite_Init(&mRowButtons[i], resource, sequence, 0x80, 0x60, TRUE);
+        func_02031260(&mRowButtons[i], 3);
+        func_02031278(&mRowButtons[i], sequence, pressedSequence);
+        mRowButtons[i].SetPosition(sRowsPosition.x << FX32_SHIFT, (sRowsPosition.y + i * 20) << FX32_SHIFT);
+        func_02031eb0(&mRowButtons[i], 0xE5, 18);
+        func_0203119c(&mRowButtons[i]);
+        mRowButtons[i].mOverwritePalette = 3;
+        mRowButtons[i].mVisible = FALSE;
+        mRowButtons[i].mUnknownDC = TRUE;
+        mRowButtons[i].mSounds.mSounds[0] = 2;
+        mRowTexts[i].InitObj(&gFonts[0].mFont, 0x1000, 16, 2, *charOffset, 0, 1, 0, 0, 15, mRowTextBuffers[i]);
+        mRowTexts[i].SetPosition(0, 0);
+        mRowTexts[i].mMessageFile = NULL;
+        mRowTexts[i].mColor = 8;
+        mRowTexts[i].mSprite.mOverwritePalette = 3;
+        *charOffset += mRowTexts[i].GetCharCount();
+    }
+    mRect.x = position.x - 0x72;
+    mRect.y = position.y - 10;
+    mRect.width = 0xE5;
+    mRect.height = mVisibleRows * 20;
+    func_02032c28(&mTouchArea, mRect);
+    mTouchArea.mUnknown44 = TRUE;
 }
 
-// -- 0x020a8eb4 to 0x020a925c: drawing (not decompiled) --
+void ItemListView::InitRows(int resource, int sequence, int pressedSequence, int *charOffset) {
+    InitRows(resource, sequence, pressedSequence, charOffset, sRowsPosition);
+}
+
+// The rows' prices, with an icon each
+void ItemListView::InitPrices(int resource, int sequence, int *charOffset) {
+    for (int i = 0; i < mRowCount; i++) {
+        mRowPrices[i].InitText(&gFonts[1].mFont, 0x1000, 8, 1, *charOffset, -2, 1, 0, 0, 15, mRowPriceBuffers[i], 2,
+                               NNS_G2D_CHARA_COLORMODE_16);
+        mRowPrices[i].mColor = 8;
+        ClearCanvas(&mRowPrices[i], 0);
+        mRowPrices[i].SetPosition(0, 0);
+        mRowPrices[i].mSprite.mOverwritePalette = 3;
+        *charOffset += mRowPrices[i].GetCharCount();
+        Sprite_Init(&mRowPriceIcons[i], resource, sequence, 0x80, 0x60, TRUE);
+        mRowPriceIcons[i].SetPosition(0, 0);
+        mRowPriceIcons[i].mOverwritePalette = 3;
+    }
+}
+
+// The rows' counts, right-aligned
+void ItemListView::InitCounts(int *charOffset) {
+    for (int i = 0; i < mRowCount; i++) {
+        mRowCounts2[i].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
+                                    NNS_G2D_HORIZONTALALIGN_RIGHT;
+        mRowCounts2[i].mTextX = 0x40;
+        mRowCounts2[i].InitText(&gFonts[1].mFont, 0x1000, 8, 1, *charOffset, -2, 1, 0, 0, 15,
+                                mRowCountBuffers[i], 2, NNS_G2D_CHARA_COLORMODE_16);
+        mRowCounts2[i].mColor = 8;
+        ClearCanvas(&mRowCounts2[i], 0);
+        mRowCounts2[i].SetPosition(0, 0);
+        mRowCounts2[i].mSprite.mOverwritePalette = 3;
+        *charOffset += mRowCounts2[i].GetCharCount();
+    }
+}
+
+static const ScreenPoint sUpButtonPosition = {0xF4, 0x3E};
+static const ScreenPoint sUpButtonSize = {14, 12};
+
+void ItemListView::InitUpButton(int resource, int sequence, int pressedSequence, ScreenPoint position,
+                                ScreenPoint size) {
+    Sprite_Init(&mUpButton, resource, sequence, 0x80, 0x60, TRUE);
+    func_02031260(&mUpButton, 1);
+    func_02031278(&mUpButton, sequence, pressedSequence);
+    mUpButton.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    func_02031eb0(&mUpButton, size.x, size.y);
+    func_0203119c(&mUpButton);
+    mUpButton.mOverwritePalette = 2;
+}
+
+void ItemListView::InitUpButton(int resource, int sequence, int pressedSequence) {
+    InitUpButton(resource, sequence, pressedSequence, sUpButtonPosition, sUpButtonSize);
+}
+
+static const ScreenPoint sDownButtonPosition = {0xF4, 0x94};
+static const ScreenPoint sDownButtonSize = {14, 12};
+
+void ItemListView::InitDownButton(int resource, int sequence, int pressedSequence, ScreenPoint position,
+                                  ScreenPoint size) {
+    Sprite_Init(&mDownButton, resource, sequence, 0x80, 0x60, TRUE);
+    func_02031260(&mDownButton, 1);
+    func_02031278(&mDownButton, sequence, pressedSequence);
+    mDownButton.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    func_02031eb0(&mDownButton, size.x, size.y);
+    func_0203119c(&mDownButton);
+    mDownButton.mOverwritePalette = 2;
+}
+
+void ItemListView::InitDownButton(int resource, int sequence, int pressedSequence) {
+    InitDownButton(resource, sequence, pressedSequence, sDownButtonPosition, sDownButtonSize);
+}
+
+static const ScreenPoint sScrollBarPosition = {0xF4, 0x69};
+static const ScreenRect sScrollKnobRect = {-8, -8, 16, 16};
+
+void ItemListView::InitScrollBar(int resource, int sequence, int knobSequence, int a, int b, int c,
+                                 ScreenPoint position, ScreenRect knob) {
+    Sprite_Init(&mScrollBar, resource, sequence, 0x80, 0x60, TRUE);
+    func_020325dc(&mScrollBar, a, b, c, knob.x, knob.y, knob.width, knob.height);
+    mScrollBar.SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    func_02032aa4(&mScrollBar, sequence, knobSequence);
+    mScrollBar.mOverwritePalette = 2;
+    mScrollBar.mUnknownE0 = TRUE;
+    mScrollBar.mUnknown124 = TRUE;
+    func_02032ac0(&mScrollBar, 4, 5);
+}
+
+void ItemListView::InitScrollBar(int resource, int sequence, int knobSequence) {
+    InitScrollBar(resource, sequence, knobSequence, 0x69, 0x38, 2, sScrollBarPosition, sScrollKnobRect);
+}
+
+void ItemListView::SetUpScrollBar(int a, int b, int c) {
+    func_02032acc(&mScrollBar, a, b, c);
+    func_02032f60(&mTouchArea, a, c);
+}
+
+// Scrolls by the arrow buttons, the scroll bar and dragging, and takes the touches of the rows
+void ItemListView::Update() {
+    BOOL moveBar = FALSE;
+    BOOL scrolled = moveBar;
+    mTouched = scrolled;
+    BOOL up = func_0203133c(&mUpButton);
+    BOOL down = func_0203133c(&mDownButton);
+    int max = (mItemCount - mVisibleRows) * 20;
+    if (max < 0) {
+        max = 0;
+    }
+    switch (mScrolling) {
+    case 0:
+        func_02032678(&mScrollBar);
+        func_02032cc0(&mTouchArea, mScroll, 0, max);
+        if (mScrollBar.mDragging) {
+            mScroll = func_020329d4(&mScrollBar, 0, max);
+            scrolled = TRUE;
+        } else if (mScrollBar.mReleased) {
+            mScroll = (func_020329d4(&mScrollBar, 0, max) + 10) / 20 * 20;
+            moveBar = TRUE;
+            scrolled = moveBar;
+        } else if (mTouchArea.mDragging) {
+            mScroll = mTouchArea.mScroll;
+            moveBar = TRUE;
+            scrolled = moveBar;
+        } else if (mTouchArea.mReleased) {
+            mScroll = (mTouchArea.mScroll + 10) / 20 * 20;
+            moveBar = TRUE;
+            scrolled = moveBar;
+        } else if (up && CanScrollUp()) {
+            mScrolling = 1;
+            gSoundManager.StartSeqArc(0, 1, 8);
+        } else if (down && CanScrollDown()) {
+            mScrolling = 2;
+            gSoundManager.StartSeqArc(0, 1, 9);
+        } else if (gTouchInput.mTouching && func_02028d88(&mRect, &gTouchInput.mPoint) && mTouchable) {
+            for (int i = 0; i < mRowCount; i++) {
+                if (func_0203133c(&mRowButtons[i])) {
+                    if (mTouchedRow != -1 && mTouchedRow != i) {
+                        func_02031e28(&mRowButtons[mTouchedRow], FALSE);
+                    }
+                    mTouchedRow = i;
+                    mSelected = GetRowItem(i);
+                    mTouched = TRUE;
+                }
+            }
+        }
+        break;
+    case 1:
+        mScroll -= 4;
+        if (mScroll % 20 == 0) {
+            if (up && CanScrollUp()) {
+                gSoundManager.StartSeqArc(0, 1, 8);
+            } else {
+                mScrolling = 0;
+            }
+        }
+        moveBar = TRUE;
+        scrolled = moveBar;
+        break;
+    case 2:
+        mScroll += 4;
+        if (mScroll % 20 == 0) {
+            if (down && CanScrollDown()) {
+                gSoundManager.StartSeqArc(0, 1, 9);
+            } else {
+                mScrolling = 0;
+            }
+        }
+        moveBar = TRUE;
+        scrolled = moveBar;
+        break;
+    }
+    if (moveBar) {
+        func_02032a0c(&mScrollBar, 0, max, mScroll);
+    }
+    if (scrolled) {
+        SetScroll(mScroll);
+        DrawDirtyRows();
+        Refresh();
+    }
+}
+
+void ItemListView::Draw() {
+    func_02031d7c(&mUpButton);
+    func_02031d7c(&mDownButton);
+    Sprite_Draw(&mScrollBar);
+    for (int i = 0; i < mRowCount; i++) {
+        mRowTexts[i].Draw();
+        switch (mMode) {
+        case MODE_NAME:
+            break;
+        case MODE_PRICE:
+            mRowPrices[i].Draw();
+            Sprite_Draw(&mRowPriceIcons[i]);
+            break;
+        case MODE_COUNT:
+        case MODE_BOTH:
+            mRowCounts2[i].Draw();
+            break;
+        }
+        func_02031d7c(&mRowButtons[i]);
+    }
+}
+
+static const ScreenPoint sCountOffset = {0x2A, -2};
+static const ScreenPoint sPriceIconOffset = {0x66, 1};
+static const ScreenPoint sPriceOffset = {0x34, -2};
+static const ScreenPoint sTextOffset = {-0x69, -6};
+
+static inline ScreenPoint AddPoints(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint p;
+    p.x = a.x + b.x;
+    p.y = a.y + b.y;
+    return p;
+}
+
+// Puts each row where its item is at the scroll position, and scrolls the background with them
+void ItemListView::Refresh() {
+    for (int i = 0; i < mRowCount; i++) {
+        ScreenPoint offset;
+        offset.x = 0;
+        offset.y = GetRowItem(i) * 20 - mScroll;
+        ScreenPoint row = AddPoints(mPosition, offset);
+        mRowButtons[i].SetPosition(row.x << FX32_SHIFT, row.y << FX32_SHIFT);
+        ScreenPoint text = AddPoints(row, sTextOffset);
+        mRowTexts[i].SetPosition(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
+        ScreenPoint price = AddPoints(row, sPriceOffset);
+        mRowPrices[i].SetPosition(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
+        ScreenPoint icon = AddPoints(row, sPriceIconOffset);
+        mRowPriceIcons[i].SetPosition(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT);
+        ScreenPoint count = AddPoints(row, sCountOffset);
+        mRowCounts2[i].SetPosition(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
+    }
+    func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
+}
+
+// Takes the palette, value and count of the rows that show an item again, and draws those that changed
+void ItemListView::UpdateShownRows() {
+    for (int i = 0; i < mRowCount; i++) {
+        if (mRowItemIds[i] != -1) {
+            int item = GetRowItem(i);
+            UpdateRowPalette(i, item);
+            UpdateRowValue(i, item);
+            UpdateRowCount(i, item);
+        }
+    }
+    DrawDirtyRows();
+}
 
 // Draws the rows that changed: with their item, or empty
 void ItemListView::DrawDirtyRows() {
@@ -162,6 +416,83 @@ void ItemListView::DrawDirtyRows() {
             }
             mRowDirty[i] = FALSE;
         }
+    }
+}
+
+void ItemListView::DrawRow(int row, int item) {
+    mRowButtons[row].mVisible = TRUE;
+    if (item == mSelected) {
+        mTouchedRow = row;
+        func_02031e28(&mRowButtons[row], TRUE);
+    } else {
+        func_02031e28(&mRowButtons[row], FALSE);
+    }
+    ClearCanvas(&mRowTexts[row], 0);
+    mRowTexts[row].mColor = mRowPalettes[row];
+    mRowTexts[row].mMessage = mRowItemIds[row];
+    mRowTexts[row].DrawAll();
+    mRowTexts[row].ObjTextCanvas::Transfer();
+    switch (mMode) {
+    case MODE_NAME:
+        break;
+    case MODE_PRICE: {
+        wchar_t price[8];
+        FormatNumber(mItems[item]->GetPrice(), price, sizeof(price), 7, FALSE);
+        mRowPrices[row].mText = (const NNSG2dChar *)price;
+        ClearCanvas(&mRowPrices[row], 0);
+        mRowPrices[row].DrawText();
+        mRowPrices[row].Transfer();
+        mRowPriceIcons[row].mVisible = TRUE;
+        break;
+    }
+    case MODE_COUNT: {
+        wchar_t count[3];
+        wchar_t text[5];
+        FormatNumber(mRowCounts[row], count, sizeof(count), 2, FALSE);
+        wcscpy(text, L"ｘ ");
+        wcsncat(text, count, 2);
+        mRowCounts2[row].mText = (const NNSG2dChar *)text;
+        ClearCanvas(&mRowCounts2[row], 0);
+        mRowCounts2[row].DrawText();
+        mRowCounts2[row].Transfer();
+        break;
+    }
+    case MODE_BOTH: {
+        wchar_t text[8];
+        wchar_t value[3];
+        wchar_t count[3];
+        MI_CpuClear16(text, sizeof(text));
+        FormatNumber(mRowValues[row], value, sizeof(value), 2, FALSE);
+        FormatNumber(mRowCounts[row], count, sizeof(count), 2, FALSE);
+        wcsncpy(text, value, 2);
+        wcscat(text, L" / ");
+        wcsncat(text, count, 2);
+        mRowCounts2[row].mText = (const NNSG2dChar *)text;
+        ClearCanvas(&mRowCounts2[row], 0);
+        mRowCounts2[row].DrawText();
+        mRowCounts2[row].Transfer();
+        break;
+    }
+    }
+}
+
+void ItemListView::ClearRow(int row) {
+    ClearCanvas(&mRowTexts[row], 0);
+    mRowTexts[row].ObjTextCanvas::Transfer();
+    mRowButtons[row].mVisible = FALSE;
+    switch (mMode) {
+    case MODE_NAME:
+        break;
+    case MODE_PRICE:
+        ClearCanvas(&mRowPrices[row], 0);
+        mRowPrices[row].Transfer();
+        mRowPriceIcons[row].mVisible = FALSE;
+        break;
+    case MODE_COUNT:
+    case MODE_BOTH:
+        ClearCanvas(&mRowCounts2[row], 0);
+        mRowCounts2[row].Transfer();
+        break;
     }
 }
 
@@ -210,8 +541,8 @@ void ItemListView::SetScroll(int scroll) {
     }
 }
 
-// A row is greyed (palette 9) in mode 1 when the money cannot pay for its item, in modes 2 and 3 when the item is
-// not had
+// A row is greyed (palette 9) in MODE_PRICE when the money cannot pay for its item, in the count modes when the
+// item has none of mUnknown0C
 void ItemListView::UpdateRowPalette(int row, int item) {
     int palette;
     if (item < 0 || mItemCount <= item) {
@@ -223,10 +554,10 @@ void ItemListView::UpdateRowPalette(int row, int item) {
         return;
     }
     switch (mMode) {
-    case 0:
+    case MODE_NAME:
         palette = 8;
         break;
-    case 1: {
+    case MODE_PRICE: {
         BOOL affordable = TRUE;
         if (mMoney != NULL) {
             affordable = mItems[item]->GetPrice() <= *mMoney ? TRUE : FALSE;
@@ -234,8 +565,8 @@ void ItemListView::UpdateRowPalette(int row, int item) {
         palette = affordable ? 8 : 9;
         break;
     }
-    case 2:
-    case 3:
+    case MODE_COUNT:
+    case MODE_BOTH:
         palette = mItems[item]->mUnknown0C ? 8 : 9;
         break;
     }
@@ -283,8 +614,8 @@ void ItemListView::SetMessageFile(MessageFile *file) {
 }
 
 // Shows a list of items from its top
-void ItemListView::SetItems(InventoryItem **items, int count) {
-    mUnknown0004 = 0;
+void ItemListView::SetItems(Item **items, int count) {
+    mScrolling = 0;
     mTouchedRow = -1;
     mSelected = -1;
     mTouched = FALSE;
@@ -297,14 +628,14 @@ void ItemListView::SetItems(InventoryItem **items, int count) {
         mItemCount = 0;
     }
     if (mItemCount <= mVisibleRows) {
-        *(BOOL *)((u8 *)&mUpButton + 0x60) = FALSE;
-        *(BOOL *)((u8 *)&mDownButton + 0x60) = FALSE;
-        *(BOOL *)(mScrollBar + 0x60) = FALSE;
+        mUpButton.mVisible = FALSE;
+        mDownButton.mVisible = FALSE;
+        mScrollBar.mVisible = FALSE;
     } else {
-        *(BOOL *)((u8 *)&mUpButton + 0x60) = TRUE;
-        *(BOOL *)((u8 *)&mDownButton + 0x60) = TRUE;
-        *(BOOL *)(mScrollBar + 0x60) = TRUE;
-        func_02032a0c(mScrollBar, 0, (mItemCount - mVisibleRows) * 20, 0);
+        mUpButton.mVisible = TRUE;
+        mDownButton.mVisible = TRUE;
+        mScrollBar.mVisible = TRUE;
+        func_02032a0c(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, 0);
     }
     UpdateRows();
     DrawDirtyRows();
@@ -337,7 +668,30 @@ void ItemListView::Select(int index) {
     mTouchedRow = -1;
 }
 
-// -- 0x020a9cc0: SetVisible (not decompiled) --
+void ItemListView::SetVisible(BOOL visible) {
+    for (int i = 0; i < mRowCount; i++) {
+        mRowButtons[i].mVisible = visible;
+        mRowTexts[i].mSprite.mVisible = visible;
+        mRowPrices[i].mSprite.mVisible = FALSE;
+        mRowPriceIcons[i].mVisible = FALSE;
+        mRowCounts2[i].mSprite.mVisible = FALSE;
+        switch (mMode) {
+        case MODE_NAME:
+            break;
+        case MODE_PRICE:
+            mRowPrices[i].mSprite.mVisible = visible;
+            mRowPriceIcons[i].mVisible = visible;
+            break;
+        case MODE_COUNT:
+        case MODE_BOTH:
+            mRowCounts2[i].mSprite.mVisible = visible;
+            break;
+        }
+    }
+    mUpButton.mVisible = visible;
+    mDownButton.mVisible = visible;
+    mScrollBar.mVisible = visible;
+}
 
 // Scrolls so that the given item is the top row, as far as the list goes
 void ItemListView::ScrollTo(int top) {
@@ -347,7 +701,7 @@ void ItemListView::ScrollTo(int top) {
     }
     top = MATH_CLAMP(top, 0, max);
     mScroll = top * 20;
-    func_02032a0c(mScrollBar, 0, (mItemCount - mVisibleRows) * 20, mScroll);
+    func_02032a0c(&mScrollBar, 0, (mItemCount - mVisibleRows) * 20, mScroll);
     SetScroll(mScroll);
     DrawDirtyRows();
     Refresh();
@@ -381,8 +735,8 @@ void ItemListView::ResetArrowButtons() {
 }
 
 void ItemListView::SetUnknown308(BOOL value) {
-    *(BOOL *)(mScrollBar + 0xE4) = value;
-    *(BOOL *)(mTouchArea + 0x24) = value;
+    mScrollBar.mUnknownE4 = value;
+    mTouchArea.mUnknown24 = value;
 }
 
 // The item that a row shows: the rows are reused round, so row r shows the item at the scroll position that is r
@@ -408,20 +762,15 @@ BOOL ItemListView::CanScrollDown() {
     return can;
 }
 
-// -- 0x020a9f54: ShopItemListView's set-up (not decompiled) --
+// --- The shops' list ----------------------------------------------------------------------------------------------
 
-// The shops' list: ItemListView with a mark beside each row whose item the player does not have yet (virtual table
-// at 0x02115398)
-class ShopItemListView : public ItemListView {
-public:
-    virtual void Draw();
-    virtual void SetVisible(BOOL visible);
-    virtual void Refresh();
-    virtual void DrawRow(int row, int item);
-    virtual void ClearRow(int row);
-
-    /* 0x13F64 */ Sprite mMarks[7];
-}; // 0x14418
+void ShopItemListView::InitMarks(int resource, int sequence) {
+    for (int i = 0; i < mRowCount; i++) {
+        Sprite_Init(&mMarks[i], resource, sequence, 0x80, 0x60, TRUE);
+        mMarks[i].SetPosition(0, 0);
+        mMarks[i].mOverwritePalette = 3;
+    }
+}
 
 void ShopItemListView::Draw() {
     for (int i = 0; i < mRowCount; i++) {
@@ -437,7 +786,32 @@ void ShopItemListView::SetVisible(BOOL visible) {
     }
 }
 
-// -- 0x020aa08c: ShopItemListView::Refresh (not decompiled) --
+static const ScreenPoint sShopCountOffset = {0x2A, -2};
+static const ScreenPoint sShopPriceIconOffset = {0x66, 1};
+static const ScreenPoint sShopPriceOffset = {0x34, -2};
+static const ScreenPoint sShopTextOffset = {-0x64, -6};
+static const ScreenPoint sShopMarkOffset = {-0x6B, 0};
+
+void ShopItemListView::Refresh() {
+    for (int i = 0; i < mRowCount; i++) {
+        ScreenPoint offset;
+        offset.x = 0;
+        offset.y = GetRowItem(i) * 20 - mScroll;
+        ScreenPoint row = AddPoints(mPosition, offset);
+        mRowButtons[i].SetPosition(row.x << FX32_SHIFT, row.y << FX32_SHIFT);
+        ScreenPoint text = AddPoints(row, sShopTextOffset);
+        mRowTexts[i].SetPosition(text.x << FX32_SHIFT, text.y << FX32_SHIFT);
+        ScreenPoint price = AddPoints(row, sShopPriceOffset);
+        mRowPrices[i].SetPosition(price.x << FX32_SHIFT, price.y << FX32_SHIFT);
+        ScreenPoint icon = AddPoints(row, sShopPriceIconOffset);
+        mRowPriceIcons[i].SetPosition(icon.x << FX32_SHIFT, icon.y << FX32_SHIFT);
+        ScreenPoint count = AddPoints(row, sShopCountOffset);
+        mRowCounts2[i].SetPosition(count.x << FX32_SHIFT, count.y << FX32_SHIFT);
+        ScreenPoint mark = AddPoints(row, sShopMarkOffset);
+        mMarks[i].SetPosition(mark.x << FX32_SHIFT, mark.y << FX32_SHIFT);
+    }
+    func_02028154(&data_02121834, mBgPlane, mScroll % 20 - mBgOffset);
+}
 
 void ShopItemListView::DrawRow(int row, int item) {
     ItemListView::DrawRow(row, item);
@@ -449,124 +823,817 @@ void ShopItemListView::ClearRow(int row) {
     mMarks[row].mVisible = FALSE;
 }
 
-// --- The shop staff and the item panel ------------------------------------------------------------------------
+// --- The price window ---------------------------------------------------------------------------------------------
 
-// The panel that shows an item's number owned ("所持数") and price ("売値", "円") beside the staff
-class ShopItemPanel {
-public:
-    void Init(int a, int b, u16 c, int d, int e); // 0x020ab09c
-    void Draw();
-    void Show(int kind, int item);
-    void SetItem(int item);
-    void Update();
-    void SetState(int state);
-    void SetUnknown(int value);
-    void SetY(int y);
-    void SetUnknown14(int value);
+void ShopWindow::Init(ScreenRect rect) {
+    func_02032fb8(this, rect);
+    mMode = MODE_BUY;
+    mCount = 0;
+}
 
-    /* 0x000 */ int mKind;
-    /* 0x004 */ u32 mState;
-    /* 0x008 */ u8 mUnknown008[0xC];
-    /* 0x014 */ int mUnknown014;
-    /* 0x018 */ u8 mUnknown018[0xB0];
-    /* 0x0C8 */ fx32 mY0C8;
-    /* 0x0CC */ u8 mUnknown0CC[0x5E8];
-    /* 0x6B4 */ fx32 mY6B4;
-    /* 0x6B8 */ u8 mUnknown6B8[0x60];
-    /* 0x718 */ int mUnknown718;
-    /* 0x71C */ u8 mUnknown71C[0x44];
-    /* 0x760 */ fx32 mY760;
-    /* 0x764 */ u8 mUnknown764[0xAC];
-    /* 0x810 */ fx32 mY810;
-    /* 0x814 */ u8 mUnknown814[0x1B4];
-    /* 0x9C8 */ fx32 mY9C8;
-    /* 0x9CC */ u8 mUnknown9CC[0x1B4];
-    /* 0xB80 */ fx32 mYB80;
-    /* 0xB84 */ u8 mUnknownB84[0x1B4];
-    /* 0xD38 */ fx32 mYD38;
-};
+static const int sCanvasColors[3] = {8, 8, 1};
+static const ScreenPoint sCanvasSizes[3] = {{4, 2}, {8, 2}, {8, 4}};
+static const ScreenPoint sCanvasPositions[3] = {{0x2E, 0x42}, {0x7F, 0x42}, {0x43, 0x70}};
+static const WindowPoint sIconPosition = {0x58, 0x76};
 
-// The shop's staff: the head staff's model, or a resident who works in the shop, with its speech
-class ShopStaff {
-public:
-    void Mount();       // 0x020abc4c: mounts the head staff's archives ("3HM", "3CM", "3HA", "3CH")
-    void Unmount();     // 0x020abd04
-    void Load(int a);   // 0x020abd84
-    void Update();
-    void Draw();
-    int GetShopAnimation(int shop);
-    void UpdateResident(); // 0x020ac20c
-    void UpdateStaff();    // 0x020ac574
-    void SetState(int state);
-    BOOL IsIdle();
+// The plus and minus buttons and the three canvases
+void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
+    Sprite_Init(&mPlusButton, resource, 6, 0x80, 0x60, TRUE);
+    func_02031260(&mPlusButton, 1);
+    func_02031278(&mPlusButton, 6, 7);
+    mPlusButton.SetPosition(56 << FX32_SHIFT, 51 << FX32_SHIFT);
+    func_02031eb0(&mPlusButton, 18, 16);
+    mPlusButton.mUnknownE0 = 6;
+    func_0203119c(&mPlusButton);
+    mPlusButton.mOverwritePalette = 0;
+    mPlusButton.mVisible = FALSE;
+    mPlusButton.mUnknownDC = TRUE;
+    Sprite_Init(&mMinusButton, resource, 8, 0x80, 0x60, TRUE);
+    func_02031260(&mMinusButton, 1);
+    func_02031278(&mMinusButton, 8, 9);
+    mMinusButton.SetPosition(56 << FX32_SHIFT, 93 << FX32_SHIFT);
+    func_02031eb0(&mMinusButton, 14, 13);
+    mMinusButton.mUnknownE0 = 6;
+    func_0203119c(&mMinusButton);
+    mMinusButton.mOverwritePalette = 0;
+    mMinusButton.mVisible = FALSE;
+    mMinusButton.mUnknownDC = TRUE;
+    mTextCanvases[1].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
+                                  NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mTextCanvases[2].mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT |
+                                  NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mTextCanvases[1].mTextX = 0x40;
+    mTextCanvases[2].mTextX = 0x40;
+    for (int i = 0; i < 3; i++) {
+        mTextCanvases[i].InitText(&gFonts[0].mFont, 0x1000, sCanvasSizes[i].x, sCanvasSizes[i].y, *charOffset, -2,
+                                  1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
+        mTextCanvases[i].mColor = sCanvasColors[i];
+        ClearCanvas(&mTextCanvases[i], 0);
+        mTextCanvases[i].SetPosition(sCanvasPositions[i].x << FX32_SHIFT, sCanvasPositions[i].y << FX32_SHIFT);
+        mTextCanvases[i].mSprite.mOverwritePalette = 0;
+        *charOffset += mTextCanvases[i].GetCharCount();
+    }
+    func_02033bb4(this, resource, 0x33, sIconPosition);
+    mMessageFile = file;
+}
 
-    /* 0x00 */ int mShop;          // 0 to 3
-    /* 0x04 */ int mUnknown04;
-    /* 0x08 */ BOOL mResident;     // A resident works in the shop instead of the head staff
-    /* 0x0C */ int mState;
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ int mUnknown14;
-    /* 0x18 */ BOOL mTalking;
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ int mUnknown20;
-    /* 0x24 */ int mMessages[2];   // The two messages it says next
-};
+static const ScreenRect sWindowRect = {0x14, 0x14, 0xD8, 0x98};
+static const u8 sButtonA[2] = {0x14, 0x14};
+static const u8 sButtonB[2] = {0x13, 0x13};
+static const ScreenPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
+static const ScreenPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
+static const int sButtonMessages[2] = {6, 5};
+static const ButtonSounds sButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
+static const WindowPoint sTextPosition = {0xC, 2};
+static const WindowPoint sTextSize = {0x53, 0x21};
 
-// The shop scenes' counter: the staff, its speech (speech player at 0xC, speech window at 0x14950) and the panel
-class ShopCounter {
-public:
-    void MountStaff();
-    void UnmountStaff();
-    void ShowPanel(int kind, int item);
-    void ClearPanelItem();
-    void SayMessagesCA();
-    void SayMessagesCE();
-    void SayMessagesD3();
-    void SayMessagesD5();
-    void SetStaffUnknown14();
-    BOOL IsStaffIdle();
+void ShopWindow::Init(const char *screenName, int plane, int resource, int *charOffset, MessageFile *file,
+                      MessageFile *buttonFile, int *money) {
+    ScreenRect rect = sWindowRect;
+    Init(rect);
+    func_02033174(this, screenName, plane);
+    func_020331bc(this, 0x3F00, rect);
+    InitButtons(resource, charOffset, file);
+    for (int i = 0; i <= 1; i++) {
+        func_02033844(this, i, resource, sButtonB[i], sButtonA[i], sButtonPositions[i].x, sButtonPositions[i].y,
+                      sButtonSizes[i].x, sButtonSizes[i].y, buttonFile, sButtonMessages[i], &gFonts[2].mFont,
+                      0x1000, charOffset, &sButtonSounds[i], 1);
+    }
+    func_020338d0(this, file, 0xC3, &gFonts[0].mFont, 0x1000, sTextPosition.x, sTextPosition.y, sTextSize.x,
+                  sTextSize.y, charOffset);
+    func_02034f80(this, 0, 1);
+    mMoney = money;
+}
 
-    /* 0x00000 */ BOOL mPanelShown;
-    /* 0x00004 */ int mUnknown00004;
-    /* 0x00008 */ BOOL mTalking;
-    /* 0x0000C */ u8 mUnknown0000C[0x14F5C - 0xC];
-    /* 0x14F5C */ ShopStaff mStaff;
-    /* 0x14F88 */ u8 mUnknown14F88[0x18178 - 0x14F88];
-    /* 0x18178 */ ShopItemPanel mPanel;
-};
-
-// The staff's animation for each of the four shops
-int ShopStaff::GetShopAnimation(int shop) {
-    int animation = 0;
-    switch (shop) {
-    case 0:
-        animation = 0x87;
+// The plus and minus buttons change the count, as far as the money, the item's count and the 99 the player can own
+// allow
+void ShopWindow::Update() {
+    func_020341d4(this);
+    if (!(mUnknownAD50 & 1)) {
+        return;
+    }
+    switch (mMode) {
+    case MODE_BUY:
+        if (func_0203133c(&mPlusButton)) {
+            int count = mCount + 1;
+            if (count + mItem->mCount <= 99 && count + mItem->mUnknown0C >= 0 && GetBuyTotal(mItem, count) <= *mMoney) {
+                mCount++;
+                DrawCounts();
+                gSoundManager.StartSeqArc(0, 1, 8);
+                return;
+            }
+        }
+        if (func_0203133c(&mMinusButton)) {
+            int count = mCount - 1;
+            if (count > 0) {
+                mCount = count;
+                DrawCounts();
+                gSoundManager.StartSeqArc(0, 1, 9);
+            }
+        }
         break;
-    case 1:
-        animation = 0x73;
-        break;
-    case 2:
-        animation = 0x97;
-        break;
-    case 3:
-        animation = 0xC0;
+    case MODE_SELL:
+        if (func_0203133c(&mPlusButton)) {
+            int count = mCount + 1;
+            if (mItem->mCount - count <= 99 && mItem->mUnknown0C - count >= 0) {
+                mCount = count;
+                DrawCounts();
+                gSoundManager.StartSeqArc(0, 1, 8);
+                return;
+            }
+        }
+        if (func_0203133c(&mMinusButton)) {
+            int count = mCount - 1;
+            if (count > 0) {
+                mCount = count;
+                DrawCounts();
+                gSoundManager.StartSeqArc(0, 1, 9);
+            }
+        }
         break;
     }
-    return animation;
+}
+
+int ShopWindow::GetBuyTotal(Item *item, int count) {
+    return item->GetPrice() * count;
+}
+
+void ShopWindow::Draw() {
+    if (mUnknownAD54[0]) {
+        for (int i = 0; i < 3; i++) {
+            mTextCanvases[i].Draw();
+        }
+        func_02031d7c(&mPlusButton);
+        func_02031d7c(&mMinusButton);
+    }
+    func_020345d8(this);
+}
+
+void ShopWindow::Open(int flags, int mode) {
+    func_02034720(this, flags, 1);
+    mCount = 1;
+    switch (mode) {
+    case MODE_BUY:
+        mMode = MODE_BUY;
+        mTexts[0].mMessage = 0xC3;
+        ClearCanvas(&mTexts[0], 0);
+        mTexts[0].DrawAll();
+        break;
+    case MODE_SELL:
+        mMode = MODE_SELL;
+        mTexts[0].mMessage = 0xC7;
+        ClearCanvas(&mTexts[0], 0);
+        mTexts[0].DrawAll();
+        break;
+    }
+}
+
+int ShopWindow::GetTotal() {
+    switch (mMode) {
+    case MODE_BUY:
+        return GetBuyTotal(mItem, mCount);
+    case MODE_SELL:
+        return GetSellTotal(mItem, mCount);
+    }
+}
+
+int ShopWindow::GetSellTotal(Item *item, int count) {
+    return item->GetPrice2() * count;
+}
+
+// Draws the count, the total and the money
+void ShopWindow::DrawCounts() {
+    wchar_t count[3];
+    wchar_t money[10];
+    wchar_t total[10];
+    FormatNumber(mCount, count, sizeof(count), 2, FALSE);
+    mTextCanvases[0].mText = (const NNSG2dChar *)count;
+    ClearCanvas(&mTextCanvases[0], 0);
+    mTextCanvases[0].DrawText();
+    FormatNumberWithCommas(GetTotal(), total, sizeof(total), 0, FALSE);
+    mTextCanvases[1].mText = (const NNSG2dChar *)total;
+    ClearCanvas(&mTextCanvases[1], 0);
+    mTextCanvases[1].DrawText();
+    FormatNumberWithCommas(*mMoney, money, sizeof(money), 0, FALSE);
+    mTextCanvases[2].mText = (const NNSG2dChar *)money;
+    ClearCanvas(&mTextCanvases[2], 0);
+    mTextCanvases[2].DrawText();
+}
+
+static const WindowPoint sPlusButtonOffset = {0x38, 0x33};
+static const WindowPoint sMinusButtonOffset = {0x38, 0x5D};
+
+void ShopWindow::SetPosition(WindowPoint position) {
+    MessageWindow::SetPosition(position);
+    mPlusButton.SetPosition((position.x + sPlusButtonOffset.x) << FX32_SHIFT,
+                            (position.y + sPlusButtonOffset.y) << FX32_SHIFT);
+    mMinusButton.SetPosition((position.x + sMinusButtonOffset.x) << FX32_SHIFT,
+                             (position.y + sMinusButtonOffset.y) << FX32_SHIFT);
+    for (int i = 0; i < 3; i++) {
+        mTextCanvases[i].SetPosition((position.x + sCanvasPositions[i].x) << FX32_SHIFT,
+                                     (position.y + sCanvasPositions[i].y) << FX32_SHIFT);
+    }
+}
+
+void ShopWindow::SetVisible(BOOL visible) {
+    MessageWindow::SetVisible(visible);
+    mPlusButton.mVisible = visible;
+    mMinusButton.mVisible = visible;
+    for (int i = 0; i < 3; i++) {
+        mTextCanvases[i].mSprite.mVisible = visible;
+    }
+}
+
+int HalfPriceShopWindow::GetBuyTotal(Item *item, int count) {
+    return item->GetPrice() / 2 * count;
+}
+
+int HalfPriceShopWindow::GetSellTotal(Item *item, int count) {
+    return item->GetPrice2() * 11 / 10 * count;
+}
+
+// --- The item panel -----------------------------------------------------------------------------------------------
+
+static const ScreenPoint sNamePosition = {0xC, 0xA0};
+static const ScreenPoint sCountPosition = {0xCD, 0xAC};
+static const ScreenPoint sPricePosition = {0xB2, 0xAC};
+static const ScreenPoint sCountLabelPosition = {0xC7, 0xA0};
+static const ScreenPoint sPriceLabelPosition = {0xC7, 0xA0};
+
+void ShopItemPanel::Init(int resource, int sequence, u16 frame, MessageFile *file, int *charOffset) {
+    mState = STATE_SHOWN;
+    mFrame = 0;
+    mKind = 0;
+    mMessageBase = 0;
+    mShowSecondIcon = FALSE;
+    mName.InitObj(&gFonts[0].mFont, 0x10, 20, 4, *charOffset, 0, 1, 0, 0, 15, NULL);
+    mName.mMessageFile = file;
+    mName.SetPosition(sNamePosition.x << FX32_SHIFT, sNamePosition.y << FX32_SHIFT);
+    mName.mSprite.mOverwritePalette = 0;
+    *charOffset += mName.GetCharCount();
+    Sprite_Init(&mIcon, resource, sequence, 0x80, 0x60, TRUE);
+    NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mIcon.mAnim));
+    Sprite_SetFrame(&mIcon, frame);
+    mIcon.SetPosition(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mIcon.mOverwritePalette = 1;
+    Sprite_Init(&mSecondIcon, resource, (u16)(sequence + 1), 0x80, 0x60, TRUE);
+    mSecondIcon.SetPosition(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mSecondIcon.mOverwritePalette = 1;
+    mSecondIcon.mVisible = FALSE;
+    mCount.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_LEFT | NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mCount.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, -1, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
+    mCount.mColor = 8;
+    ClearCanvas(&mCount, 0);
+    mCount.SetPosition(sCountPosition.x << FX32_SHIFT, sCountPosition.y << FX32_SHIFT);
+    mCount.mSprite.mOverwritePalette = 0;
+    mCount.mSprite.mVisible = FALSE;
+    *charOffset += mCount.GetCharCount();
+    mPrice.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_RIGHT;
+    mPrice.mTextX = 0x40;
+    mPrice.InitText(&gFonts[0].mFont, 0x10, 8, 2, *charOffset, -2, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
+    mPrice.mColor = 8;
+    ClearCanvas(&mPrice, 2);
+    mPrice.SetPosition(sPricePosition.x << FX32_SHIFT, sPricePosition.y << FX32_SHIFT);
+    mPrice.mSprite.mOverwritePalette = 0;
+    mPrice.mSprite.mVisible = FALSE;
+    *charOffset += mPrice.GetCharCount();
+    mCountLabel.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, 0, 1, 0, 0, 15, NULL, 2,
+                         NNS_G2D_CHARA_COLORMODE_16);
+    mCountLabel.mColor = 8;
+    ClearCanvas(&mCountLabel, 0);
+    mCountLabel.SetPosition(sCountLabelPosition.x << FX32_SHIFT, sCountLabelPosition.y << FX32_SHIFT);
+    mCountLabel.mSprite.mOverwritePalette = 0;
+    mCountLabel.mSprite.mVisible = FALSE;
+    *charOffset += mCountLabel.GetCharCount();
+    mCountLabel.mText = (const NNSG2dChar *)L"所持数";
+    mCountLabel.DrawText();
+    mPriceLabel.InitText(&gFonts[0].mFont, 0x10, 4, 2, *charOffset, 0, 1, 0, 0, 15, NULL, 2,
+                         NNS_G2D_CHARA_COLORMODE_16);
+    mPriceLabel.mColor = 8;
+    ClearCanvas(&mPriceLabel, 0);
+    mPriceLabel.SetPosition(sPriceLabelPosition.x << FX32_SHIFT, sPriceLabelPosition.y << FX32_SHIFT);
+    mPriceLabel.mSprite.mOverwritePalette = 0;
+    mPriceLabel.mSprite.mVisible = FALSE;
+    *charOffset += mPriceLabel.GetCharCount();
+    mPriceLabel.mText = (const NNSG2dChar *)L"売値";
+    mPriceLabel.DrawText();
+}
+
+void ShopItemPanel::Draw() {
+    mName.Draw();
+    Sprite_Draw(&mIcon);
+    Sprite_Draw(&mSecondIcon);
+    mCount.Draw();
+    mPrice.Draw();
+    mCountLabel.Draw();
+    mPriceLabel.Draw();
+}
+
+void ShopItemPanel::Show(Item *item, int count) {
+    mItem = item;
+    SetItem(count);
+}
+
+// Shows the item's name (count -1) or a message of a count, and the number owned or the price
+void ShopItemPanel::SetItem(int count) {
+    if (count == -1) {
+        mName.mSprite.mVisible = TRUE;
+        mName.mMessage = mMessageBase + mItem->mId;
+        ClearCanvas(&mName, 0);
+        mName.DrawAll();
+    } else {
+        mName.mSprite.mVisible = TRUE;
+        mName.mMessage = GetCountMessage(count);
+        ClearCanvas(&mName, 0);
+        mName.DrawAll();
+    }
+    switch (mKind) {
+    case 0:
+    case 2:
+    case 3: {
+        wchar_t text[8];
+        MI_CpuClear16(text, sizeof(text));
+        FormatNumber(mItem->mCount, text, sizeof(text), 2, FALSE);
+        mCount.mText = (const NNSG2dChar *)text;
+        ClearCanvas(&mCount, 0);
+        mCount.DrawText();
+        break;
+    }
+    case 1: {
+        wchar_t text[16];
+        wchar_t price[16];
+        MI_CpuClear16(text, sizeof(text));
+        FormatNumberWithCommas(mItem->GetPrice2(), price, sizeof(price), 5, FALSE);
+        wcsncpy(text, price, 16);
+        wcscat(text, L"円");
+        mPrice.mText = (const NNSG2dChar *)text;
+        ClearCanvas(&mPrice, 0);
+        mPrice.DrawText();
+        break;
+    }
+    }
+}
+
+// Slides the panel in and out
+void ShopItemPanel::Update() {
+    switch (mState) {
+    case STATE_SLIDING_IN: {
+        int y = (mFrame - 10) * 8;
+        if (y > 56) {
+            y = 56;
+        } else if (y < 0) {
+            y = 0;
+        }
+        SetY(56 - y);
+        if (y >= 56) {
+            SetState(STATE_SHOWN);
+        }
+        mFrame++;
+        break;
+    }
+    case STATE_SLIDING_OUT: {
+        int y = (10 - mFrame) * 8;
+        if (y > 56) {
+            y = 56;
+        } else if (y < 0) {
+            y = 0;
+        }
+        SetY(56 - y);
+        if (y >= 56) {
+            SetState(STATE_HIDDEN);
+        }
+        mFrame++;
+        break;
+    }
+    }
+}
+
+void ShopItemPanel::SetState(int state) {
+    mState = state;
+    mFrame = 0;
+    switch (state) {
+    case STATE_SLIDING_IN:
+        mName.mSprite.mVisible = TRUE;
+        mIcon.mVisible = TRUE;
+        mSecondIcon.mVisible = mShowSecondIcon;
+        switch (mKind) {
+        case 0:
+        case 2:
+        case 3:
+            mCount.mSprite.mVisible = TRUE;
+            mCountLabel.mSprite.mVisible = TRUE;
+            break;
+        case 1:
+            mPrice.mSprite.mVisible = TRUE;
+            mPriceLabel.mSprite.mVisible = TRUE;
+            break;
+        }
+        SetY(56);
+        break;
+    case STATE_HIDDEN:
+        mName.mSprite.mVisible = FALSE;
+        mIcon.mVisible = FALSE;
+        mSecondIcon.mVisible = FALSE;
+        mCount.mSprite.mVisible = FALSE;
+        mCountLabel.mSprite.mVisible = FALSE;
+        mPrice.mSprite.mVisible = FALSE;
+        mPriceLabel.mSprite.mVisible = FALSE;
+        SetY(56);
+        break;
+    }
+}
+
+// What the panel shows: the number owned (kinds 0, 2 and 3) or the price (1), and where the names are
+void ShopItemPanel::SetKind(int kind) {
+    const int messageBases[4] = {0, 0, 0xFF, 0x22B};
+    mKind = kind;
+    switch (kind) {
+    case 0:
+    case 2:
+    case 3:
+        mCount.mSprite.mVisible = TRUE;
+        mCountLabel.mSprite.mVisible = TRUE;
+        mPrice.mSprite.mVisible = FALSE;
+        mPriceLabel.mSprite.mVisible = FALSE;
+        break;
+    case 1:
+        mCount.mSprite.mVisible = FALSE;
+        mCountLabel.mSprite.mVisible = FALSE;
+        mPrice.mSprite.mVisible = TRUE;
+        mPriceLabel.mSprite.mVisible = TRUE;
+        break;
+    }
+    mMessageBase = messageBases[mKind];
+}
+
+void ShopItemPanel::SetY(int y) {
+    fx32 y0 = (y + 0xA0) << FX32_SHIFT;
+    fx32 y1 = (y + 0x60) << FX32_SHIFT;
+    fx32 y2 = (y + 0xAC) << FX32_SHIFT;
+    mName.mSprite.mPosition.y = y0;
+    mIcon.mPosition.y = y1;
+    mSecondIcon.mPosition.y = y1;
+    mCount.mSprite.mPosition.y = y2;
+    mCountLabel.mSprite.mPosition.y = y0;
+    mPrice.mSprite.mPosition.y = y2;
+    mPriceLabel.mSprite.mPosition.y = y0;
+}
+
+void ShopItemPanel::SetShowSecondIcon(BOOL show) {
+    mShowSecondIcon = show;
+    if (mState <= STATE_SLIDING_IN) {
+        mSecondIcon.mVisible = mShowSecondIcon;
+    }
+}
+
+// The message for a count of 5 to 30
+int ShopItemPanel::GetCountMessage(int count) {
+    switch (count) {
+    case 5:
+        return 0x279;
+    case 10:
+        return 0x27A;
+    case 15:
+        return 0x27B;
+    case 20:
+        return 0x27C;
+    case 25:
+        return 0x27D;
+    case 30:
+        return 0x27E;
+    default:
+        return 0x279;
+    }
+}
+
+// --- The staff ----------------------------------------------------------------------------------------------------
+
+// Mounts the head staff's archives: its model, its clothes, its animations and its head
+void ShopStaff::Mount() {
+    mCharacter.CharacterModel::SetArchive("3HM", 0, 0);
+    mMannequin.mBody.SetArchive("3CM", 0, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, mCharacter.mArchiveName, mCharacter.mArchivePath, 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, mMannequin.mBody.mArchiveName, mMannequin.mBody.mArchivePath,
+                                   0);
+    ArchiveManager_MountCompressed(&gArchiveManager, "3HA", "Mdl/Ica/ica_mii_contents_LZ.bin", 0);
+    ArchiveManager_MountCompressed(&gArchiveManager, "3CH", "Mdl/Misc/headStaff_3D_LZ.bin", 0);
+}
+
+void ShopStaff::Unmount() {
+    func_0202aecc(data_021223e4, 28);
+    func_0202aecc(data_021223e4, 29);
+    func_0202aecc(data_021223e4, 30);
+    func_0202aecc(data_021223e4, 31);
+    ArchiveManager_Unmount(&gArchiveManager, "3HM");
+    ArchiveManager_Unmount(&gArchiveManager, "3HA");
+    ArchiveManager_Unmount(&gArchiveManager, "3CM");
+    ArchiveManager_Unmount(&gArchiveManager, "3CH");
+}
+
+// Loads the resident who works in the shop if there is one, or else the head staff, in the shop's uniform
+void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, TtsPlayer *player,
+                     SpeechWindow *window, MessageFile *file) {
+    mShop = shop;
+    mPosition = position;
+    mAngle = angle;
+    mGreetingAngle = greetingAngle;
+    mTtsPlayer = player;
+    mSpeechWindow = window;
+    mMessageFile = file;
+    mHeldModel = NULL;
+    int uniform = GetUniform(shop);
+    FindResidentAt(shop, &mResident, &mResidentIndex);
+    if (!mResident) {
+        mResidentIndex = 0;
+    }
+    mGreet = FALSE;
+    mTalking = FALSE;
+    ModelResources_SetModel(data_021223e4, 28, mCharacter.mModelPath);
+    ModelResources_SetModel(data_021223e4, 30, mMannequin.mBody.mModelPath);
+    ModelResources_SetModel(data_021223e4, 31, "3CH:/head.imd");
+    void *animations = func_0202ad04(data_021223e4, 28, "3HA", 0);
+    mCharacter.Init(28, 0, 0);
+    func_02029660(mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    mCharacter.SetAnimation(RESOURCE_BCA0, 33);
+    if (mResident) {
+        func_0202c264(&gGameData, mResidentIndex, &mCharacter);
+        func_0202aecc(data_021223e4, 28);
+        ArchiveManager_Unmount(&gArchiveManager, mCharacter.mArchiveName);
+        mCharacter.CharacterModel::SetArchive(mCharacter.mArchiveName, uniform, MiiData_GetSex(&mCharacter));
+        ArchiveManager_MountCompressed(&gArchiveManager, mCharacter.mArchiveName, mCharacter.mArchivePath, 1);
+        ModelResources_SetModel(data_021223e4, 28, mCharacter.mModelPath);
+        mCharacter.MakeModel(28, 0);
+        mCharacter.MakeFace();
+        mCharacter.UpdateBodyColors();
+        mCharacter.UpdateBodyScale();
+        mCharacter.UpdateAnimSpeed();
+        mCharacter.SetVisible(TRUE);
+        mCharacter.mShadowVisible = TRUE;
+        VecFx32 pos = mPosition;
+        mCharacter.mPos.x = pos.x;
+        mCharacter.mPos.y = pos.y;
+        mCharacter.mPos.z = pos.z;
+        mCharacter.SetAngle(mAngle);
+        mCharacter.SetFace(8);
+        mCharacter.Update();
+        func_0209d898(&mCharacter, player);
+    } else {
+        mMannequin.Init(30, 0, 31, 0);
+        func_0202aecc(data_021223e4, 30);
+        ArchiveManager_Unmount(&gArchiveManager, "3CM");
+        mMannequin.mBody.SetArchive("3CM", uniform, 0);
+        ArchiveManager_MountCompressed(&gArchiveManager, "3CM", mMannequin.mBody.mArchivePath, 1);
+        ModelResources_SetModel(data_021223e4, 30, mMannequin.mBody.mModelPath);
+        mMannequin.mBody.MakeModel(30, 0);
+        mMannequin.LoadHead(31, 0);
+        mMannequin.mBody.LoadTexturePalette();
+        mMannequin.mBody.SetPaletteColor1(0x5FBE);
+        void *headAnimations = func_0202ad04(data_021223e4, 30, "3HA", 0);
+        func_02029660(mMannequin.mBody.mAnim.mUnknown04, RESOURCE_BCA0, headAnimations);
+        mMannequin.SetAnimation(RESOURCE_BCA0, 33);
+        mMannequin.mBody.mShadowVisible = TRUE;
+        VecFx32 pos = mPosition;
+        mMannequin.mBody.mPos.x = pos.x;
+        mMannequin.mBody.mPos.y = pos.y;
+        mMannequin.mBody.mPos.z = pos.z;
+        mMannequin.SetAngle(mAngle);
+        mMannequin.ApplyAngle();
+        mMannequin.Draw();
+    }
+    SetState(STATE_IDLE);
+}
+
+void ShopStaff::Update() {
+    if (mResident) {
+        UpdateResident();
+    } else {
+        UpdateHeadStaff();
+    }
+    UpdateHeldModel();
+}
+
+void ShopStaff::Draw() {
+    if (mResident) {
+        mCharacter.Draw();
+    } else {
+        mMannequin.Draw();
+    }
+}
+
+// The clothes the staff wears in each of the four shops
+int ShopStaff::GetUniform(int shop) {
+    int clothes = 0;
+    switch (shop) {
+    case 0:
+        clothes = 0x87;
+        break;
+    case 1:
+        clothes = 0x73;
+        break;
+    case 2:
+        clothes = 0x97;
+        break;
+    case 3:
+        clothes = 0xC0;
+        break;
+    }
+    return clothes;
+}
+
+void ShopStaff::UpdateResident() {
+    switch (mState) {
+    case STATE_IDLE:
+        if (mTalking) {
+            SetState(STATE_TALKING);
+        } else if (mGreet) {
+            SetState(STATE_GREETING);
+        }
+        break;
+    case STATE_GREETING:
+        switch (mStep) {
+        case 0:
+            if (mCharacter.mBlendFrames <= 0) {
+                BowDown();
+                mStep++;
+            }
+            break;
+        case 1:
+            mCharacter.Turn(0xFF1C);
+            if (mCharacter.mAngle < mGreetingAngle) {
+                mCharacter.SetAngle(mGreetingAngle);
+                mStep++;
+            }
+            break;
+        case 2:
+            if (mTalking || !mGreet) {
+                SetState(STATE_TURNING_BACK);
+            }
+            break;
+        }
+        break;
+    case STATE_TALKING:
+        switch (mStep) {
+        case 0:
+            mTalking = FALSE;
+            mStep++;
+            break;
+        case 1:
+            if (mCharacter.mBlendFrames <= 0) {
+                mSpeechWindow->Show(mMessages[0], 0, 120);
+                mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
+                mCharacter.BlendToAnimation(RESOURCE_BCA0, 29);
+                AnimModel_FindAnimation(&mCharacter.mAnim, RESOURCE_BCA0, mCharacter.mAnimId)->mPlayOnce = TRUE;
+                mStep++;
+            }
+            break;
+        case 2:
+            if (AnimModel_FindAnimation(&mCharacter.mAnim, RESOURCE_BCA0, mCharacter.mAnimId)->mFinished) {
+                mCharacter.BlendToAnimation(RESOURCE_BCA0, 33);
+                mAnimationDone = TRUE;
+            }
+            if (mTtsPlayer->IsEngineIdle()) {
+                mSpeechDone = TRUE;
+            }
+            if (mAnimationDone && mSpeechDone) {
+                SetState(STATE_IDLE);
+            }
+            if (mTalking) {
+                mTalking = FALSE;
+                mStep = 2;
+                mSpeechWindow->Show(mMessages[0], 0, 120);
+                mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
+                mCharacter.SetAnimation(RESOURCE_BCA0, 29);
+                AnimModel_FindAnimation(&mCharacter.mAnim, RESOURCE_BCA0, mCharacter.mAnimId)->mPlayOnce = TRUE;
+            }
+            break;
+        }
+        break;
+    case STATE_TURNING_BACK:
+        switch (mStep) {
+        case 0:
+            if (mCharacter.mBlendFrames <= 0) {
+                mCharacter.BlendToAnimation(RESOURCE_BCA0, 33);
+                mStep++;
+            }
+            break;
+        case 1:
+            mCharacter.Turn(0xE4);
+            if (mAngle < mCharacter.mAngle) {
+                mCharacter.SetAngle(mAngle);
+                SetState(STATE_IDLE);
+            }
+            break;
+        }
+        break;
+    }
+    mCharacter.LipSync(mTtsPlayer->GetPhonemeName(), 1);
+    mCharacter.Update();
+}
+
+void ShopStaff::UpdateHeadStaff() {
+    switch (mState) {
+    case STATE_IDLE:
+        if (mTalking) {
+            SetState(STATE_TALKING);
+        } else if (mGreet) {
+            SetState(STATE_GREETING);
+        }
+        break;
+    case STATE_GREETING:
+        switch (mStep) {
+        case 0:
+            if (mMannequin.mBody.mBlendFrames <= 0) {
+                BowDown();
+                mStep++;
+            }
+            break;
+        case 1:
+            mMannequin.Turn(0xFF1C);
+            if (mMannequin.mTargetAngle < mGreetingAngle) {
+                mMannequin.SetAngle(mGreetingAngle);
+                mStep++;
+            }
+            break;
+        case 2:
+            if (mTalking || !mGreet) {
+                SetState(STATE_TURNING_BACK);
+            }
+            break;
+        }
+        break;
+    case STATE_TALKING:
+        switch (mStep) {
+        case 0:
+            mTalking = FALSE;
+            mStep++;
+            break;
+        case 1:
+            if (mMannequin.mBody.mBlendFrames <= 0) {
+                mSpeechWindow->Show(mMessages[0], 0, 120);
+                mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
+                mMannequin.BlendToAnimation(RESOURCE_BCA0, 29);
+                AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+                    ->mPlayOnce = TRUE;
+                mStep++;
+            }
+            break;
+        case 2:
+            if (AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+                    ->mFinished) {
+                mMannequin.BlendToAnimation(RESOURCE_BCA0, 33);
+                mAnimationDone = TRUE;
+            }
+            if (mTtsPlayer->IsEngineIdle()) {
+                mSpeechDone = TRUE;
+            }
+            if (mAnimationDone && mSpeechDone) {
+                SetState(STATE_IDLE);
+            }
+            if (mTalking) {
+                mTalking = FALSE;
+                mStep = 2;
+                mSpeechWindow->Show(mMessages[0], 0, 120);
+                mTtsPlayer->Speak((const u16 *)mMessageFile->GetText(mMessages[1]), 0);
+                mMannequin.SetAnimation(RESOURCE_BCA0, 29);
+                AnimModel_FindAnimation(&mMannequin.mBody.mAnim, RESOURCE_BCA0, mMannequin.mBody.mAnimId)
+                    ->mPlayOnce = TRUE;
+            }
+            break;
+        }
+        break;
+    case STATE_TURNING_BACK:
+        switch (mStep) {
+        case 0:
+            if (mMannequin.mBody.mBlendFrames <= 0) {
+                mMannequin.BlendToAnimation(RESOURCE_BCA0, 33);
+                mStep++;
+            }
+            break;
+        case 1:
+            mMannequin.Turn(0xE4);
+            if (mAngle < mMannequin.mTargetAngle) {
+                mMannequin.SetAngle(mAngle);
+                SetState(STATE_IDLE);
+            }
+            break;
+        }
+        break;
+    }
+    mMannequin.ApplyAngle();
 }
 
 void ShopStaff::SetState(int state) {
     mState = state;
-    mUnknown10 = 0;
-    mUnknown1C = 0;
-    mUnknown20 = 0;
+    mStep = 0;
+    mAnimationDone = FALSE;
+    mSpeechDone = FALSE;
 }
 
 BOOL ShopStaff::IsIdle() {
     BOOL idle = FALSE;
     if (!mTalking) {
         BOOL waiting = TRUE;
-        if (mState != 0 && mState != 1) {
+        if (mState != STATE_IDLE && mState != STATE_GREETING) {
             waiting = FALSE;
         }
         if (waiting) {
@@ -576,46 +1643,143 @@ BOOL ShopStaff::IsIdle() {
     return idle;
 }
 
-void ShopItemPanel::SetY(int y) {
-    fx32 y0 = (y + 0xA0) << FX32_SHIFT;
-    fx32 y1 = (y + 0x60) << FX32_SHIFT;
-    fx32 y2 = (y + 0xAC) << FX32_SHIFT;
-    mY0C8 = y0;
-    mY6B4 = y1;
-    mY760 = y1;
-    mY810 = y2;
-    mYB80 = y0;
-    mY9C8 = y2;
-    mYD38 = y0;
-}
-
-void ShopItemPanel::SetUnknown14(int value) {
-    mUnknown014 = value;
-    if (mState <= 1) {
-        mUnknown718 = mUnknown014;
+// The bow of the greeting: the head staff's shop has a bow of its own
+void ShopStaff::BowDown() {
+    int animation;
+    switch (mShop) {
+    case 0:
+    case 1:
+    case 2:
+        animation = 0x22;
+        break;
+    case 3:
+        animation = 0x2A;
+        break;
+    }
+    if (mResident) {
+        mCharacter.BlendToAnimation(RESOURCE_BCA0, animation);
+    } else {
+        mMannequin.BlendToAnimation(RESOURCE_BCA0, animation);
     }
 }
 
-void ShopItemPanel::Show(int kind, int item) {
-    mKind = kind;
-    SetItem(item);
+// Puts the held model in the right hand
+void ShopStaff::UpdateHeldModel() {
+    if (mHeldModel == NULL) {
+        return;
+    }
+    if (mResident) {
+        MtxFx43 *hand = &mCharacter.mJointMatrices[CharacterModel::JOINT_R_HAND];
+        mHeldModel->mPosition.x = hand->_30;
+        mHeldModel->mPosition.y = hand->_31;
+        mHeldModel->mPosition.z = hand->_32;
+        MI_Copy36B(&mCharacter.mJointRotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
+        mHeldModel->mRotY = 0x4000;
+    } else {
+        MtxFx43 *hand = &mMannequin.mBody.mJointMatrices[CharacterModel::JOINT_R_HAND];
+        mHeldModel->mPosition.x = hand->_30;
+        mHeldModel->mPosition.y = hand->_31;
+        mHeldModel->mPosition.z = hand->_32;
+        MI_Copy36B(&mMannequin.mBody.mJointRotations[CharacterModel::JOINT_R_HAND], &mHeldModel->mRotation);
+        mHeldModel->mRotY = 0x4000;
+    }
 }
+
+// --- The counter --------------------------------------------------------------------------------------------------
+
+static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
+static const VecFx32 sLightDirection0 = {0x640, -0x258, -0xFA0};
+static const VecFx32 sLightDirection1 = {0, -0xFA0, 0x5DC};
 
 void ShopCounter::MountStaff() {
     mStaff.Mount();
+}
+
+// The speech window, and the 3D view: camera, lights and clear colour
+void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPosition, VecFx32 cameraTarget) {
+    mPanelShown = FALSE;
+    mTalking = FALSE;
+    mTtsPlayer.InitEngine();
+    mMessageFile = file;
+    *charOffset += mSpeechWindow.Init(*charOffset, file, 4, 0x10, &mTtsPlayer, FALSE);
+    mSpeechWindow.mText[0].mVAlign = 1;
+    mSpeechWindow.Hide();
+    func_02023ee0(data_0211d604, 4, 17, 8, 8);
+    func_0202b0e8(data_02122824);
+    *(BOOL *)(data_0211d604 + 0x48) = TRUE;
+    *(BOOL *)(data_0211d604 + 0xEC) = TRUE;
+    G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
+    Camera *camera = &data_02122764;
+    func_0202a640(camera);
+    camera->mUnknown00 = 0x281;
+    camera->mUnknown04 = 0xFCE;
+    camera->mUnknown08 = 0x1555;
+    camera->mUnknown0C = FX32_ONE;
+    camera->mUnknown10 = 0x50000;
+    camera->mPosition = cameraPosition;
+    camera->mTarget = cameraTarget;
+    data_021227cc.mColor = sLightColors[1];
+    func_0202aa28(&data_021227cc, camera, sLightDirection0);
+    data_021227d8.mColor = sLightColors[0];
+    func_0202aa28(&data_021227d8, camera, sLightDirection1);
+    func_02028280(&data_02121834, 1, 1);
+}
+
+void ShopCounter::LoadStaff(int shop, VecFx32 position, u16 angle, u16 greetingAngle) {
+    mStaff.Load(shop, position, angle, greetingAngle, &mTtsPlayer, &mSpeechWindow, mMessageFile);
+}
+
+void ShopCounter::InitPanel(int kind, int resource, int sequence, u16 frame, int *charOffset) {
+    mPanel.Init(resource, sequence, frame, mMessageFile, charOffset);
+    mPanel.SetState(ShopItemPanel::STATE_HIDDEN);
+    mPanel.SetKind(kind);
+}
+
+// The panel hides while the speech window is shown, and comes back after
+void ShopCounter::Update() {
+    BOOL shown = mSpeechWindow.mShown;
+    mStaff.Update();
+    mTtsPlayer.Update();
+    mSpeechWindow.Update();
+    mPanel.Update();
+    if (shown != mSpeechWindow.mShown && mSpeechWindow.mShown) {
+        mPanel.SetState(ShopItemPanel::STATE_HIDDEN);
+    }
+    if (mSpeechWindow.mShown) {
+        return;
+    }
+    if (!mPanelShown) {
+        return;
+    }
+    if (mPanel.mState != ShopItemPanel::STATE_HIDDEN) {
+        return;
+    }
+    mPanel.SetState(ShopItemPanel::STATE_SLIDING_IN);
+}
+
+void ShopCounter::Draw() {
+    mSpeechWindow.Draw();
+    mPanel.Draw();
+    mStaff.Draw();
 }
 
 void ShopCounter::UnmountStaff() {
     mStaff.Unmount();
 }
 
-void ShopCounter::ShowPanel(int kind, int item) {
+void ShopCounter::ShowPanel(Item *item, int count) {
     mPanelShown = TRUE;
-    mPanel.Show(kind, item);
+    mPanel.Show(item, count);
 }
 
 void ShopCounter::ClearPanelItem() {
     mPanel.SetItem(-1);
+}
+
+void ShopCounter::HidePanel() {
+    mStaff.mGreet = FALSE;
+    mSpeechWindow.Hide();
+    mPanelShown = FALSE;
 }
 
 void ShopCounter::SayMessagesCA() {
@@ -643,20 +1807,12 @@ void ShopCounter::SayMessagesD5() {
     mStaff.mTalking = TRUE;
 }
 
-void ShopCounter::SetStaffUnknown14() {
-    mStaff.mUnknown14 = TRUE;
+void ShopCounter::GreetCustomer() {
+    mStaff.mGreet = TRUE;
 }
 
 BOOL ShopCounter::IsStaffIdle() {
     return mStaff.IsIdle();
-}
-
-extern "C" {
-extern struct GameData gGameData;
-extern MATHRandContext16 gRandom;
-BOOL func_0202c354(GameData *game, int index);
-u8 func_0202c468(GameData *game, int index); // The character's event
-u8 func_0202c490(GameData *game, int index); // The place of its event
 }
 
 // Picks at random one of the residents whose event (0x14) is at the given place, for the staff to be

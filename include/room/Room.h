@@ -47,8 +47,8 @@ class InteriorItem : public Item {
 public:
     InteriorItem();
 
-    virtual u32 GetPrice() { return data_020f72f8[mId].mPrice; }
-    virtual u32 GetPrice2() { return data_020f72f8[mId].mPrice; }
+    virtual int GetPrice() { return data_020f72f8[mId].mPrice; }
+    virtual int GetPrice2() { return data_020f72f8[mId].mPrice; }
     virtual const char *GetModelName();
     virtual u8 GetWeight0() { return data_020f72f8[mId].mWeight0; }
     virtual u8 GetWeight1() { return data_020f72f8[mId].mWeight1; }

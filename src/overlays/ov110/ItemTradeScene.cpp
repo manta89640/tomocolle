@@ -428,11 +428,11 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     mList.Init();
     mList.SetBackground(0x100, 0x38);
     func_020278f8(&data_021213b8, 0x5FDF, 0x100);
-    func_020a842c(&mList, 1, 8, 9, charOffset);
-    func_020a8648(&mList, charOffset);
-    func_020a8864(&mList, 1, 2, 3);
-    func_020a8938(&mList, 1, 4, 5);
-    func_020a8a38(&mList, 1, 6, 7);
+    mList.InitRows(1, 8, 9, charOffset);
+    mList.InitCounts(charOffset);
+    mList.InitUpButton(1, 2, 3);
+    mList.InitDownButton(1, 4, 5);
+    mList.InitScrollBar(1, 6, 7);
     mList.SetUpScrollBar(2, 6, 7);
     mList.SetMessageFile(context->mItemMessages);
     mList.SetMode(2);
@@ -516,7 +516,7 @@ void ItemTradeList::UpdateListMode() {
 // @0x0214a904
 void ItemTradeList::Hide() {
     mList.SetUnknown308(FALSE);
-    func_020a8adc(&mList);
+    mList.Update();
 }
 
 // @0x0214a924
@@ -551,7 +551,7 @@ void ItemTradeList::Open() {
         mList.SetMode(2);
         mList.SetMessageFile(mContext->mItemMessages);
         mList.SetVisible(TRUE);
-        mList.SetItems((InventoryItem **)mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mList.mUnknown024 = TRUE;
         mSelection.Set(0, 0);
         break;
@@ -569,7 +569,7 @@ void ItemTradeList::Open() {
         mList.SetMode(0);
         mList.SetMessageFile(mContext->mCostumeMessages);
         mList.SetVisible(TRUE);
-        mList.SetItems((InventoryItem **)mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mList.mUnknown024 = TRUE;
         mSelection.Set(1, 0);
         break;
@@ -589,7 +589,7 @@ int ItemTradeList::Run() {
             mCostumeFilter.SetVisible(FALSE);
             mInventory->GetOwned(mItems, &mItemCount, 1, 1);
             mList.SetMessageFile(mContext->mItemMessages);
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         case ItemTradeTabs::TAB_ITEMS_2:
@@ -597,7 +597,7 @@ int ItemTradeList::Run() {
             mCostumeFilter.SetVisible(FALSE);
             mInventory->GetOwnedKind3(mItems, &mItemCount);
             mList.SetMessageFile(mContext->mItemMessages);
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         case ItemTradeTabs::TAB_COSTUMES:
@@ -606,7 +606,7 @@ int ItemTradeList::Run() {
             mCostumeFilter.Select(0);
             mCostumes->GetOwned(mItems, &mItemCount, 0);
             mList.SetMessageFile(mContext->mCostumeMessages);
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(1, 0);
             break;
         case ItemTradeTabs::TAB_INTERIORS:
@@ -614,7 +614,7 @@ int ItemTradeList::Run() {
             mCostumeFilter.SetVisible(FALSE);
             mInteriors->GetOwned(mItems, &mItemCount);
             mList.SetMessageFile(mContext->mRoomMessages);
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(2, 0);
             break;
         case ItemTradeTabs::TAB_ITEMS_3:
@@ -622,7 +622,7 @@ int ItemTradeList::Run() {
             mCostumeFilter.SetVisible(FALSE);
             mInventory->GetOwnedKinds4And5Again(mItems, &mItemCount);
             mList.SetMessageFile(mContext->mItemMessages);
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             mSelection.Set(0, 0);
             break;
         }
@@ -633,7 +633,7 @@ int ItemTradeList::Run() {
     mItemFilter.Update();
     if (mItemFilter.mPressed != -1) {
         mInventory->GetOwned(mItems, &mItemCount, 1, mItemFilter.GetFilter());
-        mList.SetItems((InventoryItem **)mItems, mItemCount);
+        mList.SetItems(mItems, mItemCount);
         mPendingIndex = -1;
         func_02031e88(&mOkButton, TRUE);
     }
@@ -644,17 +644,17 @@ int ItemTradeList::Run() {
         case 0:
         case 1:
             mCostumes->GetOwned(mItems, &mItemCount, mCostumeFilter.GetFilter());
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             break;
         case 2:
-            mList.SetItems((InventoryItem **)mItems, mItemCount);
+            mList.SetItems(mItems, mItemCount);
             break;
         }
         mPendingIndex = -1;
         func_02031e88(&mOkButton, TRUE);
     }
 
-    func_020a8adc(&mList);
+    mList.Update();
     if (mList.mTouched && mList.mSelected != -1) {
         Item *item = mList.mItems[mList.mSelected];
         int id = item->mId;
@@ -843,7 +843,7 @@ void ItemTradeList::RefreshList() {
         mInventory->GetOwnedKinds4And5Again(mItems, &mItemCount);
         break;
     }
-    mList.SetItems((InventoryItem **)mItems, mItemCount);
+    mList.SetItems(mItems, mItemCount);
     mTabs.SetMasks(mInventory, mCostumes, mInteriors);
     mTabs.SetVisible(TRUE);
 }
