@@ -1137,7 +1137,7 @@ func_020297b8 kind:function(arm,size=0x230) addr:0x020297b8
 func_020299e8 kind:function(arm,size=0xcc) addr:0x020299e8
 func_02029ab4 kind:function(arm,size=0x50) addr:0x02029ab4
 _ZN5Model4LoadEii kind:function(arm,size=0xd0) addr:0x02029b04
-func_02029bd4 kind:function(arm,size=0x4c) addr:0x02029bd4
+_ZN5Model10LoadByNameEiPKc kind:function(arm,size=0x4c) addr:0x02029bd4
 func_02029c20 kind:function(arm,size=0x120) addr:0x02029c20
 func_02029d40 kind:function(arm,size=0x5c) addr:0x02029d40
 func_02029d9c kind:function(arm,size=0x34) addr:0x02029d9c
@@ -4796,7 +4796,7 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b0650 kind:data(word) addr:0x020fc4dc
 .p__sinit_ValueRamp.cpp kind:data(word) addr:0x020fc4e0 local
 .p__sinit_SceneManager.cpp kind:data(word) addr:0x020fc4e4 local
-.p__sinit_020b06cc kind:data(word) addr:0x020fc4e8
+.p__sinit_EmptyScene.cpp kind:data(word) addr:0x020fc4e8 local
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
 .p__sinit_MiiListMenuScene.cpp kind:data(word) addr:0x020fc4f0 local
 .p__sinit_MiiListScene.cpp kind:data(word) addr:0x020fc4f4 local
@@ -5174,14 +5174,14 @@ gStr_BM0_2 kind:data(any) addr:0x02110e5c
 gStr_BT0_3 kind:data(any) addr:0x02110e60
 gStr_HT0_3 kind:data(any) addr:0x02110e64
 _ZTV17ParticleTestScene kind:data(any) addr:0x02110e68
-gStr_STE kind:data(any) addr:0x02110e8c
-gStr_Mdl_Spl_SplRoomEffect_LZ_bin kind:data(any) addr:0x02110e90
-gStr_STI kind:data(any) addr:0x02110eb0
-gStr_Mdl_Body_body000_3D_LZ_bin_2 kind:data(any) addr:0x02110eb4
-gStr_STE_SplRoomEffect_spa kind:data(any) addr:0x02110ed0
-gStr_STI_body_imd kind:data(any) addr:0x02110ee8
-gStr_STE_2 kind:data(any) addr:0x02110ef8
-gStr_STI_2 kind:data(any) addr:0x02110efc
+@13969 kind:data(any) addr:0x02110e8c local
+@13970 kind:data(any) addr:0x02110e90 local
+@13971 kind:data(any) addr:0x02110eb0 local
+@13972 kind:data(any) addr:0x02110eb4 local
+@13979 kind:data(any) addr:0x02110ed0 local
+@13980 kind:data(any) addr:0x02110ee8 local
+@14037 kind:data(any) addr:0x02110ef8 local
+@14038 kind:data(any) addr:0x02110efc local
 _ZTV15BgTextTestScene kind:data(any) addr:0x02110f00
 sStringArg kind:data(any) addr:0x02110f24 local
 gStr_B0D0F0H0J0 kind:data(any) addr:0x02110f28

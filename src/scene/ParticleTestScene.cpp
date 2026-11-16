@@ -15,7 +15,6 @@ void func_0207b258(ParticleSystem *system, void *a);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int effect, VecFx32 *position); // Starts an emitter
 void func_0207b364(ParticleSystem *system, ParticleEmitter *emitter);
 void func_0207b40c(ParticleSystem *system, ParticleEmitter *emitter);
-extern u8 data_02142438[];
 }
 
 void ParticleTestScene::StartLoading() {
@@ -97,7 +96,7 @@ void ParticleTestScene::Draw() {
     mBody.Draw();
     func_0202ad84(data_021223e4);
     NNS_G3dGlbFlushP();
-    func_0207b258(mParticles, data_02142438);
+    func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     func_0207b138(mParticles);
 }
 

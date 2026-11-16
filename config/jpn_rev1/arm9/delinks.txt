@@ -404,6 +404,7 @@ src/scene/SceneManager.cpp:
     .bss        start:0x0213b700 end:0x0213ba74
 
 src/scene/Scene.cpp:
+    complete
     .text       start:0x0204af20 end:0x0204b090
 
 src/scene/DrawManTestScene.cpp:
@@ -421,10 +422,12 @@ src/scene/HumanTestScene.cpp:
     .data       start:0x02110d00 end:0x02110e68
 
 src/scene/ParticleTestScene.cpp:
+    complete
     .text       start:0x0204c174 end:0x0204c6f4
     .data       start:0x02110e68 end:0x02110f00
 
 src/scene/BgTextTestScene.cpp:
+    complete
     .text       start:0x0204c6f4 end:0x0204c860
     .data       start:0x02110f00 end:0x02110f24
 
@@ -441,6 +444,7 @@ src/scene/TtsTestScene.cpp:
     .data       start:0x0211115c end:0x021112b0
 
 src/scene/EmptyScene.cpp:
+    complete
     .text       start:0x0204d7f8 end:0x0204d880
     .init       start:0x020b06cc end:0x020b06e0
     .ctor       start:0x020fc4e8 end:0x020fc4ec

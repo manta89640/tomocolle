@@ -7,3 +7,17 @@
 _ZN9AnimModelD1Ev                       # 0x0202af98, the 3D models' file, after its last function
 _ZN11ClothesItem12GetModelNameEv        # 0x0204ad20, src/scene/SceneManager.cpp
 _ZN14SceneCharacterD1Ev                 # 0x0203e188, src/scene/SceneManager.cpp
+_ZN9ItemModelD1Ev                       # 0x02041530, src/scene/SceneManager.cpp
+_ZN13InventoryItem12GetModelNameEv      # 0x0204abac, src/scene/SceneManager.cpp
+_ZN13InventoryItem10GetWeight3Ev        # 0x0204abc8, src/scene/SceneManager.cpp
+_ZN13InventoryItem10GetWeight2Ev        # 0x0204abf0, src/scene/SceneManager.cpp
+_ZN13InventoryItem10GetWeight1Ev        # 0x0204ac18, src/scene/SceneManager.cpp
+_ZN13InventoryItem10GetWeight0Ev        # 0x0204ac40, src/scene/SceneManager.cpp
+_ZN13InventoryItem9GetPrice2Ev          # 0x0204ac68, src/scene/SceneManager.cpp
+_ZN13InventoryItem8GetPriceEv           # 0x0204ac8c, src/scene/SceneManager.cpp
+_ZN11ClothesItem10GetWeight3Ev          # 0x0204acb0, src/scene/SceneManager.cpp
+_ZN11ClothesItem10GetWeight2Ev          # 0x0204accc, src/scene/SceneManager.cpp
+_ZN11ClothesItem10GetWeight1Ev          # 0x0204ace8, src/scene/SceneManager.cpp
+_ZN11ClothesItem10GetWeight0Ev          # 0x0204ad04, src/scene/SceneManager.cpp
+_ZN11ClothesItem9GetPrice2Ev            # 0x0204ad3c, src/scene/SceneManager.cpp
+_ZN11ClothesItem8GetPriceEv             # 0x0204ad60, src/scene/SceneManager.cpp

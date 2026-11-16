@@ -58,7 +58,7 @@ public:
         }
     }
     virtual void Load(int resourceId, int unk); // func_02029b04
-    virtual void UnknownVirtual3();             // func_02029bd4
+    virtual void LoadByName(int, const char *); // 0x02029bd4 (resource id, name): Load() with the index of the model of that name
     virtual void Draw();                        // func_02029df4
 
     void SetPosition(VecFx32 position) {
