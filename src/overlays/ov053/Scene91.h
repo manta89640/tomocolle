@@ -27,6 +27,8 @@
 // The name is descriptive, not the original.
 class Scene91Model : public AnimModel {
 public:
+    virtual void Draw(); // 0x0214A998: the overlay's (its table's last entry)
+
     /* 0x00E0 */ u8 mUnknown00E0[8];
     /* 0x00E8 */ CharacterBase mCharacters[1];
     /* 0x26CC */ ItemModel mItemModels[1];
