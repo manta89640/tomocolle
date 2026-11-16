@@ -74,6 +74,8 @@ struct TroubleInfo {
 }; // 0xC
 extern TroubleInfo *data_02114d78[];
 extern const u8 gStr_Parenthesis_2[]; // The starting progress of each trouble of category 0
+extern const u8 data_020f8d8c[10];     // The weight of each trouble category in the random choice
+extern const u32 gStr_LessThan_2[10];  // The number of troubles of each category
 extern const LongActInfo data_020f8cc0[];
 }
 
@@ -147,7 +149,7 @@ void SavedCharacter::Reset() {
     ResetRelations();
     ResetMood();
     ClearLongAct();
-    func_0209b1d8();
+    ClearTrouble();
     func_0209c4a0();
     func_0209c5d8();
     func_0209c5f4();
@@ -194,7 +196,7 @@ void SavedCharacter::Register() {
     ResetRelations();
     ResetMood();
     ClearLongAct();
-    func_0209b1d8();
+    ClearTrouble();
     func_0209c5d8();
     func_0209c5f4();
     func_0209c698();
@@ -1514,4 +1516,103 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
         SetLongAct(state, 0, now + GetLongActDuration(state, 3));
     }
     func_0202c28c(&gGameData, mIndex, this);
+}
+
+int SavedCharacter::ChooseTroubleCategory() {
+    int total = 0;
+    for (int i = 0; i < 10; i++) {
+        total += GetTroubleCategoryWeight(i);
+    }
+    int random = MATH_Rand16(&gRandom, total);
+    u8 category = 0;
+    int sum = 0;
+    for (; category < 10; category++) {
+        sum += GetTroubleCategoryWeight(category);
+        if (random < sum) {
+            break;
+        }
+    }
+    if (category >= 10) {
+        category = 0;
+    }
+    return category;
+}
+
+int SavedCharacter::GetTroubleCategoryWeight(int category) {
+    u8 weight = data_020f8d8c[category];
+    switch (category) {
+    case 0:
+        break;
+    case 1:
+        if (((u8 *)&gGameData)[0xB2] < 5) {
+            weight = 0;
+        }
+        break;
+    case 2:
+        if (!func_02039c00(data_0212348c, 10)) {
+            weight = 0;
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    case 8:
+        if (!func_02039c00(data_0212348c, 11)) {
+            weight = 0;
+        }
+        break;
+    }
+    return weight;
+}
+
+int SavedCharacter::ChooseTrouble(int category) {
+    int total = 0;
+    u32 count = gStr_LessThan_2[category];
+    for (u32 i = 0; i < count; i++) {
+        total += data_02114d78[category][i].unk0Bits24;
+    }
+    int random = MATH_Rand16(&gRandom, total);
+    u8 id = 0;
+    int sum = 0;
+    for (; id < gStr_LessThan_2[category]; id++) {
+        sum += data_02114d78[category][id].unk0Bits24;
+        if (random < sum) {
+            break;
+        }
+    }
+    if (id >= count) {
+        id = 0;
+    }
+    return id;
+}
+
+void SavedCharacter::EndTrouble(s64 now) {
+    mTroubleState = 4;
+    mTroubleEnd = now + data_02114d78[mTroubleCategory][mTroubleId].cooldownMinutes * 60;
+    mMood = 0;
+    if (!IsLongActPaired()) {
+        mLongActEnd = now;
+    }
+    func_0202c28c(&gGameData, mIndex, this);
+}
+
+void SavedCharacter::ClearTrouble() {
+    mTroubleState = 0;
+    mTroubleCategory = 0;
+    mTroubleId = 0;
+    mTroublePartner = 0;
+    mTroubleProgress = 0;
+    mTroubleEnd = 0;
+    mTroubleStart = 0;
+}
+
+BOOL SavedCharacter::StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused) {
+    if (mTroubleState != 0) {
+        return FALSE;
+    }
+    int category = ChooseTroubleCategory();
+    return StartTrouble(category, ChooseTrouble(category), now, force, partner, unused);
 }

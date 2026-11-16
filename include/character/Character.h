@@ -246,8 +246,14 @@ public:
     static BOOL IsTrouble3_4State(int state, int category, int id);
     static int GetEncounterBonus(int base, int value);
     void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    int ChooseTroubleCategory();
+    int GetTroubleCategoryWeight(int category);
+    int ChooseTrouble(int category);
+    void EndTrouble(s64 now);
+    void ClearTrouble();
+    BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
     // Not written yet
-    void func_0209b1d8();
+    BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
     void func_0209c4a0();
     void func_0209c5d8();
     void func_0209c5f4();
