@@ -644,6 +644,186 @@ void MiiEditEtcTab::Init(MiiEditFacePage *page) {
     func_02031e28(&mPage->mButtons[10], TRUE);
 }
 
+// Where the etc tab's buttons are: the glasses types', the mustache types' (and the beard types'), the mole types'
+static const ScreenPoint sGlassesPositions[9] = {
+    { 59, 77 },  { 102, 77 },  { 145, 77 },  { 59, 114 }, { 102, 114 },
+    { 145, 114 }, { 59, 151 }, { 102, 151 }, { 145, 151 },
+};
+static const ScreenPoint sMustachePositions[4] = { { 80, 77 }, { 123, 77 }, { 80, 114 }, { 123, 114 } };
+static const ScreenPoint sMolePositions[2] = { { 80, 77 }, { 123, 77 } };
+// The face page's buttons that the etc tab places beside the types (inferred: the arrows that change a part's
+// size and place, as the glasses and the mustache have two such parameters and the mole three), and where
+static const int sAdjustButtons[4] = { 14, 15, 16, 17 };
+static const ScreenPoint sAdjustButtonPositions[4] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 } };
+static const int sMoleAdjustButtons[6] = { 14, 15, 16, 17, 22, 23 };
+static const ScreenPoint sMoleAdjustButtonPositions[6] = {
+    { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 }, { 207, 100 }, { 239, 100 },
+};
+
+void MiiEditEtcTab::SelectTab(int tab, BOOL pressed) {
+    mPage->mButtons[10].mVisible = TRUE;
+    mPage->mButtons[11].mVisible = TRUE;
+    mPage->mButtons[12].mVisible = TRUE;
+    mPage->mButtons[13].mVisible = TRUE;
+    mPage->func_ov076_0214fa14(0);
+    ObjResourceManager_Load(&gObjResourceManager, "E00:/Etc.nce", "E00:/Etc.ncg", 0x1000, 1, 0x10000);
+    switch (tab) {
+    case 0:
+        for (u16 i = 0; i < 9; i++) {
+            u16 sequence = i * 2;
+            mPage->mButtons227C[i].mVisible = TRUE;
+            func_02031278(&mPage->mButtons227C[i], sequence, sequence + 1);
+            func_0203119c(&mPage->mButtons227C[i]);
+            mPage->mButtons227C[i].SetPositionFromVec(sGlassesPositions[i].x << FX32_SHIFT,
+                                                      sGlassesPositions[i].y << FX32_SHIFT);
+        }
+        for (u16 i = 9; i < 12; i++) {
+            mPage->mButtons227C[i].mVisible = FALSE;
+        }
+        break;
+    case 1:
+        for (u16 i = 0; i < 4; i++) {
+            mPage->mButtons227C[i].mVisible = TRUE;
+            u16 sequence = i * 2 + 0x12;
+            func_02031278(&mPage->mButtons227C[i], sequence, sequence + 1);
+            func_0203119c(&mPage->mButtons227C[i]);
+            mPage->mButtons227C[i].SetPositionFromVec(sMustachePositions[i].x << FX32_SHIFT,
+                                                      sMustachePositions[i].y << FX32_SHIFT);
+        }
+        for (u16 i = 4; i < 12; i++) {
+            mPage->mButtons227C[i].mVisible = FALSE;
+        }
+        break;
+    case 2:
+        for (u16 i = 0; i < 2; i++) {
+            mPage->mButtons227C[i].mVisible = TRUE;
+            u16 sequence = i * 2 + 0x1A;
+            func_02031278(&mPage->mButtons227C[i], sequence, sequence + 1);
+            func_0203119c(&mPage->mButtons227C[i]);
+            mPage->mButtons227C[i].SetPositionFromVec(sMolePositions[i].x << FX32_SHIFT,
+                                                      sMolePositions[i].y << FX32_SHIFT);
+        }
+        for (u16 i = 2; i < 12; i++) {
+            mPage->mButtons227C[i].mVisible = FALSE;
+        }
+        break;
+    case 3:
+        for (u16 i = 0; i < 4; i++) {
+            mPage->mButtons227C[i].mVisible = TRUE;
+            u16 sequence = i * 2 + 0x1E;
+            func_02031278(&mPage->mButtons227C[i], sequence, sequence + 1);
+            func_0203119c(&mPage->mButtons227C[i]);
+            mPage->mButtons227C[i].SetPositionFromVec(sMustachePositions[i].x << FX32_SHIFT,
+                                                      sMustachePositions[i].y << FX32_SHIFT);
+        }
+        for (u16 i = 4; i < 12; i++) {
+            mPage->mButtons227C[i].mVisible = FALSE;
+        }
+        break;
+    }
+    for (u16 i = 0; i < 6; i++) {
+        mPage->mButtons[sMoleAdjustButtons[i]].mVisible = FALSE;
+    }
+    switch (tab) {
+    case 0: {
+        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x1F), 7);
+        button %= 9;
+        int color = func_02098dac(&mPage->mScene->mCharacter, 0x20);
+        if (!pressed) {
+            func_02031e28(&mPage->mButtons227C[button], TRUE);
+        } else {
+            func_02031ca4(&mPage->mButtons227C[button]);
+        }
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x140, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 6) {
+                mPage->mButtons[i].mVisible = TRUE;
+            } else {
+                mPage->mButtons[i].mVisible = FALSE;
+            }
+        }
+        mPage->func_ov076_0214ee7c(color, 7, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mPage->mButtons[sAdjustButtons[i]].mVisible = TRUE;
+            mPage->mButtons[sAdjustButtons[i]].SetPositionFromVec(sAdjustButtonPositions[i].x << FX32_SHIFT,
+                                                                  sAdjustButtonPositions[i].y << FX32_SHIFT);
+        }
+        break;
+    }
+    case 1: {
+        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x12), 7);
+        button %= 4;
+        int color = func_02098dac(&mPage->mScene->mCharacter, 0x11);
+        if (!pressed) {
+            func_02031e28(&mPage->mButtons227C[button], TRUE);
+        } else {
+            func_02031ca4(&mPage->mButtons227C[button]);
+        }
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mPage->mButtons[i].mVisible = TRUE;
+            } else {
+                mPage->mButtons[i].mVisible = FALSE;
+            }
+        }
+        mPage->func_ov076_0214ee7c(color, 7, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mPage->mButtons[sAdjustButtons[i]].mVisible = TRUE;
+            mPage->mButtons[sAdjustButtons[i]].SetPositionFromVec(sAdjustButtonPositions[i].x << FX32_SHIFT,
+                                                                  sAdjustButtonPositions[i].y << FX32_SHIFT);
+        }
+        break;
+    }
+    case 2: {
+        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x15), 7);
+        button %= 2;
+        if (!pressed) {
+            func_02031e28(&mPage->mButtons227C[button], TRUE);
+        } else {
+            func_02031ca4(&mPage->mButtons227C[button]);
+        }
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 0) {
+                mPage->mButtons[i].mVisible = TRUE;
+            } else {
+                mPage->mButtons[i].mVisible = FALSE;
+            }
+        }
+        mPage->func_ov076_0214ee7c(0, 7, -1);
+        for (u16 i = 0; i < 6; i++) {
+            mPage->mButtons[sMoleAdjustButtons[i]].mVisible = TRUE;
+            mPage->mButtons[sMoleAdjustButtons[i]].SetPositionFromVec(
+                sMoleAdjustButtonPositions[i].x << FX32_SHIFT, sMoleAdjustButtonPositions[i].y << FX32_SHIFT);
+        }
+        break;
+    }
+    case 3: {
+        u32 button = mPage->GetPartButton(func_02098dac(&mPage->mScene->mCharacter, 0x10), 7);
+        button %= 4;
+        int color = func_02098dac(&mPage->mScene->mCharacter, 0x11);
+        if (!pressed) {
+            func_02031e28(&mPage->mButtons227C[button], TRUE);
+        } else {
+            func_02031ca4(&mPage->mButtons227C[button]);
+        }
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mPage->mButtons[i].mVisible = TRUE;
+            } else {
+                mPage->mButtons[i].mVisible = FALSE;
+            }
+        }
+        mPage->func_ov076_0214ee7c(color, 7, -1);
+        break;
+    }
+    }
+    mTab = tab;
+    mUnknown4 = 0;
+}
+
 // --- The profile page ---
 
 void MiiEditProfilePage::Draw() {

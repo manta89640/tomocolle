@@ -110,8 +110,8 @@ data_ov076_021588ec kind:data(any) addr:0x021588ec
 gStr_K_ov076 kind:data(any) addr:0x021588fc
 data_ov076_0215890c kind:data(any) addr:0x0215890c
 data_ov076_0215891c kind:data(any) addr:0x0215891c
-gStr_P_ov076 kind:data(any) addr:0x0215892c
-data_ov076_0215893c kind:data(any) addr:0x0215893c
+sMolePositions kind:data(any) addr:0x0215892c
+sAdjustButtons kind:data(any) addr:0x0215893c
 gStr_CircumflexAccent_ov076 kind:data(any) addr:0x0215894c
 data_ov076_0215895c kind:data(any) addr:0x0215895c
 data_ov076_02158970 kind:data(any) addr:0x02158970
@@ -119,8 +119,8 @@ gStr_GreaterThan_ov076 kind:data(any) addr:0x02158984
 data_ov076_0215899c kind:data(any) addr:0x0215899c
 data_ov076_021589b4 kind:data(any) addr:0x021589b4
 data_ov076_021589cc kind:data(any) addr:0x021589cc
-data_ov076_021589e4 kind:data(any) addr:0x021589e4
-gText_Ma_ov076 kind:data(any) addr:0x021589fc
+sMoleAdjustButtons kind:data(any) addr:0x021589e4
+sAdjustButtonPositions kind:data(any) addr:0x021589fc
 data_ov076_02158a1c kind:data(any) addr:0x02158a1c
 data_ov076_02158a3c kind:data(any) addr:0x02158a3c
 gStr_P_ov076_2 kind:data(any) addr:0x02158a5c
@@ -128,7 +128,7 @@ gStr_P_ov076_3 kind:data(any) addr:0x02158a7c
 gStr_Colon_ov076 kind:data(any) addr:0x02158a9c
 data_ov076_02158abc kind:data(any) addr:0x02158abc
 gText_E_ov076 kind:data(any) addr:0x02158adc
-gStr_P_ov076_4 kind:data(any) addr:0x02158afc
+sMustachePositions kind:data(any) addr:0x02158afc
 data_ov076_02158b1c kind:data(any) addr:0x02158b1c
 data_ov076_02158b3c kind:data(any) addr:0x02158b3c
 data_ov076_02158b60 kind:data(any) addr:0x02158b60
@@ -144,7 +144,7 @@ gStr_Parenthesis_ov076_2 kind:data(any) addr:0x02158ca4
 data_ov076_02158cd4 kind:data(any) addr:0x02158cd4
 sNoseTypes kind:data(any) addr:0x02158d04
 data_ov076_02158d34 kind:data(any) addr:0x02158d34
-gText_Ma_ov076_2 kind:data(any) addr:0x02158d64
+sMoleAdjustButtonPositions kind:data(any) addr:0x02158d64
 data_ov076_02158d94 kind:data(any) addr:0x02158d94
 data_ov076_02158db4 kind:data(any) addr:0x02158db4
 gStr__ov076 kind:data(any) addr:0x02158dc4
@@ -157,7 +157,7 @@ data_ov076_02158eb4 kind:data(any) addr:0x02158eb4
 sFaceTypePositions kind:data(any) addr:0x02158ed4
 gText_Ma_ov076_3 kind:data(any) addr:0x02158f14
 gStr_Comma_ov076 kind:data(any) addr:0x02158f54
-gStr_Semicolon_ov076 kind:data(any) addr:0x02158f9c
+sGlassesPositions kind:data(any) addr:0x02158f9c
 gStr_F_ov076 kind:data(any) addr:0x02158fe4
 gStr_t_ov076 kind:data(any) addr:0x02159034
 data_ov076_02159084 kind:data(any) addr:0x02159084
