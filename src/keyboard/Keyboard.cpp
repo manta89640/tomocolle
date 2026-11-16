@@ -56,14 +56,14 @@ typedef void (*KeyCallback)(void *userData, int event);
 typedef void (*AreaCallback)(void *userData, int event, int a, int code);
 
 extern "C" {
-void func_02081cf8(u16 *screen, int palette, int charOffset);
-void func_02081d68(void *a, void *charData, char (*files)[0x30]);
-void func_02081df0(int x, int y, int a, KeyCallback callback, void *userData);
-void func_02081ff0(int mode, BOOL b);
-void func_02082068(int a, TPData tp);
-void *func_0208265c();
-int func_02082680();
-void func_02082e70(const KeyArea *areas, int count, AreaCallback callback, void *userData);
+void KeyboardCore_MakeScreen(u16 *screen, int palette, int charOffset);
+void KeyboardCore_InitGraphics(void *a, void *charData, char (*files)[0x30]);
+void KeyboardCore_Init(int x, int y, int a, KeyCallback callback, void *userData);
+void KeyboardCore_SetMode(int mode, BOOL b);
+void KeyboardCore_Update(int a, TPData tp);
+void *KeyboardCore_GetCharData();
+int KeyboardCore_GetCharDataSize();
+void KeyboardCore_SetAreas(const KeyArea *areas, int count, AreaCallback callback, void *userData);
 }
 
 // --- This file ----------------------------------------------------------------------------------------------------
@@ -138,24 +138,24 @@ void func_02083078(SoftKeyboard *keyboard, int plane, int palette) {
 }
 
 void func_020830bc(SoftKeyboard *keyboard, int plane) {
-    func_02081d68(keyboard->mUnknown080C, keyboard->mCharData, keyboard->mBgFiles);
+    KeyboardCore_InitGraphics(keyboard->mUnknown080C, keyboard->mCharData, keyboard->mBgFiles);
     keyboard->mPlane = plane;
     gGraphicsManager[6] |= plane;
     func_0202543c(gGraphicsManager, plane, -1, 0, 0, 0, 0, 0);
 }
 
 void func_02083128(SoftKeyboard *keyboard, KeyCallback callback, void *userData) {
-    func_02081df0(45, 59, 0, callback, userData);
-    func_02081cf8(keyboard->mScreen, keyboard->mPalette, 0);
-    func_02082e70(sTabAreas, 2, NULL, NULL);
+    KeyboardCore_Init(45, 59, 0, callback, userData);
+    KeyboardCore_MakeScreen(keyboard->mScreen, keyboard->mPalette, 0);
+    KeyboardCore_SetAreas(sTabAreas, 2, NULL, NULL);
     int plane = keyboard->mPlane;
     func_02028108(&data_02121834, plane, -45);
     func_02028154(&data_02121834, plane, -59);
 }
 
 void SoftKeyboard::TransferCharData() {
-    void *data = func_0208265c();
-    VramTransferQueue_AddCharData(gVramTransferQueue, data, mPlane, 0, func_02082680());
+    void *data = KeyboardCore_GetCharData();
+    VramTransferQueue_AddCharData(gVramTransferQueue, data, mPlane, 0, KeyboardCore_GetCharDataSize());
 }
 
 void SoftKeyboard::TransferScreen() {
@@ -167,11 +167,11 @@ void SoftKeyboard::LoadBgPalette(int a) {
 }
 
 void func_02083244(SoftKeyboard *keyboard, int a, TPData tp) {
-    func_02082068(a, tp);
+    KeyboardCore_Update(a, tp);
 }
 
 void func_02083288(SoftKeyboard *keyboard, int mode, BOOL b) {
-    func_02081ff0(mode, b);
+    KeyboardCore_SetMode(mode, b);
 }
 
 KeyboardButton::KeyboardButton() {
@@ -369,7 +369,7 @@ void SoftKeyboard::Draw() {
 }
 
 void func_02083c30(SoftKeyboard *keyboard) {
-    func_02082e70(sTabAreas, 5, (AreaCallback)func_02083c54, keyboard);
+    KeyboardCore_SetAreas(sTabAreas, 5, (AreaCallback)func_02083c54, keyboard);
 }
 
 void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code) {
@@ -403,7 +403,7 @@ void func_02083c54(SoftKeyboard *keyboard, int event, int a, int code) {
         }
         Sprite_SetFrame(&tabs[tab], 1);
         Sprite_SetPlaying(&tabs[tab], TRUE);
-        func_02081ff0(modes[tab], TRUE);
+        KeyboardCore_SetMode(modes[tab], TRUE);
         break;
     }
     }

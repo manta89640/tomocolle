@@ -18,8 +18,8 @@ struct KeyboardState;
 struct KeyLayout {
     const KeyRect *keys;
     void *charFile; // The NCGR file of the layout's graphics
-    void (*func)(KeyboardState *kb);
-    u16 unk_c;
+    void (*onKey)(KeyboardState *kb); // Called in the frame a key gives a code
+    u16 numSpecialKeys; // Codes 1 to this are special keys; the character keys' codes follow
     u16 numKeys;
 };
 
@@ -34,24 +34,26 @@ struct KeyboardState {
     const KeyRect *pressed; // The key touched first
     const KeyRect *current; // The key under the pen now
     const KeyLayout *layout;
-    void (*unk_c)(void *arg, u16 code, int x, int y);
-    void *unk_10;
-    void (*unk_14)(void *arg, int sound);
-    void *unk_18;
-    const u16 *chars;
-    KeyRepeat unk_20;
-    u16 code;
-    u16 unk_2a;
-    u16 unk_2c;
-    u16 unk_2e;
-    int unk_30;
-    const KeyRect *cursor;
-    BOOL unk_38;
-    BOOL unk_3c;
-    void (*unk_40)(void *arg, int action, u16 a, u16 b, u16 x, u16 y);
-    void *unk_44;
-    const KeyRect *unk_48;
-    u16 unk_4c;
+    // Called as the pen is lifted after leaving a character key, with the character and where the pen was lifted
+    // (nothing in the ROM sets it)
+    void (*dropCallback)(void *arg, u16 c, int x, int y);
+    void *dropArg;
+    void (*soundCallback)(void *arg, int sound); // Called with sound numbers 0 to 10
+    void *soundArg;
+    const u16 *chars; // The layout's characters, of the current modifier
+    KeyRepeat repeat; // The pad's key repeat
+    u16 code;         // The code of this frame's key
+    u16 character;    // The character this frame's key gives (KeyboardCore_CodeToChar)
+    u16 dragChar;     // The character of the pressed key once the pen has left it
+    u16 modifier;     // The code of the modifier key that is on (3 or 4), 0 for none
+    int layoutIndex;  // Which of sLayouts
+    const KeyRect *cursor; // The pad cursor
+    BOOL pressCursorKey;   // Makes the next update give the cursor's key (nothing in the ROM sets it)
+    BOOL extraKeys;        // Whether sExtraKeys are keys too
+    void (*areaCallback)(void *arg, int action, u16 pressedCode, u16 touchedCode, u16 x, u16 y);
+    void *areaArg;
+    const KeyRect *areas; // Extra touch areas, with codes from 0x100 (SoftKeyboard's tabs)
+    u16 numAreas;
 };
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof((a)[0]))
@@ -81,41 +83,41 @@ void func_02081688(u16 mask);
 void func_020816b4(void);
 u16 func_02081768(void);
 
-u16 func_0208179c(const KeyLayout *layout);
-const KeyRect *func_020817f0(KeyboardState *kb, int x, int y);
-BOOL func_020819a4(void *file, NNSG2dCharacterData **charData);
-void func_020819e8(KeyboardState *kb);
-void func_02081b70(KeyboardState *kb);
-BOOL func_02081cb8(KeyboardState *kb);
-void func_02081cf8(u16 *screen, int palette, int charBase);
-void func_02081d68(void *baseBuffer, void *buffer, const char (*names)[0x30]);
-void func_02081df0(int x, int y, BOOL unk_3c, void (*func)(void *arg, int sound), void *arg);
-void func_02081f38(int layout);
-void func_02081ff0(int index, BOOL sound);
-void func_02082068(u16 pad, TPData touch);
-u16 func_02082560(void);
-u16 func_02082570(KeyboardState *kb, u16 code);
-void *func_0208265c(void);
-u32 func_02082680(void);
-void func_02082688(u32 *rows, u32 color, int x0, int y0, int x1, int y1);
-void func_02082738(u8 *chars, int width, u32 color, int x0, int y0, int x1, int y1);
-void func_0208288c(KeyboardState *kb);
-const KeyRect *func_02082914(u32 dir, const KeyRect *cursor, const KeyRect *keys);
-void func_02082b48(KeyboardState *kb);
-void func_02082b68(KeyboardState *kb);
-void func_02082b90(KeyboardState *kb);
-void func_02082bb0(KeyboardState *kb);
-void func_02082bd0(KeyboardState *kb);
-void func_02082bf0(KeyboardState *kb);
-void func_02082c58(KeyboardState *kb);
-void func_02082c8c(KeyboardState *kb);
-void func_02082c90(KeyboardState *kb, const u16 **tables);
-void func_02082d70(KeyboardState *kb);
-void func_02082d74(KeyboardState *kb);
-void func_02082d78(u16 code);
-void func_02082e18(KeyboardState *kb);
-void func_02082e70(const KeyRect *keys, u16 count, void (*func)(void *, int, u16, u16, u16, u16), void *arg);
-void func_02082e8c(void *arg, int sound);
+u16 KeyboardCore_FindFirstCharKey(const KeyLayout *layout);
+const KeyRect *KeyboardCore_FindKeyAt(KeyboardState *kb, int x, int y);
+BOOL KeyboardCore_GetUnpackedCharData(void *file, NNSG2dCharacterData **charData);
+void KeyboardCore_DrawKeyLabels(KeyboardState *kb);
+void KeyboardCore_LightKeys(KeyboardState *kb);
+BOOL KeyboardCore_IsPenOnPressedKey(KeyboardState *kb);
+void KeyboardCore_MakeScreen(u16 *screen, int palette, int charBase);
+void KeyboardCore_InitGraphics(void *baseBuffer, void *buffer, const char (*names)[0x30]);
+void KeyboardCore_Init(int x, int y, BOOL extraKeys, void (*func)(void *arg, int sound), void *arg);
+void KeyboardCore_SetLayout(int layout);
+void KeyboardCore_SetMode(int index, BOOL sound);
+void KeyboardCore_Update(u16 pad, TPData touch);
+u16 KeyboardCore_GetChar(void);
+u16 KeyboardCore_CodeToChar(KeyboardState *kb, u16 code);
+void *KeyboardCore_GetCharData(void);
+u32 KeyboardCore_GetCharDataSize(void);
+void KeyboardCore_LightTileRect(u32 *rows, u32 color, int x0, int y0, int x1, int y1);
+void KeyboardCore_LightRect(u8 *chars, int width, u32 color, int x0, int y0, int x1, int y1);
+void KeyboardCore_PlaceCursor(KeyboardState *kb);
+const KeyRect *KeyboardCore_MoveCursor(u32 dir, const KeyRect *cursor, const KeyRect *keys);
+void KeyboardCore_UseEnglishLayout(KeyboardState *kb);
+void KeyboardCore_UseKanaLayout(KeyboardState *kb);
+void KeyboardCore_UseEuroLayout(KeyboardState *kb);
+void KeyboardCore_UseSignLayout(KeyboardState *kb);
+void KeyboardCore_UsePictoLayout(KeyboardState *kb);
+void KeyboardCore_OnKanaKey(KeyboardState *kb);
+void KeyboardCore_OnEnglishKey(KeyboardState *kb);
+void KeyboardCore_OnEuroKey(KeyboardState *kb);
+void KeyboardCore_ApplyModifier(KeyboardState *kb, const u16 **tables);
+void KeyboardCore_OnSignKey(KeyboardState *kb);
+void KeyboardCore_OnPictoKey(KeyboardState *kb);
+void KeyboardCore_PlayKeySound(u16 code);
+void KeyboardCore_UpdateDrag(KeyboardState *kb);
+void KeyboardCore_SetAreas(const KeyRect *keys, u16 count, void (*func)(void *, int, u16, u16, u16, u16), void *arg);
+void KeyboardCore_PlaySound(void *arg, int sound);
 
 }
 
@@ -145,7 +147,7 @@ static wchar_t sKanaSmall[60] = L"ぁぃぅぇぉ　　　　　　　　　　�
 static wchar_t sKanaPlain[60] = L"あいうえおかきくけこさしすせそたちつてとはひふへほやゆよわアイウエオカキクケコサシスセソタチツテトハヒフヘホヤユヨワ";
 static wchar_t sKanaDakuten[60] = L"　　　　　がぎぐげござじずぜぞだぢづでどばびぶべぼ　　　　　　ヴ　　ガギグゲゴザジズゼゾダヂヅデドバビブベボ　　　　";
 static const wchar_t *sKanaTables[4] = {sKanaPlain, sKanaDakuten, sKanaHandakuten, sKanaSmall};
-static KeyRect data_02112dec[2] = {
+static KeyRect sExtraKeys[2] = {
     {104, 89, 92, 13, 0, 0}, {4, 89, 92, 13, 0, 0},
 };
 
@@ -158,11 +160,11 @@ static const KanaPair sKanaPairHandakuten = {sKanaTables[0], sKanaTables[2]};
 static const KanaPair sKanaPairSmall = {sKanaTables[0], sKanaTables[3]};
 
 static KeyLayout sLayouts[5] = {
-    {KeyboardKeysEnglish, NULL, func_02082c58, 4, 0},
-    {KeyboardKeysKana, NULL, func_02082bf0, 7, 0},
-    {KeyboardKeysEuro, NULL, func_02082c8c, 2, 0},
-    {KeyboardKeysSign, NULL, func_02082d70, 2, 0},
-    {KeyboardKeysPicto, NULL, func_02082d74, 2, 0},
+    {KeyboardKeysEnglish, NULL, KeyboardCore_OnEnglishKey, 4, 0},
+    {KeyboardKeysKana, NULL, KeyboardCore_OnKanaKey, 7, 0},
+    {KeyboardKeysEuro, NULL, KeyboardCore_OnEuroKey, 2, 0},
+    {KeyboardKeysSign, NULL, KeyboardCore_OnSignKey, 2, 0},
+    {KeyboardKeysPicto, NULL, KeyboardCore_OnPictoKey, 2, 0},
 };
 
 static int sOriginY;
@@ -173,16 +175,16 @@ static u8 *sCharData;
 static KeyboardState sKeyboard;
 static u32 data_021486d8[6]; // Only a function the link drops refers to it
 
-extern "C" u16 func_0208179c(const KeyLayout *layout) {
+extern "C" u16 KeyboardCore_FindFirstCharKey(const KeyLayout *layout) {
     for (u16 i = 0; i < layout->numKeys; i++) {
-        if (layout->keys[i].code == layout->unk_c + 1) {
+        if (layout->keys[i].code == layout->numSpecialKeys + 1) {
             return i;
         }
     }
     return 0;
 }
 
-extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
+extern "C" const KeyRect *KeyboardCore_FindKeyAt(KeyboardState *kb, int x, int y) {
     const KeyLayout *layout;
     const KeyRect *keys;
     int i;
@@ -198,9 +200,9 @@ extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
             return &keys[i];
         }
     }
-    if (kb->unk_3c) {
-        keys = data_02112dec;
-        for (i = 0; i < ARRAY_COUNT(data_02112dec); i++) {
+    if (kb->extraKeys) {
+        keys = sExtraKeys;
+        for (i = 0; i < ARRAY_COUNT(sExtraKeys); i++) {
             key = &keys[i];
             if (sOriginY + key->y <= y && y < sOriginY + (key->y + key->h) && sOriginX + key->x <= x &&
                 x < sOriginX + (key->x + key->w)) {
@@ -208,25 +210,25 @@ extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
             }
         }
     }
-    if (kb->unk_4c != 0) {
+    if (kb->numAreas != 0) {
         // The original reads the count again at the end of each pass, but not for the first test: a volatile read
         // there, and the first test written out, give that
         i = 0;
-        if (i < kb->unk_4c) {
-            key = kb->unk_48;
+        if (i < kb->numAreas) {
+            key = kb->areas;
             do {
                 if (key->y <= y && y < key->y + key->h && key->x <= x && x < key->x + key->w) {
                     return key;
                 }
                 key++;
                 i++;
-            } while (i < *(volatile u16 *)&kb->unk_4c);
+            } while (i < *(volatile u16 *)&kb->numAreas);
         }
     }
     return NULL;
 }
 
-extern "C" BOOL func_020819a4(void *file, NNSG2dCharacterData **charData) {
+extern "C" BOOL KeyboardCore_GetUnpackedCharData(void *file, NNSG2dCharacterData **charData) {
     NNSG2dBinaryBlockHeader *block =
         NNS_G2dFindBinaryBlock((NNSG2dBinaryFileHeader *)file, NNS_G2D_BINBLK_SIG_CHARACTERDATA);
     *charData = (NNSG2dCharacterData *)(block + 1);
@@ -237,7 +239,7 @@ extern "C" BOOL func_020819a4(void *file, NNSG2dCharacterData **charData) {
     return TRUE;
 }
 
-extern "C" void func_020819e8(KeyboardState *kb) {
+extern "C" void KeyboardCore_DrawKeyLabels(KeyboardState *kb) {
     int i;
     const NNSG2dFont *font;
     const KeyLayout *layout;
@@ -251,10 +253,10 @@ extern "C" void func_020819e8(KeyboardState *kb) {
     layout = kb->layout;
     cellHeight = NNS_G2dFontGetCellHeight(font);
     charData = (NNSG2dCharacterData *)&sKeyboard;
-    func_020819a4(layout->charFile, &charData);
+    KeyboardCore_GetUnpackedCharData(layout->charFile, &charData);
     MI_CpuCopyFast(charData->pRawData, sBaseCharData, 0x2280);
     NNS_G2dCharCanvasInitForBG(&canvas, sBaseCharData, 25, 11, NNS_G2D_CHARA_COLORMODE_16);
-    first = func_0208179c(layout);
+    first = KeyboardCore_FindFirstCharKey(layout);
     for (i = 0; i < layout->numKeys - first; i++) {
         const KeyRect *key = &layout->keys[first + i];
         NNS_G2dFontGetGlyph(&glyph, font, kb->chars[i]);
@@ -263,15 +265,15 @@ extern "C" void func_020819e8(KeyboardState *kb) {
     }
 }
 
-extern "C" void func_02081b70(KeyboardState *kb) {
+extern "C" void KeyboardCore_LightKeys(KeyboardState *kb) {
     const KeyLayout *layout = kb->layout;
     MI_CpuCopyFast(sBaseCharData, sCharData, 0x2280);
-    if (kb->unk_2e != 0) {
-        const KeyRect *key = &layout->keys[kb->unk_2e - 1];
-        func_02082738(sCharData, 200, 8, key->x, key->y, key->x + key->w, key->y + key->h);
+    if (kb->modifier != 0) {
+        const KeyRect *key = &layout->keys[kb->modifier - 1];
+        KeyboardCore_LightRect(sCharData, 200, 8, key->x, key->y, key->x + key->w, key->y + key->h);
     }
     const KeyRect *key = kb->pressed;
-    if (key == NULL || kb->current == NULL || kb->current->code == kb->unk_2e || key->code == kb->unk_2e ||
+    if (key == NULL || kb->current == NULL || kb->current->code == kb->modifier || key->code == kb->modifier ||
         key->code == 0) {
         return;
     }
@@ -282,12 +284,12 @@ extern "C" void func_02081b70(KeyboardState *kb) {
         return;
     }
     do {
-        func_02082738(sCharData, 200, 8, key->x, key->y, key->x + key->w, key->y + key->h);
+        KeyboardCore_LightRect(sCharData, 200, 8, key->x, key->y, key->x + key->w, key->y + key->h);
         key += key->link;
     } while (key != kb->pressed);
 }
 
-extern "C" BOOL func_02081cb8(KeyboardState *kb) {
+extern "C" BOOL KeyboardCore_IsPenOnPressedKey(KeyboardState *kb) {
     BOOL result = FALSE;
     BOOL both = kb->pressed != NULL && kb->current != NULL;
     if (both) {
@@ -298,7 +300,7 @@ extern "C" BOOL func_02081cb8(KeyboardState *kb) {
     return result;
 }
 
-extern "C" void func_02081cf8(u16 *screen, int palette, int charBase) {
+extern "C" void KeyboardCore_MakeScreen(u16 *screen, int palette, int charBase) {
     const int width = 25;
     const int blank = 0x113;
     const int height = 11;
@@ -312,7 +314,7 @@ extern "C" void func_02081cf8(u16 *screen, int palette, int charBase) {
     DC_StoreRange(screen, 0x800);
 }
 
-extern "C" void func_02081d68(void *baseBuffer, void *buffer, const char (*names)[0x30]) {
+extern "C" void KeyboardCore_InitGraphics(void *baseBuffer, void *buffer, const char (*names)[0x30]) {
     sBaseCharData = (u8 *)baseBuffer;
     sCharData = (u8 *)buffer;
     sLayouts[0].charFile = ArchiveManager_GetFileByName(gArchiveManager, names[1]);
@@ -322,13 +324,13 @@ extern "C" void func_02081d68(void *baseBuffer, void *buffer, const char (*names
     sLayouts[4].charFile = ArchiveManager_GetFileByName(gArchiveManager, names[4]);
 }
 
-extern "C" void func_02081df0(int x, int y, BOOL unk_3c, void (*func)(void *arg, int sound), void *arg) {
+extern "C" void KeyboardCore_Init(int x, int y, BOOL extraKeys, void (*func)(void *arg, int sound), void *arg) {
     sOriginX = (u16)x;
     sOriginY = (u16)y;
-    sKeyboard.unk_38 = FALSE;
-    sKeyboard.unk_3c = unk_3c;
-    sKeyboard.unk_14 = func;
-    sKeyboard.unk_18 = arg;
+    sKeyboard.pressCursorKey = FALSE;
+    sKeyboard.extraKeys = extraKeys;
+    sKeyboard.soundCallback = func;
+    sKeyboard.soundArg = arg;
     func_02081440();
     if (sInitialized) {
         return;
@@ -341,131 +343,131 @@ extern "C" void func_02081df0(int x, int y, BOOL unk_3c, void (*func)(void *arg,
     sLayouts[2].numKeys = KEY_COUNT(KeyboardKeysEuro);
     sLayouts[3].numKeys = KEY_COUNT(KeyboardKeysSign);
     sLayouts[4].numKeys = KEY_COUNT(KeyboardKeysPicto);
-    sKeyboard.unk_c = NULL;
-    sKeyboard.unk_10 = NULL;
-    sKeyboard.cursor = &sLayouts[1].keys[sLayouts[1].unk_c];
-    func_02081f38(1);
-    sKeyboard.unk_48 = NULL;
-    sKeyboard.unk_4c = 0;
-    sKeyboard.unk_40 = NULL;
-    sKeyboard.unk_44 = NULL;
+    sKeyboard.dropCallback = NULL;
+    sKeyboard.dropArg = NULL;
+    sKeyboard.cursor = &sLayouts[1].keys[sLayouts[1].numSpecialKeys];
+    KeyboardCore_SetLayout(1);
+    sKeyboard.areas = NULL;
+    sKeyboard.numAreas = 0;
+    sKeyboard.areaCallback = NULL;
+    sKeyboard.areaArg = NULL;
 }
 
-extern "C" void func_02081f38(int layout) {
-    sKeyboard.unk_30 = layout;
+extern "C" void KeyboardCore_SetLayout(int layout) {
+    sKeyboard.layoutIndex = layout;
     sKeyboard.pressed = NULL;
     sKeyboard.current = NULL;
     sKeyboard.code = 0;
-    sKeyboard.unk_2a = 0;
-    sKeyboard.unk_2e = 0;
-    sKeyboard.unk_2c = 0;
-    func_020815f8(&sKeyboard.unk_20, 1, 60);
+    sKeyboard.character = 0;
+    sKeyboard.modifier = 0;
+    sKeyboard.dragChar = 0;
+    func_020815f8(&sKeyboard.repeat, 1, 60);
     switch (layout) {
     case 0:
-        func_02082b48(&sKeyboard);
+        KeyboardCore_UseEnglishLayout(&sKeyboard);
         break;
     case 1:
-        func_02082b68(&sKeyboard);
+        KeyboardCore_UseKanaLayout(&sKeyboard);
         break;
     case 2:
-        func_02082b90(&sKeyboard);
+        KeyboardCore_UseEuroLayout(&sKeyboard);
         break;
     case 3:
-        func_02082bb0(&sKeyboard);
+        KeyboardCore_UseSignLayout(&sKeyboard);
         break;
     case 4:
-        func_02082bd0(&sKeyboard);
+        KeyboardCore_UsePictoLayout(&sKeyboard);
         break;
     }
-    func_020819e8(&sKeyboard);
-    func_02081b70(&sKeyboard);
-    func_0208288c(&sKeyboard);
+    KeyboardCore_DrawKeyLabels(&sKeyboard);
+    KeyboardCore_LightKeys(&sKeyboard);
+    KeyboardCore_PlaceCursor(&sKeyboard);
 }
 
-extern "C" void func_02081ff0(int index, BOOL sound) {
+extern "C" void KeyboardCore_SetMode(int index, BOOL sound) {
     const int unused2[5] = {2, 3, 1, 4, 0};
     int layouts[5] = {0, 2, 1, 3, 4};
     const int unused1[5] = {2, 0, 3, 4, 1};
     layouts[0] = 1;
     layouts[1] = 0;
     layouts[2] = 2;
-    func_02081f38(layouts[index]);
+    KeyboardCore_SetLayout(layouts[index]);
     if (sound) {
-        func_02082e8c(sKeyboard.unk_18, 0);
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 0);
     }
 }
 
-extern "C" void func_02082068(u16 pad, TPData touch) {
+extern "C" void KeyboardCore_Update(u16 pad, TPData touch) {
     u16 key = 0xFF00;
     u16 touched = 0xFF00;
     int action = 0;
     func_0208145c(pad, touch);
     func_020816b4();
     sKeyboard.code = 0;
-    sKeyboard.unk_2a = 0;
-    if (sKeyboard.unk_38) {
-        sKeyboard.unk_38 = FALSE;
+    sKeyboard.character = 0;
+    if (sKeyboard.pressCursorKey) {
+        sKeyboard.pressCursorKey = FALSE;
         sKeyboard.code = sKeyboard.cursor->code;
         if (sKeyboard.cursor->code != 0) {
-            func_02082d78(sKeyboard.code);
+            KeyboardCore_PlayKeySound(sKeyboard.code);
         }
     } else if (func_02081768() & PAD_BUTTON_B) {
         sKeyboard.code = 1;
-        func_02082e8c(sKeyboard.unk_18, 1);
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 1);
     } else if (func_02081768() & PAD_BUTTON_X) {
-        if (sKeyboard.unk_30 == 0) {
-            if (sKeyboard.unk_2e == 0) {
+        if (sKeyboard.layoutIndex == 0) {
+            if (sKeyboard.modifier == 0) {
                 sKeyboard.code = 3;
-            } else if (sKeyboard.unk_2e == 3) {
+            } else if (sKeyboard.modifier == 3) {
                 sKeyboard.code = 4;
-            } else if (sKeyboard.unk_2e == 4) {
+            } else if (sKeyboard.modifier == 4) {
                 sKeyboard.code = 4;
             }
         }
-        func_02082e8c(sKeyboard.unk_18, 2);
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 2);
     } else if (func_02081768() & PAD_KEY_UP) {
-        sKeyboard.cursor = func_02082914(PAD_KEY_UP, sKeyboard.cursor, sKeyboard.layout->keys);
+        sKeyboard.cursor = KeyboardCore_MoveCursor(PAD_KEY_UP, sKeyboard.cursor, sKeyboard.layout->keys);
     } else if (func_02081768() & PAD_KEY_DOWN) {
-        sKeyboard.cursor = func_02082914(PAD_KEY_DOWN, sKeyboard.cursor, sKeyboard.layout->keys);
+        sKeyboard.cursor = KeyboardCore_MoveCursor(PAD_KEY_DOWN, sKeyboard.cursor, sKeyboard.layout->keys);
     } else if (func_02081768() & PAD_KEY_LEFT) {
-        sKeyboard.cursor = func_02082914(PAD_KEY_LEFT, sKeyboard.cursor, sKeyboard.layout->keys);
+        sKeyboard.cursor = KeyboardCore_MoveCursor(PAD_KEY_LEFT, sKeyboard.cursor, sKeyboard.layout->keys);
     } else if (func_02081768() & PAD_KEY_RIGHT) {
-        sKeyboard.cursor = func_02082914(PAD_KEY_RIGHT, sKeyboard.cursor, sKeyboard.layout->keys);
-    } else if (func_02081570(PAD_BUTTON_START) && sKeyboard.unk_3c) {
-        sKeyboard.cursor = data_02112dec;
+        sKeyboard.cursor = KeyboardCore_MoveCursor(PAD_KEY_RIGHT, sKeyboard.cursor, sKeyboard.layout->keys);
+    } else if (func_02081570(PAD_BUTTON_START) && sKeyboard.extraKeys) {
+        sKeyboard.cursor = sExtraKeys;
     }
 
     if (func_02081598()) {
-        sKeyboard.current = func_020817f0(&sKeyboard, func_020815b8(), func_020815c8());
+        sKeyboard.current = KeyboardCore_FindKeyAt(&sKeyboard, func_020815b8(), func_020815c8());
         if (sKeyboard.current != NULL) {
             touched = sKeyboard.current->code;
         }
     }
 
     if (func_020815a8() == 1) {
-        sKeyboard.pressed = func_020817f0(&sKeyboard, func_020815b8(), func_020815c8());
+        sKeyboard.pressed = KeyboardCore_FindKeyAt(&sKeyboard, func_020815b8(), func_020815c8());
         if (sKeyboard.pressed != NULL) {
             u16 code = sKeyboard.pressed->code;
             if (code == 1) {
-                func_02082e8c(sKeyboard.unk_18, 1);
+                KeyboardCore_PlaySound(sKeyboard.soundArg, 1);
             } else if (code == 20) {
-                if (!sKeyboard.unk_3c) {
-                    func_02082e8c(sKeyboard.unk_18, 3);
+                if (!sKeyboard.extraKeys) {
+                    KeyboardCore_PlaySound(sKeyboard.soundArg, 3);
                 }
-            } else if (code != 0 && code <= sKeyboard.layout->unk_c) {
-                func_02082e8c(sKeyboard.unk_18, 4);
+            } else if (code != 0 && code <= sKeyboard.layout->numSpecialKeys) {
+                KeyboardCore_PlaySound(sKeyboard.soundArg, 4);
             } else if (code >= 0x100) {
                 key = code;
                 action = 1;
             } else if (code != 0) {
-                func_02082e8c(sKeyboard.unk_18, 2);
+                KeyboardCore_PlaySound(sKeyboard.soundArg, 2);
             }
         }
     } else if (func_020815a8() == 3) {
-        if (sKeyboard.unk_c != NULL && sKeyboard.unk_2c != 0) {
-            sKeyboard.unk_c(sKeyboard.unk_10, sKeyboard.unk_2c, func_020815b8(), func_020815c8());
+        if (sKeyboard.dropCallback != NULL && sKeyboard.dragChar != 0) {
+            sKeyboard.dropCallback(sKeyboard.dropArg, sKeyboard.dragChar, func_020815b8(), func_020815c8());
         }
-        const KeyRect *k = func_020817f0(&sKeyboard, func_020815b8(), func_020815c8());
+        const KeyRect *k = KeyboardCore_FindKeyAt(&sKeyboard, func_020815b8(), func_020815c8());
         if (k != NULL) {
             touched = k->code;
             if (touched >= 0x100) {
@@ -482,50 +484,50 @@ extern "C" void func_02082068(u16 pad, TPData touch) {
         } else {
             key = 0xFF00;
         }
-        sKeyboard.unk_2c = 0;
+        sKeyboard.dragChar = 0;
         sKeyboard.pressed = NULL;
     }
 
-    if (func_02081cb8(&sKeyboard)) {
+    if (KeyboardCore_IsPenOnPressedKey(&sKeyboard)) {
         if (func_020815a8() == 1) {
             sKeyboard.code = sKeyboard.pressed->code;
             u16 code = sKeyboard.pressed->code;
-            if (code != 1 && code != 20 && (code == 0 || code > sKeyboard.layout->unk_c)) {
+            if (code != 1 && code != 20 && (code == 0 || code > sKeyboard.layout->numSpecialKeys)) {
                 if (code >= 0x100) {
                     key = code;
                 }
             }
         }
     } else {
-        func_02081658(&sKeyboard.unk_20);
+        func_02081658(&sKeyboard.repeat);
     }
 
-    func_02082e18(&sKeyboard);
-    sKeyboard.unk_2a = func_02082570(&sKeyboard, sKeyboard.code);
+    KeyboardCore_UpdateDrag(&sKeyboard);
+    sKeyboard.character = KeyboardCore_CodeToChar(&sKeyboard, sKeyboard.code);
     if (sKeyboard.code != 0) {
-        sKeyboard.layout->func(&sKeyboard);
+        sKeyboard.layout->onKey(&sKeyboard);
     }
     if (action == 0 && sKeyboard.pressed != NULL && sKeyboard.pressed->code >= 0x100 &&
         (sKeyboard.current == NULL || sKeyboard.current->code != sKeyboard.pressed->code)) {
         key = sKeyboard.pressed->code;
         action = 4;
     }
-    if (action != 0 && sKeyboard.unk_40 != NULL) {
-        sKeyboard.unk_40(sKeyboard.unk_44, action, key, touched, func_020815b8(), func_020815c8());
+    if (action != 0 && sKeyboard.areaCallback != NULL) {
+        sKeyboard.areaCallback(sKeyboard.areaArg, action, key, touched, func_020815b8(), func_020815c8());
     }
-    func_02081b70(&sKeyboard);
+    KeyboardCore_LightKeys(&sKeyboard);
 }
 
-extern "C" u16 func_02082560(void) {
-    return sKeyboard.unk_2a;
+extern "C" u16 KeyboardCore_GetChar(void) {
+    return sKeyboard.character;
 }
 
-extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
+extern "C" u16 KeyboardCore_CodeToChar(KeyboardState *kb, u16 code) {
     const u32 space = L' ';
     if (code == 0 || code >= 0x100) {
         return 0;
     }
-    if (code <= kb->layout->unk_c) {
+    if (code <= kb->layout->numSpecialKeys) {
         switch (code) {
         case 1:
             return 8;
@@ -534,17 +536,17 @@ extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
         case 2:
             return space;
         case 5:
-            if (kb->unk_30 == 1) {
+            if (kb->layoutIndex == 1) {
                 return 7;
             }
             break;
         case 6:
-            if (kb->unk_30 == 1) {
+            if (kb->layoutIndex == 1) {
                 return 9;
             }
             break;
         case 7:
-            if (kb->unk_30 == 1) {
+            if (kb->layoutIndex == 1) {
                 return 11;
             }
             break;
@@ -552,7 +554,7 @@ extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
             return 0;
         }
     } else {
-        u16 c = kb->chars[code - kb->layout->unk_c - 1];
+        u16 c = kb->chars[code - kb->layout->numSpecialKeys - 1];
         if (c <= space) {
             return 0;
         }
@@ -561,16 +563,16 @@ extern "C" u16 func_02082570(KeyboardState *kb, u16 code) {
     return 0;
 }
 
-extern "C" void *func_0208265c(void) {
+extern "C" void *KeyboardCore_GetCharData(void) {
     DC_StoreRange(sCharData, 0x2280);
     return sCharData;
 }
 
-extern "C" u32 func_02082680(void) {
+extern "C" u32 KeyboardCore_GetCharDataSize(void) {
     return 0x2280;
 }
 
-extern "C" void func_02082688(u32 *rows, u32 color, int x0, int y0, int x1, int y1) {
+extern "C" void KeyboardCore_LightTileRect(u32 *rows, u32 color, int x0, int y0, int x1, int y1) {
     u32 mask = 0;
     for (int i = 0; i < x1 - x0; i++) {
         mask |= color << (i * 4);
@@ -606,7 +608,7 @@ extern "C" void func_02082688(u32 *rows, u32 color, int x0, int y0, int x1, int 
     }
 }
 
-extern "C" void func_02082738(u8 *chars, int width, u32 color, int x0, int y0, int x1, int y1) {
+extern "C" void KeyboardCore_LightRect(u8 *chars, int width, u32 color, int x0, int y0, int x1, int y1) {
     int tx, ty;
     int tx0, ty0, tx1, ty1;
     if (x0 >= x1 || y0 >= y1) {
@@ -628,26 +630,26 @@ extern "C" void func_02082738(u8 *chars, int width, u32 color, int x0, int y0, i
                 lx1 = 8;
             }
             int ly1 = y1 - ty * 8 > 8 ? 8 : y1 - ty * 8;
-            func_02082688((u32 *)(chars + (tx + ty * (width >> 3)) * 32), color, lx0, ly0, lx1, ly1);
+            KeyboardCore_LightTileRect((u32 *)(chars + (tx + ty * (width >> 3)) * 32), color, lx0, ly0, lx1, ly1);
         }
     }
 }
 
-extern "C" void func_0208288c(KeyboardState *kb) {
+extern "C" void KeyboardCore_PlaceCursor(KeyboardState *kb) {
     const KeyRect *cursor = kb->cursor;
     int x = sOriginX + (cursor->x + cursor->x + cursor->w) / 2;
     int y = sOriginY + (cursor->y + cursor->y + cursor->h) / 2;
-    const KeyRect *key = func_020817f0(kb, x + 3, y - 3);
+    const KeyRect *key = KeyboardCore_FindKeyAt(kb, x + 3, y - 3);
     if (key != NULL) {
         kb->cursor = key;
     } else {
-        kb->cursor = &kb->layout->keys[kb->layout->unk_c];
+        kb->cursor = &kb->layout->keys[kb->layout->numSpecialKeys];
     }
 }
 
-extern "C" const KeyRect *func_02082914(u32 dir, const KeyRect *cursor, const KeyRect *keys) {
+extern "C" const KeyRect *KeyboardCore_MoveCursor(u32 dir, const KeyRect *cursor, const KeyRect *keys) {
     int x, endY, endX, dy, dx, px, y;
-    func_02082e8c(sKeyboard.unk_18, 10);
+    KeyboardCore_PlaySound(sKeyboard.soundArg, 10);
     if (dir & PAD_KEY_UP) {
         dx = -8;
         dy = -8;
@@ -691,7 +693,7 @@ extern "C" const KeyRect *func_02082914(u32 dir, const KeyRect *cursor, const Ke
             } else if (ty - sOriginY > 104) {
                 ty -= 104;
             }
-            const KeyRect *key = func_020817f0(&sKeyboard, tx, ty);
+            const KeyRect *key = KeyboardCore_FindKeyAt(&sKeyboard, tx, ty);
             if (key != NULL && key != cursor) {
                 return key;
             }
@@ -700,84 +702,84 @@ extern "C" const KeyRect *func_02082914(u32 dir, const KeyRect *cursor, const Ke
     return cursor;
 }
 
-extern "C" void func_02082b48(KeyboardState *kb) {
+extern "C" void KeyboardCore_UseEnglishLayout(KeyboardState *kb) {
     kb->layout = &sLayouts[0];
     kb->chars = (const u16 *)KeyboardCharsQwertyLower + 1;
 }
 
-extern "C" void func_02082b68(KeyboardState *kb) {
+extern "C" void KeyboardCore_UseKanaLayout(KeyboardState *kb) {
     kb->layout = &sLayouts[1];
     kb->chars = (const u16 *)KeyboardCharsHiragana + 1;
-    kb->unk_2e = 3;
+    kb->modifier = 3;
 }
 
-extern "C" void func_02082b90(KeyboardState *kb) {
+extern "C" void KeyboardCore_UseEuroLayout(KeyboardState *kb) {
     kb->layout = &sLayouts[2];
     kb->chars = (const u16 *)KeyboardCharsEuro + 1;
 }
 
-extern "C" void func_02082bb0(KeyboardState *kb) {
+extern "C" void KeyboardCore_UseSignLayout(KeyboardState *kb) {
     kb->layout = &sLayouts[3];
     kb->chars = (const u16 *)KeyboardCharsSign + 1;
 }
 
-extern "C" void func_02082bd0(KeyboardState *kb) {
+extern "C" void KeyboardCore_UsePictoLayout(KeyboardState *kb) {
     kb->layout = &sLayouts[4];
     kb->chars = (const u16 *)KeyboardCharsPicto + 1;
 }
 
-extern "C" void func_02082bf0(KeyboardState *kb) {
+extern "C" void KeyboardCore_OnKanaKey(KeyboardState *kb) {
     if (kb->code < 3 || kb->code > 4) {
         return;
     }
     switch (kb->code) {
     case 3:
         kb->chars = (const u16 *)KeyboardCharsHiragana + 1;
-        kb->unk_2e = 3;
+        kb->modifier = 3;
         break;
     case 4:
         kb->chars = (const u16 *)KeyboardCharsKatakana + 1;
-        kb->unk_2e = 4;
+        kb->modifier = 4;
         break;
     }
-    func_020819e8(kb);
+    KeyboardCore_DrawKeyLabels(kb);
 }
 
-extern "C" void func_02082c58(KeyboardState *kb) {
+extern "C" void KeyboardCore_OnEnglishKey(KeyboardState *kb) {
     const u16 *tables[3] = {(const u16 *)KeyboardCharsQwertyLower, (const u16 *)KeyboardCharsQwertySymbols, (const u16 *)KeyboardCharsQwertyUpper};
-    func_02082c90(kb, tables);
+    KeyboardCore_ApplyModifier(kb, tables);
 }
 
-extern "C" void func_02082c8c(KeyboardState *kb) {
+extern "C" void KeyboardCore_OnEuroKey(KeyboardState *kb) {
 }
 
-extern "C" void func_02082c90(KeyboardState *kb, const u16 **tables) {
-    switch (kb->unk_2e) {
+extern "C" void KeyboardCore_ApplyModifier(KeyboardState *kb, const u16 **tables) {
+    switch (kb->modifier) {
     case 0:
         if (kb->code == 3) {
-            kb->unk_2e = 3;
+            kb->modifier = 3;
         } else if (kb->code == 4) {
-            kb->unk_2e = 4;
+            kb->modifier = 4;
         }
         break;
     case 3:
         if (kb->code == 3) {
-            kb->unk_2e = 0;
+            kb->modifier = 0;
         } else if (kb->code == 4) {
-            kb->unk_2e = 4;
+            kb->modifier = 4;
         } else {
-            kb->unk_2e = 0;
+            kb->modifier = 0;
         }
         break;
     case 4:
         if (kb->code == 3) {
-            kb->unk_2e = 3;
+            kb->modifier = 3;
         } else if (kb->code == 4) {
-            kb->unk_2e = 0;
+            kb->modifier = 0;
         }
         break;
     }
-    switch (kb->unk_2e) {
+    switch (kb->modifier) {
     case 0:
         kb->chars = tables[0] + 1;
         break;
@@ -788,56 +790,56 @@ extern "C" void func_02082c90(KeyboardState *kb, const u16 **tables) {
         kb->chars = tables[2] + 1;
         break;
     }
-    func_020819e8(kb);
+    KeyboardCore_DrawKeyLabels(kb);
 }
 
-extern "C" void func_02082d70(KeyboardState *kb) {
+extern "C" void KeyboardCore_OnSignKey(KeyboardState *kb) {
 }
 
-extern "C" void func_02082d74(KeyboardState *kb) {
+extern "C" void KeyboardCore_OnPictoKey(KeyboardState *kb) {
 }
 
-extern "C" void func_02082d78(u16 code) {
+extern "C" void KeyboardCore_PlayKeySound(u16 code) {
     if (code == 1) {
-        func_02082e8c(sKeyboard.unk_18, 1);
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 1);
     } else if (code == 20) {
-        if (sKeyboard.unk_3c) {
-            func_02082e8c(sKeyboard.unk_18, 9);
+        if (sKeyboard.extraKeys) {
+            KeyboardCore_PlaySound(sKeyboard.soundArg, 9);
         } else {
-            func_02082e8c(sKeyboard.unk_18, 3);
+            KeyboardCore_PlaySound(sKeyboard.soundArg, 3);
         }
-    } else if (code != 0 && code <= sKeyboard.layout->unk_c) {
-        func_02082e8c(sKeyboard.unk_18, 4);
+    } else if (code != 0 && code <= sKeyboard.layout->numSpecialKeys) {
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 4);
     } else if (code != 0) {
-        func_02082e8c(sKeyboard.unk_18, 2);
+        KeyboardCore_PlaySound(sKeyboard.soundArg, 2);
     }
 }
 
-extern "C" void func_02082e18(KeyboardState *kb) {
-    const KeyRect *key = func_020817f0(kb, func_020815b8(), func_020815c8());
+extern "C" void KeyboardCore_UpdateDrag(KeyboardState *kb) {
+    const KeyRect *key = KeyboardCore_FindKeyAt(kb, func_020815b8(), func_020815c8());
     if (kb->pressed == NULL) {
         return;
     }
     if (key != NULL && kb->pressed == key) {
         return;
     }
-    u16 c = func_02082570(kb, kb->pressed->code);
+    u16 c = KeyboardCore_CodeToChar(kb, kb->pressed->code);
     if (c >= 0x20) {
-        kb->unk_2c = c;
+        kb->dragChar = c;
     }
 }
 
-extern "C" void func_02082e70(const KeyRect *keys, u16 count, void (*func)(void *, int, u16, u16, u16, u16),
+extern "C" void KeyboardCore_SetAreas(const KeyRect *keys, u16 count, void (*func)(void *, int, u16, u16, u16, u16),
                               void *arg) {
-    sKeyboard.unk_48 = keys;
-    sKeyboard.unk_4c = count;
-    sKeyboard.unk_40 = func;
-    sKeyboard.unk_44 = arg;
+    sKeyboard.areas = keys;
+    sKeyboard.numAreas = count;
+    sKeyboard.areaCallback = func;
+    sKeyboard.areaArg = arg;
 }
 
-extern "C" void func_02082e8c(void *arg, int sound) {
-    if (sKeyboard.unk_14 != NULL) {
-        sKeyboard.unk_14(arg, sound);
+extern "C" void KeyboardCore_PlaySound(void *arg, int sound) {
+    if (sKeyboard.soundCallback != NULL) {
+        sKeyboard.soundCallback(arg, sound);
     }
 }
 
