@@ -127,38 +127,39 @@ static MiiData sMiiData[100];
 static SavedCharacter sTransfer;
 
 // The state of the wireless exchange: separate statics, which the compiler pools by size (a u8, the u16s, the
-// ints, then sParentTimers and sReceivedName). Named by address until the code shows what each is.
-static u8 data_ov109_021531e0;
+// ints, then sParentTimers and sReceivedName). Those still named by address are used by nothing in the ROM but
+// TushinScene_UnusedClear (the 13 u16s) or only cleared (data_ov109_0215320c, data_ov109_02153230).
+static u8 sDisconnected;
 static u16 data_ov109_021531ee;
 static u16 data_ov109_021531fe;
 static u16 data_ov109_021531ea;
-static u16 data_ov109_02153204;
-static u16 data_ov109_02153200; // The 2-byte answer sent to the partner (Send)
+static u16 sSendSongChunk;
+static u16 sCommand; // The 2-byte answer sent to the partner (Send)
 static u16 data_ov109_021531ec;
-static u16 data_ov109_021531e4;
-static u16 data_ov109_02153202;
+static u16 sReceivedSongChunks;
+static u16 sSendChunk;
 static u16 data_ov109_021531fc;
-static u16 data_ov109_02153206;
+static u16 sReceiveCount;
 static u16 data_ov109_021531f2;
-static u16 data_ov109_02153208;
+static u16 sNextReceivedCommand;
 static u16 data_ov109_021531f8;
 static u16 data_ov109_021531fa;
 static u16 data_ov109_021531e6;
 static u16 data_ov109_021531f6;
 static u16 data_ov109_021531e8;
 static u16 data_ov109_021531f0;
-static u16 data_ov109_021531e2;
+static u16 sReceivedCommand;
 static u16 data_ov109_021531f4;
-static int data_ov109_0215322c;
+static int sWiiParentCount;
 static int data_ov109_02153230;
-static int data_ov109_02153224;
+static int sReceivedResident;
 static int data_ov109_0215320c;
-static int data_ov109_0215321c;
-static int data_ov109_02153220;
-static int data_ov109_02153214;
-static int data_ov109_02153218;
-static int data_ov109_02153228;
-static int data_ov109_02153210;
+static int sSent;
+static int sWiiSendDone;
+static int sWiiReceiveResult;
+static int sWiiReceivedIndex;
+static int sWiiSendResult;
+static int sSongsReceived;
 static int sParentTimers[3]; // Frames for which each found partner is still shown (600 when it is new)
 static wchar_t sReceivedName[21];
 static u8 sSongs[6][0x40]; // The songs sent with a character
@@ -294,8 +295,8 @@ void TushinScene::SetUpList(int *charOffset) {
     func_020a03e8(&mResidents, &mList, &mPages);
     func_020a05dc(&mResidents);
     mUnknown35924 = mList.mUnknown9464;
-    mUnknown35920 = gGameData.mMiiListSortKey;
-    func_020a123c(&mResidents, mUnknown35920, 1);
+    mSortKey = gGameData.mMiiListSortKey;
+    func_020a123c(&mResidents, mSortKey, 1);
     mResidents.mUnknown1139C = 1;
 
     for (int i = 0; i < 3; i++) {
@@ -360,7 +361,7 @@ void TushinScene::InitCharacters() {
     mCurrent = 1;
     func_02091a14(&mCharacters[1], FALSE);
     func_02091a14(&mCharacters[2], FALSE);
-    mUnknown3F000 = 0;
+    mCharactersVisible = 0;
     mCamera = &data_02122764;
     func_0202a640(mCamera);
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
@@ -374,7 +375,7 @@ void TushinScene::InitCharacters() {
 }
 
 // NOT MATCHING: the two `|= 2` of the emitters' flags use r2/r3 where the original uses r0/r2 and sets
-// mUnknown3F034's 0 after them (register choice, 9 instructions).
+// mParticleFrames's 0 after them (register choice, 9 instructions).
 // @0x0214ad80
 void TushinScene::InitParticles() {
     func_0202680c(0x4000);
@@ -384,7 +385,7 @@ void TushinScene::InitParticles() {
     func_0207b110(mParticles);
     func_0207b124(mParticles);
     mParticleResource = 0;
-    mUnknown3F030 = 1;
+    mEmitterStarted = 1;
     VecFx32 position0 = sEmitterPosition0;
     mEmitterPositions[0].x = position0.x;
     mEmitterPositions[0].y = position0.y;
@@ -397,7 +398,7 @@ void TushinScene::InitParticles() {
     mEmitters[1] = func_0207b2fc(mParticles, mParticleResource, &mEmitterPositions[1]);
     mEmitters[0]->mFlags |= 2;
     mEmitters[1]->mFlags |= 2;
-    mUnknown3F034 = 0;
+    mParticleFrames = 0;
 }
 
 // @0x0214aed8
@@ -438,11 +439,11 @@ void TushinScene::Init() {
 
     mPage = 0;
     mNextPage = 0;
-    mUnknown18 = 0;
-    mUnknown1C = 0;
+    mPageAfterSave = 0;
+    mBgScroll = 0;
     mWait = 0;
-    mUnknown24 = 0;
-    mUnknown28 = 0;
+    mCloseListToReceive = 0;
+    mLostInList = 0;
     int charOffset = 0x200;
     SetUpList(&charOffset);
     mCharOffset = charOffset;
@@ -456,41 +457,41 @@ void TushinScene::Init() {
     mSprite.SetPosition(FxVec2(sSignalPosition.x << FX32_SHIFT, sSignalPosition.y << FX32_SHIFT));
     mSprite.mVisible = FALSE;
 
-    data_ov109_02153202 = 0;
-    data_ov109_02153204 = 0;
-    data_ov109_02153206 = 0;
-    data_ov109_021531e4 = 0;
-    data_ov109_02153224 = 0;
-    data_ov109_021531e0 = 0;
-    data_ov109_021531e2 = 0;
-    data_ov109_02153208 = 0;
-    data_ov109_02153220 = 0;
-    data_ov109_02153228 = 0;
-    data_ov109_02153214 = 0;
+    sSendChunk = 0;
+    sSendSongChunk = 0;
+    sReceiveCount = 0;
+    sReceivedSongChunks = 0;
+    sReceivedResident = 0;
+    sDisconnected = 0;
+    sReceivedCommand = 0;
+    sNextReceivedCommand = 0;
+    sWiiSendDone = 0;
+    sWiiSendResult = 0;
+    sWiiReceiveResult = 0;
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
     func_0203b7d4(data_0213b700, sParents, 3);
     func_0203b7e0(data_0213b700, sParentTimers);
     func_0203b76c(data_0213b700, 0);
     MI_CpuFill8(sParents, 0, sizeof(sParents));
     MI_CpuFill8(sParentTimers, 0, sizeof(sParentTimers));
-    mUnknown3F080 = 0;
-    mUnknown3F09C = 0;
-    mUnknown3F0A0 = 0;
-    mUnknown3F0A4 = 0;
-    mUnknown3F0A8 = 0;
-    mUnknown3F084 = 0;
-    mUnknown3F088 = 0;
-    mUnknown3F08C = 0;
+    mMusicPlaying = 0;
+    mSongStoreFull = 0;
+    mShirtDue = 0;
+    mWiiShirtDue = 0;
+    mReceiveResult = 0;
+    mSendQueued = 0;
+    mPartnerReady = 0;
+    mPartnerSending = 0;
     mUnknown3F090 = 0;
-    mUnknown3F094 = 0;
-    mUnknown3F098 = 0;
-    mUnknown3F0AC = 0;
-    mUnknown3F0B0 = 0;
+    mIsReceiveAnimation = 0;
+    mNeedsSave = 0;
+    mWindowReady = 0;
+    mConnectRequested = 0;
     data_ov109_02153230 = 0;
-    func_0207777c(&data_0212349c, sMiiData, 100);
-    func_02077720(func_ov109_02151fcc);
-    func_02077710(func_ov109_021523a4);
-    func_02077804(1);
+    MiiTransfer_Init(&data_0212349c, sMiiData, 100);
+    MiiTransfer_SetSendResultCallback(TushinScene_OnWiiSendResult);
+    MiiTransfer_SetReceiveCallback(TushinScene_OnWiiMiiReceived);
+    MiiTransfer_SetAcceptSpecial(1);
     UpdateMiiData();
     gSoundManager.LoadGroup(0x5D);
     ResetExchange();
@@ -498,21 +499,21 @@ void TushinScene::Init() {
 
 // @0x0214b3d8
 void TushinScene::ResetExchange() {
-    mUnknown3F08C = 0;
-    data_ov109_02153202 = 0;
-    data_ov109_02153204 = 0;
-    data_ov109_02153206 = 0;
-    data_ov109_021531e4 = 0;
-    data_ov109_021531e2 = 0;
-    data_ov109_02153208 = 0;
+    mPartnerSending = 0;
+    sSendChunk = 0;
+    sSendSongChunk = 0;
+    sReceiveCount = 0;
+    sReceivedSongChunks = 0;
+    sReceivedCommand = 0;
+    sNextReceivedCommand = 0;
     UpdateMiiData();
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
     ClearParentNames();
-    mUnknown3F0B0 = 0;
+    mConnectRequested = 0;
     for (int i = 0; i < 12; i++) {
         gWHChildSsid[i] = 0;
     }
-    mUnknown3F084 = 0;
+    mSendQueued = 0;
 }
 
 // @0x0214b464
@@ -593,10 +594,10 @@ void TushinScene::ReloadCharacterFromReceived(int i) {
 #pragma optimization_level 2
 // @0x0214c84c
 void TushinScene::SendSongs() {
-    if (data_ov109_02153204 != 0) {
+    if (sSendSongChunk != 0) {
         return;
     }
-    data_ov109_02153204 = 1;
+    sSendSongChunk = 1;
     int offset = mResidents.mSelected * sizeof(SavedCharacter);
     u8 *residents = (u8 *)mResidents.mResidents;
     int n = 0;
@@ -607,8 +608,8 @@ void TushinScene::SendSongs() {
             func_0202c920(&gGameData, song, sSongs[n++]);
         }
     }
-    WH_SendData(sSongs, 0x80, func_ov109_02151eb4);
-    data_ov109_0215321c = 0;
+    WH_SendData(sSongs, 0x80, TushinScene_SendCallback);
+    sSent = 0;
 }
 #pragma optimization_level reset
 
@@ -620,22 +621,22 @@ void TushinScene::Send(int kind) {
     }
     int state = WH_GetSystemState();
     if (!(state != 0 && state != 9 && state != 10)) {
-        data_ov109_02153202 = 0;
-        data_ov109_02153204 = 0;
-        data_ov109_0215321c = 0;
+        sSendChunk = 0;
+        sSendSongChunk = 0;
+        sSent = 0;
         return;
     }
-    data_ov109_02153200 = kind;
+    sCommand = kind;
     switch (kind) {
     case 0:
-        if (data_ov109_02153202 != 0) {
+        if (sSendChunk != 0) {
             return;
         }
-        data_ov109_02153202 = 1;
+        sSendChunk = 1;
         func_020979e0(&sTransfer);
         (CharacterRecord &)sTransfer = mResidents.mResidents[mResidents.mSelected];
-        WH_SendData(&sTransfer, 0x80, func_ov109_02151eb4);
-        data_ov109_0215321c = 0;
+        WH_SendData(&sTransfer, 0x80, TushinScene_SendCallback);
+        sSent = 0;
         return;
     case 1:
         SendSongs();
@@ -650,7 +651,7 @@ void TushinScene::Send(int kind) {
     case 9:
     case 10:
     default:
-        WH_SendData(&data_ov109_02153200, 2, func_ov109_02151eb4);
+        WH_SendData(&sCommand, 2, TushinScene_SendCallback);
         return;
     }
 }
@@ -658,23 +659,23 @@ void TushinScene::Send(int kind) {
 #pragma optimization_level 2
 // @0x0214ce60
 void TushinScene::UpdateSending() {
-    if (data_ov109_0215321c != 1) {
+    if (sSent != 1) {
         return;
     }
     int state = WH_GetSystemState();
     if (!(state != 0 && state != 9 && state != 10)) {
-        data_ov109_02153202 = 0;
-        data_ov109_02153204 = 0;
-        data_ov109_0215321c = 0;
+        sSendChunk = 0;
+        sSendSongChunk = 0;
+        sSent = 0;
         mNextPage = 0x22;
         return;
     }
-    if (data_ov109_02153204 != 0) {
-        if (data_ov109_02153204 >= 3) {
+    if (sSendSongChunk != 0) {
+        if (sSendSongChunk >= 3) {
             int result = func_02073520(GetSelectedResident());
-            switch (data_ov109_021531e2) {
+            switch (sReceivedCommand) {
             case 5:
-                data_ov109_02153204 = 0;
+                sSendSongChunk = 0;
                 if (func_02073520(GetSelectedResident())) {
                     func_020a0664(&mResidents);
                 }
@@ -682,11 +683,11 @@ void TushinScene::UpdateSending() {
             case 6:
             case 9:
             case 10:
-                data_ov109_02153204 = 0;
+                sSendSongChunk = 0;
                 break;
             case 7:
             case 8: {
-                data_ov109_02153204 = 0;
+                sSendSongChunk = 0;
                 func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                 SetOtherStandAnimation();
                 break;
@@ -695,21 +696,21 @@ void TushinScene::UpdateSending() {
                 return;
             }
             if (result == 1) {
-                SetUnknown3F098();
+                SetNeedsSave();
             }
         } else {
-            WH_SendData((u8 *)sSongs + data_ov109_02153204 * 0x80, 0x80, func_ov109_02151eb4);
-            data_ov109_02153204++;
-            data_ov109_0215321c = 0;
+            WH_SendData((u8 *)sSongs + sSendSongChunk * 0x80, 0x80, TushinScene_SendCallback);
+            sSendSongChunk++;
+            sSent = 0;
         }
-    } else if (data_ov109_02153202 != 0) {
-        if (data_ov109_02153202 >= 6) {
-            data_ov109_02153202 = 0;
+    } else if (sSendChunk != 0) {
+        if (sSendChunk >= 6) {
+            sSendChunk = 0;
             Send(1);
         } else {
-            WH_SendData((u8 *)&sTransfer + data_ov109_02153202 * 0x80, 0x80, func_ov109_02151eb4);
-            data_ov109_02153202++;
-            data_ov109_0215321c = 0;
+            WH_SendData((u8 *)&sTransfer + sSendChunk * 0x80, 0x80, TushinScene_SendCallback);
+            sSendChunk++;
+            sSent = 0;
         }
     }
 }
@@ -717,28 +718,28 @@ void TushinScene::UpdateSending() {
 #pragma optimization_level reset
 // @0x0214d064
 void TushinScene::SendFoundIndex() {
-    data_ov109_02153228 = 0;
+    sWiiSendResult = 0;
     u16 index = FindResident(GetSelectedResident());
     if (index == -1) {
         return;
     }
-    func_02078db8(index);
+    MiiTransfer_SendMii(index);
 }
 
 // @0x0214d0b0
 void TushinScene::UpdateSaving() {
-    if (mUnknown3F084 == 0) {
+    if (mSendQueued == 0) {
         return;
     }
     if (GetMode() == 1) {
-        if (mUnknown3F088 == 0) {
+        if (mPartnerReady == 0) {
             return;
         }
     } else if (func_0202cd38(&gGameData)) {
         return;
     }
-    mUnknown3F084 = 0;
-    mUnknown3F088 = 0;
+    mSendQueued = 0;
+    mPartnerReady = 0;
     Send(0);
 }
 
@@ -780,19 +781,19 @@ int TushinScene::ReceiveCharacter() {
     if (HasNgSongReceived() == TRUE) {
         return 7;
     }
-    data_ov109_02153224 = FindResident(&sTransfer);
-    if (data_ov109_02153224 != -1) {
+    sReceivedResident = FindResident(&sTransfer);
+    if (sReceivedResident != -1) {
         if (func_02073520(&sTransfer)) {
             return 5;
         }
         if (func_02098584(&sTransfer)) {
             return 3;
         }
-        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, data_ov109_02153224)) {
+        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, sReceivedResident)) {
             return 6;
         }
         CharacterRecord record;
-        func_0202c264(&gGameData, data_ov109_02153224, &record);
+        func_0202c264(&gGameData, sReceivedResident, &record);
         record.mMii = sTransfer.mMii;
         if (sTransfer.mUnknown050Bit0 == 0) {
             if (record.mUnknown050Bit0 == 1) {
@@ -839,7 +840,7 @@ int TushinScene::ReceiveCharacter() {
                 if (song == 0xFF) {
                     song = func_0202ca70(&gGameData);
                     if (song == 0xFF) {
-                        mUnknown3F09C = 1;
+                        mSongStoreFull = 1;
                     }
                 }
                 func_0209c73c(&sTransfer, i, song);
@@ -854,19 +855,19 @@ int TushinScene::ReceiveCharacter() {
                 }
                 n++;
                 record.mSongSlots[i] = func_0209c718(&sTransfer, i);
-                func_0202c28c(&gGameData, data_ov109_02153224, &record);
+                func_0202c28c(&gGameData, sReceivedResident, &record);
             }
         }
-        func_0202c28c(&gGameData, data_ov109_02153224, &record);
+        func_0202c28c(&gGameData, sReceivedResident, &record);
         return 4;
     }
 
-    data_ov109_02153206++;
-    data_ov109_02153224 = -1;
+    sReceiveCount++;
+    sReceivedResident = -1;
     int i = 0;
     do {
         if (!func_0202c354(&gGameData, i)) {
-            data_ov109_02153224 = i;
+            sReceivedResident = i;
             func_02097cc0(&sTransfer);
             int n = 0;
             for (int j = 0; j < 6; j++) {
@@ -875,7 +876,7 @@ int TushinScene::ReceiveCharacter() {
                 }
                 u8 song = func_0202ca70(&gGameData);
                 if (song == 0xFF) {
-                    mUnknown3F09C = 1;
+                    mSongStoreFull = 1;
                 }
                 func_0209c73c(&sTransfer, j, song);
                 if (song != 0xFF) {
@@ -937,7 +938,7 @@ void TushinScene::UpdateListButtons() {
         func_02034720(&mWindow, 0x12, 1);
         break;
     case -1:
-        if (data_ov109_02153206 == 0) {
+        if (sReceiveCount == 0) {
             break;
         }
         if (GetMode() == 1) {
@@ -948,7 +949,7 @@ void TushinScene::UpdateListButtons() {
             func_020a3634(&mList);
             func_02031228(&mButtons[0]);
         }
-        data_ov109_02153210 = 0;
+        sSongsReceived = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
         func_02034f38(&mWindow, 0, sPageMessages[mPage]);
@@ -970,14 +971,14 @@ void TushinScene::UpdateListButtons() {
 void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
     if (mListWindow.mTransitionDone) {
-        if (data_ov109_02153206 != 0 || mUnknown24 == 1) {
+        if (sReceiveCount != 0 || mCloseListToReceive == 1) {
             if (GetMode() == 1) {
                 mPage = 9;
             } else {
                 mPage = NextPageAfterReceive();
             }
-            mUnknown24 = 0;
-            data_ov109_02153210 = 0;
+            mCloseListToReceive = 0;
+            sSongsReceived = 0;
             if (mPage == 9) {
                 return;
             }
@@ -987,7 +988,7 @@ void TushinScene::UpdateListWindow() {
             func_02034720(&mWindow, 0x12, 1);
             return;
         }
-        if (mUnknown28 == 1) {
+        if (mLostInList == 1) {
             if (GetMode() == 1) {
                 mPage = 9;
                 mNextPage = 0x22;
@@ -1004,7 +1005,7 @@ void TushinScene::UpdateListWindow() {
             return;
         }
     }
-    if (((mListWindow.mUnknownAD50 & 1) && data_ov109_02153206 != 0) || mUnknown24 == 1 || mUnknown28 == 1) {
+    if (((mListWindow.mUnknownAD50 & 1) && sReceiveCount != 0) || mCloseListToReceive == 1 || mLostInList == 1) {
         mListWindow.mUnknownSetBeforeClose = 15;
         func_020349cc(&mListWindow, 0x24);
         for (int i = 0; i < 7; i++) {
@@ -1120,22 +1121,22 @@ void TushinScene::UpdateConnection() {
 
 // @0x0214e620
 void TushinScene::UpdateWiiConnection() {
-    int state = func_02078f04();
+    int state = MiiTransfer_GetState();
     if (state == 0) {
         return;
     }
     switch (state) {
     case 1:
-        data_ov109_0215322c = func_0207808c();
-        for (int i = 0; i < data_ov109_0215322c; i = (u16)(i + 1)) {
-            if (!func_0207800c(i)) {
+        sWiiParentCount = MiiTransfer_GetParentCount();
+        for (int i = 0; i < sWiiParentCount; i = (u16)(i + 1)) {
+            if (!MiiTransfer_HasParent(i)) {
                 continue;
             }
-            if (func_02078040(i) > 0) {
+            if (MiiTransfer_GetParentAge(i) > 0) {
                 continue;
             }
             BOOL known = FALSE;
-            WMBssDesc *parent = func_02078064(i);
+            WMBssDesc *parent = MiiTransfer_GetParent(i);
             for (int j = 0; j < 3; j++) {
                 if (sParentTimers[j] != 0 && memcmp(parent->bssid, sParents[j].bssid, 12) == 0) {
                     sParentTimers[j] = 599;
@@ -1150,8 +1151,8 @@ void TushinScene::UpdateWiiConnection() {
                 if (sParentTimers[k] == 0) {
                     sParentTimers[k] = 600;
                     sParents[k] = *parent;
-                    u16 size = func_0207809c(i);
-                    const u16 *name = func_020780b4(i);
+                    u16 size = MiiTransfer_GetParentUserGameInfoLength(i);
+                    const u16 *name = MiiTransfer_GetParentUserGameInfo(i);
                     for (int j = 0; j < size / 2; j++) {
                         mParentNames[k][j] = name[j];
                     }
@@ -1244,7 +1245,7 @@ void TushinScene::UpdateCharacters() {
                 mCharacters[i].mModel.mPos.x = 0x1000;
                 break;
             case 0x29:
-                mUnknown3F084 = 1;
+                mSendQueued = 1;
                 func_02091a14(&mCharacters[i], FALSE);
                 break;
             case 0x23:
@@ -1292,10 +1293,10 @@ void TushinScene::UpdateCharacters() {
         return;
     }
     BOOL show = FALSE;
-    if (GetMode() == 1 && mUnknown3F0A8 == 4) {
+    if (GetMode() == 1 && mReceiveResult == 4) {
         show = TRUE;
     }
-    if (GetMode() == 2 && mUnknown3F0A8 == 0x37) {
+    if (GetMode() == 2 && mReceiveResult == 0x37) {
         show = TRUE;
     }
     if (show != TRUE) {
@@ -1312,17 +1313,17 @@ void TushinScene::DrawCharacters() {
     switch (mPage) {
     case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
     case 38: case 39: case 40: case 41:
-        mUnknown3F000 = FALSE;
+        mCharactersVisible = FALSE;
         return;
     case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
     case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32:
     case 33: case 35: case 36: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 61: case 62:
     case 63: case 65: case 66:
-        mUnknown3F000 = TRUE;
+        mCharactersVisible = TRUE;
         break;
     case 34: case 37: case 64: case 67:
-        if (mUnknown3F000 == FALSE) {
+        if (mCharactersVisible == FALSE) {
             return;
         }
         break;
@@ -1359,7 +1360,7 @@ void TushinScene::StartSendAnimation() {
     mCharacters[2].mModel.mPos.x = -0x1000;
     func_020919a0(&mCharacters[2], 0x1000);
     func_02091a14(&mCharacters[2], TRUE);
-    mUnknown3F094 = 0;
+    mIsReceiveAnimation = 0;
 }
 
 // @0x0214f1ec
@@ -1371,7 +1372,7 @@ void TushinScene::StartReceiveAnimation() {
     mCharacters[2].mModel.mPos.x = -0x1000;
     func_020919a0(&mCharacters[2], 0x1000);
     func_02091a14(&mCharacters[2], TRUE);
-    mUnknown3F094 = 1;
+    mIsReceiveAnimation = 1;
 }
 
 // @0x0214f280
@@ -1389,17 +1390,17 @@ void TushinScene::UpdateMusic() {
     case 0x2E:
     case 0x2F:
     case 0x30:
-        if (mUnknown3F080 != 0) {
+        if (mMusicPlaying != 0) {
             return;
         }
-        mUnknown3F080 = 1;
+        mMusicPlaying = 1;
         gSoundManager.StartSeqArc(2, 0x19, 9);
         return;
     default:
-        if (mUnknown3F080 != 1) {
+        if (mMusicPlaying != 1) {
             return;
         }
-        mUnknown3F080 = 0;
+        mMusicPlaying = 0;
         gSoundManager.StopSeqArc(2, 0);
         return;
     }
@@ -1418,10 +1419,10 @@ void TushinScene::ShowReceived() {
         if (mode != 2) {
             return;
         }
-        if (data_ov109_02153224 == -1) {
+        if (sReceivedResident == -1) {
             return;
         }
-        LoadSavedCharacter(2, data_ov109_02153224);
+        LoadSavedCharacter(2, sReceivedResident);
     } else {
         ReloadCharacterFromReceived(2);
     }
@@ -1451,19 +1452,19 @@ void TushinScene::StartEmitter(int i) {
         i = 0;
     }
     mEmitters[i] = func_0207b2fc(mParticles, 0, &mEmitterPositions[i]);
-    mUnknown3F030 = 1;
+    mEmitterStarted = 1;
     gSoundManager.StartSeqArc(1, 0x19, 7);
-    mUnknown3F034 = 0;
+    mParticleFrames = 0;
 }
 
 // @0x0214f528
 void TushinScene::CountFrame() {
-    mUnknown3F034++;
+    mParticleFrames++;
 }
 
 // @0x0214f53c
 void TushinScene::DrawParticles() {
-    if (mUnknown3F034 > 600) {
+    if (mParticleFrames > 600) {
         return;
     }
     func_0202ad84(data_021223e4);
@@ -1547,18 +1548,18 @@ void TushinScene::Update() {
     case 0x29:
     case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37: case 0x38: case 0x39:
     case 0x3A: case 0x3B: case 0x3C: case 0x3D: case 0x3E: case 0x3F:
-        if (func_02078f04() == 6) {
+        if (MiiTransfer_GetState() == 6) {
             break;
         }
-        func_020777f4();
+        MiiTransfer_Update();
         break;
     default:
-        func_020777f4();
+        MiiTransfer_Update();
         break;
     }
     func_020341d4(&mWindow);
     if (mWindow.mTransitionDone) {
-        mUnknown3F0AC = 1;
+        mWindowReady = 1;
     }
     if (mWait > 0) {
         mWait--;
@@ -1566,25 +1567,25 @@ void TushinScene::Update() {
     }
 
     int layout = sPageLayouts[mPage];
-    if (data_ov109_02153208 != 0 && data_ov109_021531e2 == 0) {
-        data_ov109_021531e2 = data_ov109_02153208;
-        data_ov109_02153208 = 0;
+    if (sNextReceivedCommand != 0 && sReceivedCommand == 0) {
+        sReceivedCommand = sNextReceivedCommand;
+        sNextReceivedCommand = 0;
     }
-    if (data_ov109_021531e2 != 0) {
-        switch (data_ov109_021531e2) {
+    if (sReceivedCommand != 0) {
+        switch (sReceivedCommand) {
         case 2:
         case 3:
-            mUnknown3F08C = 2;
-            data_ov109_021531e2 = 0;
+            mPartnerSending = 2;
+            sReceivedCommand = 0;
             if (mPage == 10) {
-                mUnknown24 = 1;
+                mCloseListToReceive = 1;
             } else {
                 return;
             }
             break;
         case 4:
-            data_ov109_021531e2 = 0;
-            mUnknown3F088 = 1;
+            sReceivedCommand = 0;
+            mPartnerReady = 1;
             break;
         case 5:
         case 6:
@@ -1595,8 +1596,8 @@ void TushinScene::Update() {
             break;
         }
     }
-    if (mUnknown3F08C != 0 && mPage == 9) {
-        if (mUnknown3F08C == 2) {
+    if (mPartnerSending != 0 && mPage == 9) {
+        if (mPartnerSending == 2) {
             mPage = 0xE;
         } else {
             mPage = 0xF;
@@ -1604,9 +1605,9 @@ void TushinScene::Update() {
         ResetList();
         func_020a3634(&mList);
         func_02031228(&mButtons[0]);
-        mUnknown3F08C = 0;
+        mPartnerSending = 0;
         Send(4);
-        data_ov109_02153210 = 0;
+        sSongsReceived = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
         func_02034f38(&mWindow, 0, sPageMessages[mPage]);
@@ -1617,7 +1618,7 @@ void TushinScene::Update() {
     int next = 0x22;
     switch (GetMode()) {
     case 1:
-        if (data_ov109_021531e0 == 0) {
+        if (sDisconnected == 0) {
             if (WH_GetSystemState() != 9 && WH_GetSystemState() != 10) {
                 break;
             }
@@ -1626,22 +1627,22 @@ void TushinScene::Update() {
             }
         }
         if (mPage == 10) {
-            mUnknown28 = 1;
+            mLostInList = 1;
             break;
         }
         if (WH_GetSystemState() != 0) {
             WH_Finalize();
             func_0203b8b4(data_0213b700, 1);
         }
-        data_ov109_021531e0 = 0;
+        sDisconnected = 0;
         lost = TRUE;
         next = 0x22;
         break;
     case 2:
-        if (func_02078f04() == 0 && mPage != 0x26 && mPage != 0x27 && mPage != 0x42 && mPage != 0x30 &&
+        if (MiiTransfer_GetState() == 0 && mPage != 0x26 && mPage != 0x27 && mPage != 0x42 && mPage != 0x30 &&
             mNextPage != 0x40 && mNextPage != 0x43 && mNextPage != 0x30) {
-            if (mUnknown3F098 == 1) {
-                mUnknown18 = 0x40;
+            if (mNeedsSave == 1) {
+                mPageAfterSave = 0x40;
                 mNextPage = 0x30;
                 CloseWindow();
                 if (!func_0202c37c(&gGameData)) {
@@ -1654,15 +1655,15 @@ void TushinScene::Update() {
                 return;
             }
             if (mPage == 0x2B) {
-                mUnknown28 = 1;
+                mLostInList = 1;
                 break;
             }
             lost = TRUE;
             next = mPage != 0x28 ? 0x40 : 0x43;
             break;
         }
-        if (mUnknown28 == 1) {
-            mUnknown28 = 0;
+        if (mLostInList == 1) {
+            mLostInList = 0;
             lost = TRUE;
             next = 0x40;
         }
@@ -1683,7 +1684,7 @@ void TushinScene::Update() {
         ResetList();
         func_020a3634(&mList);
         func_02031228(&mButtons[0]);
-        mUnknown28 = 0;
+        mLostInList = 0;
         return;
     }
 
@@ -1719,7 +1720,7 @@ void TushinScene::Update() {
                     mNextPage = 0x26;
                     WH_Finalize();
                     func_0203b8b4(data_0213b700, 1);
-                    data_ov109_0215322c = 0;
+                    sWiiParentCount = 0;
                     data_ov109_0215320c = 0;
                     break;
                 case 3:
@@ -1733,13 +1734,13 @@ void TushinScene::Update() {
                 case 0:
                     mNextPage = 3;
                     func_0203b7e8(data_0213b700);
-                    WH_SetReceiver(func_ov109_02151ee0);
+                    WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 1:
                     mNextPage = 4;
                     func_0203b7e8(data_0213b700);
                     func_0203b87c(data_0213b700);
-                    WH_SetReceiver(func_ov109_02151ee0);
+                    WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 3:
                     mNextPage = 1;
@@ -1783,7 +1784,7 @@ void TushinScene::Update() {
                 if (result == 0) {
                     if (func_02073520(GetSelectedResident()) == TRUE) {
                         mNextPage = 0xC;
-                    } else if (func_ov109_02151d74(GetSelectedResident())) {
+                    } else if (CannotSend(GetSelectedResident())) {
                         mNextPage = 0x21;
                     } else {
                         mNextPage = 0xD;
@@ -1796,7 +1797,7 @@ void TushinScene::Update() {
                 break;
             case 12:
                 if (result == 0) {
-                    if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                    if (CannotSend(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x21;
                     } else {
                         mNextPage = 0xD;
@@ -1809,13 +1810,13 @@ void TushinScene::Update() {
                 break;
             case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
             case 28: case 29: case 30: case 31: case 32: case 33:
-                if (mUnknown3F09C == 1) {
-                    mUnknown3F09C = 0;
+                if (mSongStoreFull == 1) {
+                    mSongStoreFull = 0;
                     mNextPage = 0x1F;
                     break;
                 }
-                if (mUnknown3F0A0 == 1) {
-                    mUnknown3F0A0 = 0;
+                if (mShirtDue == 1) {
+                    mShirtDue = 0;
                     if (GiveShirt() == TRUE) {
                         mNextPage = 0x20;
                         break;
@@ -1823,7 +1824,7 @@ void TushinScene::Update() {
                 }
                 mNextPage = 9;
                 close = 0x14;
-                if (mPage == 0x11 && mUnknown3F094 == 1) {
+                if (mPage == 0x11 && mIsReceiveAnimation == 1) {
                     ShowNextCharacter();
                 }
                 break;
@@ -1847,16 +1848,16 @@ void TushinScene::Update() {
             case 38:
                 mNextPage = 1;
                 close = 0x2C;
-                func_02078d48();
+                MiiTransfer_Cut();
                 break;
             case 39:
                 if (result == 3) {
                     mNextPage = 1;
                     close = 0x2C;
-                    func_02078d48();
+                    MiiTransfer_Cut();
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
                     data_0213b700->mParent = result;
-                    mUnknown3F0B0 = 1;
+                    mConnectRequested = 1;
                     mNextPage = 0x28;
                 }
                 break;
@@ -1866,12 +1867,12 @@ void TushinScene::Update() {
                 break;
             case 44:
                 if (result == 0) {
-                    if (data_ov109_02153206 != 0) {
+                    if (sReceiveCount != 0) {
                         break;
                     }
                     if (func_02073520(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x2D;
-                    } else if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                    } else if (CannotSend(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
@@ -1885,14 +1886,14 @@ void TushinScene::Update() {
                 break;
             case 45:
                 if (result == 0) {
-                    if (func_ov109_02151d74(GetSelectedResident()) == TRUE) {
+                    if (CannotSend(GetSelectedResident()) == TRUE) {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
                         func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
                         func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
                         StartReceiveAnimation();
-                        SetUnknown3F098();
+                        SetNeedsSave();
                     }
                 } else {
                     mNextPage = 0x2A;
@@ -1901,8 +1902,8 @@ void TushinScene::Update() {
                 break;
             case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59:
             case 60: case 61: case 62: case 63:
-                if (mUnknown3F0A4 == 1) {
-                    mUnknown3F0A4 = 0;
+                if (mWiiShirtDue == 1) {
+                    mWiiShirtDue = 0;
                     if (GiveWiiShirt() == TRUE) {
                         mNextPage = 0x3D;
                         break;
@@ -1910,7 +1911,7 @@ void TushinScene::Update() {
                 }
                 mNextPage = 0x2A;
                 close = 0x14;
-                if (mPage == 0x31 && mUnknown3F094 == 1) {
+                if (mPage == 0x31 && mIsReceiveAnimation == 1) {
                     ShowNextCharacter();
                 }
                 break;
@@ -1949,10 +1950,10 @@ void TushinScene::Update() {
             case 11:
             case 12:
             case 35:
-                if (mUnknown3F08C == 0 || mNextPage == 0xD) {
+                if (mPartnerSending == 0 || mNextPage == 0xD) {
                     break;
                 }
-                if (mUnknown3F08C == 2) {
+                if (mPartnerSending == 2) {
                     mNextPage = 0xE;
                 } else {
                     mNextPage = 0xF;
@@ -1960,19 +1961,19 @@ void TushinScene::Update() {
                 CloseWindow();
                 break;
             case 13:
-                if (mUnknown3F084 != 0) {
+                if (mSendQueued != 0) {
                     break;
                 }
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (data_ov109_02153202 != 0 || data_ov109_02153204 != 0) {
+                if (sSendChunk != 0 || sSendSongChunk != 0) {
                     break;
                 }
                 if (GetModel(&mCharacters[2])->IsVisible()) {
                     break;
                 }
-                switch (data_ov109_021531e2) {
+                switch (sReceivedCommand) {
                 case 5:
                     mNextPage = 0x11;
                     break;
@@ -1994,11 +1995,11 @@ void TushinScene::Update() {
                     mNextPage = 0x16;
                     break;
                 }
-                if (mUnknown3F098 == 1) {
-                    mUnknown18 = mNextPage;
+                if (mNeedsSave == 1) {
+                    mPageAfterSave = mNextPage;
                     mNextPage = 0x10;
                 }
-                data_ov109_021531e2 = 0;
+                sReceivedCommand = 0;
                 CloseWindow();
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
@@ -2008,30 +2009,30 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (data_ov109_02153206 <= 5 || data_ov109_021531e4 <= 2) {
+                if (sReceiveCount <= 5 || sReceivedSongChunks <= 2) {
                     break;
                 }
                 BOOL done = FALSE;
-                if (data_ov109_02153210 == 1) {
-                    data_ov109_02153210 = 0;
-                    mUnknown3F0A8 = ReceiveCharacter();
+                if (sSongsReceived == 1) {
+                    sSongsReceived = 0;
+                    mReceiveResult = ReceiveCharacter();
                     func_020a05dc(&mResidents);
                     func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                     mNextPage = 0x17;
-                    if (mUnknown3F0A8 != 0) {
-                        data_ov109_02153206 = 0;
-                        data_ov109_021531e4 = 0;
-                        switch (mUnknown3F0A8) {
+                    if (mReceiveResult != 0) {
+                        sReceiveCount = 0;
+                        sReceivedSongChunks = 0;
+                        switch (mReceiveResult) {
                         case 3:
                             mNextPage = 0x18;
                             Send(5);
-                            mUnknown3F0A0 = 1;
+                            mShirtDue = 1;
                             ShowReceived();
                             break;
                         case 4:
                             mNextPage = 0x19;
                             Send(5);
-                            mUnknown3F0A0 = 1;
+                            mShirtDue = 1;
                             ShowReceived();
                             done = TRUE;
                             break;
@@ -2064,13 +2065,13 @@ void TushinScene::Update() {
                             break;
                         }
                     }
-                    mUnknown3F0A0 = 1;
+                    mShirtDue = 1;
                     ShowReceived();
                     if (func_02073520(&sTransfer) == TRUE) {
-                        mUnknown18 = mNextPage;
+                        mPageAfterSave = mNextPage;
                         mNextPage = 0x10;
                         CloseWindow();
-                        SetUnknown3F098();
+                        SetNeedsSave();
                         done = TRUE;
                     }
                     Send(5);
@@ -2078,8 +2079,8 @@ void TushinScene::Update() {
                         break;
                     }
                 }
-                data_ov109_02153206 = 0;
-                data_ov109_021531e4 = 0;
+                sReceiveCount = 0;
+                sReceivedSongChunks = 0;
                 CloseWindow();
                 break;
             }
@@ -2087,18 +2088,18 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (mUnknown3F098 == 1) {
+                if (mNeedsSave == 1) {
                     mWait = 60;
                     Save();
-                    mUnknown3F098 = 0;
+                    mNeedsSave = 0;
                     break;
                 }
                 if (func_0202cd38(&gGameData)) {
                     break;
                 }
-                data_ov109_02153206 = 0;
-                data_ov109_021531e4 = 0;
-                mNextPage = mUnknown18;
+                sReceiveCount = 0;
+                sReceivedSongChunks = 0;
+                mNextPage = mPageAfterSave;
                 CloseWindow();
                 break;
             case 36:
@@ -2109,7 +2110,7 @@ void TushinScene::Update() {
                 }
                 break;
             case 38:
-                if (func_02078f04() != 1) {
+                if (MiiTransfer_GetState() != 1) {
                     break;
                 }
                 if (!IsWindowOpen(&mWindow) || mNextPage == 0x27) {
@@ -2122,14 +2123,14 @@ void TushinScene::Update() {
                 CloseWindow();
                 break;
             case 40:
-                if (mUnknown3F0B0 != 1) {
+                if (mConnectRequested != 1) {
                     break;
                 }
-                func_02078da4(mParentIds[data_0213b700->mParent]);
-                mUnknown3F0B0 = 0;
+                MiiTransfer_Connect(mParentIds[data_0213b700->mParent]);
+                mConnectRequested = 0;
                 break;
             case 66:
-                if (func_02078f04() == 0) {
+                if (MiiTransfer_GetState() == 0) {
                     mNextPage = 0;
                     CloseWindow();
                     ResetExchange();
@@ -2138,7 +2139,7 @@ void TushinScene::Update() {
             case 44:
             case 45:
             case 65:
-                if (data_ov109_02153206 == 0) {
+                if (sReceiveCount == 0) {
                     break;
                 }
                 if (!IsWindowOpen(&mWindow) || mNextPage == 0x2E || mNextPage == 0x2F) {
@@ -2154,15 +2155,15 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (data_ov109_02153220 != 1) {
+                if (sWiiSendDone != 1) {
                     break;
                 }
-                if (data_ov109_02153228 == 0) {
+                if (sWiiSendResult == 0) {
                     break;
                 }
                 int sent = func_02073520(GetSelectedResident());
                 mNextPage = 0x31;
-                switch (data_ov109_02153228) {
+                switch (sWiiSendResult) {
                 case 1:
                     if (sent) {
                         func_020a0664(&mResidents);
@@ -2171,67 +2172,67 @@ void TushinScene::Update() {
                 case 2:
                     mNextPage = 0x32;
                     CloseWindow();
-                    data_ov109_02153220 = 0;
+                    sWiiSendDone = 0;
                     func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
                     mNextPage = 0x33;
                     CloseWindow();
-                    data_ov109_02153220 = 0;
+                    sWiiSendDone = 0;
                     return;
                 case -4:
                     mNextPage = 0x34;
                     CloseWindow();
-                    data_ov109_02153220 = 0;
+                    sWiiSendDone = 0;
                     func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 }
                 if (sent) {
-                    SetUnknown3F098();
-                    mUnknown18 = mNextPage;
+                    SetNeedsSave();
+                    mPageAfterSave = mNextPage;
                     mNextPage = 0x30;
                 }
                 CloseWindow();
-                data_ov109_02153228 = 0;
+                sWiiSendResult = 0;
                 break;
             }
             case 48:
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (mUnknown3F098 == 1) {
+                if (mNeedsSave == 1) {
                     mWait = 60;
                     Save();
-                    mUnknown3F098 = 0;
+                    mNeedsSave = 0;
                     break;
                 }
                 if (func_0202cd38(&gGameData)) {
                     break;
                 }
-                mNextPage = mUnknown18;
+                mNextPage = mPageAfterSave;
                 CloseWindow();
-                data_ov109_02153220 = 0;
+                sWiiSendDone = 0;
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
-                if (!IsWindowOpen(&mWindow) || data_ov109_02153206 == 0) {
+                if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
                     break;
                 }
-                data_ov109_02153206 = 0;
+                sReceiveCount = 0;
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
-                    mUnknown3F0A4 = 1;
+                    mWiiShirtDue = 1;
                 }
                 break;
             }
         }
 
-        if (mUnknown3F0AC == 1) {
+        if (mWindowReady == 1) {
             int nextLayout = sPageLayouts[mNextPage];
             if (nextLayout >= 0) {
                 SetUpWindow(mNextPage);
@@ -2267,15 +2268,15 @@ void TushinScene::Update() {
                     mUnknown3F090 = 1;
                     break;
                 case 13:
-                    if (mUnknown3F08C != 0) {
+                    if (mPartnerSending != 0) {
                         if (mUnknown3F090 == 0) {
-                            if (mUnknown3F08C == 2) { mNextPage = 0xE; } else { mNextPage = 0xF; }
-                            mUnknown3F08C = 0;
+                            if (mPartnerSending == 2) { mNextPage = 0xE; } else { mNextPage = 0xF; }
+                            mPartnerSending = 0;
                             Send(4);
-                            data_ov109_02153210 = 0;
+                            sSongsReceived = 0;
                             break;
                         }
-                        mUnknown3F08C = 0;
+                        mPartnerSending = 0;
                     }
                     switch (mPage) {
                     case 0xB:
@@ -2290,15 +2291,15 @@ void TushinScene::Update() {
                     break;
                 case 14:
                 case 15:
-                    data_ov109_02153210 = 0;
-                    mUnknown24 = 0;
+                    sSongsReceived = 0;
+                    mCloseListToReceive = 0;
                     if (mPage != 0xB && mPage != 0xC && mPage != 0x23) {
                         break;
                     }
-                    if (mUnknown3F08C == 0) {
+                    if (mPartnerSending == 0) {
                         break;
                     }
-                    mUnknown3F08C = 0;
+                    mPartnerSending = 0;
                     Send(4);
                     break;
                 case 16:
@@ -2350,15 +2351,15 @@ void TushinScene::Update() {
                     break;
                 case 46:
                 case 47:
-                    data_ov109_02153220 = 0;
+                    sWiiSendDone = 0;
                     break;
                 case 53:
                     PlaySound(0xB);
                     break;
                 case 66: {
-                    int state = func_02078f04();
+                    int state = MiiTransfer_GetState();
                     if (state != 7 && state != 10) {
-                        func_02078d48();
+                        MiiTransfer_Cut();
                     }
                     mWait = 60;
                     break;
@@ -2367,7 +2368,7 @@ void TushinScene::Update() {
                     PlaySound(0xD);
                     // fall through
                 case 64:
-                    mUnknown28 = 0;
+                    mLostInList = 0;
                     break;
                 case 38:
                     for (int i = 0; i < 3; i++) {
@@ -2375,7 +2376,7 @@ void TushinScene::Update() {
                         mParentIds[i] = 0;
                     }
                     ClearParentNames();
-                    func_02078d04();
+                    MiiTransfer_Start();
                     break;
                 case 67:
                     PlaySound(0xD);
@@ -2400,7 +2401,7 @@ void TushinScene::Update() {
             Disconnect(mNextPage);
             mPage = mNextPage;
         }
-        mUnknown3F0AC = 0;
+        mWindowReady = 0;
     } else {
         switch (mPage) {
         case 9:
@@ -2430,8 +2431,8 @@ void TushinScene::Draw() {
     func_020a05b8(&mResidents);
     DrawParticles();
     DrawCharacters();
-    mUnknown1C += 0x4CC;
-    func_02028108(&data_02121834, 2, mUnknown1C >> FX32_SHIFT);
+    mBgScroll += 0x4CC;
+    func_02028108(&data_02121834, 2, mBgScroll >> FX32_SHIFT);
 }
 
 // @0x02151620
@@ -2440,7 +2441,7 @@ void TushinScene::Exit() {
         WH_Finalize();
         func_0203b8b4(data_0213b700, 1);
     }
-    if (mUnknown35920 != mResidents.mUnknown11306) {
+    if (mSortKey != mResidents.mUnknown11306) {
         gGameData.mMiiListSortKey = mResidents.mUnknown11306;
     }
     for (int i = 0; i < 3; i++) {
@@ -2464,12 +2465,12 @@ void TushinScene::Exit() {
         }
         return;
     }
-    if (func_02078f04() == 0) {
+    if (MiiTransfer_GetState() == 0) {
         return;
     }
     do {
-        func_020777f4();
-    } while (func_02078f04() != 0);
+        MiiTransfer_Update();
+    } while (MiiTransfer_GetState() != 0);
 }
 
 // @0x021517c8
@@ -2628,8 +2629,9 @@ BOOL TushinScene::IsInvalid(CharacterRecord *record) {
     return IsNicknameBlank(record) == TRUE ? TRUE : FALSE;
 }
 
+// Whether a resident may not be sent: a song with an NG word, or an invalid Mii, name or nickname
 // @0x02151d74
-BOOL TushinScene::func_ov109_02151d74(CharacterRecord *record) {
+BOOL TushinScene::CannotSend(CharacterRecord *record) {
     if (HasNgSong(record) == TRUE) {
         return TRUE;
     }
@@ -2662,7 +2664,7 @@ BOOL TushinScene::GiveWiiShirt() {
 
 // @0x02151e48
 void TushinScene::SetEntry(BOOL enabled) {
-    WM_SetEntry(func_ov109_0215245c, enabled);
+    WM_SetEntry(TushinScene_EntryCallback, enabled);
 }
 
 // @0x02151e5c
@@ -2678,86 +2680,86 @@ void TushinScene::Save() {
 }
 
 // @0x02151ea4
-void TushinScene::SetUnknown3F098() {
-    mUnknown3F098 = 1;
+void TushinScene::SetNeedsSave() {
+    mNeedsSave = 1;
 }
 
 // @0x02151eb4
-extern "C" void func_ov109_02151eb4(BOOL result) {
+extern "C" void TushinScene_SendCallback(BOOL result) {
     switch (WH_GetSystemState()) {
     case 0:
     case 9:
     case 10:
         return;
     }
-    data_ov109_0215321c = 1;
+    sSent = 1;
 }
 
 // @0x02151ee0
-extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
+extern "C" void TushinScene_Receive(u16 aid, u16 *data, u16 size) {
     switch (size) {
     case 0:
-        data_ov109_021531e0 = 1;
+        sDisconnected = 1;
         return;
     case 2:
-        if (data_ov109_021531e2 == 0) {
-            data_ov109_021531e2 = *data;
+        if (sReceivedCommand == 0) {
+            sReceivedCommand = *data;
         } else {
-            data_ov109_02153208 = *data;
+            sNextReceivedCommand = *data;
         }
         return;
     }
-    if (data_ov109_02153206 == 0) {
+    if (sReceiveCount == 0) {
         func_020979e0(&sTransfer);
     }
-    if (data_ov109_02153206 >= 6) {
-        MI_CpuCopy8(data, (u8 *)sSongs + data_ov109_021531e4 * 0x80, 0x80);
-        if (data_ov109_021531e4 < 2) {
-            data_ov109_021531e4++;
+    if (sReceiveCount >= 6) {
+        MI_CpuCopy8(data, (u8 *)sSongs + sReceivedSongChunks * 0x80, 0x80);
+        if (sReceivedSongChunks < 2) {
+            sReceivedSongChunks++;
         } else {
-            data_ov109_021531e4++;
-            data_ov109_02153210 = 1;
+            sReceivedSongChunks++;
+            sSongsReceived = 1;
         }
     } else {
-        MI_CpuCopy8(data, (u8 *)&sTransfer + data_ov109_02153206 * 0x80, 0x80);
-        if (data_ov109_02153206 < 5) {
-            ++data_ov109_02153206;
+        MI_CpuCopy8(data, (u8 *)&sTransfer + sReceiveCount * 0x80, 0x80);
+        if (sReceiveCount < 5) {
+            ++sReceiveCount;
         } else {
-            data_ov109_02153206++;
+            sReceiveCount++;
         }
     }
 }
 
 // @0x02151fcc
-extern "C" void func_ov109_02151fcc(int a, int b) {
-    data_ov109_02153228 = a;
-    data_ov109_02153220 = 1;
+extern "C" void TushinScene_OnWiiSendResult(int a, int b) {
+    sWiiSendResult = a;
+    sWiiSendDone = 1;
 }
 
 // @0x02151fe4
 int TushinScene::NextPageAfterReceive() {
     int page = ReceiveWiiMii();
-    mUnknown3F0A8 = page;
+    mReceiveResult = page;
     if (page != 0x35) {
         return page;
     }
-    if (mUnknown3F098 == 1) {
-        mUnknown18 = page;
+    if (mNeedsSave == 1) {
+        mPageAfterSave = page;
         page = 0x30;
     }
     return page;
 }
 
-// NOT MATCHING: the original derives the -1 for data_ov109_02153224 from a register holding 0 (mov r2, #0; sub r1, r2,
+// NOT MATCHING: the original derives the -1 for sReceivedResident from a register holding 0 (mov r2, #0; sub r1, r2,
 // #1), and sets that 0 earlier (five instructions). mwcc derives a constant so when a register already holds a nearby
 // one (storing 0 first does it, but then the stores come out in the other order); a variable equal to 0 that is not
 // propagated would do it too (ItemTradeList::Receive), but none fits here.
 // @0x02152014
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;
-    data_ov109_02153224 = -1;
-    int result = data_ov109_02153214;
-    data_ov109_02153214 = 0;
+    sReceivedResident = -1;
+    int result = sWiiReceiveResult;
+    sWiiReceiveResult = 0;
     switch (result) {
     case -5:
         PlayResultSound(0xD);
@@ -2770,23 +2772,23 @@ int TushinScene::ReceiveWiiMii() {
         PlayResultSound(0xD);
         return 0x3E;
     }
-    MI_CpuCopy8(&sMiiData[data_ov109_02153218], &sTransfer, sizeof(MiiData));
-    if (IsInvalid((CharacterRecord *)&sMiiData[data_ov109_02153218])) {
+    MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &sTransfer, sizeof(MiiData));
+    if (IsInvalid((CharacterRecord *)&sMiiData[sWiiReceivedIndex])) {
         UpdateMiiData();
         PlayResultSound(0xD);
         return 0x3C;
     }
     func_020979e0(&character);
-    MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
+    MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &character, sizeof(MiiData));
     if (HasNgWord(&character) == TRUE) {
         UpdateMiiData();
         PlayResultSound(0xD);
         return 0x3F;
     }
-    data_ov109_02153224 = FindResident((CharacterRecord *)&sMiiData[data_ov109_02153218]);
-    if (data_ov109_02153224 != -1) {
+    sReceivedResident = FindResident((CharacterRecord *)&sMiiData[sWiiReceivedIndex]);
+    if (sReceivedResident != -1) {
         func_020979e0(&character);
-        func_0202c264(&gGameData, data_ov109_02153224, &character);
+        func_0202c264(&gGameData, sReceivedResident, &character);
         if (func_02073520(&character)) {
             PlayResultSound(0xD);
             return 0x38;
@@ -2795,12 +2797,12 @@ int TushinScene::ReceiveWiiMii() {
             PlayResultSound(0xD);
             return 0x36;
         }
-        MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
-        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, data_ov109_02153224)) {
+        MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &character, sizeof(MiiData));
+        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, sReceivedResident)) {
             PlayResultSound(0xC);
             return 0x39;
         }
-        func_0202c28c(&gGameData, data_ov109_02153224, &character);
+        func_0202c28c(&gGameData, sReceivedResident, &character);
         MiiData_GetName(&character, sReceivedName);
         UpdateMiiData();
         PlayResultSound(0xC);
@@ -2808,14 +2810,14 @@ int TushinScene::ReceiveWiiMii() {
     }
     for (int i = 0; i < 100; i++) {
         if (!func_0202c354(&gGameData, i)) {
-            data_ov109_02153224 = i;
+            sReceivedResident = i;
             func_020979e0(&character);
-            MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
+            MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &character, sizeof(MiiData));
             func_02097c64(&character);
             func_0202c28c(&gGameData, i, &character);
             MiiData_GetName(&character, sReceivedName);
             if (func_02073520(&character)) {
-                SetUnknown3F098();
+                SetNeedsSave();
             }
             UpdateMiiData();
             return 0x35;
@@ -2825,36 +2827,36 @@ int TushinScene::ReceiveWiiMii() {
 }
 
 // @0x021523a4
-extern "C" void func_ov109_021523a4(int index, int result) {
-    data_ov109_02153214 = result;
+extern "C" void TushinScene_OnWiiMiiReceived(int index, int result) {
+    sWiiReceiveResult = result;
     switch (result) {
     case 1:
-        data_ov109_02153218 = (u8)index;
-        data_ov109_02153206++;
+        sWiiReceivedIndex = (u8)index;
+        sReceiveCount++;
         break;
     case 2:
-        data_ov109_02153218 = (u8)index;
-        data_ov109_02153206++;
+        sWiiReceivedIndex = (u8)index;
+        sReceiveCount++;
         break;
     case 3:
-        data_ov109_02153218 = (u8)index;
-        data_ov109_02153206++;
+        sWiiReceivedIndex = (u8)index;
+        sReceiveCount++;
         break;
     case -5:
     case -4:
-        data_ov109_02153206++;
+        sReceiveCount++;
         break;
     case -2:
-        data_ov109_02153206++;
+        sReceiveCount++;
         break;
     case -3:
-        data_ov109_02153206++;
+        sReceiveCount++;
         break;
     }
 }
 
 // @0x0215245c
-extern "C" void func_ov109_0215245c(void *arg) {
+extern "C" void TushinScene_EntryCallback(void *arg) {
 }
 
 // Not in the ROM: the link left it out, as nothing calls it. Something of this file used the 13 u16s at

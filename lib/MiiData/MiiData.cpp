@@ -10,7 +10,7 @@
 #include <nitro.h>
 
 struct MiiData {
-    /* 0x00 */ u16 mUnknown00Bit0 : 1;
+    /* 0x00 */ u16 mFavorite : 1;
                u16 mFavoriteColor : 4;
                u16 mBirthDay : 5;
                u16 mBirthMonth : 4;
@@ -21,7 +21,7 @@ struct MiiData {
     /* 0x17 */ u8 mBuild;
     /* 0x18 */ u8 mCreateId[8];
     /* 0x20 */ u16 mUnknown20Bits0 : 2;
-               u16 mUnknown20Bit2 : 1;
+               u16 mLocalOnly : 1;
                u16 mUnknown20Bits3 : 3;
                u16 mFaceTexture : 4;
                u16 mFaceColor : 3;
@@ -381,8 +381,8 @@ extern "C" void MiiData_SetFavoriteColor(MiiData *mii, int value) {
     mii->mFavoriteColor = value;
 }
 
-extern "C" void func_0207a6f0(MiiData *mii, int value) {
-    mii->mUnknown20Bit2 = value;
+extern "C" void MiiData_SetLocalOnly(MiiData *mii, int value) {
+    mii->mLocalOnly = value;
 }
 
 extern "C" int MiiData_GetSex(MiiData *mii) {
@@ -424,8 +424,8 @@ extern "C" int MiiData_GetDaysInBirthMonth(MiiData *mii) {
     return sDaysInMonth[mii->mBirthMonth];
 }
 
-extern "C" void func_0207a7bc(MiiData *mii, int value) {
-    mii->mUnknown00Bit0 = value;
+extern "C" void MiiData_SetFavorite(MiiData *mii, int value) {
+    mii->mFavorite = value;
 }
 
 extern "C" int MiiData_GetBuild(MiiData *mii) {

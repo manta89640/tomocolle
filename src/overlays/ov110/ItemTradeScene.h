@@ -642,7 +642,7 @@ public:
     void SetVisible(BOOL visible);
     void Select(int tab);
     void SetEnabled(int tabs);
-    void func_ov110_0214a0bc();
+    void OnOpen();
 
     /* 0x000 */ int mPressed;  // The tab pressed this frame, as TAB_*, or 0
     /* 0x004 */ int mSelected; // Its button
@@ -739,7 +739,7 @@ public:
     void SetItemCamera();
     void SetRoomCamera();
     void ResetLights();
-    void func_ov110_0214bae8();
+    void ResetListButtons();
     void UpdatePreviewStates();
     void ShowPending();
 

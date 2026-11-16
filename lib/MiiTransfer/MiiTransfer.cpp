@@ -7,8 +7,8 @@
 // messages (sMsgState: 0x10 a Mii, 0x20 the answer to one, 0x30 to 0x50, 0xD0 idle, 0xE0 cut, 0xF0 the user's
 // name) and the state that overlay 109 sees (sState).
 //
-// The file name is descriptive, not the original. The functions keep their address names: no name of this code
-// survives in the ROM.
+// The file name is descriptive, not the original, and so are the names of the functions and statics: no name of this
+// code survives in the ROM. They are the project's own, after what each does (MiiTransfer_ for the file's functions).
 
 #include "MiiTransfer.h"
 #include "MiiTransferWH.h"
@@ -40,92 +40,92 @@ typedef struct Parent {
     WMBssDesc bssDesc;
 } Parent;
 
-typedef void (*ResultCallback)(int result);
-typedef void (*SendCallback)(int index, int result);
+typedef void (*SendResultCallback)(int result);
+typedef void (*ReceiveCallback)(int index, int result);
 
 extern "C" {
 
-BOOL func_020776e4(void);
-int func_02077700(void);
-void func_02077710(SendCallback callback);
-void func_02077720(ResultCallback callback);
-void func_02077730(void);
-void func_02077758(void);
-void func_0207777c(void *arg, MiiRecord *records, u32 count);
-void func_020777a4(void);
-void func_020777b8(void);
-void func_020777f4(void);
-void func_02077804(BOOL flag);
-void func_02077814(void);
-void func_02077858(void);
-void func_02077b0c(void);
-void func_02077bac(void);
-void func_02077c70(void);
-void func_02077cf4(void);
-BOOL func_02077d08(const void *data, int size);
-BOOL func_02077d90(void *dest);
-void func_02077ddc(int index);
-void func_02077e10(WMBssDesc *bssDesc);
-void func_02077f48(u16 aid, u16 *data, u16 size);
-void func_02077fe0(BOOL result);
-BOOL func_0207800c(int index);
-int func_02078040(int index);
-WMBssDesc *func_02078064(int index);
-int func_0207808c(void);
-u8 func_0207809c(u16 index);
-u16 *func_020780b4(u16 index);
-void func_020780cc(void);
-void func_020780d8(void);
-void func_02078114(void);
-void func_02078588(void);
-BOOL func_02078800(void);
-void func_02078824(int type, int arg, const MiiRecord *record);
-int func_020788bc(int type);
-BOOL func_020788e8(void);
-BOOL func_02078908(u16 index);
-BOOL func_0207895c(void);
-BOOL func_02078988(void);
-BOOL func_020789b0(void);
-void func_020789dc(void);
-void func_02078d04(void);
-void func_02078d48(void);
-void func_02078da4(int index);
-void func_02078db8(u16 index);
-void func_02078e58(u16 index);
-void func_02078e70(u16 index);
-void func_02078e88(const MiiCreateId *createId);
-void func_02078ebc(u16 index);
-void func_02078ed4(void);
-void func_02078ee8(void);
-int func_02078f04(void);
-void func_02078f14(int state);
+BOOL MiiTransfer_IsConnected(void);
+int MiiTransfer_GetSessionState(void);
+void MiiTransfer_SetReceiveCallback(ReceiveCallback callback);
+void MiiTransfer_SetSendResultCallback(SendResultCallback callback);
+void MiiTransfer_CallReceiveCallback(void);
+void MiiTransfer_CallSendResultCallback(void);
+void MiiTransfer_Init(void *idSource, MiiRecord *records, u32 count);
+void MiiTransfer_UpdateReceive(void);
+void MiiTransfer_UpdateSend(void);
+void MiiTransfer_Update(void);
+void MiiTransfer_SetAcceptSpecial(BOOL flag);
+void MiiTransfer_InitSession(void);
+void MiiTransfer_UpdateSession(void);
+void MiiTransfer_UpdateSessionReceive(void);
+void MiiTransfer_UpdateSessionSend(void);
+void MiiTransfer_StartSession(void);
+void MiiTransfer_EndSession(void);
+BOOL MiiTransfer_QueuePacket(const void *data, int size);
+BOOL MiiTransfer_ReadPacket(void *dest);
+void MiiTransfer_ConnectToParent(int index);
+void MiiTransfer_OnParentFound(WMBssDesc *bssDesc);
+void MiiTransfer_OnPacketReceived(u16 aid, u16 *data, u16 size);
+void MiiTransfer_OnPacketSent(BOOL result);
+BOOL MiiTransfer_HasParent(int index);
+int MiiTransfer_GetParentAge(int index);
+WMBssDesc *MiiTransfer_GetParent(int index);
+int MiiTransfer_GetParentCount(void);
+u8 MiiTransfer_GetParentUserGameInfoLength(u16 index);
+u16 *MiiTransfer_GetParentUserGameInfo(u16 index);
+void MiiTransfer_InitMessages(void);
+void MiiTransfer_ResetMessages(void);
+void MiiTransfer_HandleMessage(void);
+void MiiTransfer_SendMessages(void);
+BOOL MiiTransfer_CanSendMessage(void);
+void MiiTransfer_PostMessage(int type, int arg, const MiiRecord *record);
+int MiiTransfer_GetMessageSize(int type);
+BOOL MiiTransfer_IsMessageIdle(void);
+BOOL MiiTransfer_PostMii(u16 index);
+BOOL MiiTransfer_PostCut(void);
+BOOL MiiTransfer_IsSendingMii(void);
+BOOL MiiTransfer_IsReceivingMii(void);
+void MiiTransfer_UpdateState(void);
+void MiiTransfer_Start(void);
+void MiiTransfer_Cut(void);
+void MiiTransfer_Connect(int index);
+void MiiTransfer_SendMii(u16 index);
+void MiiTransfer_SetReceivedNew(u16 index);
+void MiiTransfer_SetReceivedExisting(u16 index);
+void MiiTransfer_SetReceiveFull(const MiiCreateId *createId);
+void MiiTransfer_SetReceivedSpecial(u16 index);
+void MiiTransfer_SetSent(void);
+void MiiTransfer_OnCutByParent(void);
+int MiiTransfer_GetState(void);
+void MiiTransfer_SetState(int state);
 
 } // extern "C"
 
 
 static u8 sSeq;
-static int data_021453a0;
+static int sPendingReply;
 static BOOL sSending;
-static SendCallback sSendCallback;
+static ReceiveCallback sReceiveCallback;
 static int sParentCount;
-static BOOL data_02145384;
-static int data_021453a4;
-static ResultCallback sResultCallback;
+static BOOL sCutRequested;
+static int sReceiveResult;
+static SendResultCallback sSendResultCallback;
 static int sSessionState;
-static BOOL data_021453d8;
-static BOOL data_021453dc;
+static BOOL sSessionLost;
+static BOOL sCutByParent;
 static int sParentIndex;
-static int data_021453d4;
+static int sReceivedIndex;
 static u32 sStateFrames;
-static int data_021453cc;
-static int data_021453c8;
+static int sSendIndex;
+static int sSendResult;
 static int sState;
-static BOOL data_021453c0;
-static BOOL data_021453bc;
+static BOOL sReceiveReported;
+static BOOL sSendReported;
 static int sMiiIndex;
-static void *data_021453b4;
+static void *sIdSource;
 static BOOL sSendPending;
-static BOOL data_021453ac;
+static BOOL sAcceptSpecial;
 static int sMsgState;
 static OSMutex sMutex;
 static u32 sParentAges[PARENT_MAX];
@@ -137,68 +137,68 @@ static Packet sSendPacket;
 static Packet sRecvBuffer;
 static Parent sParents[PARENT_MAX];
 
-extern "C" BOOL func_020776e4(void) {
+extern "C" BOOL MiiTransfer_IsConnected(void) {
     return sSessionState == 4;
 }
 
-extern "C" int func_02077700(void) {
+extern "C" int MiiTransfer_GetSessionState(void) {
     return sSessionState;
 }
 
-extern "C" void func_02077710(SendCallback callback) {
-    sSendCallback = callback;
+extern "C" void MiiTransfer_SetReceiveCallback(ReceiveCallback callback) {
+    sReceiveCallback = callback;
 }
 
-extern "C" void func_02077720(ResultCallback callback) {
-    sResultCallback = callback;
+extern "C" void MiiTransfer_SetSendResultCallback(SendResultCallback callback) {
+    sSendResultCallback = callback;
 }
 
-extern "C" void func_02077730(void) {
-    if (sSendCallback != NULL) {
-        sSendCallback(data_021453d4, data_021453a4);
+extern "C" void MiiTransfer_CallReceiveCallback(void) {
+    if (sReceiveCallback != NULL) {
+        sReceiveCallback(sReceivedIndex, sReceiveResult);
     }
 }
 
-extern "C" void func_02077758(void) {
-    if (sResultCallback != NULL) {
-        sResultCallback(data_021453c8);
+extern "C" void MiiTransfer_CallSendResultCallback(void) {
+    if (sSendResultCallback != NULL) {
+        sSendResultCallback(sSendResult);
     }
 }
 
-extern "C" void func_0207777c(void *arg, MiiRecord *records, u32 count) {
-    data_021453b4 = arg;
-    func_02079dfc(records, count);
-    func_02077814();
-    func_020780cc();
+extern "C" void MiiTransfer_Init(void *idSource, MiiRecord *records, u32 count) {
+    sIdSource = idSource;
+    MiiTransferList_Init(records, count);
+    MiiTransfer_InitSession();
+    MiiTransfer_InitMessages();
 }
 
-extern "C" void func_020777a4(void) {
-    func_02077b0c();
-    func_02078114();
-    func_020789dc();
+extern "C" void MiiTransfer_UpdateReceive(void) {
+    MiiTransfer_UpdateSessionReceive();
+    MiiTransfer_HandleMessage();
+    MiiTransfer_UpdateState();
 }
 
-extern "C" void func_020777b8(void) {
-    func_02078588();
-    func_02077bac();
+extern "C" void MiiTransfer_UpdateSend(void) {
+    MiiTransfer_SendMessages();
+    MiiTransfer_UpdateSessionSend();
     if (sState != 0) {
-        int state = func_02077700();
+        int state = MiiTransfer_GetSessionState();
         if (state == 0 || state == 6) {
-            data_021453d8 = TRUE;
+            sSessionLost = TRUE;
         }
     }
 }
 
-extern "C" void func_020777f4(void) {
-    func_020777b8();
-    func_020777a4();
+extern "C" void MiiTransfer_Update(void) {
+    MiiTransfer_UpdateSend();
+    MiiTransfer_UpdateReceive();
 }
 
-extern "C" void func_02077804(BOOL flag) {
-    data_021453ac = flag;
+extern "C" void MiiTransfer_SetAcceptSpecial(BOOL flag) {
+    sAcceptSpecial = flag;
 }
 
-extern "C" void func_02077814(void) {
+extern "C" void MiiTransfer_InitSession(void) {
     sSessionState = 0;
     OS_InitMutex(&sMutex);
     WH_SetGgid(0x412);
@@ -214,7 +214,7 @@ extern "C" void func_02077814(void) {
 // r4 (a variable, i, shared with the loop and the length), and the copy of the address from a local initialiser.
 #pragma optimization_level 2
 #pragma opt_propagation off
-extern "C" void func_02077858(void) {
+extern "C" void MiiTransfer_UpdateSession(void) {
     volatile u8 userGameInfo[0x16];
     int i;
 
@@ -227,7 +227,7 @@ extern "C" void func_02077858(void) {
             u8 macAddr[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
             i = 0;
             WH_TurnOffPictoCatch();
-            WH_StartScan(func_02077e10, macAddr, i);
+            WH_StartScan(MiiTransfer_OnParentFound, macAddr, i);
             sSessionState = 2;
             break;
         }
@@ -247,14 +247,14 @@ extern "C" void func_02077858(void) {
         switch (WH_GetSystemState()) {
         case WH_SYSSTATE_IDLE:
             WH_ChildConnect(WH_CONNECTMODE_MP_CHILD, &sParents[sParentIndex].bssDesc);
-            WH_SetReceiver(func_02077f48);
+            WH_SetReceiver(MiiTransfer_OnPacketReceived);
             sRecvBuffer.valid = FALSE;
             sSendPacket.valid = FALSE;
             sRecvPacket.valid = FALSE;
             break;
         case WH_SYSSTATE_CONNECTED: {
-            i = func_0207809c(sParentIndex);
-            u16 *info = func_020780b4(sParentIndex);
+            i = MiiTransfer_GetParentUserGameInfoLength(sParentIndex);
+            u16 *info = MiiTransfer_GetParentUserGameInfo(sParentIndex);
             for (int j = 0; j < i; j++) {
                 userGameInfo[j] = *info++;
             }
@@ -314,9 +314,9 @@ extern "C" void func_02077858(void) {
 }
 #pragma optimization_level reset
 
-extern "C" void func_02077b0c(void) {
+extern "C" void MiiTransfer_UpdateSessionReceive(void) {
     OS_LockMutex(&sMutex);
-    func_02077858();
+    MiiTransfer_UpdateSession();
     if (sSessionState == 4) {
         if (sRecvBuffer.valid) {
             MI_CpuCopy8(&sRecvBuffer, &sRecvPacket, sizeof(Packet));
@@ -330,7 +330,7 @@ extern "C" void func_02077b0c(void) {
     OS_UnlockMutex(&sMutex);
 }
 
-extern "C" void func_02077bac(void) {
+extern "C" void MiiTransfer_UpdateSessionSend(void) {
     if (sSessionState != 4) {
         return;
     }
@@ -342,14 +342,14 @@ extern "C" void func_02077bac(void) {
         sSendPacket.valid = FALSE;
     }
     if (sSendPacket.valid == TRUE && sSending == FALSE && sSeq == sSendPacket.seq) {
-        if (WH_SendData(&sSendPacket, sSendPacket.size, func_02077fe0)) {
+        if (WH_SendData(&sSendPacket, sSendPacket.size, MiiTransfer_OnPacketSent)) {
             sSending = TRUE;
         }
     }
     OS_UnlockMutex(&sMutex);
 }
 
-extern "C" void func_02077c70(void) {
+extern "C" void MiiTransfer_StartSession(void) {
     if (sSessionState != 0) {
         return;
     }
@@ -365,11 +365,11 @@ extern "C" void func_02077c70(void) {
     }
 }
 
-extern "C" void func_02077cf4(void) {
+extern "C" void MiiTransfer_EndSession(void) {
     sSessionState = 5;
 }
 
-extern "C" BOOL func_02077d08(const void *data, int size) {
+extern "C" BOOL MiiTransfer_QueuePacket(const void *data, int size) {
     if (sSessionState != 4) {
         return FALSE;
     }
@@ -387,7 +387,7 @@ extern "C" BOOL func_02077d08(const void *data, int size) {
     return FALSE;
 }
 
-extern "C" BOOL func_02077d90(void *dest) {
+extern "C" BOOL MiiTransfer_ReadPacket(void *dest) {
     if (sSessionState != 4) {
         return FALSE;
     }
@@ -397,7 +397,7 @@ extern "C" BOOL func_02077d90(void *dest) {
     return sRecvPacket.valid;
 }
 
-extern "C" void func_02077ddc(int index) {
+extern "C" void MiiTransfer_ConnectToParent(int index) {
     if (index < 0 || index >= sParentCount) {
         return;
     }
@@ -407,7 +407,7 @@ extern "C" void func_02077ddc(int index) {
     }
 }
 
-extern "C" void func_02077e10(WMBssDesc *bssDesc) {
+extern "C" void MiiTransfer_OnParentFound(WMBssDesc *bssDesc) {
     int count = sParentCount;
     if (count >= PARENT_MAX) {
         return;
@@ -434,7 +434,7 @@ extern "C" void func_02077e10(WMBssDesc *bssDesc) {
 // WH's receiver: takes a packet from the parent. Compiled without common subexpression elimination, as the ROM has
 // it: with it, the value of sSeq and its low bit swap registers (r0 and r1), and no form of the test changes that.
 #pragma opt_common_subs off
-extern "C" void func_02077f48(u16 aid, u16 *data, u16 size) {
+extern "C" void MiiTransfer_OnPacketReceived(u16 aid, u16 *data, u16 size) {
     if (data == NULL) {
         sSessionState = 5;
         return;
@@ -452,76 +452,76 @@ extern "C" void func_02077f48(u16 aid, u16 *data, u16 size) {
 }
 #pragma opt_common_subs reset
 
-extern "C" void func_02077fe0(BOOL result) {
+extern "C" void MiiTransfer_OnPacketSent(BOOL result) {
     OS_LockMutex(&sMutex);
     sSending = FALSE;
     OS_UnlockMutex(&sMutex);
 }
 
-extern "C" BOOL func_0207800c(int index) {
+extern "C" BOOL MiiTransfer_HasParent(int index) {
     if (index >= sParentCount) {
         return FALSE;
     }
     return sParentTimers[index] != 0;
 }
 
-extern "C" int func_02078040(int index) {
+extern "C" int MiiTransfer_GetParentAge(int index) {
     if (index >= sParentCount) {
         return -1;
     }
     return sParentAges[index];
 }
 
-extern "C" WMBssDesc *func_02078064(int index) {
+extern "C" WMBssDesc *MiiTransfer_GetParent(int index) {
     if (index >= sParentCount) {
         return NULL;
     }
     return &sParents[index].bssDesc;
 }
 
-extern "C" int func_0207808c(void) {
+extern "C" int MiiTransfer_GetParentCount(void) {
     return sParentCount;
 }
 
-extern "C" u8 func_0207809c(u16 index) {
-    WMBssDesc *bssDesc = func_02078064(index);
+extern "C" u8 MiiTransfer_GetParentUserGameInfoLength(u16 index) {
+    WMBssDesc *bssDesc = MiiTransfer_GetParent(index);
     if (bssDesc != NULL) {
         return bssDesc->gameInfo.userGameInfoLength;
     }
     return 0;
 }
 
-extern "C" u16 *func_020780b4(u16 index) {
-    WMBssDesc *bssDesc = func_02078064(index);
+extern "C" u16 *MiiTransfer_GetParentUserGameInfo(u16 index) {
+    WMBssDesc *bssDesc = MiiTransfer_GetParent(index);
     if (bssDesc != NULL) {
         return bssDesc->gameInfo.userGameInfo;
     }
     return NULL;
 }
 
-extern "C" void func_020780cc(void) {
-    func_020780d8();
+extern "C" void MiiTransfer_InitMessages(void) {
+    MiiTransfer_ResetMessages();
 }
 
-extern "C" void func_020780d8(void) {
+extern "C" void MiiTransfer_ResetMessages(void) {
     sMsgState = 0xF0;
     sMiiIndex = -1;
-    data_021453a0 = 0;
+    sPendingReply = 0;
     sSendPending = FALSE;
     sSendMsg.type = 0xD0;
     sSendMsg.arg = 0;
-    data_021453bc = FALSE;
-    data_021453c0 = FALSE;
+    sSendReported = FALSE;
+    sReceiveReported = FALSE;
 }
 
-extern "C" void func_02078114(void) {
-    if (!func_020776e4()) {
+extern "C" void MiiTransfer_HandleMessage(void) {
+    if (!MiiTransfer_IsConnected()) {
         return;
     }
-    if (!func_02077d90(&sRecvMsg)) {
+    if (!MiiTransfer_ReadPacket(&sRecvMsg)) {
         return;
     }
-    if (func_02078800()) {
+    if (MiiTransfer_CanSendMessage()) {
         return;
     }
     switch (sMsgState) {
@@ -529,39 +529,39 @@ extern "C" void func_02078114(void) {
         if (sRecvMsg.type != 0x20) {
             return;
         }
-        MiiRecord *record = func_02079ea4(sMiiIndex);
+        MiiRecord *record = MiiTransferList_Get(sMiiIndex);
         switch (sRecvMsg.arg) {
         case 0:
             if (func_02073264(&record->createId)) {
                 func_02073394(&record->createId);
-                data_021453a0 = 3;
+                sPendingReply = 3;
             } else {
-                func_02078824(0x30, 0, NULL);
-                func_02078ed4();
+                MiiTransfer_PostMessage(0x30, 0, NULL);
+                MiiTransfer_SetSent();
             }
             break;
         case 1:
-            func_02078824(0x30, 0, NULL);
+            MiiTransfer_PostMessage(0x30, 0, NULL);
             if (func_02073264(&record->createId)) {
-                data_021453c8 = -4;
+                sSendResult = -4;
             } else {
-                data_021453c8 = -5;
+                sSendResult = -5;
             }
             break;
         case 2:
-            func_02078824(0x30, 0, NULL);
-            func_02078ed4();
+            MiiTransfer_PostMessage(0x30, 0, NULL);
+            MiiTransfer_SetSent();
             break;
         case 5:
-            func_02078824(0x30, 0, NULL);
-            data_021453c8 = 2;
+            MiiTransfer_PostMessage(0x30, 0, NULL);
+            sSendResult = 2;
             break;
         default:
-            func_02078824(0x30, 0, NULL);
+            MiiTransfer_PostMessage(0x30, 0, NULL);
             if (func_02073264(&record->createId)) {
-                data_021453c8 = -2;
+                sSendResult = -2;
             } else {
-                data_021453c8 = -3;
+                sSendResult = -3;
             }
             break;
         }
@@ -572,9 +572,9 @@ extern "C" void func_02078114(void) {
         if (sRecvMsg.type != 0x40) {
             return;
         }
-        if (data_021453bc) {
-            func_02078824(0x50, 0, NULL);
-            data_021453bc = FALSE;
+        if (sSendReported) {
+            MiiTransfer_PostMessage(0x50, 0, NULL);
+            sSendReported = FALSE;
         }
         sMsgState = 0x40;
         return;
@@ -587,47 +587,48 @@ extern "C" void func_02078114(void) {
         }
         if (sRecvMsg.type == 0x10) {
             if (!func_02073284(&sRecvMsg.record.createId)) {
-                if (data_021453ac == FALSE && func_02073264(&sRecvMsg.record.createId)) {
-                    data_021453a4 = -2;
-                    func_02078824(0x20, 4, NULL);
+                if (sAcceptSpecial == FALSE && func_02073264(&sRecvMsg.record.createId)) {
+                    sReceiveResult = -2;
+                    MiiTransfer_PostMessage(0x20, 4, NULL);
                 } else {
+                    // The Wii's localOnly set and favorite cleared (MiiData_SetLocalOnly, MiiData_SetFavorite)
                     sRecvMsg.record.unk20[0] |= 4;
                     sRecvMsg.record.unk0[0] &= ~1;
-                    sMiiIndex = func_02079f28(&sRecvMsg.record.createId);
+                    sMiiIndex = MiiTransferList_Find(&sRecvMsg.record.createId);
                     if (sMiiIndex >= 0) {
                         if (func_02073264(&sRecvMsg.record.createId)) {
-                            func_02078824(0x20, 5, NULL);
-                            func_02078ebc(sMiiIndex);
-                        } else if (func_020732a0(data_021453b4, &sRecvMsg.record.createId)) {
-                            func_02078824(0x20, 2, NULL);
-                            func_02078e70(sMiiIndex);
+                            MiiTransfer_PostMessage(0x20, 5, NULL);
+                            MiiTransfer_SetReceivedSpecial(sMiiIndex);
+                        } else if (func_020732a0(sIdSource, &sRecvMsg.record.createId)) {
+                            MiiTransfer_PostMessage(0x20, 2, NULL);
+                            MiiTransfer_SetReceivedExisting(sMiiIndex);
                         } else {
-                            func_02079ed4(sMiiIndex, &sRecvMsg.record);
-                            data_021453a0 = 2;
-                            func_02078e70(sMiiIndex);
+                            MiiTransferList_Set(sMiiIndex, &sRecvMsg.record);
+                            sPendingReply = 2;
+                            MiiTransfer_SetReceivedExisting(sMiiIndex);
                         }
                     } else {
-                        sMiiIndex = func_02079e5c();
+                        sMiiIndex = MiiTransferList_FindFree();
                         if (sMiiIndex >= 0) {
-                            func_02079ed4(sMiiIndex, &sRecvMsg.record);
-                            data_021453a0 = 1;
-                            func_02078e58(sMiiIndex);
+                            MiiTransferList_Set(sMiiIndex, &sRecvMsg.record);
+                            sPendingReply = 1;
+                            MiiTransfer_SetReceivedNew(sMiiIndex);
                         } else {
-                            func_02078e88(&sRecvMsg.record.createId);
-                            func_02078824(0x20, 1, NULL);
+                            MiiTransfer_SetReceiveFull(&sRecvMsg.record.createId);
+                            MiiTransfer_PostMessage(0x20, 1, NULL);
                         }
                     }
                 }
             } else {
-                data_021453a4 = -3;
-                func_02078824(0x20, 4, NULL);
+                sReceiveResult = -3;
+                MiiTransfer_PostMessage(0x20, 4, NULL);
             }
             sMsgState = 0x10;
-            data_021453c0 = FALSE;
+            sReceiveReported = FALSE;
             return;
         }
         if (sRecvMsg.type == 0xE0) {
-            func_02078ee8();
+            MiiTransfer_OnCutByParent();
             sMsgState = 0xE0;
         }
         return;
@@ -635,9 +636,9 @@ extern "C" void func_02078114(void) {
         if (sRecvMsg.type != 0x30 || sRecvMsg.arg != 0) {
             return;
         }
-        if (data_021453c0) {
-            func_02078824(0x40, 0, NULL);
-            data_021453c0 = FALSE;
+        if (sReceiveReported) {
+            MiiTransfer_PostMessage(0x40, 0, NULL);
+            sReceiveReported = FALSE;
         }
         sMsgState = 0x30;
         return;
@@ -649,56 +650,56 @@ extern "C" void func_02078114(void) {
     }
 }
 
-extern "C" void func_02078588(void) {
-    if (!func_020776e4()) {
+extern "C" void MiiTransfer_SendMessages(void) {
+    if (!MiiTransfer_IsConnected()) {
         return;
     }
-    if (!func_02078800() && sMsgState != 0xF0) {
+    if (!MiiTransfer_CanSendMessage() && sMsgState != 0xF0) {
         return;
     }
     switch (sMsgState) {
     case 0x20:
-        if (data_021453a0) {
-            func_02078ed4();
-            func_02078824(0x30, 0, NULL);
-            data_021453a0 = 0;
+        if (sPendingReply) {
+            MiiTransfer_SetSent();
+            MiiTransfer_PostMessage(0x30, 0, NULL);
+            sPendingReply = 0;
         }
         break;
     case 0x40:
-        if (data_021453bc) {
-            func_02078824(0x50, 0, NULL);
-            data_021453bc = FALSE;
+        if (sSendReported) {
+            MiiTransfer_PostMessage(0x50, 0, NULL);
+            sSendReported = FALSE;
         }
         break;
     case 0x10:
-        if (data_021453a0 == 1 || data_021453a0 == 2) {
-            if (data_021453a0 == 1) {
-                func_02078824(0x20, 0, NULL);
+        if (sPendingReply == 1 || sPendingReply == 2) {
+            if (sPendingReply == 1) {
+                MiiTransfer_PostMessage(0x20, 0, NULL);
             } else {
-                func_02078824(0x20, 2, NULL);
+                MiiTransfer_PostMessage(0x20, 2, NULL);
             }
-            data_021453a0 = 0;
+            sPendingReply = 0;
         }
         break;
     case 0x30:
-        if (data_021453c0) {
-            func_02078824(0x40, 0, NULL);
-            data_021453c0 = FALSE;
+        if (sReceiveReported) {
+            MiiTransfer_PostMessage(0x40, 0, NULL);
+            sReceiveReported = FALSE;
         }
         break;
     case 0xF0:
         if (!sSendPending) {
-            func_02078824(0xF0, 0, NULL);
+            MiiTransfer_PostMessage(0xF0, 0, NULL);
         }
         break;
     }
     if (!sSendPending && (sMsgState == 0x50 || sMsgState == 0xD0)) {
-        func_02078824(0xD0, 0, NULL);
+        MiiTransfer_PostMessage(0xD0, 0, NULL);
     }
     if (!sSendPending) {
         return;
     }
-    if (!func_02077d08(&sSendMsg, func_020788bc(sSendMsg.type))) {
+    if (!MiiTransfer_QueuePacket(&sSendMsg, MiiTransfer_GetMessageSize(sSendMsg.type))) {
         return;
     }
     switch (sSendMsg.type) {
@@ -731,12 +732,12 @@ extern "C" void func_02078588(void) {
 }
 
 // Whether a message may be sent: not while one sent is unanswered (odd states), nor before the name is sent
-extern "C" BOOL func_02078800(void) {
+extern "C" BOOL MiiTransfer_CanSendMessage(void) {
     return !(sMsgState & 1) && sMsgState != 0xF0;
 }
 
 // Puts a message in the send buffer
-extern "C" void func_02078824(int type, int arg, const MiiRecord *record) {
+extern "C" void MiiTransfer_PostMessage(int type, int arg, const MiiRecord *record) {
     sSendMsg.type = type;
     sSendMsg.arg = arg;
     if (type == 0x10) {
@@ -752,7 +753,7 @@ extern "C" void func_02078824(int type, int arg, const MiiRecord *record) {
 }
 
 // The size of a message of a type
-extern "C" int func_020788bc(int type) {
+extern "C" int MiiTransfer_GetMessageSize(int type) {
     switch (type) {
     case 0x10:
         return 0x4C;
@@ -763,34 +764,34 @@ extern "C" int func_020788bc(int type) {
     }
 }
 
-extern "C" BOOL func_020788e8(void) {
+extern "C" BOOL MiiTransfer_IsMessageIdle(void) {
     return sMsgState == 0xD0 || sMsgState == 0x50;
 }
 
 // Sends the Mii of slot index
-extern "C" BOOL func_02078908(u16 index) {
-    if (!func_020788e8()) {
+extern "C" BOOL MiiTransfer_PostMii(u16 index) {
+    if (!MiiTransfer_IsMessageIdle()) {
         return FALSE;
     }
-    MiiRecord *record = func_02079ea4(index);
+    MiiRecord *record = MiiTransferList_Get(index);
     if (record == NULL) {
         return FALSE;
     }
-    func_02078824(0x10, 0, record);
+    MiiTransfer_PostMessage(0x10, 0, record);
     sMiiIndex = index;
-    data_021453bc = FALSE;
+    sSendReported = FALSE;
     return TRUE;
 }
 
-extern "C" BOOL func_0207895c(void) {
-    if (!func_020788e8()) {
+extern "C" BOOL MiiTransfer_PostCut(void) {
+    if (!MiiTransfer_IsMessageIdle()) {
         return FALSE;
     }
-    func_02078824(0xE0, 0, NULL);
+    MiiTransfer_PostMessage(0xE0, 0, NULL);
     return TRUE;
 }
 
-extern "C" BOOL func_02078988(void) {
+extern "C" BOOL MiiTransfer_IsSendingMii(void) {
     switch (sMsgState) {
     case 0x11:
     case 0x20:
@@ -799,7 +800,7 @@ extern "C" BOOL func_02078988(void) {
     return FALSE;
 }
 
-extern "C" BOOL func_020789b0(void) {
+extern "C" BOOL MiiTransfer_IsReceivingMii(void) {
     switch (sMsgState) {
     case 0x10:
     case 0x21:
@@ -809,218 +810,218 @@ extern "C" BOOL func_020789b0(void) {
     return FALSE;
 }
 
-extern "C" void func_020789dc(void) {
+extern "C" void MiiTransfer_UpdateState(void) {
     sStateFrames++;
     switch (sState) {
     case 0:
         break;
     case 1:
-        if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
         }
         break;
     case 2:
-        if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
         } else {
-            switch (func_02077700()) {
+            switch (MiiTransfer_GetSessionState()) {
             case 4:
-                func_02078f14(6);
+                MiiTransfer_SetState(6);
                 break;
             case 6:
-                func_02078f14(5);
-                func_02077cf4();
+                MiiTransfer_SetState(5);
+                MiiTransfer_EndSession();
                 break;
             }
         }
         break;
     case 3:
-        if (func_02077700() == 0) {
-            func_02078f14(0);
+        if (MiiTransfer_GetSessionState() == 0) {
+            MiiTransfer_SetState(0);
         }
         break;
     case 4:
-        if (data_021453d8 || sStateFrames > 300) {
-            func_02078f14(3);
-            func_02077cf4();
+        if (sSessionLost || sStateFrames > 300) {
+            MiiTransfer_SetState(3);
+            MiiTransfer_EndSession();
         } else {
-            func_0207895c();
+            MiiTransfer_PostCut();
         }
         break;
     case 5:
-        if (func_02077700() == 0) {
-            func_02078f14(0);
+        if (MiiTransfer_GetSessionState() == 0) {
+            MiiTransfer_SetState(0);
         }
         break;
     case 6:
-        if (data_021453dc) {
-            func_02078f14(3);
-        } else if (data_021453a4) {
-            func_02077730();
-            func_02078f14(10);
-        } else if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
-        } else if (data_02145384 && func_0207895c()) {
-            func_02078f14(4);
-            data_02145384 = FALSE;
+        if (sCutByParent) {
+            MiiTransfer_SetState(3);
+        } else if (sReceiveResult) {
+            MiiTransfer_CallReceiveCallback();
+            MiiTransfer_SetState(10);
+        } else if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
+        } else if (sCutRequested && MiiTransfer_PostCut()) {
+            MiiTransfer_SetState(4);
+            sCutRequested = FALSE;
         }
         break;
     case 7:
-        if (data_021453d8) {
-            func_02078f14(5);
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
         }
         break;
     case 10:
-        data_021453d4 = -1;
-        data_021453a4 = 0;
-        if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
-        } else if (!func_020789b0()) {
-            if (data_021453cc >= 0) {
-                if (func_02078908(data_021453cc)) {
-                    func_02078f14(8);
+        sReceivedIndex = -1;
+        sReceiveResult = 0;
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
+        } else if (!MiiTransfer_IsReceivingMii()) {
+            if (sSendIndex >= 0) {
+                if (MiiTransfer_PostMii(sSendIndex)) {
+                    MiiTransfer_SetState(8);
                 } else {
-                    func_02078f14(9);
+                    MiiTransfer_SetState(9);
                 }
             } else {
-                func_02078f14(6);
+                MiiTransfer_SetState(6);
             }
         }
         break;
     case 9:
-        if (data_021453dc) {
-            func_02078f14(3);
-        } else if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
-        } else if (data_021453a4) {
-            func_02077730();
-            func_02078f14(10);
-        } else if (func_02078908(data_021453cc)) {
-            func_02078f14(8);
+        if (sCutByParent) {
+            MiiTransfer_SetState(3);
+        } else if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
+        } else if (sReceiveResult) {
+            MiiTransfer_CallReceiveCallback();
+            MiiTransfer_SetState(10);
+        } else if (MiiTransfer_PostMii(sSendIndex)) {
+            MiiTransfer_SetState(8);
         }
         break;
     case 8:
-        if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
-        } else if (data_021453c8) {
-            func_02077758();
-            func_02078f14(11);
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
+        } else if (sSendResult) {
+            MiiTransfer_CallSendResultCallback();
+            MiiTransfer_SetState(11);
         }
         break;
     case 11:
-        data_021453cc = -1;
-        data_021453c8 = 0;
-        if (data_021453d8) {
-            func_02078f14(5);
-            func_02077cf4();
-        } else if (!func_02078988()) {
-            func_02078f14(6);
+        sSendIndex = -1;
+        sSendResult = 0;
+        if (sSessionLost) {
+            MiiTransfer_SetState(5);
+            MiiTransfer_EndSession();
+        } else if (!MiiTransfer_IsSendingMii()) {
+            MiiTransfer_SetState(6);
         }
         break;
     }
 }
 
-extern "C" void func_02078d04(void) {
-    func_02078f14(1);
-    func_02077c70();
-    func_020780d8();
-    data_021453d4 = -1;
-    data_021453cc = -1;
-    data_021453a4 = 0;
-    data_021453c8 = 0;
-    data_021453d8 = FALSE;
-    data_021453dc = FALSE;
-    data_02145384 = FALSE;
+extern "C" void MiiTransfer_Start(void) {
+    MiiTransfer_SetState(1);
+    MiiTransfer_StartSession();
+    MiiTransfer_ResetMessages();
+    sReceivedIndex = -1;
+    sSendIndex = -1;
+    sReceiveResult = 0;
+    sSendResult = 0;
+    sSessionLost = FALSE;
+    sCutByParent = FALSE;
+    sCutRequested = FALSE;
 }
 
-extern "C" void func_02078d48(void) {
+extern "C" void MiiTransfer_Cut(void) {
     switch (sState) {
     case 1:
     case 2:
-        func_02078f14(3);
-        func_02077cf4();
+        MiiTransfer_SetState(3);
+        MiiTransfer_EndSession();
         break;
     case 6:
-        if (func_0207895c()) {
-            func_02078f14(4);
+        if (MiiTransfer_PostCut()) {
+            MiiTransfer_SetState(4);
         }
-        data_02145384 = TRUE;
+        sCutRequested = TRUE;
         break;
     }
 }
 
-extern "C" void func_02078da4(int index) {
-    func_02077ddc(index);
-    func_02078f14(2);
+extern "C" void MiiTransfer_Connect(int index) {
+    MiiTransfer_ConnectToParent(index);
+    MiiTransfer_SetState(2);
 }
 
-extern "C" void func_02078db8(u16 index) {
-    MiiRecord *record = func_02079ea4(index);
+extern "C" void MiiTransfer_SendMii(u16 index) {
+    MiiRecord *record = MiiTransferList_Get(index);
     if (record == NULL || func_02073284(&record->createId)) {
-        data_021453c8 = -3;
-        func_02077758();
-        func_02078f14(11);
+        sSendResult = -3;
+        MiiTransfer_CallSendResultCallback();
+        MiiTransfer_SetState(11);
         return;
     }
     if (func_0207331c(&record->createId)) {
-        data_021453c8 = -1;
-        func_02077758();
-        func_02078f14(11);
+        sSendResult = -1;
+        MiiTransfer_CallSendResultCallback();
+        MiiTransfer_SetState(11);
         return;
     }
-    data_021453cc = index;
-    if (func_02078908(index)) {
-        func_02078f14(8);
+    sSendIndex = index;
+    if (MiiTransfer_PostMii(index)) {
+        MiiTransfer_SetState(8);
     } else {
-        func_02078f14(9);
+        MiiTransfer_SetState(9);
     }
 }
 
-extern "C" void func_02078e58(u16 index) {
-    data_021453a4 = 1;
-    data_021453d4 = index;
+extern "C" void MiiTransfer_SetReceivedNew(u16 index) {
+    sReceiveResult = 1;
+    sReceivedIndex = index;
 }
 
-extern "C" void func_02078e70(u16 index) {
-    data_021453a4 = 3;
-    data_021453d4 = index;
+extern "C" void MiiTransfer_SetReceivedExisting(u16 index) {
+    sReceiveResult = 3;
+    sReceivedIndex = index;
 }
 
-extern "C" void func_02078e88(const MiiCreateId *createId) {
+extern "C" void MiiTransfer_SetReceiveFull(const MiiCreateId *createId) {
     if (func_02073264(createId)) {
-        data_021453a4 = -4;
+        sReceiveResult = -4;
     } else {
-        data_021453a4 = -5;
+        sReceiveResult = -5;
     }
-    data_021453d4 = -1;
+    sReceivedIndex = -1;
 }
 
-extern "C" void func_02078ebc(u16 index) {
-    data_021453a4 = 2;
-    data_021453d4 = index;
+extern "C" void MiiTransfer_SetReceivedSpecial(u16 index) {
+    sReceiveResult = 2;
+    sReceivedIndex = index;
 }
 
-extern "C" void func_02078ed4(void) {
-    data_021453c8 = 1;
+extern "C" void MiiTransfer_SetSent(void) {
+    sSendResult = 1;
 }
 
-extern "C" void func_02078ee8(void) {
-    func_02077cf4();
-    data_021453dc = TRUE;
+extern "C" void MiiTransfer_OnCutByParent(void) {
+    MiiTransfer_EndSession();
+    sCutByParent = TRUE;
 }
 
-extern "C" int func_02078f04(void) {
+extern "C" int MiiTransfer_GetState(void) {
     return sState;
 }
 
-extern "C" void func_02078f14(int state) {
-    // The names of the 28 states, unused: the ROM keeps their initialiser right after the address of func_02077858.
+extern "C" void MiiTransfer_SetState(int state) {
+    // The names of the 28 states, unused: the ROM keeps their initialiser right after the address of MiiTransfer_UpdateSession.
     const char stateNames[28][20] = {
         "Off",
         "Scanning",
@@ -1058,10 +1059,10 @@ extern "C" void func_02078f14(int state) {
     sStateFrames = 0;
     switch (state) {
     case 10:
-        data_021453c0 = TRUE;
+        sReceiveReported = TRUE;
         break;
     case 11:
-        data_021453bc = TRUE;
+        sSendReported = TRUE;
         break;
     }
 }

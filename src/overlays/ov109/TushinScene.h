@@ -474,7 +474,7 @@ void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as
 void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
 void func_020a0664(ResidentList *list);
-void func_02078db8(int index);
+void MiiTransfer_SendMii(int index);
 }
 
 // --- WH, the SDK's wireless sample code (main program) ---
@@ -502,13 +502,13 @@ BOOL WH_ParentConnect(int mode, u16 tgid, u16 channel);
 // --- The Wii's Mii Channel connection (main program 0x02077000 to 0x0207a000) ---
 
 extern "C" {
-int func_02078f04(void);
-int func_0207808c(void);
-BOOL func_0207800c(int i);
-int func_02078040(int i);
-WMBssDesc *func_02078064(int i);
-u16 func_0207809c(int i);
-const u16 *func_020780b4(int i);
+int MiiTransfer_GetState(void);
+int MiiTransfer_GetParentCount(void);
+BOOL MiiTransfer_HasParent(int i);
+int MiiTransfer_GetParentAge(int i);
+WMBssDesc *MiiTransfer_GetParent(int i);
+u16 MiiTransfer_GetParentUserGameInfoLength(int i);
+const u16 *MiiTransfer_GetParentUserGameInfo(int i);
 }
 
 // --- Wireless (main program) ---
@@ -520,7 +520,7 @@ struct WirelessManager {
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mUnknown10;
     /* 0x14 */ int mUnknown14;
-    /* 0x18 */ int mUnknown18;
+    /* 0x18 */ int mPageAfterSave;
     /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
 };
 
@@ -535,13 +535,13 @@ void func_0203b940(WirelessManager *manager, int a);
 void func_0203b968(WirelessManager *manager, int a);
 int func_0203b9c4(WirelessManager *manager);
 void func_0203bac4(WirelessManager *manager, int parent);
-void func_02078d04(void);
-void func_02078d48(void);
-void func_02078da4(u16 id);
+void MiiTransfer_Start(void);
+void MiiTransfer_Cut(void);
+void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
 void func_0203b8b4(WirelessManager *manager, int a);
-void func_020777f4(void);
+void MiiTransfer_Update(void);
 void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
 void func_0203b7e0(WirelessManager *manager, void *buffer);
 void func_0203b898(WirelessManager *manager);
@@ -553,20 +553,20 @@ void func_0203b9fc(WirelessManager *manager);
 int func_0203ba10(WirelessManager *manager);
 void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
-void func_0207777c(void *a, void *miiData, int count);
-void func_02077710(void (*callback)(int, int));
-void func_02077720(void (*callback)(int, int));
-void func_02077804(int a);
+void MiiTransfer_Init(void *a, void *miiData, int count);
+void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));
+void MiiTransfer_SetSendResultCallback(void (*callback)(int, int));
+void MiiTransfer_SetAcceptSpecial(int a);
 extern u16 gWHChildSsid[12]; // WH copies the connecting child's SSID here: the scene shows it as its name
 }
 
 class TushinScene;
 extern "C" {
-void func_ov109_02151fcc(int, int);
-void func_ov109_021523a4(int, int);
-void func_ov109_02151eb4(BOOL result);
-void func_ov109_0215245c(void *arg);
-void func_ov109_02151ee0(u16 aid, u16 *data, u16 size);
+void TushinScene_OnWiiSendResult(int, int);
+void TushinScene_OnWiiMiiReceived(int, int);
+void TushinScene_SendCallback(BOOL result);
+void TushinScene_EntryCallback(void *arg);
+void TushinScene_Receive(u16 aid, u16 *data, u16 size);
 }
 
 // --- The scene ----------------------------------------------------------------------------------------------------
@@ -584,7 +584,7 @@ struct WindowLayout {
 // a DS whether to recruit a partner (the parent) or to find one (a child). A resident is chosen in the list on the
 // lower screen and sent: the 0x2C0-byte character (sTransfer) in 0x80-byte chunks, then the songs of its six slots
 // (sSongs); the receiver checks it (IsInvalid, the NG words of HasNgWord, a resident with the same Mii), stores it
-// as a new resident or updates the one it has, and answers with a 2-byte code (data_ov109_02153200). The Wii sends Miis
+// as a new resident or updates the one it has, and answers with a 2-byte code (sCommand). The Wii sends Miis
 // only: ReceiveWiiMii adds one from sMiiData. A DS or Wii T-shirt is given the first time (GiveShirt,
 // GiveWiiShirt). The scene factory (main CreateScene, case 41) loads overlay 109 and allocates 0x3F0B4 bytes; the
 // constructor is the main program's (func_02040644).
@@ -656,23 +656,23 @@ public:
     void StartEmitter(int i);
     void CountFrame();
     void DrawParticles();
-    BOOL func_ov109_02151d74(CharacterRecord *record);
+    BOOL CannotSend(CharacterRecord *record);
     BOOL GiveItem(int item);
     BOOL GiveShirt();
     BOOL GiveWiiShirt();
     void SetEntry(BOOL enabled);
     void ClearParentNames();
     void Save();
-    void SetUnknown3F098();
+    void SetNeedsSave();
     int NextPageAfterReceive();
 
     /* 0x00010 */ int mPage;     // What the window shows: an index of sPageMessages and sPageLayouts
     /* 0x00014 */ int mNextPage;
-    /* 0x00018 */ int mUnknown18;
-    /* 0x0001C */ int mUnknown1C;
+    /* 0x00018 */ int mPageAfterSave;
+    /* 0x0001C */ int mBgScroll;
     /* 0x00020 */ int mWait;
-    /* 0x00024 */ int mUnknown24;
-    /* 0x00028 */ int mUnknown28;
+    /* 0x00024 */ int mCloseListToReceive;
+    /* 0x00028 */ int mLostInList;
     /* 0x0002C */ MessageFile mMessageFiles[2]; // Etc messages, common messages
     /* 0x0005C */ int mUnknown5C;
     /* 0x00060 */ MessageWindow mWindow;
@@ -680,7 +680,7 @@ public:
     /* 0x1C3AC */ ListView mList;
     /* 0x25824 */ ListPages mPages;
     /* 0x2A97C */ MessageWindow mListWindow;
-    /* 0x35920 */ u8 mUnknown35920;
+    /* 0x35920 */ u8 mSortKey;
     /* 0x35924 */ int mUnknown35924;
     /* 0x35928 */ WindowButton mButtons[3];
     /* 0x36DF8 */ Sprite mSprite;
@@ -690,29 +690,29 @@ public:
     /* 0x36EB0 */ Camera *mCamera;
     /* 0x36EB4 */ SceneCharacter mCharacters[3];
     /* 0x3EFFC */ u8 mCurrent;
-    /* 0x3F000 */ int mUnknown3F000;
+    /* 0x3F000 */ int mCharactersVisible;
     /* 0x3F004 */ ParticleSystem *mParticles;
     /* 0x3F008 */ ParticleEmitter *mEmitters[2];
     /* 0x3F010 */ void *mParticleFile;
     /* 0x3F014 */ VecFx32 mEmitterPositions[2];
     /* 0x3F02C */ int mParticleResource;
-    /* 0x3F030 */ int mUnknown3F030;
-    /* 0x3F034 */ int mUnknown3F034;
+    /* 0x3F030 */ int mEmitterStarted;
+    /* 0x3F034 */ int mParticleFrames;
     /* 0x3F038 */ wchar_t mParentNames[3][11]; // Of the Wiis (or DSs) found
     /* 0x3F07A */ u16 mParentIds[3];
-    /* 0x3F080 */ int mUnknown3F080;
-    /* 0x3F084 */ int mUnknown3F084;
-    /* 0x3F088 */ int mUnknown3F088;
-    /* 0x3F08C */ int mUnknown3F08C;
+    /* 0x3F080 */ int mMusicPlaying;
+    /* 0x3F084 */ int mSendQueued;
+    /* 0x3F088 */ int mPartnerReady;
+    /* 0x3F08C */ int mPartnerSending;
     /* 0x3F090 */ int mUnknown3F090;
-    /* 0x3F094 */ int mUnknown3F094;
-    /* 0x3F098 */ int mUnknown3F098;
-    /* 0x3F09C */ int mUnknown3F09C;
-    /* 0x3F0A0 */ int mUnknown3F0A0;
-    /* 0x3F0A4 */ int mUnknown3F0A4;
-    /* 0x3F0A8 */ int mUnknown3F0A8;
-    /* 0x3F0AC */ int mUnknown3F0AC;
-    /* 0x3F0B0 */ int mUnknown3F0B0;
+    /* 0x3F094 */ int mIsReceiveAnimation;
+    /* 0x3F098 */ int mNeedsSave;
+    /* 0x3F09C */ int mSongStoreFull;
+    /* 0x3F0A0 */ int mShirtDue;
+    /* 0x3F0A4 */ int mWiiShirtDue;
+    /* 0x3F0A8 */ int mReceiveResult;
+    /* 0x3F0AC */ int mWindowReady;
+    /* 0x3F0B0 */ int mConnectRequested;
 }; // 0x3F0B4
 
 #endif // OV109_TUSHINSCENE_H

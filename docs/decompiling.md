@@ -343,7 +343,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)data_0213bab0;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
-  calls (overlay 110's camera setters, the Mii transfer's `func_02077858`).
+  calls (overlay 110's camera setters, the Mii transfer's `MiiTransfer_UpdateSession`).
 - In a one-iteration loop a large member offset (`this + 0x268`) is computed once and kept (`MapScene::Init`, the
   back button in two one-iteration loops around its `SetPosition`). A one-element static array read in a
   one-iteration loop is loaded, not folded.
@@ -490,7 +490,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   spilling `this` and keeping a table's address in a register for the loop (`ItemTradeScene::SetupWindow`).
 - `#pragma opt_common_subs off` around the one function (and `#pragma opt_common_subs reset` after it: `#pragma
   optimization_level reset` does not reset it) where two values swap registers whatever form the source takes (the
-  Mii transfer's `func_02077f48`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
+  Mii transfer's `MiiTransfer_OnPacketReceived`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
   know are ignored without a word under the build's `-w off`; the `opt_*` names it knows are in its executable
   (`strings mwccarm.exe | grep '^opt_'`).
 

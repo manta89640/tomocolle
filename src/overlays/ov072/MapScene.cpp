@@ -1200,7 +1200,7 @@ void MapScene::SelectBuilding(int model) {
         mHasInfo = TRUE;
         switch (model) {
         case 5:
-            if (!func_ov072_0214ef3c()) {
+            if (!IsNewDay()) {
                 ArchiveManager_MountCompressed(&gArchiveManager, "S01", sQuestionWindowArchive, 1);
                 func_02034f38(&mMessageWindows[0], 0, 0xA4);
                 mHasInfo = FALSE;
@@ -2055,7 +2055,7 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
         func_0203c02c(&gSceneManager, 0x35);
         break;
     case 5:
-        if (!func_ov072_0214ef3c()) {
+        if (!IsNewDay()) {
             ClearSceneCharacters();
             if (mFacilities.mApartmentSize < 4) {
                 func_0203c02c(&gSceneManager, 0x57);
@@ -2132,7 +2132,10 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
     }
 }
 
-BOOL MapScene::func_ov072_0214ef3c() {
+// Whether a new day has begun since the date the game data keeps at +0x6C (none kept counts as one): func_0202cb08
+// compares it with today's, a day starting at 5:00, and says FALSE when the clock cannot be read. The fountain's
+// window and where entering it leads depend on it.
+BOOL MapScene::IsNewDay() {
     return func_0202cb08(&gGameData);
 }
 

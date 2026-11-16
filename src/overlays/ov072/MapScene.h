@@ -717,7 +717,7 @@ public:
     void ResetCamera();
     void ShowBuilding(int model);
     void EnterBuilding(int model, BOOL newsDue, int button);
-    BOOL func_ov072_0214ef3c();
+    BOOL IsNewDay();
     void UpdateNewMarks();
 
     /* 0x00010 */ int mIslandStage;               // 0..4: how large the island is

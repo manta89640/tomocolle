@@ -681,7 +681,9 @@ Not done:
   from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
-- What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
+- What the date at +0x6C of `gGameData` is. `MapScene::IsNewDay` (func_0202cb08) is TRUE when it is not today's (a
+  day starting at 5:00) or not set, which gives the fountain its building window and its entry to scene 0x30; when
+  it is today's, the window asks a question (message 0xA4) and entering goes to the fountain's scene of the time of day.
 
 ## The Mii transfer
 
@@ -706,7 +708,7 @@ Measured:
   `WH_ERRCODE_NO_RADIO` 0x16). It differs from the main copy (`lib/WH`): it scans with `WM_StartScanEx` and connects
   with `WM_StartConnectEx`, a later revision; it has no strings; and it has only the child's side: of the parent's
   functions only those that end a parent's session are there, which `WH_Finalize` calls. One function is not in WH as
-  the SDK has it, `func_020791C4`, which picks the parent to connect to from a scan's results (by GGID, and the entry
+  the SDK has it, `WH_FindParentInScan` (`0x020791C4`), which picks the parent to connect to from a scan's results (by GGID, and the entry
   flag). Its statics are where WH's are, by size: the parent parameters (0x40 bytes) at +0x80, the scan parameters at
   +0xC0, `sBssDesc` +0x120, 0x200 bytes of a data set used by nothing in the ROM at +0x1E0, the scan buffer, the key
   set and data-sharing buffers, the send, receive and system buffers.
@@ -725,12 +727,12 @@ Inferred: this is not the game's own code but a library built apart from it and 
 Nintendo's DS games take Miis from the Wii with: it is built with another compiler than the game around it (below),
 carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
 
-Not done: `func_02077858` (the session's update) differs only in five branch offsets of a jump table (the unlisted
+Not done: `MiiTransfer_UpdateSession` (the session's update) differs only in five branch offsets of a jump table (the unlisted
 states of case 3 branch to the function's end, where the original branches to the inner switch's break), with a
 comment above it, so `MiiTransfer.cpp` is not complete. The same output comes from every build from 114 to 137
 and under every one of the 78 `opt_*` pragmas that build knows, each on or off. Measured with the compiler:
-`func_02077F48` is compiled with `#pragma opt_common_subs off` (with it on, sSeq and its low bit swap registers in
-every form of the source), and `func_02077858` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
+`MiiTransfer_OnPacketReceived` (WH's receiver) is compiled with `#pragma opt_common_subs off` (with it on, sSeq and its low bit swap registers in
+every form of the source), and `MiiTransfer_UpdateSession` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
 (its loops are neither rotated nor strength reduced, and the 0 it passes to `WH_StartScan` stays in r4); the
 address is copied from a local array's initialiser, the 6-byte compiler object at 0x020B7BE4, and the 28 names are
 another local array's initialiser that nothing uses, which the compiler keeps and puts in the same section right
@@ -765,8 +767,10 @@ Measured:
 - `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
   passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`func_020743a0`):
   byte 0 is `0xC0`, the random number times 4 and bits 12-13 of the counter.
-- Two setters, of bit 2 of 0x20 (`func_0207a6f0`) and bit 0 of 0x00 (`func_0207a7bc`), are called through
-  `func_02098cdc` and `func_02098ce8`; what those bits are is not known.
+- Two setters, of bit 2 of 0x20 (`MiiData_SetLocalOnly`) and bit 0 of 0x00 (`MiiData_SetFavorite`), are called through
+  `func_02098cdc` and `func_02098ce8`. Inferred: they are the Wii's `localOnly` and `favorite`, which `RFLCharData` has
+  at those places, the correspondence that names the other fields; the Mii transfer sets the first and clears the
+  second on every Mii it receives. What the game does with them is not known.
 - **Its `.rodata`** is the days of each month (`sDaysInMonth`, 13 words from month 0, February 29), which
   `MiiData_GetDaysInBirthMonth` reads, and right after it two Mii records that nothing in the ROM refers to: a male
   and a female one (sex 0 and 1), blank but for the Wii's defaults (height and build 64, hair 33 for him, 12 for her).
