@@ -1953,13 +1953,44 @@ ranges that the ROM keeps encrypted (dsd's `dsprot_range`; it decrypts them on e
 when building, `enable_dsprot: true`). The ten before them are the decryption: `DSProtect_DecryptRange` takes the
 word before a range as its marker, makes a 16-byte key of it, finds the range's end by the same word and decrypts the
 range in place (`DSProtect_DecryptWithKey`); `DSProtect_EncryptRange` does the reverse from the end. The cipher is
-RC4 (`DSProtect_RC4Init` is the key schedule over 256 bytes, `DSProtect_RC4NextByte` the generator) applied to each
-instruction's first two bytes, while the third goes through a table that flips its low bit and the fourth (the
-condition and the instruction class) is kept (`DSProtect_CryptInstructions`); `DSProtect_SyncCaches` writes back the
-data cache and disables or enables the instruction cache around it. Only `main` calls into them (three entry points, `0x020B0250`, `0x020B0328`,
-`0x020B0400`). They call `OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes
-of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
-linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+RC4 (`DSProtect_RC4Init` is the key schedule over 256 bytes, walked from the end, `DSProtect_RC4NextByte` the
+generator) applied to each instruction's first two bytes, while the third goes through a table that flips its low bit
+and the fourth (the condition and the instruction class) is kept (`DSProtect_CryptInstructions`);
+`DSProtect_SyncCaches` writes back the data cache and disables or enables the instruction cache around it. They call
+`OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes of `.rodata` are the
+last of the section. **Inferred:** this is the DS Protect library the game is known to carry, linked after the game's
+files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+
+The seven, read decrypted (measured):
+
+| Address | Name | What it does |
+| --- | --- | --- |
+| `0x020AFDD8` | `DSProtect_CheckMacAddress` | TRUE when the MAC address is 00:09:BF:00:00:31 (`sMacAddress`, stored inverted) with the owner's birthday January 1 and an empty nickname, or all zeros |
+| `0x020AFEF8` | `DSProtect_ReadRom` | Reads the card's ROM with command 0xB7 through the card's registers, 512 bytes at a time |
+| `0x020B009C` | `DSProtect_CalcChecksum` | A CRC-32 (0xEDB88320) with the test of the low bit inverted |
+| `0x020B0140` | `DSProtect_CheckRom` | Checksums six blocks (0, 0x200, 0x400, 0x8000, 0x8200, 0x8400); TRUE when one of the first three differs from 0x8000's, or the last three are equal |
+| `0x020B0250` | `DSProtect_RunRomCheck` | Runs `DSProtect_CheckRom` (from a list of addresses plus 800), and calls its argument when it returns TRUE |
+| `0x020B0328` | `DSProtect_RunMacCheck` | The same with `DSProtect_CheckMacAddress` |
+| `0x020B0400` | `DSProtect_RunNoCheck` | The same with an empty list: always FALSE |
+
+`main` calls the three runners (`0x02000DB8`, `0x02000E6C`, `0x02000F5C`). Inferred: `DSProtect_CheckRom` tells a
+copy from a genuine card, which reads its first 32 KB as copies of what follows; `DSProtect_CheckMacAddress` an
+emulator's defaults.
+
+**How the build handles the encryption** (measured): dsd decrypts the ranges when it extracts the ROM, so the
+delinked objects, and what objdiff compares a source with, hold plain code; after linking it encrypts the ranges of
+the symbols that have `dsprot_range` in `symbols.txt` again (the build's "Encrypting DS Protect in ARM9 program"). So
+an encrypted function is written as it runs. Its ranges are inline assembly in C, the library's own way (the
+compiler's quirks around `asm` blocks, a constant loaded from the pool for a variable live across one, show the
+original was so too): `DSPROTECT_BEGIN(marker)` pushes r0-r3, calls `DSProtect_DecryptRange` on the address after
+the marker word and branches over it; `DSPROTECT_END(marker)` branches over the second copy and calls
+`DSProtect_EncryptRange`. Linked from source (the unit marked complete as a test), the plain ARM9 program was the
+original's word for word over `DSProtect_CheckMacAddress`'s two ranges.
+
+What is left (measured): 15 of the 17 functions compile to the original's bytes; `DSProtect_RC4Init` differs in
+registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where the original XORs four immediates.
+objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
+with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
 
 ## The characters
 

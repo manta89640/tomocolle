@@ -4173,13 +4173,13 @@ DSProtect_CryptInstructions kind:function(arm,size=0x9c) addr:0x020afc80
 DSProtect_DecryptInstructions kind:function(arm,size=0xc) addr:0x020afd1c
 DSProtect_EncryptWithKey kind:function(arm,size=0x58) addr:0x020afd28
 DSProtect_DecryptWithKey kind:function(arm,size=0x58) addr:0x020afd80
-func_020afdd8 kind:function(arm,size=0x120,dsprot_range=(0x020afe08..0x020afe3c,0xeb003530),dsprot_range=(0x020afe78..0x020afecc,0xeb003089)) addr:0x020afdd8
-func_020afef8 kind:function(arm,size=0x1a4,dsprot_range=(0x020aff44..0x020b0060,0xeb005fdf)) addr:0x020afef8
-func_020b009c kind:function(arm,size=0xa4,dsprot_range=(0x020b00c4..0x020b0120,0xeb000d2c)) addr:0x020b009c
-func_020b0140 kind:function(arm,size=0x110,dsprot_range=(0x020b01c4..0x020b022c,0xeb00350e)) addr:0x020b0140
-func_020b0250 kind:function(arm,size=0xd8,dsprot_range=(0x020b02d8..0x020b0300,0xeb0048f8)) addr:0x020b0250
-func_020b0328 kind:function(arm,size=0xd8,dsprot_range=(0x020b03b0..0x020b03d8,0xeb003481)) addr:0x020b0328
-func_020b0400 kind:function(arm,size=0xc8,dsprot_range=(0x020b047c..0x020b04a4,0xeb0012f0)) addr:0x020b0400
+DSProtect_CheckMacAddress kind:function(arm,size=0x120,dsprot_range=(0x020afe08..0x020afe3c,0xeb003530),dsprot_range=(0x020afe78..0x020afecc,0xeb003089)) addr:0x020afdd8
+DSProtect_ReadRom kind:function(arm,size=0x1a4,dsprot_range=(0x020aff44..0x020b0060,0xeb005fdf)) addr:0x020afef8
+DSProtect_CalcChecksum kind:function(arm,size=0xa4,dsprot_range=(0x020b00c4..0x020b0120,0xeb000d2c)) addr:0x020b009c
+DSProtect_CheckRom kind:function(arm,size=0x110,dsprot_range=(0x020b01c4..0x020b022c,0xeb00350e)) addr:0x020b0140
+DSProtect_RunRomCheck kind:function(arm,size=0xd8,dsprot_range=(0x020b02d8..0x020b0300,0xeb0048f8)) addr:0x020b0250
+DSProtect_RunMacCheck kind:function(arm,size=0xd8,dsprot_range=(0x020b03b0..0x020b03d8,0xeb003481)) addr:0x020b0328
+DSProtect_RunNoCheck kind:function(arm,size=0xc8,dsprot_range=(0x020b047c..0x020b04a4,0xeb0012f0)) addr:0x020b0400
 __sinit_020b04c8 kind:function(arm,size=0x4) addr:0x020b04c8
 __sinit_020b04cc kind:function(arm,size=0x4) addr:0x020b04cc
 __sinit_020b04d0 kind:function(arm,size=0x4) addr:0x020b04d0
@@ -4774,7 +4774,7 @@ data_020fc3f0 kind:data(any) addr:0x020fc3f0
 gStr_FullStop kind:data(any) addr:0x020fc414
 data_020fc42c kind:data(any) addr:0x020fc42c
 data_020fc444 kind:data(any) addr:0x020fc444
-data_020fc48c kind:data(any) addr:0x020fc48c
+sMacAddress kind:data(any) addr:0x020fc48c local
 .p__sinit_020b04c8 kind:data(word) addr:0x020fc494
 .p__sinit_020b04cc kind:data(word) addr:0x020fc498
 .p__sinit_020b04d0 kind:data(word) addr:0x020fc49c

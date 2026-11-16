@@ -268,6 +268,17 @@ LIBRARIES["lib/NFL/"] = {
     "includes": ["lib/NFL", *SDK_INCLUDES],
 }
 
+# DS Protect, Nintendo's anti-piracy library, linked after the game's files (docs/binary.md, "DS Protect"). Its source
+# is this project's own decompilation, as C with the library's inline assembly. Which compiler built it is not
+# measured: every 3.0 build of metroskrew (114 to 139) compiles its matched functions alike, the 2.0 builds do not.
+LIBRARIES["lib/DSProtect/"] = {
+    "compiler": MWCC_VERSION,
+    "msl": GAME_MSL,
+    "flags": [*CC_FLAGS, "-lang=c99"],
+    "defines": SDK_DEFINES,
+    "includes": ["lib/DSProtect", *SDK_INCLUDES],
+}
+
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
 # "Metrowerks C/C++ for ARM 3.0.0.136", the compiler of 2.0/sp2. Its source here is this project's own decompilation,
 # written against the headers of that MSL (internal ones such as ansi_files.h included).
