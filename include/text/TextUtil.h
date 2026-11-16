@@ -37,6 +37,11 @@ wchar_t ToHalfWidth(wchar_t c);
 
 // How many syllables a katakana text has
 int CountSyllables(const wchar_t *text);
+// Splits a katakana text into its syllables, as the speech engine reads them: a kana with the small kana that go with
+// it (キャ, ファ, トゥ, スゥィ), up to three characters; any other character, a small kana, 'ッ', 'ン' or 'ー' on its own
+// is a syllable of its own. When "syllables" is not NULL, it clears "count" slots of it and writes each syllable into
+// the next (there is no check against "count"). Returns the number of syllables.
+int SplitSyllables(const wchar_t *text, wchar_t (*syllables)[4], int count);
 // Removes the pauses and the punctuation that ReplaceSymbolsForSpeech leaves ('＿', '_', '.', '?', '？', '!', '！')
 void RemoveSpeechSymbols(wchar_t *text);
 
