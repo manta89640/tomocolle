@@ -86,7 +86,6 @@ SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ei
 
 SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // 0x02048b78
 
-SCENE_STAND_IN(SceneB4, 0x202E8); // 0x020492e0
 
 
 #endif // SCENE_SCENESTANDINS_H

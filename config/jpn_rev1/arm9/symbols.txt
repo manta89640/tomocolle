@@ -1901,8 +1901,8 @@ _ZN16SceneB2CharacterD1Ev kind:function(arm,size=0x60) addr:0x0204903c
 _ZN7SceneB3C1Ei kind:function(arm,size=0x1b8) addr:0x0204909c
 _ZN16SceneB3CharacterC1Ev kind:function(arm,size=0x2c) addr:0x02049254
 _ZN16SceneB3CharacterD1Ev kind:function(arm,size=0x60) addr:0x02049280
-_ZN7SceneB4C1Ei kind:function(arm,size=0x320) addr:0x020492e0
-func_02049600 kind:function(arm,size=0x3c) addr:0x02049600
+_ZN10AlbumSceneC1Ei kind:function(arm,size=0x320) addr:0x020492e0
+_ZN14AlbumItemModelD1Ev kind:function(arm,size=0x3c) addr:0x02049600
 _ZN7SceneB5C1Ei kind:function(arm,size=0x184) addr:0x0204963c
 _ZN16SceneB5CharacterC1Ev kind:function(arm,size=0x2c) addr:0x020497c0
 _ZN16SceneB5CharacterD1Ev kind:function(arm,size=0x60) addr:0x020497ec
@@ -1935,7 +1935,7 @@ func_0204adcc kind:function(arm,size=0x44) addr:0x0204adcc
 _ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
 func_0204ae54 kind:function(arm,size=0x44) addr:0x0204ae54
 func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
-func_0204aedc kind:function(arm,size=0x44) addr:0x0204aedc
+_ZN14AlbumItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204aedc
 _ZN5Scene3RunEv kind:function(arm,size=0x170) addr:0x0204af20
 _ZN16DrawManTestScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x0204b090
 _ZN16DrawManTestScene4InitEv kind:function(arm,size=0x138) addr:0x0204b0d4
@@ -4450,10 +4450,6 @@ data_020ef022 kind:data(any) addr:0x020ef022
 ShttsPresets kind:data(any) addr:0x020f2708
 @9655 kind:data(any) addr:0x020f3fe0 local
 data_020f3ff0 kind:data(any) addr:0x020f3ff0
-data_020f3ff4 kind:data(any) addr:0x020f3ff4
-data_020f3ff5 kind:data(any) addr:0x020f3ff5
-data_020f3ff6 kind:data(any) addr:0x020f3ff6
-data_020f3ff7 kind:data(any) addr:0x020f3ff7
 data_020f5760 kind:data(any) addr:0x020f5760
 data_020f5768 kind:data(any) addr:0x020f5768
 data_020f5770 kind:data(any) addr:0x020f5770
@@ -5109,20 +5105,18 @@ _ZTV17Scene7FTextCanvas kind:data(any) addr:0x021108f4
 _ZTV10ObjCharBox kind:data(any) addr:0x02110900
 data_02110914 kind:data(any) addr:0x02110914
 _ZTV14TestNg134Model kind:data(any) addr:0x0211091c
-data_02110940 kind:data(any) addr:0x02110940
+_ZTV13AlbumListView kind:data(any) addr:0x02110938
 _ZTV20TestDrawMiiAnimModel kind:data(any) addr:0x02110954
 _ZTV5Scene kind:data(any) addr:0x02110970
 _ZTV12RankingPiece kind:data(any) addr:0x02110994
-data_021109c4 kind:data(any) addr:0x021109c4
-data_021109e0 kind:data(any) addr:0x021109e0
+_ZTV14AlbumItemModel kind:data(any) addr:0x021109bc
 data_02110a04 kind:data(any) addr:0x02110a04
 data_02110a20 kind:data(any) addr:0x02110a20
 data_02110a44 kind:data(any) addr:0x02110a44
 data_02110a60 kind:data(any) addr:0x02110a60
 data_02110a84 kind:data(any) addr:0x02110a84
 data_02110aa0 kind:data(any) addr:0x02110aa0
-data_02110ac4 kind:data(any) addr:0x02110ac4
-data_02110ae8 kind:data(any) addr:0x02110ae8
+_ZTV10AlbumItems kind:data(any) addr:0x02110abc
 data_02110b0c kind:data(any) addr:0x02110b0c
 data_02110b30 kind:data(any) addr:0x02110b30
 data_02110b54 kind:data(any) addr:0x02110b54
@@ -6347,7 +6341,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14896 kind:bss addr:0x0213b704 local
+@14918 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0

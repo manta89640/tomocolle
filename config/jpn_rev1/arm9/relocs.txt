@@ -7898,15 +7898,15 @@ from:0x020495a4 kind:arm_call to:0x02022d2c module:main
 from:0x020495b4 kind:arm_call to:0x0208fcf8 module:main
 from:0x020495c0 kind:arm_call to:0x0208eb18 module:main
 from:0x020495d0 kind:load to:0x02110970 add:0x8 module:main
-from:0x020495d4 kind:load to:0x0214ec50 module:overlays(78,90,95,100)
-from:0x020495d8 kind:load to:0x02110ac4 module:main
-from:0x020495dc kind:load to:0x02110ae8 module:main
+from:0x020495d4 kind:load to:0x0214ec48 add:0x8 module:overlay(100)
+from:0x020495d8 kind:load to:0x02110abc add:0x8 module:main
+from:0x020495dc kind:load to:0x02110abc add:0x2c module:main
 from:0x020495e0 kind:load to:0x021153b4 add:0x8 module:main
-from:0x020495e4 kind:load to:0x02110940 module:main
+from:0x020495e4 kind:load to:0x02110938 add:0x8 module:main
 from:0x020495e8 kind:load to:0x0210f640 add:0x8 module:main
 from:0x020495ec kind:load to:0x0210f65c add:0x8 module:main
-from:0x020495f0 kind:load to:0x021109c4 module:main
-from:0x020495f4 kind:load to:0x021109e0 module:main
+from:0x020495f0 kind:load to:0x021109bc add:0x8 module:main
+from:0x020495f4 kind:load to:0x021109bc add:0x24 module:main
 from:0x020495f8 kind:load to:0x0202e46c module:main
 from:0x020495fc kind:load to:0x0202e44c module:main
 from:0x02049610 kind:arm_call to:0x0202a464 module:main
@@ -8272,10 +8272,10 @@ from:0x0204ac3c kind:load to:0x020f5f0c module:main
 from:0x0204ac64 kind:load to:0x020f5f0c module:main
 from:0x0204ac88 kind:load to:0x020f5f0c module:main
 from:0x0204acac kind:load to:0x020f5f0c module:main
-from:0x0204acc8 kind:load to:0x020f3ff7 module:main
-from:0x0204ace4 kind:load to:0x020f3ff6 module:main
-from:0x0204ad00 kind:load to:0x020f3ff5 module:main
-from:0x0204ad1c kind:load to:0x020f3ff4 module:main
+from:0x0204acc8 kind:load to:0x020f3ff0 add:0x7 module:main
+from:0x0204ace4 kind:load to:0x020f3ff0 add:0x6 module:main
+from:0x0204ad00 kind:load to:0x020f3ff0 add:0x5 module:main
+from:0x0204ad1c kind:load to:0x020f3ff0 add:0x4 module:main
 from:0x0204ad38 kind:load to:0x020f3ff0 module:main
 from:0x0204ad5c kind:load to:0x020f3ff0 module:main
 from:0x0204ad80 kind:load to:0x020f3ff0 module:main
