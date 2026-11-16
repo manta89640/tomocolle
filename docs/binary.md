@@ -610,6 +610,21 @@ Cut into files by gap38-a. Measured, from the decompiled code and the delinked s
 | `src/wireless/WirelessSession.cpp` | `0x0203B748` to `0x0203BCE0` | `.rodata` `0x020B5CFC` to `0x020B5D04`, `.bss` `0x0213B6B0` to `0x0213B700` | The game's layer over WH for finding a parent DS and connecting as a child (overlays 109 and 110) |
 | `src/scene/SceneManager.cpp` | `0x0203BCE0` to `0x0204AF20` | `.init` `0x020B06A0`, `.ctor` `0x020FC4E4`, `.data` `0x0211085C` to `0x02110B94`, `.bss` `0x0213B700` to `0x0213BA74` | The scene manager, the scene factory and every scene's constructor |
 
+- **Text for the speech engine** (`TextUtil.cpp`, complete). `SplitSyllables` (`0x02037568`, 8,300 bytes) cuts a
+  katakana text into what the speech engine counts as syllables, morae in effect: a kana with the small kana that go
+  with it, three characters first (20 of them, `スゥィ`, `ドゥァ`, `ヴィェ`; `スゥィ` is listed twice), then two (145,
+  `キャ` to `ヅィ`, some twice: the rows of `ギャ`, `ビャ`, `ヒャ`, `ジャ`, `チャ` and `ウィ`), else one character, so that a
+  lone small kana, `ッ`, `ン` and `ー` are syllables of their own. Measured from its compare chains. Its callers
+  outside the file are overlays 8 (`0x0214A54C`) and 92 (`0x02150A74`, `0x0215190C`), with a buffer;
+  `CountSyllables` calls it without.
+- **Three tables the link left out.** The file's `.data` holds, besides the readings of the letters and digits, 219
+  wide strings that nothing in the ROM refers to: the 73 kana (gojūon order, `ゐ` and `ゑ` included, the voiced rows
+  after `を`, `ん` last) in hiragana, in katakana, and in letters of two at most (`KA`, `SH` for `し`, `CH`, `TS`, `FU`,
+  `JI` for both `じ` and `ぢ`). Measured: their order in the pool, which is the compiler's heap sort of the file's
+  data list (decompiling.md, "How a file's data is laid out"), is reproduced exactly, all 255 strings, only by three
+  arrays of 73 pointers declared in that order between `sLetterReadings` and `sDigitReadings`; as objects of 292
+  bytes each is in a section of its own, which the link dropped with whatever used them, while the strings, in the
+  pool, stayed. Inferred: the game once converted kana to letters, or the reverse, in this file.
 - **Save blocks.** Each block is its data as it is in the card's backup memory (a 16-byte magic string first, a
   checksum, `GameData::Checksum` at `0x0202CD00`, last), followed by two flags: read, and valid. Each has its place
   in each of two slots of 0x40000 bytes. The ten magic strings are `.rodata` in an order that is not the order of
@@ -638,8 +653,7 @@ from its code); scenes 0x1F to 0x22 are the right-job scenes after their archive
 `SceneRightJob2`.
 
 Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
-`FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
-`0x02037568` (8 KB, about 0x500 bytes of spilled constants), `Scene1E`'s constructor (97.7%: every instruction but
+`Scene1E`'s constructor (97.7%: every instruction but
 for a rotation of three callee-saved registers), and the constructors of gap38-c's ten test scenes (`0x0203E320` to
 `0x0203EA2C`, `0x0203F654`; their headers are in main, not on this branch), `RoomScene` (`0x0203ED10`) and
 `TutorialRoomScene` (`0x0203EFC0`; their overlays' headers declare their own `Scene`, `Model` and `Character`

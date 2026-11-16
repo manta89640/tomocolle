@@ -377,6 +377,7 @@ src/sound/ValueRamp.cpp:
     .bss        start:0x0213b5c0 end:0x0213b6b0
 
 src/text/TextUtil.cpp:
+    complete
     .text       start:0x0203673c end:0x02039660
     .data       start:0x021102f0 end:0x0211085c
 

@@ -382,6 +382,15 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   order of each function's statics (and over which tables are file statics) with the model found overlay 39's
   whole `.rodata` and `.data` (31 statics, two local consts, 21 strings of initialisers), with every static in its
   function but one table, which had to be the file's first static.
+- Strings in a file's `.data` that nothing refers to are the initialisers of a table the link dropped: a static of 64
+  bytes or more is in a section of its own and goes with the function that used it, but its strings are in the pool
+  and stay. Running the heap-sort model over candidate declarations (which arrays, their element order, where they
+  are declared) and scoring against the ROM's string order found `TextUtil.cpp`'s three kana arrays, all 255 strings
+  in place, in one pass of a few hundred candidates; the model then held under the build. An uncalled function
+  that reads the arrays keeps them in the object (`KanaTables_Unused`), and the link drops it.
+- `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
+  rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
+  replace the range's lines in place.
 - Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
   at the end), in the order of their declarations: overlay 39's two message numbers.
 
@@ -685,6 +694,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   chain through a member pointer, materialise a flag per operand (`MiiEditProfilePage::SetState`).
 
 **Independent statements scheduled in another order**
+- A loop's compare scheduled after the counters' decrements in the join block (`sub; sub; cmp; add; bne`) where ours
+  puts the `cmp` first: the decrements written in both branches of the if/else before it (`FormatDecimal`,
+  `TextUtil.cpp`). The compiler merges them into the join block, behind the compare in its order.
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
   statements matched NFL's `NFLi_MakeGlassesMesh` exactly, where the others moved loads and kept a value the original
   leaves in r0.
@@ -854,6 +866,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A switch of hundreds of cases (`CharacterSort::GetCollationKey`) can be written from the original's compare tree
   by running the tree for every input value (a small interpreter of its `cmp`/branch/jump-table code) and listing one
   case per body in the bodies' address order; the compiler then rebuilds the same tree.
+- A chain of hundreds of compares against character constants, each constant hoisted out of the loop and spilled
+  (`SplitSyllables`, `TextUtil.cpp`: 320 spill slots, a 0x508-byte frame): read the chain's order off the original
+  by tracking which spill slot holds which constant (the prologue computes them all from one base, `0x30A3`, by
+  `add`/`sub`), and write one `||` condition per length in that order. The compiler hoists and spills each occurrence
+  as the original did, so the frame comes out right with no further work.
 - Functions whose body is a table of character conversions are best understood by running them in an emulator over
   every character (unicorn, on `extract/.../arm9.bin`): that is how the normalization steps were named.
 - A unit whose constructor builds an `AnimModel` member after another member with an out-of-line constructor emits

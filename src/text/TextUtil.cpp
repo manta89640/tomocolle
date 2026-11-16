@@ -7,14 +7,74 @@ extern "C" {
 wchar_t *func_0201f544(wchar_t *text);
 }
 
-// How the speech engine reads the digits and the letters
-static const wchar_t *sDigitReadings[10] = {
-    L"ゼロ", L"イチ", L"ニ", L"サン", L"ヨ’ン", L"ゴ", L"ロク", L"ナナ", L"ハチ", L"キュ’ー",
-};
+// How the speech engine reads the letters and the digits
 static const wchar_t *sLetterReadings[26] = {
     L"エー",   L"ビー",     L"シー", L"ディー", L"イー",     L"エフ",     L"ジー", L"エイチ", L"アイ",
     L"ジェー", L"ケー",     L"エル", L"エム",   L"エヌ",     L"オー",     L"ピー", L"キュー", L"アール",
     L"エス",   L"ティー",   L"ユー", L"ブイ",   L"ダブリュ", L"エックス", L"ワイ", L"ゼット",
+};
+
+// The kana, in hiragana, in katakana and in two letters of the alphabet. Not in the ROM: only their strings are,
+// between the letters' and the digits' (the compiler's data order, which places all 255 strings, says that they are
+// three arrays of 73, declared here). Nothing that is left reads them: what used them was left out by the link, and
+// KanaTables_Unused at the end of the file stands in for it.
+static const wchar_t *sHiragana[73] = {
+    L"あ", L"い", L"う", L"え", L"お",
+    L"か", L"き", L"く", L"け", L"こ",
+    L"さ", L"し", L"す", L"せ", L"そ",
+    L"た", L"ち", L"つ", L"て", L"と",
+    L"な", L"に", L"ぬ", L"ね", L"の",
+    L"は", L"ひ", L"ふ", L"へ", L"ほ",
+    L"ま", L"み", L"む", L"め", L"も",
+    L"や", L"ゆ", L"よ",
+    L"ら", L"り", L"る", L"れ", L"ろ",
+    L"わ", L"ゐ", L"ゑ", L"を",
+    L"が", L"ぎ", L"ぐ", L"げ", L"ご",
+    L"ざ", L"じ", L"ず", L"ぜ", L"ぞ",
+    L"だ", L"ぢ", L"づ", L"で", L"ど",
+    L"ば", L"び", L"ぶ", L"べ", L"ぼ",
+    L"ぱ", L"ぴ", L"ぷ", L"ぺ", L"ぽ",
+    L"ん",
+};
+static const wchar_t *sKatakana[73] = {
+    L"ア", L"イ", L"ウ", L"エ", L"オ",
+    L"カ", L"キ", L"ク", L"ケ", L"コ",
+    L"サ", L"シ", L"ス", L"セ", L"ソ",
+    L"タ", L"チ", L"ツ", L"テ", L"ト",
+    L"ナ", L"ニ", L"ヌ", L"ネ", L"ノ",
+    L"ハ", L"ヒ", L"フ", L"ヘ", L"ホ",
+    L"マ", L"ミ", L"ム", L"メ", L"モ",
+    L"ヤ", L"ユ", L"ヨ",
+    L"ラ", L"リ", L"ル", L"レ", L"ロ",
+    L"ワ", L"ヰ", L"ヱ", L"ヲ",
+    L"ガ", L"ギ", L"グ", L"ゲ", L"ゴ",
+    L"ザ", L"ジ", L"ズ", L"ゼ", L"ゾ",
+    L"ダ", L"ヂ", L"ヅ", L"デ", L"ド",
+    L"バ", L"ビ", L"ブ", L"ベ", L"ボ",
+    L"パ", L"ピ", L"プ", L"ペ", L"ポ",
+    L"ン",
+};
+static const wchar_t *sKanaLetters[73] = {
+    L"A", L"I", L"U", L"E", L"O",
+    L"KA", L"KI", L"KU", L"KE", L"KO",
+    L"SA", L"SH", L"SU", L"SE", L"SO",
+    L"TA", L"CH", L"TS", L"TE", L"TO",
+    L"NA", L"NI", L"NU", L"NE", L"NO",
+    L"HA", L"HI", L"FU", L"HE", L"HO",
+    L"MA", L"MI", L"MU", L"ME", L"MO",
+    L"YA", L"YU", L"YO",
+    L"RA", L"RI", L"RU", L"RE", L"RO",
+    L"WA", L"I", L"E", L"O",
+    L"GA", L"GI", L"GU", L"GE", L"GO",
+    L"ZA", L"JI", L"ZU", L"ZE", L"ZO",
+    L"DA", L"JI", L"ZU", L"DE", L"DO",
+    L"BA", L"BI", L"BU", L"BE", L"BO",
+    L"PA", L"PI", L"PU", L"PE", L"PO",
+    L"N",
+};
+
+static const wchar_t *sDigitReadings[10] = {
+    L"ゼロ", L"イチ", L"ニ", L"サン", L"ヨ’ン", L"ゴ", L"ロク", L"ナナ", L"ハチ", L"キュ’ー",
 };
 
 // Full-width characters
@@ -561,4 +621,16 @@ void RemoveSpeechSymbols(wchar_t *text) {
     for (; kept < length; kept++) {
         text[kept] = 0;
     }
+}
+
+// Not in the ROM: the link left it out, as nothing calls it. Something of this file read the three kana tables, or
+// their strings would not be in the ROM; what it did with them is not known, and this stands in for it.
+extern "C" const wchar_t *KanaTables_Unused(int script, int i) {
+    switch (script) {
+    case 0:
+        return sHiragana[i];
+    case 1:
+        return sKatakana[i];
+    }
+    return sKanaLetters[i];
 }
