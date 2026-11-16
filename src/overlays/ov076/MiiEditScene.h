@@ -62,7 +62,8 @@ struct SoftKeyboard {
     /* 0x5EE8 */ u8 mUnknown5EE8[0xA4];
     /* 0x5F8C */ fx32 mUnknown5F8C;          // Moves 13 pixels (0xD000) with each character typed
     /* 0x5F90 */ u8 mUnknown5F90[0x68];
-    /* 0x5FF8 */ wchar_t mText[12];          // What is typed (the profile page writes it into the character)
+    /* 0x5FF8 */ wchar_t mText[11];          // What is typed (the profile page writes it into the character)
+    /* 0x600E */ u8 mUnknown600E[2];
     /* 0x6010 */ int mLength;                // and how many characters, up to 10
 };
 

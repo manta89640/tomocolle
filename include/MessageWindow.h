@@ -23,13 +23,16 @@ struct WindowButton {
     /* 0x0DC */ int mUnknown0DC;
     /* 0x0E0 */ u8 mUnknown0E0[0x78];
     /* 0x158 */ int mUnknown158;
-    /* 0x15C */ u8 mUnknown15C[0x594];
+    /* 0x15C */ u8 mUnknown15C[0x590];
+    /* 0x6EC */ BOOL mMoveText; // As TextButton's (func_02031f1c constructs both)
 }; // 0x6F0
 
 // One of the message window's sprites (func_0203117c constructs it). A stand-in: it starts with a sprite.
 struct WindowSprite {
     /* 0x000 */ Sprite mSprite;
-    /* 0x0AC */ u8 mUnknown0AC[0x48];
+    /* 0x0AC */ u8 mUnknown0AC[0x34];
+    /* 0x0E0 */ int mUnknownE0; // As SpriteButton's (func_0203117c constructs both)
+    /* 0x0E4 */ u8 mUnknown0E4[0x10];
 }; // 0xF4
 
 // The main program's message window (virtual table data_021102e8, functions func_02032fb8 to func_02034f94): a
@@ -60,7 +63,7 @@ struct MessageWindow {
     /* 0x0004 */ WindowSprite mSprites[12];
     /* 0x0B74 */ WindowButton mButtons[16]; // Constructed by func_02031f1c
     /* 0x7A74 */ MessageText mTexts[8];
-    /* 0xA9F4 */ u8 mUnknownA9F4[0x35C];
+    /* 0xA9F4 */ Sprite mSpritesA9F4[5];      // The sprites func_02033bb4 adds (overlay 76)
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
     /* 0xAD54 */ u8 mUnknownAD54[0x228];
     /* 0xAF7C */ int mUnknownAF7C;          // Overlay 76 reads the choice made from it (-1: none yet)

@@ -56,9 +56,9 @@ static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
 static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
 static const VecFx32 data_ov076_02158838 = { 0, 0, -32768 };
 static const int data_ov076_021588cc[4] = { 128, 96, 128, 96 };
-static const int data_ov076_021588dc[4] = { 20, 20, 216, 152 };
+static const ScreenRect data_ov076_021588dc = { 20, 20, 216, 152 };
 static const int data_ov076_021588ec[4] = { 16, -1, 0, -1 };
-static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
+static const ScreenPoint data_ov076_021588bc[2] = { { 202, 112 }, { 52, 8 } };
 static const int data_ov076_021588fc[4] = { 75, 149, 181, 149 };
 static const int data_ov076_0215890c[4] = { 145, 65, 145, 119 };
 static const int data_ov076_0215891c[4] = { 5, -1, 19, -1 };
@@ -74,8 +74,8 @@ static const int data_ov076_021589cc[6] = { 136, 132, 62, 175, 194, 175 };
 static const int data_ov076_021589e4[6] = { 14, 15, 16, 17, 22, 23 };
 static const int data_ov076_02158a7c[8] = { 80, 102, 176, 102, 80, 90, 176, 90 };
 static const int data_ov076_02158a9c[8] = { 58, 54, 58, 54, 58, 54, 58, 54 };
-static const int data_ov076_02158abc[8] = { 158, 76, 138, 76, 118, 76, 98, 76 };
-static const int data_ov076_02158adc[8] = { 170, 76, 150, 76, 90, 76, 70, 76 };
+static const WindowPoint data_ov076_02158abc[4] = { { 158, 76 }, { 138, 76 }, { 118, 76 }, { 98, 76 } };
+static const WindowPoint data_ov076_02158adc[4] = { { 170, 76 }, { 150, 76 }, { 90, 76 }, { 70, 76 } };
 static const ScreenPoint data_ov076_02158afc[4] = { { 80, 77 }, { 123, 77 }, { 80, 114 }, { 123, 114 } };
 static const int data_ov076_02158b1c[8] = { 14, 15, 16, 17, 18, 19, 20, 21 };
 static const ScreenPoint data_ov076_021589fc[4] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 } };
@@ -96,7 +96,7 @@ static const int data_ov076_02158cd4[12] = { 20, -1, 0, -1, 22, -1, 0, -1, 20, -
 static const int data_ov076_02158d04[12] = { 1, 10, 2, 3, 6, 0, 5, 4, 8, 9, 7, 11 };
 static const int data_ov076_02158d34[12] = { 21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22 };
 static const ScreenPoint data_ov076_02158d64[6] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 }, { 207, 100 }, { 239, 100 } };
-static const int data_ov076_02158d94[12] = { 20, -1, 0, -1, 21, -1, 0, -1, 22, -1, 0, -1 };
+static const ButtonSounds data_ov076_02158d94[3] = { { { 20, -1, 0, -1 } }, { { 21, -1, 0, -1 } }, { { 22, -1, 0, -1 } } };
 static const int data_ov076_02158dc4[12] = { 32, 181, 80, 181, 128, 181, 176, 181, 224, 181, 242, 13 };
 static const u16 data_ov076_02158df4[30] = { 0x18, 0x1a, 0x1c, 0x1e, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x20, 0x22, 0x3c, 0x3e, 0x3c, 0x3e, 0x40, 0x42, 0x4f, 0x4f, 0x4f, 0x4f, 0x4f, 0x0 };
 static const char data_ov076_02158e30[] = "E00:/Window_down.nsc";
@@ -107,8 +107,8 @@ static const ScreenPoint data_ov076_02158ed4[8] = { { 80, 40 }, { 123, 40 }, { 8
 static const int data_ov076_02158f14[16] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100, 207, 126, 239, 126 };
 static const u16 data_ov076_02158f54[36] = { 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x0, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56 };
 static const ScreenPoint data_ov076_02158f9c[9] = { { 59, 77 }, { 102, 77 }, { 145, 77 }, { 59, 114 }, { 102, 114 }, { 145, 114 }, { 59, 151 }, { 102, 151 }, { 145, 151 } };
-static const int data_ov076_02158fe4[20] = { 70, 40, 186, 40, 128, 112, 160, 76, 68, 76, 202, 112, 216, 76, 68, 149, 192, 149, 54, 112 };
-static const int data_ov076_02159034[20] = { 116, 18, 116, 18, 32, 18, 56, 18, 112, 18, 32, 18, 56, 18, 112, 18, 48, 18, 48, 18 };
+static const WindowPoint data_ov076_02158fe4[10] = { { 70, 40 }, { 186, 40 }, { 128, 112 }, { 160, 76 }, { 68, 76 }, { 202, 112 }, { 216, 76 }, { 68, 149 }, { 192, 149 }, { 54, 112 } };
+static const WindowPoint data_ov076_02159034[10] = { { 116, 18 }, { 116, 18 }, { 32, 18 }, { 56, 18 }, { 112, 18 }, { 32, 18 }, { 56, 18 }, { 112, 18 }, { 48, 18 }, { 48, 18 } };
 static const int data_ov076_02159084[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3 };
 static const int data_ov076_021590dc[24] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 20, -1, 0, -1, 16, -1, 0, -1 };
 static const int data_ov076_0215913c[24] = { 6, 0, 12, 1, 9, 19, 7, 21, 8, 17, 5, 4, 11, 10, 2, 3, 14, 20, 15, 13, 22, 18, 16, 23 };
@@ -117,16 +117,16 @@ static const ScreenPoint data_ov076_021591fc[12] = { { 59, 40 }, { 102, 40 }, { 
 static const int data_ov076_0215925c[29] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5 };
 static const int data_ov076_021592d0[32] = { 73, -6, 12, 12, 87, -6, 12, 12, 101, -6, 12, 12, 115, -6, 12, 12, 129, -6, 12, 12, 143, -6, 12, 12, 157, -6, 12, 12, 171, -6, 12, 12 };
 static const int data_ov076_02159350[36] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3 };
-static const int data_ov076_021593e0[40] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const ButtonSounds data_ov076_021593e0[10] = { { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } } };
 static const int data_ov076_02159480[44] = { 68, 52, 92, 52, 116, 52, 140, 52, 164, 52, 188, 52, 68, 92, 68, 132, 206, 134, 237, 134, 237, 134, 206, 20, 237, 20, 206, 45, 237, 45, 206, 70, 237, 70, 206, 95, 99, 138, 118, 138, 137, 138, 156, 138 };
 static const int data_ov076_02159530[44] = { 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 30, 24, 16, 16, 16, 16, 16, 16, 16, 16 };
 static const int data_ov076_021595e0[48] = { 2, 4, 0, 8, 39, 17, 1, 26, 16, 15, 27, 20, 33, 11, 19, 32, 9, 12, 23, 34, 21, 25, 40, 35, 5, 41, 13, 36, 37, 6, 24, 30, 31, 18, 28, 46, 7, 44, 38, 42, 45, 29, 3, 43, 22, 10, 14, 47 };
-static const int data_ov076_021596a0[58] = { 58, 80, 105, 80, 152, 80, 199, 80, 48, 64, 80, 64, 112, 64, 144, 64, 176, 64, 208, 64, 48, 96, 80, 96, 112, 96, 144, 96, 176, 96, 208, 96, 80, 80, 176, 80, 128, 41, 128, 111, 80, 41, 80, 111, 160, 41, 160, 111, 128, 48, 128, 72, 128, 96, 128, 120, 128, 144 };
-static const int data_ov076_02159788[58] = { 42, 36, 42, 36, 42, 36, 42, 36, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 58, 54, 58, 54, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 126, 20, 126, 20, 126, 20, 126, 20, 126, 20 };
+static const WindowPoint data_ov076_021596a0[29] = { { 58, 80 }, { 105, 80 }, { 152, 80 }, { 199, 80 }, { 48, 64 }, { 80, 64 }, { 112, 64 }, { 144, 64 }, { 176, 64 }, { 208, 64 }, { 48, 96 }, { 80, 96 }, { 112, 96 }, { 144, 96 }, { 176, 96 }, { 208, 96 }, { 80, 80 }, { 176, 80 }, { 128, 41 }, { 128, 111 }, { 80, 41 }, { 80, 111 }, { 160, 41 }, { 160, 111 }, { 128, 48 }, { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 144 } };
+static const WindowPoint data_ov076_02159788[29] = { { 42, 36 }, { 42, 36 }, { 42, 36 }, { 42, 36 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 24, 24 }, { 58, 54 }, { 58, 54 }, { 20, 15 }, { 20, 15 }, { 20, 15 }, { 20, 15 }, { 20, 15 }, { 20, 15 }, { 126, 20 }, { 126, 20 }, { 126, 20 }, { 126, 20 }, { 126, 20 } };
 static const int data_ov076_02159870[72] = { 33, 40, 51, 44, 39, 70, 45, 49, 59, 56, 68, 31, 32, 47, 37, 48, 66, 52, 58, 50, 55, 64, 60, 62, 43, 38, 42, 23, 67, 54, 36, 41, 65, 30, 57, 34, 12, 13, 69, 26, 4, 25, 1, 19, 5, 8, 27, 7, 14, 3, 22, 10, 6, 20, 11, 63, 17, 35, 21, 0, 61, 16, 46, 9, 18, 2, 28, 53, 71, 24, 15, 29 };
 static const int data_ov076_02159990[72] = { 17, 159, 17, 12, 17, 33, 17, 54, 17, 75, 17, 96, 17, 117, 17, 138, 77, 11, 127, 11, 77, 11, 127, 11, 77, 30, 127, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 223, 74, 68, 11, 136, 11, 223, 155, 179, 30, 179, 48, 179, 66, 179, 84, 179, 102, 179, 120, 179, 138, 179, 156 };
 static const int data_ov076_02159ab0[88] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 14, -1, 0, -1, 1, -1, 0, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1 };
-static const int data_ov076_02159c10[116] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const ButtonSounds data_ov076_02159c10[29] = { { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 17, -1, -1, -1 } }, { { 18, -1, -1, -1 } }, { { 17, -1, -1, -1 } }, { { 18, -1, -1, -1 } }, { { 17, -1, -1, -1 } }, { { 18, -1, -1, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } } };
 static const int data_ov076_02159de0[144] = { 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1, 13, -1, -1, -1, 13, -1, -1, -1, -1, -1, -1, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1 };
 // --- END of the file's .rodata ---
 
@@ -2094,6 +2094,454 @@ void MiiEditProfilePage::func_ov076_021508ac() {
         return;
     }
     }
+}
+
+extern "C" {
+void func_02024c14(u32 *manager, void *a, int planes);
+void func_02023f4c(ScreenControl *screens, int planes, int a);
+BOOL func_02098584(CharacterRecord *character);
+int func_02098e50(CharacterRecord *character, int parameter);
+// Adds a button to a window: (window, number, unknown, sequence, sequence when on, position, size, its sounds,
+// unknown); func_02033844 a button with a text: the same with the text's message file and message, font, plane and
+// character offset
+void func_02033448(MessageWindow *window, int button, int a, u8 sequence, u8 onSequence, WindowPoint position,
+                   WindowPoint size, const ButtonSounds *sounds, int b);
+void func_02033844(MessageWindow *window, int button, int a, u8 sequence, u8 onSequence, WindowPoint position,
+                   WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const ButtonSounds *sounds, int b);
+void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
+void func_02032140(SpriteButton *button, int a, int b, int c, int d); // Its four sounds
+// The keyboard: set up with the archive's name, ...
+void func_02082fb4(SoftKeyboard *keyboard, const char *archiveName);
+void func_02083078(SoftKeyboard *keyboard, int a, int b);
+void func_02083288(SoftKeyboard *keyboard, int a, int b);
+void func_0208382c(SoftKeyboard *keyboard, int a, MessageFile *file, int b, int c, int d, int e);
+void func_02083c30(SoftKeyboard *keyboard);
+void func_02083740(SoftKeyboard *keyboard);
+void func_020836d0(SoftKeyboard *keyboard, int a, int b, int c, int d, int e);
+void func_02083608(void *key, int a);
+size_t wcslen(const wchar_t *s);
+void func_ov076_02154190(MiiEditProfilePage *page);
+}
+
+// Whether the profile has all it needs: the two texts and the name accepted by func_ov076_0214bf20, and for a new
+// character (mUnknown5824 0) the year and the birthday, for one being edited a creator's name accepted or none
+// The same as overlay 76's other branch has it: a position passed by value, which leaves the original's copies
+static inline void SetCanvasPosition(ObjTextCanvas *canvas, WindowPoint position) {
+    canvas->mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+// Sets the page's state up: 0 leaves the keyboard or a window, 1 the profile's buttons and the six windows, 3, 5,
+// 7 and 9 the keyboard for one of the four texts, 10 to 16 open a window.
+// NOT MATCHING (99.97%): the instructions are the original's, but six stack slots are not. The original keeps the
+// WindowPoints of the windows' OK buttons (okSize, okPosition, clearPosition, an unread second copy of the size,
+// yearSize, dateSize, from sp+0x64 down) below every other local; here okSize and clearPosition get slots above
+// the inline copies, and the unread copy is missing.
+void MiiEditProfilePage::func_ov076_02151f0c(int state) {
+    wchar_t name[11];
+    wchar_t creator[11];
+    wchar_t text[11];
+    switch (mState) {
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 15:
+    case 16:
+        for (int i = 0; i < 6; i++) {
+            func_020346cc(&mWindows[i]);
+        }
+        break;
+    }
+    switch (state) {
+    case 0:
+        func_02024c14(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
+        func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+        func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
+        func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
+        func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+        func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+        data_0211d604.mPlanes = 0x17;
+        data_0211d604.mPlanesChanged = TRUE;
+        func_02023f4c(&data_0211d604, 0x3F00, 0x10);
+        break;
+    case 1: {
+        int charOffset = 0x384;
+        mScene->func_ov076_0214bbe4();
+        func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Profile.nce", "E00:/Profile.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 10; i++) {
+            u16 sequence = data_ov076_0215895c[i];
+            Sprite_Init(&mButtons[i], 1, sequence, 0x80, 0x60, TRUE);
+            func_02031eb0(&mButtons[i], data_ov076_02159034[i].x, data_ov076_02159034[i].y);
+            func_02031278(&mButtons[i], sequence, sequence + 1);
+            func_02031260(&mButtons[i], data_ov076_02158b60[i]);
+            func_02032158(&mButtons[i], &data_ov076_021593e0[i]);
+            mButtons[i].mUnknownDC = 14;
+            mButtons[i].SetPositionFromVec(data_ov076_02158fe4[i].x << FX32_SHIFT,
+                                           data_ov076_02158fe4[i].y << FX32_SHIFT);
+            func_0203119c(&mButtons[i]);
+        }
+        for (u16 i = 0; i < 2; i++) {
+            Sprite_Init(&mSprites[i], 1, data_ov076_02158774[i], 0x80, 0x60, TRUE);
+            mSprites[i].SetPositionFromVec(data_ov076_021588bc[i].x << FX32_SHIFT,
+                                           data_ov076_021588bc[i].y << FX32_SHIFT);
+            NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mSprites[i].mAnim));
+        }
+        if (mScene->mUnknown5824 == 0) {
+            func_02031278(&mButtons[3], 8, 9);
+            func_02031278(&mButtons[6], 0x12, 0x13);
+            func_02031e88(&mButtons[8], TRUE);
+        }
+        for (int i = 0; i < 10; i++) {
+            if (i >= 0 && i < 10) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        if (mScene->mSceneId != 0x43 && mScene->mSceneId != 0x6F) {
+            func_02031e88(&mButtons[9], TRUE);
+        }
+        if (!func_02098584(&mScene->mCharacter)) {
+            func_02031e88(&mButtons[4], TRUE);
+            func_02031e88(&mButtons[5], TRUE);
+            func_02031e88(&mButtons[7], TRUE);
+            int month = func_02098e50(&mScene->mCharacter, 0x26);
+            int day = func_02098e50(&mScene->mCharacter, 0x27);
+            if (month != 0 && day != 0) {
+                func_02031e88(&mButtons[6], TRUE);
+            }
+        }
+        ScreenRect rect = data_ov076_021588dc;
+        for (int i = 0; i < 6; i++) {
+            func_02032fb8(&mWindows[i], rect);
+            func_02033174(&mWindows[i], data_ov076_02158e30, 0x100);
+            func_020331bc(&mWindows[i], 0x3F00, rect);
+            func_02034f4c(&mWindows[i], 1);
+        }
+        int n = 0;
+        for (int i = 0; i <= 3; i++) {
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033448(&mWindows[0], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[0].mSprites[n], data_ov076_0215925c[i]);
+            n++;
+        }
+        WindowPoint okPosition = data_ov076_021587a8;
+        WindowPoint okSize = data_ov076_021587c0;
+        func_02033844(&mWindows[0], n, 0, 0x69, 0x6A, okPosition, okSize, &mScene->mMessageFiles[1], 7,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
+        n = 0;
+        for (int i = 4; i <= 15; i++) {
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033448(&mWindows[1], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[1].mSprites[n], data_ov076_0215925c[i]);
+            n++;
+        }
+        WindowPoint okPosition1 = data_ov076_021587a8;
+        func_02033844(&mWindows[1], n, 0, 0x69, 0x6A, okPosition1, okSize, &mScene->mMessageFiles[1], 5,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
+        n = 0;
+        for (int i = 18; i <= 19; i++) {
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033448(&mWindows[2], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[2].mSprites[n], 1);
+            mWindows[2].mSprites[n].mUnknownE0 = 6;
+            func_0203119c((SpriteButton *)&mWindows[2].mSprites[n]);
+            mWindows[2].mSprites[n].mSprite.mVisible = FALSE;
+            n++;
+        }
+        WindowPoint okPosition2 = data_ov076_021587a8;
+        WindowPoint yearSize = data_ov076_021587c0;
+        func_02033844(&mWindows[2], n, 0, 0x69, 0x6A, okPosition2, yearSize, &mScene->mMessageFiles[1], 7,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
+        WindowPoint clearPosition = data_ov076_02158790;
+        func_02033844(&mWindows[2], n + 1, 0, 0x69, 0x6A, clearPosition, yearSize, &mScene->mMessageFiles[1], 6,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[0], 14);
+        for (int i = 0; i < 4; i++) {
+            func_02033bb4(&mWindows[2], 1, 0x4A, data_ov076_02158abc[i]);
+            mWindows[2].mSpritesA9F4[i].mOverwritePalette = 0;
+            NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mWindows[2].mSpritesA9F4[i].mAnim));
+            mWindows[2].mSpritesA9F4[i].mVisible = FALSE;
+        }
+        func_02033bb4(&mWindows[2], 1, 0x4B, data_ov076_021587b8);
+        n = 0;
+        for (int i = 20; i <= 23; i++) {
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033448(&mWindows[3], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[3].mSprites[n], 1);
+            mWindows[3].mSprites[n].mUnknownE0 = 6;
+            func_0203119c((SpriteButton *)&mWindows[3].mSprites[n]);
+            mWindows[3].mSprites[n].mSprite.mVisible = FALSE;
+            n++;
+        }
+        WindowPoint okPosition3 = data_ov076_021587a8;
+        WindowPoint dateSize = data_ov076_021587c0;
+        func_02033844(&mWindows[3], n, 0, 0x69, 0x6A, okPosition3, dateSize, &mScene->mMessageFiles[1], 7,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
+        func_02033844(&mWindows[3], n + 1, 0, 0x69, 0x6A, clearPosition, dateSize, &mScene->mMessageFiles[1], 6,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[0], 14);
+        for (int i = 0; i < 4; i++) {
+            func_02033bb4(&mWindows[3], 1, 0x4A, data_ov076_02158adc[i]);
+            mWindows[3].mSpritesA9F4[i].mOverwritePalette = 0;
+            NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mWindows[3].mSpritesA9F4[i].mAnim));
+            mWindows[3].mSpritesA9F4[i].mVisible = FALSE;
+        }
+        func_02033bb4(&mWindows[3], 1, 0x4C, data_ov076_021587d0);
+        n = 0;
+        for (int i = 24; i <= 28; i++) {
+            int value;
+            switch (i - 24) {
+            case 0:
+                value = 2;
+                break;
+            case 1:
+                value = 3;
+                break;
+            case 2:
+                value = 4;
+                break;
+            case 3:
+                value = 5;
+                break;
+            case 4:
+                value = 0;
+                break;
+            }
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033844(&mWindows[4], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &mScene->mMessageFiles[0], value + 0x54, &gFonts[0].mFont, 0x1000, &charOffset,
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[4].mButtons[i - 24], data_ov076_0215925c[i - 24]);
+            mWindows[4].mButtons[i - 24].mMoveText = FALSE;
+            n++;
+        }
+        n = 0;
+        for (int i = 16; i <= 17; i++) {
+            u16 sequence = data_ov076_02158df4[i];
+            func_02033448(&mWindows[5], n, 1, sequence, sequence + 1, data_ov076_021596a0[i], data_ov076_02159788[i],
+                          &data_ov076_02159c10[i], 14);
+            func_02031260((SpriteButton *)&mWindows[5].mSprites[n], data_ov076_0215925c[i]);
+            n++;
+        }
+        WindowPoint okPosition5 = data_ov076_021587a8;
+        func_02033844(&mWindows[5], n, 0, 0x69, 0x6A, okPosition5, okSize, &mScene->mMessageFiles[1], 5,
+                      &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
+        mScene->mText1B35C.mSprite.mVisible = FALSE;
+        func_ov076_02154190(this);
+        MiiData_GetName(&mScene->mCharacter, name);
+        MiiData_GetCreatorName(&mScene->mCharacter, creator);
+        BOOL complete;
+        if (mScene->mUnknown5824 == 0) {
+            if (mScene->func_ov076_0214bf20((wchar_t *)&mScene->mCharacter.mUnknown058[0x16]) &&
+                mScene->func_ov076_0214bf20((wchar_t *)&mScene->mCharacter.mUnknown058[0]) &&
+                mScene->func_ov076_0214bf20(name) && mScene->mCharacter.mYear != 0xFFF &&
+                func_02098dac(&mScene->mCharacter, 0x26) != 0 && func_02098dac(&mScene->mCharacter, 0x27) != 0) {
+                complete = TRUE;
+            } else {
+                complete = FALSE;
+            }
+        } else {
+            if (mScene->func_ov076_0214bf20((wchar_t *)&mScene->mCharacter.mUnknown058[0x16]) &&
+                mScene->func_ov076_0214bf20((wchar_t *)&mScene->mCharacter.mUnknown058[0]) &&
+                mScene->func_ov076_0214bf20(name) &&
+                (wcslen(creator) == 0 || mScene->func_ov076_0214bf20(creator))) {
+                complete = TRUE;
+            } else {
+                complete = FALSE;
+            }
+        }
+        if (complete) {
+            int place = mScene->mSprite582C.mPlace;
+            if (place == 4) {
+                func_02031e88(&mScene->mButtons[4], FALSE);
+                func_02031e88(&mScene->mButtons[2], FALSE);
+                func_02031e88(&mScene->mButtons[3], FALSE);
+                if (!mScene->mUnknown58E8[6]) {
+                    mScene->mUnknown58DC = TRUE;
+                }
+            } else if (place == 3) {
+                func_02031e88(&mScene->mButtons[3], FALSE);
+                func_02031e88(&mScene->mButtons[2], FALSE);
+                if (!mScene->mUnknown58E8[4]) {
+                    mScene->mUnknown58DC = TRUE;
+                }
+            } else if (place <= 2) {
+                mScene->mSprite582C.func_ov076_0214bec8(2);
+                func_02031e88(&mScene->mButtons[2], FALSE);
+                if (!mScene->mUnknown58E8[3]) {
+                    mScene->mUnknown58DC = TRUE;
+                }
+            }
+        } else {
+            func_02031e88(&mScene->mButtons[2], TRUE);
+            func_02031e88(&mScene->mButtons[3], TRUE);
+            func_02031e88(&mScene->mButtons[4], TRUE);
+            mScene->mUnknown58DC = FALSE;
+        }
+        break;
+    }
+    case 3:
+    case 5:
+    case 7:
+    case 9: {
+        mScene->func_ov076_0214bd64();
+        MI_CpuClear16(mKeyboard.mText, sizeof(mKeyboard.mText));
+        mKeyboard.mLength = 0;
+        for (int i = 0; i < 10; i++) {
+            mButtons[i].mVisible = FALSE;
+        }
+        for (u16 i = 0; i < 2; i++) {
+            mSprites[i].mVisible = FALSE;
+        }
+        func_02024c14(gGraphicsManager, mScene->mUnknown00010, 0x3F00);
+        func_02028f24(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x200, 0, 0, 0, -1);
+        func_02027534(&data_021213b8, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
+        func_02027d7c(&data_02121834, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
+        G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000, GX_BG_CHARBASE_0x08000,
+                          GX_BG_EXTPLTT_01);
+        func_02082fb4(&mKeyboard, "KBD");
+        func_02083078(&mKeyboard, 0x100, 0);
+        func_02083288(&mKeyboard, 0, 0);
+        func_0208382c(&mKeyboard, 3, &mScene->mMessageFiles[1], 0x384, 0x14000, 0, 13);
+        func_02083c30(&mKeyboard);
+        func_02083740(&mKeyboard);
+        func_020836d0(&mKeyboard, 0, 1, 14, 0, 20);
+        func_02083608((u8 *)&mKeyboard.mUnknown5178 + 0x6B8, 0);
+        switch (state) {
+        case 3: {
+            mScene->mText1B35C.mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
+            mScene->mText1B35C.mMessage = 0x1F;
+            mScene->mText1B35C.DrawAll();
+            SetCanvasPosition(&mScene->mCharBox, data_ov076_021587f8);
+            func_ov076_02153cf4(this, (wchar_t *)&mScene->mCharacter.mUnknown058[0]);
+            break;
+        }
+        case 5: {
+            mScene->mText1B35C.mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
+            mScene->mText1B35C.mMessage = 0x1E;
+            mScene->mText1B35C.DrawAll();
+            SetCanvasPosition(&mScene->mCharBox, data_ov076_021587f8);
+            func_ov076_02153cf4(this, (wchar_t *)&mScene->mCharacter.mUnknown058[0x16]);
+            break;
+        }
+        case 7: {
+            mScene->mText1B35C.mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
+            mScene->mText1B35C.mMessage = 0x20;
+            mScene->mText1B35C.DrawAll();
+            SetCanvasPosition(&mScene->mCharBox, data_ov076_021587f8);
+            MiiData_GetName(&mScene->mCharacter, text);
+            func_ov076_02153cf4(this, text);
+            break;
+        }
+        case 9: {
+            mScene->mText1B35C.mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
+            mScene->mText1B35C.mMessage = 0x24;
+            mScene->mText1B35C.DrawAll();
+            SetCanvasPosition(&mScene->mCharBox, data_ov076_021587f8);
+            MiiData_GetCreatorName(&mScene->mCharacter, text);
+            func_ov076_02153cf4(this, text);
+            break;
+        }
+        }
+        func_ov076_021545dc(this, state);
+        int x = mKeyboard.mLength * 13;
+        x = CLAMP(x, 0, 0x75);
+        mKeyboard.mUnknown5F8C += x << FX32_SHIFT;
+        Sprite_Init(&mButton, 3, 0, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButton, 0x18, 0x16);
+        func_02031278(&mButton, 10, 11);
+        func_02031260(&mButton, 4);
+        func_02032140(&mButton, 0x16, -1, 0, -1);
+        mButton.mUnknownDC = 14;
+        mButton.SetPositionFromVec(0xF2000, 0xD000);
+        func_0203119c(&mButton);
+        break;
+    }
+    case 11:
+        func_02034720(&mWindows[2], 0x12, 1);
+        if (0xFFF == mScene->mCharacter.mYear) {
+            func_02098cf4(&mScene->mCharacter, 1990);
+        }
+        func_ov076_02153e54(this, mScene->mCharacter.mYear);
+        func_ov076_02154574(this);
+        break;
+    case 12:
+        func_02034720(&mWindows[3], 0x12, 1);
+        if (func_02098dac(&mScene->mCharacter, 0x26) == 0 || func_02098dac(&mScene->mCharacter, 0x27) == 0) {
+            func_02098c40(&mScene->mCharacter, 0x26, 1);
+            func_02098c40(&mScene->mCharacter, 0x27, 1);
+        }
+        func_ov076_021540a4(this, func_02098dac(&mScene->mCharacter, 0x26));
+        func_ov076_02153fb8(this, func_02098dac(&mScene->mCharacter, 0x27));
+        break;
+    case 13: {
+        func_02034720(&mWindows[0], 0x12, 1);
+        int choice = mScene->mCharacter.mUnknown050Bits29;
+        if (choice >= 0 && choice <= 3) {
+            Sprite_SetSequence(&mWindows[0].mSprites[choice].mSprite, (u16)(data_ov076_02158df4[choice] + 1), TRUE);
+        }
+        break;
+    }
+    case 14: {
+        func_02034720(&mWindows[1], 0x12, 1);
+        int color = func_02098dac(&mScene->mCharacter, 0x28);
+        if (color >= 0 && color <= 11) {
+            Sprite_SetSequence(&mWindows[1].mSprites[color].mSprite, (u16)(data_ov076_02158df4[color + 4] + 1), TRUE);
+        }
+        break;
+    }
+    case 15:
+        for (int i = 0; i < 9; i++) {
+            mScene->mTextBoxes[i].mSprite.mVisible = FALSE;
+        }
+        break;
+    case 10: {
+        func_02034720(&mWindows[4], 0x12, 1);
+        int value = mScene->mCharacter.mUnknown298;
+        if (value == 1) {
+            break;
+        }
+        int choice;
+        switch (value) {
+        case 2:
+            choice = 0;
+            break;
+        case 3:
+            choice = 1;
+            break;
+        case 4:
+            choice = 2;
+            break;
+        case 5:
+            choice = 3;
+            break;
+        case 0:
+            choice = 4;
+            break;
+        }
+        Sprite_SetSequence(&mWindows[4].mButtons[choice].mSprite, (u16)(data_ov076_02158df4[choice + 24] + 1), TRUE);
+        break;
+    }
+    case 16: {
+        func_02034720(&mWindows[5], 0x12, 1);
+        int sex = MiiData_GetSex(&mScene->mCharacter);
+        if (sex >= 0 && sex <= 1) {
+            Sprite_SetSequence(&mWindows[5].mSprites[sex].mSprite, (u16)(data_ov076_02158df4[sex + 16] + 1), TRUE);
+        }
+        break;
+    }
+    }
+    mState = state;
+    mUnknown00004 = 0;
 }
 
 void MiiEditProfilePage::Draw() {
