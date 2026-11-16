@@ -624,8 +624,8 @@ RTCi_ConvertSecondToTime kind:function(arm,size=0x80) addr:0x02010084
 RTC_ConvertSecondToDateTime kind:function(arm,size=0x8c) addr:0x02010104
 RTC_GetDayOfWeek kind:function(arm,size=0xbc) addr:0x02010190
 CARDi_SetTask kind:function(arm,size=0x3c) addr:0x0201024c
-CARDi_LockResource kind:function(arm,size=0x84) addr:0x02010288
-CARDi_UnlockResource kind:function(arm,size=0x8c) addr:0x0201030c
+CARDi_LockResource kind:function(arm,size=0x84) addr:0x02010288 local
+CARDi_UnlockResource kind:function(arm,size=0x8c) addr:0x0201030c local
 CARDi_InitCommon kind:function(arm,size=0x110) addr:0x02010398
 CARD_IsEnabled kind:function(arm,size=0x10) addr:0x020104a8
 CARD_CheckEnabled kind:function(arm,size=0x18) addr:0x020104b8
@@ -6425,9 +6425,10 @@ PMi_PreSleepCallbackList kind:bss addr:0x0211b6a4 local
 PMi_Work kind:bss addr:0x0211b6a8 local
 rtcInitialized kind:bss addr:0x0211b6b8
 rtcWork kind:bss addr:0x0211b6c4
-CARDi_EnableFlag kind:bss addr:0x0211b700
-cardi_arg kind:bss addr:0x0211b720
-cardi_common kind:bss addr:0x0211b780
+CARDi_EnableFlag kind:bss addr:0x0211b700 local
+cardi_arg kind:bss addr:0x0211b720 local
+cardi_common kind:bss(size=0x220) addr:0x0211b780
+cardi_thread_stack kind:bss(size=0x400) addr:0x0211b9a0 local
 cardi_rom_base kind:bss addr:0x0211bda0
 rom_stat kind:bss addr:0x0211bdc0
 CARDi_IsPulledOutFlag kind:bss addr:0x0211bfe0
