@@ -6433,11 +6433,11 @@ from:0x02042120 kind:arm_call to:0x020a5430 module:main
 from:0x02042128 kind:arm_call to:0x02080e8c module:main
 from:0x02042140 kind:arm_call to:0x02081074 module:main
 from:0x02042158 kind:load to:0x02110970 add:0x8 module:main
-from:0x0204215c kind:load to:0x0214baa8 module:overlays(31,39,43,44,46,70,71,80,86)
+from:0x0204215c kind:load to:0x0214baa0 add:0x8 module:overlay(86)
 from:0x02042160 kind:load to:0x0202e46c module:main
 from:0x02042164 kind:load to:0x0202e44c module:main
 from:0x02042168 kind:load to:0x021153b4 add:0x8 module:main
-from:0x0204216c kind:load to:0x0214ba8c module:overlays(31,39,43,44,46,70,71,86,110)
+from:0x0204216c kind:load to:0x0214ba84 add:0x8 module:overlay(86)
 from:0x02042170 kind:load to:0x0210f640 add:0x8 module:main
 from:0x020421a0 kind:arm_call to:0x0214a624 module:overlay(106)
 from:0x020421c8 kind:arm_call to:0x0203117c module:main
