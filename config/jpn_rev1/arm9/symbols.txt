@@ -6146,8 +6146,8 @@ gStr_Fw_BG_up_PM_Cloud_ncl_2 kind:data(any) addr:0x0211534c
 data_02115364 kind:data(any) addr:0x02115364
 _ZTV10ShopWindow kind:data(any) addr:0x02115368
 _ZTV19HalfPriceShopWindow kind:data(any) addr:0x02115380
-data_021153a0 kind:data(any) addr:0x021153a0
-data_021153bc kind:data(any) addr:0x021153bc
+_ZTV16ShopItemListView kind:data(any) addr:0x02115398
+_ZTV12ItemListView kind:data(any) addr:0x021153b4
 gText_X kind:data(any) addr:0x021153d0
 gStr__5 kind:data(any) addr:0x021153d8
 gText_ShojiSuu kind:data(any) addr:0x021153e0

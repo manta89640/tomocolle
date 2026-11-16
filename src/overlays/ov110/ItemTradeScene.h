@@ -355,7 +355,7 @@ void func_02032134(TextButton *button, int palette);     // Sets the overwrite p
 // --- The list (main program, 0x020a80f0 to 0x020a9e94) --------------------------------------------------------
 
 // The main program's scrolling list of items on the lower screen ("LTL:/BG_list", "LTL:/Obj_list"; virtual table
-// data_021153bc). A stand-in with the fields this overlay reads.
+// 0x021153BC). A stand-in with the fields this overlay reads.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class ItemListView {

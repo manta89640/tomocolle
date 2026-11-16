@@ -58,7 +58,6 @@ SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
 
 
-SCENE_STAND_IN(Scene1E, 0x48F58); // 0x0203f900
 
 
 
