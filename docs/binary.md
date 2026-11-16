@@ -639,13 +639,23 @@ from its code); scenes 0x1F to 0x22 are the right-job scenes after their archive
 
 Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
 `FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
-`0x02037568` (8 KB, about 0x500 bytes of spilled constants), `Scene1E`'s constructor (97.7%: every instruction but
-for a rotation of three callee-saved registers), and the constructors of gap38-c's ten test scenes (`0x0203E320` to
-`0x0203EA2C`, `0x0203F654`; their headers are in main, not on this branch), `RoomScene` (`0x0203ED10`) and
-`TutorialRoomScene` (`0x0203EFC0`; their overlays' headers declare their own `Scene`, `Model` and `Character`
-classes) and `VoteScene` (`0x020400F0`: a member of the unnamed class of `0x02025B5C`, a 128 by 96 pixel 4-bit
-drawing surface with a brush, and an array of a class of two `G3Sprite`s whose destructor is empty, which needs
-`G3Sprite`'s destructor inline, and that the link refuses while `G3Sprite`'s own file is not decompiled).
+`0x02037568` (8 KB, about 0x500 bytes of spilled constants) and `Scene1E`'s constructor (97.7%: every instruction but
+for a rotation of three callee-saved registers; it holds the shops' counter, which work/shop's `ShopCounter` now
+declares). `RoomScene`'s, `TutorialRoomScene`'s and `VoteScene`'s constructors match since overlays 73 and 74 moved
+onto the shared headers and `G3Sprite`'s destructor became inline (below).
+
+- **The drawing canvas** (`DrawingCanvas`, `include/DrawingCanvas.h`, measured): `0x02025A9C`/`0x02025B5C` are C2
+  and C1 of a 0x2B4-byte class that draws lines into a 128 by 96 pixel rectangle of a background's 4-bit
+  characters with the touch pen: `Update` (`0x02025C8C`) draws from the previous touch point to the current one
+  while +0x5C is set and the pen is down, `SetBrushSize` (`0x02025D00`) clamps to 0..7 and fills the brush's
+  rows from the sine table, `SetColor` (`0x02025DC0`) clamps to 0..15 and repeats the pixel through a word. Its
+  part at 0 (`0x0202575C`) holds the background's screen and character buffers (tables `0x0210F5C8`,
+  `0x0210F59C`), which flush to VRAM through the screen loader and `gVramTransferQueue`. Scenes 0x23
+  (`VoteScene`), 0x3A and 0x8E hold one; 0x3A's is a class derived from it (built with C2).
+- **The apartment scenes' members built with C2.** `RoomScene` and `TutorialRoomScene` build their particle
+  system and head icons with `ParticleSystem`'s and `HeadIcon`'s C2 and their speech player with `TtsPlayer`'s
+  C2 (`0x02083DC4`, its only caller): classes derived from those with nothing of their own
+  (`RoomParticleSystem`, `RoomHeadIcon` in `include/HeadIcon.h`, overlay 74's `RoomTtsPlayer`).
 
 - **Text canvases of the scene constructors.** Three classes derived from `ObjTextCanvas` have their tables in
   this file's data, told apart by where their `TextCanvas` virtual base is (measured, from their tables' first
@@ -704,10 +714,32 @@ Named classes of scenes whose overlay is not decompiled: after the scene's archi
 main program mounts the island map's sky, vote and apartment models (`MapModelsScene`), scene 0x2E shows a room
 stepped through the 78 interiors (`InteriorViewScene`).
 
-Not done: the constructors of scenes 0x29 (TushinScene), 0x2F, 0x35, 0x68 (the shops), 0x38, 0x3A and 0x8E (a
-member of an unidentified class whose constructor twins are `0x02025A9C`/`0x02025B5C`), 0x40, 0x46, 0x5B, 0x67, 0x7F,
-0x80, 0xAB (WeddingScene), 0xB1 (ItemTradeScene) and 0xB4; the item classes' inline virtual functions and the
-deleting destructors at the file's end (0x0204ABAC to 0x0204AF20) come with the classes whose tables this file emits.
+Done since (scene-ctors): the constructors of scenes 0x29 (`TushinScene`), 0x38 (`ChangeRoomScene`), 0x3A and
+0x8E (`TestNg55Scene`, `TestNg129Scene`, with the drawing canvas), 0x40 (`Scene40`), 0x5B (`WriteSongScene`), 0x67,
+0x7F, 0xAB (`WeddingScene`), 0xB4 (`AlbumScene`, 97.9%: `ItemListView`'s three inline loops take r5/r6/r7 in
+rotation where the original alternates r5 and r6), the implicit members after them, the item classes' inline
+getters and `Scene`'s D1 (`0x0204AD84`, the lone `bx lr` of `Scene`'s table). Measured on the way:
+
+- **Classes with two item bases.** Several scenes hold a class derived from `InventoryItem` and `ClothesItem`
+  together (`AlbumItems`, `Scene40Items`): the constructor calls both bases' constructors and only then stores
+  both of the class's tables (this file's data, one object with the second table at +0x24 of a 0x2C-byte
+  object, `relocs.txt` `add:0x8` and `add:0x2c`). With RTTI off, MW writes 0 for a secondary table's offset to
+  the top.
+- **Item models of the scenes** (`Scene40ItemModel`, `WeddingGiftModel`, `AlbumItemModel`, overlay 110's) derive
+  from `ItemModel` without a virtual function of their own: their tables (`ItemModel`'s with the
+  `InventoryItem` part at +0x24) and D0s are this file's, their D1s follow the scene's constructor, and with
+  them this file emits `InventoryItem`'s and `ClothesItem`'s inline getters (`0x0204ABAC` to `0x0204AD7C`),
+  which the ROM keeps from here.
+- **Lists derived from `ItemListView`.** `ChangeRoomScene`'s and `Scene40`'s lists override all five of its
+  virtual functions in their overlays (tables `ov086 0x0214BA84`, `ov075 0x02182CD0`); `AlbumScene`'s overrides
+  none and has its table here (`0x02110938`).
+- **Main-program copies the overlays refer to.** Overlays 73, 74, 96 and 109, now on the shared headers, emit
+  copies of `SceneCharacter`'s, `WeddingCharacter`'s, `RoomCharacter`'s, `TutorialRoomCharacter`'s and
+  `RoomPart`'s D1 and of `InteriorItem`'s getters; the originals refer to the main program's (this file's,
+  listed in `config/jpn_rev1/arm9/inline_symbols.txt`).
+
+Not done: the constructors of scenes 0x2F, 0x35, 0x68 (the shops) and 0xB1 (`ItemTradeScene`), which hold
+work/shop's `ShopCounter`, `ShopItemListView` and `ShopWindow` (and overlay 110's header, which work/shop edited).
 
 ## The main program's test scenes and the scenes' helpers
 
