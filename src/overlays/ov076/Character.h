@@ -139,6 +139,23 @@ struct CharacterRecord {
 
 // A saved character and what the game keeps beside it. 0x2C0 bytes.
 struct SavedCharacter : public CharacterRecord {
+    // The main program's functions (include/character/Character.h)
+    void AssignCreateId();
+    int GetParameter(int param);
+    void GetParameterRange(int param, int *min, int *max);
+    s8 GetPersonality();
+    int GetRawParameter(int param);
+    BOOL IsMiiFromThisConsole();
+    void Reset();
+    void SetAnswer(int index, u8 answer);
+    void SetBirthYear(u16 year);
+    void SetBloodType(int bloodType);
+    void SetLongAct(u8 state, u8 partner, s64 end);
+    void SetParameter(int param, int value);
+    void SetRegisteredDate(int year, int month, int day);
+    void SetSex(int sex);
+    void SetVoice(int index, s16 value);
+
     SavedCharacter(); // _ZN14SavedCharacterC1Ev
 
     /* 0x2A4 */ u16 mIndex;           // Which of the saved characters this is
@@ -147,6 +164,16 @@ struct SavedCharacter : public CharacterRecord {
 
 // The character as the main program draws it: the saved character and its model's resources.
 struct CharacterBase : public SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    void Draw();
+    void InitFace(u32 defaultMii);
+    void LipSync(const char *phoneme, int face);
+    void MakeFace();
+    void SetDefaultMii(u32 index, BOOL makeFace);
+    void SetFace(int kind);
+    void SetHeadMatrices(const MtxFx43 *matrix, const MtxFx33 *rotation);
+    void SetMiiParameter(int param, int value, BOOL makeFace);
+
     CharacterBase();  // _ZN13CharacterBaseC1Ev, C2Ev
     ~CharacterBase(); // _ZN13CharacterBaseD1Ev, D2Ev
 
@@ -173,6 +200,12 @@ struct CharacterBase : public SavedCharacter {
 // The model of a character (func_0208eb18 constructs it). Where it ends is not known: here, at the end of the
 // character.
 class CharacterModel : public AnimModel {
+public:
+    // The main program's functions (include/character/Character.h)
+    void GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation);
+    void MakeModel(int resourceId, int unk);
+    void SetArchive(const char *archiveName, int clothes, BOOL female);
+
 public:
     CharacterModel(); // func_0208eb18
 

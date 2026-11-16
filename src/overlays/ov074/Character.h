@@ -14,6 +14,29 @@
 // out by index, func_0202c28c back in). func_020979c0 is its constructor. The scene makes temporary ones on the
 // stack for the residents that are not in the room.
 struct SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    void AddRelationMeter(int index, int change);
+    void ClearLongActFrom(s64 now);
+    int GetAnswerScore01();
+    s8 GetPersonality();
+    BOOL IsAway();
+    static BOOL IsAwayState(int state);
+    static BOOL IsLongAct2BTo2E(int state);
+    BOOL IsLongActAsPartner();
+    static BOOL IsLongActAsPartnerState(int state);
+    BOOL IsLongActIdle();
+    BOOL IsLongActPaired();
+    static BOOL IsLongActPairedState(int state);
+    BOOL IsLongActWithPartner();
+    static BOOL IsLongActWithPartnerState(int state);
+    BOOL IsTroubleOfCategory3Kind8To10();
+    int RandomFromCreateId(int max);
+    void Reset();
+    void SetMoodFromResult(int result, int detail);
+    void SetParameter(int param, int value);
+    void SetRelation(int index, u8 rank, u8 meter);
+    void StartNextLongAct(s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+
     SavedCharacter(); // func_020979c0
 
     // mEventEndLo and mEventEndHi are one s64, which the scene compares whole (it is not 8-aligned)
@@ -62,6 +85,12 @@ struct SavedCharacter {
 // The character as the main program draws it: the saved character and its model's resources. func_0208fcf8 is its
 // constructor.
 struct CharacterBase : public SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    BOOL ClampHeadAngle(u16 *angle, int limit);
+    void LipSync(const char *phoneme, int face);
+    void MakeFace();
+    void SetFace(int kind);
+
     CharacterBase(); // func_0208fcf8
 
     /* 0x02C0 */ u8 mUnknown02C0[0x2240];
@@ -88,6 +117,15 @@ struct CharacterBase : public SavedCharacter {
 // and returns the last row of mJointMatrices[joint] (0x2A0 + 0x30 * joint from the model). Where the model ends is
 // not known: 0x4BC is where the last thing known to be its own ends.
 class CharacterModel : public AnimModel {
+public:
+    // The main program's functions (include/character/Character.h)
+    VecFx32 GetHeldItemScale();
+    VecFx32 GetJointPosition(int joint);
+    void MakeModel(int resourceId, int unk);
+    void RemoveAnimation(u32 resType);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+    void SetAnimFlagsAndFrame(BOOL playOnce, fx32 frame, BOOL finished);
+
 public:
     CharacterModel(); // func_0208eb18
     ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mRenderObj); }
@@ -146,14 +184,6 @@ struct HeadIcon {
 
 extern "C" {
 
-// --- The model (0x0208eb18 to 0x0208fcf8) ---
-// Set the current animation's two flags (mPlayOnce, mFinished); func_0208ef28 also sets its frame
-void func_0208ef00(CharacterModel *model, BOOL playOnce, BOOL finished);
-void func_0208ef28(CharacterModel *model, BOOL playOnce, fx32 frame, BOOL finished);
-// The position of one of the model's joints
-VecFx32 CharacterModel_GetJointPosition(CharacterModel *model, int joint);
-// Three scale factors from the model's 0xEC and 0xF0: the states 0x69 to 0x6D give them to a held item
-VecFx32 func_0208fc34(CharacterModel *model);
 
 // --- The head icon (0x02080f64 to 0x020810e4) ---
 int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon

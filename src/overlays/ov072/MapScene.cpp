@@ -1534,7 +1534,7 @@ void MapScene::MakeDailyNews() {
         if (func_0202c3dc(&gGameData, i)) {
             SavedCharacter character;
             func_0202c264(&gGameData, i, &character);
-            if (date.month == func_02098dac(&character, 0x26) && date.day == func_02098dac(&character, 0x27)) {
+            if (date.month == ((SavedCharacter *)(&character))->GetParameter(0x26) && date.day == ((SavedCharacter *)(&character))->GetParameter(0x27)) {
                 birthdays[birthdayCount] = i;
                 birthdayCount++;
             } else {
@@ -1634,7 +1634,7 @@ int MapScene::GetWindowTexture(int resident) {
     int row = func_0202c5b4(&gGameData, resident);
     int column = func_0202c58c(&gGameData, resident);
     int kind = data_02114d78[row][column].mUnknown0;
-    if (func_02099c94(event)) {
+    if (SavedCharacter::IsAwayState(event)) {
         return 3;
     }
     if (event == 0x12) {

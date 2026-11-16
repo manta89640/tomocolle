@@ -176,6 +176,13 @@ struct CharacterRecord {
 
 // One saved character (a resident): the record and what the game keeps beside it.
 struct SavedCharacter : public CharacterRecord {
+    // The main program's functions (include/character/Character.h)
+    s8 GetPersonality();
+    BOOL IsMiiFromThisConsole();
+    void MakeVisitor();
+    void Register();
+    void Reset();
+
     SavedCharacter(); // func_020979c0
     u16 GetIndex() { return mIndex; }
 
@@ -200,6 +207,10 @@ struct ModelBase {
 }; // 0xE0
 
 struct CharacterModel : public ModelBase {
+    // The main program's functions (include/character/Character.h)
+    void MakeModel(int resourceId, int unk);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ u8 mUnknown0EC[0x18];
     /* 0x104 */ int mAnimId; // The current 'BCA0' animation
@@ -211,6 +222,9 @@ struct CharacterModel : public ModelBase {
 
 // The character as the main program draws it (func_0208fcf8 is its constructor).
 struct CharacterBase : public SavedCharacter {
+    // The main program's functions (include/character/Character.h)
+    void MakeFace();
+
     /* 0x02C0 */ u8 mUnknown02C0[8];
     /* 0x02C8 */ int mUnknown02C8;
     /* 0x02CC */ u8 mUnknown02CC[0x2318];
@@ -235,22 +249,8 @@ struct ModelAnimation {
     /* 0x14 */ BOOL mFinished;
 };
 ModelAnimation *AnimModel_FindAnimation(CharacterModel *model, u32 resType, int id);
-void func_02090fdc(SceneCharacter *character, int slot, int param2, int param3);
-void func_02091048(SceneCharacter *character, const char *archiveName);
-void func_02091968(SceneCharacter *character); // Draws it
-void Character_SetAnimation(SceneCharacter *character, u32 resType, int id); // Starts an animation
-void func_020919e8(SceneCharacter *character, u32 resType, int id);
-void func_020919a0(SceneCharacter *character, fx32 speed);
-void func_02091a14(SceneCharacter *character, BOOL visible);
-void func_0208fefc(SceneCharacter *character);
-void func_02091a24(SceneCharacter *character);
-void func_02091a88(SceneCharacter *character);
-s8 func_02098f2c(SavedCharacter *character);
 void func_0209decc(SceneCharacter *character);
-void func_0208ef00(CharacterModel *model, int a, int b);
-void func_0208ef5c(CharacterModel *model, int resourceId, int a);
 void func_02065abc(NNSG3dResMdl *model, int a);
-void func_020979e0(SavedCharacter *character);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
 BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
 struct MiiData;
@@ -280,10 +280,6 @@ void func_0201f508(wchar_t *text);
 void func_02036bb4(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
 int NFL_GetCharInfo(void *buffer);
-void func_02097c64(SavedCharacter *character);
-void Character_ResetSoundPhase(SceneCharacter *character, int slot);
-void Character_PlaySoundAtAnimPhase(SceneCharacter *character, int slot, int player, int seqArcNo, int index,
-                                    int phaseMask);
 }
 
 // --- 3D ---
@@ -468,10 +464,8 @@ BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being writte
 BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
 int NFL_IsMiiCreateIdBit7Clear(CharacterRecord *character);
 int NFL_AreMiiCreateIdsEqual(CharacterRecord *a, CharacterRecord *b);
-int func_02098584(CharacterRecord *character);
 int MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
-void func_02097cc0(SavedCharacter *character);
 void func_0209e01c(SavedCharacter *character);
 void func_020a0664(ResidentList *list);
 void MiiTransfer_SendMii(int index);

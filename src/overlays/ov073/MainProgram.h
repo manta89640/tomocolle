@@ -202,7 +202,6 @@ int func_0202c468(GameData *game, int character);
 u8 func_0202c53c(GameData *game, int character);
 int func_0202c5b4(GameData *game, int character);
 int func_0202c58c(GameData *game, int character);
-BOOL func_02099c94(int unknown);
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The clock ---
