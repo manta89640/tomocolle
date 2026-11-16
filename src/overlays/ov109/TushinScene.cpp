@@ -6,50 +6,49 @@
 
 // --- The file's constants ---
 
-static const u8 sYesNoSequences2[2] = { 0x75, 0x75 };
 static const u8 sYesNoSequences[2] = { 0x74, 0x74 };
+static const u8 sYesNoSequences2[2] = { 0x75, 0x75 };
 
-static const WindowPoint sListCursorPos = { 12, 47 };
-static const WindowPoint sListTextPosition = { 8, 2 };
-static const WindowPoint sListTitleTextPos = { 19, 41 };
 static const WindowPoint sListScrollDownSize = { 14, 12 };
+static const u32 sYesNoMessages[2] = { 2, 3 };
+static const WindowPoint sSignalPosition = { 244, 182 }; // Where the signal strength sprite is
+static const WindowPoint sListTitlePos = { 119, 47 };
 static const WindowPoint sBackButtonSize = { 94, 30 };
-static const ScreenRect sListWindowRect = { 20, 12, 216, 168 };
-static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-static const WindowPoint sYesNoPositions[2] = { { 75, 149 }, { 181, 149 } };
 static const WindowPoint sYesNoSizes[2] = { { 94, 30 }, { 94, 30 } };
 static const ScreenRect sYesNoWindowRect = { 20, 20, 216, 152 };
 static const ScreenRect sListBarRect = { -8, -8, 16, 16 };
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
+static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
+static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
+static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const WindowPoint sListButtonPositions[3] = { { 213, 19 }, { 242, 13 }, { 128, 173 } };
 static const WindowPoint sListButtonTextPositions[3] = { { 26, 34 }, { 24, 22 }, { 116, 30 } };
-static const WindowPoint sButtonTextPositions2[3] = { { 38, 68 }, { 38, 100 }, { 38, 118 } };
 static const WindowPoint sButtonPositions2[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
 static const WindowPoint sButtonPositions3[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
 static const WindowButtonStyle sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
 
-static const WindowPoint sSignalPosition = { 244, 182 };
-static const WindowPoint sListTitlePos = { 119, 47 };
 static const WindowPoint sButtonSize2 = { 190, 26 };
-static const WindowPoint sListScrollUpPos = { 244, 150 };
-static const WindowPoint sButtonSize3 = { 190, 20 };
-static const WindowPoint sListTitleSize = { 228, 18 };
-static const WindowPoint sListScrollBarSize = { 14, 12 };
+static const WindowPoint sListCursorPos = { 12, 47 };
+static const WindowPoint sListTextPosition = { 8, 2 };
 static const WindowPoint sTextPosition = { 24, 12 };
+static const WindowPoint sListTitleSize = { 228, 18 };
+static const WindowPoint sListScrollUpPos = { 244, 150 };
 static const WindowPoint sListScrollDownPos = { 244, 44 };
+static const WindowPoint sButtonSize3 = { 190, 20 };
 static const WindowPoint sListBarPos = { 244, 97 };
-// Where the signal strength sprite is
-static const u32 sYesNoMessages[2] = { 2, 3 };
+static const WindowPoint sListTitleTextPos = { 19, 41 };
+static const WindowPoint sListScrollBarSize = { 14, 12 };
+static const VecFx32 sCameraTarget = { 0, 0x1CCC, 0 };
+static const VecFx32 sEmitterPosition0 = { 0x1000, 0, 0 };
+static const VecFx32 sEmitterPosition1 = { -0x1000, 0, 0 };
 static const u32 sListButtonMessages[3] = { (u32)-1, (u32)-1, 0x105 };
 static const int sListButtonFonts[3] = { 0, -1, 2 };
-static const VecFx32 sEmitterPosition0 = { 0x1000, 0, 0 };
 static const int sListButtonFiles[3] = { 1, 1, 0 };
 static const VecFx32 sCameraPosition = { 0, 0x24CC, 0xC000 };
-static const VecFx32 sCameraTarget = { 0, 0x1CCC, 0 };
-static const VecFx32 sEmitterPosition1 = { -0x1000, 0, 0 };
-static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
-static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
+static const ScreenRect sListWindowRect = { 20, 12, 216, 168 };
+static const WindowPoint sYesNoPositions[2] = { { 75, 149 }, { 181, 149 } };
+static const WindowPoint sButtonTextPositions2[3] = { { 38, 68 }, { 38, 100 }, { 38, 118 } };
 static const WindowPoint sTextMargins[3] = { { 32, 33 }, { 32, 50 }, { 32, 33 } };
-static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const int sListOrders[7] = { 0, 1, 2, 3, 4, 5, 6 }; // What the list is sorted by, by the button chosen
 static const u32 sListMessages[7] = { 127, 128, 129, 130, 131, 132, 133 };
 static const WindowButtonStyle sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
@@ -60,8 +59,8 @@ static const WindowPoint sListItemSizes[7] = {
     { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 }, { 128, 20 },
 };
 
-static const u8 sListButtonSequences[3] = { 0x7B, 0x00, 0x76 };
 static const u8 sListButtonSequences2[3] = { 0x7C, 0x01, 0x77 };
+static const u8 sListButtonSequences[3] = { 0x7B, 0x00, 0x76 };
 // How strong the wireless signal is: the sequence of the signal sprite by link level
 static const u8 sLinkLevelSequences[4] = { 0, 1, 2, 3 };
 static const char sListWindowScreenName[] = "MLT:/Window_down.nsc";
@@ -96,8 +95,6 @@ static const u32 sPageMessages[68] = {
 };
 // The archive names of the three characters
 static const char *sCharacterArchives[3] = { "3HM", "BI1", "SRM" };
-// Where the list window's texts are: on its items, 32 pixels left of and 6 above each (set by the static
-// initialiser)
 // The words that a received character's texts must not be (IsNgWord compares each text with them, without its
 // trailing spaces and exclamation marks)
 static const wchar_t *sNgWords[41] = {
@@ -107,9 +104,8 @@ static const wchar_t *sNgWords[41] = {
     L"ヤラセロ", L"ヤリマン", L"リョウジョク", L"レイプ", L"ロリコン",
 };
 
-// NOT MATCHING (the static initialiser, __sinit_TushinScene.cpp): the compiler folds sListItemPositions into
-// immediates here, where the original loads them from the .rodata pool (pool+0x294) and subtracts; a const source
-// is folded by every compiler version tried (2.0 SP1p2 to SP2p3), and only a non-const one is loaded.
+// Where the list window's texts are: on its items, 32 pixels left of and 6 above each (set by the static
+// initialiser)
 static const WindowPoint sListTextOrigins[7] = {
     { sListItemPositions[0].x - 32, sListItemPositions[0].y - 6 },
     { sListItemPositions[1].x - 32, sListItemPositions[1].y - 6 },
@@ -130,29 +126,39 @@ static MiiData sMiiData[100];
 // The character sent or received
 static SavedCharacter sTransfer;
 
-// The state of the wireless exchange (WORK IN PROGRESS: these are separate statics of the file, pooled by size)
-struct WirelessState {
-    /* 0x00 */ u8 m00;
-    /* 0x02 */ u16 m02;
-    /* 0x04 */ u16 m04;
-    /* 0x06 */ u16 m06[13];
-    /* 0x20 */ u16 m20;
-    /* 0x22 */ u16 m22;
-    /* 0x24 */ u16 m24;
-    /* 0x26 */ u16 m26;
-    /* 0x28 */ u16 m28;
-    /* 0x2C */ int m2C;
-    /* 0x30 */ int m30;
-    /* 0x34 */ int m34;
-    /* 0x38 */ int m38;
-    /* 0x3C */ int m3C;
-    /* 0x40 */ int m40;
-    /* 0x44 */ int m44;
-    /* 0x48 */ int m48;
-    /* 0x4C */ int m4C;
-    /* 0x50 */ int m50;
-};
-static WirelessState sWireless;
+// The state of the wireless exchange: separate statics, which the compiler pools by size (a u8, the u16s, the
+// ints, then sParentTimers and sReceivedName). Named by address until the code shows what each is.
+static u8 data_ov109_021531e0;
+static u16 data_ov109_021531ee;
+static u16 data_ov109_021531fe;
+static u16 data_ov109_021531ea;
+static u16 data_ov109_02153204;
+static u16 data_ov109_02153200; // The 2-byte answer sent to the partner (Send)
+static u16 data_ov109_021531ec;
+static u16 data_ov109_021531e4;
+static u16 data_ov109_02153202;
+static u16 data_ov109_021531fc;
+static u16 data_ov109_02153206;
+static u16 data_ov109_021531f2;
+static u16 data_ov109_02153208;
+static u16 data_ov109_021531f8;
+static u16 data_ov109_021531fa;
+static u16 data_ov109_021531e6;
+static u16 data_ov109_021531f6;
+static u16 data_ov109_021531e8;
+static u16 data_ov109_021531f0;
+static u16 data_ov109_021531e2;
+static u16 data_ov109_021531f4;
+static int data_ov109_0215322c;
+static int data_ov109_02153230;
+static int data_ov109_02153224;
+static int data_ov109_0215320c;
+static int data_ov109_0215321c;
+static int data_ov109_02153220;
+static int data_ov109_02153214;
+static int data_ov109_02153218;
+static int data_ov109_02153228;
+static int data_ov109_02153210;
 static int sParentTimers[3]; // Frames for which each found partner is still shown (600 when it is new)
 static wchar_t sReceivedName[21];
 static u8 sSongs[6][0x40]; // The songs sent with a character
@@ -360,10 +366,10 @@ void TushinScene::InitCharacters() {
     VEC_Set(&mCamera->mPosition, sCameraPosition.x, sCameraPosition.y, sCameraPosition.z);
     VEC_Set(&mCamera->mTarget, sCameraTarget.x, sCameraTarget.y, sCameraTarget.z);
     func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(&data_021227cc[1]);
+    func_0202a96c(data_021227d8);
     func_0202ab2c(&data_021227cc[0], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, 0x3E8 - 0x640,
                   -0xFA0);
-    func_0202ab2c(&data_021227cc[1], mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
+    func_0202ab2c(data_021227d8, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
     LoadCharacters();
 }
 
@@ -450,17 +456,17 @@ void TushinScene::Init() {
     mSprite.SetPosition(FxVec2(sSignalPosition.x << FX32_SHIFT, sSignalPosition.y << FX32_SHIFT));
     mSprite.mVisible = FALSE;
 
-    sWireless.m22 = 0;
-    sWireless.m24 = 0;
-    sWireless.m26 = 0;
-    sWireless.m04 = 0;
-    sWireless.m44 = 0;
-    sWireless.m00 = 0;
-    sWireless.m02 = 0;
-    sWireless.m28 = 0;
-    sWireless.m40 = 0;
-    sWireless.m48 = 0;
-    sWireless.m34 = 0;
+    data_ov109_02153202 = 0;
+    data_ov109_02153204 = 0;
+    data_ov109_02153206 = 0;
+    data_ov109_021531e4 = 0;
+    data_ov109_02153224 = 0;
+    data_ov109_021531e0 = 0;
+    data_ov109_021531e2 = 0;
+    data_ov109_02153208 = 0;
+    data_ov109_02153220 = 0;
+    data_ov109_02153228 = 0;
+    data_ov109_02153214 = 0;
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
     func_0203b7d4(data_0213b700, sParents, 3);
     func_0203b7e0(data_0213b700, sParentTimers);
@@ -480,7 +486,7 @@ void TushinScene::Init() {
     mUnknown3F098 = 0;
     mUnknown3F0AC = 0;
     mUnknown3F0B0 = 0;
-    sWireless.m50 = 0;
+    data_ov109_02153230 = 0;
     func_0207777c(&data_0212349c, sMiiData, 100);
     func_02077720(func_ov109_02151fcc);
     func_02077710(func_ov109_021523a4);
@@ -493,12 +499,12 @@ void TushinScene::Init() {
 // @0x0214b3d8
 void TushinScene::ResetExchange() {
     mUnknown3F08C = 0;
-    sWireless.m22 = 0;
-    sWireless.m24 = 0;
-    sWireless.m26 = 0;
-    sWireless.m04 = 0;
-    sWireless.m02 = 0;
-    sWireless.m28 = 0;
+    data_ov109_02153202 = 0;
+    data_ov109_02153204 = 0;
+    data_ov109_02153206 = 0;
+    data_ov109_021531e4 = 0;
+    data_ov109_021531e2 = 0;
+    data_ov109_02153208 = 0;
     UpdateMiiData();
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
     ClearParentNames();
@@ -587,10 +593,10 @@ void TushinScene::ReloadCharacterFromReceived(int i) {
 #pragma optimization_level 2
 // @0x0214c84c
 void TushinScene::SendSongs() {
-    if (sWireless.m24 != 0) {
+    if (data_ov109_02153204 != 0) {
         return;
     }
-    sWireless.m24 = 1;
+    data_ov109_02153204 = 1;
     int offset = mResidents.mSelected * sizeof(SavedCharacter);
     u8 *residents = (u8 *)mResidents.mResidents;
     int n = 0;
@@ -602,7 +608,7 @@ void TushinScene::SendSongs() {
         }
     }
     WH_SendData(sSongs, 0x80, func_ov109_02151eb4);
-    sWireless.m3C = 0;
+    data_ov109_0215321c = 0;
 }
 #pragma optimization_level reset
 
@@ -614,22 +620,22 @@ void TushinScene::Send(int kind) {
     }
     int state = WH_GetSystemState();
     if (!(state != 0 && state != 9 && state != 10)) {
-        sWireless.m22 = 0;
-        sWireless.m24 = 0;
-        sWireless.m3C = 0;
+        data_ov109_02153202 = 0;
+        data_ov109_02153204 = 0;
+        data_ov109_0215321c = 0;
         return;
     }
-    sWireless.m20 = kind;
+    data_ov109_02153200 = kind;
     switch (kind) {
     case 0:
-        if (sWireless.m22 != 0) {
+        if (data_ov109_02153202 != 0) {
             return;
         }
-        sWireless.m22 = 1;
+        data_ov109_02153202 = 1;
         func_020979e0(&sTransfer);
         (CharacterRecord &)sTransfer = mResidents.mResidents[mResidents.mSelected];
         WH_SendData(&sTransfer, 0x80, func_ov109_02151eb4);
-        sWireless.m3C = 0;
+        data_ov109_0215321c = 0;
         return;
     case 1:
         SendSongs();
@@ -644,7 +650,7 @@ void TushinScene::Send(int kind) {
     case 9:
     case 10:
     default:
-        WH_SendData(&sWireless.m20, 2, func_ov109_02151eb4);
+        WH_SendData(&data_ov109_02153200, 2, func_ov109_02151eb4);
         return;
     }
 }
@@ -652,23 +658,23 @@ void TushinScene::Send(int kind) {
 #pragma optimization_level 2
 // @0x0214ce60
 void TushinScene::UpdateSending() {
-    if (sWireless.m3C != 1) {
+    if (data_ov109_0215321c != 1) {
         return;
     }
     int state = WH_GetSystemState();
     if (!(state != 0 && state != 9 && state != 10)) {
-        sWireless.m22 = 0;
-        sWireless.m24 = 0;
-        sWireless.m3C = 0;
+        data_ov109_02153202 = 0;
+        data_ov109_02153204 = 0;
+        data_ov109_0215321c = 0;
         mNextPage = 0x22;
         return;
     }
-    if (sWireless.m24 != 0) {
-        if (sWireless.m24 >= 3) {
+    if (data_ov109_02153204 != 0) {
+        if (data_ov109_02153204 >= 3) {
             int result = func_02073520(GetSelectedResident());
-            switch (sWireless.m02) {
+            switch (data_ov109_021531e2) {
             case 5:
-                sWireless.m24 = 0;
+                data_ov109_02153204 = 0;
                 if (func_02073520(GetSelectedResident())) {
                     func_020a0664(&mResidents);
                 }
@@ -676,11 +682,11 @@ void TushinScene::UpdateSending() {
             case 6:
             case 9:
             case 10:
-                sWireless.m24 = 0;
+                data_ov109_02153204 = 0;
                 break;
             case 7:
             case 8: {
-                sWireless.m24 = 0;
+                data_ov109_02153204 = 0;
                 func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                 SetOtherStandAnimation();
                 break;
@@ -692,18 +698,18 @@ void TushinScene::UpdateSending() {
                 SetUnknown3F098();
             }
         } else {
-            WH_SendData((u8 *)sSongs + sWireless.m24 * 0x80, 0x80, func_ov109_02151eb4);
-            sWireless.m24++;
-            sWireless.m3C = 0;
+            WH_SendData((u8 *)sSongs + data_ov109_02153204 * 0x80, 0x80, func_ov109_02151eb4);
+            data_ov109_02153204++;
+            data_ov109_0215321c = 0;
         }
-    } else if (sWireless.m22 != 0) {
-        if (sWireless.m22 >= 6) {
-            sWireless.m22 = 0;
+    } else if (data_ov109_02153202 != 0) {
+        if (data_ov109_02153202 >= 6) {
+            data_ov109_02153202 = 0;
             Send(1);
         } else {
-            WH_SendData((u8 *)&sTransfer + sWireless.m22 * 0x80, 0x80, func_ov109_02151eb4);
-            sWireless.m22++;
-            sWireless.m3C = 0;
+            WH_SendData((u8 *)&sTransfer + data_ov109_02153202 * 0x80, 0x80, func_ov109_02151eb4);
+            data_ov109_02153202++;
+            data_ov109_0215321c = 0;
         }
     }
 }
@@ -711,7 +717,7 @@ void TushinScene::UpdateSending() {
 #pragma optimization_level reset
 // @0x0214d064
 void TushinScene::SendFoundIndex() {
-    sWireless.m48 = 0;
+    data_ov109_02153228 = 0;
     u16 index = FindResident(GetSelectedResident());
     if (index == -1) {
         return;
@@ -774,19 +780,19 @@ int TushinScene::ReceiveCharacter() {
     if (HasNgSongReceived() == TRUE) {
         return 7;
     }
-    sWireless.m44 = FindResident(&sTransfer);
-    if (sWireless.m44 != -1) {
+    data_ov109_02153224 = FindResident(&sTransfer);
+    if (data_ov109_02153224 != -1) {
         if (func_02073520(&sTransfer)) {
             return 5;
         }
         if (func_02098584(&sTransfer)) {
             return 3;
         }
-        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, sWireless.m44)) {
+        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, data_ov109_02153224)) {
             return 6;
         }
         CharacterRecord record;
-        func_0202c264(&gGameData, sWireless.m44, &record);
+        func_0202c264(&gGameData, data_ov109_02153224, &record);
         record.mMii = sTransfer.mMii;
         if (sTransfer.mUnknown050Bit0 == 0) {
             if (record.mUnknown050Bit0 == 1) {
@@ -848,19 +854,19 @@ int TushinScene::ReceiveCharacter() {
                 }
                 n++;
                 record.mSongSlots[i] = func_0209c718(&sTransfer, i);
-                func_0202c28c(&gGameData, sWireless.m44, &record);
+                func_0202c28c(&gGameData, data_ov109_02153224, &record);
             }
         }
-        func_0202c28c(&gGameData, sWireless.m44, &record);
+        func_0202c28c(&gGameData, data_ov109_02153224, &record);
         return 4;
     }
 
-    sWireless.m26++;
-    sWireless.m44 = -1;
+    data_ov109_02153206++;
+    data_ov109_02153224 = -1;
     int i = 0;
     do {
         if (!func_0202c354(&gGameData, i)) {
-            sWireless.m44 = i;
+            data_ov109_02153224 = i;
             func_02097cc0(&sTransfer);
             int n = 0;
             for (int j = 0; j < 6; j++) {
@@ -931,7 +937,7 @@ void TushinScene::UpdateListButtons() {
         func_02034720(&mWindow, 0x12, 1);
         break;
     case -1:
-        if (sWireless.m26 == 0) {
+        if (data_ov109_02153206 == 0) {
             break;
         }
         if (GetMode() == 1) {
@@ -942,7 +948,7 @@ void TushinScene::UpdateListButtons() {
             func_020a3634(&mList);
             func_02031228(&mButtons[0]);
         }
-        sWireless.m30 = 0;
+        data_ov109_02153210 = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
         func_02034f38(&mWindow, 0, sPageMessages[mPage]);
@@ -964,14 +970,14 @@ void TushinScene::UpdateListButtons() {
 void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
     if (mListWindow.mTransitionDone) {
-        if (sWireless.m26 != 0 || mUnknown24 == 1) {
+        if (data_ov109_02153206 != 0 || mUnknown24 == 1) {
             if (GetMode() == 1) {
                 mPage = 9;
             } else {
                 mPage = NextPageAfterReceive();
             }
             mUnknown24 = 0;
-            sWireless.m30 = 0;
+            data_ov109_02153210 = 0;
             if (mPage == 9) {
                 return;
             }
@@ -998,7 +1004,7 @@ void TushinScene::UpdateListWindow() {
             return;
         }
     }
-    if (((mListWindow.mUnknownAD50 & 1) && sWireless.m26 != 0) || mUnknown24 == 1 || mUnknown28 == 1) {
+    if (((mListWindow.mUnknownAD50 & 1) && data_ov109_02153206 != 0) || mUnknown24 == 1 || mUnknown28 == 1) {
         mListWindow.mUnknownSetBeforeClose = 15;
         func_020349cc(&mListWindow, 0x24);
         for (int i = 0; i < 7; i++) {
@@ -1120,8 +1126,8 @@ void TushinScene::UpdateWiiConnection() {
     }
     switch (state) {
     case 1:
-        sWireless.m4C = func_0207808c();
-        for (int i = 0; i < sWireless.m4C; i = (u16)(i + 1)) {
+        data_ov109_0215322c = func_0207808c();
+        for (int i = 0; i < data_ov109_0215322c; i = (u16)(i + 1)) {
             if (!func_0207800c(i)) {
                 continue;
             }
@@ -1190,15 +1196,18 @@ void TushinScene::UpdateWiiConnection() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the original reads mVisible of character 2's model off the model's
-// address and hoists only &mCharacters[0] and &mCharacters[0].mModel out of the loop; here more addresses are
-// hoisted and the registers differ (four bytes fewer).
+#pragma opt_common_subs off
+// NOT MATCHING (optimization level 2, without common subexpressions): one block, the call that finds the current
+// animation, where the original computes the animation id (r2, through r0) before the model's address (r0); here
+// the address comes first and the id goes through r1. Without opt_common_subs the original's hoisting (only
+// &mCharacters[0] and its model) and its registers come out.
+static inline CharacterModel *GetModelOf(CharacterModel *model) { return model; }
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
     int i;
     for (i = 0; i < 3; i++) {
-        if (i == 2 && mCharacters[i].mModel.IsVisible() == TRUE) {
+        if (i == 2 && GetModelOf(&mCharacters[i].mModel)->IsVisible() == TRUE) {
             int animation = mCharacters[i].mModel.mAnimId;
             if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
                 switch (mPage) {
@@ -1279,7 +1288,7 @@ void TushinScene::UpdateCharacters() {
     if (sent != TRUE) {
         return;
     }
-    if (FindResident(&sTransfer) != FindResident(&mResidents.mResidents[mResidents.mSelected])) {
+    if (FindResident(&sTransfer) != FindResident(GetSelectedResident())) {
         return;
     }
     BOOL show = FALSE;
@@ -1295,6 +1304,7 @@ void TushinScene::UpdateCharacters() {
     ShowNextCharacter();
     StartEmitter(1);
 }
+#pragma opt_common_subs reset
 #pragma optimization_level reset
 
 // @0x0214ef08
@@ -1408,10 +1418,10 @@ void TushinScene::ShowReceived() {
         if (mode != 2) {
             return;
         }
-        if (sWireless.m44 == -1) {
+        if (data_ov109_02153224 == -1) {
             return;
         }
-        LoadSavedCharacter(2, sWireless.m44);
+        LoadSavedCharacter(2, data_ov109_02153224);
     } else {
         ReloadCharacterFromReceived(2);
     }
@@ -1521,10 +1531,10 @@ void TushinScene::Leave() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the parent timers are read through their own symbol instead of the .bss
-// pool's base (the .bss is not in the ROM's order yet); in two of the four calls of func_020a123c with the sort
-// key (pages 13 and 14/15) the original loads the key's offset before the list's address (registers swapped);
-// and `moveq r6, #67` is scheduled after `mov r5, #1` in the original.
+// NOT MATCHING (optimization level 2): register order only. In the four calls of func_020a123c with the sort key the
+// original loads the key's offset into r0 and forms the list's address through r2 (ours: r1, r0), and in the two
+// SetStringArg calls with a parent's name the parent index and the names' base swap r2/r3 in the mla. The same
+// call alone in a test file comes out as in the original: the surrounding code decides it, not the call's form.
 static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 // @0x0214f7ec
 void TushinScene::Update() {
@@ -1556,16 +1566,16 @@ void TushinScene::Update() {
     }
 
     int layout = sPageLayouts[mPage];
-    if (sWireless.m28 != 0 && sWireless.m02 == 0) {
-        sWireless.m02 = sWireless.m28;
-        sWireless.m28 = 0;
+    if (data_ov109_02153208 != 0 && data_ov109_021531e2 == 0) {
+        data_ov109_021531e2 = data_ov109_02153208;
+        data_ov109_02153208 = 0;
     }
-    if (sWireless.m02 != 0) {
-        switch (sWireless.m02) {
+    if (data_ov109_021531e2 != 0) {
+        switch (data_ov109_021531e2) {
         case 2:
         case 3:
             mUnknown3F08C = 2;
-            sWireless.m02 = 0;
+            data_ov109_021531e2 = 0;
             if (mPage == 10) {
                 mUnknown24 = 1;
             } else {
@@ -1573,7 +1583,7 @@ void TushinScene::Update() {
             }
             break;
         case 4:
-            sWireless.m02 = 0;
+            data_ov109_021531e2 = 0;
             mUnknown3F088 = 1;
             break;
         case 5:
@@ -1596,7 +1606,7 @@ void TushinScene::Update() {
         func_02031228(&mButtons[0]);
         mUnknown3F08C = 0;
         Send(4);
-        sWireless.m30 = 0;
+        data_ov109_02153210 = 0;
         SetUpWindow(mPage);
         mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
         func_02034f38(&mWindow, 0, sPageMessages[mPage]);
@@ -1607,7 +1617,7 @@ void TushinScene::Update() {
     int next = 0x22;
     switch (GetMode()) {
     case 1:
-        if (sWireless.m00 == 0) {
+        if (data_ov109_021531e0 == 0) {
             if (WH_GetSystemState() != 9 && WH_GetSystemState() != 10) {
                 break;
             }
@@ -1623,7 +1633,7 @@ void TushinScene::Update() {
             WH_Finalize();
             func_0203b8b4(data_0213b700, 1);
         }
-        sWireless.m00 = 0;
+        data_ov109_021531e0 = 0;
         lost = TRUE;
         next = 0x22;
         break;
@@ -1647,8 +1657,8 @@ void TushinScene::Update() {
                 mUnknown28 = 1;
                 break;
             }
-            next = mPage != 0x28 ? 0x40 : 0x43;
             lost = TRUE;
+            next = mPage != 0x28 ? 0x40 : 0x43;
             break;
         }
         if (mUnknown28 == 1) {
@@ -1709,8 +1719,8 @@ void TushinScene::Update() {
                     mNextPage = 0x26;
                     WH_Finalize();
                     func_0203b8b4(data_0213b700, 1);
-                    sWireless.m4C = 0;
-                    sWireless.m2C = 0;
+                    data_ov109_0215322c = 0;
+                    data_ov109_0215320c = 0;
                     break;
                 case 3:
                     mNextPage = 0;
@@ -1856,7 +1866,7 @@ void TushinScene::Update() {
                 break;
             case 44:
                 if (result == 0) {
-                    if (sWireless.m26 != 0) {
+                    if (data_ov109_02153206 != 0) {
                         break;
                     }
                     if (func_02073520(GetSelectedResident()) == TRUE) {
@@ -1956,13 +1966,13 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (sWireless.m22 != 0 || sWireless.m24 != 0) {
+                if (data_ov109_02153202 != 0 || data_ov109_02153204 != 0) {
                     break;
                 }
                 if (GetModel(&mCharacters[2])->IsVisible()) {
                     break;
                 }
-                switch (sWireless.m02) {
+                switch (data_ov109_021531e2) {
                 case 5:
                     mNextPage = 0x11;
                     break;
@@ -1988,7 +1998,7 @@ void TushinScene::Update() {
                     mUnknown18 = mNextPage;
                     mNextPage = 0x10;
                 }
-                sWireless.m02 = 0;
+                data_ov109_021531e2 = 0;
                 CloseWindow();
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
@@ -1998,19 +2008,19 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (sWireless.m26 <= 5 || sWireless.m04 <= 2) {
+                if (data_ov109_02153206 <= 5 || data_ov109_021531e4 <= 2) {
                     break;
                 }
                 BOOL done = FALSE;
-                if (sWireless.m30 == 1) {
-                    sWireless.m30 = 0;
+                if (data_ov109_02153210 == 1) {
+                    data_ov109_02153210 = 0;
                     mUnknown3F0A8 = ReceiveCharacter();
                     func_020a05dc(&mResidents);
                     func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                     mNextPage = 0x17;
                     if (mUnknown3F0A8 != 0) {
-                        sWireless.m26 = 0;
-                        sWireless.m04 = 0;
+                        data_ov109_02153206 = 0;
+                        data_ov109_021531e4 = 0;
                         switch (mUnknown3F0A8) {
                         case 3:
                             mNextPage = 0x18;
@@ -2068,8 +2078,8 @@ void TushinScene::Update() {
                         break;
                     }
                 }
-                sWireless.m26 = 0;
-                sWireless.m04 = 0;
+                data_ov109_02153206 = 0;
+                data_ov109_021531e4 = 0;
                 CloseWindow();
                 break;
             }
@@ -2086,8 +2096,8 @@ void TushinScene::Update() {
                 if (func_0202cd38(&gGameData)) {
                     break;
                 }
-                sWireless.m26 = 0;
-                sWireless.m04 = 0;
+                data_ov109_02153206 = 0;
+                data_ov109_021531e4 = 0;
                 mNextPage = mUnknown18;
                 CloseWindow();
                 break;
@@ -2128,7 +2138,7 @@ void TushinScene::Update() {
             case 44:
             case 45:
             case 65:
-                if (sWireless.m26 == 0) {
+                if (data_ov109_02153206 == 0) {
                     break;
                 }
                 if (!IsWindowOpen(&mWindow) || mNextPage == 0x2E || mNextPage == 0x2F) {
@@ -2144,15 +2154,15 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow)) {
                     break;
                 }
-                if (sWireless.m40 != 1) {
+                if (data_ov109_02153220 != 1) {
                     break;
                 }
-                if (sWireless.m48 == 0) {
+                if (data_ov109_02153228 == 0) {
                     break;
                 }
                 int sent = func_02073520(GetSelectedResident());
                 mNextPage = 0x31;
-                switch (sWireless.m48) {
+                switch (data_ov109_02153228) {
                 case 1:
                     if (sent) {
                         func_020a0664(&mResidents);
@@ -2161,19 +2171,19 @@ void TushinScene::Update() {
                 case 2:
                     mNextPage = 0x32;
                     CloseWindow();
-                    sWireless.m40 = 0;
+                    data_ov109_02153220 = 0;
                     func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
                     mNextPage = 0x33;
                     CloseWindow();
-                    sWireless.m40 = 0;
+                    data_ov109_02153220 = 0;
                     return;
                 case -4:
                     mNextPage = 0x34;
                     CloseWindow();
-                    sWireless.m40 = 0;
+                    data_ov109_02153220 = 0;
                     func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
                     SetOtherStandAnimation();
                     break;
@@ -2184,7 +2194,7 @@ void TushinScene::Update() {
                     mNextPage = 0x30;
                 }
                 CloseWindow();
-                sWireless.m48 = 0;
+                data_ov109_02153228 = 0;
                 break;
             }
             case 48:
@@ -2202,15 +2212,15 @@ void TushinScene::Update() {
                 }
                 mNextPage = mUnknown18;
                 CloseWindow();
-                sWireless.m40 = 0;
+                data_ov109_02153220 = 0;
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
-                if (!IsWindowOpen(&mWindow) || sWireless.m26 == 0) {
+                if (!IsWindowOpen(&mWindow) || data_ov109_02153206 == 0) {
                     break;
                 }
-                sWireless.m26 = 0;
+                data_ov109_02153206 = 0;
                 func_020a05dc(&mResidents);
                 func_020a123c(&mResidents, mResidents.mUnknown11306, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
@@ -2259,10 +2269,10 @@ void TushinScene::Update() {
                 case 13:
                     if (mUnknown3F08C != 0) {
                         if (mUnknown3F090 == 0) {
-                            mNextPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+                            if (mUnknown3F08C == 2) { mNextPage = 0xE; } else { mNextPage = 0xF; }
                             mUnknown3F08C = 0;
                             Send(4);
-                            sWireless.m30 = 0;
+                            data_ov109_02153210 = 0;
                             break;
                         }
                         mUnknown3F08C = 0;
@@ -2280,7 +2290,7 @@ void TushinScene::Update() {
                     break;
                 case 14:
                 case 15:
-                    sWireless.m30 = 0;
+                    data_ov109_02153210 = 0;
                     mUnknown24 = 0;
                     if (mPage != 0xB && mPage != 0xC && mPage != 0x23) {
                         break;
@@ -2304,15 +2314,15 @@ void TushinScene::Update() {
                 case 49:
                     PlaySound(0xB);
                     break;
-                case 18: case 19: case 20: case 21: case 25: case 26: case 27: case 29: case 31:
-                    PlaySound(0xC);
+                case 23:
+                    mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
+                    PlaySound(0xB);
                     break;
                 case 22: case 24: case 28: case 30: case 33:
                     PlaySound(0xD);
                     break;
-                case 23:
-                    mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-                    PlaySound(0xB);
+                case 18: case 19: case 20: case 21: case 25: case 26: case 27: case 29: case 31:
+                    PlaySound(0xC);
                     break;
                 case 32:
                 case 61:
@@ -2340,7 +2350,7 @@ void TushinScene::Update() {
                     break;
                 case 46:
                 case 47:
-                    sWireless.m40 = 0;
+                    data_ov109_02153220 = 0;
                     break;
                 case 53:
                     PlaySound(0xB);
@@ -2680,48 +2690,48 @@ extern "C" void func_ov109_02151eb4(BOOL result) {
     case 10:
         return;
     }
-    sWireless.m3C = 1;
+    data_ov109_0215321c = 1;
 }
 
 // @0x02151ee0
 extern "C" void func_ov109_02151ee0(u16 aid, u16 *data, u16 size) {
     switch (size) {
     case 0:
-        sWireless.m00 = 1;
+        data_ov109_021531e0 = 1;
         return;
     case 2:
-        if (sWireless.m02 == 0) {
-            sWireless.m02 = *data;
+        if (data_ov109_021531e2 == 0) {
+            data_ov109_021531e2 = *data;
         } else {
-            sWireless.m28 = *data;
+            data_ov109_02153208 = *data;
         }
         return;
     }
-    if (sWireless.m26 == 0) {
+    if (data_ov109_02153206 == 0) {
         func_020979e0(&sTransfer);
     }
-    if (sWireless.m26 >= 6) {
-        MI_CpuCopy8(data, (u8 *)sSongs + sWireless.m04 * 0x80, 0x80);
-        if (sWireless.m04 < 2) {
-            sWireless.m04++;
+    if (data_ov109_02153206 >= 6) {
+        MI_CpuCopy8(data, (u8 *)sSongs + data_ov109_021531e4 * 0x80, 0x80);
+        if (data_ov109_021531e4 < 2) {
+            data_ov109_021531e4++;
         } else {
-            sWireless.m04++;
-            sWireless.m30 = 1;
+            data_ov109_021531e4++;
+            data_ov109_02153210 = 1;
         }
     } else {
-        MI_CpuCopy8(data, (u8 *)&sTransfer + sWireless.m26 * 0x80, 0x80);
-        if (sWireless.m26 < 5) {
-            ++sWireless.m26;
+        MI_CpuCopy8(data, (u8 *)&sTransfer + data_ov109_02153206 * 0x80, 0x80);
+        if (data_ov109_02153206 < 5) {
+            ++data_ov109_02153206;
         } else {
-            sWireless.m26++;
+            data_ov109_02153206++;
         }
     }
 }
 
 // @0x02151fcc
 extern "C" void func_ov109_02151fcc(int a, int b) {
-    sWireless.m48 = a;
-    sWireless.m40 = 1;
+    data_ov109_02153228 = a;
+    data_ov109_02153220 = 1;
 }
 
 // @0x02151fe4
@@ -2738,14 +2748,16 @@ int TushinScene::NextPageAfterReceive() {
     return page;
 }
 
-// NOT MATCHING: the original derives the -1 for sWireless.m44 from a register holding 0 (mov r2, #0; sub r1, r2,
-// #1), and sets that 0 earlier (five instructions).
+// NOT MATCHING: the original derives the -1 for data_ov109_02153224 from a register holding 0 (mov r2, #0; sub r1, r2,
+// #1), and sets that 0 earlier (five instructions). mwcc derives a constant so when a register already holds a nearby
+// one (storing 0 first does it, but then the stores come out in the other order); a variable equal to 0 that is not
+// propagated would do it too (ItemTradeList::Receive), but none fits here.
 // @0x02152014
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;
-    sWireless.m44 = -1;
-    int result = sWireless.m34;
-    sWireless.m34 = 0;
+    data_ov109_02153224 = -1;
+    int result = data_ov109_02153214;
+    data_ov109_02153214 = 0;
     switch (result) {
     case -5:
         PlayResultSound(0xD);
@@ -2758,23 +2770,23 @@ int TushinScene::ReceiveWiiMii() {
         PlayResultSound(0xD);
         return 0x3E;
     }
-    MI_CpuCopy8(&sMiiData[sWireless.m38], &sTransfer, sizeof(MiiData));
-    if (IsInvalid((CharacterRecord *)&sMiiData[sWireless.m38])) {
+    MI_CpuCopy8(&sMiiData[data_ov109_02153218], &sTransfer, sizeof(MiiData));
+    if (IsInvalid((CharacterRecord *)&sMiiData[data_ov109_02153218])) {
         UpdateMiiData();
         PlayResultSound(0xD);
         return 0x3C;
     }
     func_020979e0(&character);
-    MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
+    MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
     if (HasNgWord(&character) == TRUE) {
         UpdateMiiData();
         PlayResultSound(0xD);
         return 0x3F;
     }
-    sWireless.m44 = FindResident((CharacterRecord *)&sMiiData[sWireless.m38]);
-    if (sWireless.m44 != -1) {
+    data_ov109_02153224 = FindResident((CharacterRecord *)&sMiiData[data_ov109_02153218]);
+    if (data_ov109_02153224 != -1) {
         func_020979e0(&character);
-        func_0202c264(&gGameData, sWireless.m44, &character);
+        func_0202c264(&gGameData, data_ov109_02153224, &character);
         if (func_02073520(&character)) {
             PlayResultSound(0xD);
             return 0x38;
@@ -2783,12 +2795,12 @@ int TushinScene::ReceiveWiiMii() {
             PlayResultSound(0xD);
             return 0x36;
         }
-        MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
-        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, sWireless.m44)) {
+        MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
+        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, data_ov109_02153224)) {
             PlayResultSound(0xC);
             return 0x39;
         }
-        func_0202c28c(&gGameData, sWireless.m44, &character);
+        func_0202c28c(&gGameData, data_ov109_02153224, &character);
         MiiData_GetName(&character, sReceivedName);
         UpdateMiiData();
         PlayResultSound(0xC);
@@ -2796,9 +2808,9 @@ int TushinScene::ReceiveWiiMii() {
     }
     for (int i = 0; i < 100; i++) {
         if (!func_0202c354(&gGameData, i)) {
-            sWireless.m44 = i;
+            data_ov109_02153224 = i;
             func_020979e0(&character);
-            MI_CpuCopy8(&sMiiData[sWireless.m38], &character, sizeof(MiiData));
+            MI_CpuCopy8(&sMiiData[data_ov109_02153218], &character, sizeof(MiiData));
             func_02097c64(&character);
             func_0202c28c(&gGameData, i, &character);
             MiiData_GetName(&character, sReceivedName);
@@ -2814,29 +2826,29 @@ int TushinScene::ReceiveWiiMii() {
 
 // @0x021523a4
 extern "C" void func_ov109_021523a4(int index, int result) {
-    sWireless.m34 = result;
+    data_ov109_02153214 = result;
     switch (result) {
     case 1:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
+        data_ov109_02153218 = (u8)index;
+        data_ov109_02153206++;
         break;
     case 2:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
+        data_ov109_02153218 = (u8)index;
+        data_ov109_02153206++;
         break;
     case 3:
-        sWireless.m38 = (u8)index;
-        sWireless.m26++;
+        data_ov109_02153218 = (u8)index;
+        data_ov109_02153206++;
         break;
     case -5:
     case -4:
-        sWireless.m26++;
+        data_ov109_02153206++;
         break;
     case -2:
-        sWireless.m26++;
+        data_ov109_02153206++;
         break;
     case -3:
-        sWireless.m26++;
+        data_ov109_02153206++;
         break;
     }
 }
@@ -2844,3 +2856,26 @@ extern "C" void func_ov109_021523a4(int index, int result) {
 // @0x0215245c
 extern "C" void func_ov109_0215245c(void *arg) {
 }
+
+// Not in the ROM: the link left it out, as nothing calls it. Something of this file used the 13 u16s at
+// 0x021531E6 to 0x021531FE, or the compiler would have dropped them and the statics after them would sit lower; what
+// it did with them is not known, and this stands in for it.
+extern "C" void TushinScene_UnusedClear() {
+    data_ov109_021531e6 = 0;
+    data_ov109_021531e8 = 0;
+    data_ov109_021531ea = 0;
+    data_ov109_021531ec = 0;
+    data_ov109_021531ee = 0;
+    data_ov109_021531f0 = 0;
+    data_ov109_021531f2 = 0;
+    data_ov109_021531f4 = 0;
+    data_ov109_021531f6 = 0;
+    data_ov109_021531f8 = 0;
+    data_ov109_021531fa = 0;
+    data_ov109_021531fc = 0;
+    data_ov109_021531fe = 0;
+}
+
+// The static initialiser is compiled with the settings in effect at the end of the file: the original's reads the
+// item positions from the .rodata pool instead of folding them, which constant folding turned off gives.
+#pragma opt_foldconstants off

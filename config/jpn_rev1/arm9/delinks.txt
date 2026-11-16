@@ -590,14 +590,16 @@ lib/NitroSystem/libraries/g3d/src/cgtool/xsi.c:
     .text       start:0x0206958c end:0x02069bf4
 
 src/keyboard/KeyboardCore.cpp:
+    complete
     .text       start:0x0208179c end:0x02082eac
     .init       start:0x020b07e0 end:0x020b0810
     .ctor       start:0x020fc4f8 end:0x020fc4fc
     .rodata     start:0x020b7eec end:0x020b7f44
-    .data       start:0x02112220 end:0x0211302c
+    .data       start:0x02112dc4 end:0x0211302c
     .bss        start:0x021486c4 end:0x02148740
 
 src/keyboard/Keyboard.cpp:
+    complete
     .text       start:0x02082eac end:0x02083dc4
     .rodata     start:0x020b7f44 end:0x020b7fc8
     .data       start:0x0211302c end:0x02113134
@@ -628,58 +630,95 @@ lib/SHTTS/shtts_4.c:
     .data       start:0x021133f8 end:0x021135a0
 
 lib/MSL_C/abort_exit_arm.c:
-    .text       start:0x02014aa4 end:0x02014c18
+    complete
+    .text       start:0x02014a80 end:0x02014c18
+    .bss        start:0x0211d0b0 end:0x0211d1c0
 
 lib/MSL_C/math_arm.c:
+    complete
     .text       start:0x02014c18 end:0x02014c30
 
+lib/MSL_C/critical_regions.c:
+    complete
+    .bss        start:0x0211d1c0 end:0x0211d2e0
+
 lib/MSL_C/ansi_files.c:
+    complete
     .text       start:0x02014c30 end:0x02014c98
+    .data       start:0x0210f09c end:0x0210f180
+    .bss        start:0x0211d2e0 end:0x0211d5e0
+
+lib/MSL_C/arith.c:
+    complete
+    .text       start:0x02014c98 end:0x02014ca4
 
 lib/MSL_C/buffer_io.c:
+    complete
     .text       start:0x02014ca4 end:0x02014df0
 
 lib/MSL_C/char_io.c:
+    complete
     .text       start:0x02014df0 end:0x020150e0
 
 lib/MSL_C/file_io.c:
+    complete
     .text       start:0x020150e0 end:0x020151c8
 
 lib/MSL_C/mbstring.c:
+    complete
     .text       start:0x020151c8 end:0x0201534c
 
 lib/MSL_C/mem.c:
+    complete
     .text       start:0x0201534c end:0x020153ec
 
 lib/MSL_C/mem_funcs.c:
+    complete
     .text       start:0x020153ec end:0x0201549c
 
 lib/MSL_C/printf.c:
-    .text       start:0x0201549c end:0x020175a8
+    complete
+    .text       start:0x0201549c end:0x020175d0
+    .data       start:0x0210f3ac end:0x0210f3ec
 
 lib/MSL_C/scanf.c:
-    .text       start:0x020175d0 end:0x020188f4
+    complete
+    .text       start:0x020175d0 end:0x0201891c
+    .rodata     start:0x020b56dc end:0x020b5704
+
+lib/MSL_C/errno.c:
+    complete
+    .bss        start:0x0211d5e0 end:0x0211d5e4
 
 lib/MSL_C/signal.c:
+    complete
     .text       start:0x0201891c end:0x02018a4c
+    .bss        start:0x0211d5e4 end:0x0211d600
 
 lib/MSL_C/string.c:
+    complete
     .text       start:0x02018a4c end:0x02018d84
 
 lib/MSL_C/strtold.c:
     .text       start:0x02018d84 end:0x02019fd0
+    .rodata     start:0x020b5704 end:0x020b5714
 
 lib/MSL_C/strtoul.c:
-    .text       start:0x02019fd0 end:0x0201a8ec
+    complete
+    .text       start:0x02019fd0 end:0x0201a900
 
 lib/MSL_C/wchar_io.c:
+    complete
     .text       start:0x0201a900 end:0x0201a980
 
 lib/MSL_C/wmem.c:
+    complete
     .text       start:0x0201a980 end:0x0201a9b8
 
 lib/MSL_C/wprintf.c:
+    complete
     .text       start:0x0201a9b8 end:0x0201c950
+    .data       start:0x0210f3ec end:0x0210f450
 
 lib/MSL_C/wstring.c:
     complete
@@ -690,21 +729,35 @@ lib/MSL_C/e_pow.c:
     .rodata     start:0x020b5914 end:0x020b5944
 
 lib/MSL_C/s_copysign.c:
+    complete
     .text       start:0x0201dc4c end:0x0201dc74
 
 lib/MSL_C/s_fabs.c:
+    complete
     .text       start:0x0201dc74 end:0x0201dc94
 
 lib/MSL_C/s_frexp.c:
+    complete
     .text       start:0x0201dc94 end:0x0201dd50
 
 lib/MSL_C/s_ldexp.c:
+    complete
     .text       start:0x0201dd50 end:0x0201df9c
 
 lib/MSL_C/w_pow.c:
+    complete
     .text       start:0x0201df9c end:0x0201dfa8
 
+lib/MSL_C/ansi_fp.c:
+    .text       start:0x0201dfa8 end:0x0201f3c4
+    .data       start:0x0210f450 end:0x0210f58c
+
+lib/MSL_C/math_api.c:
+    complete
+    .text       start:0x0201f3c4 end:0x0201f4dc
+
 lib/MSL_C/math_sun.c:
+    complete
     .text       start:0x0201f4dc end:0x0201f508
 
 lib/NFL/NFL.c:

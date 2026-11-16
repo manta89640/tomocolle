@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "Character.h"
+#include "keyboard/SoftKeyboard.h"
 #include "MessageWindow.h"
 #include "Scene.h"
 #include "Sprite.h"
@@ -18,7 +19,9 @@
 
 // The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
 struct Camera {
-    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ u8 mUnknown08[0xC];
     /* 0x14 */ VecFx32 mPosition;
     /* 0x20 */ VecFx32 mUnknown20;
     /* 0x2C */ VecFx32 mTarget;
@@ -26,9 +29,28 @@ struct Camera {
 
 // The screens: which planes are shown (data_0211d604).
 struct ScreenControl {
+    void Show(u32 planes) {
+        mPlanes |= planes;
+        mPlanesChanged = TRUE;
+    }
+    void SetUnknown44(int value) {
+        mUnknown44 = value;
+        mUnknown44Changed = TRUE;
+    }
+    void SetUnknown48(int value) {
+        mUnknown48 = value;
+        mUnknown48Changed = TRUE;
+    }
+
     /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0xD0];
+    /* 0x04 */ u8 mUnknown04[0x40];
+    /* 0x44 */ int mUnknown44;
+    /* 0x48 */ int mUnknown48;
+    /* 0x4C */ u8 mUnknown4C[0x88];
     /* 0xD4 */ BOOL mPlanesChanged;
+    /* 0xD8 */ u8 mUnknownD8[0x10];
+    /* 0xE8 */ BOOL mUnknown44Changed;
+    /* 0xEC */ BOOL mUnknown48Changed;
 };
 
 // Graphics resources, loaded by file name into VRAM.
@@ -53,22 +75,6 @@ u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int
 void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-}
-
-// The on-screen keyboard of the main program (func_02082eac constructs it, 0x6014 bytes)
-struct SoftKeyboard {
-    /* 0x0000 */ u8 mUnknown0000[0x5178];
-    /* 0x5178 */ u8 mUnknown5178[2][0x6B8]; // Given to func_02083614 with the point touched
-    /* 0x5EE8 */ u8 mUnknown5EE8[0xA4];
-    /* 0x5F8C */ fx32 mUnknown5F8C;          // Moves 13 pixels (0xD000) with each character typed
-    /* 0x5F90 */ u8 mUnknown5F90[0x68];
-    /* 0x5FF8 */ wchar_t mText[11];          // What is typed (the profile page writes it into the character)
-    /* 0x600E */ u8 mUnknown600E[2];
-    /* 0x6010 */ int mLength;                // and how many characters, up to 10
-};
-
-extern "C" {
-void func_02083bcc(SoftKeyboard *keyboard); // Draws it
 }
 
 // The particle system of the main program (0x0207ab20 to 0x0207b364)
@@ -101,8 +107,30 @@ struct MiiEditSpriteB0 : public Sprite {
 // A sprite with something after it, 0x100 bytes (the face page and the voice page draw arrays of them)
 struct MiiEditSprite100 {
     /* 0x00 */ Sprite mSprite;
-    /* 0xAC */ u8 mUnknownAC[0x54];
+    /* 0xAC */ u8 mUnknownAC[0x10];
+    /* 0xBC */ BOOL mUnknownBC; // The voice page reads the slider's value while it is set (func_020324e0)
+    /* 0xC0 */ u8 mUnknownC0[8];
+    /* 0xC8 */ BOOL mUnknownC8; // The voice page backs the record up while it is set
+    /* 0xCC */ u8 mUnknownCC[0xC];
+    /* 0xD8 */ int mUnknownD8;  // The voice page sets it to 1
+    /* 0xDC */ u8 mUnknownDC[0x18];
+    /* 0xF4 */ int mUnknownF4;  // The voice page sets it to 14
+    /* 0xF8 */ u8 mUnknownF8[8];
 }; // 0x100
+
+// The texts of a character that the voice page speaks: func_0204e4b4 fills them from a record (the main program's)
+struct CharacterSpeechTexts {
+    /* 0x000 */ char mUnknown000[0x52];      // mUnknown068 in Shift JIS
+    /* 0x052 */ wchar_t mUnknown052[11];     // The Mii's name (MiiData_GetName)
+    /* 0x068 */ wchar_t mUnknown068[41];     // The same, through func_020372bc
+    /* 0x0BA */ wchar_t mUnknown0BA[41];     // CharacterRecord::mUnknown06E, through func_020372d0
+    /* 0x10C */ wchar_t mUnknown10C[41];     // CharacterRecord::mName, through func_020372d0
+    /* 0x15E */ char mUnknown15E[0x82];      // mUnknown202 in Shift JIS
+    /* 0x1E0 */ wchar_t mUnknown1E0[17];     // CharacterRecord::mSpeechDefault, or gText_MiNyuuRyoku when empty
+    /* 0x202 */ wchar_t mUnknown202[65];     // mUnknown1E0 through func_020372d0
+    /* 0x284 */ u8 mUnknown284[0xC];
+    /* 0x290 */ BOOL mUnknown290;            // Whether mSpeechDefault was set
+}; // 0x294
 
 class MiiEditPage0 {
 public:
@@ -152,6 +180,7 @@ class MiiEditFacePage {
 public:
     void func_ov076_0214c6d0(MiiEditScene *scene);
     void func_ov076_0214cc34();
+    void func_ov076_0214de94(int part, int a);
     void Draw();
     void Exit();
     void func_ov076_0214ee7c(int selected, int category, int tab);
@@ -163,9 +192,9 @@ public:
     BOOL func_ov076_0214f930(int parameter, int step, BOOL wrap);
     void func_ov076_0214fa14(int mode);
 
-    /* 0x0000 */ u8 mUnknown0000[0x20];
+    /* 0x0000 */ BOOL mUnknown0000[8]; // Set for each part as func_ov076_0214de94 shows it
     /* 0x0020 */ int mCategory; // Which part the parts' buttons show (GetPartType's category)
-    /* 0x0024 */ u8 mUnknown0024[4];
+    /* 0x0024 */ int mUnknown0024;
     /* 0x0028 */ MiiEditScene *mScene;
     /* 0x002C */ SpriteButton mButtons[36];
     /* 0x227C */ SpriteButton mButtons227C[12]; // The parts to choose from
@@ -173,7 +202,7 @@ public:
     /* 0x2DF0 */ int mUnknown2DF0;              // and which parameter it was
     /* 0x2DF4 */ MiiEditSprite100 mSprites2DF4[2];
     /* 0x2FF4 */ Sprite mSprites2FF4[2];
-    /* 0x314C */ u8 mUnknown314C[0x10];
+    /* 0x314C */ int mUnknown314C[4]; // Which page of parts 2, 3, 4 and 6 is shown (mSprite315C, 3208, 32B4, 3360 show it)
     /* 0x315C */ Sprite mSprite315C;
     /* 0x3208 */ Sprite mSprite3208;
     /* 0x32B4 */ Sprite mSprite32B4;
@@ -190,6 +219,13 @@ public:
     void func_ov076_021508ac();
     void Draw();
     void Exit();
+    void SetText(const wchar_t *text);
+    void SetNumberDigits(int value);
+    void SetDayDigits(int day);
+    void SetMonthDigits(int month);
+    void UpdateTexts();
+    void UpdateDayButton();
+    void UpdateKeyboardKey(int state);
     void func_ov076_02151f0c(int state);
 
     /* 0x00000 */ int mState;
@@ -199,6 +235,9 @@ public:
     /* 0x41DE4 */ SpriteButton mButtons[10];
     /* 0x4276C */ Sprite mSprites[2];
     /* 0x428C4 */ SoftKeyboard mKeyboard;
+    /* 0x488BC */ wchar_t mText[11];     // What is typed: SetText shows it a character at a time in mScene->mCharBox
+    /* 0x488D2 */ u8 mUnknown488D2[2];
+    /* 0x488D4 */ int mTextLength;
     /* 0x488D8 */ SpriteButton mButton;
 }; // 0x489CC
 
@@ -207,10 +246,15 @@ class MiiEditVoicePage {
 public:
     void func_ov076_02154690(MiiEditScene *scene);
     void func_ov076_02155094();
+    void SetState(int state);
     void Draw();
     void Exit();
+    void ShowVoiceSettings();
+    void func_ov076_0215707c();
     void func_ov076_02157508(int a);
+    void func_ov076_02157b94();
     void func_ov076_02157bc0();
+    int GetStarSignMessage(int month, int day);
 
     /* 0x0000 */ int mState;
     /* 0x0004 */ int mUnknown0004;
@@ -218,10 +262,13 @@ public:
     /* 0x000C */ SpriteButton mButtons[22];
     /* 0x1504 */ TextButton mTextButtons[3];
     /* 0x29D4 */ Sprite mSprites29D4[2];
-    /* 0x2B2C */ MiiEditSprite100 mSprites2B2C[5];
-    /* 0x302C */ u8 mUnknown302C[0x53C];
+    /* 0x2B2C */ MiiEditSprite100 mSprites2B2C[5]; // The sliders of the five values of CharacterRecord::mVoice
+    /* 0x302C */ CharacterRecord mUnknown302C;      // func_ov076_0215707c copies the character's record in
+    /* 0x32D0 */ int mSpeakStep;                    // Which part of the profile func_ov076_02157508 speaks
+    /* 0x32D4 */ CharacterSpeechTexts mSpeechTexts;
     /* 0x3568 */ MessageText mText;
-    /* 0x3B58 */ u8 mUnknown3B58[0x2A8];
+    /* 0x3B58 */ u8 mUnknown3B58[4];
+    /* 0x3B5C */ CharacterRecord mUnknown3B5C;      // The character's record as Init found it
 }; // 0x3E00
 
 // The page of the character's personality ("Character" graphics)
@@ -232,8 +279,8 @@ public:
     void Draw();
     void Exit();
 
-    /* 0x000 */ u8 mUnknown000[0x4];
-    /* 0x004 */ SpriteButton mButtons[5];
+    /* 0x000 */ MiiEditScene *mScene;
+    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value of CharacterRecord::mUnknown04A[0..4]
     /* 0x4C8 */ Sprite mSprites[5];
     /* 0x824 */
 }; // 0x824
@@ -245,7 +292,9 @@ public:
     void Draw();
     void Exit();
 
-    /* 0x0000 */ u8 mUnknown0000[0xC];
+    /* 0x0000 */ MiiEditScene *mScene;
+    /* 0x0004 */ int mNextPage;     // Where it goes when the window has closed: -1 leaves the scene
+    /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
     /* 0x000C */ MessageWindow mWindow;
 }; // 0xAFB0
 
@@ -256,7 +305,9 @@ public:
     void Draw();
     void Exit();
 
-    /* 0x0000 */ u8 mUnknown0000[0xC];
+    /* 0x0000 */ MiiEditScene *mScene;
+    /* 0x0004 */ int mNextPage;     // Where it goes when the window has closed: -1 leaves the scene
+    /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
     /* 0x000C */ MessageWindow mWindow;
 }; // 0xAFB0
 
