@@ -370,6 +370,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   function's first early return, where passing the parameter loads it after (`double2hex`, `wprintf.c`).
 
 **Stack slots in the wrong order, or a frame too large**
+- A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
+  that builds it, went below the other arrays and gave the original's frame. A union holding a `long double` is
+  8-aligned.
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
@@ -425,6 +428,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A value the inner loop does not change, which the original computes after the inner loop's guard, where ours
   hoists it and tests the guard twice: write the expression again at each use instead of keeping it in a local
   (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `func_02082738`).
+- How the colours are given (measured with MSL's compiler, 2.0/sp2, in C, on test files): per live range, the value
+  defined last first, each taking the lowest register free of its neighbours. Declaration order, number of uses
+  and length of the range change nothing. So to move a value to a lower register, define it later, or define the
+  value that holds that register earlier.
+- Index an array where the original walks it with a pointer, or the reverse: `nan_str[i] == toupper(c)` with the
+  count `i`, instead of `*p` with `p` stepped beside it, put `__strtold`'s NaN state in the original's registers.
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
@@ -481,6 +490,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   and another order (MSL's `double2hex`).
 - A parameter loaded before an early return, though used only after it, is a copy made first (`ld = num;` at the
   top, and `ld` passed on) (`double2hex`).
+- A constant compared from a register (`mov r0,#14; cmp r2,r0`) is a variable assigned the constant elsewhere,
+  here in one state of a loop (`max_digits = 14;` when `__strtold` reads "0x"). A literal, a `const`, a
+  `static const` or an initialised local all give `cmp r2,#14`.
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving

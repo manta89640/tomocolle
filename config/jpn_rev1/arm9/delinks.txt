@@ -635,6 +635,7 @@ lib/MSL_C/abort_exit_arm.c:
     .bss        start:0x0211d0b0 end:0x0211d1c0
 
 lib/MSL_C/math_arm.c:
+    complete
     .text       start:0x02014c18 end:0x02014c30
 
 lib/MSL_C/critical_regions.c:
@@ -700,6 +701,7 @@ lib/MSL_C/string.c:
 
 lib/MSL_C/strtold.c:
     .text       start:0x02018d84 end:0x02019fd0
+    .rodata     start:0x020b5704 end:0x020b5714
 
 lib/MSL_C/strtoul.c:
     complete
@@ -727,21 +729,35 @@ lib/MSL_C/e_pow.c:
     .rodata     start:0x020b5914 end:0x020b5944
 
 lib/MSL_C/s_copysign.c:
+    complete
     .text       start:0x0201dc4c end:0x0201dc74
 
 lib/MSL_C/s_fabs.c:
+    complete
     .text       start:0x0201dc74 end:0x0201dc94
 
 lib/MSL_C/s_frexp.c:
+    complete
     .text       start:0x0201dc94 end:0x0201dd50
 
 lib/MSL_C/s_ldexp.c:
+    complete
     .text       start:0x0201dd50 end:0x0201df9c
 
 lib/MSL_C/w_pow.c:
+    complete
     .text       start:0x0201df9c end:0x0201dfa8
 
+lib/MSL_C/ansi_fp.c:
+    .text       start:0x0201dfa8 end:0x0201f3c4
+    .data       start:0x0210f450 end:0x0210f58c
+
+lib/MSL_C/math_api.c:
+    complete
+    .text       start:0x0201f3c4 end:0x0201f4dc
+
 lib/MSL_C/math_sun.c:
+    complete
     .text       start:0x0201f4dc end:0x0201f508
 
 lib/NFL/NFL.c:
