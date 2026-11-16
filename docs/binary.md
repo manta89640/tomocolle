@@ -226,7 +226,11 @@ The ITCM is `OS_IrqHandler`, `OS_IrqHandler_ThreadSwitch` (`os_irqHandler.c`) an
 variants (`mi_dma.c`), compiled from the fetched files, where they are assembly functions in the ITCM's section. Each
 of the two files is one unit of the main program whose `delinks.txt` entry names an `.itcm` range too: dsd moves that
 range into the file's object ("section migration"). `CHT_IsPictochatParent` (`0x020144E4`, after `MATH_QSort`) is
-from the PictoChat search library, `libcht`, which the SDK ships without sources: it is still in the gap.
+from the PictoChat search library, `libcht`, which the SDK ships compiled, without sources (its header,
+`nitro/cht/ARM9/pictocatch.h`, is in the fetched SDK): `lib/CHT/pictocatch.c` is the project's decompilation of it,
+built with the SDK's compiler and flags, and complete. Measured: it takes a beacon for a PictoChat room's when its
+game group ID is 0 and the first four half-words of its user data, copied out, begin with `0x2348` or `0xBD8A` and
+have 4 as the fourth.
 
 ## Voice synthesis
 

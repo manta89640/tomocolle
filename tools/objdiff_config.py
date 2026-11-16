@@ -58,6 +58,7 @@ LIBRARIES = {
     "NFL": ("nfl", "Mii face library (NFL)"),
     "MiiData": ("miidata", "Mii data"),
     "DSProtect": ("dsprotect", "Anti-piracy (DS Protect)"),
+    "CHT": ("cht", "PictoChat search (CHT)"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
