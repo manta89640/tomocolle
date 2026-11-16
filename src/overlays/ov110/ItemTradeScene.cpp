@@ -1376,7 +1376,7 @@ void ItemTradeScene::StartLoading() {
 
     func_0202c264(&gGameData, 0, &mPlayer);
     mPlayer.mPersonality = mPlayer.GetPersonality();
-    switch (data_020fba28[mPlayer.mPersonality]) {
+    switch (gPersonalityKinds[mPlayer.mPersonality]) {
     case 0:
         ArchiveManager_MountCompressed(&gArchiveManager, "3HA", "Mdl/Ica/ica_mii_mii_touch_cool_LZ.bin", 0);
         break;

@@ -246,7 +246,7 @@ void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
 int MiiData_GetSex(CharacterRecord *character);
-extern const int data_020fba28[];
+extern const int gPersonalityKinds[];
 void func_02029f10(CharacterModel *model, GXRgb color);
 void func_02029f20(CharacterModel *model, GXRgb color);
 void func_02029f30(CharacterModel *model, GXRgb color);
@@ -874,7 +874,7 @@ void MiiEditScene::SaveCharacter() {
         mCharacter.mUnknown050Bit0 = 0;
         mCharacter.AssignFreeRoom();
     }
-    int kind = data_020fba28[((SavedCharacter *)(&mCharacter))->GetPersonality()];
+    int kind = gPersonalityKinds[((SavedCharacter *)(&mCharacter))->GetPersonality()];
     int style = 8;
     switch (kind) {
     case 0:
@@ -1011,7 +1011,7 @@ void MiiEditSexPage::Init(MiiEditScene *scene) {
 extern "C" {
 void func_020341d4(MessageWindow *window);
 void func_020349cc(MessageWindow *window, int flags);
-extern const s16 data_020fbaac[];
+extern const s16 gVoicePresets[];
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_SetName(CharacterRecord *character, const wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
@@ -1036,13 +1036,13 @@ void MiiEditSexPage::Update() {
                 case 0:
                     ((CharacterBase *)(&mScene->mCharacter))->SetDefaultMii(2, 1);
                     for (int i = 0; i < 6; i++) {
-                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, data_020fbaac[i + 12]);
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, gVoicePresets[i + 12]);
                     }
                     break;
                 case 1:
                     ((CharacterBase *)(&mScene->mCharacter))->SetDefaultMii(5, 1);
                     for (int i = 0; i < 6; i++) {
-                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, data_020fbaac[i + 18]);
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, gVoicePresets[i + 18]);
                     }
                     mScene->mUnknown580C = TRUE;
                     break;
@@ -3882,7 +3882,7 @@ struct VoiceParamRange {
 };
 
 extern "C" {
-extern const VoiceParamRange data_020fb940[]; // Of the five values of CharacterRecord::mVoice
+extern const VoiceParamRange gVoiceParams[]; // Of the five values of CharacterRecord::mVoice
 void func_0203217c(MiiEditSprite100 *slider, int x, int a, int b, int left, int top, int width, int height);
 void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressedSequence);
 void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
@@ -3978,7 +3978,7 @@ static inline s16 RandomInRange(int min, int max) {
 }
 
 // The voice presets: the six values of CharacterRecord::mVoice for each
-#define VOICE_PRESETS ((const s16(*)[6])data_020fbaac)
+#define VOICE_PRESETS ((const s16(*)[6])gVoicePresets)
 
 void MiiEditVoicePage::Update() {
     switch (mState) {
@@ -4020,7 +4020,7 @@ void MiiEditVoicePage::Update() {
                     break;
                 case 6:
                     for (int k = 0; k < 5; k++) {
-                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                        ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(gVoiceParams[k].mMin, gVoiceParams[k].mMax));
                     }
                     ShowVoiceSettings();
                     StartSpeaking();
@@ -4123,7 +4123,7 @@ void MiiEditVoicePage::Update() {
             case 17:
                 RememberForUndo();
                 for (int k = 0; k < 5; k++) {
-                    ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(data_020fb940[k].mMin, data_020fb940[k].mMax));
+                    ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(k, RandomInRange(gVoiceParams[k].mMin, gVoiceParams[k].mMax));
                 }
                 ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(5, MATH_Rand16(&gRandom, 4));
                 ShowVoiceSettings();
@@ -4167,9 +4167,9 @@ void MiiEditVoicePage::Update() {
             if (mSprites2B2C[i].mUnknownBC) {
                 int value;
                 if (i == 4) {
-                    value = func_020324e0(&mSprites2B2C[i], data_020fb940[i].mMax, data_020fb940[i].mMin);
+                    value = func_020324e0(&mSprites2B2C[i], gVoiceParams[i].mMax, gVoiceParams[i].mMin);
                 } else {
-                    value = func_020324e0(&mSprites2B2C[i], data_020fb940[i].mMin, data_020fb940[i].mMax);
+                    value = func_020324e0(&mSprites2B2C[i], gVoiceParams[i].mMin, gVoiceParams[i].mMax);
                 }
                 ((SavedCharacter *)(&mScene->mCharacter))->SetVoice(i, value);
                 StartSpeaking();
@@ -4315,10 +4315,10 @@ void MiiEditVoicePage::Exit() {
 void MiiEditVoicePage::ShowVoiceSettings() {
     for (int i = 0; i < 5; i++) {
         if (i == 4) {
-            func_02032514(&mSprites2B2C[i], data_020fb940[i].mMax, data_020fb940[i].mMin,
+            func_02032514(&mSprites2B2C[i], gVoiceParams[i].mMax, gVoiceParams[i].mMin,
                           mScene->mCharacter.mVoice[i]);
         } else {
-            func_02032514(&mSprites2B2C[i], data_020fb940[i].mMin, data_020fb940[i].mMax,
+            func_02032514(&mSprites2B2C[i], gVoiceParams[i].mMin, gVoiceParams[i].mMax,
                           mScene->mCharacter.mVoice[i]);
         }
     }

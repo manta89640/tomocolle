@@ -14789,10 +14789,10 @@ from:0x02098e78 kind:arm_call to:0x020733a4 module:main
 from:0x02098e90 kind:arm_call to:0x020985f8 module:main
 from:0x02098ed4 kind:load to:0x02098ed8 module:main
 from:0x02098ef0 kind:load to:0x020fb8e4 module:main
-from:0x02098ef4 kind:load to:0x020fb8ed module:main
+from:0x02098ef4 kind:load to:0x020fb8e4 add:0x9 module:main
 from:0x02098f08 kind:load to:0x02098f0c module:main
-from:0x02098f24 kind:load to:0x020fb8f6 module:main
-from:0x02098f28 kind:load to:0x020fb8ff module:main
+from:0x02098f24 kind:load to:0x020fb8e4 add:0x12 module:main
+from:0x02098f28 kind:load to:0x020fb8e4 add:0x1b module:main
 from:0x02098f38 kind:arm_call to:0x02098ec4 module:main
 from:0x02098f44 kind:arm_call to:0x02098ef8 module:main
 from:0x020990d4 kind:arm_call to:0x020099e4 module:main

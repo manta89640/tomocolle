@@ -3756,9 +3756,9 @@ void RoomCharacter::UpdateTalkStates() {
             }
             mStep++;
             StartSound3IfAnimOfGroup();
-            if (data_020fba28[mPersonality] == 0) {
+            if (gPersonalityKinds[mPersonality] == 0) {
                 SetAnimation(RESOURCE_BCA0, 0x23);
-            } else if (data_020fba28[mPersonality] == 1) {
+            } else if (gPersonalityKinds[mPersonality] == 1) {
                 SetAnimation(RESOURCE_BCA0, 0x23);
             } else {
                 SetAnimation(RESOURCE_BCA0, 0x24);
@@ -3806,7 +3806,7 @@ void RoomCharacter::UpdateTalkStates() {
             // Both arms start the same animation, and the original has both calls. The compiler folds two arms that
             // are the same in the syntax tree into one, so they differed in the source in some way that leaves no
             // trace in the code. What that was is not known; the cast stands in for it.
-            if (data_020fba28[mPersonality] == 0) {
+            if (gPersonalityKinds[mPersonality] == 0) {
                 SetAnimation(RESOURCE_BCA0, 0x26);
             } else {
                 ((RoomCharacterAlias *)this)->SetAnimation(RESOURCE_BCA0, 0x26);
@@ -3909,9 +3909,9 @@ void RoomCharacter::UpdateTalkStates() {
             }
             mStep++;
             StartSound3IfAnimOfGroup();
-            if (data_020fba28[mPersonality] == 0) {
+            if (gPersonalityKinds[mPersonality] == 0) {
                 SetAnimation(RESOURCE_BCA0, 0x15);
-            } else if (data_020fba28[mPersonality] == 1) {
+            } else if (gPersonalityKinds[mPersonality] == 1) {
                 SetAnimation(RESOURCE_BCA0, 0x15);
             } else {
                 SetAnimation(RESOURCE_BCA0, 0x16);

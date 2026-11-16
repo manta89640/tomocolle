@@ -87,7 +87,7 @@ struct SavedCharacter {
     /* 0x02A6 */ s16 mReaction;          // What the character chose to do next (RoomCharacter::PickReaction,
                                          // ChooseTalkReaction); cleared when the two are done
     /* 0x02A8 */ u8 mUnknown02A8[0x14];
-    /* 0x02BC */ s8 mPersonality;        // What func_02098f2c computes (0..15); data_020fba28 turns it into the
+    /* 0x02BC */ s8 mPersonality;        // What func_02098f2c computes (0..15); gPersonalityKinds turns it into the
                                          // row (0..3) of the animation tables
 }; // 0x2C0
 

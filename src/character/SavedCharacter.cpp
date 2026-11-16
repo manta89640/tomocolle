@@ -35,8 +35,93 @@ void MiiData_SetFavorite(CharacterRecord *mii, int value);
 BOOL MiiData_AssignCreateId(MiiIdSource *source, CharacterRecord *mii);
 typedef void (*MiiDataSetter)(CharacterRecord *mii, int value);
 typedef int (*MiiDataGetter)(CharacterRecord *mii);
-extern MiiDataSetter data_020fbb7c[PARAM_COUNT];
-extern MiiDataGetter data_020fbc2c[PARAM_COUNT];
+void MiiData_SetBeardColor(CharacterRecord *mii, int value);
+void MiiData_SetBeardScale(CharacterRecord *mii, int value);
+void MiiData_SetBeardType(CharacterRecord *mii, int value);
+void MiiData_SetBeardY(CharacterRecord *mii, int value);
+void MiiData_SetBirthDay(CharacterRecord *mii, int value);
+void MiiData_SetBirthMonth(CharacterRecord *mii, int value);
+void MiiData_SetBuild(CharacterRecord *mii, int value);
+void MiiData_SetEyeColor(CharacterRecord *mii, int value);
+void MiiData_SetEyeRotation(CharacterRecord *mii, int value);
+void MiiData_SetEyeScale(CharacterRecord *mii, int value);
+void MiiData_SetEyeType(CharacterRecord *mii, int value);
+void MiiData_SetEyeX(CharacterRecord *mii, int value);
+void MiiData_SetEyeY(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowColor(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowRotation(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowScale(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowType(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowX(CharacterRecord *mii, int value);
+void MiiData_SetEyebrowY(CharacterRecord *mii, int value);
+void MiiData_SetFaceColor(CharacterRecord *mii, int value);
+void MiiData_SetFaceTexture(CharacterRecord *mii, int value);
+void MiiData_SetFaceType(CharacterRecord *mii, int value);
+void MiiData_SetFavoriteColor(CharacterRecord *mii, int value);
+void MiiData_SetGlassesColor(CharacterRecord *mii, int value);
+void MiiData_SetGlassesScale(CharacterRecord *mii, int value);
+void MiiData_SetGlassesType(CharacterRecord *mii, int value);
+void MiiData_SetGlassesY(CharacterRecord *mii, int value);
+void MiiData_SetHairColor(CharacterRecord *mii, int value);
+void MiiData_SetHairFlip(CharacterRecord *mii, int value);
+void MiiData_SetHairType(CharacterRecord *mii, int value);
+void MiiData_SetHeight(CharacterRecord *mii, int value);
+void MiiData_SetMoleScale(CharacterRecord *mii, int value);
+void MiiData_SetMoleType(CharacterRecord *mii, int value);
+void MiiData_SetMoleX(CharacterRecord *mii, int value);
+void MiiData_SetMoleY(CharacterRecord *mii, int value);
+void MiiData_SetMouthColor(CharacterRecord *mii, int value);
+void MiiData_SetMouthScale(CharacterRecord *mii, int value);
+void MiiData_SetMouthType(CharacterRecord *mii, int value);
+void MiiData_SetMouthY(CharacterRecord *mii, int value);
+void MiiData_SetMustacheType(CharacterRecord *mii, int value);
+void MiiData_SetNoseScale(CharacterRecord *mii, int value);
+void MiiData_SetNoseType(CharacterRecord *mii, int value);
+void MiiData_SetNoseY(CharacterRecord *mii, int value);
+int MiiData_GetBeardColor(CharacterRecord *mii);
+int MiiData_GetBeardScale(CharacterRecord *mii);
+int MiiData_GetBeardType(CharacterRecord *mii);
+int MiiData_GetBeardY(CharacterRecord *mii);
+int MiiData_GetBirthDay(CharacterRecord *mii);
+int MiiData_GetBirthMonth(CharacterRecord *mii);
+int MiiData_GetBuild(CharacterRecord *mii);
+int MiiData_GetDaysInBirthMonth(CharacterRecord *mii);
+int MiiData_GetEyeColor(CharacterRecord *mii);
+int MiiData_GetEyeRotation(CharacterRecord *mii);
+int MiiData_GetEyeScale(CharacterRecord *mii);
+int MiiData_GetEyeType(CharacterRecord *mii);
+int MiiData_GetEyeX(CharacterRecord *mii);
+int MiiData_GetEyeY(CharacterRecord *mii);
+int MiiData_GetEyebrowColor(CharacterRecord *mii);
+int MiiData_GetEyebrowRotation(CharacterRecord *mii);
+int MiiData_GetEyebrowScale(CharacterRecord *mii);
+int MiiData_GetEyebrowType(CharacterRecord *mii);
+int MiiData_GetEyebrowX(CharacterRecord *mii);
+int MiiData_GetEyebrowY(CharacterRecord *mii);
+int MiiData_GetFaceColor(CharacterRecord *mii);
+int MiiData_GetFaceTexture(CharacterRecord *mii);
+int MiiData_GetFaceType(CharacterRecord *mii);
+int MiiData_GetFavoriteColor(CharacterRecord *mii);
+int MiiData_GetGlassesColor(CharacterRecord *mii);
+int MiiData_GetGlassesScale(CharacterRecord *mii);
+int MiiData_GetGlassesType(CharacterRecord *mii);
+int MiiData_GetGlassesY(CharacterRecord *mii);
+int MiiData_GetHairColor(CharacterRecord *mii);
+int MiiData_GetHairFlip(CharacterRecord *mii);
+int MiiData_GetHairType(CharacterRecord *mii);
+int MiiData_GetHeight(CharacterRecord *mii);
+int MiiData_GetMoleScale(CharacterRecord *mii);
+int MiiData_GetMoleType(CharacterRecord *mii);
+int MiiData_GetMoleX(CharacterRecord *mii);
+int MiiData_GetMoleY(CharacterRecord *mii);
+int MiiData_GetMouthColor(CharacterRecord *mii);
+int MiiData_GetMouthScale(CharacterRecord *mii);
+int MiiData_GetMouthType(CharacterRecord *mii);
+int MiiData_GetMouthY(CharacterRecord *mii);
+int MiiData_GetMustacheType(CharacterRecord *mii);
+int MiiData_GetNoseScale(CharacterRecord *mii);
+int MiiData_GetNoseType(CharacterRecord *mii);
+int MiiData_GetNoseY(CharacterRecord *mii);
 
 // The clock (gap)
 void Clock_GetDate(void *clock, RTCDate *date);
@@ -75,13 +160,6 @@ extern const TalkReactionInfo data_020f5828[12];
 extern const s8 *const data_021135f0[];    // By relation: the weights of the reactions by the partner's reaction
 extern const ReactionInfo data_020f5df8[15];
 extern const u8 data_020f5e28[][15];       // By the reaction before: the weights of the next
-extern const int data_020fb970[13];        // The days of each month (1 to 12)
-extern const int data_020fb9a4[13];        // and in a leap year
-extern const s16 data_020fb912[23];        // The biorhythm's cycles by day: physical,
-extern const s16 data_020fba68[33];        // intellectual
-extern const s16 data_020fb9d8[28];        // and emotional
-extern const int data_020fb8c4[4];         // By kind of personality: a column of four (GetPersonalityColumnValue)
-extern const int data_020fb8d4[4];
 int func_0202c5dc(GameData *game, int index);
 u8 func_0202c43c(GameData *game, int index, int other); // Its mRelationMeter for another
 extern u8 data_0212348c[];
@@ -93,11 +171,10 @@ extern MATHRandContext16 gRandom;
 struct LongActInfo {
     u32 minutes : 12;      // Its length
     u32 weight : 8;        // Its weight in the random choice (ChooseLongAct)
-    u32 personalities : 4; // A bit for each kind of personality (data_020fba28) that may choose it
+    u32 personalities : 4; // A bit for each kind of personality (gPersonalityKinds) that may choose it
     u32 moods : 5;         // A bit for each mood that may choose it
     u32 unk29 : 3;
 };
-extern const int data_020fba28[16]; // The kind (0 to 3) of each personality
 
 // A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78)
 struct TroubleInfo {
@@ -112,10 +189,7 @@ struct TroubleInfo {
 }; // 0xC
 extern TroubleInfo *data_02114d78[];
 extern const u8 gStr_Parenthesis_2[]; // The starting progress of each trouble of category 0
-extern const u8 gStr_2K[4]; // How much each kind of food fills
 extern const u8 data_020f8d8c[10];
-extern const s8 data_020fba10[21];  // A value for each pair of RelationBlood values (0 to 5), a triangle of 6
-extern const s8 data_020fbaf4[136]; // A value for each pair of personalities (0 to 15), a triangle of 16     // The weight of each trouble category in the random choice
 extern const u32 gStr_LessThan_2[10];  // The number of troubles of each category
 extern const LongActInfo data_020f8cc0[];
 }
@@ -127,13 +201,135 @@ struct VoiceParam {
     /* 0x4 */ s16 max;
     /* 0x6 */ s16 defaultValue;
 }; // 0x8
-extern const VoiceParam data_020fb940[6];
 
+extern const VoiceParam gVoiceParams[6];
+extern const int gPersonalityKinds[16];
+extern const s16 gVoicePresets[6][6];
+
+// How much eating each kind of food fills (ItemInfo::mFoodSize)
+static const u8 sFoodSizes[4] = {35, 50, 75, 0};
+// By kind of personality: its column of a table of four (GetPersonalityColumnValue, GetPersonalityColumnOffset)
+static const int sPersonalityColumnOffsets[4] = {3, 1, 2, 0};
+static const int sPersonalityColumns[4] = {3, 1, 2, 0};
 // The scores of the personality questions' answers (index: the answer, 1 to 8; 0 unanswered)
-static const s8 sScoresAnswer0[9] = {50, 10, 20, 30, 40, 60, 70, 80, 90};
-static const s8 sScoresAnswer1[9] = {50, 5, 15, 25, 35, 65, 75, 85, 95};
-static const s8 sScoresAnswer2[9] = {50, 10, 20, 30, 40, 60, 70, 80, 90};
-static const s8 sScoresAnswer3[9] = {50, 5, 15, 25, 35, 65, 75, 85, 95};
+// (the fifth is read by nothing the game keeps)
+static const s8 sAnswerScores[5][9] = {
+    {50, 10, 20, 30, 40, 60, 70, 80, 90},
+    {50, 5, 15, 25, 35, 65, 75, 85, 95},
+    {50, 10, 20, 30, 40, 60, 70, 80, 90},
+    {50, 5, 15, 25, 35, 65, 75, 85, 95},
+    {50, 10, 20, 30, 40, 60, 70, 80, 90},
+};
+// The biorhythm's cycles, by day of the cycle
+static const s16 sPhysicalCycle[23] = {-5000, 20805, 24897, 28359, 30932, 32426, 32767, 31823, 29770, 26724, 22912, 18615, -7000, 9857, 6045, 2999, 946, 0, 343, 1837, 4410, 7872, 11964};
+// The voice parameters: the speech engine's parameter, range and default (ResetVoice)
+const VoiceParam gVoiceParams[6] = {{14, 0, 400, 100}, {15, 0, 400, 100}, {6, 80, 130, 100}, {4, 3500, 7000, 5058}, {3, 50, 180, 100}, {12, 0, 3, 0}};
+// The days of each month (1 to 12), and in a leap year
+static const int sDaysInMonth[13] = {31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const int sDaysInMonthLeap[13] = {31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const s16 sEmotionalCycle[28] = {-5000, 20030, 23493, 26600, 29194, 31146, 32358, 32767, 32358, 31146, 29194, 26600, 23493, 20030, -7000, 12739, 9276, 6169, 3575, 1623, 411, 0, 411, 1623, 3575, 6169, 9276, 12739};
+// Whether two RelationBlood values (0 to 5) allow love, a triangle of 6
+static const s8 sRelationBloodPairs[21] = {1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0};
+// The kind (0 to 3) of each personality (mPersonality)
+const int gPersonalityKinds[16] = {0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3};
+static const s16 sIntellectualCycle[34] = {-5000, 19485, 22474, 25242, 27691, 29731, 31288, 32307, 32767, 32602, 31867, 30573, 28767, 26512, 23892, 21000, 17942, -7000, 11769, 8877, 6257, 4002, 2196, 902, 167, 0, 462, 1481, 3038, 5078, 7527, 10295, 13284};
+// The voices overlay 76 offers to choose from
+const s16 gVoicePresets[6][6] = {{100, 100, 107, 5425, 90, 0}, {100, 100, 115, 5600, 76, 0}, {100, 100, 100, 5075, 104, 0}, {100, 100, 106, 5643, 118, 0}, {100, 100, 85, 4375, 118, 0}, {170, 50, 111, 5250, 151, 0}};
+// How well two personalities go together (0 to 15), a triangle of 16
+static const s8 sPersonalityPairs[136] = {100, 90, 70, 60, 90, 80, 70, 60, 70, 60, 40, 30, 60, 50, 30, 20, 100, 80, 70, 80, 90, 70, 60, 60, 70, 50, 40, 50, 60, 40, 30, 100, 90, 60, 70, 90, 80, 40, 50, 70, 60, 30, 40, 60, 50, 100, 50, 60, 80, 90, 30, 40, 60, 70, 20, 30, 50, 60, 100, 90, 70, 60, 80, 70, 50, 40, 70, 60, 40, 30, 100, 80, 70, 70, 80, 60, 50, 60, 70, 50, 40, 100, 90, 50, 60, 80, 70, 40, 50, 70, 60, 100, 40, 50, 70, 80, 30, 40, 60, 70, 100, 90, 70, 60, 90, 80, 60, 50, 100, 80, 70, 80, 90, 70, 60, 100, 90, 60, 70, 90, 80, 100, 50, 60, 80, 90, 100, 90, 70, 60, 100, 80, 70, 100, 90, 100};
+// The Mii data's setters and getters by MiiParameter
+static MiiDataSetter const sMiiSetters[PARAM_COUNT] = {
+    MiiData_SetEyeType,
+    MiiData_SetEyeColor,
+    MiiData_SetEyeScale,
+    MiiData_SetEyeRotation,
+    MiiData_SetEyeX,
+    MiiData_SetEyeY,
+    MiiData_SetEyebrowType,
+    MiiData_SetEyebrowColor,
+    MiiData_SetEyebrowScale,
+    MiiData_SetEyebrowRotation,
+    MiiData_SetEyebrowX,
+    MiiData_SetEyebrowY,
+    MiiData_SetMouthType,
+    MiiData_SetMouthColor,
+    MiiData_SetMouthScale,
+    MiiData_SetMouthY,
+    MiiData_SetBeardType,
+    MiiData_SetBeardColor,
+    MiiData_SetMustacheType,
+    MiiData_SetBeardScale,
+    MiiData_SetBeardY,
+    MiiData_SetMoleType,
+    MiiData_SetMoleScale,
+    MiiData_SetMoleX,
+    MiiData_SetMoleY,
+    MiiData_SetHairType,
+    MiiData_SetHairColor,
+    MiiData_SetHairFlip,
+    MiiData_SetNoseType,
+    MiiData_SetNoseScale,
+    MiiData_SetNoseY,
+    MiiData_SetGlassesType,
+    MiiData_SetGlassesColor,
+    MiiData_SetGlassesScale,
+    MiiData_SetGlassesY,
+    MiiData_SetFaceType,
+    MiiData_SetFaceColor,
+    MiiData_SetFaceTexture,
+    MiiData_SetBirthMonth,
+    MiiData_SetBirthDay,
+    MiiData_SetFavoriteColor,
+    MiiData_SetHeight,
+    MiiData_SetBuild,
+    MiiData_SetBirthDay,
+};
+static MiiDataGetter const sMiiGetters[PARAM_COUNT] = {
+    MiiData_GetEyeType,
+    MiiData_GetEyeColor,
+    MiiData_GetEyeScale,
+    MiiData_GetEyeRotation,
+    MiiData_GetEyeX,
+    MiiData_GetEyeY,
+    MiiData_GetEyebrowType,
+    MiiData_GetEyebrowColor,
+    MiiData_GetEyebrowScale,
+    MiiData_GetEyebrowRotation,
+    MiiData_GetEyebrowX,
+    MiiData_GetEyebrowY,
+    MiiData_GetMouthType,
+    MiiData_GetMouthColor,
+    MiiData_GetMouthScale,
+    MiiData_GetMouthY,
+    MiiData_GetBeardType,
+    MiiData_GetBeardColor,
+    MiiData_GetMustacheType,
+    MiiData_GetBeardScale,
+    MiiData_GetBeardY,
+    MiiData_GetMoleType,
+    MiiData_GetMoleScale,
+    MiiData_GetMoleX,
+    MiiData_GetMoleY,
+    MiiData_GetHairType,
+    MiiData_GetHairColor,
+    MiiData_GetHairFlip,
+    MiiData_GetNoseType,
+    MiiData_GetNoseScale,
+    MiiData_GetNoseY,
+    MiiData_GetGlassesType,
+    MiiData_GetGlassesColor,
+    MiiData_GetGlassesScale,
+    MiiData_GetGlassesY,
+    MiiData_GetFaceType,
+    MiiData_GetFaceColor,
+    MiiData_GetFaceTexture,
+    MiiData_GetBirthMonth,
+    MiiData_GetBirthDay,
+    MiiData_GetFavoriteColor,
+    MiiData_GetHeight,
+    MiiData_GetBuild,
+    MiiData_GetDaysInBirthMonth,
+};
 
 // Keeps a field of the record within its range; FALSE when it was not. The name is the field's, for messages that
 // the final build leaves out.
@@ -301,7 +497,7 @@ BOOL SavedCharacter::Validate() {
         valid = FALSE;
     }
     for (int i = 0; i < 6; i++) {
-        if (!ClampField(&mVoice[i], data_020fb940[i].min, data_020fb940[i].max, "voice")) {
+        if (!ClampField(&mVoice[i], gVoiceParams[i].min, gVoiceParams[i].max, "voice")) {
             valid = FALSE;
         }
     }
@@ -745,7 +941,7 @@ void SavedCharacter::CheckParameter(int param, int value) {
 void SavedCharacter::SetParameter(int param, int value) {
     CheckParameter(param, value);
     if (IsMiiFromThisConsole()) {
-        data_020fbb7c[param](this, value);
+        sMiiSetters[param](this, value);
         return;
     }
     switch (param) {
@@ -759,7 +955,7 @@ void SavedCharacter::SetParameter(int param, int value) {
 }
 
 void SavedCharacter::SetRawParameter(int param, int value) {
-    data_020fbb7c[param](this, value);
+    sMiiSetters[param](this, value);
 }
 
 void SavedCharacter::SetSex(int sex) {
@@ -800,12 +996,12 @@ void SavedCharacter::SetVoice(int index, s16 value) {
 
 void SavedCharacter::ResetVoice() {
     for (int i = 0; i < 6; i++) {
-        SetVoice(i, data_020fb940[i].defaultValue);
+        SetVoice(i, gVoiceParams[i].defaultValue);
     }
 }
 
 int SavedCharacter::GetParameter(int param) {
-    u32 value = data_020fbc2c[param](this);
+    u32 value = sMiiGetters[param](this);
     switch (param) {
     case PARAM_BIRTH_MONTH:
         if (value == 0 && !IsMiiFromThisConsole()) {
@@ -828,7 +1024,7 @@ int SavedCharacter::GetParameter(int param) {
 }
 
 int SavedCharacter::GetRawParameter(int param) {
-    return data_020fbc2c[param](this);
+    return sMiiGetters[param](this);
 }
 
 GXRgb SavedCharacter::GetFaceColor() {
@@ -850,7 +1046,7 @@ int SavedCharacter::GetAnswerScore01() {
 }
 
 int SavedCharacter::ScoreAnswers01(int answer0, int answer1) {
-    return sScoresAnswer0[answer0] + sScoresAnswer1[answer1];
+    return sAnswerScores[0][answer0] + sAnswerScores[1][answer1];
 }
 
 int SavedCharacter::GetAnswerScore23() {
@@ -858,7 +1054,7 @@ int SavedCharacter::GetAnswerScore23() {
 }
 
 int SavedCharacter::ScoreAnswers23(int answer2, int answer3) {
-    return sScoresAnswer2[answer2] + sScoresAnswer3[answer3];
+    return sAnswerScores[2][answer2] + sAnswerScores[3][answer3];
 }
 
 s8 SavedCharacter::GetPersonality() {
@@ -1227,7 +1423,7 @@ BOOL SavedCharacter::IsLongActAvailable(int state) {
 
 int SavedCharacter::GetLongActWeight(int state) {
     const LongActInfo *info = &data_020f8cc0[state];
-    if ((1 << data_020fba28[mPersonality]) & info->personalities && info->moods & (1 << mMood) && info->weight != 0 &&
+    if ((1 << gPersonalityKinds[mPersonality]) & info->personalities && info->moods & (1 << mMood) && info->weight != 0 &&
         IsLongActAvailable(state)) {
         return data_020f8cc0[state].weight;
     }
@@ -2429,7 +2625,7 @@ int SavedCharacter::GetFullness(s64 now) {
 
 // How much eating the food fills
 static inline int GetFoodSize(u16 item) {
-    return gStr_2K[data_020f5f0c[item].mFoodSize];
+    return sFoodSizes[data_020f5f0c[item].mFoodSize];
 }
 
 BOOL SavedCharacter::CanEat(s64 now, u16 item) {
@@ -2572,7 +2768,7 @@ int SavedCharacter::GetClothesLiking(int clothes) {
     int low;
     int liking;
     GetCreateIdParts(&high, &low);
-    switch (data_020fba28[mPersonality]) {
+    switch (gPersonalityKinds[mPersonality]) {
     case 3:
         liking = data_020f3ff0[clothes].mTaste3;
         break;
@@ -2606,7 +2802,7 @@ int SavedCharacter::GetInteriorLiking(int interior) {
     int low;
     int liking;
     GetCreateIdParts(&high, &low);
-    switch (data_020fba28[mPersonality]) {
+    switch (gPersonalityKinds[mPersonality]) {
     case 3:
         liking = data_020f72f8[interior].mTaste3;
         break;
@@ -2754,7 +2950,7 @@ int SavedCharacter::GetRelationBloodPairValue(int a, int b) {
         a = b;
         b = t;
     }
-    return data_020fba10[b * 6 + a - ((b * (b + 1)) >> 1)];
+    return sRelationBloodPairs[b * 6 + a - ((b * (b + 1)) >> 1)];
 }
 
 void SavedCharacter::ResetPatDate() {
@@ -2784,7 +2980,7 @@ int SavedCharacter::GetPersonalityPairValue(int a, int b) {
         a = b;
         b = t;
     }
-    return data_020fbaf4[a + b * 16 - ((b * (b + 1)) >> 1)];
+    return sPersonalityPairs[a + b * 16 - ((b * (b + 1)) >> 1)];
 }
 
 // A reaction's weight scaled by the personality answers (kind 1 to 4: the first two answers' score, its complement,
@@ -2837,7 +3033,7 @@ int SavedCharacter::ScaleTalkWeightByPersonalities(int kind, int weight, SavedCh
 int SavedCharacter::GetTalkReactionWeight(s8 relation, s8 partnerReaction, s8 reaction, SavedCharacter *partner) {
     const TalkReactionInfo *info = &data_020f5828[reaction];
     int weight = data_021135f0[relation][partnerReaction * 12 + reaction];
-    if ((info->personalities & (1 << data_020fba28[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
+    if ((info->personalities & (1 << gPersonalityKinds[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
         int byAnswers = ScaleTalkWeightByAnswers(info->answerScaling, weight);
         weight += byAnswers + ScaleTalkWeightByPersonalities(info->pairScaling, weight, partner);
     } else {
@@ -2901,7 +3097,7 @@ int SavedCharacter::ScaleReactionWeightByAnswers(int kind, int weight) {
 int SavedCharacter::GetReactionWeight(s8 previous, s8 reaction) {
     int weight = data_020f5e28[previous][reaction];
     const ReactionInfo *info = &data_020f5df8[reaction];
-    if ((info->personalities & (1 << data_020fba28[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
+    if ((info->personalities & (1 << gPersonalityKinds[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
         weight += ScaleReactionWeightByAnswers(info->answerScaling, weight);
     } else {
         weight = 0;
@@ -2940,13 +3136,13 @@ void SavedCharacter::SetVoiceOf(TtsPlayer *player) {
     player->StopEngine();
     for (int i = 0; i < 6; i++) {
         int value = mVoice[i];
-        if (value < data_020fb940[i].min) {
-            value = data_020fb940[i].min;
+        if (value < gVoiceParams[i].min) {
+            value = gVoiceParams[i].min;
         }
-        if (value > data_020fb940[i].max) {
-            value = data_020fb940[i].max;
+        if (value > gVoiceParams[i].max) {
+            value = gVoiceParams[i].max;
         }
-        player->SetEngineParam(data_020fb940[i].param, value);
+        player->SetEngineParam(gVoiceParams[i].param, value);
     }
 }
 
@@ -2967,7 +3163,7 @@ int SavedCharacter::GetDaysInYear(int year) {
 }
 
 int SavedCharacter::GetDaysInMonth(int month, int year) {
-    return IsLeapYear(year) ? data_020fb9a4[month] : data_020fb970[month];
+    return IsLeapYear(year) ? sDaysInMonthLeap[month] : sDaysInMonth[month];
 }
 
 // The days from one date to a later one of the same year, 0 if it is earlier
@@ -3043,9 +3239,9 @@ int SavedCharacter::GetBiorhythm(int day) {
         day = 0;
     }
     int cycles[3];
-    cycles[0] = data_020fb912[day % 23];
-    cycles[1] = data_020fba68[day % 33];
-    cycles[2] = data_020fb9d8[day % 28];
+    cycles[0] = sPhysicalCycle[day % 23];
+    cycles[1] = sIntellectualCycle[day % 33];
+    cycles[2] = sEmotionalCycle[day % 28];
     int sum = 0;
     for (int i = 0; i < 3; i++) {
         sum += cycles[i];
@@ -3079,21 +3275,21 @@ int SavedCharacter::GetBirthDayCycle() {
 
 // A value of the row of a table of four columns that is the column of the character's kind of personality
 int SavedCharacter::GetPersonalityColumnValue(int row, const u8 *table) {
-    return (table + row * 4)[data_020fb8c4[data_020fba28[GetPersonality()]]];
+    return (table + row * 4)[sPersonalityColumns[gPersonalityKinds[GetPersonality()]]];
 }
 
 // The offset of that value
 int SavedCharacter::GetPersonalityColumnOffset(int row) {
-    return row * 4 + data_020fb8d4[data_020fba28[GetPersonality()]];
+    return row * 4 + sPersonalityColumnOffsets[gPersonalityKinds[GetPersonality()]];
 }
 
 // Today's biorhythm, its three cycles (0 to 255) and yesterday's
 void SavedCharacter::UpdateBiorhythm() {
     int day = GetAgeInDays();
     mBiorhythmYesterday = GetBiorhythm(day - 1);
-    mBiorhythmCycles[0] = data_020fb912[day % 23];
-    mBiorhythmCycles[1] = data_020fba68[day % 33];
-    mBiorhythmCycles[2] = data_020fb9d8[day % 28];
+    mBiorhythmCycles[0] = sPhysicalCycle[day % 23];
+    mBiorhythmCycles[1] = sIntellectualCycle[day % 33];
+    mBiorhythmCycles[2] = sEmotionalCycle[day % 28];
     mBiorhythm = 0;
     for (int i = 0; i < 3; i++) {
         mBiorhythm += mBiorhythmCycles[i];
