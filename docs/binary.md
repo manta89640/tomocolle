@@ -901,6 +901,46 @@ unit is linked from its object. It is the object a scene holds for the on-screen
 Inferred: the 0x1C bytes from +0x5FF8 to the end are part of the object (the Mii maker's next member starts there),
 but nothing in this file touches them.
 
+## The keyboard's core
+
+`src/keyboard/KeyboardCore.cpp` (`0x0208179C` to `0x02082EAC`, 35 functions and a static initialiser): the keys, the
+touch and pad handling, and the drawing of the key labels into character data. 35 of its 36 functions and all of its
+data match. Not complete, because `func_020817f0` does not match yet. The original reloads the count of the extra
+key areas (+0x4C) on every pass of its last loop, and no source tried does that. Measured:
+
+- **State.** Every function works on one static of 0x50 bytes, `sKeyboard`: the key touched first and the key
+  under the pen (+0x0, +0x4), the layout (+0x8), a key-up callback and its argument (+0xC, +0x10), a sound callback
+  and its argument (+0x14, +0x18, called with sound numbers 0 to 10), the layout's characters (+0x1C), a key repeat
+  of the input code (+0x20, which `relocs.txt` refers to as `sKeyboard` + 0x20), the code of this frame's key
+  (+0x28) and the character it gives (+0x2A, which `func_02082560` returns to the callers), the kana modifier
+  (+0x2E: 0, 3 or 4), the layout number (+0x30), the pad cursor (+0x34), and the extra key areas with their
+  callback (+0x40 to +0x4C: `SoftKeyboard`'s tabs).
+- **The .bss pool**: `sCharData` (the buffer `SoftKeyboard::TransferCharData` sends), `sOriginX`, `sInitialized`,
+  `sBaseCharData` (the layout's graphics with the labels drawn, copied over `sCharData` before the pressed key and
+  the modifier are lit), `sOriginY`, then 0x18 bytes no function in the ROM refers to.
+- **Keys** are 8 bytes: x, y, width and height as bytes, read as u16 bit fields (one `ldrh` for x and y), then a
+  signed link to the next key of the same group (the keys lit together), then the code. Codes 1 to the layout's
+  count of special keys (+0xC of a layout) are special keys (1 delete, 2 space, 3 and 4 the modifiers, 20 enter);
+  above it, a code indexes the layout's characters; 0x100 and above are the extra areas'.
+- **Layouts**, `sLayouts`: five of 0x10 bytes (keys, NCGR file, a function called when a key gives a code, the count
+  of special keys, the count of keys). They are English, kana, European, signs and pictograms. Their files are
+  `SoftKeyboard`'s five background paths, in the order jp, English, euro, sign, picto.
+- **Kana**: four tables of 60 characters (plain kana, then what dakuten, handakuten and the small form make of each,
+  a full-width space for none) and three pairs (plain, other) that the static initialiser fills from
+  `sKanaTables`. Nothing in the ROM reads the pairs. Inferred: code that read them was dropped by the link, as
+  were the users of the 0x18 bytes of `.bss` and of two 20-byte local tables in `.rodata` (`{2,0,3,4,1}`,
+  `{2,3,1,4,0}`, after `func_02081ff0`'s `{0,2,1,3,4}`). The source keeps them through an uncalled function.
+
+The character and key tables of the layouts, `0x02112220` to `0x02112DC4`, are left out of the unit and stay in the
+gap (`KeyboardChars*`, `KeyboardKeys*`). Measured: their sizes in memory order are 0x5C 0x5C 0x5C 0x70 0x68 0x68
+0x70 0x68, then 0x188 0x1B0 0x1D0 0x1A8 0x1C8. That is not the size order the compiler gives one file's data,
+measured for C and C++, with and without `-ipa file`. The code takes a key table's count as the bytes between its
+start and its end (two literals per table, the end being the next table's address). It reads a character table
+through a pointer cast with a separate `add` (mwcc folds `&table[1]` into the literal for an object of its own
+file, and does not fold it after a cast). The character tables are UTF-16 text with a byte-order mark (`0xFEFF`,
+skipped) and no terminator. Inferred: they are binary files linked as objects of their own, between NFL's data and
+this file's.
+
 ## The Mii maker
 
 Overlay 76, `SceneMiiEdit2`: 83 functions, `.text` `0x02149A40` to `0x02158748` (60 KB). It is cut as one unit,

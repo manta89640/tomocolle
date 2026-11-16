@@ -274,6 +274,15 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   (the main program's list scenes, overlays 76 and 109).
 - Comparing a compiled object's data with the ROM's before completing a unit finds wrong table values in the source,
   which no function shows (overlay 109's `sLayouts`).
+- A pool that looks out of size order is often made of smaller objects than it seems. The 0x28 bytes at
+  `0x02112DC4` that the static initialiser fills (0x18 of pairs, then a 0x10 table, then a 0x10 key array) are three
+  8-byte objects, not one 0x18 array, and then sort as the model says (`KeyboardCore.cpp`). Data that is in no
+  size order at all may not be the file's: see binary.md, "The keyboard's core".
+- Every object of the original has to be on the list before the same-size slots come out right: also the ones that
+  only code the link dropped referred to. The source keeps them through an uncalled function, and an unused local
+  `const` array stays in the `.rodata` pool (`KeyboardCore_Unused`, `func_02081ff0`). With the full set, one compile
+  shows which declaration lands in which slot of a size; giving each slot's declaration the ROM's object put all of
+  KeyboardCore's `.rodata`, `.data` and `.bss` in place in one pass.
 
 ## Matching techniques
 
@@ -294,6 +303,17 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **An address kept in a register, where the original reloads it**
 - Reach the member through a local pointer in the loop body (`MapCamera *camera = &mCamera;`): it stopped the
   compiler holding a table's address for the whole loop and spilling (`MapScene::Update`).
+
+**An address loaded and then offset by an `add`, where ours has the offset in the literal**
+- mwcc folds `&table[1]` and `table + 1` into the literal (`table+0x2`), but not after a pointer cast:
+  `(const u16 *)wideTable + 1`, and the same for an address of a string literal (the keyboard's character tables,
+  `func_02082b48` and the four after it).
+
+**Two literal-pool entries for one address**
+- One is an object's end: `&keys[ARRAY_COUNT(keys)]` is the object plus its size, and the next object's start is
+  another literal. In `relocs.txt` such a reference is `to:<object> add:<size>`, so that `check_relocs.py` names
+  both alike (`func_02081df0`'s key counts, `((const u8 *)end - (const u8 *)start) / sizeof(KeyRect)`, which is
+  also what gives the original's `lsr #3`).
 
 **Two operands loaded in the other order**
 - How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
@@ -329,6 +349,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   instead (`SoftKeyboard::GetButtonCharCount`).
 - A pointer to a member array declared before a local `const` array is formed before the array's `ldm`/`stm` copy,
   declared after it, after (`func_02083c54`, `Keyboard.cpp`).
+- Brute-force the order of the C-style declarations at the top, the loop counters included: a script that splices each
+  permutation into a copy of the file, compiles it and counts the differing lines of the one function. It took
+  `func_02082914` from 153 differing lines to 0 (`int x, endY, endX, dy, dx, px, y;`), and an `int i;` declared
+  first fixed `func_020819e8`.
+- A row pointer that the original recomputes from the outer counter each pass (`add r0, base, y, lsl #6`), where
+  ours strength-reduces it: index as a two-dimensional array, `((u16 (*)[32])screen)[y][x]` (`func_02081cf8`).
+- A value the inner loop does not change, which the original computes after the inner loop's guard, where ours
+  hoists it and tests the guard twice: write the expression again at each use instead of keeping it in a local
+  (`y0 - ty * 8 < 0 ? 0 : y0 - ty * 8`, `func_02082738`).
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
