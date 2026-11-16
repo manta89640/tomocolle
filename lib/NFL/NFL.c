@@ -2580,9 +2580,13 @@ int func_02076e1c(NFLObj *obj, u32 *rest) {
             go = TRUE;
             break;
         case 3:
-            src = (u8 *)stream->unk0 + (u32)work->unk78;
-            dest = obj->unkD4 + (data_02145360->unk68 == 7 ? data_020b7b8c[i].unk4 : data_020b7b8c[i].unk0);
             size = obj->unk178;
+            src = (u8 *)stream->unk0 + (u32)work->unk78;
+            if (data_02145360->unk68 == 7) {
+                dest = obj->unkD4 + data_020b7b8c[i].unk4;
+            } else {
+                dest = obj->unkD4 + data_020b7b8c[i].unk0;
+            }
             go = TRUE;
             break;
         case 4:
