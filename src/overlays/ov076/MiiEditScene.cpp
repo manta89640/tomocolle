@@ -182,7 +182,7 @@ void MiiEditScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "T02", "Msg/TmdCommonMsgJP_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "SPL", "Mdl/Spl/SplEditEffect_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "BIC", "Mdl/Ica/ica_mii_edit_LZ.bin", 0);
-    mCharacter.SetArchive("B0I", 0, 0);
+    mCharacter.CharacterModel::SetArchive("B0I", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mArchivePath, 0);
 }
 
@@ -376,7 +376,7 @@ void MiiEditScene::Init() {
     mEditedCharacter.mHeadPitchNow = mCharacter.mHeadPitchNow;
     mEditedCharacter.mHeadYawNow = mCharacter.mHeadYawNow;
     mEditedCharacter.mHeadRollNow = mCharacter.mHeadRollNow;
-    mEditedCharacter.mUnknown25E0 = mCharacter.mUnknown25E0;
+    mEditedCharacter.mFaceRoll = mCharacter.mFaceRoll;
     func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
     mUnknown580C = TRUE;
     mCamera = &data_02122764;
@@ -852,7 +852,7 @@ void MiiEditScene::LoadCharacter(int index) {
 }
 
 void MiiEditScene::LoadModel() {
-    if (mCharacter.mUnknown054Bits11 <= 1) {
+    if (mCharacter.mClothesId <= 1) {
         switch (MiiData_GetSex(&mCharacter)) {
         case 0:
             func_0202aecc(data_021223e4, 0);
