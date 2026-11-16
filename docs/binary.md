@@ -567,11 +567,23 @@ from its code); scenes 0x1F to 0x22 are the right-job scenes after their archive
 
 Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
 `FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
-`0x02037568` (8 KB, about 0x500 bytes of spilled constants), and the constructors of gap38-c's ten test scenes
-(`0x0203E320` to `0x0203EA2C`, `0x0203F654`; their headers are in main), `Scene0F` (`0x0203E748`), `RoomScene`
-(`0x0203ED10`) and `TutorialRoomScene` (`0x0203EFC0`, whose overlay headers declare base classes of their own),
-`FriendListScene` (`0x0203F350`), `Scene1E` (`0x0203F900`, which holds the shops' item list, table `0x021153BC`,
-in a derived class, table `0x021153A0`) and `VoteScene` (`0x020400F0`, a member of the class of `0x02025B5C`).
+`0x02037568` (8 KB, about 0x500 bytes of spilled constants), `Scene1E`'s constructor (97.7%: every instruction but
+for a rotation of three callee-saved registers), and the constructors of gap38-c's ten test scenes (`0x0203E320` to
+`0x0203EA2C`, `0x0203F654`; their headers are in main, not on this branch), `RoomScene` (`0x0203ED10`) and
+`TutorialRoomScene` (`0x0203EFC0`; their overlays' headers declare their own `Scene`, `Model` and `Character`
+classes) and `VoteScene` (`0x020400F0`: a member of the unnamed class of `0x02025B5C`, a 128 by 96 pixel 4-bit
+drawing surface with a brush, and an array of a class of two `G3Sprite`s whose destructor is empty, which needs
+`G3Sprite`'s destructor inline, and that the link refuses while `G3Sprite`'s own file is not decompiled).
+
+- **Text canvases of the scene constructors.** Three classes derived from `ObjTextCanvas` have their tables in
+  this file's data, told apart by where their `TextCanvas` virtual base is (measured, from their tables' first
+  words and the constructors): 0x150 (nothing of their own), 0x174 (0x24 bytes of their own), 0x16C (0x1C bytes,
+  the first cleared). Each table is a triple pointed at at its end (+0xC), each VTT passed from its second word
+  (+4) to `ObjTextCanvas`'s C2. Scene 0x0F holds all three (`Scene0FTextCanvas`, `Scene0FTextCanvas2`,
+  `Scene0FTextBox`).
+- **The mannequin's body is a base.** The shops' constructors build `Mannequin`'s `CharacterModel` with C2
+  (`0x0208EB18`), as `Character` builds its own; members are built with C1 (`0x0208EBA0`). Measured at
+  `0x0203F9D0`, `0x0203FA50`, `0x020411B0`, `0x02041AD4`, `0x020457F0`.
 
 ## The scene constructors (0x02040578 to 0x0204AF20)
 
