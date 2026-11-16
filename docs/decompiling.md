@@ -210,6 +210,11 @@ The order that the code itself suggests:
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
   into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it).
+- **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
+  array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
+  with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
+  `.bss` blocks go; `static` functions are `local`. The linked module is then compared byte for byte, which finds
+  data the functions do not show: two local `const` scalars in the wrong order, a string with a `/` too many.
 
 ## Which compiler, which flags
 
@@ -336,6 +341,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`). An array
   element read again at each use (`pair[i]->...`) rather than through a local pointer gave the original's
   callee-saved registers (`RoomScene::StartMeeting`).
+- A member set in an if/else rather than by a ternary, and constant tables indexed directly rather than through local
+  pointers (`sButtonPositions[i]`, not `positions = sButtonPositions; positions[i]`), gave the original's choice of
+  spilling `this` and keeping a table's address in a register for the loop (`ItemTradeScene::SetupWindow`).
 - `#pragma opt_common_subs off` around the one function (and `#pragma opt_common_subs reset` after it: `#pragma
   optimization_level reset` does not reset it) where two values swap registers whatever form the source takes (the
   Mii transfer's `func_02077f48`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
