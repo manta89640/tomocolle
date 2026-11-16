@@ -26,6 +26,7 @@
 #include "../overlays/ov106/PreStartScene.h"
 #include "../overlays/ov018/TestNg62Scene.h"
 #include "../overlays/ov020/Scene3F.h"
+#include "../overlays/ov021/TestNg69Scene.h"
 #include "../overlays/ov076/MiiEditScene.h"
 #include "../overlays/ov022/Scene45.h"
 #include "../overlays/ov023/Scene4B.h"
@@ -38,6 +39,7 @@
 #include "../overlays/ov034/TestNg104Scene.h"
 #include "../overlays/ov035/Scene58.h"
 #include "../overlays/ov090/RomanceScene.h"
+#include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
 #include "../overlays/ov093/Scene72.h"
 #include "../overlays/ov094/Scene74.h"
@@ -793,6 +795,9 @@ TestNg62Scene::TestNg62Scene(int sceneId) : Scene(sceneId) {}
 // Scene 0x3F, overlay 20
 Scene3F::Scene3F(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x41, overlay 21
+TestNg69Scene::TestNg69Scene(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0x42, 0x43, 0x44 and 0x6F, overlay 76
 MiiEditScene::MiiEditScene(int sceneId) : Scene(sceneId) {}
 
@@ -828,6 +833,9 @@ Scene58::Scene58(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5A, overlay 90
 RomanceScene::RomanceScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x5E, overlay 91
+CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}
