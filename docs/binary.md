@@ -1958,7 +1958,7 @@ The class names are the project's own; the field names in quotes below are the g
 | `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
 | `Character.cpp` | to `0x02092178`, 73 functions, 68 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
 | `CharacterSort.cpp` | to `0x020979A0`, 23 functions, 15 matching | The resident list's orders: name normalization, collation, comparators |
-| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 85 matching | `SavedCharacter`: the record, its parameters, relations, long activities, troubles |
+| `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 177 matching | `SavedCharacter`: the record, its parameters, relations, long activities, troubles, tastes, reactions, birthday and biorhythm |
 
 Measured:
 
@@ -1998,6 +1998,32 @@ Measured:
 - **The long activities** (`mLongActState`): odd states 0x17 to 0x2D are done with a partner, the even ones after them
   are the partner's side, 0x13 to 0x16 are away; `ChooseLongAct` draws one by weights for the personality's kind and
   the mood (`data_020F8CC0`: minutes, weight, personality bits, mood bits).
+- **The relations** (`mRelationRank`, by the other's index): 0 none, 1 friends, 2 lovers, 3 former lovers, 4 spouses,
+  5 divorced, 6 to 8 friends, lovers and spouses fighting, 9 best friends. The order is the game's list of relation
+  names (`TmdEtcMsgJP`), and the code agrees: a wish to break up looks for a lover liked no more than 50 or one it is
+  fighting with, a divorce for a spouse, a fight that nobody settles turns friends into strangers and lovers and
+  spouses into ones who want to leave each other.
+- **The troubles** (`data_02114D78`: ten tables by category, 12 bytes a trouble: kind, length in minutes, weight;
+  a mood, the minutes of cooldown, whether it has a target; flags). The kinds the code tells apart: 1 wants food
+  (the flags are kinds of food), 3 wants clothes (kinds of clothes: bit 0 warm, bit 1 cool, which are not asked for
+  out of season), 4 wants to make a friend, 5 is in love, 7 and 8 have fought (8 angry), 9 and 10 want to break up and
+  divorce, 11 is heartbroken (category 4, with a progress meter), 19 wants an interior. `StartTrouble` chooses the
+  target (`mTroubleTarget`: a character's index, or a food or clothes); `ExpireTrouble` runs when its time is over:
+  an open one fails (`FailTrouble`: the character eats something by itself, the break-up or divorce happens and
+  leaves the other heartbroken, ...), a finished one is cleared.
+- **Tastes**: goods, clothes and interiors have a taste (0 to 15) for each of four kinds of character; the
+  character's liking is that, give or take three by its create ID, and less for things of the other sex.
+- **Reactions** (overlay 74): `ChooseTalkReaction` draws one of 12 reactions to a partner in a talk by the relation and
+  the partner's last reaction, `ChooseNextReaction` one of 15 by the last one, both weighted by personality, mood and
+  the personality answers.
+- **The calendar**: `GetBirthday` makes a date of the 20th century from the create ID when there is no year of birth;
+  `GetBiorhythm` adds the physical (23 days), intellectual (33) and emotional (28) cycles at the age in days;
+  `GetBirthDayCycle` is the day of the 60-day calendar cycle the character was born on (1900-01-01 counted as day 10),
+  times two, plus the sex.
+- **The file's `.rodata`** (`0x020FB8C0` to `0x020FBCDC`) comes out of the source at the ROM's addresses: a pool of the
+  4- and 2-aligned tables under 64 bytes in size order, then the byte array and the larger tables each on their own.
+  The five answer-score tables are one `s8[5][9]` (separate `s8` arrays are never pooled and would come before the
+  16-byte tables), and the intellectual cycle has a 34th entry, which puts the voice presets on a 4-byte boundary.
 - **The collation**: `CharacterSort::GetCollationKey`, a switch of 522 characters (punctuation, Latin, Greek, kana,
   ...) to ranks, times ten plus five for a full-width letter; names are compared after normalizing in up to five
   rounds of decreasing strength.
