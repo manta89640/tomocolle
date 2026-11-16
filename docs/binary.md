@@ -1437,10 +1437,15 @@ relations GetRelationAfter maps them to are steps in friendship and love; what e
 
 ### DS Protect
 
-Measured: the last 2,776 bytes of code, `0x020AF9F0` to `0x020B04C8`, hold sixteen functions of which seven contain
+Measured: the last 2,776 bytes of code, `0x020AF9F0` to `0x020B04C8`, hold seventeen functions of which seven contain
 ranges that the ROM keeps encrypted (dsd's `dsprot_range`; it decrypts them on extraction and encrypts them again
-when building, `enable_dsprot: true`); two helpers before them flush the data cache and invalidate the instruction
-cache around the decryption. Only `main` calls into them (three entry points, `0x020B0250`, `0x020B0328`,
+when building, `enable_dsprot: true`). The ten before them are the decryption: `DSProtect_DecryptRange` takes the
+word before a range as its marker, makes a 16-byte key of it, finds the range's end by the same word and decrypts the
+range in place (`DSProtect_DecryptWithKey`); `DSProtect_EncryptRange` does the reverse from the end. The cipher is
+RC4 (`DSProtect_RC4Init` is the key schedule over 256 bytes, `DSProtect_RC4NextByte` the generator) applied to each
+instruction's first two bytes, while the third goes through a table that flips its low bit and the fourth (the
+condition and the instruction class) is kept (`DSProtect_CryptInstructions`); `DSProtect_SyncCaches` writes back the
+data cache and disables or enables the instruction cache around it. Only `main` calls into them (three entry points, `0x020B0250`, `0x020B0328`,
 `0x020B0400`). They call `OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes
 of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
 linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
