@@ -520,7 +520,7 @@ struct WirelessManager {
     /* 0x0C */ int mUnknown0C;
     /* 0x10 */ int mUnknown10;
     /* 0x14 */ int mUnknown14;
-    /* 0x18 */ int mUnknown18;
+    /* 0x18 */ int mPageAfterSave;
     /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
 };
 
@@ -663,16 +663,16 @@ public:
     void SetEntry(BOOL enabled);
     void ClearParentNames();
     void Save();
-    void SetUnknown3F098();
+    void SetNeedsSave();
     int NextPageAfterReceive();
 
     /* 0x00010 */ int mPage;     // What the window shows: an index of sPageMessages and sPageLayouts
     /* 0x00014 */ int mNextPage;
-    /* 0x00018 */ int mUnknown18;
-    /* 0x0001C */ int mUnknown1C;
+    /* 0x00018 */ int mPageAfterSave;
+    /* 0x0001C */ int mBgScroll;
     /* 0x00020 */ int mWait;
-    /* 0x00024 */ int mUnknown24;
-    /* 0x00028 */ int mUnknown28;
+    /* 0x00024 */ int mCloseListToReceive;
+    /* 0x00028 */ int mLostInList;
     /* 0x0002C */ MessageFile mMessageFiles[2]; // Etc messages, common messages
     /* 0x0005C */ int mUnknown5C;
     /* 0x00060 */ MessageWindow mWindow;
@@ -680,7 +680,7 @@ public:
     /* 0x1C3AC */ ListView mList;
     /* 0x25824 */ ListPages mPages;
     /* 0x2A97C */ MessageWindow mListWindow;
-    /* 0x35920 */ u8 mUnknown35920;
+    /* 0x35920 */ u8 mSortKey;
     /* 0x35924 */ int mUnknown35924;
     /* 0x35928 */ WindowButton mButtons[3];
     /* 0x36DF8 */ Sprite mSprite;
@@ -690,29 +690,29 @@ public:
     /* 0x36EB0 */ Camera *mCamera;
     /* 0x36EB4 */ SceneCharacter mCharacters[3];
     /* 0x3EFFC */ u8 mCurrent;
-    /* 0x3F000 */ int mUnknown3F000;
+    /* 0x3F000 */ int mCharactersVisible;
     /* 0x3F004 */ ParticleSystem *mParticles;
     /* 0x3F008 */ ParticleEmitter *mEmitters[2];
     /* 0x3F010 */ void *mParticleFile;
     /* 0x3F014 */ VecFx32 mEmitterPositions[2];
     /* 0x3F02C */ int mParticleResource;
-    /* 0x3F030 */ int mUnknown3F030;
-    /* 0x3F034 */ int mUnknown3F034;
+    /* 0x3F030 */ int mEmitterStarted;
+    /* 0x3F034 */ int mParticleFrames;
     /* 0x3F038 */ wchar_t mParentNames[3][11]; // Of the Wiis (or DSs) found
     /* 0x3F07A */ u16 mParentIds[3];
-    /* 0x3F080 */ int mUnknown3F080;
-    /* 0x3F084 */ int mUnknown3F084;
-    /* 0x3F088 */ int mUnknown3F088;
-    /* 0x3F08C */ int mUnknown3F08C;
+    /* 0x3F080 */ int mMusicPlaying;
+    /* 0x3F084 */ int mSendQueued;
+    /* 0x3F088 */ int mPartnerReady;
+    /* 0x3F08C */ int mPartnerSending;
     /* 0x3F090 */ int mUnknown3F090;
-    /* 0x3F094 */ int mUnknown3F094;
-    /* 0x3F098 */ int mUnknown3F098;
-    /* 0x3F09C */ int mUnknown3F09C;
-    /* 0x3F0A0 */ int mUnknown3F0A0;
-    /* 0x3F0A4 */ int mUnknown3F0A4;
-    /* 0x3F0A8 */ int mUnknown3F0A8;
-    /* 0x3F0AC */ int mUnknown3F0AC;
-    /* 0x3F0B0 */ int mUnknown3F0B0;
+    /* 0x3F094 */ int mIsReceiveAnimation;
+    /* 0x3F098 */ int mNeedsSave;
+    /* 0x3F09C */ int mSongStoreFull;
+    /* 0x3F0A0 */ int mShirtDue;
+    /* 0x3F0A4 */ int mWiiShirtDue;
+    /* 0x3F0A8 */ int mReceiveResult;
+    /* 0x3F0AC */ int mWindowReady;
+    /* 0x3F0B0 */ int mConnectRequested;
 }; // 0x3F0B4
 
 #endif // OV109_TUSHINSCENE_H
