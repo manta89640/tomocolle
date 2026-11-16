@@ -2293,13 +2293,6 @@ void NFLi_MapVecFx32Copy(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 
 extern const VecFx32 sNFLFaceGridPoints[3][3];
 extern const VecFx32 sNFLFaceGridNormals[3][3];
 
-#define NFL_PLANE_Z(px, py)                                                                                          \
-    (-FX_Div(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].d +                                                     \
-                 (FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].a, (px)) +                                  \
-                  FX_Mul(sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].b, (py))),                                  \
-             sNFLFacePlanes[(py) <= 0x167B][(px) >= 0x1B33].c) *                                                    \
-     0x47 / 200)
-
 // Parts 4 to 6 of NFLi_MakeFacePartsDL, the mouth (kind 1), the mustache (kind 2) and the mole (kind 0): placed as
 // NFLi_MakeEyeBrowPart places its quads, but looked up at |x| (the face is symmetric), and drawn with the vertices
 // transformed here (MTX_MultVec43, the normals by the rotation's 3x3 part) instead of by matrix commands, so the
@@ -2342,8 +2335,8 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
     int faceType;
     fx16 cos;
     fx16 sin;
-    fx32 scaleY;
-    fx32 scaleX;
+    int scaleY;
+    int scaleX;
     fx32 cross;
     fx32 dot;
     int a;
@@ -2643,9 +2636,6 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
 // Z from the planes of sNFLFacePlanes, their normals interpolated over the 3x3 grids of points (sNFLFaceGridPoints)
 // and normals (sNFLFaceGridNormals), the quad turned onto their sum by matrix commands that the expressions patch.
 // Kind 4 is the mirrored side: its X is negated and its texture runs the other way.
-// Not matching yet: the instructions are the original's but for the same plane lookup as NFLi_MakeMouthMolePart's
-// (here also in the loop, where the original reloads the point it has just stored), and four spill slots (the scales
-// and the two products the loop hoists) are in another order.
 void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state) {
     MtxFx43 mtx;
@@ -2673,8 +2663,8 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     int i;
     int j;
     int faceType;
-    fx32 scaleX;
-    fx32 scaleY;
+    int scaleX;
+    int scaleY;
     fx16 sin;
     fx16 cos;
     fx32 cross;
@@ -2691,6 +2681,7 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     int pj;
     fx32 top;
     fx32 bottom;
+    fx32 px;
 
     texW = 1;
     texH = 1;
@@ -2713,18 +2704,22 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
         cx = -cx;
     }
     center.x = cx;
-    center.z = NFL_PLANE_Z(cx, center.y);
+    pi = cx >= 0x1B33 ? 1 : 0;
+    pj = center.y <= 0x167B ? 1 : 0;
+    center.z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, cx) + FX_Mul(sNFLFacePlanes[pj][pi].b, center.y)),
+                       sNFLFacePlanes[pj][pi].c) * 0x47 / 200;
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             grid[i][j].x = center.x + FX_Mul(sin, i * w * 5 / 64) + FX_Mul(cos, h * (j * 2 - 1) * 5 / 128);
             grid[i][j].y = center.y - FX_Mul(cos, i * w * 5 / 64) + FX_Mul(sin, h * (j * 2 - 1) * 5 / 128);
-            pi = grid[i][j].x >= 0x1B33;
-            pj = grid[i][j].y <= 0x167B;
-            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, grid[i][j].x) +
+            px = grid[i][j].x;
+            pi = px >= 0x1B33 ? 1 : 0;
+            pj = grid[i][j].y <= 0x167B ? 1 : 0;
+            grid[i][j].z = -FX_Div(sNFLFacePlanes[pj][pi].d + (FX_Mul(sNFLFacePlanes[pj][pi].a, px) +
                                                                   FX_Mul(sNFLFacePlanes[pj][pi].b, grid[i][j].y)),
                                    sNFLFacePlanes[pj][pi].c) *
                            0x47 / 200;
-            u = FX_Div(grid[i][j].x - sNFLFaceGridPoints[pj][pi].x, sNFLFaceGridPoints[pj][pi + 1].x - sNFLFaceGridPoints[pj][pi].x);
+            u = FX_Div(px - sNFLFaceGridPoints[pj][pi].x, sNFLFaceGridPoints[pj][pi + 1].x - sNFLFaceGridPoints[pj][pi].x);
             v = FX_Div(grid[i][j].y - sNFLFaceGridPoints[pj][pi].y, sNFLFaceGridPoints[pj + 1][pi].y - sNFLFaceGridPoints[pj][pi].y);
             top = sNFLFaceGridNormals[pj][pi].x +
                FX_Mul(sNFLFaceGridNormals[pj][pi + 1].x - sNFLFaceGridNormals[pj][pi].x, u);

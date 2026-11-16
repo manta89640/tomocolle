@@ -419,6 +419,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   order of their declarations, and a 64-bit variable can be given two slots apart. One variable that is saved in two
   unrelated places got two slots where the original had them elsewhere: two variables, one per place, matched. A
   script that permutes the declarations and counts the differing lines gets close fast; the rest took that split.
+- Spill slots that no declaration order moves (lib/NFL's mesh builders, about 40 spilled values each): the types
+  decide them. `u32 kind` (the type of the parameter it is passed to) where `int` put it below all the others;
+  `int scaleX` where `fx32` (`s32`, a `long`) put the scales above two loop-hoisted products instead of below; `fx16`
+  sine and cosine assigned through a same-type cast (`sin = (fx16)FX_CosIdx(i);`), where without it they went below
+  the scales. Writing a product the loop hoists inline at its uses, instead of through a local set in the outer loop,
+  gave the original's reload of the inner counter. Block locals moved to function scope helped as well.
 - A constant vector copied through a local and stored field by field (`VecFx32 target = sConst; mTarget.x =
   target.x; ...`) where a by-value setter, or the same code in an inline, gave three vector copies one another's
   slots (`WeddingCamera::Reset`, overlay 96).
@@ -512,6 +518,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
   order alone in a test function, and in the other once a switch that reassigns a local follows it. Neither
   temporaries, inlines, parameter types nor `opt_*` pragmas change it. Not solved.
+- The operands of a `+` evaluated right first where the original evaluates the left first, the left one holding
+  `x < 0 ? -x : x`: write the absolute value as a static inline function, `NFLi_Abs(x / 32)` (lib/NFL's mesh
+  builders). Inline, the conditional seems to weigh less in the choice of which operand to evaluate first.
 **Two registers holding one counter**
 - A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list
@@ -556,6 +565,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   made volatile in `MessageWindow.h` changed `PreStartScene::Ask` (overlay 76's page 0 Update).
 - Two ways out of a block written as an if and its else followed by one `return`, where a `return` in each branch
   scheduled the else's code differently (`ItemTradeScene::Update`, overlay 110).
+- A field the original stores and reloads at once (`str r0,[r5,#4]; ldr r3,[r5,#4]`), with the constants of the
+  compares that follow loaded together before them: the compares are conditionals assigned to variables,
+  `pi = x >= 0x1B33 ? 1 : 0; pj = p->y <= 0x167B ? 1 : 0;`. The conditional splits the code into blocks, so the
+  stored value is not forwarded and nothing is scheduled across it; `pi = x >= 0x1B33;`, an if/else on its own line
+  elsewhere, or the compare written inside the index expression all let the compiler forward and reorder (lib/NFL's
+  `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart`, 7 and about 30 differing instructions to none). A static
+  inline `abs` (`return v < 0 ? -v : v;`) between the store and the reads does the same.
 
 **Constants and arithmetic**
 - A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in

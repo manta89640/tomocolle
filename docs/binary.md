@@ -1321,8 +1321,8 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
   the low nibble of byte 2 and bytes 3 to 7, the six bytes that `MiiData_AssignCreateId` takes from its source.
 - **The second display list.** `NFLi_MakeFacePartsDL` builds it from the seven 0x30-byte records of the context
   (0x78..0x1C8): `NFLi_MakeMouthMolePart` for records 4 and 5 (mouth and mustache), and 6 when the Mii has a mole;
-  `NFLi_MakeEyeBrowPart` for 0 to 3 (the eyes and eyebrows, kind 4 the mirrored side). Those two (6 KB and 4 KB; both
-  written, neither matching yet) place a part as a quad on the face: a 2x2 grid of points whose Z is taken from the
+  `NFLi_MakeEyeBrowPart` for 0 to 3 (the eyes and eyebrows, kind 4 the mirrored side). Those two (6 KB and 4 KB, both
+  matching) place a part as a quad on the face: a 2x2 grid of points whose Z is taken from the
   planes at `0x020B676C`, normals interpolated bilinearly over the 3x3 grids of points (`0x020B6818`,
   `sNFLFaceGridPoints`) and normals (`0x020B67AC`, `sNFLFaceGridNormals`), their sum normalised and the quad rotated
   onto it (`MTX_RotAxis43` about the cross product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`)
