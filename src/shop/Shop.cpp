@@ -109,9 +109,59 @@ template <class P> static inline void SetSpritePosition(Sprite *sprite, const P 
     sprite->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
 
-// --- The list -----------------------------------------------------------------------------------------------------
+// --- The file's tables ---------------------------------------------------------------------------------------------
 
+static const ScreenPoint sNamePosition = {0xC, 0xA0};
+static const WindowPoint sTextSize = {0x53, 0x21};
+static const ScreenPoint sShopPriceOffset = {0x34, -2};
+static const ScreenPoint sTabSize = {0x2A, 0x18};
+static const WindowPoint sTextPosition = {0xC, 2};
+static const ScreenPoint sPriceLabelPosition = {0xC7, 0xA0};
+static const WindowPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
+static const ScreenPoint sUpButtonSize = {14, 12};
+static const int sButtonMessages[2] = {6, 5};
+static const ScreenPoint sRowTouchSize = {0xE5, 18};
+static const ScreenPoint sScrollBarPosition = {0xF4, 0x69};
+static const ScreenPoint sUpButtonPosition = {0xF4, 0x3E};
+static const ScreenPoint sShopPriceIconOffset = {0x66, 1};
+static const ScreenPoint sPriceOffset = {0x34, -2};
+static const WindowPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
+static const ScreenPoint sDownButtonPosition = {0xF4, 0x94};
+static const ScreenPoint sShopCountOffset = {0x2A, -2};
+static const int sCanvasColors[3] = {8, 8, 1};
+static const ScreenPoint sCanvasPositions[3] = {{0x2E, 0x42}, {0x7F, 0x42}, {0x43, 0x70}};
+static const ScreenPoint sCanvasSizes[3] = {{4, 2}, {8, 2}, {8, 4}};
 static const ScreenPoint sRowsPosition = {0x77, 0x41};
+static const u8 sButtonB[2] = {0x13, 0x13};
+static const u8 sButtonA[2] = {0x14, 0x14};
+static const ScreenRect sWindowRect = {0x14, 0x14, 0xD8, 0x98};
+static const WindowPoint sMinusButtonOffset = {0x38, 0x5D};
+static const ButtonSounds sButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
+static const WindowPoint sPlusButtonOffset = {0x38, 0x33};
+static const ScreenPoint sIconPosition2 = {0x80, 0x60};
+static const ScreenPoint sCountPosition = {0xCD, 0xAC};
+static const WindowPoint sIconPosition = {0x58, 0x76};
+static const ScreenPoint sCountOffset = {0x2A, -2};
+static const ScreenPoint sTextOffset = {-0x69, -6};
+static const ScreenPoint sDownButtonSize = {14, 12};
+static const ScreenPoint sPricePosition = {0xB2, 0xAC};
+static const ScreenPoint sShopMarkOffset = {-0x6B, 0};
+static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
+static const VecFx32 sLightDirection0 = {0x640, -0x258, -0xFA0};
+static const VecFx32 sLightDirection1 = {0, -0xFA0, 0x5DC};
+static const int sTextMessage[1] = {0xC3}; // The window's question
+static const ScreenPoint sPlusTouchSize = {18, 16};
+static const ScreenPoint sMinusTouchSize = {14, 13};
+static const ScreenPoint sPriceIconOffset = {0x66, 1};
+static const ScreenPoint sCountLabelPosition = {0xC7, 0xA0};
+static const u16 sTabSequences[5] = {0x17, 0x19, 0x1B, 0x1D, 0x1F};
+static const u16 sTabPressedSequences[5] = {0x18, 0x1A, 0x1C, 0x1E, 0x20};
+static const int sTabKinds[5] = {1, 2, 4, 8, 16};
+static const ScreenPoint sTabPositions[5] = {{0x1A, 0x29}, {0x48, 0x29}, {0x76, 0x29}, {0xA4, 0x29}, {0xD2, 0x29}};
+static const ScreenRect sScrollKnobRect = {-8, -8, 16, 16};
+static const ScreenPoint sShopTextOffset = {-0x64, -6};
+
+// --- The list -----------------------------------------------------------------------------------------------------
 
 void ItemListView::Init(int rows) {
     mScrolling = 0;
@@ -157,7 +207,7 @@ void ItemListView::InitRows(int resource, u16 sequence, u16 pressedSequence, int
         func_02031260(&mRowButtons[i], 3);
         func_02031278(&mRowButtons[i], sequence, pressedSequence);
         mRowButtons[i].SetPosition(FxVec2(sRowsPosition.x << FX32_SHIFT, (sRowsPosition.y + i * 20) << FX32_SHIFT));
-        func_02031eb0(&mRowButtons[i], 0xE5, 18);
+        func_02031eb0(&mRowButtons[i], sRowTouchSize.x, sRowTouchSize.y);
         func_0203119c(&mRowButtons[i]);
         mRowButtons[i].mOverwritePalette = 3;
         mRowButtons[i].mVisible = FALSE;
@@ -213,9 +263,6 @@ void ItemListView::InitCounts(int *charOffset) {
     }
 }
 
-static const ScreenPoint sUpButtonPosition = {0xF4, 0x3E};
-static const ScreenPoint sUpButtonSize = {14, 12};
-
 void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                 ScreenPoint size) {
     Sprite_Init(&mUpButton, resource, sequence, 0x80, 0x60, TRUE);
@@ -231,9 +278,6 @@ void ItemListView::InitUpButton(int resource, u16 sequence, u16 pressedSequence)
     InitUpButton(resource, sequence, pressedSequence, sUpButtonPosition, sUpButtonSize);
 }
 
-static const ScreenPoint sDownButtonPosition = {0xF4, 0x94};
-static const ScreenPoint sDownButtonSize = {14, 12};
-
 void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequence, ScreenPoint position,
                                   ScreenPoint size) {
     Sprite_Init(&mDownButton, resource, sequence, 0x80, 0x60, TRUE);
@@ -248,9 +292,6 @@ void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequenc
 void ItemListView::InitDownButton(int resource, u16 sequence, u16 pressedSequence) {
     InitDownButton(resource, sequence, pressedSequence, sDownButtonPosition, sDownButtonSize);
 }
-
-static const ScreenPoint sScrollBarPosition = {0xF4, 0x69};
-static const ScreenRect sScrollKnobRect = {-8, -8, 16, 16};
 
 void ItemListView::InitScrollBar(int resource, int sequence, int knobSequence, int a, int b, int c,
                                  ScreenPoint position, ScreenRect knob) {
@@ -378,12 +419,6 @@ void ItemListView::Draw() {
         func_02031d7c(&mRowButtons[i]);
     }
 }
-
-static const ScreenPoint sCountOffset = {0x2A, -2};
-static const ScreenPoint sPriceIconOffset = {0x66, 1};
-static const ScreenPoint sPriceOffset = {0x34, -2};
-static const ScreenPoint sTextOffset = {-0x69, -6};
-
 
 // Puts each row where its item is at the scroll position, and scrolls the background with them
 void ItemListView::Refresh() {
@@ -795,12 +830,6 @@ void ShopItemListView::SetVisible(BOOL visible) {
     }
 }
 
-static const ScreenPoint sShopCountOffset = {0x2A, -2};
-static const ScreenPoint sShopPriceIconOffset = {0x66, 1};
-static const ScreenPoint sShopPriceOffset = {0x34, -2};
-static const ScreenPoint sShopTextOffset = {-0x64, -6};
-static const ScreenPoint sShopMarkOffset = {-0x6B, 0};
-
 void ShopItemListView::Refresh() {
     for (int i = 0; i < mRowCount; i++) {
         ScreenPoint offset;
@@ -840,18 +869,13 @@ void ShopWindow::Init(ScreenRect rect) {
     mCount = 0;
 }
 
-static const int sCanvasColors[3] = {8, 8, 1};
-static const ScreenPoint sCanvasSizes[3] = {{4, 2}, {8, 2}, {8, 4}};
-static const ScreenPoint sCanvasPositions[3] = {{0x2E, 0x42}, {0x7F, 0x42}, {0x43, 0x70}};
-static const WindowPoint sIconPosition = {0x58, 0x76};
-
 // The plus and minus buttons and the three canvases
 void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     Sprite_Init(&mPlusButton, resource, 6, 0x80, 0x60, TRUE);
     func_02031260(&mPlusButton, 1);
     func_02031278(&mPlusButton, 6, 7);
     mPlusButton.SetPosition(FxVec2(56 << FX32_SHIFT, 51 << FX32_SHIFT));
-    func_02031eb0(&mPlusButton, 18, 16);
+    func_02031eb0(&mPlusButton, sPlusTouchSize.x, sPlusTouchSize.y);
     mPlusButton.mUnknownE0 = 6;
     func_0203119c(&mPlusButton);
     mPlusButton.mOverwritePalette = 0;
@@ -861,7 +885,7 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     func_02031260(&mMinusButton, 1);
     func_02031278(&mMinusButton, 8, 9);
     mMinusButton.SetPositionFromVec(56 << FX32_SHIFT, 93 << FX32_SHIFT);
-    func_02031eb0(&mMinusButton, 14, 13);
+    func_02031eb0(&mMinusButton, sMinusTouchSize.x, sMinusTouchSize.y);
     mMinusButton.mUnknownE0 = 6;
     func_0203119c(&mMinusButton);
     mMinusButton.mOverwritePalette = 0;
@@ -884,16 +908,6 @@ void ShopWindow::InitButtons(int resource, int *charOffset, MessageFile *file) {
     mMessageFile = file;
 }
 
-static const ScreenRect sWindowRect = {0x14, 0x14, 0xD8, 0x98};
-static const u8 sButtonA[2] = {0x14, 0x14};
-static const u8 sButtonB[2] = {0x13, 0x13};
-static const WindowPoint sButtonPositions[2] = {{0xB5, 0x95}, {0x4B, 0x95}};
-static const WindowPoint sButtonSizes[2] = {{0x5E, 0x1E}, {0x5E, 0x1E}};
-static const int sButtonMessages[2] = {6, 5};
-static const ButtonSounds sButtonSounds[2] = {{-1, -1, 0, -1}, {0xC, -1, 0, -1}};
-static const WindowPoint sTextPosition = {0xC, 2};
-static const WindowPoint sTextSize = {0x53, 0x21};
-
 void ShopWindow::Init(const char *screenName, int plane, int resource, int *charOffset, MessageFile *file,
                       MessageFile *buttonFile, int *money) {
     ScreenRect rect = sWindowRect;
@@ -905,7 +919,7 @@ void ShopWindow::Init(const char *screenName, int plane, int resource, int *char
         func_02033844(this, i, resource, sButtonB[i], sButtonA[i], sButtonPositions[i], sButtonSizes[i], buttonFile,
                       sButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sButtonSounds[i], 1);
     }
-    func_020338d0(this, file, 0xC3, &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
+    func_020338d0(this, file, sTextMessage[0], &gFonts[0].mFont, 0x1000, sTextPosition, sTextSize, charOffset);
     func_02034f80(this, 0, 1);
     mMoney = money;
 }
@@ -1025,9 +1039,6 @@ void ShopWindow::DrawCounts() {
     mTextCanvases[2].DrawText();
 }
 
-static const WindowPoint sPlusButtonOffset = {0x38, 0x33};
-static const WindowPoint sMinusButtonOffset = {0x38, 0x5D};
-
 void ShopWindow::SetPosition(WindowPoint position) {
     MessageWindow::SetPosition(position);
     SetSpritePosition(&mPlusButton, AddPoints(position, sPlusButtonOffset));
@@ -1056,12 +1067,6 @@ int HalfPriceShopWindow::GetSellTotal(Item *item, int count) {
 
 // --- The item panel -----------------------------------------------------------------------------------------------
 
-static const ScreenPoint sNamePosition = {0xC, 0xA0};
-static const ScreenPoint sCountPosition = {0xCD, 0xAC};
-static const ScreenPoint sPricePosition = {0xB2, 0xAC};
-static const ScreenPoint sCountLabelPosition = {0xC7, 0xA0};
-static const ScreenPoint sPriceLabelPosition = {0xC7, 0xA0};
-
 void ShopItemPanel::Init(int resource, int sequence, u16 frame, MessageFile *file, int *charOffset) {
     mState = STATE_SHOWN;
     mFrame = 0;
@@ -1076,10 +1081,10 @@ void ShopItemPanel::Init(int resource, int sequence, u16 frame, MessageFile *fil
     Sprite_Init(&mIcon, resource, sequence, 0x80, 0x60, TRUE);
     NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mIcon.mAnim));
     Sprite_SetFrame(&mIcon, frame);
-    mIcon.SetPositionFromVec(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mIcon.SetPositionFromVec(sIconPosition2.x << FX32_SHIFT, sIconPosition2.y << FX32_SHIFT);
     mIcon.mOverwritePalette = 1;
     Sprite_Init(&mSecondIcon, resource, (u16)(sequence + 1), 0x80, 0x60, TRUE);
-    mSecondIcon.SetPositionFromVec(0x80 << FX32_SHIFT, 0x60 << FX32_SHIFT);
+    mSecondIcon.SetPositionFromVec(sIconPosition2.x << FX32_SHIFT, sIconPosition2.y << FX32_SHIFT);
     mSecondIcon.mOverwritePalette = 1;
     mSecondIcon.mVisible = FALSE;
     mCount.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_LEFT | NNS_G2D_HORIZONTALALIGN_LEFT;
@@ -1707,10 +1712,6 @@ static inline void SetUpLight2(Light *light, Camera *camera, GXRgb color, const 
     func_0202aa28(light, camera, direction);
 }
 
-static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
-static const VecFx32 sLightDirection0 = {0x640, -0x258, -0xFA0};
-static const VecFx32 sLightDirection1 = {0, -0xFA0, 0x5DC};
-
 void ShopCounter::MountStaff() {
     mStaff.Mount();
 }
@@ -1835,6 +1836,19 @@ void ShopCounter::GreetCustomer() {
 
 BOOL ShopCounter::IsStaffIdle() {
     return mStaff.IsIdle();
+}
+
+// Not called, and stripped by the link: it keeps the tables of five tab buttons that the ROM has among the file's
+// other tables (sTabSequences, sTabPressedSequences, sTabKinds, sTabPositions, sTabSize), which no code that is
+// linked uses. What it does with them is a guess; only the tables are the original's.
+void Shop_UnusedTabs(SpriteButton *buttons, int resource) {
+    for (int i = 0; i < 5; i++) {
+        Sprite_Init(&buttons[i], resource, sTabSequences[i], 0x80, 0x60, TRUE);
+        func_02031260(&buttons[i], sTabKinds[i]);
+        func_02031278(&buttons[i], sTabSequences[i], sTabPressedSequences[i]);
+        buttons[i].SetPosition(FxVec2(sTabPositions[i].x << FX32_SHIFT, sTabPositions[i].y << FX32_SHIFT));
+        func_02031eb0(&buttons[i], sTabSize.x, sTabSize.y);
+    }
 }
 
 // Picks at random one of the residents whose event (0x14) is at the given place, for the staff to be
