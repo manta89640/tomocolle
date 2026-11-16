@@ -11,76 +11,76 @@
 // --- BEGIN of the file's .rodata (in an order that the compiler sorts into the ROM's) ---
 static const u8 data_ov076_02158748[2] = { 0x6a, 0x6a };
 static const u8 data_ov076_0215874c[2] = { 0x69, 0x69 };
-static const int data_ov076_0215878c = 107;
 static const u8 data_ov076_02158750[4] = { 0x20, 0x22, 0x24, 0x26 };
-static const int data_ov076_0215876c = 28;
+static const int data_ov076_02158754[1] = { 76 };
+static const int data_ov076_02158770[1] = { 2 };
+static const int data_ov076_0215878c[1] = { 107 };
+static const int data_ov076_0215875c[1] = { 4 };
+static const int data_ov076_02158780[1] = { 0 };
+static const int data_ov076_02158758[1] = { 32 };
+static const int data_ov076_02158760[1] = { 4 };
+static const int data_ov076_0215876c[1] = { 28 };
 static const u16 data_ov076_02158788[2] = { 0x10, 0x6b };
-static const int data_ov076_02158754 = 76;
-static const int data_ov076_02158768 = 2;
-static const int data_ov076_02158770 = 2;
-static const int data_ov076_0215877c = 2;
 static const u16 data_ov076_02158774[2] = { 0x4d, 0x4e };
-static const int data_ov076_02158778 = 6;
-static const int data_ov076_02158780 = 0;
-static const u16 data_ov076_02158784[2] = { 0x2, 0x4 };
+static const int data_ov076_02158768[1] = { 2 };
 static const u16 data_ov076_02158764[2] = { 0x30, 0x31 };
-static const int data_ov076_0215875c = 4;
-static const int data_ov076_02158760 = 4;
-static const int data_ov076_02158758 = 32;
-static const WindowPoint data_ov076_021587b8 = { 128, 76 };
-static const WindowPoint data_ov076_02158790 = { 181, 149 };
+static const u16 data_ov076_02158784[2] = { 0x2, 0x4 };
+static const int data_ov076_02158778[1] = { 6 };
+static const int data_ov076_0215877c[1] = { 2 };
+static const WindowPoint data_ov076_021587b0 = { 16, 7 };
+static const WindowPoint data_ov076_021587d8 = { 36, 40 };
 static const WindowPoint data_ov076_021587a8 = { 75, 149 };
 static const WindowPoint data_ov076_021587d0 = { 128, 76 };
-static const WindowPoint data_ov076_021587d8 = { 36, 40 };
-static const WindowPoint data_ov076_021587c0 = { 94, 30 };
 static const WindowPoint data_ov076_021587c8 = { 32, 24 };
-static const WindowPoint data_ov076_021587f8 = { 65, 38 };
-static const WindowPoint data_ov076_02158808 = { 94, 30 };
-static const WindowPoint data_ov076_02158798 = { 42, 36 };
-static const WindowPoint data_ov076_02158800 = { 38, 33 };
-static const WindowPoint data_ov076_021587e8 = { 8, 7 };
-static const u32 data_ov076_021587f0[2] = { 2, 3 };
-static const WindowPoint data_ov076_021587b0 = { 16, 7 };
 static const WindowPoint data_ov076_02158810 = { 30, 20 };
+static const WindowPoint data_ov076_02158798 = { 42, 36 };
+static const u32 data_ov076_021587f0[2] = { 2, 3 };
+static const WindowPoint data_ov076_02158790 = { 181, 149 };
+static const WindowPoint data_ov076_02158800 = { 38, 33 };
+static const WindowPoint data_ov076_021587b8 = { 128, 76 };
+static const WindowPoint data_ov076_02158808 = { 94, 30 };
+static const WindowPoint data_ov076_021587f8 = { 65, 38 };
 static const WindowPoint data_ov076_021587a0 = { 75, 149 };
+static const WindowPoint data_ov076_021587c0 = { 94, 30 };
+static const WindowPoint data_ov076_021587e8 = { 8, 7 };
 static const WindowPoint data_ov076_021587e0 = { 36, 40 };
-static const u16 data_ov076_02158822[5] = { 0x1, 0x2, 0x3, 0x4, 0x5 };
 static const u16 data_ov076_02158818[5] = { 0x26, 0x26, 0x26, 0x26, 0x26 };
-static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
+static const u16 data_ov076_02158822[5] = { 0x1, 0x2, 0x3, 0x4, 0x5 };
 static const int data_ov076_021588b0[3] = { 4, 4, 4 };
-static const VecFx32 data_ov076_02158850 = { 0, 7844, 58762 };
-static const int data_ov076_02158874[3] = { 0, 2, 2 };
-static const VecFx32 data_ov076_0215885c = { 0, 7248, 105456 };
-static const VecFx32 data_ov076_02158838 = { 0, 0, -32768 };
-static const u32 data_ov076_02158868[3] = { 41, 5, 6 };
 static const int data_ov076_02158844[3] = { 1, 0, 0 };
-static const u16 data_ov076_02158880[6] = { 0x58, 0x5a, 0x5c, 0x5e, 0x28, 0x2a };
-static const int data_ov076_0215888c[3] = { 0, 1, 1 };
-static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
+static const VecFx32 data_ov076_02158850 = { 0, 7844, 58762 };
+static const VecFx32 data_ov076_0215885c = { 0, 7248, 105456 };
 static const VecFx32 data_ov076_0215882c = { 0, 0, 0 };
+static const u32 data_ov076_02158868[3] = { 41, 5, 6 };
+static const int data_ov076_02158874[3] = { 0, 2, 2 };
+static const u16 sButtonSequences[6] = { 0x58, 0x5a, 0x5c, 0x5e, 0x28, 0x2a };
+static const VecFx32 data_ov076_02158838 = { 0, 0, -32768 };
+static const int data_ov076_0215888c[3] = { 0, 1, 1 };
+static const VecFx32 sLightDirection1 = { 0, -4000, 1500 };
+static const VecFx32 sLightDirection0 = { 1600, -600, -4000 };
 static const WindowPoint data_ov076_021588cc[2] = { { 128, 96 }, { 128, 96 } };
-static const ScreenRect data_ov076_021588dc = { 20, 20, 216, 152 };
-static const int data_ov076_021588ec[4] = { 16, -1, 0, -1 };
-static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
+static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
+static const ButtonSounds data_ov076_021588ec = { { 16, -1, 0, -1 } };
 static const WindowPoint data_ov076_021588fc[2] = { { 75, 149 }, { 181, 149 } };
-static const int data_ov076_0215890c[4] = { 145, 65, 145, 119 };
-static const int data_ov076_0215891c[4] = { 5, -1, 19, -1 };
-static const WindowPoint data_ov076_0215894c[2] = { { 94, 30 }, { 94, 30 } };
+static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
+static const WindowPoint data_ov076_0215890c[2] = { { 145, 65 }, { 145, 119 } };
+static const ButtonSounds data_ov076_0215891c = { { 5, -1, 19, -1 } };
 static const int data_ov076_0215892c[4] = { 80, 77, 123, 77 };
+static const WindowPoint data_ov076_0215894c[2] = { { 94, 30 }, { 94, 30 } };
 static const int data_ov076_0215893c[4] = { 14, 15, 16, 17 };
 static const u16 data_ov076_0215895c[10] = { 0x0, 0x2, 0x4, 0x6, 0xa, 0xc, 0x10, 0x14, 0x16, 0xe };
 static const int data_ov076_02158970[5] = { 4, 4, 4, 4, 4 };
-static const WindowPoint data_ov076_02158984[3] = { { 62, 22 }, { 116, 30 }, { 116, 30 } };
 static const int data_ov076_0215899c[6] = { 14, 14, 14, 14, 14, 1 };
-static const int data_ov076_021589b4[6] = { 3, 3, 3, 3, 4, 4 };
+static const int sButtonKinds[6] = { 3, 3, 3, 3, 4, 4 };
 static const WindowPoint data_ov076_021589cc[3] = { { 136, 132 }, { 62, 175 }, { 194, 175 } };
 static const int data_ov076_021589e4[6] = { 14, 15, 16, 17, 22, 23 };
-static const int data_ov076_021589fc[8] = { 207, 48, 239, 48, 207, 74, 239, 74 };
+static const WindowPoint data_ov076_02158984[3] = { { 62, 22 }, { 116, 30 }, { 116, 30 } };
+static const WindowPoint data_ov076_021589fc[4] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 } };
 static const ButtonSounds data_ov076_02158a1c[2] = { { 14, -1, 0, -1 }, { 16, -1, 0, -1 } };
 static const ButtonSounds data_ov076_02158a3c[2] = { { 15, -1, 0, -1 }, { 16, -1, 0, -1 } };
-static const int data_ov076_02158a5c[8] = { 80, 90, 176, 90, 80, 90, 176, 90 };
-static const int data_ov076_02158a7c[8] = { 80, 102, 176, 102, 80, 90, 176, 90 };
-static const int data_ov076_02158a9c[8] = { 58, 54, 58, 54, 58, 54, 58, 54 };
+static const WindowPoint data_ov076_02158a5c[4] = { { 80, 90 }, { 176, 90 }, { 80, 90 }, { 176, 90 } };
+static const WindowPoint data_ov076_02158a7c[4] = { { 80, 102 }, { 176, 102 }, { 80, 90 }, { 176, 90 } };
+static const WindowPoint data_ov076_02158a9c[4] = { { 58, 54 }, { 58, 54 }, { 58, 54 }, { 58, 54 } };
 static const int data_ov076_02158abc[8] = { 158, 76, 138, 76, 118, 76, 98, 76 };
 static const int data_ov076_02158adc[8] = { 170, 76, 150, 76, 90, 76, 70, 76 };
 static const int data_ov076_02158afc[8] = { 80, 77, 123, 77, 80, 114, 123, 114 };
@@ -94,43 +94,43 @@ static const WindowPoint data_ov076_02158c00[5] = { { 8, 20 }, { 8, 20 }, { 8, 2
 static const WindowPoint data_ov076_02158c28[5] = { { 128, 26 }, { 128, 59 }, { 128, 92 }, { 128, 125 }, { 128, 158 } };
 static const WindowPoint data_ov076_02158c50[5] = { { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 }, { 12, 12 } };
 static const u16 data_ov076_02158c78[22] = { 0x0, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22, 0x24, 0x28, 0x2a, 0x2c, 0x2e };
-static const int data_ov076_02158ca4[12] = { 40, 18, 40, 18, 40, 18, 40, 18, 40, 18, 24, 22 };
+static const WindowPoint sButtonSizes[6] = { { 40, 18 }, { 40, 18 }, { 40, 18 }, { 40, 18 }, { 40, 18 }, { 24, 22 } };
 static const ButtonSounds data_ov076_02158cd4[3] = { { 20, -1, 0, -1 }, { 22, -1, 0, -1 }, { 20, -1, 0, -1 } };
 static const int data_ov076_02158d04[12] = { 1, 10, 2, 3, 6, 0, 5, 4, 8, 9, 7, 11 };
 static const int data_ov076_02158d34[12] = { 21, 19, 21, 21, 22, 22, 23, 23, 24, 24, 23, 22 };
 static const int data_ov076_02158d64[12] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100 };
 static const int data_ov076_02158d94[12] = { 20, -1, 0, -1, 21, -1, 0, -1, 22, -1, 0, -1 };
-static const int data_ov076_02158dc4[12] = { 32, 181, 80, 181, 128, 181, 176, 181, 224, 181, 242, 13 };
+static const WindowPoint sButtonPositions[6] = { { 32, 181 }, { 80, 181 }, { 128, 181 }, { 176, 181 }, { 224, 181 }, { 242, 13 } };
 static const u16 data_ov076_02158df4[30] = { 0x18, 0x1a, 0x1c, 0x1e, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x20, 0x22, 0x3c, 0x3e, 0x3c, 0x3e, 0x40, 0x42, 0x4f, 0x4f, 0x4f, 0x4f, 0x4f, 0x0 };
-static const char data_ov076_02158e30[] = "E00:/Window_down.nsc";
+static const char sWindowScreenName[] = "E00:/Window_down.nsc";
 static const u8 data_ov076_02158e48[24] = { 0x1a, 0x1a, 0x1b, 0x19, 0x1a, 0x19, 0x1a, 0x19, 0x1c, 0x19, 0x1a, 0x18, 0x1b, 0x1b, 0x1a, 0x1a, 0x19, 0x19, 0x1a, 0x1a, 0x1b, 0x1a, 0x19, 0x1b };
 static const u8 data_ov076_02158e60[50] = { 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c };
-static const int data_ov076_02158e94[16] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
+static const WindowPoint data_ov076_02158f14[8] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 }, { 207, 100 }, { 239, 100 }, { 207, 126 }, { 239, 126 } };
+static const ButtonSounds data_ov076_02158e94[4] = { { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } } };
 static const int data_ov076_02158ed4[16] = { 80, 40, 123, 40, 80, 77, 123, 77, 80, 114, 123, 114, 80, 151, 123, 151 };
-static const int data_ov076_02158f14[16] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100, 207, 126, 239, 126 };
 static const u16 data_ov076_02158f54[36] = { 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x0, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56 };
 static const int data_ov076_02158f9c[18] = { 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
 static const WindowPoint data_ov076_02158fe4[10] = { { 70, 40 }, { 186, 40 }, { 128, 112 }, { 160, 76 }, { 68, 76 }, { 202, 112 }, { 216, 76 }, { 68, 149 }, { 192, 149 }, { 54, 112 } };
 static const int data_ov076_02159034[20] = { 116, 18, 116, 18, 32, 18, 56, 18, 112, 18, 32, 18, 56, 18, 112, 18, 48, 18, 48, 18 };
 static const int data_ov076_02159084[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3 };
-static const int data_ov076_021590dc[24] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 20, -1, 0, -1, 16, -1, 0, -1 };
+static const ButtonSounds sButtonSounds[6] = { { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 20, -1, 0, -1 } }, { { 16, -1, 0, -1 } } };
 static const int data_ov076_0215913c[24] = { 6, 0, 12, 1, 9, 19, 7, 21, 8, 17, 5, 4, 11, 10, 2, 3, 14, 20, 15, 13, 22, 18, 16, 23 };
 static const int data_ov076_0215919c[24] = { 23, 1, 19, 21, 22, 5, 0, 8, 10, 16, 6, 13, 7, 9, 2, 17, 3, 4, 15, 11, 20, 18, 14, 12 };
-static const int data_ov076_021591fc[24] = { 59, 40, 102, 40, 145, 40, 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
+static const WindowPoint data_ov076_021591fc[12] = { { 59, 40 }, { 102, 40 }, { 145, 40 }, { 59, 77 }, { 102, 77 }, { 145, 77 }, { 59, 114 }, { 102, 114 }, { 145, 114 }, { 59, 151 }, { 102, 151 }, { 145, 151 } };
 static const int data_ov076_0215925c[29] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5 };
 static const ScreenRect data_ov076_021592d0[8] = { { 73, -6, 12, 12 }, { 87, -6, 12, 12 }, { 101, -6, 12, 12 }, { 115, -6, 12, 12 }, { 129, -6, 12, 12 }, { 143, -6, 12, 12 }, { 157, -6, 12, 12 }, { 171, -6, 12, 12 } };
 static const int data_ov076_02159350[36] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3 };
 static const int data_ov076_021593e0[40] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
-static const WindowPoint data_ov076_02159480[22] = { { 68, 52 }, { 92, 52 }, { 116, 52 }, { 140, 52 }, { 164, 52 }, { 188, 52 }, { 68, 92 }, { 68, 132 }, { 206, 134 }, { 237, 134 }, { 237, 134 }, { 206, 20 }, { 237, 20 }, { 206, 45 }, { 237, 45 }, { 206, 70 }, { 237, 70 }, { 206, 95 }, { 99, 138 }, { 118, 138 }, { 137, 138 }, { 156, 138 } };
 static const WindowPoint data_ov076_02159530[22] = { { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 22, 22 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 30, 24 }, { 16, 16 }, { 16, 16 }, { 16, 16 }, { 16, 16 } };
+static const WindowPoint data_ov076_02159480[22] = { { 68, 52 }, { 92, 52 }, { 116, 52 }, { 140, 52 }, { 164, 52 }, { 188, 52 }, { 68, 92 }, { 68, 132 }, { 206, 134 }, { 237, 134 }, { 237, 134 }, { 206, 20 }, { 237, 20 }, { 206, 45 }, { 237, 45 }, { 206, 70 }, { 237, 70 }, { 206, 95 }, { 99, 138 }, { 118, 138 }, { 137, 138 }, { 156, 138 } };
 static const int data_ov076_021595e0[48] = { 2, 4, 0, 8, 39, 17, 1, 26, 16, 15, 27, 20, 33, 11, 19, 32, 9, 12, 23, 34, 21, 25, 40, 35, 5, 41, 13, 36, 37, 6, 24, 30, 31, 18, 28, 46, 7, 44, 38, 42, 45, 29, 3, 43, 22, 10, 14, 47 };
 static const int data_ov076_021596a0[58] = { 58, 80, 105, 80, 152, 80, 199, 80, 48, 64, 80, 64, 112, 64, 144, 64, 176, 64, 208, 64, 48, 96, 80, 96, 112, 96, 144, 96, 176, 96, 208, 96, 80, 80, 176, 80, 128, 41, 128, 111, 80, 41, 80, 111, 160, 41, 160, 111, 128, 48, 128, 72, 128, 96, 128, 120, 128, 144 };
 static const int data_ov076_02159788[58] = { 42, 36, 42, 36, 42, 36, 42, 36, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 58, 54, 58, 54, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 126, 20, 126, 20, 126, 20, 126, 20, 126, 20 };
 static const int data_ov076_02159870[72] = { 33, 40, 51, 44, 39, 70, 45, 49, 59, 56, 68, 31, 32, 47, 37, 48, 66, 52, 58, 50, 55, 64, 60, 62, 43, 38, 42, 23, 67, 54, 36, 41, 65, 30, 57, 34, 12, 13, 69, 26, 4, 25, 1, 19, 5, 8, 27, 7, 14, 3, 22, 10, 6, 20, 11, 63, 17, 35, 21, 0, 61, 16, 46, 9, 18, 2, 28, 53, 71, 24, 15, 29 };
-static const int data_ov076_02159990[72] = { 17, 159, 17, 12, 17, 33, 17, 54, 17, 75, 17, 96, 17, 117, 17, 138, 77, 11, 127, 11, 77, 11, 127, 11, 77, 30, 127, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 223, 74, 68, 11, 136, 11, 223, 155, 179, 30, 179, 48, 179, 66, 179, 84, 179, 102, 179, 120, 179, 138, 179, 156 };
+static const WindowPoint data_ov076_02159990[36] = { { 17, 159 }, { 17, 12 }, { 17, 33 }, { 17, 54 }, { 17, 75 }, { 17, 96 }, { 17, 117 }, { 17, 138 }, { 77, 11 }, { 127, 11 }, { 77, 11 }, { 127, 11 }, { 77, 30 }, { 127, 30 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 223, 74 }, { 68, 11 }, { 136, 11 }, { 223, 155 }, { 179, 30 }, { 179, 48 }, { 179, 66 }, { 179, 84 }, { 179, 102 }, { 179, 120 }, { 179, 138 }, { 179, 156 } };
 static const ButtonSounds data_ov076_02159ab0[22] = { { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 14, -1, 0, -1 }, { 1, -1, 0, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 0, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 }, { 2, -1, -1, -1 } };
 static const int data_ov076_02159c10[116] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
-static const int data_ov076_02159de0[144] = { 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1, 13, -1, -1, -1, 13, -1, -1, -1, -1, -1, -1, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1 };
+static const ButtonSounds data_ov076_02159de0[36] = { { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { 12, -1, -1, -1 } }, { { 13, -1, -1, -1 } }, { { 13, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } } };
 // --- END of the file's .rodata ---
 
 // --- BEGIN of the file's .data ---
@@ -269,6 +269,259 @@ void func_02029f20(CharacterModel *model, GXRgb color);
 void func_02029f30(CharacterModel *model, GXRgb color);
 void func_02029f40(CharacterModel *model, GXRgb color);
 void func_02092178(wchar_t *name);
+}
+
+struct Renderer3d;
+extern "C" {
+extern Renderer3d data_02122824;
+void func_0202b0e8(Renderer3d *renderer);
+void func_02090fdc(SceneCharacter *character, int slot, int a, int b);
+void Character_SetFace(SceneCharacter *character, int face);
+void func_0209cbac(CharacterRecord *character, u8 *a, u8 *b);
+void func_02091a14(SceneCharacter *character, BOOL visible);
+BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+void func_020979e0(CharacterRecord *character);
+extern void *data_02123440[];
+void Clock_GetDate(void *clock, RTCDate *date);
+void func_020984e0(CharacterRecord *character, int year, int month, int day);
+void func_0208fd90(CharacterBase *character, int a);
+int func_02098dac(SavedCharacter *character, int param);
+void func_0202a640(Camera *camera);
+extern Camera data_02122764;
+void func_0202a96c(Light *light);
+void func_02024b10(u32 *manager, void *a, int planes);
+int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void *func_0202680c(int size);
+void *func_02026824(int size); // An allocator the particle system is given
+ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
+void func_0207ac78(ParticleSystem *system, void *file);
+void func_0207b110(ParticleSystem *system);
+void func_0207b124(ParticleSystem *system);
+BOOL func_02098584(SavedCharacter *character);
+}
+
+static inline void SetCanvasPosition(ObjTextCanvas &canvas, WindowPoint position) {
+    canvas.mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+// Puts a text canvas at a position in pixels
+static inline void SetCanvasPosition(ObjTextCanvas *canvas, WindowPoint position) {
+    canvas->mSprite.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+}
+
+void MiiEditScene::Init() {
+    mPage = -1;
+    mUnknown1B32C = FALSE;
+    func_0202b0e8(&data_02122824);
+    data_0211d604.SetUnknown44(1);
+    data_0211d604.Show(1);
+    data_0211d604.SetUnknown48(1);
+    G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
+    gSoundManager.LoadGroup(1);
+    gSoundManager.StartSeq(0, 2);
+    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+    func_02090fdc(&mCharacter, 0, 0, 2);
+    Character_SetFace(&mCharacter, 8);
+    switch (mSceneId) {
+    case 0x42:
+        mUnknown5824 = data_0213ba74.mCharacters[0];
+        func_ov076_0214b670(mUnknown5824);
+        break;
+    case 0x44: {
+        mUnknown5824 = data_0213ba74.mCharacters[0];
+        func_ov076_0214b670(mUnknown5824);
+        u8 a;
+        u8 b;
+        func_0209cbac(&mCharacter, &a, &b);
+        mCharacter.mUnknown290 = a;
+        mCharacter.mUnknown291 = b;
+        break;
+    }
+    case 0x43:
+    case 0x6F: {
+        void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
+        func_02029660((void *)mCharacter.mModel.mUnknown04, RESOURCE_BCA0, animations);
+        Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
+        Character_SetAngle(&mCharacter, 0x4000);
+        func_02091a14(&mCharacter, FALSE);
+        int i;
+        for (i = 0; i < 100; i++) {
+            if (!func_0202c354(&gGameData, i)) {
+                break;
+            }
+        }
+        if (i < 100) {
+            mUnknown5824 = i;
+        } else {
+            OS_Terminate();
+        }
+        func_020979e0(&mCharacter);
+        func_0209e01c(&mCharacter);
+        RTCDate date;
+        Clock_GetDate(data_02123440[0], &date);
+        func_020984e0(&mCharacter, date.year, date.month, date.day);
+        break;
+    }
+    }
+    func_02091a24(&mCharacter);
+    mUnknown5828 = FALSE;
+    func_02091a6c(&mCharacter);
+    func_0208fd90(&mEditedCharacter, 0);
+    *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
+    func_0208fefc(&mEditedCharacter);
+    VecFx32 v = mCharacter.mUnknown2568;
+    mEditedCharacter.mUnknown2568 = v;
+    mEditedCharacter.mUnknown25D4 = mCharacter.mUnknown25D4;
+    mEditedCharacter.mUnknown25D6 = mCharacter.mUnknown25D6;
+    mEditedCharacter.mUnknown25D8 = mCharacter.mUnknown25D8;
+    mEditedCharacter.mUnknown25E0 = mCharacter.mUnknown25E0;
+    func_0208ff94(&mEditedCharacter, mCharacter.mUnknown2538, mCharacter.mUnknown2514);
+    mUnknown580C = TRUE;
+    mCamera = &data_02122764;
+    func_0202a640(mCamera);
+    mCamera->mUnknown00 = 0x11E;
+    mCamera->mUnknown04 = 0xFF6;
+    VEC_Set(&mCamera->mPosition, 0, 0x1EA4, 0xE58A);
+    mCamera->mPosition.y += ((u32)func_02098dac(&mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+    mCamera->mTarget.x = mCamera->mPosition.x;
+    mCamera->mTarget.y = mCamera->mPosition.y;
+    mCamera->mTarget.z = mCamera->mPosition.z - FX32_CONST(8);
+    ResetCameraGoal();
+    func_0202a96c(&data_021227cc);
+    func_0202a96c(&data_021227d8);
+    mTtsPlayer.InitEngine();
+    func_02024b10(gGraphicsManager, mUnknown00010, 0x3F00);
+    func_02027290(&gObjResourceManager, "E00:/Obj_down.nce", 0x1000, 0);
+    func_02028f24(&gVramTransferQueue, "E00:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/Window_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
+    func_02028f24(&gVramTransferQueue, "E00:/BG_up.ncg", 0x2F, 0, 0, 0, -1);
+    func_02027534(&data_021213b8, "E00:/BG_up.ncl", 0x2F, -1, -1, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_up.nsc", 4, 0, 0, 0, 0, -1);
+    func_02027d7c(&data_02121834, "E00:/BG_up_textframe.nsc", 2, 0, 0, 0, 0, -1);
+    func_02028280(&data_02121834, 1, 1);
+    func_02028280(&data_02121834, 2, 2);
+    func_02028280(&data_02121834, 4, 3);
+    func_02028280(&data_02121834, 0x10, 0);
+    func_02028280(&data_02121834, 0x100, 0);
+    func_02028280(&data_02121834, 0x200, 1);
+    func_02028280(&data_02121834, 0x1000, 0);
+    func_02023ee0(&data_0211d604, 1, 4, 8, 8);
+    func_ov076_0214bbe4();
+    for (u16 i = 0; i < 6; i++) {
+        Sprite_Init(&mButtons[i], 0, 0, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        func_02031278(&mButtons[i], sButtonSequences[i], sButtonSequences[i] + 1);
+        func_02031260(&mButtons[i], sButtonKinds[i]);
+        func_02032158(&mButtons[i], &sButtonSounds[i]);
+        mButtons[i].mUnknownDC = data_ov076_0215899c[i];
+        mButtons[i].SetPosition(FxVec2(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT));
+        func_0203119c(&mButtons[i]);
+    }
+    Sprite_Init(&mSprite582C, 0, 0x6D, 0x80, 0x60, TRUE);
+    mUnknown58E0 = TRUE;
+    mUnknown58E4 = FALSE;
+    mUnknown58DC = FALSE;
+    func_0202680c(0x4000);
+    mParticles = func_0207ab20(func_02026824, 1, 100, 0, 1, 30);
+    mParticleFile = ArchiveManager_GetFileByName(&gArchiveManager, "SPL:/SplEditEffect.spa");
+    func_0207ac78(mParticles, mParticleFile);
+    func_0207b110(mParticles);
+    func_0207b124(mParticles);
+    int charOffset = 800;
+    mMessageFiles[0].Open("TBM:/tmd_etc_msg_JP.bmg");
+    mMessageFiles[1].Open("T02:/tmd_common_msg_JP.bmg");
+    for (u16 i = 0; i < 9; i++) {
+        int width;
+        switch (i) {
+        case 0:
+        case 1:
+        case 2:
+            width = 0x18;
+            break;
+        case 3:
+            width = 4;
+            break;
+        case 4:
+            width = 6;
+            break;
+        case 5:
+            width = 6;
+            break;
+        case 6:
+            width = 0x10;
+            break;
+        case 7:
+            width = 8;
+            break;
+        case 8:
+            width = 4;
+            break;
+        }
+        mTextBoxes[i].Init(0x1000, width, 2, charOffset, 0, 0, 0, 0, NULL);
+        charOffset += mTextBoxes[i].GetCharCount();
+        WindowPoint position = data_ov076_02158fe4[data_ov076_02158b3c[i]];
+        position.x += -position.x / 2 + 8;
+        position.y -= 7;
+        mTextBoxes[i].mSprite.mOverwritePalette = 1;
+        mTextBoxes[i].mColor = 8;
+        SetCanvasPosition(&mTextBoxes[i], position);
+        mTextBoxes[i].Update(TRUE);
+    }
+    mCharBox.Init(0x1000, 0x20, 2, charOffset, 0, 0, NULL);
+    mCharBox.mColor = 8;
+    SetCanvasPosition(&mCharBox, data_ov076_021587f8);
+    MessageText *text = &mText1B35C;
+    text->InitObjForMessage(&mMessageFiles[0], 0x20, &gFonts[0].mFont, 0x1000,
+                                 charOffset + mCharBox.GetCharCount(), 0, 1, 0, 0, 0xF, NULL);
+    SetCanvasPosition(&mText1B35C, data_ov076_021587b0);
+    text->DrawAll();
+    mText1B35C.mSprite.mOverwritePalette = 0;
+    mText1B35C.mHAlign = 1;
+    text = &mText1B94C;
+    text->InitObjForMessage(&mMessageFiles[0], 0x1C, &gFonts[0].mFont, 0x10, 200, 0, 1, 0, 0, 0xF, NULL);
+    SetCanvasPosition(&mText1B94C, data_ov076_021587e8);
+    text->DrawAll();
+    mText1B94C.mSprite.mOverwritePalette = 2;
+    mUnknown5904 = 0;
+    for (int i = 0; i < 7; i++) {
+        mUnknown58E8[i] = FALSE;
+    }
+    switch (mSceneId) {
+    case 0x42:
+        mSprite582C.func_ov076_0214be80(4);
+        mUnknown58E0 = FALSE;
+        func_ov076_0214b1ec(2);
+        if (!func_02098584(&mCharacter)) {
+            func_02031e88(&mButtons[0], TRUE);
+        }
+        break;
+    case 0x44:
+        func_02031e88(&mButtons[0], TRUE);
+        mSprite582C.func_ov076_0214be80(2);
+        func_ov076_0214b1ec(2);
+        break;
+    case 0x43:
+        func_02031e88(&mButtons[2], TRUE);
+        func_02031e88(&mButtons[3], TRUE);
+        func_02031e88(&mButtons[4], TRUE);
+        mSprite582C.func_ov076_0214be80(0);
+        func_ov076_0214b1ec(0);
+        break;
+    case 0x6F:
+        mButtons[5].mVisible = FALSE;
+        func_02031e88(&mButtons[2], TRUE);
+        func_02031e88(&mButtons[3], TRUE);
+        func_02031e88(&mButtons[4], TRUE);
+        mSprite582C.func_ov076_0214be80(0);
+        func_ov076_0214b1ec(0);
+        break;
+    }
+    gSoundManager.LoadGroup(0x52);
 }
 
 void MiiEditScene::Update() {
@@ -732,6 +985,57 @@ void MiiEditScene::func_ov076_0214bb24() {
 // --- Page 0 ---
 
 extern "C" {
+void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
+                   WindowPoint size, const ButtonSounds *sounds, int b);
+void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
+                   WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const ButtonSounds *sounds, int b);
+}
+
+void MiiEditPage0::func_ov076_0214bf4c(MiiEditScene *scene) {
+    mState = -1;
+    mScene = scene;
+    int charOffset = 900;
+    mScene->func_ov076_0214bb24();
+    ScreenRect rect = sWindowRect;
+    for (int i = 0; i < 2; i++) {
+        func_02032fb8(&mWindows[i], rect);
+        func_02033174(&mWindows[i], sWindowScreenName, 0x100);
+        func_020331bc(&mWindows[i], 0x3F00, rect);
+        func_02034f4c(&mWindows[i], 1);
+    }
+    int number = 0;
+    for (int i = 0; i <= 1; i++) {
+        if (mScene->mSceneId == 0x6F) {
+            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                          data_ov076_02158a7c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        } else {
+            func_02033448(&mWindows[0], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                          data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        }
+        number++;
+    }
+    if (mScene->mSceneId == 0x43) {
+        func_02033844(&mWindows[0], number, 0, 0x69, 0x6A, data_ov076_021587a0, data_ov076_02158808,
+                      &mScene->mMessageFiles[1], 5, &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_021588ec, 1);
+    }
+    charOffset = func_02033a58(&mWindows[0], &mScene->mMessageFiles[0], 0x1A, &gFonts[0].mFont, 0x1000,
+                               data_ov076_021587e0, &charOffset);
+    func_02034f4c(&mWindows[0], 1);
+    func_02034f94(&mWindows[0], 1);
+    number = 0;
+    for (int i = 2; i <= 3; i++) {
+        func_02033448(&mWindows[1], number, 0, data_ov076_02158750[i], data_ov076_02158750[i] + 1,
+                      data_ov076_02158a5c[i], data_ov076_02158a9c[i], &data_ov076_02158e94[i], 14);
+        number++;
+    }
+    charOffset = func_02033a58(&mWindows[1], &mScene->mMessageFiles[0], 0x1B, &gFonts[0].mFont, 0x1000,
+                               data_ov076_021587d8, &charOffset);
+    func_02034f4c(&mWindows[1], 1);
+    func_ov076_0214c624(0);
+}
+
+extern "C" {
 void func_020341d4(MessageWindow *window);
 void func_020349cc(MessageWindow *window, int flags);
 void func_02098cd0(CharacterRecord *character, int sex);
@@ -940,6 +1244,867 @@ int MiiEditScene::func_ov076_0214bf20(const wchar_t *name) {
 }
 
 // --- The face page ---
+
+extern "C" {
+void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
+void func_0203217c(MiiEditSprite100 *slider, int x, int a, int b, int left, int top, int width, int height);
+void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressedSequence);
+void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
+}
+
+void MiiEditFacePage::func_ov076_0214c6d0(MiiEditScene *scene) {
+    mCategory = -1;
+    mScene = scene;
+    scene->func_ov076_0214bca4();
+    for (int i = 0; i < 36; i++) {
+        u16 sequence = data_ov076_02158f54[i];
+        Sprite_Init(&mButtons[i], 0, sequence, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], data_ov076_0215a13c[i].x, data_ov076_0215a13c[i].y);
+        func_02031278(&mButtons[i], sequence, sequence + 1);
+        func_02031260(&mButtons[i], data_ov076_02159350[i]);
+        func_02032158(&mButtons[i], &data_ov076_02159de0[i]);
+        mButtons[i].mUnknownDC = 14;
+        mButtons[i].SetPositionFromVec(data_ov076_02159990[i].x << FX32_SHIFT, data_ov076_02159990[i].y << FX32_SHIFT);
+        func_0203119c(&mButtons[i]);
+    }
+    for (int i = 0; i < 8; i++) {
+        mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+        mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+    }
+    ObjResourceManager_Load(&gObjResourceManager, "E00:/Face.nce", "E00:/Face.ncg", 0x1000, 1, 0x10000);
+    for (u16 i = 0; i < 12; i++) {
+        Sprite_Init(&mButtons227C[i], 1, (u16)(i * 2), 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons227C[i], 0x2A, 0x24);
+        func_02031278(&mButtons227C[i], (u16)(i * 2), (u16)(i * 2 + 1));
+        func_02031260(&mButtons227C[i], 3);
+        func_02032158(&mButtons227C[i], &data_ov076_0215891c);
+        mButtons227C[i].mUnknownDC = 14;
+        mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+    }
+    Sprite_Init(&mSprites2FF4[0], 0, 0x60, 0x80, 0x60, TRUE);
+    Sprite_Init(&mSprites2FF4[1], 0, 0x61, 0x80, 0x60, TRUE);
+    for (int i = 0; i < 2; i++) {
+        u16 sequence = data_ov076_02158784[i];
+        Sprite_Init(&mSprites2DF4[i].mSprite, 0, sequence, 0x80, 0x60, TRUE);
+        func_0203217c(&mSprites2DF4[i], 0x91, 0x9A, 2, -8, -22, 0x10, 0x2C);
+        mSprites2DF4[i].mUnknownD8 = 1;
+        func_020325a8(&mSprites2DF4[i], sequence, sequence + 1);
+        func_020325c4(&mSprites2DF4[i], -1, 6, 7, 10);
+        mSprites2DF4[i].mUnknownF4 = 14;
+        mSprites2DF4[i].mSprite.mPosition.y = data_ov076_0215890c[i].y << FX32_SHIFT;
+        mSprites2FF4[i].mVisible = FALSE;
+        mSprites2FF4[i].SetPositionFromVec(data_ov076_0215890c[i].x << FX32_SHIFT, data_ov076_0215890c[i].y << FX32_SHIFT);
+    }
+    Sprite_Init(&mSprite315C, 0, 0x62, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite32B4, 0, 0x63, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite3208, 0, 0x64, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite3360, 0, 0x65, 0x66, 0xB, TRUE);
+    mSprite315C.mVisible = FALSE;
+    mSprite32B4.mVisible = FALSE;
+    mSprite3208.mVisible = FALSE;
+    mSprite3360.mVisible = FALSE;
+    mSprite315C.mAnim.animCtrl.bActive = FALSE;
+    mSprite32B4.mAnim.animCtrl.bActive = FALSE;
+    mSprite3208.mAnim.animCtrl.bActive = FALSE;
+    mSprite3360.mAnim.animCtrl.bActive = FALSE;
+    mUnknown314C[3] = 0;
+    mUnknown314C[1] = 0;
+    mUnknown314C[2] = 0;
+    mUnknown314C[0] = 0;
+    Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+    Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+    Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+    Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+    mFaceTab.Init(this);
+    mEtcTab.Init(this);
+    for (int i = 0; i < 8; i++) {
+        mUnknown0000[i] = FALSE;
+    }
+    func_ov076_0214de94(1, 0);
+}
+
+extern "C" {
+void func_020321ec(MiiEditSprite100 *slider);
+int func_020324e0(MiiEditSprite100 *slider, int min, int max);
+BOOL func_02032414(MiiEditSprite100 *slider);
+void func_02032578(MiiEditSprite100 *slider, BOOL a);
+}
+
+void MiiEditFacePage::func_ov076_0214cc34() {
+    for (u16 i = 0; i < 36; i++) {
+        if (!func_0203133c(&mButtons[i])) {
+            continue;
+        }
+        int parameter;
+        switch (i) {
+        case 0:
+            func_ov076_0214de94(0, 0);
+            break;
+        case 1:
+            func_ov076_0214de94(1, 0);
+            break;
+        case 2:
+            func_ov076_0214de94(2, 0);
+            break;
+        case 3:
+            func_ov076_0214de94(3, 0);
+            break;
+        case 4:
+            func_ov076_0214de94(4, 0);
+            break;
+        case 5:
+            func_ov076_0214de94(5, 0);
+            break;
+        case 6:
+            func_ov076_0214de94(6, 0);
+            break;
+        case 7:
+            func_ov076_0214de94(7, 0);
+            break;
+        case 8:
+            mFaceTab.SelectTab(0, FALSE);
+            break;
+        case 9:
+            mFaceTab.SelectTab(1, FALSE);
+            break;
+        case 10:
+            mEtcTab.SelectTab(0, FALSE);
+            break;
+        case 11:
+            mEtcTab.SelectTab(1, FALSE);
+            break;
+        case 12:
+            mEtcTab.SelectTab(2, FALSE);
+            break;
+        case 13:
+            mEtcTab.SelectTab(3, FALSE);
+            break;
+        case 27:
+            switch (mUnknown340C) {
+            case 1:
+                SetParameter(mUnknown2DF0, mUnknown2DEC);
+                func_02091a24(&mScene->mCharacter);
+                func_02091a6c(&mScene->mCharacter);
+                func_ov076_0214de94(mCategory, 1);
+                func_ov076_0214fa14(2);
+                break;
+            case 2:
+                SetParameter(mUnknown2DF0, mUnknown2DEC);
+                func_02091a24(&mScene->mCharacter);
+                func_02091a6c(&mScene->mCharacter);
+                func_ov076_0214de94(mCategory, 1);
+                func_ov076_0214fa14(1);
+                break;
+            }
+            break;
+        case 25:
+        case 26:
+            switch (mCategory) {
+            case 2: {
+                if (i == 26) {
+                    if (++mUnknown314C[0] >= 6) {
+                        mUnknown314C[0] -= 6;
+                    }
+                } else if (--mUnknown314C[0] < 0) {
+                    mUnknown314C[0] += 6;
+                }
+                Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+                func_ov076_0214ef88(mUnknown314C[0], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[0]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 3: {
+                if (i == 26) {
+                    if (++mUnknown314C[1] >= 2) {
+                        mUnknown314C[1] -= 2;
+                    }
+                } else if (--mUnknown314C[1] < 0) {
+                    mUnknown314C[1] += 2;
+                }
+                Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+                func_ov076_0214ef88(mUnknown314C[1], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[1]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 4: {
+                if (i == 26) {
+                    if (++mUnknown314C[2] >= 4) {
+                        mUnknown314C[2] -= 4;
+                    }
+                } else if (--mUnknown314C[2] < 0) {
+                    mUnknown314C[2] += 4;
+                }
+                Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+                func_ov076_0214ef88(mUnknown314C[2], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[2]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            case 6: {
+                if (i == 26) {
+                    if (++mUnknown314C[3] >= 2) {
+                        mUnknown314C[3] -= 2;
+                    }
+                } else if (--mUnknown314C[3] < 0) {
+                    mUnknown314C[3] += 2;
+                }
+                Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+                func_ov076_0214ef88(mUnknown314C[3], 12, mCategory);
+                u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), mCategory);
+                int index = button % 12;
+                int page = button / 12;
+                if (page == mUnknown314C[3]) {
+                    func_02031e28(&mButtons227C[index], TRUE);
+                }
+                break;
+            }
+            }
+            break;
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 32:
+        case 33:
+        case 34:
+        case 35: {
+            int color = i - 28;
+            func_ov076_0214ee7c(color, mCategory, mFaceTab.mTab);
+            switch (mCategory) {
+            case 1:
+                parameter = 0x24;
+                break;
+            case 2:
+                parameter = 0x1A;
+                break;
+            case 3:
+                parameter = 7;
+                break;
+            case 4:
+                parameter = 1;
+                break;
+            case 6:
+                parameter = 0xD;
+                break;
+            case 7:
+                switch (mEtcTab.mTab) {
+                case 0:
+                    parameter = 0x20;
+                    break;
+                case 1:
+                    parameter = 0x11;
+                    break;
+                case 2:
+                    parameter = 0x11;
+                    break;
+                case 3:
+                    parameter = 0x11;
+                    break;
+                }
+                break;
+            }
+            SetParameter(parameter, color);
+            break;
+        }
+        }
+        if (i <= 7) {
+            for (int j = 0; j <= 7; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        if (i >= 8 && i <= 9) {
+            for (int j = 8; j <= 9; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        if (i >= 10 && i <= 13) {
+            for (int j = 10; j <= 13; j++) {
+                if (i != j) {
+                    func_02031e28(&mButtons[j], FALSE);
+                }
+            }
+        }
+        BOOL limit = FALSE;
+        switch (mCategory) {
+        case 2:
+            if (i == 24) {
+                limit = func_ov076_0214f930(0x1B, 1, TRUE);
+            }
+            break;
+        case 3:
+            if (func_02098dac(&mScene->mCharacter, 6) == 0x17) {
+                limit = TRUE;
+                break;
+            }
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0xB, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0xB, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(8, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(8, -1, limit);
+                break;
+            case 4:
+                limit = func_ov076_0214f930(9, -1, limit);
+                break;
+            case 5:
+                limit = func_ov076_0214f930(9, 1, limit);
+                break;
+            case 6:
+                limit = func_ov076_0214f930(0xA, -1, limit);
+                break;
+            case 7:
+                limit = func_ov076_0214f930(0xA, 1, limit);
+                break;
+            }
+            break;
+        case 4:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(5, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(5, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(2, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(2, -1, limit);
+                break;
+            case 4:
+                limit = func_ov076_0214f930(3, -1, limit);
+                break;
+            case 5:
+                limit = func_ov076_0214f930(3, 1, limit);
+                break;
+            case 6:
+                limit = func_ov076_0214f930(4, -1, limit);
+                break;
+            case 7:
+                limit = func_ov076_0214f930(4, 1, limit);
+                break;
+            }
+            break;
+        case 5:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0x1E, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0x1E, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(0x1D, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(0x1D, -1, limit);
+                break;
+            }
+            break;
+        case 6:
+            switch (i - 14) {
+            case 0:
+                limit = func_ov076_0214f930(0xF, -1, limit);
+                break;
+            case 1:
+                limit = func_ov076_0214f930(0xF, 1, limit);
+                break;
+            case 2:
+                limit = func_ov076_0214f930(0xE, 1, limit);
+                break;
+            case 3:
+                limit = func_ov076_0214f930(0xE, -1, limit);
+                break;
+            }
+            break;
+        case 7:
+            switch (mEtcTab.mTab) {
+            case 0:
+                if (func_02098dac(&mScene->mCharacter, 0x1F) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x22, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x22, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x21, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x21, -1, limit);
+                    break;
+                }
+                break;
+            case 1:
+                if (func_02098dac(&mScene->mCharacter, 0x12) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x14, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x14, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x13, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x13, -1, limit);
+                    break;
+                }
+                break;
+            case 2:
+                if (func_02098dac(&mScene->mCharacter, 0x15) == 0) {
+                    limit = TRUE;
+                    break;
+                }
+                switch (i - 14) {
+                case 0:
+                    limit = func_ov076_0214f930(0x18, -1, limit);
+                    break;
+                case 1:
+                    limit = func_ov076_0214f930(0x18, 1, limit);
+                    break;
+                case 2:
+                    limit = func_ov076_0214f930(0x16, 1, limit);
+                    break;
+                case 3:
+                    limit = func_ov076_0214f930(0x16, -1, limit);
+                    break;
+                case 9:
+                    limit = func_ov076_0214f930(0x17, 1, limit);
+                    break;
+                case 8:
+                    limit = func_ov076_0214f930(0x17, -1, limit);
+                    break;
+                }
+                break;
+            case 3:
+                break;
+            }
+            break;
+        }
+        switch (i) {
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+        case 22:
+        case 23: {
+            int sound;
+            switch (i - 14) {
+            case 0:
+            case 2:
+            case 4:
+            case 6:
+            case 9:
+                sound = limit ? 0xB : 9;
+                break;
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+                sound = limit ? 0xA : 8;
+                break;
+            }
+            gSoundManager.StartSeqArc(1, 0xE, sound);
+            break;
+        }
+        }
+    }
+    for (u16 i = 0; i < 12; i++) {
+        if (!func_0203133c(&mButtons227C[i])) {
+            continue;
+        }
+        switch (mCategory) {
+        case 1:
+            switch (mFaceTab.mTab) {
+            case 0:
+                func_ov076_0214f264(0x23, i, 0, 8);
+                break;
+            case 1:
+                func_ov076_0214f264(0x25, i, 0, 12);
+                break;
+            }
+            break;
+        case 2:
+            func_ov076_0214f264(0x19, i, (u16)mUnknown314C[0], 12);
+            break;
+        case 3:
+            func_ov076_0214f264(6, i, (u16)mUnknown314C[1], 12);
+            break;
+        case 4:
+            func_ov076_0214f264(0, i, (u16)mUnknown314C[2], 12);
+            break;
+        case 5:
+            func_ov076_0214f264(0x1C, i, 0, 12);
+            break;
+        case 6:
+            func_ov076_0214f264(0xC, i, (u16)mUnknown314C[3], 12);
+            break;
+        case 7:
+            switch (mEtcTab.mTab) {
+            case 0:
+                func_ov076_0214f264(0x1F, i, 0, 9);
+                break;
+            case 1:
+                func_ov076_0214f264(0x12, i, 0, 4);
+                break;
+            case 2:
+                func_ov076_0214f264(0x15, i, 0, 2);
+                break;
+            case 3:
+                func_ov076_0214f264(0x10, i, 0, 4);
+                break;
+            }
+            break;
+        }
+    }
+    switch (mCategory) {
+    case 0:
+        for (int i = 0; i < 2; i++) {
+            func_020321ec(&mSprites2DF4[i]);
+            if (mSprites2DF4[i].mUnknownBC) {
+                switch (i) {
+                case 0: {
+                    int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
+                    func_02098dac(&mScene->mCharacter, 0x2A);
+                    func_02091a24(&mScene->mCharacter);
+                    func_02098c40(&mScene->mCharacter, 0x29, value);
+                    break;
+                }
+                case 1: {
+                    func_02098dac(&mScene->mCharacter, 0x29);
+                    int value = func_020324e0(&mSprites2DF4[i], 0, 0x7F);
+                    func_02091a24(&mScene->mCharacter);
+                    func_02098c40(&mScene->mCharacter, 0x2A, value);
+                    break;
+                }
+                }
+            }
+            if (func_02032414(&mSprites2DF4[i])) {
+                for (int j = 0; j < 2; j++) {
+                    if (j != i) {
+                        func_02032578(&mSprites2DF4[j], FALSE);
+                    }
+                }
+            }
+        }
+        break;
+    case 1:
+        mFaceTab.func_ov076_0214faac();
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    }
+}
+
+extern "C" {
+void func_02032514(MiiEditSprite100 *slider, int min, int max, int value);
+void func_02031ca4(SpriteButton *button);
+}
+
+void MiiEditFacePage::func_ov076_0214de94(int part, BOOL a) {
+    mUnknown0000[part] = TRUE;
+    if (mScene->mSprite582C.mPlace == 0 && mScene->mUnknown58E8[2] == FALSE) {
+        BOOL all = TRUE;
+        for (int i = 0; i < 8; i++) {
+            if (i != 7 && mUnknown0000[i] == FALSE) {
+                all = FALSE;
+                break;
+            }
+        }
+        if (all) {
+            mScene->mUnknown58DC = TRUE;
+        }
+    }
+    for (int i = 0; i < 2; i++) {
+        mSprites2DF4[i].mSprite.mVisible = FALSE;
+        mSprites2FF4[i].mVisible = FALSE;
+    }
+    mButtons[25].mVisible = FALSE;
+    mButtons[26].mVisible = FALSE;
+    mButtons[8].mVisible = FALSE;
+    mButtons[9].mVisible = FALSE;
+    mButtons[10].mVisible = FALSE;
+    mButtons[11].mVisible = FALSE;
+    mButtons[12].mVisible = FALSE;
+    mButtons[13].mVisible = FALSE;
+    mSprite315C.mVisible = FALSE;
+    mSprite3208.mVisible = FALSE;
+    mSprite32B4.mVisible = FALSE;
+    mSprite3360.mVisible = FALSE;
+    for (int i = 0; i <= 7; i++) {
+        if (i != part) {
+            func_02031e28(&mButtons[i], FALSE);
+        }
+    }
+    mButtons[24].mVisible = FALSE;
+    mButtons[14].mVisible = FALSE;
+    mButtons[15].mVisible = FALSE;
+    mButtons[16].mVisible = FALSE;
+    mButtons[17].mVisible = FALSE;
+    mButtons[18].mVisible = FALSE;
+    mButtons[19].mVisible = FALSE;
+    mButtons[20].mVisible = FALSE;
+    mButtons[21].mVisible = FALSE;
+    mButtons[22].mVisible = FALSE;
+    mButtons[23].mVisible = FALSE;
+    for (u16 i = 28; i <= 35; i++) {
+        mButtons[i].mVisible = FALSE;
+    }
+    func_ov076_0214fa14(0);
+    switch (part) {
+    case 0:
+        mScene->MoveCameraTo(data_ov076_0215885c);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].mVisible = FALSE;
+        }
+        for (int i = 0; i < 2; i++) {
+            mSprites2DF4[i].mSprite.mVisible = TRUE;
+            mSprites2FF4[i].mVisible = TRUE;
+        }
+        func_02032514(&mSprites2DF4[0], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x29));
+        func_02032514(&mSprites2DF4[1], 0, 0x7F, func_02098dac(&mScene->mCharacter, 0x2A));
+        func_ov076_0214ee7c(0, part, -1);
+        break;
+    case 1: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        mFaceTab.SelectTab(mFaceTab.mTab, a);
+        break;
+    }
+    case 2: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x19), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 0x1A);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        mButtons[24].mVisible = TRUE;
+        mUnknown314C[0] = page;
+        mSprite315C.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Hair.nce", "E00:/Hair.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[0], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 3: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 6), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 7);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xA0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 8) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 8; i++) {
+            mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+            mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[1] = page;
+        mSprite3208.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Eyebrow.nce", "E00:/Eyebrow.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[1], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 4: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 1);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0xE0, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 6) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 8; i++) {
+            mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+            mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[2] = page;
+        mSprite32B4.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Eye.nce", "E00:/Eye.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[2], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 5: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0x1C), part);
+        int index = button % 12;
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 0) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(0, part, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mButtons[data_ov076_0215893c[i]].mVisible = TRUE;
+            mButtons[data_ov076_0215893c[i]].SetPositionFromVec(data_ov076_021589fc[i].x << FX32_SHIFT, data_ov076_021589fc[i].y << FX32_SHIFT);
+        }
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Nose.nce", "E00:/Nose.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(0, 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 6: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        u32 button = GetPartButton(func_02098dac(&mScene->mCharacter, 0xC), part);
+        int page = button / 12;
+        int index = button % 12;
+        int color = func_02098dac(&mScene->mCharacter, 0xD);
+        func_02027534(&data_021213b8, "E00:/Fw_color.ncl", 0x1000, 0x120, 0x40, 0x60);
+        for (u16 i = 28; i <= 35; i++) {
+            if (i - 28 < 3) {
+                mButtons[i].mVisible = TRUE;
+            } else {
+                mButtons[i].mVisible = FALSE;
+            }
+        }
+        func_ov076_0214ee7c(color, part, -1);
+        for (u16 i = 0; i < 4; i++) {
+            mButtons[data_ov076_0215893c[i]].mVisible = TRUE;
+            mButtons[data_ov076_0215893c[i]].SetPositionFromVec(data_ov076_021589fc[i].x << FX32_SHIFT, data_ov076_021589fc[i].y << FX32_SHIFT);
+        }
+        mUnknown314C[3] = page;
+        mSprite3360.mVisible = TRUE;
+        Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+        mButtons[25].mVisible = TRUE;
+        mButtons[26].mVisible = TRUE;
+        ObjResourceManager_Load(&gObjResourceManager, "E00:/Mouth.nce", "E00:/Mouth.ncg", 0x1000, 1, 0x10000);
+        for (u16 i = 0; i < 12; i++) {
+            mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+        }
+        func_ov076_0214ef88(mUnknown314C[3], 12, part);
+        if (!a) {
+            func_02031e28(&mButtons227C[index], TRUE);
+        } else {
+            func_02031ca4(&mButtons227C[index]);
+        }
+        break;
+    }
+    case 7: {
+        VecFx32 goal = data_ov076_02158850;
+        goal.y += ((u32)func_02098dac(&mScene->mCharacter, 0x29) * 0x1130 >> 7) - 0x898;
+        mScene->MoveCameraTo(goal);
+        mEtcTab.SelectTab(mEtcTab.mTab, a);
+        break;
+    }
+    }
+    mCategory = part;
+    mUnknown0024 = 0;
+}
 
 void MiiEditFacePage::Draw() {
     for (u16 i = 0; i < 12; i++) {
@@ -1943,7 +3108,7 @@ void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 pre
 void MiiEditPage6::func_ov076_02158048(MiiEditScene *scene, int previousPage) {
     mScene = scene;
     mPreviousPage = previousPage;
-    ScreenRect rect = data_ov076_021588dc;
+    ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
     func_02032fb8(&mWindow, rect);
     func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
@@ -2012,7 +3177,7 @@ void MiiEditPage6::Exit() {
 void MiiEditPage5::func_ov076_0215835c(MiiEditScene *scene, int previousPage) {
     mScene = scene;
     mPreviousPage = previousPage;
-    ScreenRect rect = data_ov076_021588dc;
+    ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
     func_02032fb8(&mWindow, rect);
     func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
@@ -2119,14 +3284,14 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[41] = &data_ov076_0215885c;
     p[42] = &data_ov076_02158868;
     p[43] = &data_ov076_02158874;
-    p[44] = &data_ov076_02158880;
+    p[44] = &sButtonSequences;
     p[45] = &data_ov076_0215888c;
     p[46] = &sLightDirection1;
     p[47] = &sLightDirection0;
     p[48] = &data_ov076_021588b0;
     p[49] = &data_ov076_021588bc;
     p[50] = &data_ov076_021588cc;
-    p[51] = &data_ov076_021588dc;
+    p[51] = &sWindowRect;
     p[52] = &data_ov076_021588ec;
     p[53] = &data_ov076_021588fc;
     p[54] = &data_ov076_0215890c;
@@ -2138,7 +3303,7 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[60] = &data_ov076_02158970;
     p[61] = &data_ov076_02158984;
     p[62] = &data_ov076_0215899c;
-    p[63] = &data_ov076_021589b4;
+    p[63] = &sButtonKinds;
     p[64] = &data_ov076_021589cc;
     p[65] = &data_ov076_021589e4;
     p[66] = &data_ov076_021589fc;
@@ -2160,15 +3325,15 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[82] = &data_ov076_02158c28;
     p[83] = &data_ov076_02158c50;
     p[84] = &data_ov076_02158c78;
-    p[85] = &data_ov076_02158ca4;
+    p[85] = &sButtonSizes;
     p[86] = &data_ov076_02158cd4;
     p[87] = &data_ov076_02158d04;
     p[88] = &data_ov076_02158d34;
     p[89] = &data_ov076_02158d64;
     p[90] = &data_ov076_02158d94;
-    p[91] = &data_ov076_02158dc4;
+    p[91] = &sButtonPositions;
     p[92] = &data_ov076_02158df4;
-    p[93] = &data_ov076_02158e30;
+    p[93] = &sWindowScreenName;
     p[94] = &data_ov076_02158e48;
     p[95] = &data_ov076_02158e60;
     p[96] = &data_ov076_02158e94;
@@ -2179,7 +3344,7 @@ extern "C" void func_ov076_KeepData(const void **p) {
     p[101] = &data_ov076_02158fe4;
     p[102] = &data_ov076_02159034;
     p[103] = &data_ov076_02159084;
-    p[104] = &data_ov076_021590dc;
+    p[104] = &sButtonSounds;
     p[105] = &data_ov076_0215913c;
     p[106] = &data_ov076_0215919c;
     p[107] = &data_ov076_021591fc;

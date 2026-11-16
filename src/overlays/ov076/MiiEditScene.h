@@ -19,7 +19,9 @@
 
 // The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
 struct Camera {
-    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ u8 mUnknown08[0xC];
     /* 0x14 */ VecFx32 mPosition;
     /* 0x20 */ VecFx32 mUnknown20;
     /* 0x2C */ VecFx32 mTarget;
@@ -27,9 +29,28 @@ struct Camera {
 
 // The screens: which planes are shown (data_0211d604).
 struct ScreenControl {
+    void Show(u32 planes) {
+        mPlanes |= planes;
+        mPlanesChanged = TRUE;
+    }
+    void SetUnknown44(int value) {
+        mUnknown44 = value;
+        mUnknown44Changed = TRUE;
+    }
+    void SetUnknown48(int value) {
+        mUnknown48 = value;
+        mUnknown48Changed = TRUE;
+    }
+
     /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0xD0];
+    /* 0x04 */ u8 mUnknown04[0x40];
+    /* 0x44 */ int mUnknown44;
+    /* 0x48 */ int mUnknown48;
+    /* 0x4C */ u8 mUnknown4C[0x88];
     /* 0xD4 */ BOOL mPlanesChanged;
+    /* 0xD8 */ u8 mUnknownD8[0x10];
+    /* 0xE8 */ BOOL mUnknown44Changed;
+    /* 0xEC */ BOOL mUnknown48Changed;
 };
 
 // Graphics resources, loaded by file name into VRAM.
@@ -126,27 +147,69 @@ public:
     /* 0x00010 */ MessageWindow mWindows[2];
 }; // 0x15F58
 
+class MiiEditFacePage;
+
+// Two tabs of the face page (its buttons 8 and 9, and 10 to 13, open them): the face's shape and make-up, which
+// shows "Face" graphics and Mii parameters 0x23 to 0x25 (the face's type, colour and texture), and the other parts,
+// which shows "Etc" graphics: glasses (parameters 0x1F, 0x20), mustache (0x12, 0x11), mole (0x15) and beard (0x10,
+// 0x11).
+class MiiEditFaceTab {
+public:
+    void Init(MiiEditFacePage *page);
+    void func_ov076_0214faac();
+    void SelectTab(int tab, BOOL pressed);
+
+    /* 0x0 */ int mTab;
+    /* 0x4 */ int mUnknown4;
+    /* 0x8 */ MiiEditFacePage *mPage;
+}; // 0xC
+
+class MiiEditEtcTab {
+public:
+    void Init(MiiEditFacePage *page);
+    void SelectTab(int tab, BOOL pressed);
+
+    /* 0x0 */ int mTab;
+    /* 0x4 */ int mUnknown4;
+    /* 0x8 */ MiiEditFacePage *mPage;
+}; // 0xC
+
 // The face page: its Init and the functions after it load the parts' graphics (Face, Hair, Eyebrow, Eye, Nose,
 // Mouth, Etc, with the colour palettes Fw_color and Fw_parts)
 class MiiEditFacePage {
 public:
     void func_ov076_0214c6d0(MiiEditScene *scene);
     void func_ov076_0214cc34();
+    void func_ov076_0214de94(int part, int a);
     void Draw();
     void Exit();
+    void func_ov076_0214ee7c(int selected, int category, int tab);
+    void func_ov076_0214ef88(int page, u32 count, int category);
+    int GetPartType(int button, int category);
+    int GetPartButton(int type, int category);
+    void func_ov076_0214f264(int parameter, int selected, int page, u16 count);
+    void SetParameter(int parameter, int value);
+    BOOL func_ov076_0214f930(int parameter, int step, BOOL wrap);
+    void func_ov076_0214fa14(int mode);
 
-    /* 0x0000 */ u8 mUnknown0000[0x2C];
+    /* 0x0000 */ BOOL mUnknown0000[8]; // Set for each part as func_ov076_0214de94 shows it
+    /* 0x0020 */ int mCategory; // Which part the parts' buttons show (GetPartType's category)
+    /* 0x0024 */ int mUnknown0024;
+    /* 0x0028 */ MiiEditScene *mScene;
     /* 0x002C */ SpriteButton mButtons[36];
-    /* 0x227C */ SpriteButton mButtons227C[12];
-    /* 0x2DEC */ u8 mUnknown2DEC[8];
+    /* 0x227C */ SpriteButton mButtons227C[12]; // The parts to choose from
+    /* 0x2DEC */ int mUnknown2DEC;              // SetParameter keeps the value a part's type had before it
+    /* 0x2DF0 */ int mUnknown2DF0;              // and which parameter it was
     /* 0x2DF4 */ MiiEditSprite100 mSprites2DF4[2];
     /* 0x2FF4 */ Sprite mSprites2FF4[2];
-    /* 0x314C */ u8 mUnknown314C[0x10];
+    /* 0x314C */ int mUnknown314C[4]; // Which page of parts 2, 3, 4 and 6 is shown (mSprite315C, 3208, 32B4, 3360 show it)
     /* 0x315C */ Sprite mSprite315C;
     /* 0x3208 */ Sprite mSprite3208;
     /* 0x32B4 */ Sprite mSprite32B4;
     /* 0x3360 */ Sprite mSprite3360;
-    /* 0x340C */ u8 mUnknown340C[0x1C];
+    /* 0x340C */ int mUnknown340C; // func_ov076_0214fa14's mode
+    /* 0x3410 */ MiiEditFaceTab mFaceTab;
+    /* 0x341C */ MiiEditEtcTab mEtcTab;
 }; // 0x3428
 
 // The profile page, with the on-screen keyboard ("Profile" graphics)
