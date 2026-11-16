@@ -413,6 +413,37 @@ void func_02073394(NFLCreateId *id) {
     *(u32 *)&id->data[4] = 0;
 }
 
+u16 func_0206dd1c(int index);
+
+u16 func_02073514(int index) {
+    return func_0206dd1c(index);
+}
+
+// The create-ID helpers above, on a Mii's data
+BOOL func_02073520(const NFLCharData *data) {
+    return func_02073264(&data->createId);
+}
+
+u32 func_02073530(const NFLCharData *data) {
+    return func_02073278(&data->createId);
+}
+
+BOOL func_02073540(const NFLCreateId *a, const NFLCharData *b) {
+    return func_020732a0(a, &b->createId);
+}
+
+BOOL func_02073550(const NFLCharData *data) {
+    return func_0207331c(&data->createId);
+}
+
+BOOL func_02073560(const NFLCharData *a, const NFLCharData *b) {
+    return func_02073330(&a->createId, &b->createId);
+}
+
+void func_02073574(NFLCharData *data) {
+    func_02073394(&data->createId);
+}
+
 int func_02073584(void *p) {
     OSIntrMode enabled = OS_DisableInterrupts();
     NFLWork *work = data_02145360;
@@ -436,4 +467,518 @@ BOOL func_020735dc(void) {
 
 BOOL func_020735fc(void) {
     return data_02145360->unk78 != NULL;
+}
+
+extern const NFLCharData data_020b70c8[];
+
+// Copies Mii index (0 to 5) of the library's table into data, and gives it a blank create ID
+int func_0207361c(NFLCharData *data, u32 index) {
+    if (index > 5) {
+        return 8;
+    }
+    if (data == NULL) {
+        return 8;
+    }
+    MI_CpuCopy8(&data_020b70c8[index], data, sizeof(NFLCharData));
+    func_020731b8((u8 *)data);
+    return 0;
+}
+
+void func_020736ec(NFLCharData *data, int sex, int b, int c);
+
+int func_02073664(NFLCharData *data, int sex, int b, int c) {
+    if (data_02145360 == NULL) {
+        return 4;
+    }
+    if (data == NULL) {
+        return 8;
+    }
+    if (sex < 0 || sex > 2) {
+        return 8;
+    }
+    // The original tests sex again where b and c would be meant
+    if (b < 0 || sex > 3) {
+        return 8;
+    }
+    if (c < 0 || sex > 3) {
+        return 8;
+    }
+    func_020736ec(data, sex, b, c);
+    func_020731b8((u8 *)data);
+    return 0;
+}
+
+u16 func_020743a0(u16 max);
+void func_020737b0(NFLCharData *data, int sex, int b, int c);
+
+// Picks at random what is 2 (sex) or 3 (b and c) on entry, then makes the Mii
+void func_020736ec(NFLCharData *data, int sex, int b, int c) {
+    int d;
+    u16 r;
+
+    if (sex == 2) {
+        if (func_020743a0(2) == 0) {
+            sex = 0;
+        } else {
+            sex = 1;
+        }
+    }
+    if (b == 3) {
+        r = func_020743a0(10);
+        if (r < 4) {
+            b = 0;
+        } else if (r < 8) {
+            b = 1;
+        } else {
+            b = 2;
+        }
+    }
+    switch (c) {
+    case 0:
+        d = 0;
+        break;
+    case 1:
+        d = 1;
+        break;
+    case 2:
+        d = 2;
+        break;
+    case 3:
+        r = func_020743a0(10);
+        if (r < 4) {
+            d = 2;
+        } else if (r < 8) {
+            d = 1;
+        } else {
+            d = 0;
+        }
+        break;
+    }
+    func_020737b0(data, sex, b, d);
+}
+
+
+extern const u8 data_020b69c0[][10];
+
+u8 func_02073eac(int sex, int b, int c) {
+    return data_020b69c0[sex * 9 + b * 3 + c][func_020743a0(10)];
+}
+
+extern const u8 data_020b6c00[][20];
+
+u8 func_020741e8(int sex, int b, int c) {
+    return data_020b6c00[sex * 9 + b * 3 + c][func_020743a0(20)];
+}
+
+int func_02074228(int b) {
+    u16 r = func_020743a0(100);
+
+    switch (b) {
+    case 0:
+        if (r < 90) {
+            return 0;
+        }
+        if (r < 94) {
+            return 1;
+        }
+        if (r < 96) {
+            return 2;
+        }
+        return 3;
+    case 1:
+        if (r < 83) {
+            return 0;
+        }
+        if (r < 86) {
+            return 1;
+        }
+        if (r < 90) {
+            return 2;
+        }
+        if (r < 93) {
+            return 3;
+        }
+        if (r < 94) {
+            return 4;
+        }
+        if (r < 96) {
+            return 5;
+        }
+        if (r < 98) {
+            return 6;
+        }
+        return 7;
+    case 2:
+        if (r < 78) {
+            return 0;
+        }
+        if (r < 83) {
+            return 1;
+        }
+        if (r < 93) {
+            return 3;
+        }
+        if (r < 98) {
+            return 6;
+        }
+        return 7;
+    }
+    return 0;
+}
+
+extern const u8 data_020b6984[][10];
+
+u8 func_02074310(int sex, int c) {
+    return data_020b6984[sex * 3 + c][func_020743a0(10)];
+}
+
+extern const u8 data_020b6a74[][20];
+
+u8 func_02074344(int b, int c) {
+    return data_020b6a74[c * 3 + b][func_020743a0(20)];
+}
+
+extern const u8 data_020b6966[][10];
+
+u8 func_02074378(int c) {
+    return data_020b6966[c][func_020743a0(10)];
+}
+
+// A random number below max (a 16-bit one when max is 0), from the LCG in the work area
+u16 func_020743a0(u16 max) {
+    NFLWork *work = data_02145360;
+
+    u32 r;
+
+    work->unk58 = work->unk5C * work->unk58 + work->unk60;
+    if (max == 0) {
+        r = work->unk58;
+    } else {
+        r = (work->unk58 >> 16) * max;
+    }
+    return r >> 16;
+}
+
+// The coordinate helpers: a vector in the library's axes to the drawing context's, each component to the axis its
+// index says, negated where its flag says
+void func_020743e4(const NFLDrawContext *ctx, VecFx16 *out, const VecFx16 *in) {
+    ((fx16 *)out)[ctx->unkD2] = ctx->unkCC ? -in->x : in->x;
+    ((fx16 *)out)[ctx->unkD0] = ctx->unkC4 ? -in->y : in->y;
+    ((fx16 *)out)[ctx->unkD1] = ctx->unkC8 ? -in->z : in->z;
+}
+
+void func_02074444(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    ((fx32 *)out)[ctx->unkD2] = ctx->unkCC ? -in->x : in->x;
+    ((fx32 *)out)[ctx->unkD0] = ctx->unkC4 ? -in->y : in->y;
+    ((fx32 *)out)[ctx->unkD1] = ctx->unkC8 ? -in->z : in->z;
+}
+
+void func_02074498(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    ((fx32 *)out)[ctx->unkD2] = in->x;
+    ((fx32 *)out)[ctx->unkD0] = in->y;
+    ((fx32 *)out)[ctx->unkD1] = in->z;
+}
+
+void func_020744c0(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in) {
+    fx32 v[3];
+
+    v[ctx->unkD2] = ctx->unkCC ? -in->x : in->x;
+    v[ctx->unkD0] = ctx->unkC4 ? -in->y : in->y;
+    v[ctx->unkD1] = ctx->unkC8 ? -in->z : in->z;
+    out->x = v[0];
+    out->y = v[1];
+    out->z = v[2];
+}
+
+// Rotation about the context's z axis
+void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal) {
+    fx32 a[3];
+    VecFx32 axis;
+
+    a[ctx->unkD2] = 0;
+    a[ctx->unkD0] = 0;
+    a[ctx->unkD1] = ctx->unkC8 ? -FX32_ONE : FX32_ONE;
+    axis.x = a[0];
+    axis.y = a[1];
+    axis.z = a[2];
+    MTX_RotAxis43(mtx, &axis, sinVal, cosVal);
+}
+
+void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+    VecFx32 in;
+    VecFx32 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_02074444(ctx, &out, &in);
+    G3C_Translate(info, out.x, out.y, out.z);
+}
+
+void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+    fx32 out[3];
+    VecFx32 in = {x, y, z};
+
+    out[ctx->unkD2] = in.x;
+    out[ctx->unkD0] = in.y;
+    out[ctx->unkD1] = in.z;
+    G3C_Scale(info, out[0], out[1], out[2]);
+}
+
+void func_02074644(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+    VecFx16 in;
+    VecFx16 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_020743e4(ctx, &out, &in);
+    G3C_Vtx(info, out.x, out.y, out.z);
+}
+
+void func_02074688(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z) {
+    VecFx16 in;
+    VecFx16 out;
+
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    func_020743e4(ctx, &out, &in);
+    G3C_Normal(info, out.x, out.y, out.z);
+}
+
+// Whether end bytes fit in the texture palette slots of a GXVRamTexPltt: 14 an unknown one, 13 too many
+int func_020746cc(int bank, u32 offset, u32 end) {
+    switch (bank) {
+    case 0x20:
+    case 0x40:
+        if (end > 0x4000) {
+            return 13;
+        }
+        break;
+    case 0x60:
+        if (end > 0x8000) {
+            return 13;
+        }
+        break;
+    case 0x10:
+        if (end > 0x10000) {
+            return 13;
+        }
+        break;
+    case 0x30:
+        if (end > 0x14000) {
+            return 13;
+        }
+        break;
+    case 0x70:
+        if (end > 0x18000) {
+            return 13;
+        }
+        break;
+    default:
+        return 14;
+    }
+    return 0;
+}
+
+// Whether end bytes fit in the texture slots of a GXVRamTex: 12 none, 11 too many
+int func_02074778(int bank, u32 offset, u32 end) {
+    switch (bank) {
+    case 1:
+    case 2:
+    case 4:
+    case 8:
+        if (end > 0x20000) {
+            return 11;
+        }
+        break;
+    case 3:
+    case 5:
+    case 6:
+    case 9:
+    case 10:
+    case 12:
+        if (end > 0x40000) {
+            return 11;
+        }
+        break;
+    case 7:
+    case 11:
+    case 13:
+    case 14:
+        if (end > 0x60000) {
+            return 11;
+        }
+        break;
+    case 15:
+        if (end > 0x80000) {
+            return 11;
+        }
+        break;
+    case 0:
+    default:
+        return 12;
+    }
+    return 0;
+}
+
+// Where each GXVRamTex's texture slots are in the LCDC's memory, in 4 KB: the first part, the second part, and the
+// size of the first
+typedef struct NFLTexBank {
+    u16 unk0;
+    u16 unk2;
+    u16 unk4;
+} NFLTexBank;
+
+extern const NFLTexBank data_020b7b04[];
+
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
+int func_02074814(int bank, const void *src, u32 offset, u32 size) {
+    u32 n;
+    void *dest;
+    int result;
+    u32 second = data_020b7b04[bank].unk2 << 12;
+    u32 first = data_020b7b04[bank].unk0;
+    u32 split = data_020b7b04[bank].unk4;
+    u32 end = offset + size;
+
+    result = func_02074778(bank, offset, end);
+    if (result != 0) {
+        return result;
+    }
+    if (second == 0) {
+        dest = (void *)(offset + (first << 12));
+    } else if (end < split << 12) {
+        dest = (void *)(offset + (first << 12));
+    } else if (offset >= split << 12) {
+        dest = (void *)(second + offset - (split << 12));
+    } else {
+        n = (split << 12) - offset;
+        dest = (void *)(offset + (first << 12));
+        MIi_CpuCopy32(src, dest, n);
+        DC_FlushRange(dest, n);
+        size -= n;
+        MIi_CpuCopy32((const u8 *)src + n, (void *)second, size);
+        DC_FlushRange((void *)second, size);
+        return 0;
+    }
+    MIi_CpuCopy32(src, dest, size);
+    DC_FlushRange(dest, size);
+    return 0;
+}
+
+extern const u16 data_020b7af4[];
+
+// Copies size bytes of palettes to offset of the texture palette slots, through the LCDC, as GX_LoadTexPltt does
+int func_02074904(int bank, const void *src, u32 offset, u32 size) {
+    u32 base = data_020b7af4[bank >> 4] << 12;
+    int result = func_020746cc(bank, offset, offset + size);
+    void *dest;
+
+    if (result != 0) {
+        return result;
+    }
+    dest = (void *)(offset + base);
+    MIi_CpuCopy32(src, dest, size);
+    DC_FlushRange(dest, size);
+    return 0;
+}
+
+int func_0200473c(void);
+int func_0200474c(void);
+
+int func_02074964(const void *src, u32 offset, u32 size) {
+    int bank = func_0200473c();
+    int result;
+
+    GX_BeginLoadTex();
+    result = func_02074814(bank, src, offset, size);
+    GX_EndLoadTex();
+    return result;
+}
+
+int func_020749a4(const void *src, u32 offset, u32 size) {
+    int bank = func_0200474c();
+    int result;
+
+    GX_BeginLoadTexPltt();
+    result = func_02074904(bank, src, offset, size);
+    GX_EndLoadTexPltt();
+    return result;
+}
+
+BOOL func_02074b68(u32 *arg);
+BOOL func_0207516c(u32 *arg);
+void func_02075528(NFLObj *obj, u32 *arg);
+void func_02075f50(NFLObj *obj, u32 *arg);
+void func_020763e0(NFLObj *obj);
+
+// The library's work of a frame, which main calls every frame: 4 not set up, 0x14 and 0x13 busy, 3 nothing to do
+int func_020749e4(void) {
+    NFLWork *work = data_02145360;
+    u32 arg;
+
+    if (work == NULL) {
+        return 4;
+    }
+    arg = work->unk88;
+    if (work->unk8C == 3) {
+        return 0x14;
+    }
+    if (work->unk8C == 1) {
+        return 0x13;
+    }
+    if (work->unk8C == 4) {
+        return 3;
+    }
+    work->unk8C = 1;
+    work->unk9C = 0;
+    switch (work->unk90) {
+    case 0:
+        func_02074b68(&arg);
+        work->unk8C = 2;
+        break;
+    case 1:
+        func_0207516c(&arg);
+        work->unk8C = 2;
+        break;
+    case 2:
+        if (work->unk74 == NULL) {
+            work->unk8C = 4;
+            work->unk88 = 0;
+            work->unk80 = 0;
+            work->unk84 = 0;
+            return 3;
+        }
+        switch (work->unk74->unk170) {
+        case 0:
+            func_02075528(work->unk74, &arg);
+            work->unk8C = 2;
+            break;
+        case 1:
+            func_02075f50(work->unk74, &arg);
+            work->unk8C = 2;
+            break;
+        case 2:
+        case 4:
+            func_020763e0(work->unk74);
+            work->unk8C = 0;
+            break;
+        }
+        break;
+    }
+    work->unk88 = arg;
+    return 0;
+}
+
+void func_0206dd44(u16 *dest, const void *src, const u16 *palette, u32 size, BOOL arg4);
+
+// Copies size bytes, or converts them through palette when there is one
+void func_02074b34(const void *src, void *dest, const u16 *palette, u32 size, BOOL arg4) {
+    if (palette != NULL) {
+        func_0206dd44(dest, src, palette, size, arg4);
+    } else {
+        MIi_CpuCopy32(src, dest, size);
+    }
 }
