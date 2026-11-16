@@ -6248,7 +6248,7 @@ rtcWork kind:bss addr:0x0211b6c4
 CARDi_EnableFlag kind:bss addr:0x0211b700
 cardi_arg kind:bss addr:0x0211b720
 cardi_common kind:bss addr:0x0211b780
-data_0211bda0 kind:bss addr:0x0211bda0
+cardi_rom_base kind:bss addr:0x0211bda0
 rom_stat kind:bss addr:0x0211bdc0
 CARDi_IsPulledOutFlag kind:bss addr:0x0211bfe0
 wmInitialized kind:bss addr:0x0211c000
