@@ -193,6 +193,8 @@ typedef struct NFLWork {
         u32 unk4;
         int unk8;
     } unkA0[7];
+    // Past the work area's 0xF4 bytes: main passes a 0x4000-byte buffer right after it (data_02115574, kept at
+    // unk78), and func_0206ddb8 stores 7 at 0x38 of it through data_02145360 (measured)
     u8 unkF4[0x12C - 0xF4];
     int unk12C;
 } NFLWork;

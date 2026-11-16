@@ -777,6 +777,206 @@ int func_0206b740(NFLMakeCtx *ctx) {
 }
 #pragma optimization_level reset
 
+// The hair's other mesh, for the types with a texture of their own
+#pragma optimization_level 2
+int func_0206bb24(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    s16 texCoords[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    int type;
+    BOOL bald;
+    GXTexSizeS s;
+    GXTexSizeT t;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+    int tc;
+
+    type = mii->hairType;
+    stream = func_0206cf6c(9, type);
+    bald = type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+           type == 0x45 || type == 0x47;
+    s = bald ? GX_TEXSIZE_S32 : GX_TEXSIZE_S8;
+    t = bald ? GX_TEXSIZE_T32 : GX_TEXSIZE_T8;
+    obj->unk94[0].cmd = NULL;
+    obj->unk94[0].param = NULL;
+    obj->unk94[0].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    func_02069d28(&stream, texCoords);
+    polygons = func_02069bf4(&stream);
+    if (obj->unk90 == 7) {
+        format = GX_TEXFMT_DIRECT;
+    } else {
+        format = bald ? GX_TEXFMT_PLTT16 : GX_TEXFMT_PLTT4;
+    }
+    obj->unk94[0].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[0].param = ctx->unk64.curr_param;
+    obj->unk94[0].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_NONE,
+                      type == 0x1D ? GX_TEXPLTTCOLOR0_TRNS : GX_TEXPLTTCOLOR0_USE, ctx->unk2C[2].unk0);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, ctx->unk2C[2].unk4, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        if (!bald) {
+            G3C_TexCoord(&ctx->unk64, 0, 0);
+        }
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            tc = func_02069bf4(&stream) * 2;
+            if (bald) {
+                G3C_TexCoord(&ctx->unk64, texCoords[tc] << 5, texCoords[tc + 1] << 5);
+            }
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
+// The hair's third mesh, untextured
+#pragma optimization_level 2
+int func_0206bfa4(NFLMakeCtx *ctx) {
+    s16 vertices[0x4B0];
+    s16 normals[0x5C4];
+    VecFx32 position;
+    VecFx32 translation;
+    MtxFx43 mtx;
+    const u8 *stream;
+    VecFx16 prev;
+    VecFx16 vertex;
+    VecFx16 normal;
+    int i;
+    int polygons;
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    GXTexFmt format;
+    int j;
+    int count;
+    int v;
+    int n;
+
+    stream = func_0206cf6c(6, mii->hairType);
+    format = obj->unk90 == 7 ? GX_TEXFMT_DIRECT : GX_TEXFMT_PLTT4;
+    obj->unk94[2].cmd = NULL;
+    obj->unk94[2].param = NULL;
+    obj->unk94[2].unk8 = 0;
+    if (func_02069ce0(&stream, vertices) == 0) {
+        return 0;
+    }
+    func_02069ce0(&stream, normals);
+    polygons = func_02069bf4(&stream);
+    obj->unk94[2].cmd = ctx->unk64.curr_cmd;
+    obj->unk94[2].param = ctx->unk64.curr_param;
+    obj->unk94[2].unk8 = mii->hairFlip;
+    G3C_PolygonAttr(&ctx->unk64, 1, GX_POLYGONMODE_MODULATE, mii->hairFlip ? GX_CULL_BACK : GX_CULL_FRONT, 0, 0, 0);
+    G3C_TexImageParam(&ctx->unk64, format, GX_TEXGEN_NONE, GX_TEXSIZE_S8, GX_TEXSIZE_T8, GX_TEXREPEAT_NONE,
+                      GX_TEXFLIP_NONE, GX_TEXPLTTCOLOR0_USE, obj->unk8);
+    if (obj->unk90 != 7) {
+        G3C_TexPlttBase(&ctx->unk64, obj->unkC, format);
+    }
+    G3C_PushMtx(&ctx->unk64);
+    position.x = ctx->unk0[2].x;
+    position.y = ctx->unk0[2].y;
+    position.z = ctx->unk0[2].z;
+    func_02074444(obj, &translation, &position);
+    G3C_Translate(&ctx->unk64, translation.x, translation.y, translation.z);
+    if (mii->hairFlip) {
+        position.x = -FX32_ONE;
+        position.y = FX32_ONE;
+        position.z = FX32_ONE;
+        ((fx32 *)&translation)[obj->unkD2] = position.x;
+        ((fx32 *)&translation)[obj->unkD0] = position.y;
+        ((fx32 *)&translation)[obj->unkD1] = position.z;
+        MTX_Scale43(&mtx, translation.x, translation.y, translation.z);
+        G3C_LoadMtx43(&ctx->unk64, &mtx);
+    }
+    for (i = 0; i < polygons; i++) {
+        count = func_02069bf4(&stream);
+        func_02005124(&ctx->unk64, func_02069d70(&stream));
+        G3C_TexCoord(&ctx->unk64, 0x8000, 0);
+        for (j = 0; j < count; j++) {
+            v = func_02069bf4(&stream) * 3;
+            n = func_02069bf4(&stream) * 3;
+            func_020743e4(obj, &normal, &normals[n]);
+            G3C_Normal(&ctx->unk64, normal.x, normal.y, normal.z);
+            func_020743e4(obj, &vertex, &vertices[v]);
+            if (j > 0) {
+                if (prev.x == vertex.x) {
+                    G3C_VtxYZ(&ctx->unk64, vertex.y, vertex.z);
+                } else if (prev.y == vertex.y) {
+                    G3C_VtxXZ(&ctx->unk64, vertex.x, vertex.z);
+                } else if (prev.z == vertex.z) {
+                    G3C_VtxXY(&ctx->unk64, vertex.x, vertex.y);
+                } else {
+                    G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+                }
+            } else {
+                G3C_Vtx(&ctx->unk64, vertex.x, vertex.y, vertex.z);
+            }
+            prev = vertex;
+        }
+        func_02005148(&ctx->unk64);
+    }
+    G3C_PopMtx(&ctx->unk64, 1);
+    return 1;
+}
+#pragma optimization_level reset
+
 // The glasses' mesh
 int func_0206c2f8(NFLMakeCtx *ctx) {
     s16 vertices[0x4B0];
@@ -1912,6 +2112,90 @@ int func_0206e650(NFLMakeCtx *ctx) {
     return func_0206e5bc(obj, &ctx->unk24);
 }
 
+
+extern const u8 data_020b6884[];
+extern const u8 data_020b689c[];
+
+// The places, sizes and rotations of the seven parts (NFLMakeCtx 0x78), from the Mii's data
+void func_0206e724(NFLMakeCtx *ctx) {
+    const NFLCharData *mii = ctx->unk1CC;
+    fx32 eyeX = mii->eyeX * 0xE95 - 0x280;
+    fx32 eyeY = -(mii->eyeY * 0x11A1 - 0x21149);
+    fx32 eyeScale = FX_Mul(mii->eyeScale * 0x700 + 0x1000, 0x4C00);
+    int eyeRotation = data_020b689c[mii->eyeType] + mii->eyeRotation - 0x20;
+    fx32 eyebrowX = mii->eyebrowX * 0xE95 - 0x2E0;
+    fx32 eyebrowY = -(mii->eyebrowY * 0x10E1 - 0x22490);
+    fx32 eyebrowScale = FX_Mul(mii->eyebrowScale * 0x680 + 0x1000, 0x4C40);
+    int eyebrowRotation = data_020b6884[mii->eyebrowType] + mii->eyebrowRotation - 0x20;
+    fx32 mouthY = -(mii->mouthY * 0x10A1 - 0x161BA);
+    fx32 mouthScale = mii->mouthScale * 0x6E0 + 0x1000;
+    fx32 beardY = -(mii->beardY * 0x10E1 - 0x13DB7);
+    fx32 beardScale = mii->beardScale * 0x740 + 0x1000;
+    fx32 moleX = (mii->moleX - 8) * 0x1BCA;
+    fx32 moleY = -(mii->moleY * 0x10A1 - 0x20CE9);
+    fx32 moleScale = mii->moleScale * 0x540 + 0x1000;
+    fx32 eyeHeight = 0xD100;
+    fx32 eyebrowHeight = 0xC828;
+    fx32 beardHeight = 0x147A8;
+    fx32 moleHeight = 0x25DE;
+
+    ctx->unk78[0].unk0[0] = eyeX;
+    ctx->unk78[0].unk0[1] = eyeY;
+    ctx->unk78[0].unk0[2] = eyeScale;
+    ctx->unk78[0].unk0[3] = -eyeScale;
+    ctx->unk78[0].unk0[4] = eyeHeight;
+    ctx->unk78[0].unk0[5] = -eyeHeight;
+    ctx->unk78[0].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[0].unk0[7] = 4;
+    ctx->unk78[1].unk0[0] = eyeX;
+    ctx->unk78[1].unk0[1] = eyeY;
+    ctx->unk78[1].unk0[2] = eyeScale;
+    ctx->unk78[1].unk0[3] = -eyeScale;
+    ctx->unk78[1].unk0[4] = eyeHeight;
+    ctx->unk78[1].unk0[5] = -eyeHeight;
+    ctx->unk78[1].unk0[6] = -(eyeRotation * 0x10000 / 32);
+    ctx->unk78[1].unk0[7] = 3;
+    ctx->unk78[2].unk0[0] = eyebrowX;
+    ctx->unk78[2].unk0[1] = eyebrowY;
+    ctx->unk78[2].unk0[2] = eyebrowScale;
+    ctx->unk78[2].unk0[3] = -eyebrowScale;
+    ctx->unk78[2].unk0[4] = eyebrowHeight;
+    ctx->unk78[2].unk0[5] = -eyebrowHeight;
+    ctx->unk78[2].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[2].unk0[7] = 4;
+    ctx->unk78[3].unk0[0] = eyebrowX;
+    ctx->unk78[3].unk0[1] = eyebrowY;
+    ctx->unk78[3].unk0[2] = eyebrowScale;
+    ctx->unk78[3].unk0[3] = -eyebrowScale;
+    ctx->unk78[3].unk0[4] = eyebrowHeight;
+    ctx->unk78[3].unk0[5] = -eyebrowHeight;
+    ctx->unk78[3].unk0[6] = -(eyebrowRotation << 11);
+    ctx->unk78[3].unk0[7] = 3;
+    ctx->unk78[4].unk0[0] = 0;
+    ctx->unk78[4].unk0[1] = mouthY;
+    ctx->unk78[4].unk0[2] = FX_Mul(mouthScale, 0x5180);
+    ctx->unk78[4].unk0[3] = -FX_Mul(mouthScale, 0x28C0);
+    ctx->unk78[4].unk0[4] = 0xDD94;
+    ctx->unk78[4].unk0[5] = -0x6ECA;
+    ctx->unk78[4].unk0[6] = 0;
+    ctx->unk78[4].unk0[7] = 1;
+    ctx->unk78[5].unk0[0] = 0;
+    ctx->unk78[5].unk0[1] = beardY;
+    ctx->unk78[5].unk0[2] = FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[3] = -FX_Mul(beardScale, 0x7480);
+    ctx->unk78[5].unk0[4] = beardHeight;
+    ctx->unk78[5].unk0[5] = -beardHeight;
+    ctx->unk78[5].unk0[6] = 0;
+    ctx->unk78[5].unk0[7] = 2;
+    ctx->unk78[6].unk0[0] = moleX;
+    ctx->unk78[6].unk0[1] = moleY;
+    ctx->unk78[6].unk0[2] = FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[3] = -FX_Mul(moleScale, 0x1060);
+    ctx->unk78[6].unk0[4] = moleHeight;
+    ctx->unk78[6].unk0[5] = -moleHeight;
+    ctx->unk78[6].unk0[6] = 0;
+    ctx->unk78[6].unk0[7] = 0;
+}
 
 // Four planes, z = -(x * unk0 + y * unk4 + unkC) / unk8, by the quadrant a point is in (func_0206ebb0)
 typedef struct NFLPlane {
