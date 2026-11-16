@@ -4206,7 +4206,7 @@ __sinit_020b06cc kind:function(arm,size=0x14) addr:0x020b06cc
 __sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
 __sinit_MiiListMenuScene.cpp kind:function(arm,size=0x88) addr:0x020b06f4 local
 __sinit_MiiListScene.cpp kind:function(arm,size=0x64) addr:0x020b077c local
-__sinit_020b07e0 kind:function(arm,size=0x30) addr:0x020b07e0
+__sinit_KeyboardCore.cpp kind:function(arm,size=0x30) addr:0x020b07e0 local
 FX_SinCosTable_ kind:data(any) addr:0x020b0810
 data_020b1410 kind:data(any) addr:0x020b1410
 data_020b1810 kind:data(any) addr:0x020b1810
@@ -4838,7 +4838,7 @@ data_020fc48c kind:data(any) addr:0x020fc48c
 .p__sinit_020b06e0 kind:data(word) addr:0x020fc4ec
 .p__sinit_MiiListMenuScene.cpp kind:data(word) addr:0x020fc4f0 local
 .p__sinit_MiiListScene.cpp kind:data(word) addr:0x020fc4f4 local
-.p__sinit_020b07e0 kind:data(word) addr:0x020fc4f8
+.p__sinit_KeyboardCore.cpp kind:data(word) addr:0x020fc4f8 local
 data_020fc500 kind:data(any) addr:0x020fc500
 data_020fc504 kind:data(any) addr:0x020fc504
 gStr_NFL kind:data(any) addr:0x020fc510
@@ -5504,26 +5504,23 @@ data_0211216c kind:data(any) addr:0x0211216c
 data_021121b4 kind:data(any) addr:0x021121b4
 data_0211220c kind:data(any) addr:0x0211220c
 data_02112214 kind:data(any) addr:0x02112214
-data_02112220 kind:data(any) addr:0x02112220
-data_0211227c kind:data(any) addr:0x0211227c
-data_021122d8 kind:data(any) addr:0x021122d8
-data_02112334 kind:data(any) addr:0x02112334
-data_021123a4 kind:data(any) addr:0x021123a4
-data_0211240c kind:data(any) addr:0x0211240c
-data_02112474 kind:data(any) addr:0x02112474
-data_021124e4 kind:data(any) addr:0x021124e4
-data_0211254c kind:data(any) addr:0x0211254c
-data_021126d4 kind:data(any) addr:0x021126d4
-data_02112884 kind:data(any) addr:0x02112884
-data_02112a54 kind:data(any) addr:0x02112a54
-data_02112bfc kind:data(any) addr:0x02112bfc
-data_02112dc4 kind:data(any) addr:0x02112dc4
-gStr_hY kind:data(any) addr:0x02112dec
-data_02112dfc kind:data(any) addr:0x02112dfc
-data_02112e0c kind:data(any) addr:0x02112e0c
-data_02112e1c kind:data(any) addr:0x02112e1c
-data_02112e2c kind:data(any) addr:0x02112e2c
-data_02112e3c kind:data(any) addr:0x02112e3c
+sCharsQwertyUpper kind:data(any) addr:0x02112220 local
+sCharsQwertyLower kind:data(any) addr:0x0211227c local
+sCharsQwertySymbols kind:data(any) addr:0x021122d8 local
+sCharsEuro kind:data(any) addr:0x02112334 local
+sCharsHiragana kind:data(any) addr:0x021123a4 local
+sCharsKatakana kind:data(any) addr:0x0211240c local
+sCharsPicto kind:data(any) addr:0x02112474 local
+sCharsSign kind:data(any) addr:0x021124e4 local
+sKeysEnglish kind:data(any) addr:0x0211254c local
+sKeysEuro kind:data(any) addr:0x021126d4 local
+sKeysKana kind:data(any) addr:0x02112884 local
+sKeysSign kind:data(any) addr:0x02112a54 local
+sKeysPicto kind:data(any) addr:0x02112bfc local
+sKanaPairs kind:data(any) addr:0x02112dc4 local
+sKanaTables kind:data(any) addr:0x02112ddc local
+data_02112dec kind:data(any) addr:0x02112dec
+sLayouts kind:data(any) addr:0x02112dfc local
 gText_PaPiPuPePoPapipupepo kind:data(any) addr:0x02112e4c
 gStr_A0C0E0G0I0 kind:data(any) addr:0x02112ec4
 gText_AiUeOkakiKukeKoSaShiSuSeSoTachiTsuteToHa kind:data(any) addr:0x02112f3c
@@ -6563,9 +6560,13 @@ data_02148688 kind:bss addr:0x02148688
 data_0214868c kind:bss addr:0x0214868c
 data_02148690 kind:bss addr:0x02148690
 data_021486b8 kind:bss addr:0x021486b8
-data_021486c4 kind:bss addr:0x021486c4
-data_021486f0 kind:bss addr:0x021486f0
-data_02148710 kind:bss addr:0x02148710
+sCharData kind:bss addr:0x021486c4 local
+sOriginX kind:bss addr:0x021486c8 local
+sInitialized kind:bss addr:0x021486cc local
+sBaseCharData kind:bss addr:0x021486d0 local
+sOriginY kind:bss addr:0x021486d4 local
+data_021486d8 kind:bss addr:0x021486d8
+sKeyboard kind:bss addr:0x021486f0 local
 sInstance kind:bss(size=0x4) addr:0x02148740 local
 sStreamBuffer kind:bss(size=0x12c0) addr:0x02148760 local
 data_02149a20 kind:bss addr:0x02149a20
