@@ -2003,19 +2003,19 @@ _ZN10EmptyScene4ExitEv kind:function(arm,size=0x4) addr:0x0204d808
 _ZN10EmptySceneD1Ev kind:function(arm,size=0x4) addr:0x0204d80c
 _ZN10EmptySceneD0Ev kind:function(arm,size=0x14) addr:0x0204d810
 _ZN11SceneMemoryC1Ev kind:function(arm,size=0x5c) addr:0x0204d824
-func_0204d880 kind:function(arm,size=0x4) addr:0x0204d880
-func_0204d884 kind:function(arm,size=0x16c) addr:0x0204d884
-func_0204d9f0 kind:function(arm,size=0xac) addr:0x0204d9f0
-func_0204da9c kind:function(arm,size=0x38) addr:0x0204da9c
-func_0204dad4 kind:function(arm,size=0x424) addr:0x0204dad4
-func_0204def8 kind:function(arm,size=0x4) addr:0x0204def8
-func_0204defc kind:function(arm,size=0x3c) addr:0x0204defc
-func_0204df38 kind:function(arm,size=0x348) addr:0x0204df38
-func_0204e280 kind:function(arm,size=0x14) addr:0x0204e280
-func_0204e294 kind:function(arm,size=0xa8) addr:0x0204e294
-func_0204e33c kind:function(arm,size=0x160) addr:0x0204e33c
-func_0204e49c kind:function(arm,size=0x4) addr:0x0204e49c
-func_0204e4a0 kind:function(arm,size=0x14) addr:0x0204e4a0
+_ZN17WirelessTestScene12StartLoadingEv kind:function(arm,size=0x4) addr:0x0204d880
+_ZN17WirelessTestScene4InitEv kind:function(arm,size=0x16c) addr:0x0204d884
+_ZN17WirelessTestScene10UpdateIdleEv kind:function(arm,size=0xac) addr:0x0204d9f0
+_ZN17WirelessTestScene15ConnectToParentEv kind:function(arm,size=0x38) addr:0x0204da9c
+_ZN17WirelessTestScene6UpdateEv kind:function(arm,size=0x424) addr:0x0204dad4
+_ZN17WirelessTestScene4DrawEv kind:function(arm,size=0x4) addr:0x0204def8
+_ZN17WirelessTestScene4ExitEv kind:function(arm,size=0x3c) addr:0x0204defc
+_ZN17WirelessTestScene6RedrawEv kind:function(arm,size=0x348) addr:0x0204df38
+_ZN17WirelessTestScene6OnSentEi kind:function(arm,size=0x14) addr:0x0204e280
+_ZN17WirelessTestScene9OnReceiveEtPtt kind:function(arm,size=0xa8) addr:0x0204e294
+_ZN17WirelessTestScene13OnParentFoundEP9WMBssDesc kind:function(arm,size=0x160) addr:0x0204e33c
+_ZN17WirelessTestSceneD1Ev kind:function(arm,size=0x4) addr:0x0204e49c
+_ZN17WirelessTestSceneD0Ev kind:function(arm,size=0x14) addr:0x0204e4a0
 func_0204e4b4 kind:function(arm,size=0x178) addr:0x0204e4b4
 func_0204e62c kind:function(arm,size=0x140) addr:0x0204e62c
 func_0204e76c kind:function(arm,size=0x48) addr:0x0204e76c
@@ -4202,7 +4202,7 @@ __sinit_020b0650 kind:function(arm,size=0x24) addr:0x020b0650
 __sinit_020b0674 kind:function(arm,size=0x2c) addr:0x020b0674
 __sinit_020b06a0 kind:function(arm,size=0x2c) addr:0x020b06a0
 __sinit_EmptyScene.cpp kind:function(arm,size=0x14) addr:0x020b06cc local
-__sinit_020b06e0 kind:function(arm,size=0x14) addr:0x020b06e0
+__sinit_WirelessTestScene.cpp kind:function(arm,size=0x14) addr:0x020b06e0 local
 __sinit_MiiListMenuScene.cpp kind:function(arm,size=0x88) addr:0x020b06f4 local
 __sinit_MiiListScene.cpp kind:function(arm,size=0x64) addr:0x020b077c local
 __sinit_KeyboardCore.cpp kind:function(arm,size=0x30) addr:0x020b07e0 local
@@ -4278,7 +4278,8 @@ data_020b5cfc kind:data(any) addr:0x020b5cfc
 gStr_head_h2 kind:data(any) addr:0x020b5d04
 gStr_human01_base_pl kind:data(any) addr:0x020b5d18
 sEdgeColors kind:data(any) addr:0x020b5d2c local
-data_020b5d3c kind:data(any) addr:0x020b5d3c
+sAnyParent kind:data(any) addr:0x020b5d3c local
+data_020b5d44 kind:data(any) addr:0x020b5d44
 data_020b5d74 kind:data(any) addr:0x020b5d74
 data_020b5d80 kind:data(any) addr:0x020b5d80
 data_020b5d8c kind:data(any) addr:0x020b5d8c
@@ -5247,7 +5248,7 @@ _ZTV12TtsTestScene kind:data(any) addr:0x02111184
 gText_NaraSingleQuotationKenNoLowLineAsuNo kind:data(any) addr:0x021111a8
 gText_NaraSingleQuotationKenNoLowLineAsuNo_2 kind:data(any) addr:0x02111204
 _ZTV10EmptyScene kind:data(any) addr:0x021112b0
-data_021112d4 kind:data(any) addr:0x021112d4
+sRoleNames kind:data(any) addr:0x021112d4 local
 gText_SoushinChuu kind:data(any) addr:0x021112dc
 gText_SetsuzokuChuu kind:data(any) addr:0x021112e4
 gText_JushinChuu kind:data(any) addr:0x021112ec
@@ -5262,7 +5263,7 @@ data_0211137e kind:data(any) addr:0x0211137e
 gText_SoushinSeikouParenthesisTatchiDeShuuryou kind:data(any) addr:0x02111398
 data_021113b2 kind:data(any) addr:0x021113b2
 data_021113d2 kind:data(any) addr:0x021113d2
-data_021113f4 kind:data(any) addr:0x021113f4
+sStateTexts kind:data(any) addr:0x021113f4 local
 _ZTV17WirelessTestScene kind:data(any) addr:0x02111424
 gText_TatchiDeSoujushinKirikae kind:data(any) addr:0x02111448
 data_02111460 kind:data(any) addr:0x02111460
@@ -6383,10 +6384,10 @@ data_0213b704 kind:bss addr:0x0213b704
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
-data_0213bb20 kind:bss addr:0x0213bb20
-data_0213bb40 kind:bss addr:0x0213bb40
-data_0213bb58 kind:bss addr:0x0213bb58
-data_0213bda0 kind:bss addr:0x0213bda0
+sChunk kind:bss addr:0x0213bb20 local
+sUserGameInfo kind:bss addr:0x0213bb40 local
+sParents kind:bss addr:0x0213bb58 local
+sCharacter kind:bss addr:0x0213bda0 local
 sCurDriverInfo kind:bss addr:0x0213c060
 sPreSleepCallback kind:bss addr:0x0213c070
 sPostSleepCallback kind:bss addr:0x0213c07c
