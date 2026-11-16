@@ -48,6 +48,7 @@ struct PaletteLoader {
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
 #include "MapModelsScene.h"
 #include "../overlays/ov079/RankingScene.h"
+#include "../overlays/ov109/TushinScene.h"
 #include "../overlays/ov010/Scene2B.h"
 #include "../overlays/ov069/SavePlayScene.h"
 #include "InteriorViewScene.h"
@@ -895,6 +896,9 @@ MiiListScene::MiiListScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x27
 MapModelsScene::MapModelsScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x29, overlay 109
+TushinScene::TushinScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x2A, overlay 79
 RankingScene::RankingScene(int sceneId) : Scene(sceneId) {}

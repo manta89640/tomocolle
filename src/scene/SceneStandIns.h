@@ -65,7 +65,6 @@ SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
 
 
-SCENE_STAND_IN(TushinScene, 0x3F0B4); // _ZN11TushinSceneC1Ei
 
 SCENE_STAND_IN(Scene2F, 0x474B0); // 0x02041124
 

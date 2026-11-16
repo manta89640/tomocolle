@@ -1,9 +1,15 @@
 #include "TushinScene.h"
-#include "CharacterCalls.h"
+#include "MainProgram.h"
 
 #include <string.h>
 
 // Overlay 109: wireless play (TushinScene). One source file.
+
+// Whether a character's body model is shown, through an inline as the stand-in class had it
+static inline BOOL IsModelVisible(CharacterModel *model) { return model->mAnim.mVisible; }
+
+// A saved character's index, through an inline as the stand-in class had it (SavedCharacter has no accessor)
+static inline u16 GetIndex(SavedCharacter *character) { return character->mIndex; }
 
 // --- The file's constants ---
 
@@ -295,7 +301,7 @@ void TushinScene::SetUpList(int *charOffset) {
     mPages.Init(0, 8);
     mResidents.Init(&mList, &mPages);
     mResidents.Load();
-    mUnknown35924 = mList.mUnknown9464;
+    mUnknown35924 = mList.mSelected;
     mSortKey = gGameData.mMiiListSortKey;
     mResidents.Sort(mSortKey, 1);
     mResidents.mUnknown1139C = 1;
@@ -343,7 +349,7 @@ void TushinScene::InitCharacters() {
         CharacterRecord *record = &mCharacters[i];
         *record = *resident;
         ((Character *)(&mCharacters[i]))->SetArchive(sCharacterArchives[i]);
-        CharacterModel *model = &mCharacters[i].mModel;
+        CharacterModel *model = &mCharacters[i];
         ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
         func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
     }
@@ -351,12 +357,12 @@ void TushinScene::InitCharacters() {
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
     for (i = 0; i < 3; i++) {
         ((Character *)(&mCharacters[i]))->Init(i, 0, 0);
-        func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
+        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAnimation(RESOURCE_BCA0, GetStandAnimation(i));
-        mCharacters[i].mModel.mPos.y = 0;
-        mCharacters[i].mModel.mPos.x = -0x1000;
-        mCharacters[i].mUnknown02C8 = 10;
-        NNS_G3dMdlSetMdlPolygonIDAll(mCharacters[i].mModel.mResMdl, 3);
+        mCharacters[i].mPos.y = 0;
+        mCharacters[i].mPos.x = -0x1000;
+        mCharacters[i].mFaceDrawParam.polygonID = 10;
+        NNS_G3dMdlSetMdlPolygonIDAll(mCharacters[i].mAnim.mResMdl, 3);
     }
     ((Character *)(&mCharacters[0]))->SetVisible(TRUE);
     mCurrent = 1;
@@ -531,12 +537,12 @@ void TushinScene::SetUpCharacter(int i) {
 // @0x0214b4e8
 void TushinScene::ReloadCharacter(int i) {
     func_0202aecc(data_021223e4, i);
-    CharacterModel *model = &mCharacters[i].mModel;
+    CharacterModel *model = &mCharacters[i];
     ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
     ((Character *)(&mCharacters[i]))->SetArchive(sCharacterArchives[i]);
     ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 1);
     func_0202ad04(data_021223e4, i, model->mArchiveName, 0);
-    ((CharacterModel *)(&mCharacters[i].mModel))->MakeModel(i, 0);
+    ((CharacterModel *)(&mCharacters[i]))->MakeModel(i, 0);
 }
 
 // @0x0214b590
@@ -689,7 +695,7 @@ void TushinScene::UpdateSending() {
             case 7:
             case 8: {
                 sSendSongChunk = 0;
-                func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
+                func_0202c328(&gGameData, GetIndex(GetSelectedResident()), 1);
                 SetOtherStandAnimation();
                 break;
             }
@@ -802,31 +808,31 @@ int TushinScene::ReceiveCharacter() {
             }
             record.mUnknown050Bit0 = 0;
             for (int i = 0; i < 5; i++) {
-                record.mUnknown04A[i] = sTransfer.mUnknown04A[i];
+                record.mAnswers[i] = sTransfer.mAnswers[i];
             }
-            u32 bits = sTransfer.mUnknown050Bits29;
+            u32 bits = sTransfer.mBloodType;
             if (bits != 4) {
-                record.mUnknown050Bits29 = bits;
+                record.mBloodType = bits;
             }
             bits = sTransfer.mUnknown054Bits0;
             record.mUnknown054Bits0 = bits;
-            bits = sTransfer.mUnknown054Bits21;
+            bits = sTransfer.mOwnBirthMonth;
             if (bits != 0) {
-                record.mUnknown054Bits21 = bits;
+                record.mOwnBirthMonth = bits;
             }
-            bits = sTransfer.mUnknown054Bits25;
+            bits = sTransfer.mOwnBirthDay;
             if (bits != 0) {
-                record.mUnknown054Bits25 = bits;
+                record.mOwnBirthDay = bits;
             }
             if (sTransfer.mName != NULL) {
                 MI_CpuCopy8(sTransfer.mName, record.mName, sizeof(record.mName));
             }
-            if (sTransfer.mUnknown06E != NULL) {
-                MI_CpuCopy8(sTransfer.mUnknown06E, record.mUnknown06E, sizeof(record.mUnknown06E));
+            if (sTransfer.mFamilyName != NULL) {
+                MI_CpuCopy8(sTransfer.mFamilyName, record.mFamilyName, sizeof(record.mFamilyName));
             }
-            MI_CpuCopy8(sTransfer.mSpeechDefault, record.mSpeechDefault, sizeof(record.mSpeechDefault));
+            MI_CpuCopy8(sTransfer.mMotto, record.mMotto, sizeof(record.mMotto));
             for (int i = 0; i < 4; i++) {
-                MI_CpuCopy8(sTransfer.mSpeechByMood[i], record.mSpeechByMood[i], sizeof(record.mSpeechByMood[i]));
+                MI_CpuCopy8(sTransfer.mMottos[i], record.mMottos[i], sizeof(record.mMottos[i]));
             }
             for (int i = 0; i < 6; i++) {
                 record.mVoice[i] = sTransfer.mVoice[i];
@@ -956,12 +962,12 @@ void TushinScene::UpdateListButtons() {
         break;
     }
     mResidents.Update();
-    if (mResidents.mUnknown11398 == 0) {
+    if (mResidents.mChanged == 0) {
         return;
     }
     ShowNextCharacter();
     func_02031e88(&mButtons[2], 0);
-    mUnknown35924 = mList.mUnknown9464;
+    mUnknown35924 = mList.mSelected;
 }
 
 // NOT MATCHING: the original keeps the list window's result in r1 for the test against -1 and copies it to r4
@@ -1019,7 +1025,7 @@ void TushinScene::UpdateListWindow() {
     mListWindow.mUnknownSetBeforeClose = 15;
     func_020349cc(&mListWindow, 0x24);
     int order = sListOrders[result];
-    if (order != mResidents.mUnknown11306) {
+    if (order != mResidents.mSortKey) {
         mResidents.Sort(order, 0);
     }
 }
@@ -1201,14 +1207,14 @@ void TushinScene::UpdateWiiConnection() {
 // animation, where the original computes the animation id (r2, through r0) before the model's address (r0); here
 // the address comes first and the id goes through r1. Without opt_common_subs the original's hoisting (only
 // &mCharacters[0] and its model) and its registers come out.
-static inline CharacterModel *GetModelOf(CharacterModel *model) { return model; }
+static inline CharacterModel *GetModelOf(CharacterModel &model) { return &model; }
 // @0x0214e9e8
 void TushinScene::UpdateCharacters() {
     BOOL sent = FALSE;
     int i;
     for (i = 0; i < 3; i++) {
-        if (i == 2 && GetModelOf(&mCharacters[i].mModel)->IsVisible() == TRUE) {
-            int animation = mCharacters[i].mModel.mAnimId;
+        if (i == 2 && IsModelVisible(GetModelOf(mCharacters[i])) == TRUE) {
+            int animation = mCharacters[i].mAnimId;
             if (animation == 0x28 || animation == 0x23 || animation == GetStandAnimation(i)) {
                 switch (mPage) {
                 case 14: case 15: case 16:
@@ -1225,45 +1231,45 @@ void TushinScene::UpdateCharacters() {
                 }
             }
         }
-        if (AnimModel_FindAnimation(&mCharacters[i].mModel, RESOURCE_BCA0, mCharacters[i].mModel.mAnimId)->mFinished) {
-            mCharacters[i].mModel.mPos.x = -0x1000;
+        if (AnimModel_FindAnimation(&mCharacters[i].mAnim, RESOURCE_BCA0, mCharacters[i].mAnimId)->mFinished) {
+            mCharacters[i].mPos.x = -0x1000;
             int next = GetStandAnimation(i);
-            switch (mCharacters[i].mModel.mAnimId) {
+            switch (mCharacters[i].mAnimId) {
             case 0x26:
                 next = 0x24;
                 break;
             case 0x27:
                 ((Character *)(&mCharacters[i]))->SetAnimation(RESOURCE_BCA0, 0x25);
-                ((CharacterModel *)(&mCharacters[i].mModel))->SetAnimFlags(1, 0);
-                mCharacters[i].mModel.mPos.x = 0x1000;
+                ((CharacterModel *)(&mCharacters[i]))->SetAnimFlags(1, 0);
+                mCharacters[i].mPos.x = 0x1000;
                 return;
             case 0x25:
                 next = 0x29;
                 ((Character *)(&mCharacters[i]))->SetAnimation(RESOURCE_BCA0, next);
-                ((CharacterModel *)(&mCharacters[i].mModel))->SetAnimFlags(1, 0);
-                mCharacters[i].mModel.mPos.x = 0x1000;
+                ((CharacterModel *)(&mCharacters[i]))->SetAnimFlags(1, 0);
+                mCharacters[i].mPos.x = 0x1000;
                 break;
             case 0x29:
                 mSendQueued = 1;
                 ((Character *)(&mCharacters[i]))->SetVisible(FALSE);
                 break;
             case 0x23:
-                mCharacters[i].mModel.mPos.x = 0x1000;
+                mCharacters[i].mPos.x = 0x1000;
                 break;
             case 0x28:
-                mCharacters[i].mModel.mPos.x = 0x1000;
+                mCharacters[i].mPos.x = 0x1000;
                 next = 0x23;
                 break;
             }
             ((Character *)(&mCharacters[i]))->SetAnimSpeed(0x1000);
             ((Character *)(&mCharacters[i]))->BlendToAnimation(RESOURCE_BCA0, next);
             if (next != GetStandAnimation(i)) {
-                ((CharacterModel *)(&mCharacters[i].mModel))->SetAnimFlags(1, 0);
+                ((CharacterModel *)(&mCharacters[i]))->SetAnimFlags(1, 0);
             }
             ((Character *)(&mCharacters[i]))->ResetSoundPhase(0);
             ((Character *)(&mCharacters[i]))->ResetSoundPhase(1);
         } else {
-            switch (mCharacters[i].mModel.mAnimId) {
+            switch (mCharacters[i].mAnimId) {
             case 0x26:
                 ((Character *)(&mCharacters[i]))->PlaySoundAtAnimPhase(0, 1, 0x19, 0, 1);
                 break;
@@ -1352,11 +1358,11 @@ void TushinScene::SetOtherStandAnimation() {
 // @0x0214f100
 void TushinScene::StartSendAnimation() {
     ((Character *)(&mCharacters[mCurrent ^ 1]))->BlendToAnimation(RESOURCE_BCA0, 0x26);
-    ((CharacterModel *)(&mCharacters[mCurrent ^ 1].mModel))->SetAnimFlags(1, 0);
+    ((CharacterModel *)(&mCharacters[mCurrent ^ 1]))->SetAnimFlags(1, 0);
     ((Character *)(&mCharacters[mCurrent ^ 1]))->SetAnimSpeed(0x1000);
     ((Character *)(&mCharacters[2]))->BlendToAnimation(RESOURCE_BCA0, 0x27);
-    ((CharacterModel *)(&mCharacters[2].mModel))->SetAnimFlags(1, 0);
-    mCharacters[2].mModel.mPos.x = -0x1000;
+    ((CharacterModel *)(&mCharacters[2]))->SetAnimFlags(1, 0);
+    mCharacters[2].mPos.x = -0x1000;
     ((Character *)(&mCharacters[2]))->SetAnimSpeed(0x1000);
     ((Character *)(&mCharacters[2]))->SetVisible(TRUE);
     mIsReceiveAnimation = 0;
@@ -1367,8 +1373,8 @@ void TushinScene::StartReceiveAnimation() {
     ((Character *)(&mCharacters[0]))->SetVisible(FALSE);
     ((Character *)(&mCharacters[1]))->SetVisible(FALSE);
     ((Character *)(&mCharacters[2]))->BlendToAnimation(RESOURCE_BCA0, 0x29);
-    ((CharacterModel *)(&mCharacters[2].mModel))->SetAnimFlags(1, 0);
-    mCharacters[2].mModel.mPos.x = -0x1000;
+    ((CharacterModel *)(&mCharacters[2]))->SetAnimFlags(1, 0);
+    mCharacters[2].mPos.x = -0x1000;
     ((Character *)(&mCharacters[2]))->SetAnimSpeed(0x1000);
     ((Character *)(&mCharacters[2]))->SetVisible(TRUE);
     mIsReceiveAnimation = 1;
@@ -1426,8 +1432,8 @@ void TushinScene::ShowReceived() {
         ReloadCharacterFromReceived(2);
     }
     ((Character *)(&mCharacters[2]))->SetAnimation(RESOURCE_BCA0, 0x28);
-    ((CharacterModel *)(&mCharacters[2].mModel))->SetAnimFlags(1, 0);
-    mCharacters[2].mModel.mPos.x = 0x1000;
+    ((CharacterModel *)(&mCharacters[2]))->SetAnimFlags(1, 0);
+    mCharacters[2].mPos.x = 0x1000;
     ((Character *)(&mCharacters[2]))->SetAnimSpeed(0x1000);
     ((Character *)(&mCharacters[2]))->SetVisible(TRUE);
     gSoundManager.StartSeqArc(1, 0x19, 5);
@@ -1535,7 +1541,10 @@ void TushinScene::Leave() {
 // original loads the key's offset into r0 and forms the list's address through r2 (ours: r1, r0), and in the two
 // SetStringArg calls with a parent's name the parent index and the names' base swap r2/r3 in the mla. The same
 // call alone in a test file comes out as in the original: the surrounding code decides it, not the call's form.
-static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
+static inline CharacterModel *GetModel(SceneCharacter *c) {
+    CharacterModel &model = *c;
+    return &model;
+}
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -1889,8 +1898,8 @@ void TushinScene::Update() {
                         mNextPage = 0x3F;
                     } else {
                         mNextPage = 0x2E;
-                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
-                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
+                        func_0202c328(&gGameData, GetIndex(GetSelectedResident()), 2);
+                        func_0202d110(&gGameData, GetIndex(GetSelectedResident()));
                         StartReceiveAnimation();
                         SetNeedsSave();
                     }
@@ -1969,7 +1978,7 @@ void TushinScene::Update() {
                 if (sSendChunk != 0 || sSendSongChunk != 0) {
                     break;
                 }
-                if (GetModel(&mCharacters[2])->IsVisible()) {
+                if (IsModelVisible(GetModel(&mCharacters[2]))) {
                     break;
                 }
                 switch (sReceivedCommand) {
@@ -2001,7 +2010,7 @@ void TushinScene::Update() {
                 sReceivedCommand = 0;
                 CloseWindow();
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                mResidents.Sort(mResidents.mSortKey, 0);
                 break;
             case 14:
             case 15: {
@@ -2016,7 +2025,7 @@ void TushinScene::Update() {
                     sSongsReceived = 0;
                     mReceiveResult = ReceiveCharacter();
                     mResidents.Load();
-                    mResidents.Sort(mResidents.mUnknown11306, 0);
+                    mResidents.Sort(mResidents.mSortKey, 0);
                     mNextPage = 0x17;
                     if (mReceiveResult != 0) {
                         sReceiveCount = 0;
@@ -2172,7 +2181,7 @@ void TushinScene::Update() {
                     mNextPage = 0x32;
                     CloseWindow();
                     sWiiSendDone = 0;
-                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
+                    func_0202c328(&gGameData, GetIndex(GetSelectedResident()), 1);
                     SetOtherStandAnimation();
                     break;
                 case -5:
@@ -2184,7 +2193,7 @@ void TushinScene::Update() {
                     mNextPage = 0x34;
                     CloseWindow();
                     sWiiSendDone = 0;
-                    func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 1);
+                    func_0202c328(&gGameData, GetIndex(GetSelectedResident()), 1);
                     SetOtherStandAnimation();
                     break;
                 }
@@ -2214,7 +2223,7 @@ void TushinScene::Update() {
                 CloseWindow();
                 sWiiSendDone = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                mResidents.Sort(mResidents.mSortKey, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
                 if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
@@ -2222,7 +2231,7 @@ void TushinScene::Update() {
                 }
                 sReceiveCount = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                mResidents.Sort(mResidents.mSortKey, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
                     mWiiShirtDue = 1;
@@ -2282,8 +2291,8 @@ void TushinScene::Update() {
                         StartSendAnimation();
                         break;
                     case 0xC:
-                        func_0202c328(&gGameData, GetSelectedResident()->GetIndex(), 2);
-                        func_0202d110(&gGameData, GetSelectedResident()->GetIndex());
+                        func_0202c328(&gGameData, GetIndex(GetSelectedResident()), 2);
+                        func_0202d110(&gGameData, GetIndex(GetSelectedResident()));
                         StartReceiveAnimation();
                         break;
                     }
@@ -2440,11 +2449,11 @@ void TushinScene::Exit() {
         WH_Finalize();
         gWirelessSession->RequestEnd(1);
     }
-    if (mSortKey != mResidents.mUnknown11306) {
-        gGameData.mMiiListSortKey = mResidents.mUnknown11306;
+    if (mSortKey != mResidents.mSortKey) {
+        gGameData.mMiiListSortKey = mResidents.mSortKey;
     }
     for (int i = 0; i < 3; i++) {
-        CharacterModel *model = &mCharacters[i].mModel;
+        CharacterModel *model = &mCharacters[i];
         ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
         func_0202aecc(data_021223e4, i);
     }
@@ -2542,14 +2551,14 @@ BOOL TushinScene::HasNgWord(CharacterRecord *record) {
     if (IsNgWord(record->mName) == TRUE) {
         return TRUE;
     }
-    if (IsNgWord(record->mUnknown06E) == TRUE) {
+    if (IsNgWord(record->mFamilyName) == TRUE) {
         return TRUE;
     }
-    if (IsNgWord(record->mSpeechDefault) == TRUE) {
+    if (IsNgWord(record->mMotto) == TRUE) {
         return TRUE;
     }
     for (int i = 0; i < 4; i++) {
-        if (IsNgWord(record->mSpeechByMood[i]) == TRUE) {
+        if (IsNgWord(record->mMottos[i]) == TRUE) {
             return TRUE;
         }
     }
