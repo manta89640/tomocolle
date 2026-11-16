@@ -407,3 +407,44 @@ BOOL ItemListView::CanScrollDown() {
     }
     return can;
 }
+
+// -- 0x020a9f54: ShopItemListView's set-up (not decompiled) --
+
+// The shops' list: ItemListView with a mark beside each row whose item the player does not have yet (virtual table
+// at 0x02115398)
+class ShopItemListView : public ItemListView {
+public:
+    virtual void Draw();
+    virtual void SetVisible(BOOL visible);
+    virtual void Refresh();
+    virtual void DrawRow(int row, int item);
+    virtual void ClearRow(int row);
+
+    /* 0x13F64 */ Sprite mMarks[7];
+}; // 0x14418
+
+void ShopItemListView::Draw() {
+    for (int i = 0; i < mRowCount; i++) {
+        Sprite_Draw(&mMarks[i]);
+    }
+    ItemListView::Draw();
+}
+
+void ShopItemListView::SetVisible(BOOL visible) {
+    ItemListView::SetVisible(visible);
+    for (int i = 0; i < mRowCount; i++) {
+        mMarks[i].mVisible = visible;
+    }
+}
+
+// -- 0x020aa08c: ShopItemListView::Refresh (not decompiled) --
+
+void ShopItemListView::DrawRow(int row, int item) {
+    ItemListView::DrawRow(row, item);
+    mMarks[row].mVisible = mItems[item]->mOwned == FALSE ? TRUE : FALSE;
+}
+
+void ShopItemListView::ClearRow(int row) {
+    ItemListView::ClearRow(row);
+    mMarks[row].mVisible = FALSE;
+}
