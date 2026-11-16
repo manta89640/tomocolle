@@ -60,8 +60,8 @@ static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
 static const ButtonSounds data_ov076_021588ec = { { 16, -1, 0, -1 } };
 static const int data_ov076_021588bc[4] = { 202, 112, 52, 8 };
 static const int data_ov076_021588fc[4] = { 75, 149, 181, 149 };
-static const int data_ov076_0215890c[4] = { 145, 65, 145, 119 };
-static const int data_ov076_0215891c[4] = { 5, -1, 19, -1 };
+static const WindowPoint data_ov076_0215890c[2] = { { 145, 65 }, { 145, 119 } };
+static const ButtonSounds data_ov076_0215891c = { { 5, -1, 19, -1 } };
 static const int data_ov076_0215894c[4] = { 94, 30, 94, 30 };
 static const int data_ov076_0215892c[4] = { 80, 77, 123, 77 };
 static const int data_ov076_0215893c[4] = { 14, 15, 16, 17 };
@@ -104,7 +104,7 @@ static const u8 data_ov076_02158e48[24] = { 0x1a, 0x1a, 0x1b, 0x19, 0x1a, 0x19, 
 static const u8 data_ov076_02158e60[50] = { 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1d, 0x1d, 0x1c, 0x1d, 0x1c, 0x1c, 0x1d, 0x1c, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1c, 0x1c };
 static const ButtonSounds data_ov076_02158e94[4] = { { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } }, { { 20, -1, 0, -1 } } };
 static const int data_ov076_02158ed4[16] = { 80, 40, 123, 40, 80, 77, 123, 77, 80, 114, 123, 114, 80, 151, 123, 151 };
-static const int data_ov076_02158f14[16] = { 207, 48, 239, 48, 207, 74, 239, 74, 207, 100, 239, 100, 207, 126, 239, 126 };
+static const WindowPoint data_ov076_02158f14[8] = { { 207, 48 }, { 239, 48 }, { 207, 74 }, { 239, 74 }, { 207, 100 }, { 239, 100 }, { 207, 126 }, { 239, 126 } };
 static const u16 data_ov076_02158f54[36] = { 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e, 0x0, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56 };
 static const int data_ov076_02158f9c[18] = { 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
 static const WindowPoint data_ov076_02158fe4[10] = { { 70, 40 }, { 186, 40 }, { 128, 112 }, { 160, 76 }, { 68, 76 }, { 202, 112 }, { 216, 76 }, { 68, 149 }, { 192, 149 }, { 54, 112 } };
@@ -113,7 +113,7 @@ static const int data_ov076_02159084[22] = { 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 0,
 static const ButtonSounds sButtonSounds[6] = { { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 20, -1, 0, -1 } }, { { 16, -1, 0, -1 } } };
 static const int data_ov076_0215913c[24] = { 6, 0, 12, 1, 9, 19, 7, 21, 8, 17, 5, 4, 11, 10, 2, 3, 14, 20, 15, 13, 22, 18, 16, 23 };
 static const int data_ov076_0215919c[24] = { 23, 1, 19, 21, 22, 5, 0, 8, 10, 16, 6, 13, 7, 9, 2, 17, 3, 4, 15, 11, 20, 18, 14, 12 };
-static const int data_ov076_021591fc[24] = { 59, 40, 102, 40, 145, 40, 59, 77, 102, 77, 145, 77, 59, 114, 102, 114, 145, 114, 59, 151, 102, 151, 145, 151 };
+static const WindowPoint data_ov076_021591fc[12] = { { 59, 40 }, { 102, 40 }, { 145, 40 }, { 59, 77 }, { 102, 77 }, { 145, 77 }, { 59, 114 }, { 102, 114 }, { 145, 114 }, { 59, 151 }, { 102, 151 }, { 145, 151 } };
 static const int data_ov076_0215925c[29] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5 };
 static const int data_ov076_021592d0[32] = { 73, -6, 12, 12, 87, -6, 12, 12, 101, -6, 12, 12, 115, -6, 12, 12, 129, -6, 12, 12, 143, -6, 12, 12, 157, -6, 12, 12, 171, -6, 12, 12 };
 static const int data_ov076_02159350[36] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3 };
@@ -124,10 +124,10 @@ static const int data_ov076_021595e0[48] = { 2, 4, 0, 8, 39, 17, 1, 26, 16, 15, 
 static const int data_ov076_021596a0[58] = { 58, 80, 105, 80, 152, 80, 199, 80, 48, 64, 80, 64, 112, 64, 144, 64, 176, 64, 208, 64, 48, 96, 80, 96, 112, 96, 144, 96, 176, 96, 208, 96, 80, 80, 176, 80, 128, 41, 128, 111, 80, 41, 80, 111, 160, 41, 160, 111, 128, 48, 128, 72, 128, 96, 128, 120, 128, 144 };
 static const int data_ov076_02159788[58] = { 42, 36, 42, 36, 42, 36, 42, 36, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 58, 54, 58, 54, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 20, 15, 126, 20, 126, 20, 126, 20, 126, 20, 126, 20 };
 static const int data_ov076_02159870[72] = { 33, 40, 51, 44, 39, 70, 45, 49, 59, 56, 68, 31, 32, 47, 37, 48, 66, 52, 58, 50, 55, 64, 60, 62, 43, 38, 42, 23, 67, 54, 36, 41, 65, 30, 57, 34, 12, 13, 69, 26, 4, 25, 1, 19, 5, 8, 27, 7, 14, 3, 22, 10, 6, 20, 11, 63, 17, 35, 21, 0, 61, 16, 46, 9, 18, 2, 28, 53, 71, 24, 15, 29 };
-static const int data_ov076_02159990[72] = { 17, 159, 17, 12, 17, 33, 17, 54, 17, 75, 17, 96, 17, 117, 17, 138, 77, 11, 127, 11, 77, 11, 127, 11, 77, 30, 127, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 223, 74, 68, 11, 136, 11, 223, 155, 179, 30, 179, 48, 179, 66, 179, 84, 179, 102, 179, 120, 179, 138, 179, 156 };
+static const WindowPoint data_ov076_02159990[36] = { { 17, 159 }, { 17, 12 }, { 17, 33 }, { 17, 54 }, { 17, 75 }, { 17, 96 }, { 17, 117 }, { 17, 138 }, { 77, 11 }, { 127, 11 }, { 77, 11 }, { 127, 11 }, { 77, 30 }, { 127, 30 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 223, 74 }, { 68, 11 }, { 136, 11 }, { 223, 155 }, { 179, 30 }, { 179, 48 }, { 179, 66 }, { 179, 84 }, { 179, 102 }, { 179, 120 }, { 179, 138 }, { 179, 156 } };
 static const int data_ov076_02159ab0[88] = { 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 14, -1, 0, -1, 1, -1, 0, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1 };
 static const int data_ov076_02159c10[116] = { 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 17, -1, -1, -1, 18, -1, -1, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1, 20, -1, 0, -1 };
-static const int data_ov076_02159de0[144] = { 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 3, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1, 13, -1, -1, -1, 13, -1, -1, -1, -1, -1, -1, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1, 4, -1, 19, -1 };
+static const ButtonSounds data_ov076_02159de0[36] = { { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 3, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { 2, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { 12, -1, -1, -1 } }, { { 13, -1, -1, -1 } }, { { 13, -1, -1, -1 } }, { { -1, -1, -1, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } }, { { 4, -1, 19, -1 } } };
 // --- END of the file's .rodata ---
 
 // --- BEGIN of the file's .data ---
@@ -1241,6 +1241,84 @@ int MiiEditScene::func_ov076_0214bf20(const wchar_t *name) {
 }
 
 // --- The face page ---
+
+extern "C" {
+int ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
+void func_0203217c(MiiEditSprite100 *slider, int a, int b, int c, int d, int e, int f, int g);
+void func_020325a8(MiiEditSprite100 *slider, u16 sequence, u16 pressed);
+void func_020325c4(MiiEditSprite100 *slider, int a, int b, int c, int d);
+}
+
+void MiiEditFacePage::func_ov076_0214c6d0(MiiEditScene *scene) {
+    mCategory = -1;
+    mScene = scene;
+    scene->func_ov076_0214bca4();
+    for (int i = 0; i < 36; i++) {
+        u16 sequence = data_ov076_02158f54[i];
+        Sprite_Init(&mButtons[i], 0, sequence, 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons[i], data_ov076_0215a13c[i].x, data_ov076_0215a13c[i].y);
+        func_02031278(&mButtons[i], sequence, sequence + 1);
+        func_02031260(&mButtons[i], data_ov076_02159350[i]);
+        func_02032158(&mButtons[i], &data_ov076_02159de0[i]);
+        mButtons[i].mUnknownDC = 14;
+        mButtons[i].SetPositionFromVec(data_ov076_02159990[i].x << FX32_SHIFT, data_ov076_02159990[i].y << FX32_SHIFT);
+        func_0203119c(&mButtons[i]);
+    }
+    for (int i = 0; i < 8; i++) {
+        mButtons[data_ov076_02158b1c[i]].mVisible = TRUE;
+        mButtons[data_ov076_02158b1c[i]].SetPositionFromVec(data_ov076_02158f14[i].x << FX32_SHIFT, data_ov076_02158f14[i].y << FX32_SHIFT);
+    }
+    ObjResourceManager_Load(&gObjResourceManager, "E00:/Face.nce", "E00:/Face.ncg", 0x1000, 1, 0x10000);
+    for (u16 i = 0; i < 12; i++) {
+        Sprite_Init(&mButtons227C[i], 1, (u16)(i * 2), 0x80, 0x60, TRUE);
+        func_02031eb0(&mButtons227C[i], 0x2A, 0x24);
+        func_02031278(&mButtons227C[i], (u16)(i * 2), (u16)(i * 2 + 1));
+        func_02031260(&mButtons227C[i], 3);
+        func_02032158(&mButtons227C[i], &data_ov076_0215891c);
+        mButtons227C[i].mUnknownDC = 14;
+        mButtons227C[i].SetPositionFromVec(data_ov076_021591fc[i].x << FX32_SHIFT, data_ov076_021591fc[i].y << FX32_SHIFT);
+    }
+    Sprite_Init(&mSprites2FF4[0], 0, 0x60, 0x80, 0x60, TRUE);
+    Sprite_Init(&mSprites2FF4[1], 0, 0x61, 0x80, 0x60, TRUE);
+    for (int i = 0; i < 2; i++) {
+        u16 sequence = data_ov076_02158784[i];
+        Sprite_Init(&mSprites2DF4[i].mSprite, 0, sequence, 0x80, 0x60, TRUE);
+        func_0203217c(&mSprites2DF4[i], 0x91, 0x9A, 2, -8, -22, 0x10, 0x2C);
+        mSprites2DF4[i].mUnknownD8 = 1;
+        func_020325a8(&mSprites2DF4[i], sequence, sequence + 1);
+        func_020325c4(&mSprites2DF4[i], -1, 6, 7, 10);
+        mSprites2DF4[i].mUnknownF4 = 14;
+        mSprites2DF4[i].mSprite.mPosition.y = data_ov076_0215890c[i].y << FX32_SHIFT;
+        mSprites2FF4[i].mVisible = FALSE;
+        mSprites2FF4[i].SetPositionFromVec(data_ov076_0215890c[i].x << FX32_SHIFT, data_ov076_0215890c[i].y << FX32_SHIFT);
+    }
+    Sprite_Init(&mSprite315C, 0, 0x62, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite32B4, 0, 0x63, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite3208, 0, 0x64, 0x66, 0xB, TRUE);
+    Sprite_Init(&mSprite3360, 0, 0x65, 0x66, 0xB, TRUE);
+    mSprite315C.mVisible = FALSE;
+    mSprite32B4.mVisible = FALSE;
+    mSprite3208.mVisible = FALSE;
+    mSprite3360.mVisible = FALSE;
+    mSprite315C.mAnim.animCtrl.bActive = FALSE;
+    mSprite32B4.mAnim.animCtrl.bActive = FALSE;
+    mSprite3208.mAnim.animCtrl.bActive = FALSE;
+    mSprite3360.mAnim.animCtrl.bActive = FALSE;
+    mUnknown314C[3] = 0;
+    mUnknown314C[1] = 0;
+    mUnknown314C[2] = 0;
+    mUnknown314C[0] = 0;
+    Sprite_SetFrame(&mSprite315C, mUnknown314C[0]);
+    Sprite_SetFrame(&mSprite32B4, mUnknown314C[2]);
+    Sprite_SetFrame(&mSprite3208, mUnknown314C[1]);
+    Sprite_SetFrame(&mSprite3360, mUnknown314C[3]);
+    mFaceTab.Init(this);
+    mEtcTab.Init(this);
+    for (int i = 0; i < 8; i++) {
+        mUnknown0000[i] = FALSE;
+    }
+    func_ov076_0214de94(1, 0);
+}
 
 void MiiEditFacePage::Draw() {
     for (u16 i = 0; i < 12; i++) {
