@@ -40,6 +40,7 @@
 #include "../overlays/ov013/TestNg48Scene.h"
 #include "../overlays/ov014/TestNg50Scene.h"
 #include "../overlays/ov106/PreStartScene.h"
+#include "../overlays/ov016/Scene3B.h"
 #include "../overlays/ov017/Scene3C.h"
 #include "../overlays/ov018/TestNg62Scene.h"
 #include "../overlays/ov019/Scene3E.h"
@@ -89,6 +90,7 @@
 #include "../overlays/ov056/TestNg136Scene.h"
 #include "../overlays/ov057/TestNg137Scene.h"
 #include "../overlays/ov058/TestNg138Scene.h"
+#include "../overlays/ov059/TestNg139Scene.h"
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov060/SceneB7.h"
@@ -725,7 +727,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xAA:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(59));
-        return new SceneAA(sceneId);
+        return new TestNg139Scene(sceneId);
     case 0xAB:
         SetSoundGroup(15);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(96));
@@ -877,6 +879,9 @@ PreStartScene::PreStartScene(int sceneId) : Scene(sceneId) {
     mResidentCount = 0;
 }
 
+// Scene 0x3B, overlay 16
+Scene3B::Scene3B(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x3C, overlay 17
 Scene3C::Scene3C(int sceneId) : Scene(sceneId) {}
 
@@ -1025,6 +1030,9 @@ TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8 and 0xA9, overlay 58
 TestNg138Scene::TestNg138Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xAA, overlay 59
+TestNg139Scene::TestNg139Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0xAC and 0xAD, overlay 98
 OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}

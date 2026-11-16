@@ -87,8 +87,6 @@ SCENE_STAND_IN(ChangeRoomScene, 0x17BF8); // func_02041f80
 
 SCENE_STAND_IN(TestNg55Scene, 0x1C3D8); // func_02042254
 
-SCENE_STAND_IN(Scene3B, 0x1B0C4); // func_020422ec
-
 SCENE_STAND_IN(TestNg63Scene, 0x1CEA8); // func_02042634
 
 SCENE_STAND_IN(Scene40, 0x6F908); // func_020428e0
@@ -108,8 +106,6 @@ SCENE_STAND_IN(Scene7F, 0x22B8); // func_0204657c
 SCENE_STAND_IN(AffinityScene, 0x76A98); // func_02046750
 
 SCENE_STAND_IN(TestNg129Scene, 0x56F0); // func_020474c0
-
-SCENE_STAND_IN(SceneAA, 0x1D3A8); // func_0204846c
 
 SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ev
 
