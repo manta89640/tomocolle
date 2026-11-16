@@ -1,7 +1,11 @@
 #include "Scene40.h"
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
+#include "SceneManager.h"
 #include "SceneMemory.h"
+#include "sound/SoundManager.h"
+
+#include <wchar.h>
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -11,12 +15,25 @@ BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
+BOOL SpriteButton_IsTouched(SpriteButton *button);                // Whether the stylus came down on it
+void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled);
+BOOL func_02031d00(SpriteButton *button);                         // Whether it is selected (mUnknownB0)
+
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
 void func_ov075_02178364(Scene40CharacterPartA *part);
 }
+
+// What this scene keeps in the main program's gSceneScratch (an array of bytes there) for the scenes it goes to
+struct Scene40Scratch {
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ BOOL mMenuAvailable[5]; // The menu's first five buttons, as Scene40MenuBar::Refresh takes them back
+    /* 0x18 */ u8 mUnknown18[0x58];
+}; // 0x70
+
+extern Scene40Scratch gSceneScratch;
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
@@ -27,7 +44,7 @@ void func_ov075_02178364(Scene40CharacterPartA *part);
 void Scene40::Draw() {
     MessageWindow_Draw(&mWindows[0]);
     MessageWindow_Draw(&mWindows[1]);
-    func_ov075_0214fc00(mUnknown30B50);
+    func_ov075_0214fc00(&mPages);
     Sprite_Draw(&mSprite013D0);
 
     switch (mDrawState) {
@@ -109,6 +126,252 @@ void Scene40::Exit() {
     for (int i = 0; i < 3; i++) {
         ArchiveManager_Unmount(&gArchiveManager, mItemModels[i].mArchiveName);
         ModelResources_ReleaseModel(gModelResources, i + 14);
+    }
+}
+
+// --- The scene's menu (scene+0x6947C) ------------------------------------------------------------------------------
+
+// Each button's sequence, pressed sequence, place and touch rectangle in pixels and sound; the first button's
+// values are written out in Init as well
+static const u16 sMenuSequences[Scene40MenuBar::BUTTON_COUNT] = {4, 7, 2, 11, 9, 28, 0};
+static const u16 sMenuPressedSequences[Scene40MenuBar::BUTTON_COUNT] = {6, 8, 3, 12, 10, 29, 1};
+static const ScreenPoint sMenuPositions[Scene40MenuBar::BUTTON_COUNT] = {
+    {18, 13}, {18, 109}, {18, 37}, {18, 85}, {18, 61}, {207, 13}, {242, 13},
+};
+static const ScreenPoint sMenuTouchSizes[Scene40MenuBar::BUTTON_COUNT] = {
+    {32, 22}, {32, 22}, {32, 22}, {32, 22}, {32, 22}, {32, 22}, {24, 22},
+};
+static const int sMenuSounds[Scene40MenuBar::BUTTON_COUNT] = {10, 10, 10, 10, 10, 10, 12};
+
+void Scene40CallButton::Reset() {
+    SpriteButton_Reset(this);
+    mCallState = CALL_NONE;
+    mCallFrames = 0;
+}
+
+void Scene40CallButton::SetSequences(u16 sequence, u16 pressedSequence, u16 callSequence) {
+    SpriteButton_SetSequences(this, sequence, pressedSequence);
+    mCallSequence = callSequence;
+}
+
+void Scene40CallButton::StartCall() {
+    if (!mVisible) {
+        return;
+    }
+    mCallState = CALL_WAITING;
+    mCallFrames = 0;
+}
+
+// Whether it was pressed; a touch stops the call
+BOOL Scene40CallButton::Update() {
+    BOOL pressed = SpriteButton_Update(this);
+    BOOL selected = func_02031d00(this);
+    if (pressed | selected) {
+        mCallState = CALL_NONE;
+    }
+    return pressed;
+}
+
+void Scene40CallButton::UpdateCall() {
+    switch (mCallState) {
+    case CALL_NONE:
+        break;
+    case CALL_WAITING:
+        if (++mCallFrames < 120) {
+            break;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            break;
+        }
+        Sprite_SetSequence(this, mCallSequence, TRUE);
+        gSoundManager.StartSeqArc(1, 10, 14);
+        mCallState = CALL_CALLING;
+        mCallFrames = 0;
+        break;
+    case CALL_CALLING:
+        if (++mCallFrames < 160) {
+            if (mCallFrames % 20 == 0 && (mCallFrames / 20) % 2 == 0) {
+                gSoundManager.StartSeqArc(1, 10, 15);
+            }
+        } else if (mCallFrames >= 160) {
+            Sprite_SetSequence(this, mSequence, TRUE);
+            mCallState = CALL_NONE;
+            mCallFrames = 0;
+        }
+        break;
+    }
+}
+
+void Scene40CallButton::SetDisabled(BOOL disabled) {
+    SpriteButton_SetDisabled(this, disabled);
+    if (disabled) {
+        mCallState = CALL_NONE;
+    }
+}
+
+void Scene40ButtonFlash::Update() {
+    if (!mVisible) {
+        return;
+    }
+    if (!mAnim.animCtrl.bActive) {
+        mVisible = FALSE;
+    }
+}
+
+void Scene40ButtonFlash::Play() {
+    if (mVisible) {
+        return;
+    }
+    mVisible = TRUE;
+    Sprite_SetPlaying(this, TRUE);
+}
+
+void Scene40MenuBar::Init(Scene40Context *context) {
+    mUnknown000 = 0;
+    mUnknown004 = 0;
+    mTouchedButton = -1;
+    mPressedButton = -1;
+    mContext = context;
+    mCharacter = context->mCharacter;
+    mEnabled = FALSE;
+
+    Sprite_Init(&mCallButton, 0, 4, 128, 96, TRUE);
+    mCallButton.SetSequences(4, 6, 5);
+    mCallButton.mTtsPlayer = mContext->mTtsPlayer;
+    mCallButton.SetPositionFromVec(18 << FX32_SHIFT, 13 << FX32_SHIFT);
+    SpriteButton_SetTouchRect(&mCallButton, 32, 22);
+    mCallButton.Reset();
+    SpriteButton_SetKind(&mCallButton, 4);
+    mCallButton.mOverwritePalette = 1;
+    mCallButton.mUnknownDC = TRUE;
+    mCallButton.mSounds.mSounds[0] = 10;
+    mCallButton.mSounds.mSounds[2] = 0;
+    mButtonList[0] = &mCallButton;
+
+    for (int i = 1; i < BUTTON_COUNT; i++) {
+        Sprite_Init(&mButtons[i], 0, sMenuSequences[i], 128, 96, TRUE);
+        SpriteButton_SetSequences(&mButtons[i], sMenuSequences[i], sMenuPressedSequences[i]);
+        mButtons[i].SetPositionFromVec(sMenuPositions[i].x << FX32_SHIFT, sMenuPositions[i].y << FX32_SHIFT);
+        SpriteButton_SetTouchRect(&mButtons[i], sMenuTouchSizes[i].x, sMenuTouchSizes[i].y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 4);
+        mButtons[i].mOverwritePalette = 1;
+        mButtons[i].mUnknownDC = TRUE;
+        mButtons[i].mSounds.mSounds[0] = sMenuSounds[i];
+        mButtons[i].mSounds.mSounds[2] = 0;
+        mButtonList[i] = &mButtons[i];
+    }
+    for (int i = 0; i < 5; i++) {
+        mButtonList[i]->mVisible = FALSE;
+    }
+
+    Sprite_Init(&mFlash, 0, 31, 128, 96, TRUE);
+    mFlash.mOverwritePalette = 1;
+    mFlash.mVisible = FALSE;
+}
+
+void Scene40MenuBar::Update() {
+    mTouchedButton = -1;
+    mPressedButton = -1;
+    mFlash.Update();
+    mCallButton.UpdateCall();
+    if (mEnabled && SpriteButton_IsTouched(&mCallButton)) {
+        mTouchedButton = 0;
+    }
+    if (mEnabled && mCallButton.Update()) {
+        mPressedButton = 0;
+    }
+    for (int i = 1; i < BUTTON_COUNT; i++) {
+        if (mEnabled && SpriteButton_IsTouched(mButtonList[i])) {
+            mTouchedButton = i;
+        }
+        if (mEnabled && SpriteButton_Update(mButtonList[i])) {
+            mPressedButton = i;
+        }
+    }
+}
+
+void Scene40MenuBar::SetEnabled(BOOL enabled) {
+    if (enabled != mEnabled) {
+        mEnabled = enabled;
+    }
+}
+
+// Shows the buttons whose offer is there; coming back from scene 0x38 or 0x40, the first five are as that scene
+// left them
+void Scene40MenuBar::Refresh() {
+    UpdateAvailable();
+    if (gSceneManager.mPreviousSceneId == 0x38) {
+        for (int i = 0; i < 5; i++) {
+            mAvailable[i] = gSceneScratch.mMenuAvailable[i];
+        }
+    } else if (gSceneManager.mPreviousSceneId == 0x40) {
+        for (int i = 0; i < 5; i++) {
+            mAvailable[i] = gSceneScratch.mMenuAvailable[i];
+        }
+    }
+    for (int i = 0; i < BUTTON_COUNT; i++) {
+        mButtonList[i]->mVisible = mAvailable[i] ? TRUE : FALSE;
+    }
+}
+
+void Scene40MenuBar::UpdateAvailable() {
+    mAvailable[0] = mContext->mSceneId != 0x6C;
+    mAvailable[1] = MATH_CountPopulation(mCharacter->mUnknown299) != 0;
+    mAvailable[2] = mCharacter->CountOwnedClothes() > 1;
+    mAvailable[3] = wcslen(mCharacter->mMotto) != 0;
+    mAvailable[4] = mCharacter->CountOwnedInteriors() > 1;
+    mAvailable[5] = TRUE;
+    mAvailable[6] = TRUE;
+}
+
+void Scene40MenuBar::Draw() {
+    Sprite_Draw(&mFlash);
+    for (int i = 0; i < BUTTON_COUNT; i++) {
+        SpriteButton_Draw(mButtonList[i]);
+    }
+}
+
+void Scene40MenuBar::StartCall() {
+    mCallButton.StartCall();
+}
+
+// Shows the button chosen and plays the flash over it
+void Scene40MenuBar::Choose(int button) {
+    SetButtonVisible(button, TRUE);
+    ScreenPoint position = mButtonList[button]->GetPixelPosition();
+    mFlash.SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+    mFlash.Play();
+    gSoundManager.StartSeqArc(1, 10, 17);
+}
+
+void Scene40MenuBar::SetButtonVisible(int button, BOOL visible) {
+    mButtonList[button]->mVisible = visible;
+}
+
+void Scene40MenuBar::SetVisible(BOOL visible) {
+    for (int i = 0; i < BUTTON_COUNT; i++) {
+        mButtonList[i]->mVisible = visible;
+    }
+}
+
+void Scene40MenuBar::SetDisabled(BOOL disabled) {
+    mCallButton.SetDisabled(disabled);
+    for (int i = 1; i < BUTTON_COUNT; i++) {
+        SpriteButton_SetDisabled(mButtonList[i], disabled);
+    }
+}
+
+void Scene40MenuBar::SetLeftDisabled(BOOL disabled) {
+    mCallButton.SetDisabled(disabled);
+    for (int i = 1; i < 5; i++) {
+        SpriteButton_SetDisabled(mButtonList[i], disabled);
+    }
+}
+
+void Scene40MenuBar::SetRightDisabled(BOOL disabled) {
+    for (int i = 5; i <= 6; i++) {
+        SpriteButton_SetDisabled(mButtonList[i], disabled);
     }
 }
 

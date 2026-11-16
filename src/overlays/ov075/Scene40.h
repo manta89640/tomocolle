@@ -20,6 +20,9 @@
 #include "text/TextCanvas.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40Context.h"
+#include "Scene40MenuBar.h"
+
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates
 // 0x6F908 bytes; the constructor is the main program's (0x020428E0, src/scene/SceneManager.cpp), which stores the
 // overlay's virtual table (0x02182CEC). The members are as the constructor constructs them, by their classes; what
@@ -124,6 +127,9 @@ public:
     /* 0x004 */ u8 mUnknown004[0x640];
 }; // 0x644
 
+// The scene's lower-screen pages (the classes above are its members')
+#include "Scene40Pages.h"
+
 // Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
 // show is not known: the names say only where they are.
 class Scene40CharacterPartA {
@@ -196,73 +202,9 @@ public:
     /* 0x309B8 */ u8 mUnknown309B8[0x2C];
     /* 0x309E4 */ MessageFile mMessageFiles[7];
     /* 0x30A8C */ Scene40Unknown30A8C mUnknown30A8C;
-    /* 0x30AB0 */ u8 mUnknown30AB0[0xA0];
-    /* 0x30B50 */ u8 mUnknown30B50[0x124]; // An object of the overlay's: func_ov075_0214fc00 draws it
-    /* 0x30C74 */ Scene40Items mItems;
-    /* 0x30CA0 */ u8 mUnknown30CA0[0x50];
-    /* 0x30CF0 */ TextButton mTextButtons[4];
-    /* 0x328B0 */ u8 mUnknown328B0[0x54];
-    /* 0x32904 */ Scene40Items mItems2;
-    /* 0x32930 */ u8 mUnknown32930[0x180];
-    /* 0x32AB0 */ Scene40Items mItems3;
-    /* 0x32ADC */ u8 mUnknown32ADC[0x24];
-    /* 0x32B00 */ ClothesList mClothesList2;
-    /* 0x34BD4 */ u8 mUnknown34BD4[0x4B4];
-    /* 0x35088 */ Scene40ListView mList;
-    /* 0x494A8 */ u8 mUnknown494A8[0xC];
-    /* 0x494B4 */ SpriteButton mButtons[4];
-    /* 0x49884 */ u8 mUnknown49884[0x18];
-    /* 0x4989C */ SpriteButton mButtons2[4];
-    /* 0x49C6C */ u8 mUnknown49C6C[0x8];
-    /* 0x49C74 */ SpriteButton mButtons3[5];
-    /* 0x4A138 */ TextButton mTextButton;
-    /* 0x4A828 */ TextButton mTextButton2;
-    /* 0x4AF18 */ SpriteButton mButton;
-    /* 0x4B00C */ MessageText mText2;
-    /* 0x4B5FC */ u8 mUnknown4B5FC[0x20];
-    /* 0x4B61C */ SoftKeyboard mKeyboard;
-    /* 0x51614 */ ObjCharBox mCharBox;
-    /* 0x517D0 */ u8 mUnknown517D0[0x58];
-    /* 0x51828 */ MessageText mText3;
-    /* 0x51E18 */ SpriteButton mButton2;
-    /* 0x51F0C */ SpriteButton mButton3;
-    /* 0x52000 */ u8 mUnknown52000[0x18];
-    /* 0x52018 */ Scene40Items mItems4;
-    /* 0x52044 */ u8 mUnknown52044[0x14];
-    /* 0x52058 */ MessageText mText4;
-    /* 0x52648 */ SpriteButton mButton4;
-    /* 0x5273C */ Scene40Button mButtons4[4];
-    /* 0x52B1C */ MessageText mTexts2[4];
-    /* 0x542DC */ Scene40Button mButtons5[6];
-    /* 0x548AC */ MessageText mTexts3[6];
-    /* 0x56C4C */ Scene40Button mButtons6[8];
-    /* 0x5740C */ MessageText mTexts4[8];
-    /* 0x5A38C */ u8 mUnknown5A38C[0xDD8];
-    /* 0x5B164 */ MessageText mText5;
-    /* 0x5B754 */ u8 mUnknown5B754[0xAC];
-    /* 0x5B800 */ MessageText mText6;
-    /* 0x5BDF0 */ MessageText mTexts5[3];
-    /* 0x5CFC0 */ MessageText mText7;
-    /* 0x5D5B0 */ u8 mUnknown5D5B0[0xAC];
-    /* 0x5D65C */ ObjTextBox mTextBox;
-    /* 0x5D818 */ ObjTextBox mTextBox2;
-    /* 0x5D9D4 */ u8 mUnknown5D9D4[0xAC];
-    /* 0x5DA80 */ Scene40UnknownA mUnknownA;
-    /* 0x5E194 */ ObjTextBox mTextBox3;
-    /* 0x5E350 */ Scene40UnknownB mUnknownB;
-    /* 0x5EA44 */ Scene40UnknownC mUnknownC;
-    /* 0x5F088 */ MessageText mTexts6[9];
-    /* 0x625F8 */ ObjTextBox mTextBoxes[11];
-    /* 0x6390C */ MessageText mText8;
-    /* 0x63EFC */ MessageText mTexts7[11];
-    /* 0x6804C */ MessageText mText9;
-    /* 0x6863C */ u8 mUnknown6863C[0xC88];
-    /* 0x692C4 */ ObjTextCanvas mCanvas;
-    /* 0x6947C */ u8 mUnknown6947C[0x38];
-    /* 0x694B4 */ Scene40Button mButton5;
-    /* 0x695AC */ u8 mUnknown695AC[0xC];
-    /* 0x695B8 */ SpriteButton mButtons7[7];
-    /* 0x69C64 */ u8 mUnknown69C64[0x1F0];
+    /* 0x30AB0 */ Scene40Context mContext; // What the pages are given
+    /* 0x30B50 */ Scene40Pages mPages;
+    /* 0x69D2C */ u8 mUnknown69D2C[0x128];
     /* 0x69E54 */ Scene40ItemModel mItemModels[3];
     /* 0x6A22C */ Scene40Character mCharacter;
     /* 0x6D324 */ CharacterBase mFace;
