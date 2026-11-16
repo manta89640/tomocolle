@@ -5381,21 +5381,21 @@ sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
 _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
-@13190 kind:data(any) addr:0x02111b04 local
-@13191 kind:data(any) addr:0x02111b08 local
-@13192 kind:data(any) addr:0x02111b20 local
-@13193 kind:data(any) addr:0x02111b24 local
-@13223 kind:data(any) addr:0x02111b3c local
-@13224 kind:data(any) addr:0x02111b50 local
-@13225 kind:data(any) addr:0x02111b64 local
-@13226 kind:data(any) addr:0x02111b78 local
-@13227 kind:data(any) addr:0x02111b8c local
-@13228 kind:data(any) addr:0x02111ba4 local
-@13229 kind:data(any) addr:0x02111bb8 local
-@13230 kind:data(any) addr:0x02111bcc local
-@13231 kind:data(any) addr:0x02111be0 local
-@13259 kind:data(any) addr:0x02111bf8 local
-@13260 kind:data(any) addr:0x02111bfc local
+@13183 kind:data(any) addr:0x02111b04 local
+@13184 kind:data(any) addr:0x02111b08 local
+@13185 kind:data(any) addr:0x02111b20 local
+@13186 kind:data(any) addr:0x02111b24 local
+@13216 kind:data(any) addr:0x02111b3c local
+@13217 kind:data(any) addr:0x02111b50 local
+@13218 kind:data(any) addr:0x02111b64 local
+@13219 kind:data(any) addr:0x02111b78 local
+@13220 kind:data(any) addr:0x02111b8c local
+@13221 kind:data(any) addr:0x02111ba4 local
+@13222 kind:data(any) addr:0x02111bb8 local
+@13223 kind:data(any) addr:0x02111bcc local
+@13224 kind:data(any) addr:0x02111be0 local
+@13252 kind:data(any) addr:0x02111bf8 local
+@13253 kind:data(any) addr:0x02111bfc local
 data_02111c00 kind:data(any) addr:0x02111c00
 data_02111c08 kind:data(any) addr:0x02111c08
 gStr_M00_3 kind:data(any) addr:0x02111c24
