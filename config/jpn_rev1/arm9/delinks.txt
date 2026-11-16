@@ -39,6 +39,7 @@ lib/NitroSDK/libraries/gx/src/gx.c:
     .text       start:0x020034a0 end:0x02003750
 
 lib/NitroSDK/libraries/gx/src/gxstate.c:
+    complete
     .text       start:0x02003750 end:0x020037b0
     .bss        start:0x02119578 end:0x02119594
 
@@ -68,6 +69,7 @@ lib/NitroSDK/libraries/gx/src/g3_util.c:
     .text       start:0x020056b8 end:0x020056f4
 
 lib/NitroSDK/libraries/gx/src/gx_load2d.c:
+    complete
     .text       start:0x020056f4 end:0x02006374
     .bss        start:0x02119594 end:0x021195b0
 
@@ -383,6 +385,7 @@ src/scene/MiiListScene.cpp:
     .data       start:0x02111a80 end:0x02111c00
 
 lib/NitroSystem/libraries/snd/src/main.c:
+    complete
     .text       start:0x02053c64 end:0x02053d80
     .bss        start:0x0213c060 end:0x0213e460
 
