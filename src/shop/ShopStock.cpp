@@ -13,7 +13,7 @@ struct ShopStock {
     /* 0x10 */ u16 mClothes[5];
     /* 0x1A */ u16 mGoods1[5];      // Goods of kind 1 (on the first day a fixed list)
     /* 0x24 */ u16 mGoods4[5];      // Goods of kind 4
-    /* 0x2E */ u8 mInteriors[4];    // Three interiors (func_020a5a28 picks them)
+    /* 0x2E */ u8 mInteriors[4];    // Three interiors
     /* 0x32 */ u16 mGood;           // One more of kind 1
 }; // 0x34
 
@@ -23,7 +23,6 @@ s64 Clock_GetSeconds(void *clock);
 int func_02035aa4(void *clock);
 void func_0202c864(GameData *game, int index, ShopStock *stock);
 void func_0202c878(GameData *game, int index, const ShopStock *stock);
-void func_020a5a28(u8 *list, int count);
 }
 
 // The item files' pickers (main program, 0x0209e140 on)
@@ -31,12 +30,13 @@ u16 ChooseClothes(int availability, u16 *clothes, int count);
 u16 ChooseItems(int availability, int kind, u16 *items, int count);
 u16 ChooseItemsNot1000(int availability, int kind, u16 *items, int count);
 u16 GetFixedItems(u16 *items, int count);
+u8 ChooseInteriors(u8 *interiors, int count);
 
 void ShopStock::MakeFirst() {
     ChooseClothes(0, mClothes, 5);
     GetFixedItems(mGoods1, 5);
     ChooseItemsNot1000(0, 4, mGoods4, 5);
-    func_020a5a28(mInteriors, 3);
+    ChooseInteriors(mInteriors, 3);
     ChooseItems(0, 1, &mGood, 1);
 }
 
@@ -44,7 +44,7 @@ void ShopStock::Make() {
     ChooseClothes(0, mClothes, 5);
     ChooseItemsNot1000(0, 1, mGoods1, 5);
     ChooseItemsNot1000(0, 4, mGoods4, 5);
-    func_020a5a28(mInteriors, 3);
+    ChooseInteriors(mInteriors, 3);
     ChooseItems(0, 1, &mGood, 1);
 }
 
