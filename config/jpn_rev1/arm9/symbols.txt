@@ -1873,11 +1873,11 @@ _ZN7Scene8FC1Ei kind:function(arm,size=0x130) addr:0x020475c8
 _ZN7Scene91C1Ei kind:function(arm,size=0x204) addr:0x020476f8
 _ZN12Scene91ModelD1Ev kind:function(arm,size=0x78) addr:0x020478fc
 _ZN14TestNg133SceneC1Ei kind:function(arm,size=0x174) addr:0x02047974
-func_02047ae8 kind:function(arm,size=0x234) addr:0x02047ae8
-func_02047d1c kind:function(arm,size=0x50) addr:0x02047d1c
-func_02047d6c kind:function(arm,size=0x3c) addr:0x02047d6c
-func_02047da8 kind:function(arm,size=0x14) addr:0x02047da8
-func_02047dbc kind:function(arm,size=0x14) addr:0x02047dbc
+_ZN14TestNg134SceneC1Ei kind:function(arm,size=0x234) addr:0x02047ae8
+_ZN14TestNg134ModelC1Ev kind:function(arm,size=0x50) addr:0x02047d1c
+_ZN14TestNg134ModelD1Ev kind:function(arm,size=0x3c) addr:0x02047d6c
+_ZN18TestNg134CharacterC1Ev kind:function(arm,size=0x14) addr:0x02047da8
+_ZN18TestNg134CharacterD1Ev kind:function(arm,size=0x14) addr:0x02047dbc
 _ZN14TestNg136SceneC1Ei kind:function(arm,size=0x308) addr:0x02047dd0
 _ZN14TestNg137SceneC1Ei kind:function(arm,size=0x1ac) addr:0x020480d8
 _ZN14TestNg137ModelC1Ev kind:function(arm,size=0x48) addr:0x02048284
@@ -1932,7 +1932,7 @@ func_0204ad60 kind:function(arm,size=0x24) addr:0x0204ad60
 func_0204ad84 kind:function(arm,size=0x4) addr:0x0204ad84
 _ZN20TestDrawMiiAnimModelD0Ev kind:function(arm,size=0x44) addr:0x0204ad88
 func_0204adcc kind:function(arm,size=0x44) addr:0x0204adcc
-func_0204ae10 kind:function(arm,size=0x44) addr:0x0204ae10
+_ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
 func_0204ae54 kind:function(arm,size=0x44) addr:0x0204ae54
 func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
 func_0204aedc kind:function(arm,size=0x44) addr:0x0204aedc
@@ -5130,7 +5130,7 @@ data_021108dc kind:data(any) addr:0x021108dc
 _ZTV13ObjTextCanvas__10TextCanvas_at_340 kind:data(any) addr:0x021108e8
 _ZTV10ObjCharBox kind:data(any) addr:0x02110900
 data_02110914 kind:data(any) addr:0x02110914
-data_02110924 kind:data(any) addr:0x02110924
+_ZTV14TestNg134Model kind:data(any) addr:0x0211091c
 data_02110940 kind:data(any) addr:0x02110940
 _ZTV20TestDrawMiiAnimModel kind:data(any) addr:0x02110954
 _ZTV5Scene kind:data(any) addr:0x02110970

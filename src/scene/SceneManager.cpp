@@ -85,6 +85,7 @@
 #include "../overlays/ov052/Scene8F.h"
 #include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov054/TestNg133Scene.h"
+#include "../overlays/ov055/TestNg134Scene.h"
 #include "../overlays/ov056/TestNg136Scene.h"
 #include "../overlays/ov057/TestNg137Scene.h"
 #include "../overlays/ov058/TestNg138Scene.h"
@@ -1010,6 +1011,9 @@ Scene91::Scene91(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x92, overlay 54
 TestNg133Scene::TestNg133Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x93, overlay 55
+TestNg134Scene::TestNg134Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x94, overlay 56
 TestNg136Scene::TestNg136Scene(int sceneId) : Scene(sceneId) {}

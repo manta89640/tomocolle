@@ -109,8 +109,6 @@ SCENE_STAND_IN(AffinityScene, 0x76A98); // func_02046750
 
 SCENE_STAND_IN(TestNg129Scene, 0x56F0); // func_020474c0
 
-SCENE_STAND_IN(TestNg134Scene, 0x36640); // func_02047ae8
-
 SCENE_STAND_IN(SceneAA, 0x1D3A8); // func_0204846c
 
 SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ev
