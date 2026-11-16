@@ -2,6 +2,7 @@
 #define OV106_MAINPROGRAM_H
 
 #include "GameData.h"
+#include "SceneManager.h"
 #include "PreStartScene.h"
 #include "sound/SoundManager.h"
 
@@ -62,13 +63,6 @@ void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
-// The scene manager.
-struct SceneManager {
-    /* 0x0 */ Scene *mScene;
-    /* 0x4 */ int mNextSceneId;
-    /* 0x8 */ int mPreviousSceneId;
-};
-
 // The game's clock (data_02123440 points at it): the real-time clock with the game's own offset.
 struct GameClock {
     /* 0x00 */ u8 mUnknown00[0x34];
@@ -79,8 +73,6 @@ struct GameClock {
 
 
 extern "C" {
-extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 
 // --- The saved game ---
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists

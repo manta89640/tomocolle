@@ -15,9 +15,41 @@
 
 #include "SceneStandIns.h"
 
+// The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
+#include "MapModelsScene.h"
+#include "../overlays/ov010/Scene2B.h"
+#include "../overlays/ov069/SavePlayScene.h"
+#include "../overlays/ov081/Scene30.h"
+#include "../overlays/ov082/Scene33.h"
+#include "../overlays/ov013/TestNg48Scene.h"
+#include "../overlays/ov014/TestNg50Scene.h"
+#include "../overlays/ov106/PreStartScene.h"
+#include "../overlays/ov018/TestNg62Scene.h"
+#include "../overlays/ov020/Scene3F.h"
+#include "../overlays/ov076/MiiEditScene.h"
+#include "../overlays/ov022/Scene45.h"
+#include "../overlays/ov023/Scene4B.h"
+#include "../overlays/ov025/Scene4D.h"
+#include "../overlays/ov026/TestNg87Scene.h"
+#include "../overlays/ov027/Scene4F.h"
+#include "../overlays/ov029/Scene51.h"
+#include "../overlays/ov030/TestNg94Scene.h"
+#include "../overlays/ov089/Scene56.h"
+#include "../overlays/ov034/TestNg104Scene.h"
+#include "../overlays/ov035/Scene58.h"
+#include "../overlays/ov090/RomanceScene.h"
+#include "../overlays/ov072/MapScene.h"
+#include "../overlays/ov093/Scene72.h"
+#include "../overlays/ov094/Scene74.h"
+#include "../overlays/ov039/TestNg116Scene.h"
+#include "../overlays/ov043/Scene81.h"
+#include "../overlays/ov045/Scene88.h"
+#include "../overlays/ov052/Scene8F.h"
+// End of gap38-b's scene classes
+
 extern "C" {
 // --- The graphics managers, not decompiled: each records its state into a buffer and restores it from one ---
-extern u8 gGraphicsManager[];
+extern u32 gGraphicsManager[];
 extern u8 data_02121834[]; // The backgrounds' screens
 extern u8 gObjResourceManager[];
 struct Unknown02120a10 {
@@ -721,36 +753,6 @@ Scene *SceneManager::CreateScene(int sceneId) {
 // ---- Constructors 0x0203de78..0x02040578: scenes up to 0x26 (gap38-a) --------------------------------------------
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
-
-#include "MapModelsScene.h"
-#include "../overlays/ov010/Scene2B.h"
-#include "../overlays/ov069/SavePlayScene.h"
-#include "../overlays/ov081/Scene30.h"
-#include "../overlays/ov082/Scene33.h"
-#include "../overlays/ov013/TestNg48Scene.h"
-#include "../overlays/ov014/TestNg50Scene.h"
-#include "../overlays/ov106/PreStartScene.h"
-#include "../overlays/ov018/TestNg62Scene.h"
-#include "../overlays/ov020/Scene3F.h"
-#include "../overlays/ov076/MiiEditScene.h"
-#include "../overlays/ov022/Scene45.h"
-#include "../overlays/ov023/Scene4B.h"
-#include "../overlays/ov025/Scene4D.h"
-#include "../overlays/ov026/TestNg87Scene.h"
-#include "../overlays/ov027/Scene4F.h"
-#include "../overlays/ov029/Scene51.h"
-#include "../overlays/ov030/TestNg94Scene.h"
-#include "../overlays/ov089/Scene56.h"
-#include "../overlays/ov034/TestNg104Scene.h"
-#include "../overlays/ov035/Scene58.h"
-#include "../overlays/ov090/RomanceScene.h"
-#include "../overlays/ov072/MapScene.h"
-#include "../overlays/ov093/Scene72.h"
-#include "../overlays/ov094/Scene74.h"
-#include "../overlays/ov039/TestNg116Scene.h"
-#include "../overlays/ov043/Scene81.h"
-#include "../overlays/ov045/Scene88.h"
-#include "../overlays/ov052/Scene8F.h"
 
 // Scene 0x27
 MapModelsScene::MapModelsScene(int sceneId) : Scene(sceneId) {}

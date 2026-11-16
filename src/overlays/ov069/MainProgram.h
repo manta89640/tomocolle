@@ -5,6 +5,7 @@
 #include <nnsys.h>
 
 #include "GameData.h"
+#include "SceneManager.h"
 #include "Model.h"
 #include "character/Character.h"
 #include "sound/SoundManager.h"
@@ -66,13 +67,6 @@ void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
-// The scene manager.
-struct SceneManager {
-    /* 0x0 */ Scene *mScene;
-    /* 0x4 */ int mNextSceneId;
-    /* 0x8 */ int mPreviousSceneId;
-};
-
 // The main program's camera (data_02122764; func_0202a640 resets it). A stand-in with the fields the scene sets.
 struct Camera {
     /* 0x00 */ int mUnknown00;
@@ -95,9 +89,6 @@ struct Light {
 }; // 0xC
 
 extern "C" {
-extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
-void func_0204ab04(SceneManager *manager, int unknown);
 
 // --- The game's random number generator: every use is the inline code of the SDK's MATH_Rand16 ---
 extern MATHRandContext16 gRandom;

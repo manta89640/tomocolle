@@ -2,6 +2,7 @@
 #define OV072_MAINPROGRAM_H
 
 #include "MapScene.h"
+#include "SceneManager.h"
 
 // What overlay 72's code uses of the main program, which is not decompiled: STAND-INS and declarations, which only
 // the overlay's source includes (the scene's classes, in MapScene.h, are also included by the main program's scene
@@ -52,13 +53,6 @@ struct TouchInput {
     /* 0x40 */ u8 mUnknown40[8];
     /* 0x48 */ BOOL mTouched; // The stylus went down this frame
     /* 0x4C */ BOOL mUnknown4C; // Picks mLastPoint over mPoint
-};
-
-class Scene;
-struct SceneManager {
-    /* 0x0 */ Scene *mScene;
-    /* 0x4 */ int mNextSceneId;
-    /* 0x8 */ int mPreviousSceneId;
 };
 
 // What the scenes leave for each other (data_0213ba74)
@@ -199,7 +193,6 @@ extern ScreenControl data_0211d604;
 extern PadInput data_0211f9d4;
 extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
-extern SceneManager gSceneManager;
 extern SceneMemory data_0213ba74;
 // 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
@@ -278,7 +271,6 @@ void func_02036874(int value, wchar_t *buffer, int size, int a, int b);
 
 u8 func_02039c00(IslandState *island, int building);
 void func_02039c0c(IslandState *island, int building, int state);
-void func_0203c02c(SceneManager *manager, int sceneId);
 void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
 void func_02060c1c();
 
