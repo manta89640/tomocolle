@@ -51,7 +51,7 @@ struct MessageWindow {
 
     // Its table (0x021102E0) has these two
     virtual void SetVisible(BOOL visible); // func_02034a94: of every sprite, button, text and plain sprite, and its planes
-    virtual void func_02034bc4();         // Not known: it takes more arguments than four
+    virtual void SetPosition(WindowPoint position); // func_02034bc4: moves the window and what is on it there
 
     /* 0x0000 */ // The table
     /* 0x0004 */ SpriteButton mSprites[12];
@@ -59,7 +59,8 @@ struct MessageWindow {
     /* 0x7A74 */ MessageText mTexts[8];
     /* 0xA9F4 */ Sprite mPlainSprites[5];  // Sprites without a button: func_020345d8 draws as many as +0xAD64 says
     /* 0xAD50 */ u32 mUnknownAD50;          // Bit 0: overlay 109 tests it as "the window is open", overlay 110 waits for it
-    /* 0xAD54 */ u8 mUnknownAD54[0x228];
+    /* 0xAD54 */ BOOL mUnknownAD54;         // ShopWindow draws its own buttons and canvases only while it is set
+    /* 0xAD58 */ u8 mUnknownAD58[0x224];
     /* 0xAF7C */ int mUnknownAF7C;          // Overlay 76 reads the choice made from it (-1: none yet)
     /* 0xAF80 */ int mResult;               // func_02034720 sets it to -1; the button pressed, when one is
     /* 0xAF84 */ int mUnknownAF84;

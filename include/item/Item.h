@@ -61,8 +61,8 @@ class Item {
 public:
     Item() { mId = 0; }
 
-    virtual u32 GetPrice() = 0;
-    virtual u32 GetPrice2() = 0; // The same field as GetPrice in all three kinds
+    virtual int GetPrice() = 0;
+    virtual int GetPrice2() = 0; // The same field as GetPrice in all three kinds
     virtual const char *GetModelName() = 0;
     virtual u8 GetWeight0() = 0;
     virtual u8 GetWeight1() = 0;
@@ -84,8 +84,8 @@ class ClothesItem : public Item {
 public:
     ClothesItem();
 
-    virtual u32 GetPrice() { return data_020f3ff0[mId].mPrice; }
-    virtual u32 GetPrice2() { return data_020f3ff0[mId].mPrice; }
+    virtual int GetPrice() { return data_020f3ff0[mId].mPrice; }
+    virtual int GetPrice2() { return data_020f3ff0[mId].mPrice; }
     virtual const char *GetModelName() { return data_020f3ff0[mId].mModelName; }
     virtual u8 GetWeight0() { return data_020f3ff0[mId].mWeights[0]; }
     virtual u8 GetWeight1() { return data_020f3ff0[mId].mWeights[1]; }
@@ -103,8 +103,8 @@ class InventoryItem : public Item {
 public:
     InventoryItem();
 
-    virtual u32 GetPrice() { return data_020f5f0c[mId].mPrice; }
-    virtual u32 GetPrice2() { return data_020f5f0c[mId].mPrice; }
+    virtual int GetPrice() { return data_020f5f0c[mId].mPrice; }
+    virtual int GetPrice2() { return data_020f5f0c[mId].mPrice; }
     virtual const char *GetModelName() { return data_020f5f0c[mId].mModelName; }
     virtual u8 GetWeight0() { return data_020f5f0c[mId].mWeight0; }
     virtual u8 GetWeight1() { return data_020f5f0c[mId].mWeight1; }

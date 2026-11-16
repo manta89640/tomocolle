@@ -6,36 +6,57 @@
 #include "MessageWindow.h"
 #include "SpriteButton.h"
 #include "item/Item.h"
+#include "text/MessageFile.h"
 #include "text/TextCanvas.h"
 
-// The shop scenes' price window (main program 0x020AA464 to 0x020AB09C, not decompiled; overlays 56, 68, 83, 84 and
-// 85 use it through 0x020aa800, its set-up, 0x020aa9c0, its update, 0x020aaba4, its drawing, and 0x020aac04, its
-// opening): a message window with two buttons and three text canvases more. A STAND-IN with what the scenes'
-// constructors show: its constructor is inline (the window's, then its table, then its members). Its table is at
-// 0x02115368.
+// The shops' price window (main program 0x020AA464 to 0x020AB09C, src/shop/Shop.cpp; table 0x02115368): a message
+// window that asks how many of an item to buy or sell, with a plus and a minus button and three canvases more: the
+// count, the total and the money. Its constructor is inline (the window's, then its table, then its members), as the
+// shop scenes' constructors show it.
 //
-// The names are descriptive (gap66-c's, whose range has the class's functions): no name of these classes survives
-// in the ROM.
+// The names are descriptive: no name of these classes survives in the ROM.
 class ShopWindow : public MessageWindow {
 public:
-    // Calls the window's, and sets the two buttons' and the three canvases' visibility too (0x020aaffc)
-    virtual void SetVisible(BOOL visible);
-    virtual void func_02034bc4(); // 0x020aaea8: draws a text; what it takes is not known
-    virtual int GetBuyTotal(Item *item, int count);  // 0x020aab84: the item's first virtual function times count
-    virtual int GetSellTotal(Item *item, int count); // 0x020aad10: its second times count
+    // mMode
+    enum Mode {
+        MODE_BUY,
+        MODE_SELL,
+    };
 
-    /* 0xAFA4 */ u8 mUnknownAFA4[0x10];
-    /* 0xAFB4 */ SpriteButton mButtonAFB4;
-    /* 0xB0A8 */ SpriteButton mButtonB0A8;
-    /* 0xB19C */ ObjTextCanvas mTextCanvases[3];
-    /* 0xB6C4 */ u8 mUnknownB6C4[4];
+    ShopWindow() {}
+
+    virtual void SetVisible(BOOL visible);
+    virtual void SetPosition(WindowPoint position);  // Moves its buttons and canvases with the window
+    virtual int GetBuyTotal(Item *item, int count);  // The price times count
+    virtual int GetSellTotal(Item *item, int count); // The second price times count
+
+    void Init(ScreenRect rect);
+    void InitButtons(int resource, int *charOffset, MessageFile *file);
+    void Init(const char *screenName, int plane, int resource, int *charOffset, MessageFile *file,
+              MessageFile *buttonFile, int *money);
+    void Update();
+    void Draw();
+    void Open(int flags, int mode);
+    int GetTotal();
+    void DrawCounts();
+
+    /* 0xAFA4 */ int mMode;
+    /* 0xAFA8 */ int *mMoney;
+    /* 0xAFAC */ Item *mItem;
+    /* 0xAFB0 */ int mCount;
+    /* 0xAFB4 */ SpriteButton mPlusButton;
+    /* 0xB0A8 */ SpriteButton mMinusButton;
+    /* 0xB19C */ ObjTextCanvas mTextCanvases[3]; // The count, the total, the money
+    /* 0xB6C4 */ MessageFile *mMessageFile; // The window's own messages
 }; // 0xB6C8
 
 // The price window that buys at half the price and sells at 11/10 of it (table 0x02115380).
 class HalfPriceShopWindow : public ShopWindow {
 public:
-    virtual int GetBuyTotal(Item *item, int count);  // 0x020ab038: half the first virtual function, times count
-    virtual int GetSellTotal(Item *item, int count); // 0x020ab060: 11/10 of the second, times count
+    HalfPriceShopWindow() {}
+
+    virtual int GetBuyTotal(Item *item, int count);
+    virtual int GetSellTotal(Item *item, int count);
 }; // 0xB6C8
 
 #endif // SHOP_SHOPWINDOW_H

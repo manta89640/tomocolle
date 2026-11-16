@@ -373,7 +373,13 @@ public:
     void SetUpScrollBar(int a, int b, int c);
     void SetMessageFile(MessageFile *file); // Where the items' names are
     void SetMode(int mode);
-    void SetItems(InventoryItem **items, int count);
+    void InitRows(int resource, u16 sequence, u16 pressedSequence, int *charOffset);
+    void InitCounts(int *charOffset);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence);
+    void InitScrollBar(int resource, int sequence, int knobSequence);
+    void Update();
+    void SetItems(Item **items, int count);
     void Select(int index);
     void ScrollToSelected();
     int FindItem(u16 id); // Where the item with that id is
@@ -381,7 +387,7 @@ public:
     void SetUnknown308(BOOL value);
 
     /* 0x004 */ u8 mUnknown004[8];
-    /* 0x00C */ Item **mItems; // What func_020a9b40 gave it
+    /* 0x00C */ Item **mItems; // What SetItems gave it
     /* 0x010 */ int mItemCount;
     /* 0x014 */ int mUnknown014;
     /* 0x018 */ BOOL mTouched;           // An item was touched
@@ -391,14 +397,6 @@ public:
     /* 0x028 */ u8 mUnknown028[0x13F3C];
 }; // 0x13F64
 
-extern "C" {
-void func_020a842c(ItemListView *list, int unk1, int unk2, int unk3, int *charOffset);
-void func_020a8648(ItemListView *list, int *charOffset);
-void func_020a8864(ItemListView *list, int unk1, int unk2, int unk3);
-void func_020a8938(ItemListView *list, int unk1, int unk2, int unk3);
-void func_020a8a38(ItemListView *list, int unk1, int unk2, int unk3);
-void func_020a8adc(ItemListView *list); // Updates it
-}
 
 // --- Other main-program things --------------------------------------------------------------------------------
 
