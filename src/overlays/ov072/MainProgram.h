@@ -264,7 +264,7 @@ int GameData_GetCharacterTroubleCategory(GameData *game, int character);
 int GameData_GetCharacterTroubleId(GameData *game, int character);
 void GameData_GetNewsItem(GameData *game, int index, NewsItem *item);
 void GameData_SetNewsItem(GameData *game, int index, NewsItem *item);
-BOOL func_0202cb08(GameData *game);
+BOOL GameData_IsNewDay(GameData *game);
 BOOL func_0202cd54(GameData *game);
 
 // --- The sprite buttons (the rest are in SpriteButton.h) ---

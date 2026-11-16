@@ -31,8 +31,8 @@ extern "C" {
 void AnimModel_RemoveAnimation(AnimModel *model, u32 resType, int id);  // Removes an animation
 void AnimModel_SetSpeed(AnimModel *model, fx32 speed);           // Sets the speed of its animations
 void ModelResources_BeginDraw(u32 *resources);
-void func_02028bc0(MtxFx33 *rotation, u16 x, u16 y, u16 z); // Turns a rotation by angles
-BOOL func_02028e98(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
+void RotateMtx33ByAngles(MtxFx33 *rotation, u16 x, u16 y, u16 z); // Turns a rotation by angles
+BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
 
 extern MATHRandContext16 gRandom;
 
@@ -148,7 +148,7 @@ BOOL CharacterBase::HitTestFace(const VecFx32 *origin, const VecFx32 *dir) {
 
     MTX_MultVec43(&sFaceCenter, &mFaceMatrix, &center);
     VEC_Subtract(origin, &center, &delta);
-    return func_02028e98(&delta, dir, 0xF0A);
+    return LineMeetsSphere(&delta, dir, 0xF0A);
 }
 
 void CharacterBase::DrawFace() {
@@ -173,7 +173,7 @@ void CharacterBase::DrawFace() {
     rotation = mFaceRotation;
     G3_Scale(mFaceScale.x, mFaceScale.y, mFaceScale.z);
     G3_Translate(mFaceOffset.x, mFaceOffset.y, mFaceOffset.z);
-    func_02028bc0(&rotation, mHeadPitchNow, mHeadYawNow, (u16)(mHeadRollNow + mFaceRoll));
+    RotateMtx33ByAngles(&rotation, mHeadPitchNow, mHeadYawNow, (u16)(mHeadRollNow + mFaceRoll));
     G3_MultMtx33(&rotation);
     G3_MtxMode(GX_MTXMODE_PROJECTION);
     G3_PushMtx();

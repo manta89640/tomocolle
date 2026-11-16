@@ -1394,7 +1394,7 @@ Not done:
   from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
-- What the date at +0x6C of `gGameData` is. `MapScene::IsNewDay` (func_0202cb08) is TRUE when it is not today's (a
+- What the date at +0x6C of `gGameData` is. `MapScene::IsNewDay` (GameData_IsNewDay) is TRUE when it is not today's (a
   day starting at 5:00) or not set, which gives the fountain its building window and its entry to scene 0x30; when
   it is today's, the window asks a question (message 0xA4) and entering goes to the fountain's scene of the time of day.
 

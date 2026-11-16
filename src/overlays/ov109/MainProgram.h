@@ -166,7 +166,7 @@ void func_02031228(void *sprite);
 // --- Songs (main program) ---
 
 extern "C" {
-u8 func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
+u8 GameData_FindFreeSong(GameData *game);                                  // A free song, 0xFF when none
 void GameData_GetSong(GameData *game, int song, void *buffer);
 void GameData_SetSong(GameData *game, int song, void *buffer);
 }

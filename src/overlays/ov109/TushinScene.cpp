@@ -854,7 +854,7 @@ int TushinScene::ReceiveCharacter() {
                 }
                 u8 song = record.mSongSlots[i];
                 if (song == 0xFF) {
-                    song = func_0202ca70(&gGameData);
+                    song = GameData_FindFreeSong(&gGameData);
                     if (song == 0xFF) {
                         mSongStoreFull = 1;
                     }
@@ -889,7 +889,7 @@ int TushinScene::ReceiveCharacter() {
                 if (sTransfer.GetSongSlot(j) == 0xFF) {
                     continue;
                 }
-                u8 song = func_0202ca70(&gGameData);
+                u8 song = GameData_FindFreeSong(&gGameData);
                 if (song == 0xFF) {
                     mSongStoreFull = 1;
                 }

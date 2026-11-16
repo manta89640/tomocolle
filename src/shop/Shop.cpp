@@ -76,7 +76,6 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void ResourceSet_SetArchive(int resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
 void GameData_ReadCharacter(GameData *game, int index, Character *character); // Reads a saved character
 int MiiData_GetSex(Character *character);
-void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
 void ScreenControl_SetBlendAlpha(void *a, int b, int c, int d, int e);
 void VramManagers_Reset(void *a);
 void Camera_Reset(Camera *camera);
@@ -1390,7 +1389,7 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
         mCharacter.SetAngle(mAngle);
         mCharacter.SetFace(8);
         mCharacter.Update();
-        func_0209d898(&mCharacter, player);
+        mCharacter.SetVoiceOf(player);
     } else {
         mMannequin.Init(30, 0, 31, 0);
         ModelResources_ReleaseModel(gModelResources, 30);

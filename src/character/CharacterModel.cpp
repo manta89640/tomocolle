@@ -19,8 +19,8 @@ void AnimModel_RemoveAnimation(AnimModel *model, u32 resType, int id);          
 void func_0202a3b0(AnimModel *model, u32 resType);                           // Removes the animations of a type
 void AnimModel_SetAnimationFrame(AnimModel *model, fx32 frame, u32 resType, int id); // Sets an animation's frame
 fx32 func_0202a5fc(AnimModel *model, u32 resType, int id);                   // An animation's frame
-void func_02028bc0(MtxFx33 *rotation, u16 x, u16 y, u16 z);                  // Turns a rotation by angles
-BOOL func_02028e98(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);  // The line meets the sphere
+void RotateMtx33ByAngles(MtxFx33 *rotation, u16 x, u16 y, u16 z);                  // Turns a rotation by angles
+BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);  // The line meets the sphere
 
 // A line that HitTestJoint tests the joints against: from gCamera + 0x20, along gTouchLineDirection
 extern VecFx32 gTouchLineDirection;
@@ -291,7 +291,7 @@ BOOL CharacterModel::HitTestJoint(const VecFx32 *origin, const VecFx32 *dir, int
     VecFx32 pos;
     pos = GetJointPosition(joint);
     VEC_Subtract(origin, &pos, &delta);
-    return func_02028e98(&delta, dir, FX_Mul(radius, scale));
+    return LineMeetsSphere(&delta, dir, FX_Mul(radius, scale));
 }
 
 void CharacterModel::UpdateBlend() {
@@ -360,7 +360,7 @@ void CharacterModel::TurnJoint(NNSG3dRS *rs) {
         break;
     }
     if (angles != NULL) {
-        func_02028bc0(&result->rot, angles[0], angles[1], angles[2]);
+        RotateMtx33ByAngles(&result->rot, angles[0], angles[1], angles[2]);
     }
 }
 

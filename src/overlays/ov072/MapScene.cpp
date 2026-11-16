@@ -2133,11 +2133,11 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
     }
 }
 
-// Whether a new day has begun since the date the game data keeps at +0x6C (none kept counts as one): func_0202cb08
+// Whether a new day has begun since the date the game data keeps at +0x6C (none kept counts as one): GameData_IsNewDay
 // compares it with today's, a day starting at 5:00, and says FALSE when the clock cannot be read. The fountain's
 // window and where entering it leads depend on it.
 BOOL MapScene::IsNewDay() {
-    return func_0202cb08(&gGameData);
+    return GameData_IsNewDay(&gGameData);
 }
 
 // --- MapClock ---

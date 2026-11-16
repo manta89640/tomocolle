@@ -11,8 +11,6 @@ extern "C" {
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
 // Gives a resource set the animations of an archive
 void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
-void func_0209decc(Character *character);
-void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
 }
 
