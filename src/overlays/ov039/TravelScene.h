@@ -70,7 +70,8 @@ extern PaletteLoader data_021213b8;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
-extern Light data_021227cc[];
+extern Light data_021227cc[]; // The lights (as overlay 110 declares them)
+extern Light data_021227d8[];
 extern MATHRandContext16 gRandom;
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);

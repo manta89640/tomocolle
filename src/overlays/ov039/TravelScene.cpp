@@ -141,8 +141,8 @@ void TravelScene::Init() {
     data_0211d604.mUnknown44Changed = TRUE;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 0, 0x7FFF, 63, FALSE);
     mCast.InitCharacters();
-    func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(&data_021227cc[1]);
+    func_0202a96c(data_021227cc);
+    func_0202a96c(data_021227d8);
     func_0202a640(mCast.mCamera);
     SetCameraPosition(mCast.mCamera, sCameraPosition);
     SetCameraTarget(mCast.mCamera, sCameraTarget);
