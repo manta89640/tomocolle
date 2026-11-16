@@ -180,11 +180,18 @@ disassembly, and directives that say where it goes:
 `configure.py` compiles that in place of the fetched file, with the same compiler, flags and include directories, to
 the same object; the unit and its name are unchanged. The tracked file never holds lines of the fetched one. This is
 the coordinator's design of round 3, kept for the user to approve or replace. It is used by `mi/src/mi_dma.c` (one
-function the fetched release lacks) and `spi/src/pm.c` (a later release, see binary.md, "Libraries").
+function the fetched release lacks), `spi/src/pm.c` (a later release, see binary.md, "Libraries") and
+`card/src/card_spi.c` (one function of a later release).
 
 The fetched file's other definitions stay. A static that only a removed or replaced function used is no longer
 emitted, which matters: with `-ipa file` the statics are pooled, so the file's pool is only right once every function
 that uses one of them is the game's. Remove what the game's release does not have.
+
+A file whose code is partly in the ITCM (`os_irqHandler.c`, `mi_dma.c`) is one unit: its entry in the main program's
+`delinks.txt` names an `.itcm` range beside its `.text`, and dsd's section migration takes that range out of the ITCM
+module (`.dtcm` works the same way for the DTCM's `.bss`). `dsd json delinks` and `dsd objdiff` do not migrate and so
+still list the ITCM's old gap; `tools/migrated_gaps.py` finds it, and `configure.py` and `tools/objdiff_config.py`
+leave it out.
 
 Linking strips what nothing refers to, as the original link did: a compiled file of a library holds many functions
 the game never calls. The objects that dsd delinks are exempt, since only as much of them is known to be referred to

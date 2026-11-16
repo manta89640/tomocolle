@@ -289,6 +289,10 @@ lib/NitroSDK/libraries/rtc/src/convert.c:
 lib/NitroSDK/libraries/card/src/card_common.c:
     .text       start:0x0201024c end:0x020105cc
 
+lib/NitroSDK/libraries/card/src/card_spi.c:
+    complete
+    .text       start:0x020105cc end:0x02010950
+
 lib/NitroSDK/libraries/card/src/card_backup.c:
     .text       start:0x02010950 end:0x02010d8c
 
@@ -342,6 +346,9 @@ lib/NitroSDK/libraries/ctrdg/src/ctrdg_task.c:
 lib/NitroSDK/libraries/math/src/math.c:
     complete
     .text       start:0x020141b0 end:0x020141f4
+
+lib/NitroSDK/libraries/math/src/qsort.c:
+    .text       start:0x020141f4 end:0x020144e4
 
 lib/NitroSDK/libraries/std/src/std_string.c:
     complete
