@@ -10,7 +10,9 @@ void func_0202683c(void);
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_02161ce0(Scene40Character *character, int a); // Updates the character
+void func_ov075_02161988(Scene40Character *character);
+void func_ov075_02161d94(Scene40Character *character);
+void func_ov075_02178364(Scene40CharacterPartA *part);
 }
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
@@ -28,7 +30,7 @@ void Scene40::Draw() {
     switch (mDrawState) {
     case 0:
         mRoom.Update();
-        func_ov075_02161ce0(&mCharacter, 0);
+        mCharacter.Update(FALSE);
         mDrawFrames++;
         if (mDrawFrames >= 9) {
             mDrawState = 1;
@@ -108,6 +110,26 @@ void Scene40::Exit() {
 }
 
 // --- The scene's character ------------------------------------------------------------------------------------------
+
+// With speaking set, the lips follow the scene's speech
+void Scene40Character::Update(BOOL speaking) {
+    Character::Update();
+    func_ov075_02161988(this);
+    mHeadIcons[0].Update();
+    mHeadIcons[1].Update();
+    func_ov075_02178364(&mPartA);
+    if (!speaking) {
+        return;
+    }
+    func_ov075_02161d94(this);
+    if (mTtsPlayer->IsEngineIdle()) {
+        return;
+    }
+    if (!mLipSync) {
+        return;
+    }
+    LipSync(mTtsPlayer->GetPhonemeName(), 1);
+}
 
 // objdiff scores this 99.5% though its instructions and relocations equal the original's (checked with objdump
 // against the delinked object; check_relocs lists nothing): the two functions it calls are byte for byte the same,
