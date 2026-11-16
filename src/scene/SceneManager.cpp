@@ -86,6 +86,7 @@ struct PaletteLoader {
 #include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
+#include "../overlays/ov088/Scene67.h"
 #include "../overlays/ov108/Scene69.h"
 #include "../overlays/ov093/Scene72.h"
 #include "../overlays/ov094/Scene74.h"
@@ -1017,6 +1018,9 @@ CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x67, overlay 88
+Scene67::Scene67(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x69, overlay 108
 Scene69::Scene69(int sceneId) : Scene(sceneId) {}

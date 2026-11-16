@@ -25,14 +25,14 @@ func_ov088_0214acdc kind:function(arm,size=0x94) addr:0x0214acdc
 func_ov088_0214ad70 kind:function(arm,size=0xc0) addr:0x0214ad70
 func_ov088_0214ae30 kind:function(arm,size=0xa0) addr:0x0214ae30
 func_ov088_0214aed0 kind:function(arm,size=0xd8) addr:0x0214aed0
-func_ov088_0214afa8 kind:function(arm,size=0x248) addr:0x0214afa8
-func_ov088_0214b1f0 kind:function(arm,size=0x890) addr:0x0214b1f0
-func_ov088_0214ba80 kind:function(arm,size=0x328) addr:0x0214ba80
-func_ov088_0214bda8 kind:function(arm,size=0x8c) addr:0x0214bda8
-func_ov088_0214be34 kind:function(arm,size=0x98) addr:0x0214be34
+_ZN7Scene6712StartLoadingEv kind:function(arm,size=0x248) addr:0x0214afa8
+_ZN7Scene674InitEv kind:function(arm,size=0x890) addr:0x0214b1f0
+_ZN7Scene676UpdateEv kind:function(arm,size=0x328) addr:0x0214ba80
+_ZN7Scene674DrawEv kind:function(arm,size=0x8c) addr:0x0214bda8
+_ZN7Scene674ExitEv kind:function(arm,size=0x98) addr:0x0214be34
 func_ov088_0214becc kind:function(arm,size=0xd8) addr:0x0214becc
-func_ov088_0214bfa4 kind:function(arm,size=0xc8) addr:0x0214bfa4
-func_ov088_0214c06c kind:function(arm,size=0xd0) addr:0x0214c06c
+_ZN7Scene67D1Ev kind:function(arm,size=0xc8) addr:0x0214bfa4
+_ZN7Scene67D0Ev kind:function(arm,size=0xd0) addr:0x0214c06c
 data_ov088_0214c13c kind:data(any) addr:0x0214c13c
 data_ov088_0214c148 kind:data(any) addr:0x0214c148
 data_ov088_0214c16c kind:data(any) addr:0x0214c16c
@@ -45,7 +45,7 @@ gText_Tsu_ov088 kind:data(any) addr:0x0214c204
 gStr_t_ov088 kind:data(any) addr:0x0214c214
 data_ov088_0214c230 kind:data(any) addr:0x0214c230 ambiguous
 gStr__ov088_2 kind:data(any) addr:0x0214c244
-data_ov088_0214c288 kind:data(any) addr:0x0214c288 ambiguous
+_ZTV7Scene67 kind:data(any) addr:0x0214c280
 gStr_WLN_ov088 kind:data(any) addr:0x0214c2a4
 gStr_Msg_TmdNewsMsgJP_LZ_bin_ov088 kind:data(any) addr:0x0214c2a8
 gStr_WLJ_ov088 kind:data(any) addr:0x0214c2c0
