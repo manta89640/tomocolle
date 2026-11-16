@@ -10,11 +10,11 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
-// The main program's particle system for one effect file (func_02080e98 loads it). The shop scenes construct
-// another object of the same kind with a byte-for-byte copy of the constructor (0x02080E8C), with byte-for-byte
-// copies of HeadIcon's constructor (0x02081074) for the icons after it; what tells them apart is not known.
+// The main program's particle system for one effect file (func_02080e98 loads it). Its constructor is emitted as
+// C2 (0x02080E80) and C1 (0x02080E8C), byte for byte the same, in that order; the scenes construct plain members
+// with C1, and the classes that derive from it (scene 0x76's TestNg111Icon) with C2. HeadIcon's are alike.
 struct ParticleSystem {
-    ParticleSystem(); // 0x02080E80
+    ParticleSystem(); // C1 0x02080E8C, C2 0x02080E80
 
     /* 0x0 */ void *mManager; // func_0207b138 updates it
 }; // 0x4
@@ -31,7 +31,7 @@ struct HeadIconShown {
 
 // The icon shown over a character's head (func_020810e4 updates it).
 struct HeadIcon {
-    HeadIcon();                                       // 0x02081034
+    HeadIcon();                                       // C1 0x02081074, C2 0x02081034
     void Show();                                      // 0x02080fc4: removes the icon that is shown (frees mShown)
     void Restart();                                   // 0x02080ff0: clears three flags of the shown icon: plays it again
     void Load(ParticleSystem *particles, int iconId); // 0x020810b4: keeps the id, and creates the icon

@@ -17,6 +17,12 @@
 //
 // The name is after the scene's archive, "Scn/Scene/SceneTestNg111_LZ.bin", which no other overlay mounts; it is not the
 // original: no name of this class survives in the ROM.
+// A head icon with its own particle system: the constructor builds both as base subobjects (their C2s, 0x02080E80
+// and 0x02081034), not as members (their C1s).
+//
+// The name is descriptive, not the original.
+class TestNg111Icon : public ParticleSystem, public HeadIcon {}; // 0x44
+
 class TestNg111Scene : public Scene {
 public:
     TestNg111Scene(int sceneId);
@@ -33,8 +39,7 @@ public:
     /* 0x190C0 */ u8 mUnknown190C0[0x820];
     /* 0x198E0 */ SpriteButton mButtons[1];
     /* 0x199D4 */ u8 mUnknown199D4[0xC];
-    /* 0x199E0 */ ParticleSystem mParticles;
-    /* 0x199E4 */ HeadIcon mHeadIcon;
+    /* 0x199E0 */ TestNg111Icon mIcon;
 }; // 0x19A24
 
 #endif // OV038_TESTNG111SCENE_H
