@@ -1,6 +1,7 @@
 #include "Scene40.h"
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
+#include "save/SaveBlocks.h"
 #include "SceneManager.h"
 #include "SceneMemory.h"
 #include "ScreenControl.h"
@@ -35,6 +36,7 @@ struct Scene40Scratch {
 }; // 0x70
 
 extern Scene40Scratch gSceneScratch;
+extern SaveHeader gIslandState; // The header of the save data
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
@@ -128,6 +130,241 @@ void Scene40::Exit() {
         ArchiveManager_Unmount(&gArchiveManager, mItemModels[i].mArchiveName);
         ModelResources_ReleaseModel(gModelResources, i + 14);
     }
+}
+
+// --- The list page's tabs ------------------------------------------------------------------------------------------
+
+static const u16 sListTabSequences[Scene40ListTabs::TAB_COUNT] = {41, 47, 43, 45};
+static const u16 sListTabPressedSequences[Scene40ListTabs::TAB_COUNT] = {42, 48, 44, 46};
+static const ScreenPoint sListTabPositions[Scene40ListTabs::TAB_COUNT] = {{23, 13}, {158, 13}, {68, 13}, {113, 13}};
+
+void Scene40ListTabs::Init(int resource) {
+    mPressed = 0;
+    mSelected = 0;
+    for (int i = 0; i < TAB_COUNT; i++) {
+        Sprite_Init(&mTabs[i], resource, sListTabSequences[i], 128, 96, TRUE);
+        SpriteButton_SetSequences(&mTabs[i], sListTabSequences[i], sListTabPressedSequences[i]);
+        mTabs[i].SetPositionFromVec(sListTabPositions[i].x << FX32_SHIFT, sListTabPositions[i].y << FX32_SHIFT);
+        SpriteButton_SetTouchRect(&mTabs[i], 44, 22);
+        SpriteButton_Reset(&mTabs[i]);
+        SpriteButton_SetKind(&mTabs[i], 3);
+        mTabs[i].mOverwritePalette = 1;
+        mTabs[i].mUnknownDC = TRUE;
+        mTabs[i].mSounds.mSounds[0] = 3;
+    }
+    SetVisible(FALSE);
+}
+
+// A list's tab is there when the player owns some of it or the island has the shop that sells it
+void Scene40ListTabs::UpdateAvailable(Scene40Context *context) {
+    u8 built = gIslandState.GetUnknown44(3);
+    BOOL owned = context->mInventory->HasAnyOwnedKind1();
+    mAvailable[0] = owned | (built != 0);
+    u8 level = gGameData.mUnknownB2[0];
+    owned = context->mInventory->HasAnyOwnedKind3();
+    mAvailable[1] = owned | (level >= 5);
+    built = gIslandState.GetUnknown44(10);
+    owned = context->mClothesList->HasAnyOwned();
+    mAvailable[2] = owned | (built != 0);
+    built = gIslandState.GetUnknown44(11);
+    owned = context->mInteriors->HasAnyOwned();
+    mAvailable[3] = owned | (built != 0);
+}
+
+void Scene40ListTabs::Update() {
+    mPressed = 0;
+    if (SpriteButton_Update(&mTabs[0])) {
+        mPressed = 1 << 0;
+        SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+        mSelected = 0;
+    } else if (SpriteButton_Update(&mTabs[1])) {
+        mPressed = 1 << 1;
+        SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+        mSelected = 1;
+    } else if (SpriteButton_Update(&mTabs[2])) {
+        mPressed = 1 << 2;
+        SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+        mSelected = 2;
+    } else if (SpriteButton_Update(&mTabs[3])) {
+        mPressed = 1 << 3;
+        SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+        mSelected = 3;
+    }
+}
+
+void Scene40ListTabs::Draw() {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_Draw(&mTabs[i]);
+    }
+}
+
+void Scene40ListTabs::SetVisible(BOOL visible) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        mTabs[i].mVisible = visible & mAvailable[i];
+    }
+}
+
+void Scene40ListTabs::Select(int tab) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_SetSelected(&mTabs[i], FALSE);
+    }
+    mSelected = tab;
+    SpriteButton_SetSelected(&mTabs[tab], TRUE);
+}
+
+static const u16 sGoodsTabSequences[Scene40GoodsTabs::TAB_COUNT] = {37, 39, 20, 22};
+static const u16 sGoodsTabPressedSequences[Scene40GoodsTabs::TAB_COUNT] = {38, 40, 21, 23};
+static const ScreenPoint sGoodsTabPositions[Scene40GoodsTabs::TAB_COUNT] = {{32, 41}, {88, 41}, {144, 41}, {200, 41}};
+static const u32 sGoodsTabFilters[Scene40GoodsTabs::TAB_COUNT] = {1, 2, 8, 16};
+
+void Scene40GoodsTabs::Init(int resource) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        Sprite_Init(&mTabs[i], resource, sGoodsTabSequences[i], 128, 96, TRUE);
+        SpriteButton_SetSequences(&mTabs[i], sGoodsTabSequences[i], sGoodsTabPressedSequences[i]);
+        mTabs[i].SetPositionFromVec(sGoodsTabPositions[i].x << FX32_SHIFT, sGoodsTabPositions[i].y << FX32_SHIFT);
+        SpriteButton_SetTouchRect(&mTabs[i], 52, 24);
+        SpriteButton_Reset(&mTabs[i]);
+        SpriteButton_SetKind(&mTabs[i], 3);
+        mTabs[i].mOverwritePalette = 1;
+        mTabs[i].mUnknownDC = TRUE;
+        mTabs[i].mSounds.mSounds[0] = 3;
+    }
+    SetVisible(FALSE);
+    Select(0);
+}
+
+void Scene40GoodsTabs::Update() {
+    mPressed = -1;
+    for (int i = 0; i < TAB_COUNT; i++) {
+        if (SpriteButton_Update(&mTabs[i])) {
+            SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+            mSelected = i;
+            mPressed = i;
+        }
+    }
+}
+
+void Scene40GoodsTabs::Draw() {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_Draw(&mTabs[i]);
+    }
+}
+
+void Scene40GoodsTabs::SetVisible(BOOL visible) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        mTabs[i].mVisible = visible;
+    }
+}
+
+void Scene40GoodsTabs::Select(int tab) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_SetSelected(&mTabs[i], FALSE);
+    }
+    SpriteButton_SetSelected(&mTabs[tab], TRUE);
+    mSelected = tab;
+}
+
+u32 Scene40GoodsTabs::GetFilter() {
+    return sGoodsTabFilters[mSelected];
+}
+
+int Scene40GoodsTabs::FindTab(u32 filter) {
+    int tab = 0;
+    switch (filter & 0x1F) {
+    case 1:
+        tab = 0;
+        break;
+    case 2:
+        tab = 1;
+        break;
+    case 8:
+        tab = 2;
+        break;
+    case 16:
+        tab = 3;
+        break;
+    }
+    return tab;
+}
+
+static const u16 sClothesTabSequences[Scene40ClothesTabs::TAB_COUNT] = {24, 26, 28, 30, 32};
+static const u16 sClothesTabPressedSequences[Scene40ClothesTabs::TAB_COUNT] = {25, 27, 29, 31, 33};
+static const ScreenPoint sClothesTabPositions[Scene40ClothesTabs::TAB_COUNT] = {
+    {26, 41}, {72, 41}, {118, 41}, {164, 41}, {210, 41},
+};
+static const int sClothesTabKinds[Scene40ClothesTabs::TAB_COUNT] = {0, 1, 2, 3, 4};
+
+void Scene40ClothesTabs::Init(int resource) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        Sprite_Init(&mTabs[i], resource, sClothesTabSequences[i], 128, 96, TRUE);
+        SpriteButton_SetSequences(&mTabs[i], sClothesTabSequences[i], sClothesTabPressedSequences[i]);
+        mTabs[i].SetPositionFromVec(sClothesTabPositions[i].x << FX32_SHIFT, sClothesTabPositions[i].y << FX32_SHIFT);
+        SpriteButton_SetTouchRect(&mTabs[i], 42, 24);
+        SpriteButton_Reset(&mTabs[i]);
+        SpriteButton_SetKind(&mTabs[i], 3);
+        mTabs[i].mOverwritePalette = 1;
+        mTabs[i].mUnknownDC = TRUE;
+        mTabs[i].mSounds.mSounds[0] = 3;
+    }
+    SetVisible(FALSE);
+    Select(0);
+}
+
+void Scene40ClothesTabs::Update() {
+    mPressed = -1;
+    for (int i = 0; i < TAB_COUNT; i++) {
+        if (SpriteButton_Update(&mTabs[i])) {
+            SpriteButton_SetSelected(&mTabs[mSelected], FALSE);
+            mSelected = i;
+            mPressed = i;
+        }
+    }
+}
+
+void Scene40ClothesTabs::Draw() {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_Draw(&mTabs[i]);
+    }
+}
+
+void Scene40ClothesTabs::SetVisible(BOOL visible) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        mTabs[i].mVisible = visible;
+    }
+}
+
+void Scene40ClothesTabs::Select(int tab) {
+    for (int i = 0; i < TAB_COUNT; i++) {
+        SpriteButton_SetSelected(&mTabs[i], FALSE);
+    }
+    SpriteButton_SetSelected(&mTabs[tab], TRUE);
+    mSelected = tab;
+}
+
+int Scene40ClothesTabs::GetKind() {
+    return sClothesTabKinds[mSelected];
+}
+
+int Scene40ClothesTabs::FindTab(int kind) {
+    int tab = 0;
+    switch (kind) {
+    case 0:
+        tab = 0;
+        break;
+    case 1:
+        tab = 1;
+        break;
+    case 2:
+        tab = 2;
+        break;
+    case 3:
+        tab = 3;
+        break;
+    case 4:
+        tab = 4;
+        break;
+    }
+    return tab;
 }
 
 // --- The scene's speech window (scene+0x163B0) ---------------------------------------------------------------------

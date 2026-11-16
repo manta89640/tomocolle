@@ -7,26 +7,7 @@
 // Init (0x0214CA84) initialises every page from the scene's context, Update (0x0214CC34) runs the current page,
 // Draw (0x0214FC00) draws it. The scene switches the lower screen's graphics when a page asks for another layout
 // (mRequestedLayout). Offsets are the object's, then the scene's in brackets. See scratchpad's ov075-design.md.
-class Scene40ListPage {
-public:
-    /* 0x0000 [0x32A94] */ u8 mUnknown32A94[0x1C];
-    /* 0x001C [0x32AB0] */ Scene40Items mItems3;
-    /* 0x0048 [0x32ADC] */ u8 mUnknown32ADC[0x24];
-    /* 0x006C [0x32B00] */ ClothesList mClothesList2;
-    /* 0x2140 [0x34BD4] */ u8 mUnknown34BD4[0x4B4];
-    /* 0x25F4 [0x35088] */ Scene40ListView mList;
-    /* 0x16A14 [0x494A8] */ u8 mUnknown494A8[0xC];
-    /* 0x16A20 [0x494B4] */ SpriteButton mButtons[4];
-    /* 0x16DF0 [0x49884] */ u8 mUnknown49884[0x18];
-    /* 0x16E08 [0x4989C] */ SpriteButton mButtons2[4];
-    /* 0x171D8 [0x49C6C] */ u8 mUnknown49C6C[0x8];
-    /* 0x171E0 [0x49C74] */ SpriteButton mButtons3[5];
-    /* 0x176A4 [0x4A138] */ TextButton mTextButton;
-    /* 0x17D94 [0x4A828] */ TextButton mTextButton2;
-    /* 0x18484 [0x4AF18] */ SpriteButton mButton;
-    /* 0x18578 [0x4B00C] */ MessageText mText2;
-    /* 0x18B68 [0x4B5FC] */ u8 mUnknown4B5FC[0xC];
-}; // 0x18B74
+#include "Scene40ListPage.h"
 
 class Scene40Pages {
 public:
