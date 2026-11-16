@@ -174,8 +174,8 @@ void TutorialRoomScene::Init() {
     void *animations;
 
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     CreateMainFrameHeap(0x4000);
 
@@ -200,9 +200,9 @@ void TutorialRoomScene::Init() {
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     func_02028280(&data_02121834, 1, 2);
     func_02028280(&data_02121834, 2, 1);
-    data_0211d604.Set(0x1600);
-    data_0211d604.Show(0x11);
-    func_02023ee0(&data_0211d604, 2, 0x11, 8, 8);
+    gScreenControl.Set(0x1600);
+    gScreenControl.Show(0x11);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
 
     mEtcMessages.Open("TEM:/tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:/tmd_common_msg_JP.bmg");
@@ -328,8 +328,8 @@ void TutorialRoomScene::Draw() {
 // @0x0214a8b8
 void TutorialRoomScene::Exit() {
     SaveCharacters();
-    func_02023f4c(&data_0211d604, 0x3F00, 0);
-    func_02023eac(&data_0211d604, 0x3F3F);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F3F);
     DestroyMainFrameHeap();
     func_0202aecc(data_021223e4, 0);
     func_0202aecc(data_021223e4, 1);
@@ -411,7 +411,7 @@ void TutorialRoomScene::StartTutorialStep() {
     switch (mTutorialStep) {
     case 8:
         SetState(STATE_RESIDENT_ARRIVES);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = 0x1400000;
         mLight.SetState(TutorialRoomLight::STATE_SET_ROOM_COLOR);
         break;
@@ -420,7 +420,7 @@ void TutorialRoomScene::StartTutorialStep() {
         mCharacters[0].mPresent = TRUE;
         mCharacters[0].SetState(4);
         ((Character *)(&mCharacters[0]))->SetAngle(0x1800);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = 0x1500000;
         mLight.SetState(TutorialRoomLight::STATE_SET_STYLE_COLOR);
         mTimedMessage.SetState(TutorialTimedMessage::STATE_SHOW);
@@ -437,7 +437,7 @@ void TutorialRoomScene::StartTutorialStep() {
         FloorPos target;
         mCharacters[0].GetRandomPosInArea(&target);
         mCharacters[0].SetWalkTarget(target.x, 0, target.z);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = -0x1000000;
         mLight.SetState(TutorialRoomLight::STATE_SET_STYLE_COLOR);
         mTimedMessage.SetState(TutorialTimedMessage::STATE_SHOW);
@@ -503,7 +503,7 @@ void TutorialRoomScene::UpdateState() {
             mTimer++;
             if (mTimer > 240) {
                 mStep++;
-                func_02023f4c(&data_0211d604, 0x1F00, 0);
+                ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
                 func_02034f38(&mWindow[0], 0, 0x159);
                 func_02034a3c(&mWindow[0], 0, 0, mCharacters[0].mNameText);
                 func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
@@ -704,7 +704,7 @@ void TutorialRoomScene::UpdateState() {
             mTimer++;
             if (mTimer > 60) {
                 mStep++;
-                func_02023f4c(&data_0211d604, 0x1F00, 0);
+                ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
                 func_02034f38(&mWindow[0], 0, 0x16C);
                 func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
             }
@@ -2756,9 +2756,9 @@ void TutorialTimedMessage::SetState(int state) {
 void TutorialTimedMessage::SetVisible(BOOL visible) {
     mSprite.mVisible = visible;
     if (visible == TRUE) {
-        data_0211d604.Show(2);
+        gScreenControl.Show(2);
     } else {
-        HideScreens(&data_0211d604, 2);
+        HideScreens(&gScreenControl, 2);
     }
 }
 

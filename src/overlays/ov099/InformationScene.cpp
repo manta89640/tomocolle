@@ -265,7 +265,7 @@ void InformationScene::Init() {
 
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x100, 1);
-    data_0211d604.Set(0x1211);
+    gScreenControl.Set(0x1211);
 }
 
 void InformationScene::Update() {

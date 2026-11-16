@@ -70,7 +70,7 @@ void MiiListScene::Init() {
     func_02027290(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.Set(0x1700);
+    gScreenControl.Set(0x1700);
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 
     mPanel.Init(6);

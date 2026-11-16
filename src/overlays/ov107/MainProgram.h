@@ -45,7 +45,7 @@ extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;

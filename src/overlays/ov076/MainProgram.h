@@ -19,7 +19,7 @@ struct Camera {
     /* 0x2C */ VecFx32 mTarget;
 };
 
-// The screens: which planes are shown (data_0211d604).
+// The screens: which planes are shown (gScreenControl).
 struct ScreenControl {
     void Show(u32 planes) {
         mPlanes |= planes;
@@ -57,7 +57,7 @@ extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;

@@ -99,8 +99,8 @@ void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int x);
 void func_02028154(ScreenLoader *loader, int plane, int y);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 s64 Clock_GetSeconds(void *clock);
 }
 

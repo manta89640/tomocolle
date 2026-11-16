@@ -80,12 +80,12 @@ struct ScreenControl {
     /* 0xD8 */ u8 mUnknownD8[0x14];
     /* 0xEC */ int mUnknown48Changed;
 };
-extern ScreenControl data_0211d604;
-void func_02023be8(ScreenControl *screens, int mask, fx32 brightness);
-void func_02023c54(ScreenControl *screens, int mask, fx32 speed);
-int func_02023c44(ScreenControl *screens, int mask); // The brightness now
-void func_02023eac(ScreenControl *screens, int mask);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+extern ScreenControl gScreenControl;
+void ScreenControl_SetBrightness(ScreenControl *screens, int mask, fx32 brightness);
+void ScreenControl_SetFadeSpeed(ScreenControl *screens, int mask, fx32 speed);
+int ScreenControl_GetBrightnessLevel(ScreenControl *screens, int mask); // The brightness now
+void ScreenControl_ClearBlend(ScreenControl *screens, int mask);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // The buttons
 struct PadInput {
@@ -353,8 +353,8 @@ void RoomScene::Init() {
 
     func_0202b0e8(&data_02122824);
     func_0202ae38(data_021223e4);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     CreateMainFrameHeap(0x4000);
 
@@ -381,9 +381,9 @@ void RoomScene::Init() {
     func_02028154(&data_02121834, 0x200, -0xC0);
     func_02028108(&data_02121834, 0x400, 0);
     func_02028154(&data_02121834, 0x400, -0xC0);
-    data_0211d604.Set(0x1600);
-    data_0211d604.Show(0x11);
-    func_02023ee0(&data_0211d604, 2, 0x11, 8, 8);
+    gScreenControl.Set(0x1600);
+    gScreenControl.Show(0x11);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
     SetInputState(INPUT_IDLE);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
@@ -516,20 +516,20 @@ void RoomScene::Draw() {
             SetFadeState(0);
         } else if (mFadeStep >= 6) {
             if (mFadeStep == 6) {
-                func_02023c54(&data_0211d604, 0x3F3F, 0x2AE1);
+                ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x2AE1);
             }
             UpdateObjects();
         } else {
-            func_02023be8(&data_0211d604, 0x3F3F, 0x10000);
+            ScreenControl_SetBrightness(&gScreenControl, 0x3F3F, 0x10000);
             UpdateObjects();
         }
         break;
     case 2:
         mFadeStep++;
-        if (ABS(func_02023c44(&data_0211d604, 0x3F)) > 10) {
+        if (ABS(ScreenControl_GetBrightnessLevel(&gScreenControl, 0x3F)) > 10) {
             SetFadeState(0);
         } else if (mFadeStep == 1) {
-            func_02023c54(&data_0211d604, 0x3F3F, 0x2000);
+            ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x2000);
         } else if (mFadeStep > 1) {
             UpdateObjects();
         }
@@ -555,7 +555,7 @@ void RoomScene::Draw() {
 }
 
 void RoomScene::Exit() {
-    func_02023eac(&data_0211d604, 0x3F);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F);
     FinishEncounter();
     SaveCharacters();
     DestroyMainFrameHeap();
@@ -1000,7 +1000,7 @@ void RoomScene::ChangeRoom() {
     mIdleFrames = 0;
     mCamera.SetState(0, 0);
     mMessage.SetState(4);
-    data_0211d604.Hide(1);
+    gScreenControl.Hide(1);
     mClockDisplay.SetState(1);
     mIcon[0].SetMode(1);
 }
@@ -1303,7 +1303,7 @@ void RoomScene::UpdateEvent() {
                 StartRoomEvent();
                 ShowEventMessage();
             }
-            data_0211d604.Show(1);
+            gScreenControl.Show(1);
         }
         break;
     }
@@ -12761,9 +12761,9 @@ void TimedMessage::SetState(int state) {
 void TimedMessage::SetVisible(BOOL visible) {
     mSprite.mVisible = visible;
     if (visible == TRUE) {
-        data_0211d604.Show(2);
+        gScreenControl.Show(2);
     } else {
-        data_0211d604.Hide(2);
+        gScreenControl.Hide(2);
     }
 }
 

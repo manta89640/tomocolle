@@ -25,9 +25,9 @@ void ParticleTestScene::StartLoading() {
 
 void ParticleTestScene::Init() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 5, 5), 31, 0x7FFF, 63, FALSE);
     CreateMainFrameHeap(0x4000);
     mParticles = func_0207ab20(AllocFromMainFrameHeap, 1, 100, 0, 1, 30);

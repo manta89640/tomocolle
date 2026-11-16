@@ -177,7 +177,7 @@ void OptionScene::Init() {
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x100, 1);
     func_02028280(&data_02121834, 0x200, 2);
-    data_0211d604.Set(0x1302);
+    gScreenControl.Set(0x1302);
     mCharOffset = charOffset;
     func_02032fb8(&mWindow, sScreenRect);
     mTtsPlayer.InitEngine();
@@ -596,7 +596,7 @@ void OptionScene::SetState(int state) {
         mTextButtons[TEXT_BUTTON_SOUND].mVisible = TRUE;
         mTextButtons[TEXT_BUTTON_CLOCK].mVisible = TRUE;
         mTextButtons[TEXT_BUTTON_ERASE].mVisible = TRUE;
-        data_0211d604.Set(0x1202);
+        gScreenControl.Set(0x1202);
         break;
     case STATE_CLOCK:
     case STATE_FIRST_CLOCK:
@@ -610,7 +610,7 @@ void OptionScene::SetState(int state) {
             mSprites[b].mVisible = TRUE;
         }
         func_02027d7c(&data_02121834, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
-        data_0211d604.Set(0x1302);
+        gScreenControl.Set(0x1302);
         Clock_GetDate(data_02123440, &mDate);
         Clock_GetTime(data_02123440, &mTime);
         ShowYear(mDate.year);
@@ -660,7 +660,7 @@ void OptionScene::SetState(int state) {
             mTexts[f].mSprite.mVisible = TRUE;
         }
         func_02027d7c(&data_02121834, "N83:/BG_down_sframe.nsc", 0x100, 0, 0, 0, 0, -1);
-        data_0211d604.Set(0x1302);
+        gScreenControl.Set(0x1302);
         if (gGameData.mStereo == TRUE) {
             func_02031e28(&mTextButtons[TEXT_BUTTON_STEREO], TRUE);
             func_02031e28(&mTextButtons[TEXT_BUTTON_MONO], FALSE);

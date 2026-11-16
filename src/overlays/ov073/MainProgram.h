@@ -84,11 +84,11 @@ void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader); // Whether no archive is being loaded
 
 // --- The screens ---
-void func_02023eac(ScreenControl *screens, int mask);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_ClearBlend(ScreenControl *screens, int mask);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 // Something of the planes in the mask that the scene sets to -10 before a part and to 0 when the message window
 // comes (a brightness, by the values)
-void func_02023f4c(ScreenControl *screens, int mask, int value);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int mask, int value);
 // The offset (the plane's number shifted by 11) of a plane's screen in VRAM
 int func_020253d4(u32 *graphicsManager, int plane); // (gGraphicsManager is declared in text/TextCanvas.h)
 

@@ -664,8 +664,8 @@ Measured:
 
 - `NintendoLogoScene` (0x1C bytes; its constructor is the main program's, `0x0203DE78`) mounts
   "Cmn/Nin/NintendoLogo_LZ.bin" as "MNU" and sets both screens' fade speed to 0x19C2 of 0x10000 a frame, so that
-  its fades take ten frames (`func_02023c54(&data_0211d604, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
-  +0x10, the steps `func_02023cd4` and `func_02023ddc` add to their brightness, +0x04 and +0x08, each frame). `Init`
+  its fades take ten frames (`ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
+  +0x10, the steps `ScreenControl_StepFadeIn` and `ScreenControl_StepFadeOut` add to their brightness, +0x04 and +0x08, each frame). `Init`
   loads `MNU:/Gray_White.nsc`, `.ncg` and `.ncl` into plane 2 (one of the main engine's, whose planes are 0x3F in
   the screens' masks), shows that plane alone, and has `PaletteLoader_SetBackdrop` set colour 0x7FFF with 0x101, as
   `PreStartScene` does. `Update` counts frames in its one state and on the 61st asks for scene 0x39
@@ -1231,7 +1231,7 @@ Measured:
   in the spoken text), the shutter button appears and the player's "say cheese" (0x4B0) is spoken with the voice
   of a resident drawn at random; when its frame comes (from that resident's `mVoice[4]`: `(v - 50) * 220 / 250 +
   40`) the travellers blend into random poses ('BCA0' animations 1-4 and 10-13 together, or 5-9 each), and the
-  shutter plays sequence archive entry 15 and a white flash (`func_02023f4c` from 16 down), with faces 6 or 1. A
+  shutter plays sequence archive entry 15 and a white flash (`ScreenControl_SetBlendBrightness` from 16 down), with faces 6 or 1. A
   "next" button follows the first two photographs, a wait the third; then a return button, and the scene fades and
   asks for scene 0x40. It also stores a per-destination halfword (0xB6, 0xC3, 0xD9, 0xC2, 0xC4 to 0xC8) at
   `gSceneMemory` +0x2C (not identified): overlays 68, 75, 84 and 85 read that halfword (84 when the previous scene

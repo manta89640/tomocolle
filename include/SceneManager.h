@@ -31,7 +31,7 @@ public:
     // The state of three graphics managers as Init leaves them, which each new scene starts from
     /* 0x00C */ u8 mGraphicsState[0x140];      // gGraphicsManager's (func_02024b10 records, func_02024c14 restores)
     /* 0x14C */ u8 mScreenLoaderState[0x140];  // data_02121834's (func_02027ad0, func_02027c0c)
-    /* 0x28C */ u8 mScreenControlState[0xD4];  // data_0211d604's (func_02023848, func_02023a00)
+    /* 0x28C */ u8 mScreenControlState[0xD4];  // gScreenControl's (ScreenControl_SaveState, ScreenControl_RestoreState)
     /* 0x360 */ int mSoundGroup;               // The sound group loaded, -1 for none
 }; // 0x364
 

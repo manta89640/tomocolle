@@ -162,11 +162,11 @@ extern u32 data_021223e4[];
 void func_0202aecc(void *resources, int resourceId);
 void func_0202ad84(void *resources);
 void DestroyMainFrameHeap(void);
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern ScreenLoader data_02121834;
 void func_02024234(ScreenControl *screens, int planes, int a);
-void func_02023f4c(ScreenControl *screens, int planes, int a);
-void func_02023eac(ScreenControl *screens, int planes);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
+void ScreenControl_ClearBlend(ScreenControl *screens, int planes);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 void func_0207b258(ParticleSystem *system, void *a);
 }
@@ -233,7 +233,7 @@ extern SceneManager gSceneManager;
 extern SceneMemory gSceneMemory;
 extern Light data_021227cc;
 extern Light data_021227d8;
-BOOL func_02023fa4(ScreenControl *screens, int planes);
+BOOL ScreenControl_GetBlendBrightness(ScreenControl *screens, int planes);
 void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
 void func_0207b138(ParticleSystem *system);
 void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
@@ -265,7 +265,7 @@ extern Camera data_02122764;
 void func_0202a96c(Light *light);
 void func_02024b10(u32 *manager, void *a, int planes);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void *CreateMainFrameHeap(int size);
 void *AllocFromMainFrameHeap(int size); // An allocator the particle system is given
 ParticleSystem *func_0207ab20(void *(*alloc)(int), int a, int b, int c, int d, int e);
@@ -293,9 +293,9 @@ void MiiEditScene::Init() {
     mPage = -1;
     mUnknown1B32C = FALSE;
     func_0202b0e8(&data_02122824);
-    data_0211d604.SetUnknown44(1);
-    data_0211d604.Show(1);
-    data_0211d604.SetUnknown48(1);
+    gScreenControl.SetUnknown44(1);
+    gScreenControl.Show(1);
+    gScreenControl.SetUnknown48(1);
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     gSoundManager.LoadGroup(1);
     gSoundManager.StartSeq(0, 2);
@@ -389,7 +389,7 @@ void MiiEditScene::Init() {
     func_02028280(&data_02121834, 0x100, 0);
     func_02028280(&data_02121834, 0x200, 1);
     func_02028280(&data_02121834, 0x1000, 0);
-    func_02023ee0(&data_0211d604, 1, 4, 8, 8);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 1, 4, 8, 8);
     ShowControls();
     for (u16 i = 0; i < 6; i++) {
         Sprite_Init(&mButtons[i], 0, 0, 0x80, 0x60, TRUE);
@@ -580,7 +580,7 @@ void MiiEditScene::Update() {
         if (mProfilePage.mState == 15) return;
         if (mProfilePage.mState == 16) return;
     }
-    if (func_02023fa4(&data_0211d604, 0x3F00)) {
+    if (ScreenControl_GetBlendBrightness(&gScreenControl, 0x3F00)) {
         return;
     }
     for (u16 i = 0; i < 6; i++) {
@@ -691,9 +691,9 @@ void MiiEditScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "KBD");
     ArchiveManager_Unmount(&gArchiveManager, "TBM");
     ArchiveManager_Unmount(&gArchiveManager, "T02");
-    func_02024234(&data_0211d604, 0x3F00, 0);
-    func_02023f4c(&data_0211d604, 0x3F00, 0);
-    func_02023eac(&data_0211d604, 0x3F00);
+    func_02024234(&gScreenControl, 0x3F00, 0);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F00);
     func_02028108(&data_02121834, 4, 0);
     switch (mPage) {
     case 0:
@@ -957,8 +957,8 @@ void MiiEditScene::ShowControlsWithWindow() {
         mButtons[5].mVisible = FALSE;
     }
     func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    data_0211d604.mPlanes = 0x1317;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes = 0x1317;
+    gScreenControl.mPlanesChanged = TRUE;
 }
 
 // --- Page 0 ---
@@ -1149,8 +1149,8 @@ void MiiEditScene::ShowControls() {
         mButtons[5].mVisible = FALSE;
     }
     func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    data_0211d604.mPlanes = 0x1217;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes = 0x1217;
+    gScreenControl.mPlanesChanged = TRUE;
 }
 
 void MiiEditScene::ShowControlsEditFace() {
@@ -1165,8 +1165,8 @@ void MiiEditScene::ShowControlsEditFace() {
         mButtons[5].mVisible = FALSE;
     }
     func_02027d7c(&data_02121834, "E00:/BG_down_editface.nsc", 0x200, 0, 0, 0, 0, -1);
-    data_0211d604.mPlanes = 0x1217;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes = 0x1217;
+    gScreenControl.mPlanesChanged = TRUE;
 }
 
 void MiiEditScene::HideControls() {
@@ -1177,8 +1177,8 @@ void MiiEditScene::HideControls() {
     for (int i = 0; i < 6; i++) {
         mButtons[i].mVisible = FALSE;
     }
-    data_0211d604.mPlanes = 0x1317;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes = 0x1317;
+    gScreenControl.mPlanesChanged = TRUE;
 }
 
 void MiiEditScene::HideControlsNoBar() {
@@ -1190,8 +1190,8 @@ void MiiEditScene::HideControlsNoBar() {
         mButtons[i].mVisible = FALSE;
     }
     func_02027d7c(&data_02121834, "E00:/BG_down_nobar.nsc", 0x200, 0, 0, 0, 0, -1);
-    data_0211d604.mPlanes = 0x1217;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes = 0x1217;
+    gScreenControl.mPlanesChanged = TRUE;
 }
 
 void MiiEditProgressSprite::SetPlace(int place) {
@@ -2672,8 +2672,8 @@ struct TouchInput {
 
 extern "C" {
 extern TouchInput gTouchInput;
-BOOL func_02024004(ScreenControl *screens, int planes, int level);
-BOOL func_02024118(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int level);
 // The keyboard: its update with the touch screen, ...
 
 extern "C" u16 KeyboardCore_GetChar(void); // The character typed (8 erases, 7 and 9 add the voicing marks, 11 makes it small)
@@ -2706,13 +2706,13 @@ void MiiEditProfilePage::Update() {
     case 4:
     case 6:
     case 8:
-        if (!func_02024118(&data_0211d604, 0x3F00, 2)) {
+        if (!ScreenControl_BlendFadeOut(&gScreenControl, 0x3F00, 2)) {
             return;
         }
         SetState(mState + 1);
         return;
     case 1:
-        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+        if (!ScreenControl_BlendFadeIn(&gScreenControl, 0x3F00, -2)) {
             return;
         }
         for (int i = 0; i < 10; i++) {
@@ -2757,7 +2757,7 @@ void MiiEditProfilePage::Update() {
     case 7:
     case 9: {
         mKeyboard.Update(0, gTouchInput.mTp);
-        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+        if (!ScreenControl_BlendFadeIn(&gScreenControl, 0x3F00, -2)) {
             return;
         }
         if (func_0203133c(&mButton)) {
@@ -3217,7 +3217,7 @@ void MiiEditProfilePage::Update() {
 
 extern "C" {
 void func_02024c14(u32 *manager, void *a, int planes);
-void func_02023f4c(ScreenControl *screens, int planes, int a);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
 void func_02033bb4(MessageWindow *window, int a, int sequence, WindowPoint position); // Adds a sprite
 void func_02032140(SpriteButton *button, int a, int b, int c, int d); // Its four sounds
 // The keyboard
@@ -3258,9 +3258,9 @@ void MiiEditProfilePage::SetState(int state) {
         func_02027d7c(&data_02121834, "E00:/BG_down.nsc", 0x400, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, "E00:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
         PaletteLoader_LoadFile(&gPaletteLoader, "E00:/BG_down.ncl", 0x2F00, -1, -1, -1);
-        data_0211d604.mPlanes = 0x17;
-        data_0211d604.mPlanesChanged = TRUE;
-        func_02023f4c(&data_0211d604, 0x3F00, 0x10);
+        gScreenControl.mPlanes = 0x17;
+        gScreenControl.mPlanesChanged = TRUE;
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0x10);
         break;
     case 1: {
         int charOffset = 0x384;
@@ -3974,8 +3974,8 @@ void MiiEditVoicePage::Init(MiiEditScene *scene) {
 }
 
 extern "C" {
-BOOL func_02024004(ScreenControl *screens, int planes, int level); // The screens' fades (as overlay 72 calls them)
-BOOL func_02024118(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level); // The screens' fades (as overlay 72 calls them)
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int level);
 extern MATHRandContext16 gRandom;
 void func_020321ec(MiiEditSprite100 *slider);                // Updates it
 int func_020324e0(MiiEditSprite100 *slider, int min, int max); // Its value in the range
@@ -3995,7 +3995,7 @@ void MiiEditVoicePage::Update() {
     switch (mState) {
     case 0:
     case 3:
-        if (func_02024118(&data_0211d604, 0x3F00, 2)) {
+        if (ScreenControl_BlendFadeOut(&gScreenControl, 0x3F00, 2)) {
             SetState(mState + 1);
         }
         break;
@@ -4004,7 +4004,7 @@ void MiiEditVoicePage::Update() {
         if (mState == 1) {
             SetState(2);
         }
-        if (func_02024004(&data_0211d604, 0x3F00, -2)) {
+        if (ScreenControl_BlendFadeIn(&gScreenControl, 0x3F00, -2)) {
             for (int i = 0; i < 22; i++) {
                 if (!func_0203133c(&mButtons[i])) {
                     continue;
@@ -4090,7 +4090,7 @@ void MiiEditVoicePage::Update() {
         }
         break;
     case 4:
-        if (!func_02024004(&data_0211d604, 0x3F00, -2)) {
+        if (!ScreenControl_BlendFadeIn(&gScreenControl, 0x3F00, -2)) {
             break;
         }
         for (int i = 0; i < 22; i++) {

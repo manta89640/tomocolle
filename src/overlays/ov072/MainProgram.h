@@ -200,7 +200,7 @@ struct IslandState {
 
 extern "C" {
 // --- Main-program functions, by their address names ---
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern PadInput data_0211f9d4;
 extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
@@ -234,8 +234,8 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 
-BOOL func_02024004(ScreenControl *screens, int planes, int level);
-BOOL func_02024118(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int level);
 void CreateMainFrameHeap(int size);
 void AllocFromMainFrameHeap();
 void DestroyMainFrameHeap();

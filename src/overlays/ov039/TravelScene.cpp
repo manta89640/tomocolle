@@ -138,8 +138,8 @@ void TravelScene::Init() {
 
     gSoundManager.StartSeq(0, sSequences[mDestination]);
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown44 = 1;
-    data_0211d604.mUnknown44Changed = TRUE;
+    gScreenControl.mUnknown44 = 1;
+    gScreenControl.mUnknown44Changed = TRUE;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 0, 0x7FFF, 63, FALSE);
     mCast.InitCharacters();
     func_0202a96c(data_021227cc);
@@ -222,7 +222,7 @@ void TravelScene::Init() {
     func_02028f24(&gVramTransferQueue, "N00:/BG_down.ncg", 0x200, 0, 0, 0, -1);
     mMessageFiles[0].Open("TBM:/tmd_minicontents_msg_JP.bmg");
     mText.mMessageFile = &mMessageFiles[0];
-    func_02023ee0(&data_0211d604, 2, 0x1D, 8, 8);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x1D, 8, 8);
     func_02028f24(&gVramTransferQueue, "SFL:/caption.ncg", 2, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SFL:/caption.nsc", 2, 0, 0, 0, 0, -1);
 
@@ -279,7 +279,7 @@ void TravelScene::Init() {
     func_02028280(&data_02121834, 4, 2);
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x200, 1);
-    data_0211d604.Set(0x1217);
+    gScreenControl.Set(0x1217);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     mTtsPlayer.InitEngine();
     mLastSpot = -1;
@@ -296,7 +296,7 @@ void TravelScene::Update() {
         }
         break;
     case STATE_DEPARTURE:
-        func_02024118(&data_0211d604, 0x3F, -1);
+        ScreenControl_BlendFadeOut(&gScreenControl, 0x3F, -1);
         if (mFrame++ > 120) {
             mSprites[1].mVisible = FALSE;
             mSprites[2].mVisible = FALSE;
@@ -308,7 +308,7 @@ void TravelScene::Update() {
     case STATE_PHOTO_FADE_IN:
     case STATE_PHOTO2_FADE_IN:
     case STATE_PHOTO3_FADE_IN:
-        if (func_02024004(&data_0211d604, 0x3F, 1)) {
+        if (ScreenControl_BlendFadeIn(&gScreenControl, 0x3F, 1)) {
             SetState(mState + 1);
         }
         break;
@@ -358,7 +358,7 @@ void TravelScene::Update() {
         } else if (level < -16) {
             level = -16;
         }
-        func_02023f4c(&data_0211d604, 0x3F, level);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F, level);
         if (mFrame++ > 60) {
             SetState(mState + 1);
         }
@@ -378,7 +378,7 @@ void TravelScene::Update() {
         break;
     case STATE_PHOTO_FADE_OUT:
     case STATE_PHOTO2_FADE_OUT:
-        if (func_02024118(&data_0211d604, 0x3F, -1)) {
+        if (ScreenControl_BlendFadeOut(&gScreenControl, 0x3F, -1)) {
             SetState(mState + 1);
         }
         break;
@@ -388,7 +388,7 @@ void TravelScene::Update() {
         }
         break;
     case STATE_LEAVE:
-        func_02024118(&data_0211d604, 0x3F3F, 1);
+        ScreenControl_BlendFadeOut(&gScreenControl, 0x3F3F, 1);
         if (mFrame++ > 180) {
             gSceneManager.RequestScene(0x40);
         }
@@ -510,7 +510,7 @@ void TravelScene::SetState(int state) {
         PaletteLoader_LoadFile(&gPaletteLoader, palette, 0x2F, -1, -1, -1);
         func_02027d7c(&data_02121834, screen, 4, 0, 0, 0, 0, -1);
         func_02028f24(&gVramTransferQueue, chars, 0xC, 0, 0, 0, -1);
-        data_0211d604.Set(0x1217);
+        gScreenControl.Set(0x1217);
         mSpeechWindow.Hide();
         break;
     case STATE_PHOTO_INTRO:
@@ -531,7 +531,7 @@ void TravelScene::SetState(int state) {
         mSpeechWindow.SetMessageArg(mMessageFiles[0].GetText(GetSightName(mDestination, sight)), 0);
         mText.SetMessageArg(mMessageFiles[0].GetText(GetSightReading(mDestination, sight)), 0);
         Speak(0, 0x4AE, 0);
-        func_02023ee0(&data_0211d604, 2, 0x1D, 8, 8);
+        ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x1D, 8, 8);
         break;
     }
     case STATE_PHOTO_POSE:
@@ -552,7 +552,7 @@ void TravelScene::SetState(int state) {
     case STATE_PHOTO2_FLASH:
     case STATE_PHOTO3_FLASH:
         PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
-        data_0211d604.Set(0x1200);
+        gScreenControl.Set(0x1200);
         for (int i = 0; i < mTravellerCount; i++) {
             ModelAnimation *animation =
                 AnimModel_FindAnimation(&mCharacters[i].mAnim, RESOURCE_BCA0, mCharacters[i].mAnimId);
@@ -572,15 +572,15 @@ void TravelScene::SetState(int state) {
             mTextButtons[1].mVisible = TRUE;
             func_0203119c(&mTextButtons[1]);
         }
-        func_02023f4c(&data_0211d604, 0x3F, 0);
-        data_0211d604.Set(0x120D);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F, 0);
+        gScreenControl.Set(0x120D);
         break;
     case STATE_RETURN:
         mSpeechWindow.Hide();
         mTextButtons[3].mVisible = TRUE;
         func_0203119c(&mTextButtons[3]);
         mSprites[0].mVisible = TRUE;
-        data_0211d604.Set(0x121D);
+        gScreenControl.Set(0x121D);
         break;
     case STATE_LEAVE:
         gSoundManager.StartSeqArc(1, 0x30, 13);

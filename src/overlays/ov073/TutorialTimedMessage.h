@@ -7,7 +7,7 @@
 #include "text/MessageText.h"
 
 // A message text that shows itself (at once or line by line), stays for three seconds and hides again. While it
-// is shown it sets bit 1 of the display state data_0211d604.
+// is shown it sets bit 1 of the display state gScreenControl.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. Overlay 74 has the same
 // class without the prefix, which tells the two apart: the program is linked as one, so they cannot have one name.

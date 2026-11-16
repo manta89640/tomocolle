@@ -42,7 +42,7 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern TouchInput gTouchInput;
 extern void *data_02123440; // The game's clock
 

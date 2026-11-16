@@ -46,7 +46,7 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 // --- The screens ---
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 
 // --- Graphics resources ---
 extern CellLoader gObjResourceManager;

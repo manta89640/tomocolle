@@ -67,8 +67,8 @@ void SavePlayScene::StartLoading() {
 // @0x02149c4c
 void SavePlayScene::Init() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
 
     func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
@@ -77,8 +77,8 @@ void SavePlayScene::Init() {
     func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
     func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.Set(1);
-    data_0211d604.Show(0x1200);
+    gScreenControl.Set(1);
+    gScreenControl.Show(0x1200);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
 
     if (mSceneId == 0x2D) {

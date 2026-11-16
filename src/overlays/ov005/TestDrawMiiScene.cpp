@@ -24,9 +24,9 @@ static const VecFx32 sModelHomes[2] = {{0x5000, 0, 0}, {0, 0, -0x5000}};
 
 void TestDrawMiiScene::Init() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     G3X_AntiAlias(TRUE);
     G3X_SetShading(GX_SHADING_TOON);

@@ -10,9 +10,9 @@ void G3SpriteTestScene::StartLoading() {
 
 void G3SpriteTestScene::Init() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    data_0211d604.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    gScreenControl.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
     ModelResources_SetModel(&sModelResources, 0, "M01:/body.imd");
     mCamera = &data_02122764;

@@ -99,7 +99,7 @@ void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int x);
 void func_02028154(ScreenLoader *loader, int plane, int y);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // --- The saved game ---
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one

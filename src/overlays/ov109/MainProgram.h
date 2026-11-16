@@ -39,7 +39,7 @@ void func_02028280(ScreenLoader *loader, int plane, int priority);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 // Queues a character file for transfer to VRAM
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 }
 
 
@@ -80,8 +80,8 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 
 extern "C" {
 void func_02024234(ScreenControl *screens, int planes, int a);
-void func_02023f4c(ScreenControl *screens, int planes, int a);
-void func_02023eac(ScreenControl *screens, int planes);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int a);
+void ScreenControl_ClearBlend(ScreenControl *screens, int planes);
 void DestroyMainFrameHeap(void);
 void func_0201f508(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);

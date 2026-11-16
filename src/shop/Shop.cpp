@@ -49,7 +49,7 @@ void func_02031228(SpriteButton *button);
 extern TouchInput gTouchInput;
 extern ScreenLoader data_02121834;
 extern ArchiveLoader gArchiveManager;
-extern u8 data_0211d604[];
+extern u8 gScreenControl[];
 extern u8 data_02122824[];
 extern u8 data_02122764[];
 extern Light data_021227cc[];
@@ -77,7 +77,7 @@ void func_02029660(int resourceSet, u32 resType, void *archive); // Gives a reso
 void func_0202c264(GameData *game, int index, Character *character); // Reads a saved character
 int MiiData_GetSex(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
-void func_02023ee0(void *a, int b, int c, int d, int e);
+void ScreenControl_SetBlendAlpha(void *a, int b, int c, int d, int e);
 void func_0202b0e8(void *a);
 void func_0202a640(Camera *camera);
 void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
@@ -1714,10 +1714,10 @@ void ShopCounter::Init(int *charOffset, MessageFile *file, VecFx32 cameraPositio
     *charOffset += mSpeechWindow.Init(*charOffset, file, 4, 0x10, &mTtsPlayer, FALSE);
     mSpeechWindow.mText[0].mVAlign = 1;
     mSpeechWindow.Hide();
-    func_02023ee0(data_0211d604, 4, 17, 8, 8);
+    ScreenControl_SetBlendAlpha(gScreenControl, 4, 17, 8, 8);
     func_0202b0e8(data_02122824);
-    *(BOOL *)(data_0211d604 + 0x48) = TRUE;
-    *(BOOL *)(data_0211d604 + 0xEC) = TRUE;
+    *(BOOL *)(gScreenControl + 0x48) = TRUE;
+    *(BOOL *)(gScreenControl + 0xEC) = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     Camera *camera = (Camera *)data_02122764;
     func_0202a640(camera);

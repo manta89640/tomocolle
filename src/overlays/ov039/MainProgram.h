@@ -60,10 +60,10 @@ void func_0202b0e8(Renderer3d *renderer);
 void func_0202a640(Camera *camera); // Resets it
 void func_0202a96c(Light *light);   // Resets it
 // The screens' brightness and fades (as overlays 72, 76 and 96 call them)
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
-BOOL func_02024004(ScreenControl *screens, int planes, int step);
-BOOL func_02024118(ScreenControl *screens, int planes, int step);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int step);
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int step);
 
 int MiiData_GetSex(CharacterRecord *mii); // 0 for a man
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Copies a saved character out

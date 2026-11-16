@@ -24,8 +24,8 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 
 // The screens (ScreenControl.h). For each screen in the mask (0x3F the main engine's planes, 0x3F00 the sub
 // engine's), sets how much the brightness changes each frame while the screen fades (+0x0C and +0x10, which
-// func_02023cd4 and func_02023ddc add to the brightness at +0x04 and +0x08 until it reaches 0 or one end)
-void func_02023c54(ScreenControl *screens, int mask, fx32 speed);
+// ScreenControl_StepFadeIn and ScreenControl_StepFadeOut add to the brightness at +0x04 and +0x08 until it reaches 0 or one end)
+void ScreenControl_SetFadeSpeed(ScreenControl *screens, int mask, fx32 speed);
 
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;

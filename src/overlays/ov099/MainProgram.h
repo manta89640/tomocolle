@@ -58,7 +58,7 @@ extern CellLoader gObjResourceManager;
 extern PaletteLoader gPaletteLoader;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern void *data_02123440; // The game's clock
 // The mansion's name (what the information's title shows)
 extern wchar_t data_02123510[];

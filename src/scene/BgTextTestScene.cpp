@@ -17,7 +17,7 @@ void BgTextTestScene::Init() {
     G2_SetBG2ControlText(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3800, GX_BG_CHARBASE_0x18000);
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x8000);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
-    data_0211d604.Show(4);
+    gScreenControl.Show(4);
     func_02028280(&data_02121834, 4, 0);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     PaletteLoader_QueueColors(&gPaletteLoader, data_020b5abc, 4, 0x1E0, 0x20, 0);

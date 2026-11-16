@@ -25,11 +25,11 @@ void CharacterBodyTestScene::StartLoading() {
 #pragma opt_propagation off
 void CharacterBodyTestScene::Init() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    data_0211d604.mUnknown44 = 0;
-    data_0211d604.mUnknown44Changed = TRUE;
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    gScreenControl.mUnknown44 = 0;
+    gScreenControl.mUnknown44Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 15, 0x7FFF, 63, FALSE);
     Light *light = &data_021227cc[0];
     u16 color = sLightColor;

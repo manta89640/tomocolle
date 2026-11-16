@@ -18,7 +18,7 @@ void G3dTestScene::Init() {
     NNS_GfdDumpFrmTexVramManager();
     NNS_GfdDumpFrmPlttVramManager();
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
-    data_0211d604.Show(1);
+    gScreenControl.Show(1);
     G3X_EdgeMarking(TRUE);
     G3X_SetEdgeColorTable(sEdgeColors);
     mCamera = &data_02122764;

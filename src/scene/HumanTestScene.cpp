@@ -18,7 +18,7 @@ void HumanTestScene::Init() {
     ModelResources_SetModel(data_021223e4, 0, "HM0:/HUMAN00_.imd");
     ModelResources_SetModel(data_021223e4, 1, "BM0:/body00_.imd");
     G3X_SetClearColor(GX_RGB(1, 1, 1), 31, 0x7FFF, 63, FALSE);
-    data_0211d604.Show(1);
+    gScreenControl.Show(1);
     mCamera = &data_02122764;
     Light *light = &data_021227cc[0];
     u16 color = light->mColor;

@@ -12,7 +12,7 @@ void DrawManTestScene::Init() {
     func_0202b0e8(&data_02122824);
     ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00_.imd");
     ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
-    data_0211d604.Show(1);
+    gScreenControl.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
     mCamera = &data_02122764;
     mCamera->mPosition.z = 0x12000;

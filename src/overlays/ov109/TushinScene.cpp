@@ -448,9 +448,9 @@ void TushinScene::Init() {
     mPalette = PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "STS:/Obj_up.nce", "STS:/Obj_up.ncg", 0x10, 1, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
-    data_0211d604.mPlanes = 0x1713;
-    data_0211d604.mPlanesChanged = TRUE;
-    func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
+    gScreenControl.mPlanes = 0x1713;
+    gScreenControl.mPlanesChanged = TRUE;
+    ScreenControl_SetBlendAlpha(&gScreenControl, 1, 0x12, 8, 8);
 
     mPage = 0;
     mNextPage = 0;
@@ -2487,9 +2487,9 @@ void TushinScene::Exit() {
         ArchiveManager_Unmount(&gArchiveManager, model->mArchiveName);
         func_0202aecc(data_021223e4, i);
     }
-    func_02024234(&data_0211d604, 0x3F00, 0);
-    func_02023f4c(&data_0211d604, 0x3F00, 0);
-    func_02023eac(&data_0211d604, 0x3F00);
+    func_02024234(&gScreenControl, 0x3F00, 0);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F00);
     DestroyMainFrameHeap();
     ArchiveManager_Unmount(&gArchiveManager, "STE");
     ArchiveManager_Unmount(&gArchiveManager, "TBC");

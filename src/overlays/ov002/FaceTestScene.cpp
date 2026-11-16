@@ -18,11 +18,11 @@ void FaceTestScene::Init() {
     ModelResources_SetModel(data_021223e4, 0, "TG3:/Glass6.imd");
     ModelResources_SetModel(data_021223e4, 1, "TGH:/head.imd");
     ModelResources_SetModel(data_021223e4, 1, "TGH:/wait00.ica");
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    data_0211d604.mUnknown44 = 0;
-    data_0211d604.mUnknown44Changed = TRUE;
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    gScreenControl.mUnknown44 = 0;
+    gScreenControl.mUnknown44Changed = TRUE;
     mGlasses.Load(0, 0);
     mGlasses.mRotY = 0x6000;
     mGlasses.mPosition.y = -0x1199;

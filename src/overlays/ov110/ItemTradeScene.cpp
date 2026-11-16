@@ -1422,9 +1422,9 @@ void ItemTradeScene::Init() {
     func_02028108(&data_02121834, 0x2F00, 0);
     func_02028154(&data_02121834, 0x2F00, 0);
     func_02028154(&data_02121834, 0x100, -0x38);
-    data_0211d604.Set(0x1313);
-    data_0211d604.Set(0x1313);
-    func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
+    gScreenControl.Set(0x1313);
+    gScreenControl.Set(0x1313);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 1, 0x12, 8, 8);
     PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
@@ -1515,8 +1515,8 @@ void ItemTradeScene::Init() {
 // @0x0214d418
 void ItemTradeScene::Init3d() {
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     func_02028280(&data_02121834, 1, 0);
     func_02028280(&data_02121834, 2, 1);

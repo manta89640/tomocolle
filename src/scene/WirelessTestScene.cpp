@@ -58,7 +58,7 @@ void WirelessTestScene::Init() {
     G2_SetBG2ControlText(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3800, GX_BG_CHARBASE_0x18000);
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x20);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
-    data_0211d604.Show(4);
+    gScreenControl.Show(4);
     mRole = 0;
     mState = STATE_IDLE;
     mSelectedParent = 0;

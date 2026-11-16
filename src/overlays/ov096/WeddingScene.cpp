@@ -74,15 +74,15 @@ void WeddingScene::Init() {
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
     func_02028f24(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
     func_02027d7c(&data_02121834, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
-    data_0211d604.Set(0x1111);
+    gScreenControl.Set(0x1111);
     func_02028280(&data_02121834, 0x100, 3);
     func_02028108(&data_02121834, 0x2F00, 0);
     func_02028154(&data_02121834, 0x2F00, 0);
     func_02027290(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
     func_02028f24(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.mUnknown44 = 0;
-    data_0211d604.mUnknown44Changed = TRUE;
+    gScreenControl.mUnknown44 = 0;
+    gScreenControl.mUnknown44Changed = TRUE;
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 
     mContext.mSceneId = mSceneId;
@@ -116,7 +116,7 @@ void WeddingScene::InitLowerScreen() {
     func_02028280(&data_02121834, 4, 0);
     func_02028280(&data_02121834, 2, 1);
     func_02028280(&data_02121834, 1, 3);
-    func_02023ee0(&data_0211d604, 4, 0x11, 8, 8);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 4, 0x11, 8, 8);
 }
 
 // The top screen: the room, the camera, the lights and the two characters
@@ -125,8 +125,8 @@ void WeddingScene::Init3d() {
     void *animations;
 
     func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
     func_02028280(&data_02121834, 1, 3);
     func_0202a640(&data_02122764);
@@ -234,7 +234,7 @@ void WeddingScene::Update() {
         } else if (level < 0) {
             level = 0;
         }
-        func_02023f4c(&data_0211d604, 0x3F3F, level);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, level);
         if (mFrame >= 64) {
             mState++;
             mFrame = 0;
@@ -268,7 +268,7 @@ void WeddingScene::Update() {
         } else if (level < 0) {
             level = 0;
         }
-        func_02023f4c(&data_0211d604, 0x3F3F, level);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, level);
         if (mFrame >= 8) {
             mState++;
             mFrame = 0;

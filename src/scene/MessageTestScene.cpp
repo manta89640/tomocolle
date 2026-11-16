@@ -42,7 +42,7 @@ void MessageTestScene::Init() {
     G2_SetBG2ControlText(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3800, GX_BG_CHARBASE_0x18000);
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x20);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
-    data_0211d604.Show(4);
+    gScreenControl.Show(4);
     charOffset = 1;
     mBgTexts[0].InitBg(&gFonts[0].mFont, 4, 24, 8, charOffset, 16, charOffset, 0, 1, 15, mCharBuffer);
     mBgTexts[0].mMessageFile = &mFiles[0];

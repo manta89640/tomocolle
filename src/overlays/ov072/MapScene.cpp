@@ -409,9 +409,9 @@ void MapScene::Init() {
     const int titleMessage = 0x96;
     mNewsDue = FALSE;
     func_0202b0e8(&data_02122824);
-    data_0211d604.SetUnknown44(0);
-    data_0211d604.Show(1);
-    data_0211d604.SetUnknown48(1);
+    gScreenControl.SetUnknown44(0);
+    gScreenControl.Show(1);
+    gScreenControl.SetUnknown48(1);
     func_0202ae38(data_021223e4);
     func_02027290(&gObjResourceManager, "S00:/Obj_down.nce", 0x10, 1);
     func_02028f24(&gVramTransferQueue, "S00:/Obj_down.ncg", 0x10, 0, 0, 0, -1);
@@ -578,7 +578,7 @@ void MapScene::Init() {
     func_02028280(&data_02121834, 0x100, 0);
     func_02028280(&data_02121834, 0x1000, 0);
     func_02028280(&data_02121834, 0x200, 3);
-    data_0211d604.Set(0x1211);
+    gScreenControl.Set(0x1211);
     switch (mSceneId) {
     case 0x6D:
     case 0x6E:
@@ -628,7 +628,7 @@ void MapScene::Update() {
         mTitleCamera.Update();
         break;
     case STATE_LEAVE_TITLE:
-        if (func_02024118(&data_0211d604, 0x3F3F, 1)) {
+        if (ScreenControl_BlendFadeOut(&gScreenControl, 0x3F3F, 1)) {
             mSound.SetMode(&mClock, MapSound::MODE_CONTINUE);
             ResetCamera();
             Deselect(FALSE, 0);
@@ -717,7 +717,7 @@ void MapScene::Update() {
         }
         break;
     case STATE_NEW_BUILDING: {
-        func_02024004(&data_0211d604, 0x3F3F, -1);
+        ScreenControl_BlendFadeIn(&gScreenControl, 0x3F3F, -1);
         mCamera.Update();
         int building = mNewBuilding;
         int news;
@@ -916,7 +916,7 @@ void MapScene::Update() {
                 mIdleFrames = 0;
             }
         }
-        if (!func_02024004(&data_0211d604, 0x3F3F, -1)) {
+        if (!ScreenControl_BlendFadeIn(&gScreenControl, 0x3F3F, -1)) {
             break;
         }
         if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {

@@ -19,8 +19,8 @@ extern Light data_021227d8;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 BOOL func_02031294(SpriteButton *button);
-BOOL func_02024004(ScreenControl *screens, int planes, int level);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
 
 // --- Texts ---
@@ -443,7 +443,7 @@ void ReturnButton::Init(int sceneId, int plane, int resource) {
     SetPositionFromVec(0xF2000, 0xD000);
     func_0203119c(this);
     func_02028280(&data_02121834, plane, 0);
-    data_0211d604.Show(plane);
+    gScreenControl.Show(plane);
     mHeld = FALSE;
     mPressed = FALSE;
 }
@@ -550,7 +550,7 @@ void NewsButton::LoadBackground() {
     PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
     func_02027d7c(&data_02121834, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
-    func_02023f4c(&data_0211d604, 0x17, -16);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x17, -16);
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
@@ -573,12 +573,12 @@ void NewsButton::Init(int resource) {
 
 void NewsButton::Update(Scene *scene, BOOL leave) {
     mPressed = FALSE;
-    func_02024004(&data_0211d604, 0x17, 1);
+    ScreenControl_BlendFadeIn(&gScreenControl, 0x17, 1);
     if (func_0203133c(this)) {
         mPressed = TRUE;
         if (leave) {
             scene->mSkipFade = TRUE;
-            func_02023f4c(&data_0211d604, 0x3F, -16);
+            ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F, -16);
             gSceneManager.RequestScene(0x49);
         }
     }

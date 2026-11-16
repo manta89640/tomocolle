@@ -7,7 +7,7 @@
 void NintendoLogoScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "MNU", "Cmn/Nin/NintendoLogo_LZ.bin", 0);
     // Both screens fade in (and out) at 0x19C2 a frame: in ten frames
-    func_02023c54(&data_0211d604, 0x3F3F, 0x19C2);
+    ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x19C2);
 }
 
 void NintendoLogoScene::Init() {
@@ -15,7 +15,7 @@ void NintendoLogoScene::Init() {
     func_02027d7c(&data_02121834, "MNU:/Gray_White.nsc", 2, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "MNU:/Gray_White.ncg", 2, 0, 0, 0, -1);
     PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Gray_White.ncl", 2, -1, -1, -1);
-    data_0211d604.Set(2);
+    gScreenControl.Set(2);
     SetState(STATE_SHOW);
 }
 

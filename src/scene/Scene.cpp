@@ -5,8 +5,8 @@
 
 extern "C" {
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader); // Whether no archive is being loaded
-BOOL func_02023c88(ScreenControl *screens, int planes); // Fades the screens in: TRUE when done
-BOOL func_02023d90(ScreenControl *screens, int planes); // Fades the screens out: TRUE when done
+BOOL ScreenControl_FadeIn(ScreenControl *screens, int planes); // Fades the screens in: TRUE when done
+BOOL ScreenControl_FadeOut(ScreenControl *screens, int planes); // Fades the screens out: TRUE when done
 }
 
 void Scene::Run() {
@@ -26,7 +26,7 @@ void Scene::Run() {
     case PHASE_FADE_IN:
         if (mSkipFade) {
             mPhase++;
-        } else if (func_02023c88(&data_0211d604, 0x3F3F)) {
+        } else if (ScreenControl_FadeIn(&gScreenControl, 0x3F3F)) {
             mPhase++;
         }
         Draw();
@@ -38,7 +38,7 @@ void Scene::Run() {
     case PHASE_FADE_OUT:
         if (mSkipFade) {
             mPhase++;
-        } else if (func_02023d90(&data_0211d604, 0x3F3F)) {
+        } else if (ScreenControl_FadeOut(&gScreenControl, 0x3F3F)) {
             mPhase++;
         }
         Draw();
