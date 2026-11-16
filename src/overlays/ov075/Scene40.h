@@ -16,6 +16,7 @@
 #include "shop/Shop.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
+#include "text/SpeechWindow.h"
 #include "text/TextCanvas.h"
 #include "voice/TtsPlayer.h"
 
@@ -50,6 +51,14 @@ public:
 // 0x0215E4E0, table 0x02182CD0). Its constructor is inline.
 class Scene40ListView : public ItemListView {
 public:
+    // What the rows' marks show (mMarkKind): whether the character has had the row's item, by the kind of item
+    enum MarkKind {
+        MARK_NONE = 0,
+        MARK_ITEMS = 1,     // The record's bits at 0x1C8
+        MARK_CLOTHES = 2,   // mOwnedClothes
+        MARK_INTERIORS = 3, // mOwnedInteriors
+    };
+
     Scene40ListView() {}
 
     virtual void Draw();
@@ -57,17 +66,23 @@ public:
     virtual void Refresh();
     virtual void DrawRow(int row, int item);
     virtual void ClearRow(int row);
-}; // 0x13F64
 
-// What the overlay's 0x02179728 constructs: 0x10 and 0xC bytes cleared and two ints.
+    /* 0x13F64 */ u32 mMarkKind;
+    /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from
+    /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
+}; // 0x14420
+
+// The scene's clock (what the overlay's 0x02179728 constructs): the date and time last read and the same moment in
+// seconds, as overlay 74's Clock has them in another order.
 class Scene40Unknown30A8C {
 public:
     Scene40Unknown30A8C();
+    void Read();       // 0x02179764: reads the date and time now
+    void ReadIfIdle(); // 0x02179790: the same, but only while the archive manager is idle
 
-    /* 0x00 */ u8 mUnknown00[0x10];
-    /* 0x10 */ u8 mUnknown10[0xC];
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ int mUnknown20;
+    /* 0x00 */ RTCDate mDate; // Exit gives it to the character as the date they last met
+    /* 0x10 */ RTCTime mTime;
+    /* 0x1C */ s64 mSeconds; // The same moment in seconds, as the main program's Clock_GetDateTime returns it
 }; // 0x24
 
 // Three classes of the overlay whose constructors only store their tables (0x02182CA0, 0x02182CB8, 0x02182C88:
@@ -109,18 +124,43 @@ public:
     /* 0x004 */ u8 mUnknown004[0x640];
 }; // 0x644
 
+// Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
+// show is not known: the names say only where they are.
+class Scene40CharacterPartA {
+public:
+    void Draw();
+
+    /* 0x00 */ u8 mUnknown00[0x10];
+    /* 0x10 */ AnimModel mModel;
+    /* 0xF0 */ u8 mUnknownF0[0x8];
+}; // 0xF8
+
+class Scene40CharacterPartB {
+public:
+    void Draw();
+
+    /* 0x00 */ u8 mUnknown00[0x4];
+    /* 0x04 */ AnimModel mModel;
+}; // 0xE4
+
 // A character with two models, the goods and clothes it holds and two head icons
 class Scene40Character : public Character {
 public:
-    /* 0x2B18 */ u8 mUnknown2B18[0xDC];
-    /* 0x2BF4 */ AnimModel mModel;
-    /* 0x2CD4 */ u8 mUnknown2CD4[0xC];
-    /* 0x2CE0 */ AnimModel mModel2;
+    void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
+    void Update(BOOL speaking);
+
+    /* 0x2B18 */ u8 mUnknown2B18[0xC0];
+    /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
+    /* 0x2BDC */ u8 mUnknown2BDC[0x8];
+    /* 0x2BE4 */ Scene40CharacterPartA mPartA;
+    /* 0x2CDC */ Scene40CharacterPartB mPartB;
     /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
     /* 0x2DC4 */ Scene40Items mItems;
     /* 0x2DF0 */ u8 mUnknown2DF0[0xC];
     /* 0x2DFC */ HeadIcon mHeadIcons[2];
-    /* 0x2E7C */ u8 mUnknown2E7C[0x27C];
+    /* 0x2E7C */ u8 mUnknown2E7C[0x48];
+    /* 0x2EC4 */ BOOL mLipSync;         // Update moves the lips with the speech only while it is set
+    /* 0x2EC8 */ u8 mUnknown2EC8[0x230];
 }; // 0x30F8
 
 class Scene40 : public Scene {
@@ -133,16 +173,17 @@ public:
     virtual void Draw();
     virtual void Exit();
 
-    /* 0x00010 */ u8 mUnknown00010[0x160];
+    /* 0x00010 */ u8 mUnknown00010[0x158];
+    /* 0x00168 */ int mDrawState;  // 0 while the room and the character are still updated from Draw, 1 after nine frames
+    /* 0x0016C */ int mDrawFrames;
     /* 0x00170 */ Mannequin mMannequin;
     /* 0x00828 */ Room mRoom;
     /* 0x01130 */ AnimModel mModels[3];
-    /* 0x013D0 */ u8 mUnknown013D0[0xAC];
+    /* 0x013D0 */ Sprite mSprite013D0;
     /* 0x0147C */ TtsPlayer mTtsPlayer;
     /* 0x15DC0 */ MessageText mText;
-    /* 0x163B0 */ u8 mUnknown163B0[0x8];
-    /* 0x163B8 */ MessageText mTexts[1];
-    /* 0x169A8 */ u8 mUnknown169A8[0x18];
+    /* 0x163B0 */ SpeechWindow mSpeechWindow;
+    /* 0x169BC */ u8 mUnknown169BC[0x4];
     /* 0x169C0 */ MessageWindow mWindows[2];
     /* 0x2C908 */ u8 mUnknown2C908[0x4C];
     /* 0x2C954 */ ParticleSystem mParticles;
@@ -151,10 +192,12 @@ public:
     /* 0x2C9A0 */ ClothesList mClothesList;
     /* 0x2EA74 */ Inventory mInventory;
     /* 0x30260 */ InteriorList mInteriors;
-    /* 0x309B4 */ u8 mUnknown309B4[0x30];
+    /* 0x309B4 */ int mUnknown309B4;       // Exit gives it to GameData::SetCappedCounter
+    /* 0x309B8 */ u8 mUnknown309B8[0x2C];
     /* 0x309E4 */ MessageFile mMessageFiles[7];
     /* 0x30A8C */ Scene40Unknown30A8C mUnknown30A8C;
-    /* 0x30AB0 */ u8 mUnknown30AB0[0x1C4];
+    /* 0x30AB0 */ u8 mUnknown30AB0[0xA0];
+    /* 0x30B50 */ u8 mUnknown30B50[0x124]; // An object of the overlay's: func_ov075_0214fc00 draws it
     /* 0x30C74 */ Scene40Items mItems;
     /* 0x30CA0 */ u8 mUnknown30CA0[0x50];
     /* 0x30CF0 */ TextButton mTextButtons[4];
@@ -166,7 +209,7 @@ public:
     /* 0x32B00 */ ClothesList mClothesList2;
     /* 0x34BD4 */ u8 mUnknown34BD4[0x4B4];
     /* 0x35088 */ Scene40ListView mList;
-    /* 0x48FEC */ u8 mUnknown48FEC[0x4C8];
+    /* 0x494A8 */ u8 mUnknown494A8[0xC];
     /* 0x494B4 */ SpriteButton mButtons[4];
     /* 0x49884 */ u8 mUnknown49884[0x18];
     /* 0x4989C */ SpriteButton mButtons2[4];
