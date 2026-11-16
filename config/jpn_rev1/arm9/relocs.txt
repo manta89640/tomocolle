@@ -5544,7 +5544,7 @@ from:0x0203e218 kind:arm_call to:0x0208fd18 module:main
 from:0x0203e238 kind:arm_call to:0x02022d2c module:main
 from:0x0203e270 kind:arm_call to:0x0202a618 module:main
 from:0x0203e28c kind:load to:0x02110978 module:main
-from:0x0203e290 kind:load to:0x0214a504 module:overlays(5,13,16,21,26,50,62)
+from:0x0203e290 kind:load to:0x0214a4fc add:0x8 module:overlay(5)
 from:0x0203e294 kind:load to:0x0203e2a8 module:main
 from:0x0203e298 kind:load to:0x02149f10 module:overlay(5)
 from:0x0203e29c kind:load to:0x0210f640 add:0x8 module:main
