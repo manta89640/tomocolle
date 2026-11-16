@@ -1157,6 +1157,39 @@ windows' set-up).
 Not done in the first third: `MiiEditScene::Init` (95.8%: the registers of the index and the character offset in the
 loops over the buttons and the text boxes).
 
+## Items, the mannequin, the room and the Mii list
+
+Four files of the main program after the character code (`include/item/`, `include/room/`, `include/list/`):
+
+| File | Range | Holds |
+| --- | --- | --- |
+| `src/item/Item.cpp` | `0x0209E140`..`0x020A00BC` | the item classes, the clothes list, the inventory, ItemModel, the random choice of goods and clothes |
+| `src/item/Mannequin.cpp` | `0x020A00BC`..`0x020A03E8` | the mannequin that shows clothes |
+| `src/list/MiiList.cpp` | `0x020A03E8`..`0x020A3C68` | the list of saved characters, its panel and tabs |
+| `src/room/Room.cpp` | `0x020A3C68`..`0x020A5CC4` | a resident's room: door, furniture, interiors |
+
+Measured:
+- The character file ends at `0x0209E140`: `0x0209E0E8` and `0x0209E114` are one clamp template instantiated for
+  `s16` and `u8`, called only by `0x02097D8C`, and such instances follow the last function of the file that uses
+  them. The item file ends with ItemModel's implicit deleting destructor (`0x020A0078`, entry 1 of its table).
+- `Item` (virtual table `_ZTV4Item`, `0x02114F78`) has seven entries, all 0: pure virtual functions. Its three
+  kinds read their tables: `ClothesItem` the clothes (`data_020f3ff0`, 0x14 bytes a row, 300 rows), `InventoryItem`
+  the goods (`data_020f5f0c`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
+  (`data_020f72f8`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
+  (+8 for goods and clothes, +0xA for interiors) and four weights, one of which `gGameData+0x4E` selects; the random
+  choices of goods, clothes and interiors on offer sum those weights. The goods' and clothes' getters are emitted
+  at `0x0204ABAC`..`0x0204AD84` (in the scene constructors' file), the interiors' at the end of Room.cpp.
+- `ItemModel` derives from `AnimModel` and `InventoryItem`: its constructors build the item base after the model
+  and then store both halves of `_ZTV9ItemModel` (the second at `0x02115000`).
+- `Room` derives from `InteriorItem` and `RoomModels`, which holds the room's own model with its door (`RoomDoor`,
+  a node callback shows the node "entrance" while the door moves; node description 0 gives the matrix the
+  furniture is placed by) and six pieces of furniture (`RoomPart`, faded out between the camera and the room).
+- The list's `.rodata` ends at `0x020FBFD4`; the room's begins there with an unreferenced halfword `0xFFFF` (its
+  objects sort by size: 2, 0x10, 0x14 bytes) and ends at `0x020FBFFC`.
+
+Inferred: the classes' names are descriptive; none survives in the ROM. That the first virtual function is a price
+rests on the values (250, 480, 5800).
+
 ## The Mii library (NFL)
 
 Code of the main program from `0x02069BF4` (right after NitroSystem) to `0x020776E4` (the Mii transfer), 144

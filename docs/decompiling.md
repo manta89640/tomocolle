@@ -502,6 +502,19 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
   `MiiEditProfilePage::Update`).
 
+- A list filled in a loop with its count kept through a pointer (`*count`) and an index of its own: `list[n] =
+  item; (*count)++; n++;` gave the original's registers, where `list[n++] = item` swaps the two counters
+  (Item.cpp's list getters).
+- A row of furniture placed from a table, where the original computes the element's address from the counter at
+  each pass and ours strength-reduces it: an inline member taking the index (`SetPartPosition(i, pos)`) of the
+  class that holds the array (Room.cpp's `LoadParts`).
+- Two members set from one value without a reload: `mAngle = mTargetAngle = 0;` (Mannequin.cpp).
+- A constructor that stores its virtual table after a member's constructor call has that "member" as a second base
+  class (`ItemModel : public AnimModel, public InventoryItem`; `Room : public InteriorItem, public RoomModels`).
+- dsd gives each delinked unit's sections the module's alignment and takes no `align:` on a file's line: a unit (or
+  the gap after one) whose `.rodata` starts at a two-aligned address moves everything after it. Look for a small
+  object that lets the boundary be four-aligned (the room file's halfword at `0x020FBFD4`).
+
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
