@@ -37,12 +37,12 @@ func_ov092_0214b620 kind:function(arm,size=0x28) addr:0x0214b620
 func_ov092_0214b648 kind:function(arm,size=0xa0) addr:0x0214b648
 func_ov092_0214b6e8 kind:function(arm,size=0x3c) addr:0x0214b6e8
 func_ov092_0214b724 kind:function(arm,size=0x70) addr:0x0214b724
-func_ov092_0214b794 kind:function(arm,size=0x214) addr:0x0214b794
-func_ov092_0214b9a8 kind:function(arm,size=0xc0c) addr:0x0214b9a8
-func_ov092_0214c5b4 kind:function(arm,size=0xc9c) addr:0x0214c5b4
+_ZN14WriteSongScene12StartLoadingEv kind:function(arm,size=0x214) addr:0x0214b794
+_ZN14WriteSongScene4InitEv kind:function(arm,size=0xc0c) addr:0x0214b9a8
+_ZN14WriteSongScene6UpdateEv kind:function(arm,size=0xc9c) addr:0x0214c5b4
 func_ov092_0214d250 kind:function(arm,size=0x2e4) addr:0x0214d250
-func_ov092_0214d534 kind:function(arm,size=0x4ac) addr:0x0214d534
-func_ov092_0214d9e0 kind:function(arm,size=0xf8) addr:0x0214d9e0
+_ZN14WriteSongScene4DrawEv kind:function(arm,size=0x4ac) addr:0x0214d534
+_ZN14WriteSongScene4ExitEv kind:function(arm,size=0xf8) addr:0x0214d9e0
 func_ov092_0214dad8 kind:function(arm,size=0xf54) addr:0x0214dad8
 func_ov092_0214ea2c kind:function(arm,size=0x2e8) addr:0x0214ea2c
 func_ov092_0214ed14 kind:function(arm,size=0x3b4) addr:0x0214ed14
@@ -59,7 +59,7 @@ func_ov092_02150044 kind:function(arm,size=0x50) addr:0x02150044
 func_ov092_02150094 kind:function(arm,size=0xc0) addr:0x02150094
 func_ov092_02150154 kind:function(arm,size=0x4) addr:0x02150154
 func_ov092_02150158 kind:function(arm,size=0xc4) addr:0x02150158
-func_ov092_0215021c kind:function(arm,size=0x30) addr:0x0215021c
+_ZN14WriteSongModel4DrawEv kind:function(arm,size=0x30) addr:0x0215021c
 func_ov092_0215024c kind:function(arm,size=0x30) addr:0x0215024c
 func_ov092_0215027c kind:function(arm,size=0x34) addr:0x0215027c
 func_ov092_021502b0 kind:function(arm,size=0x2cc) addr:0x021502b0
@@ -98,9 +98,9 @@ func_ov092_02151dd8 kind:function(arm,size=0x130) addr:0x02151dd8
 func_ov092_02151f08 kind:function(arm,size=0x914) addr:0x02151f08
 func_ov092_0215281c kind:function(arm,size=0x348) addr:0x0215281c
 func_ov092_02152b64 kind:function(arm,size=0x6f8) addr:0x02152b64
-func_ov092_0215325c kind:function(arm,size=0x80) addr:0x0215325c
-func_ov092_021532dc kind:function(arm,size=0x190) addr:0x021532dc
-func_ov092_0215346c kind:function(arm,size=0x198) addr:0x0215346c
+_ZN14WriteSongModelD0Ev kind:function(arm,size=0x80) addr:0x0215325c
+_ZN14WriteSongSceneD1Ev kind:function(arm,size=0x190) addr:0x021532dc
+_ZN14WriteSongSceneD0Ev kind:function(arm,size=0x198) addr:0x0215346c
 data_ov092_02153604 kind:data(any) addr:0x02153604
 gStr_Dollar_ov092 kind:data(any) addr:0x0215368c
 data_ov092_021536fc kind:data(any) addr:0x021536fc
@@ -254,14 +254,14 @@ gStr_P17_item_imd_ov092 kind:data(any) addr:0x02154e24
 gStr_P18_item_imd_ov092 kind:data(any) addr:0x02154e34
 gStr_P19_item_imd_ov092 kind:data(any) addr:0x02154e44
 gStr_P13_item_imd_ov092 kind:data(any) addr:0x02154e54
-data_ov092_02154e6c kind:data(any) addr:0x02154e6c ambiguous
+_ZTV14WriteSongModel kind:data(any) addr:0x02154e64
 gStr_Mdl_Ica_ica_mii_song_rap_LZ_bin kind:data(any) addr:0x02154e80
 gStr_Mdl_Ica_ica_mii_song_enka_LZ_bin_ov092 kind:data(any) addr:0x02154ea0
 gStr_Mdl_Ica_ica_mii_song_enka_LZ_bin_ov092_2 kind:data(any) addr:0x02154ec4
 gStr_Mdl_Ica_ica_mii_song_jpop_LZ_bin_ov092 kind:data(any) addr:0x02154ee8
 gStr_Mdl_Ica_ica_mii_song_jpop_LZ_bin_ov092_2 kind:data(any) addr:0x02154f0c
 gStr_Mdl_Ica_ica_mii_song_metal_LZ_bin kind:data(any) addr:0x02154f30
-data_ov092_02154f5c kind:data(any) addr:0x02154f5c ambiguous
+_ZTV14WriteSongScene kind:data(any) addr:0x02154f54
 data_ov092_02154f78 kind:data(any) addr:0x02154f78
 data_ov092_02154fc8 kind:data(any) addr:0x02154fc8
 gStr_WLS_ov092 kind:data(any) addr:0x02155018

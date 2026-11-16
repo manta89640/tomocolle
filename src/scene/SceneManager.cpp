@@ -83,6 +83,7 @@ struct PaletteLoader {
 #include "../overlays/ov035/Scene58.h"
 #include "../overlays/ov036/TestNg107Scene.h"
 #include "../overlays/ov090/RomanceScene.h"
+#include "../overlays/ov092/WriteSongScene.h"
 #include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
@@ -1009,6 +1010,9 @@ TestNg107Scene::TestNg107Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5A, overlay 90
 RomanceScene::RomanceScene(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x5B, 0x5C and 0xB0, overlay 92
+WriteSongScene::WriteSongScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5D, overlay 65
 Scene5D::Scene5D(int sceneId) : Scene(sceneId) {}

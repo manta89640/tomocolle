@@ -1837,7 +1837,7 @@ _ZN7Scene58C1Ei kind:function(arm,size=0x98) addr:0x02044988
 _ZN14TestNg107SceneC1Ei kind:function(arm,size=0x180) addr:0x02044a20
 _ZN12RomanceSceneC1Ei kind:function(arm,size=0xe0) addr:0x02044ba0
 _ZN14WriteSongSceneC1Ei kind:function(arm,size=0x41c) addr:0x02044c80
-func_0204509c kind:function(arm,size=0x78) addr:0x0204509c
+_ZN14WriteSongModelD1Ev kind:function(arm,size=0x78) addr:0x0204509c
 _ZN7Scene5DC1Ei kind:function(arm,size=0xd4) addr:0x02045114
 _ZN13CityHallSceneC1Ei kind:function(arm,size=0x164) addr:0x020451e8
 _ZN8MapSceneC1Ei kind:function(arm,size=0x1b8) addr:0x0204534c
@@ -6346,7 +6346,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14875 kind:bss addr:0x0213b704 local
+@14883 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
