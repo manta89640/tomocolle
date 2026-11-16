@@ -303,6 +303,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **An address kept in a register, where the original reloads it**
 - Reach the member through a local pointer in the loop body (`MapCamera *camera = &mCamera;`): it stopped the
   compiler holding a table's address for the whole loop and spilling (`MapScene::Update`).
+- A loop count the original reads again at the end of every pass but not for the first test (`cmp r3,#0; ble`
+  on the value just tested by the `if` before the loop, then `ldrh` at the bottom): write the first test out and
+  read the count through a volatile cast at the end only,
+  `i = 0; if (i < kb->unk_4c) { do { ... } while (i < *(volatile u16 *)&kb->unk_4c); }` (`func_020817f0`). Loop
+  forms, inlines, pragmas and other compiler builds kept the count in a register. `#pragma opt_common_subs off` gives
+  the reload but reallocates the rest of the function.
 
 **An address loaded and then offset by an `add`, where ours has the offset in the literal**
 - mwcc folds `&table[1]` and `table + 1` into the literal (`table+0x2`), but not after a pointer cast:

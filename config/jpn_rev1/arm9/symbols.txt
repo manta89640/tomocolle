@@ -4422,14 +4422,14 @@ data_020b7be4 kind:data(any) addr:0x020b7be4 local
 sDaysInMonth kind:data(any) addr:0x020b7e1c local
 sDefaultMiis kind:data(any) addr:0x020b7e50 local
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
-space$12977 kind:data(any) addr:0x020b7eec local
-blank$12801 kind:data(any) addr:0x020b7ef0 local
-width$12799 kind:data(any) addr:0x020b7ef4 local
-height$12803 kind:data(any) addr:0x020b7ef8 local
-@13179 kind:data(any) addr:0x020b7efc local
-@12852 kind:data(any) addr:0x020b7f08 local
-@12854 kind:data(any) addr:0x020b7f1c local
-@12850 kind:data(any) addr:0x020b7f30 local
+space$12976 kind:data(any) addr:0x020b7eec local
+blank$12800 kind:data(any) addr:0x020b7ef0 local
+width$12798 kind:data(any) addr:0x020b7ef4 local
+height$12802 kind:data(any) addr:0x020b7ef8 local
+@13178 kind:data(any) addr:0x020b7efc local
+@12851 kind:data(any) addr:0x020b7f08 local
+@12853 kind:data(any) addr:0x020b7f1c local
+@12849 kind:data(any) addr:0x020b7f30 local
 sButtonPositions kind:data(any) addr:0x020b7f44 local
 sButtonRect kind:data(any) addr:0x020b7f54 local
 @13399 kind:data(any) addr:0x020b7f64 local

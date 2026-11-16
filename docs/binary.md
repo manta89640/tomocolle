@@ -904,9 +904,8 @@ but nothing in this file touches them.
 ## The keyboard's core
 
 `src/keyboard/KeyboardCore.cpp` (`0x0208179C` to `0x02082EAC`, 35 functions and a static initialiser): the keys, the
-touch and pad handling, and the drawing of the key labels into character data. 35 of its 36 functions and all of its
-data match. Not complete, because `func_020817f0` does not match yet. The original reloads the count of the extra
-key areas (+0x4C) on every pass of its last loop, and no source tried does that. Measured:
+touch and pad handling, and the drawing of the key labels into character data. It is complete: every function and
+all its data match, and the unit is linked from its object. Measured:
 
 - **State.** Every function works on one static of 0x50 bytes, `sKeyboard`: the key touched first and the key
   under the pen (+0x0, +0x4), the layout (+0x8), a key-up callback and its argument (+0xC, +0x10), a sound callback

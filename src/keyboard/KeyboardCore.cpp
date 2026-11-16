@@ -183,12 +183,16 @@ extern "C" u16 func_0208179c(const KeyLayout *layout) {
 }
 
 extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
+    const KeyLayout *layout;
+    const KeyRect *keys;
     int i;
-    const KeyLayout *layout = kb->layout;
-    const KeyRect *keys = layout->keys;
-    int numKeys = layout->numKeys;
+    int numKeys;
+    const KeyRect *key;
+    layout = kb->layout;
+    keys = layout->keys;
+    numKeys = layout->numKeys;
     for (i = 0; i < numKeys; i++) {
-        const KeyRect *key = &keys[i];
+        key = &keys[i];
         if (sOriginY + key->y <= y && y < sOriginY + (key->y + key->h) && sOriginX + key->x <= x &&
             x < sOriginX + (key->x + key->w)) {
             return &keys[i];
@@ -197,7 +201,7 @@ extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
     if (kb->unk_3c) {
         keys = data_02112dec;
         for (i = 0; i < ARRAY_COUNT(data_02112dec); i++) {
-            const KeyRect *key = &keys[i];
+            key = &keys[i];
             if (sOriginY + key->y <= y && y < sOriginY + (key->y + key->h) && sOriginX + key->x <= x &&
                 x < sOriginX + (key->x + key->w)) {
                 return &keys[i];
@@ -205,12 +209,18 @@ extern "C" const KeyRect *func_020817f0(KeyboardState *kb, int x, int y) {
         }
     }
     if (kb->unk_4c != 0) {
-        const KeyRect *key = kb->unk_48;
-        for (i = 0; i < kb->unk_4c; i++) {
-            if (key->y <= y && y < key->y + key->h && key->x <= x && x < key->x + key->w) {
-                return key;
-            }
-            key++;
+        // The original reads the count again at the end of each pass, but not for the first test: a volatile read
+        // there, and the first test written out, give that
+        i = 0;
+        if (i < kb->unk_4c) {
+            key = kb->unk_48;
+            do {
+                if (key->y <= y && y < key->y + key->h && key->x <= x && x < key->x + key->w) {
+                    return key;
+                }
+                key++;
+                i++;
+            } while (i < *(volatile u16 *)&kb->unk_4c);
         }
     }
     return NULL;
