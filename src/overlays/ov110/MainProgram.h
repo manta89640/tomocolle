@@ -16,7 +16,7 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 
 extern "C" {
 // The personalities' kinds (0 to 3), by personality
-extern const int data_020fba28[];
+extern const int gPersonalityKinds[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);
 int MiiData_GetSex(SavedCharacter *character);
 GXRgb NFL_GetFavoriteColor(int index); // lib/NFL

@@ -41,75 +41,36 @@ void CharacterSort::KatakanaToHiragana(wchar_t *str) {
     }
 }
 
+// Makes small kana their full-size letters (also small ka and ke, and 0x26FE and 0x26FF, which become ka and ke)
 void CharacterSort::EnlargeSmallKana(wchar_t *str) {
     u32 length = wcslen(str);
-    for (u32 i = 0; i < length; i++) {
-        switch (str[i]) {
-        case 0x26FE:
-            str[i] = 0x304B;
-            break;
-        case 0x26FF:
-            str[i] = 0x3051;
-            break;
+    for (int i = 0; i < length; i++) {
+        wchar_t c = str[i];
+        if (c < 0x3040 && c > 0x30FE) {
+            continue;
+        }
+        switch (c) {
         case 0x3041:
-            str[i] = 0x3042;
-            break;
         case 0x3043:
-            str[i] = 0x3044;
-            break;
         case 0x3045:
-            str[i] = 0x3046;
-            break;
         case 0x3047:
-            str[i] = 0x3048;
-            break;
         case 0x3049:
-            str[i] = 0x304A;
-            break;
         case 0x3063:
-            str[i] = 0x3064;
-            break;
         case 0x3083:
-            str[i] = 0x3084;
-            break;
         case 0x3085:
-            str[i] = 0x3086;
-            break;
         case 0x3087:
-            str[i] = 0x3088;
-            break;
         case 0x308E:
-            str[i] = 0x308F;
-            break;
         case 0x30A1:
-            str[i] = 0x30A2;
-            break;
         case 0x30A3:
-            str[i] = 0x30A4;
-            break;
         case 0x30A5:
-            str[i] = 0x30A6;
-            break;
         case 0x30A7:
-            str[i] = 0x30A8;
-            break;
         case 0x30A9:
-            str[i] = 0x30AA;
-            break;
         case 0x30C3:
-            str[i] = 0x30C4;
-            break;
         case 0x30E3:
-            str[i] = 0x30E4;
-            break;
         case 0x30E5:
-            str[i] = 0x30E6;
-            break;
         case 0x30E7:
-            str[i] = 0x30E8;
-            break;
         case 0x30EE:
-            str[i] = 0x30EF;
+            str[i] = c + 1;
             break;
         case 0x30F5:
             str[i] = 0x30AB;
@@ -117,849 +78,430 @@ void CharacterSort::EnlargeSmallKana(wchar_t *str) {
         case 0x30F6:
             str[i] = 0x30B1;
             break;
+        case 0x26FE:
+            str[i] = 0x304B;
+            break;
+        case 0x26FF:
+            str[i] = 0x3051;
+            break;
         }
     }
 }
 
+// Removes the voiced and half-voiced marks from kana (0x26FD and katakana vu become u)
 void CharacterSort::RemoveVoicedMarks(wchar_t *str) {
     u32 length = wcslen(str);
-    for (u32 i = 0; i < length; i++) {
-        switch (str[i]) {
-        case 0x26FD:
-            str[i] = 0x3046;
-            break;
+    for (int i = 0; i < length; i++) {
+        wchar_t c = str[i];
+        if (c < 0x3040 && c > 0x30FE) {
+            continue;
+        }
+        switch (c) {
         case 0x304C:
-            str[i] = 0x304B;
-            break;
         case 0x304E:
-            str[i] = 0x304D;
-            break;
         case 0x3050:
-            str[i] = 0x304F;
-            break;
         case 0x3052:
-            str[i] = 0x3051;
-            break;
         case 0x3054:
-            str[i] = 0x3053;
-            break;
         case 0x3056:
-            str[i] = 0x3055;
-            break;
         case 0x3058:
-            str[i] = 0x3057;
-            break;
         case 0x305A:
-            str[i] = 0x3059;
-            break;
         case 0x305C:
-            str[i] = 0x305B;
-            break;
         case 0x305E:
-            str[i] = 0x305D;
-            break;
         case 0x3060:
-            str[i] = 0x305F;
-            break;
         case 0x3062:
-            str[i] = 0x3061;
-            break;
         case 0x3065:
-            str[i] = 0x3064;
-            break;
         case 0x3067:
-            str[i] = 0x3066;
-            break;
         case 0x3069:
-            str[i] = 0x3068;
-            break;
         case 0x3070:
-            str[i] = 0x306F;
+        case 0x3073:
+        case 0x3076:
+        case 0x3079:
+        case 0x307C:
+        case 0x30AC:
+        case 0x30AE:
+        case 0x30B0:
+        case 0x30B2:
+        case 0x30B4:
+        case 0x30B6:
+        case 0x30B8:
+        case 0x30BA:
+        case 0x30BC:
+        case 0x30BE:
+        case 0x30C0:
+        case 0x30C2:
+        case 0x30C5:
+        case 0x30C7:
+        case 0x30C9:
+        case 0x30D0:
+        case 0x30D3:
+        case 0x30D6:
+        case 0x30D9:
+        case 0x30DC:
+            str[i] = c - 1;
             break;
         case 0x3071:
-            str[i] = 0x306F;
-            break;
-        case 0x3073:
-            str[i] = 0x3072;
-            break;
         case 0x3074:
-            str[i] = 0x3072;
-            break;
-        case 0x3076:
-            str[i] = 0x3075;
-            break;
         case 0x3077:
-            str[i] = 0x3075;
-            break;
-        case 0x3079:
-            str[i] = 0x3078;
-            break;
         case 0x307A:
-            str[i] = 0x3078;
-            break;
-        case 0x307C:
-            str[i] = 0x307B;
-            break;
         case 0x307D:
-            str[i] = 0x307B;
-            break;
-        case 0x30AC:
-            str[i] = 0x30AB;
-            break;
-        case 0x30AE:
-            str[i] = 0x30AD;
-            break;
-        case 0x30B0:
-            str[i] = 0x30AF;
-            break;
-        case 0x30B2:
-            str[i] = 0x30B1;
-            break;
-        case 0x30B4:
-            str[i] = 0x30B3;
-            break;
-        case 0x30B6:
-            str[i] = 0x30B5;
-            break;
-        case 0x30B8:
-            str[i] = 0x30B7;
-            break;
-        case 0x30BA:
-            str[i] = 0x30B9;
-            break;
-        case 0x30BC:
-            str[i] = 0x30BB;
-            break;
-        case 0x30BE:
-            str[i] = 0x30BD;
-            break;
-        case 0x30C0:
-            str[i] = 0x30BF;
-            break;
-        case 0x30C2:
-            str[i] = 0x30C1;
-            break;
-        case 0x30C5:
-            str[i] = 0x30C4;
-            break;
-        case 0x30C7:
-            str[i] = 0x30C6;
-            break;
-        case 0x30C9:
-            str[i] = 0x30C8;
-            break;
-        case 0x30D0:
-            str[i] = 0x30CF;
-            break;
         case 0x30D1:
-            str[i] = 0x30CF;
-            break;
-        case 0x30D3:
-            str[i] = 0x30D2;
-            break;
         case 0x30D4:
-            str[i] = 0x30D2;
-            break;
-        case 0x30D6:
-            str[i] = 0x30D5;
-            break;
         case 0x30D7:
-            str[i] = 0x30D5;
-            break;
-        case 0x30D9:
-            str[i] = 0x30D8;
-            break;
         case 0x30DA:
-            str[i] = 0x30D8;
-            break;
-        case 0x30DC:
-            str[i] = 0x30DB;
-            break;
         case 0x30DD:
-            str[i] = 0x30DB;
+            str[i] = c - 2;
             break;
         case 0x30F4:
             str[i] = 0x30A6;
             break;
+        case 0x26FD:
+            str[i] = 0x3046;
+            break;
         }
     }
 }
 
+// Writes a long vowel mark (U+30FC, or the full-width tilde) after a kana out as the kana's vowel, in the kana's
+// script: a hiragana or katakana a, i, u, e or o
 void CharacterSort::ExpandLongVowelMarks(wchar_t *str) {
+    u32 length = wcslen(str);
+    if (length == 0) {
+        str[length] = 0;
+        return;
+    }
+    if (length == 1) {
+        str[length] = 0;
+        return;
+    }
+    for (int i = 0; i < length - 1; i++) {
+        wchar_t c = str[i];
+        wchar_t next = str[i + 1];
+        if (next == 0x30FC || next == 0xFF5E) {
+            if (c == 0x3041 ||
+                c == 0x3042 ||
+                c == 0x304B ||
+                c == 0x304C ||
+                c == 0x3055 ||
+                c == 0x3056 ||
+                c == 0x305F ||
+                c == 0x3060 ||
+                c == 0x306A ||
+                c == 0x306F ||
+                c == 0x3070 ||
+                c == 0x3071 ||
+                c == 0x307E ||
+                c == 0x3083 ||
+                c == 0x3084 ||
+                c == 0x3089 ||
+                c == 0x308E ||
+                c == 0x308F ||
+                c == 0x26FE) {
+                str[i + 1] = 0x3042;
+            } else if (c == 0x30A1 ||
+                c == 0x30A2 ||
+                c == 0x30AB ||
+                c == 0x30AC ||
+                c == 0x30B5 ||
+                c == 0x30B6 ||
+                c == 0x30BF ||
+                c == 0x30C0 ||
+                c == 0x30CA ||
+                c == 0x30CF ||
+                c == 0x30D0 ||
+                c == 0x30D1 ||
+                c == 0x30DE ||
+                c == 0x30E3 ||
+                c == 0x30E4 ||
+                c == 0x30E9 ||
+                c == 0x30EE ||
+                c == 0x30EF ||
+                c == 0x30F5) {
+                str[i + 1] = 0x30A2;
+            } else if (c == 0x3043 ||
+                c == 0x3044 ||
+                c == 0x304D ||
+                c == 0x304E ||
+                c == 0x3057 ||
+                c == 0x3058 ||
+                c == 0x3061 ||
+                c == 0x3062 ||
+                c == 0x306B ||
+                c == 0x3072 ||
+                c == 0x3073 ||
+                c == 0x3074 ||
+                c == 0x307F ||
+                c == 0x308A ||
+                c == 0x3090) {
+                str[i + 1] = 0x3044;
+            } else if (c == 0x30A3 ||
+                c == 0x30A4 ||
+                c == 0x30AD ||
+                c == 0x30AE ||
+                c == 0x30B7 ||
+                c == 0x30B8 ||
+                c == 0x30C1 ||
+                c == 0x30C2 ||
+                c == 0x30CB ||
+                c == 0x30D2 ||
+                c == 0x30D3 ||
+                c == 0x30D4 ||
+                c == 0x30DF ||
+                c == 0x30EA) {
+                str[i + 1] = 0x30A4;
+            } else if (c == 0x3045 ||
+                c == 0x3046 ||
+                c == 0x304F ||
+                c == 0x3050 ||
+                c == 0x3059 ||
+                c == 0x305A ||
+                c == 0x3063 ||
+                c == 0x3064 ||
+                c == 0x3065 ||
+                c == 0x306C ||
+                c == 0x3075 ||
+                c == 0x3076 ||
+                c == 0x3077 ||
+                c == 0x3080 ||
+                c == 0x3085 ||
+                c == 0x3086 ||
+                c == 0x308B ||
+                c == 0x26FD) {
+                str[i + 1] = 0x3046;
+            } else if (c == 0x30A5 ||
+                c == 0x30A6 ||
+                c == 0x30AF ||
+                c == 0x30B0 ||
+                c == 0x30B9 ||
+                c == 0x30BA ||
+                c == 0x30C3 ||
+                c == 0x30C4 ||
+                c == 0x30C5 ||
+                c == 0x30CC ||
+                c == 0x30D5 ||
+                c == 0x30D6 ||
+                c == 0x30D7 ||
+                c == 0x30E0 ||
+                c == 0x30E5 ||
+                c == 0x30E6 ||
+                c == 0x30EB ||
+                c == 0x30F4) {
+                str[i + 1] = 0x30A6;
+            } else if (c == 0x3047 ||
+                c == 0x3048 ||
+                c == 0x3051 ||
+                c == 0x3052 ||
+                c == 0x305B ||
+                c == 0x305C ||
+                c == 0x3066 ||
+                c == 0x3067 ||
+                c == 0x306D ||
+                c == 0x3078 ||
+                c == 0x3079 ||
+                c == 0x307A ||
+                c == 0x3081 ||
+                c == 0x308C ||
+                c == 0x3091 ||
+                c == 0x26FF) {
+                str[i + 1] = 0x3048;
+            } else if (c == 0x30A7 ||
+                c == 0x30A8 ||
+                c == 0x30B1 ||
+                c == 0x30B2 ||
+                c == 0x30BB ||
+                c == 0x30BC ||
+                c == 0x30C6 ||
+                c == 0x30C7 ||
+                c == 0x30CD ||
+                c == 0x30D8 ||
+                c == 0x30D9 ||
+                c == 0x30DA ||
+                c == 0x30E1 ||
+                c == 0x30EC ||
+                c == 0x30F6) {
+                str[i + 1] = 0x30A8;
+            } else if (c == 0x3049 ||
+                c == 0x304A ||
+                c == 0x3053 ||
+                c == 0x3054 ||
+                c == 0x305D ||
+                c == 0x305E ||
+                c == 0x3068 ||
+                c == 0x3069 ||
+                c == 0x306E ||
+                c == 0x307B ||
+                c == 0x307C ||
+                c == 0x307D ||
+                c == 0x3082 ||
+                c == 0x3087 ||
+                c == 0x3088 ||
+                c == 0x308D ||
+                c == 0x3092) {
+                str[i + 1] = 0x304A;
+            } else if (c == 0x30A9 ||
+                c == 0x30AA ||
+                c == 0x30B3 ||
+                c == 0x30B4 ||
+                c == 0x30BD ||
+                c == 0x30BE ||
+                c == 0x30C8 ||
+                c == 0x30C9 ||
+                c == 0x30CE ||
+                c == 0x30DB ||
+                c == 0x30DC ||
+                c == 0x30DD ||
+                c == 0x30E2 ||
+                c == 0x30E7 ||
+                c == 0x30E8 ||
+                c == 0x30ED ||
+                c == 0x30F2) {
+                str[i + 1] = 0x30AA;
+            }
+        }
+    }
 }
 
+// Writes the ligatures out as two letters: U+00C6, U+00E6, U+0152 and U+0153 as AE, ae, OE and oe (at most 40
+// characters)
 void CharacterSort::ExpandLigatures(wchar_t *str) {
+    int n = 0;
+    wchar_t expanded[42];
+    u32 length = wcslen(str);
+    for (u32 i = 0; i < length; i++) {
+        switch (str[i]) {
+        case 0x00C6:
+            expanded[n] = L'A';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'E';
+                n++;
+            }
+            break;
+        case 0x00E6:
+            expanded[n] = L'a';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'e';
+                n++;
+            }
+            break;
+        case 0x0152:
+            expanded[n] = L'O';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'E';
+                n++;
+            }
+            break;
+        case 0x0153:
+            expanded[n] = L'o';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'e';
+                n++;
+            }
+            break;
+        default:
+            expanded[n] = str[i];
+            n++;
+            break;
+        }
+        if (n >= 40) {
+            break;
+        }
+    }
+    expanded[n] = 0;
+    wcscpy(str, expanded);
 }
 
 void CharacterSort::ToUpperCase(wchar_t *str) {
     u32 length = wcslen(str);
-    for (u32 i = 0; i < length; i++) {
-        switch (str[i]) {
-        case 0x0061:
-            str[i] = 0x0041;
-            break;
-        case 0x0062:
-            str[i] = 0x0042;
-            break;
-        case 0x0063:
-            str[i] = 0x0043;
-            break;
-        case 0x0064:
-            str[i] = 0x0044;
-            break;
-        case 0x0065:
-            str[i] = 0x0045;
-            break;
-        case 0x0066:
-            str[i] = 0x0046;
-            break;
-        case 0x0067:
-            str[i] = 0x0047;
-            break;
-        case 0x0068:
-            str[i] = 0x0048;
-            break;
-        case 0x0069:
-            str[i] = 0x0049;
-            break;
-        case 0x006A:
-            str[i] = 0x004A;
-            break;
-        case 0x006B:
-            str[i] = 0x004B;
-            break;
-        case 0x006C:
-            str[i] = 0x004C;
-            break;
-        case 0x006D:
-            str[i] = 0x004D;
-            break;
-        case 0x006E:
-            str[i] = 0x004E;
-            break;
-        case 0x006F:
-            str[i] = 0x004F;
-            break;
-        case 0x0070:
-            str[i] = 0x0050;
-            break;
-        case 0x0071:
-            str[i] = 0x0051;
-            break;
-        case 0x0072:
-            str[i] = 0x0052;
-            break;
-        case 0x0073:
-            str[i] = 0x0053;
-            break;
-        case 0x0074:
-            str[i] = 0x0054;
-            break;
-        case 0x0075:
-            str[i] = 0x0055;
-            break;
-        case 0x0076:
-            str[i] = 0x0056;
-            break;
-        case 0x0077:
-            str[i] = 0x0057;
-            break;
-        case 0x0078:
-            str[i] = 0x0058;
-            break;
-        case 0x0079:
-            str[i] = 0x0059;
-            break;
-        case 0x007A:
-            str[i] = 0x005A;
-            break;
-        case 0x00E0:
-            str[i] = 0x00C0;
-            break;
-        case 0x00E1:
-            str[i] = 0x00C1;
-            break;
-        case 0x00E2:
-            str[i] = 0x00C2;
-            break;
-        case 0x00E3:
-            str[i] = 0x00C3;
-            break;
-        case 0x00E4:
-            str[i] = 0x00C4;
-            break;
-        case 0x00E5:
-            str[i] = 0x00C5;
-            break;
-        case 0x00E6:
-            str[i] = 0x00C6;
-            break;
-        case 0x00E7:
-            str[i] = 0x00C7;
-            break;
-        case 0x00E8:
-            str[i] = 0x00C8;
-            break;
-        case 0x00E9:
-            str[i] = 0x00C9;
-            break;
-        case 0x00EA:
-            str[i] = 0x00CA;
-            break;
-        case 0x00EB:
-            str[i] = 0x00CB;
-            break;
-        case 0x00EC:
-            str[i] = 0x00CC;
-            break;
-        case 0x00ED:
-            str[i] = 0x00CD;
-            break;
-        case 0x00EE:
-            str[i] = 0x00CE;
-            break;
-        case 0x00EF:
-            str[i] = 0x00CF;
-            break;
-        case 0x00F0:
-            str[i] = 0x00D0;
-            break;
-        case 0x00F1:
-            str[i] = 0x00D1;
-            break;
-        case 0x00F2:
-            str[i] = 0x00D2;
-            break;
-        case 0x00F3:
-            str[i] = 0x00D3;
-            break;
-        case 0x00F4:
-            str[i] = 0x00D4;
-            break;
-        case 0x00F5:
-            str[i] = 0x00D5;
-            break;
-        case 0x00F6:
-            str[i] = 0x00D6;
-            break;
-        case 0x00F8:
-            str[i] = 0x00D8;
-            break;
-        case 0x00F9:
-            str[i] = 0x00D9;
-            break;
-        case 0x00FA:
-            str[i] = 0x00DA;
-            break;
-        case 0x00FB:
-            str[i] = 0x00DB;
-            break;
-        case 0x00FC:
-            str[i] = 0x00DC;
-            break;
-        case 0x00FD:
-            str[i] = 0x00DD;
-            break;
-        case 0x00FE:
-            str[i] = 0x00DE;
-            break;
-        case 0x00FF:
-            str[i] = 0x0178;
-            break;
-        case 0x0153:
+    for (int i = 0; i < length; i++) {
+        wchar_t c = str[i];
+        if ((c >= 0x0061 && c <= 0x007A) || (c >= 0x00E0 && c <= 0x00FE && c != 0x00F7) ||
+            (c >= 0x03B1 && c <= 0x03CB && c != 0x03C2)) {
+            str[i] = c - 0x20;
+        } else if (c == 0x0153) {
             str[i] = 0x0152;
-            break;
-        case 0x03AB:
-            str[i] = 0x038E;
-            break;
-        case 0x03AC:
+        } else if (c == 0x00FF) {
+            str[i] = 0x0178;
+        } else if (c == 0x03AC) {
             str[i] = 0x0386;
-            break;
-        case 0x03AD:
+        } else if (c == 0x03AD) {
             str[i] = 0x0388;
-            break;
-        case 0x03AE:
+        } else if (c == 0x03AE) {
             str[i] = 0x0389;
-            break;
-        case 0x03AF:
-            str[i] = 0x038A;
-            break;
-        case 0x03B1:
-            str[i] = 0x0391;
-            break;
-        case 0x03B2:
-            str[i] = 0x0392;
-            break;
-        case 0x03B3:
-            str[i] = 0x0393;
-            break;
-        case 0x03B4:
-            str[i] = 0x0394;
-            break;
-        case 0x03B5:
-            str[i] = 0x0395;
-            break;
-        case 0x03B6:
-            str[i] = 0x0396;
-            break;
-        case 0x03B7:
-            str[i] = 0x0397;
-            break;
-        case 0x03B8:
+        } else if (c == 0x03B8) {
             str[i] = 0x0398;
-            break;
-        case 0x03B9:
-            str[i] = 0x0399;
-            break;
-        case 0x03BA:
-            str[i] = 0x039A;
-            break;
-        case 0x03BB:
-            str[i] = 0x039B;
-            break;
-        case 0x03BC:
-            str[i] = 0x039C;
-            break;
-        case 0x03BD:
-            str[i] = 0x039D;
-            break;
-        case 0x03BE:
-            str[i] = 0x039E;
-            break;
-        case 0x03BF:
-            str[i] = 0x039F;
-            break;
-        case 0x03C0:
-            str[i] = 0x03A0;
-            break;
-        case 0x03C1:
-            str[i] = 0x03A1;
-            break;
-        case 0x03C2:
-            str[i] = 0x03A3;
-            break;
-        case 0x03C3:
-            str[i] = 0x03A3;
-            break;
-        case 0x03C4:
-            str[i] = 0x03A4;
-            break;
-        case 0x03C5:
-            str[i] = 0x03A5;
-            break;
-        case 0x03C6:
-            str[i] = 0x03A6;
-            break;
-        case 0x03C7:
-            str[i] = 0x03A7;
-            break;
-        case 0x03C8:
-            str[i] = 0x03A8;
-            break;
-        case 0x03C9:
-            str[i] = 0x03A9;
-            break;
-        case 0x03CA:
+        } else if (c == 0x03AF) {
+            str[i] = 0x038A;
+        } else if (c == 0x03CA) {
             str[i] = 0x03AA;
-            break;
-        case 0x03CB:
-            str[i] = 0x03AB;
-            break;
-        case 0x03CD:
+        } else if (c == 0x03AB) {
             str[i] = 0x038E;
-            break;
-        case 0x03CE:
+        } else if (c == 0x03CD) {
+            str[i] = 0x038E;
+        } else if (c == 0x03CE) {
             str[i] = 0x038F;
-            break;
+        } else if (c == 0x03C2) {
+            str[i] = 0x03A3;
         }
     }
 }
 
 void CharacterSort::ToUpperCaseWithoutAccents(wchar_t *str) {
     u32 length = wcslen(str);
-    for (u32 i = 0; i < length; i++) {
-        switch (str[i]) {
-        case 0x0061:
+    for (int i = 0; i < length; i++) {
+        wchar_t c = str[i];
+        if (c >= 0x3040 && c <= 0x30FE) {
+            // Kana are left alone
+        } else if (c == 0x0061 || c == 0x00C0 || c == 0x00E0 || c == 0x00C1 || c == 0x00E1 || c == 0x00C2 ||
+                   c == 0x00E2 || c == 0x00C4 || c == 0x00E4 || c == 0x00C3 || c == 0x00E3 || c == 0x00C5 ||
+                   c == 0x00E5) {
             str[i] = 0x0041;
-            break;
-        case 0x0062:
-            str[i] = 0x0042;
-            break;
-        case 0x0063:
+        } else if (c == 0x00C7 || c == 0x0063 || c == 0x00E7) {
             str[i] = 0x0043;
-            break;
-        case 0x0064:
-            str[i] = 0x0044;
-            break;
-        case 0x0065:
+        } else if (c == 0x0065 || c == 0x00C8 || c == 0x00E8 || c == 0x00C9 || c == 0x00E9 || c == 0x00CA ||
+                   c == 0x00EA || c == 0x00CB || c == 0x00EB) {
             str[i] = 0x0045;
-            break;
-        case 0x0066:
-            str[i] = 0x0046;
-            break;
-        case 0x0067:
-            str[i] = 0x0047;
-            break;
-        case 0x0068:
-            str[i] = 0x0048;
-            break;
-        case 0x0069:
+        } else if (c == 0x0069 || c == 0x00CC || c == 0x00EC || c == 0x00CD || c == 0x00ED || c == 0x00CE ||
+                   c == 0x00EE || c == 0x00CF || c == 0x00EF) {
             str[i] = 0x0049;
-            break;
-        case 0x006A:
-            str[i] = 0x004A;
-            break;
-        case 0x006B:
-            str[i] = 0x004B;
-            break;
-        case 0x006C:
-            str[i] = 0x004C;
-            break;
-        case 0x006D:
-            str[i] = 0x004D;
-            break;
-        case 0x006E:
+        } else if (c == 0x006E) {
             str[i] = 0x004E;
-            break;
-        case 0x006F:
-            str[i] = 0x004F;
-            break;
-        case 0x0070:
-            str[i] = 0x0050;
-            break;
-        case 0x0071:
-            str[i] = 0x0051;
-            break;
-        case 0x0072:
-            str[i] = 0x0052;
-            break;
-        case 0x0073:
-            str[i] = 0x0053;
-            break;
-        case 0x0074:
-            str[i] = 0x0054;
-            break;
-        case 0x0075:
-            str[i] = 0x0055;
-            break;
-        case 0x0076:
-            str[i] = 0x0056;
-            break;
-        case 0x0077:
-            str[i] = 0x0057;
-            break;
-        case 0x0078:
-            str[i] = 0x0058;
-            break;
-        case 0x0079:
-            str[i] = 0x0059;
-            break;
-        case 0x007A:
-            str[i] = 0x005A;
-            break;
-        case 0x00C0:
-            str[i] = 0x0041;
-            break;
-        case 0x00C1:
-            str[i] = 0x0041;
-            break;
-        case 0x00C2:
-            str[i] = 0x0041;
-            break;
-        case 0x00C3:
-            str[i] = 0x0041;
-            break;
-        case 0x00C4:
-            str[i] = 0x0041;
-            break;
-        case 0x00C5:
-            str[i] = 0x0041;
-            break;
-        case 0x00C7:
-            str[i] = 0x0043;
-            break;
-        case 0x00C8:
-            str[i] = 0x0045;
-            break;
-        case 0x00C9:
-            str[i] = 0x0045;
-            break;
-        case 0x00CA:
-            str[i] = 0x0045;
-            break;
-        case 0x00CB:
-            str[i] = 0x0045;
-            break;
-        case 0x00CC:
-            str[i] = 0x0049;
-            break;
-        case 0x00CD:
-            str[i] = 0x0049;
-            break;
-        case 0x00CE:
-            str[i] = 0x0049;
-            break;
-        case 0x00CF:
-            str[i] = 0x0049;
-            break;
-        case 0x00D2:
-            str[i] = 0x004F;
-            break;
-        case 0x00D3:
-            str[i] = 0x004F;
-            break;
-        case 0x00D4:
-            str[i] = 0x004F;
-            break;
-        case 0x00D5:
-            str[i] = 0x004F;
-            break;
-        case 0x00D6:
-            str[i] = 0x004F;
-            break;
-        case 0x00D8:
-            str[i] = 0x004F;
-            break;
-        case 0x00D9:
-            str[i] = 0x0055;
-            break;
-        case 0x00DA:
-            str[i] = 0x0055;
-            break;
-        case 0x00DB:
-            str[i] = 0x0055;
-            break;
-        case 0x00DC:
-            str[i] = 0x0055;
-            break;
-        case 0x00DD:
-            str[i] = 0x0059;
-            break;
-        case 0x00DF:
-            str[i] = 0x0053;
-            break;
-        case 0x00E0:
-            str[i] = 0x0041;
-            break;
-        case 0x00E1:
-            str[i] = 0x0041;
-            break;
-        case 0x00E2:
-            str[i] = 0x0041;
-            break;
-        case 0x00E3:
-            str[i] = 0x0041;
-            break;
-        case 0x00E4:
-            str[i] = 0x0041;
-            break;
-        case 0x00E5:
-            str[i] = 0x0041;
-            break;
-        case 0x00E7:
-            str[i] = 0x0043;
-            break;
-        case 0x00E8:
-            str[i] = 0x0045;
-            break;
-        case 0x00E9:
-            str[i] = 0x0045;
-            break;
-        case 0x00EA:
-            str[i] = 0x0045;
-            break;
-        case 0x00EB:
-            str[i] = 0x0045;
-            break;
-        case 0x00EC:
-            str[i] = 0x0049;
-            break;
-        case 0x00ED:
-            str[i] = 0x0049;
-            break;
-        case 0x00EE:
-            str[i] = 0x0049;
-            break;
-        case 0x00EF:
-            str[i] = 0x0049;
-            break;
-        case 0x00F1:
+        } else if (c == 0x00F1) {
             str[i] = 0x00D1;
-            break;
-        case 0x00F2:
+        } else if (c == 0x006F || c == 0x00D2 || c == 0x00F2 || c == 0x00D3 || c == 0x00F3 || c == 0x00D4 ||
+                   c == 0x00F4 || c == 0x00D6 || c == 0x00F6 || c == 0x00D5 || c == 0x00F5 || c == 0x00D8 ||
+                   c == 0x00F8) {
             str[i] = 0x004F;
-            break;
-        case 0x00F3:
-            str[i] = 0x004F;
-            break;
-        case 0x00F4:
-            str[i] = 0x004F;
-            break;
-        case 0x00F5:
-            str[i] = 0x004F;
-            break;
-        case 0x00F6:
-            str[i] = 0x004F;
-            break;
-        case 0x00F8:
-            str[i] = 0x004F;
-            break;
-        case 0x00F9:
+        } else if (c == 0x0073 || c == 0x00DF) {
+            str[i] = 0x0053;
+        } else if (c == 0x0075 || c == 0x00D9 || c == 0x00F9 || c == 0x00DA || c == 0x00FA || c == 0x00DB ||
+                   c == 0x00FB || c == 0x00DC || c == 0x00FC) {
             str[i] = 0x0055;
-            break;
-        case 0x00FA:
-            str[i] = 0x0055;
-            break;
-        case 0x00FB:
-            str[i] = 0x0055;
-            break;
-        case 0x00FC:
-            str[i] = 0x0055;
-            break;
-        case 0x00FD:
+        } else if (c == 0x0079 || c == 0x00DD || c == 0x00FD || c == 0x0178 || c == 0x00FF) {
             str[i] = 0x0059;
-            break;
-        case 0x00FF:
-            str[i] = 0x0059;
-            break;
-        case 0x0178:
-            str[i] = 0x0059;
-            break;
-        case 0x0386:
+        } else if (c == 0x03B1 || c == 0x0386 || c == 0x0020 || c == 0x03AC) {
             str[i] = 0x0391;
-            break;
-        case 0x0388:
+        } else if (c == 0x03B5 || c == 0x0388 || c == 0x03AD) {
             str[i] = 0x0395;
-            break;
-        case 0x0389:
+        } else if (c == 0x03B7 || c == 0x0389 || c == 0x03AE) {
             str[i] = 0x0397;
-            break;
-        case 0x038A:
+        } else if (c == 0x03B9 || c == 0x038A || c == 0x03AF || c == 0x03AA || c == 0x03CA || c == 0x0020 ||
+                   c == 0x0390) {
             str[i] = 0x0399;
-            break;
-        case 0x038C:
-            str[i] = 0x039F;
-            break;
-        case 0x038E:
-            str[i] = 0x03A5;
-            break;
-        case 0x038F:
-            str[i] = 0x03A9;
-            break;
-        case 0x0390:
-            str[i] = 0x0399;
-            break;
-        case 0x03AA:
-            str[i] = 0x0399;
-            break;
-        case 0x03AB:
-            str[i] = 0x03A5;
-            break;
-        case 0x03AC:
-            str[i] = 0x0391;
-            break;
-        case 0x03AD:
-            str[i] = 0x0395;
-            break;
-        case 0x03AE:
-            str[i] = 0x0397;
-            break;
-        case 0x03AF:
-            str[i] = 0x0399;
-            break;
-        case 0x03B0:
-            str[i] = 0x03A5;
-            break;
-        case 0x03B1:
-            str[i] = 0x0391;
-            break;
-        case 0x03B2:
-            str[i] = 0x0392;
-            break;
-        case 0x03B3:
-            str[i] = 0x0393;
-            break;
-        case 0x03B4:
-            str[i] = 0x0394;
-            break;
-        case 0x03B5:
-            str[i] = 0x0395;
-            break;
-        case 0x03B6:
-            str[i] = 0x0396;
-            break;
-        case 0x03B7:
-            str[i] = 0x0397;
-            break;
-        case 0x03B8:
-            str[i] = 0x0398;
-            break;
-        case 0x03B9:
-            str[i] = 0x0399;
-            break;
-        case 0x03BA:
-            str[i] = 0x039A;
-            break;
-        case 0x03BB:
-            str[i] = 0x039B;
-            break;
-        case 0x03BC:
-            str[i] = 0x039C;
-            break;
-        case 0x03BD:
+        } else if (c == 0x03BD) {
             str[i] = 0x039D;
-            break;
-        case 0x03BE:
-            str[i] = 0x039E;
-            break;
-        case 0x03BF:
+        } else if (c == 0x03BF || c == 0x038C || c == 0x03CC) {
             str[i] = 0x039F;
-            break;
-        case 0x03C0:
-            str[i] = 0x03A0;
-            break;
-        case 0x03C1:
-            str[i] = 0x03A1;
-            break;
-        case 0x03C2:
+        } else if (c == 0x03C2 || c == 0x03C3) {
             str[i] = 0x03A3;
-            break;
-        case 0x03C3:
-            str[i] = 0x03A3;
-            break;
-        case 0x03C4:
-            str[i] = 0x03A4;
-            break;
-        case 0x03C5:
+        } else if (c == 0x03C5 || c == 0x038E || c == 0x03AB || c == 0x03CD || c == 0x03CB || c == 0x03B0) {
             str[i] = 0x03A5;
-            break;
-        case 0x03C6:
-            str[i] = 0x03A6;
-            break;
-        case 0x03C7:
-            str[i] = 0x03A7;
-            break;
-        case 0x03C8:
-            str[i] = 0x03A8;
-            break;
-        case 0x03C9:
+        } else if (c == 0x03C9 || c == 0x038F || c == 0x03CE) {
             str[i] = 0x03A9;
-            break;
-        case 0x03CA:
-            str[i] = 0x0399;
-            break;
-        case 0x03CB:
-            str[i] = 0x03A5;
-            break;
-        case 0x03CC:
-            str[i] = 0x039F;
-            break;
-        case 0x03CD:
-            str[i] = 0x03A5;
-            break;
-        case 0x03CE:
-            str[i] = 0x03A9;
-            break;
+        } else if ((c >= 0x0061 && c <= 0x007A) || (c >= 0x03B1 && c <= 0x03C9)) {
+            str[i] = c - 0x20;
         }
     }
 }
@@ -2728,12 +2270,13 @@ int CharacterSort::CompareByPersonality(SavedCharacter *a, SavedCharacter *b) {
 }
 
 int CharacterSort::CompareByBirthday(SavedCharacter *a, SavedCharacter *b) {
-    int yearA = a->mBirthYear;
-    int yearB = b->mBirthYear;
-    int monthA = a->GetParameter(PARAM_BIRTH_MONTH);
-    int monthB = b->GetParameter(PARAM_BIRTH_MONTH);
-    int dayA = a->GetParameter(PARAM_BIRTH_DAY);
-    int dayB = b->GetParameter(PARAM_BIRTH_DAY);
+    int dayB, monthA, monthB, dayA, yearA, yearB;
+    yearA = a->mBirthYear;
+    yearB = b->mBirthYear;
+    monthA = a->GetParameter(PARAM_BIRTH_MONTH);
+    monthB = b->GetParameter(PARAM_BIRTH_MONTH);
+    dayA = a->GetParameter(PARAM_BIRTH_DAY);
+    dayB = b->GetParameter(PARAM_BIRTH_DAY);
     if (yearA == 0xFFF) {
         yearA = 2100;
     }
@@ -2752,8 +2295,8 @@ int CharacterSort::CompareByBirthday(SavedCharacter *a, SavedCharacter *b) {
     if (dayB == 0) {
         dayB = 32;
     }
-    int keyA = yearA * 366 + monthA * 31 + dayA;
-    int keyB = yearB * 366 + monthB * 31 + dayB;
+    u32 keyA = yearA * 366 + monthA * 31 + dayA;
+    u32 keyB = yearB * 366 + monthB * 31 + dayB;
     int result = keyA - keyB;
     if (result != 0) {
         return result;
@@ -2778,8 +2321,8 @@ int CharacterSort::CompareByBirthdayInYear(SavedCharacter *a, SavedCharacter *b)
     if (dayB == 0) {
         dayB = 32;
     }
-    int keyA = monthA * 31 + dayA;
-    int keyB = monthB * 31 + dayB;
+    u32 keyA = monthA * 31 + dayA;
+    u32 keyB = monthB * 31 + dayB;
     int result = keyA - keyB;
     if (result != 0) {
         return result;

@@ -278,7 +278,7 @@ void ForgetCharacter(int index, int count, SavedCharacter *list) {
             character->ClearLongAct();
             func_0202c28c(&gGameData, other, character);
         }
-        if (character->IsTroubleOfCategory34OrKind18() && index == character->mTroublePartner) {
+        if (character->IsTroubleOfCategory34OrKind18() && index == character->mTroubleTarget) {
             if (character->IsLongActPaired()) {
                 int partner = character->mLongActPartner;
                 int found = -1;

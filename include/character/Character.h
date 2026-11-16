@@ -71,6 +71,20 @@ enum MiiParameter {
     PARAM_COUNT
 };
 
+// What a character is to another (CharacterRecord::mRelationRank), as the game's list of relations names them
+enum Relation {
+    RELATION_NONE,
+    RELATION_FRIENDS,
+    RELATION_LOVERS,
+    RELATION_EX_LOVERS,
+    RELATION_SPOUSES,
+    RELATION_DIVORCED,
+    RELATION_FRIENDS_FIGHTING,
+    RELATION_LOVERS_FIGHTING,
+    RELATION_SPOUSES_FIGHTING,
+    RELATION_BEST_FRIENDS,
+};
+
 // A Mii's create ID (lib/NFL's NFLCreateId)
 struct CreateId {
     u8 data[8];
@@ -108,7 +122,7 @@ struct CharacterRecord {
     /* 0x1C4 */ u32 mUnknown1C4;
     /* 0x1C8 */ struct { u32 m[8]; } mUnknown1C8;
     /* 0x1E8 */ struct { u32 m[10]; } mOwnedClothes; // A bit for each row of the clothes table
-    /* 0x210 */ u32 mUnknown210[3];      // Flags, a bit each
+    /* 0x210 */ u32 mOwnedInteriors[3];  // A bit for each row of the interiors table
     /* 0x21C */ s64 mLongActEnd;         // A time in seconds, as the clock's
     /* 0x224 */ u8 mLongActState;        // "LongActState", 0 to 0x2E: what it is doing for a long while
     /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
@@ -116,7 +130,7 @@ struct CharacterRecord {
     /* 0x227 */ u8 mTroubleCategory;     // "TroubleCategory", 0 to 9
     /* 0x228 */ s64 mTroubleStart;       // When the trouble began (a time in seconds)
     /* 0x230 */ s64 mTroubleEnd;         // When it ends (the wedding sets it to the honeymoon's end)
-    /* 0x238 */ u16 mTroublePartner;     // mIndex of the other character of the trouble
+    /* 0x238 */ u16 mTroubleTarget;      // What the trouble is about: mIndex of a character, or an item
     /* 0x23A */ u8 mTroubleState;        // "TroubleState", 0 to 5
     /* 0x23B */ u8 mTroubleProgress;     // 0 to 200
     /* 0x23C */ s64 mUnknown23C;
@@ -149,6 +163,8 @@ struct CharacterRecord {
 }; // 0x2A4
 
 // A saved character and what the game keeps beside it.
+class TtsPlayer;
+
 class SavedCharacter : public CharacterRecord {
 public:
     SavedCharacter();
@@ -166,7 +182,7 @@ public:
     void AssignCreateId();
     static void GetCreateId(CreateId *id, const CharacterRecord *character);
     u32 GetCreateIdNumber();
-    void GetCreateIdParts(int *high, int *low);
+    u32 GetCreateIdParts(int *high, int *low);
     void GetParameterRange(int param, int *min, int *max);
     void CheckParameter(int param, int value);
     void SetParameter(int param, int value);
@@ -196,14 +212,14 @@ public:
     void AddRelationMeter(int index, int change);
     void SetRelation(int index, u8 rank, u8 meter);
     void ResetRelations();
-    int FindOtherWithRank2478();
-    int FindOtherWithRank2Or4();
-    int FindOtherWithRank9();
-    BOOL IsRank2478(int rank);
-    BOOL IsRank2Or4(int rank);
-    static BOOL IsRank678(int rank);
-    static BOOL IsRank124(int rank);
-    BOOL IsRank1249Or678(int rank);
+    int FindCouplePartner();
+    int FindLoverOrSpouse();
+    int FindBestFriend();
+    BOOL IsCoupleRelation(int rank);
+    BOOL IsLoversOrSpouses(int rank);
+    static BOOL IsFightingRelation(int rank);
+    static BOOL IsFriendsLoversOrSpouses(int rank);
+    BOOL IsFriendlyOrFightingRelation(int rank);
     void SetLongAct(u8 state, u8 partner, s64 end);
     void ClearLongActFrom(s64 now);
     void ClearLongAct();
@@ -227,7 +243,7 @@ public:
     int ChooseLongAct();
     bool IsInTrouble();
     static bool IsTroubleStateActive(int state);
-    BOOL IsInTroubleWithoutUnknown4Bits8();
+    BOOL IsInTroubleWithoutMood();
     void SetTrouble(u8 state, u8 category, u8 id);
     BOOL IsProgressingTrouble();
     BOOL IsProgressingTroubleInState2();
@@ -239,11 +255,11 @@ public:
     static BOOL IsTroubleProgressFullAt(s64 now, s64 start, int progress);
     BOOL IsTroubleProgressFull(s64 now);
     BOOL IsTroubleOfCategory34OrKind20();
-    BOOL IsTroubleOfCategory3Kind8To10();
+    BOOL IsInFightOrSeparationTrouble();
     BOOL IsTroubleOfCategory34OrKind18();
-    BOOL IsTrouble3_4();
-    static BOOL IsTrouble3_4State(int state, int category, int id);
-    static int GetEncounterBonus(int base, int value);
+    BOOL IsAngryAfterFight();
+    static BOOL IsAngryAfterFightState(int state, int category, int id);
+    static int GetFightsAllowed(int fights, int residents);
     void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
     int ChooseTroubleCategory();
     int GetTroubleCategoryWeight(int category);
@@ -264,7 +280,7 @@ public:
     void ResetMeetDate();
     void ResetTouchTalk();
     void ClearUnknown1C8();
-    int CountOwnedClothes();
+    u32 CountOwnedClothes();
     void ClearOwnedClothes();
     u8 GetSongSlot(int slot);
     void SetSongSlot(int slot, u8 song);
@@ -283,20 +299,71 @@ public:
     void RandomizeUnknown24E();
     void ResetUnknown24E();
     int GetPersonalityPairValue(int a, int b);
-    // Not written yet
-    BOOL StartTrouble(int category, int id, s64 now, int force, SavedCharacter *partner, int unused);
-    void func_0209e01c();
-    BOOL func_0209ccf0();
-    void func_0209cda4();
+    int GetClothesLiking(int clothes);
+    int GetInteriorLiking(int interior);
+    void ChooseFoodPreferences(u8 *favorite, u8 *disliked);
+    BOOL AreFoodPreferencesValid();
+    void ChooseNewFoodPreferences();
+    int ScaleTalkWeightByAnswers(int kind, int weight);
+    int ScaleTalkWeightByPersonalities(int kind, int weight, SavedCharacter *partner);
+    int GetTalkReactionWeight(s8 relation, s8 partnerReaction, s8 reaction, SavedCharacter *partner);
+    int GetTotalTalkReactionWeight(s8 relation, s8 partnerReaction, SavedCharacter *partner);
+    int ChooseTalkReaction(s8 relation, s8 partnerReaction, SavedCharacter *partner);
+    int ScaleReactionWeightByAnswers(int kind, int weight);
+    int GetReactionWeight(s8 previous, s8 reaction);
+    int GetTotalReactionWeight(s8 previous);
+    int ChooseNextReaction(s8 previous);
+    void SetVoiceOf(TtsPlayer *player);
+    static int CompareRecords(const CharacterRecord *a, const CharacterRecord *b);
+    BOOL IsLeapYear(int year);
+    int GetDaysInYear(int year);
+    int GetDaysInMonth(int month, int year);
+    int GetDaysBetweenInYear(int month1, int day1, int month2, int day2, int year);
+    int GetDaysBetween(int month1, int day1, int year1, int month2, int day2, int year2);
+    int GetDaysBetween(RTCDate from, RTCDate to);
+    void GetBirthday(RTCDate *date);
+    int GetAgeInDays();
+    int GetBiorhythm(int day);
+    int GetBirthDayCycle();
+    int GetPersonalityColumnValue(int row, const u8 *table);
+    int GetPersonalityColumnOffset(int row);
+    void UpdateBiorhythm();
+    void AssignFreeRoom();
+    u32 CountOwnedInteriors();
+    void ExpireTrouble(s64 now, SavedCharacter *partner);
+    void FailTrouble(s64 now, SavedCharacter *target);
+    void EatRandomFood();
+    void FailFightTrouble(s64 now, SavedCharacter *other);
+    void BreakUp(s64 now, SavedCharacter *other);
+    void Divorce(s64 now, SavedCharacter *other);
+    BOOL StartTrouble(int category, int id, s64 now, BOOL shortened, SavedCharacter *partner, BOOL allowFight);
+    s64 GetTroubleDuration(BOOL shortened);
+    BOOL SetTroubleMood(int mood);
+    int ChooseWantedFood();
+    int ChooseWantedClothes(s64 now);
+    int ChooseNewFriend();
+    int ChooseFightOpponent();
+    int ChooseLoverToLeave();
+    int ChooseSpouseToLeave();
+    void CountFights(int *residents, int *fights);
+    void BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner);
+    int ChooseLoveInterest();
+    int ChooseCharacterByRelation();
+
+    // The steps the trouble functions share
+    void FinishTroubleUnsolved();
+    void StartTroubleWith(int category, int id, SavedCharacter *other, s64 now);
+    void StartHeartbreak(int id, SavedCharacter *other, s64 now);
+    void BeginTrouble(int category, int id, u16 target, s64 now, BOOL shortened, SavedCharacter *partner);
 
     // Marks a row of the clothes table as owned
     void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }
 
     /* 0x2A4 */ u16 mIndex;              // Which of the saved characters this is
     /* 0x2A6 */ s16 mReaction;
-    /* 0x2A8 */ u32 mUnknown2A8[3];
-    /* 0x2B4 */ int mUnknown2B4;
-    /* 0x2B8 */ int mUnknown2B8;
+    /* 0x2A8 */ int mBiorhythmCycles[3]; // Today's physical, intellectual and emotional cycles, 0 to 255
+    /* 0x2B4 */ int mBiorhythm;          // Today's biorhythm, 0 to 1000 (UpdateBiorhythm)
+    /* 0x2B8 */ int mBiorhythmYesterday;
     /* 0x2BC */ s8 mPersonality;         // 0..15
     /* 0x2BD */ u8 mUnknown2BD[3];
 }; // 0x2C0

@@ -101,7 +101,7 @@ void SavePlayScene::Init() {
     mCharacters[0].CharacterBase::MakeFace();
     mCharacters[0].Character::UpdateBodyScale();
     mCharacters[0].mPersonality = mCharacters[0].GetPersonality();
-    func_0209decc(&mCharacters[0]);
+    mCharacters[0].UpdateBiorhythm();
     mCharacters[0].Character::UpdateAnimSpeed();
     mCharacters[0].Character::UpdateSpeedScales();
     mCharacters[0].Character::UpdateBodyColors();

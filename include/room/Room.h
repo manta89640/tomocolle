@@ -28,12 +28,16 @@ struct InteriorInfo {
     /*      */ u32 mWeight1 : 4;
     /*      */ u32 mWeight2 : 4;
     /*      */ u32 mWeight3 : 4;
-    /*      */ u32 mUnknown04Bits16 : 16;
+    /*      */ u32 mTaste3 : 4; // How much each kind of personality likes it, 0 to 15 (GetInteriorLiking)
+    /*      */ u32 mTaste1 : 4;
+    /*      */ u32 mTaste2 : 4;
+    /*      */ u32 mTaste0 : 4;
     /* 0x08 */ GXRgb mLightColor;
     /* 0x0A */ char mModelName[8]; // "rm63": "Mdl/Room/<name>_3D_LZ.bin"
     /* 0x12 */ u8 mPieceCount;
     /* 0x13 */ u8 mKind;
-    /* 0x14 */ u16 mUnknown14;
+    /* 0x14 */ u8 mUnknown14;
+    /* 0x15 */ u8 mSex; // 1: for men, 2: for women, as ClothesInfo::mSex
     /* 0x16 */ InteriorPiece mPieces[6];
 }; // 0x54
 

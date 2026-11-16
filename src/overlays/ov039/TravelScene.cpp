@@ -543,7 +543,7 @@ void TravelScene::SetState(int state) {
         // The player, who takes the photograph and says "cheese", speaks with the voice of a resident drawn at random
         SavedCharacter photographer;
         func_0202c264(&gGameData, mCast.mResidents[Rand(mCast.mResidentCount)], &photographer);
-        func_0209d898(&photographer, &mTtsPlayer);
+        photographer.SetVoiceOf(&mTtsPlayer);
         Speak(-1, 0x4B0, 0);
         mPoseFrame = (photographer.mVoice[4] - 50) * 220 / 250 + 40;
         break;
@@ -599,7 +599,7 @@ void TravelScene::Speak(int speaker, u32 message, int mode) {
     mCast.mSpeaker = speaker;
     mCast.mSpeakerFace = 1;
     if (speaker != -1) {
-        func_0209d898(mCast.mCharacters[mCast.mSpeaker], &mTtsPlayer);
+        mCast.mCharacters[mCast.mSpeaker]->SetVoiceOf(&mTtsPlayer);
     }
     MI_CpuFill8(mSpeech, 0, sizeof(mSpeech));
     mText.mMessage = message + 1;

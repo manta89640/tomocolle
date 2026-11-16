@@ -21,7 +21,7 @@ extern "C" {
 
 
 // --- Data ---
-extern const int data_020fba28[16];   // By mPersonality: the row of the two tables below
+extern const int gPersonalityKinds[16];   // By mPersonality: the row of the two tables below
 extern const s16 data_020fb870[4][5]; // Animation ids, by that row and by mMood: standing
 extern const s16 data_020fb898[4][5]; // The same: walking
 
@@ -92,8 +92,8 @@ public:
         mTarget.x = pos.x;
         mTarget.z = pos.z;
     }
-    s16 GetIdleAnim() { return data_020fb870[data_020fba28[mPersonality]][mMood]; }
-    s16 GetWalkAnim() { return data_020fb898[data_020fba28[mPersonality]][mMood]; }
+    s16 GetIdleAnim() { return data_020fb870[gPersonalityKinds[mPersonality]][mMood]; }
+    s16 GetWalkAnim() { return data_020fb898[gPersonalityKinds[mPersonality]][mMood]; }
     // Overlay 74 has this as a function of its own (func_ov074_021694e8)
     void ResetSoundPhaseUnlessWalking() {
         if (!IsWalkAnim()) {

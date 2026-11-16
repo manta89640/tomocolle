@@ -1038,6 +1038,24 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   the compiler drops the argument at every call (`ClampField` in `SavedCharacter::Validate`, whose name strings
   otherwise vanish from the literal pools).
 - `FX32_CONST(variable)` is a floating-point conversion; shift instead.
+- A compare against a `u8` field or a `MATH_Rand16` result done signed in the original (`ge`, `lt` where ours has
+  `cs`, `cc`): the value went through an `int` first, `int level = mSatisfyLevel;`, or an inline
+  `static inline int Rand(int max) { return MATH_Rand16(&gRandom, max); }`; the same inline also gave the original's
+  registers around the generator in five functions (`SavedCharacter.cpp`).
+- Three byte loads given the scratch registers in another order: a field extracted as `(b & 0x0F) << 12` where
+  `(u16)(b << 12)` gives the same instructions with the loads defined in another order (`GetCreateIdNumber`).
+- A result kept in r1 where ours puts it in r0, with r0 unused afterwards: the function returns the value r0 holds
+  (`GetCreateIdParts` returns the number it splits).
+- `sum *= 1000; sum /= 32767 * 3;` where `sum = sum * 1000 / (32767 * 3)` schedules the whole function differently
+  (`GetBiorhythm`, `UpdateBiorhythm`).
+- A cascade of `x == 6 || x == 13 || x == 14` becomes a range test for 13..14; the original's `cmp; cmpne; cmpne` is a
+  switch. The other way round, a switch over 1, 2, 4 gives a compare chain where the original's bit test
+  (`sub; cmp #3; lsl; tst #11`) is `int state = mTroubleState; BOOL b = state == 1 || state == 2 || state == 4;`.
+- An `if (...) return TRUE; return FALSE;` the original compiles with branches and two `mov r0` returns: a switch of
+  one case (`switch (kind) { case 18: return TRUE; } return FALSE;`); for `ClampField`, an if / else if / else with
+  one `return FALSE` after it.
+- Byte arrays are never pooled, but a two-dimensional one is: `s8 sAnswerScores[5][9]` sat in the `.rodata` pool
+  among the 16- and 46-byte tables, where five `s8[9]` came out before the pool.
 - A switch of hundreds of cases (`CharacterSort::GetCollationKey`) can be written from the original's compare tree
   by running the tree for every input value (a small interpreter of its `cmp`/branch/jump-table code) and listing one
   case per body in the bodies' address order; the compiler then rebuilds the same tree.

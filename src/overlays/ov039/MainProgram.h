@@ -67,7 +67,6 @@ BOOL func_02024118(ScreenControl *screens, int planes, int step);
 
 int MiiData_GetSex(CharacterRecord *mii); // 0 for a man
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Copies a saved character out
-void func_0209d898(SavedCharacter *character, TtsPlayer *player); // Gives the speech engine the character's voice
 }
 
 #endif // OV039_MAINPROGRAM_H

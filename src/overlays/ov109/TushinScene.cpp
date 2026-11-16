@@ -537,7 +537,7 @@ void TushinScene::SetUpCharacter(int i) {
     ((Character *)(&mCharacters[i]))->UpdateBodyColors();
     ((Character *)(&mCharacters[i]))->UpdateBodyScale();
     mCharacters[i].mPersonality = ((SavedCharacter *)(&mCharacters[i]))->GetPersonality();
-    func_0209decc(&mCharacters[i]);
+    mCharacters[i].UpdateBiorhythm();
     ((Character *)(&mCharacters[i]))->SetAnimation(RESOURCE_BCA0, GetStandAnimation(i));
     ((Character *)(&mCharacters[i]))->SetAnimSpeed(0x1000);
 }
@@ -777,7 +777,7 @@ void TushinScene::RefreshRecord(CharacterRecord *record) {
     SavedCharacter character;
     (CharacterRecord &)character = *record;
     ((SavedCharacter *)(&character))->Register();
-    func_0209e01c(&character);
+    character.AssignFreeRoom();
     *record = character;
 }
 

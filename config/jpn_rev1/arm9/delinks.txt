@@ -791,6 +791,7 @@ src/character/Character.cpp:
     .rodata     start:0x020fb864 end:0x020fb8c0
 
 src/character/CharacterSort.cpp:
+    complete
     .text       start:0x02092178 end:0x020979a0
 
 src/character/SavedCharacter.cpp:

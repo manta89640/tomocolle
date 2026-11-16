@@ -670,10 +670,15 @@ BOOL Character::WalkToTarget(fx32 reach, fx32 speed, int turnShift) {
     return FALSE;
 }
 
+// The direction from the character to a point (the copies of the points it leaves on the stack are the original's)
+static inline u16 AngleTo(const Character *character, FloorPos target) {
+    FloorPos delta = target - character->GetFloorPos();
+    return FX_Atan2Idx(delta.z, delta.x);
+}
+
 BOOL Character::TurnToWalkTarget(int turnSpeed, int walkSpeed) {
     FloorPos target = GetTargetFloorPos();
-    FloorPos delta = target - GetFloorPos();
-    mWalkAngle = FX_Atan2Idx(delta.z, delta.x);
+    mWalkAngle = AngleTo(this, target);
     return TurnTo(turnSpeed, walkSpeed, mWalkAngle);
 }
 
