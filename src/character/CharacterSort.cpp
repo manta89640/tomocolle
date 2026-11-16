@@ -285,10 +285,256 @@ void CharacterSort::RemoveVoicedMarks(wchar_t *str) {
     }
 }
 
+// Writes a long vowel mark (U+30FC, or the full-width tilde) after a kana out as the kana's vowel, in the kana's
+// script: a hiragana or katakana a, i, u, e or o
 void CharacterSort::ExpandLongVowelMarks(wchar_t *str) {
+    u32 length = wcslen(str);
+    if (length == 0) {
+        str[length] = 0;
+        return;
+    }
+    if (length == 1) {
+        str[length] = 0;
+        return;
+    }
+    for (int i = 0; i < length - 1; i++) {
+        wchar_t c = str[i];
+        wchar_t next = str[i + 1];
+        if (next == 0x30FC || next == 0xFF5E) {
+            if (c == 0x3041 ||
+                c == 0x3042 ||
+                c == 0x304B ||
+                c == 0x304C ||
+                c == 0x3055 ||
+                c == 0x3056 ||
+                c == 0x305F ||
+                c == 0x3060 ||
+                c == 0x306A ||
+                c == 0x306F ||
+                c == 0x3070 ||
+                c == 0x3071 ||
+                c == 0x307E ||
+                c == 0x3083 ||
+                c == 0x3084 ||
+                c == 0x3089 ||
+                c == 0x308E ||
+                c == 0x308F ||
+                c == 0x26FE) {
+                str[i + 1] = 0x3042;
+            } else if (c == 0x30A1 ||
+                c == 0x30A2 ||
+                c == 0x30AB ||
+                c == 0x30AC ||
+                c == 0x30B5 ||
+                c == 0x30B6 ||
+                c == 0x30BF ||
+                c == 0x30C0 ||
+                c == 0x30CA ||
+                c == 0x30CF ||
+                c == 0x30D0 ||
+                c == 0x30D1 ||
+                c == 0x30DE ||
+                c == 0x30E3 ||
+                c == 0x30E4 ||
+                c == 0x30E9 ||
+                c == 0x30EE ||
+                c == 0x30EF ||
+                c == 0x30F5) {
+                str[i + 1] = 0x30A2;
+            } else if (c == 0x3043 ||
+                c == 0x3044 ||
+                c == 0x304D ||
+                c == 0x304E ||
+                c == 0x3057 ||
+                c == 0x3058 ||
+                c == 0x3061 ||
+                c == 0x3062 ||
+                c == 0x306B ||
+                c == 0x3072 ||
+                c == 0x3073 ||
+                c == 0x3074 ||
+                c == 0x307F ||
+                c == 0x308A ||
+                c == 0x3090) {
+                str[i + 1] = 0x3044;
+            } else if (c == 0x30A3 ||
+                c == 0x30A4 ||
+                c == 0x30AD ||
+                c == 0x30AE ||
+                c == 0x30B7 ||
+                c == 0x30B8 ||
+                c == 0x30C1 ||
+                c == 0x30C2 ||
+                c == 0x30CB ||
+                c == 0x30D2 ||
+                c == 0x30D3 ||
+                c == 0x30D4 ||
+                c == 0x30DF ||
+                c == 0x30EA) {
+                str[i + 1] = 0x30A4;
+            } else if (c == 0x3045 ||
+                c == 0x3046 ||
+                c == 0x304F ||
+                c == 0x3050 ||
+                c == 0x3059 ||
+                c == 0x305A ||
+                c == 0x3063 ||
+                c == 0x3064 ||
+                c == 0x3065 ||
+                c == 0x306C ||
+                c == 0x3075 ||
+                c == 0x3076 ||
+                c == 0x3077 ||
+                c == 0x3080 ||
+                c == 0x3085 ||
+                c == 0x3086 ||
+                c == 0x308B ||
+                c == 0x26FD) {
+                str[i + 1] = 0x3046;
+            } else if (c == 0x30A5 ||
+                c == 0x30A6 ||
+                c == 0x30AF ||
+                c == 0x30B0 ||
+                c == 0x30B9 ||
+                c == 0x30BA ||
+                c == 0x30C3 ||
+                c == 0x30C4 ||
+                c == 0x30C5 ||
+                c == 0x30CC ||
+                c == 0x30D5 ||
+                c == 0x30D6 ||
+                c == 0x30D7 ||
+                c == 0x30E0 ||
+                c == 0x30E5 ||
+                c == 0x30E6 ||
+                c == 0x30EB ||
+                c == 0x30F4) {
+                str[i + 1] = 0x30A6;
+            } else if (c == 0x3047 ||
+                c == 0x3048 ||
+                c == 0x3051 ||
+                c == 0x3052 ||
+                c == 0x305B ||
+                c == 0x305C ||
+                c == 0x3066 ||
+                c == 0x3067 ||
+                c == 0x306D ||
+                c == 0x3078 ||
+                c == 0x3079 ||
+                c == 0x307A ||
+                c == 0x3081 ||
+                c == 0x308C ||
+                c == 0x3091 ||
+                c == 0x26FF) {
+                str[i + 1] = 0x3048;
+            } else if (c == 0x30A7 ||
+                c == 0x30A8 ||
+                c == 0x30B1 ||
+                c == 0x30B2 ||
+                c == 0x30BB ||
+                c == 0x30BC ||
+                c == 0x30C6 ||
+                c == 0x30C7 ||
+                c == 0x30CD ||
+                c == 0x30D8 ||
+                c == 0x30D9 ||
+                c == 0x30DA ||
+                c == 0x30E1 ||
+                c == 0x30EC ||
+                c == 0x30F6) {
+                str[i + 1] = 0x30A8;
+            } else if (c == 0x3049 ||
+                c == 0x304A ||
+                c == 0x3053 ||
+                c == 0x3054 ||
+                c == 0x305D ||
+                c == 0x305E ||
+                c == 0x3068 ||
+                c == 0x3069 ||
+                c == 0x306E ||
+                c == 0x307B ||
+                c == 0x307C ||
+                c == 0x307D ||
+                c == 0x3082 ||
+                c == 0x3087 ||
+                c == 0x3088 ||
+                c == 0x308D ||
+                c == 0x3092) {
+                str[i + 1] = 0x304A;
+            } else if (c == 0x30A9 ||
+                c == 0x30AA ||
+                c == 0x30B3 ||
+                c == 0x30B4 ||
+                c == 0x30BD ||
+                c == 0x30BE ||
+                c == 0x30C8 ||
+                c == 0x30C9 ||
+                c == 0x30CE ||
+                c == 0x30DB ||
+                c == 0x30DC ||
+                c == 0x30DD ||
+                c == 0x30E2 ||
+                c == 0x30E7 ||
+                c == 0x30E8 ||
+                c == 0x30ED ||
+                c == 0x30F2) {
+                str[i + 1] = 0x30AA;
+            }
+        }
+    }
 }
 
+// Writes the ligatures out as two letters: U+00C6, U+00E6, U+0152 and U+0153 as AE, ae, OE and oe (at most 40
+// characters)
 void CharacterSort::ExpandLigatures(wchar_t *str) {
+    int n = 0;
+    wchar_t expanded[42];
+    u32 length = wcslen(str);
+    for (u32 i = 0; i < length; i++) {
+        switch (str[i]) {
+        case 0x00C6:
+            expanded[n] = L'A';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'E';
+                n++;
+            }
+            break;
+        case 0x00E6:
+            expanded[n] = L'a';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'e';
+                n++;
+            }
+            break;
+        case 0x0152:
+            expanded[n] = L'O';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'E';
+                n++;
+            }
+            break;
+        case 0x0153:
+            expanded[n] = L'o';
+            n++;
+            if (n < 40) {
+                expanded[n] = L'e';
+                n++;
+            }
+            break;
+        default:
+            expanded[n] = str[i];
+            n++;
+            break;
+        }
+        if (n >= 40) {
+            break;
+        }
+    }
+    expanded[n] = 0;
+    wcscpy(str, expanded);
 }
 
 void CharacterSort::ToUpperCase(wchar_t *str) {

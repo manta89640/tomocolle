@@ -182,7 +182,7 @@ public:
     void AssignCreateId();
     static void GetCreateId(CreateId *id, const CharacterRecord *character);
     u32 GetCreateIdNumber();
-    void GetCreateIdParts(int *high, int *low);
+    u32 GetCreateIdParts(int *high, int *low);
     void GetParameterRange(int param, int *min, int *max);
     void CheckParameter(int param, int value);
     void SetParameter(int param, int value);

@@ -703,10 +703,11 @@ u32 SavedCharacter::GetCreateIdNumber() {
     return number;
 }
 
-void SavedCharacter::GetCreateIdParts(int *high, int *low) {
+u32 SavedCharacter::GetCreateIdParts(int *high, int *low) {
     u32 number = GetCreateIdNumber();
     *high = (number & 0xC000) >> 14;
     *low = number & 0x3FFF;
+    return number;
 }
 
 void SavedCharacter::GetParameterRange(int param, int *min, int *max) {
