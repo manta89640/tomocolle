@@ -169,19 +169,27 @@ public:
 
 class MiiEditPage5 {
 public:
+    void Init(MiiEditScene *scene, int previousPage);
+    void Update();
     void Draw();
     void Exit();
 
-    /* 0x0000 */ u8 mUnknown0000[0xC];
+    /* 0x0000 */ MiiEditScene *mScene;
+    /* 0x0004 */ int mNextPage;     // Where Update goes when the window has closed: -1 leaves the scene
+    /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
     /* 0x000C */ MessageWindow mWindow;
 }; // 0xAFB0
 
 class MiiEditPage6 {
 public:
+    void Init(MiiEditScene *scene, int previousPage);
+    void Update();
     void Draw();
     void Exit();
 
-    /* 0x0000 */ u8 mUnknown0000[0xC];
+    /* 0x0000 */ MiiEditScene *mScene;
+    /* 0x0004 */ int mNextPage;     // Where Update goes when the window has closed: -1 leaves the scene
+    /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
     /* 0x000C */ MessageWindow mWindow;
 }; // 0xAFB0
 
@@ -218,7 +226,8 @@ public:
     /* 0x05810 */ Camera *mCamera;              // data_02122764
     /* 0x05814 */ int mCameraFrame;             // UpdateCamera moves the camera while it is under 40
     /* 0x05818 */ VecFx32 mCameraGoal;
-    /* 0x05824 */ u8 mUnknown5824[8];
+    /* 0x05824 */ int mUnknown5824;          // Page 6 hands it to the next scene as the resident (data_0213ba74 +0x20)
+    /* 0x05828 */ u8 mUnknown5828[4];
     /* 0x0582C */ Sprite mSprite582C;
     /* 0x058D8 */ u8 mUnknown58D8[4];
     /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mSprite582C while these two are set and 58E4 is not

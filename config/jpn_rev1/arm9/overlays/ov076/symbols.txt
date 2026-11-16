@@ -70,18 +70,18 @@ _ZN20MiiEditCharacterPage4InitEP12MiiEditScene kind:function(arm,size=0x238) add
 _ZN20MiiEditCharacterPage6UpdateEv kind:function(arm,size=0x1b0) addr:0x02157e3c
 _ZN20MiiEditCharacterPage4DrawEv kind:function(arm,size=0x58) addr:0x02157fec
 _ZN20MiiEditCharacterPage4ExitEv kind:function(arm,size=0x4) addr:0x02158044
-func_ov076_02158048 kind:function(arm,size=0x1d4) addr:0x02158048
-func_ov076_0215821c kind:function(arm,size=0x120) addr:0x0215821c
+_ZN12MiiEditPage64InitEP12MiiEditScenei kind:function(arm,size=0x1d4) addr:0x02158048
+_ZN12MiiEditPage66UpdateEv kind:function(arm,size=0x120) addr:0x0215821c
 _ZN12MiiEditPage64DrawEv kind:function(arm,size=0x10) addr:0x0215833c
 _ZN12MiiEditPage64ExitEv kind:function(arm,size=0x10) addr:0x0215834c
-func_ov076_0215835c kind:function(arm,size=0x1d0) addr:0x0215835c
-func_ov076_0215852c kind:function(arm,size=0xcc) addr:0x0215852c
+_ZN12MiiEditPage54InitEP12MiiEditScenei kind:function(arm,size=0x1d0) addr:0x0215835c
+_ZN12MiiEditPage56UpdateEv kind:function(arm,size=0xcc) addr:0x0215852c
 _ZN12MiiEditPage54DrawEv kind:function(arm,size=0x10) addr:0x021585f8
 _ZN12MiiEditPage54ExitEv kind:function(arm,size=0x10) addr:0x02158608
 _ZN12MiiEditSceneD1Ev kind:function(arm,size=0x94) addr:0x02158618
 _ZN12MiiEditSceneD0Ev kind:function(arm,size=0x9c) addr:0x021586ac
-gStr_jj kind:data(any) addr:0x02158748
-gStr_ii kind:data(any) addr:0x0215874c
+sQuestionButtonPressedSequences kind:data(any) addr:0x02158748 local
+sQuestionButtonSequences kind:data(any) addr:0x0215874c local
 data_ov076_02158750 kind:data(any) addr:0x02158750
 data_ov076_02158752 kind:data(any) addr:0x02158752
 gStr_L kind:data(any) addr:0x02158754
@@ -89,7 +89,10 @@ gStr_0_ov076 kind:data(any) addr:0x02158764
 gStr_M_ov076 kind:data(any) addr:0x02158774
 data_ov076_02158784 kind:data(any) addr:0x02158784
 data_ov076_02158788 kind:data(any) addr:0x02158788
-data_ov076_021587f0 kind:data(any) addr:0x021587f0
+sQuestionButtonMessages kind:data(any) addr:0x021587f0 local
+data_ov076_021587f8 kind:data(any) addr:0x021587f8
+sQuestionTextPosition kind:data(any) addr:0x02158800 local
+data_ov076_02158808 kind:data(any) addr:0x02158808
 gStr_Ampersand_ov076 kind:data(any) addr:0x02158818
 sCharacterLabelSequences kind:data(any) addr:0x02158822 local
 sCharacterKnobSequences kind:data(any) addr:0x0215882c local
@@ -105,14 +108,14 @@ data_ov076_021588a4 kind:data(any) addr:0x021588a4
 data_ov076_021588b0 kind:data(any) addr:0x021588b0
 gText_Ha kind:data(any) addr:0x021588bc
 data_ov076_021588cc kind:data(any) addr:0x021588cc
-data_ov076_021588dc kind:data(any) addr:0x021588dc
+sQuestionWindowRect kind:data(any) addr:0x021588dc local
 data_ov076_021588ec kind:data(any) addr:0x021588ec
-gStr_K_ov076 kind:data(any) addr:0x021588fc
+sQuestionButtonPositions kind:data(any) addr:0x021588fc local
 data_ov076_0215890c kind:data(any) addr:0x0215890c
 data_ov076_0215891c kind:data(any) addr:0x0215891c
 gStr_P_ov076 kind:data(any) addr:0x0215892c
 data_ov076_0215893c kind:data(any) addr:0x0215893c
-gStr_CircumflexAccent_ov076 kind:data(any) addr:0x0215894c
+sQuestionButtonSizes kind:data(any) addr:0x0215894c local
 data_ov076_0215895c kind:data(any) addr:0x0215895c
 sCharacterKnobKinds kind:data(any) addr:0x02158970 local
 gStr_GreaterThan_ov076 kind:data(any) addr:0x02158984
@@ -121,8 +124,8 @@ data_ov076_021589b4 kind:data(any) addr:0x021589b4
 data_ov076_021589cc kind:data(any) addr:0x021589cc
 data_ov076_021589e4 kind:data(any) addr:0x021589e4
 gText_Ma_ov076 kind:data(any) addr:0x021589fc
-data_ov076_02158a1c kind:data(any) addr:0x02158a1c
-data_ov076_02158a3c kind:data(any) addr:0x02158a3c
+sPage5ButtonSounds kind:data(any) addr:0x02158a1c local
+sPage6ButtonSounds kind:data(any) addr:0x02158a3c local
 gStr_P_ov076_2 kind:data(any) addr:0x02158a5c
 gStr_P_ov076_3 kind:data(any) addr:0x02158a7c
 gStr_Colon_ov076 kind:data(any) addr:0x02158a9c

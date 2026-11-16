@@ -429,12 +429,163 @@ void MiiEditCharacterPage::Exit() {}
 
 // --- Pages 5 and 6 ---
 
+// What these pages use of the main program (stand-ins)
+struct SceneManager {
+    /* 0x0 */ Scene *mScene;
+    /* 0x4 */ int mNextSceneId;
+    /* 0x8 */ int mPreviousSceneId;
+};
+
+// What the scenes keep for one another (data_0213ba74)
+struct SceneMemory {
+    /* 0x00 */ u8 mUnknown00[0x20];
+    /* 0x20 */ u8 mCharacter; // The resident a scene is about
+};
+
+extern "C" {
+extern SceneManager gSceneManager;
+extern SceneMemory data_0213ba74;
+void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
+void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 pressedSequence, WindowPoint position,
+                   WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+                   int *charOffset, const ButtonSounds *sounds, int b);
+void func_ov076_0214b1ec(MiiEditScene *scene, int page); // Opens a page
+void func_ov076_0214b890(MiiEditScene *scene);
+}
+
+// The two pages are windows with two buttons, common messages 2 and 3 ("はい", "いいえ")
+static const ScreenRect sQuestionWindowRect = { 20, 20, 216, 152 };
+static const u8 sQuestionButtonPressedSequences[2] = { 106, 106 };
+static const u8 sQuestionButtonSequences[2] = { 105, 105 };
+static const WindowPoint sQuestionButtonPositions[2] = { { 75, 149 }, { 181, 149 } };
+static const WindowPoint sQuestionButtonSizes[2] = { { 94, 30 }, { 94, 30 } };
+static const u32 sQuestionButtonMessages[2] = { 2, 3 };
+static const WindowPoint sQuestionTextPosition = { 38, 33 };
+static const ButtonSounds sPage6ButtonSounds[2] = { { 15, -1, 0, -1 }, { 16, -1, 0, -1 } };
+static const ButtonSounds sPage5ButtonSounds[2] = { { 14, -1, 0, -1 }, { 16, -1, 0, -1 } };
+
+void MiiEditPage6::Init(MiiEditScene *scene, int previousPage) {
+    mScene = scene;
+    mPreviousPage = previousPage;
+    ScreenRect rect = sQuestionWindowRect;
+    int charOffset = 0x384;
+    func_02032fb8(&mWindow, rect);
+    func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
+    func_020331bc(&mWindow, 0x3F00, rect);
+    func_02034f4c(&mWindow, 1);
+    int number = 0;
+    for (int i = 0; i <= 1; i++) {
+        func_02033844(&mWindow, number, 0, sQuestionButtonSequences[i], sQuestionButtonPressedSequences[i],
+                      sQuestionButtonPositions[i], sQuestionButtonSizes[i], &mScene->mMessageFiles[1],
+                      sQuestionButtonMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, &sPage6ButtonSounds[i], 1);
+        number++;
+    }
+    charOffset = func_02033a58(&mWindow, &mScene->mMessageFiles[0], 0x2D, &gFonts[0].mFont, 0x1000,
+                               sQuestionTextPosition, &charOffset);
+    func_02034f4c(&mWindow, 1);
+    func_02034f94(&mWindow, 1);
+    func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+}
+
+void MiiEditPage6::Update() {
+    func_020341d4(&mWindow);
+    if (mWindow.mResult != -1) {
+        mWindow.mUnknownSetBeforeClose = 15;
+        func_020349cc(&mWindow, MessageWindow::FLAG_CLOSE | 0x20);
+        switch (mWindow.mResult) {
+        case 0:
+            mNextPage = -1;
+            break;
+        case 1:
+            mNextPage = mPreviousPage;
+            break;
+        }
+    }
+    if (!mWindow.mTransitionDone) {
+        return;
+    }
+    if (mNextPage == -1) {
+        func_ov076_0214b890(mScene);
+        switch (mScene->mSceneId) {
+        case 0x42:
+            func_0203c02c(&gSceneManager, 0x1A);
+            break;
+        case 0x43:
+        case 0x44:
+            data_0213ba74.mCharacter = mScene->mUnknown5824;
+            func_0203c02c(&gSceneManager, 0x74);
+            break;
+        case 0x6F:
+            data_0213ba74.mCharacter = mScene->mUnknown5824;
+            func_0203c02c(&gSceneManager, 0x69);
+            break;
+        }
+    } else {
+        func_ov076_0214b1ec(mScene, mNextPage);
+    }
+}
+
 void MiiEditPage6::Draw() {
     func_020345d8(&mWindow);
 }
 
 void MiiEditPage6::Exit() {
     func_020346cc(&mWindow);
+}
+
+void MiiEditPage5::Init(MiiEditScene *scene, int previousPage) {
+    mScene = scene;
+    mPreviousPage = previousPage;
+    ScreenRect rect = sQuestionWindowRect;
+    int charOffset = 0x384;
+    func_02032fb8(&mWindow, rect);
+    func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
+    func_020331bc(&mWindow, 0x3F00, rect);
+    func_02034f4c(&mWindow, 1);
+    int number = 0;
+    for (int i = 0; i <= 1; i++) {
+        func_02033844(&mWindow, number, 0, sQuestionButtonSequences[i], sQuestionButtonPressedSequences[i],
+                      sQuestionButtonPositions[i], sQuestionButtonSizes[i], &mScene->mMessageFiles[1],
+                      sQuestionButtonMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, &sPage5ButtonSounds[i], 1);
+        number++;
+    }
+    func_02033a58(&mWindow, &mScene->mMessageFiles[0], 0x2E, &gFonts[0].mFont, 0x1000, sQuestionTextPosition,
+                  &charOffset);
+    func_02034f4c(&mWindow, 1);
+    func_02034f94(&mWindow, 1);
+    func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+}
+
+void MiiEditPage5::Update() {
+    func_020341d4(&mWindow);
+    if (mWindow.mResult != -1) {
+        mWindow.mUnknownSetBeforeClose = 15;
+        func_020349cc(&mWindow, MessageWindow::FLAG_CLOSE | 0x20);
+        switch (mWindow.mResult) {
+        case 0:
+            mNextPage = -1;
+            break;
+        case 1:
+            mNextPage = mPreviousPage;
+            break;
+        }
+    }
+    if (!mWindow.mTransitionDone) {
+        return;
+    }
+    if (mNextPage == -1) {
+        switch (mScene->mSceneId) {
+        case 0x42:
+        case 0x44:
+            func_0203c02c(&gSceneManager, 0x1A);
+            break;
+        case 0x43:
+            func_0203c02c(&gSceneManager, 0x5E);
+            break;
+        }
+    } else {
+        func_ov076_0214b1ec(mScene, mNextPage);
+    }
 }
 
 void MiiEditPage5::Draw() {
