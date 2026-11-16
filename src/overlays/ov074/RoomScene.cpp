@@ -10994,23 +10994,25 @@ u16 RoomCharacter::SnapAngle(u16 angle) {
     return angle;
 }
 
-// Not matching yet: 0x32c bytes against 0x348. The stack frame's 21 FloorPos slots are all where the original has
-// them (so the inline helpers and their order are right), and the arithmetic is the same; what differs is register
-// allocation after the call of FX_Atan2Idx: the original keeps offset.x and offset.z in r5/r4 across the call (and
-// spills the high words of the four sines and cosines to five more stack words), this reloads them from the
-// stack. Tried: Rotate taking a reference, a pointer, the value, two scalars, or the sine and cosine; the sines and
-// cosines as locals; offset.x/z as locals before the call (keeps z in a register, not x); the angle through an
-// inline; the two distances right after each point (this) or after both (0x340 bytes) or in the conditions. In the
-// single file, again: Rotate by value, by pointer, as two scalars, with the sine and cosine as locals.
+// Not matching yet (0x350 bytes against 0x348, 95%). The direction through Angle(offset) and the two points
+// assigned after their declarations give the original's arithmetic after FX_Atan2Idx, its spills of the high words
+// included (straight FX_Atan2Idx(offset.z, offset.x) gave 0x32c bytes and 67%). What differs: the original keeps
+// offset.x and offset.z in r5 and r4 across the call and has two copies of offset where this has three (Angle's
+// parameter), so the frame is 8 bytes larger and offset is read back from Rotate's copy. Tried on top of this:
+// Angle by reference or pointer, Rotate by value or pointer, offset as a reference or assigned, middle initialised,
+// the operators, member LengthSq; before: Rotate taking a reference, a pointer, the value, two scalars, or the
+// sine and cosine, the sines and cosines as locals, offset.x/z as locals before the call.
 // @0x02168dfc
 BOOL RoomCharacter::GetAngleAround(u16 *angle, FloorPos from, FloorPos to, int margin) {
     FloorPos middle;
     middle = Half(Add(from, to));
     FloorPos offset = Sub(from, to);
-    u16 direction = FX_Atan2Idx(offset.z, offset.x);
-    FloorPos right = Add(Rotate(offset, 0x4000), middle);
+    u16 direction = Angle(offset);
+    FloorPos right;
+    right = Add(Rotate(offset, 0x4000), middle);
     fx32 rightDistance = LengthSq(right);
-    FloorPos left = Add(Rotate(offset, 0xC000), middle);
+    FloorPos left;
+    left = Add(Rotate(offset, 0xC000), middle);
     fx32 leftDistance = LengthSq(left);
     if (rightDistance == leftDistance || (middle.x == 0 && middle.z == 0)) {
         *angle = direction;

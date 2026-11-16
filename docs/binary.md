@@ -335,7 +335,7 @@ Not done:
 
 - 5 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the callee-saved
   registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround`, `ApartmentFront::UpdateCursorTarget`; in overlay 73
+  constant), `GetAngleAround` (one copy and two registers of one vector, 95%), `ApartmentFront::UpdateCursorTarget`; in overlay 73
   `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
   digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Both copies of
   `NamePanel::Init` match: the character counts read through a pointer to the canvas, and both text positions set
