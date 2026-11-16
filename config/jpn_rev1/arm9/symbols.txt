@@ -3409,36 +3409,36 @@ ShttsEffect_MultiplyDoubled kind:function(arm,size=0x20) addr:0x0208e81c
 ShttsSynth_FilterRecursive kind:function(arm,size=0x1e4) addr:0x0208e83c
 ShttsSynth_SumFilter6 kind:function(arm,size=0x64) addr:0x0208ea20
 ShttsSynth_SumFilter10 kind:function(arm,size=0x94) addr:0x0208ea84
-_ZN14CharacterModelC1Ev kind:function(arm,size=0x88) addr:0x0208eb18
-func_0208eba0 kind:function(arm,size=0x88) addr:0x0208eba0
-func_0208ec28 kind:function(arm,size=0x108) addr:0x0208ec28
-func_0208ed30 kind:function(arm,size=0x34) addr:0x0208ed30
-func_0208ed64 kind:function(arm,size=0x48) addr:0x0208ed64
-func_0208edac kind:function(arm,size=0x6c) addr:0x0208edac
-func_0208ee18 kind:function(arm,size=0x64) addr:0x0208ee18
-func_0208ee7c kind:function(arm,size=0x3c) addr:0x0208ee7c
-func_0208eeb8 kind:function(arm,size=0x48) addr:0x0208eeb8
-func_0208ef00 kind:function(arm,size=0x28) addr:0x0208ef00
-func_0208ef28 kind:function(arm,size=0x34) addr:0x0208ef28
-func_0208ef5c kind:function(arm,size=0xac) addr:0x0208ef5c
-func_0208f008 kind:function(arm,size=0x48) addr:0x0208f008
-func_0208f050 kind:function(arm,size=0xa8) addr:0x0208f050
-func_0208f0f8 kind:function(arm,size=0x48) addr:0x0208f0f8
-func_0208f140 kind:function(arm,size=0x28) addr:0x0208f140
-func_0208f168 kind:function(arm,size=0x34) addr:0x0208f168
-func_0208f19c kind:function(arm,size=0x44) addr:0x0208f19c
-CharacterModel_GetJointMatrices kind:function(arm,size=0x3c) addr:0x0208f1e0
-CharacterModel_GetJointPosition kind:function(arm,size=0x40) addr:0x0208f21c
-func_0208f25c kind:function(arm,size=0x50) addr:0x0208f25c
-func_0208f2ac kind:function(arm,size=0x14c) addr:0x0208f2ac
-func_0208f3f8 kind:function(arm,size=0xc0) addr:0x0208f3f8
-func_0208f4b8 kind:function(arm,size=0x114) addr:0x0208f4b8
-func_0208f5cc kind:function(arm,size=0x170) addr:0x0208f5cc
-func_0208f73c kind:function(arm,size=0x3e4) addr:0x0208f73c
-func_0208fb20 kind:function(arm,size=0x6c) addr:0x0208fb20
-func_0208fb8c kind:function(arm,size=0x28) addr:0x0208fb8c
-func_0208fbb4 kind:function(arm,size=0x80) addr:0x0208fbb4
-func_0208fc34 kind:function(arm,size=0xc4) addr:0x0208fc34
+_ZN14CharacterModelC2Ev kind:function(arm,size=0x88) addr:0x0208eb18
+_ZN14CharacterModelC1Ev kind:function(arm,size=0x88) addr:0x0208eba0
+_ZN14CharacterModel4LoadEii kind:function(arm,size=0x108) addr:0x0208ec28
+_ZN14CharacterModel4DrawEv kind:function(arm,size=0x34) addr:0x0208ed30
+_ZN14CharacterModel6ReloadEii kind:function(arm,size=0x48) addr:0x0208ed64
+_ZN14CharacterModel19MakeBodyArchivePathEv kind:function(arm,size=0x6c) addr:0x0208edac
+_ZN14CharacterModel10SetArchiveEPKcii kind:function(arm,size=0x64) addr:0x0208ee18
+_ZN14CharacterModel10SetClothesEii kind:function(arm,size=0x3c) addr:0x0208ee7c
+_ZN14CharacterModel13UseFemaleBodyEi kind:function(arm,size=0x48) addr:0x0208eeb8
+_ZN14CharacterModel12SetAnimFlagsEii kind:function(arm,size=0x28) addr:0x0208ef00
+_ZN14CharacterModel20SetAnimFlagsAndFrameEili kind:function(arm,size=0x34) addr:0x0208ef28
+_ZN14CharacterModel9MakeModelEii kind:function(arm,size=0xac) addr:0x0208ef5c
+_ZN14CharacterModel12SetAnimationEmi kind:function(arm,size=0x48) addr:0x0208f008
+_ZN14CharacterModel16BlendToAnimationEmi kind:function(arm,size=0xa8) addr:0x0208f050
+_ZN14CharacterModel15RemoveAnimationEm kind:function(arm,size=0x48) addr:0x0208f0f8
+_ZN14CharacterModel16SetPaletteColor1Et kind:function(arm,size=0x28) addr:0x0208f140
+_ZN14CharacterModel18LoadTexturePaletteEv kind:function(arm,size=0x34) addr:0x0208f168
+_ZN14CharacterModel16SetPaletteColorsEtt kind:function(arm,size=0x44) addr:0x0208f19c
+_ZN14CharacterModel16GetJointMatricesEiP7MtxFx43P7MtxFx33 kind:function(arm,size=0x3c) addr:0x0208f1e0
+_ZN14CharacterModel16GetJointPositionEi kind:function(arm,size=0x40) addr:0x0208f21c
+_ZN14CharacterModel12HitTestJointEi kind:function(arm,size=0x50) addr:0x0208f25c
+_ZN14CharacterModel12HitTestJointEPK7VecFx32S2_i kind:function(arm,size=0x14c) addr:0x0208f2ac
+_ZN14CharacterModel11UpdateBlendEv kind:function(arm,size=0xc0) addr:0x0208f3f8
+_ZN14CharacterModel9TurnJointEP9NNSG3dRS_ kind:function(arm,size=0x114) addr:0x0208f4b8
+_ZN14CharacterModel10OnNodeDescEP9NNSG3dRS_ kind:function(arm,size=0x170) addr:0x0208f5cc
+_ZN14CharacterModel14OnNodeDescDoneEP9NNSG3dRS_ kind:function(arm,size=0x3e4) addr:0x0208f73c
+_ZN14CharacterModel12OnShadowNodeEP9NNSG3dRS_ kind:function(arm,size=0x6c) addr:0x0208fb20
+_ZN14CharacterModel13InitCallbacksEP9NNSG3dRS_ kind:function(arm,size=0x28) addr:0x0208fb8c
+_ZN14CharacterModel16SetScaleFromBodyEmm kind:function(arm,size=0x80) addr:0x0208fbb4
+_ZN14CharacterModel16GetHeldItemScaleEv kind:function(arm,size=0xc4) addr:0x0208fc34
 _ZN13CharacterBaseC2Ev kind:function(arm,size=0x20) addr:0x0208fcf8
 _ZN13CharacterBaseC1Ev kind:function(arm,size=0x20) addr:0x0208fd18
 _ZN13CharacterBaseD1Ev kind:function(arm,size=0x2c) addr:0x0208fd38
@@ -4702,19 +4702,19 @@ data_020fa14c kind:data(any) addr:0x020fa14c
 data_020fa1d0 kind:data(any) addr:0x020fa1d0
 data_020fa1ea kind:data(any) addr:0x020fa1ea
 data_020fa1eb kind:data(any) addr:0x020fa1eb
-data_020fb768 kind:data(any) addr:0x020fb768
-gStr_shadow kind:data(any) addr:0x020fb774
-gStr_L_elbow kind:data(any) addr:0x020fb788
-gStr_R_elbow kind:data(any) addr:0x020fb79c
-gStr_L_knee kind:data(any) addr:0x020fb7b0
-gStr_R_knee kind:data(any) addr:0x020fb7c4
-gStr_shadow_2 kind:data(any) addr:0x020fb7d8
-gStr_body kind:data(any) addr:0x020fb7ec
-gStr_neck kind:data(any) addr:0x020fb800
-gStr_L_ankle kind:data(any) addr:0x020fb814
-gStr_L_hand1 kind:data(any) addr:0x020fb828
-gStr_R_hand1 kind:data(any) addr:0x020fb83c
-gStr_R_ankle kind:data(any) addr:0x020fb850
+sDrawOffset$12738 kind:data(any) addr:0x020fb768 local
+sShadowA kind:data(any) addr:0x020fb774 local
+sLeftElbow kind:data(any) addr:0x020fb788 local
+sRightElbow kind:data(any) addr:0x020fb79c local
+sLeftKnee kind:data(any) addr:0x020fb7b0 local
+sRightKnee kind:data(any) addr:0x020fb7c4 local
+sShadowB kind:data(any) addr:0x020fb7d8 local
+sBody kind:data(any) addr:0x020fb7ec local
+sNeck kind:data(any) addr:0x020fb800 local
+sLeftAnkle kind:data(any) addr:0x020fb814 local
+sLeftHand kind:data(any) addr:0x020fb828 local
+sRightHand kind:data(any) addr:0x020fb83c local
+sRightAnkle kind:data(any) addr:0x020fb850 local
 data_020fb864 kind:data(any) addr:0x020fb864
 data_020fb870 kind:data(any) addr:0x020fb870
 data_020fb898 kind:data(any) addr:0x020fb898
@@ -5365,14 +5365,14 @@ _ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
 @13464 kind:data(any) addr:0x021119e4 local
 @13465 kind:data(any) addr:0x021119e8 local
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-@13178 kind:data(any) addr:0x02111a10 local
-@13179 kind:data(any) addr:0x02111a14 local
-@13180 kind:data(any) addr:0x02111a30 local
-@13181 kind:data(any) addr:0x02111a34 local
-@13193 kind:data(any) addr:0x02111a58 local
-@13194 kind:data(any) addr:0x02111a68 local
-@13207 kind:data(any) addr:0x02111a78 local
-@13208 kind:data(any) addr:0x02111a7c local
+@13176 kind:data(any) addr:0x02111a10 local
+@13177 kind:data(any) addr:0x02111a14 local
+@13178 kind:data(any) addr:0x02111a30 local
+@13179 kind:data(any) addr:0x02111a34 local
+@13191 kind:data(any) addr:0x02111a58 local
+@13192 kind:data(any) addr:0x02111a68 local
+@13205 kind:data(any) addr:0x02111a78 local
+@13206 kind:data(any) addr:0x02111a7c local
 sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
@@ -6065,14 +6065,14 @@ gStr_rm01_1 kind:data(any) addr:0x02114598
 gStr_rm01_0 kind:data(any) addr:0x021145a0
 data_021145a8 kind:data(any) addr:0x021145a8
 data_02114d78 kind:data(any) addr:0x02114d78
-gStr_Mdl_Body_body000_3D_LZ_bin_4 kind:data(any) addr:0x02114da0
-gStr_XXX_body_imd kind:data(any) addr:0x02114dbc
-gStr_XXX_body_c0_ntfp kind:data(any) addr:0x02114dcc
-gStr_Mdl_Body_body000_3D_LZ_bin_5 kind:data(any) addr:0x02114de0
-gStr_XXX_body_imd_2 kind:data(any) addr:0x02114dfc
-gStr_XXX_body_c0_ntfp_2 kind:data(any) addr:0x02114e0c
-gStr_Mdl_Body_body kind:data(any) addr:0x02114e20
-gStr_3D_LZ_bin kind:data(any) addr:0x02114e30
+@13441 kind:data(any) addr:0x02114da0 local
+@13442 kind:data(any) addr:0x02114dbc local
+@13443 kind:data(any) addr:0x02114dcc local
+@13458 kind:data(any) addr:0x02114de0 local
+@13459 kind:data(any) addr:0x02114dfc local
+@13460 kind:data(any) addr:0x02114e0c local
+@13478 kind:data(any) addr:0x02114e20 local
+@13484 kind:data(any) addr:0x02114e30 local
 data_02114e3c kind:data(any) addr:0x02114e3c
 data_02114e40 kind:data(any) addr:0x02114e40
 gStr_character kind:data(any) addr:0x02114e44

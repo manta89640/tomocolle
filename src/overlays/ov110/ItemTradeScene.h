@@ -89,14 +89,18 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
-// The model of a character with its animations and joints (func_0208eb18 constructs it). The model is a member,
-// not a base: the scene's destructor resets the render callback and then runs AnimModel's destructor, without a
-// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel). Named
-// CharacterModelMember so as not to clash with the other overlays' stand-ins called CharacterModel, which have
-// AnimModel as a base.
-class CharacterModelMember {
+// The model of a character with its animations and joints (include/character/CharacterModel.h has the class).
+// AnimModel is a member, not a base: the scene's destructor resets the render callback and then runs AnimModel's
+// destructor, without a virtual table of the character model's own being stored in between.
+class CharacterModel {
 public:
-    ~CharacterModelMember() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+
+    // Names the archive and the body's model for a costume (name of the archive, costume, female)
+    void SetArchive(const char *archiveName, int clothes, BOOL female);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+    void MakeModel(int resourceId, int unk);
+    void SetPaletteColors(GXRgb color0, GXRgb color1);
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
@@ -107,14 +111,6 @@ public:
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-extern "C" {
-// --- The character model's functions (0x0208eb18 to 0x0208fcf8), as this scene calls them ---
-// Fills the archive and model names of the model's owner for a costume (name of the archive, costume, unknown)
-void func_0208ee18(CharacterModelMember *model, const char *archiveName, int costume, int unk);
-void func_0208ef00(CharacterModelMember *model, BOOL playOnce, BOOL finished);
-void func_0208ef5c(CharacterModelMember *model, int unk1, int unk2);
-void func_0208f19c(CharacterModelMember *model, int unk, int color);
-}
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
 
@@ -138,7 +134,7 @@ public:
 // The main program's character class that the scenes derive theirs from (0x2B18 bytes).
 class Character : public CharacterBase {
 public:
-    /* 0x25E4 */ CharacterModelMember mModel;
+    /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0x78];
 }; // 0x2B18
 
@@ -148,7 +144,7 @@ s8 func_02098f2c(SavedCharacter *character); // Its personality
 extern const int data_020fba28[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);
 int MiiData_GetSex(SavedCharacter *character);
-int NFL_GetFavoriteColor(int unk);
+GXRgb NFL_GetFavoriteColor(int index); // lib/NFL
 }
 
 // The model the scene dresses in a costume to show it: a body ("3MM") with a head ("3MH:/head.imd",
@@ -164,9 +160,9 @@ public:
     /* 0x0E0 */ u8 mUnknown0E0[0x60];
     /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
     /* 0x14C */ u8 mUnknown14C[0x5C];
-    /* 0x1A8 */ CharacterModelMember mModel;
+    /* 0x1A8 */ CharacterModel mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
-    /* 0x674 */ char mArchivePath[0x1C]; // What func_0208ee18 sets for the costume
+    /* 0x674 */ char mArchivePath[0x1C]; // What CharacterModel::SetArchive sets for the costume
     /* 0x690 */ char mModelPath[0x28];
 }; // 0x6B8
 
