@@ -86,3 +86,12 @@ void Scene40ListView::ClearRow(int row) {
     ItemListView::ClearRow(row);
     mMarks[row].mVisible = FALSE;
 }
+
+// --- The object at 0x30A8C of the scene --------------------------------------------------------------------------
+
+Scene40Unknown30A8C::Scene40Unknown30A8C() {
+    MI_CpuClear32(mUnknown00, sizeof(mUnknown00));
+    MI_CpuClear32(mUnknown10, sizeof(mUnknown10));
+    mUnknown1C = 0;
+    mUnknown20 = 0;
+}
