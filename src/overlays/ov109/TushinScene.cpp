@@ -375,8 +375,15 @@ void TushinScene::InitCharacters() {
     LoadCharacters();
 }
 
-// NOT MATCHING: the two `|= 2` of the emitters' flags use r2/r3 where the original uses r0/r2 and sets
-// mParticleFrames's 0 after them (register choice, 9 instructions).
+// Sets a flag of a particle emitter
+template <class T> static inline void SetEmitterFlag(T *emitter, u32 flag) {
+    emitter->mFlags |= flag;
+}
+
+// Compiled with dead assignments kept: the emitters' flags set through the inline then take r0/r2 and leave the 0 of
+// mParticleFrames after them, as the original has it (with the plain `|= 2`, or without the pragma, they do not).
+#pragma push
+#pragma opt_dead_assignments off
 // @0x0214ad80
 void TushinScene::InitParticles() {
     func_0202680c(0x4000);
@@ -397,10 +404,11 @@ void TushinScene::InitParticles() {
     mEmitterPositions[1].z = position1.z;
     mEmitters[0] = func_0207b2fc(mParticles, mParticleResource, &mEmitterPositions[0]);
     mEmitters[1] = func_0207b2fc(mParticles, mParticleResource, &mEmitterPositions[1]);
-    mEmitters[0]->mFlags |= 2;
-    mEmitters[1]->mFlags |= 2;
+    SetEmitterFlag(mEmitters[0], 2);
+    SetEmitterFlag(mEmitters[1], 2);
     mParticleFrames = 0;
 }
+#pragma pop
 
 // @0x0214aed8
 void TushinScene::UpdateMiiData() {
