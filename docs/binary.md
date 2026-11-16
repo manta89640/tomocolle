@@ -96,8 +96,14 @@ what a correct match looks like and a coincidence does not. The names the matche
 hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
 
 So 1,293 of the main program's 4,205 functions are library code with known names, and 181 library files are cut
-out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`; `math_api.c`
-and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have).
+out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`). `ansi_fp.c` and
+`math_api.c` were cut later. Measured: their ranges seemed to hold one function more than the objects have because
+dsd had split `__dorounddecup` (0x50 bytes in the archive's `ansi_fp.o`) at its unreachable last `bx lr` into
+`func_0201e014` and a 4-byte `func_0201e060`; with that one function, `ansi_fp.o`'s 13 functions fill `0x0201DFA8` to
+`0x0201F3C4` in the object's order, and `math_api.o`'s `__msl_generic_count_bits64`, `__signbitd` and `__fpclassifyd`
+(the others are not linked) fill `0x0201F3C4` to `0x0201F4DC`. `ansi_fp.o`'s `.data` (`pow_10`, then its 22 digit
+strings) is at `0x0210F450` to `0x0210F58C`, byte for byte, and `strtold.o`'s `.rodata` ("NAN(", "INFINITY") at
+`0x020B5704`.
 
 MSL's own files are compiled with 2.0/sp2 (measured: its objects say "Metrowerks C/C++ for ARM 3.0.0.136", which is
 what that compiler writes) and the headers of that MSL, internal ones included. `lib/MSL_C/wstring.c` is the first:

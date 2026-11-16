@@ -711,6 +711,13 @@ lib/MSL_C/w_pow.c:
     complete
     .text       start:0x0201df9c end:0x0201dfa8
 
+lib/MSL_C/ansi_fp.c:
+    .text       start:0x0201dfa8 end:0x0201f3c4
+    .data       start:0x0210f450 end:0x0210f58c
+
+lib/MSL_C/math_api.c:
+    .text       start:0x0201f3c4 end:0x0201f4dc
+
 lib/MSL_C/math_sun.c:
     complete
     .text       start:0x0201f4dc end:0x0201f508

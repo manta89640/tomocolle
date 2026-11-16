@@ -830,8 +830,7 @@ frexp kind:function(arm,size=0xbc) addr:0x0201dc94
 ldexp kind:function(arm,size=0x24c) addr:0x0201dd50
 pow kind:function(arm,size=0xc) addr:0x0201df9c
 __must_round kind:function(arm,size=0x6c) addr:0x0201dfa8
-func_0201e014 kind:function(arm,size=0x4c) addr:0x0201e014
-func_0201e060 kind:function(arm,size=0x4) addr:0x0201e060
+__dorounddecup kind:function(arm,size=0x50) addr:0x0201e014
 __rounddec kind:function(arm,size=0x40) addr:0x0201e064
 __ull2dec kind:function(arm,size=0xcc) addr:0x0201e0a4
 __timesdec kind:function(arm,size=0x184) addr:0x0201e170
@@ -4924,7 +4923,7 @@ gStr_N kind:data(any) addr:0x0210f438
 gStr_n kind:data(any) addr:0x0210f440
 data_0210f448 kind:data(any) addr:0x0210f448
 data_0210f44c kind:data(any) addr:0x0210f44c
-data_0210f450 kind:data(any) addr:0x0210f450
+pow_10 kind:data(any) addr:0x0210f450 local
 gStr_5421010862427522170037264004349708557128 kind:data(any) addr:0x0210f490
 gStr_11102230246251565404236316680908203125 kind:data(any) addr:0x0210f4c0
 gStr_23283064365386962890625 kind:data(any) addr:0x0210f4e8
