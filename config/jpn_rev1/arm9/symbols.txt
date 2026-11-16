@@ -806,13 +806,13 @@ __fwide kind:function(arm,size=0xc) addr:0x0201a900
 fwide kind:function(arm,size=0x74) addr:0x0201a90c
 wmemcpy kind:function(arm,size=0x10) addr:0x0201a980
 wmemchr kind:function(arm,size=0x28) addr:0x0201a990
-func_0201a9b8 kind:function(arm,size=0x578) addr:0x0201a9b8
-func_0201af30 kind:function(arm,size=0x250) addr:0x0201af30
-func_0201b180 kind:function(arm,size=0x300) addr:0x0201b180
-func_0201b480 kind:function(arm,size=0x398) addr:0x0201b480
-func_0201b818 kind:function(arm,size=0x124) addr:0x0201b818
-func_0201b93c kind:function(arm,size=0x64c) addr:0x0201b93c
-__wpformatter kind:function(arm,size=0x8f0) addr:0x0201bf88
+parse_format kind:function(arm,size=0x578) addr:0x0201a9b8 local
+long2str kind:function(arm,size=0x250) addr:0x0201af30 local
+longlong2str kind:function(arm,size=0x300) addr:0x0201b180 local
+double2hex kind:function(arm,size=0x398) addr:0x0201b480 local
+round_decimal kind:function(arm,size=0x124) addr:0x0201b818 local
+float2str kind:function(arm,size=0x64c) addr:0x0201b93c local
+__wpformatter kind:function(arm,size=0x8f0) addr:0x0201bf88 local
 __wStringWrite kind:function(arm,size=0x40) addr:0x0201c878
 swprintf kind:function(arm,size=0x28) addr:0x0201c8b8
 vswprintf kind:function(arm,size=0x70) addr:0x0201c8e0
@@ -862,15 +862,15 @@ func_020203cc kind:function(arm,size=0x21c) addr:0x020203cc
 func_020205e8 kind:function(arm,size=0x8) addr:0x020205e8
 _dgr kind:function(arm,size=0x98) addr:0x020205f0
 _dleq kind:function(arm,size=0xa4) addr:0x02020688
-func_0202072c kind:function(arm,size=0x9c) addr:0x0202072c
-func_020207c8 kind:function(arm,size=0x8c) addr:0x020207c8
+_dls kind:function(arm,size=0x9c) addr:0x0202072c
+_deq kind:function(arm,size=0x8c) addr:0x020207c8
 func_02020854 kind:function(arm,size=0x8c) addr:0x02020854
 _f2d kind:function(arm,size=0x84) addr:0x020208e0
 func_02020970 kind:function(arm,size=0x278) addr:0x02020970
 _ll_mod kind:function(arm,size=0x1c0) addr:0x02020be8
 .L_02020bf8 kind:label(arm) addr:0x02020bf8
 _ll_udiv kind:function(arm,size=0x48) addr:0x02020da8
-.L_02020db4 kind:label(arm) addr:0x02020db4
+_ull_mod kind:label(arm) addr:0x02020db4
 _s32_div_f kind:function(arm,size=0x20c) addr:0x02020df0
 _u32_div_f kind:function(arm,size=0x1e4) addr:0x02020ffc
 .L_02021004 kind:label(arm) addr:0x02021004
@@ -4229,7 +4229,7 @@ data_020b56dc kind:data(any) addr:0x020b56dc
 gStr_NAN kind:data(any) addr:0x020b5704
 data_020b5709 kind:data(any) addr:0x020b5709
 data_020b5714 kind:data(any) addr:0x020b5714
-data_020b5814 kind:data(any) addr:0x020b5814
+__wctype_mapC kind:data(any) addr:0x020b5814
 dp_h kind:data(any) addr:0x020b5914 local
 bp kind:data(any) addr:0x020b5924 local
 dp_l kind:data(any) addr:0x020b5934 local
@@ -4913,17 +4913,17 @@ gStr_NAN_3 kind:data(any) addr:0x0210f3dc
 gStr_nan_2 kind:data(any) addr:0x0210f3e0
 data_0210f3e4 kind:data(any) addr:0x0210f3e4
 data_0210f3e8 kind:data(any) addr:0x0210f3e8
-gStr_0_4 kind:data(any) addr:0x0210f3ec
-gStr_HyphenMinus kind:data(any) addr:0x0210f3f8
-gStr_HyphenMinus_2 kind:data(any) addr:0x0210f404
-gStr_I kind:data(any) addr:0x0210f410
-gStr_i kind:data(any) addr:0x0210f418
-gStr_HyphenMinus_3 kind:data(any) addr:0x0210f420
-gStr_HyphenMinus_4 kind:data(any) addr:0x0210f42c
-gStr_N kind:data(any) addr:0x0210f438
-gStr_n kind:data(any) addr:0x0210f440
-data_0210f448 kind:data(any) addr:0x0210f448
-data_0210f44c kind:data(any) addr:0x0210f44c
+@1921 kind:data(any) addr:0x0210f3ec local
+@1922 kind:data(any) addr:0x0210f3f8 local
+@1923 kind:data(any) addr:0x0210f404 local
+@1924 kind:data(any) addr:0x0210f410 local
+@1925 kind:data(any) addr:0x0210f418 local
+@1926 kind:data(any) addr:0x0210f420 local
+@1927 kind:data(any) addr:0x0210f42c local
+@1928 kind:data(any) addr:0x0210f438 local
+@1929 kind:data(any) addr:0x0210f440 local
+@2320 kind:data(any) addr:0x0210f448 local
+@2321 kind:data(any) addr:0x0210f44c local
 data_0210f450 kind:data(any) addr:0x0210f450
 gStr_5421010862427522170037264004349708557128 kind:data(any) addr:0x0210f490
 gStr_11102230246251565404236316680908203125 kind:data(any) addr:0x0210f4c0

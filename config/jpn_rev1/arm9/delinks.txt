@@ -682,7 +682,9 @@ lib/MSL_C/wmem.c:
     .text       start:0x0201a980 end:0x0201a9b8
 
 lib/MSL_C/wprintf.c:
+    complete
     .text       start:0x0201a9b8 end:0x0201c950
+    .data       start:0x0210f3ec end:0x0210f450
 
 lib/MSL_C/wstring.c:
     complete
