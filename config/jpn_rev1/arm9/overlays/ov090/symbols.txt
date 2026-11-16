@@ -110,7 +110,7 @@ data_ov090_0215638c kind:data(any) addr:0x0215638c
 __sinit_ov090_02156920 kind:function(arm,size=0x1c) addr:0x02156920
 .p__sinit_ov090_02156920 kind:data(word) addr:0x0215693c
 data_ov090_02156960 kind:data(any) addr:0x02156960
-data_ov090_0215696c kind:data(any) addr:0x0215696c
+_ZTV12RomanceScene kind:data(any) addr:0x02156964
 gStr_3M0_ov090 kind:data(any) addr:0x02156988
 gStr_3M1_ov090 kind:data(any) addr:0x0215698c
 gStr_3M0_ov090_2 kind:data(any) addr:0x02156990

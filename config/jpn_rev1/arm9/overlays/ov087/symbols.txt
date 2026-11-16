@@ -78,7 +78,7 @@ gStr_P18_item_imd_ov087 kind:data(any) addr:0x0214df24
 gStr_P19_item_imd_ov087 kind:data(any) addr:0x0214df34
 gStr_P00_item_imd_ov087 kind:data(any) addr:0x0214df44
 gStr_News_news000_LZ_bin kind:data(any) addr:0x0214df54
-data_ov087_0214df70 kind:data(any) addr:0x0214df70 ambiguous
+_ZTV12MiiNewsScene kind:data(any) addr:0x0214df68
 data_ov087_0214df8c kind:data(any) addr:0x0214df8c
 data_ov087_0214dfdc kind:data(any) addr:0x0214dfdc
 gStr_M00_ov087 kind:data(any) addr:0x0214e02c

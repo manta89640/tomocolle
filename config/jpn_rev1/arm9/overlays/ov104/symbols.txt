@@ -67,7 +67,7 @@ data_ov104_0214d8c8 kind:data(any) addr:0x0214d8c8
 __sinit_ov104_0214dc80 kind:function(arm,size=0x1c) addr:0x0214dc80
 .p__sinit_ov104_0214dc80 kind:data(word) addr:0x0214dc9c
 data_ov104_0214dcc0 kind:data(any) addr:0x0214dcc0
-data_ov104_0214dccc kind:data(any) addr:0x0214dccc ambiguous
+_ZTV7SceneB5 kind:data(any) addr:0x0214dcc4
 gStr_3H0_ov104 kind:data(any) addr:0x0214dce8
 gStr_3H1_ov104 kind:data(any) addr:0x0214dcec
 gStr_CO0_ov104 kind:data(any) addr:0x0214dcf0

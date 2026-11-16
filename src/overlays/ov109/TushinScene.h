@@ -65,6 +65,8 @@ void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
 
 // The scene manager.
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -72,28 +74,19 @@ struct SceneManager {
 
 extern "C" {
 extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 }
 
 // --- The message window's parts ---
-
-// A style of a window button (what the four numbers are is not known)
-struct WindowButtonStyle {
-    /* 0x0 */ int mUnknown0;
-    /* 0x4 */ int mUnknown4;
-    /* 0x8 */ int mUnknown8;
-    /* 0xC */ int mUnknownC;
-};
 
 extern "C" {
 // Adds a button with a text: (.., number, .., two sprite sequences, position, size, the text's message file and
 // message, font, plane, character offset, style, ..)
 void func_02033844(MessageWindow *window, int number, int a, u8 sequence, u8 sequence2, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                   int *charOffset, const WindowButtonStyle *style, int b);
+                   int *charOffset, const ButtonSounds *style, int b);
 // Adds a button without a text
 void func_02033448(MessageWindow *window, int number, int a, int sequence, u8 sequence2, WindowPoint position,
-                   WindowPoint size, const WindowButtonStyle *style, int b);
+                   WindowPoint size, const ButtonSounds *style, int b);
 // Sets the window's message text up
 void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint position, WindowPoint margin, int *charOffset);
@@ -265,7 +258,6 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 
 
 extern "C" {
-void func_0203206c(void *button);
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
@@ -381,19 +373,11 @@ void func_020a27dc(ListView *view, int a, int b, int c);
 void func_020a380c(ListPages *pages, int a, int b);
 }
 
-// --- Window buttons ---
+// --- Window buttons (the others are in SpriteButton.h) ---
 
 extern "C" {
-void func_02031260(WindowButton *button, int a);
-void func_02031278(WindowButton *button, int a, int b);
-void func_02031eb0(WindowButton *button, int x, int y);
-void func_02032158(WindowButton *button, const WindowButtonStyle *style);
-void func_0203119c(WindowButton *button);
-int func_02031f58(WindowButton *button, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
-                  int charOffset);
 void func_02031e88(void *button, int a);
 void func_02031228(void *sprite);
-BOOL func_0203133c(void *button);
 }
 
 // --- Items (main program) ---
@@ -496,45 +480,16 @@ const u16 *MiiTransfer_GetParentUserGameInfo(int i);
 
 // --- Wireless (main program) ---
 
-struct WirelessManager {
-    /* 0x00 */ int mUnknown00;
-    /* 0x04 */ int mUnknown04;
-    /* 0x08 */ int mUnknown08;
-    /* 0x0C */ int mUnknown0C;
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ int mUnknown14;
-    /* 0x18 */ int mPageAfterSave;
-    /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
-};
+#include "wireless/WirelessSession.h"
+
 
 extern "C" {
-extern WirelessManager *data_0213b700;
-void func_0203b76c(WirelessManager *manager, int a);
-int func_0203b800(WirelessManager *manager);
-void func_0203b7e8(WirelessManager *manager);
-void func_0203b87c(WirelessManager *manager);
-void func_0203b900(WirelessManager *manager, int a);
-void func_0203b940(WirelessManager *manager, int a);
-void func_0203b968(WirelessManager *manager, int a);
-int func_0203b9c4(WirelessManager *manager);
-void func_0203bac4(WirelessManager *manager, int parent);
 void MiiTransfer_Start(void);
 void MiiTransfer_Cut(void);
 void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
-void func_0203b8b4(WirelessManager *manager, int a);
 void MiiTransfer_Update(void);
-void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
-void func_0203b7e0(WirelessManager *manager, void *buffer);
-void func_0203b898(WirelessManager *manager);
-void func_0203b908(WirelessManager *manager);
-void func_0203b948(WirelessManager *manager);
-BOOL func_0203b970(WirelessManager *manager);
-BOOL func_0203b9b4(WirelessManager *manager);
-void func_0203b9fc(WirelessManager *manager);
-int func_0203ba10(WirelessManager *manager);
-void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
 void MiiTransfer_Init(void *a, void *miiData, int count);
 void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));
@@ -665,7 +620,7 @@ public:
     /* 0x2A97C */ MessageWindow mListWindow;
     /* 0x35920 */ u8 mSortKey;
     /* 0x35924 */ int mUnknown35924;
-    /* 0x35928 */ WindowButton mButtons[3];
+    /* 0x35928 */ TextButton mButtons[3];
     /* 0x36DF8 */ Sprite mSprite;
     /* 0x36EA4 */ int mCharOffset;
     /* 0x36EA8 */ int mUnknown36EA8;

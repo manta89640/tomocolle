@@ -65,7 +65,7 @@ gStr_M02_Window_down_nsc_ov057 kind:data(any) addr:0x0214ca9c
 data_ov057_0214cab4 kind:data(any) addr:0x0214cab4
 data_ov057_0214cafc kind:data(any) addr:0x0214cafc
 data_ov057_0214cb44 kind:data(any) addr:0x0214cb44
-data_ov057_0214cba8 kind:data(any) addr:0x0214cba8 ambiguous
+_ZTV14TestNg137Scene kind:data(any) addr:0x0214cba0
 gStr_Mdl_Ica_ica_mii_mini_contents_live_LZ_bi_ov057 kind:data(any) addr:0x0214cbc4
 gStr_Mdl_Ica_ica_mii_mini_contents_live_LZ_bi_ov057_2 kind:data(any) addr:0x0214cbf0
 gStr_TBM_ov057 kind:data(any) addr:0x0214cc1c

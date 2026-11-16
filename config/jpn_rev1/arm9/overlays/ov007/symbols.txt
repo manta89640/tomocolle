@@ -1,20 +1,20 @@
-func_ov007_02149a40 kind:function(arm,size=0x118) addr:0x02149a40
-func_ov007_02149b58 kind:function(arm,size=0x6cc) addr:0x02149b58
-func_ov007_0214a224 kind:function(arm,size=0x218) addr:0x0214a224
-func_ov007_0214a43c kind:function(arm,size=0x5c) addr:0x0214a43c
-func_ov007_0214a498 kind:function(arm,size=0x74) addr:0x0214a498
+_ZN7Scene1812StartLoadingEv kind:function(arm,size=0x118) addr:0x02149a40
+_ZN7Scene184InitEv kind:function(arm,size=0x6cc) addr:0x02149b58
+_ZN7Scene186UpdateEv kind:function(arm,size=0x218) addr:0x0214a224
+_ZN7Scene184DrawEv kind:function(arm,size=0x5c) addr:0x0214a43c
+_ZN7Scene184ExitEv kind:function(arm,size=0x74) addr:0x0214a498
 func_ov007_0214a50c kind:function(arm,size=0x6bc) addr:0x0214a50c
 func_ov007_0214abc8 kind:function(arm,size=0x13c) addr:0x0214abc8
 func_ov007_0214ad04 kind:function(arm,size=0x94) addr:0x0214ad04
 func_ov007_0214ad98 kind:function(arm,size=0x9c) addr:0x0214ad98
-func_ov007_0214ae34 kind:function(arm,size=0x58) addr:0x0214ae34
-func_ov007_0214ae8c kind:function(arm,size=0x60) addr:0x0214ae8c
+_ZN7Scene18D1Ev kind:function(arm,size=0x58) addr:0x0214ae34
+_ZN7Scene18D0Ev kind:function(arm,size=0x60) addr:0x0214ae8c
 data_ov007_0214aeec kind:data(any) addr:0x0214aeec
 data_ov007_0214aef4 kind:data(any) addr:0x0214aef4
 data_ov007_0214af00 kind:data(any) addr:0x0214af00
 data_ov007_0214af24 kind:data(any) addr:0x0214af24
 gStr_T_ov007 kind:data(any) addr:0x0214af30
-data_ov007_0214af68 kind:data(any) addr:0x0214af68 ambiguous
+_ZTV7Scene18 kind:data(any) addr:0x0214af60
 data_ov007_0214af84 kind:data(any) addr:0x0214af84
 data_ov007_0214af98 kind:data(any) addr:0x0214af98 ambiguous
 gStr_M00_ov007 kind:data(any) addr:0x0214afac

@@ -24,7 +24,7 @@ data_ov094_0214af70 kind:data(any) addr:0x0214af70
 gStr__ov094 kind:data(any) addr:0x0214af80
 data_ov094_0214af98 kind:data(any) addr:0x0214af98 ambiguous
 gStr_e_ov094 kind:data(any) addr:0x0214afc0
-data_ov094_0214b028 kind:data(any) addr:0x0214b028 ambiguous
+_ZTV7Scene74 kind:data(any) addr:0x0214b020
 gStr_SCD_ov094 kind:data(any) addr:0x0214b044
 gStr_Scn_Scene_SceneCharDistribution_LZ_bin_ov094 kind:data(any) addr:0x0214b048
 gStr_TBM_ov094 kind:data(any) addr:0x0214b070

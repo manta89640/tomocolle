@@ -6,6 +6,7 @@
 
 #include "GameData.h"
 #include "Scene.h"
+#include "ScreenControl.h"
 #include "Sprite.h"
 #include "text/MessageFile.h"
 #include "text/TextCanvas.h"
@@ -30,28 +31,6 @@ struct InitPoint {
 
     /* 0x0 */ int x;
     /* 0x4 */ int y;
-};
-
-// The screens: which planes are shown.
-struct ScreenControl {
-    void Set(u32 planes) {
-        mPlanes = planes;
-        mPlanesChanged = TRUE;
-    }
-    void Show(u32 planes) {
-        mPlanes |= planes;
-        mPlanesChanged = TRUE;
-    }
-
-    /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0x40];
-    /* 0x44 */ int mUnknown44;
-    /* 0x48 */ int mUnknown48;
-    /* 0x4C */ u8 mUnknown4C[0x88];
-    /* 0xD4 */ BOOL mPlanesChanged;
-    /* 0xD8 */ u8 mUnknownD8[0x10];
-    /* 0xE8 */ BOOL mUnknown44Changed;
-    /* 0xEC */ BOOL mUnknown48Changed;
 };
 
 // The archive loader and the graphics resources, loaded by file name into VRAM.
@@ -90,9 +69,6 @@ extern "C" {
 extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-
-// --- The screens ---
-extern ScreenControl data_0211d604;
 
 // --- Graphics resources ---
 extern CellLoader gObjResourceManager;

@@ -9,7 +9,7 @@ func_ov038_0214a5e0 kind:function(arm,size=0x40) addr:0x0214a5e0
 data_ov038_0214a620 kind:data(any) addr:0x0214a620
 data_ov038_0214a648 kind:data(any) addr:0x0214a648 ambiguous
 gStr_CommercialAt_ov038 kind:data(any) addr:0x0214a650
-data_ov038_0214a688 kind:data(any) addr:0x0214a688 ambiguous
+_ZTV14TestNg111Scene kind:data(any) addr:0x0214a680
 gStr_Mdl_Ica_ica_mii_room_LZ_bin_ov038 kind:data(any) addr:0x0214a6a4
 gStr_M00_ov038 kind:data(any) addr:0x0214a6c0
 gStr_Scn_Scene_SceneTestNg111_LZ_bin kind:data(any) addr:0x0214a6c4

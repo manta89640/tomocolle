@@ -669,6 +669,21 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Pitfall: a zero-length padding array in a class (a `sizeof` that came out 0) made mwcc drop a member array's
   `__cxa_vec_cleanup` from the implicit destructor without a word (overlay 76).
 
+**Constructors**
+- Constructors called out of line from a function that would inline them are defined out of line (the scene
+  factory's constructors, `src/scene/SceneManager.cpp`): an inline constructor in the class gets inlined into the
+  caller, however many cases it has.
+- An array of a class with a destructor is constructed by `__cxa_vec_ctor`; without one, by a loop. A loop that runs
+  once is an array of one (`MessageWindow mWindow[1]`); a single member gets no loop.
+- Members that the original addresses from the end pointer of the loop before them (`add r0, r5, #0x174` with r5
+  the loop's end) are members of a part of their own that starts there; as plain members they are addressed from
+  `this` (`Scene74Part`, `RankingPart`).
+- A class whose table is another file's needs a non-inline virtual function declared (its key function), or a file
+  that constructs it emits its table too (`Scene75Model::Draw`). A class with nothing virtual of its own gets its
+  table emitted where it is constructed (`TestNg134Model`).
+- Two byte-identical constructors one after the other are C2 then C1: members and array elements use C1, a base
+  subobject C2 (`HeadIcon`, `ParticleSystem`, `CharacterModel`).
+
 **Scenes**
 - A scene's virtual table symbol goes at the table's start, and the main program's constructor's reference to it is
   `to:<table> add:0x8 module:overlay(<n>)`.

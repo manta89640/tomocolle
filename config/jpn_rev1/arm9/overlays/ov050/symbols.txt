@@ -12,7 +12,7 @@ func_ov050_0214a2e8 kind:function(arm,size=0xb0) addr:0x0214a2e8
 func_ov050_0214a398 kind:function(arm,size=0xb8) addr:0x0214a398
 data_ov050_0214a450 kind:data(any) addr:0x0214a450
 data_ov050_0214a45c kind:data(any) addr:0x0214a45c
-data_ov050_0214a4a8 kind:data(any) addr:0x0214a4a8 ambiguous
+_ZTV7Scene8D kind:data(any) addr:0x0214a4a0
 data_ov050_0214a4c4 kind:data(any) addr:0x0214a4c4
 data_ov050_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
 gStr_TBM_ov050 kind:data(any) addr:0x0214a4ec

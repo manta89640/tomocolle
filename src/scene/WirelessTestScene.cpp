@@ -1,12 +1,11 @@
 #include "WirelessTestScene.h"
 
 #include "GameData.h"
+#include "SceneManager.h"
 
 #include <string.h>
 
 extern "C" {
-void func_0203c02c(void *manager, int sceneId); // Asks for the next scene
-extern u8 gSceneManager[];
 extern void *data_02123440[];                  // The game's clock
 void func_02035460(void *clock, RTCDate *date, RTCTime *time); // Sets it
 void Clock_GetDate(void *clock, RTCDate *date);
@@ -14,7 +13,6 @@ wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL un
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
 void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
 BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
-void func_02097cc0(SavedCharacter *character);
 int NFL_GetCharInfo(void *info, const void *mii); // lib/NFL: the Mii's name and fields, 7 for invalid data
 }
 
@@ -117,7 +115,7 @@ void WirelessTestScene::Update() {
     }
     if (mState == STATE_DONE) {
         if (gTouchInput.mTouched) {
-            func_0203c02c(gSceneManager, 0x11);
+            gSceneManager.RequestScene(0x11);
         }
         return;
     }
@@ -284,7 +282,7 @@ void WirelessTestScene::OnReceive(u16, u16 *data, u16 size) {
     }
     for (int i = 0; i < 100; i++) {
         if (!func_0202c354(&gGameData, i)) {
-            func_02097cc0(&sCharacter);
+            sCharacter.Register();
             func_0202c28c(&gGameData, i, &sCharacter);
             break;
         }

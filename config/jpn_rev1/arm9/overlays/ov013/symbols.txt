@@ -9,7 +9,7 @@ func_ov013_0214a3b8 kind:function(arm,size=0x54) addr:0x0214a3b8
 func_ov013_0214a40c kind:function(arm,size=0x5c) addr:0x0214a40c
 data_ov013_0214a468 kind:data(any) addr:0x0214a468
 data_ov013_0214a4c0 kind:data(any) addr:0x0214a4c0
-data_ov013_0214a4cc kind:data(any) addr:0x0214a4cc ambiguous
+_ZTV13TestNg48Scene kind:data(any) addr:0x0214a4c4
 data_ov013_0214a4e8 kind:data(any) addr:0x0214a4e8
 data_ov013_0214a504 kind:data(any) addr:0x0214a504 ambiguous
 data_ov013_0214a508 kind:data(any) addr:0x0214a508 ambiguous

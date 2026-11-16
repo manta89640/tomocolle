@@ -119,7 +119,7 @@ void TutorialRoomScene::StartLoading() {
     }
 
     if (!ChooseCharacters()) {
-        func_0203c02c(&gSceneManager, 0x69);
+        gSceneManager.RequestScene(0x69);
         return;
     }
     LoadCharacters();
@@ -742,7 +742,7 @@ void TutorialRoomScene::UpdateState() {
 
     case STATE_LEAVE:
         SetState(STATE_LEAVING);
-        func_0203c02c(&gSceneManager, 0x69);
+        gSceneManager.RequestScene(0x69);
         break;
 
     case STATE_LEAVING:

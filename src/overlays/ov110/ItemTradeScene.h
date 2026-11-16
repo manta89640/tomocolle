@@ -89,14 +89,18 @@ void func_02029660(void *resourceSet, u32 resType, void *archive);
 void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
-// The model of a character with its animations and joints (func_0208eb18 constructs it). The model is a member,
-// not a base: the scene's destructor resets the render callback and then runs AnimModel's destructor, without a
-// virtual table of the character model's own being stored in between (as overlay 74's RoomDoorModel). Named
-// CharacterModelMember so as not to clash with the other overlays' stand-ins called CharacterModel, which have
-// AnimModel as a base.
-class CharacterModelMember {
+// The model of a character with its animations and joints (include/character/CharacterModel.h has the class).
+// AnimModel is a member, not a base: the scene's destructor resets the render callback and then runs AnimModel's
+// destructor, without a virtual table of the character model's own being stored in between.
+class CharacterModel {
 public:
-    ~CharacterModelMember() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+    ~CharacterModel() { NNS_G3dRenderObjResetCallBack(&mAnim.mRenderObj); }
+
+    // Names the archive and the body's model for a costume (name of the archive, costume, female)
+    void SetArchive(const char *archiveName, int clothes, BOOL female);
+    void SetAnimFlags(BOOL playOnce, BOOL finished);
+    void MakeModel(int resourceId, int unk);
+    void SetPaletteColors(GXRgb color0, GXRgb color1);
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
@@ -107,21 +111,15 @@ public:
     /* 0x4A8 */ u8 mUnknown4A8[0x14];
 }; // 0x4BC
 
-extern "C" {
-// --- The character model's functions (0x0208eb18 to 0x0208fcf8), as this scene calls them ---
-// Fills the archive and model names of the model's owner for a costume (name of the archive, costume, unknown)
-void func_0208ee18(CharacterModelMember *model, const char *archiveName, int costume, int unk);
-void func_0208ef00(CharacterModelMember *model, BOOL playOnce, BOOL finished);
-void func_0208ef5c(CharacterModelMember *model, int unk1, int unk2);
-void func_0208f19c(CharacterModelMember *model, int unk, int color);
-}
 
 // --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
 
 // One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
 struct SavedCharacter {
+    s8 GetPersonality(); // Its personality, 0 to 15
+
     /* 0x0000 */ u8 mUnknown0000[0x2BC];
-    /* 0x02BC */ s8 mPersonality; // What func_02098f2c computes
+    /* 0x02BC */ s8 mPersonality; // What GetPersonality computes
     /* 0x02BD */ u8 mUnknown02BD[3];
 }; // 0x2C0
 
@@ -138,17 +136,16 @@ public:
 // The main program's character class that the scenes derive theirs from (0x2B18 bytes).
 class Character : public CharacterBase {
 public:
-    /* 0x25E4 */ CharacterModelMember mModel;
+    /* 0x25E4 */ CharacterModel mModel;
     /* 0x2AA0 */ u8 mUnknown2AA0[0x78];
 }; // 0x2B18
 
 extern "C" {
-s8 func_02098f2c(SavedCharacter *character); // Its personality
 // The personalities' kinds (0 to 3), by personality
 extern const int data_020fba28[];
 int MiiData_GetFavoriteColor(SavedCharacter *character);
 int MiiData_GetSex(SavedCharacter *character);
-int NFL_GetFavoriteColor(int unk);
+GXRgb NFL_GetFavoriteColor(int index); // lib/NFL
 }
 
 // The model the scene dresses in a costume to show it: a body ("3MM") with a head ("3MH:/head.imd",
@@ -164,9 +161,9 @@ public:
     /* 0x0E0 */ u8 mUnknown0E0[0x60];
     /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
     /* 0x14C */ u8 mUnknown14C[0x5C];
-    /* 0x1A8 */ CharacterModelMember mModel;
+    /* 0x1A8 */ CharacterModel mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
-    /* 0x674 */ char mArchivePath[0x1C]; // What func_0208ee18 sets for the costume
+    /* 0x674 */ char mArchivePath[0x1C]; // What CharacterModel::SetArchive sets for the costume
     /* 0x690 */ char mModelPath[0x28];
 }; // 0x6B8
 
@@ -441,6 +438,8 @@ struct ScreenControl {
 };
 
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -476,7 +475,6 @@ void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx3
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 void func_0202b0e8(Renderer3d *renderer);
 int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
 void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
@@ -549,39 +547,8 @@ void WH_Reset(void);
 void WH_Finalize(void);
 }
 
-// The main program's layer over WH that finds and connects the other DS (functions 0x0203b748 to 0x0203bcd4; the
-// one instance is reached through data_0213b700). A stand-in.
-//
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-struct WirelessSession {
-    /* 0x00 */ BOOL mActive;
-    /* 0x04 */ u8 mUnknown04[0x18];
-    /* 0x1C */ int mPartner; // Which of the parents found was chosen
-};
-
-extern "C" {
-extern WirelessSession *data_0213b700;
-void func_0203b7d4(WirelessSession *session, void *parents, int count); // Where the parents found are kept
-void func_0203b7e0(WirelessSession *session, int *timers);
-void func_0203b76c(WirelessSession *session, int unk);
-void func_0203b7e8(WirelessSession *session);
-BOOL func_0203b800(WirelessSession *session); // Updates it: TRUE while it is ending
-void func_0203b87c(WirelessSession *session);
-void func_0203b898(WirelessSession *session);
-void func_0203b8b4(WirelessSession *session, BOOL active);
-void func_0203b900(WirelessSession *session, BOOL unk);
-void func_0203b908(WirelessSession *session);
-void func_0203b940(WirelessSession *session, BOOL unk);
-void func_0203b948(WirelessSession *session);
-void func_0203b968(WirelessSession *session, BOOL unk);
-BOOL func_0203b970(WirelessSession *session);
-BOOL func_0203b9b4(WirelessSession *session); // A parent has been found
-int func_0203b9c4(WirelessSession *session);  // How many parents are found
-void func_0203b9fc(WirelessSession *session);
-int func_0203ba10(WirelessSession *session);  // The parent found last
-void func_0203ba20(WirelessSession *session, wchar_t *name);
-void func_0203bac4(WirelessSession *session, int partner);
-}
+// The main program's layer over WH that finds and connects the other DS
+#include "wireless/WirelessSession.h"
 
 // --- This overlay's classes ----------------------------------------------------------------------------------------
 

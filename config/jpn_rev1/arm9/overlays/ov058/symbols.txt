@@ -42,7 +42,7 @@ gStr_Mdl_Misc_musicbox_job_3D_LZ_bin kind:data(any) addr:0x0214b050
 gStr_Mdl_Misc_musicbox_food_3D_LZ_bin kind:data(any) addr:0x0214b070
 gStr_Mdl_Misc_musicbox_news_3D_LZ_bin kind:data(any) addr:0x0214b094
 gStr_Mdl_Misc_musicbox_machine_3D_LZ_bin kind:data(any) addr:0x0214b0b8
-data_ov058_0214b0e4 kind:data(any) addr:0x0214b0e4 ambiguous
+_ZTV14TestNg138Scene kind:data(any) addr:0x0214b0dc
 gStr_Mdl_Ica_ica_mii_mini_contents2_LZ_bin_ov058 kind:data(any) addr:0x0214b100
 gStr_TBM_ov058 kind:data(any) addr:0x0214b128
 data_ov058_0214b12c kind:data(any) addr:0x0214b12c

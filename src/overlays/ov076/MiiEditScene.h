@@ -4,8 +4,9 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "Character.h"
+#include "Model.h"
 #include "character/CharacterSpeechTexts.h"
+#include "character/SceneCharacter.h"
 #include "keyboard/SoftKeyboard.h"
 #include "MessageWindow.h"
 #include "Scene.h"
@@ -16,76 +17,10 @@
 #include "text/TextCanvas.h"
 #include "voice/TtsPlayer.h"
 
-// --- What the scene uses of the main program (STAND-INS, not decompiled) ----------------------------------------
-
-// The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
-struct Camera {
-    /* 0x00 */ int mUnknown00;
-    /* 0x04 */ int mUnknown04;
-    /* 0x08 */ u8 mUnknown08[0xC];
-    /* 0x14 */ VecFx32 mPosition;
-    /* 0x20 */ VecFx32 mUnknown20;
-    /* 0x2C */ VecFx32 mTarget;
-};
-
-// The screens: which planes are shown (data_0211d604).
-struct ScreenControl {
-    void Show(u32 planes) {
-        mPlanes |= planes;
-        mPlanesChanged = TRUE;
-    }
-    void SetUnknown44(int value) {
-        mUnknown44 = value;
-        mUnknown44Changed = TRUE;
-    }
-    void SetUnknown48(int value) {
-        mUnknown48 = value;
-        mUnknown48Changed = TRUE;
-    }
-
-    /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0x40];
-    /* 0x44 */ int mUnknown44;
-    /* 0x48 */ int mUnknown48;
-    /* 0x4C */ u8 mUnknown4C[0x88];
-    /* 0xD4 */ BOOL mPlanesChanged;
-    /* 0xD8 */ u8 mUnknownD8[0x10];
-    /* 0xE8 */ BOOL mUnknown44Changed;
-    /* 0xEC */ BOOL mUnknown48Changed;
-};
-
-// Graphics resources, loaded by file name into VRAM.
-struct ArchiveLoader;
-struct CellLoader;
-struct PaletteLoader;
-struct ScreenLoader;
-struct CharLoader;
-
-extern "C" {
-extern ArchiveLoader gArchiveManager;
-void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
-void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
-extern ScreenControl data_0211d604;
-extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
-extern CharLoader gVramTransferQueue;
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-}
-
-// The particle system of the main program (0x0207ab20 to 0x0207b364)
+// The main program's camera and its particle system (MainProgram.h)
+struct Camera;
 struct ParticleSystem;
 struct ParticleEmitter;
-
-// A Mii's data: the first 0x4A bytes of a saved character, copied as a structure
-struct MiiData {
-    /* 0x00 */ u8 mBytes[0x4A];
-};
 
 // --- The scene's pages -------------------------------------------------------------------------------------------
 
@@ -268,7 +203,7 @@ public:
     void Exit();
 
     /* 0x000 */ MiiEditScene *mScene;
-    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value of CharacterRecord::mUnknown04A[0..4]
+    /* 0x004 */ SpriteButton mButtons[5]; // The sliders' knobs, one per value of CharacterRecord::mAnswers[0..4]
     /* 0x4C8 */ Sprite mSprites[5];
     /* 0x824 */
 }; // 0x824
@@ -284,7 +219,7 @@ public:
     /* 0x0000 */ MiiEditScene *mScene;
     /* 0x0004 */ int mNextPage;     // Where it goes when the window has closed: -1 leaves the scene
     /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
-    /* 0x000C */ MessageWindow mWindow;
+    /* 0x000C */ MessageWindow mWindow[1]; // An array of one: the constructor builds it in a loop
 }; // 0xAFB0
 
 // Page 6: "登録します。よろしいですか？" (etc message 0x2D: register the Mii?); yes saves it (SaveCharacter)
@@ -298,7 +233,7 @@ public:
     /* 0x0000 */ MiiEditScene *mScene;
     /* 0x0004 */ int mNextPage;     // Where it goes when the window has closed: -1 leaves the scene
     /* 0x0008 */ int mPreviousPage; // The page shown before this one, where the second button goes back to
-    /* 0x000C */ MessageWindow mWindow;
+    /* 0x000C */ MessageWindow mWindow[1]; // An array of one: the constructor builds it in a loop
 }; // 0xAFB0
 
 // --- The scene ----------------------------------------------------------------------------------------------------
@@ -311,6 +246,8 @@ public:
 // The name is descriptive, not the original: it is after the scene's archive, "Scn/Scene/SceneMiiEdit2_LZ.bin".
 class MiiEditScene : public Scene {
 public:
+    MiiEditScene(int sceneId); // The main program's (src/scene/SceneManager.cpp)
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();
@@ -363,8 +300,8 @@ public:
     /* 0x1B304 */ u8 mUnknown1B304[0x28];
     /* 0x1B32C */ BOOL mUnknown1B32C;          // When set, Update redraws mTextBoxes and shows them
     /* 0x1B330 */ u8 mUnknown1B330[0x2C];
-    /* 0x1B35C */ MessageText mText1B35C;
-    /* 0x1B94C */ MessageText mText1B94C;
+    /* 0x1B35C */ MessageText mText1B35C[1]; // Arrays of one: the constructor builds each in a loop
+    /* 0x1B94C */ MessageText mText1B94C[1];
     /* 0x1BF3C */ ObjCharBox mCharBox;
     /* 0x1C0F8 */ MessageFile mMessageFiles[2]; // Etc messages ("TBM"), common messages ("T02")
     /* 0x1C128 */ MiiEditSexPage mSexPage;

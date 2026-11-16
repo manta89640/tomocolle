@@ -4,7 +4,7 @@ func_ov021_02149f20 kind:function(arm,size=0x1b8) addr:0x02149f20
 func_ov021_0214a0d8 kind:function(arm,size=0x44) addr:0x0214a0d8
 func_ov021_0214a11c kind:function(arm,size=0x64) addr:0x0214a11c
 func_ov021_0214a180 kind:function(arm,size=0x14) addr:0x0214a180
-func_ov021_0214a194 kind:function(arm,size=0x60) addr:0x0214a194
+_ZN13TestNg69ModelC1Ev kind:function(arm,size=0x60) addr:0x0214a194
 func_ov021_0214a1f4 kind:function(arm,size=0x90) addr:0x0214a1f4
 func_ov021_0214a284 kind:function(arm,size=0x44) addr:0x0214a284
 func_ov021_0214a2c8 kind:function(arm,size=0x70) addr:0x0214a2c8
@@ -62,7 +62,7 @@ data_ov021_0214a594 kind:data(any) addr:0x0214a594
 data_ov021_0214a5a8 kind:data(any) addr:0x0214a5a8 ambiguous
 data_ov021_0214a5b8 kind:data(any) addr:0x0214a5b8
 data_ov021_0214a5c8 kind:data(any) addr:0x0214a5c8 ambiguous
-data_ov021_0214a5d4 kind:data(any) addr:0x0214a5d4 ambiguous
+_ZTV13TestNg69Scene kind:data(any) addr:0x0214a5cc
 data_ov021_0214a5e8 kind:data(any) addr:0x0214a5e8 ambiguous
 data_ov021_0214a5f0 kind:data(any) addr:0x0214a5f0
 data_ov021_0214a640 kind:data(any) addr:0x0214a640

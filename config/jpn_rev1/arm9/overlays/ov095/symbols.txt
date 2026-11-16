@@ -101,7 +101,7 @@ data_ov095_0214f830 kind:data(any) addr:0x0214f830
 data_ov095_0214f860 kind:data(any) addr:0x0214f860
 data_ov095_0214f890 kind:data(any) addr:0x0214f890
 data_ov095_0214f8c0 kind:data(any) addr:0x0214f8c0
-data_ov095_0214f900 kind:data(any) addr:0x0214f900 ambiguous
+_ZTV13AffinityScene kind:data(any) addr:0x0214f8f8
 gStr_Scn_Affn_affinity_result_m_0_3D_LZ_bin kind:data(any) addr:0x0214f91c
 gStr_Scn_Affn_affinity_result_m_1_3D_LZ_bin kind:data(any) addr:0x0214f944
 gStr_Scn_Affn_affinity_result_l_6_3D_LZ_bin kind:data(any) addr:0x0214f96c

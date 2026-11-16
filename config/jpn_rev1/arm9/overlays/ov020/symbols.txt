@@ -15,7 +15,7 @@ data_ov020_0214b29c kind:data(any) addr:0x0214b29c
 gStr__ov020 kind:data(any) addr:0x0214b2b4
 data_ov020_0214b2c4 kind:data(any) addr:0x0214b2c4
 data_ov020_0214b2c8 kind:data(any) addr:0x0214b2c8 ambiguous
-data_ov020_0214b308 kind:data(any) addr:0x0214b308 ambiguous
+_ZTV7Scene3F kind:data(any) addr:0x0214b300
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov020 kind:data(any) addr:0x0214b324
 gStr_TBM_ov020 kind:data(any) addr:0x0214b34c
 gStr_Msg_TmdMiniContentsMsgJP_LZ_bin_ov020 kind:data(any) addr:0x0214b350

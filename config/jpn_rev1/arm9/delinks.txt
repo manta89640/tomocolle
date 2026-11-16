@@ -371,7 +371,36 @@ src/sound/SoundManager.cpp:
 
 src/sound/ValueRamp.cpp:
     complete
-    .text       start:0x02036558 end:0x0203671c
+    .text       start:0x02036558 end:0x0203673c
+    .init       start:0x020b0674 end:0x020b06a0
+    .ctor       start:0x020fc4e0 end:0x020fc4e4
+    .bss        start:0x0213b5c0 end:0x0213b6b0
+
+src/text/TextUtil.cpp:
+    .text       start:0x0203673c end:0x02039660
+    .data       start:0x021102f0 end:0x02110860
+
+src/text/SpeechWindow.cpp:
+    complete
+    .text       start:0x02039660 end:0x020398e4
+    .rodata     start:0x020b5c54 end:0x020b5c5c
+
+src/save/SaveBlocks.cpp:
+    .text       start:0x020398e4 end:0x0203b748
+    .rodata     start:0x020b5c5c end:0x020b5cfc
+
+src/wireless/WirelessSession.cpp:
+    complete
+    .text       start:0x0203b748 end:0x0203bce0
+    .rodata     start:0x020b5cfc end:0x020b5d04
+    .bss        start:0x0213b6b0 end:0x0213b700
+
+src/scene/SceneManager.cpp:
+    .text       start:0x0203bce0 end:0x0204af20
+    .init       start:0x020b06a0 end:0x020b06cc
+    .ctor       start:0x020fc4e4 end:0x020fc4e8
+    .data       start:0x02110860 end:0x02110b94
+    .bss        start:0x0213b700 end:0x0213ba74
 
 src/scene/Scene.cpp:
     .text       start:0x0204af20 end:0x0204b090
@@ -743,6 +772,23 @@ lib/SHTTS/shtts_4.c:
     .text       start:0x0208c8e0 end:0x0208eb18
     .rodata     start:0x020f3fe0 end:0x020f3ff0
     .data       start:0x021133f8 end:0x021135a0
+
+src/character/CharacterModel.cpp:
+    .text       start:0x0208eb18 end:0x0208fcf8
+    .rodata     start:0x020fb768 end:0x020fb864
+    .data       start:0x02114da0 end:0x02114e3c
+
+src/character/Character.cpp:
+    .text       start:0x0208fcf8 end:0x02092178
+    .rodata     start:0x020fb864 end:0x020fb8c0
+
+src/character/CharacterSort.cpp:
+    .text       start:0x02092178 end:0x020979a0
+
+src/character/SavedCharacter.cpp:
+    .text       start:0x020979a0 end:0x0209e140
+    .rodata     start:0x020fb8c0 end:0x020fbcdc
+    .data       start:0x02114e3c end:0x02114f80
 
 lib/MSL_C/abort_exit_arm.c:
     complete

@@ -18,14 +18,14 @@ static const WindowPoint sYesNoSizes[2] = { { 94, 30 }, { 94, 30 } };
 static const ScreenRect sYesNoWindowRect = { 20, 20, 216, 152 };
 static const ScreenRect sListBarRect = { -8, -8, 16, 16 };
 static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
-static const WindowButtonStyle sButtonStyle = { 10, -1, 0, -1 };
+static const ButtonSounds sButtonStyle = { 10, -1, 0, -1 };
 static const WindowPoint sFirstPageIconPositions[2] = { { 204, 74 }, { 204, 106 } };
 static const WindowPoint sButtonTextPositions3[3] = { { 38, 66 }, { 38, 90 }, { 38, 114 } };
 static const WindowPoint sListButtonPositions[3] = { { 213, 19 }, { 242, 13 }, { 128, 173 } };
 static const WindowPoint sListButtonTextPositions[3] = { { 26, 34 }, { 24, 22 }, { 116, 30 } };
 static const WindowPoint sButtonPositions2[4] = { { 128, 74 }, { 128, 106 }, { 128, 124 }, { 128, 149 } };
 static const WindowPoint sButtonPositions3[4] = { { 128, 72 }, { 128, 96 }, { 128, 120 }, { 128, 149 } };
-static const WindowButtonStyle sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
+static const ButtonSounds sYesNoStyles[2] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 } };
 
 static const WindowPoint sButtonSize2 = { 190, 26 };
 static const WindowPoint sListCursorPos = { 12, 47 };
@@ -51,7 +51,7 @@ static const WindowPoint sButtonTextPositions2[3] = { { 38, 68 }, { 38, 100 }, {
 static const WindowPoint sTextMargins[3] = { { 32, 33 }, { 32, 50 }, { 32, 33 } };
 static const int sListOrders[7] = { 0, 1, 2, 3, 4, 5, 6 }; // What the list is sorted by, by the button chosen
 static const u32 sListMessages[7] = { 127, 128, 129, 130, 131, 132, 133 };
-static const WindowButtonStyle sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
+static const ButtonSounds sListButtonStyles[3] = { { 10, -1, 0, -1 }, { 12, -1, 0, -1 }, { 10, -1, 0, -1 } };
 static const WindowPoint sListItemPositions[7] = {
     { 128, 30 }, { 128, 52 }, { 128, 74 }, { 128, 96 }, { 128, 118 }, { 128, 140 }, { 128, 162 },
 };
@@ -77,7 +77,7 @@ static const WindowLayout sLayouts[9] = {
     { { FALSE, FALSE, FALSE }, TRUE },
     { { FALSE, FALSE, FALSE }, TRUE },
 };
-static const WindowButtonStyle sBackButtonStyles[9] = {
+static const ButtonSounds sBackButtonStyles[9] = {
     { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 }, { 12, -1, 0, -1 },
     { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 10, -1, 0, -1 }, { 11, -1, 0, -1 },
 };
@@ -274,9 +274,9 @@ void TushinScene::SetUpWindow(int page) {
         func_02033bb4(&mWindow, 0, 0x7E, sFirstPageIconPositions[i]);
     }
     for (int i = 0; i < 3; i++) {
-        mWindow.mSprites[i].mSprite.mUnknown5E = 8;
+        mWindow.mSprites[i].mUnknown5E = 8;
     }
-    mWindow.mButtons[0].mSprite.mUnknown5E = 8;
+    mWindow.mButtons[0].mUnknown5E = 8;
 }
 
 // @0x0214a140
@@ -300,18 +300,18 @@ void TushinScene::SetUpList(int *charOffset) {
     mResidents.mUnknown1139C = 1;
 
     for (int i = 0; i < 3; i++) {
-        Sprite_Init(&mButtons[i].mSprite, 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
+        Sprite_Init(&mButtons[i], 0, sListButtonSequences[i], 0x80, 0x60, TRUE);
         func_02031260(&mButtons[i], 4);
         func_02031278(&mButtons[i], sListButtonSequences[i], sListButtonSequences2[i]);
-        mButtons[i].mSprite.SetPosition(
+        mButtons[i].SetPosition(
             FxVec2(sListButtonPositions[i].x << FX32_SHIFT, sListButtonPositions[i].y << FX32_SHIFT));
         func_02031eb0(&mButtons[i], sListButtonTextPositions[i].x, sListButtonTextPositions[i].y);
-        mButtons[i].mUnknown0DC = 1;
+        mButtons[i].mUnknownDC = 1;
         func_02032158(&mButtons[i], &sListButtonStyles[i]);
         func_0203119c(&mButtons[i]);
-        mButtons[i].mSprite.mUnknown5E = 1;
+        mButtons[i].mUnknown5E = 1;
         if (sListButtonMessages[i] == (u32)-1) {
-            mButtons[i].mUnknown158 = 0;
+            mButtons[i].mText.mSprite.mVisible = FALSE;
         } else {
             *charOffset += func_02031f58(&mButtons[i], &mMessageFiles[sListButtonFiles[i]], sListButtonMessages[i],
                                          &gFonts[sListButtonFonts[i]].mFont, 0x1000, *charOffset);
@@ -469,9 +469,9 @@ void TushinScene::Init() {
     sWiiSendResult = 0;
     sWiiReceiveResult = 0;
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
-    func_0203b7d4(data_0213b700, sParents, 3);
-    func_0203b7e0(data_0213b700, sParentTimers);
-    func_0203b76c(data_0213b700, 0);
+    gWirelessSession->SetParentBuffer(sParents, 3);
+    gWirelessSession->SetTimers(sParentTimers);
+    gWirelessSession->Reset(0);
     MI_CpuFill8(sParents, 0, sizeof(sParents));
     MI_CpuFill8(sParentTimers, 0, sizeof(sParentTimers));
     mMusicPlaying = 0;
@@ -1034,10 +1034,10 @@ void TushinScene::UpdateConnection() {
     }
     switch (WH_GetSystemState()) {
     case 1:
-        func_0203b898(data_0213b700);
-        func_0203b908(data_0213b700);
-        func_0203b948(data_0213b700);
-        if (func_0203b970(data_0213b700)) {
+        gWirelessSession->SetUserGameInfo();
+        gWirelessSession->UpdateScan();
+        gWirelessSession->UpdateMeasureChannel();
+        if (gWirelessSession->UpdateConnect()) {
             return;
         }
         mNextPage = 0x25;
@@ -1049,10 +1049,10 @@ void TushinScene::UpdateConnection() {
         return;
     }
     case 2:
-        if (func_0203b9b4(data_0213b700)) {
-            func_0203b9fc(data_0213b700);
-            WirelessManager *manager = data_0213b700;
-            func_0203ba20(manager, mParentNames[func_0203ba10(manager)]);
+        if (gWirelessSession->IsParentFound()) {
+            gWirelessSession->ClearParentFound();
+            WirelessSession *manager = gWirelessSession;
+            manager->GetFoundParentName(mParentNames[manager->GetFoundParent()]);
         }
         if (mPage != 5) {
             return;
@@ -1508,7 +1508,7 @@ void TushinScene::Disconnect(int kind) {
             return;
         }
         WH_Finalize();
-        func_0203b8b4(data_0213b700, 1);
+        gWirelessSession->RequestEnd(1);
         return;
     case 1:
     case 2:
@@ -1523,9 +1523,9 @@ void TushinScene::Leave() {
     progress.Init(NULL, NULL);
     progress.Count();
     if (progress.GetNewFacility(FALSE) != -1) {
-        func_0203c02c(&gSceneManager, 0x5F);
+        gSceneManager.RequestScene(0x5F);
     } else {
-        func_0203c02c(&gSceneManager, 0x5E);
+        gSceneManager.RequestScene(0x5E);
     }
 }
 
@@ -1539,7 +1539,7 @@ static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 void TushinScene::Update() {
     UpdateSignal();
     CountFrame();
-    func_0203b800(data_0213b700);
+    gWirelessSession->UpdateEnd();
     UpdateMusic();
     UpdateCharacters();
     switch (mPage) {
@@ -1630,7 +1630,7 @@ void TushinScene::Update() {
         }
         if (WH_GetSystemState() != 0) {
             WH_Finalize();
-            func_0203b8b4(data_0213b700, 1);
+            gWirelessSession->RequestEnd(1);
         }
         sDisconnected = 0;
         lost = TRUE;
@@ -1698,7 +1698,7 @@ void TushinScene::Update() {
                     mNextPage = 1;
                     break;
                 case 1:
-                    func_0203c02c(&gSceneManager, 0xB1);
+                    gSceneManager.RequestScene(0xB1);
                     mNextPage = 1;
                     close = 0x2C;
                     break;
@@ -1717,7 +1717,7 @@ void TushinScene::Update() {
                 case 1:
                     mNextPage = 0x26;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     sWiiParentCount = 0;
                     data_ov109_0215320c = 0;
                     break;
@@ -1731,13 +1731,13 @@ void TushinScene::Update() {
                 switch (result) {
                 case 0:
                     mNextPage = 3;
-                    func_0203b7e8(data_0213b700);
+                    gWirelessSession->Initialize();
                     WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 1:
                     mNextPage = 4;
-                    func_0203b7e8(data_0213b700);
-                    func_0203b87c(data_0213b700);
+                    gWirelessSession->Initialize();
+                    gWirelessSession->SetSsid();
                     WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 3:
@@ -1751,7 +1751,7 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 }
                 break;
             case 4:
@@ -1759,7 +1759,7 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 }
                 break;
             case 5:
@@ -1767,9 +1767,9 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
-                    func_0203bac4(data_0213b700, result);
+                    gWirelessSession->EndScan(result);
                     mNextPage = 6;
                 }
                 break;
@@ -1854,7 +1854,7 @@ void TushinScene::Update() {
                     close = 0x2C;
                     MiiTransfer_Cut();
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
-                    data_0213b700->mParent = result;
+                    gWirelessSession->mParent = result;
                     mConnectRequested = 1;
                     mNextPage = 0x28;
                 }
@@ -1939,7 +1939,7 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow) || mNextPage == 5) {
                     break;
                 }
-                if (func_0203b9c4(data_0213b700) <= 0) {
+                if (gWirelessSession->CountParents() <= 0) {
                     break;
                 }
                 mNextPage = 5;
@@ -2124,7 +2124,7 @@ void TushinScene::Update() {
                 if (mConnectRequested != 1) {
                     break;
                 }
-                MiiTransfer_Connect(mParentIds[data_0213b700->mParent]);
+                MiiTransfer_Connect(mParentIds[gWirelessSession->mParent]);
                 mConnectRequested = 0;
                 break;
             case 66:
@@ -2246,10 +2246,10 @@ void TushinScene::Update() {
                 }
                 switch (mNextPage) {
                 case 3:
-                    func_0203b940(data_0213b700, 1);
+                    gWirelessSession->RequestMeasureChannel(1);
                     break;
                 case 4:
-                    func_0203b900(data_0213b700, 1);
+                    gWirelessSession->RequestScan(1);
                     for (int i = 0; i < 3; i++) {
                         sParentTimers[i] = 0;
                         mParentIds[i] = 0;
@@ -2305,7 +2305,7 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 8:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
                     PlaySound(0xB);
                     mUnknown3F090 = 0;
                     break;
@@ -2328,23 +2328,23 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 6:
-                    func_0203b968(data_0213b700, 1);
+                    gWirelessSession->RequestConnect(1);
                     mWait = 60;
                     break;
                 case 36:
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     mWait = 60;
                     break;
                 case 37:
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     PlaySound(0xD);
                     break;
                 case 40:
                     mWait = 60;
                     break;
                 case 41:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
                     PlaySound(0xB);
                     break;
                 case 46:
@@ -2435,9 +2435,9 @@ void TushinScene::Draw() {
 
 // @0x02151620
 void TushinScene::Exit() {
-    if (GetMode() == 1 && WH_GetSystemState() != 0 && data_0213b700->mUnknown00 == 0) {
+    if (GetMode() == 1 && WH_GetSystemState() != 0 && gWirelessSession->mEndRequested == 0) {
         WH_Finalize();
-        func_0203b8b4(data_0213b700, 1);
+        gWirelessSession->RequestEnd(1);
     }
     if (mSortKey != mResidents.mUnknown11306) {
         gGameData.mMiiListSortKey = mResidents.mUnknown11306;
@@ -2458,8 +2458,8 @@ void TushinScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "STS");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     if (GetMode() == 1) {
-        func_0203b8b4(data_0213b700, 1);
-        while (func_0203b800(data_0213b700) == 1) {
+        gWirelessSession->RequestEnd(1);
+        while (gWirelessSession->UpdateEnd() == 1) {
         }
         return;
     }
@@ -2673,7 +2673,7 @@ void TushinScene::ClearParentNames() {
 // @0x02151e78
 void TushinScene::Save() {
     if (!func_0202cd48(&gGameData)) {
-        func_0203c02c(&gSceneManager, 0xC2);
+        gSceneManager.RequestScene(0xC2);
     }
 }
 

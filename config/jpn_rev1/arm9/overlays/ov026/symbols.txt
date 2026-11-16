@@ -16,7 +16,7 @@ data_ov026_0214a508 kind:data(any) addr:0x0214a508 ambiguous
 data_ov026_0214a51c kind:data(any) addr:0x0214a51c
 data_ov026_0214a548 kind:data(any) addr:0x0214a548 ambiguous
 data_ov026_0214a54c kind:data(any) addr:0x0214a54c
-data_ov026_0214a568 kind:data(any) addr:0x0214a568 ambiguous
+_ZTV13TestNg87Scene kind:data(any) addr:0x0214a560
 data_ov026_0214a584 kind:data(any) addr:0x0214a584
 data_ov026_0214a588 kind:data(any) addr:0x0214a588 ambiguous
 gStr_N87_ov026 kind:data(any) addr:0x0214a5a0

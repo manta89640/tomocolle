@@ -53,7 +53,7 @@ gStr_Scn_Travel_Okinawa_LZ_bin kind:data(any) addr:0x0214ba1c
 gStr_Scn_Travel_Hongkong_LZ_bin kind:data(any) addr:0x0214ba38
 data_ov039_0214ba54 kind:data(any) addr:0x0214ba54
 data_ov039_0214ba68 kind:data(any) addr:0x0214ba68 ambiguous
-data_ov039_0214ba78 kind:data(any) addr:0x0214ba78 ambiguous
+_ZTV14TestNg116Scene kind:data(any) addr:0x0214ba70
 data_ov039_0214ba8c kind:data(any) addr:0x0214ba8c ambiguous
 data_ov039_0214ba94 kind:data(any) addr:0x0214ba94
 data_ov039_0214baa8 kind:data(any) addr:0x0214baa8 ambiguous

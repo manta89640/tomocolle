@@ -15,7 +15,7 @@ data_ov040_0214abf0 kind:data(any) addr:0x0214abf0
 data_ov040_0214ac00 kind:data(any) addr:0x0214ac00
 data_ov040_0214ac1c kind:data(any) addr:0x0214ac1c
 gStr_M00_BG_frame_nsc_ov040 kind:data(any) addr:0x0214ac54
-data_ov040_0214ac88 kind:data(any) addr:0x0214ac88 ambiguous
+_ZTV7Scene7A kind:data(any) addr:0x0214ac80
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov040 kind:data(any) addr:0x0214aca4
 gStr_M00_ov040 kind:data(any) addr:0x0214accc
 data_ov040_0214acd0 kind:data(any) addr:0x0214acd0

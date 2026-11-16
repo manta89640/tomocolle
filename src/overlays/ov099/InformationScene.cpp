@@ -5,6 +5,7 @@
 #include "sound/SoundManager.h"
 
 #include "InformationScene.h"
+#include "MainProgram.h"
 
 // Overlay 99: the mansion's information (InformationScene). One source file: its constants are one pool at the
 // start of .rodata, its strings the .data after the scene's virtual table.
@@ -108,8 +109,8 @@ void InformationScene::Init() {
             func_0202c264(&gGameData, i, &character);
             year = character.mBirthYear;
             if (year != BIRTH_YEAR_UNKNOWN) {
-                month = func_02098dac(&character, PROPERTY_BIRTH_MONTH);
-                int day = func_02098dac(&character, PROPERTY_BIRTH_DAY);
+                month = character.GetParameter(PROPERTY_BIRTH_MONTH);
+                int day = character.GetParameter(PROPERTY_BIRTH_DAY);
                 int age = GetAge(year, month, day);
                 if (age != -1) {
                     ageSum += age;
@@ -117,7 +118,7 @@ void InformationScene::Init() {
                 }
             }
             comfortSum += character.mUnknown0FB;
-            s8 personality = func_02098f2c(&character);
+            s8 personality = character.GetPersonality();
             typeX += sPersonalityX[personality];
             typeY += sPersonalityY[personality];
         }
@@ -269,7 +270,7 @@ void InformationScene::Init() {
 
 void InformationScene::Update() {
     if (func_0203133c(&mButtons[0])) {
-        func_0203c02c(&gSceneManager, 0x11);
+        gSceneManager.RequestScene(0x11);
     }
 }
 

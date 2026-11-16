@@ -3,7 +3,6 @@
 
 #include <nitro.h>
 
-#include "../../scene/MainProgram3d.h"
 #include "character/Character.h"
 #include "Model.h"
 #include "Scene.h"
@@ -31,28 +30,5 @@ public:
     /* 0x4DD4 */ int mFaceKind;              // X with up and down: 0 to 26
     /* 0x4DD8 */ int mHeadTurn;              // L with up and down: 0 to 7
 }; // 0x4DDC
-
-// --- What the scene uses of the main program (not decompiled) ---------------------------------------------------
-
-extern "C" {
-// Moves the camera, its position and its target alike
-void Camera_Translate(Camera *camera, fx32 x, fx32 y, fx32 z);
-// Points a light along -z, white, and turns it on
-void func_0202a96c(Light *light);
-// Sets the frame of a model's animation (found as AnimModel_FindAnimation finds it)
-void AnimModel_SetAnimationFrame(AnimModel *model, fx32 frame, u32 resType, int id);
-// Sets the line that CharacterBase::HitTestFace() tests against: from the camera's eye (data_02122764 + 0x20)
-// through the touched point (data_021223e4 + 0x428), its direction at data_02122818 (data_021223e4 + 0x434).
-// Returns NNS_G3dScrPosToWorldLine's result.
-int ModelResources_SetTouchLine(void *resources, int x, int y);
-
-// Members of CharacterBase that main's symbols.txt still has under these names, and that complete units of the
-// main program and of overlay 96 call by them (CharacterBase::InitFace, SetFace, SetDefaultMii and Draw on
-// work/gap66-a)
-void func_0208fd90(CharacterBase *character, u32 defaultMii);
-void Character_SetFace(CharacterBase *character, int kind);
-void func_0208ff44(CharacterBase *character, u32 index, BOOL makeFace);
-void func_02090214(CharacterBase *character);
-}
 
 #endif // OV002_FACETESTSCENE_H

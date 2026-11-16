@@ -27,7 +27,7 @@ data_ov091_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
 gStr__ov091_3 kind:data(any) addr:0x0214a8f4
 data_ov091_0214a90c kind:data(any) addr:0x0214a90c ambiguous
 data_ov091_0214a948 kind:data(any) addr:0x0214a948 ambiguous
-data_ov091_0214a988 kind:data(any) addr:0x0214a988 ambiguous
+_ZTV13CityHallScene kind:data(any) addr:0x0214a980
 gStr_N83_ov091 kind:data(any) addr:0x0214a9a4
 data_ov091_0214a9a8 kind:data(any) addr:0x0214a9a8
 data_ov091_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous

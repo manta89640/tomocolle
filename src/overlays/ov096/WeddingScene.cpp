@@ -15,10 +15,10 @@ static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0,
 void WeddingScene::StartLoading() {
     func_0202c264(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
     mCharacters[0].mIndex = GetCharacterIndex(0);
-    func_02091048(&mCharacters[0], "3H0");
+    mCharacters[0].Character::SetArchive("3H0");
     func_0202c264(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
     mCharacters[1].mIndex = GetCharacterIndex(1);
-    func_02091048(&mCharacters[1], "3H1");
+    mCharacters[1].Character::SetArchive("3H1");
     mRoom.mStyle = mCharacters[0].mInterior;
     func_020a54c4(&mRoom, "CO0", 0);
     func_020a56bc(&mRoom, "RM?", 0);
@@ -143,23 +143,22 @@ void WeddingScene::Init3d() {
     animations = func_0202ad04(data_021223e4, 2, "3HA", 0);
     ModelResources_SetModel(data_021223e4, 0, mCharacters[0].mModelPath);
     ModelResources_SetModel(data_021223e4, 1, mCharacters[1].mModelPath);
-    func_02090fdc(&mCharacters[0], 0, 0, 0);
-    func_02090fdc(&mCharacters[1], 1, 0, 0);
+    mCharacters[0].Character::Init(0, 0, 0);
+    mCharacters[1].Character::Init(1, 0, 0);
     for (int i = 0; i < 2; i++) {
         WeddingCharacter *character = &mCharacters[i];
         func_0202c264(&gGameData, GetCharacterIndex(i), character);
-        func_0208fefc(character);
-        func_02091a88(character);
-        func_02091a24(character);
-        func_02091a6c(character);
-        mCharacters[i].mPersonality = func_02098f2c(character);
+        character->CharacterBase::MakeFace();
+        character->Character::UpdateBodyColors();
+        character->Character::UpdateBodyScale();
+        character->Character::UpdateAnimSpeed();
+        mCharacters[i].mPersonality = character->GetPersonality();
         func_0209decc(character);
-        func_020910d4(character);
+        character->Character::UpdateSpeedScales();
         func_02029660(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, animations);
         mCharacters[i].mModel.mUnknown4A4 = TRUE;
-        Character_SetFace(character, 10);
-        Character_SetAnimation(character, RESOURCE_BCA0,
-                      ResourceSet_FindIndexByName(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, "idle00"));
+        character->CharacterBase::SetFace(10);
+        character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mCharacters[i].mModel.mResourceSet, RESOURCE_BCA0, "idle00"));
         mCharacters[i].SetPos(points[i]);
         character->FaceCamera();
         character->TurnHeadToCamera();
@@ -244,7 +243,7 @@ void WeddingScene::Update() {
     case STATE_GIVE_ALBUM:
         if (mFrame >= 56) {
             mInventory.mItems[ITEM_WEDDING_ALBUM].Add(1);
-            func_0203c02c(&gSceneManager, 0xC0);
+            gSceneManager.RequestScene(0xC0);
             gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
             gSceneMemory.mCharacters[1] = mCharacters[1].mIndex;
         }
@@ -282,7 +281,7 @@ void WeddingScene::Update() {
             mCharacters[1].mAwayUntil = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
             mCharacters[0].mMoodLocked = 3;
             mCharacters[1].mMoodLocked = 3;
-            func_0203c02c(&gSceneManager, 0x77);
+            gSceneManager.RequestScene(0x77);
             gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
             gSceneMemory.mCharacters[1] = mCharacters[1].mIndex;
         }
@@ -307,8 +306,8 @@ void WeddingScene::Draw() {
     case 1:
         break;
     }
-    func_02091968(&mCharacters[0]);
-    func_02091968(&mCharacters[1]);
+    mCharacters[0].Character::Draw();
+    mCharacters[1].Character::Draw();
     func_020a4a50(&mRoom.mParts);
     mGift.Draw();
 }
@@ -366,13 +365,13 @@ void WeddingCharacter::Init(WeddingContext *context) {
 }
 
 void WeddingCharacter::Update() {
-    func_020910a8(this);
+    Character::Update();
     UpdateState();
     if (mTtsPlayer->IsEngineIdle()) {
         return;
     }
     if (mLipSync) {
-        func_02090a58(this, mTtsPlayer->GetPhonemeName(), 1);
+        CharacterBase::LipSync(mTtsPlayer->GetPhonemeName(), 1);
     }
 }
 
@@ -403,7 +402,7 @@ void WeddingCharacter::UpdateState() {
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
                 mDone = TRUE;
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
             }
             break;
         }
@@ -434,7 +433,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 2:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mDone = TRUE;
             }
             break;
@@ -445,7 +444,7 @@ void WeddingCharacter::UpdateState() {
         if (mEntered) {
             mEntered = FALSE;
             LookAtPartner();
-            Character_SetFace(this, 9);
+            CharacterBase::SetFace(9);
         }
         break;
 
@@ -468,7 +467,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mDone = TRUE;
             }
             break;
@@ -556,7 +555,7 @@ void WeddingCharacter::UpdateState() {
             break;
         case 1:
             if (mTtsPlayer->IsEngineIdle()) {
-                Character_SetFace(this, 10);
+                CharacterBase::SetFace(10);
                 mFrame = 0;
                 mStep++;
             }
@@ -584,7 +583,7 @@ void WeddingCharacter::FaceCamera() {
     FloorPos camera;
     camera.x = data_02122764.mEye.x;
     camera.z = data_02122764.mEye.z;
-    Character_SetAngle(this, AngleTo(camera));
+    Character::SetAngle(AngleTo(camera));
 }
 
 // Shows a message of the trouble messages (file 0) or of the other messages (file 1) in the window, with its
@@ -664,10 +663,10 @@ void WeddingCharacter::HoldOutGift() {
         return;
     }
     mModel.mUnknown45C = TRUE;
-    rightHand = CharacterModel_GetJointPosition(&mModel, 2);
-    rightArm = CharacterModel_GetJointPosition(&mModel, 9);
-    leftHand = CharacterModel_GetJointPosition(&mModel, 1);
-    leftArm = CharacterModel_GetJointPosition(&mModel, 8);
+    rightHand = mModel.GetJointPosition(2);
+    rightArm = mModel.GetJointPosition(9);
+    leftHand = mModel.GetJointPosition(1);
+    leftArm = mModel.GetJointPosition(8);
 
     VEC_Subtract(&rightHand, &rightArm, &rightOffset);
     VEC_Normalize(&rightOffset, &rightReach);
@@ -701,8 +700,8 @@ void WeddingCharacter::LookAt(VecFx32 *target, int pitchLimit, int yawLimit) {
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
     mHeadTurnActive = TRUE;
-    func_02090c78(this, &pitch, pitchLimit);
-    func_02090c78(this, &yaw, yawLimit);
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
     mHeadYaw = yaw;
 }
@@ -712,8 +711,8 @@ void WeddingCharacter::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit)
     u16 pitch = GetHeadPitchTo(target);
     u16 yaw = GetHeadYawTo(target);
     mHeadTurnActive = TRUE;
-    func_02090c78(this, &pitch, pitchLimit);
-    func_02090c78(this, &yaw, yawLimit);
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
     mHeadPitch = pitch;
     mHeadYaw = yaw;
     mHeadPitchNow = pitch;
@@ -730,7 +729,7 @@ void WeddingCharacter::TurnHeadToCamera() {
 
 void WeddingCharacter::LookAtPartner() {
     VecFx32 target;
-    const VecFx32 &head = CharacterModel_GetJointPosition(&mPartner->mModel, 0);
+    const VecFx32 &head = mPartner->mModel.GetJointPosition(0);
     target.x = head.x;
     target.z = head.z;
     target.y = head.y + 0xB33;
@@ -740,7 +739,7 @@ void WeddingCharacter::LookAtPartner() {
 u16 WeddingCharacter::GetHeadPitchTo(VecFx32 *target) {
     MtxFx43 matrix;
     MtxFx33 rotation;
-    CharacterModel_GetJointMatrices(&mModel, 0, &matrix, &rotation);
+    mModel.GetJointMatrices(0, &matrix, &rotation);
     fx32 dz = target->z - mModel.mPos.z;
     fx32 dx = target->x - mModel.mPos.x;
     fx32 eyes = matrix._31 + 0xCCC;

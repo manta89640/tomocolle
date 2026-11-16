@@ -1,4 +1,5 @@
 #include "FaceTestScene.h"
+#include "MainProgram.h"
 
 // Overlay 2: one source file, FaceTestScene and its virtual table, with the scene's implicit destructor at the end
 // of .text. The scene is a test of the Mii face on its own: a bare face (mFace, a CharacterBase without a head
@@ -28,7 +29,7 @@ void FaceTestScene::Init() {
     mCamera = &data_02122764;
     func_0202a96c(&data_021227cc[0]);
     func_0202a96c(&data_021227cc[1]);
-    func_0208fd90(&mFace, 0);
+    mFace.InitFace(0);
     mFaceKind = 0;
     mHeadTurn = 0;
     mFace.mHeadRoll = 0x2000;
@@ -88,7 +89,7 @@ void FaceTestScene::Update() {
                 mFaceKind = 26;
             }
         } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT || data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
-            Character_SetFace(&mFace, mFaceKind);
+            mFace.SetFace(mFaceKind);
         }
     } else if (data_0211f9d4.mHeld & PAD_BUTTON_L) {
         if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
@@ -117,7 +118,7 @@ void FaceTestScene::Update() {
     if (gTouchInput.mTouched) {
         SetTouchLine(gTouchInput.mPoint);
         if (mFace.HitTestFace()) {
-            func_0208ff44(&mFace, MATH_Rand16(&gRandom, 6), TRUE);
+            mFace.SetDefaultMii(MATH_Rand16(&gRandom, 6), TRUE);
         }
     }
     mFace.UpdateFace();
@@ -126,7 +127,7 @@ void FaceTestScene::Update() {
 
 void FaceTestScene::Draw() {
     mGlasses.Draw();
-    func_02090214(&mFace);
+    mFace.Draw();
     mHead.Draw();
 }
 

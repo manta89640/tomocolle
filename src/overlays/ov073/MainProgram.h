@@ -66,6 +66,8 @@ struct Renderer3d;
 // The scene manager.
 class Scene;
 struct SceneManager {
+    void RequestScene(int sceneId); // Asks for the next scene
+
     /* 0x0 */ Scene *mScene;
     /* 0x4 */ int mNextSceneId;
     /* 0x8 */ int mPreviousSceneId;
@@ -202,7 +204,6 @@ extern int data_02123440[];
 
 // --- Scenes ---
 extern SceneManager gSceneManager;
-void func_0203c02c(SceneManager *manager, int sceneId); // Asks for the next scene
 extern SceneMemory gSceneMemory;
 
 } // extern "C"

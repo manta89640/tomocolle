@@ -740,12 +740,12 @@ void ItemTradeList::Draw() {
 void ItemTradeList::ShowCostume(int costume) {
     func_0202aecc(data_021223e4, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
-    func_0208ee18(&mMannequin->mModel, "3MM", costume, MiiData_GetSex(mContext->mPlayer));
+    mMannequin->mModel.SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
     ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
-    func_0208ef5c(&mMannequin->mModel, 0, 0);
-    func_0208f19c(&mMannequin->mModel, NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
-    func_0208ef00(&mMannequin->mModel, TRUE, TRUE);
+    mMannequin->mModel.MakeModel(0, 0);
+    mMannequin->mModel.SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
+    mMannequin->mModel.SetAnimFlags(TRUE, TRUE);
 }
 
 // @0x0214b414
@@ -1371,11 +1371,11 @@ void ItemTradeScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "STS", "Scn/Scene/SceneTushin_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "LTL", "Scn/List/List_TushinItemList_LZ.bin", 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MH", "Mdl/Misc/headManikin_3D_LZ.bin", 0);
-    func_0208ee18(&mMannequin.mModel, "3MM", 0, 0);
+    mMannequin.mModel.SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
 
     func_0202c264(&gGameData, 0, &mPlayer);
-    mPlayer.mPersonality = func_02098f2c(&mPlayer);
+    mPlayer.mPersonality = mPlayer.GetPersonality();
     switch (data_020fba28[mPlayer.mPersonality]) {
     case 0:
         ArchiveManager_MountCompressed(&gArchiveManager, "3HA", "Mdl/Ica/ica_mii_mii_touch_cool_LZ.bin", 0);
@@ -1462,9 +1462,9 @@ void ItemTradeScene::Init() {
     mNameText.mSprite.mOverwritePalette = 0;
     mNameCharOffset += ((mNameText.mCanvas.areaWidth * mNameText.mCanvas.areaHeight - 1) >> mNameText.mVramMode) + 1;
 
-    func_0203b7d4(data_0213b700, sPartners, 3);
-    func_0203b7e0(data_0213b700, sPartnerTimers);
-    func_0203b76c(data_0213b700, 1);
+    gWirelessSession->SetParentBuffer((WMBssDesc *)sPartners, 3);
+    gWirelessSession->SetTimers(sPartnerTimers);
+    gWirelessSession->Reset(1);
     MI_CpuClear8(sPartners, sizeof(sPartners));
     MI_CpuClear8(sPartnerTimers, sizeof(sPartnerTimers));
     mMusicPlaying = FALSE;
@@ -1535,7 +1535,7 @@ void ItemTradeScene::Init3d() {
     void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
     func_02029660(mMannequin.mModel.mAnim.mResourceSet, RESOURCE_BCA0, animations);
     mMannequin.SetAnimation("idle00");
-    func_0208ef00(&mMannequin.mModel, TRUE, TRUE);
+    mMannequin.mModel.SetAnimFlags(TRUE, TRUE);
     mMannequin.mModel.mUnknown4A4 = FALSE;
     func_020a03bc(&mMannequin, FALSE);
 
@@ -1574,10 +1574,10 @@ void ItemTradeScene::UpdateWireless() {
     }
     switch (WH_GetSystemState()) {
     case WH_SYSSTATE_IDLE:
-        func_0203b898(data_0213b700);
-        func_0203b908(data_0213b700);
-        func_0203b948(data_0213b700);
-        if (!func_0203b970(data_0213b700)) {
+        gWirelessSession->SetUserGameInfo();
+        gWirelessSession->UpdateScan();
+        gWirelessSession->UpdateMeasureChannel();
+        if (!gWirelessSession->UpdateConnect()) {
             mNextState = STATE_ERROR;
             WH_Reset();
         }
@@ -1614,10 +1614,10 @@ void ItemTradeScene::UpdateWireless() {
         break;
     }
     case WH_SYSSTATE_SCANNING:
-        if (func_0203b9b4(data_0213b700)) {
-            func_0203b9fc(data_0213b700);
-            WirelessSession *session = data_0213b700;
-            func_0203ba20(session, mNames[func_0203ba10(session)]);
+        if (gWirelessSession->IsParentFound()) {
+            gWirelessSession->ClearParentFound();
+            WirelessSession *session = gWirelessSession;
+            session->GetFoundParentName(mNames[session->GetFoundParent()]);
         }
         if (mState == STATE_CHOOSE_PARTNER) {
             for (int i = 0; i < 3; i++) {
@@ -1727,7 +1727,7 @@ void ItemTradeScene::InitWirelessWhenIdle() {
 // after: with a return in each, the window's address is computed after mState is loaded, not before.
 // @0x0214dc20
 void ItemTradeScene::Update() {
-    func_0203b800(data_0213b700);
+    gWirelessSession->UpdateEnd();
     UpdateMusic();
     UpdateLinkIcon();
     func_020341d4(&mWindow);
@@ -1773,7 +1773,7 @@ void ItemTradeScene::Update() {
          mNextState != STATE_DISCONNECTED)) {
         if (WH_GetSystemState() != WH_SYSSTATE_STOP) {
             WH_Finalize();
-            func_0203b8b4(data_0213b700, TRUE);
+            gWirelessSession->RequestEnd(TRUE);
         }
         sDisconnected = 0;
         failed = TRUE;
@@ -1807,7 +1807,7 @@ void ItemTradeScene::Update() {
                 switch (result) {
                 case 0:
                     mNextState = STATE_RECRUITING;
-                    func_0203b7e8(data_0213b700);
+                    gWirelessSession->Initialize();
                     WH_SetReceiver(Receive);
                     break;
                 case 1:
@@ -1816,12 +1816,12 @@ void ItemTradeScene::Update() {
                         sPartnerTimers[i] = 0;
                     }
                     ClearNames();
-                    func_0203b7e8(data_0213b700);
-                    func_0203b87c(data_0213b700);
+                    gWirelessSession->Initialize();
+                    gWirelessSession->SetSsid();
                     WH_SetReceiver(Receive);
                     break;
                 case 3:
-                    func_0203c02c(&gSceneManager, 0x29);
+                    gSceneManager.RequestScene(0x29);
                     flags = 0x2C;
                     break;
                 }
@@ -1831,7 +1831,7 @@ void ItemTradeScene::Update() {
                     mNextState = STATE_CHOOSE;
                     flags = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, TRUE);
+                    gWirelessSession->RequestEnd(TRUE);
                 }
                 break;
             case STATE_SEARCHING:
@@ -1839,7 +1839,7 @@ void ItemTradeScene::Update() {
                     mNextState = STATE_CHOOSE;
                     flags = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, TRUE);
+                    gWirelessSession->RequestEnd(TRUE);
                 }
                 break;
             case STATE_CHOOSE_PARTNER:
@@ -1847,9 +1847,9 @@ void ItemTradeScene::Update() {
                     mNextState = STATE_CHOOSE;
                     flags = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, TRUE);
+                    gWirelessSession->RequestEnd(TRUE);
                 } else if (result >= 0 && result < 3 && sPartnerTimers[result] > 0) {
-                    func_0203bac4(data_0213b700, result);
+                    gWirelessSession->EndScan(result);
                     mNextState = STATE_CONNECTING;
                 }
                 break;
@@ -1875,7 +1875,7 @@ void ItemTradeScene::Update() {
                 flags = 0x14;
                 break;
             case STATE_DISCONNECTED:
-                func_0203c02c(&gSceneManager, 0x29);
+                gSceneManager.RequestScene(0x29);
                 break;
             case STATE_ASK_DISCONNECT:
                 if (result == 0) {
@@ -1887,7 +1887,7 @@ void ItemTradeScene::Update() {
                 break;
             case STATE_ERROR:
                 mNextState = STATE_CHOOSE;
-                func_0203c02c(&gSceneManager, 0x29);
+                gSceneManager.RequestScene(0x29);
                 break;
             }
             func_020349cc(&mWindow, flags);
@@ -1895,7 +1895,7 @@ void ItemTradeScene::Update() {
             switch (mState) {
             case STATE_SEARCHING:
                 if (WH_GetSystemState() == WH_SYSSTATE_SCANNING && IsWindowOpen(&mWindow) &&
-                    mNextState != STATE_CHOOSE_PARTNER && func_0203b9c4(data_0213b700) > 0) {
+                    mNextState != STATE_CHOOSE_PARTNER && gWirelessSession->CountParents() > 0) {
                     mNextState = STATE_CHOOSE_PARTNER;
                     mWindow.mUnknownSetBeforeClose = 15;
                     func_020349cc(&mWindow, 0x1C);
@@ -1983,7 +1983,7 @@ void ItemTradeScene::Update() {
                 break;
             case STATE_WAIT:
                 if (WH_GetSystemState() == WH_SYSSTATE_STOP || WH_GetSystemState() == WH_SYSSTATE_IDLE) {
-                    func_0203c02c(&gSceneManager, 0x29);
+                    gSceneManager.RequestScene(0x29);
                 }
                 break;
             }
@@ -2005,16 +2005,16 @@ void ItemTradeScene::Update() {
                 }
                 switch (mNextState) {
                 case STATE_RECRUITING:
-                    func_0203b940(data_0213b700, TRUE);
+                    gWirelessSession->RequestMeasureChannel(TRUE);
                     break;
                 case STATE_SEARCHING:
-                    func_0203b900(data_0213b700, TRUE);
+                    gWirelessSession->RequestScan(TRUE);
                     break;
                 case STATE_CHOOSE_PARTNER:
                     PlaySound(10);
                     break;
                 case STATE_CONNECTING:
-                    func_0203b968(data_0213b700, TRUE);
+                    gWirelessSession->RequestConnect(TRUE);
                     mWait = 60;
                     break;
                 case STATE_CONNECTED_PARENT:
@@ -2023,7 +2023,7 @@ void ItemTradeScene::Update() {
                     mIsParent = TRUE;
                     break;
                 case STATE_CONNECTED_CHILD:
-                    int partner = data_0213b700->mPartner;
+                    int partner = gWirelessSession->mParent;
                     mWindow.mTexts[0].SetStringArg(mNames[partner], 0);
                     PlaySound(11);
                     mIsParent = FALSE;
@@ -2073,11 +2073,11 @@ void ItemTradeScene::Update() {
                 }
                 case STATE_WAIT:
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, TRUE);
+                    gWirelessSession->RequestEnd(TRUE);
                     mWait = 60;
                     break;
                 case STATE_ERROR:
-                    func_0203b8b4(data_0213b700, TRUE);
+                    gWirelessSession->RequestEnd(TRUE);
                     PlaySound(13);
                     break;
                 }
@@ -2163,9 +2163,9 @@ void ItemTradeScene::Draw() {
 
 // @0x0214ebe8
 void ItemTradeScene::Exit() {
-    if (WH_GetSystemState() != WH_SYSSTATE_STOP && !data_0213b700->mActive) {
+    if (WH_GetSystemState() != WH_SYSSTATE_STOP && !gWirelessSession->mEndRequested) {
         WH_Finalize();
-        func_0203b8b4(data_0213b700, TRUE);
+        gWirelessSession->RequestEnd(TRUE);
     }
     func_0209e310(&mCostumes);
     mInventory.Save();
@@ -2186,8 +2186,8 @@ void ItemTradeScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "TRM");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
     ArchiveManager_Unmount(&gArchiveManager, "TXM");
-    func_0203b8b4(data_0213b700, TRUE);
-    while (func_0203b800(data_0213b700) == TRUE) {
+    gWirelessSession->RequestEnd(TRUE);
+    while (gWirelessSession->UpdateEnd() == TRUE) {
     }
 }
 
@@ -2247,7 +2247,7 @@ void ItemTradeScene::ClearNames() {
 // @0x0214ee88
 void ItemTradeScene::WriteSave() {
     if (!func_0202cd48(&gGameData)) {
-        func_0203c02c(&gSceneManager, 0xC2);
+        gSceneManager.RequestScene(0xC2);
     }
 }
 

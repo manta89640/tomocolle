@@ -13,6 +13,14 @@
 // saved game's record into one, func_0202c28c back). The fields are named as the character headers name them.
 struct SavedCharacter {
     SavedCharacter();
+    // Its functions that these call, as include/character/Character.h names them
+    void SetMoodFromResult(int result, int detail);
+    void AddRelationMeter(int index, int change);
+    void SetRelation(int index, u8 rank, u8 meter);
+    static BOOL IsRank678(int rank);
+    BOOL IsRank1249Or678(int rank);
+    void EndLongAct(SavedCharacter *first, SavedCharacter *second);
+    BOOL IsLongActPaired();
 
     /* 0x000 */ u8 mUnknown000[0x54];
     /* 0x054 */ u32 mUnknown054Bits0 : 11;
@@ -104,14 +112,7 @@ u8 func_0202c5b4(GameData *game, int index);
 u8 func_0202c748(GameData *game, int index);
 BOOL func_0202c354(GameData *game, int index);
 int MiiData_GetSex(SavedCharacter *character);
-void func_02098fe0(SavedCharacter *character, int result, int relation);
-void func_02099088(SavedCharacter *character, int other, int change);
-void func_020990b0(SavedCharacter *character, int other, u8 relation, int value);
-BOOL func_0209926c(int relation);
-BOOL func_020992ac(SavedCharacter *character, int relation);
-void func_02099384(SavedCharacter *character, int a, int b);
 void func_0209944c(SavedCharacter *character, int event, s64 now, RTCTime *time, int a, int b);
-int func_02099cdc(SavedCharacter *character);
 int func_0209a10c(SavedCharacter *character);
 BOOL func_0209a190(SavedCharacter *character);
 BOOL func_0209a1a0(int kind);
@@ -160,7 +161,7 @@ void StartRandomEvents(s64 now) {
         BOOL started;
         func_0202c264(&gGameData, indices[i], &character);
         character.mIndex = indices[i];
-        if (func_02099cdc(&character)) {
+        if (character.IsLongActPaired()) {
             func_0202c264(&gGameData, character.mEventPartner, &partner);
             partner.mIndex = character.mEventPartner;
             started = func_0209b208(&character, now, force, &partner, TRUE);
@@ -175,7 +176,7 @@ void StartRandomEvents(s64 now) {
                 int otherIndex = character.mMoodPartner;
                 func_0202c264(&gGameData, otherIndex, &other);
                 other.mIndex = otherIndex;
-                if (func_02099cdc(&other)) {
+                if (other.IsLongActPaired()) {
                     if (other.mEventPartner != character.mIndex) {
                         func_0202c264(&gGameData, other.mEventPartner, &otherPartner);
                         otherPartner.mIndex = other.mEventPartner;
@@ -238,7 +239,7 @@ void UpdateResident(int index, s64 now, RTCTime *time) {
         SavedCharacter character;
         func_0202c264(&gGameData, index, &character);
         character.mIndex = index;
-        func_02099384(&character, 0, 0);
+        character.EndLongAct(NULL, NULL);
     }
     if (now >= func_0202c4e4(&gGameData, index)) {
         SavedCharacter character;
@@ -478,7 +479,7 @@ int EncounterJudge::GetMeetingChange(SavedCharacter *first, SavedCharacter *seco
 
 // Counts the other residents by their relation to the two (counts[0..9] for the first, counts[10..19] for the
 // second); *a counts those of whom func_0209a518/func_0209a534 hold, *b those both have a relation with that
-// func_020992ac holds for. Returns the number of residents.
+// SavedCharacter::IsRank1249Or678 holds for. Returns the number of residents.
 int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *second, u8 *counts, s16 *a, s16 *b) {
     MI_CpuFill8(counts, 0, 20);
     *a = 0;
@@ -508,7 +509,7 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
                               func_0202c58c(&gGameData, i))) {
                 (*a)++;
             }
-            if (func_020992ac(first, first->mRelation[i]) && func_020992ac(second, second->mRelation[i])) {
+            if (first->IsRank1249Or678(first->mRelation[i]) && second->IsRank1249Or678(second->mRelation[i])) {
                 (*b)++;
             }
         }
@@ -606,7 +607,7 @@ int EncounterJudge::JudgeEnd(SavedCharacter *first, SavedCharacter *second, BOOL
         }
     }
     int result = GetRelationAfter(relation);
-    if (func_0209926c(result)) {
+    if (SavedCharacter::IsRank678(result)) {
         int residents = CountAcquaintances(first, second, counts, &a, &b);
         if (func_0209a3ec(first) || func_0209a3ec(second)) {
             result = 10;
@@ -650,8 +651,8 @@ int GetRelationAfter(int result) {
 void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int change) {
     int firstIndex = first->mIndex;
     int secondIndex = second->mIndex;
-    func_02099088(first, secondIndex, change);
-    func_02099088(second, firstIndex, change);
+    first->AddRelationMeter(secondIndex, change);
+    second->AddRelationMeter(firstIndex, change);
     int result = 10;
     if (first->mMood == 3 || second->mMood == 3) {
         result = 10;
@@ -663,16 +664,16 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
     if (result != 10) {
         u8 relation = first->mRelation[secondIndex];
         if (change > 0) {
-            func_020990b0(first, secondIndex, result, 100);
-            func_020990b0(second, firstIndex, result, 100);
-            func_02098fe0(first, result, relation);
-            func_02098fe0(second, result, relation);
+            first->SetRelation(secondIndex, result, 100);
+            second->SetRelation(firstIndex, result, 100);
+            first->SetMoodFromResult(result, relation);
+            second->SetMoodFromResult(result, relation);
             Apply(first, second, relation, Clock_GetSeconds(data_02123440));
         } else if (change < 0) {
-            func_020990b0(first, secondIndex, result, 100);
-            func_020990b0(second, firstIndex, result, 100);
-            func_02098fe0(first, result, relation);
-            func_02098fe0(second, result, relation);
+            first->SetRelation(secondIndex, result, 100);
+            second->SetRelation(firstIndex, result, 100);
+            first->SetMoodFromResult(result, relation);
+            second->SetMoodFromResult(result, relation);
             ApplyEnd(first, second, relation, Clock_GetSeconds(data_02123440), TRUE);
         }
     }
@@ -706,7 +707,7 @@ void EncounterJudge::SetEventEnds(SavedCharacter *first, SavedCharacter *second,
     if (!partners) {
         return;
     }
-    if (func_02099cdc(first)) {
+    if (first->IsLongActPaired()) {
         u8 index = first->mEventPartner;
         if (index != second->mIndex) {
             SavedCharacter partner;
@@ -715,7 +716,7 @@ void EncounterJudge::SetEventEnds(SavedCharacter *first, SavedCharacter *second,
             func_0202c28c(&gGameData, index, &partner);
         }
     }
-    if (!func_02099cdc(second)) {
+    if (!second->IsLongActPaired()) {
         return;
     }
     u8 index = second->mEventPartner;
@@ -738,10 +739,10 @@ void EncounterJudge::Apply(SavedCharacter *first, SavedCharacter *second, int re
     StartOuting(first, second, 3, 2, now);
     first->mMood = 1;
     second->mMood = 1;
-    if (!func_02099cdc(first)) {
+    if (!first->IsLongActPaired()) {
         first->mEventEnd = now;
     }
-    if (!func_02099cdc(second)) {
+    if (!second->IsLongActPaired()) {
         second->mEventEnd = now;
     }
 }
@@ -758,7 +759,7 @@ void EncounterJudge::ApplyEnd(SavedCharacter *first, SavedCharacter *second, int
         func_0209b1d8(second);
         first->mMood = 0;
         second->mMood = 0;
-    } else if (func_0209926c(current)) {
+    } else if (SavedCharacter::IsRank678(current)) {
         StartOuting(first, second, 3, 4, now);
         first->mMood = 2;
         second->mMood = 2;
