@@ -2339,6 +2339,58 @@ void func_0207183c(NFLObj *obj) {
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
+// Not matching yet: the original keeps the compare and branch of this clamp, whose result nothing uses (the eye's
+// rotation goes in unclamped); here the compiler drops the whole clamp.
+#pragma optimization_level 2
+#pragma opt_common_subs off
+void func_02071a78(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+    int rot;
+
+    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[26]);
+    if (rot < 0) {
+        rot = 0;
+    } else if (rot > 7) {
+        rot = 7;
+    }
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[0].unk0, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[0].unk0, obj->unk14);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
 #pragma optimization_level 2
 #pragma opt_common_subs off
 void func_02071cdc(NFLObj *obj) {
@@ -2379,6 +2431,241 @@ void func_02071cdc(NFLObj *obj) {
     cos = (fx16)FX_CosIdx(0);
     func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[1].unk0, obj->unk24);
 }
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+// Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
+#pragma optimization_level 2
+#pragma opt_common_subs off
+#pragma opt_propagation off
+void func_02071f24(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+    int rot;
+
+    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[48]);
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    if (rot < 0) {
+        rot = 0;
+    } else if (rot > 7) {
+        rot = 7;
+    }
+    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[2].unk0, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[2].unk0, obj->unk14);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+}
+#pragma opt_propagation reset
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+// Not matching yet: for the eyebrow the original adds d twice (once to compare, once in the else), where this folds
+// the sum into brow before the compares. opt_propagation off keeps d in a register, as the original does.
+#pragma optimization_level 2
+#pragma opt_common_subs off
+#pragma opt_propagation off
+void func_0207219c(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+    int rot;
+    int brow;
+    int d;
+
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    brow = obj->unk80[6];
+    d = 2;
+    rot = obj->unk80[3] + 2;
+    if (rot < 0) {
+        rot = 0;
+    } else if (rot > 7) {
+        rot = 7;
+    }
+    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    if (brow + d < 0) {
+        brow = 0;
+    } else if (brow + d > 11) {
+        brow = 11;
+    } else {
+        brow += d;
+    }
+    idx = (u16)((brow + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[3].unk0, obj->unk24);
+}
+#pragma opt_propagation reset
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+// Not matching yet: as func_0207219c, with d = -2 and an eyebrow rotation past 11 set to 0.
+#pragma optimization_level 2
+#pragma opt_common_subs off
+#pragma opt_propagation off
+void func_02072418(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+    int rot;
+    int brow;
+    int d;
+
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    brow = obj->unk80[6];
+    d = -2;
+    rot = obj->unk80[3] + -2;
+    if (rot < 0) {
+        rot = 0;
+    } else if (rot > 7) {
+        rot = 7;
+    }
+    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    if (brow + d < 0) {
+        brow = 0;
+    } else if (brow + d > 11) {
+        brow = 0;
+    } else {
+        brow += d;
+    }
+    idx = (u16)((brow + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[4].unk0, obj->unk24);
+}
+#pragma opt_propagation reset
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+// Not matching yet: as func_02071f24.
+#pragma optimization_level 2
+#pragma opt_common_subs off
+#pragma opt_propagation off
+void func_02072694(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+    int rot;
+
+    rot = obj->unk80[3] + (data_020b689c[obj->unk80[3]] - data_020b689c[49]);
+    y = -((obj->unk80[2] - 2) * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    if (rot < 0) {
+        rot = 0;
+    } else if (rot > 7) {
+        rot = 7;
+    }
+    idx = (u16)(((rot + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk18, obj->unk1C);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+}
+#pragma opt_propagation reset
 #pragma opt_common_subs reset
 #pragma optimization_level reset
 
