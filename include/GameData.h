@@ -40,6 +40,10 @@ public:
     /* 0xC9 */ u8 mMusicVolume;  // 0 to 3, for sequences and streams (default 3)
     /* 0xCA */ u8 mEffectVolume; // 0 to 3, for sequence archive entries (default 3)
     /* 0xCB */ u8 mVoiceVolume;  // 0 to 3, for the speech synthesizer (default 3)
+    /* 0xCC */ u8 mUnknownCC[0x44];
+    // A bit for each of the things a visited character can propose to do (overlay 75's sActivities) that one
+    // has proposed
+    /* 0x110 */ u32 mActivitiesProposed;
 };
 
 extern GameData gGameData;
