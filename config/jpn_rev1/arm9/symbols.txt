@@ -4211,10 +4211,8 @@ data_020b1410 kind:data(any) addr:0x020b1410
 data_020b1810 kind:data(any) addr:0x020b1810
 data_020b3810 kind:data(any) addr:0x020b3810
 FX_AtanIdxTable_ kind:data(any) addr:0x020b4810
-sTexPlttStartAddrTable kind:data(any) addr:0x020b4914
-data_020b4924 kind:data(any) addr:0x020b4924
-data_020b4926 kind:data(any) addr:0x020b4926
-data_020b4928 kind:data(any) addr:0x020b4928
+sTexPlttStartAddrTable kind:data(any) addr:0x020b4914 local
+sTexStartAddrTable kind:data(any) addr:0x020b4924 local
 data_020b4984 kind:data(any) addr:0x020b4984
 SNDi_DecibelTable kind:data(any) addr:0x020b4aa4
 VolumeTable kind:data(any) addr:0x020b51a4
@@ -6172,7 +6170,14 @@ sBGExtPlttLCDCOffset kind:bss addr:0x021195a0 local
 sBGExtPlttLCDCBlk kind:bss addr:0x021195a4 local
 sBGExtPltt kind:bss addr:0x021195a8 local
 sSubOBJExtPltt kind:bss addr:0x021195ac local
-sClrImg kind:bss addr:0x021195b0
+sClrImg kind:bss addr:0x021195b0 local
+sTexLCDCBlk1 kind:bss addr:0x021195b4 local
+sTexPlttLCDCBlk kind:bss addr:0x021195b8 local
+sTexPltt kind:bss addr:0x021195bc local
+sClrImgLCDCBlk kind:bss addr:0x021195c0 local
+sTex kind:bss addr:0x021195c4 local
+sTexLCDCBlk2 kind:bss addr:0x021195c8 local
+sSzTexBlk1 kind:bss addr:0x021195cc local
 data_021195d0 kind:bss addr:0x021195d0
 data_021195d4 kind:bss addr:0x021195d4
 data_021195d8 kind:bss addr:0x021195d8
@@ -6387,23 +6392,20 @@ sSeqPlayer kind:bss addr:0x0213e5c4
 data_0213ea04 kind:bss addr:0x0213ea04
 data_0213ea1c kind:bss addr:0x0213ea1c
 data_0213ea20 kind:bss addr:0x0213ea20
-data_0213ee84 kind:bss addr:0x0213ee84
-sStrmList kind:bss addr:0x0213ee88
-data_0213ee94 kind:bss addr:0x0213ee94
-data_0213eed4 kind:bss addr:0x0213eed4
-data_0213eed8 kind:bss addr:0x0213eed8
+bInitialized$2674 kind:bss addr:0x0213ee84 local
+sStrmList kind:bss addr:0x0213ee88 local
+buffer$2790 kind:bss addr:0x0213ee94 local
+sStrmChannel kind:bss addr:0x0213eed4 local
 sIsThreadCreated kind:bss addr:0x0213ef54
 sMesgQ kind:bss addr:0x0213ef5c
 sCapParam kind:bss addr:0x0213ef9c
 sCurrent kind:bss addr:0x0213f550
 waveArcHeader$3136 kind:bss addr:0x0213f554 local
-data_0213f590 kind:bss addr:0x0213f590
+initialized$3243 kind:bss addr:0x0213f590
 sFreeCommandList kind:bss addr:0x0213f59c
 sDecodeBufferMutex kind:bss addr:0x0213f5a8
 sLoadCommandBuffer kind:bss addr:0x0213f5c0
 sStrmThread kind:bss addr:0x0213f740
-data_0213fc08 kind:bss addr:0x0213fc08
-data_0213fc20 kind:bss addr:0x0213fc20
 sStrmPlayer kind:bss addr:0x0213fc2c
 sDecodeBufferArea kind:bss addr:0x02140200
 sRootListInitialized kind:bss addr:0x02140400

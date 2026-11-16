@@ -76,6 +76,8 @@ lib/NitroSDK/libraries/gx/src/gx_load2d.c:
 
 lib/NitroSDK/libraries/gx/src/gx_load3d.c:
     .text       start:0x02006374 end:0x020067e8
+    .rodata     start:0x020b4914 end:0x020b4984
+    .bss        start:0x021195b0 end:0x021195d0
 
 lib/NitroSDK/libraries/gx/src/g3.c:
     complete
@@ -408,6 +410,7 @@ lib/NitroSystem/libraries/snd/src/player.c:
 
 lib/NitroSystem/libraries/snd/src/stream.c:
     .text       start:0x02054b74 end:0x02055194
+    .bss        start:0x0213ee84 end:0x0213ef54
 
 lib/NitroSystem/libraries/snd/src/capture.c:
     .text       start:0x02055194 end:0x02055408
