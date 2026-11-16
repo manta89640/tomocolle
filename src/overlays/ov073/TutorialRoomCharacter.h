@@ -37,7 +37,7 @@ extern const s16 data_020fb898[4][5]; // The same: walking
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. The prefix tells it from
 // overlay 74's: the program is linked as one, so the two cannot have one name.
-class TutorialRoomCharacter : public CharacterBase {
+class TutorialRoomCharacter : public Character {
 public:
     TutorialRoomCharacter();
     void SetState(int state);
@@ -73,12 +73,12 @@ public:
     // the point on the callers' stacks.
     FloorPos GetFloorPos() {
         FloorPos pos;
-        pos.x = mModel.mPos.x;
-        pos.z = mModel.mPos.z;
+        pos.x = mPos.x;
+        pos.z = mPos.z;
         return pos;
     }
-    VecFx32 GetPos() const { return mModel.mPos; }
-    void SetPos(VecFx32 pos) { mModel.mPos = pos; }
+    VecFx32 GetPos() const { return mPos; }
+    void SetPos(VecFx32 pos) { mPos = pos; }
     u8 GetRelationToPartner() { return mRelation[mPartner->mIndex]; }
     BOOL IsWithinReach(TutorialRoomCharacter *other, fx32 reach, fx32 maxReach) {
         FloorPos pos = other->GetFloorPos();
@@ -111,24 +111,7 @@ public:
         mHeadIcon.SetMode(3);
     }
 
-    /* 0x25E4 */ CharacterModel mModel;
-    /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];     // Name its archive is mounted under (func_02091048 sets both)
-    /* 0x2AB0 */ char mArchivePath[0x3C];  // and the archive's path
-    /* 0x2AEC */ fx32 mSpeed;
-    /* 0x2AF0 */ fx32 mUnknown2AF0;        // func_02091174 multiplies a distance by it; state 0x12 walks for
-                                           // longer when it is under 1.0
-    /* 0x2AF4 */ fx32 mUnknown2AF4;
-    /* 0x2AF8 */ VecFx32 mTarget;          // Where it walks to
-    /* 0x2B04 */ int mUnknown2B04;
-    /* 0x2B08 */ u16 mMoveAngle;           // The way Character_MoveAlongAngle moves it
-    /* 0x2B0A */ u16 mAngle;               // The way the character faces (Character_SetAngle sets both)
-    /* 0x2B0C */ u16 mTargetAngle;         // Character_TurnToTargetAngle turns mAngle towards it
-    /* 0x2B0E */ u16 mWalkAngle;           // The direction to mTarget, as func_02091194 and Character_TurnToWalkTarget
-                                           // find it; its negative is the head's yaw while turning
-    /* 0x2B10 */ s8 mSoundPhase[2];        // Character_PlaySoundAtAnimPhase's progress through an animation, per slot
-    /* 0x2B12 */ u8 mUnknown2B12[2];
-    /* 0x2B14 */ fx32 mAnimSpeed;          // func_020919e8 gives it to the model when an animation starts
+    /* 0x25E4 */ // Character: CharacterModel, then its own fields
     /* 0x2B18 */ int mState;               // 0 when it has finished what SetState told it to do
     /* 0x2B1C */ int mPrevState;           // SetState keeps the state before
     // --- From here on the tutorial's own layout ---
@@ -137,7 +120,7 @@ public:
     /* 0x2B28 */ TutorialApartmentRoom *mApartmentRoom; // The states of entering move its door. Not "mRoom": the
                                            // saved character has its room number under that name
     /* 0x2B2C */ TutorialRoomCamera *mCamera; // The character turns to it and looks into it
-    /* 0x2B30 */ HeadIcon mHeadIcon;
+    /* 0x2B30 */ RoomHeadIcon mHeadIcon;
     /* 0x2B70 */ int mWait;                // Frames, counted down by Update: the scene chooses what to do next at 0
     /* 0x2B74 */ BOOL mSoundArmed;         // The Start...Sound functions only set it the first time they are called
     /* 0x2B78 */ s16 mStep;                // The step inside a state: SetState clears it
