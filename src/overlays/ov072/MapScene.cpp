@@ -443,9 +443,9 @@ void MapScene::Init() {
     func_02027d7c(&data_02121834, "SKY:/BG_up.nsc", 0x200, 0, 0, 0, 0, -1);
     func_02028f24(&gVramTransferQueue, "SKY:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
     func_02027290(&gObjResourceManager, "SKY:/Obj_up.nce", 0x1000, 3);
-    func_020a679c(&mSky, "SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
-    func_020a6930(&mSky);
-    G3X_SetClearColor(mSky.mColors[1], 31, 0x7FFF, 63, FALSE);
+    mSky.Init("SKY", 3, 0x1000, 0x200, 1, 1, 1, 1, 1);
+    mSky.Update();
+    G3X_SetClearColor(mSky.mBgPalette[1], 31, 0x7FFF, 63, FALSE);
     func_0202b4d8(&data_021232e4);
     func_0202b4dc(&data_021232e4, 0, "S00:/w_live.tga", 3, 32, 32);
     func_0202b4dc(&data_021232e4, 1, "S00:/w_pinch.tga", 3, 32, 32);
@@ -519,9 +519,9 @@ void MapScene::Init() {
     func_0202a96c(mLights[1]);
     mLights[1]->mColor = sLightColors[0];
     mLights[1]->SetDirection(mCamera.mCamera, sLightDirection1);
-    int phase = func_020a6214(&mSky);
-    mLights[0]->mColor = func_020a6574(phase);
-    GXRgb color = func_020a659c(phase);
+    int phase = mSky.GetPhase();
+    mLights[0]->mColor = GetSkyLightColor(phase);
+    GXRgb color = GetSkyLightColor2(phase);
     mLights[1]->mColor = color;
 
     for (int i = 0; i < 1; i++) {
@@ -615,9 +615,9 @@ void MapScene::Update() {
         func_020341d4(&mMessageWindows[i]);
     }
     if (mSky.mChanged) {
-        int phase = func_020a6214(&mSky);
-        mLights[0]->mColor = func_020a6574(phase);
-        mLights[1]->mColor = func_020a659c(phase);
+        int phase = mSky.GetPhase();
+        mLights[0]->mColor = GetSkyLightColor(phase);
+        mLights[1]->mColor = GetSkyLightColor2(phase);
     }
     switch (mState) {
     case STATE_TITLE:
@@ -1028,9 +1028,9 @@ void MapScene::Update() {
         }
         break;
     }
-    func_020a6930(&mSky);
+    mSky.Update();
     if (mSky.mChanged) {
-        G3X_SetClearColor(mSky.mColors[1], 31, 0x7FFF, 63, FALSE);
+        G3X_SetClearColor(mSky.mBgPalette[1], 31, 0x7FFF, 63, FALSE);
     }
     mSound.Update(&mClock);
 }
@@ -1056,7 +1056,7 @@ void MapScene::Draw() {
     }
     Sprite_Draw(&mTitleSprite);
     Sprite_Draw(&mSprite41BC);
-    func_020a6a6c(&mSky);
+    mSky.Draw();
     func_0202ad84(data_021223e4);
     NNS_G3dGlbFlushP();
     func_0207b258(mParticles, data_02142438);
@@ -1064,13 +1064,13 @@ void MapScene::Draw() {
 }
 
 void MapScene::Exit() {
-    GXRgb clearColor = mSky.mColors[1];
+    GXRgb clearColor = mSky.mBgPalette[1];
     // A pointer cast from the byte buffer is kept in a register across the calls; the buffer's address is not.
     GXRgb *colors = (GXRgb *)data_0213bab0;
-    int phase = func_020a6214(&mSky);
+    int phase = mSky.GetPhase();
     colors[0] = clearColor;
-    colors[1] = func_020a6574(phase);
-    colors[2] = func_020a659c(phase);
+    colors[1] = GetSkyLightColor(phase);
+    colors[2] = GetSkyLightColor2(phase);
     for (int i = 0; i < 14; i++) {
         func_0202aecc(data_021223e4, i);
         ArchiveManager_Unmount(&gArchiveManager, sResourceArchives[i]);
@@ -1693,8 +1693,8 @@ void MapSound::Init(MapClock *clock, int mode) {
 }
 
 void MapSound::SetMode(MapClock *clock, int mode) {
-    mDayStart = func_020a6390(clock->mDate.month, 0);
-    mNightStart = func_020a6480(clock->mDate.month, 0);
+    mDayStart = GetSunrise(clock->mDate.month, 0);
+    mNightStart = GetSunset(clock->mDate.month, 0);
     switch (mode) {
     case MODE_START:
     case MODE_CONTINUE:

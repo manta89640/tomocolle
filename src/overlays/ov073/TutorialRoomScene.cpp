@@ -2340,7 +2340,7 @@ TutorialSkyBackground::TutorialSkyBackground() {
 // @0x0214fc20
 void TutorialSkyBackground::Init(TutorialClock *clock, int buildingSize) {
     mClock = clock;
-    func_020a612c(this, &clock->mDate, &clock->mTime);
+    DayPhase::Init(&clock->mDate, &clock->mTime);
     mBuildingSize = buildingSize;
     mArchivePath[11] = buildingSize + '0';
     UpdatePaths();
@@ -2353,7 +2353,7 @@ void TutorialSkyBackground::Refresh() {
 
 // @0x0214fc64
 void TutorialSkyBackground::Update() {
-    func_020a61cc(this, &mClock->mDate, &mClock->mTime);
+    DayPhase::Update(&mClock->mDate, &mClock->mTime);
     UpdateState();
 }
 
@@ -2393,7 +2393,7 @@ void TutorialSkyBackground::UpdateState() {
 
 // @0x0214fdd8
 void TutorialSkyBackground::UpdatePaths() {
-    s8 digit = sSkyPictures[func_020a6214(this) & 0x1F] + '0';
+    s8 digit = sSkyPictures[DayPhase::GetPhase() & 0x1F] + '0';
     mArchivePath[17] = digit;
     mCharPath[10] = digit;
     mPalettePath[10] = digit;
@@ -2401,7 +2401,7 @@ void TutorialSkyBackground::UpdatePaths() {
 
 // @0x0214fe10
 void TutorialSkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[func_020a6214(this)], 0x100);
+    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- TutorialNamePanel ---

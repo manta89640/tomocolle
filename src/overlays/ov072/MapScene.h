@@ -9,6 +9,7 @@
 #include "Sprite.h"
 #include "SpriteButton.h"
 #include "island/Apartment.h"
+#include "island/Sky.h"
 #include "sound/SoundManager.h"
 #include "sound/ValueRamp.h"
 #include "text/MessageFile.h"
@@ -129,24 +130,6 @@ struct Light {
     /* 0x6 */ GXRgb mColor;
     /* 0x8 */ BOOL mEnabled;
 }; // 0xC
-
-// The main program's time-of-day tracker, as overlay 73 has it
-struct DayPhase {
-    /* 0x00 */ u32 mChanged; // Not 0 in the frame the phase changed
-    /* 0x04 */ u8 mUnknown04[0x10];
-    /* 0x14 */ int mFramesToCheck;
-    /* 0x18 */ int mPhase;
-    /* 0x1C */ int mUnknown1C;
-    /* 0x20 */ u8 mUnknown20[8];
-}; // 0x28
-
-// The sky of the upper screen (main program, func_020a679c to func_020a6a6c): a background and its sprites, which
-// change with the time of day.
-struct MapSky : public DayPhase {
-    /* 0x028 */ u8 mUnknown028[0x1C];
-    /* 0x044 */ const GXRgb *mColors; // Of the time of day: [1] is the 3D clear colour
-    /* 0x048 */ u8 mUnknown048[0xEB0];
-}; // 0xEF8
 
 // One of the eleven news items of the saved game (func_0202c8a8 copies one out, func_0202c8bc in): the news scene
 // (overlay 87, scene 0x46) shows them.
@@ -494,14 +477,6 @@ struct Unknown02114d78Entry {
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The island ---
-int func_020a6214(DayPhase *phase);
-u32 func_020a6390(int month, int a);
-u32 func_020a6480(int month, int a);
-GXRgb func_020a6574(int phase);
-GXRgb func_020a659c(int phase);
-void func_020a679c(MapSky *sky, const char *archiveName, int a, int b, int c, int d, int e, int f, int g, int h);
-void func_020a6930(MapSky *sky);
-void func_020a6a6c(MapSky *sky);
 
 void func_020ad294(s64 now, RTCTime *time);
 void func_020ad514(s64 now, RTCTime *time);
@@ -731,7 +706,7 @@ public:
     /* 0x041BC */ Sprite mSprite41BC;
     /* 0x04268 */ SpriteButton mBackButtons[1];
     /* 0x0435C */ TextButton mButtons[3];
-    /* 0x0582C */ MapSky mSky;
+    /* 0x0582C */ Sky mSky;
     /* 0x06724 */ MessageFile mMessageFiles[2];   // "TCO:tmd_common_msg_JP.bmg", "TET:tmd_etc_msg_JP.bmg"
     /* 0x06754 */ int mResidentRooms[RESIDENT_COUNT]; // The room of each saved character, or -1
     /* 0x068E4 */ int mRoomResidents[RESIDENT_COUNT]; // The saved character in each room, or -1

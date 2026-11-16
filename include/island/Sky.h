@@ -48,7 +48,7 @@ public:
     void LoadPalette();
 
     /* 0x28 */ char mArchiveName[4];
-    /* 0x2C */ void *mPalette;
+    /* 0x2C */ const GXRgb *mPalette;
     /* 0x30 */ int mPlane;
 }; // 0x34
 
@@ -137,8 +137,8 @@ public:
     /* 0x034 */ int mObjPlane;
     /* 0x038 */ int mBgPlane;
     /* 0x03C */ fx32 mScrollY;
-    /* 0x040 */ void *mObjPalette;
-    /* 0x044 */ void *mBgPalette;
+    /* 0x040 */ const GXRgb *mObjPalette;
+    /* 0x044 */ const GXRgb *mBgPalette; // The colours of the loaded palette: [1] is the 3D clear colour
     /* 0x048 */ BOOL mPalettesOn;   // Load the palettes of the new time of day when it changes
     /* 0x04C */ BOOL mCloudsOn;
     /* 0x050 */ BOOL mBirdsOn;

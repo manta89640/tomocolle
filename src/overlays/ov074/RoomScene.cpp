@@ -10936,9 +10936,6 @@ struct Unknown02114d78Entry {
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // The time-of-day tracker
-void func_020a612c(DayPhase *phase, RTCDate *date, RTCTime *time);
-void func_020a61cc(DayPhase *phase, RTCDate *date, RTCTime *time);
-int func_020a6214(DayPhase *phase);
 
 // The current time with the game's offset applied, as seconds and as date and time
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
@@ -12378,7 +12375,7 @@ SkyBackground::SkyBackground() {
 // @0x0216c3cc
 void SkyBackground::Init(Clock *clock, int buildingSize) {
     mClock = clock;
-    func_020a612c(this, &clock->mDate, &clock->mTime);
+    DayPhase::Init(&clock->mDate, &clock->mTime);
     mBuildingSize = buildingSize;
     mArchivePath[11] = buildingSize + '0';
     UpdatePaths();
@@ -12391,7 +12388,7 @@ void SkyBackground::Refresh() {
 
 // @0x0216c410
 void SkyBackground::Update() {
-    func_020a61cc(this, &mClock->mDate, &mClock->mTime);
+    DayPhase::Update(&mClock->mDate, &mClock->mTime);
     UpdateState();
 }
 
@@ -12431,7 +12428,7 @@ void SkyBackground::UpdateState() {
 
 // @0x0216c584
 void SkyBackground::UpdatePaths() {
-    s8 digit = sSkyPictures[func_020a6214(this) & 0x1F] + '0';
+    s8 digit = sSkyPictures[DayPhase::GetPhase() & 0x1F] + '0';
     mArchivePath[17] = digit;
     mCharPath[10] = digit;
     mPalettePath[10] = digit;
@@ -12439,7 +12436,7 @@ void SkyBackground::UpdatePaths() {
 
 // @0x0216c5bc
 void SkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[func_020a6214(this)], 0x100);
+    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- NamePanel ---
