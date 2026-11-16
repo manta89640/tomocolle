@@ -1638,11 +1638,16 @@ void MiiEditCharacterPage::func_ov076_02157e3c() {
     if (gTouchInput.mTouching == 0) {
         return;
     }
-    ScreenPoint point = *(gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint);
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 8; j++) {
+    ScreenPoint point;
+    int i;
+    int j;
+    int y;
+    point = *(gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint);
+    for (i = 0; i < 5; i++) {
+        y = data_ov076_02158c28[i].y;
+        for (j = 0; j < 8; j++) {
             ScreenRect rect = data_ov076_021592d0[j];
-            rect.y += data_ov076_02158c28[i].y;
+            rect.y += y;
             if (func_02028d88(&rect, &point) && j + 1 != mScene->mCharacter.mUnknown04A[i]) {
                 func_02098d5c(&mScene->mCharacter, i, j + 1);
                 func_02091a6c(&mScene->mCharacter);
