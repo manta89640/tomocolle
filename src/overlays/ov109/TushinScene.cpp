@@ -1538,12 +1538,19 @@ void TushinScene::Leave() {
     }
 }
 
-#pragma optimization_level 2
-// NOT MATCHING (optimization level 2): register order only. In the four calls of func_020a123c with the sort key the
-// original loads the key's offset into r0 and forms the list's address through r2 (ours: r1, r0), and in the two
-// SetStringArg calls with a parent's name the parent index and the names' base swap r2/r3 in the mla. The same
-// call alone in a test file comes out as in the original: the surrounding code decides it, not the call's form.
 static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
+
+// Sorts a list through an inline forwarder: without propagation, the forwarder's arguments are formed last to first
+// (Update's re-sorts load the key's offset into r0 and form the list's address through r2, as the original does)
+template <class L> static inline void SortBy(L *list, int key, BOOL selectFirst) {
+    list->Sort(key, selectFirst);
+}
+
+// Compiled at optimization level 2 and without propagation: the re-sorts go through SortBy, and the parent's index
+// for a found parent's name is a local, which gives the original's registers in the mla of the name's address.
+#pragma optimization_level 2
+#pragma push
+#pragma opt_propagation off
 // @0x0214f7ec
 void TushinScene::Update() {
     UpdateSignal();
@@ -2009,7 +2016,7 @@ void TushinScene::Update() {
                 sReceivedCommand = 0;
                 CloseWindow();
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                SortBy(&mResidents, mResidents.mUnknown11306, 0);
                 break;
             case 14:
             case 15: {
@@ -2024,7 +2031,7 @@ void TushinScene::Update() {
                     sSongsReceived = 0;
                     mReceiveResult = ReceiveCharacter();
                     mResidents.Load();
-                    mResidents.Sort(mResidents.mUnknown11306, 0);
+                    SortBy(&mResidents, mResidents.mUnknown11306, 0);
                     mNextPage = 0x17;
                     if (mReceiveResult != 0) {
                         sReceiveCount = 0;
@@ -2222,7 +2229,7 @@ void TushinScene::Update() {
                 CloseWindow();
                 sWiiSendDone = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                SortBy(&mResidents, mResidents.mUnknown11306, 0);
                 break;
             case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: case 62: case 63:
                 if (!IsWindowOpen(&mWindow) || sReceiveCount == 0) {
@@ -2230,7 +2237,7 @@ void TushinScene::Update() {
                 }
                 sReceiveCount = 0;
                 mResidents.Load();
-                mResidents.Sort(mResidents.mUnknown11306, 0);
+                SortBy(&mResidents, mResidents.mUnknown11306, 0);
                 if (mPage == 0x35 || mPage == 0x36 || mPage == 0x37) {
                     ShowReceived();
                     mWiiShirtDue = 1;
@@ -2314,7 +2321,10 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 8:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
+                    {
+                        int parent = gWirelessSession->mParent;
+                        mWindow.mTexts[0].SetStringArg(mParentNames[parent], 0);
+                    }
                     PlaySound(0xB);
                     mUnknown3F090 = 0;
                     break;
@@ -2353,7 +2363,10 @@ void TushinScene::Update() {
                     mWait = 60;
                     break;
                 case 41:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
+                    {
+                        int parent = gWirelessSession->mParent;
+                        mWindow.mTexts[0].SetStringArg(mParentNames[parent], 0);
+                    }
                     PlaySound(0xB);
                     break;
                 case 46:
@@ -2425,6 +2438,7 @@ void TushinScene::Update() {
     UpdateSending();
     UpdateSaving();
 }
+#pragma pop
 #pragma optimization_level reset
 
 // @0x02151590
