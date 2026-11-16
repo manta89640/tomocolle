@@ -114,11 +114,11 @@ struct CharacterRecord {
     /* 0x225 */ u8 mLongActPartner;      // mIndex of the character it is doing it with
     /* 0x226 */ u8 mTroubleId;           // "TroubleID", 0 to 0x6D
     /* 0x227 */ u8 mTroubleCategory;     // "TroubleCategory", 0 to 9
-    /* 0x228 */ s64 mUnknown228;
-    /* 0x230 */ s64 mAwayUntil;
-    /* 0x238 */ u16 mUnknown238;
+    /* 0x228 */ s64 mTroubleStart;       // When the trouble began (a time in seconds)
+    /* 0x230 */ s64 mTroubleEnd;         // When it ends (the wedding sets it to the honeymoon's end)
+    /* 0x238 */ u16 mTroublePartner;     // mIndex of the other character of the trouble
     /* 0x23A */ u8 mTroubleState;        // "TroubleState", 0 to 5
-    /* 0x23B */ u8 mUnknown23B;
+    /* 0x23B */ u8 mTroubleProgress;     // 0 to 200
     /* 0x23C */ s64 mUnknown23C;
     /* 0x244 */ u8 mEatFullness;         // "EatFullness", 0 to 100
     /* 0x245 */ u8 mEatLastFood;         // "EatLastFood"
@@ -223,9 +223,30 @@ public:
     static BOOL IsLongActIdleState(int state);
     s64 GetLongActDuration(int state, int shift);
     BOOL IsLongActAvailable(int state);
-    // Not written yet
-    void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    int GetLongActWeight(int state);
+    int GetTotalLongActWeight();
     int ChooseLongAct();
+    bool IsInTrouble();
+    static bool IsTroubleStateActive(int state);
+    BOOL IsInTroubleWithoutUnknown4Bits8();
+    void SetTrouble(u8 state, u8 category, u8 id);
+    BOOL IsProgressingTrouble();
+    BOOL IsProgressingTroubleInState2();
+    void ResetTroubleProgress();
+    void AddTroubleProgress(int value);
+    static int GetTroubleTimeProgress(s64 now, s64 start);
+    static u32 GetTroubleProgressAt(s64 now, s64 start, int progress);
+    u32 GetTroubleProgress(s64 now);
+    static BOOL IsTroubleProgressFullAt(s64 now, s64 start, int progress);
+    BOOL IsTroubleProgressFull(s64 now);
+    BOOL IsTroubleOfCategory34OrKind20();
+    BOOL IsTroubleOfCategory3Kind8To10();
+    BOOL IsTroubleOfCategory34OrKind18();
+    BOOL IsTrouble3_4();
+    static BOOL IsTrouble3_4State(int state, int category, int id);
+    static int GetEncounterBonus(int base, int value);
+    void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
+    // Not written yet
     void func_0209b1d8();
     void func_0209c4a0();
     void func_0209c5d8();
@@ -243,6 +264,7 @@ public:
     BOOL func_0209ccf0();
     void func_0209cda4();
     BOOL func_0209d1d0();
+    void func_0209c600();
 
     // Marks a row of the clothes table as owned
     void OwnClothes(int clothes) { mOwnedClothes.m[clothes >> 5] |= 1 << (clothes & 0x1F); }
