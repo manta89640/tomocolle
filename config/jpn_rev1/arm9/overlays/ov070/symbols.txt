@@ -1,6 +1,6 @@
-func_ov070_02149a40 kind:function(arm,size=0xdc) addr:0x02149a40
-func_ov070_02149b1c kind:function(arm,size=0xa38) addr:0x02149b1c
-func_ov070_0214a554 kind:function(arm,size=0x7c) addr:0x0214a554
+_ZN13RightJobScene12StartLoadingEv kind:function(arm,size=0xdc) addr:0x02149a40
+_ZN13RightJobScene4InitEv kind:function(arm,size=0xa38) addr:0x02149b1c
+_ZN13RightJobScene6UpdateEv kind:function(arm,size=0x7c) addr:0x0214a554
 func_ov070_0214a5d0 kind:function(arm,size=0x110) addr:0x0214a5d0
 func_ov070_0214a6e0 kind:function(arm,size=0x160) addr:0x0214a6e0
 func_ov070_0214a840 kind:function(arm,size=0x21c) addr:0x0214a840
@@ -9,8 +9,8 @@ func_ov070_0214aab8 kind:function(arm,size=0x1c) addr:0x0214aab8
 func_ov070_0214aad4 kind:function(arm,size=0x10c) addr:0x0214aad4
 func_ov070_0214abe0 kind:function(arm,size=0x274) addr:0x0214abe0
 func_ov070_0214ae54 kind:function(arm,size=0x14) addr:0x0214ae54
-func_ov070_0214ae68 kind:function(arm,size=0x78) addr:0x0214ae68
-func_ov070_0214aee0 kind:function(arm,size=0xdc) addr:0x0214aee0
+_ZN13RightJobScene4DrawEv kind:function(arm,size=0x78) addr:0x0214ae68
+_ZN13RightJobScene4ExitEv kind:function(arm,size=0xdc) addr:0x0214aee0
 func_ov070_0214afbc kind:function(arm,size=0x9c) addr:0x0214afbc
 func_ov070_0214b058 kind:function(arm,size=0x35c) addr:0x0214b058
 func_ov070_0214b3b4 kind:function(arm,size=0x1c) addr:0x0214b3b4
@@ -19,8 +19,8 @@ func_ov070_0214b528 kind:function(arm,size=0x78) addr:0x0214b528
 func_ov070_0214b5a0 kind:function(arm,size=0x124) addr:0x0214b5a0
 func_ov070_0214b6c4 kind:function(arm,size=0x10) addr:0x0214b6c4
 func_ov070_0214b6d4 kind:function(arm,size=0xc) addr:0x0214b6d4
-func_ov070_0214b6e0 kind:function(arm,size=0xcc) addr:0x0214b6e0
-func_ov070_0214b7ac kind:function(arm,size=0xd4) addr:0x0214b7ac
+_ZN13RightJobSceneD1Ev kind:function(arm,size=0xcc) addr:0x0214b6e0
+_ZN13RightJobSceneD0Ev kind:function(arm,size=0xd4) addr:0x0214b7ac
 data_ov070_0214b880 kind:data(any) addr:0x0214b880
 gStr_CurlyBracket_ov070 kind:data(any) addr:0x0214b884
 gStr_LessThan_ov070 kind:data(any) addr:0x0214b888
@@ -53,7 +53,7 @@ __sinit_ov070_0214bae8 kind:function(arm,size=0x64) addr:0x0214bae8
 .p__sinit_ov070_0214bae8 kind:data(word) addr:0x0214bb4c
 gText_KetsuParenthesis kind:data(any) addr:0x0214bb60
 data_ov070_0214bb64 kind:data(any) addr:0x0214bb64
-data_ov070_0214bba4 kind:data(any) addr:0x0214bba4 ambiguous
+_ZTV13RightJobScene kind:data(any) addr:0x0214bb9c
 gStr_SFL_ov070 kind:data(any) addr:0x0214bbc0
 gStr_Scn_Scene_SceneRightJob_LZ_bin kind:data(any) addr:0x0214bbc4
 gStr_LST_ov070 kind:data(any) addr:0x0214bbe4

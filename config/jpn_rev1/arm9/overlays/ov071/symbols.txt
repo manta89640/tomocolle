@@ -1,13 +1,13 @@
-func_ov071_02149a40 kind:function(arm,size=0xb4) addr:0x02149a40
-func_ov071_02149af4 kind:function(arm,size=0x60) addr:0x02149af4
-func_ov071_02149b54 kind:function(arm,size=0x5fc) addr:0x02149b54
-func_ov071_0214a150 kind:function(arm,size=0x7c) addr:0x0214a150
-func_ov071_0214a1cc kind:function(arm,size=0x160) addr:0x0214a1cc
+_ZN14RightJob2Scene12StartLoadingEv kind:function(arm,size=0xb4) addr:0x02149a40
+_ZN14RightJob2Scene4ExitEv kind:function(arm,size=0x60) addr:0x02149af4
+_ZN14RightJob2Scene4InitEv kind:function(arm,size=0x5fc) addr:0x02149b54
+_ZN14RightJob2Scene4DrawEv kind:function(arm,size=0x7c) addr:0x0214a150
+_ZN14RightJob2Scene6UpdateEv kind:function(arm,size=0x160) addr:0x0214a1cc
 func_ov071_0214a32c kind:function(arm,size=0x85c) addr:0x0214a32c
 func_ov071_0214ab88 kind:function(arm,size=0x768) addr:0x0214ab88
 func_ov071_0214b2f0 kind:function(arm,size=0x4c) addr:0x0214b2f0
-func_ov071_0214b33c kind:function(arm,size=0x70) addr:0x0214b33c
-func_ov071_0214b3ac kind:function(arm,size=0x78) addr:0x0214b3ac
+_ZN14RightJob2SceneD1Ev kind:function(arm,size=0x70) addr:0x0214b33c
+_ZN14RightJob2SceneD0Ev kind:function(arm,size=0x78) addr:0x0214b3ac
 data_ov071_0214b424 kind:data(any) addr:0x0214b424
 data_ov071_0214b430 kind:data(any) addr:0x0214b430
 data_ov071_0214b438 kind:data(any) addr:0x0214b438
@@ -165,7 +165,7 @@ data_ov071_0214c2ec kind:data(any) addr:0x0214c2ec ambiguous
 data_ov071_0214c4cc kind:data(any) addr:0x0214c4cc ambiguous
 data_ov071_0214c500 kind:data(any) addr:0x0214c500
 gStr_Job_job000_LZ_bin kind:data(any) addr:0x0214c504
-data_ov071_0214c520 kind:data(any) addr:0x0214c520 ambiguous
+_ZTV14RightJob2Scene kind:data(any) addr:0x0214c518
 gStr_M00_ov071 kind:data(any) addr:0x0214c53c
 gStr_Scn_Scene_SceneRightJob2_LZ_bin kind:data(any) addr:0x0214c540
 gStr_TBM_ov071 kind:data(any) addr:0x0214c560

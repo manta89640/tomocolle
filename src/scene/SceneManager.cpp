@@ -20,7 +20,7 @@
 #include "../overlays/ov105/NintendoLogoScene.h"
 #include "../overlays/ov002/FaceTestScene.h"
 #include "../overlays/ov003/BodyPaletteTestScene.h"
-#include "../overlays/ov004/Scene04.h"
+#include "../overlays/ov004/CharacterBodyTestScene.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
 #include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov077/Scene17.h"
@@ -28,6 +28,8 @@
 #include "../overlays/ov008/Scene19.h"
 #include "../overlays/ov009/TestNg20Scene.h"
 #include "../overlays/ov067/ChangeClothesScene.h"
+#include "../overlays/ov070/RightJobScene.h"
+#include "../overlays/ov071/RightJob2Scene.h"
 // End of gap38-a's scene classes
 
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
@@ -267,7 +269,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x04:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(4));
-        return new Scene04(sceneId);
+        return new CharacterBodyTestScene(sceneId);
     case 0x05:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(5));
@@ -825,7 +827,7 @@ FaceTestScene::FaceTestScene(int sceneId) : Scene(sceneId) {}
 
 BodyPaletteTestScene::BodyPaletteTestScene(int sceneId) : Scene(sceneId) {}
 
-Scene04::Scene04(int sceneId) : Scene(sceneId) {}
+CharacterBodyTestScene::CharacterBodyTestScene(int sceneId) : Scene(sceneId) {}
 
 TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
@@ -848,6 +850,12 @@ Scene19::Scene19(int sceneId) : Scene(sceneId) {}
 TestNg20Scene::TestNg20Scene(int sceneId) : Scene(sceneId) {}
 
 ChangeClothesScene::ChangeClothesScene(int sceneId) : Scene(sceneId) {}
+
+// (Scene1E)
+
+RightJobScene::RightJobScene(int sceneId) : Scene(sceneId) {}
+
+RightJob2Scene::RightJob2Scene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 

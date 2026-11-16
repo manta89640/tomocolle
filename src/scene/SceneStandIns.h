@@ -62,9 +62,7 @@ SCENE_STAND_IN(WirelessTestScene, 0xCC); // func_0203f654
 
 SCENE_STAND_IN(Scene1E, 0x48F58); // func_0203f900
 
-SCENE_STAND_IN(RightJobScene, 0x51730); // func_0203fd6c
 
-SCENE_STAND_IN(RightJob2Scene, 0x34520); // func_0203ffc8
 
 SCENE_STAND_IN(VoteScene, 0x3CD5C); // func_020400f0
 
