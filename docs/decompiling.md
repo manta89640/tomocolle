@@ -560,6 +560,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
   statements matched NFL's `NFLi_MakeGlassesMesh` exactly, where the others moved loads and kept a value the original
   leaves in r0.
+- An array walked by a pointer whose increment comes before the loop's compare is incremented in the body
+  (`...; character++; }`); in the `for` header (`i++, character++`) it comes after the compare (overlay 1).
 
 **A value read once where the original reads it twice**
 - A volatile cast at the one read that must stay, `*(volatile int *)&mWindows[0].mResult != -1`; the field itself
@@ -587,6 +589,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A constant compared from a register (`mov r0,#14; cmp r2,r0`) is a variable assigned the constant elsewhere,
   here in one state of a loop (`max_digits = 14;` when `__strtold` reads "0x"). A literal, a `const`, a
   `static const` or an initialised local all give `cmp r2,#14`.
+- A `clz` whose result nothing uses (`ldr r1,=8; clz; rsb #31; cmp #0; bgt ...`, and a second `clz` on the other
+  branch) is an SDK inline built on `MATH_CountLeadingZeros`, called for nothing: the compiler drops the arithmetic
+  around it but keeps the inline assembly. `MATH_QSortStackSize(8);` as a statement gives it exactly (overlay 1's
+  `NameSortTestScene::Init`).
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
