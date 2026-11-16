@@ -228,6 +228,9 @@ each library):
 So when a file will not match, try the other build before the source (CLAUDE.md says as much). Every mwccarm build
 is at `~/Projects/pokesxf/subprojects/metroskrew/bin/mwccarm-<version>.exe` (2.0 builds 72 to 87, 3.0 builds 114 to
 139, 4.0 builds 1018 to 1051) for testing; they run under `~/Projects/pokesxf/tools/wibo/wibo`, without `-enc SJIS`.
+Judge a match by the build, not by such a run: the project's own `mwccarm.exe` of 2.0/sp2, run under wibo, divided
+MSL's `__pformatter` switch into jump tables differently from the same compiler in the build (which runs it under
+wine), where metroskrew's `mwccarm-3.0-136.exe` under wibo agreed with the build.
 The project itself fetches its compilers from the archive in `configure.py`.
 
 Within a file, the original also set the optimisation per function: overlay 109's and the Mii transfer's functions
@@ -346,6 +349,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   original's registers.
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
+- A step assigned back to its own variable (`snum = (snum >> 21) & mask; exp = snum - 1023;`) keeps the
+  intermediate in the original's register; computed straight into `exp`, the same instructions get other registers
+  and another order (MSL's `double2hex`).
+- A parameter loaded before an early return, though used only after it, is a copy made first (`ld = num;` at the
+  top, and `ld` passed on) (`double2hex`).
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
@@ -356,6 +364,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Bit fields are allocated from the low bit, so a structure laid out high bits first (the Wii's `RFLCharData`) is
   declared in reverse (`lib/MiiData`).
 - `NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(...))` rather than writing the field directly.
+- A literal copied byte by byte (`ldrb`/`strb` pairs) is `memcpy(p, "inf", 4)`; `strcpy` stays a call (MSL's
+  `double2hex`, `float2str`).
 - Pitfall: a zero-length padding array in a class (a `sizeof` that came out 0) made mwcc drop a member array's
   `__cxa_vec_cleanup` from the implicit destructor without a word (overlay 76).
 

@@ -110,6 +110,12 @@ the end of NitroSystem to the end of the code at `0x020B04C8`. They hold the gam
 matched yet: NFL, and whatever of the SDK differs between release 30001 and the game's 30007. The text-to-speech
 middleware and WH (`0x0202F42C` to `0x0203115C`, see "WH, the wireless wrapper") have since been found and decompiled.
 
+`lib/MSL_C/printf.c` (`0x0201549C` to `0x020175D0`, data `0x0210F3AC` to `0x0210F3EC`) is complete. Measured: the game
+keeps ten of the archive's sixteen functions of `printf.o`, the conversion helpers, `__pformatter`, `__StringWrite`,
+`vsnprintf` and `snprintf`; `printf`, `vprintf`, `vfprintf`, `vsprintf`, `sprintf` and `__FileWrite` are not in the
+ROM. The object calls the runtime's `_dls`, `_deq` and `_ull_mod`; `_ull_mod` is a second entry point inside
+`_ll_udiv`, at `0x02020DB4`.
+
 ## Voice synthesis
 
 The Miis' voices come from Sharp's text-to-speech engine, SHTTS 1.2.0 (the version is in the SDK's list of library
