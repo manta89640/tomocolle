@@ -22,6 +22,7 @@
 
 #include "Scene40Context.h"
 #include "Scene40MenuBar.h"
+#include "Scene40SpeechWindow.h"
 
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates
 // 0x6F908 bytes; the constructor is the main program's (0x020428E0, src/scene/SceneManager.cpp), which stores the
@@ -188,8 +189,7 @@ public:
     /* 0x013D0 */ Sprite mSprite013D0;
     /* 0x0147C */ TtsPlayer mTtsPlayer;
     /* 0x15DC0 */ MessageText mText;
-    /* 0x163B0 */ SpeechWindow mSpeechWindow;
-    /* 0x169BC */ u8 mUnknown169BC[0x4];
+    /* 0x163B0 */ Scene40SpeechWindow mSpeechWindow;
     /* 0x169C0 */ MessageWindow mWindows[2];
     /* 0x2C908 */ u8 mUnknown2C908[0x4C];
     /* 0x2C954 */ ParticleSystem mParticles;

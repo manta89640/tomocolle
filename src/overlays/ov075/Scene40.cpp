@@ -3,6 +3,7 @@
 #include "GameData.h"
 #include "SceneManager.h"
 #include "SceneMemory.h"
+#include "ScreenControl.h"
 #include "sound/SoundManager.h"
 
 #include <wchar.h>
@@ -127,6 +128,26 @@ void Scene40::Exit() {
         ArchiveManager_Unmount(&gArchiveManager, mItemModels[i].mArchiveName);
         ModelResources_ReleaseModel(gModelResources, i + 14);
     }
+}
+
+// --- The scene's speech window (scene+0x163B0) ---------------------------------------------------------------------
+
+void Scene40SpeechWindow::Update() {
+    SpeechWindow::Update();
+    if (mEnabled && gScreenControl.mUnknown44 == 0) {
+        return;
+    }
+    Hide();
+}
+
+void Scene40SpeechWindow::Show(u32 message, int mode, int frames) {
+    if (!mEnabled) {
+        return;
+    }
+    if (gScreenControl.mUnknown44 != 0) {
+        return;
+    }
+    SpeechWindow::Show(message, mode, frames);
 }
 
 // --- The scene's menu (scene+0x6947C) ------------------------------------------------------------------------------
