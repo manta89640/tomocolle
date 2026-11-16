@@ -161,6 +161,19 @@ FETCHED = {
     "lib/NitroSDK": ("https://github.com/ntrtwl/NitroSDK.git", "e6fbeba60332e660639ad664eda2dc85c0e14649"),
     "lib/NitroSystem": ("https://github.com/ntrtwl/NitroSystem.git", "21c8fd078fdda34f3c2622ef0751d00adaacf890"),
 }
+# Single files of those repositories whose game release is the one of a later commit than the repository's pinned one.
+# Each is fetched from the same repository at its own pinned commit, checked against its SHA-256, into
+# lib/fetched/<repository>/<commit>/ (ignored), and compiled in place of the repository's file. See docs/decompiling.md,
+# "Where the game's release of a file differs".
+FETCHED_FILES = {
+    # MATH_QSort with each conditionally executed instruction written as a branch around it under
+    # SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS, as the SDK's other assembly is (docs/binary.md, "Libraries")
+    "lib/NitroSDK/libraries/math/src/qsort.c": (
+        "ccbbcc8b6db4c4dbba3d503d2026978d78977840",
+        "7ca9b28ce14f9609e6d0e7628e47217aff0940ce133afbdedc255b53488c442c",
+    ),
+}
+FETCHED_FILES_DIR = Path("lib/fetched")
 
 # These are the flags that the Pokemon Platinum decompilation builds the same sources with, and matches its ROM
 SDK_FLAGS = [
@@ -444,6 +457,32 @@ def fetch_repository(directory: Path, url: str, commit: str):
             sys.exit(f"git {' '.join(step)} failed in {directory}:\n{result.stderr.strip()}")
 
 
+def fetched_file(source: str) -> tuple[Path, str, str]:
+    """Returns where a file of FETCHED_FILES goes, the URL it is fetched from and its SHA-256."""
+    commit, digest = FETCHED_FILES[source]
+    directory = next(d for d in FETCHED if source.startswith(d + "/"))
+    url, _ = FETCHED[directory]
+    if not url.startswith("https://github.com/"):
+        sys.exit(f"{source}: only single files of GitHub repositories can be fetched")
+    path = Path(source).relative_to(directory).as_posix()
+    raw = url.removesuffix(".git").replace("https://github.com/", "https://raw.githubusercontent.com/", 1)
+    return FETCHED_FILES_DIR / Path(directory).name / commit / path, f"{raw}/{commit}/{path}", digest
+
+
+def fetch_file(source: str):
+    """Fetches a file of FETCHED_FILES, unless the one there already has its SHA-256."""
+    target, url, expected = fetched_file(source)
+    target = ROOT / target
+    if target.exists() and sha256(target) == expected:
+        return
+    data = fetch(url)
+    actual = hashlib.sha256(data).hexdigest()
+    if actual != expected:
+        sys.exit(f"{url}\n  has SHA-256 {actual}\n  expected    {expected}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data)
+
+
 def library_of(source: str) -> tuple[str, dict] | None:
     """Returns the prefix and settings of the library a source file belongs to, or None for the game's own code."""
     return next(((prefix, library) for prefix, library in LIBRARIES.items() if source.startswith(prefix)), None)
@@ -578,6 +617,8 @@ def main():
         msl_dir = download_msl(tools_dir, msl_versions).relative_to(ROOT)
         for directory, (url, commit) in FETCHED.items():
             fetch_repository(ROOT / directory, url, commit)
+        for source in FETCHED_FILES:
+            fetch_file(source)
     wrapper = find_wrapper(args.wrapper, system, machine, tools_dir)
 
     # Paths
@@ -724,11 +765,14 @@ def main():
                 flags.append(f"-prefix {settings['prefix']}")
             # Where the game's release of the file differs from the fetched one, the fetched file with the project's
             # definitions of lib/overrides/ put in is compiled instead, and sees the fetched file's own directory
-            compile_source = source
+            # A file of FETCHED_FILES is the later commit's, fetched alone, and sees the repository's directory too
+            compile_source = fetched_file(name)[0] if name in FETCHED_FILES else source
             override = OVERRIDES_DIR / source.relative_to("lib")
             if override.exists():
+                n.build([build_dir / "override" / source], "override", [compile_source, override],
+                        implicit=["tools/override_functions.py"])
                 compile_source = build_dir / "override" / source
-                n.build([compile_source], "override", [source, override], implicit=["tools/override_functions.py"])
+            if compile_source != source:
                 includes.insert(0, source.parent.as_posix())
             n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py"], order_only=generated,
                     variables={

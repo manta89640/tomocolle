@@ -358,6 +358,7 @@ lib/NitroSDK/libraries/math/src/math.c:
     .text       start:0x020141b0 end:0x020141f4
 
 lib/NitroSDK/libraries/math/src/qsort.c:
+    complete
     .text       start:0x020141f4 end:0x020144e4
 
 lib/CHT/pictocatch.c:

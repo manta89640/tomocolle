@@ -182,7 +182,7 @@ compiled object with the delinked one in object order, size and bytes outside re
   `NNS_G3dRSOnGlb`, sbc's command statics and nsbca's `pivotUtil_` were each several symbols. They are one again,
   referred to with an offset (the scenes' `data_02142438` is `&NNS_G3dGlb.cameraMtx`).
 
-Four files are another release than the fetched one, in code:
+Four files are another release than the fetched one, in code (the last only in how it is written):
 
 - **`mi/src/mi_dma.c`** has `MI_StopAllDma` (`0x02009400`, `MI_StopDma` of channels 0 to 3) after `MI_StopDma`,
   which the fetched file lacks. Its name is the one later SDKs document for it.
@@ -204,12 +204,22 @@ Four files are another release than the fetched one, in code:
   one device more, a 128 KB EEPROM (size bit 17: 256-byte pages, three address bytes, five pages a program
   operation). Measured: everything else it sets is the fetched release's. It is the only function of the file the game
   keeps.
-- **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against 0x288) is a later revision of the SDK's
-  hand-written assembly sort: the partition loop differs from the fetched one (measured: the first 0x134 bytes are the
-  same). It is not written: its source is assembly, and the project's rule is that no assembly taken from the ROM is
-  committed. Its unit compiles the fetched file, at 85.8%.
+- **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against the fetched 0x288) is the same
+  hand-written routine, written out the way the SDK's other assembly is under the define
+  `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS`, which `configure.py` gives the SDK's files. Measured: it keeps the
+  fetched text's register use, its `stmfd`/`ldmfd` of r4-r11 and lr, its frame on the stack when `stackBuf` is NULL,
+  its swap loops (`swp`/`swpb`) and its stack of sub-ranges, instruction for instruction, with no compiler idiom; the
+  only difference is that each of its 13 conditionally executed instructions other than branches (`addlt` and
+  `subgt` of the partition scans, the eight `strlt` that push the sub-ranges, `ldreq`/`addeq`/`addeq` that free the
+  frame) is a conditional branch to it and a branch past it, `b<cc> 1f; b 2f; 1: <op>; 2:`, 8 bytes more each:
+  0x288 + 13 * 8 = 0x2F0. A later commit of the fetched repository, `ccbbcc8` ("Add options for HeartGold"), writes
+  those 13 out so under that define, and its file compiles, with this unit's compiler and flags, to the game's bytes;
+  `configure.py` fetches that one file. Inferred: the branches are what the SDK's own compiler, 2.0 SP1p3 by the
+  define's name, made of conditional instructions in inline assembly, which the fetched repository's other assembly
+  (`crt0.c`, `mi_memory.c`, `os_*.c`) already spells out the same way.
 
-The first three are built as `lib/overrides/` describes (decompiling.md, "Where the game's release of a file differs").
+The first three are built as `lib/overrides/` describes, `qsort.c` from the later commit's file (decompiling.md,
+"Where the game's release of a file differs").
 
 The small gaps between the units turned out to be functions of the files on either side, or small files of their own
 (measured, by the compiled objects: bytes equal outside relocations, in the objects' order): the ranges of 19 files

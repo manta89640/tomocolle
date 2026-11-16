@@ -63,8 +63,9 @@ ROM is identical.
 Part of the game is Nintendo's SDK (NitroSDK and NitroSystem), which other projects have already decompiled. Those
 sources are not copied here. `configure.py` fetches [ntrtwl/NitroSDK](https://github.com/ntrtwl/NitroSDK) and
 [ntrtwl/NitroSystem](https://github.com/ntrtwl/NitroSystem) at pinned commits, and the build compiles the files of
-theirs that the game links, each with the compiler and flags its library was built with. Their code counts as matched
-where it comes out identical to the game's. `python3 configure.py --no-libraries` leaves them out.
+theirs that the game links, each with the compiler and flags its library was built with (a file that the game has as
+a later commit has it is fetched alone, at that commit, into `lib/fetched/`). Their code counts as matched where it
+comes out identical to the game's. `python3 configure.py --no-libraries` leaves them out.
 
 ## Decompiling
 
