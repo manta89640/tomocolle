@@ -4,7 +4,7 @@
 #include <nitro.h>
 
 // The buttons, read once a frame by main() (PadInput::Update). Nothing is pressed while the lid is closed or the
-// screens are off for want of input.
+// screens are off (gLcdPower).
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. The overlays' sources declare
 // the object with stand-ins of their own (PadInput, PadInputState).

@@ -1,12 +1,5 @@
 #include "PadInput.h"
-
-// The screens' power (0x0202B6D0 on, not decompiled): a STAND-IN with the one field this file reads
-struct ScreenPower {
-    /* 0x00 */ int mUnknown00;
-    /* 0x04 */ BOOL mLcdOff; // The screens were turned off for want of input
-    /* 0x08 */ int mUnknown08;
-};
-extern ScreenPower data_02123434;
+#include "LcdPower.h"
 
 PadInput data_0211f9d4;
 
@@ -20,7 +13,7 @@ void PadInput::Init() {
 
 void PadInput::Update() {
     mFolded = PAD_DetectFold();
-    if (mFolded || data_02123434.mLcdOff) {
+    if (mFolded || gLcdPower.mLcdOff) {
         mRepeatTimer = 0;
         mPrevHeld = 0;
         mRepeat = 0;

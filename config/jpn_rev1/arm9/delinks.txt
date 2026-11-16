@@ -350,6 +350,13 @@ src/sound/SoundSystem.cpp:
     complete
     .text       start:0x02028630 end:0x020287f8
 
+src/LcdPower.cpp:
+    complete
+    .text       start:0x0202b6d0 end:0x0202b840
+    .init       start:0x020b05d0 end:0x020b05d4
+    .ctor       start:0x020fc4c8 end:0x020fc4cc
+    .bss        start:0x02123434 end:0x02123440
+
 src/text/Font.cpp:
     complete
     .text       start:0x0202d5a4 end:0x0202d5d0

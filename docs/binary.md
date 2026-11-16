@@ -386,7 +386,7 @@ the file is placed by that order, and by which object of that part of `.bss` has
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
 | `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `data_021223E4` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `func_0202a640` on the camera at +0x380 (`data_02122764`), `func_0202a96c` on four lights of 0xC at +0x3E8 (`data_021227CC`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
 | `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `data_021232E4` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
-| `0x020B05D0` | 4 | The screens' power's (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `data_02123434` (0xC bytes: `func_0202b6d0` from `NitroMain`; `func_0202b6ec` turns the LCDs off and on after frames of the lid's state) | inferred |
+| `0x020B05D0` | 4 | `src/LcdPower.cpp` (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `gLcdPower` (0xC bytes: `LcdPower::Update` turns the LCDs off after 20 frames of the lid closed and on after 10 open), whose constructor is empty | measured: the file compiles to it |
 | `0x020B05D4` | 4 | `GameData`'s (`0x0202B840` to `Font.cpp`, `0x0202D5A4`) | `bx lr`: `gGameData` (`func_0202b840` from `NitroMain`) | inferred |
 | `0x020B05D8` | 0x2C | `src/text/Font.cpp` | `gFonts`: three `Font`s through `__cxa_vec_ctor` | measured |
 | `0x020B0604` | 4 | `src/CardPullOutMonitor.cpp` | `bx lr`: `gCardPullOutMonitor` | measured |
@@ -420,7 +420,7 @@ uses):
 | `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
 | `0x021223D8` to `0x021232E4` | | The destructor record, `data_021223E4` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `data_02123024` (`0x020299E8`, `0x02029D40`) | Models |
 | `0x021232E4` | 0x150 | `func_0202b2e8`, `func_0202b4dc` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
-| `0x02123434` | 0xC | `func_0202b6d0`, `func_0202b6ec` | Screens' power |
+| `0x02123434` | 0xC | `gLcdPower` (`LcdPower::Init`, `LcdPower::Update`) | `LcdPower.cpp` |
 | `0x02123440` to `0x02138E1C` | | `data_02123440`, `data_02123444`, `gGameData` | GameData |
 
 Inferred from this:
@@ -432,7 +432,7 @@ Inferred from this:
   to `0x02027A08`. The owner information is `0x02027A08` to `0x02027A7C` (cut and decompiled: `src/OwnerInfo.cpp`). The screens are `0x02027A7C` to
   `0x02028630`. Touch starts at `0x020287F8`. The characters start at `0x02028F20`. The models end at `0x0202B0A8`:
   its last functions are the destructors and the constructor that the initialiser uses, and the implicit destructor
-  `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840`.
+  `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840` (cut and decompiled: `src/LcdPower.cpp`).
   GameData is `0x0202B840` to `0x0202D5A4`. The graphics code between `0x020249FC` and `0x0202678C` may be more than
   one file: only one part of `.bss` belongs to it.
 - `data_021223E4` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the

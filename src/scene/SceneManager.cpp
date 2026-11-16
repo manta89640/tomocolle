@@ -10,6 +10,7 @@
 #include "Overlay.h"
 #include "SceneManager.h"
 #include "ScreenControl.h"
+#include "LcdPower.h"
 #include "sound/SoundManager.h"
 #include "wireless/WirelessSession.h"
 
@@ -134,7 +135,6 @@ struct Unknown02120a10 {
     /* 0x99C */ int mUnknown99C;
 };
 extern Unknown02120a10 data_02120a10;
-extern u8 data_02123434[];
 void func_02024b10(void *manager, void *state, u32 flags);
 void func_02024c14(void *manager, void *state, u32 flags);
 void func_02027ad0(void *manager, void *state, u32 flags);
@@ -144,7 +144,6 @@ void func_02023a00(ScreenControl *screens, void *state, u32 flags);
 void func_02027270(void *manager);
 void func_020279f4(void *manager);
 void func_0202683c(void);
-void func_0202b6ec(void *unknown);
 // The pad input: +0x14 says whether it is read
 struct PadInputState {
     /* 0x00 */ u8 mUnknown00[0x14];
@@ -224,7 +223,7 @@ void SceneManager::Update() {
     }
     int phase = mScene->mPhase;
     if (phase == Scene::PHASE_RUN) {
-        func_0202b6ec(data_02123434);
+        gLcdPower.Update();
     } else if (phase == Scene::PHASE_DONE) {
         func_0202683c();
         delete mScene;
