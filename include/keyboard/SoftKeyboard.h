@@ -85,7 +85,6 @@ public:
     /* 0x5F98 */ char mObjCellFile[0x20];    // obj_keyboard.nce
     /* 0x5FB8 */ char mObjCharFile[0x20];    // obj_chat_keyboard.ncg
     /* 0x5FD8 */ char mObjPaletteFile[0x20]; // keyboardColor.ncl
-    /* 0x5FF8 */ u8 mUnknown5FF8[0x1C];
-}; // 0x6014
+}; // 0x5FF8: the Mii maker's profile page has fields of its own from +0x5FF8 of its keyboard on
 
 #endif // KEYBOARD_SOFTKEYBOARD_H
