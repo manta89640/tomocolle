@@ -2,24 +2,79 @@
 
 #include <wchar.h>
 
-// Splits a katakana text into its syllables (a kana with the small kana and long marks that go with it, up to three
-// characters), writing each into an 8-byte slot of "syllables" when it is not NULL (cleared first, "count" slots),
-// and returns how many there are. Not decompiled yet: 8 KB of comparisons of each syllable with constants.
-extern "C" int func_02037568(const wchar_t *text, u16 (*syllables)[4], int count);
-
 extern "C" {
 // Reverses a wide string in place (in the C library's part of the main program, not named yet)
 wchar_t *func_0201f544(wchar_t *text);
 }
 
-// How the speech engine reads the digits and the letters
-static const wchar_t *sDigitReadings[10] = {
-    L"ゼロ", L"イチ", L"ニ", L"サン", L"ヨ’ン", L"ゴ", L"ロク", L"ナナ", L"ハチ", L"キュ’ー",
-};
+// How the speech engine reads the letters and the digits
 static const wchar_t *sLetterReadings[26] = {
     L"エー",   L"ビー",     L"シー", L"ディー", L"イー",     L"エフ",     L"ジー", L"エイチ", L"アイ",
     L"ジェー", L"ケー",     L"エル", L"エム",   L"エヌ",     L"オー",     L"ピー", L"キュー", L"アール",
     L"エス",   L"ティー",   L"ユー", L"ブイ",   L"ダブリュ", L"エックス", L"ワイ", L"ゼット",
+};
+
+// The kana, in hiragana, in katakana and in two letters of the alphabet. Not in the ROM: only their strings are,
+// between the letters' and the digits' (the compiler's data order, which places all 255 strings, says that they are
+// three arrays of 73, declared here). Nothing that is left reads them: what used them was left out by the link, and
+// KanaTables_Unused at the end of the file stands in for it.
+static const wchar_t *sHiragana[73] = {
+    L"あ", L"い", L"う", L"え", L"お",
+    L"か", L"き", L"く", L"け", L"こ",
+    L"さ", L"し", L"す", L"せ", L"そ",
+    L"た", L"ち", L"つ", L"て", L"と",
+    L"な", L"に", L"ぬ", L"ね", L"の",
+    L"は", L"ひ", L"ふ", L"へ", L"ほ",
+    L"ま", L"み", L"む", L"め", L"も",
+    L"や", L"ゆ", L"よ",
+    L"ら", L"り", L"る", L"れ", L"ろ",
+    L"わ", L"ゐ", L"ゑ", L"を",
+    L"が", L"ぎ", L"ぐ", L"げ", L"ご",
+    L"ざ", L"じ", L"ず", L"ぜ", L"ぞ",
+    L"だ", L"ぢ", L"づ", L"で", L"ど",
+    L"ば", L"び", L"ぶ", L"べ", L"ぼ",
+    L"ぱ", L"ぴ", L"ぷ", L"ぺ", L"ぽ",
+    L"ん",
+};
+static const wchar_t *sKatakana[73] = {
+    L"ア", L"イ", L"ウ", L"エ", L"オ",
+    L"カ", L"キ", L"ク", L"ケ", L"コ",
+    L"サ", L"シ", L"ス", L"セ", L"ソ",
+    L"タ", L"チ", L"ツ", L"テ", L"ト",
+    L"ナ", L"ニ", L"ヌ", L"ネ", L"ノ",
+    L"ハ", L"ヒ", L"フ", L"ヘ", L"ホ",
+    L"マ", L"ミ", L"ム", L"メ", L"モ",
+    L"ヤ", L"ユ", L"ヨ",
+    L"ラ", L"リ", L"ル", L"レ", L"ロ",
+    L"ワ", L"ヰ", L"ヱ", L"ヲ",
+    L"ガ", L"ギ", L"グ", L"ゲ", L"ゴ",
+    L"ザ", L"ジ", L"ズ", L"ゼ", L"ゾ",
+    L"ダ", L"ヂ", L"ヅ", L"デ", L"ド",
+    L"バ", L"ビ", L"ブ", L"ベ", L"ボ",
+    L"パ", L"ピ", L"プ", L"ペ", L"ポ",
+    L"ン",
+};
+static const wchar_t *sKanaLetters[73] = {
+    L"A", L"I", L"U", L"E", L"O",
+    L"KA", L"KI", L"KU", L"KE", L"KO",
+    L"SA", L"SH", L"SU", L"SE", L"SO",
+    L"TA", L"CH", L"TS", L"TE", L"TO",
+    L"NA", L"NI", L"NU", L"NE", L"NO",
+    L"HA", L"HI", L"FU", L"HE", L"HO",
+    L"MA", L"MI", L"MU", L"ME", L"MO",
+    L"YA", L"YU", L"YO",
+    L"RA", L"RI", L"RU", L"RE", L"RO",
+    L"WA", L"I", L"E", L"O",
+    L"GA", L"GI", L"GU", L"GE", L"GO",
+    L"ZA", L"JI", L"ZU", L"ZE", L"ZO",
+    L"DA", L"JI", L"ZU", L"DE", L"DO",
+    L"BA", L"BI", L"BU", L"BE", L"BO",
+    L"PA", L"PI", L"PU", L"PE", L"PO",
+    L"N",
+};
+
+static const wchar_t *sDigitReadings[10] = {
+    L"ゼロ", L"イチ", L"ニ", L"サン", L"ヨ’ン", L"ゴ", L"ロク", L"ナナ", L"ハチ", L"キュ’ー",
 };
 
 // Full-width characters
@@ -161,12 +216,14 @@ wchar_t *FormatDecimal(int value, wchar_t *text, u32 size, int width, BOOL zeroP
             text[length] = FULL_WIDTH_ZERO + value % 10;
             length++;
             value /= 10;
+            left--;
+            width--;
         } else {
             text[length] = FULL_WIDTH_POINT;
             length++;
+            left--;
+            width--;
         }
-        left--;
-        width--;
         position++;
     } while (value != 0);
     if (!zeroPad && negative) {
@@ -340,7 +397,216 @@ wchar_t ToHalfWidth(wchar_t c) {
 }
 
 int CountSyllables(const wchar_t *text) {
-    return func_02037568(text, NULL, 0);
+    return SplitSyllables(text, NULL, 0);
+}
+
+int SplitSyllables(const wchar_t *text, wchar_t (*syllables)[4], int count) {
+    if (syllables != NULL) {
+        MI_CpuClear8(syllables, count * sizeof(*syllables));
+    }
+    int n = 0;
+    u32 length = wcslen(text);
+    u32 i = 0;
+    while (i < length) {
+        wchar_t syllable[3];
+        MI_CpuClear8(syllable, sizeof(syllable));
+        u32 rest = length - i;
+        syllable[0] = text[i];
+        if (rest >= 2) {
+            syllable[1] = text[i + 1];
+            if (rest >= 3) {
+                syllable[2] = text[i + 2];
+            }
+        }
+        if (rest >= 3 &&
+            ((syllable[0] == L'ス' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'ス' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'ズ' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'デ' && syllable[1] == L'ィ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ド' && syllable[1] == L'ゥ' && syllable[2] == L'ァ') ||
+             (syllable[0] == L'ド' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'ド' && syllable[1] == L'ゥ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ド' && syllable[1] == L'ゥ' && syllable[2] == L'ォ') ||
+             (syllable[0] == L'テ' && syllable[1] == L'ィ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ト' && syllable[1] == L'ゥ' && syllable[2] == L'ァ') ||
+             (syllable[0] == L'ト' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'ト' && syllable[1] == L'ゥ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ト' && syllable[1] == L'ゥ' && syllable[2] == L'ォ') ||
+             (syllable[0] == L'ヴ' && syllable[1] == L'ィ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ヴ' && syllable[1] == L'ゥ' && syllable[2] == L'ァ') ||
+             (syllable[0] == L'ヴ' && syllable[1] == L'ゥ' && syllable[2] == L'ィ') ||
+             (syllable[0] == L'ヴ' && syllable[1] == L'ゥ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ヴ' && syllable[1] == L'ゥ' && syllable[2] == L'ォ') ||
+             (syllable[0] == L'フ' && syllable[1] == L'ィ' && syllable[2] == L'ェ') ||
+             (syllable[0] == L'ヅ' && syllable[1] == L'ゥ' && syllable[2] == L'ィ'))) {
+            if (syllables != NULL) {
+                syllables[n][0] = syllable[0];
+                syllables[n][1] = syllable[1];
+                syllables[n][2] = syllable[2];
+            }
+            n++;
+            i += 3;
+        } else if (rest >= 2 &&
+                   ((syllable[0] == L'イ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'キ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'キ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'キ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'キ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ク' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ク' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ク' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ク' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'シ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'シ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'シ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'シ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ス' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ス' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ス' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ツ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ツ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ツ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ツ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ニ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ニ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ニ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ニ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ヌ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ヌ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ヌ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヌ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ミ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ミ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ミ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ミ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ム' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ム' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ム' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ム' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'リ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'リ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'リ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'リ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ル' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ル' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ル' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ル' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'グ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'グ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'グ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'グ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ギ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ズ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ズ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ズ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'デ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ド' && syllable[1] == L'ゥ') ||
+                    (syllable[0] == L'デ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'デ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'デ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ブ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ブ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ブ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ブ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ピ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ピ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ピ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ピ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'プ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'プ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'プ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'プ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'テ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ト' && syllable[1] == L'ゥ') ||
+                    (syllable[0] == L'テ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'テ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'テ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'チ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヴ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ビ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ス' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'フ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ヒ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ズ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ヂ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ャ') ||
+                    (syllable[0] == L'ヂ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ュ') ||
+                    (syllable[0] == L'ヂ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヂ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ジ' && syllable[1] == L'ョ') ||
+                    (syllable[0] == L'ヅ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ヅ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ヅ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ィ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ォ') ||
+                    (syllable[0] == L'デ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'テ' && syllable[1] == L'ェ') ||
+                    (syllable[0] == L'ウ' && syllable[1] == L'ァ') ||
+                    (syllable[0] == L'ヅ' && syllable[1] == L'ィ'))) {
+            if (syllables != NULL) {
+                syllables[n][0] = syllable[0];
+                syllables[n][1] = syllable[1];
+            }
+            n++;
+            i += 2;
+        } else {
+            if (syllables != NULL) {
+                syllables[n][0] = syllable[0];
+            }
+            n++;
+            i++;
+        }
+    }
+    return n;
 }
 
 void RemoveSpeechSymbols(wchar_t *text) {
@@ -355,4 +621,16 @@ void RemoveSpeechSymbols(wchar_t *text) {
     for (; kept < length; kept++) {
         text[kept] = 0;
     }
+}
+
+// Not in the ROM: the link left it out, as nothing calls it. Something of this file read the three kana tables, or
+// their strings would not be in the ROM; what it did with them is not known, and this stands in for it.
+extern "C" const wchar_t *KanaTables_Unused(int script, int i) {
+    switch (script) {
+    case 0:
+        return sHiragana[i];
+    case 1:
+        return sKatakana[i];
+    }
+    return sKanaLetters[i];
 }

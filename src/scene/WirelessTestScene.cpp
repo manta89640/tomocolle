@@ -5,11 +5,12 @@
 
 #include <string.h>
 
+#include "text/TextUtil.h"
+
 extern "C" {
 extern void *data_02123440[];                  // The game's clock
-void func_02035460(void *clock, RTCDate *date, RTCTime *time); // Sets it
+void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
 void Clock_GetDate(void *clock, RTCDate *date);
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk); // A number as text
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
 void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
 BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
@@ -77,7 +78,7 @@ void WirelessTestScene::Init() {
     time.minute = 13;
     time.second = 14;
     date.week = RTC_WEEK_SUNDAY;
-    func_02035460(data_02123440[0], &date, &time);
+    func_02035460(data_02123440[0], &date, &time, FALSE);
     Clock_GetDate(data_02123440[0], &date);
 }
 
@@ -215,6 +216,10 @@ void WirelessTestScene::Exit() {
     WH_End();
 }
 
+// Compiled at optimisation level 2 with propagation off: the loop is not rotated, and the constants stay in registers
+#pragma push
+#pragma optimization_level 2
+#pragma opt_propagation off
 void WirelessTestScene::Redraw() {
     NNS_G2dCharCanvasClear(&mCanvas.mCanvas, 0);
     mCanvas.mTextX = 0;
@@ -240,7 +245,7 @@ void WirelessTestScene::Redraw() {
                 mCanvas.DrawText();
             }
             mCanvas.mTextX = 24;
-            mCanvas.mText = ToG2dChars(mParentNames[i]);
+            mCanvas.mText = (const NNSG2dChar *)mParentNames[i];
             mCanvas.DrawText();
         }
         break;
@@ -248,7 +253,7 @@ void WirelessTestScene::Redraw() {
         if (mRole == 0) {
             func_0202c264(&gGameData, mCharacter, &sCharacter);
             wchar_t number[4];
-            func_0203673c(mCharacter, number, sizeof(number), 3, TRUE);
+            FormatNumber(mCharacter, number, sizeof(number), 3, TRUE);
             mCanvas.mTextX = 32;
             mCanvas.mTextY = 28;
             mCanvas.mText = ToG2dChars(number);
@@ -266,6 +271,7 @@ void WirelessTestScene::Redraw() {
         break;
     }
 }
+#pragma pop
 
 void WirelessTestScene::OnSent(BOOL) {
     sSendReady = TRUE;

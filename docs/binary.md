@@ -610,6 +610,21 @@ Cut into files by gap38-a. Measured, from the decompiled code and the delinked s
 | `src/wireless/WirelessSession.cpp` | `0x0203B748` to `0x0203BCE0` | `.rodata` `0x020B5CFC` to `0x020B5D04`, `.bss` `0x0213B6B0` to `0x0213B700` | The game's layer over WH for finding a parent DS and connecting as a child (overlays 109 and 110) |
 | `src/scene/SceneManager.cpp` | `0x0203BCE0` to `0x0204AF20` | `.init` `0x020B06A0`, `.ctor` `0x020FC4E4`, `.data` `0x0211085C` to `0x02110B94`, `.bss` `0x0213B700` to `0x0213BA74` | The scene manager, the scene factory and every scene's constructor |
 
+- **Text for the speech engine** (`TextUtil.cpp`, complete). `SplitSyllables` (`0x02037568`, 8,300 bytes) cuts a
+  katakana text into what the speech engine counts as syllables, morae in effect: a kana with the small kana that go
+  with it, three characters first (20 of them, `スゥィ`, `ドゥァ`, `ヴィェ`; `スゥィ` is listed twice), then two (145,
+  `キャ` to `ヅィ`, some twice: the rows of `ギャ`, `ビャ`, `ヒャ`, `ジャ`, `チャ` and `ウィ`), else one character, so that a
+  lone small kana, `ッ`, `ン` and `ー` are syllables of their own. Measured from its compare chains. Its callers
+  outside the file are overlays 8 (`0x0214A54C`) and 92 (`0x02150A74`, `0x0215190C`), with a buffer;
+  `CountSyllables` calls it without.
+- **Three tables the link left out.** The file's `.data` holds, besides the readings of the letters and digits, 219
+  wide strings that nothing in the ROM refers to: the 73 kana (gojūon order, `ゐ` and `ゑ` included, the voiced rows
+  after `を`, `ん` last) in hiragana, in katakana, and in letters of two at most (`KA`, `SH` for `し`, `CH`, `TS`, `FU`,
+  `JI` for both `じ` and `ぢ`). Measured: their order in the pool, which is the compiler's heap sort of the file's
+  data list (decompiling.md, "How a file's data is laid out"), is reproduced exactly, all 255 strings, only by three
+  arrays of 73 pointers declared in that order between `sLetterReadings` and `sDigitReadings`; as objects of 292
+  bytes each is in a section of its own, which the link dropped with whatever used them, while the strings, in the
+  pool, stayed. Inferred: the game once converted kana to letters, or the reverse, in this file.
 - **Save blocks.** Each block is its data as it is in the card's backup memory (a 16-byte magic string first, a
   checksum, `GameData::Checksum` at `0x0202CD00`, last), followed by two flags: read, and valid. Each has its place
   in each of two slots of 0x40000 bytes. The ten magic strings are `.rodata` in an order that is not the order of
@@ -638,8 +653,7 @@ from its code); scenes 0x1F to 0x22 are the right-job scenes after their archive
 `SceneRightJob2`.
 
 Not done in this range: `SceneManager::Init` (92.6%: six loads and constants scheduled differently at its end),
-`FormatDecimal` (97.8%: one compare placed differently at the end of its loop), the syllable splitter
-`0x02037568` (8 KB, about 0x500 bytes of spilled constants), `Scene1E`'s constructor (97.7%: every instruction but
+`Scene1E`'s constructor (97.7%: every instruction but
 for a rotation of three callee-saved registers), and the constructors of gap38-c's ten test scenes (`0x0203E320` to
 `0x0203EA2C`, `0x0203F654`; their headers are in main, not on this branch), `RoomScene` (`0x0203ED10`) and
 `TutorialRoomScene` (`0x0203EFC0`; their overlays' headers declare their own `Scene`, `Model` and `Character`
@@ -728,7 +742,7 @@ factory's file, the destructors (implicit) in theirs.
 | 11 | `KeyboardTestScene` | 0x6AF8 | `0x0204CE28` | 6 of 7 | The on-screen keyboard (`SoftKeyboard`), typing ten characters into a text box |
 | 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
 | 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
-| 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 11 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
+| 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 13 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
 | | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
 
 Measured:
@@ -776,8 +790,11 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   copies, volatile reads, accesses through the array).
 - `MessageTestScene::Init` keeps 0 and 1 in a callee-saved register as `#pragma opt_propagation off` does; with the
   pragma the sprite positions get one dead copy too many. `KeyboardTestScene::Init`: two dead position copies
-  stored in another order. `WirelessTestScene`: `Init` (the store of `date.week`), `Update` and `Redraw` (loops
-  not rotated as at optimisation level 2, which gives the rest differently).
+  stored in another order (none of the 25 combinations of the five position setters for the two boxes gives it).
+  `WirelessTestScene::Update` (78%): its loops are not rotated as at optimisation level 2, but level 2, with
+  `opt_common_subs` off or the eight IR passes off, still differs in 130 lines (shared epilogue, registers).
+  `WirelessTestScene::Init` matched once the clock setter `func_02035460` got its fourth argument (it reads r3; overlay
+  98 passes it): the 0 in r3 is also the `date.week` stored. `Redraw` matched at level 2 with `opt_propagation` off.
 - `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
 
@@ -1939,13 +1956,44 @@ ranges that the ROM keeps encrypted (dsd's `dsprot_range`; it decrypts them on e
 when building, `enable_dsprot: true`). The ten before them are the decryption: `DSProtect_DecryptRange` takes the
 word before a range as its marker, makes a 16-byte key of it, finds the range's end by the same word and decrypts the
 range in place (`DSProtect_DecryptWithKey`); `DSProtect_EncryptRange` does the reverse from the end. The cipher is
-RC4 (`DSProtect_RC4Init` is the key schedule over 256 bytes, `DSProtect_RC4NextByte` the generator) applied to each
-instruction's first two bytes, while the third goes through a table that flips its low bit and the fourth (the
-condition and the instruction class) is kept (`DSProtect_CryptInstructions`); `DSProtect_SyncCaches` writes back the
-data cache and disables or enables the instruction cache around it. Only `main` calls into them (three entry points, `0x020B0250`, `0x020B0328`,
-`0x020B0400`). They call `OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes
-of `.rodata` are the last of the section. **Inferred:** this is the DS Protect library the game is known to carry,
-linked after the game's files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+RC4 (`DSProtect_RC4Init` is the key schedule over 256 bytes, walked from the end, `DSProtect_RC4NextByte` the
+generator) applied to each instruction's first two bytes, while the third goes through a table that flips its low bit
+and the fourth (the condition and the instruction class) is kept (`DSProtect_CryptInstructions`);
+`DSProtect_SyncCaches` writes back the data cache and disables or enables the instruction cache around it. They call
+`OS_GetMacAddress`, `OS_GetOwnerInfo`, `CARD_LockRom` and `CARD_UnlockRom`, and their 8 bytes of `.rodata` are the
+last of the section. **Inferred:** this is the DS Protect library the game is known to carry, linked after the game's
+files; it is cut as `lib/DSProtect/DSProtect.c`, one unit, as no file names of it are known.
+
+The seven, read decrypted (measured):
+
+| Address | Name | What it does |
+| --- | --- | --- |
+| `0x020AFDD8` | `DSProtect_CheckMacAddress` | TRUE when the MAC address is 00:09:BF:00:00:31 (`sMacAddress`, stored inverted) with the owner's birthday January 1 and an empty nickname, or all zeros |
+| `0x020AFEF8` | `DSProtect_ReadRom` | Reads the card's ROM with command 0xB7 through the card's registers, 512 bytes at a time |
+| `0x020B009C` | `DSProtect_CalcChecksum` | A CRC-32 (0xEDB88320) with the test of the low bit inverted |
+| `0x020B0140` | `DSProtect_CheckRom` | Checksums six blocks (0, 0x200, 0x400, 0x8000, 0x8200, 0x8400); TRUE when one of the first three differs from 0x8000's, or the last three are equal |
+| `0x020B0250` | `DSProtect_RunRomCheck` | Runs `DSProtect_CheckRom` (from a list of addresses plus 800), and calls its argument when it returns TRUE |
+| `0x020B0328` | `DSProtect_RunMacCheck` | The same with `DSProtect_CheckMacAddress` |
+| `0x020B0400` | `DSProtect_RunNoCheck` | The same with an empty list: always FALSE |
+
+`main` calls the three runners (`0x02000DB8`, `0x02000E6C`, `0x02000F5C`). Inferred: `DSProtect_CheckRom` tells a
+copy from a genuine card, which reads its first 32 KB as copies of what follows; `DSProtect_CheckMacAddress` an
+emulator's defaults.
+
+**How the build handles the encryption** (measured): dsd decrypts the ranges when it extracts the ROM, so the
+delinked objects, and what objdiff compares a source with, hold plain code; after linking it encrypts the ranges of
+the symbols that have `dsprot_range` in `symbols.txt` again (the build's "Encrypting DS Protect in ARM9 program"). So
+an encrypted function is written as it runs. Its ranges are inline assembly in C, the library's own way (the
+compiler's quirks around `asm` blocks, a constant loaded from the pool for a variable live across one, show the
+original was so too): `DSPROTECT_BEGIN(marker)` pushes r0-r3, calls `DSProtect_DecryptRange` on the address after
+the marker word and branches over it; `DSPROTECT_END(marker)` branches over the second copy and calls
+`DSProtect_EncryptRange`. Linked from source (the unit marked complete as a test), the plain ARM9 program was the
+original's word for word over `DSProtect_CheckMacAddress`'s two ranges.
+
+What is left (measured): 15 of the 17 functions compile to the original's bytes; `DSProtect_RC4Init` differs in
+registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where the original XORs four immediates.
+objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
+with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
 
 ## The characters
 

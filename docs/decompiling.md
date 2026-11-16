@@ -382,6 +382,15 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   order of each function's statics (and over which tables are file statics) with the model found overlay 39's
   whole `.rodata` and `.data` (31 statics, two local consts, 21 strings of initialisers), with every static in its
   function but one table, which had to be the file's first static.
+- Strings in a file's `.data` that nothing refers to are the initialisers of a table the link dropped: a static of 64
+  bytes or more is in a section of its own and goes with the function that used it, but its strings are in the pool
+  and stay. Running the heap-sort model over candidate declarations (which arrays, their element order, where they
+  are declared) and scoring against the ROM's string order found `TextUtil.cpp`'s three kana arrays, all 255 strings
+  in place, in one pass of a few hundred candidates; the model then held under the build. An uncalled function
+  that reads the arrays keeps them in the object (`KanaTables_Unused`), and the link drops it.
+- `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
+  rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
+  replace the range's lines in place.
 - Local `const` scalars come after all the statics and the virtual table (with `-ipa file` the functions are compiled
   at the end), in the order of their declarations: overlay 39's two message numbers.
 
@@ -685,6 +694,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   chain through a member pointer, materialise a flag per operand (`MiiEditProfilePage::SetState`).
 
 **Independent statements scheduled in another order**
+- A loop's compare scheduled after the counters' decrements in the join block (`sub; sub; cmp; add; bne`) where ours
+  puts the `cmp` first: the decrements written in both branches of the if/else before it (`FormatDecimal`,
+  `TextUtil.cpp`). The compiler merges them into the join block, behind the compare in its order.
 - Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
   statements matched NFL's `NFLi_MakeGlassesMesh` exactly, where the others moved loads and kept a value the original
   leaves in r0.
@@ -725,6 +737,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   elsewhere, or the compare written inside the index expression all let the compiler forward and reorder (lib/NFL's
   `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart`, 7 and about 30 differing instructions to none). A static
   inline `abs` (`return v < 0 ? -v : v;`) between the store and the reads does the same.
+
+**A call's arguments**
+- A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
+  fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
+  (`WirelessTestScene::Init`, the clock setter `func_02035460`).
+- A pointer passed through an inline cast helper (`ToG2dChars(mParentNames[i])`) scheduled its address computation
+  before a store the original makes first; the plain cast gave the original's order (`WirelessTestScene::Redraw`, at
+  level 2 with `opt_propagation` off).
 
 **Constants and arithmetic**
 - A truncation to 16 bits at a call (`lsl #16; lsr #16`) where the parameter is `u16` in the original but `int` in
@@ -839,6 +859,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   code is the build's, byte for byte (measured on overlays 72, 74, 96 and 110 and the Mii transfer), but objects of
   one size can come out in another order, so data offsets, and with them a match, are for `ninja` to say.
 
+**Found on DS Protect (`lib/DSProtect`)**
+- In a function with inline assembly the compiler gives a variable live across an `asm` block its initial value with
+  an `ldr` from the literal pool (`int r = 0;` gives `ldr r4, =0`), and does not fold a shift of a variable that holds
+  a constant: the original's `ldr r7, =1; lsl r7, r7, #26` and `mov r4, #1; lsl r4, r4, #15` are `u32 base = 1;
+  base <<= 26;` and `one << 15` with `u32 one = 1;`. Neither the `#pragma opt_*` switches nor the optimisation level
+  changed anything in such functions.
+- Data emitted by `dcd` in an `asm` block gets a `$d` mapping symbol, so objdiff shows it as data; a word dsd delinks
+  inside a function without a mapping is shown as an instruction. The two cannot compare equal in objdiff even when the
+  bytes are.
+
 **Found on the character code (`src/character/`)**
 - A chain of assignments, `mMoveAngle = mAngle = mTargetAngle = mWalkAngle = 0;`, gives the original's order of the
   stores and of the constants' registers where one statement per field schedules them otherwise (`Character::Init`,
@@ -854,6 +884,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A switch of hundreds of cases (`CharacterSort::GetCollationKey`) can be written from the original's compare tree
   by running the tree for every input value (a small interpreter of its `cmp`/branch/jump-table code) and listing one
   case per body in the bodies' address order; the compiler then rebuilds the same tree.
+- A chain of hundreds of compares against character constants, each constant hoisted out of the loop and spilled
+  (`SplitSyllables`, `TextUtil.cpp`: 320 spill slots, a 0x508-byte frame): read the chain's order off the original
+  by tracking which spill slot holds which constant (the prologue computes them all from one base, `0x30A3`, by
+  `add`/`sub`), and write one `||` condition per length in that order. The compiler hoists and spills each occurrence
+  as the original did, so the frame comes out right with no further work.
 - Functions whose body is a table of character conversions are best understood by running them in an emulator over
   every character (unicorn, on `extract/.../arm9.bin`): that is how the normalization steps were named.
 - A unit whose constructor builds an `AnimModel` member after another member with an out-of-line constructor emits

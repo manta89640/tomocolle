@@ -163,7 +163,6 @@ from:0x0214a79c kind:arm_call to:0x020267bc module:main
 from:0x0214a7a8 kind:load to:0x0202e46c module:main
 from:0x0214a7ac kind:load to:0x0202af98 module:main
 from:0x0214a7b4 kind:load to:0x0208fd38 module:main
-from:0x0214a9e4 kind:load to:0x02110653 module:main
 from:0x0214ac8c kind:load to:0x02120948 module:main
 from:0x0214b020 kind:load to:0x0214b024 module:overlay(97)
 from:0x0214b044 kind:load to:0x02149a40 module:overlay(97)
