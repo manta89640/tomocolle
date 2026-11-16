@@ -4,6 +4,7 @@
 #include <nitro.h>
 
 #include "Scene.h"
+#include "shop/ShopWindow.h"
 #include "MessageWindow.h"
 #include "Model.h"
 #include "SpriteButton.h"
@@ -49,12 +50,7 @@ public:
     /* 0x1D150 */ u8 mUnknown1D150[0x68];
     /* 0x1D1B8 */ Inventory mInventory;
     /* 0x1E9A4 */ u8 mUnknown1E9A4[0x4];
-    /* 0x1E9A8 */ MessageWindow mWindow;
-    /* 0x2994C */ u8 mUnknown2994C[0x10];
-    /* 0x2995C */ SpriteButton mButton;
-    /* 0x29A50 */ SpriteButton mButton29A50;
-    /* 0x29B44 */ ObjTextCanvas mTextCanvases[3];
-    /* 0x2A06C */ u8 mUnknown2A06C[0x4];
+    /* 0x1E9A8 */ HalfPriceShopWindow mShopWindow;
     /* 0x2A070 */ MessageWindow mWindow2A070;
     /* 0x35014 */ u8 mUnknown35014[0x8];
     /* 0x3501C */ TextButton mTextButtons[1];
