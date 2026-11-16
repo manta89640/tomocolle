@@ -188,6 +188,9 @@ public:
 // A Mii head without a body: the face on a head model of its own (overlays 2, 77 and 79).
 class CharacterHead : public CharacterBase {
 public:
+    // Implicit constructor; the destructor as the scenes' copies of it have it inlined (0x0203E064, 0x02040DC0)
+    ~CharacterHead() { NNS_G3dRenderObjResetCallBack(&mHead.mRenderObj); }
+
     void Init(int resourceId, u32 defaultMii);
     void Update();
     void Draw();
