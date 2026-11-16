@@ -9,9 +9,10 @@
 //   the original's.
 // - The mantissa is cleared with memset (inlined as byte stores), and the result's bytes are a union declared in
 //   the block that builds them, which puts it, 8-aligned, below the other arrays as in the original's frame.
-// Not matching yet: 64 of 1171 instructions, all register choices: j and p of the NaN state swap r6 and r7, and in
-// the hexadecimal tail the result pointer and the mantissa's address swap r3 and r4, the bit loop's counter and
-// byte index r2 and r7.
+// - The NaN and infinity states index their copies of "NAN(" and "INFINITY" with the count; a pointer walked over
+//   them gives the NaN state's registers in another order.
+// Not matching yet: 47 instructions of the hexadecimal tail, all register choices: the result's pointer and the
+// mantissa's address swap r3 and r4, the bit loop's counter and byte index r2 and r7.
 
 #include <ansi_fp.h>
 #include <ctype.h>
@@ -122,9 +123,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 		case infin_state: {
 			int i = 1;
 			char infinity[] = "INFINITY";
-			char *p = &infinity[1];
-			while (i < 8 && *p == toupper(c)) {
-				++p;
+			while (i < 8 && infinity[i] == toupper(c)) {
 				++i;
 				c = fetch();
 			}
@@ -145,9 +144,7 @@ long double __strtold(int max_width, int (*ReadProc)(void *, int, int), void *Re
 			int j = 0;
 			char nan_str[] = "NAN(";
 			char nan_arg[32] = "";
-			char *p = &nan_str[1];
-			while (i < 4 && *p == toupper(c)) {
-				++p;
+			while (i < 4 && nan_str[i] == toupper(c)) {
 				++i;
 				c = fetch();
 			}
