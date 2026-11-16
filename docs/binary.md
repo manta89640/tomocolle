@@ -1327,6 +1327,17 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
   `sNFLFaceGridPoints`) and normals (`0x020B67AC`, `sNFLFaceGridNormals`), their sum normalised and the quad rotated
   onto it (`MTX_RotAxis43` about the cross product with (0, 0, 1)); records 0 to 3 can share a state (`NFLMakeState`)
   whose +0x20 (`set`) says the first of a pair has set it.
+- **`NFLi_MakeMouthMolePart` transforms its vertices on the CPU.** Where `NFLi_MakeEyeBrowPart` emits matrix
+  commands (which the expressions patch), it builds the matrix itself (identity, translation, the rotation onto the
+  normal, scale) and sends each corner through `MTX_MultVec43` and each normal through `MTX_MultVec33` (the
+  rotation's 3x3 part) before `G3C_Vtx` and `G3C_Normal`, and clears the patch's matrix command, so the expressions
+  rotate no mouth. It looks the face up at |x| (the face is symmetric) and mirrors the normals of points left of the
+  centre; the mole (kind 0) takes the mean of its own Z and its four corners' Zs. The mouth (kind 1) is a quad strip
+  of three columns whose texture runs from s = width at its right edge through the middle to 0, its side normals
+  tilted by 0x197 in X; the mustache (kind 2) a strip whose texture runs 0, width, 0, so one half mirrors the other
+  (its last normal is tilted in Y where the mouth's is in X); the mole a plain quad. The second of a pair (the
+  mustache) is put at the first's depth only if its centre is within a third of their summed sizes of the first's,
+  else at depth offset 0.
 
 On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
 with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
