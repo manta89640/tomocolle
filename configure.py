@@ -255,6 +255,16 @@ LIBRARIES["lib/MiiData/"] = {
     "includes": ["lib/MiiData", *SDK_INCLUDES],
 }
 
+# CHT, the SDK's PictoChat search library, which the SDK ships compiled, without sources: its one function the game
+# links (docs/binary.md, "What differs from the fetched release") is this project's own decompilation, built as the
+# SDK's files are.
+LIBRARIES["lib/CHT/"] = {
+    "compiler": "2.0/sp1p2",
+    "flags": SDK_FLAGS,
+    "defines": SDK_DEFINES,
+    "includes": ["lib/CHT", *SDK_INCLUDES],
+}
+
 # NFL, the Mii face library (docs/binary.md, "The Mii library"): the main program's code from the end of NitroSystem
 # to the Mii transfer. Its source is this project's own decompilation, as C. Which compiler built it is not measured:
 # its code compiles the same with 2.0 SP1p2, SP2, SP2p2 and SP2p3, and its only static is one pointer, so the pooling
@@ -589,7 +599,11 @@ def main():
     if result.returncode != 0:
         sys.exit(f"dsd json delinks failed:\n{result.stderr.strip()}")
     delinks = json.loads(result.stdout)
-    files = delinks["files"]
+    # Less the ITCM's gap once files of the main program claim all of its code (see tools/migrated_gaps.py)
+    sys.path.insert(0, "tools")
+    from migrated_gaps import migrated_gaps
+    migrated = migrated_gaps(arm9_config)
+    files = [f for f in delinks["files"] if f["name"] not in migrated]
     lcf_file = Path(delinks["arm9_lcf_file"])
     objects_file = Path(delinks["arm9_objects_file"])
     delink_outputs = sorted({f["delink_file"] for f in files})

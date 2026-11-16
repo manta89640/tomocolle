@@ -136,7 +136,7 @@ void func_02028154(ScreenLoader *loader, int plane, int y);
 void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void func_0202680c(int size);
 void func_0202683c();
-void func_02060c1c();
+void NNS_GfdDumpLnkPlttVramManager();
 
 // The particle system
 void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
@@ -480,7 +480,7 @@ void RoomScene::Init() {
     UpdateButtons();
     mMessage.Update();
     NNS_GfdDumpLnkTexVramManager();
-    func_02060c1c();
+    NNS_GfdDumpLnkPlttVramManager();
     gSoundManager.LoadGroup(0x4C);
 }
 

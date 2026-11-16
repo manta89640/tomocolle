@@ -182,7 +182,7 @@ compiled object with the delinked one in object order, size and bytes outside re
   `NNS_G3dRSOnGlb`, sbc's command statics and nsbca's `pivotUtil_` were each several symbols. They are one again,
   referred to with an offset (the scenes' `data_02142438` is `&NNS_G3dGlb.cameraMtx`).
 
-Two files are another release than the fetched one, in code:
+Four files are another release than the fetched one, in code:
 
 - **`mi/src/mi_dma.c`** has `MI_StopAllDma` (`0x02009400`, `MI_StopDma` of channels 0 to 3) after `MI_StopDma`,
   which the fetched file lacks. Its name is the one later SDKs document for it.
@@ -200,7 +200,47 @@ Two files are another release than the fetched one, in code:
   Inferred: the flag is the sleep-end flag, whose command number changed with the others. The functions the fetched
   file does not have, and the statics, have the project's names for what their code does.
 
-Both are built as `lib/overrides/` describes (decompiling.md, "Where the game's release of a file differs").
+- **`card/src/card_spi.c`**: `CARDi_IdentifyBackupCore` (`0x020105CC`, 0x384 bytes against the fetched 0x348) knows
+  one device more, a 128 KB EEPROM (size bit 17: 256-byte pages, three address bytes, five pages a program
+  operation). Measured: everything else it sets is the fetched release's. It is the only function of the file the game
+  keeps.
+- **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against 0x288) is a later revision of the SDK's
+  hand-written assembly sort: the partition loop differs from the fetched one (measured: the first 0x134 bytes are the
+  same). It is not written: its source is assembly, and the project's rule is that no assembly taken from the ROM is
+  committed. Its unit compiles the fetched file, at 85.8%.
+
+The first three are built as `lib/overrides/` describes (decompiling.md, "Where the game's release of a file differs").
+
+The small gaps between the units turned out to be functions of the files on either side, or small files of their own
+(measured, by the compiled objects: bytes equal outside relocations, in the objects' order): the ranges of 19 files
+ended or began one to eight functions early, and `fx.c`, `mi_wram.c`, `mi_init.c`, `wm_ks.c`, `card_spi.c`,
+`qsort.c`, `g2d_NCG_load.c`, `g2di_SplitChar.c`, `gfd_TexVramMan.c`, `gfd_PlttVramMan.c` and
+`gfd_FramePlttVramMan.c` are units now. Where two functions of an object have the same bytes, the object's order, or
+the data that points at them, told them apart, and so found three that dsd's signatures had named wrongly:
+`0x02004718` is `GX_DisableBankForLCDC` (it passes `&gGXState.lcdc`), `0x0205FDA4` is `NNSi_G2dSplitCharUTF16` and
+`0x0205E2EC` `NNS_G2dFontInitUTF16`, and one more when its file was linked from source: `0x0205B9C4` is
+`NNS_G2dDrawCellAnimation`, not `NNS_G2dDrawCell` (the same bytes, but it calls `DrawCellAnimationImpl_`, which the
+linker otherwise drops). Linking a file from source checks what objdiff does not: a wrong name for a function with a
+twin, or a static that only a misnamed function calls, changes the ROM. With their data placed, `os_ownerInfo.c`,
+`tp.c`, `fs_rom.c`, `fs_command_default.c`, `card_common.c`, `g2d_Renderer.c`, `g2d_OAM.c` and the gfd files are
+complete; among what the data showed, `fs_command_default.c`'s table of commands (`0x020B5478`) had been named as text,
+and `card_common.c` gives the card thread the top of its 1 KB stack, `cardi_thread_stack + 0x400`, which dsd had taken
+for `card_rom.c`'s `cardi_rom_base`. Still incomplete: `os_irqHandler.c`, `os_irqTable.c` and `os_interrupt.c`, which
+need the DTCM's `OS_IRQTable` (`0x027E0000`) and `OSi_IrqThreadQueue` and the linker's `SDK_AUTOLOAD_DTCM_START` and
+`SDK_IRQ_STACKSIZE`; and `card_backup.c`, whose `[SDK+NINTENDO:BACKUP]` string is in a `.version` section, at
+`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
+(`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG` or `...BGCharacterData`/`...BGNCG`), which are byte for byte the
+same, and keep their address names.
+
+The ITCM is `OS_IrqHandler`, `OS_IrqHandler_ThreadSwitch` (`os_irqHandler.c`) and `MIi_DmaSetParams` with its three
+variants (`mi_dma.c`), compiled from the fetched files, where they are assembly functions in the ITCM's section. Each
+of the two files is one unit of the main program whose `delinks.txt` entry names an `.itcm` range too: dsd moves that
+range into the file's object ("section migration"). `CHT_IsPictochatParent` (`0x020144E4`, after `MATH_QSort`) is
+from the PictoChat search library, `libcht`, which the SDK ships compiled, without sources (its header,
+`nitro/cht/ARM9/pictocatch.h`, is in the fetched SDK): `lib/CHT/pictocatch.c` is the project's decompilation of it,
+built with the SDK's compiler and flags, and complete. Measured: it takes a beacon for a PictoChat room's when its
+game group ID is 0 and the first four half-words of its user data, copied out, begin with `0x2348` or `0xBD8A` and
+have 4 as the fourth.
 
 ## Voice synthesis
 

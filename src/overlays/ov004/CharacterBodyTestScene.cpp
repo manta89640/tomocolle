@@ -50,7 +50,7 @@ void CharacterBodyTestScene::Init() {
     mUnknown2B2C = 0;
     mTurnTest = TURN_TEST_IDLE;
     NNS_GfdDumpLnkTexVramManager();
-    func_02060c1c();
+    NNS_GfdDumpLnkPlttVramManager();
 }
 
 #pragma pop

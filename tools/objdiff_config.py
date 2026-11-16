@@ -21,6 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from place_data import Object, STT_FUNC  # noqa: E402
+from migrated_gaps import migrated_gaps  # noqa: E402
 
 # What is left of a module once its decompiled files are taken out, which dsd delinks as "_dsd_gap@<module>_<n>"
 GAP = re.compile(r"^_dsd_gap@(?P<module>.+)_(?P<index>\d+)$")
@@ -57,6 +58,7 @@ LIBRARIES = {
     "NFL": ("nfl", "Mii face library (NFL)"),
     "MiiData": ("miidata", "Mii data"),
     "DSProtect": ("dsprotect", "Anti-piracy (DS Protect)"),
+    "CHT": ("cht", "PictoChat search (CHT)"),
 }
 SUBSYSTEMS = {
     "sound": ("sound", "Sound"),
@@ -160,6 +162,10 @@ def main() -> int:
         if key in objdiff:
             objdiff[key] = clean(objdiff[key])
     objdiff["progress_categories"] = CATEGORIES
+
+    # dsd lists the ITCM's gap even when files of the main program claim all of its code, and delinks no object for it
+    migrated = migrated_gaps(args.config)
+    objdiff["units"] = [unit for unit in objdiff["units"] if unit["name"] not in migrated]
 
     modules = source_modules(args.config)
     addresses = symbol_addresses(args.config)

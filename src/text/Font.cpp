@@ -13,5 +13,5 @@ Font::Font() {
 
 void Font::Init(const char *fileName) {
     mResource = ArchiveManager_GetFileByName(gArchiveManager, fileName);
-    NNS_G2dFontInitUTF8(&mFont, mResource);
+    NNS_G2dFontInitUTF16(&mFont, mResource);
 }

@@ -34,7 +34,7 @@ void HumanTestScene::Init() {
     mBody.mPosition.x = -0x2000;
     mBody.mScale.x = mBody.mScale.y = mBody.mScale.z = 0x200;
     NNS_GfdDumpFrmTexVramManager();
-    func_0205ff40();
+    NNS_GfdDumpFrmPlttVramManager();
     mTexturesLoaded = FALSE;
 }
 

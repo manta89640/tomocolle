@@ -24,11 +24,11 @@ void func_02029c20(Model *model, u32 resType, int resourceId, int unk);
 void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
 NNSG3dResFileHeader *func_020295a4(void *resourceSet, u32 resType); // The file of a type in a resource set
 void func_02029758(void *resourceSet, u32 resType);
-void func_0205ff40(void);
+void NNS_GfdDumpFrmPlttVramManager(void);
 // Queues a transfer of palette colours to the model's palette in VRAM (a NNS_GFD_DST_3D_TEX_PLTT task): size bytes
 // at offset bytes into it, each taken from the palette's VRAM key when negative
 void func_02029d40(Model *model, const void *pltt, int offset, int size);
-void func_02060c1c(void); // Dumps the linked VRAM managers' free lists (NNSi_GfdDumpLnkVramManFreeListInfo)
+void NNS_GfdDumpLnkPlttVramManager(void);
 }
 
 // --- Characters: include/character/Character.h ---
