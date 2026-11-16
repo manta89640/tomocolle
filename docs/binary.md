@@ -333,13 +333,13 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 5 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the callee-saved
-  registers named differently), `StartPairEvent` (the offset of a pooled
-  constant), `GetAngleAround` (one copy and two registers of one vector, 95%), `ApartmentFront::UpdateCursorTarget`; in overlay 73
+- 5 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the
+  callee-saved registers named differently), `StartPairEvent` (the offset of a pooled constant), `GetAngleAround`
+  (one copy and two registers of one vector, 95%) and `ApartmentFront::UpdateCursorTarget`; in overlay 73
   `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
   digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Both copies of
   `NamePanel::Init` match: the character counts read through a pointer to the canvas, and both text positions set
-  with `SetPositionFromVec`.
+  with `SetPositionFromVec`. `StartMeeting` matches with the distances taken straight off `GetFloorPos`'s results.
 - The data of both files, above: the order of the objects after the pool of small constants, and of overlay 73's
   `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
   order the compiler does give, by which its pool is reproduced.
@@ -625,12 +625,14 @@ order of the source was solved with this model (`docs/notes/ov072.md`).
 
 Not done:
 
-- Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop reaches the camera
-  through a pointer; the stack slots of the clock's date and time and the order of the rectangle arithmetic
-  differ; the apartment mark is set with `SetPositionFromVec`, which orders its dead copies as the ROM does), `MakeDailyNews` (the registers of the loop that picks the month's kind of news). `Exit` matches since `data_0213bab0` is a byte
-  buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with `MI_CpuFill8`, overlays 31 and
-  90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast from it: the cast pointer is
-  kept in a register, the array's own address is loaded again before each store.
+- Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop
+  reaches the camera through a pointer, the apartment mark is set with `SetPositionFromVec`, which orders its dead
+  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `func_0202a640`; the registers and order of
+  the touch loop's rectangle arithmetic differ) and `MakeDailyNews` (the registers of the loop that picks the
+  month's kind of news). `Init` matches with the second light's colour through a local. `Exit` matches since
+  `data_0213bab0` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
+  `MI_CpuFill8`, overlays 31 and 90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast
+  from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
 - What `func_ov072_0214ef3c` (func_0202cb08 of `gGameData`, which decides whether the fountain can be entered) is.
