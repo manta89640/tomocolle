@@ -76,14 +76,14 @@ void Mannequin::DrawHead() {
 }
 
 void Mannequin::Init(int bodyResourceId, int bodyUnk, int headResourceId, int headUnk) {
-    mBody.Load(bodyResourceId, bodyUnk);
+    CharacterModel::Load(bodyResourceId, bodyUnk);
     InitHead(headResourceId, headUnk);
     mAngle = mTargetAngle = 0;
     mAnimSpeed = FX32_ONE;
 }
 
 void Mannequin::ApplyAngle() {
-    mBody.mAnim.mRotY = 0x4000 - mTargetAngle;
+    mAnim.mRotY = 0x4000 - mTargetAngle;
 }
 
 void Mannequin::SetAngle(u16 angle) {
@@ -97,27 +97,27 @@ void Mannequin::Turn(u16 delta) {
 }
 
 void Mannequin::Draw() {
-    mBody.Draw();
-    SetNeck(&mBody.mJointMatrices[0], &mBody.mJointRotations[0]);
+    CharacterModel::Draw();
+    SetNeck(&mJointMatrices[0], &mJointRotations[0]);
     DrawHead();
 }
 
 void Mannequin::SetAnimation(u32 resType, int id) {
-    mBody.SetAnimation(resType, id);
-    func_0202a4d8(&mBody.mAnim, mAnimSpeed);
+    CharacterModel::SetAnimation(resType, id);
+    func_0202a4d8(&mAnim, mAnimSpeed);
 }
 
 void Mannequin::BlendToAnimation(u32 resType, int id) {
-    mBody.BlendToAnimation(resType, id);
-    func_0202a4d8(&mBody.mAnim, mAnimSpeed);
+    CharacterModel::BlendToAnimation(resType, id);
+    func_0202a4d8(&mAnim, mAnimSpeed);
 }
 
 void Mannequin::SetVisible(BOOL visible) {
-    mBody.mAnim.mVisible = visible;
+    mAnim.mVisible = visible;
     mHead.mVisible = visible;
 }
 
 void Mannequin::SetAlpha(int alpha) {
     func_02029f50(&mHead, alpha);
-    func_02029f50(&mBody.mAnim, alpha);
+    func_02029f50(&mAnim, alpha);
 }
