@@ -8,6 +8,7 @@
 #include "MessageWindow.h"
 #include "Scene.h"
 #include "Sprite.h"
+#include "island/IslandProgress.h"
 #include "song/Song.h"
 #include "sound/SoundManager.h"
 #include "text/MessageFile.h"
@@ -263,15 +264,8 @@ void func_0202aecc(void *resources, int resourceId);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 }
 
-// The main program's object that decides the scene to go back to (0x2C bytes)
-struct SceneCheck {
-    /* 0x00 */ u8 mUnknown00[0x2C];
-};
 
 extern "C" {
-void func_020af224(SceneCheck *check, int a, int b);
-void func_020af260(SceneCheck *check);
-int func_020af4d8(SceneCheck *check, int a);
 void func_0203206c(void *button);
 void func_02024234(ScreenControl *screens, int planes, int a);
 void func_02023f4c(ScreenControl *screens, int planes, int a);

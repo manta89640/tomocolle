@@ -9,6 +9,7 @@
 #include "Sprite.h"
 #include "SpriteButton.h"
 #include "island/Apartment.h"
+#include "island/IslandProgress.h"
 #include "island/Sky.h"
 #include "sound/SoundManager.h"
 #include "sound/ValueRamp.h"
@@ -203,13 +204,7 @@ public:
     /* 0x13F0 */ InventoryItem *mList[255];
 }; // 0x17EC
 
-// What the island has: the shops' stock, the size of the apartment building (main program func_020af224 to
-// func_020af9dc). A stand-in of its size.
-struct IslandFacilities {
-    /* 0x00 */ u8 mUnknown00[0xC];
-    /* 0x0C */ int mApartmentSize; // Picks the building's model and sizes, and is at least 4 for the fountain's events
-    /* 0x10 */ u8 mUnknown10[0x1C];
-}; // 0x2C
+// 0x2C
 
 // The state of each building and feature of the island, as a byte from 0x60 on (func_02039c00 reads one,
 // func_02039c0c writes one): 0 not built, 1 built, 2 new, 3 not open yet
@@ -481,12 +476,6 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 void func_020ad294(s64 now, RTCTime *time);
 void func_020ad514(s64 now, RTCTime *time);
 void func_020ad568(s64 now);
-void func_020af224(IslandFacilities *island, int a, int b);
-int func_020af4d8(IslandFacilities *island, BOOL a);
-BOOL func_020af988(IslandFacilities *island);
-BOOL func_020af9ac(IslandFacilities *island);
-BOOL func_020af9c0(IslandFacilities *island);
-BOOL func_020af9dc(IslandFacilities *island);
 }
 
 #define gSceneMemory data_0213ba74
@@ -726,7 +715,7 @@ public:
     /* 0x1CA8C */ void *mEmitters[3];
     /* 0x1CA98 */ void *mParticleResource;
     /* 0x1CA9C */ TitleCamera mTitleCamera;
-    /* 0x1CAA8 */ IslandFacilities mFacilities;
+    /* 0x1CAA8 */ IslandProgress mFacilities;
     /* 0x1CAD4 */ MapClock mClock;
     /* 0x1CAF8 */ MapClockDisplay mClockDisplay;
     /* 0x1D284 */ MoneyDisplay mMoneyDisplay;

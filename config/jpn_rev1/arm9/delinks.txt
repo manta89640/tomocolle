@@ -813,7 +813,8 @@ src/song/Song.cpp:
     complete
     .text       start:0x020af058 end:0x020af224
 
-src/island/IslandFacilities.cpp:
+src/island/IslandProgress.cpp:
+    complete
     .text       start:0x020af224 end:0x020af9f0
 
 lib/DSProtect/DSProtect.c:

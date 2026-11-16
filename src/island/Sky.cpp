@@ -16,7 +16,7 @@ extern PaletteLoader data_021213b8;
 extern ScreenLoader data_02121834;
 void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
 void Clock_GetTime(void *clock, RTCTime *time);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
+const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
 void func_02028108(ScreenLoader *loader, int plane, int offset);
 void func_020145d8(char *dst, const char *src); // Appends a string
 }

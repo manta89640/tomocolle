@@ -359,8 +359,8 @@ void MapScene::StartLoading() {
                 mRoomResidents[mResidentRooms[i]] = i;
             }
         }
-        func_020af224(&mFacilities, 0, 0);
-        mNewBuilding = func_020af4d8(&mFacilities, mSceneId == 0x6A);
+        mFacilities.Init(NULL, NULL);
+        mNewBuilding = mFacilities.GetNewFacility(mSceneId == 0x6A);
         if (mNewBuilding != -1) {
             func_02039c0c(&gIsland, mNewBuilding, 2);
         }
@@ -487,7 +487,7 @@ void MapScene::Init() {
         case 2:
             if (mNewBuilding == sModelBuildings[i]) {
                 if (i == MODEL_APARTMENT) {
-                    if (mFacilities.mApartmentSize == 1) {
+                    if (mFacilities.mResidents == 1) {
                         mModels[i].Load(1, 0);
                         for (int j = 0; j < mWindowCount; j++) {
                             mWindows[j].mVisible = FALSE;
@@ -731,7 +731,7 @@ void MapScene::Update() {
                 for (int i = 1; i < MODEL_COUNT; i++) {
                     if (mNewBuilding == sModelBuildings[i]) {
                         if (i == MODEL_APARTMENT) {
-                            int stages = GetApartmentStage(mFacilities.mApartmentSize);
+                            int stages = GetApartmentStage(mFacilities.mResidents);
                             if (mIslandStage < stages) {
                                 mIslandStage++;
                             }
@@ -985,16 +985,16 @@ void MapScene::Update() {
                 if (!(state == 1 || state == 2)) {
                     continue;
                 }
-                if (mSelected == 3 && !func_020af9c0(&mFacilities)) {
+                if (mSelected == 3 && !mFacilities.HasTwoOfEachSex()) {
                     continue;
                 }
-                if (mSelected == 1 && !func_020af9ac(&mFacilities)) {
+                if (mSelected == 1 && !mFacilities.HasTwoWithBirthdays()) {
                     continue;
                 }
-                if (mSelected == 2 && !func_020af9dc(&mFacilities)) {
+                if (mSelected == 2 && !mFacilities.HasFourResidents()) {
                     continue;
                 }
-                if (mSelected == 10 && !func_020af988(&mFacilities)) {
+                if (mSelected == 10 && !mFacilities.HasSevenResidentsThreeOfEachSex()) {
                     continue;
                 }
                 EnterBuilding(mSelected, mNewsDue, 0);
@@ -1211,7 +1211,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 3:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9c0(&mFacilities)) {
+            if (!mFacilities.HasTwoOfEachSex()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9A);
                 mHasInfo = FALSE;
             } else {
@@ -1220,7 +1220,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 1:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9ac(&mFacilities)) {
+            if (!mFacilities.HasTwoWithBirthdays()) {
                 func_02034f38(&mMessageWindows[0], 0, 0xA6);
                 mHasInfo = FALSE;
             } else {
@@ -1229,7 +1229,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 2:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af9dc(&mFacilities)) {
+            if (!mFacilities.HasFourResidents()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9D);
                 mHasInfo = FALSE;
             } else {
@@ -1238,7 +1238,7 @@ void MapScene::SelectBuilding(int model) {
             break;
         case 10:
             ArchiveManager_MountCompressed(&gArchiveManager, "S01", sBuildingWindowArchives[building], 1);
-            if (!func_020af988(&mFacilities)) {
+            if (!mFacilities.HasSevenResidentsThreeOfEachSex()) {
                 func_02034f38(&mMessageWindows[0], 0, 0x9F);
                 mHasInfo = FALSE;
             } else {
@@ -2057,7 +2057,7 @@ void MapScene::EnterBuilding(int model, BOOL newsDue, int button) {
     case 5:
         if (!IsNewDay()) {
             ClearSceneCharacters();
-            if (mFacilities.mApartmentSize < 4) {
+            if (mFacilities.mResidents < 4) {
                 func_0203c02c(&gSceneManager, 0x57);
                 break;
             }

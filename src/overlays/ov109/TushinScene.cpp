@@ -1519,10 +1519,10 @@ void TushinScene::Disconnect(int kind) {
 
 // @0x0214f788
 void TushinScene::Leave() {
-    SceneCheck check;
-    func_020af224(&check, 0, 0);
-    func_020af260(&check);
-    if (func_020af4d8(&check, 0) != -1) {
+    IslandProgress progress;
+    progress.Init(NULL, NULL);
+    progress.Count();
+    if (progress.GetNewFacility(FALSE) != -1) {
         func_0203c02c(&gSceneManager, 0x5F);
     } else {
         func_0203c02c(&gSceneManager, 0x5E);
