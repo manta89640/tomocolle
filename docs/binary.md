@@ -350,7 +350,8 @@ Not done:
 
 ## The wedding announcement
 
-Overlay 96, `src/overlays/ov096/WeddingScene.cpp`: all 37 of its functions match.
+Overlay 96, `src/overlays/ov096/WeddingScene.cpp`: all 37 of its functions match, and its data is the ROM's:
+complete.
 
 Measured: the scene `WeddingScene` (0x1CEE0 bytes, constructed in the main program at `0x02048600` after
 `FS_LoadOverlay(0x60)`; its virtual table at `0x0214C860`) shows two characters in front of the camera. Its messages
@@ -368,8 +369,11 @@ of its functions are byte for byte the same there. The main program's classes it
 `Inventory` and `InventoryItem` (236 item counts read from and written back to the save data, at most 99 of each) and
 `ItemModel` (the model `Mdl/Item/item%03d_3D_LZ.bin` of an item, scaled by the item table's size).
 
-Not done: the data. `.rodata` starts with an 8-byte object `{25, 128}` that nothing refers to, which the source does
-not give; the strings of `.data` are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
+The data: `.rodata` starts with an 8-byte object `{25, 128}` (0x0214C80C) that nothing in the ROM refers to; it is
+in the source as `data_ov096_0214c80c`, kept by an uncalled stand-in that the link strips, and the four 12-byte
+vectors are declared in the order that sorts them as the ROM has them. The scene's four message files are opened as
+`"TCM:tmd_common_msg_JP.bmg"` and so on, without the slash after the colon that the source had (the strings are
+the ROM's now, and with them the offsets of everything after them in `.data`).
 
 ## The save screens
 

@@ -3,11 +3,13 @@
 // The item the wedding gives: the wedding album ("kekkon arubamu" in the item messages)
 #define ITEM_WEDDING_ALBUM 0xAA
 
-// In this order, the compiler (which sorts a file's constants by size) puts them in the ROM's order
-static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
+// In this order, the compiler (which sorts a file's constants by size) puts them in the ROM's order. The first is
+// read by nothing in the ROM (see Ov096_UnusedData at the end of the file).
+static const int data_ov096_0214c80c[2] = {25, 128};
 static const VecFx32 sCameraStartPosition = {0, 0x41D0, 0xC000};
 static const VecFx32 sFarAway = {0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF};
 static const VecFx32 sCameraTarget = {0, 0x1999, 0};
+static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
 static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0, 0x5DC}};
 
 void WeddingScene::StartLoading() {
@@ -56,10 +58,10 @@ void WeddingScene::Init() {
         mState = STATE_ANNOUNCE;
     }
     mInventory.Load();
-    mMessageFiles[0].Open("TCM:/tmd_common_msg_JP.bmg");
-    mMessageFiles[1].Open("TTM:/tmd_trouble_msg_JP.bmg");
-    mMessageFiles[2].Open("TIM:/tmd_item_msg_JP.bmg");
-    mMessageFiles[3].Open("TEM:/tmd_etc_msg_JP.bmg");
+    mMessageFiles[0].Open("TCM:tmd_common_msg_JP.bmg");
+    mMessageFiles[1].Open("TTM:tmd_trouble_msg_JP.bmg");
+    mMessageFiles[2].Open("TIM:tmd_item_msg_JP.bmg");
+    mMessageFiles[3].Open("TEM:tmd_etc_msg_JP.bmg");
     mTtsPlayer.InitEngine();
     mSpeechText.mMessageFile = &mMessageFiles[1];
     mCharOffset += mWindow.Init(mCharOffset, &mMessageFiles[1], 4, 0x10, &mTtsPlayer, FALSE);
@@ -900,4 +902,10 @@ void WeddingGiftModel::ChangeItem(int item) {
     ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
     LoadAnimation(mResourceId);
     ResetScale();
+}
+
+// Not in the ROM: the link left it out, as nothing calls it. Something of this file read data_ov096_0214c80c, or it
+// would not be in the ROM; what it did with it is not known, and this stands in for it.
+extern "C" const int *Ov096_UnusedData(void) {
+    return data_ov096_0214c80c;
 }
