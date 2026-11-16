@@ -95,6 +95,14 @@ Every object's functions come out in the game in the order they have in the obje
 what a correct match looks like and a coincidence does not. The names the matcher gave agree with the ten assigned by
 hand from the CP15 operations of `os_cache.c`, and with dsd's own signatures.
 
+MSL's wide-character files the game links are written and complete: `wprintf.c` (`swprintf`, `vswprintf` and the
+formatter, ten functions, and its wide string literals at `0x0210F3EC`), `mbstring.c` (6), `wchar_io.c` (`fwide`,
+`__fwide`) and `wmem.c` (`wmemcpy`, `wmemchr`). Measured: the game links of them only what `swprintf` needs, and
+`mbtowc`/`wctomb` convert through `_current_locale` (`0x0210F1E4`), whose "C" locale passes a byte through unchanged.
+`wprintf.o`'s formatter is `printf.o`'s with wide characters, except that `float2str` converts in a `char` buffer and
+widens the result with `mbstowcs`, `__wStringWrite` returns `wmemcpy`'s result where `__StringWrite` returns 1, and a
+narrow `%#s` reads its length through the wide buffer pointer instead of the string.
+
 So 1,293 of the main program's 4,205 functions are library code with known names, and 181 library files are cut
 out as units under `lib/`: 155 of NitroSDK and NitroSystem, and 26 of MSL's C library (`lib/MSL_C/`; `math_api.c`
 and `ansi_fp.c` are left in the gap, as their ranges would hold more functions than the objects have).

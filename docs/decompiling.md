@@ -294,6 +294,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **An address kept in a register, where the original reloads it**
 - Reach the member through a local pointer in the loop body (`MapCamera *camera = &mCamera;`): it stopped the
   compiler holding a table's address for the whole loop and spilling (`MapScene::Update`).
+- A local `char` buffer filled backwards: `p = buff + size; *--p = 0;` makes the compiler reload a local struct's
+  fields after each store through `p`, as the original does, where `p = buff + size - 1; *p = 0;` lets it keep them
+  in registers (`float2str`, `wprintf.c`).
 
 **Two operands loaded in the other order**
 - How an object's address is formed decides it. Two adjacent members opened through one pointer to the first,
@@ -305,6 +308,8 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `int next; BOOL go; go = FALSE; next = 0x44;` gives another order than the initialised declarations
   (`UpdateConnection`).
 - `hour * 3600 + minute * 60` computes the minutes first.
+- A parameter passed on through a local copy (`ld = num; ... __num2dec(&form, ld, &dec);`) is loaded before the
+  function's first early return, where passing the parameter loads it after (`double2hex`, `wprintf.c`).
 
 **Stack slots in the wrong order, or a frame too large**
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
@@ -319,6 +324,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   another (the main program's list scenes).
 
 **Registers allocated differently**
+- A loop that counts down a variable of its own and steps a second one (`for (k = n; k >= 1; k--, bit -= 4)`) gives
+  the two the other pair of registers from `for (i = k, ...)` over a copy; and a byte swap
+  (`t = cp[i]; cp[i] = cp[7 - i]; cp[7 - i] = t;`) through a `char *` declared in a block of its own keeps both
+  accesses indexed, where one through `(char *)&num` is turned into a post-incremented pointer (`double2hex`).
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
   original spills them.
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
@@ -346,6 +355,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   original's registers.
 - `x * 5 * FX32_CONST(0.01)` keeps the shift-add and the multiplication by 41, where `x * 5 * 41` folds to 205.
 - `(x == 1 || x == 2)` on a `u8` gives `add #255; and; cmp #1; bhi`, where `(u8)(x - 1) <= 1` gives a `sub`.
+- A `wchar_t` set from a choice of two wide constants (`fill = zero ? L'0' : L' ';`) and then compared is compared
+  in its register; with `'0' : ' '` the compiler reloads it from the stack, where its address is taken
+  (`__wpformatter`, `wprintf.c`).
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
