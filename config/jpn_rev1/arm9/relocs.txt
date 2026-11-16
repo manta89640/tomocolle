@@ -1490,7 +1490,7 @@ from:0x0200fe28 kind:load to:0x0200fe4c module:main
 from:0x0200fe38 kind:load to:0x0200fe4c module:main
 from:0x0200fe48 kind:load to:0x0200fe4c module:main
 from:0x0200fe60 kind:arm_call to:0x0200b3b8 module:main
-from:0x0200ff00 kind:load to:0x020fc794 module:main
+from:0x0200ff00 kind:load to:0x020fc798 add:-0x4 module:main
 from:0x0200ff28 kind:arm_call to:0x0200fe74 module:main
 from:0x0200ff44 kind:arm_call to:0x0200ff08 module:main
 from:0x02010080 kind:load to:0x020fc798 module:main

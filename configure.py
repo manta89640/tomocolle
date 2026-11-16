@@ -295,6 +295,11 @@ LIBRARIES["lib/MSL_C/"] = {
     "includes": ["lib/MSL_C", *SDK_INCLUDES],
 }
 
+# The project's own definitions for library files whose release in the game differs from the fetched one, by the
+# fetched file's path under lib/: written from the game's code, never copied from the fetched file. See
+# tools/override_functions.py and docs/decompiling.md, "Where the game's release of a file differs".
+OVERRIDES_DIR = Path("lib/overrides")
+
 # A header that the SDK's build generates from a table of constants. tools/gen_fx_const.py does the same, so that
 # nothing fetched is run here: the fetched sources are only ever input to the compiler.
 FX_CONST = ("tools/gen_fx_const.py", "lib/NitroSDK/gen/nitro/fx/fx_const.csv",
@@ -631,6 +636,8 @@ def main():
     n.rule("mwcc_lib", "$wrapper $cc $flags $includes -gccdep -MD -c $in -o $out "
            "&& $python tools/fix_depfile.py $dep", "Compiling $in", depfile="$dep", deps="gcc")
     n.rule("fx_const", "$python $script $in $out", "Generating $out")
+    # A fetched library file with the project's own definitions put in, from lib/overrides/ (see the tool)
+    n.rule("override", "$python tools/override_functions.py $in $out", "Writing $out")
     n.rule("force_active", "$python tools/force_active.py $lcf $out --objects $out.rsp", "Writing $out",
            rspfile="$out.rsp", rspfile_content="$in_newline")
     n.rule("mwld", "$wrapper $mwld $ld_flags @$objects $lcf -o $out", "Linking $out")
@@ -686,7 +693,15 @@ def main():
             flags = [*settings["flags"], *(f"-d {define}" for define in settings["defines"])]
             if "prefix" in settings:
                 flags.append(f"-prefix {settings['prefix']}")
-            n.build([obj], "mwcc_lib", [source], implicit=["tools/fix_depfile.py"], order_only=generated,
+            # Where the game's release of the file differs from the fetched one, the fetched file with the project's
+            # definitions of lib/overrides/ put in is compiled instead, and sees the fetched file's own directory
+            compile_source = source
+            override = OVERRIDES_DIR / source.relative_to("lib")
+            if override.exists():
+                compile_source = build_dir / "override" / source
+                n.build([compile_source], "override", [source, override], implicit=["tools/override_functions.py"])
+                includes.insert(0, source.parent.as_posix())
+            n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py"], order_only=generated,
                     variables={
                         "cc": ("$sjiswrap " if settings.get("sjis") else "")
                         + shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),

@@ -5,7 +5,7 @@ CpuSet kind:function(thumb,size=0x4) addr:0x020001ba
 IsDebugger kind:function(thumb,size=0x4) addr:0x0200022e
 LZ77UnCompReadByCallbackWrite16bit kind:function(thumb,size=0x4) addr:0x02000294
 RLUnCompReadNormalWrite8bit kind:function(thumb,size=0x4) addr:0x020002f6
-WaitByLoop kind:function(thumb,size=0x4) addr:0x0200035a
+SVC_WaitByLoop kind:function(thumb,size=0x4) addr:0x0200035a
 CpuFastSet kind:function(thumb,size=0x4) addr:0x020003c2
 RLUnCompReadByCallbackWrite16bit kind:function(thumb,size=0x4) addr:0x0200043c
 BitUnPack kind:function(thumb,size=0x4) addr:0x020004b0
@@ -366,7 +366,7 @@ OS_RestoreInterrupts_IrqAndFiq kind:function(arm,size=0x18) addr:0x02008dd4
 OS_GetCpsrIrq kind:function(arm,size=0xc) addr:0x02008dec
 OS_GetProcMode kind:function(arm,size=0xc) addr:0x02008df8
 OS_SpinWait kind:function(arm,size=0xc) addr:0x02008e04
-func_02008e10 kind:function(arm,size=0x1c) addr:0x02008e10
+OS_WaitVBlankIntr kind:function(arm,size=0x1c) addr:0x02008e10
 OS_InitReset kind:function(arm,size=0x54) addr:0x02008e2c
 OSi_CommonCallback kind:function(arm,size=0x34) addr:0x02008e80
 OS_GetMacAddress kind:function(arm,size=0x1c) addr:0x02008eb4
@@ -386,7 +386,7 @@ MI_DmaFill32Async kind:function(arm,size=0xc4) addr:0x020091c0
 MI_DmaCopy32Async kind:function(arm,size=0x98) addr:0x02009284
 MI_WaitDma kind:function(arm,size=0x68) addr:0x0200931c
 MI_StopDma kind:function(arm,size=0x7c) addr:0x02009384
-func_02009400 kind:function(arm,size=0x28) addr:0x02009400
+MI_StopAllDma kind:function(arm,size=0x28) addr:0x02009400
 MIi_CheckAnotherAutoDMA kind:function(arm,size=0x84) addr:0x02009428
 MIi_CheckDma0SourceAddress kind:function(arm,size=0x54) addr:0x020094ac
 MI_SendGXCommandAsync kind:function(arm,size=0xf8) addr:0x02009500
@@ -573,24 +573,24 @@ TP_CalcCalibrateParam kind:function(arm,size=0x1ec) addr:0x0200e96c
 TP_GetCalibratedPoint kind:function(arm,size=0x124) addr:0x0200eb58
 func_0200ec7c kind:function(arm,size=0x18) addr:0x0200ec7c
 func_0200ec94 kind:function(arm,size=0x14) addr:0x0200ec94
-PMi_Lock kind:function(arm,size=0x3c) addr:0x0200eca8
-func_0200ece4 kind:function(arm,size=0x40) addr:0x0200ece4
-func_0200ed24 kind:function(arm,size=0x50) addr:0x0200ed24
-func_0200ed74 kind:function(arm,size=0x5c) addr:0x0200ed74
-func_0200edd0 kind:function(arm,size=0xc) addr:0x0200edd0
-func_0200eddc kind:function(arm,size=0x30) addr:0x0200eddc
-func_0200ee0c kind:function(arm,size=0x98) addr:0x0200ee0c
-func_0200eea4 kind:function(arm,size=0x94) addr:0x0200eea4
-func_0200ef38 kind:function(arm,size=0x68) addr:0x0200ef38
-func_0200efa0 kind:function(arm,size=0x44) addr:0x0200efa0
-func_0200efe4 kind:function(arm,size=0x64) addr:0x0200efe4
-func_0200f048 kind:function(arm,size=0x34) addr:0x0200f048
-func_0200f07c kind:function(arm,size=0x88) addr:0x0200f07c
-func_0200f104 kind:function(arm,size=0x34) addr:0x0200f104
-func_0200f138 kind:function(arm,size=0x54) addr:0x0200f138
-func_0200f18c kind:function(arm,size=0x4c) addr:0x0200f18c
+PMi_Lock kind:function(arm,size=0x3c) addr:0x0200eca8 local
+PMi_WaitBusy kind:function(arm,size=0x40) addr:0x0200ece4 local
+PMi_WaitBusyWithInterruptsOff kind:function(arm,size=0x50) addr:0x0200ed24 local
+PMi_WaitBusyAnyContext kind:function(arm,size=0x5c) addr:0x0200ed74 local
+PMi_DummyCallback kind:function(arm,size=0xc) addr:0x0200edd0 local
+PMi_CallCallbackAndUnlock kind:function(arm,size=0x30) addr:0x0200eddc local
+PM_Init kind:function(arm,size=0x98) addr:0x0200ee0c
+PMi_CommonCallback kind:function(arm,size=0x94) addr:0x0200eea4
+PMi_SendUtilityCommandAsync kind:function(arm,size=0x68) addr:0x0200ef38 local
+PMi_SendUtilityCommand kind:function(arm,size=0x44) addr:0x0200efa0 local
+PMi_SetLEDAsync kind:function(arm,size=0x64) addr:0x0200efe4
+PMi_SetLED kind:function(arm,size=0x34) addr:0x0200f048
+PM_SetBackLightAsync kind:function(arm,size=0x88) addr:0x0200f07c
+PM_SetBackLight kind:function(arm,size=0x34) addr:0x0200f104
+PM_ForceToPowerOffAsync kind:function(arm,size=0x54) addr:0x0200f138
+PMi_ForceToPowerOff kind:function(arm,size=0x4c) addr:0x0200f18c local
 PM_ForceToPowerOff kind:function(arm,size=0x3c) addr:0x0200f1d8
-func_0200f214 kind:function(arm,size=0x30) addr:0x0200f214
+PMi_SendLCDUtilityCommand kind:function(arm,size=0x30) addr:0x0200f214 local
 PMi_SendPxiData kind:function(arm,size=0x2c) addr:0x0200f244
 PMi_SetLCDPower kind:function(arm,size=0x218) addr:0x0200f270
 PM_SetLCDPower kind:function(arm,size=0x20) addr:0x0200f488
@@ -602,7 +602,7 @@ PM_PrependPreSleepCallback kind:function(arm,size=0x18) addr:0x0200f57c
 PM_AppendPostSleepCallback kind:function(arm,size=0x18) addr:0x0200f594
 PM_DeletePreSleepCallback kind:function(arm,size=0x18) addr:0x0200f5ac
 PM_DeletePostSleepCallback kind:function(arm,size=0x18) addr:0x0200f5c4
-func_0200f5dc kind:function(arm,size=0x8c) addr:0x0200f5dc
+PMi_PrepareLCDForPowerOff kind:function(arm,size=0x8c) addr:0x0200f5dc local
 RTC_Init kind:function(arm,size=0x6c) addr:0x0200f668
 RTC_GetTimeAsync kind:function(arm,size=0x74) addr:0x0200f6d4
 RTC_GetTime kind:function(arm,size=0x38) addr:0x0200f748
@@ -4859,7 +4859,7 @@ data_020fc6e4 kind:data(any) addr:0x020fc6e4
 data_020fc6fc kind:data(any) addr:0x020fc6fc
 gStr_abcdbcdecdefdefgefghfghighijhijkijkljklm kind:data(any) addr:0x020fc714
 gStr_0123456701234567012345670123456701234567 kind:data(any) addr:0x020fc750
-gText_Mushiro kind:data(any) addr:0x020fc794
+PMi_WaitBusyMethod kind:data(any) addr:0x020fc794 local
 sDayOfYear kind:data(any) addr:0x020fc798
 cardi_rom_header_addr kind:data(any) addr:0x020fc7c8
 data_020fc7cc kind:data(any) addr:0x020fc7cc
@@ -6220,10 +6220,14 @@ fsi_ovt7 kind:bss addr:0x0211b5ec
 fsi_arc_rom kind:bss addr:0x0211b5f4
 data_0211b650 kind:bss addr:0x0211b650
 tpState kind:bss addr:0x0211b66c
-PMi_IsInit kind:bss addr:0x0211b68c
-PMi_PostSleepCallbackList kind:bss addr:0x0211b6a0
-PMi_PreSleepCallbackList kind:bss addr:0x0211b6a4
-data_0211b6a8 kind:bss addr:0x0211b6a8
+PMi_IsInit kind:bss addr:0x0211b68c local
+PMi_LCDCount kind:bss addr:0x0211b690 local
+PMi_InitVBlankCount kind:bss addr:0x0211b694 local
+PMi_SleepEndFlag kind:bss addr:0x0211b698 local
+PMi_LCDUtilityParam kind:bss addr:0x0211b69c local
+PMi_PostSleepCallbackList kind:bss addr:0x0211b6a0 local
+PMi_PreSleepCallbackList kind:bss addr:0x0211b6a4 local
+PMi_Work kind:bss addr:0x0211b6a8 local
 rtcInitialized kind:bss addr:0x0211b6b8
 rtcWork kind:bss addr:0x0211b6c4
 CARDi_EnableFlag kind:bss addr:0x0211b700
