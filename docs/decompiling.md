@@ -501,6 +501,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   to the lower callee-saved registers; with `#pragma optimization_level 2` and `opt_common_subs off` it gave
   `NFLi_ApplyExpression0` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is
   coloured as a new value: there the second pair of assignments had to keep the casts too.
+- An element pointer taken from the index at the top of the loop body, `stream = &obj->texStreams[i];`, where a
+  pointer stepped in the `for` beside the counter (`stream++, i++`) gave the same instructions with four
+  callee-saved registers rotated (NFL's `NFLi_CopyFaceTextures`, 99.1% to 99.9%). In `NFLi_CopySharedTextures`
+  the same change made things worse, and declaring `source` before `stream` was what helped.
 - A loop counter and a value it is compared with in the original's registers: `int i; int choice;` at the block's
   top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
   `MiiEditProfilePage::Update`).
