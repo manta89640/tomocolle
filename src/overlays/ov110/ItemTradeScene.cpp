@@ -666,7 +666,7 @@ int ItemTradeList::Run() {
             mItemModel->ChangeItem(id);
             mItemModel->mVisible = TRUE;
             ShowName(mSelection.mKind, id);
-            func_020a03bc(mMannequin, FALSE);
+            mMannequin->SetVisible(FALSE);
             func_020a4b74(&mRoom->mParts, FALSE);
             mSelection.Set(0, id);
             ResetLights();
@@ -676,7 +676,7 @@ int ItemTradeList::Run() {
             ShowCostume(id);
             LoadMannequinHead();
             ShowName(mSelection.mKind, id);
-            func_020a03bc(mMannequin, TRUE);
+            mMannequin->SetVisible(TRUE);
             mItemModel->mVisible = FALSE;
             func_020a4b74(&mRoom->mParts, FALSE);
             mSelection.Set(1, id);
@@ -685,7 +685,7 @@ int ItemTradeList::Run() {
         case PREVIEW_ROOM:
             SetRoomCamera();
             mItemModel->mVisible = FALSE;
-            func_020a03bc(mMannequin, FALSE);
+            mMannequin->SetVisible(FALSE);
             func_020a4b74(&mRoom->mParts, FALSE);
             ShowRoom(id);
             mSelection.Set(2, id);
@@ -714,7 +714,7 @@ int ItemTradeList::Run() {
 void ItemTradeList::Close() {
     mItemModel->Reset();
     mItemModel = NULL;
-    func_020a03bc(mMannequin, FALSE);
+    mMannequin->SetVisible(FALSE);
     func_020a4b74(&mRoom->mParts, FALSE);
     mOkButton.mVisible = FALSE;
     mBackButton.mVisible = FALSE;
@@ -1022,7 +1022,7 @@ void ItemTradeList::UpdatePreviewStates() {
             ShowName(PREVIEW_ROOM, style);
         } else if (sItem >= 0x800 && mPreviewStates[PREVIEW_COSTUME] == 1) {
             SetItemCamera();
-            func_020a03bc(mMannequin, TRUE);
+            mMannequin->SetVisible(TRUE);
             mPreviewStates[PREVIEW_COSTUME] = 3;
             mPreviewStates[PREVIEW_ITEM] = 2;
             mPreviewStates[PREVIEW_ROOM] = 2;
@@ -1127,7 +1127,7 @@ void ItemTradeList::UpdatePreviewStates() {
                 func_02029f50(mItemModel, 31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_COSTUME:
-                func_020a03c8(mMannequin, 31 - mPreviewTimers[i] * 2);
+                mMannequin->SetAlpha(31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_ROOM:
                 func_020a4bc4(&mRoom->mParts, 31 - mPreviewTimers[i] * 2);
@@ -1136,10 +1136,10 @@ void ItemTradeList::UpdatePreviewStates() {
             }
             if (mPreviewTimers[i] >= 15) {
                 func_020a4b74(&mRoom->mParts, FALSE);
-                func_020a03bc(mMannequin, FALSE);
+                mMannequin->SetVisible(FALSE);
                 mItemModel->SetVisible(FALSE);
                 func_020a4bc4(&mRoom->mParts, 31);
-                func_020a03c8(mMannequin, 31);
+                mMannequin->SetAlpha(31);
                 func_02029f50(mItemModel, 31);
                 mPreviewStates[i] = 0;
                 if (i == PREVIEW_ROOM) {
@@ -1194,7 +1194,7 @@ void ItemTradeList::ShowPending() {
             return;
         }
         SetItemCamera();
-        func_020a03bc(mMannequin, TRUE);
+        mMannequin->SetVisible(TRUE);
         ShowCostume(mPendingId);
         LoadMannequinHead();
         func_020a9bf4(&mList, mPendingIndex);
@@ -1531,28 +1531,28 @@ void ItemTradeScene::Init3d() {
 
     ModelResources_SetModel(data_021223e4, 0, mMannequin.mModelPath);
     ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
-    func_020a02c0(&mMannequin, 0, 0, 1, 0);
+    mMannequin.Init(0, 0, 1, 0);
     void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
     func_02029660(mMannequin.mModel.mAnim.mResourceSet, RESOURCE_BCA0, animations);
     mMannequin.SetAnimation("idle00");
     func_0208ef00(&mMannequin.mModel, TRUE, TRUE);
     mMannequin.mModel.mUnknown4A4 = FALSE;
-    func_020a03bc(&mMannequin, FALSE);
+    mMannequin.SetVisible(FALSE);
 
     VecFx32 zero = sZero;
     VecFx32 position = zero;
     mMannequin.mModel.mPos.x = position.x;
     mMannequin.mModel.mPos.y = position.y;
     mMannequin.mModel.mPos.z = position.z;
-    mMannequin.mModel.mScale.x = data_020fbe0c.x * 4 / 10;
+    mMannequin.mModel.mScale.x = gMannequinBodyScale.x * 4 / 10;
     mMannequin.mModel.mInvScale.x = FX_Inv(mMannequin.mModel.mScale.x);
-    mMannequin.mModel.mScale.y = data_020fbe0c.y * 4 / 10;
+    mMannequin.mModel.mScale.y = gMannequinBodyScale.y * 4 / 10;
     mMannequin.mModel.mInvScale.y = FX_Inv(mMannequin.mModel.mScale.y);
-    mMannequin.mModel.mScale.z = data_020fbe0c.z * 4 / 10;
+    mMannequin.mModel.mScale.z = gMannequinBodyScale.z * 4 / 10;
     mMannequin.mModel.mInvScale.z = FX_Inv(mMannequin.mModel.mScale.z);
-    mMannequin.mUnknown140.x = data_020fbe00.x * 4 / 10;
-    mMannequin.mUnknown140.y = data_020fbe00.y * 4 / 10;
-    mMannequin.mUnknown140.z = data_020fbe00.z * 4 / 10;
+    mMannequin.mUnknown140.x = gMannequinHeadScale.x * 4 / 10;
+    mMannequin.mUnknown140.y = gMannequinHeadScale.y * 4 / 10;
+    mMannequin.mUnknown140.z = gMannequinHeadScale.z * 4 / 10;
 
     ModelResources_SetModel(data_021223e4, 2, mItemModel.mModelPath);
     mItemModel.Load(2);
@@ -2154,7 +2154,7 @@ void ItemTradeScene::Draw() {
     Sprite_Draw(&mLinkIcon);
     mList.Draw();
     func_020345d8(&mWindow);
-    func_020a034c(&mMannequin);
+    mMannequin.Draw();
     mItemModel.Draw();
     func_020a4a50(&mRoom.mParts);
     mScroll += 0x4CC;

@@ -15123,7 +15123,7 @@ from:0x020a0240 kind:arm_call to:0x0200134c module:main
 from:0x020a0254 kind:arm_call_thumb to:0x02001468 module:main
 from:0x020a0264 kind:arm_call to:0x020015d8 module:main
 from:0x020a0270 kind:arm_call to:0x02009978 module:main
-from:0x020a02bc kind:load to:0x020b3810 module:main
+from:0x020a02bc kind:load to:0x020b0810 add:0x3000 module:main
 from:0x020a02d0 kind:arm_call to:0x0208ec28 module:main
 from:0x020a02e0 kind:arm_call to:0x020a00bc module:main
 from:0x020a0358 kind:arm_call to:0x0208ed30 module:main

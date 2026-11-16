@@ -100,7 +100,7 @@ public:
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ VecFx32 mScale;    // The scene's Init gives the mannequin's data_020fbe0c * 4 / 10
+    /* 0x0EC */ VecFx32 mScale;    // The scene's Init gives the mannequin's gMannequinBodyScale * 4 / 10
     /* 0x0F8 */ VecFx32 mInvScale; // and its inverses
     /* 0x104 */ u8 mUnknown104[0x3A0];
     /* 0x4A4 */ BOOL mUnknown4A4;
@@ -152,17 +152,22 @@ int NFL_GetFavoriteColor(int unk);
 }
 
 // The model the scene dresses in a costume to show it: a body ("3MM") with a head ("3MH:/head.imd",
-// "Mdl/Misc/headManikin_3D_LZ.bin"). A main-program class (functions 0x020a02c0 to 0x020a03c8); the scene's
+// "Mdl/Misc/headManikin_3D_LZ.bin"). A main-program class (src/item/Mannequin.cpp); the scene's
 // constructor builds its members in place.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class Mannequin {
 public:
+    void Init(int bodyResourceId, int bodyUnk, int headResourceId, int headUnk);
+    void Draw();
+    void SetAnimation(u32 resType, int id);
+    void SetVisible(BOOL visible);
+    void SetAlpha(int alpha); // 0 to 31
     void SetAnimation(const char *name);
 
     /* 0x000 */ AnimModel mHead;
     /* 0x0E0 */ u8 mUnknown0E0[0x60];
-    /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it data_020fbe00 * 4 / 10
+    /* 0x140 */ VecFx32 mUnknown140; // The scene's Init gives it gMannequinHeadScale * 4 / 10
     /* 0x14C */ u8 mUnknown14C[0x5C];
     /* 0x1A8 */ CharacterModelMember mModel;
     /* 0x664 */ u8 mUnknown664[0x10];
@@ -170,16 +175,8 @@ public:
     /* 0x690 */ char mModelPath[0x28];
 }; // 0x6B8
 
-extern "C" {
-void func_020a02c0(Mannequin *mannequin, int unk1, int unk2, int unk3, int unk4);
-void func_020a034c(Mannequin *mannequin);            // Draws it
-void func_020a037c(Mannequin *mannequin, u32 resType, int animation);
-void func_020a03bc(Mannequin *mannequin, BOOL visible);
-void func_020a03c8(Mannequin *mannequin, int alpha); // Sets its alpha (0 to 31)
-}
-
 inline void Mannequin::SetAnimation(const char *name) {
-    func_020a037c(this, RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mAnim.mResourceSet, RESOURCE_BCA0, name));
+    SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mAnim.mResourceSet, RESOURCE_BCA0, name));
 }
 
 // --- Items (main program 0x0209e140 to 0x0209f84c, 0x020a4d34 to 0x020a5ca0) ---------------------------------
@@ -463,8 +460,8 @@ extern PaletteLoader data_021213b8;
 extern ScreenLoader data_02121834;
 extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
-extern const VecFx32 data_020fbe00;
-extern const VecFx32 data_020fbe0c;
+extern const VecFx32 gMannequinHeadScale;
+extern const VecFx32 gMannequinBodyScale;
 
 void func_0202a640(Camera *camera);
 void func_0202a748(Camera *camera);
