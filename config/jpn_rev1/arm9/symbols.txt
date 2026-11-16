@@ -4150,12 +4150,12 @@ func_020aecb0 kind:function(arm,size=0xcc) addr:0x020aecb0
 func_020aed7c kind:function(arm,size=0x178) addr:0x020aed7c
 func_020aeef4 kind:function(arm,size=0x8c) addr:0x020aeef4
 func_020aef80 kind:function(arm,size=0xd8) addr:0x020aef80
-func_020af058 kind:function(arm,size=0x14) addr:0x020af058
-func_020af06c kind:function(arm,size=0x18) addr:0x020af06c
-func_020af084 kind:function(arm,size=0x18) addr:0x020af084
-func_020af09c kind:function(arm,size=0x1c) addr:0x020af09c
-func_020af0b8 kind:function(arm,size=0xe4) addr:0x020af0b8
-func_020af19c kind:function(arm,size=0x88) addr:0x020af19c
+_ZN9SongEntryC1Ev kind:function(arm,size=0x14) addr:0x020af058
+_ZN9SongEntry4SaveEh kind:function(arm,size=0x18) addr:0x020af06c
+_ZN9SongEntry4LoadEh kind:function(arm,size=0x18) addr:0x020af084
+_ZN9SongEntry5ClearEv kind:function(arm,size=0x1c) addr:0x020af09c
+_ZN9SongEntry16SetNotesFromSlotEii kind:function(arm,size=0xe4) addr:0x020af0b8
+_ZN9SongEntry8FindPartEiiPiS0_ kind:function(arm,size=0x88) addr:0x020af19c
 func_020af224 kind:function(arm,size=0x3c) addr:0x020af224
 func_020af260 kind:function(arm,size=0x278) addr:0x020af260
 func_020af4d8 kind:function(arm,size=0x4b0) addr:0x020af4d8
@@ -4523,7 +4523,7 @@ data_020f8f5c kind:data(any) addr:0x020f8f5c
 data_020f8fc4 kind:data(any) addr:0x020f8fc4
 data_020f9138 kind:data(any) addr:0x020f9138
 data_020f9408 kind:data(any) addr:0x020f9408
-gStr_Parenthesis_3 kind:data(any) addr:0x020f9414
+data_020f9414 kind:data(any) addr:0x020f9414
 data_020f9418 kind:data(any) addr:0x020f9418
 data_020f9419 kind:data(any) addr:0x020f9419
 data_020f9954 kind:data(any) addr:0x020f9954

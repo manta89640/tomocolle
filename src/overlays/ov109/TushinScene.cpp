@@ -847,11 +847,10 @@ int TushinScene::ReceiveCharacter() {
                 if (song != 0xFF) {
                     func_0202c934(&gGameData, func_0209c718(&sTransfer, i), sSongs[n]);
                     SongEntry entry;
-                    func_020af058(&entry);
                     entry.mSong = func_0209c718(&sTransfer, i);
-                    func_020af084(&entry, entry.mSong);
-                    func_020af0b8(&entry, -1, i);
-                    func_020af06c(&entry, entry.mSong);
+                    entry.Load(entry.mSong);
+                    entry.SetNotesFromSlot(-1, i);
+                    entry.Save(entry.mSong);
                 }
                 n++;
                 record.mSongSlots[i] = func_0209c718(&sTransfer, i);
@@ -882,11 +881,10 @@ int TushinScene::ReceiveCharacter() {
                 if (song != 0xFF) {
                     func_0202c934(&gGameData, func_0209c718(&sTransfer, j), sSongs[n]);
                     SongEntry entry;
-                    func_020af058(&entry);
                     entry.mSong = func_0209c718(&sTransfer, j);
-                    func_020af084(&entry, entry.mSong);
-                    func_020af0b8(&entry, -1, j);
-                    func_020af06c(&entry, entry.mSong);
+                    entry.Load(entry.mSong);
+                    entry.SetNotesFromSlot(-1, j);
+                    entry.Save(entry.mSong);
                 }
                 n++;
                 func_0202c28c(&gGameData, i, &sTransfer);

@@ -810,6 +810,7 @@ src/resident/ResidentLife.cpp:
     .text       start:0x020acfe4 end:0x020af058
 
 src/song/Song.cpp:
+    complete
     .text       start:0x020af058 end:0x020af224
 
 src/island/IslandFacilities.cpp:
