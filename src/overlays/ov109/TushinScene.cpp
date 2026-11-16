@@ -1656,8 +1656,8 @@ void TushinScene::Update() {
                 mUnknown28 = 1;
                 break;
             }
-            next = mPage != 0x28 ? 0x40 : 0x43;
             lost = TRUE;
+            next = mPage != 0x28 ? 0x40 : 0x43;
             break;
         }
         if (mUnknown28 == 1) {
@@ -2268,7 +2268,7 @@ void TushinScene::Update() {
                 case 13:
                     if (mUnknown3F08C != 0) {
                         if (mUnknown3F090 == 0) {
-                            mNextPage = mUnknown3F08C == 2 ? 0xE : 0xF;
+                            if (mUnknown3F08C == 2) { mNextPage = 0xE; } else { mNextPage = 0xF; }
                             mUnknown3F08C = 0;
                             Send(4);
                             data_ov109_02153210 = 0;
@@ -2313,15 +2313,15 @@ void TushinScene::Update() {
                 case 49:
                     PlaySound(0xB);
                     break;
-                case 18: case 19: case 20: case 21: case 25: case 26: case 27: case 29: case 31:
-                    PlaySound(0xC);
+                case 23:
+                    mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
+                    PlaySound(0xB);
                     break;
                 case 22: case 24: case 28: case 30: case 33:
                     PlaySound(0xD);
                     break;
-                case 23:
-                    mWindow.mTexts[0].SetStringArg(sReceivedName, 0);
-                    PlaySound(0xB);
+                case 18: case 19: case 20: case 21: case 25: case 26: case 27: case 29: case 31:
+                    PlaySound(0xC);
                     break;
                 case 32:
                 case 61:
