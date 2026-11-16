@@ -426,7 +426,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 `compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
 
 **An address reloaded at each use, where the original keeps it in a register**
-- Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)data_0213bab0;`. A plain local pointer to the
+- Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)gSceneScratch;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
   calls (overlay 110's camera setters, the Mii transfer's `MiiTransfer_UpdateSession`).

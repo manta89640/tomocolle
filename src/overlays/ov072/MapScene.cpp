@@ -1067,7 +1067,7 @@ void MapScene::Draw() {
 void MapScene::Exit() {
     GXRgb clearColor = mSky.mBgPalette[1];
     // A pointer cast from the byte buffer is kept in a register across the calls; the buffer's address is not.
-    GXRgb *colors = (GXRgb *)data_0213bab0;
+    GXRgb *colors = (GXRgb *)gSceneScratch;
     int phase = mSky.GetPhase();
     colors[0] = clearColor;
     colors[1] = GetSkyLightColor(phase);

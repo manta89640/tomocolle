@@ -139,9 +139,9 @@ void DestroyMainFrameHeap();
 void NNS_GfdDumpLnkPlttVramManager();
 
 // The particle system
-void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void ParticleSystem_Load(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
 void func_02080ee4(ParticleSystem *particles);
-void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                          // Updates
 
 // The room (Room.h has the others)
@@ -387,7 +387,7 @@ void RoomScene::Init() {
     SetInputState(INPUT_IDLE);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
-    func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
+    ParticleSystem_Load(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
     mRoom.Refresh();
@@ -543,7 +543,7 @@ void RoomScene::Draw() {
     for (int i = 0; i < 4; i++) {
         mItems[i].Draw();
     }
-    func_02080f00(&mParticles, 0);
+    ParticleSystem_Draw(&mParticles, 0);
     mMessage.Draw();
     mButtonLabel[0].Draw();
     mNamePanel.Draw();

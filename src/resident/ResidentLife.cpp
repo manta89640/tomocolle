@@ -91,7 +91,7 @@ struct OutingEntry {
     /* 0x8 */ int mUnknown8;
 }; // 0xC
 
-// What an event is (data_020f8cc0, by event)
+// What an event is (gEventTable, by event)
 struct EventInfo {
     u32 mMinutes : 12; // How long it lasts
     u32 mUnknownBits12 : 20;
@@ -110,7 +110,7 @@ struct ItemInfo {
 extern "C" {
 extern GameClock *gGameClock;
 extern MATHRandContext16 gRandom;
-extern const EventInfo data_020f8cc0[];    // By event
+extern const EventInfo gEventTable[];    // By event
 extern const s8 data_020f8ca8[];           // By month: an adjustment in hours
 extern const u8 data_020f8f5c[];           // By number of residents
 extern const OutingEntry *const data_02114d78[];
@@ -290,7 +290,7 @@ void LimitEventTimes(s64 now) {
         }
         s64 end = GameData_GetCharacterEventEnd(&gGameData, i);
         if (end != NO_TIME) {
-            s64 length = data_020f8cc0[GameData_GetCharacterEvent(&gGameData, i)].mMinutes * 60;
+            s64 length = gEventTable[GameData_GetCharacterEvent(&gGameData, i)].mMinutes * 60;
             if (now + length * 2 < end) {
                 SavedCharacter character;
                 GameData_ReadCharacter(&gGameData, i, &character);
@@ -374,7 +374,7 @@ void ShiftEventTimes(s64 now) {
                     end += CENTURY;
                 } while (end < 0);
             }
-            s64 length = data_020f8cc0[character.mLongActState].mMinutes * 60;
+            s64 length = gEventTable[character.mLongActState].mMinutes * 60;
             if (now + length * 2 < end || otherConsole) {
                 end = now + length;
                 if (character.mLongActState == 0x12) {

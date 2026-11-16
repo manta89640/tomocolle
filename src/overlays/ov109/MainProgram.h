@@ -232,7 +232,7 @@ void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
 void MiiTransfer_Update(void);
-extern u8 data_0212349c[];
+extern u8 gMiiIdSource[];
 void MiiTransfer_Init(void *a, void *miiData, int count);
 void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));
 void MiiTransfer_SetSendResultCallback(void (*callback)(int, int));

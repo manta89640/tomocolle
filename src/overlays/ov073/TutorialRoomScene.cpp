@@ -213,7 +213,7 @@ void TutorialRoomScene::Init() {
     mRoom.SetUnknown(10);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
-    func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
+    ParticleSystem_Load(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
 
@@ -315,7 +315,7 @@ void TutorialRoomScene::Draw() {
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Draw();
     }
-    func_02080f00(&mParticles, 0);
+    ParticleSystem_Draw(&mParticles, 0);
     mTimedMessage.Draw();
     MessageWindow_Draw(&mWindow[0]);
     mButtonLabel[0].Draw();

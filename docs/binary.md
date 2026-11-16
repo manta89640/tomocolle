@@ -995,7 +995,7 @@ factory's file, the destructors (implicit) in theirs.
 | 10 | `MessageTestScene` | 0x2D84 | `0x0204C860` | 6 of 7 | Etc messages on sprites and on background 2, with a string and item messages in their tags |
 | 11 | `KeyboardTestScene` | 0x6AF8 | `0x0204CE28` | 6 of 7 | The on-screen keyboard (`SoftKeyboard`), typing ten characters into a text box |
 | 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
-| 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
+| 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `gSceneScratch` |
 | 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 13 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
 | | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
 
@@ -1389,7 +1389,7 @@ Not done:
   copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `Camera_Reset`; the registers and order of
   the touch loop's rectangle arithmetic differ) and `MakeDailyNews` (the registers of the loop that picks the
   month's kind of news). `Init` matches with the second light's colour through a local. `Exit` matches since
-  `data_0213bab0` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
+  `gSceneScratch` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
   `MI_CpuFill8`, overlays 31 and 90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast
   from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
@@ -1478,7 +1478,7 @@ Measured:
   character 0, or that character's name when `MiiEditScene::GetNameLength` rejects it. (Overlay 109's source calls it a
   nickname.)
 - `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
-  passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`NFL_Random`):
+  passes `gMiiIdSource`, through `func_0209859c`) and a random number from the main Mii code (`NFL_Random`):
   byte 0 is `0xC0`, the random number times 4 and bits 12-13 of the counter.
 - Two setters, of bit 2 of 0x20 (`MiiData_SetLocalOnly`) and bit 0 of 0x00 (`MiiData_SetFavorite`), are called through
   `func_02098cdc` and `func_02098ce8`. Inferred: they are the Wii's `localOnly` and `favorite`, which `RFLCharData` has
@@ -2357,7 +2357,7 @@ Measured:
   (`MiiParameter`); for a Mii made on another console the birth month and day are the record's own.
 - **The long activities** (`mLongActState`): odd states 0x17 to 0x2D are done with a partner, the even ones after them
   are the partner's side, 0x13 to 0x16 are away; `ChooseLongAct` draws one by weights for the personality's kind and
-  the mood (`data_020F8CC0`: minutes, weight, personality bits, mood bits).
+  the mood (`gEventTable`: minutes, weight, personality bits, mood bits).
 - **The relations** (`mRelationRank`, by the other's index): 0 none, 1 friends, 2 lovers, 3 former lovers, 4 spouses,
   5 divorced, 6 to 8 friends, lovers and spouses fighting, 9 best friends. The order is the game's list of relation
   names (`TmdEtcMsgJP`), and the code agrees: a wish to break up looks for a lover liked no more than 50 or one it is

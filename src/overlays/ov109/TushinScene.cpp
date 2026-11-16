@@ -503,7 +503,7 @@ void TushinScene::Init() {
     mWindowReady = 0;
     mConnectRequested = 0;
     data_ov109_02153230 = 0;
-    MiiTransfer_Init(&data_0212349c, sMiiData, 100);
+    MiiTransfer_Init(&gMiiIdSource, sMiiData, 100);
     MiiTransfer_SetSendResultCallback(TushinScene_OnWiiSendResult);
     MiiTransfer_SetReceiveCallback(TushinScene_OnWiiMiiReceived);
     MiiTransfer_SetAcceptSpecial(1);

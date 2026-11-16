@@ -167,9 +167,9 @@ extern const s8 *data_021135c8[];
 void ResourceSet_SetArchive(void *resource, u32 resType, void *archive);
 
 // --- The particle system and the head icon (0x02080e80 to 0x020810e4) ---
-void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void ParticleSystem_Load(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
 void func_02080ee4(ParticleSystem *particles);
-void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                          // Updates
 int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon
 

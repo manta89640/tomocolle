@@ -207,7 +207,7 @@ extern MATHRandContext16 gRandom;
 extern SceneMemory gSceneMemory;
 // 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
-extern u8 data_0213bab0[100];
+extern u8 gSceneScratch[100];
 extern IslandState gIslandState;
 extern Camera gCamera;
 extern Light gLights;

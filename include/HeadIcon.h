@@ -10,7 +10,7 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
-// The main program's particle system for one effect file (func_02080e98 loads it). Its constructor is emitted as
+// The main program's particle system for one effect file (ParticleSystem_Load loads it). Its constructor is emitted as
 // C2 (0x02080E80) and C1 (0x02080E8C), byte for byte the same, in that order; the scenes construct plain members
 // with C1, and the classes that derive from it (scene 0x76's TestNg111Icon) with C2. HeadIcon's are alike.
 struct ParticleSystem {

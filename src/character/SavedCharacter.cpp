@@ -126,7 +126,7 @@ int MiiData_GetNoseY(CharacterRecord *mii);
 // The clock (gap)
 void Clock_GetDate(void *clock, RTCDate *date);
 extern void *gGameClock;
-extern MiiIdSource data_0212349c; // Where this console's Miis' create IDs come from
+extern MiiIdSource gMiiIdSource; // Where this console's Miis' create IDs come from
 
 // The saved game (gap)
 BOOL GameData_CharacterExists(GameData *game, int index); // Whether there is a saved character with that index
@@ -156,9 +156,9 @@ struct ReactionInfo {
     u8 personalities;
     u8 moods;
 };
-extern const TalkReactionInfo data_020f5828[12];
+extern const TalkReactionInfo gTalkReactions[12];
 extern const s8 *const data_021135f0[];    // By relation: the weights of the reactions by the partner's reaction
-extern const ReactionInfo data_020f5df8[15];
+extern const ReactionInfo gReactions[15];
 extern const u8 data_020f5e28[][15];       // By the reaction before: the weights of the next
 int GameData_GetCharacterMood(GameData *game, int index);
 u8 GameData_GetCharacterAffinity(GameData *game, int index, int other); // Its mRelationMeter for another
@@ -191,7 +191,7 @@ extern TroubleInfo *data_02114d78[];
 extern const u8 gStr_Parenthesis_2[]; // The starting progress of each trouble of category 0
 extern const u8 data_020f8d8c[10];
 extern const u32 gStr_LessThan_2[10];  // The number of troubles of each category
-extern const LongActInfo data_020f8cc0[];
+extern const LongActInfo gEventTable[];
 }
 
 // The voice parameters' ranges and defaults (VoiceParam::defaultValue is what ResetVoice sets)
@@ -672,11 +672,11 @@ void SavedCharacter::AddUnknown1C4(int value) {
 }
 
 BOOL SavedCharacter::IsMiiFromThisConsole() {
-    return NFL_IsSameMiiCreateIdSource(&data_0212349c, this);
+    return NFL_IsSameMiiCreateIdSource(&gMiiIdSource, this);
 }
 
 void SavedCharacter::AssignCreateId() {
-    MiiData_AssignCreateId(&data_0212349c, this);
+    MiiData_AssignCreateId(&gMiiIdSource, this);
 }
 
 void SavedCharacter::GetCreateId(CreateId *id, const CharacterRecord *character) {
@@ -1375,7 +1375,7 @@ BOOL SavedCharacter::IsLongActIdleState(int state) {
 }
 
 s64 SavedCharacter::GetLongActDuration(int state, int shift) {
-    int minutes = data_020f8cc0[state].minutes * 60;
+    int minutes = gEventTable[state].minutes * 60;
     int random = minutes >> shift;
     if (random > 0x7FFF) {
         random = 0x7FFF;
@@ -1423,10 +1423,10 @@ BOOL SavedCharacter::IsLongActAvailable(int state) {
 }
 
 int SavedCharacter::GetLongActWeight(int state) {
-    const LongActInfo *info = &data_020f8cc0[state];
+    const LongActInfo *info = &gEventTable[state];
     if ((1 << gPersonalityKinds[mPersonality]) & info->personalities && info->moods & (1 << mMood) && info->weight != 0 &&
         IsLongActAvailable(state)) {
-        return data_020f8cc0[state].weight;
+        return gEventTable[state].weight;
     }
     return 0;
 }
@@ -3032,7 +3032,7 @@ int SavedCharacter::ScaleTalkWeightByPersonalities(int kind, int weight, SavedCh
 // The weight of one of the twelve reactions to what the partner did in a talk: by the relation and the partner's
 // reaction, for the character's kind of personality and mood only, plus its scalings
 int SavedCharacter::GetTalkReactionWeight(s8 relation, s8 partnerReaction, s8 reaction, SavedCharacter *partner) {
-    const TalkReactionInfo *info = &data_020f5828[reaction];
+    const TalkReactionInfo *info = &gTalkReactions[reaction];
     int weight = data_021135f0[relation][partnerReaction * 12 + reaction];
     if ((info->personalities & (1 << gPersonalityKinds[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
         int byAnswers = ScaleTalkWeightByAnswers(info->answerScaling, weight);
@@ -3097,7 +3097,7 @@ int SavedCharacter::ScaleReactionWeightByAnswers(int kind, int weight) {
 // The weight of one of the fifteen reactions that follow the one before
 int SavedCharacter::GetReactionWeight(s8 previous, s8 reaction) {
     int weight = data_020f5e28[previous][reaction];
-    const ReactionInfo *info = &data_020f5df8[reaction];
+    const ReactionInfo *info = &gReactions[reaction];
     if ((info->personalities & (1 << gPersonalityKinds[mPersonality])) && (info->moods & (1 << mMood)) && weight != 0) {
         weight += ScaleReactionWeightByAnswers(info->answerScaling, weight);
     } else {
