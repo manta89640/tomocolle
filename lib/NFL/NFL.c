@@ -278,6 +278,548 @@ void func_0206a99c(u16 *palette, int index) {
     palette[15] = 0;
 }
 
+// The glasses
+int func_0206aaec(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->glassesType;
+    int color = mii->glassesColor;
+
+    if (params[13] != type || (obj->unk1A4[6].state >= 1 && obj->unk1A4[6].state <= 6)) {
+        obj->unk1A4[6].state = 0;
+        obj->unk1A4[6].value = type;
+    }
+    if (color != params[12] || (obj->unk228[5].state >= 1 && obj->unk228[5].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[5].value = color;
+            obj->unk228[5].state = 0;
+        } else {
+            obj->unk1A4[6].state = 0;
+            obj->unk1A4[6].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0x2880;
+    } else {
+        ctx->unk2C[4].unk0 = obj->unkD4 + 0xA10;
+        ctx->unk2C[4].unk4 = obj->unkD8 + 0x90;
+    }
+    return 0;
+}
+
+// The beard
+int func_0206abb4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->beardType;
+    int color = mii->beardColor;
+
+    if (params[15] != type || (obj->unk1A4[7].state >= 1 && obj->unk1A4[7].state <= 6)) {
+        if (type < 2) {
+            ctx->unk2C[3].unk0 = obj->unk8;
+            obj->unk1A4[7].state = 7;
+        } else {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (color != params[14] || (obj->unk228[6].state >= 1 && obj->unk228[6].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[6].value = color;
+            obj->unk228[6].state = 0;
+        } else if (type >= 2) {
+            obj->unk1A4[7].state = 0;
+            obj->unk1A4[7].value = type;
+        }
+    }
+    if (type < 2) {
+        ctx->unk2C[3].unk0 = obj->unk8;
+        ctx->unk2C[3].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0x3880;
+    } else {
+        ctx->unk2C[3].unk0 = obj->unkD4 + 0xE10;
+        ctx->unk2C[3].unk4 = obj->unkD8 + 0xB0;
+    }
+    return 0;
+}
+
+// The hair
+int func_0206acc0(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->hairColor;
+
+    if ((params[3] != type || color != params[4]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+        (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+        if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+            type == 0x45 || type == 0x47) {
+            obj->unk1A4[9].state = 0;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = color;
+            }
+        } else if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].state = 7;
+            obj->unk228[8].state = 7;
+        }
+        if (type != 0x22 && type != 0x39) {
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 != 7) {
+                obj->unk228[8].value = color;
+            }
+        }
+    }
+    if (type == 5 || type == 7 || type == 0x18 || type == 0x1D || type == 0x2A || type == 0x35 || type == 0x3A ||
+        type == 0x45 || type == 0x47) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x5080;
+            ctx->unk2C[2].unk4 = obj->unkC;
+        } else {
+            ctx->unk2C[2].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[2].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else {
+        ctx->unk2C[2].unk0 = obj->unk8;
+        ctx->unk2C[2].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The hair again, for the two types (0x22 and 0x39) that the other leaves alone
+int func_0206ae14(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->hairType;
+    int color = mii->favoriteColor;
+
+    if (type == 0x22 || type == 0x39) {
+        if ((type != params[3] || color != params[0]) || (obj->unk1A4[9].state >= 1 && obj->unk1A4[9].state <= 6) ||
+            (obj->unk228[8].state >= 1 && obj->unk228[8].state <= 6)) {
+            obj->unk1A4[9].state = 0;
+            obj->unk1A4[9].value = type;
+            if (obj->unk90 == 7) {
+                obj->unk228[8].state = 7;
+            } else {
+                obj->unk228[8].state = 0;
+                obj->unk228[8].value = type;
+            }
+        }
+    }
+    if (type == 0x22 || type == 0x39) {
+        if (obj->unk90 == 7) {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x5080;
+        } else {
+            ctx->unk2C[5].unk0 = obj->unkD4 + 0x1410;
+            ctx->unk2C[5].unk4 = obj->unkD8 + 0xF0;
+        }
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[5].unk0 = obj->unk8;
+    } else {
+        ctx->unk2C[5].unk0 = obj->unk8;
+        ctx->unk2C[5].unk4 = obj->unkC;
+    }
+    return 0;
+}
+
+// The face's texture
+int func_0206af1c(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int texture = mii->faceTexture;
+    int color = mii->faceColor;
+
+    if (params[1] != texture || (obj->unk1A4[8].state >= 1 && obj->unk1A4[8].state <= 6)) {
+        obj->unk1A4[8].state = texture == 0 ? 7 : 0;
+        obj->unk1A4[8].value = texture;
+    }
+    if (color != params[2] || (obj->unk228[7].state >= 1 && obj->unk228[7].state <= 6)) {
+        if (obj->unk90 != 7) {
+            obj->unk228[7].value = color;
+            obj->unk228[7].state = 0;
+        } else if (texture != 0) {
+            obj->unk1A4[8].state = 0;
+            obj->unk1A4[8].value = texture;
+        }
+    }
+    if (texture == 0) {
+        ctx->unk2C[1].unk0 = obj->unk8;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else if (obj->unk90 == 7) {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x4080;
+        ctx->unk2C[1].unk4 = obj->unkC;
+    } else {
+        ctx->unk2C[1].unk0 = obj->unkD4 + 0x1010;
+        ctx->unk2C[1].unk4 = obj->unkD8 + 0xD0;
+    }
+    return 0;
+}
+
+// The nose
+int func_0206b024(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+    int type = mii->noseType;
+
+    if (params[9] != type || (obj->unk1A4[10].state >= 1 && obj->unk1A4[10].state <= 6) ||
+        (obj->unk228[9].state >= 1 && obj->unk228[9].state <= 6)) {
+        obj->unk1A4[10].state = 0;
+        obj->unk1A4[10].value = type;
+        if (obj->unk90 == 7) {
+            obj->unk228[9].state = 7;
+        } else {
+            obj->unk228[9].state = 0;
+            obj->unk228[9].value = type;
+        }
+    }
+    if (obj->unk90 == 7) {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x5880;
+        ctx->unk2C[6].unk4 = obj->unkD8;
+    } else {
+        ctx->unk2C[6].unk0 = obj->unkD4 + 0x1610;
+        ctx->unk2C[6].unk4 = obj->unkD8 + 0x110;
+    }
+    return 0;
+}
+
+extern const u16 data_020b6524[];
+extern const u16 data_020b6530[];
+extern const u16 data_020b6540[];
+
+void func_0206cc30(u16 *palette) {
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        palette[i] = 0x5500;
+        palette[i + 4] = 0xFFAA;
+    }
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cc6c(u16 *palette, const s16 *params) {
+    palette[0] = data_020b6530[params[4]];
+    palette[1] = data_020b6524[params[2]];
+    palette[2] = data_020b6530[params[14]];
+    palette[3] = data_020b6540[params[0]];
+    DC_FlushRange(palette, 0x10);
+}
+
+void func_0206cd9c(u16 *palette, const s16 *params) {
+    int i;
+    int j;
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[4]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6524[params[2]];
+        }
+    }
+    for (i = 4; i < 8; i++) {
+        for (j = 0; j < 4; j++) {
+            palette[i * 8 + j] = data_020b6530[params[14]];
+        }
+        for (j = 4; j < 8; j++) {
+            palette[i * 8 + j] = data_020b6540[params[0]];
+        }
+    }
+    DC_FlushRange(palette, 0x80);
+}
+
+int func_0206ccd4(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6) ||
+        (obj->unk228[0].state >= 1 && obj->unk228[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+        obj->unk228[0].state = 0;
+        obj->unk228[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unkC = obj->unkD8;
+    return 0;
+}
+
+int func_0206cea8(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *mii = ctx->unk1CC;
+    s16 *params = obj->unk180;
+
+    if (params[4] != mii->hairColor || params[2] != mii->faceColor || params[14] != mii->beardColor ||
+        params[0] != mii->favoriteColor || (obj->unk1A4[0].state >= 1 && obj->unk1A4[0].state <= 6)) {
+        obj->unk1A4[0].state = 0;
+        obj->unk1A4[0].value = mii->favoriteColor;
+    }
+    obj->unk8 = obj->unkD4;
+    obj->unk228[0].state = 7;
+    return 0;
+}
+
+int func_0206cf48(NFLMakeCtx *ctx) {
+    if (ctx->unk1C8->unk90 == 7) {
+        return func_0206cea8(ctx);
+    }
+    return func_0206ccd4(ctx);
+}
+
+// The stream of item index of category in the library's resource
+const u8 *func_0206cf6c(int category, u32 index) {
+    const u8 *header = data_02145360->unk64;
+    const u8 *items;
+    u32 offsets[20];
+    int i;
+    u16 count;
+    u32 offset;
+
+    func_02069c08(&header);
+    func_02069c08(&header);
+    for (i = 0; i < 20; i++) {
+        offsets[i] = func_02069c58(&header);
+    }
+    items = data_02145360->unk64 + offsets[category];
+    count = func_02069c08(&items);
+    func_02069c08(&items);
+    offset = 0;
+    if (count < index) {
+        return NULL;
+    }
+    for (i = 0; i < count; i++) {
+        u32 value = func_02069c58(&items);
+        if (i == index) {
+            offset = value;
+        }
+    }
+    return items + offset;
+}
+
+// Whether every field of a Mii's data is in its range
+BOOL func_0206d040(const NFLCharData *mii) {
+    if (mii->faceType > 7) {
+        return FALSE;
+    }
+    if (mii->faceColor > 5) {
+        return FALSE;
+    }
+    if (mii->faceTexture > 11) {
+        return FALSE;
+    }
+    if (mii->hairType > 71) {
+        return FALSE;
+    }
+    if (mii->hairColor > 7) {
+        return FALSE;
+    }
+    if (mii->hairFlip > 1) {
+        return FALSE;
+    }
+    if (mii->eyeType > 47) {
+        return FALSE;
+    }
+    if (mii->eyeColor > 5) {
+        return FALSE;
+    }
+    if (mii->eyeScale > 7) {
+        return FALSE;
+    }
+    if (mii->eyeRotation > 7) {
+        return FALSE;
+    }
+    if (mii->eyeX > 12) {
+        return FALSE;
+    }
+    if (mii->eyeY > 18) {
+        return FALSE;
+    }
+    if (mii->eyebrowType > 23) {
+        return FALSE;
+    }
+    if (mii->eyebrowColor > 7) {
+        return FALSE;
+    }
+    if (mii->eyebrowScale > 8) {
+        return FALSE;
+    }
+    if (mii->eyebrowRotation > 11) {
+        return FALSE;
+    }
+    if (mii->eyebrowX > 12) {
+        return FALSE;
+    }
+    if (mii->eyebrowY < 3) {
+        return FALSE;
+    }
+    if (mii->eyebrowY > 18) {
+        return FALSE;
+    }
+    if (mii->noseType > 11) {
+        return FALSE;
+    }
+    if (mii->noseScale > 8) {
+        return FALSE;
+    }
+    if (mii->noseY > 18) {
+        return FALSE;
+    }
+    if (mii->mouthType > 23) {
+        return FALSE;
+    }
+    if (mii->mouthColor > 2) {
+        return FALSE;
+    }
+    if (mii->mouthScale > 8) {
+        return FALSE;
+    }
+    if (mii->mouthY > 18) {
+        return FALSE;
+    }
+    if (mii->mustacheType > 3) {
+        return FALSE;
+    }
+    if (mii->beardType > 3) {
+        return FALSE;
+    }
+    if (mii->beardColor > 7) {
+        return FALSE;
+    }
+    if (mii->beardScale > 8) {
+        return FALSE;
+    }
+    if (mii->beardY > 16) {
+        return FALSE;
+    }
+    if (mii->glassesType > 8) {
+        return FALSE;
+    }
+    if (mii->glassesColor > 5) {
+        return FALSE;
+    }
+    if (mii->glassesScale > 7) {
+        return FALSE;
+    }
+    if (mii->glassesY > 20) {
+        return FALSE;
+    }
+    if (mii->moleType > 1) {
+        return FALSE;
+    }
+    if (mii->moleScale > 8) {
+        return FALSE;
+    }
+    if (mii->moleX > 16) {
+        return FALSE;
+    }
+    if (mii->moleY > 30) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void func_0206d374(NFLObj *obj) {
+    s16 *params = obj->unk180;
+
+    params[0] = -1;
+    params[1] = -1;
+    params[2] = -1;
+    params[3] = -1;
+    params[4] = -1;
+    params[5] = -1;
+    params[6] = -1;
+    params[7] = -1;
+    params[8] = -1;
+    params[9] = -1;
+    params[10] = -1;
+    params[11] = -1;
+    params[12] = -1;
+    params[13] = -1;
+    params[14] = -1;
+    params[15] = -1;
+    params[16] = -1;
+    params[17] = -1;
+}
+
+// Keeps the fields of the Mii's data that its display lists were made from
+void func_0206d3cc(NFLObj *obj, const NFLCharData *mii) {
+    s16 *params = obj->unk180;
+
+    params[0] = mii->favoriteColor;
+    params[1] = mii->faceTexture;
+    params[2] = mii->faceColor;
+    params[3] = mii->hairType;
+    params[4] = mii->hairColor;
+    params[5] = mii->eyebrowType;
+    params[6] = mii->eyebrowColor;
+    params[7] = mii->eyeType;
+    params[8] = mii->eyeColor;
+    params[9] = mii->noseType;
+    params[10] = mii->mouthColor;
+    params[11] = mii->mouthType;
+    params[12] = mii->glassesColor;
+    params[13] = mii->glassesType;
+    params[14] = mii->beardColor;
+    params[15] = mii->beardType;
+    params[16] = mii->mustacheType;
+    params[17] = mii->moleType;
+}
+
+int func_0206d924(int index, const MtxFx43 *mtx43, const MtxFx33 *mtx33) {
+    NFLObj *obj;
+
+    if (mtx33 == NULL || mtx43 == NULL) {
+        return 8;
+    }
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    MI_Copy48B(mtx43, &obj->unk2C);
+    MI_Copy36B(mtx33, &obj->unk5C);
+    return 0;
+}
+
+int func_0206dc84(int index) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    if (obj->unk170 == 3) {
+        return 0xA;
+    }
+    if (obj->unk170 != 2) {
+        return 0xF;
+    }
+    return 0;
+}
+
+extern const NFLColor data_020b65a0[];
+
+GXRgb func_0206dcd0(int index) {
+    return GX_RGB(data_020b65a0[index].r >> 3, data_020b65a0[index].g >> 3, data_020b65a0[index].b >> 3);
+}
+
+GXRgb func_0206dd1c(int index) {
+    return data_020b6540[index] & 0x7FFF;
+}
+
 BOOL func_02072c1c(void) {
     return data_02145360 != NULL;
 }
