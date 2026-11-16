@@ -18,7 +18,7 @@ data_ov036_0214adb8 kind:data(any) addr:0x0214adb8
 data_ov036_0214ade0 kind:data(any) addr:0x0214ade0
 data_ov036_0214ae10 kind:data(any) addr:0x0214ae10
 gStr_M00_BG_frame_nsc_ov036 kind:data(any) addr:0x0214ae18
-data_ov036_0214ae48 kind:data(any) addr:0x0214ae48 ambiguous
+_ZTV14TestNg107Scene kind:data(any) addr:0x0214ae40
 data_ov036_0214ae58 kind:data(any) addr:0x0214ae58 ambiguous
 gStr_Mdl_Ica_body_ICA_OLD_LZ_bin_ov036 kind:data(any) addr:0x0214ae64
 gStr_M00_ov036 kind:data(any) addr:0x0214ae80

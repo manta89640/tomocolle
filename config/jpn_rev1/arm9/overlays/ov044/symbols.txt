@@ -48,7 +48,7 @@ data_ov044_0214bd00 kind:data(any) addr:0x0214bd00
 data_ov044_0214bd18 kind:data(any) addr:0x0214bd18
 gStr_M02_Obj_down_ladybird_nce kind:data(any) addr:0x0214bd30
 gStr_M02_Obj_down_ladybird_ncg kind:data(any) addr:0x0214bd4c
-data_ov044_0214bd70 kind:data(any) addr:0x0214bd70 ambiguous
+_ZTV14TestNg121Scene kind:data(any) addr:0x0214bd68
 data_ov044_0214bd8c kind:data(any) addr:0x0214bd8c
 data_ov044_0214bda0 kind:data(any) addr:0x0214bda0 ambiguous
 data_ov044_0214bda8 kind:data(any) addr:0x0214bda8 ambiguous

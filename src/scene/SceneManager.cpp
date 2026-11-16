@@ -33,7 +33,9 @@
 #include "../overlays/ov010/Scene2B.h"
 #include "../overlays/ov069/SavePlayScene.h"
 #include "../overlays/ov081/Scene30.h"
+#include "../overlays/ov011/Scene31.h"
 #include "../overlays/ov082/Scene33.h"
+#include "../overlays/ov012/Scene34.h"
 #include "../overlays/ov013/TestNg48Scene.h"
 #include "../overlays/ov014/TestNg50Scene.h"
 #include "../overlays/ov106/PreStartScene.h"
@@ -43,15 +45,20 @@
 #include "../overlays/ov076/MiiEditScene.h"
 #include "../overlays/ov022/Scene45.h"
 #include "../overlays/ov023/Scene4B.h"
+#include "../overlays/ov024/Scene4C.h"
 #include "../overlays/ov025/Scene4D.h"
 #include "../overlays/ov026/TestNg87Scene.h"
 #include "../overlays/ov027/Scene4F.h"
 #include "../overlays/ov028/Scene50.h"
 #include "../overlays/ov029/Scene51.h"
 #include "../overlays/ov030/TestNg94Scene.h"
+#include "../overlays/ov031/TestNg95Scene.h"
+#include "../overlays/ov032/Scene54.h"
+#include "../overlays/ov033/TestNg100Scene.h"
 #include "../overlays/ov089/Scene56.h"
 #include "../overlays/ov034/TestNg104Scene.h"
 #include "../overlays/ov035/Scene58.h"
+#include "../overlays/ov036/TestNg107Scene.h"
 #include "../overlays/ov090/RomanceScene.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
@@ -60,16 +67,28 @@
 #include "../overlays/ov094/Scene74.h"
 #include "../overlays/ov038/TestNg111Scene.h"
 #include "../overlays/ov039/TestNg116Scene.h"
+#include "../overlays/ov040/Scene7A.h"
 #include "../overlays/ov041/Scene7B.h"
+#include "../overlays/ov042/TestNg119Scene.h"
 #include "../overlays/ov043/Scene81.h"
+#include "../overlays/ov044/TestNg121Scene.h"
 #include "../overlays/ov045/Scene88.h"
+#include "../overlays/ov046/Scene89.h"
+#include "../overlays/ov047/TestNg125Scene.h"
+#include "../overlays/ov048/Scene8B.h"
+#include "../overlays/ov049/Scene8C.h"
 #include "../overlays/ov050/Scene8D.h"
 #include "../overlays/ov052/Scene8F.h"
 #include "../overlays/ov053/Scene91.h"
+#include "../overlays/ov054/TestNg133Scene.h"
 #include "../overlays/ov056/TestNg136Scene.h"
 #include "../overlays/ov057/TestNg137Scene.h"
+#include "../overlays/ov058/TestNg138Scene.h"
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
+#include "../overlays/ov060/SceneB7.h"
+#include "../overlays/ov061/TestNg143Scene.h"
+#include "../overlays/ov062/SceneB9.h"
 #include "../overlays/ov063/SceneBA.h"
 #include "../overlays/ov064/TestNg149Scene.h"
 #include "../overlays/ov097/Marriage2Scene.h"
@@ -697,7 +716,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xA9:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(58));
-        return new SceneA3(sceneId);
+        return new TestNg138Scene(sceneId);
     case 0xAA:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(59));
@@ -750,7 +769,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xB8:
         SetSoundGroup(-2);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(61));
-        return new SceneB8(sceneId);
+        return new TestNg143Scene(sceneId);
     case 0xB9:
         SetSoundGroup(-2);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(62));
@@ -827,8 +846,14 @@ SavePlayCharacter::~SavePlayCharacter() {}
 // Scenes 0x30 and 0x70, overlay 81
 Scene30::Scene30(int sceneId) : Scene(sceneId) {}
 
+// Scenes 0x31 and 0x32, overlay 11
+Scene31::Scene31(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0x33 and 0x73, overlay 82
 Scene33::Scene33(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x34, overlay 12
+Scene34::Scene34(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x36, overlay 13
 TestNg48Scene::TestNg48Scene(int sceneId) : Scene(sceneId) {}
@@ -859,6 +884,9 @@ Scene45::Scene45(int sceneId) : Scene(sceneId) {}
 // Scene 0x4B, overlay 23
 Scene4B::Scene4B(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x4C, overlay 24
+Scene4C::Scene4C(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x4D, overlay 25
 Scene4D::Scene4D(int sceneId) : Scene(sceneId) {}
 
@@ -877,6 +905,15 @@ Scene51::Scene51(int sceneId) : Scene(sceneId) {}
 // Scene 0x52, overlay 30
 TestNg94Scene::TestNg94Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x53, overlay 31
+TestNg95Scene::TestNg95Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x54, overlay 32
+Scene54::Scene54(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x55, overlay 33
+TestNg100Scene::TestNg100Scene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x56, overlay 89
 Scene56::Scene56(int sceneId) : Scene(sceneId) {}
 
@@ -885,6 +922,9 @@ TestNg104Scene::TestNg104Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x58, overlay 35
 Scene58::Scene58(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x59, overlay 36
+TestNg107Scene::TestNg107Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x5A, overlay 90
 RomanceScene::RomanceScene(int sceneId) : Scene(sceneId) {}
@@ -910,14 +950,35 @@ TestNg111Scene::TestNg111Scene(int sceneId) : Scene(sceneId) {}
 // Scenes 0x77, 0x78 and 0x79, overlay 39
 TestNg116Scene::TestNg116Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x7A, overlay 40
+Scene7A::Scene7A(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x7B, overlay 41
 Scene7B::Scene7B(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x7C, overlay 42
+TestNg119Scene::TestNg119Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x81, overlay 43
 Scene81::Scene81(int sceneId) : Scene(sceneId) {}
 
+// Scenes 0x82, 0x83, 0x84, 0x85, 0x86 and 0x87, overlay 44
+TestNg121Scene::TestNg121Scene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x88, overlay 45
 Scene88::Scene88(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x89, overlay 46
+Scene89::Scene89(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x8A, overlay 47
+TestNg125Scene::TestNg125Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x8B, overlay 48
+Scene8B::Scene8B(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x8C, overlay 49
+Scene8C::Scene8C(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x8D, overlay 50
 Scene8D::Scene8D(int sceneId) : Scene(sceneId) {}
@@ -928,6 +989,9 @@ Scene8F::Scene8F(int sceneId) : Scene(sceneId) {}
 // Scene 0x91, overlay 53
 Scene91::Scene91(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x92, overlay 54
+TestNg133Scene::TestNg133Scene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x94, overlay 56
 TestNg136Scene::TestNg136Scene(int sceneId) : Scene(sceneId) {}
 
@@ -936,11 +1000,23 @@ TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-b, taken over from gap38-c) ---------------------
 
+// Scenes 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8 and 0xA9, overlay 58
+TestNg138Scene::TestNg138Scene(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0xAC and 0xAD, overlay 98
 OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xAE, overlay 99
 InformationScene::InformationScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB7, overlay 60
+SceneB7::SceneB7(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB8, overlay 61
+TestNg143Scene::TestNg143Scene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB9, overlay 62
+SceneB9::SceneB9(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0xBA, 0xBB, 0xBC, 0xBD and 0xBE, overlay 63
 SceneBA::SceneBA(int sceneId) : Scene(sceneId) {}

@@ -17,7 +17,7 @@ data_ov046_0214b864 kind:data(any) addr:0x0214b864
 data_ov046_0214b878 kind:data(any) addr:0x0214b878
 gStr_M00_BG_frame2_nsc kind:data(any) addr:0x0214b89c
 data_ov046_0214b8b0 kind:data(any) addr:0x0214b8b0
-data_ov046_0214b908 kind:data(any) addr:0x0214b908 ambiguous
+_ZTV7Scene89 kind:data(any) addr:0x0214b900
 data_ov046_0214b924 kind:data(any) addr:0x0214b924
 data_ov046_0214b934 kind:data(any) addr:0x0214b934 ambiguous
 gStr_M00_ov046 kind:data(any) addr:0x0214b94c
