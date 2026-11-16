@@ -2,6 +2,7 @@
 #define OV073_ROOM_H
 
 #include <nitro.h>
+#include "text/TextUtil.h"
 #include <nnsys.h>
 
 #include "Model.h"
@@ -117,7 +118,6 @@ extern const RoomStyle data_020f72f8[];
 // --- The room's functions, as the apartment scene calls them ---
 // The room's current light colour, whole and split
 // Writes a number as full-width digits: (value, buffer, buffer size in bytes, digits, BOOL unk)
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);
 }
 
 // The room of the tutorial's apartment scene: a Room that can change its style in the background, and that knows

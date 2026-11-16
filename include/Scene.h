@@ -3,7 +3,7 @@
 
 #include <nitro.h>
 
-// The main program's scene base class (its constructor is inlined into each scene's; func_0204af20 runs a scene).
+// The main program's scene base class (its constructor is inlined into each scene's; Scene::Run, 0x0204af20, runs a scene).
 // Not decompiled: this is what the runner shows of it. The same definition as in overlay 74's RoomScene.h.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.

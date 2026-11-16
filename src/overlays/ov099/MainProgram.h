@@ -3,6 +3,7 @@
 
 #include "InformationScene.h"
 #include "SceneManager.h"
+#include "text/TextUtil.h"
 
 // What overlay 99's code uses of the main program, which is not decompiled: STAND-INS and declarations, which only
 // the overlay's source includes (the scene's classes, in InformationScene.h, are also included by the main program's
@@ -76,10 +77,6 @@ BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character wi
 BOOL func_0202c604(GameData *game, int index); // The gender bit of its Mii (set for a woman)
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
 
-// A number as a string: (value, buffer, size of the buffer in bytes, ...)
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk);
-// A number in tenths as a string, with a decimal point
-wchar_t *func_02036a2c(int value, wchar_t *buffer, int size, int a, int b, int c);
 }
 
 

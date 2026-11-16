@@ -2,6 +2,7 @@
 #define OV096_WEDDINGSCENE_H
 
 #include <nitro.h>
+#include "text/TextUtil.h"
 #include <nnsys.h>
 
 #include "Scene.h"
@@ -271,7 +272,6 @@ extern "C" {
 void func_0209decc(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
-void func_020372d0(wchar_t *dst, const wchar_t *src, int size);
 }
 
 // --- Other main-program things --------------------------------------------------------------------------------
@@ -689,7 +689,7 @@ public:
         STATE_LEAVE,
     };
 
-    WeddingScene(); // func_02048600, the main program's
+    WeddingScene(int sceneId); // 0x02048600, in the main program
 
     virtual void StartLoading();
     virtual void Init();

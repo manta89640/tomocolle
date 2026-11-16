@@ -26,84 +26,73 @@
 
 
 
-SCENE_STAND_IN(DrawManTestScene, 0x272C); // func_0203e320
+SCENE_STAND_IN(DrawManTestScene, 0x272C); // 0x0203e320
 
-SCENE_STAND_IN(HumanTestScene, 0x1D8); // func_0203e394
+SCENE_STAND_IN(HumanTestScene, 0x1D8); // 0x0203e394
 
-SCENE_STAND_IN(ParticleTestScene, 0x53C); // func_0203e430
+SCENE_STAND_IN(ParticleTestScene, 0x53C); // 0x0203e430
 
-SCENE_STAND_IN(G3dTestScene, 0x5C2C); // func_0203e470
+SCENE_STAND_IN(G3dTestScene, 0x5C2C); // 0x0203e470
 
-SCENE_STAND_IN(BgTextTestScene, 0x1D4); // func_0203e524
+SCENE_STAND_IN(BgTextTestScene, 0x1D4); // 0x0203e524
 
-SCENE_STAND_IN(MessageTestScene, 0x2D84); // func_0203e564
+SCENE_STAND_IN(MessageTestScene, 0x2D84); // 0x0203e564
 
-SCENE_STAND_IN(KeyboardTestScene, 0x6AF8); // func_0203e620
-
-
-SCENE_STAND_IN(Scene0F, 0x6334); // func_0203e748
-
-SCENE_STAND_IN(TtsTestScene, 0x6A858); // func_0203e9ec
-
-SCENE_STAND_IN(EmptyScene, 0x10); // func_0203ea2c
+SCENE_STAND_IN(KeyboardTestScene, 0x6AF8); // 0x0203e620
 
 
 
-SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ev
+SCENE_STAND_IN(TtsTestScene, 0x6A858); // 0x0203e9ec
 
-SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ev
+SCENE_STAND_IN(EmptyScene, 0x10); // 0x0203ea2c
 
-SCENE_STAND_IN(Scene19, 0x1F7A8); // func_0203f220
 
-SCENE_STAND_IN(FriendListScene, 0x7A3B8); // func_0203f350
 
-SCENE_STAND_IN(WirelessTestScene, 0xCC); // func_0203f654
+SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ei
 
-SCENE_STAND_IN(TestNg20Scene, 0x19FF8); // func_0203f694
+SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ei
 
-SCENE_STAND_IN(ChangeClothesScene, 0xD070); // func_0203f784
 
-SCENE_STAND_IN(Scene1E, 0x48F58); // func_0203f900
 
-SCENE_STAND_IN(RightJobScene, 0x51730); // func_0203fd6c
+SCENE_STAND_IN(WirelessTestScene, 0xCC); // 0x0203f654
 
-SCENE_STAND_IN(RightJob2Scene, 0x34520); // func_0203ffc8
 
-SCENE_STAND_IN(VoteScene, 0x3CD5C); // func_020400f0
 
-SCENE_STAND_IN(MiiListMenuScene, 0x2C0C0); // func_02040288
 
-SCENE_STAND_IN(G3SpriteTestScene, 0x48B4); // func_0204036c
 
-SCENE_STAND_IN(MiiListScene, 0x2AA44); // func_020403e8
+
+SCENE_STAND_IN(VoteScene, 0x3CD5C); // 0x020400f0
+
+
+
 
 SCENE_STAND_IN(TushinScene, 0x3F0B4); // _ZN11TushinSceneC1Ei
 
-SCENE_STAND_IN(Scene2F, 0x474B0); // func_02041124
+SCENE_STAND_IN(Scene2F, 0x474B0); // 0x02041124
 
-SCENE_STAND_IN(Scene35, 0x46D4C); // func_02041a04
+SCENE_STAND_IN(Scene35, 0x46D4C); // 0x02041a04
 
-SCENE_STAND_IN(ChangeRoomScene, 0x17BF8); // func_02041f80
+SCENE_STAND_IN(ChangeRoomScene, 0x17BF8); // 0x02041f80
 
-SCENE_STAND_IN(TestNg55Scene, 0x1C3D8); // func_02042254
+SCENE_STAND_IN(TestNg55Scene, 0x1C3D8); // 0x02042254
 
-SCENE_STAND_IN(Scene40, 0x6F908); // func_020428e0
+SCENE_STAND_IN(Scene40, 0x6F908); // 0x020428e0
 
-SCENE_STAND_IN(WriteSongScene, 0x81224); // func_02044c80
+SCENE_STAND_IN(WriteSongScene, 0x81224); // 0x02044c80
 
-SCENE_STAND_IN(Scene67, 0x3D940); // func_02045504
+SCENE_STAND_IN(Scene67, 0x3D940); // 0x02045504
 
-SCENE_STAND_IN(Scene68, 0x47854); // func_02045720
+SCENE_STAND_IN(Scene68, 0x47854); // 0x02045720
 
-SCENE_STAND_IN(Scene7F, 0x22B8); // func_0204657c
+SCENE_STAND_IN(Scene7F, 0x22B8); // 0x0204657c
 
-SCENE_STAND_IN(TestNg129Scene, 0x56F0); // func_020474c0
+SCENE_STAND_IN(TestNg129Scene, 0x56F0); // 0x020474c0
 
-SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ev
+SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ei
 
-SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // func_02048b78
+SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // 0x02048b78
 
-SCENE_STAND_IN(SceneB4, 0x202E8); // func_020492e0
+SCENE_STAND_IN(SceneB4, 0x202E8); // 0x020492e0
 
 
 #endif // SCENE_SCENESTANDINS_H

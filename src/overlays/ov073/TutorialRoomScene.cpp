@@ -1680,7 +1680,7 @@ void TutorialApartmentRoom::SetStyle(u16 style) {
 void TutorialApartmentRoom::UpdateNumberText() {
     int room = (mRoomIndex & 7) + 1;
     int floor = (mRoomIndex >> 3) + 1;
-    func_0203673c(floor * 100 + room, mNumberText, sizeof(mNumberText), 4, FALSE);
+    FormatNumber(floor * 100 + room, mNumberText, sizeof(mNumberText), 4, FALSE);
 }
 
 // @0x0214e2a8

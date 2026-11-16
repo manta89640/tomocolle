@@ -2,6 +2,7 @@
 
 #include "GameData.h"
 #include "SceneManager.h"
+#include "text/TextUtil.h"
 #include "SceneMemory.h"
 
 #include <string.h>
@@ -10,10 +11,6 @@
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
-// Turns a text into the speech synthesizer's notation (readings), from src into dst, of size bytes
-void func_020372d0(wchar_t *dst, const wchar_t *src, int size);
-void func_020372bc(wchar_t *text, int size); // The same in place
-wchar_t *func_0203673c(int value, wchar_t *buffer, int size, int digits, BOOL unk); // A number as text
 void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
 BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
 void func_0202a96c(Light *light);
@@ -37,11 +34,11 @@ void MakeCharacterSpeechTexts(CharacterSpeechTexts *texts, SavedCharacter *chara
     MI_CpuFill8(texts->mPhraseReadingSjis, 0, sizeof(texts->mPhraseReadingSjis));
     MI_CpuClear16(texts->mPhrase, sizeof(texts->mPhrase));
     MI_CpuClear16(texts->mPhraseReading, sizeof(texts->mPhraseReading));
-    func_020372d0(texts->mFamilyNameReading, character->mFamilyName, sizeof(texts->mFamilyNameReading));
-    func_020372d0(texts->mGivenNameReading, character->mName, sizeof(texts->mGivenNameReading));
+    MakeSpeechText(texts->mFamilyNameReading, character->mFamilyName, sizeof(texts->mFamilyNameReading));
+    MakeSpeechText(texts->mGivenNameReading, character->mName, sizeof(texts->mGivenNameReading));
     MiiData_GetName(character, texts->mName);
     MiiData_GetName(character, texts->mNameReading);
-    func_020372bc(texts->mNameReading, sizeof(texts->mNameReading));
+    MakeSpeechTextInPlace(texts->mNameReading, sizeof(texts->mNameReading));
     int length = sizeof(texts->mNameReadingSjis);
     STD_ConvertStringUnicodeToSjis(texts->mNameReadingSjis, &length, (const u16 *)texts->mNameReading, NULL, NULL);
     if (wcslen(character->mMotto) == 0) {
@@ -51,7 +48,7 @@ void MakeCharacterSpeechTexts(CharacterSpeechTexts *texts, SavedCharacter *chara
         wcscpy(texts->mPhrase, character->mMotto);
         texts->mHasPhrase = TRUE;
     }
-    func_020372d0(texts->mPhraseReading, texts->mPhrase, sizeof(texts->mPhraseReading));
+    MakeSpeechText(texts->mPhraseReading, texts->mPhrase, sizeof(texts->mPhraseReading));
     length = sizeof(texts->mPhraseReadingSjis);
     STD_ConvertStringUnicodeToSjis(texts->mPhraseReadingSjis, &length, (const u16 *)texts->mPhraseReading, NULL,
                                    NULL);
@@ -91,7 +88,7 @@ void MakeNumberText(wchar_t *text, int number) {
     if (number >= 10000) {
         number = 9999;
     }
-    func_0203673c(number, text, 10, 0, FALSE);
+    FormatNumber(number, text, 10, 0, FALSE);
 }
 
 // The directions of FaceCast's two lights

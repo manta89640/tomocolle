@@ -2,6 +2,7 @@
 #define OV109_TUSHINSCENE_H
 
 #include <nitro.h>
+#include "text/TextUtil.h"
 #include <nnsys.h>
 
 #include "GameData.h"
@@ -265,7 +266,6 @@ void func_02023f4c(ScreenControl *screens, int planes, int a);
 void func_02023eac(ScreenControl *screens, int planes);
 void func_0202683c(void);
 void func_0201f508(wchar_t *text);
-void func_02036bb4(wchar_t *text);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *nickname);
 int NFL_GetCharInfo(void *buffer);
 }

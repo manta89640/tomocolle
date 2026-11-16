@@ -12,15 +12,6 @@
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 
-// The sounds a button plays (include/SpriteButton.h has the same stand-in)
-struct ButtonSounds {
-    /* 0x0 */ int mSounds[4];
-}; // 0x10
-
-extern "C" {
-void func_02032158(SpriteButton *button, const ButtonSounds *sounds); // Copies its sounds in
-}
-
 // Fills text with the reading of a number from 0 to 9999 in the synthesizer's notation ("レイ" for 0)
 void MakeNumberReading(wchar_t *text, int number);
 // Fills text with a number as digits (at most 9999)

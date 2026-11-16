@@ -29,7 +29,7 @@
 // the scene's archive, "Scn/Scene/ScenePlayRoom2_LZ.bin", and its messages, "tmd_mainroom_msg_JP.bmg".
 
 // ---------------------------------------------------------------------------------------------------------------
-// The main program's scene base class (its constructor is inlined into each scene's; func_0204af20 runs a scene).
+// The main program's scene base class (its constructor is inlined into each scene's; Scene::Run, 0x0204af20, runs a scene).
 // Not decompiled: this is what the runner shows of it.
 class Scene {
 public:

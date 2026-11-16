@@ -14,11 +14,11 @@ void G3SpriteTestScene::Init() {
     data_0211d604.mUnknown48Changed = TRUE;
     data_0211d604.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
-    ModelResources_SetModel(&data_021223e4, 0, "M01:/body.imd");
+    ModelResources_SetModel(&sModelResources, 0, "M01:/body.imd");
     mCamera = &data_02122764;
     func_0202a640(mCamera);
     func_0202a93c(mCamera, 1);
-    data_021223e4.mUnknown424 = 0;
+    sModelResources.mUnknown424 = 0;
     mNextSprite = SPRITE_COUNT - 1;
     func_0202b4d8(&data_021232e4);
     func_0202b4dc(&data_021232e4, 0, "M00:/Face.tga", 3, 0x80, 0x80);
@@ -42,8 +42,8 @@ void G3SpriteTestScene::Init() {
     mModel.mPos.z = FX32_ONE;
     mCharacter.InitFace(1);
     mCharacter.SetRandomMii(2, 3, 3, 1);
-    mCharacter.mUnknown2570 = FX32_ONE;
-    mCharacter.mUnknown2568 = -FX32_ONE;
+    mCharacter.mFaceOffset.z = FX32_ONE;
+    mCharacter.mFaceOffset.x = -FX32_ONE;
 }
 
 void G3SpriteTestScene::Update() {
@@ -59,8 +59,8 @@ void G3SpriteTestScene::Draw() {
 }
 
 void G3SpriteTestScene::Exit() {
-    func_0202aecc(&data_021223e4, 0);
-    func_0202ae38(&data_021223e4);
+    func_0202aecc(data_021223e4, 0);
+    func_0202ae38(&sModelResources);
     ArchiveManager_Unmount(&gArchiveManager, "M00");
     ArchiveManager_Unmount(&gArchiveManager, "M01");
 }

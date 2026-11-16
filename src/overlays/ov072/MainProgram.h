@@ -2,6 +2,7 @@
 #define OV072_MAINPROGRAM_H
 
 #include "MapScene.h"
+#include "text/TextUtil.h"
 #include "SceneManager.h"
 
 // What overlay 72's code uses of the main program, which is not decompiled: STAND-INS and declarations, which only
@@ -177,8 +178,16 @@ public:
 }; // 0x17EC
 
 
-// The state of each building and feature of the island, as a byte from 0x60 on (func_02039c00 reads one,
-// func_02039c0c writes one): 0 not built, 1 built, 2 new, 3 not open yet
+// The save data's header (gap38-a's SaveHeader, include/save/SaveBlocks.h), as far as the scene calls it: a
+// declaration-only stand-in, which the calls reach by a cast
+class SaveHeader {
+public:
+    u8 GetUnknown44(int index);
+    void SetUnknown44(int index, u8 value);
+};
+
+// The state of each building and feature of the island, as a byte from 0x60 on (SaveHeader::GetUnknown44 reads one,
+// SetUnknown44 writes one): 0 not built, 1 built, 2 new, 3 not open yet
 struct IslandState {
     /* 0x00 */ u8 mUnknown00[0x60];
     /* 0x60 */ u8 mStates[1];
@@ -268,10 +277,7 @@ BOOL func_02031294(SpriteButton *button);
 s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
 void Clock_GetDate(int offset, RTCDate *date);
 void Clock_GetTime(int offset, RTCTime *time);
-void func_02036874(int value, wchar_t *buffer, int size, int a, int b);
 
-u8 func_02039c00(IslandState *island, int building);
-void func_02039c0c(IslandState *island, int building, int state);
 void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
 void func_02060c1c();
 

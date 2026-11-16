@@ -2494,7 +2494,7 @@ BOOL TushinScene::IsNgWord(const wchar_t *text) {
     MI_CpuClear16(buffer, sizeof(buffer));
     wcscpy(buffer, text);
     func_0201f508(buffer);
-    func_02036bb4(buffer);
+    ToKatakana(buffer);
     u32 length = wcslen(buffer);
     if (length >= 1) {
         wchar_t last = buffer[length - 1];
