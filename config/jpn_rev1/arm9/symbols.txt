@@ -5174,14 +5174,14 @@ gStr_BM0_2 kind:data(any) addr:0x02110e5c
 gStr_BT0_3 kind:data(any) addr:0x02110e60
 gStr_HT0_3 kind:data(any) addr:0x02110e64
 _ZTV17ParticleTestScene kind:data(any) addr:0x02110e68
-@13969 kind:data(any) addr:0x02110e8c local
-@13970 kind:data(any) addr:0x02110e90 local
-@13971 kind:data(any) addr:0x02110eb0 local
-@13972 kind:data(any) addr:0x02110eb4 local
-@13979 kind:data(any) addr:0x02110ed0 local
-@13980 kind:data(any) addr:0x02110ee8 local
-@14037 kind:data(any) addr:0x02110ef8 local
-@14038 kind:data(any) addr:0x02110efc local
+@13970 kind:data(any) addr:0x02110e8c local
+@13971 kind:data(any) addr:0x02110e90 local
+@13972 kind:data(any) addr:0x02110eb0 local
+@13973 kind:data(any) addr:0x02110eb4 local
+@13980 kind:data(any) addr:0x02110ed0 local
+@13981 kind:data(any) addr:0x02110ee8 local
+@14038 kind:data(any) addr:0x02110ef8 local
+@14039 kind:data(any) addr:0x02110efc local
 _ZTV15BgTextTestScene kind:data(any) addr:0x02110f00
 sStringArg kind:data(any) addr:0x02110f24 local
 gStr_B0D0F0H0J0 kind:data(any) addr:0x02110f28

@@ -1,4 +1,5 @@
 #include "G3dTestScene.h"
+#include "MainProgram3d.h"
 
 // The edge marking colours: red, green and blue for polygon ids 8 to 31
 static const GXRgb sEdgeColors[8] = {0, GX_RGB(31, 0, 0), GX_RGB(0, 31, 0), GX_RGB(0, 0, 31)};

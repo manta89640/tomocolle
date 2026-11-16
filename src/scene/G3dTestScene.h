@@ -1,7 +1,11 @@
 #ifndef SCENE_G3DTESTSCENE_H
 #define SCENE_G3DTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "Model.h"
+#include "character/Character.h"
+
+struct Camera;
 
 // Scene 16 (main program, no overlay): a test of the 3D engine with two characters, a body model and a pair of
 // glasses, with the archives "Mdl/Ica/ica_mii_room_LZ.bin" (BIC, the room animations), "Mdl/Body/body000_3D_LZ.bin"
@@ -13,6 +17,8 @@
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 class G3dTestScene : public Scene {
 public:
+    G3dTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

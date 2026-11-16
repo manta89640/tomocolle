@@ -21,6 +21,19 @@ struct PaletteLoader {
     /* 0x41C */ int mUnknown41C;
 };
 
+// The main program's test scenes (src/scene/*TestScene.h, EmptyScene.h): constructors 0x0203E320..0x0203EA2C and
+// 0x0203F654
+#include "DrawManTestScene.h"
+#include "HumanTestScene.h"
+#include "ParticleTestScene.h"
+#include "G3dTestScene.h"
+#include "BgTextTestScene.h"
+#include "MessageTestScene.h"
+#include "KeyboardTestScene.h"
+#include "TtsTestScene.h"
+#include "EmptyScene.h"
+#include "WirelessTestScene.h"
+
 // The scene classes of the constructors 0x0203de78..0x02040578 (gap38-a)
 #include "../overlays/ov000/TextTestScene.h"
 #include "../overlays/ov105/NintendoLogoScene.h"
@@ -835,7 +848,19 @@ CharacterBodyTestScene::CharacterBodyTestScene(int sceneId) : Scene(sceneId) {}
 
 TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
-// (Scenes 0x06 to 0x08, 0x10, 0x09 to 0x0B: gap38-c's test scenes)
+DrawManTestScene::DrawManTestScene(int sceneId) : Scene(sceneId) {}
+
+HumanTestScene::HumanTestScene(int sceneId) : Scene(sceneId) {}
+
+ParticleTestScene::ParticleTestScene(int sceneId) : Scene(sceneId) {}
+
+G3dTestScene::G3dTestScene(int sceneId) : Scene(sceneId) {}
+
+BgTextTestScene::BgTextTestScene(int sceneId) : Scene(sceneId) {}
+
+MessageTestScene::MessageTestScene(int sceneId) : Scene(sceneId) {}
+
+KeyboardTestScene::KeyboardTestScene(int sceneId) : Scene(sceneId) {}
 
 NameSortTestScene::NameSortTestScene(int sceneId) : Scene(sceneId) {}
 
@@ -847,7 +872,9 @@ Scene0F::Scene0F(int sceneId) : Scene(sceneId) {
     mUnknown62C4 = 0;
 }
 
-// (Scenes 0x0E and 0x16: gap38-c's test scenes)
+TtsTestScene::TtsTestScene(int sceneId) : Scene(sceneId) {}
+
+EmptyScene::EmptyScene(int sceneId) : Scene(sceneId) {}
 
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
@@ -859,7 +886,7 @@ Scene19::Scene19(int sceneId) : Scene(sceneId) {}
 
 FriendListScene::FriendListScene(int sceneId) : Scene(sceneId) {}
 
-// (Scene 0x1B: gap38-c's test scene)
+WirelessTestScene::WirelessTestScene(int sceneId) : Scene(sceneId) {}
 
 TestNg20Scene::TestNg20Scene(int sceneId) : Scene(sceneId) {}
 

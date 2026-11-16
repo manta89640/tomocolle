@@ -1,7 +1,8 @@
 #ifndef SCENE_WIRELESSTESTSCENE_H
 #define SCENE_WIRELESSTESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "text/TextCanvas.h"
 
 #include "../../lib/WH/wh.h"
 
@@ -16,6 +17,8 @@
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class WirelessTestScene : public Scene {
 public:
+    WirelessTestScene(int sceneId);
+
     enum State {
         STATE_IDLE,       // "スタートで通信開始"
         STATE_CONNECTING, // Measuring the channel (parent), or choosing a parent (child)

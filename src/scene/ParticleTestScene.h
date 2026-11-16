@@ -1,7 +1,11 @@
 #ifndef SCENE_PARTICLETESTSCENE_H
 #define SCENE_PARTICLETESTSCENE_H
 
-#include "MainProgram3d.h"
+#include "Scene.h"
+#include "Model.h"
+#include "character/Character.h"
+
+struct Camera;
 
 // Scene 8 (main program, no overlay): a test of the particle library (main program 0x0207AB20 on) with the room
 // effects "Mdl/Spl/SplRoomEffect_LZ.bin" (STE) and a body model "Mdl/Body/body000_3D_LZ.bin" (STI). An emitter of
@@ -50,6 +54,8 @@ struct ParticleSystem;
 
 class ParticleTestScene : public Scene {
 public:
+    ParticleTestScene(int sceneId);
+
     virtual void StartLoading();
     virtual void Init();
     virtual void Update();

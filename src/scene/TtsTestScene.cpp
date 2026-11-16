@@ -1,4 +1,5 @@
 #include "TtsTestScene.h"
+#include "MainProgram3d.h"
 
 // What the scene speaks: the text in the engine's notation, as wide characters (A) and in Shift JIS (the second
 // is not used)

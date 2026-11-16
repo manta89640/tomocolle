@@ -1,4 +1,5 @@
 #include "HumanTestScene.h"
+#include "MainProgram3d.h"
 
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);

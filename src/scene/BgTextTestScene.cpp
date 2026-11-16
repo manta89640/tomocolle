@@ -1,4 +1,13 @@
 #include "BgTextTestScene.h"
+#include "MainProgram.h"
+
+extern "C" {
+// Sixteen colours: white, white, red, green, yellow, blue...
+extern const u16 data_020b5abc[];
+// Queues colours for copying to the palette of a plane: (loader, colours, plane, offset in bytes, size in bytes,
+// unknown)
+void func_020277dc(PaletteLoader *loader, const void *colors, int plane, int offset, int size, int unknown);
+}
 
 void BgTextTestScene::StartLoading() {
 }
