@@ -959,13 +959,19 @@ void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx
     G3C_Translate(info, out.x, out.y, out.z);
 }
 
+// Not matching: the original loads G3C_Scale's arguments last to first (out[2], out[1], out[0]). The stores to in
+// are the original's too, which keeps them only while its address is taken: hence the index i
 void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z) {
+    VecFx32 in;
     fx32 out[3];
-    VecFx32 in = {x, y, z};
+    int i = 0;
 
-    out[ctx->unkD2] = in.x;
-    out[ctx->unkD0] = in.y;
-    out[ctx->unkD1] = in.z;
+    in.x = x;
+    in.y = y;
+    in.z = z;
+    out[ctx->unkD2] = ((fx32 *)&in)[i];
+    out[ctx->unkD0] = ((fx32 *)&in)[i + 1];
+    out[ctx->unkD1] = ((fx32 *)&in)[i + 2];
     G3C_Scale(info, out[0], out[1], out[2]);
 }
 
@@ -1078,6 +1084,7 @@ typedef struct NFLTexBank {
 extern const NFLTexBank data_020b7b04[];
 
 // Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does
+// Not matching: register allocation only (the original keeps the second part's address in r4, which becomes dest)
 int func_02074814(int bank, const void *src, u32 offset, u32 size) {
     u32 n;
     void *dest;
@@ -1238,6 +1245,7 @@ extern NFLStreamSource data_0211216c[];
 
 void *func_0206cf6c(int kind, int index);
 
+// Not matching: register allocation only (the original has pal in r5 before stream, source, extra and size)
 BOOL func_02074b68(u32 *pos) {
     NFLWork *work = (NFLWork *)data_02145360;
     NFLWorkUnkA0 *stream = work->unkA0;
@@ -1594,6 +1602,7 @@ extern NFLObjSource data_021121b4[];
 void func_0206cd9c(u16 *palette, const s16 *params);
 void func_0206cc30(u16 *palette);
 
+// Not matching: register allocation only (the original has stream in r4, then size, pal, obj, work)
 BOOL func_02075528(NFLObj *obj, u32 *pos) {
     NFLWorkUnkA0 *stream;
     NFLWork *work = data_02145360;

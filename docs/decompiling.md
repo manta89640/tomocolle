@@ -324,6 +324,18 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
 - Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- In C (lib/NFL, measured on functions whose instructions were already the original's): a pointer initialised
+  from a global with a cast to its own type, `NFLWork *work = (NFLWork *)data_02145360;`, takes r4 where the plain
+  initialiser leaves it last (`func_0207516c`, `func_02076680`, `func_02077300`). An uninitialised local declared
+  above the initialised pointers takes a lower register than they (`u32 dest;` before `stream = work->unkA0` in
+  `func_02076680`), and initialised declarations take registers in their order (`func_02075f50`). A variable used
+  in two exclusive paths is one register for both: giving the second path a variable of its own block moved two
+  registers into place (`func_0207516c`). The type of a block local counts: `u32 over, n` where `int` gave other
+  registers (`func_02076a98`). So does how a value is returned: `if (result != 0) return result; return 1;`, not
+  `if (result == 0) result = 1;` (`func_02076448`), and `result = f(); return result;` kept a tail call out of the
+  shared epilogue (`func_02076e1c`).
+- The order of independent statements in a case decides the scheduling of their loads: `func_02076e1c` and
+  `func_02077300` matched only with one of the six orders of their three assignments, found by trying them all.
 
 **Fields read off an element's address, where ours folds the offsets**
 - At optimisation level 2 the compiler stops folding offsets through inline calls: `GetSelectedResident()->

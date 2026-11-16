@@ -949,6 +949,33 @@ records it reads have the Wii's layout: the birthday check `func_020731e0` reads
 from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
 bits 1-4 against 11, as `RFLCharData` places them.
 
+The last third, `0x02073514` to `0x020776E4`, measured from its code (in `lib/NFL/NFL.c`; names are still
+addresses):
+
+- **A random Mii.** `func_020737b0` fills a Mii's data from the library's LCG (`func_020743a0`, state at +0x58 of
+  the work area, the constants at +0x5C/+0x60): each part from a picker (`func_02073eac` to `func_02074378`) that
+  takes one of the choices of row `sex * 9 + b * 3 + c` of a table (`data_020b69c0`, `data_020b6c00`, ..., and
+  tables that are local arrays copied to the stack), the face's parts set lower by up to 4, a beard on one man in
+  five; height and build 64, names, create ID and birthday cleared, favourite colour random. `func_02073664`
+  checks its arguments (it tests the first one where the second and third are meant), `func_020736ec` picks 2
+  (sex) and 3 (b, c) at random. `func_0207361c` copies one of six default Miis (`data_020b70c8`, 0x4A bytes each).
+- **Streams into VRAM.** The work area holds a ring buffer (+0x78, +0x7C bytes; write offset +0x84, read offset
+  +0x80, bytes pending +0x88) and seven streams of 12 bytes at +0xA0 (buffer offset, VRAM address, state 0 to 7).
+  Every frame `func_020749e4` copies resources into the buffer (`func_02074b68`: six from the table `data_0211216c`,
+  then `func_0207516c`, the seventh, then the objects' streams, `func_02075528` and `func_02075f50`, eleven each at
+  +0x1A4 and +0x228 of an object, with palettes made from the object's parameters at +0x180); after the interrupt
+  `func_02076448` loads them into texture and palette VRAM (`func_02076680`, `func_02076a98`, `func_02076e1c`,
+  `func_02077300`) through the LCDC (`func_02074814`, `func_02074904`, which check the bank's size first), up to
+  the budget main passes (0x4000). A copy that wraps around the buffer is made in two parts, and one cut short by
+  the budget is resumed the next time (states 3 to 5). Mode 7 (+0x68) converts 4-bit images through a palette
+  (`func_0206dd44`), so its sizes are four times the others'.
+- The coordinate helpers `func_020743e4` to `func_02074688` map x, y and z to the axes of the drawing context
+  (indices at +0xD0..+0xD2, negations at +0xC4..+0xCC) before `G3C_Translate`, `G3C_Scale`, `G3C_Vtx`,
+  `G3C_Normal` and `MTX_RotAxis43`.
+- Two disagreements in the original: `func_02077300` loads ten of the eleven palette streams that
+  `func_02075f50` fills, and the eleventh entry of the array at +0x228 lies over the pointer at +0x2A0 that
+  `func_02072c5c` links its list through.
+
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
 it is 2.0 SP2p2, the game SP2p3), and its function names.
