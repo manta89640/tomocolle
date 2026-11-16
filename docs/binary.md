@@ -539,6 +539,44 @@ Measured:
 
 Inferred: scene 0 is the way back to the start of the game, through the logo and `PreStartScene`'s check of the
 save data.
+## The tutorial's steps (overlay 108)
+
+Overlay 108, `src/overlays/ov108/TutorialStepScene.cpp`: all 7 of its functions match, and the unit is complete
+(its `.data` is the virtual table, 0x24 bytes, and alignment padding to 0x40).
+
+Measured:
+
+- `TutorialStepScene` (scene 0x69; `CreateScene` loads overlay 108 without setting a sound group and allocates
+  0x10 bytes; constructor `_ZN17TutorialStepSceneC1Ei`, 0x02045B44, in the main program; virtual table at
+  0x02149DC0) has no members of its own. `Init`, `Update`, `Draw` and `Exit` are empty: everything is in
+  `StartLoading`, which adds one to the tutorial's step (`gSceneMemory.mTutorialStep`, the byte at
+  `data_0213ba74 + 0x1E`) while it is below 24 and asks for the scene of the new step:
+
+  | Steps | Scene | What it is |
+  | --- | --- | --- |
+  | 1 | 0xAD | the first start's settings (overlay 98, `OptionScene`: the clock) |
+  | 2, 7, 15, 18, 20, 23 | 0x6D | the island (overlay 72, `MapScene`) |
+  | 4 | 0x6E | the island, without setting the sound group |
+  | 3 | 0x72 | overlay 93 |
+  | 5, 10 | 0x6F | the Mii maker (overlay 76, `MiiEditScene`) |
+  | 6, 11 | 0x7E | overlay 94 |
+  | 8, 13, 16, 21 | 0x6B | the tutorial's apartment (overlay 73, `TutorialRoomScene`) |
+  | 9, 12, 17, 22 | 0x6C | overlay 75 |
+  | 14 | 0x7D | overlay 77 |
+  | 19 | 0x71 | overlay 85 |
+
+  The step after 23 stays 24: it ends the tutorial. Of the saved characters that exist (`func_0202c3dc`, indices 0
+  to 99), the first two are read (`func_0202c264`), have `ClearLongAct` and `ClearTrouble` applied and are written
+  back (`func_0202c28c`). Then saved character 0 is read, cleared of trouble and given trouble id 0 of category 9 in
+  state 1, ending at 0x7FFFFFFFFFFFFFFF (never), and written back; the scene asks for scene 0x5F, the island.
+  Step 0 cannot occur (the jump table's entry 0 returns).
+- The scenes that ask for scene 0x69 are those of the tutorial: `PreStartScene` (overlay 106) on a first start,
+  `OptionScene` after the first start's clock (scene 0xAD), `MapScene` at the end of its tutorial visits,
+  `TutorialRoomScene` and `MiiEditScene`.
+
+Inferred: the steps the island handles (2, 4, 7, 15, 18, 20, 23) and those overlay 73 handles (8, 13, 16, 21) are
+the same numbers these scenes switch on, so each scene of the tutorial plays the step this scene chose and comes
+back here. What trouble category 9, which saved character 0 is left with, is, is not known.
 
 ## The name sort test
 

@@ -817,6 +817,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `str r2,[sp,#4]` beside the call) goes through a `static inline` that takes the struct by value and passes its
   fields (`SetTouchLine(ScreenPoint point)` in overlay 2's `Update`). Passing the struct, or a local copy of it,
   to the function directly gives `ldm` or other registers.
+- An `s64` constant built from a small constant held for another store (`mov r2,#1; sub ip,r2,#2; sub
+  r3,r2,#0x80000002` for 0x7FFFFFFFFFFFFFFF): the compiler derives both halves from the constant assigned in the
+  statement just before the `s64` one, so order the stores to make that the right one (`mTroubleState = 1;` last
+  before `mTroubleEnd = ...;` in overlay 108's `TutorialStepScene::StartLoading`; three orders tried derived from 9,
+  0 and 1).
+- A counter incremented in a register and masked (`addcc r1,#1; andcc r1,#0xFF; strbcc`) and then switched on
+  without a reload is a `u8` local: `u8 step = g.mStep; if (step < 24) { g.mStep = ++step; } switch (step)`.
+  Incrementing the global and switching on it reloads it (overlay 108).
 
 **Classes, copies and tables**
 - A class whose constructor stores only another class's tables holds that class as a member rather than deriving
