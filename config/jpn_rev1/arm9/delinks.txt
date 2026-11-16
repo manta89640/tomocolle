@@ -791,6 +791,7 @@ src/shop/ShopStock.cpp:
     .text       start:0x020a5cc4 end:0x020a6074
 
 src/island/Apartment.cpp:
+    complete
     .text       start:0x020a6074 end:0x020a612c
     .rodata     start:0x020fbffc end:0x020fc040
 

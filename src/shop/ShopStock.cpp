@@ -10,11 +10,11 @@ struct ShopStock {
     void SetDate(const RTCDate *date);
 
     /* 0x00 */ RTCDate mDate;       // The day the stock is for
-    /* 0x10 */ u16 mCostumes[5];    // func_0209eb54 picks them
-    /* 0x1A */ u16 mUnknown1A[5];
-    /* 0x24 */ u16 mUnknown24[5];
-    /* 0x2E */ u8 mInteriors[4];    // func_020a5a28 picks them
-    /* 0x32 */ u16 mUnknown32;
+    /* 0x10 */ u16 mClothes[5];
+    /* 0x1A */ u16 mGoods1[5];      // Goods of kind 1 (on the first day a fixed list)
+    /* 0x24 */ u16 mGoods4[5];      // Goods of kind 4
+    /* 0x2E */ u8 mInteriors[4];    // Three interiors (func_020a5a28 picks them)
+    /* 0x32 */ u16 mGood;           // One more of kind 1
 }; // 0x34
 
 extern "C" {
@@ -23,27 +23,29 @@ s64 Clock_GetSeconds(void *clock);
 int func_02035aa4(void *clock);
 void func_0202c864(GameData *game, int index, ShopStock *stock);
 void func_0202c878(GameData *game, int index, const ShopStock *stock);
-void func_0209eb54(int a, u16 *list, int count);
-u16 func_020a0010(u16 *list, int count);
-void func_0209fe48(int a, int b, u16 *list, int count);
 void func_020a5a28(u8 *list, int count);
-void func_0209fcc4(int a, int b, u16 *list, int count);
 }
 
+// The item files' pickers (main program, 0x0209e140 on)
+u16 ChooseClothes(int availability, u16 *clothes, int count);
+u16 ChooseItems(int availability, int kind, u16 *items, int count);
+u16 ChooseItemsNot1000(int availability, int kind, u16 *items, int count);
+u16 GetFixedItems(u16 *items, int count);
+
 void ShopStock::MakeFirst() {
-    func_0209eb54(0, mCostumes, 5);
-    func_020a0010(mUnknown1A, 5);
-    func_0209fe48(0, 4, mUnknown24, 5);
+    ChooseClothes(0, mClothes, 5);
+    GetFixedItems(mGoods1, 5);
+    ChooseItemsNot1000(0, 4, mGoods4, 5);
     func_020a5a28(mInteriors, 3);
-    func_0209fcc4(0, 1, &mUnknown32, 1);
+    ChooseItems(0, 1, &mGood, 1);
 }
 
 void ShopStock::Make() {
-    func_0209eb54(0, mCostumes, 5);
-    func_0209fe48(0, 1, mUnknown1A, 5);
-    func_0209fe48(0, 4, mUnknown24, 5);
+    ChooseClothes(0, mClothes, 5);
+    ChooseItemsNot1000(0, 1, mGoods1, 5);
+    ChooseItemsNot1000(0, 4, mGoods4, 5);
     func_020a5a28(mInteriors, 3);
-    func_0209fcc4(0, 1, &mUnknown32, 1);
+    ChooseItems(0, 1, &mGood, 1);
 }
 
 void ShopStock::SetDate(const RTCDate *date) {
@@ -91,7 +93,7 @@ void UpdateShopStocks() {
     RTCDate today;
     func_0202c864(&gGameData, 0, &current);
     func_0202c864(&gGameData, 1, &next);
-    if (current.mCostumes[0] == 0 || current.mInteriors[0] == 0 || next.mCostumes[0] == 0 || next.mInteriors[0] == 0) {
+    if (current.mClothes[0] == 0 || current.mInteriors[0] == 0 || next.mClothes[0] == 0 || next.mInteriors[0] == 0) {
         InitShopStocks();
         func_0202c864(&gGameData, 0, &current);
         func_0202c864(&gGameData, 1, &next);

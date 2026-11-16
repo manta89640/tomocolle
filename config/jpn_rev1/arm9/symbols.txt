@@ -3737,7 +3737,7 @@ func_0209e7dc kind:function(arm,size=0x44) addr:0x0209e7dc
 func_0209e820 kind:function(arm,size=0x114) addr:0x0209e820
 func_0209e934 kind:function(arm,size=0xf4) addr:0x0209e934
 func_0209ea28 kind:function(arm,size=0x12c) addr:0x0209ea28
-func_0209eb54 kind:function(arm,size=0x1ac) addr:0x0209eb54
+_Z13ChooseClothesiPti kind:function(arm,size=0x1ac) addr:0x0209eb54
 func_0209ed00 kind:function(arm,size=0x30) addr:0x0209ed00
 func_0209ed30 kind:function(arm,size=0x14) addr:0x0209ed30
 func_0209ed44 kind:function(arm,size=0x40) addr:0x0209ed44
@@ -3773,9 +3773,9 @@ func_0209f974 kind:function(arm,size=0x144) addr:0x0209f974
 func_0209fab8 kind:function(arm,size=0x38) addr:0x0209fab8
 func_0209faf0 kind:function(arm,size=0xf0) addr:0x0209faf0
 func_0209fbe0 kind:function(arm,size=0xe4) addr:0x0209fbe0
-func_0209fcc4 kind:function(arm,size=0x184) addr:0x0209fcc4
-func_0209fe48 kind:function(arm,size=0x1c8) addr:0x0209fe48
-func_020a0010 kind:function(arm,size=0x38) addr:0x020a0010
+_Z11ChooseItemsiiPti kind:function(arm,size=0x184) addr:0x0209fcc4
+_Z18ChooseItemsNot1000iiPti kind:function(arm,size=0x1c8) addr:0x0209fe48
+_Z13GetFixedItemsPti kind:function(arm,size=0x38) addr:0x020a0010
 func_020a0048 kind:function(arm,size=0x30) addr:0x020a0048
 func_020a0078 kind:function(arm,size=0x44) addr:0x020a0078
 func_020a00bc kind:function(arm,size=0x11c) addr:0x020a00bc
@@ -3973,10 +3973,10 @@ _Z11GetGameDatexP7RTCDate kind:function(arm,size=0x60) addr:0x020a5da8
 _Z12GetDayNumberPK7RTCDate kind:function(arm,size=0x50) addr:0x020a5e08
 _Z14InitShopStocksv kind:function(arm,size=0x74) addr:0x020a5e58
 _Z16UpdateShopStocksv kind:function(arm,size=0x1a8) addr:0x020a5ecc
-func_020a6074 kind:function(arm,size=0x2c) addr:0x020a6074
-func_020a60a0 kind:function(arm,size=0x18) addr:0x020a60a0
-func_020a60b8 kind:function(arm,size=0x14) addr:0x020a60b8
-func_020a60cc kind:function(arm,size=0x60) addr:0x020a60cc
+_Z17GetApartmentStaget kind:function(arm,size=0x2c) addr:0x020a6074
+_Z17GetApartmentRoomsv kind:function(arm,size=0x18) addr:0x020a60a0
+_Z22GetApartmentStageRoomsi kind:function(arm,size=0x14) addr:0x020a60b8
+_Z13GetWindowCelli kind:function(arm,size=0x60) addr:0x020a60cc
 func_020a612c kind:function(arm,size=0x64) addr:0x020a612c
 func_020a6190 kind:function(arm,size=0x3c) addr:0x020a6190
 func_020a61cc kind:function(arm,size=0x48) addr:0x020a61cc
@@ -4756,9 +4756,9 @@ data_020fbee4 kind:data(any) addr:0x020fbee4
 gStr_f kind:data(any) addr:0x020fbf4c
 data_020fbfd6 kind:data(any) addr:0x020fbfd6
 gStr_entrance kind:data(any) addr:0x020fbfe8
-data_020fbffc kind:data(any) addr:0x020fbffc
-data_020fc002 kind:data(any) addr:0x020fc002
-data_020fc00c kind:data(any) addr:0x020fc00c
+sStageResidents kind:data(any) addr:0x020fbffc local
+sStageRooms kind:data(any) addr:0x020fc002 local
+sFloorRooms kind:data(any) addr:0x020fc00c local
 gStr_0_3 kind:data(any) addr:0x020fc040
 data_020fc080 kind:data(any) addr:0x020fc080
 data_020fc08c kind:data(any) addr:0x020fc08c
