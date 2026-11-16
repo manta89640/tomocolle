@@ -870,8 +870,13 @@ BOOL Character::IsNearerThan(FloorPos pos, fx32 distanceSq) {
     return LengthSq(delta) < distanceSq;
 }
 
+// Plays a sound at the quarters of the animation that `quarters` has bits for, one step per call; returns the step
+// passed (-1 for none). The phase is read through a const reference and stepped through the array: the compiler does
+// not take a value read through a const lvalue for the same expression as the non-const one, so the step reads the
+// byte again, as the original does.
 int Character::PlaySoundAtAnimPhase(int slot, int player, int seqArc, int index, int quarters) {
     s8 *phases = mSoundPhase;
+    const s8 &phase = phases[slot];
     int result = -1;
     ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
     if (anim == NULL) {
@@ -883,45 +888,45 @@ int Character::PlaySoundAtAnimPhase(int slot, int player, int seqArc, int index,
     NNSG3dAnmObj *anmObj = anim->mAnmObj;
     BOOL play = FALSE;
     fx32 length = ((NNSG3dResAnmCommon *)anmObj->resAnm)->numFrame << FX32_SHIFT;
-    if (phases[slot] == 0) {
+    if (phase == 0) {
         if (anmObj->frame >= 0) {
-            result = phases[slot];
-            phases[slot]++;
+            result = phase;
             if (quarters & 1) {
                 play = TRUE;
             }
-        }
-    } else if (phases[slot] == 1) {
-        if (anmObj->frame >= length >> 2) {
-            result = phases[slot];
             phases[slot]++;
+        }
+    } else if (phase == 1) {
+        if (anmObj->frame >= length >> 2) {
+            result = phase;
             if (quarters & 2) {
                 play = TRUE;
             }
-        }
-    } else if (phases[slot] == 2) {
-        if (anmObj->frame >= length >> 1) {
-            result = phases[slot];
             phases[slot]++;
+        }
+    } else if (phase == 2) {
+        if (anmObj->frame >= length >> 1) {
+            result = phase;
             if (quarters & 4) {
                 play = TRUE;
             }
-        }
-    } else if (phases[slot] == 3) {
-        if (anmObj->frame >= (length * 3) >> 2) {
-            result = phases[slot];
             phases[slot]++;
+        }
+    } else if (phase == 3) {
+        if (anmObj->frame >= (length * 3) >> 2) {
+            result = phase;
             if (quarters & 8) {
                 play = TRUE;
             }
+            phases[slot]++;
         }
-    } else if (phases[slot] == 4) {
+    } else if (phase == 4) {
         if (anmObj->frame + (fx32)anim->mUnknown10 >= length) {
-            result = phases[slot];
-            phases[slot] = 0;
+            result = phase;
             if (quarters & 0x10) {
                 play = TRUE;
             }
+            phases[slot] = 0;
         }
     } else {
         phases[slot] = 0;
