@@ -3818,10 +3818,10 @@ func_020a1fe0 kind:function(arm,size=0x124) addr:0x020a1fe0
 func_020a2104 kind:function(arm,size=0x14) addr:0x020a2104
 func_020a2118 kind:function(arm,size=0x168) addr:0x020a2118
 func_020a2280 kind:function(arm,size=0x14c) addr:0x020a2280
-func_020a23cc kind:function(arm,size=0xe0) addr:0x020a23cc
-func_020a24ac kind:function(arm,size=0xe0) addr:0x020a24ac
-func_020a258c kind:function(arm,size=0xb8) addr:0x020a258c
-func_020a2644 kind:function(arm,size=0xb8) addr:0x020a2644
+_ZN12MiiListPanel9InitIconsEii11WindowPoint kind:function(arm,size=0xe0) addr:0x020a23cc
+_ZN12MiiListPanel10InitIcons2Eii11WindowPoint kind:function(arm,size=0xe0) addr:0x020a24ac
+_ZN12MiiListPanel12InitUpButtonEitt11WindowPointS0_ kind:function(arm,size=0xb8) addr:0x020a258c
+_ZN12MiiListPanel14InitDownButtonEitt11WindowPointS0_ kind:function(arm,size=0xb8) addr:0x020a2644
 func_020a26fc kind:function(arm,size=0xe0) addr:0x020a26fc
 func_020a27dc kind:function(arm,size=0x34) addr:0x020a27dc
 func_020a2810 kind:function(arm,size=0x528) addr:0x020a2810
@@ -3840,8 +3840,8 @@ _ZN12MiiListPanel14ClearSelectionEv kind:function(arm,size=0x38) addr:0x020a35fc
 _ZN12MiiListPanel18ResetScrollButtonsEv kind:function(arm,size=0x24) addr:0x020a3634
 _ZN12MiiListPanel16SetScrollUnknownEi kind:function(arm,size=0x10) addr:0x020a3658
 func_020a3668 kind:function(arm,size=0x30) addr:0x020a3668
-func_020a3698 kind:function(arm,size=0x24) addr:0x020a3698
-func_020a36bc kind:function(arm,size=0x30) addr:0x020a36bc
+_ZN12MiiListPanel11CanScrollUpEv kind:function(arm,size=0x24) addr:0x020a3698
+_ZN12MiiListPanel13CanScrollDownEv kind:function(arm,size=0x30) addr:0x020a36bc
 _ZN11MiiListTabs8InitTabsEv kind:function(arm,size=0x30) addr:0x020a36ec
 _ZN11MiiListTabs10AddButtonsEiiPKhS1_ kind:function(arm,size=0xb0) addr:0x020a371c
 _ZN11MiiListTabs5ResetEv kind:function(arm,size=0x40) addr:0x020a37cc
@@ -5381,21 +5381,21 @@ sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
 _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
-@13183 kind:data(any) addr:0x02111b04 local
-@13184 kind:data(any) addr:0x02111b08 local
-@13185 kind:data(any) addr:0x02111b20 local
-@13186 kind:data(any) addr:0x02111b24 local
-@13216 kind:data(any) addr:0x02111b3c local
-@13217 kind:data(any) addr:0x02111b50 local
-@13218 kind:data(any) addr:0x02111b64 local
-@13219 kind:data(any) addr:0x02111b78 local
-@13220 kind:data(any) addr:0x02111b8c local
-@13221 kind:data(any) addr:0x02111ba4 local
-@13222 kind:data(any) addr:0x02111bb8 local
-@13223 kind:data(any) addr:0x02111bcc local
-@13224 kind:data(any) addr:0x02111be0 local
-@13252 kind:data(any) addr:0x02111bf8 local
-@13253 kind:data(any) addr:0x02111bfc local
+@13181 kind:data(any) addr:0x02111b04 local
+@13182 kind:data(any) addr:0x02111b08 local
+@13183 kind:data(any) addr:0x02111b20 local
+@13184 kind:data(any) addr:0x02111b24 local
+@13214 kind:data(any) addr:0x02111b3c local
+@13215 kind:data(any) addr:0x02111b50 local
+@13216 kind:data(any) addr:0x02111b64 local
+@13217 kind:data(any) addr:0x02111b78 local
+@13218 kind:data(any) addr:0x02111b8c local
+@13219 kind:data(any) addr:0x02111ba4 local
+@13220 kind:data(any) addr:0x02111bb8 local
+@13221 kind:data(any) addr:0x02111bcc local
+@13222 kind:data(any) addr:0x02111be0 local
+@13250 kind:data(any) addr:0x02111bf8 local
+@13251 kind:data(any) addr:0x02111bfc local
 data_02111c00 kind:data(any) addr:0x02111c00
 data_02111c08 kind:data(any) addr:0x02111c08
 gStr_M00_3 kind:data(any) addr:0x02111c24

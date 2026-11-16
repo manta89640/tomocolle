@@ -24,6 +24,12 @@ struct WindowPoint; // A point or a size in pixels, by value (MessageWindow.h)
 // The panel of the list's buttons (0x9478 bytes): a page of buttons with the characters' names, scroll buttons and
 // a scroll bar.
 struct MiiListPanel {
+    void InitIcons(int resource, int sequence, WindowPoint position);
+    void InitIcons2(int resource, int sequence, WindowPoint position);
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    BOOL CanScrollUp();
+    BOOL CanScrollDown();
     void SetEntries(SavedCharacter *entries, int count);
     void SetMode(int mode);
     void Select(int entry);
@@ -55,7 +61,10 @@ struct MiiListPanel {
     /* 0x928C */ u8 mScrollBar[0x13C];
     /* 0x93C8 */ u8 mUnknown93C8[0x5C];
     /* 0x9424 */ int mUnknown9424[8];
-    /* 0x9444 */ int mUnknown9444[7];
+    /* 0x9444 */ int mUnknown9444[4];
+    /* 0x9454 */ BOOL mIconsShown;
+    /* 0x9458 */ BOOL mIcons2Shown;
+    /* 0x945C */ int mUnknown945C;
     /* 0x9460 */ int mSelectedButton; // -1 for none
     /* 0x9464 */ int mSelected; // The entry selected, -1 for none
     /* 0x9468 */ BOOL mUnknown9468;

@@ -26,6 +26,9 @@ struct MiiListTabs {
 
 // The panel of the list's controls (0x9478 bytes): buttons, texts and scroll arrows.
 struct MiiListPanel {
+    void InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+    void InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size);
+
     /* 0x0000 */ u8 mUnknown0000[0x9478];
 }; // 0x9478
 
@@ -49,8 +52,6 @@ void func_020a1fe0(MiiListPanel *panel, int unknown);
 void func_020a2104(MiiListPanel *panel, int plane, int unknown);
 void func_020a2118(MiiListPanel *panel, int a, int b, int c, WindowPoint position, WindowPoint size);
 void func_020a2280(MiiListPanel *panel, int plane, WindowPoint position, int *charOffset);
-void func_020a258c(MiiListPanel *panel, int a, int b, int c, WindowPoint position, WindowPoint size);
-void func_020a2644(MiiListPanel *panel, int a, int b, int c, WindowPoint position, WindowPoint size);
 void func_020a26fc(MiiListPanel *panel, int a, int b, int c, int d, int e, int f, WindowPoint position,
                    ScreenRect rect);
 

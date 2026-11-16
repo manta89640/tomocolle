@@ -77,8 +77,8 @@ void MiiListScene::Init() {
     func_020a2104(&mPanel, 0x100, 0);
     func_020a2118(&mPanel, 0, 0x68, 0x68, sPanelPosition, sPanelSize);
     func_020a2280(&mPanel, 0x1000, sPanelTextPosition, &mCharOffset);
-    func_020a258c(&mPanel, 0, 2, 3, sPanelPosition0, sPanelSize0);
-    func_020a2644(&mPanel, 0, 4, 5, sPanelPosition2, sPanelSize2);
+    mPanel.InitUpButton(0, 2, 3, sPanelPosition0, sPanelSize0);
+    mPanel.InitDownButton(0, 4, 5, sPanelPosition2, sPanelSize2);
     func_020a26fc(&mPanel, 0, 6, 7, 0x81, 0x4A, 1, sPanelPosition1, sPanelRect);
 
     mTabs.InitTabs();

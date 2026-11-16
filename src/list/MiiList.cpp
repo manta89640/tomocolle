@@ -203,10 +203,10 @@ void MiiList::ClearSelection() {
 
 void MiiListPanel::Draw() {
     for (int i = 0; i < mButtonCount; i++) {
-        if (mUnknown9444[4]) {
+        if (mIconsShown) {
             Sprite_Draw(&mIcons[i]);
         }
-        if (mUnknown9444[5]) {
+        if (mIcons2Shown) {
             Sprite_Draw(&mIcons2[i]);
         }
         mTexts[i].Draw();
@@ -526,4 +526,62 @@ void MiiListPanel::ScrollToSelection() {
     func_02032a0c(mScrollBar, 0, (mEntryCount - mPageSize) * 20, mScroll * 20);
     func_020a31cc(this);
     func_020a2d38(this);
+}
+
+void MiiListPanel::InitIcons(int resource, int sequence, WindowPoint position) {
+    mUnknown9424[2] = position.x;
+    mUnknown9424[3] = position.y;
+    mIconsShown = TRUE;
+    for (int i = 0; i < mButtonCount; i++) {
+        Sprite_Init(&mIcons[i], resource, sequence, 0x80, 0x60, TRUE);
+        mIcons[i].SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+        mIcons[i].mOverwritePalette = 3;
+        mIcons[i].mVisible = FALSE;
+        position.y += 20;
+    }
+}
+
+void MiiListPanel::InitIcons2(int resource, int sequence, WindowPoint position) {
+    mUnknown9424[4] = position.x;
+    mUnknown9424[5] = position.y;
+    mIcons2Shown = TRUE;
+    for (int i = 0; i < mButtonCount; i++) {
+        Sprite_Init(&mIcons2[i], resource, sequence, 0x80, 0x60, TRUE);
+        mIcons2[i].SetPositionFromVec(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+        mIcons2[i].mOverwritePalette = 3;
+        mIcons2[i].mVisible = FALSE;
+        position.y += 20;
+    }
+}
+
+void MiiListPanel::InitUpButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size) {
+    Sprite_Init(&mUpButton, resource, sequence, 0x80, 0x60, TRUE);
+    func_02031260(&mUpButton, 1);
+    func_02031278(&mUpButton, sequence, pressedSequence);
+    mUpButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+    func_02031eb0(&mUpButton, size.x, size.y);
+    func_0203119c(&mUpButton);
+    mUpButton.mUnknown5E = 3;
+}
+
+void MiiListPanel::InitDownButton(int resource, u16 sequence, u16 pressedSequence, WindowPoint position, WindowPoint size) {
+    Sprite_Init(&mDownButton, resource, sequence, 0x80, 0x60, TRUE);
+    func_02031260(&mDownButton, 1);
+    func_02031278(&mDownButton, sequence, pressedSequence);
+    mDownButton.SetPosition(FxVec2(position.x << FX32_SHIFT, position.y << FX32_SHIFT));
+    func_02031eb0(&mDownButton, size.x, size.y);
+    func_0203119c(&mDownButton);
+    mDownButton.mUnknown5E = 3;
+}
+
+BOOL MiiListPanel::CanScrollUp() {
+    return mEntryCount > mPageSize && mScroll > 0;
+}
+
+BOOL MiiListPanel::CanScrollDown() {
+    BOOL result = FALSE;
+    if (mEntryCount > mPageSize && mScroll < mEntryCount - mPageSize) {
+        result = TRUE;
+    }
+    return result;
 }
