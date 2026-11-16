@@ -307,7 +307,7 @@ BOOL MapCamera::IsAtHome() {
 
 inline void MapScene::ResetCamera() {
     mCamera.mCamera = &data_02122764;
-    func_0202a640(&data_02122764);
+    func_0202a640(mCamera.mCamera);
     mCamera.mCamera->mPosition = sCameraHome;
     mCamera.mCamera->mTarget = sCameraHomeTarget;
     mCamera.mCamera->mAngleX = 0;
@@ -606,7 +606,7 @@ void MapScene::Init() {
 // Not matching yet (0x1148 bytes against 0x1144). With the camera through a pointer in the touch loop, the
 // rectangle table's address is loaded in each branch as in the original and the frame is the original's; what
 // differs: the registers of &mCamera and of the division's constant in the touch loop, with the order of the
-// rectangle arithmetic, and the registers of the camera's reset.
+// rectangle arithmetic.
 void MapScene::Update() {
     mClock.UpdateIfArchiveIdle();
     mClockDisplay.Update();
