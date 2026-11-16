@@ -17,7 +17,7 @@ gStr__ov043 kind:data(any) addr:0x0214ba04
 data_ov043_0214ba14 kind:data(any) addr:0x0214ba14
 data_ov043_0214ba18 kind:data(any) addr:0x0214ba18 ambiguous
 data_ov043_0214ba2c kind:data(any) addr:0x0214ba2c
-data_ov043_0214ba68 kind:data(any) addr:0x0214ba68 ambiguous
+_ZTV7Scene81 kind:data(any) addr:0x0214ba60
 data_ov043_0214ba78 kind:data(any) addr:0x0214ba78 ambiguous
 data_ov043_0214ba84 kind:data(any) addr:0x0214ba84
 data_ov043_0214ba8c kind:data(any) addr:0x0214ba8c ambiguous

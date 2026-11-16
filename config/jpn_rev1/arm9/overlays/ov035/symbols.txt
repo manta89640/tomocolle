@@ -20,7 +20,7 @@ gStr__ov035 kind:data(any) addr:0x0214a6b8
 __sinit_ov035_0214a6c8 kind:function(arm,size=0x1c) addr:0x0214a6c8
 .p__sinit_ov035_0214a6c8 kind:data(word) addr:0x0214a6e4
 data_ov035_0214a700 kind:data(any) addr:0x0214a700
-data_ov035_0214a718 kind:data(any) addr:0x0214a718 ambiguous
+_ZTV7Scene58 kind:data(any) addr:0x0214a710
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov035 kind:data(any) addr:0x0214a734
 gStr_M00_ov035 kind:data(any) addr:0x0214a75c
 gStr_Scn_Scene_SceneTestNg105_LZ_bin kind:data(any) addr:0x0214a760

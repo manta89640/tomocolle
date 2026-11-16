@@ -14,7 +14,7 @@ data_ov029_0214a68c kind:data(any) addr:0x0214a68c
 data_ov029_0214a6a4 kind:data(any) addr:0x0214a6a4
 data_ov029_0214a6b4 kind:data(any) addr:0x0214a6b4
 gText_CombiningSemiVoicedAsterisk kind:data(any) addr:0x0214a6e0
-data_ov029_0214a6ec kind:data(any) addr:0x0214a6ec ambiguous
+_ZTV7Scene51 kind:data(any) addr:0x0214a6e4
 data_ov029_0214a708 kind:data(any) addr:0x0214a708
 data_ov029_0214a718 kind:data(any) addr:0x0214a718 ambiguous
 gStr_RM0_ov029 kind:data(any) addr:0x0214a730
