@@ -146,6 +146,22 @@ Placing that data is the next step for the library files, and is not done. `tool
 file's data is from the addresses in its matched functions, and reports it, but what it writes is not usable yet:
 see its header.
 
+A library function that objdiff scores 0% is often already right and only has dsd's name: objdiff pairs functions by
+name, and dsd gives a file's statics address names. Before changing anything, compare the compiled object with
+`build/<version>/delinks/<unit>.o` in object order, by size and by the bytes outside relocations; a run of equal
+functions between two named ones takes the compiled object's names (104 functions of the SDK and NitroSystem were
+named so). The same comparison finds a range that ends a function or two early (`cgtool/3dsmax.c`), and a relocation
+dsd got wrong shows as a near-miss: a constant it took for an address, or a call it missed after a `bx`. Then:
+
+- a static is `local` in `symbols.txt`, which a complete unit needs; one that a table in the gap still refers to has to
+  stay global until that table's data is placed with its unit (dsd refuses a local symbol referred to from another
+  unit);
+- a structure that dsd cut into its fields (it puts a symbol on every address the code loads) is folded back: one
+  symbol, and every reference in every `relocs.txt` as `to:<structure> add:<offset>` (negative addends are accepted,
+  `add:-0x4`, for `table - 1`);
+- `tools/name_unit_data.py --apply` writes `kind:data(any)` for `.bss` objects and can leave a symbol twice: make
+  them `kind:bss` and check `symbols.txt` for duplicate addresses afterwards.
+
 ### Where the game's release of a file differs (awaiting the user's review)
 
 The fetched sources are another release than the game's (4.2.30007), and a few files differ in code, not only in
