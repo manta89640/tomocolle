@@ -20,6 +20,8 @@ WirelessSession *gWirelessSession;
 #include "MapModelsScene.h"
 #include "../overlays/ov069/SavePlayScene.h"
 #include "../overlays/ov072/MapScene.h"
+#include "../overlays/ov076/MiiEditScene.h"
+#include "../overlays/ov106/PreStartScene.h"
 
 // Scene 0x27
 MapModelsScene::MapModelsScene(int sceneId) : Scene(sceneId) {}
@@ -33,6 +35,14 @@ SavePlayScene::SavePlayScene(int sceneId) : Scene(sceneId) {
 SavePlayCharacter::SavePlayCharacter() {}
 
 SavePlayCharacter::~SavePlayCharacter() {}
+
+// Scene 0x39, overlay 106
+PreStartScene::PreStartScene(int sceneId) : Scene(sceneId) {
+    mResidentCount = 0;
+}
+
+// Scenes 0x42, 0x43, 0x44 and 0x6F, overlay 76
+MiiEditScene::MiiEditScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}

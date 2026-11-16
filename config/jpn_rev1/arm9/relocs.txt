@@ -6590,7 +6590,7 @@ from:0x020436ec kind:arm_call to:0x0203117c module:main
 from:0x02043708 kind:arm_call to:0x02031f1c module:main
 from:0x02043724 kind:arm_call to:0x0202e770 module:main
 from:0x0204374c kind:load to:0x02110978 module:main
-from:0x02043750 kind:load to:0x0215a120 module:overlay(76)
+from:0x02043750 kind:load to:0x0215a118 add:0x8 module:overlay(76)
 from:0x02043754 kind:load to:0x02110868 module:main
 from:0x02043758 kind:load to:0x021108b8 module:main
 from:0x0204375c kind:load to:0x02110870 module:main

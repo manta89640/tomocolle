@@ -181,7 +181,7 @@ data_ov076_0215a100 kind:data(any) addr:0x0215a100
 data_ov076_0215a102 kind:data(any) addr:0x0215a102
 data_ov076_0215a106 kind:data(any) addr:0x0215a106
 data_ov076_0215a10c kind:data(any) addr:0x0215a10c local
-data_ov076_0215a120 kind:data(any) addr:0x0215a120
+_ZTV12MiiEditScene kind:data(any) addr:0x0215a118
 data_ov076_0215a13c kind:data(any) addr:0x0215a13c local
 gStr_E00_ov076 kind:data(any) addr:0x0215a25c
 gStr_Scn_Scene_SceneMiiEdit2_LZ_bin kind:data(any) addr:0x0215a260

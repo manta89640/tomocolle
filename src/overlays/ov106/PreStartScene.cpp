@@ -1,4 +1,5 @@
 #include "PreStartScene.h"
+#include "MainProgram.h"
 
 // Overlay 106: what comes before the game starts (PreStartScene). One source file: the scene, its clock and its
 // saving icon, with the scene's implicit destructor, which the compiler emits with the scene's virtual table, at the

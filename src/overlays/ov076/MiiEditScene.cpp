@@ -1,4 +1,5 @@
 #include "MiiEditScene.h"
+#include "MainProgram.h"
 #include "sound/SoundManager.h"
 
 #include <wchar.h>
@@ -322,7 +323,7 @@ void MiiEditScene::Init() {
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     gSoundManager.LoadGroup(1);
     gSoundManager.StartSeq(0, 2);
-    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+    ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
     func_02090fdc(&mCharacter, 0, 0, 2);
     Character_SetFace(&mCharacter, 8);
     switch (mSceneId) {
@@ -343,7 +344,7 @@ void MiiEditScene::Init() {
     case 0x43:
     case 0x6F: {
         void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
-        func_02029660((void *)mCharacter.mModel.mUnknown04, RESOURCE_BCA0, animations);
+        func_02029660((void *)mCharacter.mModel.mAnim.mUnknown04, RESOURCE_BCA0, animations);
         Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
         Character_SetAngle(&mCharacter, 0x4000);
         func_02091a14(&mCharacter, FALSE);
@@ -372,13 +373,13 @@ void MiiEditScene::Init() {
     func_0208fd90(&mEditedCharacter, 0);
     *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
     func_0208fefc(&mEditedCharacter);
-    VecFx32 v = mCharacter.mUnknown2568;
-    mEditedCharacter.mUnknown2568 = v;
-    mEditedCharacter.mUnknown25D4 = mCharacter.mUnknown25D4;
-    mEditedCharacter.mUnknown25D6 = mCharacter.mUnknown25D6;
-    mEditedCharacter.mUnknown25D8 = mCharacter.mUnknown25D8;
+    VecFx32 v = mCharacter.mFaceOffset;
+    mEditedCharacter.mFaceOffset = v;
+    mEditedCharacter.mHeadPitchNow = mCharacter.mHeadPitchNow;
+    mEditedCharacter.mHeadYawNow = mCharacter.mHeadYawNow;
+    mEditedCharacter.mHeadRollNow = mCharacter.mHeadRollNow;
     mEditedCharacter.mUnknown25E0 = mCharacter.mUnknown25E0;
-    func_0208ff94(&mEditedCharacter, mCharacter.mUnknown2538, mCharacter.mUnknown2514);
+    func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
     mUnknown580C = TRUE;
     mCamera = &data_02122764;
     func_0202a640(mCamera);
@@ -477,18 +478,18 @@ void MiiEditScene::Init() {
     mCharBox.Init(0x1000, 0x20, 2, charOffset, 0, 0, NULL);
     mCharBox.mColor = 8;
     SetCanvasPosition(&mCharBox, sCharBoxPosition);
-    MessageText *text = &mText1B35C;
+    MessageText *text = &mText1B35C[0];
     text->InitObjForMessage(&mMessageFiles[0], 0x20, &gFonts[0].mFont, 0x1000,
                                  charOffset + mCharBox.GetCharCount(), 0, 1, 0, 0, 0xF, NULL);
-    SetCanvasPosition(&mText1B35C, data_ov076_021587b0);
+    SetCanvasPosition(&mText1B35C[0], data_ov076_021587b0);
     text->DrawAll();
-    mText1B35C.mSprite.mOverwritePalette = 0;
-    mText1B35C.mHAlign = 1;
-    text = &mText1B94C;
+    mText1B35C[0].mSprite.mOverwritePalette = 0;
+    mText1B35C[0].mHAlign = 1;
+    text = &mText1B94C[0];
     text->InitObjForMessage(&mMessageFiles[0], 0x1C, &gFonts[0].mFont, 0x10, 200, 0, 1, 0, 0, 0xF, NULL);
-    SetCanvasPosition(&mText1B94C, data_ov076_021587e8);
+    SetCanvasPosition(&mText1B94C[0], data_ov076_021587e8);
     text->DrawAll();
-    mText1B94C.mSprite.mOverwritePalette = 2;
+    mText1B94C[0].mSprite.mOverwritePalette = 2;
     mUnknown5904 = 0;
     for (int i = 0; i < 7; i++) {
         mUnknown58E8[i] = FALSE;
@@ -556,7 +557,7 @@ void MiiEditScene::Update() {
     }
     if (mUnknown5828) {
         func_02091578(&mCharacter, 0xFE00);
-        if (mCharacter.mModel.mUnknown526 == 0x4000) {
+        if (mCharacter.mAngle == 0x4000) {
             mUnknown5828 = FALSE;
         }
     }
@@ -654,22 +655,22 @@ void MiiEditScene::Draw() {
     if (mUnknown58DC && mUnknown58E0 && !mUnknown58E4) {
         Sprite_Draw(&mProgressSprite);
     }
-    mText1B94C.ObjTextCanvas::Draw();
+    mText1B94C[0].ObjTextCanvas::Draw();
     func_02091968(&mCharacter);
-    if (mCharacter.IsUnknown24F8Clear()) {
+    if (IsFaceClear(&mCharacter)) {
         if (mUnknown580C == TRUE) {
             *(MiiData *)mEditedCharacter.mMii = *(MiiData *)mCharacter.mMii;
             func_0208fefc(&mEditedCharacter);
-            VecFx32 v = mCharacter.mUnknown2568;
-            mEditedCharacter.mUnknown2568 = v;
-            mEditedCharacter.mUnknown25D4 = mCharacter.mUnknown25D4;
-            mEditedCharacter.mUnknown25D6 = mCharacter.mUnknown25D6;
-            mEditedCharacter.mUnknown25D8 = mCharacter.mUnknown25D8;
-            func_0208ff94(&mEditedCharacter, mCharacter.mUnknown2538, mCharacter.mUnknown2514);
+            VecFx32 v = mCharacter.mFaceOffset;
+            mEditedCharacter.mFaceOffset = v;
+            mEditedCharacter.mHeadPitchNow = mCharacter.mHeadPitchNow;
+            mEditedCharacter.mHeadYawNow = mCharacter.mHeadYawNow;
+            mEditedCharacter.mHeadRollNow = mCharacter.mHeadRollNow;
+            func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
             mUnknown580C = FALSE;
         }
     } else {
-        func_0208ff94(&mEditedCharacter, mCharacter.mUnknown2538, mCharacter.mUnknown2514);
+        func_0208ff94(&mEditedCharacter, &mCharacter.mHeadMatrix, &mCharacter.mHeadRotation);
         func_02090214(&mEditedCharacter);
     }
     func_0202ad84(data_021223e4);
@@ -770,17 +771,17 @@ void MiiEditScene::SetPage(int page) {
     mUnknown58E8[page] = TRUE;
     switch (page) {
     case 0:
-        NNS_G2dCharCanvasClear(&mText1B94C.mCanvas, 0);
-        mText1B94C.mMessage = 0x1A;
-        mText1B94C.DrawAll();
-        mText1B94C.mSprite.mVisible = FALSE;
+        NNS_G2dCharCanvasClear(&mText1B94C[0].mCanvas, 0);
+        mText1B94C[0].mMessage = 0x1A;
+        mText1B94C[0].DrawAll();
+        mText1B94C[0].mSprite.mVisible = FALSE;
         mSexPage.Init(this);
         break;
     case 1:
-        NNS_G2dCharCanvasClear(&mText1B94C.mCanvas, 0);
-        mText1B94C.mMessage = 0x1C;
-        mText1B94C.DrawAll();
-        mText1B94C.mSprite.mVisible = TRUE;
+        NNS_G2dCharCanvasClear(&mText1B94C[0].mCanvas, 0);
+        mText1B94C[0].mMessage = 0x1C;
+        mText1B94C[0].DrawAll();
+        mText1B94C[0].mSprite.mVisible = TRUE;
         SetCharacterColors(FALSE);
         mFacePage.Init(this);
         func_02031e28(&mButtons[page - 1], TRUE);
@@ -790,10 +791,10 @@ void MiiEditScene::SetPage(int page) {
         if (mProgressSprite.mPlace == 1) {
             mUnknown58DC = FALSE;
         }
-        NNS_G2dCharCanvasClear(&mText1B94C.mCanvas, 0);
-        mText1B94C.mMessage = 0x1D;
-        mText1B94C.DrawAll();
-        mText1B94C.mSprite.mVisible = TRUE;
+        NNS_G2dCharCanvasClear(&mText1B94C[0].mCanvas, 0);
+        mText1B94C[0].mMessage = 0x1D;
+        mText1B94C[0].DrawAll();
+        mText1B94C[0].mSprite.mVisible = TRUE;
         mProfilePage.Init(this);
         func_02031e28(&mButtons[page - 1], TRUE);
         Sprite_SetFrame(&mButtons[page - 1], 1);
@@ -802,10 +803,10 @@ void MiiEditScene::SetPage(int page) {
         if (mProgressSprite.mPlace == 2) {
             mUnknown58DC = FALSE;
         }
-        NNS_G2dCharCanvasClear(&mText1B94C.mCanvas, 0);
-        mText1B94C.mMessage = 0x21;
-        mText1B94C.DrawAll();
-        mText1B94C.mSprite.mVisible = TRUE;
+        NNS_G2dCharCanvasClear(&mText1B94C[0].mCanvas, 0);
+        mText1B94C[0].mMessage = 0x21;
+        mText1B94C[0].DrawAll();
+        mText1B94C[0].mSprite.mVisible = TRUE;
         mVoicePage.Init(this);
         func_02031e28(&mButtons[page - 1], TRUE);
         Sprite_SetFrame(&mButtons[page - 1], 1);
@@ -814,10 +815,10 @@ void MiiEditScene::SetPage(int page) {
         if (mProgressSprite.mPlace == 3) {
             mUnknown58DC = FALSE;
         }
-        NNS_G2dCharCanvasClear(&mText1B94C.mCanvas, 0);
-        mText1B94C.mMessage = 0x22;
-        mText1B94C.DrawAll();
-        mText1B94C.mSprite.mVisible = TRUE;
+        NNS_G2dCharCanvasClear(&mText1B94C[0].mCanvas, 0);
+        mText1B94C[0].mMessage = 0x22;
+        mText1B94C[0].DrawAll();
+        mText1B94C[0].mSprite.mVisible = TRUE;
         mCharacterPage.Init(this);
         func_02031e28(&mButtons[page - 1], TRUE);
         Sprite_SetFrame(&mButtons[page - 1], 1);
@@ -860,7 +861,7 @@ void MiiEditScene::LoadModel() {
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             func_02091048(&mCharacter, "B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
             func_0208ef5c(&mCharacter.mModel, 0, 0);
             break;
         case 1:
@@ -868,7 +869,7 @@ void MiiEditScene::LoadModel() {
             ArchiveManager_Unmount(&gArchiveManager, "B0I");
             func_02091048(&mCharacter, "B0I");
             ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+            ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
             func_0208ef5c(&mCharacter.mModel, 0, 0);
             break;
         }
@@ -877,11 +878,11 @@ void MiiEditScene::LoadModel() {
         ArchiveManager_Unmount(&gArchiveManager, "B0I");
         func_02091048(&mCharacter, "B0I");
         ArchiveManager_MountCompressed(&gArchiveManager, "B0I", mCharacter.mModel.mArchivePath, 1);
-        ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mUnknown4E8);
+        ModelResources_SetModel(data_021223e4, 0, mCharacter.mModel.mModelPath);
         func_0208ef5c(&mCharacter.mModel, 0, 0);
     }
     void *animations = func_0202ad04(data_021223e4, 0x1F, "BIC", 0);
-    func_02029660((void *)mCharacter.mModel.mUnknown04, RESOURCE_BCA0, animations);
+    func_02029660((void *)mCharacter.mModel.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     Character_SetAnimation(&mCharacter, RESOURCE_BCA0, 0);
     Character_SetAngle(&mCharacter, 0x4000);
     func_0208fefc(&mCharacter);
@@ -936,17 +937,17 @@ void MiiEditScene::SaveCharacter() {
     switch (mSceneId) {
     case 0x6F:
         func_0209930c(&mCharacter, 0x13, 0, 0x7FFFFFFFFFFFFFFF);
-        mCharacter.mUnknown23A = 1;
+        mCharacter.mMoodLocked = 1;
         mCharacter.mUnknown227 = 0;
         mCharacter.mUnknown226 = 0;
-        mCharacter.mUnknown238 = 0;
-        mCharacter.mUnknown230 = 0x7FFFFFFFFFFFFFFF;
+        mCharacter.mMoodPartner = 0;
+        mCharacter.mAwayUntil = 0x7FFFFFFFFFFFFFFF;
         break;
     case 0x43:
     case 0x44:
         func_0209930c(&mCharacter, 0x13, 0, 0x7FFFFFFFFFFFFFFF);
         func_0209b1d8(&mCharacter);
-        mCharacter.mUnknown230 = 0x7FFFFFFFFFFFFFFF;
+        mCharacter.mAwayUntil = 0x7FFFFFFFFFFFFFFF;
         break;
     }
     func_0202c28c(&gGameData, mUnknown5824, &mCharacter);
@@ -954,15 +955,15 @@ void MiiEditScene::SaveCharacter() {
 
 void MiiEditScene::SetCharacterColors(BOOL a) {
     if (a) {
-        mCharacter.mUnknown02D4 = 0;
-        mCharacter.mUnknown02D6 = 0;
+        ((u16 *)mCharacter.mFaceDrawParam)[10] = 0;
+        ((u16 *)mCharacter.mFaceDrawParam)[11] = 0;
         func_02029f10(&mCharacter.mModel, 0);
         func_02029f20(&mCharacter.mModel, 0);
         func_02029f30(&mCharacter.mModel, 0);
         func_02029f40(&mCharacter.mModel, 0);
     } else {
-        mCharacter.mUnknown02D4 = GX_RGB(31, 31, 31);
-        mCharacter.mUnknown02D6 = GX_RGB(8, 8, 8);
+        ((u16 *)mCharacter.mFaceDrawParam)[10] = GX_RGB(31, 31, 31);
+        ((u16 *)mCharacter.mFaceDrawParam)[11] = GX_RGB(8, 8, 8);
         func_02029f10(&mCharacter.mModel, GX_RGB(31, 31, 31));
         func_02029f20(&mCharacter.mModel, GX_RGB(8, 8, 8));
     }
@@ -3468,7 +3469,7 @@ void MiiEditProfilePage::SetState(int state) {
         WindowPoint okPosition5 = data_ov076_021587a8;
         func_02033844(&mWindows[5], n, 0, 0x69, 0x6A, okPosition5, okSize, &mScene->mMessageFiles[1], 5,
                       &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158d94[2], 14);
-        mScene->mText1B35C.mSprite.mVisible = FALSE;
+        mScene->mText1B35C[0].mSprite.mVisible = FALSE;
         UpdateTexts();
         MiiData_GetName(&mScene->mCharacter, name);
         MiiData_GetCreatorName(&mScene->mCharacter, creator);
@@ -3551,38 +3552,38 @@ void MiiEditProfilePage::SetState(int state) {
         ((KeyboardButton *)((u8 *)&mKeyboard.mButtons + 0x6B8))->SetVisible(FALSE);
         switch (state) {
         case 3: {
-            mScene->mText1B35C.mSprite.mVisible = TRUE;
-            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
-            mScene->mText1B35C.mMessage = 0x1F;
-            mScene->mText1B35C.DrawAll();
+            mScene->mText1B35C[0].mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C[0].mCanvas, 0);
+            mScene->mText1B35C[0].mMessage = 0x1F;
+            mScene->mText1B35C[0].DrawAll();
             SetCanvasPosition(&mScene->mCharBox, sCharBoxPosition);
             SetText(mScene->mCharacter.mName);
             break;
         }
         case 5: {
-            mScene->mText1B35C.mSprite.mVisible = TRUE;
-            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
-            mScene->mText1B35C.mMessage = 0x1E;
-            mScene->mText1B35C.DrawAll();
+            mScene->mText1B35C[0].mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C[0].mCanvas, 0);
+            mScene->mText1B35C[0].mMessage = 0x1E;
+            mScene->mText1B35C[0].DrawAll();
             SetCanvasPosition(&mScene->mCharBox, sCharBoxPosition);
             SetText(mScene->mCharacter.mFamilyName);
             break;
         }
         case 7: {
-            mScene->mText1B35C.mSprite.mVisible = TRUE;
-            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
-            mScene->mText1B35C.mMessage = 0x20;
-            mScene->mText1B35C.DrawAll();
+            mScene->mText1B35C[0].mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C[0].mCanvas, 0);
+            mScene->mText1B35C[0].mMessage = 0x20;
+            mScene->mText1B35C[0].DrawAll();
             SetCanvasPosition(&mScene->mCharBox, sCharBoxPosition);
             MiiData_GetName(&mScene->mCharacter, text);
             SetText(text);
             break;
         }
         case 9: {
-            mScene->mText1B35C.mSprite.mVisible = TRUE;
-            NNS_G2dCharCanvasClear(&mScene->mText1B35C.mCanvas, 0);
-            mScene->mText1B35C.mMessage = 0x24;
-            mScene->mText1B35C.DrawAll();
+            mScene->mText1B35C[0].mSprite.mVisible = TRUE;
+            NNS_G2dCharCanvasClear(&mScene->mText1B35C[0].mCanvas, 0);
+            mScene->mText1B35C[0].mMessage = 0x24;
+            mScene->mText1B35C[0].DrawAll();
             SetCanvasPosition(&mScene->mCharBox, sCharBoxPosition);
             MiiData_GetCreatorName(&mScene->mCharacter, text);
             SetText(text);
@@ -3688,7 +3689,7 @@ void MiiEditProfilePage::Draw() {
     for (u16 i = 0; i < 9; i++) {
         mScene->mTextBoxes[i].Draw();
     }
-    mScene->mText1B35C.ObjTextCanvas::Draw();
+    mScene->mText1B35C[0].ObjTextCanvas::Draw();
     for (u16 i = 0; i < 10; i++) {
         func_02031d7c(&mButtons[i]);
     }
@@ -3701,7 +3702,7 @@ void MiiEditProfilePage::Draw() {
     case 7:
     case 9:
         mKeyboard.Draw();
-        mScene->mText1B35C.ObjTextCanvas::Draw();
+        mScene->mText1B35C[0].ObjTextCanvas::Draw();
         mScene->mCharBox.Draw();
         func_02031d7c(&mButton);
         break;
@@ -4653,30 +4654,30 @@ void MiiEditRegisterPage::Init(MiiEditScene *scene, int previousPage) {
     mPreviousPage = previousPage;
     ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
-    func_020331bc(&mWindow, 0x3F00, rect);
-    func_02034f4c(&mWindow, 1);
+    func_02032fb8(&mWindow[0], rect);
+    func_02033174(&mWindow[0], "E00:/Window_down.nsc", 0x100);
+    func_020331bc(&mWindow[0], 0x3F00, rect);
+    func_02034f4c(&mWindow[0], 1);
     int number = 0;
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow, number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
+        func_02033844(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
                       data_ov076_021588fc[i], data_ov076_0215894c[i], &mScene->mMessageFiles[1],
                       data_ov076_021587f0[i], &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158a3c[i], 1);
         number++;
     }
-    charOffset = func_02033a58(&mWindow, &mScene->mMessageFiles[0], 0x2D, &gFonts[0].mFont, 0x1000,
+    charOffset = func_02033a58(&mWindow[0], &mScene->mMessageFiles[0], 0x2D, &gFonts[0].mFont, 0x1000,
                                data_ov076_02158800, &charOffset);
-    func_02034f4c(&mWindow, 1);
-    func_02034f94(&mWindow, 1);
-    func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+    func_02034f4c(&mWindow[0], 1);
+    func_02034f94(&mWindow[0], 1);
+    func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
 void MiiEditRegisterPage::Update() {
-    func_020341d4(&mWindow);
-    if (mWindow.mResult != -1) {
-        mWindow.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindow, MessageWindow::FLAG_CLOSE | 0x20);
-        switch (mWindow.mResult) {
+    func_020341d4(&mWindow[0]);
+    if (mWindow[0].mResult != -1) {
+        mWindow[0].mUnknownSetBeforeClose = 15;
+        func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
+        switch (mWindow[0].mResult) {
         case 0:
             mNextPage = -1;
             break;
@@ -4685,7 +4686,7 @@ void MiiEditRegisterPage::Update() {
             break;
         }
     }
-    if (!mWindow.mTransitionDone) {
+    if (!mWindow[0].mTransitionDone) {
         return;
     }
     if (mNextPage == -1) {
@@ -4710,11 +4711,11 @@ void MiiEditRegisterPage::Update() {
 }
 
 void MiiEditRegisterPage::Draw() {
-    func_020345d8(&mWindow);
+    func_020345d8(&mWindow[0]);
 }
 
 void MiiEditRegisterPage::Exit() {
-    func_020346cc(&mWindow);
+    func_020346cc(&mWindow[0]);
 }
 
 void MiiEditQuitPage::Init(MiiEditScene *scene, int previousPage) {
@@ -4722,30 +4723,30 @@ void MiiEditQuitPage::Init(MiiEditScene *scene, int previousPage) {
     mPreviousPage = previousPage;
     ScreenRect rect = sWindowRect;
     int charOffset = 0x384;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, "E00:/Window_down.nsc", 0x100);
-    func_020331bc(&mWindow, 0x3F00, rect);
-    func_02034f4c(&mWindow, 1);
+    func_02032fb8(&mWindow[0], rect);
+    func_02033174(&mWindow[0], "E00:/Window_down.nsc", 0x100);
+    func_020331bc(&mWindow[0], 0x3F00, rect);
+    func_02034f4c(&mWindow[0], 1);
     int number = 0;
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow, number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
+        func_02033844(&mWindow[0], number, 0, data_ov076_0215874c[i], data_ov076_02158748[i],
                       data_ov076_021588fc[i], data_ov076_0215894c[i], &mScene->mMessageFiles[1],
                       data_ov076_021587f0[i], &gFonts[2].mFont, 0x1000, &charOffset, &data_ov076_02158a1c[i], 1);
         number++;
     }
-    func_02033a58(&mWindow, &mScene->mMessageFiles[0], 0x2E, &gFonts[0].mFont, 0x1000, data_ov076_02158800,
+    func_02033a58(&mWindow[0], &mScene->mMessageFiles[0], 0x2E, &gFonts[0].mFont, 0x1000, data_ov076_02158800,
                   &charOffset);
-    func_02034f4c(&mWindow, 1);
-    func_02034f94(&mWindow, 1);
-    func_02034720(&mWindow, MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
+    func_02034f4c(&mWindow[0], 1);
+    func_02034f94(&mWindow[0], 1);
+    func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 1);
 }
 
 void MiiEditQuitPage::Update() {
-    func_020341d4(&mWindow);
-    if (mWindow.mResult != -1) {
-        mWindow.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mWindow, MessageWindow::FLAG_CLOSE | 0x20);
-        switch (mWindow.mResult) {
+    func_020341d4(&mWindow[0]);
+    if (mWindow[0].mResult != -1) {
+        mWindow[0].mUnknownSetBeforeClose = 15;
+        func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | 0x20);
+        switch (mWindow[0].mResult) {
         case 0:
             mNextPage = -1;
             break;
@@ -4754,7 +4755,7 @@ void MiiEditQuitPage::Update() {
             break;
         }
     }
-    if (!mWindow.mTransitionDone) {
+    if (!mWindow[0].mTransitionDone) {
         return;
     }
     if (mNextPage == -1) {
@@ -4773,11 +4774,11 @@ void MiiEditQuitPage::Update() {
 }
 
 void MiiEditQuitPage::Draw() {
-    func_020345d8(&mWindow);
+    func_020345d8(&mWindow[0]);
 }
 
 void MiiEditQuitPage::Exit() {
-    func_020346cc(&mWindow);
+    func_020346cc(&mWindow[0]);
 }
 
 // TEMPORARY: refers to every object of .rodata, so that the compiler keeps the ones that only functions not
