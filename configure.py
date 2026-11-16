@@ -286,9 +286,13 @@ LIBRARIES["lib/MSL_C/"] = {
         "-w off",
         "-nolink",
         "-msgstyle gcc",
+        "-ipa file",  # The objects pool each file's statics into one section
+        "-Cpp_exceptions off",  # The game's link has no exception tables; the code is the same without them
     ],
     "defines": [],
-    "includes": ["lib/MSL_C"],
+    # MSL's own prefix for NITRO: it makes the library thread-safe, as the objects' calls to OS_LockMutex show
+    "prefix": "PREFIX_NITRO.h",
+    "includes": ["lib/MSL_C", *SDK_INCLUDES],
 }
 
 # A header that the SDK's build generates from a table of constants. tools/gen_fx_const.py does the same, so that
