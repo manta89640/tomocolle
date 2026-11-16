@@ -870,6 +870,37 @@ Not done:
   reaches from the pool's start. 13 of the `u16` (pool+0x06 to +0x1F) are not referred to by anything in the
   overlay. Inferred: functions that used them were stripped by the link, which keeps the pooled statics they used.
 
+## The keyboard's object
+
+`src/keyboard/Keyboard.cpp` (`0x02082EAC` to `0x02083DC4`, 34 functions) is complete: every function matches and the
+unit is linked from its object. It is the object a scene holds for the on-screen keyboard (`SoftKeyboard`,
+`include/keyboard/SoftKeyboard.h`, 0x6014 bytes), and sets up and draws the keyboard's core
+(`KeyboardCore.cpp`) through it. Measured:
+
+- **Callers.** The main program's scene constructors construct it (`_ZN12SoftKeyboardC1Ev`, six calls), and
+  `func_0204ce88`/`func_0204d178` of the main program and overlays 43, 75, 76, 92 and 93 use it. The main program's
+  set-up is `SetArchiveName("KBD")`, `func_02083078` (the background plane 0x100 and a palette),
+  `func_02083288(0, 0)`, `func_0208382c` (the sprite resource, a message file, a character offset, the layout),
+  `func_02083c30` and `GetButtonCharCount`; the overlays call the same functions.
+- **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
+  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given
+  (`func_02081d68`; the second is what `func_020831a4` queues to VRAM), the six background paths (five of 0x30 bytes
+  and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite, its resource and layout, and the
+  three sprite paths. Every path starts `xxx:/`, which `SetArchiveName` overwrites with the archive's mount name.
+- **The buttons** (`KeyboardButton`, `0x0208329C` to `0x02083740`) are a sprite with a `MessageText`: they show
+  messages 6 and 5 of the file passed to `func_0208382c`, at (0x80, 0xAD) and (0, 0xAD), and play a sound of
+  `gSoundManager` as they are touched and as they are released. `Update` returns TRUE when the stylus is lifted on the
+  button.
+- **The tabs.** The five areas of `sTabAreas` (`0x020B7F78`) are the core's key areas (`func_02082e70`): the core
+  calls `func_02083c54` when one is touched, which lights that tab and selects keyboard mode 0 to 4
+  (`func_02081ff0`). `func_02083128` registers only the first two at first.
+- **Data.** `.rodata` is one pool, `sButtonPositions`, `sButtonRect`, the local table of the five modes,
+  `sTabAreas`, `sLayoutPositions`; `.data` is the nine paths. The `gText_Yu` and `gStr_F` that the string tool had
+  named here were `sButtonPositions` + 4 (the code reads the y column off it) and `sLayoutPositions`.
+
+Inferred: the 0x1C bytes from +0x5FF8 to the end are part of the object (the Mii maker's next member starts there),
+but nothing in this file touches them.
+
 ## The Mii maker
 
 Overlay 76, `SceneMiiEdit2`: 83 functions, `.text` `0x02149A40` to `0x02158748` (60 KB). It is cut as one unit,
