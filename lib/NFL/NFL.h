@@ -35,7 +35,8 @@ typedef struct NFLObj {
     struct NFLObj *unk17C;
     s16 unk180[0x12]; // The parameters func_02075528 makes its palettes from
     NFLWorkUnkA0 unk1A4[11];
-    u8 unk228[0x2A0 - 0x228];
+    NFLWorkUnkA0 unk228[10]; // func_02075f50 walks eleven, the last over next
+
     struct NFLObj *next;
 } NFLObj;
 

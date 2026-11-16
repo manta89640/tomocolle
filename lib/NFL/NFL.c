@@ -1949,6 +1949,171 @@ BOOL func_02075528(NFLObj *obj, u32 *pos) {
     return TRUE;
 }
 
+void func_0206cc6c(u16 *palette, const s16 *params);
+
+// The palettes of an object's eleven palette streams (unk228), made from its parameters at unk180
+BOOL func_02075f50(NFLObj *obj, u32 *pos) {
+    NFLWork *work = (NFLWork *)data_02145360;
+    s16 *params = obj->unk180;
+
+    if (work->unk68 != 7) {
+        u16 palette[16];
+        NFLWorkUnkA0 *stream = obj->unk228;
+        u16 *pal = palette;
+        int i;
+
+        for (i = 0; i < 11; stream++, i++) {
+            int size;
+            BOOL overflowB;
+            BOOL overflowA;
+            u8 *p;
+
+            if (*pos >= work->unk7C) {
+                return TRUE;
+            }
+            if (!work->unk9C) {
+                if (stream->unk8 >= 2 && stream->unk8 <= 5) {
+                    work->unk9C = TRUE;
+                } else if (stream->unk8 <= 1) {
+                    work->unk88 = 0;
+                    work->unk80 = 0;
+                    work->unk84 = 0;
+                    *pos = 0;
+                    work->unk9C = TRUE;
+                }
+            }
+            if (stream->unk8 == 0 || stream->unk8 == 1 || stream->unk8 == 3 || stream->unk8 == 4) {
+                overflowB = FALSE;
+                overflowA = FALSE;
+                if (i == 0) {
+                    size = 16;
+                } else {
+                    size = 32;
+                }
+                switch (i) {
+                case 0:
+                    func_0206cc6c(pal, params);
+                    break;
+                case 1:
+                    func_0206a014(pal, params[8]);
+                    break;
+                case 2:
+                    func_02069de4(pal, params[6]);
+                    break;
+                case 3:
+                    func_0206a1b4(pal, params[10]);
+                    break;
+                case 4:
+                    func_02069de4(pal, params[14]);
+                    break;
+                case 5:
+                    func_0206a99c(pal, params[12]);
+                    break;
+                case 6:
+                    func_02069de4(pal, params[14]);
+                    break;
+                case 7:
+                    func_0206a2e4(pal, params[2]);
+                    break;
+                case 8:
+                    if (params[3] == 34 || params[3] == 57) {
+                        func_0206a894(pal, params[0]);
+                    } else {
+                        func_02069de4(pal, params[4]);
+                    }
+                    break;
+                case 9:
+                    MIi_CpuCopy32(func_0206cf6c(12, 0), pal, size);
+                    DC_FlushRange(pal, size);
+                    break;
+                }
+                if (stream->unk8 == 0) {
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(pal, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(pal, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32((u8 *)pal + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = 2;
+                    } else {
+                        obj->unk178 = size;
+                        stream->unk8 = 3;
+                    }
+                    stream->unk0 = work->unk84;
+                } else {
+                    p = (u8 *)pal;
+                    switch (stream->unk8) {
+                    case 3:
+                    case 4:
+                        p += obj->unk178;
+                        size -= obj->unk178;
+                        break;
+                    case 1:
+                        p = (u8 *)pal + obj->unk174;
+                        size -= obj->unk174;
+                        stream->unk0 = work->unk84;
+                        break;
+                    }
+                    if (*pos + size > work->unk7C) {
+                        overflowA = TRUE;
+                        size = work->unk7C - *pos;
+                    }
+                    if (work->unk84 + size > work->unk7C) {
+                        overflowB = TRUE;
+                    }
+                    if (!overflowA) {
+                        stream->unk8 = stream->unk8 == 3 ? 2 : 5;
+                        obj->unk178 = 0;
+                    } else {
+                        switch (stream->unk8) {
+                        case 3:
+                        case 4:
+                            obj->unk178 += size;
+                            break;
+                        case 1:
+                            obj->unk178 = obj->unk174 + size;
+                            stream->unk8 = 5;
+                            break;
+                        }
+                    }
+                    if (!overflowB) {
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
+                        DC_FlushRange(work->unk78 + work->unk84, size);
+                    } else {
+                        int over = work->unk84 + size - work->unk7C;
+                        int n = size - over;
+
+                        MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
+                        DC_FlushRange(work->unk78 + work->unk84, n);
+                        MIi_CpuCopy32(p + n, work->unk78, over);
+                        DC_FlushRange(work->unk78, over);
+                    }
+                }
+                work->unk84 = (work->unk84 + size) % work->unk7C;
+                *pos += size;
+            }
+        }
+    }
+    if (obj->unk17C != NULL) {
+        func_02075528(obj->unk17C, pos);
+    }
+    return TRUE;
+}
+
 // Takes obj out of the list at unk74 of the work area
 void func_020763e0(NFLObj *obj) {
     NFLWork *work = data_02145360;
