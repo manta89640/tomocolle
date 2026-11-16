@@ -1443,8 +1443,6 @@ BOOL func_0207516c(u32 *pos) {
     NFLWork *work = (NFLWork *)data_02145360;
 
     if (work->unk68 != 7) {
-        NFLWorkUnkA0 *stream;
-
         if (*pos >= work->unk7C) {
             return TRUE;
         }
@@ -1503,21 +1501,22 @@ BOOL func_0207516c(u32 *pos) {
                 }
                 work->unkA0[6].unk0 = work->unk84;
             } else {
-                src = func_0206cf6c(12, 0);
+                u8 *p = func_0206cf6c(12, 0);
+
                 switch (work->unkA0[6].unk8) {
                 case 3:
-                    src += work->unk98;
+                    p += work->unk98;
                     size -= work->unk98;
                     break;
                 case 4:
-                    src += work->unk98;
+                    p += work->unk98;
                     extra = work->unk94;
                     size -= work->unk98;
                     break;
                 case 1:
                     extra = work->unk94;
                     work->unkA0[6].unk0 = work->unk84;
-                    src += extra;
+                    p += extra;
                     size -= extra;
                     break;
                 }
@@ -1544,20 +1543,20 @@ BOOL func_0207516c(u32 *pos) {
                     }
                 }
                 if (!overflowB) {
-                    MIi_CpuCopy32(src, work->unk78 + work->unk84, size);
+                    MIi_CpuCopy32(p, work->unk78 + work->unk84, size);
                     DC_FlushRange(work->unk78 + work->unk84, size);
                 } else {
                     int over = work->unk84 + size - work->unk7C;
                     int n = size - over;
 
-                    MIi_CpuCopy32(src, work->unk78 + work->unk84, n);
+                    MIi_CpuCopy32(p, work->unk78 + work->unk84, n);
                     DC_FlushRange(work->unk78 + work->unk84, n);
                     if (data_02145360->unk68 == 7) {
-                        src += n / 4;
+                        p += n / 4;
                     } else {
-                        src += n;
+                        p += n;
                     }
-                    MIi_CpuCopy32(src, work->unk78, over);
+                    MIi_CpuCopy32(p, work->unk78, over);
                     DC_FlushRange(work->unk78, over);
                 }
             }
