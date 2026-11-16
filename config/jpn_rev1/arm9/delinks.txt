@@ -669,6 +669,7 @@ lib/MSL_C/string.c:
 
 lib/MSL_C/strtold.c:
     .text       start:0x02018d84 end:0x02019fd0
+    .rodata     start:0x020b5704 end:0x020b5714
 
 lib/MSL_C/strtoul.c:
     .text       start:0x02019fd0 end:0x0201a8ec
