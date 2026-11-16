@@ -964,8 +964,8 @@ void TushinScene::UpdateListButtons() {
     mUnknown35924 = mList.mUnknown9464;
 }
 
-// NOT MATCHING: the original keeps the list window's result in r1 for the test against -1 and copies it to r4
-// for the table; here it is loaded into r4 directly (one instruction fewer).
+// The list window's result is tested through a volatile read of the field, as the message windows' results are read
+// elsewhere: that keeps it in r1 for the test and copies it to r4 for the table, as the original does.
 // @0x0214e144
 void TushinScene::UpdateListWindow() {
     func_020341d4(&mListWindow);
@@ -1013,7 +1013,7 @@ void TushinScene::UpdateListWindow() {
         return;
     }
     int result = mListWindow.mResult;
-    if (result == -1) {
+    if (*(volatile int *)&mListWindow.mResult == -1) {
         return;
     }
     mListWindow.mUnknownSetBeforeClose = 15;
