@@ -114,47 +114,47 @@ void OptionScene::Init() {
     mMessageFiles[1].Open("TCO:/tmd_common_msg_JP.bmg");
     mScroll = 0;
 
-    func_02027534(&data_021213b8, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_down.ncg", 0x300, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 2, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_up.ncg", 2, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
 
     for (int a = 0; a < BUTTON_COUNT; a++) {
         u16 sequence = sButtonSequences[a];
         Sprite_Init(&mButtons[a], 1, sequence, 0x80, 0x60, 1);
-        func_02031eb0(&mButtons[a], sButtonSizes[a].x, sButtonSizes[a].y);
-        func_02031278(&mButtons[a], sequence, sequence + 1);
-        func_02031260(&mButtons[a], sButtonKinds[a]);
+        SpriteButton_SetTouchRect(&mButtons[a], sButtonSizes[a].x, sButtonSizes[a].y);
+        SpriteButton_SetSequences(&mButtons[a], sequence, sequence + 1);
+        SpriteButton_SetKind(&mButtons[a], sButtonKinds[a]);
         mButtons[a].SetPositionFromVec(sButtonPositions[a].x << FX32_SHIFT, sButtonPositions[a].y << FX32_SHIFT);
-        func_02032158(&mButtons[a], &sButtonSounds[a]);
-        func_0203119c(&mButtons[a]);
+        SpriteButton_SetSounds(&mButtons[a], &sButtonSounds[a]);
+        SpriteButton_Reset(&mButtons[a]);
     }
     // The buttons of the date and time repeat while they are held
     for (int b = BUTTON_YEAR_UP; b <= BUTTON_MINUTE_DOWN; b++) {
-        func_02031260(&mButtons[b], 1);
+        SpriteButton_SetKind(&mButtons[b], 1);
         mButtons[b].mUnknownE0 = 6;
     }
 
     for (int c = 0; c < TEXT_BUTTON_COUNT; c++) {
         u16 sequence = sTextButtonSequences[c];
         Sprite_Init(&mTextButtons[c], 1, sequence, 0x80, 0x60, 1);
-        func_02031eb0(&mTextButtons[c], sTextButtonSizes[c].x, sTextButtonSizes[c].y);
-        func_02031278(&mTextButtons[c], sequence, sequence + 1);
-        func_02031260(&mTextButtons[c], sTextButtonKinds[c]);
+        SpriteButton_SetTouchRect(&mTextButtons[c], sTextButtonSizes[c].x, sTextButtonSizes[c].y);
+        SpriteButton_SetSequences(&mTextButtons[c], sequence, sequence + 1);
+        SpriteButton_SetKind(&mTextButtons[c], sTextButtonKinds[c]);
         mTextButtons[c].SetPositionFromVec(sTextButtonPositions[c].x << FX32_SHIFT,
                                            sTextButtonPositions[c].y << FX32_SHIFT);
-        func_02032158(&mTextButtons[c], &sTextButtonSounds[c]);
-        func_0203119c(&mTextButtons[c]);
+        SpriteButton_SetSounds(&mTextButtons[c], &sTextButtonSounds[c]);
+        SpriteButton_Reset(&mTextButtons[c]);
     }
     for (int d = TEXT_BUTTON_SOUND; d <= TEXT_BUTTON_ERASE; d++) {
         mTextButtons[d].mMoveText = FALSE;
     }
     for (u16 j = 0; j < TEXT_BUTTON_COUNT; j++) {
-        charOffset += func_02031f58(&mTextButtons[j], &mMessageFiles[0], sTextButtonMessages[j],
+        charOffset += TextButton_SetMessage(&mTextButtons[j], &mMessageFiles[0], sTextButtonMessages[j],
                                     &gFonts[sTextButtonFonts[j]].mFont, 0x1000, charOffset);
     }
 
@@ -174,12 +174,12 @@ void OptionScene::Init() {
         charOffset += mTexts[f].GetCharCount();
     }
 
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x100, 1);
-    func_02028280(&data_02121834, 0x200, 2);
-    data_0211d604.Set(0x1302);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    gScreenControl.Set(0x1302);
     mCharOffset = charOffset;
-    func_02032fb8(&mWindow, sScreenRect);
+    MessageWindow_Init(&mWindow, sScreenRect);
     mTtsPlayer.InitEngine();
     mSpeechMessage.mMessageFile = &mMessageFiles[0];
     if (mSceneId == 0xAD) {
@@ -193,8 +193,8 @@ void OptionScene::Init() {
 void OptionScene::Update() {
     mTtsPlayer.Update();
     mScroll += 0x4CC;
-    func_02028108(&data_02121834, 0x202, mScroll >> FX32_SHIFT);
-    func_020341d4(&mWindow);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x202, mScroll >> FX32_SHIFT);
+    MessageWindow_Update(&mWindow);
 
     switch (mState) {
     case STATE_MENU:
@@ -203,7 +203,7 @@ void OptionScene::Update() {
     case STATE_FIRST_CLOCK_SET: {
         int i;
         for (i = 0; i < BUTTON_COUNT; i++) {
-            if (!func_0203133c(&mButtons[i])) {
+            if (!SpriteButton_Update(&mButtons[i])) {
                 continue;
             }
             switch (i) {
@@ -422,7 +422,7 @@ void OptionScene::Update() {
         }
 
         for (int j = 0; j < TEXT_BUTTON_COUNT; j++) {
-            if (!func_0203133c(&mTextButtons[j])) {
+            if (!SpriteButton_Update(&mTextButtons[j])) {
                 continue;
             }
             switch (j) {
@@ -444,13 +444,13 @@ void OptionScene::Update() {
             case TEXT_BUTTON_STEREO:
                 gGameData.mStereo = TRUE;
                 gSoundManager.ApplyOutputSetting();
-                func_02031e28(&mTextButtons[TEXT_BUTTON_MONO], FALSE);
+                SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_MONO], FALSE);
                 gSoundManager.StartSeqIfNotPlaying(0, 0x60);
                 break;
             case TEXT_BUTTON_MONO:
                 gGameData.mStereo = FALSE;
                 gSoundManager.ApplyOutputSetting();
-                func_02031e28(&mTextButtons[TEXT_BUTTON_STEREO], FALSE);
+                SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_STEREO], FALSE);
                 gSoundManager.StartSeqIfNotPlaying(0, 0x60);
                 break;
             }
@@ -462,7 +462,7 @@ void OptionScene::Update() {
             // The point and the rectangle as locals in this order, the inline's own rectangle below them
             ScreenPoint point = *touch;
             ScreenRect rect = GetAmPmRect();
-            if (func_02028d88(&rect, &point)) {
+            if (ScreenRect_Contains(&rect, &point)) {
                 mTime.hour += 12;
                 if (mTime.hour >= 24) {
                     mTime.hour -= 24;
@@ -480,7 +480,7 @@ void OptionScene::Update() {
     case STATE_ASK_FIRST_CLOCK:
         if (mWindow.mResult != -1) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
             mWindowResult = mWindow.mResult;
         }
         if (!mWindow.mTransitionDone) {
@@ -513,9 +513,9 @@ void OptionScene::Update() {
         }
         break;
     case STATE_SAVING_CLOCK:
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
         }
         if (mWindow.mTransitionDone) {
             SetState(mState + 1);
@@ -527,9 +527,9 @@ void OptionScene::Update() {
         }
         break;
     case STATE_ERASING:
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
-            func_020349cc(&mWindow, 0x24);
+            MessageWindow_Close(&mWindow, 0x24);
         }
         if (mWindow.mTransitionDone) {
             SetState(mState + 1);
@@ -544,15 +544,15 @@ void OptionScene::Update() {
 }
 
 void OptionScene::Draw() {
-    func_020345d8(&mWindow);
+    MessageWindow_Draw(&mWindow);
     for (int i = 0; i < TEXT_COUNT; i++) {
         mTexts[i].Draw();
     }
     for (int j = 0; j < BUTTON_COUNT; j++) {
-        func_02031d7c(&mButtons[j]);
+        SpriteButton_Draw(&mButtons[j]);
     }
     for (int k = 0; k < TEXT_BUTTON_COUNT; k++) {
-        func_0203206c(&mTextButtons[k]);
+        TextButton_Draw(&mTextButtons[k]);
     }
     for (int l = 0; l < SPRITE_COUNT; l++) {
         Sprite_Draw(&mSprites[l]);
@@ -565,8 +565,8 @@ void OptionScene::Exit() {
     (void)sUnknown2;
     (void)sUnknown3;
     (void)sUnknown4;
-    func_02028108(&data_02121834, 1, 0);
-    func_020346cc(&mWindow);
+    ScreenLoader_SetScrollX(&gScreenLoader, 1, 0);
+    MessageWindow_Release(&mWindow);
     ArchiveManager_Unmount(&gArchiveManager, "N83");
     ArchiveManager_Unmount(&gArchiveManager, "TET");
     ArchiveManager_Unmount(&gArchiveManager, "TCO");
@@ -596,7 +596,7 @@ void OptionScene::SetState(int state) {
         mTextButtons[TEXT_BUTTON_SOUND].mVisible = TRUE;
         mTextButtons[TEXT_BUTTON_CLOCK].mVisible = TRUE;
         mTextButtons[TEXT_BUTTON_ERASE].mVisible = TRUE;
-        data_0211d604.Set(0x1202);
+        gScreenControl.Set(0x1202);
         break;
     case STATE_CLOCK:
     case STATE_FIRST_CLOCK:
@@ -609,10 +609,10 @@ void OptionScene::SetState(int state) {
         for (int b = 0; b <= SPRITE_AM_PM; b++) {
             mSprites[b].mVisible = TRUE;
         }
-        func_02027d7c(&data_02121834, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
-        data_0211d604.Set(0x1302);
-        Clock_GetDate(data_02123440, &mDate);
-        Clock_GetTime(data_02123440, &mTime);
+        ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down_tframe.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1302);
+        Clock_GetDate(gGameClock, &mDate);
+        Clock_GetTime(gGameClock, &mTime);
         ShowYear(mDate.year);
         ShowMonth(mDate.month);
         ShowDay(mDate.day);
@@ -623,25 +623,25 @@ void OptionScene::SetState(int state) {
             mTextButtons[TEXT_BUTTON_SET].mVisible = FALSE;
             mTextButtons[TEXT_BUTTON_DONE].mVisible = TRUE;
             OpenWindow(WINDOW_SET_CLOCK, mCharOffset);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_Open(&mWindow, 0x12, 1);
         }
         break;
     case STATE_ASK_SAVE_CLOCK:
         OpenWindow(WINDOW_ASK_SAVE_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_SAVING_CLOCK:
         OpenWindow(WINDOW_SAVING_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
-        func_02035460(data_02123440, &mDate, &mTime, FALSE);
+        MessageWindow_Open(&mWindow, 0x12, 1);
+        Clock_SetDateTime(gGameClock, &mDate, &mTime, FALSE);
         func_0202c8f8(&gGameData, 0);
-        if (!func_0202cd48(&gGameData)) {
+        if (!GameData_StartSave(&gGameData)) {
             gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_CLOCK_SAVED:
         OpenWindow(WINDOW_CLOCK_SAVED, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         gSoundManager.StartSeqArc(1, 0x18, 0);
         break;
     case STATE_SOUND:
@@ -659,14 +659,14 @@ void OptionScene::SetState(int state) {
         for (int f = 0; f <= 3; f++) {
             mTexts[f].mSprite.mVisible = TRUE;
         }
-        func_02027d7c(&data_02121834, "N83:/BG_down_sframe.nsc", 0x100, 0, 0, 0, 0, -1);
-        data_0211d604.Set(0x1302);
+        ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down_sframe.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1302);
         if (gGameData.mStereo == TRUE) {
-            func_02031e28(&mTextButtons[TEXT_BUTTON_STEREO], TRUE);
-            func_02031e28(&mTextButtons[TEXT_BUTTON_MONO], FALSE);
+            SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_STEREO], TRUE);
+            SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_MONO], FALSE);
         } else {
-            func_02031e28(&mTextButtons[TEXT_BUTTON_STEREO], FALSE);
-            func_02031e28(&mTextButtons[TEXT_BUTTON_MONO], TRUE);
+            SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_STEREO], FALSE);
+            SpriteButton_SetSelected(&mTextButtons[TEXT_BUTTON_MONO], TRUE);
         }
         Sprite_SetFrame(&mSprites[SPRITE_MUSIC_VOLUME], gGameData.mMusicVolume);
         Sprite_SetFrame(&mSprites[SPRITE_EFFECT_VOLUME], gGameData.mEffectVolume);
@@ -676,34 +676,34 @@ void OptionScene::SetState(int state) {
         gSoundManager.MoveSeqVolume(0, 0x40, 0x3C);
         gSoundManager.StartSeqArc(0, 8, 1);
         OpenWindow(WINDOW_ASK_ERASE, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ASK_ERASE_AGAIN:
         OpenWindow(WINDOW_ASK_ERASE_AGAIN, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ASK_ERASE_LAST:
         OpenWindow(WINDOW_ASK_ERASE_LAST, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     case STATE_ERASING:
         OpenWindow(WINDOW_ERASING, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         if (!func_0202cd94(&gGameData)) {
             gSceneManager.RequestScene(0xC2);
         }
         break;
     case STATE_ERASED:
         OpenWindow(WINDOW_ERASED, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         gSoundManager.StartSeqArc(1, 0x18, 0);
         break;
     case STATE_FIRST_CLOCK_SET:
         break;
     case STATE_ASK_FIRST_CLOCK:
-        func_02035668(data_02123440, &mDate, &mTime);
+        func_02035668(gGameClock, &mDate, &mTime);
         OpenWindow(WINDOW_ASK_CLOCK, mCharOffset);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_Open(&mWindow, 0x12, 1);
         break;
     }
     mState = state;
@@ -714,7 +714,7 @@ void OptionScene::SetState(int state) {
 static inline void AddYesNoButtons(OptionScene *scene, int *charOffset) {
     WindowPoint size = sWindowButtonSize;
     for (int i = 0; i < 2; i++) {
-        func_020337b8(&scene->mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &scene->mMessageFiles[1],
+        MessageWindow_AddTextButtonWithSounds(&scene->mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &scene->mMessageFiles[1],
                       sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, charOffset, &sWindowButtonSounds[i]);
     }
 }
@@ -722,8 +722,8 @@ static inline void AddYesNoButtons(OptionScene *scene, int *charOffset) {
 // Opens the message window with one of its messages, and its buttons
 void OptionScene::OpenWindow(int window, int charOffset) {
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     int i;
     switch (window) {
@@ -732,7 +732,7 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ASK_ERASE_AGAIN:
     case WINDOW_ASK_ERASE_LAST:
     {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sQuestionTextPosition, &charOffset);
         AddYesNoButtons(this, &charOffset);
         break;
@@ -767,21 +767,21 @@ void OptionScene::OpenWindow(int window, int charOffset) {
                 FormatNumber(mTime.minute, text, sizeof(mDateTexts[j]), 0, FALSE);
                 break;
             }
-            func_02034a3c(&mWindow, 0, j, text);
+            MessageWindow_SetTextStringArg(&mWindow, 0, j, text);
         }
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sClockTextPosition, &charOffset);
         WindowPoint size = sWindowButtonSize;
         for (i = 0; i < 2; i++) {
-            func_020337b8(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
+            MessageWindow_AddTextButtonWithSounds(&mWindow, i, 1, 10, 0xB, sWindowButtonPositions[i], size, &mMessageFiles[1],
                           sWindowButtonMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[i]);
         }
         break;
     }
     case WINDOW_SET_CLOCK: {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sSetClockTextPosition, &charOffset);
-        func_020337b8(&mWindow, 0, 1, 10, 0xB, sOkButtonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
+        MessageWindow_AddTextButtonWithSounds(&mWindow, 0, 1, 10, 0xB, sOkButtonPosition, sWindowButtonSize, &mMessageFiles[1], 2,
                       &gFonts[2].mFont, 0x1000, &charOffset, &sWindowButtonSounds[1]);
         break;
     }
@@ -790,13 +790,13 @@ void OptionScene::OpenWindow(int window, int charOffset) {
     case WINDOW_ERASING:
     case WINDOW_ERASED:
     {
-        charOffset = func_02033a58(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
+        charOffset = MessageWindow_AddText(&mWindow, &mMessageFiles[0], sWindowMessages[window], &gFonts[0].mFont, 0x1000,
                                    sMessageTextPosition, &charOffset);
         break;
     }
     }
-    func_02034f4c(&mWindow, 1);
-    func_02034f94(&mWindow, 1);
+    MessageWindow_SetTextsHAlign(&mWindow, 1);
+    MessageWindow_SetTextsVAlign(&mWindow, 1);
 }
 
 void OptionScene::ShowYear(u32 year) {

@@ -3,7 +3,7 @@
 
 #include <nitro.h>
 
-// A song as the saved game keeps it (0x40 bytes, func_0202c920 copies one out of the saved game, func_0202c934 in),
+// A song as the saved game keeps it (0x40 bytes, GameData_GetSong copies one out of the saved game, GameData_SetSong in),
 // with the number it is kept under. Overlays 92 and 109 use it.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.

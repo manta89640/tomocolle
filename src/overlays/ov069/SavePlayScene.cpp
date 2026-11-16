@@ -42,7 +42,7 @@ void SavePlayScene::StartLoading() {
     gSoundManager.LoadGroup(0x5C);
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i)) {
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
         }
@@ -58,7 +58,7 @@ void SavePlayScene::StartLoading() {
         mCharacters[0].mIndex = 0;
     } else {
         mCharacters[0].mIndex = mResidents[Rand(mResidentCount)];
-        func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+        GameData_ReadCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     }
     mCharacters[0].Character::SetArchive("MT0");
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
@@ -66,20 +66,20 @@ void SavePlayScene::StartLoading() {
 
 // @0x02149c4c
 void SavePlayScene::Init() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
 
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, sScreenName, 0x200, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.Set(1);
-    data_0211d604.Show(0x1200);
-    func_020278f8(&data_021213b8, 0x7FFF, 0x101);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sScreenName, 0x200, 0, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    gScreenControl.Set(1);
+    gScreenControl.Show(0x1200);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
 
     if (mSceneId == 0x2D) {
         SetState(STATE_ASK_SAVE_WIRELESS);
@@ -94,10 +94,10 @@ void SavePlayScene::Init() {
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
     mCharacters[0].Character::Init(0, 0, 0);
-    void *animations = func_0202ad04(data_021223e4, 1, "BIC", 0);
-    func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+    void *animations = ModelResources_BindArchive(gModelResources, 1, "BIC", 0);
+    GameData_ReadCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     mCharacters[0].CharacterBase::MakeFace();
     mCharacters[0].Character::UpdateBodyScale();
     mCharacters[0].mPersonality = mCharacters[0].GetPersonality();
@@ -105,13 +105,13 @@ void SavePlayScene::Init() {
     mCharacters[0].Character::UpdateAnimSpeed();
     mCharacters[0].Character::UpdateSpeedScales();
     mCharacters[0].Character::UpdateBodyColors();
-    func_02029660((void *)mCharacters[0].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    ResourceSet_SetArchive((void *)mCharacters[0].mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacters[0].Character::SetAngle(0x4000);
 
     int count = 0;
     void *resourceSet = (void *)mCharacters[0].mAnim.mUnknown04;
     for (;;) {
-        if (NNS_G3dGetAnmByIdx(func_020295a4(resourceSet, RESOURCE_BCA0), count) == NULL) {
+        if (NNS_G3dGetAnmByIdx(ResourceSet_GetFile(resourceSet, RESOURCE_BCA0), count) == NULL) {
             break;
         }
         count++;
@@ -127,19 +127,19 @@ void SavePlayScene::Init() {
     MessageFile *etc = &mEtcMessages;
     MessageFile *common = &mCommonMessages;
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], sScreenName, 0x200);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], sScreenName, 0x200);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_020336b4(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
+    MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
                   &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, 10);
     for (int i = 0; i < 2; i++) {
-        func_020336b4(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize, common,
+        MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize, common,
                       sChoiceMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, -1);
     }
-    func_02033a58(&mWindow[0], etc, 0x17C, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
-    func_02034f94(&mWindow[0], 1);
-    func_02034f4c(&mWindow[0], 1);
-    func_02028280(&data_02121834, 0x200, 0);
+    MessageWindow_AddText(&mWindow[0], etc, 0x17C, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 0);
 }
 
 // @0x0214a1ac
@@ -157,14 +157,14 @@ void SavePlayScene::Update() {
 // @0x0214a1e4
 void SavePlayScene::Draw() {
     mCharacters[0].Character::Draw();
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
 }
 
 // @0x0214a204
 void SavePlayScene::Exit() {
     gSoundManager.SetSeqTempoRatio(0, 0x100);
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "MLT");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
@@ -318,10 +318,10 @@ BOOL SavePlayScene::Save(int kind) {
         mFrames = 0;
         if (kind == SAVE_0) {
             func_0202c8f8(&gGameData, 0);
-            ok = func_0202cd48(&gGameData);
+            ok = GameData_StartSave(&gGameData);
         } else if (kind == SAVE_1) {
             func_0202c8f8(&gGameData, 1);
-            ok = func_0202cd48(&gGameData);
+            ok = GameData_StartSave(&gGameData);
         } else if (kind == SAVE_2) {
             ok = func_0202cd54(&gGameData);
         } else if (kind == SAVE_3) {
@@ -334,7 +334,7 @@ BOOL SavePlayScene::Save(int kind) {
         }
     } else if (mSubStep == 1) {
         mFrames++;
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mSubStep++;
         }
     } else if (mSubStep == 2) {
@@ -344,7 +344,7 @@ BOOL SavePlayScene::Save(int kind) {
             } else {
                 mSubStep++;
                 mWindow[0].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                                MessageWindow::FLAG_FROM_BELOW);
             }
         } else {
@@ -365,8 +365,8 @@ BOOL SavePlayScene::Save(int kind) {
 BOOL SavePlayScene::ShowMessage(u32 message) {
     if (mSubStep == 0) {
         mSubStep++;
-        func_02034f38(&mWindow[0], 0, message);
-        func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
+        MessageWindow_SetTextMessage(&mWindow[0], 0, message);
+        MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         for (int i = 0; i < 3; i++) {
             mWindow[0].mButtons[i].mVisible = FALSE;
@@ -388,7 +388,7 @@ BOOL SavePlayScene::ShowOk(u32 message) {
     if (mSubStep == 0) {
         mSubStep++;
         mWindow[0].mTexts[0].mMessage = message;
-        func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
+        MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         mWindow[0].mButtons[MessageWindow::BUTTON_YES].mVisible = FALSE;
         mWindow[0].mButtons[MessageWindow::BUTTON_NO].mVisible = FALSE;
@@ -396,7 +396,7 @@ BOOL SavePlayScene::ShowOk(u32 message) {
         if (mWindow[0].mResult != -1) {
             mSubStep++;
             mWindow[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+            MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                            MessageWindow::FLAG_FROM_BELOW);
         }
     } else if (mSubStep == 2) {
@@ -416,8 +416,8 @@ BOOL SavePlayScene::Ask(u32 message, int flags) {
     if (mSubStep == 0) {
         mSubStep++;
         mAnswer = -1;
-        func_02034f38(&mWindow[0], 0, message);
-        func_02034720(&mWindow[0], flags, 0);
+        MessageWindow_SetTextMessage(&mWindow[0], 0, message);
+        MessageWindow_Open(&mWindow[0], flags, 0);
         mWindow[0].mButtons[MessageWindow::BUTTON_OK].mVisible = FALSE;
     } else if (mSubStep == 1) {
         int result = mWindow[0].mResult;
@@ -425,7 +425,7 @@ BOOL SavePlayScene::Ask(u32 message, int flags) {
             mSubStep++;
             mAnswer = result;
             mWindow[0].mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
+            MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_8 |
                                            MessageWindow::FLAG_FROM_BELOW);
             if (result == MessageWindow::BUTTON_YES) {
                 gSoundManager.StartSeqArc(1, 1, 10);
@@ -445,7 +445,7 @@ BOOL SavePlayScene::Ask(u32 message, int flags) {
 
 // @0x0214ab34
 void SavePlayScene::UpdateObjects() {
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
     mCamera.Update();
     mCharacters[0].Character::Update();
     mLights.Update();
@@ -453,12 +453,12 @@ void SavePlayScene::UpdateObjects() {
 
 // @0x0214ab6c
 SavePlayCamera::SavePlayCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0214ab7c
 void SavePlayCamera::Init() {
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mCamera->mUnknown00 = 0x281;
     mCamera->mUnknown04 = 0xFCE;
     VEC_Set(&mCamera->mPosition, 0x13000, 0x3666, 0x18000);
@@ -473,15 +473,15 @@ void SavePlayCamera::Update() {
 void SavePlayLights::Init(SavePlayCamera *camera) {
     mCamera = camera;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
     }
 }
 
 // @0x0214ac24
 void SavePlayLights::Update() {
-    func_0202ab2c(mLights[0], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, 0x1388,
+    Light_SetRotatedDirection(mLights[0], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, 0x1388,
                   -0xFA0, -0x1B58);
-    func_0202ab2c(mLights[1], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, -0x2328,
+    Light_SetRotatedDirection(mLights[1], mCamera->mCamera->mAngleX, mCamera->mCamera->mAngleY, mCamera->mCamera->mAngleZ, -0x2328,
                   -0x7D0, -0xE74);
 }

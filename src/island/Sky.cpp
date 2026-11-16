@@ -10,14 +10,14 @@ struct PaletteLoader;
 struct ScreenLoader;
 
 extern "C" {
-extern void *data_02123440; // The game's clock
+extern void *gGameClock; // The game's clock
 extern MATHRandContext16 gRandom;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
-void func_02035870(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
+void Clock_GetDateTime(void *clock, RTCDate *date, RTCTime *time); // The date and time, with the game's offset
 void Clock_GetTime(void *clock, RTCTime *time);
-const GXRgb *func_02027534(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
+const GXRgb *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, u16 offset, int a, int size);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
 }
 
 static inline u16 Rand(int max) {
@@ -89,7 +89,7 @@ void DayPhase::Init(const RTCDate *date, const RTCTime *time) {
 void DayPhase::Update() {
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     Update(&date, &time);
 }
 
@@ -203,7 +203,7 @@ GXRgb GetSkyLightColor2(int phase) {
 void SkyPalette::Init(const char *archiveName, int plane) {
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     DayPhase::Init(&date, &time);
     MI_CpuFill8(mArchiveName, 0, sizeof(mArchiveName));
     mArchiveName[0] = archiveName[0];
@@ -246,7 +246,7 @@ void SkyPalette::LoadPalette() {
             STD_ConcatenateString(path, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
-    mPalette = func_02027534(&data_021213b8, path, mPlane, mPhase * 32, 0, 0x20);
+    mPalette = PaletteLoader_LoadFile(&gPaletteLoader, path, mPlane, mPhase * 32, 0, 0x20);
 }
 
 // --- Sky --------------------------------------------------------------------------------------------------------
@@ -261,7 +261,7 @@ void Sky::Init(const char *archiveName, int resource, int objPlane, int bgPlane,
     mUnknown28 = TRUE;
     RTCDate date;
     RTCTime time;
-    func_02035870(data_02123440, &date, &time);
+    Clock_GetDateTime(gGameClock, &date, &time);
     DayPhase::Init(&date, &time);
     MI_CpuFill8(mArchiveName, 0, sizeof(mArchiveName));
     mArchiveName[0] = archiveName[0];
@@ -305,7 +305,7 @@ void Sky::UpdateObjects() {
     if (mChanged && mPalettesOn) {
         LoadPalettes();
     }
-    func_02028108(&data_02121834, mBgPlane, mScrollY >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, mBgPlane, mScrollY >> FX32_SHIFT);
     if (mBirdsOn) {
         mBirds.Update();
     }
@@ -427,7 +427,7 @@ void Sky::SetMoonAge(const RTCDate *date) {
 
 void Sky::PlaceMoon() {
     RTCTime time;
-    Clock_GetTime(data_02123440, &time);
+    Clock_GetTime(gGameClock, &time);
     int minutes = ((int)time.hour * 60 + (int)time.minute + 1440 - (mMoonAge * 1440 / 30 + 360)) % 1440;
     mMoon.SetPosition(FxVec2(((minutes << 8) / 720) << FX32_SHIFT, FX32_CONST(48)));
 }
@@ -623,8 +623,8 @@ void Sky::LoadPalettes() {
             STD_ConcatenateString(bgPath, ":/Fw_BG_up_PM_Cloud.ncl");
         }
     }
-    mObjPalette = func_02027534(&data_021213b8, objPath, mObjPlane, mPhase * 32, 0, 0x20);
-    mBgPalette = func_02027534(&data_021213b8, bgPath, mBgPlane, mPhase * 32, 0, 0x20);
+    mObjPalette = PaletteLoader_LoadFile(&gPaletteLoader, objPath, mObjPlane, mPhase * 32, 0, 0x20);
+    mBgPalette = PaletteLoader_LoadFile(&gPaletteLoader, bgPath, mBgPlane, mPhase * 32, 0, 0x20);
 }
 
 // --- SkyBirds ---------------------------------------------------------------------------------------------------

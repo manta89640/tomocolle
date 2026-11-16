@@ -112,7 +112,7 @@ void ItemTradeSelection::Set(int kind, int id) {
         mValue = id;
         {
             u16 item = InventoryItem::mId;
-            int itemKind = data_020f5f0c[item].mKind;
+            int itemKind = gGoodsTable[item].mKind;
             if (itemKind == 1) {
                 mCategory = 0;
             } else if (itemKind == 2) {
@@ -155,11 +155,11 @@ void ItemTradeTabs::Init(int plane, MessageFile *file, int *charOffset) {
     mSelected = 0;
     for (int i = 0; i < 5; i++) {
         Sprite_Init(&mButtons[i], plane, sTabSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sTabSequences[i], sTabOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sTabSequences[i], sTabOnSequences[i]);
         mButtons[i].SetPosition(FxVec2(sTabPositions[i].x << FX32_SHIFT, sTabPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sTabTouchSize.x, sTabTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sTabTouchSize.x, sTabTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -179,25 +179,25 @@ void ItemTradeTabs::SetMasks(Inventory *inventory, ClothesList *costumes, Interi
 // @0x02149cdc
 void ItemTradeTabs::Update() {
     mPressed = 0;
-    if (func_0203133c(&mButtons[0])) {
+    if (SpriteButton_Update(&mButtons[0])) {
         mPressed = TAB_ITEMS;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 0;
-    } else if (func_0203133c(&mButtons[3])) {
+    } else if (SpriteButton_Update(&mButtons[3])) {
         mPressed = TAB_ITEMS_2;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 3;
-    } else if (func_0203133c(&mButtons[1])) {
+    } else if (SpriteButton_Update(&mButtons[1])) {
         mPressed = TAB_COSTUMES;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 1;
-    } else if (func_0203133c(&mButtons[2])) {
+    } else if (SpriteButton_Update(&mButtons[2])) {
         mPressed = TAB_INTERIORS;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 2;
-    } else if (func_0203133c(&mButtons[4])) {
+    } else if (SpriteButton_Update(&mButtons[4])) {
         mPressed = TAB_ITEMS_3;
-        func_02031e28(&mButtons[mSelected], FALSE);
+        SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
         mSelected = 4;
     }
 }
@@ -205,7 +205,7 @@ void ItemTradeTabs::Update() {
 // @0x02149e18
 void ItemTradeTabs::Draw() {
     for (int i = 0; i < 5; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -221,43 +221,43 @@ void ItemTradeTabs::Select(int tab) {
     switch (tab) {
     case TAB_ITEMS:
         mSelected = 0;
-        func_02031e28(&mButtons[0], TRUE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], TRUE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_ITEMS_2:
         mSelected = 3;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], TRUE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], TRUE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_COSTUMES:
         mSelected = 1;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], TRUE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], TRUE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_INTERIORS:
         mSelected = 2;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], TRUE);
-        func_02031e28(&mButtons[4], FALSE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], TRUE);
+        SpriteButton_SetSelected(&mButtons[4], FALSE);
         break;
     case TAB_ITEMS_3:
         mSelected = 4;
-        func_02031e28(&mButtons[0], FALSE);
-        func_02031e28(&mButtons[3], FALSE);
-        func_02031e28(&mButtons[1], FALSE);
-        func_02031e28(&mButtons[2], FALSE);
-        func_02031e28(&mButtons[4], TRUE);
+        SpriteButton_SetSelected(&mButtons[0], FALSE);
+        SpriteButton_SetSelected(&mButtons[3], FALSE);
+        SpriteButton_SetSelected(&mButtons[1], FALSE);
+        SpriteButton_SetSelected(&mButtons[2], FALSE);
+        SpriteButton_SetSelected(&mButtons[4], TRUE);
         break;
     }
 }
@@ -265,22 +265,22 @@ void ItemTradeTabs::Select(int tab) {
 // @0x0214a020
 void ItemTradeTabs::SetEnabled(int tabs) {
     for (int i = 0; i < 5; i++) {
-        func_02031e88(&mButtons[i], TRUE);
+        SpriteButton_SetDisabled(&mButtons[i], TRUE);
     }
     if (tabs & TAB_ITEMS) {
-        func_02031e88(&mButtons[0], FALSE);
+        SpriteButton_SetDisabled(&mButtons[0], FALSE);
     }
     if (tabs & TAB_ITEMS_2) {
-        func_02031e88(&mButtons[3], FALSE);
+        SpriteButton_SetDisabled(&mButtons[3], FALSE);
     }
     if (tabs & TAB_COSTUMES) {
-        func_02031e88(&mButtons[1], FALSE);
+        SpriteButton_SetDisabled(&mButtons[1], FALSE);
     }
     if (tabs & TAB_INTERIORS) {
-        func_02031e88(&mButtons[2], FALSE);
+        SpriteButton_SetDisabled(&mButtons[2], FALSE);
     }
     if (tabs & TAB_ITEMS_3) {
-        func_02031e88(&mButtons[4], FALSE);
+        SpriteButton_SetDisabled(&mButtons[4], FALSE);
     }
 }
 
@@ -295,12 +295,12 @@ void ItemTradeTabs::OnOpen() {
 void ItemTradeItemFilter::Init(int plane) {
     for (int i = 0; i < 4; i++) {
         Sprite_Init(&mButtons[i], plane, sItemFilterSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sItemFilterSequences[i], sItemFilterOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sItemFilterSequences[i], sItemFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sItemFilterPositions[i].x << FX32_SHIFT, sItemFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sItemFilterTouchSize.x, sItemFilterTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sItemFilterTouchSize.x, sItemFilterTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -313,8 +313,8 @@ void ItemTradeItemFilter::Init(int plane) {
 void ItemTradeItemFilter::Update() {
     mPressed = -1;
     for (int i = 0; i < 4; i++) {
-        if (func_0203133c(&mButtons[i])) {
-            func_02031e28(&mButtons[mSelected], FALSE);
+        if (SpriteButton_Update(&mButtons[i])) {
+            SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
             mSelected = i;
             mPressed = i;
         }
@@ -324,7 +324,7 @@ void ItemTradeItemFilter::Update() {
 // @0x0214a228
 void ItemTradeItemFilter::Draw() {
     for (int i = 0; i < 4; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -338,9 +338,9 @@ void ItemTradeItemFilter::SetVisible(BOOL visible) {
 // @0x0214a26c
 void ItemTradeItemFilter::Select(int button) {
     for (int i = 0; i < 4; i++) {
-        func_02031e28(&mButtons[i], FALSE);
+        SpriteButton_SetSelected(&mButtons[i], FALSE);
     }
-    func_02031e28(&mButtons[button], TRUE);
+    SpriteButton_SetSelected(&mButtons[button], TRUE);
     mSelected = button;
 }
 
@@ -355,12 +355,12 @@ int ItemTradeItemFilter::GetFilter() {
 void ItemTradeCostumeFilter::Init(int plane) {
     for (int i = 0; i < 5; i++) {
         Sprite_Init(&mButtons[i], plane, sCostumeFilterSequences[i], 128, 96, TRUE);
-        func_02031278(&mButtons[i], sCostumeFilterSequences[i], sCostumeFilterOnSequences[i]);
+        SpriteButton_SetSequences(&mButtons[i], sCostumeFilterSequences[i], sCostumeFilterOnSequences[i]);
         mButtons[i].SetPosition(
             FxVec2(sCostumeFilterPositions[i].x << FX32_SHIFT, sCostumeFilterPositions[i].y << FX32_SHIFT));
-        func_02031eb0(&mButtons[i], sCostumeFilterTouchSize.x, sCostumeFilterTouchSize.y);
-        func_0203119c(&mButtons[i]);
-        func_02031260(&mButtons[i], 3);
+        SpriteButton_SetTouchRect(&mButtons[i], sCostumeFilterTouchSize.x, sCostumeFilterTouchSize.y);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 3);
         mButtons[i].mOverwritePalette = 1;
         mButtons[i].mUnknownDC = 1;
         mButtons[i].mSounds.mSounds[0] = 3;
@@ -373,8 +373,8 @@ void ItemTradeCostumeFilter::Init(int plane) {
 void ItemTradeCostumeFilter::Update() {
     mPressed = -1;
     for (int i = 0; i < 5; i++) {
-        if (func_0203133c(&mButtons[i])) {
-            func_02031e28(&mButtons[mSelected], FALSE);
+        if (SpriteButton_Update(&mButtons[i])) {
+            SpriteButton_SetSelected(&mButtons[mSelected], FALSE);
             mSelected = i;
             mPressed = i;
         }
@@ -384,7 +384,7 @@ void ItemTradeCostumeFilter::Update() {
 // @0x0214a438
 void ItemTradeCostumeFilter::Draw() {
     for (int i = 0; i < 5; i++) {
-        func_02031d7c(&mButtons[i]);
+        SpriteButton_Draw(&mButtons[i]);
     }
 }
 
@@ -398,9 +398,9 @@ void ItemTradeCostumeFilter::SetVisible(BOOL visible) {
 // @0x0214a47c
 void ItemTradeCostumeFilter::Select(int button) {
     for (int i = 0; i < 5; i++) {
-        func_02031e28(&mButtons[i], FALSE);
+        SpriteButton_SetSelected(&mButtons[i], FALSE);
     }
-    func_02031e28(&mButtons[button], TRUE);
+    SpriteButton_SetSelected(&mButtons[button], TRUE);
     mSelected = button;
 }
 
@@ -428,7 +428,7 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
 
     mList.Init();
     mList.SetBackground(0x100, 0x38);
-    func_020278f8(&data_021213b8, 0x5FDF, 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x5FDF, 0x100);
     mList.InitRows(1, 8, 9, charOffset);
     mList.InitCounts(charOffset);
     mList.InitUpButton(1, 2, 3);
@@ -444,24 +444,24 @@ void ItemTradeList::Init(ItemTradeContext *context, int *charOffset) {
     mCostumeFilter.Init(1);
 
     Sprite_Init(&mOkButton, 1, 10, 128, 96, TRUE);
-    func_02031278(&mOkButton, 10, 11);
+    SpriteButton_SetSequences(&mOkButton, 10, 11);
     mOkButton.SetPositionFromVec(sOkPosition.x << FX32_SHIFT, sOkPosition.y << FX32_SHIFT);
-    func_02031eb0(&mOkButton, sOkTouchSize.x, sOkTouchSize.y);
-    *charOffset += func_02031f58(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
-    func_0203119c(&mOkButton);
-    func_02031260(&mOkButton, 4);
+    SpriteButton_SetTouchRect(&mOkButton, sOkTouchSize.x, sOkTouchSize.y);
+    *charOffset += TextButton_SetMessage(&mOkButton, context->mTroubleMessages, 0x1DC, &gFonts[2].mFont, 0x1000, *charOffset);
+    SpriteButton_Reset(&mOkButton);
+    SpriteButton_SetKind(&mOkButton, 4);
     mOkButton.mUnknownDC = 1;
     mOkButton.mSounds.mSounds[0] = 10;
     mOkButton.mSounds.mSounds[2] = 0;
-    func_02032134(&mOkButton, 1);
+    TextButton_SetOverwritePalette(&mOkButton, 1);
     mOkButton.mVisible = FALSE;
 
     Sprite_Init(&mBackButton, 1, 0, 128, 96, TRUE);
-    func_02031278(&mBackButton, 0, 1);
+    SpriteButton_SetSequences(&mBackButton, 0, 1);
     mBackButton.SetPositionFromVec(sBackPosition.x << FX32_SHIFT, sBackPosition.y << FX32_SHIFT);
-    func_02031eb0(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
-    func_0203119c(&mBackButton);
-    func_02031260(&mBackButton, 4);
+    SpriteButton_SetTouchRect(&mBackButton, sBackTouchSize.x, sBackTouchSize.y);
+    SpriteButton_Reset(&mBackButton);
+    SpriteButton_SetKind(&mBackButton, 4);
     mBackButton.mUnknownDC = 1;
     mBackButton.mSounds.mSounds[0] = 12;
     mBackButton.mSounds.mSounds[2] = 0;
@@ -529,7 +529,7 @@ void ItemTradeList::UpdatePreviews() {
 // @0x0214a93c
 void ItemTradeList::Open() {
     mItemModel = mContext->mItemModel;
-    func_020278f8(&data_021213b8, 0x5FDF, 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x5FDF, 0x100);
     switch (mMode) {
     case 0:
     case 1:
@@ -545,7 +545,7 @@ void ItemTradeList::Open() {
         mCostumeFilter.Select(0);
         mInventory->GetOwned(mItems, &mItemCount, 1, 1);
         mOkButton.mVisible = TRUE;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DC;
         mOkButton.mText.DrawAll();
@@ -563,7 +563,7 @@ void ItemTradeList::Open() {
         mCostumeFilter.SetVisible(TRUE);
         mCostumeFilter.Select(0);
         mOkButton.mVisible = TRUE;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
         ClearText(&mOkButton.mText);
         mOkButton.mText.mMessage = 0x1DF;
         mOkButton.mText.DrawAll();
@@ -628,7 +628,7 @@ int ItemTradeList::Run() {
             break;
         }
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mItemFilter.Update();
@@ -636,7 +636,7 @@ int ItemTradeList::Run() {
         mInventory->GetOwned(mItems, &mItemCount, 1, mItemFilter.GetFilter());
         mList.SetItems(mItems, mItemCount);
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mCostumeFilter.Update();
@@ -652,14 +652,14 @@ int ItemTradeList::Run() {
             break;
         }
         mPendingIndex = -1;
-        func_02031e88(&mOkButton, TRUE);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
     }
 
     mList.Update();
     if (mList.mTouched && mList.mSelected != -1) {
         Item *item = mList.mItems[mList.mSelected];
         int id = item->mId;
-        func_02031e88(&mOkButton, item->mCount <= 0);
+        SpriteButton_SetDisabled(&mOkButton, item->mCount <= 0);
         mPendingIndex = mList.mSelected;
         switch (mSelection.mKind) {
         case PREVIEW_ITEM:
@@ -695,7 +695,7 @@ int ItemTradeList::Run() {
         }
     }
 
-    if (func_0203133c(&mOkButton)) {
+    if (SpriteButton_Update(&mOkButton)) {
         if (mList.mSelected == -1) {
             mChosen = FALSE;
         } else {
@@ -704,7 +704,7 @@ int ItemTradeList::Run() {
             mChosen = TRUE;
         }
     }
-    if (func_0203133c(&mBackButton)) {
+    if (SpriteButton_Update(&mBackButton)) {
         result = RESULT_BACK;
         mChosen = FALSE;
     }
@@ -729,8 +729,8 @@ void ItemTradeList::Close() {
 // @0x0214b2bc
 void ItemTradeList::Draw() {
     mList.Draw();
-    func_0203206c(&mOkButton);
-    func_02031d7c(&mBackButton);
+    TextButton_Draw(&mOkButton);
+    SpriteButton_Draw(&mBackButton);
     mTabs.Draw();
     mItemFilter.Draw();
     mCostumeFilter.Draw();
@@ -739,11 +739,11 @@ void ItemTradeList::Draw() {
 // Dresses the mannequin in a costume
 // @0x0214b314
 void ItemTradeList::ShowCostume(int costume) {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
     mMannequin->SetArchive("3MM", costume, MiiData_GetSex(mContext->mPlayer));
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, 0, mMannequin->mModelPath);
+    ModelResources_SetModel(gModelResources, 0, mMannequin->mModelPath);
     mMannequin->MakeModel(0, 0);
     mMannequin->SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mPlayer)), 0x5FBE);
     mMannequin->SetAnimFlags(TRUE, TRUE);
@@ -751,10 +751,10 @@ void ItemTradeList::ShowCostume(int costume) {
 
 // @0x0214b414
 void ItemTradeList::LoadMannequinHead() {
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "3MH");
     ArchiveManager_MountCompressed(&gArchiveManager, "3MH", "Mdl/Misc/headManikin_3D_LZ.bin", 1);
-    ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
+    ModelResources_SetModel(gModelResources, 1, "3MH:/head.imd");
 }
 
 // @0x0214b470
@@ -771,7 +771,7 @@ void ItemTradeList::RemoveOne() {
     RefreshList();
     mList.Select(mPendingIndex);
     mList.ScrollToSelected();
-    func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+    SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
 // Gives one of the item chosen back
@@ -781,7 +781,7 @@ void ItemTradeList::AddOne() {
     RefreshList();
     mList.Select(mPendingIndex);
     mList.ScrollToSelected();
-    func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+    SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
 }
 
 // Adds what came: FALSE when there are 99 of it already
@@ -820,7 +820,7 @@ BOOL ItemTradeList::Receive(int id) {
         mPendingIndex = mList.FindItem(selected);
         mList.Select(mPendingIndex);
         mList.ScrollToSelected();
-        func_02031e88(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+        SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
     }
     return received;
 }
@@ -919,8 +919,8 @@ void ItemTradeList::UpdateRoom() {
         case 5:
             SetRoomMode(0);
             mRoom->RoomModels::SetVisible(TRUE);
-            data_021226e4.mLights[0].mColor = data_020f72f8[mRoom->mId].mLightColor;
-            data_021226e4.mLights[1].mColor = data_020f72f8[mRoom->mId].mLightColor;
+            data_021226e4.mLights[0].mColor = gInteriorTable[mRoom->mId].mLightColor;
+            data_021226e4.mLights[1].mColor = gInteriorTable[mRoom->mId].mLightColor;
             break;
         }
         break;
@@ -928,21 +928,21 @@ void ItemTradeList::UpdateRoom() {
 }
 
 // The two camera setters are compiled without propagation (`#pragma opt_propagation off`): with it, the camera's
-// address is reloaded from the literal pool after func_0202a640 instead of kept in r4, and loaded before the
+// address is reloaded from the literal pool after Camera_Reset instead of kept in r4, and loaded before the
 // constants instead of after them.
 #pragma opt_propagation off
 // @0x0214ba40
 void ItemTradeList::SetItemCamera() {
-    Camera *camera = &data_02122764;
-    func_0202a640(camera);
+    Camera *camera = &gCamera;
+    Camera_Reset(camera);
     camera->mPosition = sItemCameraPosition;
     camera->mTarget = sItemCameraTarget;
-    func_0202a748(camera);
+    Camera_UpdateEye(camera);
 }
 
 // @0x0214ba8c
 void ItemTradeList::SetRoomCamera() {
-    Camera *camera = &data_02122764;
+    Camera *camera = &gCamera;
     camera->mPosition = sRoomCameraPosition;
     camera->mTarget = sRoomCameraTarget;
 }
@@ -1125,7 +1125,7 @@ void ItemTradeList::UpdatePreviewStates() {
             mPreviewTimers[i] = 15;
             switch (i) {
             case PREVIEW_ITEM:
-                func_02029f50(mItemModel, 31 - mPreviewTimers[i] * 2);
+                Model_SetAlpha(mItemModel, 31 - mPreviewTimers[i] * 2);
                 break;
             case PREVIEW_COSTUME:
                 mMannequin->SetAlpha(31 - mPreviewTimers[i] * 2);
@@ -1141,7 +1141,7 @@ void ItemTradeList::UpdatePreviewStates() {
                 mItemModel->SetVisible(FALSE);
                 mRoom->RoomModels::SetAlpha(31);
                 mMannequin->SetAlpha(31);
-                func_02029f50(mItemModel, 31);
+                Model_SetAlpha(mItemModel, 31);
                 mPreviewStates[i] = 0;
                 if (i == PREVIEW_ROOM) {
                     mPreviewOffsets[i] = -0x34CC;
@@ -1236,11 +1236,11 @@ void ItemTradeItemModel::Reset() {
 // Shows another item: lets go of the old one's files, and loads the new one's
 // @0x0214c384
 void ItemTradeItemModel::ChangeItem(int item) {
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
     SetItem(mArchiveName, item);
     ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
     LoadAnimation(mResourceId);
     ResetScale();
 }
@@ -1287,15 +1287,15 @@ static inline BOOL IsWindowOpen(MessageWindow *window) {
 // @0x0214c400
 void ItemTradeScene::SetupQuestion(int *charOffset, MessageFile *file, u32 message) {
     ScreenRect rect = sQuestionRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
     for (int i = 0; i <= 1; i++) {
-        func_02033844(&mWindow, i, 1, sAnswerSequences[i], sAnswerOnSequences[i], sAnswerPositions[i],
+        MessageWindow_AddTextButtonEx(&mWindow, i, 1, sAnswerSequences[i], sAnswerOnSequences[i], sAnswerPositions[i],
                       sAnswerSizes[i], &mMessages[0], sAnswerMessages[i], &gFonts[2].mFont, 0x1000, charOffset,
                       sAnswerSounds[i], 1);
     }
-    func_020338d0(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sTextPositions[2], charOffset);
+    MessageWindow_AddTextInArea(&mWindow, file, message, &gFonts[0].mFont, 0x1000, sTextArea, sTextPositions[2], charOffset);
     mWindow.mTexts[2].mHAlign = mWindow.mTexts[2].mMessageFile->GetAlignment(mWindow.mTexts[2].mMessage);
 }
 
@@ -1313,8 +1313,8 @@ void ItemTradeScene::SetupWindow(int state) {
     }
 
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow, rect);
-    func_02033174(&mWindow, sWindowScreenName, 0x400);
+    MessageWindow_Init(&mWindow, rect);
+    MessageWindow_SetScreen(&mWindow, sWindowScreenName, 0x400);
     func_020331bc(&mWindow, 0x3F00, rect);
 
     WindowPoint textPosition;
@@ -1326,7 +1326,7 @@ void ItemTradeScene::SetupWindow(int state) {
     } else {
         textPosition = sTextPositions[1];
     }
-    func_020338d0(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
+    MessageWindow_AddTextInArea(&mWindow, &mMessages[5], sStateMessages[state], &gFonts[0].mFont, 0x1000, sTextArea, textPosition,
                   &charOffset);
     mWindow.mTexts[0].mHAlign = mWindow.mTexts[0].mMessageFile->GetAlignment(mWindow.mTexts[0].mMessage);
     if (buttons == 0) {
@@ -1338,24 +1338,24 @@ void ItemTradeScene::SetupWindow(int state) {
     if (sWindowButtons[kind].mButtons[2]) {
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], sThreeButtonSize, sButtonSounds,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 1, 0x37, 0x38, sThreeButtonPositions[i], sThreeButtonSize, sButtonSounds,
                               1);
-                func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
+                MessageWindow_AddText(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sThreeButtonTextPositions[i], &charOffset);
             }
         }
     } else {
         for (i = 0; i < 3; i++) {
             if (sWindowButtons[kind].mButtons[i]) {
-                func_02033448(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], sButtonSize, sButtonSounds, 1);
-                func_02033a58(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
+                MessageWindow_AddSpriteButtonEx(&mWindow, i, 1, 0x35, 0x36, sButtonPositions[i], sButtonSize, sButtonSounds, 1);
+                MessageWindow_AddText(&mWindow, &mMessages[5], sWindowButtonMessages[kind].mButtons[i], &gFonts[0].mFont,
                               0x1000, sButtonTextPositions[i], &charOffset);
             }
         }
     }
 
     if (sWindowButtons[kind].mOk) {
-        func_02033844(&mWindow, 3, 1, 10, 11, sButtonPositions[3], sOkSize, &mMessages[0],
+        MessageWindow_AddTextButtonEx(&mWindow, 3, 1, 10, 11, sButtonPositions[3], sOkSize, &mMessages[0],
                       sWindowButtonMessages[kind].mOk, &gFonts[2].mFont, 0x1000, &charOffset, sOkSounds[kind], 1);
     }
 }
@@ -1375,7 +1375,7 @@ void ItemTradeScene::StartLoading() {
     mMannequin.SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
 
-    func_0202c264(&gGameData, 0, &mPlayer);
+    GameData_ReadCharacter(&gGameData, 0, &mPlayer);
     mPlayer.mPersonality = mPlayer.GetPersonality();
     switch (gPersonalityKinds[mPlayer.mPersonality]) {
     case 0:
@@ -1410,27 +1410,27 @@ void ItemTradeScene::Init() {
     mMessages[5].Open("TEM:tmd_etc_msg_JP.bmg");
     mMessages[6].Open("TXM:tmd_explain_msg_JP.bmg");
 
-    func_02028f24(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "STS:/BG_up.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02028108(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x100, -0x38);
-    data_0211d604.Set(0x1313);
-    data_0211d604.Set(0x1313);
-    func_02023ee0(&data_0211d604, 1, 0x12, 8, 8);
-    func_02027534(&data_021213b8, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
-    func_02027534(&data_021213b8, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "STS:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "STS:/Obj_up.nce", 0x10, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "STS:/BG_up.ncg", 2, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/BG_up.ncl", 2, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "STS:/BG_up.nsc", 2, 0, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_TushinEtc_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x100, -0x38);
+    gScreenControl.Set(0x1313);
+    gScreenControl.Set(0x1313);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 1, 0x12, 8, 8);
+    PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "LTL:/Obj_TushinEtc_list.nce", 0x1000, 1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "STS:/Obj_up.ncl", 0x10, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "STS:/Obj_up.ncg", 0x10, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "STS:/Obj_up.nce", 0x10, 0);
     Init3d();
 
     Sprite_Init(&mLinkIcon, 0, 0, 128, 96, TRUE);
@@ -1490,8 +1490,8 @@ void ItemTradeScene::Init() {
     mNextState = STATE_CHOOSE;
     mWindowCharOffset = mListCharOffset;
     SetupWindow(mState);
-    func_02034f38(&mWindow, 0, sStateMessages[mState]);
-    func_02034720(&mWindow, 0x12, 1);
+    MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+    MessageWindow_Open(&mWindow, 0x12, 1);
     sReceivedCommand = 0;
     sSending = 0;
     sReceived = 0;
@@ -1514,27 +1514,27 @@ void ItemTradeScene::Init() {
 
 // @0x0214d418
 void ItemTradeScene::Init3d() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    func_02028280(&data_02121834, 1, 0);
-    func_02028280(&data_02121834, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
 
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     VEC_Set(&mCamera->mPosition, 0, 0x599, 0x4666);
     VEC_Set(&mCamera->mTarget, 0, 0x599, 0);
-    func_0202a96c(data_021227cc);
-    func_0202a96c(data_021227d8);
-    func_0202ab2c(data_021227cc, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, -0x258, -0xFA0);
-    func_0202ab2c(data_021227d8, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
+    Light_Reset(gLights);
+    Light_Reset(gLight1);
+    Light_SetRotatedDirection(gLights, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0x640, -0x258, -0xFA0);
+    Light_SetRotatedDirection(gLight1, mCamera->mAngleX, mCamera->mAngleY, mCamera->mAngleZ, 0, -0xFA0, 0x5DC);
 
-    ModelResources_SetModel(data_021223e4, 0, mMannequin.mModelPath);
-    ModelResources_SetModel(data_021223e4, 1, "3MH:/head.imd");
+    ModelResources_SetModel(gModelResources, 0, mMannequin.mModelPath);
+    ModelResources_SetModel(gModelResources, 1, "3MH:/head.imd");
     mMannequin.Init(0, 0, 1, 0);
-    void *animations = func_0202ad04(data_021223e4, 0, "3HA", 0);
-    func_02029660((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
+    void *animations = ModelResources_BindArchive(gModelResources, 0, "3HA", 0);
+    ResourceSet_SetArchive((void *)mMannequin.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     SetMannequinAnimation(&mMannequin, "idle00");
     mMannequin.SetAnimFlags(TRUE, TRUE);
     mMannequin.mShadowVisible = FALSE;
@@ -1555,7 +1555,7 @@ void ItemTradeScene::Init3d() {
     mMannequin.mHeadScale.y = gMannequinHeadScale.y * 4 / 10;
     mMannequin.mHeadScale.z = gMannequinHeadScale.z * 4 / 10;
 
-    ModelResources_SetModel(data_021223e4, 2, mItemModel.mModelPath);
+    ModelResources_SetModel(gModelResources, 2, mItemModel.mModelPath);
     mItemModel.Load(2);
     VecFx32 itemPosition = zero;
     mItemModel.mPosition.x = itemPosition.x;
@@ -1605,7 +1605,7 @@ void ItemTradeScene::UpdateWireless() {
             if (next == STATE_CONNECTED_PARENT) {
                 SetEntry(FALSE);
             }
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
         }
         break;
     }
@@ -1629,13 +1629,13 @@ void ItemTradeScene::UpdateWireless() {
                     mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
                     ClearText(&mWindow.mTexts[i + 1]);
                     mWindow.mTexts[i + 1].DrawAll();
-                    func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                    SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                 }
                 if (--sPartnerTimers[i] == 0) {
                     mWindow.mTexts[i + 1].SetStringArg(L"", 0);
                     ClearText(&mWindow.mTexts[i + 1]);
                     mWindow.mTexts[i + 1].DrawAll();
-                    func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                    SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                 }
             }
         }
@@ -1646,7 +1646,7 @@ void ItemTradeScene::UpdateWireless() {
         }
         mNextState = STATE_ERROR;
         if (mWindow.mUnknownAD50 & 1) {
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
         }
         WH_Reset();
         break;
@@ -1731,7 +1731,7 @@ void ItemTradeScene::Update() {
     gWirelessSession->UpdateEnd();
     UpdateMusic();
     UpdateLinkIcon();
-    func_020341d4(&mWindow);
+    MessageWindow_Update(&mWindow);
     if (mWindow.mTransitionDone) {
         mWindowDone = TRUE;
     }
@@ -1762,8 +1762,8 @@ void ItemTradeScene::Update() {
         Send(COMMAND_READY);
         sReceivedNew = FALSE;
         SetupWindow(mState);
-        func_02034f38(&mWindow, 0, sStateMessages[mState]);
-        func_02034720(&mWindow, 0x12, 1);
+        MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+        MessageWindow_Open(&mWindow, 0x12, 1);
     }
 
     int kind = sWindowKinds[mState];
@@ -1785,13 +1785,13 @@ void ItemTradeScene::Update() {
         mList.Hide();
         if (kind != -1) {
             mWindow.mUnknownSetBeforeClose = 15;
-            func_020349cc(&mWindow, 0x1C);
+            MessageWindow_Close(&mWindow, 0x1C);
             PlaySound(13);
         } else {
             mState = next;
             SetupWindow(mState);
-            func_02034f38(&mWindow, 0, sStateMessages[mState]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
             PlaySound(12);
         }
         return;
@@ -1891,7 +1891,7 @@ void ItemTradeScene::Update() {
                 gSceneManager.RequestScene(0x29);
                 break;
             }
-            func_020349cc(&mWindow, flags);
+            MessageWindow_Close(&mWindow, flags);
         } else {
             switch (mState) {
             case STATE_SEARCHING:
@@ -1899,7 +1899,7 @@ void ItemTradeScene::Update() {
                     mNextState != STATE_CHOOSE_PARTNER && gWirelessSession->CountParents() > 0) {
                     mNextState = STATE_CHOOSE_PARTNER;
                     mWindow.mUnknownSetBeforeClose = 15;
-                    func_020349cc(&mWindow, 0x1C);
+                    MessageWindow_Close(&mWindow, 0x1C);
                 }
                 break;
             case STATE_ASK_SEND:
@@ -1907,7 +1907,7 @@ void ItemTradeScene::Update() {
                 if (mPartnerSending == TRUE && mNextState != STATE_SENDING) {
                     mNextState = STATE_RECEIVING;
                     mWindow.mUnknownSetBeforeClose = 15;
-                    func_020349cc(&mWindow, 0x1C);
+                    MessageWindow_Close(&mWindow, 0x1C);
                 }
                 break;
             case STATE_SENDING:
@@ -1919,7 +1919,7 @@ void ItemTradeScene::Update() {
                     mSendStep = 3;
                     break;
                 case 3:
-                    if (!func_0202cd38(&gGameData)) {
+                    if (!GameData_IsSaving(&gGameData)) {
                         mSendStep = 1;
                     }
                     break;
@@ -1939,7 +1939,7 @@ void ItemTradeScene::Update() {
                         break;
                     }
                     sReceivedCommand = 0;
-                    if (mSaveAfterReturn == TRUE && !func_0202cd38(&gGameData)) {
+                    if (mSaveAfterReturn == TRUE && !GameData_IsSaving(&gGameData)) {
                         mNextState = STATE_PARTNER_FULL;
                         mSaveAfterReturn = FALSE;
                         done = TRUE;
@@ -1948,7 +1948,7 @@ void ItemTradeScene::Update() {
                         sSent = FALSE;
                         sSending = 0;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                 }
                 break;
@@ -1959,26 +1959,26 @@ void ItemTradeScene::Update() {
                         Send(COMMAND_RECEIVED);
                         mNextState = STATE_SAVING;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     } else {
                         Send(COMMAND_FULL);
                         sReceived = 0;
                         mNextState = STATE_FULL;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                     sReceivedNew = FALSE;
                 }
                 break;
             case STATE_SAVING:
-                if (IsWindowOpen(&mWindow) && !func_0202cd38(&gGameData)) {
+                if (IsWindowOpen(&mWindow) && !GameData_IsSaving(&gGameData)) {
                     if (sReceived) {
                         WriteSave();
                         sReceived = 0;
                     } else {
                         mNextState = STATE_RECEIVED;
                         mWindow.mUnknownSetBeforeClose = 15;
-                        func_020349cc(&mWindow, 0x1C);
+                        MessageWindow_Close(&mWindow, 0x1C);
                     }
                 }
                 break;
@@ -1997,10 +1997,10 @@ void ItemTradeScene::Update() {
                 if (nextKind == 2) {
                     for (int i = 0; i < 3; i++) {
                         if (sPartnerTimers[i] > 0) {
-                            func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                             mWindow.mTexts[i + 1].SetStringArg(mNames[i], 0);
                         } else {
-                            func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                         }
                     }
                 }
@@ -2082,18 +2082,18 @@ void ItemTradeScene::Update() {
                     PlaySound(13);
                     break;
                 }
-                func_02034f38(&mWindow, 0, sStateMessages[mNextState]);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mNextState]);
                 if (mState > mNextState) {
-                    func_02034720(&mWindow, 0x2A, 1);
+                    MessageWindow_Open(&mWindow, 0x2A, 1);
                 } else {
-                    func_02034720(&mWindow, 0x1A, 1);
+                    MessageWindow_Open(&mWindow, 0x1A, 1);
                 }
                 if (nextKind == 2) {
                     for (int i = 0; i < 3; i++) {
                         if (sPartnerTimers[i] > 0) {
-                            func_02031e88(GetWindowButton(&mWindow, i), FALSE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), FALSE);
                         } else {
-                            func_02031e88(GetWindowButton(&mWindow, i), TRUE);
+                            SpriteButton_SetDisabled(GetWindowButton(&mWindow, i), TRUE);
                         }
                     }
                 }
@@ -2108,8 +2108,8 @@ void ItemTradeScene::Update() {
             mState = STATE_RECEIVING;
             sReceivedNew = FALSE;
             SetupWindow(mState);
-            func_02034f38(&mWindow, 0, sStateMessages[mState]);
-            func_02034720(&mWindow, 0x12, 1);
+            MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+            MessageWindow_Open(&mWindow, 0x12, 1);
         } else if (mState == STATE_LIST) {
             switch (result) {
             case ItemTradeList::RESULT_OK: {
@@ -2132,16 +2132,16 @@ void ItemTradeScene::Update() {
                     break;
                 }
                 mWindow.mTexts[0].SetStringArg(name, 0);
-                func_02034f38(&mWindow, 0, sStateMessages[mState]);
-                func_02034720(&mWindow, 0x12, 1);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+                MessageWindow_Open(&mWindow, 0x12, 1);
                 break;
             }
             case ItemTradeList::RESULT_BACK:
                 mState = STATE_ASK_DISCONNECT;
                 mList.Hide();
                 SetupWindow(mState);
-                func_02034f38(&mWindow, 0, sStateMessages[mState]);
-                func_02034720(&mWindow, 0x12, 1);
+                MessageWindow_SetTextMessage(&mWindow, 0, sStateMessages[mState]);
+                MessageWindow_Open(&mWindow, 0x12, 1);
                 break;
             }
         }
@@ -2154,12 +2154,12 @@ void ItemTradeScene::Update() {
 void ItemTradeScene::Draw() {
     Sprite_Draw(&mLinkIcon);
     mList.Draw();
-    func_020345d8(&mWindow);
+    MessageWindow_Draw(&mWindow);
     mMannequin.Draw();
     mItemModel.Draw();
     mRoom.RoomModels::Draw();
     mScroll += 0x4CC;
-    func_02028108(&data_02121834, 2, mScroll >> FX32_SHIFT);
+    ScreenLoader_SetScrollX(&gScreenLoader, 2, mScroll >> FX32_SHIFT);
 }
 
 // @0x0214ebe8
@@ -2172,10 +2172,10 @@ void ItemTradeScene::Exit() {
     mInventory.Save();
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mItemModel.mArchiveName);
-    func_0202aecc(data_021223e4, 2);
+    ModelResources_ReleaseModel(gModelResources, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "3MM");
     ArchiveManager_Unmount(&gArchiveManager, "3MH");
     ArchiveManager_Unmount(&gArchiveManager, "LTL");
@@ -2247,7 +2247,7 @@ void ItemTradeScene::ClearNames() {
 // Starts writing the save data, or asks for the scene that says it could not be written
 // @0x0214ee88
 void ItemTradeScene::WriteSave() {
-    if (!func_0202cd48(&gGameData)) {
+    if (!GameData_StartSave(&gGameData)) {
         gSceneManager.RequestScene(0xC2);
     }
 }

@@ -5,9 +5,9 @@
 // clothes on it.
 
 extern "C" {
-void func_02029c20(Model *model, u32 resType, int resourceId, int unk);
-void func_02029f50(Model *model, int alpha);    // Sets a model's alpha (0 to 31)
-void func_0202a4d8(AnimModel *model, fx32 speed); // Sets the speed of a model's animations
+void Model_BindResource(Model *model, u32 resType, int resourceId, int unk);
+void Model_SetAlpha(Model *model, int alpha);    // Sets a model's alpha (0 to 31)
+void AnimModel_SetSpeed(AnimModel *model, fx32 speed); // Sets the speed of a model's animations
 }
 
 // The scale the scenes give the head (overlay 110 takes 4/10 of it)
@@ -52,7 +52,7 @@ void Mannequin::InitHead(int resourceId, int unk) {
 
 void Mannequin::LoadHead(int resourceId, int unk) {
     mHead.RemoveAnims();
-    func_02029c20(&mHead, RESOURCE_BMD0, resourceId, unk);
+    Model_BindResource(&mHead, RESOURCE_BMD0, resourceId, unk);
 }
 
 void Mannequin::SetNeck(const MtxFx43 *matrix, const MtxFx33 *rotation) {
@@ -104,12 +104,12 @@ void Mannequin::Draw() {
 
 void Mannequin::SetAnimation(u32 resType, int id) {
     CharacterModel::SetAnimation(resType, id);
-    func_0202a4d8(&mAnim, mAnimSpeed);
+    AnimModel_SetSpeed(&mAnim, mAnimSpeed);
 }
 
 void Mannequin::BlendToAnimation(u32 resType, int id) {
     CharacterModel::BlendToAnimation(resType, id);
-    func_0202a4d8(&mAnim, mAnimSpeed);
+    AnimModel_SetSpeed(&mAnim, mAnimSpeed);
 }
 
 void Mannequin::SetVisible(BOOL visible) {
@@ -118,6 +118,6 @@ void Mannequin::SetVisible(BOOL visible) {
 }
 
 void Mannequin::SetAlpha(int alpha) {
-    func_02029f50(&mHead, alpha);
-    func_02029f50(&mAnim, alpha);
+    Model_SetAlpha(&mHead, alpha);
+    Model_SetAlpha(&mAnim, alpha);
 }

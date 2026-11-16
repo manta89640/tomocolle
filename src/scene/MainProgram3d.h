@@ -16,18 +16,18 @@
 #define RESOURCE_BTX0 0x30585442 // Textures
 
 extern "C" {
-// The models' resource table (data_021223e4, include/Model.h)
+// The models' resource table (gModelResources, include/Model.h)
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
-void func_0202ad84(void *resources);
+void ModelResources_BeginDraw(void *resources);
 // Binds the resources of a type (textures, ...) of the model's resource id to the model
-void func_02029c20(Model *model, u32 resType, int resourceId, int unk);
-void func_02029660(void *resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
-NNSG3dResFileHeader *func_020295a4(void *resourceSet, u32 resType); // The file of a type in a resource set
-void func_02029758(void *resourceSet, u32 resType);
+void Model_BindResource(Model *model, u32 resType, int resourceId, int unk);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
+NNSG3dResFileHeader *ResourceSet_GetFile(void *resourceSet, u32 resType); // The file of a type in a resource set
+void ResourceSet_ReleaseFile(void *resourceSet, u32 resType);
 void NNS_GfdDumpFrmPlttVramManager(void);
 // Queues a transfer of palette colours to the model's palette in VRAM (a NNS_GFD_DST_3D_TEX_PLTT task): size bytes
 // at offset bytes into it, each taken from the palette's VRAM key when negative
-void func_02029d40(Model *model, const void *pltt, int offset, int size);
+void Model_QueuePalette(Model *model, const void *pltt, int offset, int size);
 void NNS_GfdDumpLnkPlttVramManager(void);
 }
 
@@ -46,7 +46,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -54,8 +54,8 @@ struct Light {
 }; // 0xC
 
 extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
+extern Camera gCamera;
+extern Light gLights[];
 }
 
 // --- Input ---
@@ -80,7 +80,7 @@ struct TouchInput {
 };
 
 extern "C" {
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern TouchInput gTouchInput;
 }
 

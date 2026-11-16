@@ -11,7 +11,7 @@ void ModelResources_SetModel(void *resources, int resourceId, const char *modelP
 // The id of an animation of a resource set by its name
 int ResourceSet_FindIndexByName(void *resourceSet, u32 resType, const char *name);
 // Gives a resource set the animations of an archive
-void func_02029660(void *resourceSet, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 }
 
 extern "C" {
@@ -31,8 +31,8 @@ static inline void SetMannequinAnimation(Mannequin *mannequin, const char *name)
 // --- The main program's touch buttons (include/SpriteButton.h) ------------------------------------------------
 
 extern "C" {
-void func_02031e88(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
-void func_02032134(TextButton *button, int palette);     // Sets the overwrite palette of the button and its text
+void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled); // Sets mUnknownB8, and draws the button darkened while it is set
+void TextButton_SetOverwritePalette(TextButton *button, int palette);     // Sets the overwrite palette of the button and its text
 }
 
 // --- Other main-program things --------------------------------------------------------------------------------
@@ -70,55 +70,55 @@ struct CharLoader;
 struct Renderer3d;
 
 extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
-extern Light data_021227d8[];
+extern Camera gCamera;
+extern Light gLights[];
+extern Light gLight1[];
 extern Lighting data_021226e4;
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
+extern Renderer3d gVramManagerWork;
 extern const VecFx32 gMannequinHeadScale;
 extern const VecFx32 gMannequinBodyScale;
 
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-void func_0202a96c(Light *light);
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
-void func_0202b0e8(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028154(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void VramManagers_Reset(Renderer3d *renderer);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // --- The saved game ---
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
-BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+BOOL GameData_StartSave(GameData *game); // Starts writing the save data; FALSE when it cannot
+BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being written
 }
 
 // --- The message window's functions this scene calls besides MessageWindow.h's ---
 extern "C" {
 // Adds a button: (window, number, unknown, sequence, sequence when on, position, size, its sounds, unknown)
-void func_02033448(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+void MessageWindow_AddSpriteButtonEx(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
                    WindowPoint size, const int *sounds, int unk2);
-// Adds a button with a text: as func_02033448, with the text's message file and message, font, plane, and
+// Adds a button with a text: as MessageWindow_AddSpriteButtonEx, with the text's message file and message, font, plane, and
 // character offset
-void func_02033844(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
+void MessageWindow_AddTextButtonEx(MessageWindow *window, int button, int unk1, u8 sequence, u8 onSequence, WindowPoint position,
                    WindowPoint size, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    int *charOffset, const int *sounds, int unk2);
 // Adds the window's message text: (window, file, message, font, plane, area, position, character offset)
-void func_020338d0(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, u32 message, const NNSG2dFont *font, int plane,
                    WindowPoint area, WindowPoint position, int *charOffset);
 }
 

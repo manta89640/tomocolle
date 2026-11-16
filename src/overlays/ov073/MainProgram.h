@@ -61,7 +61,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one).
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -84,16 +84,16 @@ void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader); // Whether no archive is being loaded
 
 // --- The screens ---
-void func_02023eac(ScreenControl *screens, int mask);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_ClearBlend(ScreenControl *screens, int mask);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 // Something of the planes in the mask that the scene sets to -10 before a part and to 0 when the message window
 // comes (a brightness, by the values)
-void func_02023f4c(ScreenControl *screens, int mask, int value);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int mask, int value);
 // The offset (the plane's number shifted by 11) of a plane's screen in VRAM
-int func_020253d4(u32 *graphicsManager, int plane); // (gGraphicsManager is declared in text/TextCanvas.h)
+int GraphicsManager_GetScreenOffset(u32 *graphicsManager, int plane); // (gGraphicsManager is declared in text/TextCanvas.h)
 
 // --- Input ---
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern TouchInput gTouchInput;
 
 // --- The game's random number generator: every use is the inline code of the SDK's MATH_Rand16 ---
@@ -101,56 +101,56 @@ extern MATHRandContext16 gRandom;
 
 // --- Graphics resources ---
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
 // The same without the characters. It returns something (what ObjResourceManager_Load leaves in r0) that the
 // scene's Init does not use: declared void, Init's instructions come out in another order.
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown); // Sets colours of a loaded palette
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 // Sets the scroll of the planes of the mask
-void func_02028154(ScreenLoader *loader, int planes, int y);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int planes, int y);
 // Queues a character file for transfer to VRAM
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_0202680c(int size);
-void func_0202683c();
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void CreateMainFrameHeap(int size);
+void DestroyMainFrameHeap();
 // Splits a 15-bit colour
-void func_02028b98(int color, int *r, int *g, int *b);
+void SplitColor(int color, int *r, int *g, int *b);
 // The absolute value of each component
-void func_02028e0c(const VecFx32 *in, VecFx32 *out);
+void AbsVec(const VecFx32 *in, VecFx32 *out);
 
 // --- 3D ---
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-extern Light data_021227cc[];
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+extern Light gLights[];
 // Resets a light: direction straight down, colour white, enabled
-void func_0202a96c(Light *light);
+void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 
 // --- The saved game ---
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-int func_0202c414(GameData *game, int index);  // Its room number (SavedCharacter::mRoom)
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+int GameData_GetCharacterRoomNumber(GameData *game, int index);  // Its room number (SavedCharacter::mRoom)
 struct SavedCharacter;
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
 // What is known of a character by its index
-int func_0202c468(GameData *game, int character);
-u8 func_0202c53c(GameData *game, int character);
-int func_0202c5b4(GameData *game, int character);
-int func_0202c58c(GameData *game, int character);
+int GameData_GetCharacterEvent(GameData *game, int character);
+u8 GameData_GetCharacterTroubleState(GameData *game, int character);
+int GameData_GetCharacterTroubleCategory(GameData *game, int character);
+int GameData_GetCharacterTroubleId(GameData *game, int character);
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The clock ---
 // The current time with the game's offset applied, as seconds and as date and time
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
-extern int data_02123440[];
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
+extern int gGameClock[];
 
 // --- Scenes ---
 
@@ -164,12 +164,12 @@ void MiiData_GetName(SavedCharacter *character, wchar_t *name);
 // For each kind of relation, how much each reaction changes the affinity by, halved
 extern const s8 *data_021135c8[];
 // Binds the joint animations of an archive to a model's resource
-void func_02029660(void *resource, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resource, u32 resType, void *archive);
 
 // --- The particle system and the head icon (0x02080e80 to 0x020810e4) ---
-void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void ParticleSystem_Load(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
 void func_02080ee4(ParticleSystem *particles);
-void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                          // Updates
 int func_02081024(HeadIcon *icon, HeadIconFrame *frame); // frame ? frame->mValue : 0; does not use the icon
 

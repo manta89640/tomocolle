@@ -20,7 +20,7 @@ struct InteriorPiece {
     /* 0x8 */ u16 mRotY;
 }; // 0xA
 
-// An entry of the interiors table (data_020f72f8, 78 entries)
+// An entry of the interiors table (gInteriorTable, 78 entries)
 struct InteriorInfo {
     /* 0x00 */ u32 mPrice : 24;
     /*      */ u32 mSortKey : 8;
@@ -42,7 +42,7 @@ struct InteriorInfo {
 }; // 0x54
 
 extern "C" {
-extern const InteriorInfo data_020f72f8[];
+extern const InteriorInfo gInteriorTable[];
 extern const char *data_021145a8[];
 }
 
@@ -51,13 +51,13 @@ class InteriorItem : public Item {
 public:
     InteriorItem();
 
-    virtual int GetPrice() { return data_020f72f8[mId].mPrice; }
-    virtual int GetPrice2() { return data_020f72f8[mId].mPrice; }
+    virtual int GetPrice() { return gInteriorTable[mId].mPrice; }
+    virtual int GetPrice2() { return gInteriorTable[mId].mPrice; }
     virtual const char *GetModelName();
-    virtual u8 GetWeight0() { return data_020f72f8[mId].mWeight0; }
-    virtual u8 GetWeight1() { return data_020f72f8[mId].mWeight1; }
-    virtual u8 GetWeight2() { return data_020f72f8[mId].mWeight2; }
-    virtual u8 GetWeight3() { return data_020f72f8[mId].mWeight3; }
+    virtual u8 GetWeight0() { return gInteriorTable[mId].mWeight0; }
+    virtual u8 GetWeight1() { return gInteriorTable[mId].mWeight1; }
+    virtual u8 GetWeight2() { return gInteriorTable[mId].mWeight2; }
+    virtual u8 GetWeight3() { return gInteriorTable[mId].mWeight3; }
 
     void Settle();
     GXRgb GetLightColor();
@@ -90,9 +90,9 @@ public:
 }; // 0x754
 
 extern "C" {
-void func_02029f50(Model *model, int alpha); // Sets a model's alpha (0 to 31)
-int func_02029d9c(Model *model);
-int func_02029dd0(Model *model);
+void Model_SetAlpha(Model *model, int alpha); // Sets a model's alpha (0 to 31)
+int Model_GetTexSize(Model *model);
+int Model_GetPlttSize(Model *model);
 }
 
 // What the room's models have in common: the archive they come from and where they are.
@@ -186,9 +186,9 @@ public:
     void Update();
     void Draw(const MtxFx33 *rotation, const MtxFx43 *matrix);
     void SetFlags(int flags);
-    void SetModelAlpha(int alpha) { func_02029f50(&mModel, alpha); }
-    int GetUnknown() { return func_02029d9c(&mModel); }
-    int GetUnknown2() { return func_02029dd0(&mModel); }
+    void SetModelAlpha(int alpha) { Model_SetAlpha(&mModel, alpha); }
+    int GetUnknown() { return Model_GetTexSize(&mModel); }
+    int GetUnknown2() { return Model_GetPlttSize(&mModel); }
 
     /* 0x04C */ AnimModel mModel;
     /* 0x12C */ int mState;
@@ -243,7 +243,7 @@ public:
 
     /* 0x000 */ RoomDoor mDoor;
     /* 0x1A4 */ RoomPart mParts[ROOM_PART_COUNT];
-    /* 0x8DC */ void *mCamera; // The main program's camera, data_02122764
+    /* 0x8DC */ void *mCamera; // The main program's camera, gCamera
     /* 0x8E0 */ int mState;
     /* 0x8E4 */ BOOL mVisible;
     /* 0x8E8 */ fx32 mNearY;

@@ -9,24 +9,24 @@ void G3SpriteTestScene::StartLoading() {
 }
 
 void G3SpriteTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    data_0211d604.Show(1);
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    gScreenControl.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 0, 0x7FFF, 63, FALSE);
     ModelResources_SetModel(&sModelResources, 0, "M01:/body.imd");
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
-    func_0202a93c(mCamera, 1);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
+    Camera_SetProjection(mCamera, 1);
     sModelResources.mUnknown424 = 0;
     mNextSprite = SPRITE_COUNT - 1;
-    func_0202b4d8(&data_021232e4);
-    func_0202b4dc(&data_021232e4, 0, "M00:/Face.tga", 3, 0x80, 0x80);
+    func_0202b4d8(&gG3SpriteTextures);
+    G3SpriteTextures_Load(&gG3SpriteTextures, 0, "M00:/Face.tga", 3, 0x80, 0x80);
 
     for (int i = 0; i < SPRITE_COUNT; i++) {
         ScreenRect spriteRect = sSpriteRect;
         spriteRect.x = (MATH_Rand16(&gRandom, 0) & 3) * 0x20;
-        func_0202b1f0(&mSprites[i], 0, &spriteRect);
+        G3Sprite_SetTexture(&mSprites[i], 0, &spriteRect);
         mSprites[i].mScaleY = FX32_ONE;
         mSprites[i].mScaleX = FX32_ONE;
         func_0202b4c4(&mSprites[i]);
@@ -54,13 +54,13 @@ void G3SpriteTestScene::Draw() {
     mModel.Draw();
     mCharacter.Draw();
     for (int i = 0; i < SPRITE_COUNT; i++) {
-        func_0202b4a4(&mSprites[i]);
+        G3Sprite_Draw(&mSprites[i]);
     }
 }
 
 void G3SpriteTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202ae38(&sModelResources);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_Reset(&sModelResources);
     ArchiveManager_Unmount(&gArchiveManager, "M00");
     ArchiveManager_Unmount(&gArchiveManager, "M01");
 }

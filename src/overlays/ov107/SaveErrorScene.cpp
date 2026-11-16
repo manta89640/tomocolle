@@ -32,20 +32,20 @@ void SaveErrorScene::StartLoading() {
 
 // @0x02149aa0
 void SaveErrorScene::Init() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknownEC = 1;
     G3X_SetClearColor(GX_RGB(31, 31, 31), 31, 0x7FFF, 63, FALSE);
 
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, sScreenName, 0x200, 0, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.Set(1);
-    data_0211d604.Show(0x1200);
-    func_020278f8(&data_021213b8, 0x7FFF, 0x101);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sScreenName, 0x200, 0, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x200, -1, -1, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    gScreenControl.Set(1);
+    gScreenControl.Show(0x1200);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x7FFF, 0x101);
 
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
@@ -54,19 +54,19 @@ void SaveErrorScene::Init() {
     MessageFile *etc = &mEtcMessages;
     MessageFile *common = &mCommonMessages;
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], sScreenName, 0x200);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], sScreenName, 0x200);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_020336b4(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
+    MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_OK, 0, 0, 1, sButtonPosition, sButtonSize, common, 4,
                   &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, 10);
     for (int i = 0; i < 2; i++) {
-        func_020336b4(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize,
+        MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], MessageWindow::BUTTON_YES + i, 0, 0, 1, sChoicePositions[i], sButtonSize,
                       common, sChoiceMessages[i], &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, -1);
     }
-    func_02033a58(&mWindow[0], etc, 0x1A2, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
-    func_02034f94(&mWindow[0], 1);
-    func_02034f4c(&mWindow[0], 1);
-    func_02028280(&data_02121834, 0x200, 0);
+    MessageWindow_AddText(&mWindow[0], etc, 0x1A2, &gFonts[0].mFont, 0x1000, sTextPosition, &charOffset);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 0);
     SetState(0);
 }
 
@@ -89,7 +89,7 @@ void SaveErrorScene::Update() {
 
 // @0x02149e9c
 void SaveErrorScene::Draw() {
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
 }
 
 // @0x02149eac
@@ -108,7 +108,7 @@ void SaveErrorScene::SetState(int state) {
 
 // @0x02149f00
 void SaveErrorScene::UpdateWindow() {
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
 }
 
 // Opens the window with a message and no buttons, and returns TRUE once it is shown
@@ -116,8 +116,8 @@ void SaveErrorScene::UpdateWindow() {
 BOOL SaveErrorScene::ShowMessage(u32 message) {
     if (mSubStep == 0) {
         mSubStep++;
-        func_02034f38(&mWindow[0], 0, message);
-        func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
+        MessageWindow_SetTextMessage(&mWindow[0], 0, message);
+        MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_8 | MessageWindow::FLAG_FROM_BELOW,
                       0);
         for (int i = 0; i < 3; i++) {
             mWindow[0].mButtons[i].mVisible = FALSE;

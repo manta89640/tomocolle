@@ -10,9 +10,7 @@
 extern "C" {
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
 // Gives a resource set the animations of an archive
-void func_02029660(void *resourceSet, u32 resType, void *archive);
-void func_0209decc(Character *character);
-void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
+void ResourceSet_SetArchive(void *resourceSet, u32 resType, void *archive);
 void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
 }
 
@@ -22,8 +20,8 @@ void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as 
 struct SavedGame;
 extern "C" {
 extern SavedGame gGameData;
-void func_0202c264(SavedGame *game, int index, SavedCharacter *character); // Copies a saved character out
-void func_0202c28c(SavedGame *game, int index, SavedCharacter *character); // and back in
+void GameData_ReadCharacter(SavedGame *game, int index, SavedCharacter *character); // Copies a saved character out
+void GameData_WriteCharacter(SavedGame *game, int index, SavedCharacter *character); // and back in
 }
 
 // The main program's camera
@@ -64,15 +62,15 @@ struct CharLoader;
 struct Renderer3d;
 
 extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
+extern Camera gCamera;
+extern Light gLights[];
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-extern void *data_02123440;
+extern Renderer3d gVramManagerWork;
+extern void *gGameClock;
 // By SavedCharacter::mUnknown0227, a table of these by mUnknown0226
 struct EventInfo {
     /* 0x0 */ u32 mUnknown0;
@@ -83,24 +81,24 @@ struct EventInfo {
 }; // 0xC
 extern const EventInfo *data_02114d78[];
 
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-void func_0202a96c(Light *light);
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
 void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
 void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_0202b0e8(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, int a, int b);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028154(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
+void VramManagers_Reset(Renderer3d *renderer);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 s64 Clock_GetSeconds(void *clock);
 }
 

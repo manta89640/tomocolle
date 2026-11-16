@@ -60,17 +60,17 @@ void MiiListScene::StartLoading() {
 void MiiListScene::Init() {
     mState = STATE_IDLE;
     mCharOffset = 0x258;
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02027d7c(&data_02121834, "MLT:/BG_frame_L.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 0x200, 2);
-    func_02027d7c(&data_02121834, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.Set(0x1700);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_list.ncg", 0x700, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_list.ncl", 0x700, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_frame_L.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/Window_down.nsc", 0x400, 0, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_list.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_list.ncl", 0x1000, -1, -1, -1);
+    gScreenControl.Set(0x1700);
     mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
 
     mPanel.Init(6);
@@ -92,26 +92,26 @@ void MiiListScene::Init() {
     mList.Sort(mSortKey, TRUE);
 
     Sprite_Init(&mSortButton, 0, 0x74, 0x80, 0x60, TRUE);
-    func_02031260(&mSortButton, 4);
-    func_02031278(&mSortButton, 0x74, 0x75);
+    SpriteButton_SetKind(&mSortButton, 4);
+    SpriteButton_SetSequences(&mSortButton, 0x74, 0x75);
     mSortButton.SetPosition(FxVec2(0xD0 << FX32_SHIFT, 0x0D << FX32_SHIFT));
-    func_02031eb0(&mSortButton, 0x28, 0x16);
-    func_0203119c(&mSortButton);
+    SpriteButton_SetTouchRect(&mSortButton, 0x28, 0x16);
+    SpriteButton_Reset(&mSortButton);
     mSortButton.mUnknown5E = 1;
 
     ScreenRect rect = sSortMenuRect;
-    func_02032fb8(&mSortMenu, rect);
-    func_02033174(&mSortMenu, sSortMenuScreenName, 0x400);
+    MessageWindow_Init(&mSortMenu, rect);
+    MessageWindow_SetScreen(&mSortMenu, sSortMenuScreenName, 0x400);
     func_020331bc(&mSortMenu, 0x3F00, rect);
     for (int i = 0; i <= 6; i++) {
-        func_02033390(&mSortMenu, i, 0, 0x6A, 0x6B, sSortButtonPositions[i], sSortButtonSizes[i]);
+        MessageWindow_AddSpriteButton(&mSortMenu, i, 0, 0x6A, 0x6B, sSortButtonPositions[i], sSortButtonSizes[i]);
     }
     for (int i = 0; i < 7; i++) {
         WindowPoint offset = sSortTextOffset;
-        func_020338d0(&mSortMenu, &mEtcMessages, sSortMessages[i], &gFonts[0].mFont, 0x1000, offset,
+        MessageWindow_AddTextInArea(&mSortMenu, &mEtcMessages, sSortMessages[i], &gFonts[0].mFont, 0x1000, offset,
                       sSortTextPositions[i], &mCharOffset);
     }
-    func_02034f4c(&mSortMenu, 1);
+    MessageWindow_SetTextsHAlign(&mSortMenu, 1);
 }
 
 void MiiListScene::Update() {
@@ -126,62 +126,62 @@ void MiiListScene::Update() {
 }
 
 void MiiListScene::UpdateIdle() {
-    func_0203133c(&mSortButton);
+    SpriteButton_Update(&mSortButton);
     if (func_02031ccc(&mSortButton)) {
         mState = STATE_SORT_MENU;
-        func_02034720(&mSortMenu, 0x12, 1);
+        MessageWindow_Open(&mSortMenu, 0x12, 1);
     }
     mList.Update();
 }
 
 void MiiListScene::UpdateSortMenu() {
-    func_020341d4(&mSortMenu);
+    MessageWindow_Update(&mSortMenu);
     switch (mSortMenu.mFinishedButton) {
     case 0:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 0) {
             mList.Sort(0, FALSE);
         }
         break;
     case 1:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 1) {
             mList.Sort(1, FALSE);
         }
         break;
     case 2:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 2) {
             mList.Sort(2, FALSE);
         }
         break;
     case 3:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 3) {
             mList.Sort(3, FALSE);
         }
         break;
     case 4:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 4) {
             mList.Sort(4, FALSE);
         }
         break;
     case 5:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 5) {
             mList.Sort(5, FALSE);
         }
         break;
     case 6:
         mSortMenu.mUnknownSetBeforeClose = 15;
-        func_020349cc(&mSortMenu, 0x24);
+        MessageWindow_Close(&mSortMenu, 0x24);
         if (mList.mSortKey != 6) {
             mList.Sort(6, FALSE);
         }
@@ -193,8 +193,8 @@ void MiiListScene::UpdateSortMenu() {
 }
 
 void MiiListScene::Draw() {
-    func_02031d7c(&mSortButton);
-    func_020345d8(&mSortMenu);
+    SpriteButton_Draw(&mSortButton);
+    MessageWindow_Draw(&mSortMenu);
     mList.Draw();
 }
 
@@ -202,7 +202,7 @@ void MiiListScene::Exit() {
     if (mSortKey != mList.mSortKey) {
         gGameData.mMiiListSortKey = mList.mSortKey;
     }
-    func_020346cc(&mSortMenu);
+    MessageWindow_Release(&mSortMenu);
     ArchiveManager_Unmount(&gArchiveManager, "MLT");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
 }

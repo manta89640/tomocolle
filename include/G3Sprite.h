@@ -6,7 +6,7 @@
 #include "Sprite.h"
 
 // A textured square drawn by the 3D engine (main program 0x0202B0E8 to 0x0202B6D0, not decompiled): a rectangle of
-// a texture of the sprite texture list (data_021232e4), at a position, with a scale. A STAND-IN with what its
+// a texture of the sprite texture list (gG3SpriteTextures), at a position, with a scale. A STAND-IN with what its
 // constructor (_ZN8G3SpriteC1Ev, out of line) sets and the fields that its users touch: the island map shows the
 // apartment building's windows with them, scene 0x25 a hundred faces. One definition for every user (the scene
 // constructors of src/scene/SceneManager.cpp include several of their scenes' headers at once).
@@ -26,7 +26,7 @@ public:
     }
 
     /* 0x04 */ int mTexture;
-    /* 0x08 */ BOOL mVisible;    // TRUE from the constructor: func_0202b4a4 draws nothing while it or mUnknown18 is 0
+    /* 0x08 */ BOOL mVisible;    // TRUE from the constructor: G3Sprite_Draw draws nothing while it or mUnknown18 is 0
     /* 0x0C */ int mDepth;       // The map sets it from a position's z; scene 0x25 counts frames in it
     /* 0x10 */ int mUnknown10;
     /* 0x14 */ int mUnknown14;
@@ -50,11 +50,11 @@ public:
 struct G3SpriteTextures;
 
 extern "C" {
-extern G3SpriteTextures data_021232e4;
+extern G3SpriteTextures gG3SpriteTextures;
 void func_0202b4d8(G3SpriteTextures *textures);
-void func_0202b4dc(G3SpriteTextures *textures, int index, const char *path, int format, int width, int height);
-void func_0202b1f0(G3Sprite *sprite, int texture, const ScreenRect *rect); // Sets its texture and rectangle
-void func_0202b4a4(G3Sprite *sprite);                                         // Draws it
+void G3SpriteTextures_Load(G3SpriteTextures *textures, int index, const char *path, int format, int width, int height);
+void G3Sprite_SetTexture(G3Sprite *sprite, int texture, const ScreenRect *rect); // Sets its texture and rectangle
+void G3Sprite_Draw(G3Sprite *sprite);                                         // Draws it
 void func_0202b4c4(G3Sprite *sprite);
 }
 

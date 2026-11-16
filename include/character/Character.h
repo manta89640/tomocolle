@@ -10,7 +10,7 @@
 // The main program's character classes (src/character/), from the record that the save data holds to the character
 // that a scene draws:
 //
-//   CharacterRecord   0x2A4 bytes  what the save data holds of a character (func_0202c264 copies one out)
+//   CharacterRecord   0x2A4 bytes  what the save data holds of a character (GameData_ReadCharacter copies one out)
 //   SavedCharacter    0x2C0        + its index and what the game derives from the record
 //   CharacterBase     0x25E4       + the Mii's face, drawn with the Mii library (NFL) at the head
 //   Character         0x2B18       + the body (CharacterModel, a second base), walking, turning, animations, sounds
@@ -90,7 +90,7 @@ struct CreateId {
     u8 data[8];
 };
 
-// What the save data holds of a character: the 0x2A4 bytes that func_0202c264 copies out. Overlay 109's implicit
+// What the save data holds of a character: the 0x2A4 bytes that GameData_ReadCharacter copies out. Overlay 109's implicit
 // copy assignment of it shows its members. The names in quotes are the game's own: SavedCharacter::Validate gives
 // them with each field it checks.
 struct CharacterRecord {

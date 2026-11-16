@@ -64,7 +64,7 @@ struct SceneMemory {
     /* 0x20 */ u8 mCharacters[12]; // The characters the next scene shows (0xFF: none); the news scene reads them
 };
 
-// The main program's camera (data_02122764)
+// The main program's camera (gCamera)
 struct Camera {
     void SetPosition(VecFx32 position) {
         mPosition.x = position.x;
@@ -91,10 +91,10 @@ struct Camera {
 
 // One of the main program's 3D lights
 struct Light;
-extern "C" void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+extern "C" void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 struct Light {
     // Points the light, relative to the camera
-    void SetDirection(Camera *camera, VecFx32 direction) { func_0202aa28(this, camera, direction); }
+    void SetDirection(Camera *camera, VecFx32 direction) { Light_SetDirectionByCamera(this, camera, direction); }
 
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ GXRgb mColor;
@@ -103,10 +103,10 @@ struct Light {
 
 
 
-// One of the eleven news items of the saved game (func_0202c8a8 copies one out, func_0202c8bc in): the news scene
+// One of the eleven news items of the saved game (GameData_GetNewsItem copies one out, GameData_SetNewsItem in): the news scene
 // (overlay 87, scene 0x46) shows them.
 struct NewsItem {
-    /* 0x00 */ u8 mKind;      // An entry of data_020fa1d0; 0x1D is a birthday
+    /* 0x00 */ u8 mKind;      // An entry of gNewsKinds; 0x1D is a birthday
     /* 0x01 */ u8 mUnknown01[2];
     /* 0x03 */ u8 mCharacter; // Of a birthday: whose
     /* 0x04 */ u8 mUnknown04[8];
@@ -124,7 +124,7 @@ struct NewsItem {
     /* 0x12 */ u8 mUnknown12[2];
 }; // 0x14
 
-// What a news kind is (data_020fa1d0, 0xAC of them, 0x20 bytes each)
+// What a news kind is (gNewsKinds, 0xAC of them, 0x20 bytes each)
 struct NewsKind {
     /* 0x00 */ u32 mUnknown00;
     /* 0x04 */ u32 mUnknown04Bits0 : 16;
@@ -200,21 +200,21 @@ struct IslandState {
 
 extern "C" {
 // --- Main-program functions, by their address names ---
-extern ScreenControl data_0211d604;
-extern PadInput data_0211f9d4;
+extern ScreenControl gScreenControl;
+extern PadInput gPadInput;
 extern TouchInput gTouchInput;
 extern MATHRandContext16 gRandom;
 extern SceneMemory gSceneMemory;
 // 100 bytes (cleared with MI_CpuFill8 by overlays 68 and 75) that scenes leave for the next one, read as different
 // types by each. The map leaves the sky's clear colour and light colours in it as three GXRgb.
-extern u8 data_0213bab0[100];
-extern IslandState data_0212348c;
-extern Camera data_02122764;
-extern Light data_021227cc;
-extern Light data_021227d8;
-extern int data_02123440[];
+extern u8 gSceneScratch[100];
+extern IslandState gIslandState;
+extern Camera gCamera;
+extern Light gLights;
+extern Light gLight1;
+extern int gGameClock[];
 extern wchar_t data_02123510[]; // The player's name
-extern const NewsKind data_020fa1d0[];
+extern const NewsKind gNewsKinds[];
 
 struct ArchiveLoader;
 struct CellLoader;
@@ -224,61 +224,61 @@ struct CharLoader;
 struct Renderer3d;
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
+extern Renderer3d gVramManagerWork;
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 
-BOOL func_02024004(ScreenControl *screens, int planes, int level);
-BOOL func_02024118(ScreenControl *screens, int planes, int level);
-void func_0202680c(int size);
-void func_02026824();
-void func_0202683c();
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int level);
+void CreateMainFrameHeap(int size);
+void AllocFromMainFrameHeap();
+void DestroyMainFrameHeap();
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
-int func_0202a1f8(AnimModel *model, u32 resType, int slot);
-void func_0202a640(Camera *camera);
-void func_0202a96c(Light *light);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
+int AnimModel_GetAnimationId(AnimModel *model, u32 resType, int slot);
+void Camera_Reset(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath);
-void func_0202ad84(void *resources);
-void func_0202ae38(void *resources);
-void func_0202b0e8(Renderer3d *renderer);
+void ModelResources_BeginDraw(void *resources);
+void ModelResources_Reset(void *resources);
+void VramManagers_Reset(Renderer3d *renderer);
 
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202c264(GameData *game, int index, SavedCharacter *character);
-void func_0202c28c(GameData *game, int index, SavedCharacter *character);
-u8 func_0202c468(GameData *game, int character);
-u8 func_0202c53c(GameData *game, int character);
-int func_0202c5b4(GameData *game, int character);
-int func_0202c58c(GameData *game, int character);
-void func_0202c8a8(GameData *game, int index, NewsItem *item);
-void func_0202c8bc(GameData *game, int index, NewsItem *item);
-BOOL func_0202cb08(GameData *game);
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character);
+u8 GameData_GetCharacterEvent(GameData *game, int character);
+u8 GameData_GetCharacterTroubleState(GameData *game, int character);
+int GameData_GetCharacterTroubleCategory(GameData *game, int character);
+int GameData_GetCharacterTroubleId(GameData *game, int character);
+void GameData_GetNewsItem(GameData *game, int index, NewsItem *item);
+void GameData_SetNewsItem(GameData *game, int index, NewsItem *item);
+BOOL GameData_IsNewDay(GameData *game);
 BOOL func_0202cd54(GameData *game);
 
 // --- The sprite buttons (the rest are in SpriteButton.h) ---
 // Whether the stylus is on the button (the scene ignores touches elsewhere while one is)
-BOOL func_02031294(SpriteButton *button);
+BOOL SpriteButton_IsTouched(SpriteButton *button);
 
 // --- The message window ---
 
 // --- The clock ---
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
 void Clock_GetDate(int offset, RTCDate *date);
 void Clock_GetTime(int offset, RTCTime *time);
 
-void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (data_020fa1d0), with its characters
+void NewsItem_Make(NewsItem *item, int kind); // Makes a news item of a kind (gNewsKinds), with its characters
 void NNS_GfdDumpLnkPlttVramManager();
 
 // --- Particles ---
@@ -306,7 +306,7 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 
 }
 
-#define gIsland data_0212348c
+#define gIsland gIslandState
 
 
 #endif // OV072_MAINPROGRAM_H

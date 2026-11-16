@@ -19,7 +19,7 @@ struct ModelAnimation;
 
 extern "C" {
 // Frees a block of the main heap
-void func_020267f4(void *block);
+void FreeToMainHeap(void *block);
 // Finds an animation of a model by its resource type and id
 ModelAnimation *AnimModel_FindAnimation(AnimModel *model, u32 resType, int id);
 // Marks all of a model's animations finished
@@ -48,7 +48,7 @@ public:
     }
     virtual ~Model() {
         if (mResource != NULL) {
-            func_020267f4(mResource);
+            FreeToMainHeap(mResource);
         }
     }
     virtual void Load(int resourceId, int unk); // func_02029b04
@@ -71,7 +71,7 @@ public:
     /* 0x04 */ int mUnknown04;
     /* 0x08 */ int mUnknown08;
     /* 0x0C */ NNSG3dResMdl *mResMdl;
-    /* 0x10 */ NNSG3dResTex *mResTex; // Its textures and palettes (func_02029d40 finds the palette's VRAM key here)
+    /* 0x10 */ NNSG3dResTex *mResTex; // Its textures and palettes (Model_QueuePalette finds the palette's VRAM key here)
     /* 0x14 */ NNSG3dRenderObj mRenderObj;
     /* 0x68 */ MtxFx33 mRotation;
     /* 0x8C */ VecFx32 mScale;
@@ -105,11 +105,11 @@ public:
 }; // 0xE0
 
 extern "C" {
-// The models' resource table (data_021223e4, 0x1c bytes per resource id): func_0202ad04 binds the files of a
-// mounted archive to an id, func_0202aecc releases its model ('BMD0') and texture ('BTX0')
-extern u32 data_021223e4[];
-void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk);
-void func_0202aecc(void *resources, int resourceId);
+// The models' resource table (gModelResources, 0x1c bytes per resource id): ModelResources_BindArchive binds the files of a
+// mounted archive to an id, ModelResources_ReleaseModel releases its model ('BMD0') and texture ('BTX0')
+extern u32 gModelResources[];
+void *ModelResources_BindArchive(void *resources, int resourceId, const char *archiveName, int unk);
+void ModelResources_ReleaseModel(void *resources, int resourceId);
 }
 
 #endif // MODEL_H

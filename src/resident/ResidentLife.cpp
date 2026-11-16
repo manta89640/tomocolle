@@ -9,8 +9,8 @@
 //
 // The names are descriptive, not the original: no name of these functions survives in the ROM.
 
-// A saved character as these functions use it (the main program's class, 0x2C0 bytes; func_0202c264 copies the
-// saved game's record into one, func_0202c28c back). The fields are named as the character headers name them.
+// A saved character as these functions use it (the main program's class, 0x2C0 bytes; GameData_ReadCharacter copies the
+// saved game's record into one, GameData_WriteCharacter back). The fields are named as the character headers name them.
 struct SavedCharacter {
     SavedCharacter();
     // Its functions that these call, as include/character/Character.h names them
@@ -73,7 +73,7 @@ struct SavedCharacter {
     /* 0x2A6 */ u8 mUnknown2A6[0x1A];
 }; // 0x2C0
 
-// The game's clock (data_02123440 points at it)
+// The game's clock (gGameClock points at it)
 struct GameClock {
     /* 0x00 */ u8 mUnknown00[0x18];
     /* 0x18 */ s64 mSecondsAway;       // How long the game was off
@@ -91,13 +91,13 @@ struct OutingEntry {
     /* 0x8 */ int mUnknown8;
 }; // 0xC
 
-// What an event is (data_020f8cc0, by event)
+// What an event is (gEventTable, by event)
 struct EventInfo {
     u32 mMinutes : 12; // How long it lasts
     u32 mUnknownBits12 : 20;
 };
 
-// What the item table (data_020f5f0c, 0x14 bytes an item) says of an item, as far as is used here
+// What the item table (gGoodsTable, 0x14 bytes an item) says of an item, as far as is used here
 struct ItemInfo {
     /* 0x00 */ u8 mUnknown00[0xC];
     /* 0x0C */ u32 mUnknown0CBits0 : 4;
@@ -108,30 +108,30 @@ struct ItemInfo {
 
 
 extern "C" {
-extern GameClock *data_02123440;
+extern GameClock *gGameClock;
 extern MATHRandContext16 gRandom;
-extern const EventInfo data_020f8cc0[];    // By event
+extern const EventInfo gEventTable[];    // By event
 extern const s8 data_020f8ca8[];           // By month: an adjustment in hours
 extern const u8 data_020f8f5c[];           // By number of residents
 extern const OutingEntry *const data_02114d78[];
 extern const s8 *const data_021135a0[];    // By relation: changes of affinity
-extern const ItemInfo data_020f5f0c[];
+extern const ItemInfo gGoodsTable[];
 s64 Clock_GetSeconds(GameClock *clock);
 s64 func_02035ae0(GameClock *clock);
-BOOL func_0202c3dc(GameData *game, int index);
-void func_0202c264(GameData *game, int index, SavedCharacter *character);
-void func_0202c28c(GameData *game, int index, SavedCharacter *character);
-u8 func_0202c468(GameData *game, int index);
-u8 func_0202c490(GameData *game, int index);
-s64 func_0202c4b8(GameData *game, int index);
-s64 func_0202c4e4(GameData *game, int index);
-s64 func_0202c510(GameData *game, int index);
-u8 func_0202c53c(GameData *game, int index);
-s64 func_0202c564(GameData *game, int index);
-u8 func_0202c58c(GameData *game, int index);
-u8 func_0202c5b4(GameData *game, int index);
+BOOL GameData_CharacterExists(GameData *game, int index);
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character);
+u8 GameData_GetCharacterEvent(GameData *game, int index);
+u8 GameData_GetCharacterEventPartner(GameData *game, int index);
+s64 GameData_GetCharacterEventEnd(GameData *game, int index);
+s64 GameData_GetCharacterAwayUntil(GameData *game, int index);
+s64 GameData_GetCharacterTroubleStart(GameData *game, int index);
+u8 GameData_GetCharacterTroubleState(GameData *game, int index);
+s64 GameData_GetCharacterTroubleProgress(GameData *game, int index);
+u8 GameData_GetCharacterTroubleId(GameData *game, int index);
+u8 GameData_GetCharacterTroubleCategory(GameData *game, int index);
 u8 func_0202c748(GameData *game, int index);
-BOOL func_0202c354(GameData *game, int index);
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);
 int MiiData_GetSex(SavedCharacter *character);
 }
 
@@ -167,13 +167,13 @@ void StartRandomEvents(s64 now) {
         SavedCharacter character;
         SavedCharacter partner;
         BOOL started;
-        func_0202c264(&gGameData, indices[i], &character);
+        GameData_ReadCharacter(&gGameData, indices[i], &character);
         character.mIndex = indices[i];
         if (character.IsLongActPaired()) {
-            func_0202c264(&gGameData, character.mLongActPartner, &partner);
+            GameData_ReadCharacter(&gGameData, character.mLongActPartner, &partner);
             partner.mIndex = character.mLongActPartner;
             started = character.StartRandomTrouble(now, force, &partner, TRUE);
-            func_0202c28c(&gGameData, partner.mIndex, &partner);
+            GameData_WriteCharacter(&gGameData, partner.mIndex, &partner);
         } else {
             started = character.StartRandomTrouble(now, force, NULL, TRUE);
         }
@@ -182,14 +182,14 @@ void StartRandomEvents(s64 now) {
                 SavedCharacter other;
                 SavedCharacter otherPartner;
                 int otherIndex = character.mTroubleTarget;
-                func_0202c264(&gGameData, otherIndex, &other);
+                GameData_ReadCharacter(&gGameData, otherIndex, &other);
                 other.mIndex = otherIndex;
                 if (other.IsLongActPaired()) {
                     if (other.mLongActPartner != character.mIndex) {
-                        func_0202c264(&gGameData, other.mLongActPartner, &otherPartner);
+                        GameData_ReadCharacter(&gGameData, other.mLongActPartner, &otherPartner);
                         otherPartner.mIndex = other.mLongActPartner;
                         other.BecomeAngryAt(&character, now, &otherPartner);
-                        func_0202c28c(&gGameData, otherPartner.mIndex, &otherPartner);
+                        GameData_WriteCharacter(&gGameData, otherPartner.mIndex, &otherPartner);
                     } else {
                         other.BecomeAngryAt(&character, now, NULL);
                     }
@@ -199,9 +199,9 @@ void StartRandomEvents(s64 now) {
                 u8 relation = GetRelationAfter(character.mRelationRank[other.mIndex]);
                 character.mRelationRank[other.mIndex] = relation;
                 other.mRelationRank[character.mIndex] = relation;
-                func_0202c28c(&gGameData, other.mIndex, &other);
+                GameData_WriteCharacter(&gGameData, other.mIndex, &other);
             }
-            func_0202c28c(&gGameData, character.mIndex, &character);
+            GameData_WriteCharacter(&gGameData, character.mIndex, &character);
         }
     }
 }
@@ -210,9 +210,9 @@ void StartRandomEvents(s64 now) {
 void StartNextEvents(s64 now, RTCTime *time) {
     StartRandomEvents(now);
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && now >= func_0202c4b8(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i) && now >= GameData_GetCharacterEventEnd(&gGameData, i)) {
             SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             character.mIndex = i;
             character.StartLongAct(character.ChooseLongAct(), now, time, NULL, NULL);
         }
@@ -221,18 +221,18 @@ void StartNextEvents(s64 now, RTCTime *time) {
 
 // Whether the outing of the resident (state 4) is over by now
 BOOL IsOutingOver(int index, s64 now) {
-    if (func_0202c5b4(&gGameData, index) == 4) {
+    if (GameData_GetCharacterTroubleCategory(&gGameData, index) == 4) {
         s64 start;
         int length;
-        u8 kind = func_0202c53c(&gGameData, index);
+        u8 kind = GameData_GetCharacterTroubleState(&gGameData, index);
         BOOL check = FALSE;
         if (kind == 2) {
-            start = func_0202c510(&gGameData, index);
-            length = func_0202c564(&gGameData, index);
+            start = GameData_GetCharacterTroubleStart(&gGameData, index);
+            length = GameData_GetCharacterTroubleProgress(&gGameData, index);
             check = TRUE;
         } else if (kind == 1) {
             start = now;
-            length = func_0202c564(&gGameData, index);
+            length = GameData_GetCharacterTroubleProgress(&gGameData, index);
             check = TRUE;
         }
         if (check && SavedCharacter::IsTroubleProgressFullAt(now, start, length)) {
@@ -243,15 +243,15 @@ BOOL IsOutingOver(int index, s64 now) {
 }
 
 void UpdateResident(int index, s64 now, RTCTime *time) {
-    if (now >= func_0202c4b8(&gGameData, index)) {
+    if (now >= GameData_GetCharacterEventEnd(&gGameData, index)) {
         SavedCharacter character;
-        func_0202c264(&gGameData, index, &character);
+        GameData_ReadCharacter(&gGameData, index, &character);
         character.mIndex = index;
         character.EndLongAct(NULL, NULL);
     }
-    if (now >= func_0202c4e4(&gGameData, index)) {
+    if (now >= GameData_GetCharacterAwayUntil(&gGameData, index)) {
         SavedCharacter character;
-        func_0202c264(&gGameData, index, &character);
+        GameData_ReadCharacter(&gGameData, index, &character);
         character.mIndex = index;
         character.ExpireTrouble(now, NULL);
         return;
@@ -260,14 +260,14 @@ void UpdateResident(int index, s64 now, RTCTime *time) {
         return;
     }
     SavedCharacter character;
-    func_0202c264(&gGameData, index, &character);
+    GameData_ReadCharacter(&gGameData, index, &character);
     character.mIndex = index;
     character.EndTrouble(now);
 }
 
 void UpdateResidents(s64 now, RTCTime *time) {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             UpdateResident(i, now, time);
         }
     }
@@ -285,35 +285,35 @@ void LimitEventTimes(s64 now) {
     RTCTime time;
     RTC_ConvertSecondToDateTime(&date, &time, now);
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c3dc(&gGameData, i)) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
             continue;
         }
-        s64 end = func_0202c4b8(&gGameData, i);
+        s64 end = GameData_GetCharacterEventEnd(&gGameData, i);
         if (end != NO_TIME) {
-            s64 length = data_020f8cc0[func_0202c468(&gGameData, i)].mMinutes * 60;
+            s64 length = gEventTable[GameData_GetCharacterEvent(&gGameData, i)].mMinutes * 60;
             if (now + length * 2 < end) {
                 SavedCharacter character;
-                func_0202c264(&gGameData, i, &character);
+                GameData_ReadCharacter(&gGameData, i, &character);
                 character.mIndex = (u8)i;
                 s64 newEnd = now + length;
                 if (character.mLongActState == 0x12) {
                     newEnd += (s64)data_020f8ca8[time.hour] * 3600;
                 }
                 character.mLongActEnd = newEnd;
-                func_0202c28c(&gGameData, i, &character);
+                GameData_WriteCharacter(&gGameData, i, &character);
             }
         }
-        if (func_0202c53c(&gGameData, i) == 0) {
+        if (GameData_GetCharacterTroubleState(&gGameData, i) == 0) {
             continue;
         }
-        s64 away = func_0202c4e4(&gGameData, i);
+        s64 away = GameData_GetCharacterAwayUntil(&gGameData, i);
         if (away == NO_TIME) {
             continue;
         }
-        u8 table = func_0202c5b4(&gGameData, i);
-        u8 row = func_0202c58c(&gGameData, i);
+        u8 table = GameData_GetCharacterTroubleCategory(&gGameData, i);
+        u8 row = GameData_GetCharacterTroubleId(&gGameData, i);
         u32 minutes;
-        if (SavedCharacter::IsTroubleStateActive(func_0202c53c(&gGameData, i))) {
+        if (SavedCharacter::IsTroubleStateActive(GameData_GetCharacterTroubleState(&gGameData, i))) {
             minutes = data_02114d78[table][row].mMinutes;
         } else {
             minutes = data_02114d78[table][row].mMinutes2;
@@ -321,11 +321,11 @@ void LimitEventTimes(s64 now) {
         s64 limit = now + (u64)minutes * 60;
         if (limit < away) {
             SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             character.mTroubleEnd = limit;
             character.mTroubleStart = now;
             character.mIndex = (u8)i;
-            func_0202c28c(&gGameData, i, &character);
+            GameData_WriteCharacter(&gGameData, i, &character);
         }
     }
 }
@@ -339,11 +339,11 @@ void ShiftEventTimes(s64 now) {
     RTCTime time;
     s64 offset;
     RTC_ConvertSecondToDateTime(&date, &time, now);
-    BOOL otherConsole = data_02123440->mOtherConsole;
+    BOOL otherConsole = gGameClock->mOtherConsole;
     if (otherConsole) {
         offset = 0;
     } else {
-        offset = func_02035ae0(data_02123440);
+        offset = func_02035ae0(gGameClock);
         s64 diff = now - offset;
         if (diff > CENTURY - 1) {
             if (offset < 0) {
@@ -361,11 +361,11 @@ void ShiftEventTimes(s64 now) {
         return;
     }
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c3dc(&gGameData, i)) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
             continue;
         }
         SavedCharacter character;
-        func_0202c264(&gGameData, i, &character);
+        GameData_ReadCharacter(&gGameData, i, &character);
         character.mIndex = (u8)i;
         if (character.mLongActEnd != NO_TIME) {
             s64 end = offset + character.mLongActEnd;
@@ -374,7 +374,7 @@ void ShiftEventTimes(s64 now) {
                     end += CENTURY;
                 } while (end < 0);
             }
-            s64 length = data_020f8cc0[character.mLongActState].mMinutes * 60;
+            s64 length = gEventTable[character.mLongActState].mMinutes * 60;
             if (now + length * 2 < end || otherConsole) {
                 end = now + length;
                 if (character.mLongActState == 0x12) {
@@ -405,7 +405,7 @@ void ShiftEventTimes(s64 now) {
             character.mTroubleEnd = away;
             character.mTroubleStart = start;
         }
-        func_0202c28c(&gGameData, i, &character);
+        GameData_WriteCharacter(&gGameData, i, &character);
     }
 }
 
@@ -415,9 +415,9 @@ int GetRandomEventCount(int *force) {
     int residents = 0;
     int busy = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             residents++;
-            if (func_0202c53c(&gGameData, i) != 0 || func_0202c4e4(&gGameData, i) == NO_TIME) {
+            if (GameData_GetCharacterTroubleState(&gGameData, i) != 0 || GameData_GetCharacterAwayUntil(&gGameData, i) == NO_TIME) {
                 busy++;
             }
         }
@@ -436,8 +436,8 @@ int GetRandomEventCount(int *force) {
 int ListRandomEventCandidates(u16 *indices) {
     int count = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && func_0202c53c(&gGameData, i) == 0 &&
-            func_0202c4e4(&gGameData, i) != NO_TIME) {
+        if (GameData_CharacterExists(&gGameData, i) && GameData_GetCharacterTroubleState(&gGameData, i) == 0 &&
+            GameData_GetCharacterAwayUntil(&gGameData, i) != NO_TIME) {
             indices[count] = i;
             count++;
         }
@@ -468,7 +468,7 @@ int EncounterJudge::GetMeetingInterval(int count) {
 
 // How many meetings the time the game was off makes, up to 500
 int EncounterJudge::GetMeetingsWhileAway(int count) {
-    s64 minutes = data_02123440->mSecondsAway / 60;
+    s64 minutes = gGameClock->mSecondsAway / 60;
     int interval = GetMeetingInterval(count);
     if (interval == 0) {
         return 0;
@@ -495,7 +495,7 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
     int residents = 0;
     *b = 0;
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c3dc(&gGameData, i)) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
             continue;
         }
         residents++;
@@ -514,8 +514,8 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
                 (*a)++;
             }
         } else {
-            if (SavedCharacter::IsAngryAfterFightState(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
-                              func_0202c58c(&gGameData, i))) {
+            if (SavedCharacter::IsAngryAfterFightState(GameData_GetCharacterTroubleState(&gGameData, i), GameData_GetCharacterTroubleCategory(&gGameData, i),
+                              GameData_GetCharacterTroubleId(&gGameData, i))) {
                 (*a)++;
             }
             if (first->IsFriendlyOrFightingRelation(first->mRelationRank[i]) && second->IsFriendlyOrFightingRelation(second->mRelationRank[i])) {
@@ -677,20 +677,20 @@ void EncounterJudge::Meet(SavedCharacter *first, SavedCharacter *second, int cha
             second->SetRelation(firstIndex, result, 100);
             first->SetMoodFromResult(result, relation);
             second->SetMoodFromResult(result, relation);
-            Apply(first, second, relation, Clock_GetSeconds(data_02123440));
+            Apply(first, second, relation, Clock_GetSeconds(gGameClock));
         } else if (change < 0) {
             first->SetRelation(secondIndex, result, 100);
             second->SetRelation(firstIndex, result, 100);
             first->SetMoodFromResult(result, relation);
             second->SetMoodFromResult(result, relation);
-            ApplyEnd(first, second, relation, Clock_GetSeconds(data_02123440), TRUE);
+            ApplyEnd(first, second, relation, Clock_GetSeconds(gGameClock), TRUE);
         }
     }
     if (change == 0 && result == 10) {
         return;
     }
-    func_0202c28c(&gGameData, firstIndex, first);
-    func_0202c28c(&gGameData, secondIndex, second);
+    GameData_WriteCharacter(&gGameData, firstIndex, first);
+    GameData_WriteCharacter(&gGameData, secondIndex, second);
 }
 
 // The two go out together (trouble state 1 of the category and id) for between three quarters and all of the
@@ -722,9 +722,9 @@ void EncounterJudge::SetEventEnds(SavedCharacter *first, SavedCharacter *second,
         u8 index = first->mLongActPartner;
         if (index != second->mIndex) {
             SavedCharacter partner;
-            func_0202c264(&gGameData, index, &partner);
+            GameData_ReadCharacter(&gGameData, index, &partner);
             partner.mLongActEnd = end;
-            func_0202c28c(&gGameData, index, &partner);
+            GameData_WriteCharacter(&gGameData, index, &partner);
         }
     }
     if (!second->IsLongActPaired()) {
@@ -735,9 +735,9 @@ void EncounterJudge::SetEventEnds(SavedCharacter *first, SavedCharacter *second,
         return;
     }
     SavedCharacter partner;
-    func_0202c264(&gGameData, index, &partner);
+    GameData_ReadCharacter(&gGameData, index, &partner);
     partner.mLongActEnd = end;
-    func_0202c28c(&gGameData, index, &partner);
+    GameData_WriteCharacter(&gGameData, index, &partner);
 }
 
 void EncounterJudge::Apply(SavedCharacter *first, SavedCharacter *second, int relation, s64 now) {
@@ -792,8 +792,8 @@ void EncounterJudge::MeetRandomPair(int count, u8 *residents) {
     SavedCharacter characters[2];
     characters[0].mIndex = residents[a];
     characters[1].mIndex = residents[b];
-    func_0202c264(&gGameData, characters[0].mIndex, &characters[0]);
-    func_0202c264(&gGameData, characters[1].mIndex, &characters[1]);
+    GameData_ReadCharacter(&gGameData, characters[0].mIndex, &characters[0]);
+    GameData_ReadCharacter(&gGameData, characters[1].mIndex, &characters[1]);
     Meet(&characters[0], &characters[1], GetMeetingChange(&characters[0], &characters[1]));
 }
 
@@ -809,11 +809,11 @@ void EncounterJudge::MeetWhileAway(int count, u8 *residents) {
 void EncounterJudge::PickItemsWhileAway(int count, u8 *residents, s64 now) {
     int items[0xFF];
     int half = count / 2;
-    int times = half * (int)(data_02123440->mSecondsAway / 3600) / 24;
+    int times = half * (int)(gGameClock->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, half);
     int itemCount = 0;
     for (int i = 0; i < 0xFF; i++) {
-        if (data_020f5f0c[(u16)i].mKind == 1) {
+        if (gGoodsTable[(u16)i].mKind == 1) {
             items[itemCount] = i;
             itemCount++;
         }
@@ -825,15 +825,15 @@ void EncounterJudge::PickItemsWhileAway(int count, u8 *residents, s64 now) {
 
 void EncounterJudge::PickItem(int index, int *items, int itemCount, s64 now) {
     BOOL busy = FALSE;
-    if (func_0202c5b4(&gGameData, index) == 0 &&
-        (func_0202c53c(&gGameData, index) == 1 || func_0202c53c(&gGameData, index) == 2)) {
+    if (GameData_GetCharacterTroubleCategory(&gGameData, index) == 0 &&
+        (GameData_GetCharacterTroubleState(&gGameData, index) == 1 || GameData_GetCharacterTroubleState(&gGameData, index) == 2)) {
         busy = TRUE;
     }
     if (busy) {
         return;
     }
     SavedCharacter character;
-    func_0202c264(&gGameData, index, &character);
+    GameData_ReadCharacter(&gGameData, index, &character);
     character.mIndex = index;
     if (character.GetFullness(now) > 0) {
         return;
@@ -841,13 +841,13 @@ void EncounterJudge::PickItem(int index, int *items, int itemCount, s64 now) {
     int item = items[Rand(itemCount)];
     character.Eat(now - Rand(7200), item);
     character.mEatLastFood = item;
-    func_0202c28c(&gGameData, index, &character);
+    GameData_WriteCharacter(&gGameData, index, &character);
 }
 
 // While the game was off, residents (a fifth of them for every day, at most a fifth) change their clothes
 void EncounterJudge::ChangeClothesWhileAway(int count, u8 *residents) {
     int fifth = count / 5;
-    int times = fifth * (int)(data_02123440->mSecondsAway / 3600) / 24;
+    int times = fifth * (int)(gGameClock->mSecondsAway / 3600) / 24;
     times = MATH_CLAMP(times, 0, fifth);
     for (int j = 0; j < times; j++) {
         ChangeClothes(residents[Rand(count)]);
@@ -860,7 +860,7 @@ void EncounterJudge::ChangeClothes(int index) {
     SavedCharacter character;
     u16 choices[1800];
     int count = 0;
-    func_0202c264(&gGameData, index, &character);
+    GameData_ReadCharacter(&gGameData, index, &character);
     character.mIndex = index;
     for (int i = 1; i < 300; i++) {
         if ((character.mOwnedClothes[i >> 5] >> (i & 31)) & 1) {
@@ -883,18 +883,18 @@ void EncounterJudge::ChangeClothes(int index) {
         return;
     }
     character.mClothesId = choices[Rand(count)];
-    func_0202c28c(&gGameData, index, &character);
+    GameData_WriteCharacter(&gGameData, index, &character);
 }
 
 // Clears byte 0x24E of every resident that has it set (SavedCharacter::ResetUnknown24E sets it to 0xFF)
 void EncounterJudge::ClearUnknown24E() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && func_0202c748(&gGameData, i) != 0xFF) {
+        if (GameData_CharacterExists(&gGameData, i) && func_0202c748(&gGameData, i) != 0xFF) {
             SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             character.mIndex = i;
             character.ResetUnknown24E();
-            func_0202c28c(&gGameData, i, &character);
+            GameData_WriteCharacter(&gGameData, i, &character);
         }
     }
 }
@@ -905,9 +905,9 @@ void EncounterJudge::SetRandomUnknown24E(int count, u8 *residents) {
     for (int j = 0; j < times; j++) {
         int index = residents[Rand(count)];
         SavedCharacter character;
-        func_0202c264(&gGameData, index, &character);
+        GameData_ReadCharacter(&gGameData, index, &character);
         character.mIndex = index;
         character.RandomizeUnknown24E();
-        func_0202c28c(&gGameData, index, &character);
+        GameData_WriteCharacter(&gGameData, index, &character);
     }
 }

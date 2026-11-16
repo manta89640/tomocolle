@@ -24,7 +24,7 @@ public:
     virtual void Exit();
 
     /* 0x0010 */ Model mGlasses;             // TG3:/Glass6.imd, resource 0
-    /* 0x00C4 */ Camera *mCamera;            // &data_02122764
+    /* 0x00C4 */ Camera *mCamera;            // &gCamera
     /* 0x00C8 */ CharacterBase mFace;        // A face with no head model
     /* 0x26AC */ CharacterHead mHead;        // Resource 1: TGH:/head.imd with wait00.ica
     /* 0x4DD4 */ int mFaceKind;              // X with up and down: 0 to 26

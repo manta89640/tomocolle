@@ -115,10 +115,10 @@ void TutorialRoomScene::StartLoading() {
     mTutorialStep = gSceneMemory.mTutorialStep;
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
-            mFront.mResidents[func_0202c414(&gGameData, i)] = i;
+            mFront.mResidents[GameData_GetCharacterRoomNumber(&gGameData, i)] = i;
         }
     }
 
@@ -165,7 +165,7 @@ void TutorialRoomScene::StartLoading() {
 // are loaded, and starts the part of the tutorial that is due.
 //
 // The window's button position, size and text position are read from the pool of constants at the start of
-// .rodata (see the constants at the top). Two things matter besides: func_02027290 is declared returning a value,
+// .rodata (see the constants at the top). Two things matter besides: ObjResourceManager_LoadCell is declared returning a value,
 // and the character counts read the canvas through a pointer (GetCharCount above).
 // @0x02149d8c
 void TutorialRoomScene::Init() {
@@ -173,36 +173,36 @@ void TutorialRoomScene::Init() {
     void *file;
     void *animations;
 
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
-    func_0202680c(0x4000);
+    CreateMainFrameHeap(0x4000);
 
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
-    func_02027d7c(&data_02121834, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
-    mFront.mScreen = func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
-    func_02028f24(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027290(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
-    func_02028f24(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_down.ncg", 0x100, 0, 0, 0x4000, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_down.ncl", 0x100, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, sWindowScreenName, 0x100, 0, 0, 0, 0, -1);
+    mFront.mScreen = ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, 0x140);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/BG_sub.ncg", 2, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/BG_sub.ncl", 2, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MLT:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "MLT:/Obj_down.nce", 0x1000, 0);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MLT:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MLT:/Obj_up.nce", "MLT:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "MLT:/Obj_up.ncl", 0x10, -1, -1, -1);
-    mSky.mColors = (u16 *)func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
-    func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-    mSky.mPalette = func_02027534(&data_021213b8, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
-    func_020278f8(&data_021213b8, 0, 0x101);
-    func_02028280(&data_02121834, 1, 2);
-    func_02028280(&data_02121834, 2, 1);
-    data_0211d604.Set(0x1600);
-    data_0211d604.Show(0x11);
-    func_02023ee0(&data_0211d604, 2, 0x11, 8, 8);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MLT:/Obj_up.ncl", 0x10, -1, -1, -1);
+    mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+    mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    gScreenControl.Set(0x1600);
+    gScreenControl.Show(0x11);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
 
     mEtcMessages.Open("TEM:/tmd_etc_msg_JP.bmg");
     mCommonMessages.Open("TCM:/tmd_common_msg_JP.bmg");
@@ -213,17 +213,17 @@ void TutorialRoomScene::Init() {
     mRoom.SetUnknown(10);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
-    func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
+    ParticleSystem_Load(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_0202ad04(data_021223e4, 1, mCharacters[1].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 1, mCharacters[1].mArchiveName, 0);
     ((Character *)(&mCharacters[0]))->Init(0, 0, 0);
     ((Character *)(&mCharacters[1]))->Init(1, 0, 1);
     mCharacters[0].mPartner = &mCharacters[1];
     mCharacters[1].mPartner = &mCharacters[0];
-    animations = func_0202ad04(data_021223e4, 2, "BIC", 0);
+    animations = ModelResources_BindArchive(gModelResources, 2, "BIC", 0);
     for (i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         ((CharacterBase *)(&mCharacters[i]))->MakeFace();
@@ -233,7 +233,7 @@ void TutorialRoomScene::Init() {
         ((Character *)(&mCharacters[i]))->UpdateSpeedScales();
         ((Character *)(&mCharacters[i]))->UpdateBodyColors();
         mCharacters[i].CopyName();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAngle(0x4000);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mApartmentRoom = &mRoom;
@@ -248,15 +248,15 @@ void TutorialRoomScene::Init() {
 
     int charOffset = 0x200;
     ScreenRect rect = sWindowRect;
-    func_02032fb8(&mWindow[0], rect);
-    func_02033174(&mWindow[0], sWindowScreenName, 0x100);
+    MessageWindow_Init(&mWindow[0], rect);
+    MessageWindow_SetScreen(&mWindow[0], sWindowScreenName, 0x100);
     func_020331bc(&mWindow[0], 0x3F00, rect);
-    func_020336b4(&mWindow[0], 0, 0, 6, 7, sWindowButtonPosition, sWindowButtonSize, &mCommonMessages, 4,
+    MessageWindow_AddTextButtonWithSoundIds(&mWindow[0], 0, 0, 6, 7, sWindowButtonPosition, sWindowButtonSize, &mCommonMessages, 4,
                   &gFonts[2].mFont, 0x1000, &charOffset, -1, -1, 0, 10);
-    func_02033a58(&mWindow[0], &mEtcMessages, 0x159, &gFonts[0].mFont, 0x1000, sWindowTextPosition, &charOffset);
-    func_02034f94(&mWindow[0], 1);
-    func_02034f4c(&mWindow[0], 1);
-    func_02028280(&data_02121834, 0x100, 0);
+    MessageWindow_AddText(&mWindow[0], &mEtcMessages, 0x159, &gFonts[0].mFont, 0x1000, sWindowTextPosition, &charOffset);
+    MessageWindow_SetTextsVAlign(&mWindow[0], 1);
+    MessageWindow_SetTextsHAlign(&mWindow[0], 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 0);
     mWindow[0].mTexts[0].SetStringArg(mCharacters[0].mNameText, 0);
 
     mButtonLabel[0].InitObjForMessage(&mEtcMessages, 0xB3, &gFonts[0].mFont, 0x1000, charOffset, 0, 1, 0, 0, 15,
@@ -294,14 +294,14 @@ void TutorialRoomScene::Init() {
 
 // @0x0214a784
 void TutorialRoomScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_KEY_RIGHT) {
         mCamera.mInput.y = 0x10000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+    } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
         mCamera.mInput.y = -0x10000;
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+    if (gPadInput.mHeld & PAD_KEY_UP) {
         mCamera.mInput.x = 0xE000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+    } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
         mCamera.mInput.x = -0xE000;
     }
     UpdateState();
@@ -315,9 +315,9 @@ void TutorialRoomScene::Draw() {
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Draw();
     }
-    func_02080f00(&mParticles, 0);
+    ParticleSystem_Draw(&mParticles, 0);
     mTimedMessage.Draw();
-    func_020345d8(&mWindow[0]);
+    MessageWindow_Draw(&mWindow[0]);
     mButtonLabel[0].Draw();
     mNamePanel.Draw();
     mButtons[0].Draw();
@@ -328,12 +328,12 @@ void TutorialRoomScene::Draw() {
 // @0x0214a8b8
 void TutorialRoomScene::Exit() {
     SaveCharacters();
-    func_02023f4c(&data_0211d604, 0x3F00, 0);
-    func_02023eac(&data_0211d604, 0x3F3F);
-    func_0202683c();
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F00, 0);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F3F);
+    DestroyMainFrameHeap();
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
@@ -411,7 +411,7 @@ void TutorialRoomScene::StartTutorialStep() {
     switch (mTutorialStep) {
     case 8:
         SetState(STATE_RESIDENT_ARRIVES);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = 0x1400000;
         mLight.SetState(TutorialRoomLight::STATE_SET_ROOM_COLOR);
         break;
@@ -420,7 +420,7 @@ void TutorialRoomScene::StartTutorialStep() {
         mCharacters[0].mPresent = TRUE;
         mCharacters[0].SetState(4);
         ((Character *)(&mCharacters[0]))->SetAngle(0x1800);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = 0x1500000;
         mLight.SetState(TutorialRoomLight::STATE_SET_STYLE_COLOR);
         mTimedMessage.SetState(TutorialTimedMessage::STATE_SHOW);
@@ -437,7 +437,7 @@ void TutorialRoomScene::StartTutorialStep() {
         FloorPos target;
         mCharacters[0].GetRandomPosInArea(&target);
         mCharacters[0].SetWalkTarget(target.x, 0, target.z);
-        func_02023f4c(&data_0211d604, 0x1F00, -10);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, -10);
         mCamera.mOrbit.y = -0x1000000;
         mLight.SetState(TutorialRoomLight::STATE_SET_STYLE_COLOR);
         mTimedMessage.SetState(TutorialTimedMessage::STATE_SHOW);
@@ -503,17 +503,17 @@ void TutorialRoomScene::UpdateState() {
             mTimer++;
             if (mTimer > 240) {
                 mStep++;
-                func_02023f4c(&data_0211d604, 0x1F00, 0);
-                func_02034f38(&mWindow[0], 0, 0x159);
-                func_02034a3c(&mWindow[0], 0, 0, mCharacters[0].mNameText);
-                func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+                ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
+                MessageWindow_SetTextMessage(&mWindow[0], 0, 0x159);
+                MessageWindow_SetTextStringArg(&mWindow[0], 0, 0, mCharacters[0].mNameText);
+                MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
             }
             UpdateIdle();
         } else if (mStep == 4) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
             }
             UpdateIdle();
         } else if (mStep == 5) {
@@ -655,36 +655,36 @@ void TutorialRoomScene::UpdateState() {
         if (mStep == 0) {
             mStep++;
             mWindow[0].mTexts[0].mMessage = 0x165;
-            func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+            MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
         } else if (mStep == 1) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 15;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 2) {
             if (mWindow[0].mTransitionDone) {
                 mStep++;
                 mWindow[0].mTexts[0].mMessage = 0x166;
-                func_02034720(&mWindow[0], 0x1A, 0);
+                MessageWindow_Open(&mWindow[0], 0x1A, 0);
             }
         } else if (mStep == 3) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 4) {
             if (mWindow[0].mTransitionDone) {
                 mStep++;
                 mWindow[0].mTexts[0].mMessage = 0x167;
-                func_02034720(&mWindow[0], 0x1A, 0);
+                MessageWindow_Open(&mWindow[0], 0x1A, 0);
             }
         } else if (mStep == 5) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], 0x1C);
+                MessageWindow_Close(&mWindow[0], 0x1C);
             }
         } else if (mStep == 6) {
             if (mWindow[0].mTransitionDone) {
@@ -704,16 +704,16 @@ void TutorialRoomScene::UpdateState() {
             mTimer++;
             if (mTimer > 60) {
                 mStep++;
-                func_02023f4c(&data_0211d604, 0x1F00, 0);
-                func_02034f38(&mWindow[0], 0, 0x16C);
-                func_02034720(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
+                ScreenControl_SetBlendBrightness(&gScreenControl, 0x1F00, 0);
+                MessageWindow_SetTextMessage(&mWindow[0], 0, 0x16C);
+                MessageWindow_Open(&mWindow[0], MessageWindow::FLAG_OPEN | MessageWindow::FLAG_FROM_BELOW, 0);
             }
             UpdateIdle();
         } else if (mStep == 1) {
             if (mWindow[0].mResult != -1) {
                 mStep++;
                 mWindow[0].mUnknownSetBeforeClose = 5;
-                func_020349cc(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
+                MessageWindow_Close(&mWindow[0], MessageWindow::FLAG_CLOSE | MessageWindow::FLAG_FROM_BELOW);
             }
             UpdateIdle();
         } else if (mStep == 2) {
@@ -759,7 +759,7 @@ void TutorialRoomScene::UpdateState() {
 void TutorialRoomScene::UpdateObjects() {
     mClock.UpdateIfArchiveIdle();
     mCamera.Update();
-    func_020341d4(&mWindow[0]);
+    MessageWindow_Update(&mWindow[0]);
     func_0207b138(mParticles.mManager);
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Update();
@@ -923,8 +923,8 @@ void TutorialRoomScene::UpdateIdle() {
 // @0x0214c0c8
 void TutorialRoomScene::SaveCharacter(SavedCharacter *character) {
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, character);
     }
 }
 
@@ -937,8 +937,8 @@ void TutorialRoomScene::SaveCharacters() {
 // @0x0214c128
 void TutorialRoomScene::LoadCharacter(SavedCharacter *character) {
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c264(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_ReadCharacter(&gGameData, index, character);
     } else {
         ((SavedCharacter *)(character))->Reset();
         ((SavedCharacter *)(character))->SetParameter(40, index & 7);
@@ -1592,7 +1592,7 @@ BOOL TutorialRoomCharacter::IsWalkAnim() {
     int anim = mAnimId;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 5; j++) {
-            if (anim == data_020fb898[i][j]) {
+            if (anim == gWalkAnimations[i][j]) {
                 return TRUE;
             }
         }
@@ -1745,7 +1745,7 @@ void TutorialApartmentRoom::UpdateState() {
 
 // @0x0214e41c
 TutorialRoomCamera::TutorialRoomCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0214e42c
@@ -1760,7 +1760,7 @@ void TutorialRoomCamera::Reset() {
     SetMode(MODE_NONE);
     mIgnoreInput = FALSE;
     mSnap = TRUE;
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mPosition.x = 0;
     mPosition.y = FX32_CONST(5);
     mPosition.z = FX32_CONST(16);
@@ -1837,7 +1837,7 @@ void TutorialRoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -1862,7 +1862,7 @@ void TutorialRoomCamera::Update() {
         Clamp(&target.z, 0x3800);
         VecFx32 radius;
         VEC_Subtract(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &radius);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0x9000;
         radius.z = (radius.z * 9 >> 2) + 0x9000;
         radius.y = 0x8000;
@@ -1955,9 +1955,9 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
     mCamera = camera;
     mRoom = room;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
     }
 }
 
@@ -1965,7 +1965,7 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
 void TutorialRoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mId].mLightColor);
+        SetColor(gInteriorTable[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -1977,10 +1977,10 @@ void TutorialRoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
+            SplitColor(gInteriorTable[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mId].mLightColor;
+                color = gInteriorTable[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);
@@ -2013,9 +2013,9 @@ void TutorialRoomLight::Update() {
         }
         break;
     }
-    func_0202ab2c(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
+    Light_SetRotatedDirection(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
                   -600, -4000);
-    func_0202ab2c(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
+    Light_SetRotatedDirection(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
                   -4000, 1500);
 }
 
@@ -2034,7 +2034,7 @@ void TutorialRoomLight::SetColor(u16 color) {
 
 // @0x0214f3b8
 void TutorialRoomLight::BlendColor(int *targetR, int *targetG, int *targetB, int *r, int *g, int *b) {
-    func_02028b98(mLights[0]->mColor, r, g, b);
+    SplitColor(mLights[0]->mColor, r, g, b);
     fx32 weight = FX_Mul(mFade, mFade);
     *r = *r + ((weight * (*targetR - *r)) >> FX32_SHIFT);
     *g = *g + ((weight * (*targetG - *g)) >> FX32_SHIFT);
@@ -2072,7 +2072,7 @@ BOOL TutorialRoomCursor::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- TutorialBuildingButton ---
@@ -2139,7 +2139,7 @@ void TutorialApartmentFront::Init(int room) {
     for (u8 i = 0; i < sRoomCounts[mBuildingSize]; i++) {
         DrawWindow(i);
     }
-    mScreen = (u16 *)(func_020253d4(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
+    mScreen = (u16 *)(GraphicsManager_GetScreenOffset(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
     mSelectedRoom = room;
     int column;
     int floor;
@@ -2174,8 +2174,8 @@ void TutorialApartmentFront::Update() {
     }
     }
     int y = 320 - (mScroll >> FX32_SHIFT);
-    func_02028154(&data_02121834, 0x200, y);
-    func_02028154(&data_02121834, 0x400, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, y);
     mCursor.Update();
     mButton.Update();
     UpdateButtonPosition();
@@ -2242,10 +2242,10 @@ int TutorialApartmentFront::GetWindowKind(int room) {
     if (character == 0xFF) {
         return WINDOW_EMPTY;
     }
-    int unknown1 = func_0202c468(&gGameData, character);
-    u8 unknown2 = func_0202c53c(&gGameData, character);
-    int unknown3 = func_0202c5b4(&gGameData, character);
-    int unknown4 = data_02114d78[unknown3][func_0202c58c(&gGameData, character)].mUnknown0;
+    int unknown1 = GameData_GetCharacterEvent(&gGameData, character);
+    u8 unknown2 = GameData_GetCharacterTroubleState(&gGameData, character);
+    int unknown3 = GameData_GetCharacterTroubleCategory(&gGameData, character);
+    int unknown4 = data_02114d78[unknown3][GameData_GetCharacterTroubleId(&gGameData, character)].mUnknown0;
     if (SavedCharacter::IsAwayState(unknown1)) {
         return WINDOW_2;
     }
@@ -2386,8 +2386,8 @@ void TutorialSkyBackground::UpdateState() {
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
-                func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-                mPalette = func_02027534(&data_021213b8, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+                VramTransferQueue_LoadFile(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+                mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
         }
@@ -2405,7 +2405,7 @@ void TutorialSkyBackground::UpdatePaths() {
 
 // @0x0214fe10
 void TutorialSkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- TutorialNamePanel ---
@@ -2522,7 +2522,7 @@ BOOL TutorialTouchSprite::Contains(ScreenPoint point) {
     ScreenRect rect = *mTouchRect;
     rect.x += mX;
     rect.y += mY;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // @0x02150264
@@ -2599,13 +2599,13 @@ TutorialClock::TutorialClock() {
 
 // @0x021504cc
 void TutorialClock::Update() {
-    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
 }
 
 // @0x021504f4
 void TutorialClock::UpdateIfArchiveIdle() {
     if (ArchiveManager_IsIdle(&gArchiveManager)) {
-        mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+        mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
     }
 }
 
@@ -2756,9 +2756,9 @@ void TutorialTimedMessage::SetState(int state) {
 void TutorialTimedMessage::SetVisible(BOOL visible) {
     mSprite.mVisible = visible;
     if (visible == TRUE) {
-        data_0211d604.Show(2);
+        gScreenControl.Show(2);
     } else {
-        HideScreens(&data_0211d604, 2);
+        HideScreens(&gScreenControl, 2);
     }
 }
 

@@ -9,7 +9,7 @@
 
 // --- The main program, as far as this overlay uses it ---
 
-// The main program's camera (data_02122764): SceneCast::mCamera points at it. As MainProgram3d.h has it.
+// The main program's camera (gCamera): SceneCast::mCamera points at it. As MainProgram3d.h has it.
 struct Camera {
     /* 0x00 */ u8 mUnknown00[0x14];
     /* 0x14 */ VecFx32 mPosition;
@@ -21,7 +21,7 @@ struct Camera {
     /* 0x48 */ u16 mAngleZ;
 };
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one)
+// One of the main program's 3D lights (gLights is an array of them; Light_Reset resets one)
 struct Light {
     /* 0x0 */ VecFx16 mDirection;
     /* 0x6 */ u16 mColor;
@@ -40,33 +40,33 @@ struct Renderer3d;
 extern "C" {
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-extern Light data_021227cc[]; // The lights (as overlay 110 declares them)
-extern Light data_021227d8[];
+extern Renderer3d gVramManagerWork;
+extern Light gLights[]; // The lights (as overlay 110 declares them)
+extern Light gLight1[];
 extern MATHRandContext16 gRandom;
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown);
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_0202b0e8(Renderer3d *renderer);
-void func_0202a640(Camera *camera); // Resets it
-void func_0202a96c(Light *light);   // Resets it
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void VramManagers_Reset(Renderer3d *renderer);
+void Camera_Reset(Camera *camera); // Resets it
+void Light_Reset(Light *light);   // Resets it
 // The screens' brightness and fades (as overlays 72, 76 and 96 call them)
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
-BOOL func_02024004(ScreenControl *screens, int planes, int step);
-BOOL func_02024118(ScreenControl *screens, int planes, int step);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int step);
+BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int step);
 
 int MiiData_GetSex(CharacterRecord *mii); // 0 for a man
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Copies a saved character out
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Copies a saved character out
 }
 
 #endif // OV039_MAINPROGRAM_H

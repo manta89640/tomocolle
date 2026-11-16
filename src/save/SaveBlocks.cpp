@@ -18,7 +18,7 @@ struct PadInputState {
     /* 0x00 */ u8 mUnknown00[0x14];
     /* 0x14 */ BOOL mEnabled;
 };
-extern PadInputState data_0211f9d4;
+extern PadInputState gPadInput;
 }
 
 // Where the blocks are in each slot of the backup memory
@@ -80,7 +80,7 @@ int SaveHeader::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup((u32)slot << SLOT_SHIFT, &buffer, sizeof(buffer));
@@ -97,7 +97,7 @@ int SaveHeader::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -185,7 +185,7 @@ int CharacterSave::Load(int slot) {
     CARDResult code;
     int result = 0;
     u32 offset = mIndex * sizeof(CharacterSaveData) + CHARACTER_SAVE_OFFSET;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(offset + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -202,7 +202,7 @@ int CharacterSave::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -356,7 +356,7 @@ int SaveBlock3::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK3_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -373,7 +373,7 @@ int SaveBlock3::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -428,7 +428,7 @@ int SaveBlock4::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK4_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -445,7 +445,7 @@ int SaveBlock4::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -492,7 +492,7 @@ int SaveBlock5::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK5_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -509,7 +509,7 @@ int SaveBlock5::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -548,7 +548,7 @@ int SaveBlock6::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK6_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -565,7 +565,7 @@ int SaveBlock6::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -604,7 +604,7 @@ int SaveBlock7::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK7_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -621,7 +621,7 @@ int SaveBlock7::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -660,7 +660,7 @@ int SaveBlock8::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK8_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -677,7 +677,7 @@ int SaveBlock8::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -708,7 +708,7 @@ int SaveBlock9::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK9_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -725,7 +725,7 @@ int SaveBlock9::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 
@@ -768,7 +768,7 @@ int SaveBlock10::Load(int slot) {
     BOOL read;
     CARDResult code;
     int result = 0;
-    data_0211f9d4.mEnabled = FALSE;
+    gPadInput.mEnabled = FALSE;
     mLoaded = FALSE;
     CARD_LockBackup(lockId);
     read = CARD_ReadBackup(SAVE_BLOCK10_OFFSET + ((u32)slot << SLOT_SHIFT), &buffer, sizeof(buffer));
@@ -785,7 +785,7 @@ int SaveBlock10::Load(int slot) {
             }
         }
     }
-    data_0211f9d4.mEnabled = TRUE;
+    gPadInput.mEnabled = TRUE;
     return read ? result : code + 16;
 }
 

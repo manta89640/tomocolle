@@ -3,8 +3,8 @@
 
 #include <nitro.h>
 
-// The screens: which planes are shown (data_0211d604, functions 0x02023848 on, not decompiled). What the scenes
-// and the scene manager show of it. The names are descriptive, not the original.
+// The screens: which planes are shown, their brightness and blending (gScreenControl, functions 0x0202320C to
+// 0x02024370, not decompiled). What the scenes and the scene manager show of it. The names are descriptive, not the original.
 struct ScreenControl {
     void Set(u32 planes) {
         mPlanes = planes;
@@ -27,7 +27,7 @@ struct ScreenControl {
 };
 
 extern "C" {
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 }
 
 #endif // SCREENCONTROL_H

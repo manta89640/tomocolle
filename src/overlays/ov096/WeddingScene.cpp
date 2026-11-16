@@ -14,10 +14,10 @@ static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
 static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0, 0x5DC}};
 
 void WeddingScene::StartLoading() {
-    func_0202c264(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
+    GameData_ReadCharacter(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
     mCharacters[0].mIndex = GetCharacterIndex(0);
     mCharacters[0].Character::SetArchive("3H0");
-    func_0202c264(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
+    GameData_ReadCharacter(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
     mCharacters[1].mIndex = GetCharacterIndex(1);
     mCharacters[1].Character::SetArchive("3H1");
     mRoom.mId = mCharacters[0].mInterior;
@@ -71,19 +71,19 @@ void WeddingScene::Init() {
     InitLowerScreen();
     Init3d();
 
-    func_02027534(&data_021213b8, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
-    data_0211d604.Set(0x1111);
-    func_02028280(&data_02121834, 0x100, 3);
-    func_02028108(&data_02121834, 0x2F00, 0);
-    func_02028154(&data_02121834, 0x2F00, 0);
-    func_02027290(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
-    func_02028f24(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
-    data_0211d604.mUnknown44 = 0;
-    data_0211d604.mUnknown44Changed = TRUE;
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_common.nsc", 0x100, 0, 0, 0, 0, -1);
+    gScreenControl.Set(0x1111);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
+    gScreenControl.mUnknown44 = 0;
+    gScreenControl.mUnknown44Changed = TRUE;
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 
     mContext.mSceneId = mSceneId;
     mContext.mCommonMessages = &mMessageFiles[0];
@@ -109,14 +109,14 @@ void WeddingScene::Init() {
 
 // The touch screen: the window for the messages over a background
 void WeddingScene::InitLowerScreen() {
-    func_02027534(&data_021213b8, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
-    func_02028f24(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);
-    func_02028280(&data_02121834, 4, 0);
-    func_02028280(&data_02121834, 2, 1);
-    func_02028280(&data_02121834, 1, 3);
-    func_02023ee0(&data_0211d604, 4, 0x11, 8, 8);
+    PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F, -1, -1, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_down.ncg", 6, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/Window_down.nsc", 2, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_dialogue.nsc", 4, 0, 0, 0, 0, -1);
+    ScreenLoader_SetPriority(&gScreenLoader, 4, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 3);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 4, 0x11, 8, 8);
 }
 
 // The top screen: the room, the camera, the lights and the two characters
@@ -124,31 +124,31 @@ void WeddingScene::Init3d() {
     VecFx32 points[2];
     void *animations;
 
-    func_0202b0e8(&data_02122824);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 0, 0x7FFF, 63, FALSE);
-    func_02028280(&data_02121834, 1, 3);
-    func_0202a640(&data_02122764);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 3);
+    Camera_Reset(&gCamera);
     mCamera.Init(&mCharacters[0], &mCharacters[1]);
     mCamera.Reset(gSceneManager.mPreviousSceneId);
     mCamera.GetStandingPoints(&points[0], &points[1]);
-    mLights.Init(&data_02122764, &mRoom);
+    mLights.Init(&gCamera, &mRoom);
     mRoom.Load(3);
     mRoom.LoadParts(4);
     mRoom.SetState(2);
-    ModelResources_SetModel(data_021223e4, 10, mGift.mModelPath);
+    ModelResources_SetModel(gModelResources, 10, mGift.mModelPath);
     mGift.Load(10);
     mGift.SetPosition(sFarAway);
     mGift.mVisible = FALSE;
-    animations = func_0202ad04(data_021223e4, 2, "3HA", 0);
-    ModelResources_SetModel(data_021223e4, 0, mCharacters[0].mModelPath);
-    ModelResources_SetModel(data_021223e4, 1, mCharacters[1].mModelPath);
+    animations = ModelResources_BindArchive(gModelResources, 2, "3HA", 0);
+    ModelResources_SetModel(gModelResources, 0, mCharacters[0].mModelPath);
+    ModelResources_SetModel(gModelResources, 1, mCharacters[1].mModelPath);
     mCharacters[0].Character::Init(0, 0, 0);
     mCharacters[1].Character::Init(1, 0, 0);
     for (int i = 0; i < 2; i++) {
         WeddingCharacter *character = &mCharacters[i];
-        func_0202c264(&gGameData, GetCharacterIndex(i), character);
+        GameData_ReadCharacter(&gGameData, GetCharacterIndex(i), character);
         character->CharacterBase::MakeFace();
         character->Character::UpdateBodyColors();
         character->Character::UpdateBodyScale();
@@ -156,7 +156,7 @@ void WeddingScene::Init3d() {
         mCharacters[i].mPersonality = character->GetPersonality();
         character->UpdateBiorhythm();
         character->Character::UpdateSpeedScales();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].mShadowVisible = TRUE;
         character->CharacterBase::SetFace(10);
         character->Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, "idle00"));
@@ -234,7 +234,7 @@ void WeddingScene::Update() {
         } else if (level < 0) {
             level = 0;
         }
-        func_02023f4c(&data_0211d604, 0x3F3F, level);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, level);
         if (mFrame >= 64) {
             mState++;
             mFrame = 0;
@@ -268,7 +268,7 @@ void WeddingScene::Update() {
         } else if (level < 0) {
             level = 0;
         }
-        func_02023f4c(&data_0211d604, 0x3F3F, level);
+        ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, level);
         if (mFrame >= 8) {
             mState++;
             mFrame = 0;
@@ -277,7 +277,7 @@ void WeddingScene::Update() {
     }
     case STATE_LEAVE:
         if (mFrame >= 52) {
-            s64 now = Clock_GetSeconds(data_02123440);
+            s64 now = Clock_GetSeconds(gGameClock);
             mCharacters[0].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[0]) * 60;
             mCharacters[1].mTroubleEnd = now + GetHoneymoonMinutes(&mCharacters[1]) * 60;
             mCharacters[0].mTroubleState = 3;
@@ -315,22 +315,22 @@ void WeddingScene::Draw() {
 
 void WeddingScene::Exit() {
     mInventory.Save();
-    func_0202c28c(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
-    func_0202c28c(&gGameData, mCharacters[1].mIndex, &mCharacters[1]);
+    GameData_WriteCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+    GameData_WriteCharacter(&gGameData, mCharacters[1].mIndex, &mCharacters[1]);
     ArchiveManager_Unmount(&gArchiveManager, "SMT");
     ArchiveManager_Unmount(&gArchiveManager, "TCM");
     ArchiveManager_Unmount(&gArchiveManager, "TTM");
     ArchiveManager_Unmount(&gArchiveManager, "TIM");
     ArchiveManager_Unmount(&gArchiveManager, "TEM");
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
     ArchiveManager_Unmount(&gArchiveManager, "3HA");
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, "3H0");
     ArchiveManager_Unmount(&gArchiveManager, "3H1");
     ArchiveManager_Unmount(&gArchiveManager, mGift.mArchiveName);
-    func_0202aecc(data_021223e4, 10);
+    ModelResources_ReleaseModel(gModelResources, 10);
 }
 
 // Which saved character each of the two is: when the scene comes back from scene 0x40 or 0xC0, the ones that it
@@ -582,8 +582,8 @@ void WeddingCharacter::SetState(int state) {
 
 void WeddingCharacter::FaceCamera() {
     FloorPos camera;
-    camera.x = data_02122764.mEye.x;
-    camera.z = data_02122764.mEye.z;
+    camera.x = gCamera.mEye.x;
+    camera.z = gCamera.mEye.z;
     Character::SetAngle(AngleTo(camera));
 }
 
@@ -616,7 +616,7 @@ void WeddingCharacter::Speak(int file, u32 message, int count, int *types, int *
             case ARG_NONE:
                 break;
             case ARG_CHARACTER:
-                func_0202c264(&gGameData, values[i], &character);
+                GameData_ReadCharacter(&gGameData, values[i], &character);
                 MiiData_GetName(&character, names[i]);
                 MakeSpeechText(pronunciations[i], names[i], sizeof(names[i]));
                 break;
@@ -721,11 +721,11 @@ void WeddingCharacter::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit)
 }
 
 void WeddingCharacter::LookAtCamera() {
-    LookAt(&data_02122764.mEye, 0x2000, 0x3200);
+    LookAt(&gCamera.mEye, 0x2000, 0x3200);
 }
 
 void WeddingCharacter::TurnHeadToCamera() {
-    TurnHeadTo(&data_02122764.mEye, 0x2000, 0x3200);
+    TurnHeadTo(&gCamera.mEye, 0x2000, 0x3200);
 }
 
 void WeddingCharacter::LookAtPartner() {
@@ -754,14 +754,14 @@ u16 WeddingCharacter::GetHeadYawTo(VecFx32 *target) {
 // --- The camera -------------------------------------------------------------------------------------------------
 
 void WeddingCamera::Init(WeddingCharacter *first, WeddingCharacter *second) {
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     mCamera->SetPosition(sCameraStartPosition);
     mCamera->SetTarget(sCameraStartTarget);
     mCamera->mAngleX = 0;
     mCamera->mAngleY = 0;
     mCamera->mAngleZ = 0;
-    func_0202a748(mCamera);
+    Camera_UpdateEye(mCamera);
     mFirst = first;
     mSecond = second;
     CopyVec(&mPosition, &mCamera->mPosition);
@@ -788,7 +788,7 @@ void WeddingCamera::Reset(BOOL restore) {
     mPosition.y = 0x41D0;
     CopyVec(&mCamera->mPosition, &mPosition);
     CopyVec(&mCamera->mTarget, &mTarget);
-    func_0202a748(mCamera);
+    Camera_UpdateEye(mCamera);
 }
 
 // Follows the middle between the two, keeping the distance and the height
@@ -856,9 +856,9 @@ void WeddingLights::Init(Camera *camera, Room *room) {
     VEC_Subtract(&mCamera->mPosition, &mCamera->mTarget, &view);
     u16 angle = FX_Atan2Idx(view.x, view.z);
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(&data_021227cc[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i] = &gLights[i];
+        Light_Reset(&gLights[i]);
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
         Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
     }
 }
@@ -895,11 +895,11 @@ void WeddingGiftModel::Load(int resourceId) {
 
 // Shows another item: lets go of the old one's files, and loads the new one's
 void WeddingGiftModel::ChangeItem(int item) {
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
     SetItem(mArchiveName, item);
     ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, mResourceId, mModelPath);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
     LoadAnimation(mResourceId);
     ResetScale();
 }

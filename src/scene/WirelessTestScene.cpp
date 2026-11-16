@@ -9,12 +9,12 @@
 #include "text/TextUtil.h"
 
 extern "C" {
-extern void *data_02123440[];                  // The game's clock
-void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
+extern void *gGameClock[];                  // The game's clock
+void Clock_SetDateTime(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
 void Clock_GetDate(void *clock, RTCDate *date);
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
-BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads a saved character
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
 int NFL_GetCharInfo(void *info, const void *mii); // lib/NFL: the Mii's name and fields, 7 for invalid data
 }
 
@@ -58,7 +58,7 @@ void WirelessTestScene::Init() {
     G2_SetBG2ControlText(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3800, GX_BG_CHARBASE_0x18000);
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x20);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
-    data_0211d604.Show(4);
+    gScreenControl.Show(4);
     mRole = 0;
     mState = STATE_IDLE;
     mSelectedParent = 0;
@@ -79,12 +79,12 @@ void WirelessTestScene::Init() {
     time.minute = 13;
     time.second = 14;
     date.week = RTC_WEEK_SUNDAY;
-    func_02035460(data_02123440[0], &date, &time, FALSE);
-    Clock_GetDate(data_02123440[0], &date);
+    Clock_SetDateTime(gGameClock[0], &date, &time, FALSE);
+    Clock_GetDate(gGameClock[0], &date);
 }
 
 void WirelessTestScene::UpdateIdle() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
+    if (gPadInput.mTrigger & PAD_BUTTON_START) {
         WH_SetReceiver(OnReceive);
         mState = STATE_CONNECTING;
         Redraw();
@@ -145,23 +145,23 @@ void WirelessTestScene::Update() {
             Redraw();
         }
         if (mRole == 0) {
-            if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+            if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
                 mCharacter++;
                 if (mCharacter >= 100) {
                     mCharacter = 0;
                 }
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+            if (gPadInput.mTrigger & PAD_KEY_LEFT) {
                 mCharacter += 150;
                 mCharacter--;
                 mCharacter %= 150;
                 Redraw();
             }
-            if ((data_0211f9d4.mTrigger & PAD_BUTTON_START) && sChunk == 0) {
+            if ((gPadInput.mTrigger & PAD_BUTTON_START) && sChunk == 0) {
                 sChunk = 1;
                 mState = STATE_SENDING;
-                func_0202c264(&gGameData, mCharacter, &sCharacter);
+                GameData_ReadCharacter(&gGameData, mCharacter, &sCharacter);
                 WH_SendData(&sCharacter, 0x80, OnSent);
                 sSendReady = FALSE;
             }
@@ -188,21 +188,21 @@ void WirelessTestScene::Update() {
             sShownParentCount = sParentCount;
         }
         if (sParentCount > 0) {
-            if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+            if (gPadInput.mTrigger & PAD_KEY_UP) {
                 mSelectedParent = (mSelectedParent + (sParentCount - 1)) % sParentCount;
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+            if (gPadInput.mTrigger & PAD_KEY_DOWN) {
                 mSelectedParent = (mSelectedParent + (sParentCount + 1)) % sParentCount;
                 Redraw();
             }
-            if (data_0211f9d4.mTrigger & PAD_BUTTON_START) {
+            if (gPadInput.mTrigger & PAD_BUTTON_START) {
                 WH_EndScan();
             }
         }
         break;
     }
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
     }
 }
 
@@ -252,7 +252,7 @@ void WirelessTestScene::Redraw() {
         break;
     case STATE_CONNECTED:
         if (mRole == 0) {
-            func_0202c264(&gGameData, mCharacter, &sCharacter);
+            GameData_ReadCharacter(&gGameData, mCharacter, &sCharacter);
             wchar_t number[4];
             FormatNumber(mCharacter, number, sizeof(number), 3, TRUE);
             mCanvas.mTextX = 32;
@@ -261,7 +261,7 @@ void WirelessTestScene::Redraw() {
             mCanvas.DrawText();
             mCanvas.mTextX = 80;
             MiiCharInfo info;
-            if (func_0202c354(&gGameData, mCharacter)) {
+            if (GameData_IsCharacterSlotUsed(&gGameData, mCharacter)) {
                 NFL_GetCharInfo(&info, &sCharacter);
                 mCanvas.mText = ToG2dChars(info.name);
             } else {
@@ -288,9 +288,9 @@ void WirelessTestScene::OnReceive(u16, u16 *data, u16 size) {
         return;
     }
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c354(&gGameData, i)) {
+        if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
             sCharacter.Register();
-            func_0202c28c(&gGameData, i, &sCharacter);
+            GameData_WriteCharacter(&gGameData, i, &sCharacter);
             break;
         }
     }

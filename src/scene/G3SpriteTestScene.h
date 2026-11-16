@@ -10,22 +10,22 @@
 // "Scn/Scene/SceneTestG3Sprite_LZ.bin". A hundred sprites of the texture "Face.tga" (32 by 32 pixels, one of four
 // picked at random) stand at random places in front of a character's body model ("Mdl/Body/body000_3D_LZ.bin");
 // each frame one of them, in turn, moves to a new place and gets a new random size. The scene factory (main
-// func_0203c050, case 37) allocates 0x48B4 bytes and calls the constructor, which is in the main program's file of
+// SceneManager::CreateScene, case 37) allocates 0x48B4 bytes and calls the constructor, which is in the main program's file of
 // scene constructors (func_0204036c).
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM. The classes of the
 // rest of the main program are in include/.
 
-// The models' resource table (data_021223e4, which Model.h declares as words)
+// The models' resource table (gModelResources, which Model.h declares as words)
 struct ModelResources {
     /* 0x000 */ u8 mUnknown000[0x424];
     /* 0x424 */ int mUnknown424;
 };
-#define sModelResources (*(ModelResources *)data_021223e4)
+#define sModelResources (*(ModelResources *)gModelResources)
 
 extern "C" {
 void ModelResources_SetModel(ModelResources *resources, int resourceId, const char *modelPath);
-void func_0202ae38(ModelResources *resources);
+void ModelResources_Reset(ModelResources *resources);
 }
 
 // The scene.

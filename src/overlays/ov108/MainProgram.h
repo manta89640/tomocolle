@@ -12,9 +12,9 @@
 // constructors, src/scene/SceneManager.cpp).
 
 extern "C" {
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
 }
 
 #endif // OV108_MAINPROGRAM_H

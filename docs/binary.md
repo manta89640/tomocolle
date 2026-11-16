@@ -423,19 +423,19 @@ the file is placed by that order, and by which object of that part of `.bss` has
 
 | `.init` | Size | File (code) | What it constructs | |
 | --- | --- | --- | --- | --- |
-| `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `data_0211D604` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
+| `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `gScreenControl` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
 | `0x020B04CC` | 4 | The archive manager's (`0x02024370` to `0x020249FC`) | `bx lr`: `gArchiveManager` (`ArchiveManager_Init` from `NitroStartUp`) | inferred |
 | `0x020B04D0` | 4 | The graphics manager's (`0x020249FC` on) | `bx lr`: `gGraphicsManager` (0x10A4 bytes: `GraphicsManager_Init` clears 0x140, 0xC0, 0xEA0 = 0x48 entries of 0x34 from 0x204) | inferred |
 | `0x020B04D4` | 0x18 | `src/MainHeap.cpp` (`0x0202678C`, `operator new`, to `0x02026A1C`) | `gMainHeap` (0x3C bytes): stores 0 at 0x1C and 0x20, the frame heap and its memory (`MainHeap::CreateFrameHeap` sets them, `MainHeap::DestroyFrameHeap` clears them) | measured |
-| `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `data_0211F9D4` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
+| `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `gPadInput` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
 | `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
-| `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `data_021213B8` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
+| `0x020B0504` | 0x14 | `src/PaletteLoader.cpp` (`0x02027528` to `0x02027A08`) | `gPaletteLoader` (`PaletteLoader`, 0x420 bytes): its inline constructor clears the queue's count at 0x400 | measured |
 | `0x020B0518` | 4 | `src/OwnerInfo.cpp` (`0x02027A08` to `0x02027A7C`) | `bx lr`: `gOwnerInfo` (0x5C bytes: the `OSOwnerInfo`, the favourite colour at 0x54, the MAC address at 0x56), whose constructor is empty | measured: the file compiles to it |
-| `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `data_02121834` (0x624 bytes): stores 0 at 0x480 | measured |
+| `0x020B051C` | 0x14 | The screen loader's (`0x02027A7C` to `SoundSystem.cpp`, `0x02028630`) | `gScreenLoader` (0x624 bytes): stores 0 at 0x480 | measured |
 | `0x020B0530` | 4 | After `SoundSystem.cpp`: the touch screen's (`0x020287F8` on), or the file of `gRandom` or of `data_02121EB8` | `bx lr`: most likely `gTouchInput` (0x54 bytes; `TouchInput_Init`). `gRandom` is seeded by `NitroMain` itself | inferred |
 | `0x020B0534` | 0x14 | The character loader's (`0x02028F20` on) | `gVramTransferQueue` (0x4F4 bytes): stores 0 at 0x4F0 | measured |
-| `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `data_021223E4` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `func_0202a640` on the camera at +0x380 (`data_02122764`), `func_0202a96c` on four lights of 0xC at +0x3E8 (`data_021227CC`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
-| `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `data_021232E4` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
+| `0x020B0548` | 0x84 | The models' (to `0x0202B0A8`) | `gModelResources` (`ModelResources_Init`): an array of 0x20 entries of 0x1C (`__cxa_vec_ctor` with `ModelResource_Construct`, `ModelResource_Destruct`), `Camera_Reset` on the camera at +0x380 (`gCamera`), `Light_Reset` on four lights of 0xC at +0x3E8 (`gLights`, a loop, no destructor). Registers `ModelResources_Destruct` (`__cxa_vec_cleanup` of the 0x20 entries) with the record `data_021223D8` | measured |
+| `0x020B05CC` | 4 | The 3D sprites' (`0x0202B0A8` or `0x0202B130` to `0x0202B6D0`) | `bx lr`: `gG3SpriteTextures` (the 3D sprites' texture list, 0x150 bytes: 12 entries of 0x1C, indexed by `G3Sprite::mTexture`) | inferred |
 | `0x020B05D0` | 4 | `src/LcdPower.cpp` (`0x0202B6D0` to `0x0202B840`) | `bx lr`: `gLcdPower` (0xC bytes: `LcdPower::Update` turns the LCDs off after 20 frames of the lid closed and on after 10 open), whose constructor is empty | measured: the file compiles to it |
 | `0x020B05D4` | 4 | `GameData`'s (`0x0202B840` to `Font.cpp`, `0x0202D5A4`) | `bx lr`: `gGameData` (`func_0202b840` from `NitroMain`) | inferred |
 | `0x020B05D8` | 0x2C | `src/text/Font.cpp` | `gFonts`: three `Font`s through `__cxa_vec_ctor` | measured |
@@ -468,10 +468,10 @@ uses):
 | `0x02121834` | 0x624 | `ScreenLoader_Init` (clears 0x484 and 0x5C4, and eight 0x1C entries at 0x4F8) | Screens |
 | `0x02121E58`, `0x02121EAC`, `0x02121EB8` | 0x54, 0xC, 0x2C | `gTouchInput` (`TouchInput_Init`, `0x02028880`); `gRandom`; the path buffer of `func_02028af4` | Touch, random numbers, paths (two or three files) |
 | `0x02121EE4` | 0x4F4 | `gVramTransferQueue` (`VramTransferQueue_Init` is a `bx lr`) | Characters |
-| `0x021223D8` to `0x021232E4` | | The destructor record, `data_021223E4` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `data_02123024` (`0x020299E8`, `0x02029D40`) | Models |
-| `0x021232E4` | 0x150 | `func_0202b2e8`, `func_0202b4dc` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
+| `0x021223D8` to `0x021232E4` | | The destructor record, `gModelResources` with the camera and lights inside it (`ModelResources_Init` clears +0x418 and +0x41C), and `gVramTransferTasks` (`0x020299E8`, `0x02029D40`) | Models |
+| `0x021232E4` | 0x150 | `func_0202b2e8`, `G3SpriteTextures_Load` (at their own addresses `data_021232EC` to `data_021232FC`: fields of the entries, which it indexes with a stride of 0x1C) | 3D sprites |
 | `0x02123434` | 0xC | `gLcdPower` (`LcdPower::Init`, `LcdPower::Update`) | `LcdPower.cpp` |
-| `0x02123440` to `0x02138E1C` | | `data_02123440`, `data_02123444`, `gGameData` | GameData |
+| `0x02123440` to `0x02138E1C` | | `gGameClock`, `data_02123444`, `gGameData` | GameData |
 
 Inferred from this:
 
@@ -485,13 +485,22 @@ Inferred from this:
   `ModelResources_Destruct` is the file's last function. The screens' power is `0x0202B6D0` to `0x0202B840` (cut and decompiled: `src/LcdPower.cpp`).
   GameData is `0x0202B840` to `0x0202D5A4`. The graphics code between `0x020249FC` and `0x0202678C` may be more than
   one file: only one part of `.bss` belongs to it.
-- `data_021223E4` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the
-  camera at +0x380 and four lights at +0x3E8. The initialiser computes the lights' end from `data_021223E4`, and
+- `gModelResources` is one object of a class (called ModelResources here) that holds the 0x20 resource entries, the
+  camera at +0x380 and four lights at +0x3E8. The initialiser computes the lights' end from `gModelResources`, and
   `ModelResources_Init` writes +0x418 and +0x41C. The registered destructor destroys only the array, because the
-  camera and the lights have trivial destructors. `func_0202a640` and `func_0202a96c` set a camera's and a light's
+  camera and the lights have trivial destructors. `Camera_Reset` and `Light_Reset` set a camera's and a light's
   defaults: either they are the constructors, out of line, or inline constructors call them.
+  Measured: code loads some of its members by their own addresses, so dsd made symbols of them. They are named, and
+  they are members of the one object at these offsets: `gCamera` (+0x380), `gLights` (+0x3E8), `gLight1`,
+  `gLight2` and `gLight3` (+0x3F4, +0x400, +0x40C, the other three lights), and `gTouchLineDirection` (+0x434, where
+  `ModelResources_SetTouchLine` stores the direction). `data_021226E4` (+0x300) is no member: the compiler reached
+  the lights' fields from that address plus 0xE8 (`ModelResources_BeginDraw` does the same in a register), and some
+  overlays' code loads it. Open work: fold these symbols into `gModelResources` plus addend in `relocs.txt`, as
+  "Subdividing units" in decompiling.md describes. That needs one shared `ModelResources` class in `include/` for
+  the overlays' own `Camera` and `Light` stand-ins to give way to. The object is 0x440 bytes. `gVramManagerWork`
+  (0x800 bytes, `VramManagers_Init`'s work areas) and `gVramTransferTasks` (0x2C tasks of 0x10 bytes) follow it.
 - MessageWindow's file has `.init` `0x020B0650` to `0x020B0674`, `.ctor` `0x020FC4DC` to `0x020FC4E0`, `.rodata`
-  `0x020B5AEC` to `0x020B5C44` (every object there is used by `func_02032fb8` to `func_020341d4`), `.data`
+  `0x020B5AEC` to `0x020B5C44` (every object there is used by `MessageWindow_Init` to `MessageWindow_Update`), `.data`
   `0x021102D8` to `0x021102F0` (the pair, then `MessageWindow`'s virtual table at `0x021102E0`, whose two functions
   are `0x02034A94` and `0x02034BC4`), and no `.bss`. `wh.cpp`'s `.data` ends at `0x021102D8` and `TextUtil.cpp`'s
   begins at `0x021102F0`. Its initialiser is the pattern of `MiiListMenuScene.cpp`: a `const` aggregate initialised
@@ -575,7 +584,7 @@ Not done:
   `.data`, is not one our compiler gives, so neither unit is complete. Overlay 73's notes have the rule for the
   order the compiler does give, by which its pool is reproduced.
 - `tools/check_relocs.py` lists, for overlay 74, only string literals and `data_020f7300`, which is
-  `data_020f72f8[0].mLightColor` (other overlays refer to it by that name too); for overlay 73, string literals and
+  `gInteriorTable[0].mLightColor` (other overlays refer to it by that name too); for overlay 73, string literals and
   three anonymous vectors.
 - `docs/notes/ov074.md` and `docs/notes/ov073.md` keep the working notes, with the evidence for names and layouts.
 
@@ -608,16 +617,16 @@ the ROM's now, and with them the offsets of everything after them in `.data`).
 
 ## The message window's buttons
 
-Measured (fix-link) on the window's update, `func_020341d4`: it sets +0xAF7C, +0xAF80 and +0xAF84 to -1 at the
+Measured (fix-link) on the window's update, `MessageWindow_Update`: it sets +0xAF7C, +0xAF80 and +0xAF84 to -1 at the
 start of each frame, then three helpers walk the window's sprite buttons (count +0xAD58, the numbers they were
 added with at +0xAD68) and text buttons (count +0xAD5C, numbers at +0xAD98) and store the number of the first one
 that reports:
 
 | Field | Set by | Means | Name |
 | --- | --- | --- | --- |
-| +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`func_02031294`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
-| +0xAF80 | `func_0203404c` | its update, `func_0203133c`, returned TRUE: it was pressed. Open (`func_02034720`) also clears it | `mResult` |
-| +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`func_02031d7c`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
+| +0xAF7C | `func_02033f6c` | the stylus came down on it this frame (`SpriteButton_IsTouched`, the touch point inside the button's rectangle, and `gTouchInput.mTouched`) | `mTouchedButton` (overlay 76's choices) |
+| +0xAF80 | `func_0203404c` | its update, `SpriteButton_Update`, returned TRUE: it was pressed. Open (`MessageWindow_Open`) also clears it | `mResult` |
+| +0xAF84 | `func_02034110` | `func_02031ccc`: the button's +0xB4 flag, which its draw (`SpriteButton_Draw`) sets when the pressed sequence has ended (kinds 0, 4, 5) | `mFinishedButton` (the main program's list scenes) |
 
 So a scene that reacts at once reads +0xAF80, one that waits for the button's animation +0xAF84 (inferred from
 the flags; the names are descriptive).
@@ -642,13 +651,13 @@ Measured:
   table. Two of them call a constructor that is the overlay's own: overlay 69's camera (0x0214AB6C) and overlay 106's
   clock (0x0214A624). The compiler emits such a constructor as C1 and C2; the link keeps the one the main program
   calls, so the ROM has one copy.
-- Overlays 69 and 106 ask for scene 0xC2 when the main program's write (`func_0202cd48`) fails.
+- Overlays 69 and 106 ask for scene 0xC2 when the main program's write (`GameData_StartSave`) fails.
 - `PreStartScene` reads `gGameData+8` as the outcome of loading the save data (0: it goes on; 1: it goes on as on
   a first start, clearing the flag below; 2: the data is broken and initialised; 3 and 4: it stops), and
   `gGameData+0xB1` as a flag: when it is set, it lists the residents and runs the main program's functions around
   `EncounterJudge`'s (0x020ad294 to 0x020aef80) on them with the clock's time, then asks for scene 0x6A; when it is
   not, it sets it and asks for scene 0x69. The warning about another console comes when the game clock's +0x34
-  (`data_02123440`) is set.
+  (`gGameClock`) is set.
 - `SavePlayScene` shows one resident, picked at random, with a random animation of `Mdl/Ica/ica_mii_save_LZ.bin`.
   The character is an array of one: the scene's destructor calls `__cxa_vec_cleanup` with a count of 1 and the main
   program's `_ZN17SavePlayCharacterD1Ev`. 0x60000 bytes of the scene, from 0xDB14, are touched by nothing in the
@@ -674,10 +683,10 @@ Measured:
 
 - `NintendoLogoScene` (0x1C bytes; its constructor is the main program's, `0x0203DE78`) mounts
   "Cmn/Nin/NintendoLogo_LZ.bin" as "MNU" and sets both screens' fade speed to 0x19C2 of 0x10000 a frame, so that
-  its fades take ten frames (`func_02023c54(&data_0211d604, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
-  +0x10, the steps `func_02023cd4` and `func_02023ddc` add to their brightness, +0x04 and +0x08, each frame). `Init`
+  its fades take ten frames (`ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x19C2)`: it writes the screens' +0x0C and
+  +0x10, the steps `ScreenControl_StepFadeIn` and `ScreenControl_StepFadeOut` add to their brightness, +0x04 and +0x08, each frame). `Init`
   loads `MNU:/Gray_White.nsc`, `.ncg` and `.ncl` into plane 2 (one of the main engine's, whose planes are 0x3F in
-  the screens' masks), shows that plane alone, and has `func_020278f8` set colour 0x7FFF with 0x101, as
+  the screens' masks), shows that plane alone, and has `PaletteLoader_SetBackdrop` set colour 0x7FFF with 0x101, as
   `PreStartScene` does. `Update` counts frames in its one state and on the 61st asks for scene 0x39
   (`PreStartScene`, overlay 106). `Exit` unmounts "MNU", `Draw` is empty, and the field at +0x14 is cleared by
   `SetState` and read by nothing.
@@ -720,9 +729,9 @@ Measured:
   | 14 | 0x7D | overlay 77 |
   | 19 | 0x71 | overlay 85 |
 
-  The step after 23 stays 24: it ends the tutorial. Of the saved characters that exist (`func_0202c3dc`, indices 0
-  to 99), the first two are read (`func_0202c264`), have `ClearLongAct` and `ClearTrouble` applied and are written
-  back (`func_0202c28c`). Then saved character 0 is read, cleared of trouble and given trouble id 0 of category 9 in
+  The step after 23 stays 24: it ends the tutorial. Of the saved characters that exist (`GameData_CharacterExists`, indices 0
+  to 99), the first two are read (`GameData_ReadCharacter`), have `ClearLongAct` and `ClearTrouble` applied and are written
+  back (`GameData_WriteCharacter`). Then saved character 0 is read, cleared of trouble and given trouble id 0 of category 9 in
   state 1, ending at 0x7FFFFFFFFFFFFFFF (never), and written back; the scene asks for scene 0x5F, the island.
   Step 0 cannot occur (the jump table's entry 0 returns).
 - The scenes that ask for scene 0x69 are those of the tutorial: `PreStartScene` (overlay 106) on a first start,
@@ -996,7 +1005,7 @@ factory's file, the destructors (implicit) in theirs.
 | 10 | `MessageTestScene` | 0x2D84 | `0x0204C860` | 6 of 7 | Etc messages on sprites and on background 2, with a string and item messages in their tags |
 | 11 | `KeyboardTestScene` | 0x6AF8 | `0x0204CE28` | 6 of 7 | The on-screen keyboard (`SoftKeyboard`), typing ten characters into a text box |
 | 14 | `TtsTestScene` | 0x6A858 | `0x0204D678` | 7 of 7 | The speech synthesizer: a weather report straight to the stream, a test sentence into the capture buffer |
-| 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `data_0213bab0` |
+| 22 | `EmptyScene` | 0x10 | `0x0204D7F8` | 9 of 9 | Does nothing; the file also defines `gSceneMemory` and `gSceneScratch` |
 | 27 | `WirelessTestScene` | 0xCC | `0x0204D880` | 13 of 14 | WH: a parent sends a saved character in four packets, a child lists parents and stores what it receives |
 | | (helpers) | | `SceneHelpers.cpp`, `0x0204E4B4` | 39 of 42 | See below |
 
@@ -1048,7 +1057,7 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   stored in another order (none of the 25 combinations of the five position setters for the two boxes gives it).
   `WirelessTestScene::Update` (78%): its loops are not rotated as at optimisation level 2, but level 2, with
   `opt_common_subs` off or the eight IR passes off, still differs in 130 lines (shared epilogue, registers).
-  `WirelessTestScene::Init` matched once the clock setter `func_02035460` got its fourth argument (it reads r3; overlay
+  `WirelessTestScene::Init` matched once the clock setter `Clock_SetDateTime` got its fourth argument (it reads r3; overlay
   98 passes it): the 0 in r3 is also the `date.week` stored. `Redraw` matched at level 2 with `opt_propagation` off.
 - `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
   FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
@@ -1072,10 +1081,10 @@ Measured:
   7) for `mHeadTurn`. With R held the pad moves the camera (`Camera_Translate`, 0x0202a6fc: adds to its position
   and target alike). Every frame it runs the face's `UpdateFace` and `UpdateHeadTurn`.
 - Touching the screen sets the touch line (`ModelResources_SetTouchLine`, 0x0202af00: `NNS_G3dScrPosToWorldLine` of
-  the point into `data_021223e4 + 0x428`, then the normalised direction from the camera's eye, `data_02122764 + 0x20`,
-  into `data_021223e4 + 0x434` = `data_02122818`, which `CharacterBase::HitTestFace()` reads); when the line hits
+  the point into `gModelResources + 0x428`, then the normalised direction from the camera's eye, `gCamera + 0x20`,
+  into `gModelResources + 0x434` = `gTouchLineDirection`, which `CharacterBase::HitTestFace()` reads); when the line hits
   the face it gets a random default Mii of 6 (`SetDefaultMii`).
-- `Init` resets lights 0 and 1 with `func_0202a96c` (direction (0, 0, -0xFFF), colour 0x7FFF, on) and has none of
+- `Init` resets lights 0 and 1 with `Light_Reset` (direction (0, 0, -0xFFF), colour 0x7FFF, on) and has none of
   `G3dTestScene`'s light-0 code.
 - `AnimModel_SetAnimationFrame` (0x0202a5d8) finds a model's animation by type and id and sets its `NNSG3dAnmObj`'s
   frame.
@@ -1110,7 +1119,7 @@ Measured:
   random place (each of x and z from 0 to 3.9, either sign), left gives x and z of the radius random values from
   9.0 to 17.9 and up a random yaw. The steps are `FX32_ONE / 10` (0x199), not `FX32_CONST(0.1)` (0x19A).
 - Each frame a model whose distance from the eye on the floor (x and z) is less than the eye's from the origin
-  fades out (its alpha down by 5 a frame to 0, `func_02029f50`), and the others fade back in to 31: the models
+  fades out (its alpha down by 5 a frame to 0, `Model_SetAlpha`), and the others fade back in to 31: the models
   between the camera and the room's middle get out of the way.
 - `TestDrawMiiModel::Init` is empty; the scene calls it after `Load`. Its complete-object destructor is the main
   program's copy (`0x0203E2A8`), which the scene's destructor and the model's table refer to; the overlay has only
@@ -1137,7 +1146,7 @@ Measured:
   camera's y angle to 0x4000.
 - B steps +0x2B28 (`mBodyStep`) through four changes: TG3 mounted again with body000 and the model made again
   (`CharacterModel::MakeModel`), the palette file `TG3:/body_c1.ntfp` sent to the body's palette in VRAM
-  (`func_02029d40`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
+  (`Model_QueuePalette`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
   again.
 - With A held the pad rotates the body model about z and x (by 0x80) and turns the character (`Character::Turn`,
   ±0x100); with X it scales the body in y and z (by 0x40, `mInvScale` kept as `FX_Inv` of `mScale`); with Y right
@@ -1147,7 +1156,7 @@ Measured:
   3)` and `SetAngle` a step a frame until it faces it. Otherwise the pad turns the camera.
 - Touching the screen sets the touch line (`ModelResources_SetTouchLine`) and hit-tests two of the character's
   joints, the body (`CharacterModel::HitTestJoint(int)`) and the left knee (`HitTestJoint` with the
-  camera's eye and the line's direction, `data_02122818`); both results are thrown away.
+  camera's eye and the line's direction, `gTouchLineDirection`); both results are thrown away.
 - +0x2B2C is only cleared, in `Init`.
 
 Not done: `Init` (97%), the light-0 block of scenes 6, 7 and 16: with `#pragma opt_propagation off` every register
@@ -1241,7 +1250,7 @@ Measured:
   in the spoken text), the shutter button appears and the player's "say cheese" (0x4B0) is spoken with the voice
   of a resident drawn at random; when its frame comes (from that resident's `mVoice[4]`: `(v - 50) * 220 / 250 +
   40`) the travellers blend into random poses ('BCA0' animations 1-4 and 10-13 together, or 5-9 each), and the
-  shutter plays sequence archive entry 15 and a white flash (`func_02023f4c` from 16 down), with faces 6 or 1. A
+  shutter plays sequence archive entry 15 and a white flash (`ScreenControl_SetBlendBrightness` from 16 down), with faces 6 or 1. A
   "next" button follows the first two photographs, a wait the third; then a return button, and the scene fades and
   asks for scene 0x40. It also stores a per-destination halfword (0xB6, 0xC3, 0xD9, 0xC2, 0xC4 to 0xC8) at
   `gSceneMemory` +0x2C (not identified): overlays 68, 75, 84 and 85 read that halfword (84 when the previous scene
@@ -1281,16 +1290,16 @@ Measured:
   points light 0 along x with the code of the main program's `G3dTestScene` and `HumanTestScene` (x stored,
   reloaded and stored again, the colour loaded and stored back).
 - `Update`, by the button pressed this frame: A gets the file "TG3:/body_c1.ntfp" (a palette), makes its colour 1
-  red and gives it to `func_02029d40` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
+  red and gives it to `Model_QueuePalette` with offset and size -1 (the whole of `mBody`'s palette, from its VRAM key);
   X makes colour 1 of `mBody`'s own palette data (`mResTex->plttInfo.ofsPlttData`) cyan and transfers 4 bytes;
-  B releases the model resource (`func_02029758`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
-  `body.imd` to resource 0 again and rebinds `mBody`'s model (`func_02029c20`); Y walks the palette-to-material
+  B releases the model resource (`ResourceSet_ReleaseFile`, 'BMD0'), remounts TG3 on "Mdl/Body/body001_3D_LZ.bin", binds its
+  `body.imd` to resource 0 again and rebinds `mBody`'s model (`Model_BindResource`); Y walks the palette-to-material
   dictionary of `mBody`'s materials and looks each name up in its textures' palette dictionary
   (`NNS_G3dGetPlttDataByName`), with nothing done with the result. Otherwise the pad turns the camera, as in
   `HumanTestScene`.
-- `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `func_02029d40` (0x02029d40, `Model*`, palette, offset,
+- `Model` +0x10 is the model's `NNSG3dResTex` (`mResTex`): `Model_QueuePalette` (0x02029d40, `Model*`, palette, offset,
   size) takes the palette's VRAM address and size from its `plttInfo.vramKey` when offset or size is negative, and
-  queues the transfer with `func_0202b108(data_02123024, 1, ...)`, which passes it on to
+  queues the transfer with `VramTransfer_RegisterTask(gVramTransferTasks, 1, ...)`, which passes it on to
   `NNS_GfdRegisterNewVramTransferTask` (type 1, `NNS_GFD_DST_3D_TEX_PLTT`). `func_02060c1c` passes the linked VRAM managers'
   state (`data_021423d8`) to `NNSi_GfdDumpLnkVramManFreeListInfo`.
 
@@ -1309,7 +1318,7 @@ Measured:
   `FS_LoadOverlay(0x63)`, virtual table at `0x0214AA20`) shows statistics over the 100 saved characters with the
   etc messages 0x185 to 0x1A1: the number of residents, their average age to a tenth (the birth year is 12 bits at
   0x50 of a saved character, 0xFFF when not given; month and day are func_02098dac's properties 0x26 and 0x27; the
-  age is taken against `Clock_GetDate`), the ratio of men to women (func_0202c604 is set for women, by the
+  age is taken against `Clock_GetDate`), the ratio of men to women (GameData_GetCharacterSex is set for women, by the
   numbers' order in "男女比"), reduced by their greatest common divisor, zero to five stars of comfort from the byte
   at 0xFB of each character, the troubles solved (`gGameData` 0xC2, "悩み事解決数"), and one of 17 types of
   mansion (0x18F + type): the summed personalities (0 to 15) give a point on two axes, its direction one of eight
@@ -1319,7 +1328,7 @@ Measured:
   `FS_LoadOverlay(0x62)`, virtual table at `0x0214C700`) is the settings, with the etc messages 0xD7 to 0xF4 and
   0x150/0x151: the sound settings (stereo or mono, and the volumes of music, effects and voice, 0 to 3, in
   `gGameData` 0xC8 to 0xCB; the voice's volume is spoken, "ボリュームゼロ" to "ボリュームサン"), the clock (date
-  and time on sprite digits, written to the game's clock by func_02035460 and saved), and erasing all the data after
+  and time on sprite digits, written to the game's clock by Clock_SetDateTime and saved), and erasing all the data after
   three questions. Scene 0xAD is the first start ("時刻を設定してください"), which goes on to scene 0x69.
 - Both scenes are built from two main-program classes, now stand-ins in `include/SpriteButton.h`: a sprite button
   of 0xF4 bytes (constructor `0x0203117C`, update `0x0203133C`, draw `0x02031D7C`) and a button with a message
@@ -1370,7 +1379,7 @@ Measured:
   has its own volume, pitch, tempo and pan for the music, ramped to when it is selected.
 - The news stand's texture animation shows whether a new issue is due (`IsNewsDue`: the newest item is from before
   the last 7:00 or 19:00 edition by half a day); entering it then makes the day's news (`MakeDailyNews`: a
-  resident's birthday, else a random kind of news of the month, `data_020fa1d0`).
+  resident's birthday, else a random kind of news of the month, `gNewsKinds`).
 - `MapClock` and `MapClockDisplay` are overlay 74's `Clock` and `ClockDisplay` but for the sprite bank;
   `MoneyDisplay` counts the shown money up to `gGameData`'s.
 
@@ -1387,15 +1396,15 @@ Not done:
 
 - Two functions differ, each with a comment saying how: `Update` (the frame is the original's since the touch loop
   reaches the camera through a pointer, the apartment mark is set with `SetPositionFromVec`, which orders its dead
-  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `func_0202a640`; the registers and order of
+  copies as the ROM does, and `ResetCamera` passes `mCamera.mCamera` to `Camera_Reset`; the registers and order of
   the touch loop's rectangle arithmetic differ) and `MakeDailyNews` (the registers of the loop that picks the
   month's kind of news). `Init` matches with the second light's colour through a local. `Exit` matches since
-  `data_0213bab0` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
+  `gSceneScratch` is a byte buffer (0x70 bytes to the next symbol; overlays 68 and 75 clear 100 of them with
   `MI_CpuFill8`, overlays 31 and 90 read bytes of it) and the map writes its three colours through a `GXRgb *` cast
   from it: the cast pointer is kept in a register, the array's own address is loaded again before each store.
 - `.data`: its pool is the ROM's, but of the 112 sorted strings and the virtual table after it only some are in the
   ROM's order yet; the strings of the code are named `gStr_*` in `symbols.txt`, not by the compiler's numbers.
-- What the date at +0x6C of `gGameData` is. `MapScene::IsNewDay` (func_0202cb08) is TRUE when it is not today's (a
+- What the date at +0x6C of `gGameData` is. `MapScene::IsNewDay` (GameData_IsNewDay) is TRUE when it is not today's (a
   day starting at 5:00) or not set, which gives the fountain its building window and its entry to scene 0x30; when
   it is today's, the window asks a question (message 0xA4) and entering goes to the fountain's scene of the time of day.
 
@@ -1479,7 +1488,7 @@ Measured:
   character 0, or that character's name when `MiiEditScene::GetNameLength` rejects it. (Overlay 109's source calls it a
   nickname.)
 - `MiiData_AssignCreateId` writes the create ID from a counter that it advances, six bytes beside it (the Mii maker
-  passes `data_0212349c`, through `func_0209859c`) and a random number from the main Mii code (`NFL_Random`):
+  passes `gMiiIdSource`, through `func_0209859c`) and a random number from the main Mii code (`NFL_Random`):
   byte 0 is `0xC0`, the random number times 4 and bits 12-13 of the counter.
 - Two setters, of bit 2 of 0x20 (`MiiData_SetLocalOnly`) and bit 0 of 0x00 (`MiiData_SetFavorite`), are called through
   `func_02098cdc` and `func_02098ce8`. Inferred: they are the Wii's `localOnly` and `favorite`, which `RFLCharData` has
@@ -1568,7 +1577,7 @@ How the last functions matched:
 Not done:
 
 - `tools/check_relocs.py` lists one reference: `UpdateRoom` reads the room style's light colour as
-  `data_020f72f8[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
+  `gInteriorTable[style].mLightColor` where the original refers to `data_020f7300`, as overlay 74 does.
 - What the two item tabs besides the first list (`0x0209F208`, `0x0209F28C`), and what the selection's category and
   value (0x30, 0x34 of `ItemTradeSelection`) are for: nothing in the overlay reads them.
 
@@ -1609,7 +1618,7 @@ Measured:
   (message 0x104).
 - The scene's characters are three of the main program's 0x2B18-byte class that several scenes hold
   (`SceneCharacter`, constructor `0x0203E168`, destructor `0x0203E188`); a resident's first 0x2A4 bytes
-  (`CharacterRecord`, the record `func_0202c264` reads) are copied into them by the record's implicit assignment,
+  (`CharacterRecord`, the record `GameData_ReadCharacter` reads) are copied into them by the record's implicit assignment,
   whose member-by-member copy shows the record's members (arrays of 5 and 6 bytes, s64 at 0x21C, 0x228, 0x230,
   0x23C, 32- and 40-byte structures).
 
@@ -1673,14 +1682,14 @@ the core calls back are static members. Measured:
   offset, an argument of `LoadObjCells`, the layout and the sprite palette: `0, file, n, -1, 0, 13` in the main
   program, `0, file, n, 0x14000, 4, 13` in overlay 43), `EnableTabs` and `GetButtonCharCount`. Each frame they call
   `Update` with a pad of 0 and `gTouchInput`'s touch data, then `KeyboardCore_GetChar`. `func_0204d178` loads the
-  `MNU:BG_down` background onto the plane when A is pressed (`data_0211f9d4`'s trigger), and when B is, the
+  `MNU:BG_down` background onto the plane when A is pressed (`gPadInput`'s trigger), and when B is, the
   keyboard's again with `InitBg` and `LoadObj`.
 - **Background.** `InitBg` is `InitBgGraphics` (the core's buffers and the five NCGR paths, `KeyboardCore_InitGraphics`;
   the plane), `InitCore` (`KeyboardCore_Init` at the keys' origin (45, 59) with `PlayKeySound` as the sound
   callback, the screen made by `KeyboardCore_MakeScreen`, the plane scrolled to the origin), then
   `TransferCharData`, `TransferScreen` and `LoadBgPalette`.
 - **Layout.** The plane, the palette number (13), the sound handle of the key sounds, the keys' screen data
-  (0x800 bytes, which `func_02027f3c` sends) and two buffers of 0x2280 bytes that the core is given (`mBaseCharData`,
+  (0x800 bytes, which `ScreenLoader_QueueScreen` sends) and two buffers of 0x2280 bytes that the core is given (`mBaseCharData`,
   `mCharData`; the second is what `TransferCharData` queues to VRAM), the six background paths (five of 0x30 bytes
   and the palette's of 0x20), five tab sprites, two buttons of 0x6B8 bytes, a sprite (`mLayoutSprite`, cell 7, at
   the one of five positions that `mLayout` selects: `PlaceLayoutSprite`), its resource and layout, and the three
@@ -1775,8 +1784,8 @@ Measured:
 - StartLoading mounts `Scn/Scene/SceneMiiEdit2_LZ.bin` (`E00`), `Cmn/Kbd/SoftKeyboard_LZ.bin` (`KBD`), the etc and
   common messages (`TBM`, `T02`), `Mdl/Spl/SplEditEffect_LZ.bin` and `Mdl/Ica/ica_mii_edit_LZ.bin`.
 - Init switches on the scene id. For 0x42 and 0x44 it takes a resident's index from `data_0213ba74`+0x20 and reads
-  that saved character into the scene's character at +0x710 (`func_0202c264`, through `0x0214B670`). For 0x43 and 0x6F
-  it takes the first of the 100 save slots that `func_0202c354` reports free, and stops (`OS_Terminate`) when none
+  that saved character into the scene's character at +0x710 (`GameData_ReadCharacter`, through `0x0214B670`). For 0x43 and 0x6F
+  it takes the first of the 100 save slots that `GameData_IsCharacterSlotUsed` reports free, and stops (`OS_Terminate`) when none
   is. It then sets the character up with a fresh Mii and today's date. **Inferred**: 0x43 and 0x6F make a new Mii,
   and 0x42 and 0x44 edit an existing one. How 0x42 and 0x44, and 0x43 and 0x6F, differ is not established.
 - The layout, from the constructor and the destructor: six sprite buttons at +0x158; a character (`CharacterBase`
@@ -1806,7 +1815,7 @@ Measured, from the last third of the file (`0x02153CF4` on):
   (`func_02098d5c`), 1 to 8, 0 while unset.
 - **The profile page (2)** keeps its own text (11 `wchar_t` and a count) right after its keyboard. The keyboard
   object is therefore 0x5FF8 bytes. Its helpers show the birthday and a four-digit number with a window's plain
-  sprites (MessageWindow +0xA9F4, five sprites that `func_020345d8` draws), and the profile in the scene's nine text
+  sprites (MessageWindow +0xA9F4, five sprites that `MessageWindow_Draw` draws), and the profile in the scene's nine text
   boxes. That number is bits 17-28 of the record's +0x50, 0xFFF for none.
 - **The voice page (3)** has six voice presets (`data_020FBAAC`, six `s16` each), a random voice (`MATH_Rand16`
   over each value's range, `data_020FB940`), five sliders and a choice of four for +0xEE..+0xF9 of the record (six
@@ -1825,7 +1834,7 @@ Measured, from the first third of the file (to `0x0214EDB8`):
 
 - **The scene's own functions.** `MiiEditScene::LoadCharacter` reads the saved character into the scene's character and
   `MiiEditScene::LoadModel` loads its model ("B0I"), by sex. `MiiEditScene::SaveCharacter` writes the character back
-  (`func_0202c28c` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
+  (`GameData_WriteCharacter` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
   at +0x54 (overlay 109's `mInterior`) from the personality's row (`data_020fba28`) and the sex, and for scenes 0x43,
   0x44 and 0x6F resets some of the record's fields. The four functions beside `MiiEditScene::ShowControls` show or hide the
   scene's buttons and texts with one of the lower screen's backgrounds ("BG_down", "BG_down_editface",
@@ -1894,9 +1903,9 @@ Measured:
   `s16` and `u8`, called only by `0x02097D8C`, and such instances follow the last function of the file that uses
   them. The item file ends with ItemModel's implicit deleting destructor (`0x020A0078`, entry 1 of its table).
 - `Item` (virtual table `_ZTV4Item`, `0x02114F78`) has seven entries, all 0: pure virtual functions. Its three
-  kinds read their tables: `ClothesItem` the clothes (`data_020f3ff0`, 0x14 bytes a row, 300 rows), `InventoryItem`
-  the goods (`data_020f5f0c`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
-  (`data_020f72f8`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
+  kinds read their tables: `ClothesItem` the clothes (`gClothesTable`, 0x14 bytes a row, 300 rows), `InventoryItem`
+  the goods (`gGoodsTable`, 0x14 bytes, 255 rows, 236 of them saved), `InteriorItem` the interiors
+  (`gInteriorTable`, 0x54 bytes, 78 rows). The seven virtual functions return the price field twice, the model name
   (+8 for goods and clothes, +0xA for interiors) and four weights, one of which `gGameData+0x4E` selects; the random
   choices of goods, clothes and interiors on offer sum those weights. The goods' and clothes' getters are emitted
   at `0x0204ABAC`..`0x0204AD84` (in the scene constructors' file), the interiors' at the end of Room.cpp.
@@ -2199,7 +2208,7 @@ three 12-byte, five 16-byte (the last a local array of `SetKind`), an `int[5]`, 
 
 ### The shops' stock
 
-Measured: the saved game holds two records of 0x34 bytes (func_0202c864 reads one, func_0202c878 writes one): a
+Measured: the saved game holds two records of 0x34 bytes (GameData_GetShopStock reads one, GameData_SetShopStock writes one): a
 date, then five clothes, five goods of kind 1, five of kind 4, three interiors and one more good, which the item
 files' pickers choose (gap66-b's ChooseClothes, ChooseItemsNot1000, ChooseItems, and 0x020A5A28 for the interiors;
 on the very first day the first five goods are a fixed list). `UpdateShopStocks`, called only by the shop scenes
@@ -2237,7 +2246,7 @@ January and February) and whose x follows the time of day.
 
 ### What decides the island's next facility
 
-Measured, `IslandProgress` (0x2C bytes): `Count` counts the saved characters by sex (func_0202c604 is the
+Measured, `IslandProgress` (0x2C bytes): `Count` counts the saved characters by sex (GameData_GetCharacterSex is the
 character's `MiiData_GetSex`), those with a full date of birth, the residents in all, the items of kinds 4 to 6 the
 player owns, the money (gGameData's capped counter, which this settles as the money), the used entries of two lists
 of ten in the saved game and the troubles solved. `GetNewFacility` goes through the island's state bytes
@@ -2249,7 +2258,7 @@ a stage above the saved one. Overlay 72's map asks the four `Has*` tests before 
 ### The saved songs
 
 Measured: `SongEntry` is a song of 0x40 bytes as the saved game keeps it, with the number it is kept under;
-func_0202c934 stores one (`Save`), func_0202c920 copies one out (`Load`). Its 21 notes at 0x16 are 16 bits each, a
+GameData_SetSong stores one (`Save`), GameData_GetSong copies one out (`Load`). Its 21 notes at 0x16 are 16 bits each, a
 kind in the low three bits and a 9-bit value; `SetNotesFromSlot` (overlay 109, for songs received over the air)
 replaces the values of the notes of kinds 1 to 4 from the table of the song's slot (`0x020F9414`, 0xE0 bytes a
 slot) through `data_020f9408`.
@@ -2365,7 +2374,7 @@ Measured:
   (`MiiParameter`); for a Mii made on another console the birth month and day are the record's own.
 - **The long activities** (`mLongActState`): odd states 0x17 to 0x2D are done with a partner, the even ones after them
   are the partner's side, 0x13 to 0x16 are away; `ChooseLongAct` draws one by weights for the personality's kind and
-  the mood (`data_020F8CC0`: minutes, weight, personality bits, mood bits).
+  the mood (`gEventTable`: minutes, weight, personality bits, mood bits).
 - **The relations** (`mRelationRank`, by the other's index): 0 none, 1 friends, 2 lovers, 3 former lovers, 4 spouses,
   5 divorced, 6 to 8 friends, lovers and spouses fighting, 9 best friends. The order is the game's list of relation
   names (`TmdEtcMsgJP`), and the code agrees: a wish to break up looks for a lover liked no more than 50 or one it is

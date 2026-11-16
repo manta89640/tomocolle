@@ -447,7 +447,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 `compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
 
 **An address reloaded at each use, where the original keeps it in a register**
-- Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)data_0213bab0;`. A plain local pointer to the
+- Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)gSceneScratch;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
   calls (overlay 110's camera setters, the Mii transfer's `MiiTransfer_UpdateSession`).
@@ -537,7 +537,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
   `SetUpWindow`, `SetUpList`). Where the original has the slot, make the local and pass its address, point first
-  (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); func_02028d88(&rect, &point);`,
+  (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); ScreenRect_Contains(&rect, &point);`,
   `OptionScene::Update`).
 - Two dead copies of a vector are the by-value `FxVec2` of `SetPosition(FxVec2(x, y))`; which of
   `SetPosition`/`SetPositionFromVec` is called decides their order. All three forms (`SetPosition(FxVec2(...))`,
@@ -719,7 +719,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - Dead copies of four sprites' positions per row in the original's slots: one of the 27 combinations of the three
   position setters, found by script (`PlaceButtons`).
 **A value the original computes from the counter at each use, where ours strength-reduces it**
-- Index the array with a `u32`: `data_020f72f8[style].mParts[i]` read through `static inline s16 GetPieceZ(u16 style,
+- Index the array with a `u32`: `gInteriorTable[style].mParts[i]` read through `static inline s16 GetPieceZ(u16 style,
   u32 i)` (or `[(u32)i]`) keeps the original's `mla i, #10` at each use, where an `int` index is strength-reduced
   into a pointer stepped by 10; it also brought the loop's three hoisted zeros into the original's registers
   (`SceneRoom::ShowParts`). `#pragma opt_strength_reduction off` gave the same `mla` but no longer reduced the
@@ -811,7 +811,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `#pragma pop`). A store between the x store and its reload (`mEnabled = TRUE;` or y) is what keeps the reload;
   `x = x` straight after it is dropped. In overlay 3 a `const char *path` local for `ModelResources_SetModel`'s path
   gave the original's early `ldr r2` of it. Measured there too: what is left of such an `Init` is scheduling that
-  flips with unrelated code earlier in the function (removing the first call, `func_0202b0e8`, puts the virtual
+  flips with unrelated code earlier in the function (removing the first call, `VramManagers_Reset`, puts the virtual
   `Load` calls' argument set-up in the original's order), so search the light statements' orders last, in the
   file as it will stay.
 
@@ -835,7 +835,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
     argument (`Set(p->x = 0xFFF, ...)`). Overlay 4 always comes out `mov r0,#1; str r0,[r3,#8]; strh r2,[r3]`, against
     the original's x store first. No single `opt_*` pragma, `scheduling` or `peephole` moves it.
   - Volatile accesses keep their source order. Making the colour, x and `mEnabled` stores volatile gives overlay 4
-    the original's store order. The call's first argument (`ldr r0,=data_021223e4`) then moves above them, so 1
+    the original's store order. The call's first argument (`ldr r0,=gModelResources`) then moves above them, so 1
     goes to r2. In DrawManTestScene, volatile reads of x and stores of y and z leave only the x store and the
     constants 0 and 0xFFF out of place. Both look like the scheduler/allocator interplay that fix-nfl also left
     open (call arguments loaded before or after a value's last use).
@@ -871,7 +871,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 **A call's arguments**
 - A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
   fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
-  (`WirelessTestScene::Init`, the clock setter `func_02035460`).
+  (`WirelessTestScene::Init`, the clock setter `Clock_SetDateTime`).
 - A pointer passed through an inline cast helper (`ToG2dChars(mParentNames[i])`) scheduled its address computation
   before a store the original makes first; the plain cast gave the original's order (`WirelessTestScene::Redraw`, at
   level 2 with `opt_propagation` off).

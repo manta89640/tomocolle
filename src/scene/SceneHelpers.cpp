@@ -11,16 +11,16 @@
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202a96c(Light *light);
-void func_0202aa28(Light *light, Camera *camera, VecFx32 direction);
-extern Light data_021227d8;
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads a saved character
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+void Light_Reset(Light *light);
+void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
+extern Light gLight1;
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-BOOL func_02031294(SpriteButton *button);
-BOOL func_02024004(ScreenControl *screens, int planes, int level);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
+BOOL SpriteButton_IsTouched(SpriteButton *button);
+BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int level);
+void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
 
 // --- Texts ---
@@ -105,7 +105,7 @@ BOOL SceneCast::Choose(int count) {
     mCount = count;
     mResidentCount = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
         }
@@ -116,7 +116,7 @@ BOOL SceneCast::Choose(int count) {
     int n = 0;
     while (n < 4) {
         u32 character = gSceneMemory.mCharacters[(u8)n];
-        if (character >= 100 || !func_0202c3dc(&gGameData, character)) {
+        if (character >= 100 || !GameData_CharacterExists(&gGameData, character)) {
             break;
         }
         mChosen[n] = character;
@@ -143,7 +143,7 @@ void SceneCast::SetCharacters(Character *characters) {
         mCharacters[i] = &characters[i];
     }
     for (int i = 0; i < mCount; i++) {
-        func_0202c264(&gGameData, mChosen[i], mCharacters[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], mCharacters[i]);
         mCharacters[i]->mIndex = mChosen[i];
     }
 }
@@ -158,21 +158,21 @@ void SceneCast::MountArchives(const char *animationArchive) {
 }
 
 void SceneCast::InitCharacters() {
-    void *animations = func_0202ad04(data_021223e4, 31, "BIC", 0);
+    void *animations = ModelResources_BindArchive(gModelResources, 31, "BIC", 0);
     for (int i = 0; i < mCount; i++) {
-        ModelResources_SetModel(data_021223e4, i, mCharacters[i]->mModelPath);
+        ModelResources_SetModel(gModelResources, i, mCharacters[i]->mModelPath);
         mCharacters[i]->Init(i, 0, 2);
-        func_0202c264(&gGameData, mChosen[i], mCharacters[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], mCharacters[i]);
         mCharacters[i]->MakeFace();
         mCharacters[i]->UpdateBodyScale();
         mCharacters[i]->UpdateAnimSpeed();
         mCharacters[i]->UpdateBodyColors();
-        func_02029660((void *)mCharacters[i]->mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i]->mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i]->SetAnimation(RESOURCE_BCA0, 0);
         mCharacters[i]->SetAngle(0x4000);
         MakeCharacterSpeechTexts(&mSpeechTexts[i], mCharacters[i]);
     }
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mSpeaker = -1;
 }
 
@@ -196,21 +196,21 @@ void SceneCast::DrawCharacters() {
 
 void SceneCast::Release() {
     for (int i = 0; i < mCount; i++) {
-        func_0202aecc(data_021223e4, i);
+        ModelResources_ReleaseModel(gModelResources, i);
         ArchiveManager_Unmount(&gArchiveManager, sArchiveNames[i]);
     }
-    func_0202aecc(data_021223e4, 31);
+    ModelResources_ReleaseModel(gModelResources, 31);
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
 }
 
 // Loads a character's archive and model again (after its clothes changed)
 void SceneCast::ReloadCharacter(int index) {
-    func_0202aecc(data_021223e4, index);
+    ModelResources_ReleaseModel(gModelResources, index);
     ArchiveManager_Unmount(&gArchiveManager, sArchiveNames[index]);
     mCharacters[index]->SetArchive(sArchiveNames[index]);
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[index]->mArchiveName,
                                    mCharacters[index]->mArchivePath, 1);
-    ModelResources_SetModel(data_021223e4, index, mCharacters[index]->mModelPath);
+    ModelResources_SetModel(gModelResources, index, mCharacters[index]->mModelPath);
     mCharacters[index]->MakeModel(index, 0);
     mCharacters[index]->UpdateBodyColors();
     mCharacters[index]->UpdateBodyScale();
@@ -220,7 +220,7 @@ void SceneCast::ReloadCharacter(int index) {
 // Reads a character from the save data again
 void SceneCast::RereadCharacter(int index) {
     mCharacters[index]->Init(index, 0, 2);
-    func_0202c264(&gGameData, mChosen[index], mCharacters[index]);
+    GameData_ReadCharacter(&gGameData, mChosen[index], mCharacters[index]);
     mCharacters[index]->MakeFace();
     MakeCharacterSpeechTexts(&mSpeechTexts[index], mCharacters[index]);
 }
@@ -251,16 +251,16 @@ void FaceCast::Init(int capacity) {
 // The camera at its start, and the two lights from the front left and the back
 #pragma opt_propagation off
 void FaceCast::SetupCamera() {
-    Camera *camera = &data_02122764;
-    func_0202a640(camera);
-    func_0202a93c(camera, 1);
-    Light *light = &data_021227cc[0];
-    data_021223e4[0x424 / 4] = 0;
-    func_0202a96c(light);
-    func_0202aa28(light, camera, sLightDirections[0]);
-    light = &data_021227d8;
-    func_0202a96c(light);
-    func_0202aa28(light, camera, sLightDirections[1]);
+    Camera *camera = &gCamera;
+    Camera_Reset(camera);
+    Camera_SetProjection(camera, 1);
+    Light *light = &gLights[0];
+    gModelResources[0x424 / 4] = 0;
+    Light_Reset(light);
+    Light_SetDirectionByCamera(light, camera, sLightDirections[0]);
+    light = &gLight1;
+    Light_Reset(light);
+    Light_SetDirectionByCamera(light, camera, sLightDirections[1]);
 }
 
 #pragma opt_propagation reset
@@ -311,8 +311,8 @@ void FaceCast::DrawFaces() {
 }
 
 void FaceCast::ResetCamera() {
-    func_0202a640(&data_02122764);
-    data_021223e4[0x424 / 4] = 1;
+    Camera_Reset(&gCamera);
+    gModelResources[0x424 / 4] = 1;
 }
 
 // Chooses mCount saved characters as SceneCast::Choose does
@@ -320,7 +320,7 @@ BOOL FaceCast::Choose() {
     int residents[100];
     int count = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             residents[count] = i;
             count++;
         }
@@ -331,7 +331,7 @@ BOOL FaceCast::Choose() {
     int n = 0;
     while (n < 4) {
         u32 character = gSceneMemory.mCharacters[(u8)n];
-        if (character >= 100 || !func_0202c3dc(&gGameData, character)) {
+        if (character >= 100 || !GameData_CharacterExists(&gGameData, character)) {
             break;
         }
         mChosen[n] = character;
@@ -355,7 +355,7 @@ BOOL FaceCast::Choose() {
 
 void FaceCast::ReadCharacters() {
     for (u16 i = 0; i < mCount; i++) {
-        func_0202c264(&gGameData, mChosen[i], &mFaces[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], &mFaces[i]);
         mFaces[i].MakeFace();
         MakeCharacterSpeechTexts(&mSpeechTexts[i], &mFaces[i]);
     }
@@ -434,16 +434,16 @@ void ReturnButton::MountArchive() {
 void ReturnButton::Init(int sceneId, int plane, int resource) {
     mSceneId = sceneId;
     ObjResourceManager_Load(&gObjResourceManager, "RET:/Obj_down.nce", "RET:/Obj_down.ncg", plane, resource, -1);
-    func_02027534(&data_021213b8, "RET:/Obj_down.ncl", plane, 0xE0, 0xE0, 0x40);
+    PaletteLoader_LoadFile(&gPaletteLoader, "RET:/Obj_down.ncl", plane, 0xE0, 0xE0, 0x40);
     Sprite_Init(this, resource, 2, 0x80, 0x60, TRUE);
-    func_02031eb0(this, 24, 22);
-    func_02031278(this, 2, 3);
-    func_02031260(this, 4);
-    func_02032158(this, &sReturnButtonSounds);
+    SpriteButton_SetTouchRect(this, 24, 22);
+    SpriteButton_SetSequences(this, 2, 3);
+    SpriteButton_SetKind(this, 4);
+    SpriteButton_SetSounds(this, &sReturnButtonSounds);
     SetPositionFromVec(0xF2000, 0xD000);
-    func_0203119c(this);
-    func_02028280(&data_02121834, plane, 0);
-    data_0211d604.Show(plane);
+    SpriteButton_Reset(this);
+    ScreenLoader_SetPriority(&gScreenLoader, plane, 0);
+    gScreenControl.Show(plane);
     mHeld = FALSE;
     mPressed = FALSE;
 }
@@ -451,19 +451,19 @@ void ReturnButton::Init(int sceneId, int plane, int resource) {
 void ReturnButton::Update() {
     mHeld = FALSE;
     mPressed = FALSE;
-    if (func_0203133c(this)) {
+    if (SpriteButton_Update(this)) {
         if (mSceneId != -1) {
             gSceneManager.RequestScene(mSceneId);
         }
         mPressed = TRUE;
     }
-    if (func_02031294(this)) {
+    if (SpriteButton_IsTouched(this)) {
         mHeld = TRUE;
     }
 }
 
 void ReturnButton::Draw() {
-    func_02031d7c(this);
+    SpriteButton_Draw(this);
 }
 
 void ReturnButton::UnmountArchive() {
@@ -512,7 +512,7 @@ void SceneRoom::Draw() {
 // The z of a piece of the style's furniture. The index is a u32: with an int, the compiler strength-reduces the
 // piece's address in ShowParts' loop, where the original computes it from the counter at each use.
 static inline s16 GetPieceZ(u16 style, u32 i) {
-    return data_020f72f8[style].mParts[i].mUnknown8;
+    return gInteriorTable[style].mParts[i].mUnknown8;
 }
 
 void SceneRoom::ShowParts(int mode) {
@@ -545,50 +545,50 @@ void SceneRoom::ShowParts(int mode) {
 
 void NewsButton::LoadBackground() {
     ArchiveManager_MountCompressed(&gArchiveManager, "NEW", "Scn/Scene/SceneMiiNews_LZ.bin", 1);
-    func_02027d7c(&data_02121834, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
-    func_02027d7c(&data_02121834, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
-    func_02023f4c(&data_0211d604, 0x17, -16);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    ScreenLoader_LoadFile(&gScreenLoader, "NEW:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/BG_down.ncg", 0x100, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/BG_down.ncl", 0x100, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "NEW:/TVframeWide.nsc", 8, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/TVframe.ncg", 8, 0, 0, 0, -1);
+    ScreenControl_SetBlendBrightness(&gScreenControl, 0x17, -16);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
 void NewsButton::Init(int resource) {
-    func_02027290(&gObjResourceManager, "NEW:/Obj_down.nce", 0x1000, resource);
-    func_02028f24(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    ObjResourceManager_LoadCell(&gObjResourceManager, "NEW:/Obj_down.nce", 0x1000, resource);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "NEW:/Obj_down.ncg", 0x1000, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "NEW:/Obj_down.ncl", 0x1000, -1, -1, -1);
     Sprite_Init(this, 1, 6, 0x80, 0x60, TRUE);
-    func_02031eb0(this, 116, 30);
-    func_02031278(this, 6, 7);
-    func_02031260(this, 4);
-    func_02032158(this, &sNewsButtonSounds);
+    SpriteButton_SetTouchRect(this, 116, 30);
+    SpriteButton_SetSequences(this, 6, 7);
+    SpriteButton_SetKind(this, 4);
+    SpriteButton_SetSounds(this, &sNewsButtonSounds);
     SetPositionFromVec(0x80000, 0x60000);
-    func_0203119c(this);
-    func_02028280(&data_02121834, 8, 0);
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x100, 1);
-    func_020278f8(&data_021213b8, 0, 0x101);
+    SpriteButton_Reset(this);
+    ScreenLoader_SetPriority(&gScreenLoader, 8, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }
 
 void NewsButton::Update(Scene *scene, BOOL leave) {
     mPressed = FALSE;
-    func_02024004(&data_0211d604, 0x17, 1);
-    if (func_0203133c(this)) {
+    ScreenControl_BlendFadeIn(&gScreenControl, 0x17, 1);
+    if (SpriteButton_Update(this)) {
         mPressed = TRUE;
         if (leave) {
             scene->mSkipFade = TRUE;
-            func_02023f4c(&data_0211d604, 0x3F, -16);
+            ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F, -16);
             gSceneManager.RequestScene(0x49);
         }
     }
 }
 
 void NewsButton::Draw() {
-    func_02031d7c(this);
+    SpriteButton_Draw(this);
 }
 
 void NewsButton::Unload() {
     ArchiveManager_Unmount(&gArchiveManager, "NEW");
-    func_020278f8(&data_021213b8, 0, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
 }

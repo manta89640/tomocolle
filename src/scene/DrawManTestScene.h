@@ -12,7 +12,7 @@ struct Camera;
 // "HUMAN00_.imd" with the textures "HUMAN00.itx" and a character, and keeps the matrix of the model's joint
 // "head_h2" as it is drawn, which the character is drawn with. The pad turns the camera; with A held, left and
 // right move the model; B binds another palette to the model and Y loads its textures again. The scene factory
-// (main func_0203c050, case 6) allocates 0x272C bytes.
+// (main SceneManager::CreateScene, case 6) allocates 0x272C bytes.
 //
 // The names are descriptive, not the original: no name of these classes survives in the ROM.
 class DrawManTestScene : public Scene {

@@ -34,13 +34,13 @@ static void (*const sLoaders[])(const void *source, u32 offset, u32 size) = {
     LoadOBJExtPltt,    LoadSubOBJExtPltt,
 };
 
-PaletteLoader data_021213b8;
+PaletteLoader gPaletteLoader;
 
 extern "C" void PaletteLoader_Init(PaletteLoader *loader) {
-    func_020279f4(loader);
+    PaletteLoader_ClearDefaults(loader);
 }
 
-extern "C" void *func_02027534(PaletteLoader *loader, const char *name, int planes, int offset, int size,
+extern "C" void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int planes, int offset, int size,
                                int unknown) {
     NNSG2dPaletteData *palette;
     PaletteLoader_ReadFile(loader, name, &palette);
@@ -131,7 +131,7 @@ static void LoadSubOBJExtPltt(const void *source, u32 offset, u32 size) {
     GXS_EndLoadOBJExtPltt();
 }
 
-extern "C" void func_020277dc(PaletteLoader *loader, const void *colors, u32 planes, u32 offset, u32 size,
+extern "C" void PaletteLoader_QueueColors(PaletteLoader *loader, const void *colors, u32 planes, u32 offset, u32 size,
                               BOOL extended) {
     int base = extended ? 10 : 0;
     if (colors == NULL) {
@@ -164,7 +164,7 @@ extern "C" void func_020277dc(PaletteLoader *loader, const void *colors, u32 pla
     }
 }
 
-extern "C" void func_020278f8(PaletteLoader *loader, GXRgb color, u32 planes) {
+extern "C" void PaletteLoader_SetBackdrop(PaletteLoader *loader, GXRgb color, u32 planes) {
     if (planes & 0x3F) {
         loader->mMainBackdrop = color;
         loader->mMainBackdropChanged = TRUE;
@@ -199,7 +199,7 @@ extern "C" void PaletteLoader_Transfer(PaletteLoader *loader) {
     }
 }
 
-extern "C" void func_020279f4(PaletteLoader *loader) {
+extern "C" void PaletteLoader_ClearDefaults(PaletteLoader *loader) {
     loader->mDefaultOffset = 0;
     loader->mDefaultSize = 0;
     loader->mDefaultUnknown = 0;

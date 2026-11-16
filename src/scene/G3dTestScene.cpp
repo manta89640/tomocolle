@@ -11,18 +11,18 @@ void G3dTestScene::StartLoading() {
 }
 
 void G3dTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "THM:/body.imd");
-    func_0202ad04(data_021223e4, 0, "BIC", 0);
-    ModelResources_SetModel(data_021223e4, 1, "TG3:/Glass6.imd");
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "THM:/body.imd");
+    ModelResources_BindArchive(gModelResources, 0, "BIC", 0);
+    ModelResources_SetModel(gModelResources, 1, "TG3:/Glass6.imd");
     NNS_GfdDumpFrmTexVramManager();
     NNS_GfdDumpFrmPlttVramManager();
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
-    data_0211d604.Show(1);
+    gScreenControl.Show(1);
     G3X_EdgeMarking(TRUE);
     G3X_SetEdgeColorTable(sEdgeColors);
-    mCamera = &data_02122764;
-    Light *light = &data_021227cc[0];
+    mCamera = &gCamera;
+    Light *light = &gLights[0];
     u16 color = light->mColor;
     light->mDirection.x = 0xFFF;
     light->mEnabled = TRUE;
@@ -52,44 +52,44 @@ void G3dTestScene::Init() {
 }
 
 void G3dTestScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
+    if (gPadInput.mHeld & PAD_BUTTON_A) {
         return;
     }
-    if (data_0211f9d4.mHeld & PAD_BUTTON_B) {
-        if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+    if (gPadInput.mHeld & PAD_BUTTON_B) {
+        if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCharacter.mAnim.mRotZ += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        } else if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCharacter.mAnim.mRotZ += 0xFE00; // Written so: "-= 0x200" compiles to a sub
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCharacter.mAnim.mRotY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCharacter.mAnim.mRotY += 0xFE00; // Written so: "-= 0x200" compiles to a sub
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_X) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_X) {
         u16 anim = MATH_Rand16(&gRandom, 3);
-        if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        if (gPadInput.mHeld & PAD_KEY_LEFT) {
             anim = 0;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        } else if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             anim = 1;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             anim = 2;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             anim = 1;
         }
         mCharacter.BlendToAnimation(RESOURCE_BCA0, anim);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         mCharacter.SetDefaultMii(MATH_Rand16(&gRandom, 6), TRUE);
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_R) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }
@@ -110,8 +110,8 @@ void G3dTestScene::Draw() {
 }
 
 void G3dTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "TG3");
     ArchiveManager_Unmount(&gArchiveManager, "THM");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");

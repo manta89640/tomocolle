@@ -272,17 +272,17 @@ public:
     void HideControlsNoBar();
     int GetNameLength(const wchar_t *name);
 
-    /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to func_02024b10
+    /* 0x00010 */ u8 mUnknown00010[0x140];      // Init gives +0x10 to GraphicsManager_SaveState
     /* 0x00150 */ int mPage;                    // Which page Draw and Exit pass on to (0 to 6); Init sets -1
     /* 0x00154 */ int mUnknown00154;           // SetPage clears it
     /* 0x00158 */ SpriteButton mButtons[6];
     /* 0x00710 */ SceneCharacter mCharacter;    // The Mii shown
     /* 0x03228 */ CharacterBase mEditedCharacter;
     /* 0x0580C */ BOOL mUnknown580C;
-    /* 0x05810 */ Camera *mCamera;              // data_02122764
+    /* 0x05810 */ Camera *mCamera;              // gCamera
     /* 0x05814 */ int mCameraFrame;             // UpdateCamera moves the camera while it is under 40
     /* 0x05818 */ VecFx32 mCameraGoal;
-    /* 0x05824 */ int mUnknown5824;            // The saved character's index (func_0202c264, func_0202c28c)
+    /* 0x05824 */ int mUnknown5824;            // The saved character's index (GameData_ReadCharacter, GameData_WriteCharacter)
     /* 0x05828 */ BOOL mUnknown5828;           // While set, Update turns the character until its angle is 0x4000
     /* 0x0582C */ MiiEditProgressSprite mProgressSprite;
     /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mProgressSprite while these two are set and 58E4 is not

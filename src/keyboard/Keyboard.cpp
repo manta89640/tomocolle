@@ -26,14 +26,14 @@ struct TouchInput {
 
 extern "C" {
 extern TouchInput gTouchInput;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CellLoader gObjResourceManager;
 extern u8 gVramTransferQueue[];
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-void func_02027f3c(ScreenLoader *loader, const void *screen, int plane, int a, int size);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02028154(ScreenLoader *loader, int plane, int offset);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+void ScreenLoader_QueueScreen(ScreenLoader *loader, const void *screen, int plane, int a, int size);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int offset);
 void func_0202543c(u32 *graphicsManager, int plane, int a, int b, int c, int d, int e, int f);
 void VramTransferQueue_AddCharData(void *queue, void *source, int plane, int offset, int size);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellPath, const char *charPath, int plane,
@@ -129,8 +129,8 @@ void SoftKeyboard::InitCore(KeyboardSoundCallback callback, void *userData) {
     KeyboardCore_MakeScreen(mScreen, mPalette, 0);
     KeyboardCore_SetAreas(sTabAreas, 2, NULL, NULL);
     int plane = mPlane;
-    func_02028108(&data_02121834, plane, -45);
-    func_02028154(&data_02121834, plane, -59);
+    ScreenLoader_SetScrollX(&gScreenLoader, plane, -45);
+    ScreenLoader_SetScrollY(&gScreenLoader, plane, -59);
 }
 
 void SoftKeyboard::TransferCharData() {
@@ -139,11 +139,11 @@ void SoftKeyboard::TransferCharData() {
 }
 
 void SoftKeyboard::TransferScreen() {
-    func_02027f3c(&data_02121834, mScreen, mPlane, 0, 0x800);
+    ScreenLoader_QueueScreen(&gScreenLoader, mScreen, mPlane, 0, 0x800);
 }
 
 void SoftKeyboard::LoadBgPalette(int offset) {
-    func_02027534(&data_021213b8, mBgPaletteFile, mPlane, offset, mPalette * 32, 32);
+    PaletteLoader_LoadFile(&gPaletteLoader, mBgPaletteFile, mPlane, offset, mPalette * 32, 32);
 }
 
 void SoftKeyboard::Update(int pad, TPData tp) {
@@ -246,7 +246,7 @@ BOOL KeyboardButton::Contains(ScreenPoint point) {
     ScreenRect rect = sButtonRect;
     rect.x += mPosition.x >> FX32_SHIFT;
     rect.y += mPosition.y >> FX32_SHIFT;
-    return func_02028d88(&rect, &point) ? TRUE : FALSE;
+    return ScreenRect_Contains(&rect, &point) ? TRUE : FALSE;
 }
 
 void KeyboardButton::SetSounds(int handle, int seqArc, int touchSound, int releaseSound) {
@@ -308,7 +308,7 @@ void SoftKeyboard::LoadObjCells(int a) {
 }
 
 void SoftKeyboard::LoadObjPalette(int palette) {
-    func_02027534(&data_021213b8, mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
+    PaletteLoader_LoadFile(&gPaletteLoader, mObjPaletteFile, 0x1000, palette * 32, 0x1A0, 32);
 }
 
 void SoftKeyboard::InitSprites() {

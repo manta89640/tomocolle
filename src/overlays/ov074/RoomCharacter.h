@@ -38,8 +38,8 @@ GXRgb NFL_GetFavoriteColor(int color);
 // --- Data ---
 extern MATHRandContext16 gRandom; // The game's random number generator
 extern const int gPersonalityKinds[16];   // By mPersonality: the row of the two tables below
-extern const s16 data_020fb870[4][5]; // Animation ids, by that row and by mMood: standing
-extern const s16 data_020fb898[4][5]; // The same: walking
+extern const s16 gStandAnimations[4][5]; // Animation ids, by that row and by mMood: standing
+extern const s16 gWalkAnimations[4][5]; // The same: walking
 
 } // extern "C"
 
@@ -210,7 +210,7 @@ public:
     void RefreshSpeechTexts();
     void ConvertSpeechTexts();
     void ClearSpeechTexts();
-    // func_0202c28c(gGameData, mIndex, this) if func_0202c3dc
+    // GameData_WriteCharacter(gGameData, mIndex, this) if GameData_CharacterExists
     void Save();
 
     // --- Inline helpers. Each is here because the match of some state function depends on its shape: do not
@@ -305,8 +305,8 @@ public:
     }
 
     // The standing and the walking animation of the character's personality and mood
-    s16 GetIdleAnim() { return data_020fb870[gPersonalityKinds[mPersonality]][mMood]; }
-    s16 GetWalkAnim() { return data_020fb898[gPersonalityKinds[mPersonality]][mMood]; }
+    s16 GetIdleAnim() { return gStandAnimations[gPersonalityKinds[mPersonality]][mMood]; }
+    s16 GetWalkAnim() { return gWalkAnimations[gPersonalityKinds[mPersonality]][mMood]; }
     ModelAnimation *GetCurrentAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
     BOOL IsAnimationFinished() { return GetCurrentAnimation()->mFinished; }
     // A joint's matrix, as GetMidpoint takes it

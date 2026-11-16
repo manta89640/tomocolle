@@ -22,13 +22,13 @@ void BodyPaletteTestScene::StartLoading() {
 #pragma push
 #pragma opt_propagation off
 void BodyPaletteTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
     G3X_SetClearColor(GX_RGB(15, 15, 15), 31, 0x7FFF, 63, FALSE);
-    mCamera = &data_02122764;
-    Light *light = &data_021227cc[0];
+    mCamera = &gCamera;
+    Light *light = &gLights[0];
     u16 color = light->mColor;
     light->mDirection.x = 0xFFF;
     light->mEnabled = TRUE;
@@ -38,9 +38,9 @@ void BodyPaletteTestScene::Init() {
     light->mDirection.z = 0;
     light->mDirection.y = 0;
     const char *path = "TG3:/body.imd";
-    ModelResources_SetModel(data_021223e4, 0, path);
+    ModelResources_SetModel(gModelResources, 0, path);
     mBody.Load(0, 0);
-    ModelResources_SetModel(data_021223e4, 1, "TG4:/body.imd");
+    ModelResources_SetModel(gModelResources, 1, "TG4:/body.imd");
     mSecondBody.Load(1, 0);
     mSecondBody.mPosition.x = -0x2000;
     NNS_GfdDumpLnkTexVramManager();
@@ -49,19 +49,19 @@ void BodyPaletteTestScene::Init() {
 #pragma pop
 
 void BodyPaletteTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         GXRgb *palette = (GXRgb *)ArchiveManager_GetFileByName(&gArchiveManager, "TG3:/body_c1.ntfp");
         palette[1] = GX_RGB(31, 0, 0);
-        func_02029d40(&mBody, palette, -1, -1);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
-        func_02029758(data_021223e4, RESOURCE_BMD0);
+        Model_QueuePalette(&mBody, palette, -1, -1);
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
+        ResourceSet_ReleaseFile(gModelResources, RESOURCE_BMD0);
         ArchiveManager_Unmount(&gArchiveManager, "TG3");
         ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body001_3D_LZ.bin", 1);
-        ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
-        func_02029c20(&mBody, RESOURCE_BMD0, 0, 0);
+        ModelResources_SetModel(gModelResources, 0, "TG3:/body.imd");
+        Model_BindResource(&mBody, RESOURCE_BMD0, 0, 0);
         NNS_GfdDumpLnkTexVramManager();
         NNS_GfdDumpLnkPlttVramManager();
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         NNSG3dResDict *dict;
         int i;
         NNSG3dResTex *textures = mBody.mResTex;
@@ -70,20 +70,20 @@ void BodyPaletteTestScene::Update() {
         for (i = 0; i < dict->numEntry; i++) {
             NNS_G3dGetPlttDataByName(textures, NNS_G3dGetResNameByIdx(dict, i));
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_X) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_X) {
         NNSG3dResTex *textures = mBody.mResTex;
         GXRgb *palette = (GXRgb *)((u8 *)textures + textures->plttInfo.ofsPlttData);
         palette[1] = GX_RGB(0, 31, 31);
-        func_02029d40(&mBody, palette, -1, 4);
+        Model_QueuePalette(&mBody, palette, -1, 4);
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }
@@ -95,8 +95,8 @@ void BodyPaletteTestScene::Draw() {
 }
 
 void BodyPaletteTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "TG3");
     ArchiveManager_Unmount(&gArchiveManager, "TG4");
 }

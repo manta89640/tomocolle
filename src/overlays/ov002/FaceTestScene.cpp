@@ -14,21 +14,21 @@ void FaceTestScene::StartLoading() {
 }
 
 void FaceTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "TG3:/Glass6.imd");
-    ModelResources_SetModel(data_021223e4, 1, "TGH:/head.imd");
-    ModelResources_SetModel(data_021223e4, 1, "TGH:/wait00.ica");
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    data_0211d604.mUnknown44 = 0;
-    data_0211d604.mUnknown44Changed = TRUE;
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "TG3:/Glass6.imd");
+    ModelResources_SetModel(gModelResources, 1, "TGH:/head.imd");
+    ModelResources_SetModel(gModelResources, 1, "TGH:/wait00.ica");
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    gScreenControl.mUnknown44 = 0;
+    gScreenControl.mUnknown44Changed = TRUE;
     mGlasses.Load(0, 0);
     mGlasses.mRotY = 0x6000;
     mGlasses.mPosition.y = -0x1199;
-    mCamera = &data_02122764;
-    func_0202a96c(&data_021227cc[0]);
-    func_0202a96c(&data_021227cc[1]);
+    mCamera = &gCamera;
+    Light_Reset(&gLights[0]);
+    Light_Reset(&gLights[1]);
     mFace.InitFace(0);
     mFaceKind = 0;
     mHeadTurn = 0;
@@ -47,71 +47,71 @@ void FaceTestScene::Init() {
 // Sets the line from the camera through the touched point, which CharacterBase::HitTestFace() tests. The point goes
 // by value through an inline: that is what leaves the original's dead copy of it on the stack.
 static inline int SetTouchLine(ScreenPoint point) {
-    return ModelResources_SetTouchLine(data_021223e4, point.x, point.y);
+    return ModelResources_SetTouchLine(gModelResources, point.x, point.y);
 }
 
 void FaceTestScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_A) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mFaceOffset.x += 0x40;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mFaceOffset.x -= 0x40;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mFace.mFaceOffset.y += 0x40;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mFace.mFaceOffset.y -= 0x40;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_B) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_B) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mHeadRollNow += 0xFF50;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mHeadRollNow += 0xB0;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mFace.mHeadPitchNow += 0xFF50;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mFace.mHeadPitchNow += 0xB0;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_Y) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_Y) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mFace.mHeadYawNow += 0xFF60;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mFace.mHeadYawNow += 0xA0;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mTrigger & PAD_KEY_UP) {
             if (++mFaceKind >= 27) {
                 mFaceKind = 0;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             if (--mFaceKind < 0) {
                 mFaceKind = 26;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT || data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_RIGHT || gPadInput.mTrigger & PAD_KEY_LEFT) {
             mFace.SetFace(mFaceKind);
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_L) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_L) {
+        if (gPadInput.mTrigger & PAD_KEY_UP) {
             if (++mHeadTurn >= 8) {
                 mHeadTurn = 0;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_DOWN) {
+        } else if (gPadInput.mTrigger & PAD_KEY_DOWN) {
             if (--mHeadTurn < 0) {
                 mHeadTurn = 7;
             }
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT || data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_RIGHT || gPadInput.mTrigger & PAD_KEY_LEFT) {
             mFace.mHeadTurn = mHeadTurn;
         }
-    } else if (data_0211f9d4.mHeld & PAD_BUTTON_R) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    } else if (gPadInput.mHeld & PAD_BUTTON_R) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             Camera_Translate(mCamera, 0, 0, 0x200);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             Camera_Translate(mCamera, 0, 0, -0x200);
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             Camera_Translate(mCamera, 0, 0x200, 0);
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             Camera_Translate(mCamera, 0, -0x200, 0);
         }
     }
@@ -132,8 +132,8 @@ void FaceTestScene::Draw() {
 }
 
 void FaceTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
     ArchiveManager_Unmount(&gArchiveManager, "TG3");
     ArchiveManager_Unmount(&gArchiveManager, "TGH");
 }

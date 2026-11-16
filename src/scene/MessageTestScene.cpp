@@ -20,7 +20,7 @@ void MessageTestScene::StartLoading() {
 
 #pragma opt_propagation off
 void MessageTestScene::Init() {
-    func_020278f8(&data_021213b8, 0x2800, 0x101);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x2800, 0x101);
     mMessage = 0;
     mFiles[0].Open("TBM:/tmd_etc_msg_JP.bmg");
     mFiles[1].Open("ITM:/tmd_item_msg_JP.bmg");
@@ -42,7 +42,7 @@ void MessageTestScene::Init() {
     G2_SetBG2ControlText(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3800, GX_BG_CHARBASE_0x18000);
     MI_CpuClearFast(G2_GetBG2CharPtr(), 0x20);
     MI_CpuClearFast(G2_GetBG2ScrPtr(), 0x800);
-    data_0211d604.Show(4);
+    gScreenControl.Show(4);
     charOffset = 1;
     mBgTexts[0].InitBg(&gFonts[0].mFont, 4, 24, 8, charOffset, 16, charOffset, 0, 1, 15, mCharBuffer);
     mBgTexts[0].mMessageFile = &mFiles[0];
@@ -66,7 +66,7 @@ void MessageTestScene::Init() {
 #pragma opt_propagation reset
 
 void MessageTestScene::Update() {
-    if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+    if (gPadInput.mTrigger & PAD_BUTTON_A) {
         mObjTexts[0].mMessage = mMessage;
         NNS_G2dCharCanvasClear(&mObjTexts[0].mCanvas, 6);
         mObjTexts[0].mDrawMode = 2;
@@ -82,7 +82,7 @@ void MessageTestScene::Update() {
         mBgTexts[1].mDrawMode = 2;
         mBgTexts[1].mStarted = FALSE;
         mMessage++;
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         mBgTexts[1].mDrawMode = 4;
         mBgTexts[1].mStarted = FALSE;
     }

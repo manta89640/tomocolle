@@ -28,18 +28,18 @@ struct SavedGame {
     /* 0x4C */ u8 mBuilding; // Its low two bits: which building the plain apartment scene (id 0x11) shows
 };
 extern SavedGame gGameData;
-BOOL func_0202c3dc(SavedGame *game, int index); // Whether the saved character with that index exists
-int func_0202c414(SavedGame *game, int index);  // Its room number (SavedCharacter::mRoom), 0xFF without save data
-u8 func_0202c468(SavedGame *game, int index);   // Its event (SavedCharacter::mLongActState)
-int func_0202c490(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mLongActPartner)
-s64 func_0202c4b8(SavedGame *game, int index);  // The time its next event starts at
-s64 func_0202c4e4(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
+BOOL GameData_CharacterExists(SavedGame *game, int index); // Whether the saved character with that index exists
+int GameData_GetCharacterRoomNumber(SavedGame *game, int index);  // Its room number (SavedCharacter::mRoom), 0xFF without save data
+u8 GameData_GetCharacterEvent(SavedGame *game, int index);   // Its event (SavedCharacter::mLongActState)
+int GameData_GetCharacterEventPartner(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mLongActPartner)
+s64 GameData_GetCharacterEventEnd(SavedGame *game, int index);  // The time its next event starts at
+s64 GameData_GetCharacterAwayUntil(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
 
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
 
 
-void func_02029660(void *resource, u32 resType, void *archive);
+void ResourceSet_SetArchive(void *resource, u32 resType, void *archive);
 
 // The archive loader: archives are asked for by name and path, and load on a thread
 struct ArchiveLoader;
@@ -80,12 +80,12 @@ struct ScreenControl {
     /* 0xD8 */ u8 mUnknownD8[0x14];
     /* 0xEC */ int mUnknown48Changed;
 };
-extern ScreenControl data_0211d604;
-void func_02023be8(ScreenControl *screens, int mask, fx32 brightness);
-void func_02023c54(ScreenControl *screens, int mask, fx32 speed);
-int func_02023c44(ScreenControl *screens, int mask); // The brightness now
-void func_02023eac(ScreenControl *screens, int mask);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
+extern ScreenControl gScreenControl;
+void ScreenControl_SetBrightness(ScreenControl *screens, int mask, fx32 brightness);
+void ScreenControl_SetFadeSpeed(ScreenControl *screens, int mask, fx32 speed);
+int ScreenControl_GetBrightnessLevel(ScreenControl *screens, int mask); // The brightness now
+void ScreenControl_ClearBlend(ScreenControl *screens, int mask);
+void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // The buttons
 struct PadInput {
@@ -94,7 +94,7 @@ struct PadInput {
     /* 0x08 */ u8 mUnknown08[0x18];
     /* 0x20 */ BOOL mUnknown20; // Has to be set for a let-go on a button to count
 };
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 
 // The touch screen
 struct TouchInput {
@@ -120,28 +120,28 @@ struct ScreenLoader;
 struct CharLoader;
 struct Renderer3d;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
-void func_0202ae38(void *resources); // Of the models' resource table, data_021223e4 (Model.h)
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
+void ModelResources_Reset(void *resources); // Of the models' resource table, gModelResources (Model.h)
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, int a, int b);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028154(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_0202680c(int size);
-void func_0202683c();
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, int a, int b);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetScrollY(ScreenLoader *loader, int plane, int y);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void CreateMainFrameHeap(int size);
+void DestroyMainFrameHeap();
 void NNS_GfdDumpLnkPlttVramManager();
 
 // The particle system
-void func_02080e98(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
+void ParticleSystem_Load(ParticleSystem *particles, void *file, int a, int b, int c, int d, int e);
 void func_02080ee4(ParticleSystem *particles);
-void func_02080f00(ParticleSystem *particles, int unknown); // Draws
+void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                          // Updates
 
 // The room (Room.h has the others)
@@ -167,8 +167,8 @@ extern "C" {
 
 
 // The saved game's characters, by index
-void func_0202c264(SavedGame *savedGame, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(SavedGame *savedGame, int index, SavedCharacter *character); // Writes one
+void GameData_ReadCharacter(SavedGame *savedGame, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(SavedGame *savedGame, int index, SavedCharacter *character); // Writes one
 
 // Copies the character's name out as a string
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
@@ -216,15 +216,15 @@ void RoomScene::StartLoading() {
     StartNextEvents(mClock.mSeconds, &mClock.mTime);
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
-            mFront.mResidents[func_0202c414(&gGameData, i)] = i;
+            mFront.mResidents[GameData_GetCharacterRoomNumber(&gGameData, i)] = i;
         }
     }
 
     last = gSceneMemory.mCharacters[0];
-    if (last < 100 && func_0202c3dc(&gGameData, last)) {
+    if (last < 100 && GameData_CharacterExists(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
@@ -330,8 +330,8 @@ void RoomScene::ChooseCharacters(int resident) {
             mCharacters[1].mIndex = 2;
         }
     } else {
-        if (SavedCharacter::IsLongActPairedState(func_0202c468(&gGameData, resident))) {
-            other = func_0202c490(&gGameData, resident);
+        if (SavedCharacter::IsLongActPairedState(GameData_GetCharacterEvent(&gGameData, resident))) {
+            other = GameData_GetCharacterEventPartner(&gGameData, resident);
         } else {
             other = mResidents[0];
             if (other == resident) {
@@ -351,43 +351,43 @@ void RoomScene::Init() {
     void *animations;
     int charOffset;
 
-    func_0202b0e8(&data_02122824);
-    func_0202ae38(data_021223e4);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = 1;
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_Reset(gModelResources);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
-    func_0202680c(0x4000);
+    CreateMainFrameHeap(0x4000);
 
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_down.nce", "MNU:/Obj_down.ncg", 0x1000, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "MNU:/Obj_up.nce", "MNU:/Obj_up.ncg", 0x10, 1, -1);
-    func_02027534(&data_021213b8, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
-    mFront.mScreen = (u16 *)func_02027d7c(&data_02121834, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02027d7c(&data_02121834, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
-    func_02027d7c(&data_02121834, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
-    mSky.mColors = (u16 *)func_02027534(&data_021213b8, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
-    func_02028f24(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-    mSky.mPalette = func_02027534(&data_021213b8, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
-    func_020278f8(&data_021213b8, 0, 1);
-    func_02028280(&data_02121834, 1, 2);
-    func_02028280(&data_02121834, 2, 1);
-    func_02028108(&data_02121834, 2, 0);
-    func_02028154(&data_02121834, 2, 0);
-    func_02028108(&data_02121834, 0x200, 0);
-    func_02028154(&data_02121834, 0x200, -0xC0);
-    func_02028108(&data_02121834, 0x400, 0);
-    func_02028154(&data_02121834, 0x400, -0xC0);
-    data_0211d604.Set(0x1600);
-    data_0211d604.Show(0x11);
-    func_02023ee0(&data_0211d604, 2, 0x11, 8, 8);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/Obj_up.ncl", 0x10, -1, -1, -1);
+    mFront.mScreen = (u16 *)ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_window.nsc", 0x200, 0, 0, 0, 0, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "APX:/BG_wall.nsc", 0x400, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "APX:/BG_down.ncg", 0x600, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "APX:/BG_down.ncl", 0x600, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "MNU:/BG_dialogue.nsc", 2, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "MNU:/BG_sub.ncg", 2, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "MNU:/BG_sub.ncl", 2, -1, -1, -1);
+    mSky.mColors = (u16 *)PaletteLoader_LoadFile(&gPaletteLoader, "ASP:/Fw_BG_sky.ncl", 0x2F00, 0, 0, 2);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, mSky.mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+    mSky.mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mSky.mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 1);
+    ScreenLoader_SetPriority(&gScreenLoader, 1, 2);
+    ScreenLoader_SetPriority(&gScreenLoader, 2, 1);
+    ScreenLoader_SetScrollX(&gScreenLoader, 2, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 2, 0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x200, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, -0xC0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 0x400, 0);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, -0xC0);
+    gScreenControl.Set(0x1600);
+    gScreenControl.Show(0x11);
+    ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
     SetInputState(INPUT_IDLE);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
-    func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
+    ParticleSystem_Load(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
     func_02080ee4(&mParticles);
     mIcon[0].Load(&mParticles, 0);
     mRoom.Refresh();
@@ -397,13 +397,13 @@ void RoomScene::Init() {
     mRoom.mDoor.mSoundPlayer = 2;
     for (i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
-        func_0202ad04(data_021223e4, i + 2, item->mArchiveName, 0);
+        ModelResources_BindArchive(gModelResources, i + 2, item->mArchiveName, 0);
         item->Init(i + 2);
     }
     mTtsPlayer.InitEngine();
 
-    func_0202ad04(data_021223e4, 0, mCharacters[0].mArchiveName, 0);
-    func_0202ad04(data_021223e4, 1, mCharacters[1].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, 1, mCharacters[1].mArchiveName, 0);
     mCharacters[0].Init(0, 0, 0);
     mCharacters[1].Init(1, 0, 1);
     mCharacters[0].mPartner = &mCharacters[1];
@@ -416,7 +416,7 @@ void RoomScene::Init() {
     mCharacters[1].mSoundHandle = 5;
     mCharacters[0].mPresent = FALSE;
     mCharacters[1].mPresent = FALSE;
-    animations = func_0202ad04(data_021223e4, 6, "BIC", 0);
+    animations = ModelResources_BindArchive(gModelResources, 6, "BIC", 0);
     for (int i = 0; i < 2; i++) {
         LoadCharacter(&mCharacters[i]);
         ((CharacterBase *)(&mCharacters[i]))->MakeFace();
@@ -427,7 +427,7 @@ void RoomScene::Init() {
         mCharacters[i].CopyName();
         mCharacters[i].mTtsPlayer = &mTtsPlayer;
         mCharacters[i].RefreshSpeechTexts();
-        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].SetState(1);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mRoom = &mRoom;
@@ -485,18 +485,18 @@ void RoomScene::Init() {
 }
 
 void RoomScene::Update() {
-    if ((data_0211f9d4.mHeld & 0x2FFF) != 0 || gTouchInput.mTouching != 0) {
+    if ((gPadInput.mHeld & 0x2FFF) != 0 || gTouchInput.mTouching != 0) {
         mIdleFrames = 0;
         mCamera.SetState(4, 0x474);
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_KEY_RIGHT) {
         mCamera.mInput.y = 0x10000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+    } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
         mCamera.mInput.y = -0x10000;
     }
-    if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+    if (gPadInput.mHeld & PAD_KEY_UP) {
         mCamera.mInput.x = 0xE000;
-    } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+    } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
         mCamera.mInput.x = -0xE000;
     }
     UpdateInput();
@@ -516,20 +516,20 @@ void RoomScene::Draw() {
             SetFadeState(0);
         } else if (mFadeStep >= 6) {
             if (mFadeStep == 6) {
-                func_02023c54(&data_0211d604, 0x3F3F, 0x2AE1);
+                ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x2AE1);
             }
             UpdateObjects();
         } else {
-            func_02023be8(&data_0211d604, 0x3F3F, 0x10000);
+            ScreenControl_SetBrightness(&gScreenControl, 0x3F3F, 0x10000);
             UpdateObjects();
         }
         break;
     case 2:
         mFadeStep++;
-        if (ABS(func_02023c44(&data_0211d604, 0x3F)) > 10) {
+        if (ABS(ScreenControl_GetBrightnessLevel(&gScreenControl, 0x3F)) > 10) {
             SetFadeState(0);
         } else if (mFadeStep == 1) {
-            func_02023c54(&data_0211d604, 0x3F3F, 0x2000);
+            ScreenControl_SetFadeSpeed(&gScreenControl, 0x3F3F, 0x2000);
         } else if (mFadeStep > 1) {
             UpdateObjects();
         }
@@ -543,7 +543,7 @@ void RoomScene::Draw() {
     for (int i = 0; i < 4; i++) {
         mItems[i].Draw();
     }
-    func_02080f00(&mParticles, 0);
+    ParticleSystem_Draw(&mParticles, 0);
     mMessage.Draw();
     mButtonLabel[0].Draw();
     mNamePanel.Draw();
@@ -555,17 +555,17 @@ void RoomScene::Draw() {
 }
 
 void RoomScene::Exit() {
-    func_02023eac(&data_0211d604, 0x3F);
+    ScreenControl_ClearBlend(&gScreenControl, 0x3F);
     FinishEncounter();
     SaveCharacters();
-    func_0202683c();
-    func_0202aecc(data_021223e4, 0);
-    func_0202aecc(data_021223e4, 1);
-    func_0202aecc(data_021223e4, 2);
-    func_0202aecc(data_021223e4, 3);
-    func_0202aecc(data_021223e4, 4);
-    func_0202aecc(data_021223e4, 5);
-    func_0202aecc(data_021223e4, 6);
+    DestroyMainFrameHeap();
+    ModelResources_ReleaseModel(gModelResources, 0);
+    ModelResources_ReleaseModel(gModelResources, 1);
+    ModelResources_ReleaseModel(gModelResources, 2);
+    ModelResources_ReleaseModel(gModelResources, 3);
+    ModelResources_ReleaseModel(gModelResources, 4);
+    ModelResources_ReleaseModel(gModelResources, 5);
+    ModelResources_ReleaseModel(gModelResources, 6);
     mRoom.ReleaseAll();
     ArchiveManager_Unmount(&gArchiveManager, mCharacters[0].mArchiveName);
     ArchiveManager_Unmount(&gArchiveManager, "MNU");
@@ -825,7 +825,7 @@ void RoomScene::UpdateInput() {
             mIdleFrames++;
             if (mIdleFrames > 3600 && mResidentCount >= 2) {
                 int count = mResidentCount;
-                int room = func_0202c414(&gGameData, mResidents[MATH_Rand16(&gRandom, count)]);
+                int room = GameData_GetCharacterRoomNumber(&gGameData, mResidents[MATH_Rand16(&gRandom, count)]);
                 if ((u16)room != mFront.mSelectedRoom) {
                     mIdleFrames = 0;
                     mCamera.SetState(4, 0x474);
@@ -845,7 +845,7 @@ void RoomScene::UpdateInput() {
             }
         } else {
             if (mButtons[mPressedButton].Contains(gTouchInput.mLastPoint) &&
-                data_0211f9d4.mUnknown20) {
+                gPadInput.mUnknown20) {
                 mButtons[mPressedButton].mState = 3;
                 PressButton(mPressedButton);
             } else {
@@ -863,7 +863,7 @@ void RoomScene::UpdateInput() {
                 mFront.mButton.SetState(2);
             }
         } else {
-            if (mFront.mButton.Contains(gTouchInput.mLastPoint) && data_0211f9d4.mUnknown20) {
+            if (mFront.mButton.Contains(gTouchInput.mLastPoint) && gPadInput.mUnknown20) {
                 mFront.mButton.SetState(3);
                 GoToInformation();
             } else {
@@ -966,10 +966,10 @@ void RoomScene::ChangeRoom() {
     SaveCharacters();
 
     for (i = 0; i < 2; i++) {
-        if (func_0202c3dc(&gGameData, mCharacters[i].mIndex)) {
+        if (GameData_CharacterExists(&gGameData, mCharacters[i].mIndex)) {
             mFront.DrawWindow(mCharacters[i].mRoomNumber);
             if (((SavedCharacter *)(&mCharacters[i]))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mCharacters[i].mLongActPartner));
             }
         }
     }
@@ -1000,7 +1000,7 @@ void RoomScene::ChangeRoom() {
     mIdleFrames = 0;
     mCamera.SetState(0, 0);
     mMessage.SetState(4);
-    data_0211d604.Hide(1);
+    gScreenControl.Hide(1);
     mClockDisplay.SetState(1);
     mIcon[0].SetMode(1);
 }
@@ -1303,7 +1303,7 @@ void RoomScene::UpdateEvent() {
                 StartRoomEvent();
                 ShowEventMessage();
             }
-            data_0211d604.Show(1);
+            gScreenControl.Show(1);
         }
         break;
     }
@@ -1319,25 +1319,25 @@ void RoomScene::UpdateEvent() {
             mScanIndex = 0;
             int index = StartRandomEvent(now);
             if (index >= 0) {
-                mFront.DrawWindow(func_0202c414(&gGameData, index));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
             }
         } else {
-            if (func_0202c3dc(&gGameData, mScanIndex)) {
-                if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+            if (GameData_CharacterExists(&gGameData, mScanIndex)) {
+                if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                     SavedCharacter temp;
                     StartDueEvent(now, &temp);
-                    if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                    if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                     }
-                } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                     int partner = EndDueEvent();
                     if (partner >= 0) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                     }
                 } else if (IsOutingOver(mScanIndex, now)) {
                     UpdateAbsentCharacter(now);
                 }
-                mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
             }
             mScanIndex++;
         }
@@ -1355,29 +1355,29 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         StartDueEvent(now, &temp);
                         // The resident's new event has it at home
                         if (mScanIndex == mCharacters[0].mIndex && !((SavedCharacter *)(&mCharacters[0]))->IsAway()) {
                             SetEventState(EVENT_CHOOSE);
                         }
-                        if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                        if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
-                    mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                 }
                 mScanIndex++;
             }
@@ -1403,13 +1403,13 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
                     refresh = TRUE;
 
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         SavedCharacter *character = StartDueEvent(now, &temp);
 
@@ -1437,22 +1437,22 @@ void RoomScene::UpdateEvent() {
                         }
 
                         if (mScanIndex != mCharacters[0].mIndex) {
-                            if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                             }
                         } else if (!((SavedCharacter *)(&mCharacters[0]))->IsAway() && ((SavedCharacter *)(&mCharacters[0]))->IsLongActAsPartner()) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[0].mLongActPartner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mCharacters[0].mLongActPartner));
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1489,13 +1489,13 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
                     refresh = TRUE;
 
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         StartDueEvent(now, &temp);
 
@@ -1514,20 +1514,20 @@ void RoomScene::UpdateEvent() {
                         }
 
                         if (mScanIndex != mCharacters[0].mIndex && mScanIndex != mCharacters[1].mIndex) {
-                            if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                             }
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1722,9 +1722,9 @@ void RoomScene::UpdateEvent() {
             SetEventState(EVENT_NOBODY_HOME);
             mCamera.SetMode(1);
             mLight.SetState(4);
-            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
+            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1749,9 +1749,9 @@ void RoomScene::UpdateEvent() {
                 StartEvent(mActorOther, 0);
             }
             mCamera.SetMode(2);
-            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
+            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -3079,8 +3079,8 @@ void RoomScene::SaveCharacter(RoomCharacter *character) {
         return;
     }
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, character);
     }
 }
 
@@ -3096,8 +3096,8 @@ void RoomScene::LoadCharacter(RoomCharacter *character) {
         return;
     }
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c264(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_ReadCharacter(&gGameData, index, character);
     } else {
         ((SavedCharacter *)(character))->Reset();
         ((SavedCharacter *)(character))->SetParameter(40, index & 7);
@@ -10735,7 +10735,7 @@ BOOL RoomCharacter::IsWalkAnim() {
     int anim = mAnimId;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 5; j++) {
-            if (anim == data_020fb898[i][j]) {
+            if (anim == gWalkAnimations[i][j]) {
                 return TRUE;
             }
         }
@@ -10859,20 +10859,20 @@ extern "C" {
 // --- The main program's, not decompiled or not named yet ---
 
 // The offset (the plane's number shifted by 11) of a plane's screen in VRAM
-int func_020253d4(void *graphicsManager, int plane);
+int GraphicsManager_GetScreenOffset(void *graphicsManager, int plane);
 
 // Splits a 15-bit colour
-void func_02028b98(int color, int *r, int *g, int *b);
+void SplitColor(int color, int *r, int *g, int *b);
 // Resets a light: direction straight down... colour white, enabled
-void func_0202a96c(Light *light);
+void Light_Reset(Light *light);
 // Sets a light's direction: the vector, rotated by the three angles and normalized
-void func_0202ab2c(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
-extern Light data_021227cc[];
+void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
+extern Light gLights[];
 
 // The saved game: what is known of a character by its index
-u8 func_0202c53c(SavedGame *game, int character);
-int func_0202c5b4(SavedGame *game, int character);
-int func_0202c58c(SavedGame *game, int character);
+u8 GameData_GetCharacterTroubleState(SavedGame *game, int character);
+int GameData_GetCharacterTroubleCategory(SavedGame *game, int character);
+int GameData_GetCharacterTroubleId(SavedGame *game, int character);
 struct Unknown02114d78Entry {
     u32 mUnknown0 : 8;
     int mUnknown4;
@@ -10883,8 +10883,8 @@ extern const Unknown02114d78Entry *const data_02114d78[];
 // The time-of-day tracker
 
 // The current time with the game's offset applied, as seconds and as date and time
-s64 func_02035870(int offset, RTCDate *date, RTCTime *time);
-extern int data_02123440[];
+s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time);
+extern int gGameClock[];
 
 // Copies a text, of at most that many bytes
 }
@@ -11157,7 +11157,7 @@ void RoomCharacter::UpdateOverrideState() {
         ClearSpeechTexts();
         ((Character *)(this))->ResetSoundPhases();
         mSoundArmed = FALSE;
-        func_0202aecc(data_021223e4, mSlot);
+        ModelResources_ReleaseModel(gModelResources, mSlot);
         ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
         break;
     case OVERRIDE_LOAD_ARCHIVE:
@@ -11178,7 +11178,7 @@ void RoomCharacter::UpdateOverrideState() {
         break;
     case OVERRIDE_MAKE_MODEL:
         if (mOverrideStep == 0) {
-            func_0202ad04(data_021223e4, mSlot, mArchiveName, 0);
+            ModelResources_BindArchive(gModelResources, mSlot, mArchiveName, 0);
             CharacterModel::MakeModel(mSlot, 0);
             ((Character *)(this))->UpdateBodyColors();
             ResetBody();
@@ -11285,8 +11285,8 @@ void RoomCharacter::ClearSpeechTexts() {
 // @0x02169d90
 void RoomCharacter::Save() {
     u16 index = mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, this);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, this);
     }
 }
 
@@ -11445,13 +11445,13 @@ void HeldItem::Unload() {
     SetShowState(SHOW_IDLE);
     mVisible = FALSE;
     RemoveAnims();
-    func_0202aecc(data_021223e4, mResourceId);
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
     ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
 }
 
 // @0x0216a1f0
 void HeldItem::Reload() {
-    func_0202ad04(data_021223e4, mResourceId, mArchiveName, 0);
+    ModelResources_BindArchive(gModelResources, mResourceId, mArchiveName, 0);
     AnimModel::Load(mResourceId, 0);
     mVisible = FALSE;
 }
@@ -11460,7 +11460,7 @@ void HeldItem::Reload() {
 void HeldItem::StartPattern() {
     BOOL hasPattern = sHeldItemHasPattern[mKind];
     if (hasPattern) {
-        func_0202ad04(data_021223e4, mResourceId, mArchiveName, hasPattern);
+        ModelResources_BindArchive(gModelResources, mResourceId, mArchiveName, hasPattern);
         SetAnimation(RESOURCE_BTP0, 0);
     }
 }
@@ -11556,7 +11556,7 @@ void ApartmentRoom::UpdateState() {
 
 // @0x0216a4a4
 RoomCamera::RoomCamera() {
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
 }
 
 // @0x0216a4b4
@@ -11572,7 +11572,7 @@ void RoomCamera::Reset() {
     SetState(STATE_TURN_RIGHT, 0);
     mSnap = TRUE;
     mIgnoreInput = FALSE;
-    func_0202a640(mCamera);
+    Camera_Reset(mCamera);
     mPosition.x = 0;
     mPosition.y = FX32_CONST(1);
     mPosition.z = FX32_CONST(16);
@@ -11690,7 +11690,7 @@ void RoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -11715,7 +11715,7 @@ void RoomCamera::Update() {
         Clamp(&target.z, 0x3800);
         VecFx32 radius;
         VEC_Subtract(&mCharacters[0]->mPos, &mCharacters[1]->mPos, &radius);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0x9000;
         radius.z = (radius.z * 9 >> 2) + 0x9000;
         radius.y = 0x8000;
@@ -11741,7 +11741,7 @@ void RoomCamera::Update() {
         target.y = 0x1999;
         Clamp(&target.x, 0x3800);
         Clamp(&target.z, 0x3800);
-        func_02028e0c(&radius, &radius);
+        AbsVec(&radius, &radius);
         radius.x = (radius.x * 9 >> 2) + 0xA800;
         radius.z = (radius.z * 9 >> 2) + 0xA800;
         radius.y = 0x8000;
@@ -11758,7 +11758,7 @@ void RoomCamera::Update() {
     }
 
     if (mState == STATE_TURNED) {
-        func_0202a748(mCamera);
+        Camera_UpdateEye(mCamera);
     }
 }
 
@@ -11838,9 +11838,9 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
     mCamera = camera;
     mRoom = room;
     for (int i = 0; i < 2; i++) {
-        mLights[i] = &data_021227cc[i];
-        func_0202a96c(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
+        mLights[i] = &gLights[i];
+        Light_Reset(mLights[i]);
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
     }
 }
 
@@ -11848,7 +11848,7 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
 void RoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mId].mLightColor);
+        SetColor(gInteriorTable[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -11860,10 +11860,10 @@ void RoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
+            SplitColor(gInteriorTable[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mId].mLightColor;
+                color = gInteriorTable[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);
@@ -11896,9 +11896,9 @@ void RoomLight::Update() {
         }
         break;
     }
-    func_0202ab2c(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
+    Light_SetRotatedDirection(mLights[0], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 1600,
                   -600, -4000);
-    func_0202ab2c(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
+    Light_SetRotatedDirection(mLights[1], mCamera->mOrbit.x >> 12, mCamera->mOrbit.y >> 12, mCamera->mOrbit.z >> 12, 0,
                   -4000, 1500);
 }
 
@@ -11917,7 +11917,7 @@ void RoomLight::SetColor(u16 color) {
 
 // @0x0216b8d4
 void RoomLight::BlendColor(int *targetR, int *targetG, int *targetB, int *r, int *g, int *b) {
-    func_02028b98(mLights[0]->mColor, r, g, b);
+    SplitColor(mLights[0]->mColor, r, g, b);
     fx32 weight = FX_Mul(mFade, mFade);
     *r = *r + ((weight * (*targetR - *r)) >> FX32_SHIFT);
     *g = *g + ((weight * (*targetG - *g)) >> FX32_SHIFT);
@@ -11959,7 +11959,7 @@ BOOL RoomCursor::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- BuildingButton ---
@@ -12007,7 +12007,7 @@ BOOL BuildingButton::Contains(ScreenPoint point) {
     ScreenPoint position = GetPixelPosition();
     rect.x += position.x;
     rect.y += position.y;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- ApartmentFront ---
@@ -12039,7 +12039,7 @@ void ApartmentFront::Init(int room) {
     for (u8 i = 0; i < sRoomCounts[mBuildingSize]; i++) {
         DrawWindow(i);
     }
-    mScreen = (u16 *)(func_020253d4(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
+    mScreen = (u16 *)(GraphicsManager_GetScreenOffset(gGraphicsManager, 0x200) + HW_DB_BG_VRAM);
     mSelectedRoom = room;
     int column;
     int floor;
@@ -12079,8 +12079,8 @@ void ApartmentFront::Update() {
     }
     }
     int y = 320 - (mScroll >> FX32_SHIFT);
-    func_02028154(&data_02121834, 0x200, y);
-    func_02028154(&data_02121834, 0x400, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x200, y);
+    ScreenLoader_SetScrollY(&gScreenLoader, 0x400, y);
     mCursor.Update();
     mButton.Update();
     UpdateButtonPosition();
@@ -12204,10 +12204,10 @@ int ApartmentFront::GetWindowKind(int room) {
     if (character == 0xFF) {
         return WINDOW_EMPTY;
     }
-    int unknown1 = func_0202c468(&gGameData, character);
-    u8 unknown2 = func_0202c53c(&gGameData, character);
-    int unknown3 = func_0202c5b4(&gGameData, character);
-    int unknown4 = data_02114d78[unknown3][func_0202c58c(&gGameData, character)].mUnknown0;
+    int unknown1 = GameData_GetCharacterEvent(&gGameData, character);
+    u8 unknown2 = GameData_GetCharacterTroubleState(&gGameData, character);
+    int unknown3 = GameData_GetCharacterTroubleCategory(&gGameData, character);
+    int unknown4 = data_02114d78[unknown3][GameData_GetCharacterTroubleId(&gGameData, character)].mUnknown0;
     if (SavedCharacter::IsAwayState(unknown1)) {
         return WINDOW_2;
     }
@@ -12353,8 +12353,8 @@ void SkyBackground::UpdateState() {
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
                 SetState(STATE_WATCH);
-                func_02028f24(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
-                mPalette = func_02027534(&data_021213b8, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
+                VramTransferQueue_LoadFile(&gVramTransferQueue, mCharPath, 0x400, 0, 0x1000, 0x3000, 0);
+                mPalette = PaletteLoader_LoadFile(&gPaletteLoader, mPalettePath, 0x400, 0x80, 0x80, 0xC0);
                 ApplyPalette();
             }
         }
@@ -12372,7 +12372,7 @@ void SkyBackground::UpdatePaths() {
 
 // @0x0216c5bc
 void SkyBackground::ApplyPalette() {
-    func_020278f8(&data_021213b8, mColors[DayPhase::GetPhase()], 0x100);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, mColors[DayPhase::GetPhase()], 0x100);
 }
 
 // --- NamePanel ---
@@ -12511,7 +12511,7 @@ BOOL TouchSprite::Contains(ScreenPoint point) {
     ScreenRect rect = *mTouchRect;
     rect.x += mX;
     rect.y += mY;
-    return func_02028d88(&rect, &point) != 0;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // @0x0216ca14
@@ -12597,13 +12597,13 @@ Clock::Clock() {
 
 // @0x0216ccac
 void Clock::Update() {
-    mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
 }
 
 // @0x0216ccd4
 void Clock::UpdateIfArchiveIdle() {
     if (ArchiveManager_IsIdle(&gArchiveManager)) {
-        mSeconds = func_02035870(data_02123440[0], &mDate, &mTime);
+        mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
     }
 }
 
@@ -12761,9 +12761,9 @@ void TimedMessage::SetState(int state) {
 void TimedMessage::SetVisible(BOOL visible) {
     mSprite.mVisible = visible;
     if (visible == TRUE) {
-        data_0211d604.Show(2);
+        gScreenControl.Show(2);
     } else {
-        data_0211d604.Hide(2);
+        gScreenControl.Hide(2);
     }
 }
 

@@ -39,32 +39,32 @@ struct TouchInput {
 extern "C" {
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern TouchInput gTouchInput;
-extern void *data_02123440; // The game's clock
+extern void *gGameClock; // The game's clock
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 
 // The date and the time as the clock gives them (RTCDate and RTCTime: the year is 0 to 99)
 void Clock_GetDate(void *clock, RTCDate *date);
 void Clock_GetTime(void *clock, RTCTime *time);
 // Sets the clock's offset so that it shows that date and time
-void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown);
-void func_02035668(void *clock, RTCDate *date, RTCTime *time); // func_02035460 with TRUE
+void Clock_SetDateTime(void *clock, RTCDate *date, RTCTime *time, BOOL unknown);
+void func_02035668(void *clock, RTCDate *date, RTCTime *time); // Clock_SetDateTime with TRUE
 
-BOOL func_0202cd38(GameData *game); // Whether the save data is still being written
+BOOL GameData_IsSaving(GameData *game); // Whether the save data is still being written
 void func_0202c8f8(GameData *game, int unknown);
-BOOL func_0202cd48(GameData *game);
+BOOL GameData_StartSave(GameData *game);
 BOOL func_0202cd94(GameData *game);
 
 }

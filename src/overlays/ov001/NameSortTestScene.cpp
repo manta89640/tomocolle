@@ -17,7 +17,7 @@ struct PadInput {
 };
 
 extern "C" {
-extern PadInput data_0211f9d4;
+extern PadInput gPadInput;
 extern MATHRandContext16 gRandom;
 
 // lib/MiiData: the Mii's name, at the start of the character's record
@@ -49,10 +49,10 @@ void NameSortTestScene::Init() {
 void NameSortTestScene::Update() {
     switch (mStep) {
     case STEP_IDLE:
-        if (data_0211f9d4.mTrigger & PAD_BUTTON_A) {
+        if (gPadInput.mTrigger & PAD_BUTTON_A) {
             CharacterSort::ToUpperCase(mText);
             PrintText(mText, FALSE);
-        } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+        } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
             // Random names and family names, sorted by name
             SavedCharacter *character = mCharacters;
             for (int i = 0; i < 8; i++) {
@@ -83,7 +83,7 @@ void NameSortTestScene::Update() {
                 PrintName(0, character->mName, 10);
                 PrintName(1, character->mFamilyName, 10);
             }
-        } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+        } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
             // Random Mii names, sorted on the thread
             for (int i = 0; i < 8; i++) {
                 wchar_t name[11];

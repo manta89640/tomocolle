@@ -29,7 +29,7 @@ class TutorialMessageWindow : public MessageWindow {};
 // The apartment scene as the tutorial shows it (overlay 73, scene id 0x6B): one room with its resident, a visitor
 // who comes in, and a message window that explains what is going on. It is built from the classes of the apartment
 // scene (overlay 74) in the tutorial's cut, and runs one of four scripted parts, chosen by the step the tutorial has
-// reached. The scene factory (main func_0203c050, case 107) loads overlay 73, allocates 0x134E8 bytes and calls
+// reached. The scene factory (main SceneManager::CreateScene, case 107) loads overlay 73, allocates 0x134E8 bytes and calls
 // the constructor, which is in the main program (func_0203efc0), like overlay 74's.
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. It is after the scene's

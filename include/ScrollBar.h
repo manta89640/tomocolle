@@ -36,15 +36,15 @@ struct TouchScrollArea {
 }; // 0x5C
 
 extern "C" {
-void func_020325dc(ScrollBar *bar, int a, int b, int c, int d, int e, int f, int g); // Sets it up
-void func_02032678(ScrollBar *bar);                                                  // Updates it
-int func_020329d4(ScrollBar *bar, int min, int max);       // The position of the knob between min and max
-void func_02032a0c(ScrollBar *bar, int min, int max, int value); // Puts the knob at value between min and max
+void ScrollBar_Init(ScrollBar *bar, int a, int b, int c, int d, int e, int f, int g); // Sets it up
+void ScrollBar_Update(ScrollBar *bar);                                                  // Updates it
+int ScrollBar_GetPosition(ScrollBar *bar, int min, int max);       // The position of the knob between min and max
+void ScrollBar_SetPosition(ScrollBar *bar, int min, int max, int value); // Puts the knob at value between min and max
 void func_02032aa4(ScrollBar *bar, int a, int b);
 void func_02032ac0(ScrollBar *bar, int a, int b);
 void func_02032acc(ScrollBar *bar, int a, int b, int c);
-void func_02032c28(TouchScrollArea *area, ScreenRect rect);     // Sets it up on a rectangle
-void func_02032cc0(TouchScrollArea *area, int scroll, int min, int max); // Updates it
+void TouchScrollArea_Init(TouchScrollArea *area, ScreenRect rect);     // Sets it up on a rectangle
+void TouchScrollArea_Update(TouchScrollArea *area, int scroll, int min, int max); // Updates it
 void func_02032f60(TouchScrollArea *area, int a, int b);
 }
 

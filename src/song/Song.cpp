@@ -3,7 +3,7 @@
 #include "GameData.h"
 #include "song/Song.h"
 
-// The parts of a slot's table (data_020f9414: 0xE0 bytes a slot, eight parts of 0x1C)
+// The parts of a slot's table (gSongSlotTables: 0xE0 bytes a slot, eight parts of 0x1C)
 struct SongPart {
     /* 0x00 */ u8 mUnknown00[4];
     /* 0x04 */ u8 mLength;
@@ -16,9 +16,9 @@ struct SongSlotTable {
 
 extern "C" {
 extern const u16 data_020f9408[];
-extern const SongSlotTable data_020f9414[];
-void func_0202c920(GameData *game, u8 song, SongEntry *entry);
-void func_0202c934(GameData *game, u8 song, SongEntry *entry);
+extern const SongSlotTable gSongSlotTables[];
+void GameData_GetSong(GameData *game, u8 song, SongEntry *entry);
+void GameData_SetSong(GameData *game, u8 song, SongEntry *entry);
 }
 
 SongEntry::SongEntry() {
@@ -26,11 +26,11 @@ SongEntry::SongEntry() {
 }
 
 void SongEntry::Save(u8 song) {
-    func_0202c934(&gGameData, song, this);
+    GameData_SetSong(&gGameData, song, this);
 }
 
 void SongEntry::Load(u8 song) {
-    func_0202c920(&gGameData, song, this);
+    GameData_GetSong(&gGameData, song, this);
 }
 
 void SongEntry::Clear() {
@@ -46,7 +46,7 @@ BOOL SongEntry::SetNotesFromSlot(int value, int slot) {
             int part;
             int offset;
             FindPart(slot, i, &part, &offset);
-            u16 newValue = data_020f9408[data_020f9414[slot].mParts[part].mValues[offset]];
+            u16 newValue = data_020f9408[gSongSlotTables[slot].mParts[part].mValues[offset]];
             note->mKind = 0;
             note->mValue = newValue;
             changed = TRUE;
@@ -58,7 +58,7 @@ BOOL SongEntry::SetNotesFromSlot(int value, int slot) {
 void SongEntry::FindPart(int slot, int index, int *part, int *offset) {
     int total = 0;
     for (int i = 0; i < 8; i++) {
-        total += data_020f9414[slot].mParts[i].mLength;
+        total += gSongSlotTables[slot].mParts[i].mLength;
     }
     if (index >= total) {
         *part = -1;
@@ -66,7 +66,7 @@ void SongEntry::FindPart(int slot, int index, int *part, int *offset) {
         return;
     }
     for (int i = 0; i < 8; i++) {
-        int rest = index - data_020f9414[slot].mParts[i].mLength;
+        int rest = index - gSongSlotTables[slot].mParts[i].mLength;
         if (rest >= 0) {
             index = rest;
         } else {

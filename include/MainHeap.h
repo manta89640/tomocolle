@@ -31,11 +31,11 @@ extern MainHeap gMainHeap;
 
 extern "C" {
 void *AllocFromMainHeap(u32 size, int align);
-// These keep their addresses as names: the sources of the scenes and overlays call them by those names.
-void func_020267f4(void *block);  // Frees a block of the main heap
-void func_0202680c(u32 size);     // Makes the frame heap, of size bytes
-void *func_02026824(u32 size);    // Allocates from the frame heap
-void func_0202683c(void);         // Destroys the frame heap
+// C functions on gMainHeap, for the sources of the scenes and overlays
+void FreeToMainHeap(void *block);  // Frees a block of the main heap
+void CreateMainFrameHeap(u32 size);     // Makes the frame heap, of size bytes
+void *AllocFromMainFrameHeap(u32 size);    // Allocates from the frame heap
+void DestroyMainFrameHeap(void);         // Destroys the frame heap
 }
 
 #endif // MAINHEAP_H

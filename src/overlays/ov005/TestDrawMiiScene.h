@@ -48,7 +48,7 @@ public:
     void SetRandomRadius();
     void SetRandomTarget();
 
-    /* 0x00 */ Camera *mCamera; // &data_02122764
+    /* 0x00 */ Camera *mCamera; // &gCamera
     /* 0x04 */ VecFx32 mEye;    // Where it looks from, as GetEye last gave it
     /* 0x10 */ VecFx32 mAngles; // fx32 sine table indices: x the height (pitch), y the turn about the point (yaw)
     /* 0x1C */ VecFx32 mRadius; // The distance along each axis: z with the yaw's sine on x, x with its cosine on z

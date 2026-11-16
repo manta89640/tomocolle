@@ -46,38 +46,38 @@ void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 
 // --- The screens ---
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 
 // --- Graphics resources ---
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-void func_0202b0e8(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, u16 color, int unknown);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+extern Renderer3d gVramManagerWork;
+void VramManagers_Reset(Renderer3d *renderer);
+int ObjResourceManager_LoadCell(CellLoader *loader, const char *cellName, int plane, int a);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+void PaletteLoader_SetBackdrop(PaletteLoader *loader, u16 color, int unknown);
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 
 // --- 3D ---
-extern Camera data_02122764;
-void func_0202a640(Camera *camera);
-void func_0202a93c(Camera *camera, int unknown);
+extern Camera gCamera;
+void Camera_Reset(Camera *camera);
+void Camera_SetProjection(Camera *camera, int unknown);
 extern MATHRandContext16 gRandom;
 
 // --- The button ---
 BOOL func_02031ccc(SpriteButton *button); // Whether it was pressed
 
 // --- The message window ---
-void func_02033390(MessageWindow *window, int index, int a, u8 b, u8 c, WindowPoint position, WindowPoint size);
-void func_0203373c(MessageWindow *window, int index, int a, int b, int c, WindowPoint position, WindowPoint size,
+void MessageWindow_AddSpriteButton(MessageWindow *window, int index, int a, u8 b, u8 c, WindowPoint position, WindowPoint size);
+void MessageWindow_AddTextButton(MessageWindow *window, int index, int a, int b, int c, WindowPoint position, WindowPoint size,
                    MessageFile *file, int message, const NNSG2dFont *font, int plane, int *charOffset);
-void func_020338d0(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
+void MessageWindow_AddTextInArea(MessageWindow *window, MessageFile *file, int message, const NNSG2dFont *font, int plane,
                    WindowPoint a, WindowPoint b, int *charOffset);
-void func_02033bb4(MessageWindow *window, int a, int b, WindowPoint position);
+void MessageWindow_AddSprite(MessageWindow *window, int a, int b, WindowPoint position);
 void func_02033c88(MessageWindow *window, int plane, int objPlane, MessageFile *file, int message, int a,
                    MessageFile *buttonFile, int *charOffset);
 void func_02033ddc(MessageWindow *window, int plane, int objPlane, MessageFile *file, int message, int a,

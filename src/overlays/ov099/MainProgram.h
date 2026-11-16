@@ -55,27 +55,27 @@ struct ScreenControl {
 extern "C" {
 extern ArchiveLoader gArchiveManager;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-extern ScreenControl data_0211d604;
-extern void *data_02123440; // The game's clock
+extern ScreenControl gScreenControl;
+extern void *gGameClock; // The game's clock
 // The mansion's name (what the information's title shows)
 extern wchar_t data_02123510[];
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 void ObjResourceManager_Load(CellLoader *loader, const char *cellName, const char *charName, int plane, int a, int b);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void Clock_GetDate(void *clock, Date *date); // The date with the game's offset applied
 
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-BOOL func_0202c604(GameData *game, int index); // The gender bit of its Mii (set for a woman)
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+BOOL GameData_GetCharacterSex(GameData *game, int index); // The gender bit of its Mii (set for a woman)
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
 
 }
 

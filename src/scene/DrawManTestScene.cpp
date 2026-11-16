@@ -9,14 +9,14 @@ void DrawManTestScene::StartLoading() {
 }
 
 void DrawManTestScene::Init() {
-    func_0202b0e8(&data_02122824);
-    ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00_.imd");
-    ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
-    data_0211d604.Show(1);
+    VramManagers_Reset(&gVramManagerWork);
+    ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00_.imd");
+    ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00.itx");
+    gScreenControl.Show(1);
     G3X_SetClearColor(GX_RGB(21, 21, 21), 31, 0x7FFF, 63, FALSE);
-    mCamera = &data_02122764;
+    mCamera = &gCamera;
     mCamera->mPosition.z = 0x12000;
-    Light *light = &data_021227cc[0];
+    Light *light = &gLights[0];
     light->mDirection.x = 0xFFF;
     light->mEnabled = TRUE;
     u16 color = light->mColor;
@@ -26,7 +26,7 @@ void DrawManTestScene::Init() {
     light->mDirection.x = x;
     light->mColor = color;
     mModel.Load(0, 0);
-    func_02029c20(&mModel, RESOURCE_BTX0, 0, 1);
+    Model_BindResource(&mModel, RESOURCE_BTX0, 0, 1);
     NNS_GfdDumpFrmTexVramManager();
     NNS_GfdDumpFrmPlttVramManager();
     NNS_G3dRenderObjSetCallBack(&mModel.mRenderObj, HeadCallback, NULL, NNS_G3D_SBC_NODEDESC,
@@ -36,40 +36,40 @@ void DrawManTestScene::Init() {
 }
 
 void DrawManTestScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_A) {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_A) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mModel.mPosition.x += 0x100;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mModel.mPosition.x -= 0x100;
         }
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_B) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_B) {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         NNSG3dResMdl *mdl = mModel.mResMdl;
         NNS_G3D_DEFRESNAME(name, "human01_base_pl");
         NNS_G3dReleaseMdlPlttEx(mdl, &name.resName);
         NNS_G3dForceBindMdlPltt(mdl, mModel.mResTex, 1, 7);
-    } else if (data_0211f9d4.mTrigger & PAD_BUTTON_Y) {
+    } else if (gPadInput.mTrigger & PAD_BUTTON_Y) {
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
         void *resourceSet = (void *)mModel.mUnknown04;
-        NNS_G3dReleaseMdlSet(NNS_G3dGetMdlSet(func_020295a4(resourceSet, RESOURCE_BMD0)));
-        func_02029758(resourceSet, RESOURCE_BTX0);
+        NNS_G3dReleaseMdlSet(NNS_G3dGetMdlSet(ResourceSet_GetFile(resourceSet, RESOURCE_BMD0)));
+        ResourceSet_ReleaseFile(resourceSet, RESOURCE_BTX0);
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
-        func_0202b0e8(&data_02122824);
-        ModelResources_SetModel(data_021223e4, 0, "DMN:/HUMAN00.itx");
+        VramManagers_Reset(&gVramManagerWork);
+        ModelResources_SetModel(gModelResources, 0, "DMN:/HUMAN00.itx");
         NNS_GfdDumpFrmTexVramManager();
         NNS_GfdDumpFrmPlttVramManager();
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera->mAngleY += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera->mAngleY -= 0x200;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera->mAngleX += 0x200;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        } else if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera->mAngleX -= 0x200;
         }
     }
@@ -82,7 +82,7 @@ void DrawManTestScene::Draw() {
 }
 
 void DrawManTestScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "DMN");
     ArchiveManager_Unmount(&gArchiveManager, "CA3");
 }

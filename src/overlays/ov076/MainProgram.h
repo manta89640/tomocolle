@@ -9,7 +9,7 @@
 
 // --- What the scene uses of the main program (STAND-INS, not decompiled) ----------------------------------------
 
-// The main program's camera (data_02122764; func_0202a640 resets it). As overlay 109 has it.
+// The main program's camera (gCamera; Camera_Reset resets it). As overlay 109 has it.
 struct Camera {
     /* 0x00 */ int mUnknown00;
     /* 0x04 */ int mUnknown04;
@@ -19,7 +19,7 @@ struct Camera {
     /* 0x2C */ VecFx32 mTarget;
 };
 
-// The screens: which planes are shown (data_0211d604).
+// The screens: which planes are shown (gScreenControl).
 struct ScreenControl {
     void Show(u32 planes) {
         mPlanes |= planes;
@@ -57,16 +57,16 @@ extern ArchiveLoader gArchiveManager;
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
-extern ScreenControl data_0211d604;
+extern ScreenControl gScreenControl;
 extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
+extern PaletteLoader gPaletteLoader;
+extern ScreenLoader gScreenLoader;
 extern CharLoader gVramTransferQueue;
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
-u16 *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int offset);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
+void *PaletteLoader_LoadFile(PaletteLoader *loader, const char *name, int plane, int a, int b, int c); // Loads a palette
+u16 *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
+void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
+void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int offset);
+void VramTransferQueue_LoadFile(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
 }
 
 

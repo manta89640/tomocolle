@@ -4,12 +4,12 @@ extern "C" {
 // --- The main program's, not named yet ---
 // The palette loader (as overlay 74 has it)
 struct PaletteLoader;
-extern PaletteLoader data_021213b8;
+extern PaletteLoader gPaletteLoader;
 // Sixteen colours: white, white, red, green, yellow, blue...
 extern const u16 data_020b5abc[];
 // Queues colours for copying to the palette of a plane: (loader, colours, plane, offset in bytes, size in bytes,
 // unknown)
-void func_020277dc(PaletteLoader *loader, const void *colors, int plane, int offset, int size, int unknown);
+void PaletteLoader_QueueColors(PaletteLoader *loader, const void *colors, int plane, int offset, int size, int unknown);
 }
 
 // The library's character type is u16, which is not this compiler's wchar_t: a wide string literal is given to the
@@ -25,7 +25,7 @@ void TextTestScene::StartLoading() {
 
 // @0x02149a44
 void TextTestScene::Init() {
-    func_020277dc(&data_021213b8, data_020b5abc, 0x10, 0x1E0, 0x20, 0);
+    PaletteLoader_QueueColors(&gPaletteLoader, data_020b5abc, 0x10, 0x1E0, 0x20, 0);
     MI_CpuClearFast(GraphicsManager_GetCharBase(gGraphicsManager, 0x10), 0x800);
 
     mText.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT;

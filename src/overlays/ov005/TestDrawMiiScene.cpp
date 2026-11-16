@@ -10,7 +10,7 @@
 // distances and up a random turn.
 
 extern "C" {
-void func_02029f50(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
+void Model_SetAlpha(AnimModel *model, int alpha); // Sets the model's alpha (0 to 31)
 }
 
 void TestDrawMiiScene::StartLoading() {
@@ -23,11 +23,11 @@ static const int sModelIndices[2] = {1, 2};
 static const VecFx32 sModelHomes[2] = {{0x5000, 0, 0}, {0, 0, -0x5000}};
 
 void TestDrawMiiScene::Init() {
-    func_0202b0e8(&data_02122824);
-    data_0211d604.Show(1);
-    data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknown48Changed = TRUE;
-    func_020278f8(&data_021213b8, 0, 0x101);
+    VramManagers_Reset(&gVramManagerWork);
+    gScreenControl.Show(1);
+    gScreenControl.mUnknown48 = 1;
+    gScreenControl.mUnknown48Changed = TRUE;
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
     G3X_AntiAlias(TRUE);
     G3X_SetShading(GX_SHADING_TOON);
     G3_SwapBuffers(GX_SORTMODE_AUTO, GX_BUFFERMODE_W);
@@ -36,7 +36,7 @@ void TestDrawMiiScene::Init() {
     // and stores them again with y and z (light in r4, x reloaded into r0). Here the compiler drops the reload of x
     // and its store; volatile reads or `#pragma opt_dead_assignments off` keep them but give other registers. The
     // same block is unmatched in three of the main program's test scenes and in overlay 3.
-    Light *light = &data_021227cc[0];
+    Light *light = &gLights[0];
     light->mEnabled = TRUE;
     light->mDirection.x = 0xFFF;
     light->mColor = 0x7FFF;
@@ -46,7 +46,7 @@ void TestDrawMiiScene::Init() {
     light->mDirection.y = 0;
     light->mDirection.z = 0;
     light->mColor = color;
-    ModelResources_SetModel(data_021223e4, 0, "SME:/room.imd");
+    ModelResources_SetModel(gModelResources, 0, "SME:/room.imd");
     mAnimModel.Load(0, 0);
     for (int i = 0; i < 2; i++) {
         TestDrawMiiModel *model = &mModels[i];
@@ -65,23 +65,23 @@ void TestDrawMiiScene::Init() {
 }
 
 void TestDrawMiiScene::Update() {
-    if (data_0211f9d4.mHeld & PAD_BUTTON_X) {
-        if (data_0211f9d4.mTrigger & PAD_KEY_RIGHT) {
+    if (gPadInput.mHeld & PAD_BUTTON_X) {
+        if (gPadInput.mTrigger & PAD_KEY_RIGHT) {
             mCamera.SetRandomTarget();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_LEFT) {
+        } else if (gPadInput.mTrigger & PAD_KEY_LEFT) {
             mCamera.SetRandomRadius();
-        } else if (data_0211f9d4.mTrigger & PAD_KEY_UP) {
+        } else if (gPadInput.mTrigger & PAD_KEY_UP) {
             mCamera.mAngles.y += MATH_Rand16(&gRandom, 0) << FX32_SHIFT;
         }
     } else {
-        if (data_0211f9d4.mHeld & PAD_KEY_RIGHT) {
+        if (gPadInput.mHeld & PAD_KEY_RIGHT) {
             mCamera.mAngles.y += 0x100 << FX32_SHIFT;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_LEFT) {
+        } else if (gPadInput.mHeld & PAD_KEY_LEFT) {
             mCamera.mAngles.y -= 0x100 << FX32_SHIFT;
         }
-        if (data_0211f9d4.mHeld & PAD_KEY_UP) {
+        if (gPadInput.mHeld & PAD_KEY_UP) {
             mCamera.mAngles.x += 0x30 << FX32_SHIFT;
-        } else if (data_0211f9d4.mHeld & PAD_KEY_DOWN) {
+        } else if (gPadInput.mHeld & PAD_KEY_DOWN) {
             mCamera.mAngles.x -= 0x30 << FX32_SHIFT;
         }
     }
@@ -101,7 +101,7 @@ void TestDrawMiiScene::Draw() {
 }
 
 void TestDrawMiiScene::Exit() {
-    func_0202aecc(data_021223e4, 0);
+    ModelResources_ReleaseModel(gModelResources, 0);
     ArchiveManager_Unmount(&gArchiveManager, "SME");
 }
 
@@ -141,7 +141,7 @@ void TestDrawMiiModel::Update() {
             if (mAlpha > 31) {
                 mAlpha = 31;
             }
-            func_02029f50(this, mAlpha);
+            Model_SetAlpha(this, mAlpha);
         }
         break;
     case FADE_OUT:
@@ -150,7 +150,7 @@ void TestDrawMiiModel::Update() {
             if (mAlpha < 0) {
                 mAlpha = 0;
             }
-            func_02029f50(this, mAlpha);
+            Model_SetAlpha(this, mAlpha);
         }
         break;
     }
@@ -172,8 +172,8 @@ static const VecFx32 sCameraAngles = {0x1200 << FX32_SHIFT, 0x1600 << FX32_SHIFT
 
 void TestDrawMiiCamera::Init() {
 
-    mCamera = &data_02122764;
-    func_0202a640(mCamera);
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
     SetCameraAngles(mCamera, 0, 0, 0);
     VecFx32 angles = sCameraAngles;
     mAngles.x = angles.x;

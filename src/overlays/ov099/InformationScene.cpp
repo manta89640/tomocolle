@@ -51,20 +51,20 @@ void InformationScene::StartLoading() {
 }
 
 void InformationScene::Init() {
-    Clock_GetDate(data_02123440, &mDate);
+    Clock_GetDate(gGameClock, &mDate);
     mDate.year += 2000;
     int charOffset = 100;
     mMessageFiles[0].Open("TET:/tmd_etc_msg_JP.bmg");
 
-    func_02027534(&data_021213b8, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_down.ncg", 0x200, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/BG_up.ncl", 1, -1, -1, -1);
-    func_02027d7c(&data_02121834, "N83:/BG_up.nsc", 1, 0, 0, 0, 0, -1);
-    func_02028f24(&gVramTransferQueue, "N83:/BG_up.ncg", 1, 0, 0, 0, -1);
-    func_02027534(&data_021213b8, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_down.ncl", 0x300, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_down.nsc", 0x200, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_down.ncg", 0x200, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/BG_up.ncl", 1, -1, -1, -1);
+    ScreenLoader_LoadFile(&gScreenLoader, "N83:/BG_up.nsc", 1, 0, 0, 0, 0, -1);
+    VramTransferQueue_LoadFile(&gVramTransferQueue, "N83:/BG_up.ncg", 1, 0, 0, 0, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_down.ncl", 0x1000, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_down.nce", "N83:/Obj_down.ncg", 0x1000, 1, -1);
-    func_02027534(&data_021213b8, "N83:/Obj_up.ncl", 0x10, -1, -1, -1);
+    PaletteLoader_LoadFile(&gPaletteLoader, "N83:/Obj_up.ncl", 0x10, -1, -1, -1);
     ObjResourceManager_Load(&gObjResourceManager, "N83:/Obj_up.nce", "N83:/Obj_up.ncg", 0x10, 0, -1);
 
     int i;
@@ -76,12 +76,12 @@ void InformationScene::Init() {
     for (i = 0; i < 1; i++) {
         u16 sequence = sButtonSequences[i];
         Sprite_Init(&mButtons[i], 1, sequence, 0x80, 0x60, 1);
-        func_02031eb0(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
-        func_02031278(&mButtons[i], sequence, sequence + 1);
-        func_02031260(&mButtons[i], 4);
+        SpriteButton_SetTouchRect(&mButtons[i], sButtonSizes[i].x, sButtonSizes[i].y);
+        SpriteButton_SetSequences(&mButtons[i], sequence, sequence + 1);
+        SpriteButton_SetKind(&mButtons[i], 4);
         mButtons[i].SetPositionFromVec(sButtonPositions[i].x << FX32_SHIFT, sButtonPositions[i].y << FX32_SHIFT);
-        func_02032158(&mButtons[i], &sButtonSounds[i]);
-        func_0203119c(&mButtons[i]);
+        SpriteButton_SetSounds(&mButtons[i], &sButtonSounds[i]);
+        SpriteButton_Reset(&mButtons[i]);
     }
 
     // The statistics over the saved characters
@@ -100,13 +100,13 @@ void InformationScene::Init() {
     int year;
     u32 typeMessage;
     for (i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
-            if (func_0202c604(&gGameData, i) == FALSE) {
+        if (GameData_CharacterExists(&gGameData, i)) {
+            if (GameData_GetCharacterSex(&gGameData, i) == FALSE) {
                 men++;
             } else {
                 women++;
             }            SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             year = character.mBirthYear;
             if (year != BIRTH_YEAR_UNKNOWN) {
                 month = character.GetParameter(PROPERTY_BIRTH_MONTH);
@@ -263,13 +263,13 @@ void InformationScene::Init() {
         charOffset += mTexts[t].GetCharCount();
     }
 
-    func_02028280(&data_02121834, 0x1000, 0);
-    func_02028280(&data_02121834, 0x100, 1);
-    data_0211d604.Set(0x1211);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x1000, 0);
+    ScreenLoader_SetPriority(&gScreenLoader, 0x100, 1);
+    gScreenControl.Set(0x1211);
 }
 
 void InformationScene::Update() {
-    if (func_0203133c(&mButtons[0])) {
+    if (SpriteButton_Update(&mButtons[0])) {
         gSceneManager.RequestScene(0x11);
     }
 }
@@ -278,14 +278,14 @@ void InformationScene::Draw() {
     for (int i = 0; i < TEXT_COUNT; i++) {
         mTexts[i].Draw();
     }
-    func_02031d7c(&mButtons[0]);
+    SpriteButton_Draw(&mButtons[0]);
     for (int j = 0; j < STAR_COUNT; j++) {
         Sprite_Draw(&mStars[j]);
     }
 }
 
 void InformationScene::Exit() {
-    func_02028108(&data_02121834, 1, 0);
+    ScreenLoader_SetScrollX(&gScreenLoader, 1, 0);
     ArchiveManager_Unmount(&gArchiveManager, "N83");
     ArchiveManager_Unmount(&gArchiveManager, "TET");
 }

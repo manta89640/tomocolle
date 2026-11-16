@@ -11,7 +11,7 @@
 // ten characters typed are shown on a sprite text box on the upper screen, the last of them also alone, centred
 // over its place, on a character box; touching the keyboard's two buttons presses one and releases the other. A
 // puts the room's background "MNU:/BG_down" on the keyboard's plane, B the keyboard's again. The scene factory
-// (main func_0203c050, case 11) allocates 0x6AF8 bytes.
+// (main SceneManager::CreateScene, case 11) allocates 0x6AF8 bytes.
 //
 // The names are descriptive, not the original: no name of this class survives in the ROM.
 class KeyboardTestScene : public Scene {
@@ -36,7 +36,7 @@ public:
     /* 0x6384 */ u8 mCharBuffer[0x600];     // The text box's
     /* 0x6984 */ int mLength;               // How many characters are typed
     /* 0x6988 */ wchar_t mName[NAME_LENGTH + 1];
-    /* 0x69A0 */ u32 mSavedGraphics[0x50];  // The graphics state of the lower screen, as func_02024b10 saved it
+    /* 0x69A0 */ u32 mSavedGraphics[0x50];  // The graphics state of the lower screen, as GraphicsManager_SaveState saved it
     /* 0x6AE0 */ MessageFile mFiles[1];
 }; // 0x6AF8
 

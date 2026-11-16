@@ -30,7 +30,7 @@ void SpeechWindow::Show(u32 message, int mode, int frames) {
     NNS_G2dCharCanvasClear(&mText[0].mCanvas, 0);
     mText[0].DrawAll();
     mText[0].mSprite.mVisible = TRUE;
-    data_0211d604.Show(mPlanes);
+    gScreenControl.Show(mPlanes);
     mMode = mode;
     mFrame = 0;
     mFrames = frames;
@@ -38,8 +38,8 @@ void SpeechWindow::Show(u32 message, int mode, int frames) {
 }
 
 void SpeechWindow::Hide() {
-    data_0211d604.mPlanes &= ~mPlanes;
-    data_0211d604.mPlanesChanged = TRUE;
+    gScreenControl.mPlanes &= ~mPlanes;
+    gScreenControl.mPlanesChanged = TRUE;
     mText[0].mSprite.mVisible = FALSE;
     mShown = FALSE;
 }
