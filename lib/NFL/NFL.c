@@ -2234,7 +2234,12 @@ void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, 
 
 // The state that func_0206ed94 and func_020705d4 share across calls (func_020715ac clears unk20 between pairs)
 typedef struct NFLMakeState {
-    u8 unk0[0x20];
+    fx32 unk0;
+    fx32 unk4;
+    fx32 unk8;
+    fx32 unkC;
+    VecFx32 unk10;
+    fx32 unk1C;
     int unk20;
 } NFLMakeState;
 
@@ -2242,6 +2247,284 @@ void func_0206ed94(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharDa
                    NFLDLRef *ref, int n, NFLMakeState *state);
 void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
                    NFLDLRef *ref, int n, NFLMakeState *state);
+
+void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal);
+void func_020745b0(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
+void func_020745f4(const NFLDrawContext *ctx, GXDLInfo *info, fx32 x, fx32 y, fx32 z);
+void func_02074644(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
+void func_02074688(const NFLDrawContext *ctx, GXDLInfo *info, fx16 x, fx16 y, fx16 z);
+// Not matching yet, a first draft from the code: the instructions are close (0xF98 bytes against 0xFA4) but the
+// registers and stack slots are not the original's. Records 0 to 3 of func_020715ac: a part placed as a quad on the
+// face, its 2x2 points' Z from the planes of data_020b676c, their normals interpolated over the 3x3 grids of points
+// (data_020b6818) and normals (data_020b67ac), the quad turned onto their sum.
+extern const VecFx32 data_020b6818[3][3];
+extern const VecFx32 data_020b67ac[3][3];
+
+#define NFL_PLANE_Z(px, py)                                                                                          \
+    (-FX_Div(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unkC +                                                     \
+                 (FX_Mul(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk0, (px)) +                                  \
+                  FX_Mul(data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk4, (py))),                                  \
+             data_020b676c[(py) <= 0x167B][(px) >= 0x1B33].unk8) *                                                    \
+     0x47 / 200)
+
+void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state) {
+    MtxFx43 mtx;
+    VecFx32 grid[2][2];
+    VecFx32 normals[2][2];
+    VecFx32 axis;
+    VecFx32 center;
+    VecFx32 normal;
+    VecFx32 up;
+    VecFx32 point;
+    VecFx32 point2;
+    VecFx32 sum;
+    VecFx32 rotated;
+    fx32 s0;
+    fx32 s1;
+    fx32 x0;
+    fx32 x;
+    fx32 y;
+    fx32 w;
+    fx32 h;
+    int kind;
+    int fmt;
+    int texW;
+    int texH;
+    int faceType;
+    int i;
+    int j;
+    fx32 scaleX;
+    fx32 scaleY;
+    fx16 sin;
+    fx16 cos;
+    fx32 dot;
+    fx32 cross;
+    int k;
+    int a;
+    int b;
+    fx32 size;
+    fx32 u;
+    fx32 v;
+
+    texW = 1;
+    texH = 1;
+    x = part->unk0[0];
+    y = part->unk0[1];
+    scaleX = part->unk0[2];
+    scaleY = part->unk0[3];
+    w = part->unk0[4];
+    h = part->unk0[5];
+    kind = part->unk0[7];
+    fmt = obj->unk90;
+    G3C_PushMtx(dl);
+    sin = FX_CosIdx((u16)part->unk0[6]);
+    cos = FX_SinIdx((u16)part->unk0[6]);
+    faceType = data->faceType;
+    center.x = x * 5 / 64;
+    center.y = y * 5 / 64;
+    if (center.x < 0) {
+        center.x = -center.x;
+    }
+    center.z = NFL_PLANE_Z(center.x, center.y);
+    for (i = 0; i < 2; i++) {
+        fx32 t1 = i * w * 5 / 64;
+        fx32 ct = FX_Mul(sin, t1);
+        fx32 st = FX_Mul(cos, t1);
+
+        for (j = 0; j < 2; j++) {
+            fx32 t2 = h * (j * 2 - 1) * 5 / 128;
+            int pi;
+            int pj;
+            const VecFx32 *p;
+            const VecFx32 *q;
+
+            grid[i][j].x = center.x + ct + FX_Mul(cos, t2);
+            grid[i][j].y = center.y - st + FX_Mul(sin, t2);
+            pi = grid[i][j].x >= 0x1B33;
+            pj = grid[i][j].y <= 0x167B;
+            grid[i][j].z = -FX_Div(data_020b676c[pj][pi].unkC + (FX_Mul(data_020b676c[pj][pi].unk0, grid[i][j].x) +
+                                                                  FX_Mul(data_020b676c[pj][pi].unk4, grid[i][j].y)),
+                                   data_020b676c[pj][pi].unk8) *
+                           0x47 / 200;
+            p = &data_020b6818[pj][pi];
+            u = FX_Div(grid[i][j].x - p[0].x, p[1].x - p[0].x);
+            v = FX_Div(grid[i][j].y - p[0].y, p[3].y - p[0].y);
+            q = &data_020b67ac[pj][pi];
+            {
+                fx32 top = q[0].x + FX_Mul(q[1].x - q[0].x, u);
+                fx32 bottom = q[3].x + FX_Mul(q[4].x - q[3].x, u);
+                normals[i][j].x = top + FX_Mul(bottom - top, v);
+            }
+            {
+                fx32 top = q[0].y + FX_Mul(q[1].y - q[0].y, u);
+                fx32 bottom = q[3].y + FX_Mul(q[4].y - q[3].y, u);
+                normals[i][j].y = top + FX_Mul(bottom - top, v);
+            }
+            {
+                fx32 top = q[0].z + FX_Mul(q[1].z - q[0].z, u);
+                fx32 bottom = q[3].z + FX_Mul(q[4].z - q[3].z, u);
+                normals[i][j].z = top + FX_Mul(bottom - top, v);
+            }
+            VEC_Normalize(&normals[i][j], &normals[i][j]);
+        }
+    }
+    normal.x = 0;
+    normal.y = 0;
+    normal.z = 0;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            if (kind == 4) {
+                normal.x -= normals[i][j].x;
+            } else {
+                normal.x += normals[i][j].x;
+            }
+            normal.y += normals[i][j].y;
+            normal.z += normals[i][j].z;
+        }
+    }
+    if (kind == 0) {
+        center.z /= 2;
+        if (x < 0) {
+            normal.x = -normal.x;
+        }
+    }
+    VEC_Normalize(&normal, &normal);
+    if (state != NULL && state->unk20 == 0) {
+        state->unk10.x = 0;
+        state->unk10.y = 0;
+        state->unk10.z = 0;
+        for (a = 0; a < 2; a++) {
+            for (b = 0; b < 2; b++) {
+                func_0206ebb0(&point, &center, kind, a, b, scaleX, scaleY, sin, cos);
+                state->unk10.x += point.x;
+                state->unk10.y += point.y;
+            }
+        }
+        state->unk10.x /= 4;
+        state->unk10.y /= 4;
+        state->unk10.z = 0;
+        state->unk1C = (scaleX > scaleY ? scaleX : scaleY) * 5 / 128;
+        state->unk0 = normal.x < 0 ? -normal.x : normal.x;
+        state->unk4 = normal.y;
+        state->unk8 = normal.z * 200 / 0x47;
+        state->unkC = -(FX_Mul(state->unk8, center.z) + (FX_Mul(state->unk0, x / 32 < 0 ? -(x / 32) : x / 32) +
+                                                          FX_Mul(normal.y, y / 32)));
+    }
+    if (state != NULL) {
+        if (state->unk20 == 1) {
+            sum.x = 0;
+            sum.y = 0;
+            sum.z = 0;
+            for (k = 0; k < 4; k++) {
+                func_0206ebb0(&point2, &center, kind, k / 2, k % 2, scaleX, scaleY, sin, cos);
+                sum.x += point2.x;
+                sum.y += point2.y;
+            }
+            sum.x /= 4;
+            sum.y /= 4;
+            sum.z = 0;
+            size = (scaleX > scaleY ? scaleX : scaleY) * 5 / 128;
+            if (VEC_Distance(&sum, &state->unk10) > (size + state->unk1C) * 3 / 5) {
+                n = 0;
+            } else {
+                center.z = -FX_Div(state->unkC + (FX_Mul(state->unk0, x / 32 < 0 ? -(x / 32) : x / 32) +
+                                                  FX_Mul(state->unk4, y / 32)),
+                                   state->unk8);
+            }
+        } else {
+            state->unk20 = 1;
+        }
+    }
+    up.x = 0;
+    up.y = 0;
+    up.z = FX32_ONE;
+    dot = VEC_DotProduct(&normal, &up);
+    cross = FX_Sqrt(FX32_ONE - FX_Mul(dot, dot));
+    VEC_CrossProduct(&up, &normal, &axis);
+    switch (faceType) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (ref != NULL) {
+        ref->cmd = dl->curr_cmd;
+        ref->param = dl->curr_param;
+    }
+    if (kind == 4) {
+        func_020745b0(obj, dl, -x / 32, y / 32, obj->unk28 + (center.z + n));
+    } else {
+        func_020745b0(obj, dl, x / 32, y / 32, obj->unk28 + (center.z + n));
+    }
+    func_02074444(obj, &rotated, &axis);
+    axis = rotated;
+    MTX_RotAxis43(&mtx, &axis, cross, dot);
+    G3C_MultMtx43(dl, &mtx);
+    patch->mtx.cmd = dl->curr_cmd;
+    patch->mtx.param = dl->curr_param;
+    func_02074548(obj, &mtx, cos, sin);
+    G3C_MultMtx43(dl, &mtx);
+    func_020745f4(obj, dl, scaleX / 32, scaleY / 32, FX32_ONE);
+    if (fmt == GX_TEXFMT_DIRECT) {
+        patch->tex.cmd = dl->curr_cmd;
+        patch->tex.param = dl->curr_param;
+        G3C_TexImageParam(dl, GX_TEXFMT_DIRECT, GX_TEXGEN_NONE, part->unk28, part->unk2C, GX_TEXREPEAT_ST,
+                          GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS, part->unk20);
+    } else {
+        patch->tex.cmd = dl->curr_cmd;
+        patch->tex.param = dl->curr_param;
+        G3C_TexImageParam(dl, GX_TEXFMT_PLTT16, GX_TEXGEN_NONE, part->unk28, part->unk2C, GX_TEXREPEAT_ST,
+                          GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS, part->unk20);
+        patch->pltt.cmd = dl->curr_cmd;
+        patch->pltt.param = dl->curr_param;
+        G3C_TexPlttBase(dl, part->unk24, GX_TEXFMT_PLTT16);
+    }
+    switch (part->unk28) {
+    case 1:
+        texW = 16;
+        break;
+    case 2:
+        texW = 32;
+        break;
+    case 3:
+        texW = 64;
+        break;
+    }
+    switch (part->unk2C) {
+    case 1:
+        texH = 16;
+        break;
+    case 2:
+        texH = 32;
+        break;
+    case 3:
+        texH = 64;
+        break;
+    }
+    if (kind == 3) {
+        x0 = 0;
+        s1 = 0;
+        s0 = texW << 12;
+    } else if (kind == 4) {
+        x0 = -FX32_ONE;
+        s1 = texW << 12;
+        s0 = 0;
+    }
+    func_02005124(dl, GX_BEGIN_QUADS);
+    G3C_TexCoord(dl, s0, 0);
+    func_02074688(obj, dl, 0, 0, 0xFEA);
+    func_02074644(obj, dl, x0, -0x800, 0);
+    G3C_TexCoord(dl, s1, 0);
+    func_02074644(obj, dl, x0 + FX32_ONE, -0x800, 0);
+    G3C_TexCoord(dl, s1, texH << 12);
+    func_02074644(obj, dl, x0 + FX32_ONE, 0x800, 0);
+    G3C_TexCoord(dl, s0, texH << 12);
+    func_02074644(obj, dl, x0, 0x800, 0);
+    func_02005148(dl);
+    G3C_PopMtx(dl, 1);
+}
 
 void func_020715ac(NFLMakeCtx *ctx) {
     NFLObj *obj = ctx->unk1C8;
@@ -2262,7 +2545,6 @@ void func_020715ac(NFLMakeCtx *ctx) {
     }
 }
 
-void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal);
 
 // Patches a face part's display list: its rotation, if it has a matrix command, and its texture and palette
 void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fmt, GXTexSizeS s, GXTexSizeT t,
