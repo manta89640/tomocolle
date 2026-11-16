@@ -15,7 +15,9 @@
 class G3Sprite {
 public:
     G3Sprite();
-    virtual ~G3Sprite(); // func_0202b6cc, which does nothing
+    // Inline: VoteScene's pair of sprites has an empty destructor (0x02040284). The game's copies are D0 0x0202B6B8
+    // and D1 0x0202B6CC (config/jpn_rev1/arm9/inline_symbols.txt).
+    virtual ~G3Sprite() {}
 
     void SetPosition(VecFx32 position) {
         mX = position.x;

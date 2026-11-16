@@ -1,11 +1,11 @@
 #include <nitro.h>
-#include "CharacterCalls.h"
 #include <nnsys.h>
 
 #include "GameData.h"
 #include "sound/SoundManager.h"
 
 #include "TutorialRoomScene.h"
+#include "MainProgram.h"
 
 // Overlay 73: the apartment scene as the tutorial shows it (TutorialRoomScene), with its own versions of the
 // classes of overlay 74's apartment. It is one source file: its small constants share one pool at the start of
@@ -129,20 +129,20 @@ void TutorialRoomScene::StartLoading() {
     LoadCharacters();
     if (mTutorialStep == 13) {
         // The visitor's event is to visit the resident
-        mCharacters[1].mEvent = 0x17;
-        mCharacters[1].mEventPartner = mCharacters[0].mIndex;
-        mCharacters[0].mEvent = 0x18;
-        mCharacters[0].mEventPartner = mCharacters[1].mIndex;
+        mCharacters[1].mLongActState = 0x17;
+        mCharacters[1].mLongActPartner = mCharacters[0].mIndex;
+        mCharacters[0].mLongActState = 0x18;
+        mCharacters[0].mLongActPartner = mCharacters[1].mIndex;
         SaveCharacters();
     } else if (mTutorialStep == 16) {
-        mCharacters[0].mEvent = 0;
-        mCharacters[1].mEvent = 0;
+        mCharacters[0].mLongActState = 0;
+        mCharacters[1].mLongActState = 0;
         SaveCharacters();
     }
     ((Character *)(&mCharacters[0]))->SetArchive("MT0");
     ((Character *)(&mCharacters[1]))->SetArchive("MT1");
     mRoom.SetStyle(mCharacters[0].mInterior);
-    mRoom.mRoomIndex = mCharacters[0].mRoom;
+    mRoom.mRoomIndex = mCharacters[0].mRoomNumber;
     mFront.SetBuildingSize(0);
     mSky.Init(&mClock, 0);
 
@@ -175,7 +175,7 @@ void TutorialRoomScene::Init() {
 
     func_0202b0e8(&data_02122824);
     data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    data_0211d604.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     func_0202680c(0x4000);
 
@@ -210,7 +210,7 @@ void TutorialRoomScene::Init() {
     mRoom.Refresh();
     mRoom.Load(3);
     mRoom.LoadParts(4);
-    mRoom.mParts.SetUnknown(10);
+    mRoom.SetUnknown(10);
 
     file = ArchiveManager_GetFileByName(&gArchiveManager, "EFT:/SplRoomEffect.spa");
     func_02080e98(&mParticles, file, 3, 0x50, 0x15, 0x16, 0x1E);
@@ -233,7 +233,7 @@ void TutorialRoomScene::Init() {
         ((Character *)(&mCharacters[i]))->UpdateSpeedScales();
         ((Character *)(&mCharacters[i]))->UpdateBodyColors();
         mCharacters[i].CopyName();
-        func_02029660(mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
+        func_02029660((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         ((Character *)(&mCharacters[i]))->SetAngle(0x4000);
         mCharacters[i].LoadHeadIcon(&mParticles);
         mCharacters[i].mApartmentRoom = &mRoom;
@@ -277,7 +277,7 @@ void TutorialRoomScene::Init() {
     mButtons[0].mLabel = &mButtonLabel[0];
     mButtons[0].Init(0);
     mPressedButton = 0;
-    mFront.Init(mCharacters[0].mRoom);
+    mFront.Init(mCharacters[0].mRoomNumber);
     mSky.Refresh();
     mClockDisplay.Init(&mClock);
 
@@ -311,7 +311,7 @@ void TutorialRoomScene::Update() {
 // @0x0214a814
 void TutorialRoomScene::Draw() {
     UpdateFade();
-    mRoom.mParts.Draw();
+    mRoom.Draw();
     for (int i = 0; i < 2; i++) {
         mCharacters[i].Draw();
     }
@@ -479,9 +479,9 @@ void TutorialRoomScene::UpdateState() {
                 mStep++;
                 mTimer = 0;
                 mLight.SetState(TutorialRoomLight::STATE_FADE_STYLE_COLOR);
-                mCharacters[0].mEvent = 0;
+                mCharacters[0].mLongActState = 0;
                 SaveCharacter(&mCharacters[0]);
-                mFront.DrawWindow(mCharacters[0].mRoom);
+                mFront.DrawWindow(mCharacters[0].mRoomNumber);
             }
         } else if (mStep == 1) {
             mTimer++;
@@ -605,7 +605,7 @@ void TutorialRoomScene::UpdateState() {
             }
             speaker->mWait = 180;
             listener->mWait = 170;
-            if (speaker->mAffinity[listener->mIndex] >= 200 && listener->mAffinity[speaker->mIndex] >= 200) {
+            if (speaker->mRelationMeter[listener->mIndex] >= 200 && listener->mRelationMeter[speaker->mIndex] >= 200) {
                 SetState(STATE_BECOME_FRIENDS);
             }
         }
@@ -1031,7 +1031,7 @@ void TutorialRoomCharacter::UpdateStates01To04() {
                 ResetSoundPhaseUnlessWalking();
                 SetAnimation(BCA0, GetWalkAnim());
                 ((CharacterBase *)(this))->SetFace(8);
-                mHeadTurnFrames = 5;
+                mHeadTurnShift = 5;
                 ShowHeadIcon();
             }
         } else {
@@ -1070,7 +1070,7 @@ void TutorialRoomCharacter::UpdateStates05To08() {
                 SetAnimation(BCA0, GetWalkAnim());
                 ((CharacterBase *)(this))->SetFace(8);
                 ShowHeadIcon();
-                mHeadTurnFrames = 4;
+                mHeadTurnShift = 4;
             }
         } else if (mStep == 1) {
             SetWalkTargetOnFloor(mPartner->GetFloorPos());
@@ -1091,7 +1091,7 @@ void TutorialRoomCharacter::UpdateStates05To08() {
                     SetAnimation(BCA0, GetWalkAnim());
                 }
                 ((CharacterBase *)(this))->SetFace(8);
-                mHeadTurnFrames = 4;
+                mHeadTurnShift = 4;
                 ShowHeadIcon();
             }
         } else if (mStep == 1) {
@@ -1200,14 +1200,14 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 VecFx32 pos = { 0, 0, -0x9000 };
                 SetPos(pos);
                 ((Character *)(this))->SetAngle(0x4000);
-                mHeadTurnActive = 0;
-                mUnknown25D6 = 0;
+                mHeadTurn = 0;
+                mHeadYawNow = 0;
                 ((Character *)(this))->ResetSoundPhase(0);
                 ShowHeadIcon();
             }
         } else if (mStep == 1) {
             mStep++;
-            mApartmentRoom->mParts.GetDoor()->SetMotion(1);
+            mApartmentRoom->mDoor.SetMotion(1);
             FloorPos target = sInsideDoor;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
@@ -1216,7 +1216,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
             }
         } else if (mStep == 3) {
             mStep++;
-            mApartmentRoom->mParts.GetDoor()->SetMotion(2);
+            mApartmentRoom->mDoor.SetMotion(2);
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
             FloorPos target = sRoomFront;
             SetWalkTargetOnFloor(target);
@@ -1236,7 +1236,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 VecFx32 pos = { 0, 0, -0x9000 };
                 SetPos(pos);
                 ((Character *)(this))->SetAngle(0x4000);
-                mUnknown25D6 = 0;
+                mHeadYawNow = 0;
                 ShowHeadIcon();
                 SetHeadTurn(0, 0, 0, 5);
                 ((Character *)(this))->ResetSoundPhase(0);
@@ -1253,14 +1253,14 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 VecFx32 pos = { 0, 0, -0x9000 };
                 SetPos(pos);
                 ((Character *)(this))->SetAngle(0x4000);
-                mUnknown25D6 = 0;
+                mHeadYawNow = 0;
                 ShowHeadIcon();
                 SetHeadTurn(0, 0, 0, 5);
                 ((Character *)(this))->ResetSoundPhase(0);
             }
         } else if (mStep == 1) {
             mStep++;
-            mApartmentRoom->mParts.GetDoor()->SetMotion(1);
+            mApartmentRoom->mDoor.SetMotion(1);
             FloorPos target = sDoorstep;
             SetWalkTargetOnFloor(target);
         } else if (mStep == 2) {
@@ -1268,22 +1268,22 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                 mStep++;
                 FloorPos target = sPastDoor;
                 SetWalkTargetOnFloor(target);
-                mHeadTurnFrames = 4;
+                mHeadTurnShift = 4;
             }
         } else if (mStep == 3) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
                 SetWalkTargetOnFloor(mPartner->GetFloorPos());
-                mApartmentRoom->mParts.GetDoor()->SetMotion(2);
-                mHeadTurnFrames = 3;
+                mApartmentRoom->mDoor.SetMotion(2);
+                mHeadTurnShift = 3;
             }
-            SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnFrames);
+            SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnShift);
         } else if (mStep == 4) {
             if (StepTurnLooking(0x120, 0, 0x3800)) {
                 if (mBlendFrames <= 0) {
                     mStep++;
                     SetAnimation(BCA0, GetIdleAnim());
-                    SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                    SetHeadTurn(0, 0, 0, mHeadTurnShift);
                 }
             }
         } else if (mStep == 5) {
@@ -1354,7 +1354,7 @@ void TutorialRoomCharacter::UpdateStates0ATo0F() {
                     mStep++;
                     SetAnimation(BCA0, GetIdleAnim());
                 }
-                SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                SetHeadTurn(0, 0, 0, mHeadTurnShift);
             }
         } else {
             SetWalkTargetOnFloor(mPartner->GetFloorPos());
@@ -1417,7 +1417,7 @@ void TutorialRoomCharacter::UpdateStates10To12() {
                 mStep++;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, 10);
-                mTargetAngle = mAngle - mUnknown25D6;
+                mTargetAngle = mAngle - mHeadYawNow;
                 ((Character *)(this))->ResetSoundPhase(0);
                 ShowHeadIcon();
             }
@@ -1434,7 +1434,7 @@ void TutorialRoomCharacter::UpdateStates10To12() {
     case 0x12:
         if (mStep == 0) {
             mStep++;
-            if (mUnknown2AF0 < 0x1000) {
+            if (mWalkSpeedScale < 0x1000) {
                 mTimer = 40;
             } else {
                 mTimer = 30;
@@ -1452,7 +1452,7 @@ void TutorialRoomCharacter::UpdateStates10To12() {
                 StartSound3IfAnimOfGroup();
                 SetAnimation(BCA0, 7);
             }
-            SetHeadTurn(mHeadPitch, GetHeadYawToCamera(), 0, mHeadTurnFrames);
+            SetHeadTurn(mHeadPitch, GetHeadYawToCamera(), 0, mHeadTurnShift);
             StepWalkLooking(0x8000, 0, 0x28F, 0x1F, 6);
         }
         break;
@@ -1483,11 +1483,11 @@ u16 TutorialRoomCharacter::GetHeadYaw(u16 angle, int limit) {
 
 // @0x0214db10
 void TutorialRoomCharacter::SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames) {
-    mHeadTurnFrames = frames;
+    mHeadTurnShift = frames;
     mHeadPitch = pitch;
     mHeadYaw = yaw;
     mHeadRoll = roll;
-    mHeadTurnActive = TRUE;
+    mHeadTurn = TRUE;
 }
 
 // @0x0214db3c
@@ -1522,7 +1522,7 @@ BOOL TutorialRoomCharacter::StepWalkLooking(u32 lookLimit, int lookAngle, fx32 r
     }
     ((Character *)(this))->MoveAlongAngle();
     if (lookLimit < 0x4000) {
-        SetHeadTurn(mHeadPitch, GetHeadYaw(lookAngle - mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+        SetHeadTurn(mHeadPitch, GetHeadYaw(lookAngle - mWalkAngle, lookLimit), mHeadRoll, mHeadTurnShift);
     }
     return arrived;
 }
@@ -1538,7 +1538,7 @@ BOOL TutorialRoomCharacter::StepTurnLooking(int speed, int accel, u32 lookLimit)
         ((Character *)(this))->MoveAlongAngle();
     }
     if (lookLimit < 0x4000) {
-        SetHeadTurn(mHeadPitch, GetHeadYaw(-mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+        SetHeadTurn(mHeadPitch, GetHeadYaw(-mWalkAngle, lookLimit), mHeadRoll, mHeadTurnShift);
     }
     return facing;
 }
@@ -1563,8 +1563,8 @@ void TutorialRoomCharacter::LoadHeadIcon(ParticleSystem *particles) {
 
 // @0x0214def8
 void TutorialRoomCharacter::PlaceHeadIcon() {
-    mHeadIcon.mAngle = 0x4000 - mAngle + mUnknown25D6;
-    MtxFx43 *head = GetJointMatrix(0);
+    mHeadIcon.mAngle = 0x4000 - mAngle + mHeadYawNow;
+    MtxFx43 *head = GetJointMatrix(*this, 0);
     VEC_Set(&mHeadIcon.mPos, head->_30, head->_31, head->_32);
 }
 
@@ -1574,7 +1574,7 @@ void TutorialRoomCharacter::ShowHeadIcon() {
         mHeadIcon.SetMode(1);
         return;
     }
-    mHeadIcon.mAngle = 0x4000 - mAngle + mUnknown25D6;
+    mHeadIcon.mAngle = 0x4000 - mAngle + mHeadYawNow;
     s16 iconId = sMoodHeadIcons[mMood];
     if (mHeadIcon.mIconId != iconId) {
         mHeadIcon.Show();
@@ -1664,7 +1664,7 @@ void TutorialRoomCharacter::StartSound0UnlessGroupA() {
 // @0x0214e1fc
 TutorialApartmentRoom::TutorialApartmentRoom() {
     SetState(STATE_IDLE);
-    mParts.SetState(3);
+    RoomModels::SetState(3);
     MI_CpuClear16(mNumberText, sizeof(mNumberText));
 }
 
@@ -1676,7 +1676,7 @@ void TutorialApartmentRoom::Refresh() {
 // @0x0214e254
 void TutorialApartmentRoom::SetStyle(u16 style) {
     mNextStyle = style;
-    mStyle = style;
+    mId = style;
 }
 
 // @0x0214e264
@@ -1707,16 +1707,16 @@ void TutorialApartmentRoom::UpdateState() {
         break;
     case STATE_RESET:
         SetState(STATE_IDLE);
-        mParts.SetState(0);
-        mParts.GetDoor()->SetMotion(0);
-        mParts.SetVisible(0);
+        RoomModels::SetState(0);
+        mDoor.SetMotion(0);
+        RoomModels::SetVisible(0);
         ReleaseAll();
         UpdateNumberText();
         break;
     case STATE_CHANGE_STYLE:
         if (mStep == 0) {
             mStep++;
-            mStyle = mNextStyle;
+            mId = mNextStyle;
             MountModel(0);
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
@@ -1750,9 +1750,9 @@ TutorialRoomCamera::TutorialRoomCamera() {
 
 // @0x0214e42c
 TutorialRoomCamera::~TutorialRoomCamera() {
-    VEC_Set(&gSceneMemory.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
-    VEC_Set(&gSceneMemory.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
-    gSceneMemory.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
+    VEC_Set(&gSceneMemory.mCameraPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
+    VEC_Set(&gSceneMemory.mCameraTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
+    SetMemoryOrbit(&gSceneMemory, mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
 }
 
 // @0x0214e48c
@@ -1957,7 +1957,7 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
     for (int i = 0; i < 2; i++) {
         mLights[i] = &data_021227cc[i];
         func_0202a96c(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mStyle].mLightColor;
+        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
     }
 }
 
@@ -1965,7 +1965,7 @@ void TutorialRoomLight::Init(TutorialRoomCamera *camera, TutorialApartmentRoom *
 void TutorialRoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mStyle].mLightColor);
+        SetColor(data_020f72f8[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -1977,10 +1977,10 @@ void TutorialRoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mStyle].mLightColor, &targetR, &targetG, &targetB);
+            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mStyle].mLightColor;
+                color = data_020f72f8[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);
@@ -2758,7 +2758,7 @@ void TutorialTimedMessage::SetVisible(BOOL visible) {
     if (visible == TRUE) {
         data_0211d604.Show(2);
     } else {
-        data_0211d604.Hide(2);
+        HideScreens(&data_0211d604, 2);
     }
 }
 

@@ -986,13 +986,13 @@ func_020257d0 kind:function(arm,size=0x1bc) addr:0x020257d0
 func_0202598c kind:function(arm,size=0x6c) addr:0x0202598c
 func_020259f8 kind:function(arm,size=0x70) addr:0x020259f8
 func_02025a68 kind:function(arm,size=0x34) addr:0x02025a68
-func_02025a9c kind:function(arm,size=0xc0) addr:0x02025a9c
-func_02025b5c kind:function(arm,size=0xc0) addr:0x02025b5c
+_ZN13DrawingCanvasC2Ev kind:function(arm,size=0xc0) addr:0x02025a9c
+_ZN13DrawingCanvasC1Ev kind:function(arm,size=0xc0) addr:0x02025b5c
 func_02025c1c kind:function(arm,size=0x70) addr:0x02025c1c
-func_02025c8c kind:function(arm,size=0x50) addr:0x02025c8c
+_ZN13DrawingCanvas6UpdateEv kind:function(arm,size=0x50) addr:0x02025c8c
 func_02025cdc kind:function(arm,size=0x24) addr:0x02025cdc
-func_02025d00 kind:function(arm,size=0xc0) addr:0x02025d00
-func_02025dc0 kind:function(arm,size=0x50) addr:0x02025dc0
+_ZN13DrawingCanvas12SetBrushSizeEi kind:function(arm,size=0xc0) addr:0x02025d00
+_ZN13DrawingCanvas8SetColorEi kind:function(arm,size=0x50) addr:0x02025dc0
 func_02025e10 kind:function(arm,size=0x1b8) addr:0x02025e10
 func_02025fc8 kind:function(arm,size=0x1a8) addr:0x02025fc8
 func_02026170 kind:function(arm,size=0x14c) addr:0x02026170
@@ -1774,8 +1774,8 @@ _ZN7Scene1EC1Ei kind:function(arm,size=0x46c) addr:0x0203f900
 _ZN13RightJobSceneC1Ei kind:function(arm,size=0x25c) addr:0x0203fd6c
 _ZN14RightJob2SceneC1Ei kind:function(arm,size=0x128) addr:0x0203ffc8
 _ZN9VoteSceneC1Ei kind:function(arm,size=0x178) addr:0x020400f0
-func_02040268 kind:function(arm,size=0x1c) addr:0x02040268
-func_02040284 kind:function(arm,size=0x4) addr:0x02040284
+_ZN14VoteSpritePairC1Ev kind:function(arm,size=0x1c) addr:0x02040268
+_ZN14VoteSpritePairD1Ev kind:function(arm,size=0x4) addr:0x02040284
 _ZN16MiiListMenuSceneC1Ei kind:function(arm,size=0xe4) addr:0x02040288
 _ZN17G3SpriteTestSceneC1Ei kind:function(arm,size=0x7c) addr:0x0204036c
 _ZN12MiiListSceneC1Ei kind:function(arm,size=0x190) addr:0x020403e8
@@ -1813,8 +1813,8 @@ _ZN13TestNg63SceneC1Ei kind:function(arm,size=0x14c) addr:0x02042634
 _ZN13TestNg63ModelD1Ev kind:function(arm,size=0x3c) addr:0x02042780
 _ZN7Scene3FC1Ei kind:function(arm,size=0x124) addr:0x020427bc
 _ZN7Scene40C1Ei kind:function(arm,size=0x8c0) addr:0x020428e0
-func_020431a0 kind:function(arm,size=0x2c) addr:0x020431a0
-func_020431cc kind:function(arm,size=0x3c) addr:0x020431cc
+_ZN16Scene40ItemModelC1Ev kind:function(arm,size=0x2c) addr:0x020431a0
+_ZN16Scene40ItemModelD1Ev kind:function(arm,size=0x3c) addr:0x020431cc
 _ZN13TestNg69SceneC1Ei kind:function(arm,size=0xe8) addr:0x02043208
 _ZN13TestNg69ModelD1Ev kind:function(arm,size=0x3c) addr:0x020432f0
 _ZN12MiiEditSceneC1Ei kind:function(arm,size=0x460) addr:0x0204332c
@@ -1837,7 +1837,7 @@ _ZN7Scene58C1Ei kind:function(arm,size=0x98) addr:0x02044988
 _ZN14TestNg107SceneC1Ei kind:function(arm,size=0x180) addr:0x02044a20
 _ZN12RomanceSceneC1Ei kind:function(arm,size=0xe0) addr:0x02044ba0
 _ZN14WriteSongSceneC1Ei kind:function(arm,size=0x41c) addr:0x02044c80
-func_0204509c kind:function(arm,size=0x78) addr:0x0204509c
+_ZN14WriteSongModelD1Ev kind:function(arm,size=0x78) addr:0x0204509c
 _ZN7Scene5DC1Ei kind:function(arm,size=0xd4) addr:0x02045114
 _ZN13CityHallSceneC1Ei kind:function(arm,size=0x164) addr:0x020451e8
 _ZN8MapSceneC1Ei kind:function(arm,size=0x1b8) addr:0x0204534c
@@ -1887,7 +1887,7 @@ _ZN14TestNg139SceneC1Ei kind:function(arm,size=0x194) addr:0x0204846c
 _ZN12WeddingSceneC1Ei kind:function(arm,size=0x128) addr:0x02048600
 _ZN16WeddingCharacterC1Ev kind:function(arm,size=0x20) addr:0x02048728
 _ZN16WeddingCharacterD1Ev kind:function(arm,size=0x60) addr:0x02048748
-func_020487a8 kind:function(arm,size=0x3c) addr:0x020487a8
+_ZN16WeddingGiftModelD1Ev kind:function(arm,size=0x3c) addr:0x020487a8
 _ZN11OptionSceneC1Ei kind:function(arm,size=0x134) addr:0x020487e4
 _ZN16InformationSceneC1Ei kind:function(arm,size=0x9c) addr:0x02048918
 _ZN7SceneAFC1Ei kind:function(arm,size=0x138) addr:0x020489b4
@@ -1901,8 +1901,8 @@ _ZN16SceneB2CharacterD1Ev kind:function(arm,size=0x60) addr:0x0204903c
 _ZN7SceneB3C1Ei kind:function(arm,size=0x1b8) addr:0x0204909c
 _ZN16SceneB3CharacterC1Ev kind:function(arm,size=0x2c) addr:0x02049254
 _ZN16SceneB3CharacterD1Ev kind:function(arm,size=0x60) addr:0x02049280
-_ZN7SceneB4C1Ei kind:function(arm,size=0x320) addr:0x020492e0
-func_02049600 kind:function(arm,size=0x3c) addr:0x02049600
+_ZN10AlbumSceneC1Ei kind:function(arm,size=0x320) addr:0x020492e0
+_ZN14AlbumItemModelD1Ev kind:function(arm,size=0x3c) addr:0x02049600
 _ZN7SceneB5C1Ei kind:function(arm,size=0x184) addr:0x0204963c
 _ZN16SceneB5CharacterC1Ev kind:function(arm,size=0x2c) addr:0x020497c0
 _ZN16SceneB5CharacterD1Ev kind:function(arm,size=0x60) addr:0x020497ec
@@ -1929,13 +1929,13 @@ _ZN11ClothesItem10GetWeight0Ev kind:function(arm,size=0x1c) addr:0x0204ad04
 _ZN11ClothesItem12GetModelNameEv kind:function(arm,size=0x1c) addr:0x0204ad20
 _ZN11ClothesItem9GetPrice2Ev kind:function(arm,size=0x24) addr:0x0204ad3c
 _ZN11ClothesItem8GetPriceEv kind:function(arm,size=0x24) addr:0x0204ad60
-func_0204ad84 kind:function(arm,size=0x4) addr:0x0204ad84
+_ZN5SceneD1Ev kind:function(arm,size=0x4) addr:0x0204ad84
 _ZN20TestDrawMiiAnimModelD0Ev kind:function(arm,size=0x44) addr:0x0204ad88
-func_0204adcc kind:function(arm,size=0x44) addr:0x0204adcc
+_ZN16Scene40ItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204adcc
 _ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
-func_0204ae54 kind:function(arm,size=0x44) addr:0x0204ae54
+_ZN16WeddingGiftModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae54
 func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
-func_0204aedc kind:function(arm,size=0x44) addr:0x0204aedc
+_ZN14AlbumItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204aedc
 _ZN5Scene3RunEv kind:function(arm,size=0x170) addr:0x0204af20
 _ZN16DrawManTestScene12StartLoadingEv kind:function(arm,size=0x44) addr:0x0204b090
 _ZN16DrawManTestScene4InitEv kind:function(arm,size=0x138) addr:0x0204b0d4
@@ -4450,10 +4450,6 @@ data_020ef022 kind:data(any) addr:0x020ef022
 ShttsPresets kind:data(any) addr:0x020f2708
 @9655 kind:data(any) addr:0x020f3fe0 local
 data_020f3ff0 kind:data(any) addr:0x020f3ff0
-data_020f3ff4 kind:data(any) addr:0x020f3ff4
-data_020f3ff5 kind:data(any) addr:0x020f3ff5
-data_020f3ff6 kind:data(any) addr:0x020f3ff6
-data_020f3ff7 kind:data(any) addr:0x020f3ff7
 data_020f5760 kind:data(any) addr:0x020f5760
 data_020f5768 kind:data(any) addr:0x020f5768
 data_020f5770 kind:data(any) addr:0x020f5770
@@ -5307,41 +5303,37 @@ _ZTV13MessageWindow kind:data(any) addr:0x021102e0
 @8822 kind:data(any) addr:0x021107c2 local
 sDigitReadings kind:data(any) addr:0x021107cc local
 sLetterReadings kind:data(any) addr:0x021107f4 local
-data_0211085c kind:data(any) addr:0x0211085c
-data_02110860 kind:data(any) addr:0x02110860
+_ZTT14Scene7FTextBox kind:data(any) addr:0x0211085c
 _ZTT10ObjTextBox kind:data(any) addr:0x02110864
 _ZTT10ObjCharBox kind:data(any) addr:0x0211086c
 _ZTT18Scene0FTextCanvas2 kind:data(any) addr:0x02110874
-data_02110880 kind:data(any) addr:0x02110880
+_ZTT17Scene7FTextCanvas kind:data(any) addr:0x0211087c
 _ZTT17Scene0FTextCanvas kind:data(any) addr:0x02110884
 _ZTT14Scene0FTextBox kind:data(any) addr:0x0211088c
+_ZTV14Scene7FTextBox kind:data(any) addr:0x02110894
 _ZTV14Scene0FTextBox kind:data(any) addr:0x021108a0
 _ZTV10ObjTextBox kind:data(any) addr:0x021108ac
 data_021108c4 kind:data(any) addr:0x021108c4
 _ZTV18Scene0FTextCanvas2 kind:data(any) addr:0x021108d0
 _ZTV17Scene0FTextCanvas kind:data(any) addr:0x021108dc
 _ZTV13ObjTextCanvas__10TextCanvas_at_340 kind:data(any) addr:0x021108e8
+_ZTV17Scene7FTextCanvas kind:data(any) addr:0x021108f4
 _ZTV10ObjCharBox kind:data(any) addr:0x02110900
-data_02110914 kind:data(any) addr:0x02110914
+_ZTV21TutorialMessageWindow kind:data(any) addr:0x0211090c
 _ZTV14TestNg134Model kind:data(any) addr:0x0211091c
-data_02110940 kind:data(any) addr:0x02110940
+_ZTV13AlbumListView kind:data(any) addr:0x02110938
 _ZTV20TestDrawMiiAnimModel kind:data(any) addr:0x02110954
 _ZTV5Scene kind:data(any) addr:0x02110970
 _ZTV12RankingPiece kind:data(any) addr:0x02110994
-data_021109c4 kind:data(any) addr:0x021109c4
-data_021109e0 kind:data(any) addr:0x021109e0
+_ZTV14AlbumItemModel kind:data(any) addr:0x021109bc
 data_02110a04 kind:data(any) addr:0x02110a04
 data_02110a20 kind:data(any) addr:0x02110a20
-data_02110a44 kind:data(any) addr:0x02110a44
-data_02110a60 kind:data(any) addr:0x02110a60
-data_02110a84 kind:data(any) addr:0x02110a84
-data_02110aa0 kind:data(any) addr:0x02110aa0
-data_02110ac4 kind:data(any) addr:0x02110ac4
-data_02110ae8 kind:data(any) addr:0x02110ae8
+_ZTV16WeddingGiftModel kind:data(any) addr:0x02110a3c
+_ZTV16Scene40ItemModel kind:data(any) addr:0x02110a7c
+_ZTV10AlbumItems kind:data(any) addr:0x02110abc
 data_02110b0c kind:data(any) addr:0x02110b0c
 data_02110b30 kind:data(any) addr:0x02110b30
-data_02110b54 kind:data(any) addr:0x02110b54
-data_02110b78 kind:data(any) addr:0x02110b78
+_ZTV12Scene40Items kind:data(any) addr:0x02110b4c
 _ZTV16DrawManTestScene kind:data(any) addr:0x02110b94
 gStr_DMN kind:data(any) addr:0x02110bb8
 gStr_Scn_Scene_SceneTestDrawMan_LZ_bin kind:data(any) addr:0x02110bbc
@@ -5557,14 +5549,14 @@ _ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
 @13626 kind:data(any) addr:0x021119e4 local
 @13627 kind:data(any) addr:0x021119e8 local
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-@13903 kind:data(any) addr:0x02111a10 local
-@13904 kind:data(any) addr:0x02111a14 local
-@13905 kind:data(any) addr:0x02111a30 local
-@13906 kind:data(any) addr:0x02111a34 local
-@13918 kind:data(any) addr:0x02111a58 local
-@13919 kind:data(any) addr:0x02111a68 local
-@13932 kind:data(any) addr:0x02111a78 local
-@13933 kind:data(any) addr:0x02111a7c local
+@13910 kind:data(any) addr:0x02111a10 local
+@13911 kind:data(any) addr:0x02111a14 local
+@13912 kind:data(any) addr:0x02111a30 local
+@13913 kind:data(any) addr:0x02111a34 local
+@13925 kind:data(any) addr:0x02111a58 local
+@13926 kind:data(any) addr:0x02111a68 local
+@13939 kind:data(any) addr:0x02111a78 local
+@13940 kind:data(any) addr:0x02111a7c local
 sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
@@ -6551,7 +6543,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14926 kind:bss addr:0x0213b704 local
+@15898 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0

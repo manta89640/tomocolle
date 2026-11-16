@@ -8,10 +8,10 @@
 #include "text/TextUtil.h"
 #include <nnsys.h>
 
-#include "CharacterCalls.h"
 #include "sound/SoundManager.h"
 
 #include "RoomScene.h"
+#include "MainProgram.h"
 
 // ===================================================================================================================
 // The main program's functions and data that the overlay uses, not decompiled yet
@@ -30,8 +30,8 @@ struct SavedGame {
 extern SavedGame gGameData;
 BOOL func_0202c3dc(SavedGame *game, int index); // Whether the saved character with that index exists
 int func_0202c414(SavedGame *game, int index);  // Its room number (SavedCharacter::mRoom), 0xFF without save data
-u8 func_0202c468(SavedGame *game, int index);   // Its event (SavedCharacter::mEvent)
-int func_0202c490(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mEventPartner)
+u8 func_0202c468(SavedGame *game, int index);   // Its event (SavedCharacter::mLongActState)
+int func_0202c490(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mLongActPartner)
 s64 func_0202c4b8(SavedGame *game, int index);  // The time its next event starts at
 s64 func_0202c4e4(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
 
@@ -79,7 +79,7 @@ struct ScreenControl {
     /* 0x4C */ u8 mUnknown4C[0x88];
     /* 0xD4 */ BOOL mPlanesChanged;
     /* 0xD8 */ u8 mUnknownD8[0x14];
-    /* 0xEC */ int mUnknownEC;
+    /* 0xEC */ int mUnknown48Changed;
 };
 extern ScreenControl data_0211d604;
 void func_02023be8(ScreenControl *screens, int mask, fx32 brightness);
@@ -225,12 +225,12 @@ void RoomScene::StartLoading() {
         }
     }
 
-    last = gSceneMemory.mCharacter;
+    last = gSceneMemory.mCharacters[0];
     if (last < 100 && func_0202c3dc(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
-        gSceneMemory.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
     }
     LoadCharacters();
     ((Character *)(&mCharacters[0]))->SetArchive("3HM");
@@ -272,7 +272,7 @@ void RoomScene::StartLoading() {
 
 // Which two things the resident holds for its event (the numbers of their archives), 0 for none.
 void RoomScene::GetEventItems(u8 *first, u8 *second) {
-    u32 event = mCharacters[0].mEvent;
+    u32 event = mCharacters[0].mLongActState;
 
     *first = 0;
     *second = 0;
@@ -356,7 +356,7 @@ void RoomScene::Init() {
     func_0202b0e8(&data_02122824);
     func_0202ae38(data_021223e4);
     data_0211d604.mUnknown48 = 1;
-    data_0211d604.mUnknownEC = 1;
+    data_0211d604.mUnknown48Changed = 1;
     G3X_SetClearColor(GX_RGB(1, 1, 1), 0, 0x7FFF, 63, FALSE);
     func_0202680c(0x4000);
 
@@ -395,8 +395,8 @@ void RoomScene::Init() {
     mRoom.Refresh();
     mRoom.Load(7);
     mRoom.LoadParts(8);
-    mRoom.mParts.SetUnknown(10);
-    mRoom.mParts.mDoor.mUnknown13C = 2;
+    mRoom.RoomModels::SetUnknown(10);
+    mRoom.mDoor.mSoundPlayer = 2;
     for (i = 0; i < 4; i++) {
         HeldItem *item = &mItems[i];
         func_0202ad04(data_021223e4, i + 2, item->mArchiveName, 0);
@@ -473,7 +473,7 @@ void RoomScene::Init() {
     mClockDisplay.Init(&mClock);
 
     // Coming from the character distribution scene with a resident that has just moved in
-    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].GetEventEnd() == 0x7FFFFFFFFFFFFFFFLL) {
+    if (gSceneManager.mPreviousSceneId == 0x74 && mCharacters[0].mLongActEnd == 0x7FFFFFFFFFFFFFFFLL) {
         SetInputState(INPUT_OFF);
         SetEventState(EVENT_AFTER_DISTRIBUTION, 60);
         mCamera.SetState(2, 0);
@@ -538,7 +538,7 @@ void RoomScene::Draw() {
         break;
     }
 
-    mRoom.mParts.Draw();
+    mRoom.RoomModels::Draw();
     for (int i = 0; i < 2; i++) {
         mCharacters[i].UpdateBodyIfPresent();
     }
@@ -635,7 +635,7 @@ void RoomScene::PlaceCharacters() {
 
 // Starts what the resident's event has the characters do, unless the resident is out.
 void RoomScene::StartCharacterEvents() {
-    u8 event = mCharacters[0].mEvent;
+    u8 event = mCharacters[0].mLongActState;
 
     if (SavedCharacter::IsAwayState(event)) {
         mCharacters[0].mPresent = FALSE;
@@ -660,7 +660,7 @@ void RoomScene::AimCamera() {
         mLight.SetState(3);
     } else if (count == 1) {
         mCamera.SetMode(2);
-        if (mCharacters[0].mEvent == 18) {
+        if (mCharacters[0].mLongActState == 18) {
             mLight.SetState(3);
         } else {
             mLight.SetState(1);
@@ -695,7 +695,7 @@ void RoomScene::PressButton(int button) {
         SetEventState(EVENT_NONE);
         mTtsPlayer.Stop();
         mNextSceneId = 0x5F;
-        gSceneMemory.mCharacter = mCharacters[0].mIndex;
+        gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
         break;
     }
 }
@@ -734,7 +734,7 @@ void RoomScene::EnterRoom() {
     if (!CanEnterRoom()) {
         return;
     }
-    if (mCharacters[0].mEvent == 18 || mCharacters[0].mEvent == 15 || mCharacters[0].mEvent == 17) {
+    if (mCharacters[0].mLongActState == 18 || mCharacters[0].mLongActState == 15 || mCharacters[0].mLongActState == 17) {
         SetInputState(INPUT_WAIT_LEAVE);
     } else {
         SetInputState(INPUT_ENTER_ROOM);
@@ -751,7 +751,7 @@ void RoomScene::GoToInformation() {
     SetEventState(EVENT_NONE);
     mTtsPlayer.Stop();
     mNextSceneId = 0xAE;
-    gSceneMemory.mCharacter = mCharacters[0].mIndex;
+    gSceneMemory.mCharacters[0] = mCharacters[0].mIndex;
 }
 
 // Enables the two buttons as the state allows.
@@ -971,7 +971,7 @@ void RoomScene::ChangeRoom() {
         if (func_0202c3dc(&gGameData, mCharacters[i].mIndex)) {
             mFront.DrawWindow(mCharacters[i].mRoomNumber);
             if (((SavedCharacter *)(&mCharacters[i]))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mLongActPartner));
             }
         }
     }
@@ -984,7 +984,7 @@ void RoomScene::ChangeRoom() {
         mNamePanel.SetState(2);
     } else {
         ChooseCharacters(resident);
-        gSceneMemory.mCharacter = resident;
+        gSceneMemory.mCharacters[0] = resident;
         LoadCharacters();
         mRoom.SetNextStyle(mCharacters[0].mInterior);
         mNamePanel.SetState(1);
@@ -1026,7 +1026,7 @@ SavedCharacter *RoomScene::StartDueEvent(s64 now, SavedCharacter *temp) {
 
     SaveCharacters();
     for (int i = 0; i < 2; i++) {
-        events[i] = mCharacters[i].mEvent;
+        events[i] = mCharacters[i].mLongActState;
     }
 
     if (mScanIndex == mCharacters[0].mIndex) {
@@ -1067,7 +1067,7 @@ int RoomScene::EndDueEvent() {
 
     SaveCharacters();
     for (int i = 0; i < 2; i++) {
-        events[i] = mCharacters[i].mEvent;
+        events[i] = mCharacters[i].mLongActState;
     }
     SavedCharacter temp;
 
@@ -1084,8 +1084,8 @@ int RoomScene::EndDueEvent() {
 
     partnerIndex = -1;
     partner = NULL;
-    if (character->mMoodLocked != 0 && ((SavedCharacter *)(character))->IsTroubleOfCategory3Kind8To10() && mResidentCount > 1) {
-        partnerIndex = character->mMoodPartner;
+    if (character->mTroubleState != 0 && ((SavedCharacter *)(character))->IsTroubleOfCategory3Kind8To10() && mResidentCount > 1) {
+        partnerIndex = character->mTroublePartner;
         if (partnerIndex == mCharacters[0].mIndex) {
             partner = &mCharacters[0];
         } else if (partnerIndex == mCharacters[1].mIndex) {
@@ -1108,7 +1108,7 @@ void RoomScene::UpdateAbsentCharacter(s64 now) {
 
     SaveCharacters();
     for (int i = 0; i < 2; i++) {
-        events[i] = mCharacters[i].mEvent;
+        events[i] = mCharacters[i].mLongActState;
     }
     SavedCharacter temp;
 
@@ -1140,7 +1140,7 @@ int RoomScene::StartRandomEvent(s64 now) {
     SaveCharacters();
     result = -1;
     for (int i = 0; i < 2; i++) {
-        events[i] = mCharacters[i].mEvent;
+        events[i] = mCharacters[i].mLongActState;
     }
 
     if (GetRandomEventCount(&force) > 0) {
@@ -1164,7 +1164,7 @@ int RoomScene::StartRandomEvent(s64 now) {
         }
 
         if (((SavedCharacter *)(character))->IsLongActPaired()) {
-            u8 partnerIndex = character->mEventPartner;
+            u8 partnerIndex = character->mLongActPartner;
             if (partnerIndex == mCharacters[0].mIndex) {
                 partner = &mCharacters[0];
             } else if (partnerIndex == mCharacters[1].mIndex) {
@@ -1277,7 +1277,7 @@ void RoomScene::UpdateEvent() {
             mEventStep++;
             ((Character *)(&mCharacters[0]))->SetVisible(1);
             ((Character *)(&mCharacters[1]))->SetVisible(1);
-            mRoom.mParts.SetVisible(1);
+            mRoom.RoomModels::SetVisible(1);
             if (resident != 0xFF) {
                 mCharacters[0].SetState(1);
                 mCharacters[0].mWait = 0;
@@ -1290,7 +1290,7 @@ void RoomScene::UpdateEvent() {
         } else if (mEventStep == 3) {
             mEventStep++;
             mEventTimer = 4;
-            mRoom.mParts.SetState(3);
+            mRoom.RoomModels::SetState(3);
             mCamera.SetState(1, 0);
         } else if (mEventStep == 4) {
             if (!IsTransitionDone()) {
@@ -1426,12 +1426,12 @@ void RoomScene::UpdateEvent() {
                                 mCharacters[0].mWait = 0;
                                 mCharacters[0].SetState(0x117);
                             }
-                        } else if (((SavedCharacter *)(character))->IsLongActWithPartner() && character->mEventPartner == mCharacters[0].mIndex) {
+                        } else if (((SavedCharacter *)(character))->IsLongActWithPartner() && character->mLongActPartner == mCharacters[0].mIndex) {
                             mEventStep++;
                             mCharacters[0].mWait = 0;
                             mCharacters[0].SetState(0x117);
                             refresh = FALSE;
-                        } else if (((SavedCharacter *)(character))->IsLongActAsPartner() && character->mEventPartner == mCharacters[0].mIndex) {
+                        } else if (((SavedCharacter *)(character))->IsLongActAsPartner() && character->mLongActPartner == mCharacters[0].mIndex) {
                             mEventStep++;
                             mCharacters[0].mWait = 0;
                             mCharacters[0].SetState(0x117);
@@ -1443,7 +1443,7 @@ void RoomScene::UpdateEvent() {
                                 mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
                             }
                         } else if (!((SavedCharacter *)(&mCharacters[0]))->IsAway() && ((SavedCharacter *)(&mCharacters[0]))->IsLongActAsPartner()) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[0].mEventPartner));
+                            mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[0].mLongActPartner));
                         }
                     } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
@@ -1502,14 +1502,14 @@ void RoomScene::UpdateEvent() {
                         StartDueEvent(now, &temp);
 
                         BOOL withPartner = ((SavedCharacter *)(&mCharacters[1]))->IsLongActWithPartner();
-                        if (!withPartner || (withPartner && mCharacters[1].mEventPartner != mCharacters[0].mIndex)) {
+                        if (!withPartner || (withPartner && mCharacters[1].mLongActPartner != mCharacters[0].mIndex)) {
                             mEventStep++;
                             mCharacters[0].SetState(0x117);
                             mCharacters[1].SetState(0x117);
                             refresh = FALSE;
                             mCharacters[0].mWait = 0;
                             mCharacters[1].mWait = 0;
-                        } else if (withPartner && mCharacters[1].mEventPartner == mCharacters[0].mIndex) {
+                        } else if (withPartner && mCharacters[1].mLongActPartner == mCharacters[0].mIndex) {
                             if (mScanIndex == mCharacters[0].mIndex || mScanIndex == mCharacters[1].mIndex) {
                                 mEventStep++;
                             }
@@ -1571,7 +1571,7 @@ void RoomScene::UpdateEvent() {
             int index = MATH_Rand16(&gRandom, 0) & 1;
             mEventStep++;
             RoomCharacter *partner = mCharacters[index].mPartner;
-            ((SavedCharacter *)(&mCharacters[index]))->AddRelationMeter(partner->mIndex, data_021135c8[mCharacters[index].mRelation[partner->mIndex]][1] * 2);
+            ((SavedCharacter *)(&mCharacters[index]))->AddRelationMeter(partner->mIndex, data_021135c8[mCharacters[index].mRelationRank[partner->mIndex]][1] * 2);
             StartTalkReaction(index, 1);
             mCharacters[index].mReaction = 1;
             partner->mReaction = 1;
@@ -1726,7 +1726,7 @@ void RoomScene::UpdateEvent() {
             mLight.SetState(4);
             mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1753,7 +1753,7 @@ void RoomScene::UpdateEvent() {
             mCamera.SetMode(2);
             mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mEventPartner));
+                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1767,7 +1767,7 @@ void RoomScene::UpdateEvent() {
             mCamera.SetMode(2);
             mCamera.SetState(4, 0x474);
             mLight.SetState(2);
-            if (mCharacters[0].mEvent == 18) {
+            if (mCharacters[0].mLongActState == 18) {
                 mFront.DrawWindowOfKind(0, mCharacters[0].mRoomNumber);
             } else {
                 mFront.DrawWindow(mCharacters[0].mRoomNumber);
@@ -1943,7 +1943,7 @@ void RoomScene::ChooseEncounter() {
     } else if (count == 2) {
         int chance = RAND(1000);
         int withPartner = ((SavedCharacter *)(&mCharacters[1]))->IsLongActWithPartner();
-        if (!withPartner || (withPartner && mCharacters[1].mEventPartner != mCharacters[0].mIndex)) {
+        if (!withPartner || (withPartner && mCharacters[1].mLongActPartner != mCharacters[0].mIndex)) {
             FloorPos pos1 = mCharacters[1].GetFloorPos();
             FloorPos pos0 = mCharacters[0].GetFloorPos();
             if (pos0.z < -0x1800) {
@@ -2249,7 +2249,7 @@ void RoomScene::ShowEventMessage() {
     } else if (mCharacters[0].mPresent) {
         ShowMessage(&mCharacters[0], NULL, 3, 1);
     } else {
-        u8 event = mCharacters[0].mEvent;
+        u8 event = mCharacters[0].mLongActState;
         if (SavedCharacter::IsLongActWithPartnerState(event)) {
             ShowMessage(&mCharacters[0], &mCharacters[1], 5, 1);
         } else {
@@ -2270,7 +2270,7 @@ void RoomScene::ShowEventMessage() {
 
 // 0x0214f67c
 void RoomScene::ApplyEncounterResult(RoomCharacter *first, RoomCharacter *second, int result, int kind) {
-    u8 relation = first->mRelation[second->mIndex];
+    u8 relation = first->mRelationRank[second->mIndex];
     u16 firstIndex = first->mIndex;
     ((SavedCharacter *)(first))->SetRelation(second->mIndex, result, 100);
     ((SavedCharacter *)(second))->SetRelation(firstIndex, result, 100);
@@ -2353,7 +2353,7 @@ void RoomScene::ChooseTalkReaction(int index) {
     u16 partnerIndex;
     RoomCharacter *partner = mCharacters[index].mPartner;
     partnerIndex = partner->mIndex;
-    u8 relation = mCharacters[index].mRelation[partnerIndex];
+    u8 relation = mCharacters[index].mRelationRank[partnerIndex];
     int reaction = func_0209d5ac(&mCharacters[index], relation, partner->mReaction, partner);
     int patience = (200 - ((SavedCharacter *)(&mCharacters[index]))->GetAnswerScore01()) >> 2;
     mCharacters[index].mReaction = reaction;
@@ -2369,7 +2369,7 @@ void RoomScene::ChooseTalkReaction(int index) {
 void RoomScene::StartTalkReaction(int index, int reaction) {
     switch (reaction) {
     case 0:
-        if (!mCharacters[index].mMoodLocked) {
+        if (!mCharacters[index].mTroubleState) {
             int state = mCharacters[index].mState;
             if (state == 0xf9) {
                 mCharacters[index].mMood = 2;
@@ -2422,10 +2422,10 @@ void RoomScene::StartTalkReaction(int index, int reaction) {
 
 // @0x0214fd84
 void RoomScene::StartEvent(RoomCharacter *character, int phase) {
-    if (character->mPrevEvent != character->mEvent) {
+    if (character->mPrevEvent != character->mLongActState) {
         character->SetHeldItemsVisible(FALSE);
     }
-    switch (character->mEvent) {
+    switch (character->mLongActState) {
     case 0:
         if (phase == 0) {
             mLight.SetState(2);
@@ -2448,7 +2448,7 @@ void RoomScene::StartEvent(RoomCharacter *character, int phase) {
             mLight.SetState(2);
         } else {
             character->SetState(0x28);
-            character->mUnknown25D4 = 0xd100;
+            character->mHeadPitchNow = 0xd100;
         }
         break;
     case 3:
@@ -2617,15 +2617,15 @@ void RoomScene::StartPairEvent(int phase) {
     RoomCharacter *pair[2];
     for (int i = 0; i < 2; i++) {
         pair[i] = &mCharacters[i];
-        if (pair[i]->mPrevEvent != pair[i]->mEvent) {
+        if (pair[i]->mPrevEvent != pair[i]->mLongActState) {
             pair[i]->SetHeldItemsVisible(FALSE);
         }
     }
     RoomCharacter *second = pair[1];
-    if (pair[0]->mEventPartner != second->mIndex) {
+    if (pair[0]->mLongActPartner != second->mIndex) {
         return;
     }
-    switch (pair[0]->mEvent) {
+    switch (pair[0]->mLongActState) {
     case 0x18:
         if (phase == 0) {
             pair[0]->SetState(0x117);
@@ -2722,7 +2722,7 @@ void RoomScene::StartPairEvent(int phase) {
                 character->GetAngleAroundPartner(&angle, 0x1000);
                 ((Character *)(character))->SetAngle(angle);
             }
-            second->mUnknown25D6 = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3000);
+            second->mHeadYawNow = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3000);
             pair[0]->SetState(0x95);
             second->SetState(0x97);
         }
@@ -2741,7 +2741,7 @@ void RoomScene::StartPairEvent(int phase) {
                 character->GetAngleAroundPartner(&angle, 0xa00);
                 ((Character *)(character))->SetAngle(angle);
             }
-            second->mUnknown25D6 = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
+            second->mHeadYawNow = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
             pair[0]->SetState(0xa0);
             second->SetState(0xa1);
         }
@@ -2761,7 +2761,7 @@ void RoomScene::StartPairEvent(int phase) {
                 character->GetAngleAroundPartner(&angle, extra + 0x1000);
                 ((Character *)(character))->SetAngle(angle);
             }
-            second->mUnknown25D6 = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
+            second->mHeadYawNow = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
             pair[0]->SetState(0xa9);
             second->SetState(0xab);
         }
@@ -2796,7 +2796,7 @@ void RoomScene::StartPairEvent(int phase) {
             second->SetFloorPos(FX_Mul(FX_CosIdx(angle), 0xf33), FX_Mul(FX_SinIdx(angle), 0xf33));
             angle = angle + 0x4000 + (Rand(256) << 7);
             pair[0]->SetFloorPos(FX_Mul(FX_CosIdx(angle), 0x24cc), FX_Mul(FX_SinIdx(angle), 0x24cc));
-            second->mUnknown25D6 = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
+            second->mHeadYawNow = second->GetHeadYawTo(pair[0]->GetFloorPos(), 0x3800);
             pair[0]->SetState(Rand(100) < 50 ? 0xc0 : 0xc1);
             second->SetState(0xc2);
         }
@@ -2886,7 +2886,7 @@ int RoomScene::GetCharacterCountForDisplay() {
         if (CountPresent() == 0) {
             return mCharacters[0].mIndex;
         } else {
-            return mCharacters[0].mEventPartner;
+            return mCharacters[0].mLongActPartner;
         }
     }
 }
@@ -3132,10 +3132,10 @@ void RoomCharacter::Init(int slot, int param2, int param3) {
     mKeepSound = FALSE;
     ClearSpeechTexts();
     mSpeechText[0] = mSpeechTextDefault;
-    mSpeechParam[0] = mSpeechDefault;
+    mSpeechParam[0] = mMotto;
     for (int i = 0; i < 4; i++) {
         mSpeechText[i + 1] = mSpeechTextByMood[i];
-        mSpeechParam[i + 1] = mSpeechByMood[i];
+        mSpeechParam[i + 1] = mMottos[i];
     }
 }
 
@@ -3146,7 +3146,7 @@ void RoomCharacter::LoadHeadIcon(ParticleSystem *particles) {
 
 // 0x0215232c
 void RoomCharacter::PlaceHeadIcon() {
-    mHeadIcon.mAngle = 0x4000 - mAngle + mUnknown25D6;
+    mHeadIcon.mAngle = 0x4000 - mAngle + mHeadYawNow;
     PositionedNode *node = GetNode(0);
     mHeadIcon.SetPos(node->mPos.x, node->mPos.y, node->mPos.z);
 }
@@ -3182,8 +3182,8 @@ void RoomCharacter::CopyName() {
 
 // 0x02152450
 void RoomCharacter::SetEvent(u8 event) {
-    mPrevEvent = mEvent;
-    mEvent = event;
+    mPrevEvent = mLongActState;
+    mLongActState = event;
 }
 
 // 0x02152464
@@ -3192,7 +3192,7 @@ void RoomCharacter::ShowHeadIcon() {
         mHeadIcon.SetMode(1);
         return;
     }
-    mHeadIcon.mAngle = 0x4000 - mAngle + mUnknown25D6;
+    mHeadIcon.mAngle = 0x4000 - mAngle + mHeadYawNow;
     s16 iconId = gMoodHeadIcons[mMood];
     if (mHeadIcon.mIconId != iconId) {
         mHeadIcon.Show();
@@ -3315,11 +3315,11 @@ void RoomCharacter::UpdateTalkStates() {
                 }
                 SetHeadTurn(pitch, yaw, 0, 5);
                 if (mPartner->mState == 0x18) {
-                    if (mFace != 0x1a) {
+                    if (mFaceKind != 0x1a) {
                         ((CharacterBase *)(this))->SetFace(0x1a);
                     }
                 } else {
-                    int face = mFace;
+                    int face = mFaceKind;
                     if (face != GetFace()) {
                         ((CharacterBase *)(this))->SetFace(GetFace());
                     }
@@ -3641,11 +3641,11 @@ void RoomCharacter::UpdateTalkStates() {
                 }
                 SetHeadTurn(pitch, yaw, 0, 5);
                 if (mPartner->mState == 0x18) {
-                    if (mFace != 0x11) {
+                    if (mFaceKind != 0x11) {
                         ((CharacterBase *)(this))->SetFace(0x11);
                     }
                 } else {
-                    int face = mFace;
+                    int face = mFaceKind;
                     if (face != GetFace()) {
                         ((CharacterBase *)(this))->SetFace(GetFace());
                     }
@@ -4108,7 +4108,7 @@ void RoomCharacter::UpdateSoloStates1DTo3F() {
                 ((CharacterBase *)(this))->SetFace(8);
                 GetRandomPosInArea(&pos);
                 SetTarget(pos.x, 0, pos.z);
-                mHeadTurnFrames = 5;
+                mHeadTurnShift = 5;
                 mTimer = Random(100) + 0x1f4;
                 if (mState == 0x24) {
                     gSoundManager.StartSeqArcIfNotPlaying(mSoundHandle, 0x25, 4);
@@ -5103,7 +5103,7 @@ void RoomCharacter::UpdateSoloStates1DTo3F() {
                 yaw = 0;
             } else {
                 yaw = GetHeadYaw(-mWalkAngle, 0x3800);
-                mHeadTurnActive = TRUE;
+                mHeadTurn = TRUE;
             }
             SetHeadTurn(0, yaw, 0, 5);
             ((Character *)(this))->MoveAlongAngle();
@@ -5175,7 +5175,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 mTimer3 = 1000;
                 if (Random(100) < 30) {
                     SetHeadTurn(0, (0x28 - Random(0x50)) << 8, 0, 5);
-                    mHeadTurnActive = 1;
+                    mHeadTurn = 1;
                 }
             }
             mTimer--;
@@ -5354,7 +5354,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 SetState(0x45);
             }
         }
-        mHeldItems[0]->mRotX = mUnknown25D6;
+        mHeldItems[0]->mRotX = mHeadYawNow;
         mHeldItems[0]->SetJointOffset(GetJointMatrix(2), GetJointRotation(0), 0x666, 0, 0);
         break;
 
@@ -6048,7 +6048,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                     }
                 }
             }
-            if (mFace == 0x14 || mFace == 0x16) {
+            if (mFaceKind == 0x14 || mFaceKind == 0x16) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1A, 3, 10);
             } else {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1A, 7, 2);
@@ -6085,7 +6085,7 @@ void RoomCharacter::UpdateSoloStates40To67() {
                 FloorPos pos;
                 GetRandomPosInArea(&pos);
                 SetTargetOnFloor(pos.x, pos.z);
-                mHeadTurnFrames = 5;
+                mHeadTurnShift = 5;
                 mTimer = Random(200) + 800;
                 mTimer2 = 0;
             }
@@ -6290,7 +6290,7 @@ void RoomCharacter::UpdateSoloStates68To6F() {
                     mHeadIcon.SetMode(3);
                 }
                 if (mState == 0x6A) {
-                    mUnknown25D6 = Random(0x4000) - 0x2000;
+                    mHeadYawNow = Random(0x4000) - 0x2000;
                 } else {
                     SetHeadTurn(0, 0, 0, 5);
                 }
@@ -6926,7 +6926,7 @@ void RoomCharacter::UpdatePairStates70To92() {
                 FloorPos p;
                 GetRandomPosInArea(&p);
                 SetTarget(p.x, 0, p.z);
-                mHeadTurnFrames = 5;
+                mHeadTurnShift = 5;
                 mTimer = Random(100) + 500;
                 gSoundManager.StartSeqArcLimited(mSoundHandle, 0x25, 4, 2);
             }
@@ -7617,7 +7617,7 @@ void RoomCharacter::UpdatePairStates93ToB2() {
         } else if (mStep == 1) {
             if (mBlendFrames <= 0) {
                 mStep++;
-                SetHeadTurn(GetHeadPitchToPartner(0, 0x1800), mUnknown25D6, 0, 4);
+                SetHeadTurn(GetHeadPitchToPartner(0, 0x1800), mHeadYawNow, 0, 4);
             }
         } else {
             mTimer--;
@@ -7798,7 +7798,7 @@ void RoomCharacter::UpdateStatesB3ToC9() {
                     } else {
                         ((CharacterBase *)(this))->SetFace(10);
                     }
-                    ((CharacterBase *)(mPartner))->SetFace(mFace);
+                    ((CharacterBase *)(mPartner))->SetFace(mFaceKind);
                     u16 yaw;
                     if (Random(100) < 25) {
                         yaw = GetHeadYawTo(mPartner->GetFloorPos(), 0x2000);
@@ -7882,7 +7882,7 @@ void RoomCharacter::UpdateStatesB3ToC9() {
                     } else {
                         ((CharacterBase *)(this))->SetFace(10);
                     }
-                    ((CharacterBase *)(mPartner))->SetFace(mFace);
+                    ((CharacterBase *)(mPartner))->SetFace(mFaceKind);
                     u16 yaw;
                     if (Random(100) < 25) {
                         yaw = GetHeadYawTo(mPartner->GetFloorPos(), 0x2000);
@@ -8004,7 +8004,7 @@ void RoomCharacter::UpdateStatesB3ToC9() {
                 }
             }
         }
-        mHeldItems[0]->mRotX = mUnknown25D6;
+        mHeldItems[0]->mRotX = mHeadYawNow;
         mHeldItems[0]->SetJointOffset(GetJointMatrix(2), GetJointRotation(0), 0x666, 0, 0);
         break;
 
@@ -8089,7 +8089,7 @@ void RoomCharacter::UpdateStatesB3ToC9() {
                     }
                 }
             }
-            if (mFace == 0x14 || mFace == 0x16) {
+            if (mFaceKind == 0x14 || mFaceKind == 0x16) {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1a, 3, 10);
             } else {
                 ((Character *)(this))->PlaySoundAtAnimPhase(0, 1, 0x1a, 7, 2);
@@ -9060,7 +9060,7 @@ void RoomCharacter::UpdateStatesE1ToF1() {
                     } else {
                         ((CharacterBase *)(this))->SetFace(2);
                     }
-                    ((CharacterBase *)(mPartner))->SetFace(mFace);
+                    ((CharacterBase *)(mPartner))->SetFace(mFaceKind);
                 }
             }
             mTimer3--;
@@ -9096,7 +9096,7 @@ void RoomCharacter::UpdateStatesE1ToF1() {
                     } else {
                         ((CharacterBase *)(this))->SetFace(2);
                     }
-                    ((CharacterBase *)(mPartner))->SetFace(mFace);
+                    ((CharacterBase *)(mPartner))->SetFace(mFaceKind);
                 }
             }
             mTimer3--;
@@ -9750,7 +9750,7 @@ void RoomCharacter::UpdateStates106To10B() {
             if (StepWalkLooking(0x3800, 0, 0x199, 0x22, 6)) {
                 mStep++;
                 SetTargetFloorPos(gRoomPoints[6]);
-                mHeadTurnFrames = 3;
+                mHeadTurnShift = 3;
             }
         } else if (mStep == 2) {
             if (StepTurnLooking(0x100, 0, 0x3800)) {
@@ -9764,9 +9764,9 @@ void RoomCharacter::UpdateStates106To10B() {
             }
         } else if (mStep == 4) {
             mStep++;
-            mRoom->mParts.GetDoor()->SetMotion(1);
+            mRoom->mDoor.SetMotion(1);
         } else if (mStep == 5) {
-            if (mRoom->mParts.mDoor.mMotion == 0 && mBlendFrames <= 0) {
+            if (mRoom->mDoor.mMotion == 0 && mBlendFrames <= 0) {
                 mStep++;
                 RestartStepSound();
                 SetAnimation(RESOURCE_BCA0, GetWalkAnim());
@@ -9779,10 +9779,10 @@ void RoomCharacter::UpdateStates106To10B() {
             }
         } else if (mStep == 7) {
             mStep++;
-            mRoom->mParts.GetDoor()->SetMotion(2);
+            mRoom->mDoor.SetMotion(2);
         } else {
             StepWalkLooking(0x8000, 0, 0x28F, 0x28, 6);
-            if (mRoom->mParts.mDoor.mMotion == 0) {
+            if (mRoom->mDoor.mMotion == 0) {
                 mPresent = FALSE;
                 SetState(0);
                 mHeadIcon.SetMode(1);
@@ -9806,7 +9806,7 @@ void RoomCharacter::UpdateStates106To10B() {
         } else if (mStep == 1) {
             BOOL near = FALSE;
             if (IsWithinReach(mPartner->GetFloorPos(), 0x1800, 0x2333)) {
-                SetHeadTurn(0, GetHeadYawTo(GetTargetFloorPos(), 0x3800), 0, mHeadTurnFrames);
+                SetHeadTurn(0, GetHeadYawTo(GetTargetFloorPos(), 0x3800), 0, mHeadTurnShift);
                 ((Character *)(this))->SetWalkTargetReflected(mPartner->GetFloorPos());
                 near = TRUE;
             }
@@ -9818,16 +9818,16 @@ void RoomCharacter::UpdateStates106To10B() {
                     ((Character *)(this))->SetWalkTarget(data_ov074_0216d490);
                 }
                 mSavedTarget = GetTarget();
-                mHeadTurnFrames = 3;
+                mHeadTurnShift = 3;
             }
             ((Character *)(this))->SetWalkTarget(mSavedTarget);
             if (!near) {
-                SetHeadTurn(0, GetHeadYaw(-mWalkAngle, 0x3800), 0, mHeadTurnFrames);
+                SetHeadTurn(0, GetHeadYaw(-mWalkAngle, 0x3800), 0, mHeadTurnShift);
             }
         } else if (mStep == 2) {
             if (StepTurnLooking(0x100, 0, 0x3800)) {
                 mStep++;
-                SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                SetHeadTurn(0, 0, 0, mHeadTurnShift);
             }
         } else if (mStep == 3) {
             if (mPartner->mBlendFrames <= 0 && mBlendFrames <= 0) {
@@ -9867,14 +9867,14 @@ void RoomCharacter::UpdateStates106To10B() {
         } else if (mStep == 5) {
             if (StepTurnLooking(0x180, 4, 0x3800)) {
                 mStep++;
-                SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                SetHeadTurn(0, 0, 0, mHeadTurnShift);
             }
         } else if (mStep == 6) {
             mStep++;
             SetAnimation(RESOURCE_BCA0, GetIdleAnim());
-            mRoom->mParts.GetDoor()->SetMotion(1);
+            mRoom->mDoor.SetMotion(1);
         } else if (mStep == 7) {
-            if (mRoom->mParts.mDoor.mMotion == 0 && mBlendFrames <= 0) {
+            if (mRoom->mDoor.mMotion == 0 && mBlendFrames <= 0) {
                 mStep++;
                 RestartStepSound();
                 SetAnimation(RESOURCE_BCA0, GetWalkAnim());
@@ -9888,10 +9888,10 @@ void RoomCharacter::UpdateStates106To10B() {
         } else if (mStep == 9) {
             mStep++;
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
-            mRoom->mParts.GetDoor()->SetMotion(2);
+            mRoom->mDoor.SetMotion(2);
         } else {
             StepWalkLooking(0x8000, 0, 0x28F, 0x28, 6);
-            if (mRoom->mParts.mDoor.mMotion == 0) {
+            if (mRoom->mDoor.mMotion == 0) {
                 mPresent = FALSE;
                 SetState(0);
                 mHeadIcon.SetMode(1);
@@ -9988,7 +9988,7 @@ void RoomCharacter::UpdateStates106To10B() {
             }
             if (StepWalkLooking(0x3800, 0, 0x23D, 0x28, 5)) {
                 mStep++;
-                mHeadTurnFrames = 3;
+                mHeadTurnShift = 3;
             }
             ((Character *)(this))->SetWalkTarget(mSavedTarget);
         } else {
@@ -10018,20 +10018,20 @@ void RoomCharacter::UpdateStates10CTo112() {
                 SetPos(data_ov074_0216d4a8);
                 ((Character *)(this))->SetAngle(0x4000);
                 SetHeadTurn(0, 0, 0, 5);
-                mUnknown25D4 = 0;
-                mUnknown25D6 = 0;
-                mUnknown25D8 = 0;
+                mHeadPitchNow = 0;
+                mHeadYawNow = 0;
+                mHeadRollNow = 0;
                 SetHeldItemsShowState(1);
             }
         } else if (mStep == 1) {
             mStep++;
-            mRoom->mParts.GetDoor()->SetMotion(1);
+            mRoom->mDoor.SetMotion(1);
             SetTargetFloorPos(gRoomPoints[8]);
             ShowHeadIcon();
         } else if (mStep == 2) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x28, 6)) {
                 mStep++;
-                mRoom->mParts.GetDoor()->SetMotion(2);
+                mRoom->mDoor.SetMotion(2);
             }
         } else if (mStep == 3) {
             mStep++;
@@ -10040,7 +10040,7 @@ void RoomCharacter::UpdateStates10CTo112() {
             pos.z = MATH_Rand16(&gRandom, 16) * 0x385 - 0x1999;
             SetTargetFloorPos(pos);
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
-            mHeadTurnFrames = 5;
+            mHeadTurnShift = 5;
         } else {
             if (StepWalkLooking(0x2000, 0, 0x23D, 0x25, 6)) {
                 SetState(0x111);
@@ -10058,9 +10058,9 @@ void RoomCharacter::UpdateStates10CTo112() {
                 SetPos(data_ov074_0216d4c0);
                 ((Character *)(this))->SetAngle(0x4000);
                 SetHeadTurn(0, 0, 0, 5);
-                mUnknown25D4 = 0;
-                mUnknown25D6 = 0;
-                mUnknown25D8 = 0;
+                mHeadPitchNow = 0;
+                mHeadYawNow = 0;
+                mHeadRollNow = 0;
                 SetHeldItemsShowState(1);
             }
         }
@@ -10076,36 +10076,36 @@ void RoomCharacter::UpdateStates10CTo112() {
                 SetPos(data_ov074_0216d4cc);
                 ((Character *)(this))->SetAngle(0x4000);
                 SetHeadTurn(0, 0, 0, 5);
-                mUnknown25D4 = 0;
-                mUnknown25D6 = 0;
-                mUnknown25D8 = 0;
+                mHeadPitchNow = 0;
+                mHeadYawNow = 0;
+                mHeadRollNow = 0;
                 SetHeldItemsShowState(1);
             }
         } else if (mStep == 1) {
             mStep++;
-            mRoom->mParts.GetDoor()->SetMotion(1);
+            mRoom->mDoor.SetMotion(1);
             SetTargetFloorPos(gRoomPoints[9]);
             ShowHeadIcon();
         } else if (mStep == 2) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
                 SetTargetFloorPos(gRoomPoints[14]);
-                mHeadTurnFrames = 4;
+                mHeadTurnShift = 4;
             }
         } else if (mStep == 3) {
             if (StepWalkLooking(0x8000, 0, 0x23D, 0x33, 6)) {
                 mStep++;
                 SetTargetFloorPos(mPartner->GetFloorPos());
-                mRoom->mParts.GetDoor()->SetMotion(2);
-                mHeadTurnFrames = 3;
+                mRoom->mDoor.SetMotion(2);
+                mHeadTurnShift = 3;
             }
-            SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnFrames);
+            SetHeadTurn(0, GetHeadYawTo(mPartner->GetFloorPos(), 0x3800), 0, mHeadTurnShift);
         } else if (mStep == 4) {
             if (StepTurnLooking(0x120, 0, 0x3800)) {
                 if (mBlendFrames <= 0) {
                     mStep++;
                     SetAnimation(RESOURCE_BCA0, GetIdleAnim());
-                    SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                    SetHeadTurn(0, 0, 0, mHeadTurnShift);
                 }
             }
         } else if (mStep == 5) {
@@ -10199,7 +10199,7 @@ void RoomCharacter::UpdateStates10CTo112() {
                     mStep++;
                     SetAnimation(RESOURCE_BCA0, GetIdleAnim());
                 }
-                SetHeadTurn(0, 0, 0, mHeadTurnFrames);
+                SetHeadTurn(0, 0, 0, mHeadTurnShift);
             }
         } else {
             SetTargetFloorPos(mPartner->GetFloorPos());
@@ -10238,7 +10238,7 @@ void RoomCharacter::UpdateStates113To116() {
                     SetAnimation(RESOURCE_BCA0, 0x1A);
                 }
                 ((CharacterBase *)(this))->SetFace(GetFaceOfMood(0));
-                mHeadTurnActive = 1;
+                mHeadTurn = 1;
                 SetHeldItemsShowState(1);
                 ShowHeadIcon();
             }
@@ -10248,7 +10248,7 @@ void RoomCharacter::UpdateStates113To116() {
                 mTimer = 90;
                 StartSound3IfAnimOfGroup();
                 SetAnimation(RESOURCE_BCA0, 0);
-                if (SavedCharacter::IsLongAct2BTo2E(mEvent)) {
+                if (SavedCharacter::IsLongAct2BTo2E(mLongActState)) {
                     ((CharacterBase *)(this))->SetFace(5);
                 }
             }
@@ -10272,11 +10272,11 @@ void RoomCharacter::UpdateStates113To116() {
                 StartSound3IfAnimOfGroup();
                 RestartStepSound();
                 SetAnimation(RESOURCE_BCA0, 10);
-                mTargetAngle = mAngle - mUnknown25D6;
+                mTargetAngle = mAngle - mHeadYawNow;
                 ShowHeadIcon();
             }
         } else {
-            mHeadTurnActive = 1;
+            mHeadTurn = 1;
             ((Character *)(this))->PlaySoundOnce(1, 0, 0x1A);
             if (((Character *)(this))->TurnToTargetAngle(0xE0, 0x10)) {
                 SetState(0);
@@ -10290,7 +10290,7 @@ void RoomCharacter::UpdateStates113To116() {
         if (mStep == 0) {
             mStep++;
             if (mState == 0x115) {
-                if (mUnknown2AF0 < 0x1000) {
+                if (mWalkSpeedScale < 0x1000) {
                     mTimer = 40;
                 } else {
                     mTimer = 30;
@@ -10305,7 +10305,7 @@ void RoomCharacter::UpdateStates113To116() {
                 StartSound3IfAnimOfGroup();
                 SetAnimation(RESOURCE_BCA0, 7);
             }
-            mHeadTurnActive = 1;
+            mHeadTurn = 1;
             StepWalkLooking(0x8000, 0, 0x28F, 0x1D, 5);
         }
         LookAtCamera(2);
@@ -10342,7 +10342,7 @@ int RoomCharacter::StepWalkToRandomPos() {
             SetAnimation(RESOURCE_BCA0, 0x14);
             ((CharacterBase *)(this))->SetFace(8);
             SetHeldItemsShowState(1);
-            mHeadTurnFrames = 5;
+            mHeadTurnShift = 5;
             ShowHeadIcon();
         }
     } else {
@@ -10982,8 +10982,8 @@ void RoomCharacter::SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames) {
     mHeadPitch = pitch;
     mHeadYaw = yaw;
     mHeadRoll = roll;
-    mHeadTurnFrames = frames;
-    mHeadTurnActive = TRUE;
+    mHeadTurnShift = frames;
+    mHeadTurn = TRUE;
 }
 
 // @0x021691fc
@@ -11018,7 +11018,7 @@ BOOL RoomCharacter::StepWalkLooking(u32 lookLimit, int lookAngle, fx32 reach, in
     }
     ((Character *)(this))->MoveAlongAngle();
     if (lookLimit < 0x4000) {
-        SetHeadTurn(mHeadPitch, GetHeadYaw(lookAngle - mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+        SetHeadTurn(mHeadPitch, GetHeadYaw(lookAngle - mWalkAngle, lookLimit), mHeadRoll, mHeadTurnShift);
     }
     return arrived;
 }
@@ -11034,7 +11034,7 @@ BOOL RoomCharacter::StepTurnLooking(int speed, int accel, u32 lookLimit) {
         ((Character *)(this))->MoveAlongAngle();
     }
     if (lookLimit < 0x4000) {
-        SetHeadTurn(mHeadPitch, GetHeadYaw(-mWalkAngle, lookLimit), mHeadRoll, mHeadTurnFrames);
+        SetHeadTurn(mHeadPitch, GetHeadYaw(-mWalkAngle, lookLimit), mHeadRoll, mHeadTurnShift);
     }
     return facing;
 }
@@ -11091,7 +11091,7 @@ void RoomCharacter::PlaceHeldItemsInHands() {
 
 // @0x021696b8
 void RoomCharacter::PlaceHeldItemAtHead() {
-    mHeldItems[0]->mRotX = mUnknown25D6;
+    mHeldItems[0]->mRotX = mHeadYawNow;
     mHeldItems[0]->SetJointOffset(GetJointMatrix(0), GetJointRotation(0), 0xBD7, 0, 0);
 }
 
@@ -11184,9 +11184,9 @@ void RoomCharacter::UpdateOverrideState() {
             CharacterModel::MakeModel(mSlot, 0);
             ((Character *)(this))->UpdateBodyColors();
             ResetBody();
-            mUnknown25D4 = 0;
-            mUnknown25D6 = 0;
-            mUnknown25D8 = 0;
+            mHeadPitchNow = 0;
+            mHeadYawNow = 0;
+            mHeadRollNow = 0;
             mHeadPitch = 0;
             mHeadYaw = 0;
             mHeadRoll = 0;
@@ -11260,14 +11260,14 @@ void RoomCharacter::RefreshSpeechTexts() {
 // @0x02169c78
 void RoomCharacter::ConvertSpeechTexts() {
     wchar_t text[0x80];
-    if (mSpeechDefault[0] == L'\0') {
+    if (mMotto[0] == L'\0') {
         MI_CpuFill8(mSpeechTextDefault, 0, 4);
     } else {
-        MakeSpeechText(text, mSpeechDefault, sizeof(mSpeechTextDefault));
+        MakeSpeechText(text, mMotto, sizeof(mSpeechTextDefault));
         STD_ConvertStringUnicodeToSjis(mSpeechTextDefault, NULL, (const u16 *)text, NULL, NULL);
     }
     for (int i = 0; i < 4; i++) {
-        const wchar_t *source = mSpeechByMood[i];
+        const wchar_t *source = mMottos[i];
         char *dest = mSpeechTextByMood[i];
         if (source[0] == L'\0') {
             MI_CpuFill8(dest, 0, 4);
@@ -11472,7 +11472,7 @@ void HeldItem::StartPattern() {
 // @0x0216a278
 ApartmentRoom::ApartmentRoom() {
     SetState(STATE_IDLE);
-    mParts.SetState(3);
+    RoomModels::SetState(3);
     MI_CpuClear16(mNumberText, sizeof(mNumberText));
 }
 
@@ -11489,7 +11489,7 @@ void ApartmentRoom::SetNextStyle(u16 style) {
 // @0x0216a2dc
 void ApartmentRoom::SetStyle(u16 style) {
     mNextStyle = style;
-    mStyle = style;
+    mId = style;
 }
 
 // @0x0216a2ec
@@ -11520,16 +11520,16 @@ void ApartmentRoom::UpdateState() {
         break;
     case STATE_RESET:
         SetState(STATE_IDLE);
-        mParts.SetState(0);
-        mParts.GetDoor()->SetMotion(0);
-        mParts.SetVisible(0);
+        RoomModels::SetState(0);
+        mDoor.SetMotion(0);
+        RoomModels::SetVisible(0);
         ReleaseAll();
         UpdateNumberText();
         break;
     case STATE_CHANGE_STYLE:
         if (mStep == 0) {
             mStep++;
-            mStyle = mNextStyle;
+            mId = mNextStyle;
             MountModel(0);
         } else if (mStep == 1) {
             if (ArchiveManager_IsIdle(&gArchiveManager)) {
@@ -11563,9 +11563,9 @@ RoomCamera::RoomCamera() {
 
 // @0x0216a4b4
 RoomCamera::~RoomCamera() {
-    VEC_Set(&gSceneMemory.mCamera.mPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
-    VEC_Set(&gSceneMemory.mCamera.mTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
-    gSceneMemory.mCamera.SetOrbit(mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
+    VEC_Set(&gSceneMemory.mCameraPosition, mCamera->mPosition.x, mCamera->mPosition.y, mCamera->mPosition.z);
+    VEC_Set(&gSceneMemory.mCameraTarget, mCamera->mTarget.x, mCamera->mTarget.y, mCamera->mTarget.z);
+    SetMemoryOrbit(&gSceneMemory, mOrbit.x >> FX32_SHIFT, mOrbit.y >> FX32_SHIFT, mOrbit.z >> FX32_SHIFT);
 }
 
 // @0x0216a514
@@ -11644,7 +11644,7 @@ void RoomCamera::Update() {
         if (mOrbit.x > 0x3000000) {
             mOrbit.x = 0x3000000;
         }
-        mRoom->mParts.SetState(mRoom->mParts.mState);
+        mRoom->RoomModels::SetState(mRoom->RoomModels::mState);
         break;
     case STATE_TURNED:
         SetState(STATE_WAIT, 1140);
@@ -11842,7 +11842,7 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
     for (int i = 0; i < 2; i++) {
         mLights[i] = &data_021227cc[i];
         func_0202a96c(mLights[i]);
-        mLights[i]->mColor = data_020f72f8[mRoom->mStyle].mLightColor;
+        mLights[i]->mColor = data_020f72f8[mRoom->mId].mLightColor;
     }
 }
 
@@ -11850,7 +11850,7 @@ void RoomLight::Init(RoomCamera *camera, ApartmentRoom *room) {
 void RoomLight::Update() {
     switch (mState) {
     case STATE_SET_STYLE_COLOR:
-        SetColor(data_020f72f8[mRoom->mStyle].mLightColor);
+        SetColor(data_020f72f8[mRoom->mId].mLightColor);
         SetState(STATE_IDLE);
         break;
     case STATE_FADE_STYLE_COLOR:
@@ -11862,10 +11862,10 @@ void RoomLight::Update() {
             int r, g, b;
             u16 color;
             mFade += 0x80;
-            func_02028b98(data_020f72f8[mRoom->mStyle].mLightColor, &targetR, &targetG, &targetB);
+            func_02028b98(data_020f72f8[mRoom->mId].mLightColor, &targetR, &targetG, &targetB);
             BlendColor(&targetR, &targetG, &targetB, &r, &g, &b);
             if (r >= targetR || g >= targetG || b >= targetB) {
-                color = data_020f72f8[mRoom->mStyle].mLightColor;
+                color = data_020f72f8[mRoom->mId].mLightColor;
                 SetState(STATE_IDLE);
             } else {
                 color = r | (g << 5) | (b << 10);

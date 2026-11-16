@@ -4,8 +4,7 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "FloorPos.h"
-#include "MainProgram.h"
+#include "character/FloorPos.h"
 #include "Room.h"
 #include "TutorialRoomCharacter.h"
 
@@ -17,6 +16,8 @@
 //
 // The name is descriptive, not the original: no name of this class survives in the ROM. The prefix tells it from
 // overlay 74's: the program is linked as one, so the two cannot have one name.
+struct Camera;
+
 class TutorialRoomCamera {
 public:
     enum Mode {
@@ -42,10 +43,7 @@ public:
         VecFx32 result = { v.x >> shift, v.y >> shift, v.z >> shift };
         return result;
     }
-    void ApplyToCamera() {
-        mCamera->mPosition = mPosition;
-        mCamera->mTarget = mTarget;
-    }
+    void ApplyToCamera(); // Inline, in MainProgram.h (where the main program's Camera is)
     // Where the camera is, on the floor: the characters turn to it
     FloorPos GetFloorPos() {
         FloorPos pos;

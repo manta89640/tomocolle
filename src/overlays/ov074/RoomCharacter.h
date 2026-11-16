@@ -4,12 +4,11 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "CharacterCalls.h"
+#include "character/Character.h"
+#include "HeadIcon.h"
 #include "sound/SoundManager.h"
 #include "voice/TtsPlayer.h"
 
-#include "Character.h"
-#include "FloorPos.h"
 #include "HeldItem.h"
 #include "Model.h"
 #include "Room.h"
@@ -78,6 +77,10 @@ static inline int Random(int max) {
 // The name is descriptive, not the original: no name of this class survives in the ROM.
 class RoomCharacter : public Character {
 public:
+    // A joint's matrices of the body, as the stand-in CharacterModel had them (inline)
+    MtxFx33 *GetJointRotation(int joint) { return &mJointRotations[joint]; }
+    MtxFx43 *GetJointMatrix(int joint) { return &mJointMatrices[joint]; }
+
     // mOverrideState: what is done with the character's model while its own states do not run
     enum OverrideState {
         OVERRIDE_NONE,
@@ -166,7 +169,7 @@ public:
     BOOL GetAngleAroundPartner(u16 *angle, int margin);
     // angle + mAngle, limited by func_02090c78
     u16 GetHeadYaw(u16 angle, int limit);
-    // Sets mHeadPitch, mHeadYaw, mHeadRoll, mHeadTurnFrames and mHeadTurnActive
+    // Sets mHeadPitch, mHeadYaw, mHeadRoll, mHeadTurnShift and mHeadTurn
     void SetHeadTurn(u16 pitch, u16 yaw, u16 roll, u8 frames);
     // The head's yaw towards a point, limited
     u16 GetHeadYawTo(FloorPos pos, int limit);
@@ -313,7 +316,7 @@ public:
     PositionedNode *GetNode(int joint) { return (PositionedNode *)&mJointMatrices[joint]; }
 
     // GetFlagOfPartner (0x021686f4) as the states have it inline
-    u8 GetFlagOfPartnerInline() { return mRelation[mPartner->mIndex]; }
+    u8 GetFlagOfPartnerInline() { return mRelationRank[mPartner->mIndex]; }
 
     // UpdateEvent's match depends on the character being the object of this one
     void SetHeadIconMode(int mode) { mHeadIcon.SetMode(mode); }
@@ -334,9 +337,9 @@ public:
             mHeadIcon.Restart();
         }
     }
-    // Icon 9, or icon 3 for the characters whose record has mUnknown0246 set
+    // Icon 9, or icon 3 for the characters whose record has mUnknown246 set
     void ShowHeadIconOfRecord() {
-        if (mUnknown0246 == 0) {
+        if (mUnknown246 == 0) {
             ShowHeadIconOfId(9);
         } else {
             ShowHeadIconOfId(3);
@@ -391,7 +394,7 @@ public:
     /* 0x2BEC */ char mSpeechTextDefault[0x88]; // The saved character's texts in Shift JIS
     /* 0x2C74 */ char mSpeechTextByMood[4][0x48];
     /* 0x2D94 */ u8 mUnknown2D94;
-    /* 0x2D95 */ u8 mPrevEvent;            // mEvent before SetEvent
+    /* 0x2D95 */ u8 mPrevEvent;            // mLongActState before SetEvent
     /* 0x2D96 */ s8 mSubStep;              // Step of the Step... functions that the states call
     /* 0x2D97 */ s8 mSubSubStep;
 }; // 0x2D98

@@ -4,6 +4,8 @@
 #include <nitro.h>
 #include <nnsys.h>
 
+#include "HeadIcon.h"
+#include "Scene.h"
 #include "sound/SoundManager.h"
 #include "resident/ResidentLife.h"
 #include "voice/TtsPlayer.h"
@@ -31,44 +33,6 @@
 // ---------------------------------------------------------------------------------------------------------------
 // The main program's scene base class (its constructor is inlined into each scene's; Scene::Run, 0x0204af20, runs a scene).
 // Not decompiled: this is what the runner shows of it.
-class Scene {
-public:
-    // What mPhase counts through
-    enum Phase {
-        PHASE_START_LOADING, // StartLoading() is called once
-        PHASE_INIT,          // When the archives are loaded: Init(), Draw()
-        PHASE_FADE_IN,       // Draw() while the screens fade in
-        PHASE_RUN,           // Update(), Draw()
-        PHASE_FADE_OUT,      // Draw() while the screens fade out (the scene manager sets this to leave the scene)
-        PHASE_EXIT,          // When the archive loader is idle: Exit()
-        PHASE_DONE,          // The scene manager deletes the scene
-    };
-
-    virtual void StartLoading() = 0;
-    virtual void Init() = 0;
-    virtual void Update() = 0;
-    virtual void Draw() = 0;
-    virtual void Exit() = 0;
-    virtual ~Scene() {}
-
-    /* 0x04 */ int mSceneId;
-    /* 0x08 */ int mPhase;
-    /* 0x0C */ BOOL mSkipFade;
-};
-
-// ---------------------------------------------------------------------------------------------------------------
-// STAND-INS for main-program classes that are not decompiled and not in the overlay's shared headers.
-
-// The main program's particle system for one effect file (func_02080e80 constructs it, func_02080e98 loads it).
-struct ParticleSystem {
-    /* 0x0 */ void *mManager; // func_0207b138 updates it
-}; // 0x4
-
-
-// The scene's speech player: a class of its own derived from TtsPlayer, with nothing added. Measured: the scene's
-// constructor (main program, 0x0203ed10) constructs the member with TtsPlayer's base-object constructor (C2) where
-// every other scene calls the complete one, and the scene's destructor destroys it with the base-object destructor.
-// The name is descriptive.
 class RoomTtsPlayer : public TtsPlayer {};
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -107,6 +71,8 @@ public:
         EVENT_VISITOR_LEAVES,   // One of two goes out (states 0x107 and 0x109) until one is left
         EVENT_AFTER_DISTRIBUTION, // Coming from the character distribution scene
     };
+
+    RoomScene(int sceneId); // 0x0203ED10, the main program's (src/scene/SceneManager.cpp)
 
     virtual void StartLoading();
     virtual void Init();
@@ -181,8 +147,8 @@ public:
     /* 0x0692C */ RoomLight mLight;
     /* 0x06948 */ ApartmentFront mFront;
     /* 0x06B48 */ SkyBackground mSky;
-    /* 0x06BC0 */ ParticleSystem mParticles;
-    /* 0x06BC4 */ HeadIcon mIcon[1];      // A mark shown between the two characters (the class of their head icons)
+    /* 0x06BC0 */ RoomParticleSystem mParticles;
+    /* 0x06BC4 */ RoomHeadIcon mIcon[1];      // A mark shown between the two characters (the class of their head icons)
     /* 0x06C04 */ NamePanel mNamePanel;
     /* 0x07898 */ TouchButton mButtons[2];
     /* 0x07A30 */ MessageText mButtonLabel[1];

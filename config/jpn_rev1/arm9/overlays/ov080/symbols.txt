@@ -1,9 +1,9 @@
-func_ov080_02149a40 kind:function(arm,size=0xb4) addr:0x02149a40
-func_ov080_02149af4 kind:function(arm,size=0xcb0) addr:0x02149af4
-func_ov080_0214a7a4 kind:function(arm,size=0x734) addr:0x0214a7a4
+_ZN9VoteScene12StartLoadingEv kind:function(arm,size=0xb4) addr:0x02149a40
+_ZN9VoteScene4InitEv kind:function(arm,size=0xcb0) addr:0x02149af4
+_ZN9VoteScene6UpdateEv kind:function(arm,size=0x734) addr:0x0214a7a4
 func_ov080_0214aed8 kind:function(arm,size=0x8b4) addr:0x0214aed8
-func_ov080_0214b78c kind:function(arm,size=0x130) addr:0x0214b78c
-func_ov080_0214b8bc kind:function(arm,size=0x84) addr:0x0214b8bc
+_ZN9VoteScene4DrawEv kind:function(arm,size=0x130) addr:0x0214b78c
+_ZN9VoteScene4ExitEv kind:function(arm,size=0x84) addr:0x0214b8bc
 func_ov080_0214b940 kind:function(arm,size=0xb4) addr:0x0214b940
 func_ov080_0214b9f4 kind:function(arm,size=0xb4) addr:0x0214b9f4
 func_ov080_0214baa8 kind:function(arm,size=0x16c) addr:0x0214baa8
@@ -40,8 +40,8 @@ func_ov080_0214c898 kind:function(arm,size=0x44) addr:0x0214c898
 func_ov080_0214c8dc kind:function(arm,size=0x50) addr:0x0214c8dc
 func_ov080_0214c92c kind:function(arm,size=0x150) addr:0x0214c92c
 func_ov080_0214ca7c kind:function(arm,size=0x20) addr:0x0214ca7c
-func_ov080_0214ca9c kind:function(arm,size=0x80) addr:0x0214ca9c
-func_ov080_0214cb1c kind:function(arm,size=0x88) addr:0x0214cb1c
+_ZN9VoteSceneD1Ev kind:function(arm,size=0x80) addr:0x0214ca9c
+_ZN9VoteSceneD0Ev kind:function(arm,size=0x88) addr:0x0214cb1c
 data_ov080_0214cba8 kind:data(any) addr:0x0214cba8
 data_ov080_0214cbae kind:data(any) addr:0x0214cbae
 data_ov080_0214cbb4 kind:data(any) addr:0x0214cbb4
@@ -79,7 +79,7 @@ data_ov080_0214cf10 kind:data(any) addr:0x0214cf10
 data_ov080_0214cf20 kind:data(any) addr:0x0214cf20
 data_ov080_0214cf30 kind:data(any) addr:0x0214cf30
 data_ov080_0214cf40 kind:data(any) addr:0x0214cf40
-data_ov080_0214cf58 kind:data(any) addr:0x0214cf58 ambiguous
+_ZTV9VoteScene kind:data(any) addr:0x0214cf50
 gStr_M00_ov080 kind:data(any) addr:0x0214cf74
 gStr_Scn_Scene_SceneVote_LZ_bin kind:data(any) addr:0x0214cf78
 gStr_TMJ_ov080 kind:data(any) addr:0x0214cf94

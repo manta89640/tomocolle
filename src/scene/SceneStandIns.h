@@ -39,9 +39,6 @@
 
 
 
-SCENE_STAND_IN(RoomScene, 0x1D7C8); // _ZN9RoomSceneC1Ei
-
-SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ei
 
 
 
@@ -51,38 +48,28 @@ SCENE_STAND_IN(TutorialRoomScene, 0x134E8); // _ZN17TutorialRoomSceneC1Ei
 
 
 
-SCENE_STAND_IN(VoteScene, 0x3CD5C); // 0x020400f0
 
 
 
 
-SCENE_STAND_IN(TushinScene, 0x3F0B4); // _ZN11TushinSceneC1Ei
+
 
 SCENE_STAND_IN(Scene2F, 0x474B0); // 0x02041124
 
 SCENE_STAND_IN(Scene35, 0x46D4C); // 0x02041a04
 
-SCENE_STAND_IN(ChangeRoomScene, 0x17BF8); // 0x02041f80
 
-SCENE_STAND_IN(TestNg55Scene, 0x1C3D8); // 0x02042254
 
-SCENE_STAND_IN(Scene40, 0x6F908); // 0x020428e0
 
-SCENE_STAND_IN(WriteSongScene, 0x81224); // 0x02044c80
 
-SCENE_STAND_IN(Scene67, 0x3D940); // 0x02045504
 
 SCENE_STAND_IN(Scene68, 0x47854); // 0x02045720
 
-SCENE_STAND_IN(Scene7F, 0x22B8); // 0x0204657c
 
-SCENE_STAND_IN(TestNg129Scene, 0x56F0); // 0x020474c0
 
-SCENE_STAND_IN(WeddingScene, 0x1CEE0); // _ZN12WeddingSceneC1Ei
 
 SCENE_STAND_IN(ItemTradeScene, 0x28E0C); // 0x02048b78
 
-SCENE_STAND_IN(SceneB4, 0x202E8); // 0x020492e0
 
 
 #endif // SCENE_SCENESTANDINS_H

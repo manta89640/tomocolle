@@ -7,12 +7,7 @@
 class RoomCamera;
 class ApartmentRoom;
 
-// One of the main program's 3D lights (data_021227cc is an array of them; func_0202a96c resets one).
-struct Light {
-    /* 0x0 */ VecFx16 mDirection;
-    /* 0x6 */ u16 mColor;
-    /* 0x8 */ BOOL mEnabled;
-}; // 0xC
+struct Light; // The main program's lights (MainProgram.h)
 
 // The lighting of the apartment room: two lights that keep their direction relative to the camera, and whose
 // colour fades between the room style's own and the room's current one.

@@ -155,7 +155,7 @@ _ZTT20TutorialTimedMessage kind:data(any) addr:0x02150dc0
 _ZTV13ObjTextCanvas__10TextCanvas_at_1424 kind:data(any) addr:0x02150dd8 local
 _ZTV12BgTextCanvas__10TextCanvas_at_1088 kind:data(any) addr:0x02150de4 local
 _ZTV21TutorialApartmentRoom kind:data(any) addr:0x02150df0
-data_ov073_02150e1c kind:data(any) addr:0x02150e1c ambiguous
+_ZTV17TutorialRoomScene kind:data(any) addr:0x02150e14
 gStr_MT0_ov073 kind:data(any) addr:0x02150e38
 gStr_MT1 kind:data(any) addr:0x02150e3c
 gStr_BIC_ov073 kind:data(any) addr:0x02150e40

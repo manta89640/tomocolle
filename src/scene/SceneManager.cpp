@@ -44,6 +44,8 @@ struct PaletteLoader {
 #include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov006/Scene0F.h"
 #include "../overlays/ov077/Scene17.h"
+#include "../overlays/ov074/RoomScene.h"
+#include "../overlays/ov073/TutorialRoomScene.h"
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
 #include "../overlays/ov009/TestNg20Scene.h"
@@ -52,6 +54,7 @@ struct PaletteLoader {
 #include "../overlays/ov068/Scene1E.h"
 #include "../overlays/ov070/RightJobScene.h"
 #include "../overlays/ov071/RightJob2Scene.h"
+#include "../overlays/ov080/VoteScene.h"
 #include "MiiListMenuScene.h"
 #include "G3SpriteTestScene.h"
 #include "MiiListScene.h"
@@ -60,6 +63,7 @@ struct PaletteLoader {
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
 #include "MapModelsScene.h"
 #include "../overlays/ov079/RankingScene.h"
+#include "../overlays/ov109/TushinScene.h"
 #include "../overlays/ov010/Scene2B.h"
 #include "../overlays/ov069/SavePlayScene.h"
 #include "InteriorViewScene.h"
@@ -69,12 +73,15 @@ struct PaletteLoader {
 #include "../overlays/ov012/Scene34.h"
 #include "../overlays/ov013/TestNg48Scene.h"
 #include "../overlays/ov014/TestNg50Scene.h"
+#include "../overlays/ov086/ChangeRoomScene.h"
 #include "../overlays/ov106/PreStartScene.h"
+#include "../overlays/ov015/TestNg55Scene.h"
 #include "../overlays/ov016/Scene3B.h"
 #include "../overlays/ov017/Scene3C.h"
 #include "../overlays/ov018/TestNg62Scene.h"
 #include "../overlays/ov019/TestNg63Scene.h"
 #include "../overlays/ov020/Scene3F.h"
+#include "../overlays/ov075/Scene40.h"
 #include "../overlays/ov021/TestNg69Scene.h"
 #include "../overlays/ov076/MiiEditScene.h"
 #include "../overlays/ov022/Scene45.h"
@@ -95,10 +102,12 @@ struct PaletteLoader {
 #include "../overlays/ov035/Scene58.h"
 #include "../overlays/ov036/TestNg107Scene.h"
 #include "../overlays/ov090/RomanceScene.h"
+#include "../overlays/ov092/WriteSongScene.h"
 #include "../overlays/ov065/Scene5D.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
 #include "../overlays/ov108/TutorialStepScene.h"
+#include "../overlays/ov088/Scene67.h"
 #include "../overlays/ov093/Scene72.h"
 #include "../overlays/ov094/Scene74.h"
 #include "../overlays/ov037/Scene75.h"
@@ -107,6 +116,7 @@ struct PaletteLoader {
 #include "../overlays/ov040/Scene7A.h"
 #include "../overlays/ov041/Scene7B.h"
 #include "../overlays/ov042/TestNg119Scene.h"
+#include "../overlays/ov066/Scene7F.h"
 #include "../overlays/ov095/AffinityScene.h"
 #include "../overlays/ov043/Scene81.h"
 #include "../overlays/ov044/TestNg121Scene.h"
@@ -116,6 +126,7 @@ struct PaletteLoader {
 #include "../overlays/ov048/Scene8B.h"
 #include "../overlays/ov049/Scene8C.h"
 #include "../overlays/ov050/Scene8D.h"
+#include "../overlays/ov051/TestNg129Scene.h"
 #include "../overlays/ov052/Scene8F.h"
 #include "../overlays/ov053/Scene91.h"
 #include "../overlays/ov054/TestNg133Scene.h"
@@ -124,11 +135,13 @@ struct PaletteLoader {
 #include "../overlays/ov057/TestNg137Scene.h"
 #include "../overlays/ov058/TestNg138Scene.h"
 #include "../overlays/ov059/TestNg139Scene.h"
+#include "../overlays/ov096/WeddingScene.h"
 #include "../overlays/ov098/OptionScene.h"
 #include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov101/SceneAF.h"
 #include "../overlays/ov102/SceneB2.h"
 #include "../overlays/ov103/SceneB3.h"
+#include "../overlays/ov100/AlbumScene.h"
 #include "../overlays/ov104/SceneB5.h"
 #include "../overlays/ov060/SceneB7.h"
 #include "../overlays/ov061/TestNg143Scene.h"
@@ -789,7 +802,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xB4:
         SetSoundGroup(2);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(100));
-        return new SceneB4(sceneId);
+        return new AlbumScene(sceneId);
     case 0xB5:
         SetSoundGroup(66);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(104));
@@ -880,6 +893,26 @@ Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
 Scene18::Scene18(int sceneId) : Scene(sceneId) {}
 
+// Scenes 0x11 to 0x15, overlay 74
+RoomScene::RoomScene(int sceneId) : Scene(sceneId) {
+    mResidentCount = 0;
+    mScanIndex = 0;
+    mEventTimer = 0;
+    mIdleFrames = 0;
+    SetFadeState(1);
+    mEncounterPending = FALSE;
+    mEventFrames = 0;
+    MI_CpuFill8(mResidents, 0xFF, sizeof(mResidents));
+}
+
+// Scene 0x6B, overlay 73 (its constructor comes here, after RoomScene's: the tutorial's room is built from the
+// apartment's classes)
+TutorialRoomScene::TutorialRoomScene(int sceneId) : Scene(sceneId) {
+    mResidentCount = 0;
+    SetFadeState(1);
+    mTouchStep = 0;
+}
+
 // (RoomScene, TutorialRoomScene)
 
 Scene19::Scene19(int sceneId) : Scene(sceneId) {}
@@ -898,6 +931,9 @@ RightJobScene::RightJobScene(int sceneId) : Scene(sceneId) {}
 
 RightJob2Scene::RightJob2Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x23, overlay 80
+VoteScene::VoteScene(int sceneId) : Scene(sceneId) {}
+
 // (VoteScene)
 
 MiiListMenuScene::MiiListMenuScene(int sceneId) : Scene(sceneId) {}
@@ -910,6 +946,9 @@ MiiListScene::MiiListScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x27
 MapModelsScene::MapModelsScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x29, overlay 109
+TushinScene::TushinScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x2A, overlay 79
 RankingScene::RankingScene(int sceneId) : Scene(sceneId) {}
@@ -951,10 +990,16 @@ TestNg48Scene::TestNg48Scene(int sceneId) : Scene(sceneId) {}
 // Scene 0x37, overlay 14
 TestNg50Scene::TestNg50Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x38, overlay 86
+ChangeRoomScene::ChangeRoomScene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x39, overlay 106
 PreStartScene::PreStartScene(int sceneId) : Scene(sceneId) {
     mResidentCount = 0;
 }
+
+// Scene 0x3A, overlay 15
+TestNg55Scene::TestNg55Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x3B, overlay 16
 Scene3B::Scene3B(int sceneId) : Scene(sceneId) {}
@@ -970,6 +1015,9 @@ TestNg63Scene::TestNg63Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x3F, overlay 20
 Scene3F::Scene3F(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x40 and 0x6C, overlay 75
+Scene40::Scene40(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x41, overlay 21
 TestNg69Scene::TestNg69Scene(int sceneId) : Scene(sceneId) {}
@@ -1031,6 +1079,9 @@ TestNg107Scene::TestNg107Scene(int sceneId) : Scene(sceneId) {}
 // Scene 0x5A, overlay 90
 RomanceScene::RomanceScene(int sceneId) : Scene(sceneId) {}
 
+// Scenes 0x5B, 0x5C and 0xB0, overlay 92
+WriteSongScene::WriteSongScene(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x5D, overlay 65
 Scene5D::Scene5D(int sceneId) : Scene(sceneId) {}
 
@@ -1039,6 +1090,9 @@ CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x67, overlay 88
+Scene67::Scene67(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x69, overlay 108
 TutorialStepScene::TutorialStepScene(int sceneId) : Scene(sceneId) {}
@@ -1067,6 +1121,13 @@ Scene7B::Scene7B(int sceneId) : Scene(sceneId) {}
 // Scene 0x7C, overlay 42
 TestNg119Scene::TestNg119Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x7F, overlay 66
+Scene7F::Scene7F(int sceneId) : Scene(sceneId) {
+    mUnknown22B4[0] = 0;
+    mUnknown22B4[1] = 0;
+    mUnknown22B0 = 0;
+}
+
 // Scene 0x80, overlay 95
 AffinityScene::AffinityScene(int sceneId) : Scene(sceneId) {}
 
@@ -1094,6 +1155,9 @@ Scene8C::Scene8C(int sceneId) : Scene(sceneId) {}
 // Scene 0x8D, overlay 50
 Scene8D::Scene8D(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x8E, overlay 51
+TestNg129Scene::TestNg129Scene(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0x8F and 0x90, overlay 52
 Scene8F::Scene8F(int sceneId) : Scene(sceneId) {}
 
@@ -1120,6 +1184,9 @@ TestNg138Scene::TestNg138Scene(int sceneId) : Scene(sceneId) {}
 // Scene 0xAA, overlay 59
 TestNg139Scene::TestNg139Scene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0xAB, overlay 96
+WeddingScene::WeddingScene(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0xAC and 0xAD, overlay 98
 OptionScene::OptionScene(int sceneId) : Scene(sceneId) {}
 
@@ -1134,6 +1201,9 @@ SceneB2::SceneB2(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB3, overlay 103
 SceneB3::SceneB3(int sceneId) : Scene(sceneId) {}
+
+// Scene 0xB4, overlay 100
+AlbumScene::AlbumScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB5, overlay 104
 SceneB5::SceneB5(int sceneId) : Scene(sceneId) {}

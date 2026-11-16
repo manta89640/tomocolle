@@ -4,11 +4,10 @@
 #include <nitro.h>
 #include <nnsys.h>
 
-#include "CharacterCalls.h"
+#include "character/Character.h"
+#include "HeadIcon.h"
 #include "sound/SoundManager.h"
 
-#include "Character.h"
-#include "FloorPos.h"
 #include "Model.h"
 #include "Room.h"
 
@@ -79,7 +78,7 @@ public:
     }
     VecFx32 GetPos() const { return mPos; }
     void SetPos(VecFx32 pos) { mPos = pos; }
-    u8 GetRelationToPartner() { return mRelation[mPartner->mIndex]; }
+    u8 GetRelationToPartner() { return mRelationRank[mPartner->mIndex]; }
     BOOL IsWithinReach(TutorialRoomCharacter *other, fx32 reach, fx32 maxReach) {
         FloorPos pos = other->GetFloorPos();
         return ((Character *)(this))->IsPointWithinReach(pos.x, pos.z, reach, maxReach);

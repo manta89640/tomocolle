@@ -5,7 +5,15 @@
 #include "text/TextUtil.h"
 #include <nnsys.h>
 
+#include "Model.h"
 #include "Scene.h"
+#include "SceneManager.h"
+#include "SceneMemory.h"
+#include "ScreenControl.h"
+#include "character/Character.h"
+#include "item/Item.h"
+#include "room/Room.h"
+#include "text/SpeechWindow.h"
 #include "sound/SoundManager.h"
 #include "text/MessageFile.h"
 #include "text/MessageText.h"
@@ -18,9 +26,8 @@
 // marriage, and the second hands the player a wedding album, which goes into the inventory. When the scene comes
 // back from the album (scene 0xC0), they say goodbye and leave on their honeymoon.
 //
-// The names are descriptive, not the original: no name of these classes survives in the ROM. The main program's
-// classes below are STAND-INS (not decompiled): their sizes and the fields that this overlay's code touches. Most of
-// them are the same as overlay 74's stand-ins, whose headers say more.
+// The names are descriptive, not the original: no name of these classes survives in the ROM. What it uses of the
+// main program that has no shared header is in MainProgram.h, beside it.
 
 // Resource types, as the files have them (the four letters in memory order)
 #define RESOURCE_BCA0 0x30414342 // Joint animation
@@ -28,304 +35,10 @@
 class WeddingCharacter;
 class WeddingScene;
 
-// --- Models (main program 0x02029b04 to 0x0202b008) -----------------------------------------------------------
-
-class AnimModel;
-struct ModelAnimation;
-
 extern "C" {
-void func_020267f4(void *block); // Frees a block of the main heap
-ModelAnimation *AnimModel_FindAnimation(AnimModel *model, u32 resType, int id);
-}
-
-// One animation of a model, as AnimModel_FindAnimation finds it.
-struct ModelAnimation {
-    /* 0x00 */ u32 mUnknown00;
-    /* 0x04 */ int mId;
-    /* 0x08 */ u32 mResType;
-    /* 0x0C */ NNSG3dAnmObj *mAnmObj;
-    /* 0x10 */ fx32 mSpeed;    // Frames of the animation per frame of the game
-    /* 0x14 */ BOOL mFinished; // Set when a play-once animation reaches its end
-    /* 0x18 */ BOOL mPlayOnce;
-}; // 0x1C
-
-// A model of the library with its position, rotation and scale.
-class Model {
-public:
-    virtual ~Model() {
-        if (mResource != NULL) {
-            func_020267f4(mResource);
-        }
-    }
-    virtual void Load(int resourceId, int unk); // func_02029b04
-    virtual void LoadByName(int, const char *); // 0x02029bd4 (resource id, name): Load() with the index of the model of that name
-    virtual void Draw();                        // func_02029df4
-
-    void SetPosition(VecFx32 position) {
-        mPosition.x = position.x;
-        mPosition.y = position.y;
-        mPosition.z = position.z;
-    }
-
-    /* 0x04 */ void *mResourceSet; // What ResourceSet_FindIndexByName and func_02029660 look the animations up in
-    /* 0x08 */ int mUnknown08;
-    /* 0x0C */ NNSG3dResMdl *mResMdl;
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ NNSG3dRenderObj mRenderObj;
-    /* 0x68 */ MtxFx33 mRotation;
-    /* 0x8C */ VecFx32 mScale;
-    /* 0x98 */ VecFx32 mPosition;
-    /* 0xA4 */ u16 mRotX;
-    /* 0xA6 */ u16 mRotY;
-    /* 0xA8 */ u16 mRotZ;
-    /* 0xAC */ void *mResource; // A block of the main heap that the model owns
-    /* 0xB0 */ BOOL mVisible;
-}; // 0xB4
-
-// A model with animations.
-class AnimModel : public Model {
-public:
-    virtual ~AnimModel() { RemoveAnims(); }
-    virtual void Draw(); // func_0202a0e4
-
-    void RemoveAnims(); // func_0202a464
-
-    /* 0xB4 */ void *mAnims[8];
-    /* 0xD4 */ int mAnimCount;
-    /* 0xD8 */ fx32 mUnknownD8;
-    /* 0xDC */ int mUnknownDC;
-}; // 0xE0
-
-extern "C" {
-// The models' resource table (0x1C bytes per resource id)
-extern u8 data_021223e4[];
-void *func_0202ad04(void *resources, int resourceId, const char *archiveName, int unk); // Binds an archive's files to an id
-void ModelResources_SetModel(void *resources, int resourceId, const char *modelPath); // Binds a model file to an id
-void func_0202aecc(void *resources, int resourceId); // Releases an id's model and texture
 // The id of an animation of a resource set by its name
 int ResourceSet_FindIndexByName(void *resourceSet, u32 resType, const char *name);
-// Gives a resource set the animations of an archive
-void func_02029660(void *resourceSet, u32 resType, void *archive);
 }
-
-// --- The room (main program 0x020a3c68 to 0x020a5ca0) ---------------------------------------------------------
-
-// The room's door. Not a class derived from the model: its destructor does not set a virtual table before it takes
-// the model's render callback away.
-class RoomDoorModel {
-public:
-    ~RoomDoorModel() { NNS_G3dRenderObjResetCallBack(&mModel.mRenderObj); }
-
-    /* 0x000 */ AnimModel mModel;
-    /* 0x0E0 */ u8 mUnknownE0[0x78];
-}; // 0x158
-
-class RoomPart {
-public:
-    ~RoomPart();
-
-    /* 0x000 */ u8 mUnknown00[0x4C];
-    /* 0x04C */ AnimModel mModel;
-    /* 0x12C */ u8 mUnknown12C[8];
-}; // 0x134
-
-class RoomModels {
-public:
-    void Draw();
-    void SetState(int state);
-    void SetVisible(BOOL visible);
-    void SetAlpha(int alpha); // 0 to 31
-
-    /* 0x000 */ u8 mUnknown000[0x4C];
-    /* 0x04C */ RoomDoorModel mDoor;
-    /* 0x1A4 */ RoomPart mParts[6];
-    /* 0x8DC */ u8 mUnknown8DC[0x18];
-}; // 0x8F4
-
-// The styles a room can have, 0x54 bytes each
-struct RoomStyle {
-    /* 0x00 */ u8 mUnknown00[8];
-    /* 0x08 */ u16 mLightColor;
-    /* 0x0A */ u8 mUnknown0A[0x4A];
-}; // 0x54
-
-// The interior a room shows (include/room/Room.h has the main program's classes)
-class InteriorItem {
-public:
-    virtual u32 GetPrice();
-    GXRgb GetLightColor(); // The room's light colour now
-
-    /* 0x004 */ u16 mStyle; // Index into data_020f72f8
-    /* 0x008 */ u8 mUnknown008[0xC];
-}; // 0x14
-
-class Room : public InteriorItem {
-public:
-    void Mount(const char *archiveName, int unk);
-    void MountModel(int unk);
-    void Load(int resourceId);
-    void Reload(int resourceId);
-    void MountAll(const char *archiveName, int unk);
-    void MountPartModels(int unk);
-    void LoadParts(int resourceId);
-    void ReloadParts(int resourceId);
-    void ReleaseAll();
-    void Update();
-    void SetScale(fx32 scale);
-
-    /* 0x014 */ RoomModels mParts;
-}; // 0x908
-
-extern "C" {
-extern const RoomStyle data_020f72f8[];
-}
-
-// --- Characters (main program 0x0208eb18 to 0x0209d898) -------------------------------------------------------
-
-// One saved character (a resident): the 0x2C0 bytes that the save data holds for each.
-struct SavedCharacter {
-    SavedCharacter();
-    s8 GetPersonality(); // Computes its personality (0 to 15) from its answers
-
-    /* 0x0000 */ u8 mUnknown0000[0x54];
-    /* 0x0054 */ u32 mUnknown0054Bits0 : 4;
-    /*        */ u32 mInterior : 7;   // Which interior its room has
-    /* 0x0058 */ u8 mUnknown0058[0x1CE];
-    /* 0x0226 */ u8 mUnknown0226;     // With mUnknown0227, an entry of data_02114d78 that says how long the
-    /* 0x0227 */ u8 mUnknown0227;     // honeymoon lasts
-    /* 0x0228 */ u8 mUnknown0228[8];
-    /* 0x0230 */ s64 mAwayUntil;      // A time in seconds, as the clock's: the wedding sets it to when the honeymoon
-                                      // ends
-    /* 0x0238 */ u8 mUnknown0238[2];
-    /* 0x023A */ u8 mMoodLocked;      // Overlay 74's name; the wedding sets it to 3 for the honeymoon
-    /* 0x023B */ u8 mUnknown023B[0x69];
-    /* 0x02A4 */ u16 mIndex;          // Which of the saved characters this is
-    /* 0x02A6 */ u8 mUnknown02A6[0x16];
-    /* 0x02BC */ s8 mPersonality;     // What GetPersonality computes
-}; // 0x2C0
-
-// The character with its Mii face (include/character/Character.h has the class).
-struct CharacterBase : public SavedCharacter {
-    void MakeFace();
-    void SetFace(int kind);
-    void LipSync(const char *phoneme, int face); // Opens the mouth (face 7) while the phoneme is a vowel or 'w'
-    BOOL ClampHeadAngle(u16 *angle, int limit);  // Clamps an angle of the head to +-limit
-
-    /* 0x02C0 */ u8 mUnknown02C0[0x2250];
-    /* 0x2510 */ BOOL mHeadTurnActive; // The head is turning to mHeadPitch/mHeadYaw
-    /* 0x2514 */ u8 mUnknown2514[0xC0];
-    /* 0x25D4 */ u16 mHeadPitchNow;    // Where the head is turned now
-    /* 0x25D6 */ u16 mHeadYawNow;
-    /* 0x25D8 */ u16 mHeadRollNow;
-    /* 0x25DA */ u16 mHeadPitch;       // Where it turns to
-    /* 0x25DC */ u16 mHeadYaw;
-    /* 0x25DE */ u16 mHeadRoll;
-    /* 0x25E0 */ u8 mUnknown25E0[4];
-}; // 0x25E4
-
-// The model of a character with its animations and joints (func_0208eb18 constructs it).
-class CharacterModel : public AnimModel {
-public:
-    // The matrix of one of the model's joints, and its rotation
-    void GetJointMatrices(int joint, MtxFx43 *matrix, MtxFx33 *rotation);
-    // The position of one of the model's joints (0 is the head, 1 and 2 the hands)
-    VecFx32 GetJointPosition(int joint);
-
-    /* 0x0E0 */ VecFx32 mPos;
-    /* 0x0EC */ u8 mUnknown0EC[0x18];
-    /* 0x104 */ int mAnimId; // The current 'BCA0' animation
-    /* 0x108 */ u8 mUnknown108[0x354];
-    /* 0x45C */ BOOL mUnknown45C; // Set while a character holds the item out
-    /* 0x460 */ u8 mUnknown460[0x44];
-    /* 0x4A4 */ BOOL mUnknown4A4; // Set once a character's animations are bound
-    /* 0x4A8 */ u8 mUnknown4A8[0x14];
-}; // 0x4BC
-
-
-// The main program's character class that the scenes derive theirs from (0x2B18 bytes; include/character/Character.h
-// has the class, whose second base, CharacterModel, is mModel here).
-class Character : public CharacterBase {
-public:
-    void Init(int resourceId, int unk, u32 defaultMii);
-    void SetArchive(const char *archiveName);
-    void Update();
-    void UpdateSpeedScales();
-    void Draw();
-    void SetAnimation(u32 resType, int id);
-    void BlendToAnimation(u32 resType, int id);
-    void SetAngle(u16 angle);
-    void UpdateBodyScale();
-    void UpdateAnimSpeed();
-    void UpdateBodyColors();
-
-    /* 0x25E4 */ CharacterModel mModel;
-    /* 0x2AA0 */ u8 mUnknown2AA0[0xC];
-    /* 0x2AAC */ char mArchiveName[4];  // Name its archive is mounted under (Character::SetArchive sets both)
-    /* 0x2AB0 */ char mArchivePath[0x1C]; // and the archive's path
-    /* 0x2ACC */ char mModelPath[0x20];   // The model in the archive
-    /* 0x2AEC */ u8 mUnknown2AEC[0x1E];
-    /* 0x2B0A */ u16 mAngle;            // The way the character faces
-    /* 0x2B0C */ u8 mUnknown2B0C[0xC];
-}; // 0x2B18
-
-extern "C" {
-void func_0209decc(Character *character);
-void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech engine the character's voice
-void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as a string
-}
-
-// --- Other main-program things --------------------------------------------------------------------------------
-
-// The saved game
-struct SavedGame;
-extern "C" {
-extern SavedGame gGameData;
-void func_0202c264(SavedGame *game, int index, SavedCharacter *character); // Copies a saved character out
-void func_0202c28c(SavedGame *game, int index, SavedCharacter *character); // and back in
-}
-
-// An item: the base class of an item in the inventory and of the item shown by an item model.
-class Item {
-public:
-    virtual void UnknownVirtual0();
-
-    BOOL Add(int count); // _ZN4Item3AddEi (include/item/Item.h has the main program's classes)
-
-    /* 0x04 */ u16 mId;
-    /* 0x08 */ BOOL mOwned;
-    /* 0x0C */ int mUnknown0C;
-    /* 0x10 */ int mCount;
-}; // 0x14
-
-class InventoryItem : public Item {}; // 0x14
-
-// The player's items: what the save data holds of each kind, loaded and saved together.
-class Inventory {
-public:
-    void Load();
-    void Save();
-
-    /* 0x0000 */ int mCount;
-    /* 0x0004 */ InventoryItem mItems[255];
-    /* 0x13F0 */ InventoryItem *mList[255];
-}; // 0x17EC
-
-// The 3D model of an item (constructors _ZN9ItemModelC1Ev, _ZN9ItemModelC2Ev)
-class ItemModel : public AnimModel {
-public:
-    void SetItem(const char *archiveName, int item);
-    void LoadModel(int resourceId);                
-    void LoadAnimation(int resourceId);            
-    void ResetScale();        
-    void SetScale(fx32 scale);
-
-    /* 0x0E0 */ Item mItem;
-    /* 0x0F4 */ int mResourceId;
-    /* 0x0F8 */ char mArchiveName[4];
-    /* 0x0FC */ char mArchivePath[0x1E];
-    /* 0x11A */ char mModelPath[0xE];
-    /* 0x128 */ fx32 mBaseScale;
-}; // 0x12C
 
 // The item the wedding gives.
 class WeddingGiftModel : public ItemModel {
@@ -334,211 +47,8 @@ public:
     void ChangeItem(int item);
 }; // 0x12C
 
-// The main program's camera
-struct Camera {
-    void SetPosition(VecFx32 position) {
-        mPosition.x = position.x;
-        mPosition.y = position.y;
-        mPosition.z = position.z;
-    }
-    void SetTarget(VecFx32 target) {
-        mTarget.x = target.x;
-        mTarget.y = target.y;
-        mTarget.z = target.z;
-    }
-
-    /* 0x00 */ u8 mUnknown00[0x14];
-    /* 0x14 */ VecFx32 mPosition;
-    /* 0x20 */ VecFx32 mEye;
-    /* 0x2C */ VecFx32 mTarget;
-    /* 0x38 */ u8 mUnknown38[0xC];
-    /* 0x44 */ u16 mAngleX;
-    /* 0x46 */ u16 mAngleY;
-    /* 0x48 */ u16 mAngleZ;
-};
-
-// One of the main program's 3D lights
-struct Light {
-    /* 0x0 */ u8 mUnknown0[6];
-    /* 0x6 */ u16 mColor;
-    /* 0x8 */ u8 mUnknown8[4];
-}; // 0xC
-
-// What the scenes remember for each other
-struct SceneMemory {
-    /* 0x00 */ VecFx32 mCameraPosition;
-    /* 0x0C */ VecFx32 mCameraTarget;
-    /* 0x18 */ u8 mUnknown18[8];
-    /* 0x20 */ u8 mCharacters[2]; // The characters a scene shows: the wedding's come back to it from scene 0xC0
-};
-
-struct ScreenControl {
-    void Set(u32 planes) {
-        mPlanes = planes;
-        mPlanesChanged = TRUE;
-    }
-
-    /* 0x00 */ u32 mPlanes;
-    /* 0x04 */ u8 mUnknown04[0x40];
-    /* 0x44 */ int mUnknown44;
-    /* 0x48 */ int mUnknown48;
-    /* 0x4C */ u8 mUnknown4C[0x88];
-    /* 0xD4 */ BOOL mPlanesChanged;
-    /* 0xD8 */ u8 mUnknownD8[0x10];
-    /* 0xE8 */ BOOL mUnknown44Changed;
-    /* 0xEC */ BOOL mUnknown48Changed;
-};
-
-struct SceneManager {
-    void RequestScene(int sceneId); // Asks for the next scene
-
-    /* 0x0 */ Scene *mScene;
-    /* 0x4 */ int mNextSceneId;
-    /* 0x8 */ int mPreviousSceneId;
-};
-
-struct ArchiveLoader;
-struct CellLoader;
-struct PaletteLoader;
-struct ScreenLoader;
-struct CharLoader;
-struct Renderer3d;
-
-extern "C" {
-extern Camera data_02122764;
-extern Light data_021227cc[];
-extern SceneMemory gSceneMemory;
-extern ScreenControl data_0211d604;
-extern SceneManager gSceneManager;
-extern ArchiveLoader gArchiveManager;
-extern CellLoader gObjResourceManager;
-extern PaletteLoader data_021213b8;
-extern ScreenLoader data_02121834;
-extern CharLoader gVramTransferQueue;
-extern Renderer3d data_02122824;
-extern void *data_02123440;
-// By SavedCharacter::mUnknown0227, a table of these by mUnknown0226
-struct EventInfo {
-    /* 0x0 */ u32 mUnknown0;
-    /* 0x4 */ u32 mUnknown4 : 16;
-    /*     */ u32 mMinutes : 12; // How long it lasts
-    /*     */ u32 mUnknown4Bits28 : 4;
-    /* 0x8 */ u32 mUnknown8;
-}; // 0xC
-extern const EventInfo *data_02114d78[];
-
-void func_0202a640(Camera *camera);
-void func_0202a748(Camera *camera);
-void func_0202a96c(Light *light);
-void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
-void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
-void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
-void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
-void func_0202b0e8(Renderer3d *renderer);
-int func_02027290(CellLoader *loader, const char *cellName, int plane, int a);
-void *func_02027534(PaletteLoader *loader, const char *name, int plane, int a, int b, int c);
-void func_020278f8(PaletteLoader *loader, int a, int b);
-void *func_02027d7c(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e);
-void func_02028280(ScreenLoader *loader, int plane, int priority);
-void func_02028108(ScreenLoader *loader, int plane, int x);
-void func_02028154(ScreenLoader *loader, int plane, int y);
-void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b, int c, int d);
-void func_02023ee0(ScreenControl *screens, int a, int b, int c, int d);
-void func_02023f4c(ScreenControl *screens, int planes, int level);
-s64 Clock_GetSeconds(void *clock);
-}
-
-
-// How long a character's honeymoon lasts
-inline u32 GetHoneymoonMinutes(SavedCharacter *character) {
-    return data_02114d78[character->mUnknown0227][character->mUnknown0226].mMinutes;
-}
-
-
-// --- Vector helpers -----------------------------------------------------------------------------------------------
-
-// A point on the floor: the x and z of a VecFx32 (as overlay 74's FloorPos: a plain structure, passed by value).
-struct FloorPos {
-    /* 0x0 */ fx32 x;
-    /* 0x4 */ fx32 z;
-};
-
-inline FloorPos operator-(FloorPos a, FloorPos b) {
-    FloorPos result;
-    result.x = a.x - b.x;
-    result.z = a.z - b.z;
-    return result;
-}
-
-static inline fx32 LengthSq(const VecFx32 *v) {
-    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
-}
-
-// The length of (x, z), by the hardware square root
-static inline fx32 SqrtXZ(fx32 x, fx32 z) {
-    fx64 t = (fx64)x * x + (fx64)z * z;
-    CP_SetSqrt64((u64)(t << 2));
-    return ((s32)CP_GetSqrtResult32() + 1) >> 1;
-}
-
-// (x, z) made one long, as VEC_Normalize does it
-static inline FloorPos NormalizeXZ(fx32 x, fx32 z) {
-    FloorPos result;
-    fx64 t = (fx64)x * x + (fx64)z * z;
-    CP_SetSqrt64((u64)(t << 2));
-    CP_SetDiv64_64(1LL << (FX32_SHIFT + FX32_SHIFT + FX64C_SHIFT), (u64)t);
-    s32 sqrt = (s32)CP_GetSqrtResult32();
-    t = CP_GetDivResult64();
-    t = t * sqrt;
-    result.x = (fx32)((t * x + (1LL << (32 + FX32_SHIFT))) >> (32 + FX32_SHIFT + 1));
-    result.z = (fx32)((t * z + (1LL << (32 + FX32_SHIFT))) >> (32 + FX32_SHIFT + 1));
-    return result;
-}
-
-static inline fx32 Clamp(fx32 value, fx32 min, fx32 max) {
-    if (value > max) {
-        value = max;
-    } else if (value < min) {
-        value = min;
-    }
-    return value;
-}
-
-static inline void CopyVec(VecFx32 *dst, const VecFx32 *src) {
-    dst->x = src->x;
-    dst->y = src->y;
-    dst->z = src->z;
-}
-
-// The shift is unsigned: as an int, WeddingCamera::Approach loads it after the vector's x, not before
-static inline VecFx32 Shift(const VecFx32 &v, u32 shift) {
-    VecFx32 result;
-    result.x = v.x >> shift;
-    result.y = v.y >> shift;
-    result.z = v.z >> shift;
-    return result;
-}
-
-// --- The speech window (main program 0x02039660 to 0x020398e4) -------------------------------------------------
-
-class SpeechWindow {
-public:
-    int Init(int charOffset, MessageFile *file, u32 planes, int screen, TtsPlayer *player, BOOL tall);
-    void Show(u32 message, int mode, int frames);
-    void Hide();
-    void Update();
-    void SetStringArg(const wchar_t *text, int index);
-    void Draw();
-
-    /* 0x000 */ MessageFile *mMessageFile;
-    /* 0x004 */ TtsPlayer *mTtsPlayer;
-    /* 0x008 */ MessageText mText;
-    /* 0x5F8 */ int mMode;
-    /* 0x5FC */ int mFrames;
-    /* 0x600 */ int mFrame;
-    /* 0x604 */ u32 mPlanes;
-    /* 0x608 */ BOOL mShown;
-}; // 0x60C
+struct Camera; // The main program's camera and lights (MainProgram.h)
+struct Light;
 
 // --- This overlay's classes --------------------------------------------------------------------------------------
 
@@ -577,8 +87,6 @@ public:
         ARG_ITEM,      // The name of the item with that number
     };
 
-    ~WeddingCharacter(); // func_02048748, the main program's
-
     void Init(WeddingContext *context);
     void Update();
     void UpdateState();
@@ -597,26 +105,26 @@ public:
     u16 GetHeadYawTo(VecFx32 *target);
 
     void PlayAnimation(const char *name, BOOL once) {
-        Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName(mModel.mResourceSet, RESOURCE_BCA0, name));
-        AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, mModel.mAnimId)->mPlayOnce = once;
+        Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
+        AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId)->mPlayOnce = once;
     }
-    VecFx32 GetPos() { return mModel.mPos; }
+    VecFx32 GetPos() { return mPos; }
     void SetPos(VecFx32 pos) {
-        mModel.mPos.x = pos.x;
-        mModel.mPos.y = pos.y;
-        mModel.mPos.z = pos.z;
+        mPos.x = pos.x;
+        mPos.y = pos.y;
+        mPos.z = pos.z;
     }
     FloorPos GetFloorPos() {
         FloorPos pos;
-        pos.x = mModel.mPos.x;
-        pos.z = mModel.mPos.z;
+        pos.x = mPos.x;
+        pos.z = mPos.z;
         return pos;
     }
     u16 AngleTo(FloorPos target) {
         FloorPos delta = target - GetFloorPos();
         return FX_Atan2Idx(delta.z, delta.x);
     }
-    ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mModel, RESOURCE_BCA0, mModel.mAnimId); }
+    ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
 
     /* 0x2B18 */ int mCurrentState;
     /* 0x2B1C */ int mState;

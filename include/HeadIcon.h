@@ -53,4 +53,10 @@ struct HeadIcon {
     /* 0x3E */ s16 mIconId;           // Which icon: Reload creates the one of this id
 }; // 0x40
 
+// The apartment scenes' (overlays 73 and 74) particle system and head icons: classes derived from ParticleSystem and
+// HeadIcon with nothing of their own, which the scenes' constructors build with the bases' C2 (members are built
+// with C1)
+struct RoomParticleSystem : public ParticleSystem {};
+struct RoomHeadIcon : public HeadIcon {};
+
 #endif // HEADICON_H
