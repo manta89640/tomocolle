@@ -238,6 +238,8 @@ with loops that are neither rotated nor strength-reduced sit between ordinary on
 `#pragma optimization_level 2` around the function (then `#pragma optimization_level reset`). Nothing at the
 default level gives that shape: not `volatile`, narrower or unsigned counters, other loop forms, or the `opt_*`
 pragmas.
+NFL's `func_0206d4f8` has that shape and also reloads a list link that level 2 alone keeps in a register: it matches
+with `#pragma opt_common_subs off` added (reset it after the function too: `optimization_level reset` does not).
 
 Other per-function settings found the same way (overlay 109):
 
@@ -358,6 +360,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   the two the other pair of registers from `for (i = k, ...)` over a copy; and a byte swap
   (`t = cp[i]; cp[i] = cp[7 - i]; cp[7 - i] = t;`) through a `char *` declared in a block of its own keeps both
   accesses indexed, where one through `(char *)&num` is turned into a post-incremented pointer (`double2hex`).
+- Search the declaration order by script rather than by hand: move one declaration line at a time to every other
+  place, keep the best, repeat. NFL's mesh functions (`func_0206b0d8`) went from 18 differing instructions to none
+  in four rounds; what mattered was declaring the inner loop's index variables at function scope, in an order no
+  guess had tried. Keep arrays and address-taken structures where they are: they decide the stack slots.
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
   original spills them.
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
@@ -396,6 +402,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - `for (;;) { if (!cond) break; n++; }` where `while (cond) n++` gets rotated (the save screens). An `i < 100` loop
   that is rotated at level 2 is a `do { } while`.
 - Identical statements in an if and its else are merged into one: `++n` in one and `n++` in the other keeps both.
+
+**Independent statements scheduled in another order**
+- Try every order of the independent statements at the top of the function by script: one of the 24 orders of four
+  statements matched NFL's `func_0206c2f8` exactly, where the others moved loads and kept a value the original
+  leaves in r0.
 
 **Constants and arithmetic**
 - `MATH_Rand16(...) & 3` where `% 4` adds sign fix-ups; an inline `Rand(int max)` around `MATH_Rand16` gives the
@@ -437,6 +448,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A constructor emitted as C1 and C2 (no virtual base) has its string literals twice, the C2 copy first; the link
   strips C2 and its strings. `name_unit_data.py` lays both copies out, so name the strings of the C1 copy
   (`Keyboard.cpp`: the second nine `@` numbers).
+- dsd puts a symbol on every address the code loads, so a table whose fields' addresses are formed apart (NFL's
+  colour tables and planes, `data_020b676c[j][i].unkC`) shows as one object per field, and a source that indexes the
+  table refers to the first with an addend. Remove the inner symbols from `symbols.txt` and write the references in
+  `relocs.txt` as `to:<table> add:<offset>`; `check_relocs.py` is then clean.
 - `tools/strings.py` has named some number tables as text (`gText_Ri`, `gStr_F`, ...). A "string" in a table is
   data; rename it when the code shows what it is.
 - MSL's files are best checked against the archive's own object: `tools/compare_object.py build/.../x.o

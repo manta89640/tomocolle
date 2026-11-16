@@ -1023,6 +1023,34 @@ records it reads have the Wii's layout: the birthday check `func_020731e0` reads
 from bits 5-9 of the first halfword and checks them against a table of days a month, and the favourite colour in
 bits 1-4 against 11, as `RFLCharData` places them.
 
+Measured from the functions of `0x0206AAEC`-`0x0206EBB0` (the display-list builder, matched but for four):
+
+- **`func_0206d4f8(index, mii, unk)` builds a face's two display lists.** It rejects a Mii whose fields are out of
+  range (`func_0206d040`, a bound for each of 37 fields) or whose birthday is invalid, takes the object of `index`
+  (`func_02073060`), gives it VRAM from the work area's bases at 0x8 and 0xC (0x1A10 bytes of texture and 0x130 of
+  palette per index, 0x6880 of texture in mode 7, the mode being the work area's 0x68), runs the seven part functions
+  of the table at `0x02112140` on a context on its stack, and makes the display list at 0x2A4 of the object (0x1AE0
+  bytes) from eight mesh functions and the one at 0x1D84 (0x494 bytes) from `func_020715ac`. `func_0206db98` sends
+  them to the geometry FIFO under the object's matrices (0x2C, a 4x3, and 0x5C, a 3x3 loaded as the vector matrix).
+- **The resource is a table of 20 categories** (`func_0206cf6c(category, index)`: two halfwords, 20 offsets, then in
+  a category a count, a halfword and the offsets of its items). A mesh item is vertices and normals (three halfwords
+  each), texture coordinates (two), then strips of index triples. The meshes read are: 0 the beard (by its type), 4
+  the face (by the face type; it also holds the three points the other meshes are placed at), 6, 9 and 0x12 the hair
+  (by the hair type), 7 the glasses, 0xF and 0x10 the nose.
+- **An object keeps the fields it was built from** (0x180, 18 halfwords) and a value and a state for each of 21
+  textures (0x1A4 and 0x228, 12 bytes each): the part functions compare the Mii with the kept fields and set a state
+  of 0 where a texture must be redrawn, 7 where there is none; 1 to 6 are states in progress.
+- **Hair types** 5, 7, 0x18, 0x1D, 0x2A, 0x35, 0x3A, 0x45 and 0x47 have a texture of their own, and 0x22 and 0x39 are
+  drawn in the favourite colour; hair flip mirrors the hair meshes with a scale of -1 on the X axis.
+- **The colour tables** at `0x020B6558`, `0x020B65A0`, `0x020B65E8`, `0x020B6630`, `0x020B6678` and `0x020B66D8` are
+  arrays of {r, g, b} words, and `0x020B676C` four planes of {a, b, c, d} (`func_0206ebb0` takes a part's Z from the
+  plane of its quadrant). The symbols that sat on their inner words were fields, now addends in `relocs.txt`.
+
+Measured on the compiler: `func_0206d4f8` matches only under `#pragma optimization_level 2` with
+`#pragma opt_common_subs off`, and the three hair meshes (`func_0206b740`, `func_0206bb24`, `func_0206bfa4`) have
+level 2's unrotated loops but evaluate their calls' arguments from the last to the first, which nothing tried
+reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build, other `-proc`).
+
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
 it is 2.0 SP2p2, the game SP2p3), and its function names.
