@@ -24,7 +24,7 @@ public:
         STATE_IDLE,
         STATE_SET_STYLE_COLOR,  // Take the colour of the room's style at once
         STATE_FADE_STYLE_COLOR, // Fade to it
-        STATE_SET_ROOM_COLOR,   // Take the colour the room gives (func_020a4d90) at once
+        STATE_SET_ROOM_COLOR,   // Take the colour the room gives (InteriorItem::GetLightColor) at once
         STATE_FADE_ROOM_COLOR,  // Fade to it
     };
 
