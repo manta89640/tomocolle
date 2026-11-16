@@ -339,6 +339,95 @@ void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fm
     G3CS_TexPlttBase(&dl, plttAddr, fmt);
 }
 
+extern const u8 data_020b689c[];
+extern const u8 data_020b6884[];
+
+#pragma optimization_level 2
+#pragma opt_common_subs off
+void func_0207183c(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+
+    idx = (u16)(((obj->unk86 + data_020b689c[obj->unk88] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    y = -(obj->unk84 * 0x10E1 - 0x22490);
+    type = obj->unk8A;
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk8C + data_020b6884[obj->unk8E] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+#pragma optimization_level 2
+#pragma opt_common_subs off
+void func_02071cdc(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+
+    idx = (u16)(((obj->unk86 + data_020b689c[obj->unk88] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    y = -(obj->unk84 * 0x10E1 - 0x22490);
+    type = obj->unk8A;
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk8C + data_020b6884[obj->unk8E] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[1].unk0, obj->unk24);
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
 int func_0206ddb8(NFLMakeCtx *ctx);
 int func_0206e650(NFLMakeCtx *ctx);
 void func_0206e724(NFLMakeCtx *ctx);

@@ -90,7 +90,8 @@ typedef struct NFLObj {
     u8 unk0[0x10];
     u32 unk10; // a texture address (func_0207183c)
     u32 unk14; // a palette address
-    u8 unk18[0x20 - 0x18];
+    u32 unk18; // a texture address (func_02072694)
+    u32 unk1C; // a palette address
     u32 unk20; // a texture address
     u32 unk24; // a palette address
     u8 unk28[0x84 - 0x28];
@@ -139,7 +140,7 @@ typedef struct NFLWork {
     u32 unk4;
     u32 unk8;
     u32 unkC;
-    u8 unk10[0x58 - 0x10];
+    NFLWorkEntry unk10[6]; // unk0 is a texture address (func_02071a78 and its siblings)
     u32 unk58; // the state of a linear congruential generator, seeded with the time in seconds
     u32 unk5C; // its multiplier
     u32 unk60; // its increment
