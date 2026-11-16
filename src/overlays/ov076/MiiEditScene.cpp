@@ -172,7 +172,6 @@ void func_0208fefc(CharacterBase *character);
 void func_0208ff94(CharacterBase *character, void *a, void *b);
 void func_02090214(CharacterBase *character);
 void func_0207b258(ParticleSystem *system, void *a);
-extern u8 data_02142438[];
 }
 
 void MiiEditScene::StartLoading() {
@@ -674,7 +673,7 @@ void MiiEditScene::Draw() {
     }
     func_0202ad84(data_021223e4);
     NNS_G3dGlbFlushP();
-    func_0207b258(mParticles, data_02142438);
+    func_0207b258(mParticles, &NNS_G3dGlb.cameraMtx);
     for (u16 i = 0; i < 6; i++) {
         func_02031d7c(&mButtons[i]);
     }

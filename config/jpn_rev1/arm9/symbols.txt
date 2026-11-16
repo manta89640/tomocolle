@@ -25,8 +25,8 @@ init_cp15 kind:function(arm,size=0xe8) addr:0x02000ab0
 OSi_ReferSymbol kind:function(arm,size=0x4) addr:0x02000b98
 BuildInfo kind:data(any) addr:0x02000b9c
 ShttsMiddlewareTag kind:data(any) addr:0x02000bd8
-main kind:function(arm,size=0x56c) addr:0x02000bf0
-func_0200115c kind:function(arm,size=0x30) addr:0x0200115c
+NitroMain kind:function(arm,size=0x56c) addr:0x02000bf0
+NitroStartUp kind:function(arm,size=0x30) addr:0x0200115c
 func_0200118c kind:function(arm,size=0x1c) addr:0x0200118c
 func_020011a8 kind:function(thumb,size=0xc) addr:0x020011a8
 func_020011b4 kind:function(thumb,size=0xc) addr:0x020011b4
@@ -874,7 +874,7 @@ _s32_div_f kind:function(arm,size=0x20c) addr:0x02020df0
 _u32_div_f kind:function(arm,size=0x1e4) addr:0x02020ffc
 .L_02021004 kind:label(arm) addr:0x02021004
 _ddiv kind:function(arm,size=0x544) addr:0x020211f8
-func_0202173c kind:function(arm,size=0x4) addr:0x0202173c
+_fp_init kind:function(arm,size=0x4) addr:0x0202173c
 func_02021740 kind:function(arm,size=0x14) addr:0x02021740
 func_02021754 kind:function(arm,size=0x14) addr:0x02021754
 func_02021768 kind:function(arm,size=0x10) addr:0x02021768
@@ -896,7 +896,7 @@ func_02022914 kind:function(arm,size=0x1dc) addr:0x02022914
 func_02022af0 kind:function(arm,size=0x5c) addr:0x02022af0
 func_02022b4c kind:function(arm,size=0xec) addr:0x02022b4c
 func_02022c38 kind:function(arm,size=0x28) addr:0x02022c38
-func_02022c60 kind:function(arm,size=0x2c) addr:0x02022c60
+__call_static_initializers kind:function(arm,size=0x2c) addr:0x02022c60
 __destroy_global_chain kind:function(arm,size=0x44) addr:0x02022c8c
 func_02022cd0 kind:function(arm,size=0x48) addr:0x02022cd0
 func_02022d18 kind:function(arm,size=0x14) addr:0x02022d18
@@ -4355,15 +4355,10 @@ data_020b6398 kind:data(any) addr:0x020b6398
 NNSiG2dBGCNTTable kind:data(any) addr:0x020b63d8
 transFunc$8501 kind:data(any) addr:0x020b63f8 local
 data_020b6488 kind:data(any) addr:0x020b6488
-data_020b64b8 kind:data(any) addr:0x020b64b8
-data_020b64d8 kind:data(any) addr:0x020b64d8
-data_020b64d9 kind:data(any) addr:0x020b64d9
-data_020b64da kind:data(any) addr:0x020b64da
-data_020b64db kind:data(any) addr:0x020b64db
-data_020b64fc kind:data(any) addr:0x020b64fc
-data_020b64fd kind:data(any) addr:0x020b64fd
-data_020b64fe kind:data(any) addr:0x020b64fe
-data_020b64ff kind:data(any) addr:0x020b64ff
+matColorMask_$9839 kind:data(any) addr:0x020b64b8 local
+pivotUtil_$9944 kind:data(any) addr:0x020b64d8 local
+pivotUtil_ kind:data(any) addr:0x020b64fc local
+data_020b6520 kind:data(any) addr:0x020b6520
 sNFLFaceGXColors kind:data(any) addr:0x020b6524
 sNFLHairGXColors kind:data(any) addr:0x020b6530
 sNFLFavoriteGXColors kind:data(any) addr:0x020b6540
@@ -4853,7 +4848,8 @@ OSi_IrqCallbackInfoIndex kind:data(any) addr:0x020fc654
 OSi_ConsoleTypeCache kind:data(any) addr:0x020fc664
 gStr_ColonSolidus kind:data(any) addr:0x020fc668
 gStr_rom kind:data(any) addr:0x020fc66c
-fsi_digest_key_ptr kind:data(any) addr:0x020fc670
+fsi_digest_key_ptr kind:data(any) addr:0x020fc670 local
+fsi_digest_key_len kind:data(any) addr:0x020fc674 local
 gStr_a_2 kind:data(any) addr:0x020fc678
 gText_ReverseSolidusCombiningSemiVoiced kind:data(any) addr:0x020fc67c
 gStr_abc kind:data(any) addr:0x020fc6b0
@@ -5458,27 +5454,17 @@ NNS_G3dFuncAnmMatNsBmaDefault kind:data(any) addr:0x02111ed8
 NNS_G3dFuncBlendVisDefault kind:data(any) addr:0x02111edc
 NNS_G3dFuncBlendJntDefault kind:data(any) addr:0x02111ee0
 NNS_G3dFuncBlendMatDefault kind:data(any) addr:0x02111ee4
-gStr_M kind:data(any) addr:0x02111ee8
-NNS_G3dAnmObjInitFuncArray kind:data(any) addr:0x02111eec
+NNS_G3dAnmObjInitFuncArray kind:data(any) addr:0x02111ee8
 NNS_G3dSendJointSRT_FuncArray kind:data(any) addr:0x02111f38
 NNS_G3dGetJointScale_FuncArray kind:data(any) addr:0x02111f44
 NNS_G3dSendTexSRT_FuncArray kind:data(any) addr:0x02111f50
-gStr_Asterisk kind:data(any) addr:0x02111f60
-data_02111f64 kind:data(any) addr:0x02111f64
-data_02111f6c kind:data(any) addr:0x02111f6c
+cmd$10252 kind:data(any) addr:0x02111f60 local
+cmd$10211 kind:data(any) addr:0x02111f68 local
 NNS_G3dFuncSbcMatTable kind:data(any) addr:0x02111f70
 NNS_G3dFuncSbcShpTable kind:data(any) addr:0x02111f80
-data_02111f90 kind:data(any) addr:0x02111f90
-data_02111fd0 kind:data(any) addr:0x02111fd0
-data_02111fd4 kind:data(any) addr:0x02111fd4
-data_02111fdc kind:data(any) addr:0x02111fdc
-data_02112000 kind:data(any) addr:0x02112000
-data_0211200c kind:data(any) addr:0x0211200c
-data_02112018 kind:data(any) addr:0x02112018
-data_0211201c kind:data(any) addr:0x0211201c
-data_02112024 kind:data(any) addr:0x02112024
-data_02112048 kind:data(any) addr:0x02112048
-data_02112054 kind:data(any) addr:0x02112054
+mtx$10257 kind:data(any) addr:0x02111f90 local
+bbcmd1$10018 kind:data(any) addr:0x02111fd0 local
+bbcmd1$10079 kind:data(any) addr:0x02112018 local
 NNS_G3dFuncSbcTable kind:data(any) addr:0x02112060
 calcTexMtx_ kind:data(any) addr:0x021120e0 local
 calcTexMtx_ kind:data(any) addr:0x02112100 local
@@ -6178,20 +6164,14 @@ data_02115800 kind:bss addr:0x02115800
 data_02115818 kind:bss addr:0x02115818
 sDispMode kind:bss addr:0x02119574
 GXi_VRamLockId kind:bss addr:0x02119576
-data_02119578 kind:bss addr:0x02119578
-data_0211957a kind:bss addr:0x0211957a
-data_0211957c kind:bss addr:0x0211957c
-data_0211957e kind:bss addr:0x0211957e
-data_02119580 kind:bss addr:0x02119580
-data_02119582 kind:bss addr:0x02119582
-data_02119584 kind:bss addr:0x02119584
-data_02119586 kind:bss addr:0x02119586
-data_02119588 kind:bss addr:0x02119588
-data_0211958a kind:bss addr:0x0211958a
-data_0211958c kind:bss addr:0x0211958c
-data_0211958e kind:bss addr:0x0211958e
-data_02119590 kind:bss addr:0x02119590
-sSubBGExtPltt kind:bss addr:0x02119594
+gGXState kind:bss addr:0x02119578
+sSubBGExtPltt kind:bss addr:0x02119594 local
+sOBJExtPlttLCDCBlk kind:bss addr:0x02119598 local
+sOBJExtPltt kind:bss addr:0x0211959c local
+sBGExtPlttLCDCOffset kind:bss addr:0x021195a0 local
+sBGExtPlttLCDCBlk kind:bss addr:0x021195a4 local
+sBGExtPltt kind:bss addr:0x021195a8 local
+sSubOBJExtPltt kind:bss addr:0x021195ac local
 sClrImg kind:bss addr:0x021195b0
 data_021195d0 kind:bss addr:0x021195d0
 data_021195d4 kind:bss addr:0x021195d4
@@ -6206,10 +6186,11 @@ data_0211965c kind:bss addr:0x0211965c
 OSi_IdleThread kind:bss addr:0x02119668
 OSi_LauncherThread kind:bss addr:0x02119728
 data_021198b0 kind:bss addr:0x021198b0
-OSi_DebuggerHandler kind:bss addr:0x021198b8
-OSi_UserExceptionHandlerArg kind:bss addr:0x021198bc
-OSi_UserExceptionHandler kind:bss addr:0x021198c0
-OSi_ExContext kind:bss addr:0x021198e4
+OSi_DebuggerHandler kind:bss addr:0x021198b8 local
+OSi_UserExceptionHandlerArg kind:bss addr:0x021198bc local
+OSi_UserExceptionHandler kind:bss addr:0x021198c0 local
+OSi_ExceptionHookStack kind:bss addr:0x021198c4 local
+OSi_ExContext kind:bss addr:0x021198e4 local
 OSi_TimerReserved kind:bss addr:0x02119964
 OSi_UseTick kind:bss addr:0x02119968
 OSi_UseAlarm kind:bss addr:0x02119978
@@ -6387,9 +6368,13 @@ data_0213bb20 kind:bss addr:0x0213bb20
 data_0213bb40 kind:bss addr:0x0213bb40
 data_0213bb58 kind:bss addr:0x0213bb58
 data_0213bda0 kind:bss addr:0x0213bda0
-sCurDriverInfo kind:bss addr:0x0213c060
-sPreSleepCallback kind:bss addr:0x0213c070
-sPostSleepCallback kind:bss addr:0x0213c07c
+sCurDriverInfo kind:bss addr:0x0213c060 local
+sDriverInfoFirstFlag kind:bss addr:0x0213c064 local
+sDriverInfoCommandTag kind:bss addr:0x0213c068 local
+initialized$3280 kind:bss addr:0x0213c06c local
+sPreSleepCallback kind:bss addr:0x0213c070 local
+sPostSleepCallback kind:bss addr:0x0213c07c local
+sDriverInfo kind:bss addr:0x0213c0a0 local
 sCaptureLock kind:bss addr:0x0213e460
 sWaveOut kind:bss addr:0x0213e46c
 data_0213e5ac kind:bss addr:0x0213e5ac
@@ -6407,7 +6392,7 @@ sIsThreadCreated kind:bss addr:0x0213ef54
 sMesgQ kind:bss addr:0x0213ef5c
 sCapParam kind:bss addr:0x0213ef9c
 sCurrent kind:bss addr:0x0213f550
-data_0213f554 kind:bss addr:0x0213f554
+waveArcHeader$3136 kind:bss addr:0x0213f554 local
 data_0213f590 kind:bss addr:0x0213f590
 sFreeCommandList kind:bss addr:0x0213f59c
 sDecodeBufferMutex kind:bss addr:0x0213f5a8
@@ -6452,21 +6437,7 @@ data_021423c0 kind:bss addr:0x021423c0
 data_021423c4 kind:bss addr:0x021423c4
 data_021423d8 kind:bss addr:0x021423d8
 data_021423dc kind:bss addr:0x021423dc
-data_021423ec kind:bss addr:0x021423ec
-data_021423f0 kind:bss addr:0x021423f0
-data_021423f4 kind:bss addr:0x021423f4
-data_02142438 kind:bss addr:0x02142438
-data_02142468 kind:bss addr:0x02142468
-data_0214246c kind:bss addr:0x0214246c
-data_02142494 kind:bss addr:0x02142494
-data_021424a8 kind:bss addr:0x021424a8
-data_021424cc kind:bss addr:0x021424cc
-data_021424d8 kind:bss addr:0x021424d8
-data_021424ec kind:bss addr:0x021424ec
-data_0214251c kind:bss addr:0x0214251c
-data_0214254c kind:bss addr:0x0214254c
-data_021425ac kind:bss addr:0x021425ac
-data_021425ec kind:bss addr:0x021425ec
+NNS_G3dGlb kind:bss addr:0x021423ec
 NNS_G3dRS kind:bss addr:0x02142650
 NNS_G3dRSOnGlb kind:bss addr:0x02142654
 NNS_G3dGeBuffer kind:bss addr:0x02145354

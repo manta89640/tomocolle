@@ -392,7 +392,6 @@ extern CharLoader gVramTransferQueue;
 extern Renderer3d data_02122824;
 extern u8 data_021223e4[];
 extern G3SpriteTextures data_021232e4;
-extern u8 data_02142438[];
 
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
