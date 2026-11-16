@@ -15,10 +15,10 @@ class MessageText;
 class MessageWindow;
 class Room;
 class Scene40Character;
-class Scene40Unknown30A8C;
+class Scene40Clock;
 class Scene40MessageSequence;
+class Scene40SpeechWindow;
 class Scene40ItemModel;
-class SpeechWindow;
 class Sprite;
 class TtsPlayer;
 
@@ -39,11 +39,11 @@ struct Scene40Context {
     /* 0x30 */ MessageFile *mRoomMessages;     // TRM:/tmd_room_msg_JP.bmg
     /* 0x34 */ MessageFile *mMiiTouchMessages; // TEM:/tmd_miitouch_msg_JP.bmg
     /* 0x38 */ Sprite *mSprite;                // scene+0x13D0
-    /* 0x3C */ SpeechWindow *mSpeechWindow;
+    /* 0x3C */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x40 */ TtsPlayer *mTtsPlayer;
     /* 0x44 */ MessageText *mText;             // scene+0x15DC0
     /* 0x48 */ IslandProgress *mIslandProgress;
-    /* 0x4C */ Scene40Unknown30A8C *mClock;
+    /* 0x4C */ Scene40Clock *mClock;
     /* 0x50 */ void *mUnknown50; // scene+0x69D2C
     /* 0x54 */ void *mUnknown54; // scene+0x69DEC
     /* 0x58 */ void *mUnknown58; // scene+0x69E10

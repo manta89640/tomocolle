@@ -77,11 +77,7 @@ public:
     /* 0x374FC [0x6804C] */ MessageText mText9;
     /* 0x37AEC [0x6863C] */ u8 mUnknown6863C[0xC88];
     /* 0x38774 [0x692C4] */ ObjTextCanvas mCanvas;
-    /* 0x3892C [0x6947C] */ u8 mUnknown6947C[0x38];
-    /* 0x38964 [0x694B4] */ Scene40Button mButton5;
-    /* 0x38A5C [0x695AC] */ u8 mUnknown695AC[0xC];
-    /* 0x38A68 [0x695B8] */ SpriteButton mButtons7[7];
-    /* 0x39114 [0x69C64] */ u8 mUnknown69C64[0xC8];
+    /* 0x3892C [0x6947C] */ Scene40MenuBar mMenuBar;
 }; // 0x391DC
 
 #endif // OV075_SCENE40PAGES_H
