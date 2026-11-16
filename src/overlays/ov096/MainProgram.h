@@ -22,8 +22,8 @@ void MiiData_GetName(SavedCharacter *character, wchar_t *name); // Its name, as 
 struct SavedGame;
 extern "C" {
 extern SavedGame gGameData;
-void func_0202c264(SavedGame *game, int index, SavedCharacter *character); // Copies a saved character out
-void func_0202c28c(SavedGame *game, int index, SavedCharacter *character); // and back in
+void GameData_ReadCharacter(SavedGame *game, int index, SavedCharacter *character); // Copies a saved character out
+void GameData_WriteCharacter(SavedGame *game, int index, SavedCharacter *character); // and back in
 }
 
 // The main program's camera

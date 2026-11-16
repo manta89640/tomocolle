@@ -100,13 +100,13 @@ void InformationScene::Init() {
     int year;
     u32 typeMessage;
     for (i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
-            if (func_0202c604(&gGameData, i) == FALSE) {
+        if (GameData_CharacterExists(&gGameData, i)) {
+            if (GameData_GetCharacterSex(&gGameData, i) == FALSE) {
                 men++;
             } else {
                 women++;
             }            SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             year = character.mBirthYear;
             if (year != BIRTH_YEAR_UNKNOWN) {
                 month = character.GetParameter(PROPERTY_BIRTH_MONTH);

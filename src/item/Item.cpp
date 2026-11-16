@@ -7,12 +7,12 @@
 
 extern "C" {
 // The save data's counts of the clothes and goods
-int func_0202c770(GameData *game, int clothes); // The clothes' count
+int GameData_GetClothesCount(GameData *game, int clothes); // The clothes' count
 int func_0202c784(GameData *game, int clothes); // The clothes' second value, -1 when they are not owned
-void func_0202c798(GameData *game, int clothes, u8 count);
+void GameData_SetClothesCount(GameData *game, int clothes, u8 count);
 void func_0202c7ac(GameData *game, int clothes, s8 value);
-int func_0202c7dc(GameData *game, int item); // The goods' count, -1 when they are not owned
-void func_0202c7f0(GameData *game, int item, s8 count);
+int GameData_GetGoodsCount(GameData *game, int item); // The goods' count, -1 when they are not owned
+void GameData_SetGoodsCount(GameData *game, int item, s8 count);
 
 // The game's clock
 extern void *data_02123440;
@@ -91,7 +91,7 @@ void ClothesList::Load() {
         mItems[i].Clear();
         mItems[i].mId = i;
         BOOL owned = TRUE;
-        int count = func_0202c770(&gGameData, i);
+        int count = GameData_GetClothesCount(&gGameData, i);
         int value = func_0202c784(&gGameData, i);
         if (value == -1) {
             owned = FALSE;
@@ -115,10 +115,10 @@ void ClothesList::Save() {
         mItems[i].Settle();
         u16 id = mItems[i].mId;
         if (mItems[i].mOwned != FALSE) {
-            func_0202c798(&gGameData, id, mItems[i].mCount);
+            GameData_SetClothesCount(&gGameData, id, mItems[i].mCount);
             func_0202c7ac(&gGameData, id, mItems[i].mUnknown14);
         } else if (mItems[i].mOwned == FALSE) {
-            func_0202c798(&gGameData, id, 0);
+            GameData_SetClothesCount(&gGameData, id, 0);
             func_0202c7ac(&gGameData, id, -1);
         }
     }
@@ -252,8 +252,8 @@ void LoadClothes(ClothesItem *items, int max, int *count) {
             items[*count].Clear();
             items[*count].mId = i;
             items[*count].mOwned = TRUE;
-            items[*count].mUnknown0C = func_0202c770(&gGameData, i);
-            items[*count].mCount = func_0202c770(&gGameData, i);
+            items[*count].mUnknown0C = GameData_GetClothesCount(&gGameData, i);
+            items[*count].mCount = GameData_GetClothesCount(&gGameData, i);
             items[*count].mUnknown14 = value;
             (*count)++;
         }
@@ -270,14 +270,14 @@ void SaveClothes(ClothesItem *items, int count) {
         u16 id = items[i].mId;
         if (items[i].mOwned) {
             int value = items[i].mUnknown14;
-            if (value != func_0202c784(&gGameData, id) || items[i].mCount != func_0202c770(&gGameData, id)) {
-                func_0202c798(&gGameData, id, items[i].mCount);
+            if (value != func_0202c784(&gGameData, id) || items[i].mCount != GameData_GetClothesCount(&gGameData, id)) {
+                GameData_SetClothesCount(&gGameData, id, items[i].mCount);
                 func_0202c7ac(&gGameData, id, items[i].mUnknown14);
                 continue;
             }
         }
         if (!items[i].mOwned && func_0202c784(&gGameData, id) != -1) {
-            func_0202c798(&gGameData, id, 0);
+            GameData_SetClothesCount(&gGameData, id, 0);
             func_0202c7ac(&gGameData, id, -1);
         }
     }
@@ -407,7 +407,7 @@ void Inventory::Load() {
     }
     for (int i = 0; i < INVENTORY_SAVED; i++) {
         BOOL owned = TRUE;
-        int count = func_0202c7dc(&gGameData, i);
+        int count = GameData_GetGoodsCount(&gGameData, i);
         if (count == -1) {
             owned = FALSE;
             count = 0;
@@ -429,9 +429,9 @@ void Inventory::Save() {
     for (int i = 0; i < INVENTORY_SAVED; i++) {
         u16 id = mItems[i].mId;
         if (mItems[i].mOwned != FALSE) {
-            func_0202c7f0(&gGameData, id, mItems[i].mCount);
+            GameData_SetGoodsCount(&gGameData, id, mItems[i].mCount);
         } else if (mItems[i].mOwned == FALSE) {
-            func_0202c7f0(&gGameData, id, -1);
+            GameData_SetGoodsCount(&gGameData, id, -1);
         }
     }
 }
@@ -659,7 +659,7 @@ void LoadItems(InventoryItem *items, int max, int *count) {
     }
     for (int i = 0; i < INVENTORY_SAVED && i < max; i++) {
         BOOL owned = TRUE;
-        int value = func_0202c7dc(&gGameData, i);
+        int value = GameData_GetGoodsCount(&gGameData, i);
         if (value == -1) {
             owned = FALSE;
             value = 0;

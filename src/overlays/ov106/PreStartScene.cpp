@@ -149,12 +149,12 @@ void PreStartScene::Update() {
                 mSubStep = 0;
                 mSavingIcon.mVisible = TRUE;
                 func_0202c8f8(&gGameData, 0);
-                if (!func_0202cd48(&gGameData)) {
+                if (!GameData_StartSave(&gGameData)) {
                     gSceneManager.RequestScene(0xC2);
                 }
             }
         } else if (mStep == 2) {
-            if (!func_0202cd38(&gGameData)) {
+            if (!GameData_IsSaving(&gGameData)) {
                 mStep++;
                 mSubStep = 0;
                 mWindow[0].mUnknownSetBeforeClose = 15;
@@ -220,7 +220,7 @@ void PreStartScene::UpdateResidents() {
     s64 seconds = mClock.mSeconds;
 
     for (i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
         }

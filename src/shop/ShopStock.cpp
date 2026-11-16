@@ -2,8 +2,8 @@
 
 #include "GameData.h"
 
-// The shops' stock: what the island's shops sell on a day. The saved game holds two records of it (func_0202c864
-// reads one, func_0202c878 writes one): record 0 is today's, record 1 the next day's.
+// The shops' stock: what the island's shops sell on a day. The saved game holds two records of it (GameData_GetShopStock
+// reads one, GameData_SetShopStock writes one): record 0 is today's, record 1 the next day's.
 struct ShopStock {
     void MakeFirst();
     void Make();
@@ -21,8 +21,8 @@ extern "C" {
 extern void *data_02123440;
 s64 Clock_GetSeconds(void *clock);
 int func_02035aa4(void *clock);
-void func_0202c864(GameData *game, int index, ShopStock *stock);
-void func_0202c878(GameData *game, int index, const ShopStock *stock);
+void GameData_GetShopStock(GameData *game, int index, ShopStock *stock);
+void GameData_SetShopStock(GameData *game, int index, const ShopStock *stock);
 }
 
 // The item files' pickers (main program, 0x0209e140 on)
@@ -82,8 +82,8 @@ void InitShopStocks() {
     first.SetDate(&today);
     next.Make();
     next.SetDate(&today);
-    func_0202c878(&gGameData, 0, &first);
-    func_0202c878(&gGameData, 1, &next);
+    GameData_SetShopStock(&gGameData, 0, &first);
+    GameData_SetShopStock(&gGameData, 1, &next);
 }
 
 void UpdateShopStocks() {
@@ -91,12 +91,12 @@ void UpdateShopStocks() {
     ShopStock next;
     RTCDate stockDate;
     RTCDate today;
-    func_0202c864(&gGameData, 0, &current);
-    func_0202c864(&gGameData, 1, &next);
+    GameData_GetShopStock(&gGameData, 0, &current);
+    GameData_GetShopStock(&gGameData, 1, &next);
     if (current.mClothes[0] == 0 || current.mInteriors[0] == 0 || next.mClothes[0] == 0 || next.mInteriors[0] == 0) {
         InitShopStocks();
-        func_0202c864(&gGameData, 0, &current);
-        func_0202c864(&gGameData, 1, &next);
+        GameData_GetShopStock(&gGameData, 0, &current);
+        GameData_GetShopStock(&gGameData, 1, &next);
     }
     stockDate = current.mDate;
     GetGameDate(Clock_GetSeconds(data_02123440), &today);
@@ -122,8 +122,8 @@ void UpdateShopStocks() {
         return;
     }
     next.SetDate(&today);
-    func_0202c878(&gGameData, 0, &next);
+    GameData_SetShopStock(&gGameData, 0, &next);
     next.Make();
     next.SetDate(&today);
-    func_0202c878(&gGameData, 1, &next);
+    GameData_SetShopStock(&gGameData, 1, &next);
 }

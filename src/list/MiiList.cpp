@@ -17,7 +17,7 @@ struct TouchInput {
     /* 0x38 */ ScreenPoint mPoint;
 };
 
-// One of the eleven news items of the saved game (func_0202c8a8 copies one out, func_0202c8bc in), as far as
+// One of the eleven news items of the saved game (GameData_GetNewsItem copies one out, GameData_SetNewsItem in), as far as
 // removing a character reads it
 struct NewsItem {
     /* 0x00 */ u8 mKind;          // An entry of data_020fa1d0
@@ -68,13 +68,13 @@ extern "C" {
 extern TouchInput gTouchInput;
 extern const NewsKind data_020fa1d0[];
 extern u8 gScreenLoader[]; // The background screens' loader
-BOOL func_0202c354(GameData *game, int index);                          // Whether there is a saved character
-void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one back
-void func_0202c2fc(GameData *game, int index);                          // Marks its slot free
-BOOL func_0202c3dc(GameData *game, int index);                          // Whether the saved character exists
-void func_0202c8a8(GameData *game, int index, NewsItem *item);
-void func_0202c8bc(GameData *game, int index, NewsItem *item);
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);                          // Whether there is a saved character
+void GameData_ReadCharacter(GameData *game, int index, CharacterRecord *record); // Reads a saved character
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one back
+void GameData_FreeCharacter(GameData *game, int index);                          // Marks its slot free
+BOOL GameData_CharacterExists(GameData *game, int index);                          // Whether the saved character exists
+void GameData_GetNewsItem(GameData *game, int index, NewsItem *item);
+void GameData_SetNewsItem(GameData *game, int index, NewsItem *item);
 int func_0202ca34(GameData *game, int song, int *slot);
 void ScreenLoader_SetScrollY(void *screens, int plane, int offset); // Scrolls a background
 int MiiData_GetSex(const CharacterRecord *character);
@@ -155,8 +155,8 @@ void MiiList::Draw() {
 void MiiList::Load() {
     mCount = 0;
     for (u16 i = 0; i < MII_LIST_SIZE; i++) {
-        if (func_0202c354(&gGameData, i)) {
-            func_0202c264(&gGameData, i, &mResidents[mCount]);
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
+            GameData_ReadCharacter(&gGameData, i, &mResidents[mCount]);
             mResidents[mCount].mIndex = i;
             mCount++;
         }
@@ -260,10 +260,10 @@ void ForgetCharacter(int index, int count, SavedCharacter *list) {
         } else {
             other = i;
             n = 0;
-            if (!func_0202c3dc(&gGameData, other)) {
+            if (!GameData_CharacterExists(&gGameData, other)) {
                 continue;
             }
-            func_0202c264(&gGameData, other, &loaded);
+            GameData_ReadCharacter(&gGameData, other, &loaded);
             loaded.mIndex = other;
         }
         if (other == index) {
@@ -271,12 +271,12 @@ void ForgetCharacter(int index, int count, SavedCharacter *list) {
         }
         if (characters[n].mRelationMeter[index] != 100 || characters[n].mRelationRank[index] != 0) {
             characters[n].SetRelation(index, 0, 100);
-            func_0202c28c(&gGameData, other, &characters[n]);
+            GameData_WriteCharacter(&gGameData, other, &characters[n]);
         }
         SavedCharacter *character = &characters[n];
         if (character->IsLongActPaired() && index == character->mLongActPartner) {
             character->ClearLongAct();
-            func_0202c28c(&gGameData, other, character);
+            GameData_WriteCharacter(&gGameData, other, character);
         }
         if (character->IsTroubleOfCategory34OrKind18() && index == character->mTroubleTarget) {
             if (character->IsLongActPaired()) {
@@ -293,19 +293,19 @@ void ForgetCharacter(int index, int count, SavedCharacter *list) {
                     }
                     p = &characters[found];
                 } else {
-                    if (func_0202c3dc(&gGameData, partner)) {
-                        func_0202c264(&gGameData, partner, &partnerLoaded);
+                    if (GameData_CharacterExists(&gGameData, partner)) {
+                        GameData_ReadCharacter(&gGameData, partner, &partnerLoaded);
                         partnerLoaded.mIndex = partner;
                     }
                     p = &partnerLoaded;
                 }
                 p->ClearLongAct();
-                func_0202c28c(&gGameData, p->mIndex, p);
+                GameData_WriteCharacter(&gGameData, p->mIndex, p);
             }
             characters[n].mMood = 0;
             characters[n].ClearLongAct();
             characters[n].ClearTrouble();
-            func_0202c28c(&gGameData, other, &characters[n]);
+            GameData_WriteCharacter(&gGameData, other, &characters[n]);
         }
     }
 }
@@ -314,7 +314,7 @@ void ForgetCharacter(int index, int count, SavedCharacter *list) {
 void RemoveNewsOf(int index) {
     NewsItem items[11];
     for (int i = 0; i < 11; i++) {
-        func_0202c8a8(&gGameData, i, &items[i]);
+        GameData_GetNewsItem(&gGameData, i, &items[i]);
     }
     int n = 0;
     for (int i = 0; i < 11; i++) {
@@ -329,14 +329,14 @@ void RemoveNewsOf(int index) {
             }
         }
         if (!about) {
-            func_0202c8bc(&gGameData, n, &items[i]);
+            GameData_SetNewsItem(&gGameData, n, &items[i]);
             n++;
         }
     }
     NewsItem empty;
     MI_CpuClear16(&empty, sizeof(empty));
     for (int i = n; i < 11; i++) {
-        func_0202c8bc(&gGameData, n, &empty);
+        GameData_SetNewsItem(&gGameData, n, &empty);
         n++;
     }
 }
@@ -437,8 +437,8 @@ void RemoveFromSongs(int index) {
 void ClearRecord(int index) {
     SavedCharacter character;
     character.Reset();
-    func_0202c28c(&gGameData, index, &character);
-    func_0202c2fc(&gGameData, index);
+    GameData_WriteCharacter(&gGameData, index, &character);
+    GameData_FreeCharacter(&gGameData, index);
 }
 
 void MiiList::ShowTabs(int sortKey, int group) {

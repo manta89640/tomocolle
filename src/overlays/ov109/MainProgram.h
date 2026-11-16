@@ -71,8 +71,8 @@ struct MiiData {
 extern "C" {
 extern const s16 data_020fb870[4][5]; // Animation ids, by a row and by mood: standing
 void func_0209decc(SceneCharacter *character);
-void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
-BOOL func_0202c354(GameData *game, int index);                          // Whether there is one with that index
+void GameData_ReadCharacter(GameData *game, int index, CharacterRecord *record); // Reads a saved character
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);                          // Whether there is one with that index
 void NFL_ClearMiiCreateId(MiiData *mii);
 void func_02029660(void *resourceSet, u32 resType, void *archive);
 }
@@ -167,18 +167,18 @@ void func_02031228(void *sprite);
 
 extern "C" {
 u8 func_0202ca70(GameData *game);                                  // A free song, 0xFF when none
-void func_0202c920(GameData *game, int song, void *buffer);
-void func_0202c934(GameData *game, int song, void *buffer);
+void GameData_GetSong(GameData *game, int song, void *buffer);
+void GameData_SetSong(GameData *game, int song, void *buffer);
 }
 
 // --- Saving ---
 
 extern "C" {
-void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Writes a saved character
+void GameData_WriteCharacter(GameData *game, int index, CharacterRecord *record); // Writes a saved character
 void func_0202c328(GameData *game, int index, int a);
-int func_0202c604(GameData *game, int index);
-BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
-BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
+int GameData_GetCharacterSex(GameData *game, int index);
+BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being written
+BOOL GameData_StartSave(GameData *game); // Starts writing the save data; FALSE when it cannot
 int NFL_IsMiiCreateIdBit7Clear(CharacterRecord *character);
 int NFL_AreMiiCreateIdsEqual(CharacterRecord *a, CharacterRecord *b);
 int MiiData_GetSex(CharacterRecord *character);

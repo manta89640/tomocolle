@@ -75,10 +75,10 @@ struct GameClock {
 extern "C" {
 
 // --- The saved game ---
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
 void func_0202c8f8(GameData *game, int unknown);
-BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
-BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+BOOL GameData_StartSave(GameData *game); // Starts writing the save data; FALSE when it cannot
+BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being written
 
 // --- The clock ---
 extern GameClock *data_02123440;

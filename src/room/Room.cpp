@@ -21,8 +21,8 @@ void func_02029f30(Model *model, int flags);
 void func_02029f40(Model *model, int flags);
 void func_02028b98(GXRgb color, int *r, int *g, int *b); // Splits a colour into its components
 
-int func_0202c820(GameData *game, int interior); // The interior's count, -1 when it is not owned
-void func_0202c834(GameData *game, int interior, s8 count);
+int GameData_GetInteriorCount(GameData *game, int interior); // The interior's count, -1 when it is not owned
+void GameData_SetInteriorCount(GameData *game, int interior, s8 count);
 
 extern void *data_02123440;
 void Clock_GetDate(void *clock, RTCDate *date);
@@ -628,7 +628,7 @@ void InteriorList::Load() {
         mItems[i].Clear();
         mItems[i].mId = i;
         BOOL owned = TRUE;
-        int count = func_0202c820(&gGameData, i);
+        int count = GameData_GetInteriorCount(&gGameData, i);
         if (count == -1) {
             owned = FALSE;
             count = 0;
@@ -649,9 +649,9 @@ void InteriorList::Save() {
         mItems[i].Settle();
         u16 id = mItems[i].mId;
         if (mItems[i].mOwned != FALSE) {
-            func_0202c834(&gGameData, id, mItems[i].mCount);
+            GameData_SetInteriorCount(&gGameData, id, mItems[i].mCount);
         } else if (mItems[i].mOwned == FALSE) {
-            func_0202c834(&gGameData, id, -1);
+            GameData_SetInteriorCount(&gGameData, id, -1);
         }
     }
 }

@@ -419,9 +419,9 @@ void TushinScene::InitParticles() {
 // @0x0214aed8
 void TushinScene::UpdateMiiData() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i)) {
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
             CharacterRecord record;
-            func_0202c264(&gGameData, i, &record);
+            GameData_ReadCharacter(&gGameData, i, &record);
             MI_CpuCopy8(&record, &sMiiData[i], sizeof(sMiiData[i]));
         } else {
             MI_CpuFill8(&sMiiData[i], 0, sizeof(sMiiData[i]));
@@ -576,7 +576,7 @@ void TushinScene::LoadSavedCharacter(int i, int index) {
     if (index < 0 || index >= 100) {
         return;
     }
-    func_0202c264(&gGameData, index, &mCharacters[i]);
+    GameData_ReadCharacter(&gGameData, index, &mCharacters[i]);
     ReloadCharacter(i);
     SetUpCharacter(i);
 }
@@ -620,7 +620,7 @@ void TushinScene::SendSongs() {
     for (int i = 0; i < 6; i++) {
         int song = ((SavedCharacter *)(residents + offset))->GetSongSlot(i);
         if (song != 0xFF) {
-            func_0202c920(&gGameData, song, sSongs[n++]);
+            GameData_GetSong(&gGameData, song, sSongs[n++]);
         }
     }
     WH_SendData(sSongs, 0x80, TushinScene_SendCallback);
@@ -750,7 +750,7 @@ void TushinScene::UpdateSaving() {
         if (mPartnerReady == 0) {
             return;
         }
-    } else if (func_0202cd38(&gGameData)) {
+    } else if (GameData_IsSaving(&gGameData)) {
         return;
     }
     mSendQueued = 0;
@@ -761,9 +761,9 @@ void TushinScene::UpdateSaving() {
 // @0x0214d118
 int TushinScene::FindResident(CharacterRecord *record) {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i)) {
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
             CharacterRecord resident;
-            func_0202c264(&gGameData, i, &resident);
+            GameData_ReadCharacter(&gGameData, i, &resident);
             if (NFL_AreMiiCreateIdsEqual(&resident, record) == 1) {
                 return i;
             }
@@ -804,11 +804,11 @@ int TushinScene::ReceiveCharacter() {
         if (((SavedCharacter *)(&sTransfer))->IsMiiFromThisConsole()) {
             return 3;
         }
-        if (MiiData_GetSex(&sTransfer) != func_0202c604(&gGameData, sReceivedResident)) {
+        if (MiiData_GetSex(&sTransfer) != GameData_GetCharacterSex(&gGameData, sReceivedResident)) {
             return 6;
         }
         CharacterRecord record;
-        func_0202c264(&gGameData, sReceivedResident, &record);
+        GameData_ReadCharacter(&gGameData, sReceivedResident, &record);
         record.mMii = sTransfer.mMii;
         if (sTransfer.mUnknown050Bit0 == 0) {
             if (record.mUnknown050Bit0 == 1) {
@@ -861,7 +861,7 @@ int TushinScene::ReceiveCharacter() {
                 }
                 sTransfer.SetSongSlot(i, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, sTransfer.GetSongSlot(i), sSongs[n]);
+                    GameData_SetSong(&gGameData, sTransfer.GetSongSlot(i), sSongs[n]);
                     SongEntry entry;
                     entry.mSong = sTransfer.GetSongSlot(i);
                     entry.Load(entry.mSong);
@@ -870,10 +870,10 @@ int TushinScene::ReceiveCharacter() {
                 }
                 n++;
                 record.mSongSlots[i] = sTransfer.GetSongSlot(i);
-                func_0202c28c(&gGameData, sReceivedResident, &record);
+                GameData_WriteCharacter(&gGameData, sReceivedResident, &record);
             }
         }
-        func_0202c28c(&gGameData, sReceivedResident, &record);
+        GameData_WriteCharacter(&gGameData, sReceivedResident, &record);
         return 4;
     }
 
@@ -881,7 +881,7 @@ int TushinScene::ReceiveCharacter() {
     sReceivedResident = -1;
     int i = 0;
     do {
-        if (!func_0202c354(&gGameData, i)) {
+        if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
             sReceivedResident = i;
             ((SavedCharacter *)(&sTransfer))->Register();
             int n = 0;
@@ -895,7 +895,7 @@ int TushinScene::ReceiveCharacter() {
                 }
                 sTransfer.SetSongSlot(j, song);
                 if (song != 0xFF) {
-                    func_0202c934(&gGameData, sTransfer.GetSongSlot(j), sSongs[n]);
+                    GameData_SetSong(&gGameData, sTransfer.GetSongSlot(j), sSongs[n]);
                     SongEntry entry;
                     entry.mSong = sTransfer.GetSongSlot(j);
                     entry.Load(entry.mSong);
@@ -903,9 +903,9 @@ int TushinScene::ReceiveCharacter() {
                     entry.Save(entry.mSong);
                 }
                 n++;
-                func_0202c28c(&gGameData, i, &sTransfer);
+                GameData_WriteCharacter(&gGameData, i, &sTransfer);
             }
-            func_0202c28c(&gGameData, i, &sTransfer);
+            GameData_WriteCharacter(&gGameData, i, &sTransfer);
             MiiData_GetName(&sTransfer, sReceivedName);
             goto received;
         }
@@ -2125,7 +2125,7 @@ void TushinScene::Update() {
                     mNeedsSave = 0;
                     break;
                 }
-                if (func_0202cd38(&gGameData)) {
+                if (GameData_IsSaving(&gGameData)) {
                     break;
                 }
                 sReceiveCount = 0;
@@ -2239,7 +2239,7 @@ void TushinScene::Update() {
                     mNeedsSave = 0;
                     break;
                 }
-                if (func_0202cd38(&gGameData)) {
+                if (GameData_IsSaving(&gGameData)) {
                     break;
                 }
                 mNextPage = mPageAfterSave;
@@ -2625,7 +2625,7 @@ BOOL TushinScene::HasNgSong(CharacterRecord *record) {
     for (int i = 0; i < 6; i++) {
         int song = ((SavedCharacter *)(record))->GetSongSlot(i);
         if (song != 0xFF) {
-            func_0202c920(&gGameData, song, lyrics);
+            GameData_GetSong(&gGameData, song, lyrics);
             if (IsNgWord(lyrics) == TRUE) {
                 return TRUE;
             }
@@ -2712,7 +2712,7 @@ void TushinScene::ClearParentNames() {
 
 // @0x02151e78
 void TushinScene::Save() {
-    if (!func_0202cd48(&gGameData)) {
+    if (!GameData_StartSave(&gGameData)) {
         gSceneManager.RequestScene(0xC2);
     }
 }
@@ -2827,7 +2827,7 @@ int TushinScene::ReceiveWiiMii() {
     sReceivedResident = FindResident((CharacterRecord *)&sMiiData[sWiiReceivedIndex]);
     if (sReceivedResident != -1) {
         ((SavedCharacter *)(&character))->Reset();
-        func_0202c264(&gGameData, sReceivedResident, &character);
+        GameData_ReadCharacter(&gGameData, sReceivedResident, &character);
         if (NFL_IsMiiCreateIdBit7Clear(&character)) {
             PlayResultSound(0xD);
             return 0x38;
@@ -2837,23 +2837,23 @@ int TushinScene::ReceiveWiiMii() {
             return 0x36;
         }
         MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &character, sizeof(MiiData));
-        if (MiiData_GetSex(&character) != func_0202c604(&gGameData, sReceivedResident)) {
+        if (MiiData_GetSex(&character) != GameData_GetCharacterSex(&gGameData, sReceivedResident)) {
             PlayResultSound(0xC);
             return 0x39;
         }
-        func_0202c28c(&gGameData, sReceivedResident, &character);
+        GameData_WriteCharacter(&gGameData, sReceivedResident, &character);
         MiiData_GetName(&character, sReceivedName);
         UpdateMiiData();
         PlayResultSound(0xC);
         return 0x37;
     }
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c354(&gGameData, i)) {
+        if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
             sReceivedResident = i;
             ((SavedCharacter *)(&character))->Reset();
             MI_CpuCopy8(&sMiiData[sWiiReceivedIndex], &character, sizeof(MiiData));
             ((SavedCharacter *)(&character))->MakeVisitor();
-            func_0202c28c(&gGameData, i, &character);
+            GameData_WriteCharacter(&gGameData, i, &character);
             MiiData_GetName(&character, sReceivedName);
             if (NFL_IsMiiCreateIdBit7Clear(&character)) {
                 SetNeedsSave();

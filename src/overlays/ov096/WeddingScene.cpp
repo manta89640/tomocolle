@@ -14,10 +14,10 @@ static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
 static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0, 0x5DC}};
 
 void WeddingScene::StartLoading() {
-    func_0202c264(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
+    GameData_ReadCharacter(&gGameData, GetCharacterIndex(0), &mCharacters[0]);
     mCharacters[0].mIndex = GetCharacterIndex(0);
     mCharacters[0].Character::SetArchive("3H0");
-    func_0202c264(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
+    GameData_ReadCharacter(&gGameData, GetCharacterIndex(1), &mCharacters[1]);
     mCharacters[1].mIndex = GetCharacterIndex(1);
     mCharacters[1].Character::SetArchive("3H1");
     mRoom.mId = mCharacters[0].mInterior;
@@ -148,7 +148,7 @@ void WeddingScene::Init3d() {
     mCharacters[1].Character::Init(1, 0, 0);
     for (int i = 0; i < 2; i++) {
         WeddingCharacter *character = &mCharacters[i];
-        func_0202c264(&gGameData, GetCharacterIndex(i), character);
+        GameData_ReadCharacter(&gGameData, GetCharacterIndex(i), character);
         character->CharacterBase::MakeFace();
         character->Character::UpdateBodyColors();
         character->Character::UpdateBodyScale();
@@ -315,8 +315,8 @@ void WeddingScene::Draw() {
 
 void WeddingScene::Exit() {
     mInventory.Save();
-    func_0202c28c(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
-    func_0202c28c(&gGameData, mCharacters[1].mIndex, &mCharacters[1]);
+    GameData_WriteCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+    GameData_WriteCharacter(&gGameData, mCharacters[1].mIndex, &mCharacters[1]);
     ArchiveManager_Unmount(&gArchiveManager, "SMT");
     ArchiveManager_Unmount(&gArchiveManager, "TCM");
     ArchiveManager_Unmount(&gArchiveManager, "TTM");
@@ -616,7 +616,7 @@ void WeddingCharacter::Speak(int file, u32 message, int count, int *types, int *
             case ARG_NONE:
                 break;
             case ARG_CHARACTER:
-                func_0202c264(&gGameData, values[i], &character);
+                GameData_ReadCharacter(&gGameData, values[i], &character);
                 MiiData_GetName(&character, names[i]);
                 MakeSpeechText(pronunciations[i], names[i], sizeof(names[i]));
                 break;

@@ -210,7 +210,7 @@ public:
     void RefreshSpeechTexts();
     void ConvertSpeechTexts();
     void ClearSpeechTexts();
-    // func_0202c28c(gGameData, mIndex, this) if func_0202c3dc
+    // GameData_WriteCharacter(gGameData, mIndex, this) if GameData_CharacterExists
     void Save();
 
     // --- Inline helpers. Each is here because the match of some state function depends on its shape: do not

@@ -17,8 +17,8 @@ struct SongSlotTable {
 extern "C" {
 extern const u16 data_020f9408[];
 extern const SongSlotTable data_020f9414[];
-void func_0202c920(GameData *game, u8 song, SongEntry *entry);
-void func_0202c934(GameData *game, u8 song, SongEntry *entry);
+void GameData_GetSong(GameData *game, u8 song, SongEntry *entry);
+void GameData_SetSong(GameData *game, u8 song, SongEntry *entry);
 }
 
 SongEntry::SongEntry() {
@@ -26,11 +26,11 @@ SongEntry::SongEntry() {
 }
 
 void SongEntry::Save(u8 song) {
-    func_0202c934(&gGameData, song, this);
+    GameData_SetSong(&gGameData, song, this);
 }
 
 void SongEntry::Load(u8 song) {
-    func_0202c920(&gGameData, song, this);
+    GameData_GetSong(&gGameData, song, this);
 }
 
 void SongEntry::Clear() {

@@ -62,9 +62,9 @@ void Clock_GetTime(void *clock, RTCTime *time);
 void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown);
 void func_02035668(void *clock, RTCDate *date, RTCTime *time); // func_02035460 with TRUE
 
-BOOL func_0202cd38(GameData *game); // Whether the save data is still being written
+BOOL GameData_IsSaving(GameData *game); // Whether the save data is still being written
 void func_0202c8f8(GameData *game, int unknown);
-BOOL func_0202cd48(GameData *game);
+BOOL GameData_StartSave(GameData *game);
 BOOL func_0202cd94(GameData *game);
 
 }

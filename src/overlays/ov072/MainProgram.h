@@ -103,7 +103,7 @@ struct Light {
 
 
 
-// One of the eleven news items of the saved game (func_0202c8a8 copies one out, func_0202c8bc in): the news scene
+// One of the eleven news items of the saved game (GameData_GetNewsItem copies one out, GameData_SetNewsItem in): the news scene
 // (overlay 87, scene 0x46) shows them.
 struct NewsItem {
     /* 0x00 */ u8 mKind;      // An entry of data_020fa1d0; 0x1D is a birthday
@@ -255,15 +255,15 @@ void ModelResources_BeginDraw(void *resources);
 void ModelResources_Reset(void *resources);
 void VramManagers_Reset(Renderer3d *renderer);
 
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-void func_0202c264(GameData *game, int index, SavedCharacter *character);
-void func_0202c28c(GameData *game, int index, SavedCharacter *character);
-u8 func_0202c468(GameData *game, int character);
-u8 func_0202c53c(GameData *game, int character);
-int func_0202c5b4(GameData *game, int character);
-int func_0202c58c(GameData *game, int character);
-void func_0202c8a8(GameData *game, int index, NewsItem *item);
-void func_0202c8bc(GameData *game, int index, NewsItem *item);
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character);
+u8 GameData_GetCharacterEvent(GameData *game, int character);
+u8 GameData_GetCharacterTroubleState(GameData *game, int character);
+int GameData_GetCharacterTroubleCategory(GameData *game, int character);
+int GameData_GetCharacterTroubleId(GameData *game, int character);
+void GameData_GetNewsItem(GameData *game, int index, NewsItem *item);
+void GameData_SetNewsItem(GameData *game, int index, NewsItem *item);
 BOOL func_0202cb08(GameData *game);
 BOOL func_0202cd54(GameData *game);
 

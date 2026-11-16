@@ -102,9 +102,9 @@ void func_02028f24(CharLoader *loader, const char *name, int plane, int a, int b
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 
 // --- The saved game ---
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
-BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+BOOL GameData_StartSave(GameData *game); // Starts writing the save data; FALSE when it cannot
+BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being written
 }
 
 // --- The message window's functions this scene calls besides MessageWindow.h's ---

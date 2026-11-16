@@ -115,10 +115,10 @@ void TutorialRoomScene::StartLoading() {
     mTutorialStep = gSceneMemory.mTutorialStep;
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
-            mFront.mResidents[func_0202c414(&gGameData, i)] = i;
+            mFront.mResidents[GameData_GetCharacterRoomNumber(&gGameData, i)] = i;
         }
     }
 
@@ -923,8 +923,8 @@ void TutorialRoomScene::UpdateIdle() {
 // @0x0214c0c8
 void TutorialRoomScene::SaveCharacter(SavedCharacter *character) {
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, character);
     }
 }
 
@@ -937,8 +937,8 @@ void TutorialRoomScene::SaveCharacters() {
 // @0x0214c128
 void TutorialRoomScene::LoadCharacter(SavedCharacter *character) {
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c264(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_ReadCharacter(&gGameData, index, character);
     } else {
         ((SavedCharacter *)(character))->Reset();
         ((SavedCharacter *)(character))->SetParameter(40, index & 7);
@@ -2242,10 +2242,10 @@ int TutorialApartmentFront::GetWindowKind(int room) {
     if (character == 0xFF) {
         return WINDOW_EMPTY;
     }
-    int unknown1 = func_0202c468(&gGameData, character);
-    u8 unknown2 = func_0202c53c(&gGameData, character);
-    int unknown3 = func_0202c5b4(&gGameData, character);
-    int unknown4 = data_02114d78[unknown3][func_0202c58c(&gGameData, character)].mUnknown0;
+    int unknown1 = GameData_GetCharacterEvent(&gGameData, character);
+    u8 unknown2 = GameData_GetCharacterTroubleState(&gGameData, character);
+    int unknown3 = GameData_GetCharacterTroubleCategory(&gGameData, character);
+    int unknown4 = data_02114d78[unknown3][GameData_GetCharacterTroubleId(&gGameData, character)].mUnknown0;
     if (SavedCharacter::IsAwayState(unknown1)) {
         return WINDOW_2;
     }

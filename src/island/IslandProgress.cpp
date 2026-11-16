@@ -63,11 +63,11 @@ public:
 extern "C" {
 extern const ItemInfo data_020f5f0c[];
 extern IslandState data_0212348c; // The state of the island's buildings and features
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-BOOL func_0202c604(GameData *game, int index); // Its sex (MiiData_GetSex): 0 male, 1 female
-u32 func_0202c6a8(GameData *game, int index);  // Its year of birth, 0xFFF for none
-u32 func_0202c6d0(GameData *game, int index);  // Its month of birth
-u32 func_0202c6f8(GameData *game, int index);  // Its day of birth
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+BOOL GameData_GetCharacterSex(GameData *game, int index); // Its sex (MiiData_GetSex): 0 male, 1 female
+u32 GameData_GetCharacterBirthYear(GameData *game, int index);  // Its year of birth, 0xFFF for none
+u32 GameData_GetCharacterBirthMonth(GameData *game, int index);  // Its month of birth
+u32 GameData_GetCharacterBirthDay(GameData *game, int index);  // Its day of birth
 }
 
 void IslandProgress::Init(Inventory *inventory, int *money) {
@@ -96,19 +96,19 @@ void IslandProgress::Count() {
     mEntriesB = 0;
     mTroublesSolved = 0;
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c3dc(&gGameData, i)) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
             continue;
         }
-        if (!func_0202c604(&gGameData, i)) {
+        if (!GameData_GetCharacterSex(&gGameData, i)) {
             mMen++;
         } else {
             mWomen++;
         }
-        if (func_0202c6a8(&gGameData, i) == 0xFFF) {
+        if (GameData_GetCharacterBirthYear(&gGameData, i) == 0xFFF) {
             continue;
         }
-        u32 month = func_0202c6d0(&gGameData, i);
-        u32 day = func_0202c6f8(&gGameData, i);
+        u32 month = GameData_GetCharacterBirthMonth(&gGameData, i);
+        u32 day = GameData_GetCharacterBirthDay(&gGameData, i);
         if (month != 0 && month <= 12 && day != 0 && day <= 31) {
             mWithBirthday++;
         }

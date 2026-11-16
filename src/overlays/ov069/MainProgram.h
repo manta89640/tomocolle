@@ -94,13 +94,13 @@ extern "C" {
 extern MATHRandContext16 gRandom;
 
 // --- The saved game ---
-BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
 void func_0202c8f8(GameData *game, int unknown);
-BOOL func_0202cd48(GameData *game); // Starts writing the save data; FALSE when it cannot
+BOOL GameData_StartSave(GameData *game); // Starts writing the save data; FALSE when it cannot
 BOOL func_0202cd54(GameData *game); // The same after func_0202c8f8(game, 1) and func_0202d07c(game, 0)
 BOOL func_0202cd74(GameData *game); // The same after func_0202c8f8(game, 0) and func_0202d07c(game, 0)
-BOOL func_0202cd38(GameData *game); // Not 0 while the save data is being written
+BOOL GameData_IsSaving(GameData *game); // Not 0 while the save data is being written
 
 // --- 3D ---
 extern Camera gCamera;

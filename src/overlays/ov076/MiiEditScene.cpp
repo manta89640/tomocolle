@@ -236,8 +236,8 @@ extern Light gLight1;
 BOOL ScreenControl_GetBlendBrightness(ScreenControl *screens, int planes);
 void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 void func_0207b138(ParticleSystem *system);
-void func_0202c264(GameData *game, int index, CharacterRecord *record); // Reads a saved character
-void func_0202c28c(GameData *game, int index, CharacterRecord *record); // Writes one
+void GameData_ReadCharacter(GameData *game, int index, CharacterRecord *record); // Reads a saved character
+void GameData_WriteCharacter(GameData *game, int index, CharacterRecord *record); // Writes one
 void func_02031e88(SpriteButton *button, BOOL a);
 void func_0207b3dc(ParticleSystem *system);
 ParticleEmitter *func_0207b2fc(ParticleSystem *system, int resource, VecFx32 *position);
@@ -257,7 +257,7 @@ struct Renderer3d;
 extern "C" {
 extern Renderer3d gVramManagerWork;
 void VramManagers_Reset(Renderer3d *renderer);
-BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
 extern void *data_02123440[];
 void Clock_GetDate(void *clock, RTCDate *date);
 void Camera_Reset(Camera *camera);
@@ -326,7 +326,7 @@ void MiiEditScene::Init() {
         mCharacter.Character::SetVisible(FALSE);
         int i;
         for (i = 0; i < 100; i++) {
-            if (!func_0202c354(&gGameData, i)) {
+            if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
                 break;
             }
         }
@@ -606,7 +606,7 @@ void MiiEditScene::Update() {
         case 5:
             if (mSceneId == 0x42) {
                 CharacterRecord record;
-                func_0202c264(&gGameData, (u16)mUnknown5824, &record);
+                GameData_ReadCharacter(&gGameData, (u16)mUnknown5824, &record);
                 if (!SavedCharacter::CompareRecords(&record, &mCharacter)) {
                     gSceneManager.RequestScene(0x1A);
                 } else {
@@ -825,7 +825,7 @@ void MiiEditScene::PlayEffectAtHead(int resource, fx32 offsetY) {
 
 // Reads the saved character into mCharacter, and sets it up
 void MiiEditScene::LoadCharacter(int index) {
-    func_0202c264(&gGameData, index, &mCharacter);
+    GameData_ReadCharacter(&gGameData, index, &mCharacter);
     LoadModel();
 }
 
@@ -926,7 +926,7 @@ void MiiEditScene::SaveCharacter() {
         mCharacter.mTroubleEnd = 0x7FFFFFFFFFFFFFFF;
         break;
     }
-    func_0202c28c(&gGameData, mUnknown5824, &mCharacter);
+    GameData_WriteCharacter(&gGameData, mUnknown5824, &mCharacter);
 }
 
 void MiiEditScene::SetCharacterColors(BOOL a) {
@@ -1069,7 +1069,7 @@ void MiiEditSexPage::Update() {
                     wchar_t name[11];
                     SavedCharacter first;
                     MI_CpuClear16(name, sizeof(name));
-                    func_0202c264(&gGameData, 0, &first);
+                    GameData_ReadCharacter(&gGameData, 0, &first);
                     MiiData_GetCreatorName(&first, name);
                     if (mScene->GetNameLength(name) == 0) {
                         MI_CpuClear16(name, sizeof(name));

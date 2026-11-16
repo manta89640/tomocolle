@@ -42,7 +42,7 @@ void SavePlayScene::StartLoading() {
     gSoundManager.LoadGroup(0x5C);
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i)) {
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
         }
@@ -58,7 +58,7 @@ void SavePlayScene::StartLoading() {
         mCharacters[0].mIndex = 0;
     } else {
         mCharacters[0].mIndex = mResidents[Rand(mResidentCount)];
-        func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+        GameData_ReadCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     }
     mCharacters[0].Character::SetArchive("MT0");
     ArchiveManager_MountCompressed(&gArchiveManager, mCharacters[0].mArchiveName, mCharacters[0].mArchivePath, 0);
@@ -97,7 +97,7 @@ void SavePlayScene::Init() {
     ModelResources_BindArchive(gModelResources, 0, mCharacters[0].mArchiveName, 0);
     mCharacters[0].Character::Init(0, 0, 0);
     void *animations = ModelResources_BindArchive(gModelResources, 1, "BIC", 0);
-    func_0202c264(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
+    GameData_ReadCharacter(&gGameData, mCharacters[0].mIndex, &mCharacters[0]);
     mCharacters[0].CharacterBase::MakeFace();
     mCharacters[0].Character::UpdateBodyScale();
     mCharacters[0].mPersonality = mCharacters[0].GetPersonality();
@@ -318,10 +318,10 @@ BOOL SavePlayScene::Save(int kind) {
         mFrames = 0;
         if (kind == SAVE_0) {
             func_0202c8f8(&gGameData, 0);
-            ok = func_0202cd48(&gGameData);
+            ok = GameData_StartSave(&gGameData);
         } else if (kind == SAVE_1) {
             func_0202c8f8(&gGameData, 1);
-            ok = func_0202cd48(&gGameData);
+            ok = GameData_StartSave(&gGameData);
         } else if (kind == SAVE_2) {
             ok = func_0202cd54(&gGameData);
         } else if (kind == SAVE_3) {
@@ -334,7 +334,7 @@ BOOL SavePlayScene::Save(int kind) {
         }
     } else if (mSubStep == 1) {
         mFrames++;
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mSubStep++;
         }
     } else if (mSubStep == 2) {

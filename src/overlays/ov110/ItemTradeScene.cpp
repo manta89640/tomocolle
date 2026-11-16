@@ -1375,7 +1375,7 @@ void ItemTradeScene::StartLoading() {
     mMannequin.SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
 
-    func_0202c264(&gGameData, 0, &mPlayer);
+    GameData_ReadCharacter(&gGameData, 0, &mPlayer);
     mPlayer.mPersonality = mPlayer.GetPersonality();
     switch (gPersonalityKinds[mPlayer.mPersonality]) {
     case 0:
@@ -1919,7 +1919,7 @@ void ItemTradeScene::Update() {
                     mSendStep = 3;
                     break;
                 case 3:
-                    if (!func_0202cd38(&gGameData)) {
+                    if (!GameData_IsSaving(&gGameData)) {
                         mSendStep = 1;
                     }
                     break;
@@ -1939,7 +1939,7 @@ void ItemTradeScene::Update() {
                         break;
                     }
                     sReceivedCommand = 0;
-                    if (mSaveAfterReturn == TRUE && !func_0202cd38(&gGameData)) {
+                    if (mSaveAfterReturn == TRUE && !GameData_IsSaving(&gGameData)) {
                         mNextState = STATE_PARTNER_FULL;
                         mSaveAfterReturn = FALSE;
                         done = TRUE;
@@ -1971,7 +1971,7 @@ void ItemTradeScene::Update() {
                 }
                 break;
             case STATE_SAVING:
-                if (IsWindowOpen(&mWindow) && !func_0202cd38(&gGameData)) {
+                if (IsWindowOpen(&mWindow) && !GameData_IsSaving(&gGameData)) {
                     if (sReceived) {
                         WriteSave();
                         sReceived = 0;
@@ -2247,7 +2247,7 @@ void ItemTradeScene::ClearNames() {
 // Starts writing the save data, or asks for the scene that says it could not be written
 // @0x0214ee88
 void ItemTradeScene::WriteSave() {
-    if (!func_0202cd48(&gGameData)) {
+    if (!GameData_StartSave(&gGameData)) {
         gSceneManager.RequestScene(0xC2);
     }
 }

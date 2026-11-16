@@ -12,9 +12,9 @@ extern "C" {
 extern void *data_02123440[];                  // The game's clock
 void func_02035460(void *clock, RTCDate *date, RTCTime *time, BOOL unknown); // Sets it (as overlay 98 declares it)
 void Clock_GetDate(void *clock, RTCDate *date);
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
-BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads a saved character
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
 int NFL_GetCharInfo(void *info, const void *mii); // lib/NFL: the Mii's name and fields, 7 for invalid data
 }
 
@@ -161,7 +161,7 @@ void WirelessTestScene::Update() {
             if ((gPadInput.mTrigger & PAD_BUTTON_START) && sChunk == 0) {
                 sChunk = 1;
                 mState = STATE_SENDING;
-                func_0202c264(&gGameData, mCharacter, &sCharacter);
+                GameData_ReadCharacter(&gGameData, mCharacter, &sCharacter);
                 WH_SendData(&sCharacter, 0x80, OnSent);
                 sSendReady = FALSE;
             }
@@ -252,7 +252,7 @@ void WirelessTestScene::Redraw() {
         break;
     case STATE_CONNECTED:
         if (mRole == 0) {
-            func_0202c264(&gGameData, mCharacter, &sCharacter);
+            GameData_ReadCharacter(&gGameData, mCharacter, &sCharacter);
             wchar_t number[4];
             FormatNumber(mCharacter, number, sizeof(number), 3, TRUE);
             mCanvas.mTextX = 32;
@@ -261,7 +261,7 @@ void WirelessTestScene::Redraw() {
             mCanvas.DrawText();
             mCanvas.mTextX = 80;
             MiiCharInfo info;
-            if (func_0202c354(&gGameData, mCharacter)) {
+            if (GameData_IsCharacterSlotUsed(&gGameData, mCharacter)) {
                 NFL_GetCharInfo(&info, &sCharacter);
                 mCanvas.mText = ToG2dChars(info.name);
             } else {
@@ -288,9 +288,9 @@ void WirelessTestScene::OnReceive(u16, u16 *data, u16 size) {
         return;
     }
     for (int i = 0; i < 100; i++) {
-        if (!func_0202c354(&gGameData, i)) {
+        if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
             sCharacter.Register();
-            func_0202c28c(&gGameData, i, &sCharacter);
+            GameData_WriteCharacter(&gGameData, i, &sCharacter);
             break;
         }
     }

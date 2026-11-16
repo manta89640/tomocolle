@@ -129,20 +129,20 @@ extern void *data_02123440;
 extern MiiIdSource data_0212349c; // Where this console's Miis' create IDs come from
 
 // The saved game (gap)
-BOOL func_0202c3dc(GameData *game, int index); // Whether there is a saved character with that index
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one back
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether there is a saved character with that index
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one back
 
-BOOL func_0202c468(GameData *game, int index);
-u8 func_0202c53c(GameData *game, int index); // The saved character's mTroubleState
-u8 func_0202c58c(GameData *game, int index); // Its mTroubleId
-u8 func_0202c5b4(GameData *game, int index); // Its mTroubleCategory
-int func_0202c604(GameData *game, int index); // Its sex
-int func_0202c680(GameData *game, int index); // Its mRelationBlood
+BOOL GameData_GetCharacterEvent(GameData *game, int index);
+u8 GameData_GetCharacterTroubleState(GameData *game, int index); // The saved character's mTroubleState
+u8 GameData_GetCharacterTroubleId(GameData *game, int index); // Its mTroubleId
+u8 GameData_GetCharacterTroubleCategory(GameData *game, int index); // Its mTroubleCategory
+int GameData_GetCharacterSex(GameData *game, int index); // Its sex
+int GameData_GetCharacterRelationToPlayer(GameData *game, int index); // Its mRelationBlood
 int MiiData_GetSex(const CharacterRecord *mii);
 extern const u8 data_020f8d7c[6]; // ChooseCharacterByRelation's weights of its groups
-BOOL func_0202c354(GameData *game, int index); // Whether there is a saved character with that index
-int func_0202c414(GameData *game, int index);  // Its mRoomNumber
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index); // Whether there is a saved character with that index
+int GameData_GetCharacterRoomNumber(GameData *game, int index);  // Its mRoomNumber
 
 // The reactions in a talk (ChooseTalkReaction) and by themselves (ChooseNextReaction)
 struct TalkReactionInfo {
@@ -160,8 +160,8 @@ extern const TalkReactionInfo data_020f5828[12];
 extern const s8 *const data_021135f0[];    // By relation: the weights of the reactions by the partner's reaction
 extern const ReactionInfo data_020f5df8[15];
 extern const u8 data_020f5e28[][15];       // By the reaction before: the weights of the next
-int func_0202c5dc(GameData *game, int index);
-u8 func_0202c43c(GameData *game, int index, int other); // Its mRelationMeter for another
+int GameData_GetCharacterMood(GameData *game, int index);
+u8 GameData_GetCharacterAffinity(GameData *game, int index, int other); // Its mRelationMeter for another
 extern u8 data_0212348c[];
 extern const s8 gStr_AFKPUUA[24];  // By hour: the chance (of 100) that an idle character goes to sleep
 extern const s8 data_020f8ca8[24]; // By hour: how many hours it then sleeps on top of the activity's length
@@ -1152,7 +1152,7 @@ void SavedCharacter::ResetRelations() {
 
 int SavedCharacter::FindCouplePartner() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsCoupleRelation(mRelationRank[i])) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && IsCoupleRelation(mRelationRank[i])) {
             return i;
         }
     }
@@ -1161,7 +1161,7 @@ int SavedCharacter::FindCouplePartner() {
 
 int SavedCharacter::FindLoverOrSpouse() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsLoversOrSpouses(mRelationRank[i])) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && IsLoversOrSpouses(mRelationRank[i])) {
             return i;
         }
     }
@@ -1170,7 +1170,7 @@ int SavedCharacter::FindLoverOrSpouse() {
 
 int SavedCharacter::FindBestFriend() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && mRelationRank[i] == 9) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && mRelationRank[i] == 9) {
             return i;
         }
     }
@@ -1255,16 +1255,16 @@ void SavedCharacter::EndLongAct(SavedCharacter *first, SavedCharacter *second) {
         } else if (second != NULL && partner == second->mIndex) {
             partnerCharacter = second;
         } else {
-            func_0202c264(&gGameData, partner, &other);
+            GameData_ReadCharacter(&gGameData, partner, &other);
             other.mPersonality = other.GetPersonality();
             partnerCharacter = &other;
         }
         partnerCharacter->ClearLongAct();
-        func_0202c28c(&gGameData, partner, partnerCharacter);
+        GameData_WriteCharacter(&gGameData, partner, partnerCharacter);
     }
     ClearLongAct();
     ClearUnknown246();
-    func_0202c28c(&gGameData, mIndex, this);
+    GameData_WriteCharacter(&gGameData, mIndex, this);
 }
 
 void SavedCharacter::StartNextLongAct(s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second) {
@@ -1708,7 +1708,7 @@ void SavedCharacter::ExpireTrouble(s64 now, SavedCharacter *partner) {
         break;
     }
     if (changed) {
-        func_0202c28c(&gGameData, mIndex, this);
+        GameData_WriteCharacter(&gGameData, mIndex, this);
     }
 }
 
@@ -1721,7 +1721,7 @@ void SavedCharacter::FailTrouble(s64 now, SavedCharacter *target) {
     if (IsInFightOrSeparationTrouble() && target == NULL) {
         u16 index = mTroubleTarget;
         target = &other;
-        func_0202c264(&gGameData, index, target);
+        GameData_ReadCharacter(&gGameData, index, target);
         other.mIndex = index;
     }
     const TroubleInfo *info = &data_02114d78[mTroubleCategory][mTroubleId];
@@ -1731,15 +1731,15 @@ void SavedCharacter::FailTrouble(s64 now, SavedCharacter *target) {
         return;
     case 8:
         FailFightTrouble(now, target);
-        func_0202c28c(&gGameData, target->mIndex, target);
+        GameData_WriteCharacter(&gGameData, target->mIndex, target);
         return;
     case 9:
         BreakUp(now, target);
-        func_0202c28c(&gGameData, target->mIndex, target);
+        GameData_WriteCharacter(&gGameData, target->mIndex, target);
         return;
     case 10:
         Divorce(now, target);
-        func_0202c28c(&gGameData, target->mIndex, target);
+        GameData_WriteCharacter(&gGameData, target->mIndex, target);
         return;
     default:
         mTroubleEnd += info->cooldownMinutes * 60;
@@ -1830,8 +1830,8 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
         int count = 0;
         MI_CpuFill16(special, 0xFFFF, sizeof(special));
         for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
-            if (func_0202c3dc(&gGameData, i) && !func_0202c468(&gGameData, i) && i != mIndex &&
-                Is0Or1(func_0202c5dc(&gGameData, i))) {
+            if (GameData_CharacterExists(&gGameData, i) && !GameData_GetCharacterEvent(&gGameData, i) && i != mIndex &&
+                Is0Or1(GameData_GetCharacterMood(&gGameData, i))) {
                 u8 rank = mRelationRank[i];
                 if (!IsFightingRelation(rank) && rank != 0 && rank != 3 && rank != 5) {
                     if (IsCoupleRelation(rank)) {
@@ -1851,7 +1851,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
             for (j = 0; j < 2; j++) {
                 if (special[j] != 0xFFFF && MATH_Rand16(&gRandom, 100) < 75 - j * 25) {
                     partner = special[j];
-                    if (j == 0 && mRelationMeter[partner] > 50 && func_0202c43c(&gGameData, partner, mIndex) > 50) {
+                    if (j == 0 && mRelationMeter[partner] > 50 && GameData_GetCharacterAffinity(&gGameData, partner, mIndex) > 50) {
                         int random = MATH_Rand16(&gRandom, 100);
                         if (random < 30) {
                             state = 0x2C;
@@ -1872,7 +1872,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
                 if (second != NULL && partner == second->mIndex) {
                     first = second;
                 } else {
-                    func_0202c264(&gGameData, partner, &other);
+                    GameData_ReadCharacter(&gGameData, partner, &other);
                     first = &other;
                 }
             }
@@ -1903,7 +1903,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
                 partnerState = 0x2D;
             }
             first->SetLongAct(partnerState, mIndex, end);
-            func_0202c28c(&gGameData, partner, first);
+            GameData_WriteCharacter(&gGameData, partner, first);
         } else {
             SetLongAct(0, 0, now + GetLongActDuration(0, 3));
         }
@@ -1957,7 +1957,7 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
     } else {
         SetLongAct(state, 0, now + GetLongActDuration(state, 3));
     }
-    func_0202c28c(&gGameData, mIndex, this);
+    GameData_WriteCharacter(&gGameData, mIndex, this);
 }
 
 int SavedCharacter::ChooseTroubleCategory() {
@@ -2042,7 +2042,7 @@ void SavedCharacter::EndTrouble(s64 now) {
     if (!IsLongActPaired()) {
         mLongActEnd = now;
     }
-    func_0202c28c(&gGameData, mIndex, this);
+    GameData_WriteCharacter(&gGameData, mIndex, this);
 }
 
 void SavedCharacter::ClearTrouble() {
@@ -2299,7 +2299,7 @@ int SavedCharacter::ChooseNewFriend() {
     int count = 0;
     int friends = 0;
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex) {
             u8 rank = mRelationRank[i];
             if (rank == RELATION_NONE) {
                 others[count] = i;
@@ -2327,7 +2327,7 @@ int SavedCharacter::ChooseFightOpponent() {
     int partners = 0;
     int partner;
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && !func_0202c53c(&gGameData, i) &&
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && !GameData_GetCharacterTroubleState(&gGameData, i) &&
             IsFriendsLoversOrSpouses(mRelationRank[i])) {
             others[count] = i;
             count++;
@@ -2357,7 +2357,7 @@ int SavedCharacter::ChooseLoverToLeave() {
             cooled = TRUE;
         }
         BOOL fighting = rank == RELATION_LOVERS_FIGHTING ? TRUE : FALSE;
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && (fighting || cooled)) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && (fighting || cooled)) {
             other = i;
             break;
         }
@@ -2375,7 +2375,7 @@ int SavedCharacter::ChooseSpouseToLeave() {
             cooled = TRUE;
         }
         BOOL fighting = rank == RELATION_SPOUSES_FIGHTING ? TRUE : FALSE;
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && (fighting || cooled)) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && (fighting || cooled)) {
             other = i;
             break;
         }
@@ -2388,10 +2388,10 @@ void SavedCharacter::CountFights(int *residents, int *fights) {
     *residents = 0;
     *fights = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             (*residents)++;
-            if (IsAngryAfterFightState(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
-                                  func_0202c58c(&gGameData, i))) {
+            if (IsAngryAfterFightState(GameData_GetCharacterTroubleState(&gGameData, i), GameData_GetCharacterTroubleCategory(&gGameData, i),
+                                  GameData_GetCharacterTroubleId(&gGameData, i))) {
                 (*fights)++;
             }
         }
@@ -2424,8 +2424,8 @@ int SavedCharacter::ChooseLoveInterest() {
         return -1;
     }
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && MiiData_GetSex(this) != func_0202c604(&gGameData, i) &&
-            GetRelationBloodPairValue(mRelationBlood, func_0202c680(&gGameData, i)) != 0) {
+        if (GameData_CharacterExists(&gGameData, i) && i != mIndex && MiiData_GetSex(this) != GameData_GetCharacterSex(&gGameData, i) &&
+            GetRelationBloodPairValue(mRelationBlood, GameData_GetCharacterRelationToPlayer(&gGameData, i)) != 0) {
             u8 rank = mRelationRank[i];
             if ((rank == RELATION_FRIENDS || rank == RELATION_BEST_FRIENDS) && mRelationMeter[i] >= 140) {
                 others[count] = i;
@@ -2448,7 +2448,7 @@ int SavedCharacter::ChooseCharacterByRelation() {
     int bestFriend = -1;
     int result;
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
-        if (!func_0202c3dc(&gGameData, i) || i == mIndex) {
+        if (!GameData_CharacterExists(&gGameData, i) || i == mIndex) {
             continue;
         }
         if (IsLoversOrSpouses(mRelationRank[i])) {
@@ -2456,7 +2456,7 @@ int SavedCharacter::ChooseCharacterByRelation() {
         } else if (mRelationRank[i] == RELATION_BEST_FRIENDS) {
             bestFriend = i;
         } else if (mRelationRank[i] == RELATION_FRIENDS) {
-            if (MiiData_GetSex(this) != func_0202c604(&gGameData, i)) {
+            if (MiiData_GetSex(this) != GameData_GetCharacterSex(&gGameData, i)) {
                 groups[0][counts[0]] = i;
                 counts[0]++;
             } else {
@@ -2464,7 +2464,7 @@ int SavedCharacter::ChooseCharacterByRelation() {
                 counts[1]++;
             }
         } else if (mRelationRank[i] == RELATION_NONE) {
-            if (MiiData_GetSex(this) != func_0202c604(&gGameData, i)) {
+            if (MiiData_GetSex(this) != GameData_GetCharacterSex(&gGameData, i)) {
                 groups[2][counts[2]] = i;
                 counts[2]++;
             } else {
@@ -3317,8 +3317,8 @@ void SavedCharacter::AssignFreeRoom() {
     u8 rooms[100];
     MI_CpuFill8(rooms, 0xFF, sizeof(rooms));
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i)) {
-            rooms[func_0202c414(&gGameData, i)] = i;
+        if (GameData_IsCharacterSlotUsed(&gGameData, i)) {
+            rooms[GameData_GetCharacterRoomNumber(&gGameData, i)] = i;
         }
     }
     GetApartmentRooms();

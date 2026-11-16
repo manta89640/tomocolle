@@ -88,24 +88,24 @@ void TutorialStepScene::StartLoading() {
     case 24: {
         int found = 0;
         for (int i = 0; i < 100 && found < 2; i++) {
-            if (func_0202c3dc(&gGameData, i)) {
+            if (GameData_CharacterExists(&gGameData, i)) {
                 SavedCharacter resident;
-                func_0202c264(&gGameData, i, &resident);
+                GameData_ReadCharacter(&gGameData, i, &resident);
                 resident.ClearLongAct();
                 resident.ClearTrouble();
-                func_0202c28c(&gGameData, i, &resident);
+                GameData_WriteCharacter(&gGameData, i, &resident);
                 found++;
             }
         }
 
         SavedCharacter first;
-        func_0202c264(&gGameData, 0, &first);
+        GameData_ReadCharacter(&gGameData, 0, &first);
         first.ClearTrouble();
         first.mTroubleId = 0;
         first.mTroubleCategory = 9;
         first.mTroubleState = 1;
         first.mTroubleEnd = 0x7FFFFFFFFFFFFFFF;
-        func_0202c28c(&gGameData, 0, &first);
+        GameData_WriteCharacter(&gGameData, 0, &first);
         gSceneManager.RequestScene(0x5F);
         break;
     }

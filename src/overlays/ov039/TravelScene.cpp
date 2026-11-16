@@ -542,7 +542,7 @@ void TravelScene::SetState(int state) {
         mTtsPlayer.StopEngine();
         // The player, who takes the photograph and says "cheese", speaks with the voice of a resident drawn at random
         SavedCharacter photographer;
-        func_0202c264(&gGameData, mCast.mResidents[Rand(mCast.mResidentCount)], &photographer);
+        GameData_ReadCharacter(&gGameData, mCast.mResidents[Rand(mCast.mResidentCount)], &photographer);
         photographer.SetVoiceOf(&mTtsPlayer);
         Speak(-1, 0x4B0, 0);
         mPoseFrame = (photographer.mVoice[4] - 50) * 220 / 250 + 40;

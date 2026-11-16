@@ -345,8 +345,8 @@ void MapScene::StartLoading() {
     default: {
         SavedCharacter character;
         for (int i = 0; i < RESIDENT_COUNT; i++) {
-            if (func_0202c3dc(&gGameData, i)) {
-                func_0202c264(&gGameData, (u16)i, &character);
+            if (GameData_CharacterExists(&gGameData, i)) {
+                GameData_ReadCharacter(&gGameData, (u16)i, &character);
                 mResidentRooms[i] = character.mRoom;
             } else {
                 mResidentRooms[i] = -1;
@@ -867,11 +867,11 @@ void MapScene::Update() {
                     } else {
                         news = 0xA0;
                         for (int i = 0; i < RESIDENT_COUNT; i++) {
-                            if (func_0202c3dc(&gGameData, i)) {
+                            if (GameData_CharacterExists(&gGameData, i)) {
                                 SavedCharacter character;
-                                func_0202c264(&gGameData, i, &character);
+                                GameData_ReadCharacter(&gGameData, i, &character);
                                 func_0209c44c(&character, -30);
-                                func_0202c28c(&gGameData, i, &character);
+                                GameData_WriteCharacter(&gGameData, i, &character);
                             }
                         }
                     }
@@ -1131,12 +1131,12 @@ void MapScene::SetState(int state) {
         case 15: {
             SavedCharacter first;
             SavedCharacter second;
-            func_0202c264(&gGameData, 0, &first);
-            func_0202c264(&gGameData, 1, &second);
+            GameData_ReadCharacter(&gGameData, 0, &first);
+            GameData_ReadCharacter(&gGameData, 1, &second);
             first.mEvent = 0;
             second.mEvent = 0;
-            func_0202c28c(&gGameData, 0, &first);
-            func_0202c28c(&gGameData, 1, &second);
+            GameData_WriteCharacter(&gGameData, 0, &first);
+            GameData_WriteCharacter(&gGameData, 1, &second);
             UpdateWindows();
             SetTutorialStep(11);
             ((SaveHeader *)&gIsland)->SetUnknown44(3, 3);
@@ -1369,7 +1369,7 @@ void MapScene::SetTutorialStep(int step) {
         break;
     case 6: {
         SavedCharacter character;
-        func_0202c264(&gGameData, 0, &character);
+        GameData_ReadCharacter(&gGameData, 0, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
@@ -1382,7 +1382,7 @@ void MapScene::SetTutorialStep(int step) {
     }
     case 8: {
         SavedCharacter character;
-        func_0202c264(&gGameData, 0, &character);
+        GameData_ReadCharacter(&gGameData, 0, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
@@ -1410,7 +1410,7 @@ void MapScene::SetTutorialStep(int step) {
         break;
     case 15: {
         SavedCharacter character;
-        func_0202c264(&gGameData, 1, &character);
+        GameData_ReadCharacter(&gGameData, 1, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
@@ -1437,7 +1437,7 @@ void MapScene::SetTutorialStep(int step) {
         break;
     case 18: {
         SavedCharacter character;
-        func_0202c264(&gGameData, 1, &character);
+        GameData_ReadCharacter(&gGameData, 1, &character);
         wchar_t name[11];
         MiiData_GetName(&character, name);
         func_02034a3c(&mMessageWindows[1], 0, 0, name);
@@ -1483,7 +1483,7 @@ BOOL MapScene::IsNewsDue() {
     Clock_GetDate(data_02123440[0], &date);
     Clock_GetTime(data_02123440[0], &time);
     NewsItem item;
-    func_0202c8a8(&gGameData, 0, &item);
+    GameData_GetNewsItem(&gGameData, 0, &item);
     RTCDate itemDate;
     itemDate.year = item.mYear;
     itemDate.month = item.GetMonth();
@@ -1532,9 +1532,9 @@ void MapScene::MakeDailyNews() {
     u8 birthdays[RESIDENT_COUNT];
     u8 others[RESIDENT_COUNT];
     for (int i = 0; i < RESIDENT_COUNT; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             SavedCharacter character;
-            func_0202c264(&gGameData, i, &character);
+            GameData_ReadCharacter(&gGameData, i, &character);
             if (date.month == character.GetParameter(0x26) && date.day == character.GetParameter(0x27)) {
                 birthdays[birthdayCount] = i;
                 birthdayCount++;
@@ -1556,7 +1556,7 @@ void MapScene::MakeDailyNews() {
         int last = -1;
         for (int i = 0; i < 11; i++) {
             NewsItem item;
-            func_0202c8a8(&gGameData, i, &item);
+            GameData_GetNewsItem(&gGameData, i, &item);
             u32 year = item.mYear + 2000;
             if (item.mKind == 0x1D && year == date.year) {
                 last = item.mCharacter;
@@ -1603,7 +1603,7 @@ void MapScene::MakeDailyNews() {
 void MapScene::AddNews(int kind) {
     NewsItem items[11];
     for (int i = 0; i < 11; i++) {
-        func_0202c8a8(&gGameData, i, &items[i]);
+        GameData_GetNewsItem(&gGameData, i, &items[i]);
     }
     int dropped = 0;
     for (int i = 10; i >= 0; i--) {
@@ -1615,11 +1615,11 @@ void MapScene::AddNews(int kind) {
     NewsItem item;
     int index = 0;
     NewsItem_Make(&item, kind);
-    func_0202c8bc(&gGameData, index, &item);
+    GameData_SetNewsItem(&gGameData, index, &item);
     index++;
     for (int i = 0; i < 11; i++) {
         if (i != dropped) {
-            func_0202c8bc(&gGameData, index, &items[i]);
+            GameData_SetNewsItem(&gGameData, index, &items[i]);
             index++;
         }
     }
@@ -1630,10 +1630,10 @@ int MapScene::GetWindowTexture(int resident) {
     if (resident == -1) {
         return 2;
     }
-    u8 event = func_0202c468(&gGameData, resident);
-    u8 unknown = func_0202c53c(&gGameData, resident);
-    int row = func_0202c5b4(&gGameData, resident);
-    int column = func_0202c58c(&gGameData, resident);
+    u8 event = GameData_GetCharacterEvent(&gGameData, resident);
+    u8 unknown = GameData_GetCharacterTroubleState(&gGameData, resident);
+    int row = GameData_GetCharacterTroubleCategory(&gGameData, resident);
+    int column = GameData_GetCharacterTroubleId(&gGameData, resident);
     int kind = data_02114d78[row][column].mUnknown0;
     if (SavedCharacter::IsAwayState(event)) {
         return 3;

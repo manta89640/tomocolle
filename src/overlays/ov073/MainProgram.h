@@ -135,16 +135,16 @@ void Light_Reset(Light *light);
 void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ, fx32 x, fx32 y, fx32 z);
 
 // --- The saved game ---
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-int func_0202c414(GameData *game, int index);  // Its room number (SavedCharacter::mRoom)
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+int GameData_GetCharacterRoomNumber(GameData *game, int index);  // Its room number (SavedCharacter::mRoom)
 struct SavedCharacter;
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(GameData *game, int index, SavedCharacter *character); // Writes one
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(GameData *game, int index, SavedCharacter *character); // Writes one
 // What is known of a character by its index
-int func_0202c468(GameData *game, int character);
-u8 func_0202c53c(GameData *game, int character);
-int func_0202c5b4(GameData *game, int character);
-int func_0202c58c(GameData *game, int character);
+int GameData_GetCharacterEvent(GameData *game, int character);
+u8 GameData_GetCharacterTroubleState(GameData *game, int character);
+int GameData_GetCharacterTroubleCategory(GameData *game, int character);
+int GameData_GetCharacterTroubleId(GameData *game, int character);
 extern const Unknown02114d78Entry *const data_02114d78[];
 
 // --- The clock ---

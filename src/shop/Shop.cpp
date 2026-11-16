@@ -74,7 +74,7 @@ void ModelResources_SetModel(void *resources, int resourceId, const char *modelP
 void ArchiveManager_MountCompressed(ArchiveLoader *loader, const char *name, const char *path, int unknown);
 void ArchiveManager_Unmount(ArchiveLoader *loader, const char *name);
 void func_02029660(int resourceSet, u32 resType, void *archive); // Gives a resource set an archive's animations
-void func_0202c264(GameData *game, int index, Character *character); // Reads a saved character
+void GameData_ReadCharacter(GameData *game, int index, Character *character); // Reads a saved character
 int MiiData_GetSex(Character *character);
 void func_0209d898(Character *character, TtsPlayer *player); // Gives the speech player the character's voice
 void ScreenControl_SetBlendAlpha(void *a, int b, int c, int d, int e);
@@ -82,9 +82,9 @@ void VramManagers_Reset(void *a);
 void Camera_Reset(Camera *camera);
 void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 
-BOOL func_0202c354(GameData *game, int index);
-u8 func_0202c468(GameData *game, int index); // The character's event
-u8 func_0202c490(GameData *game, int index); // The place of its event
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);
+u8 GameData_GetCharacterEvent(GameData *game, int index); // The character's event
+u8 GameData_GetCharacterEventPartner(GameData *game, int index); // The place of its event
 }
 
 #define RESOURCE_BCA0 0x30414342 // Joint animations
@@ -1370,7 +1370,7 @@ void ShopStaff::Load(int shop, VecFx32 position, u16 angle, u16 greetingAngle, T
     func_02029660(mCharacter.mAnim.mUnknown04, RESOURCE_BCA0, animations);
     mCharacter.SetAnimation(RESOURCE_BCA0, 33);
     if (mResident) {
-        func_0202c264(&gGameData, mResidentIndex, &mCharacter);
+        GameData_ReadCharacter(&gGameData, mResidentIndex, &mCharacter);
         ModelResources_ReleaseModel(gModelResources, 28);
         ArchiveManager_Unmount(&gArchiveManager, mCharacter.mArchiveName);
         mCharacter.CharacterModel::SetArchive(mCharacter.mArchiveName, uniform, MiiData_GetSex(&mCharacter));
@@ -1847,8 +1847,8 @@ BOOL FindResidentAt(int place, BOOL *found, int *index) {
     *found = FALSE;
     *index = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c354(&gGameData, i) && func_0202c468(&gGameData, i) == 0x14 &&
-            place == func_0202c490(&gGameData, i)) {
+        if (GameData_IsCharacterSlotUsed(&gGameData, i) && GameData_GetCharacterEvent(&gGameData, i) == 0x14 &&
+            place == GameData_GetCharacterEventPartner(&gGameData, i)) {
             candidates[count] = i;
             count++;
         }

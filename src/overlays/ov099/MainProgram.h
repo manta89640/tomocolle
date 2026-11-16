@@ -73,9 +73,9 @@ void ScreenLoader_SetScrollX(ScreenLoader *loader, int plane, int x);
 void ScreenLoader_SetPriority(ScreenLoader *loader, int plane, int priority);
 void Clock_GetDate(void *clock, Date *date); // The date with the game's offset applied
 
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
-BOOL func_0202c604(GameData *game, int index); // The gender bit of its Mii (set for a woman)
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads one
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
+BOOL GameData_GetCharacterSex(GameData *game, int index); // The gender bit of its Mii (set for a woman)
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads one
 
 }
 

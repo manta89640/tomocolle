@@ -11,8 +11,8 @@
 extern "C" {
 void *ArchiveManager_GetFileByName(ArchiveLoader *loader, const char *path);
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Reads a saved character
-BOOL func_0202c3dc(GameData *game, int index); // Whether the saved character with that index exists
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Reads a saved character
+BOOL GameData_CharacterExists(GameData *game, int index); // Whether the saved character with that index exists
 void Light_Reset(Light *light);
 void Light_SetDirectionByCamera(Light *light, Camera *camera, VecFx32 direction);
 extern Light gLight1;
@@ -105,7 +105,7 @@ BOOL SceneCast::Choose(int count) {
     mCount = count;
     mResidentCount = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
         }
@@ -116,7 +116,7 @@ BOOL SceneCast::Choose(int count) {
     int n = 0;
     while (n < 4) {
         u32 character = gSceneMemory.mCharacters[(u8)n];
-        if (character >= 100 || !func_0202c3dc(&gGameData, character)) {
+        if (character >= 100 || !GameData_CharacterExists(&gGameData, character)) {
             break;
         }
         mChosen[n] = character;
@@ -143,7 +143,7 @@ void SceneCast::SetCharacters(Character *characters) {
         mCharacters[i] = &characters[i];
     }
     for (int i = 0; i < mCount; i++) {
-        func_0202c264(&gGameData, mChosen[i], mCharacters[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], mCharacters[i]);
         mCharacters[i]->mIndex = mChosen[i];
     }
 }
@@ -162,7 +162,7 @@ void SceneCast::InitCharacters() {
     for (int i = 0; i < mCount; i++) {
         ModelResources_SetModel(gModelResources, i, mCharacters[i]->mModelPath);
         mCharacters[i]->Init(i, 0, 2);
-        func_0202c264(&gGameData, mChosen[i], mCharacters[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], mCharacters[i]);
         mCharacters[i]->MakeFace();
         mCharacters[i]->UpdateBodyScale();
         mCharacters[i]->UpdateAnimSpeed();
@@ -220,7 +220,7 @@ void SceneCast::ReloadCharacter(int index) {
 // Reads a character from the save data again
 void SceneCast::RereadCharacter(int index) {
     mCharacters[index]->Init(index, 0, 2);
-    func_0202c264(&gGameData, mChosen[index], mCharacters[index]);
+    GameData_ReadCharacter(&gGameData, mChosen[index], mCharacters[index]);
     mCharacters[index]->MakeFace();
     MakeCharacterSpeechTexts(&mSpeechTexts[index], mCharacters[index]);
 }
@@ -320,7 +320,7 @@ BOOL FaceCast::Choose() {
     int residents[100];
     int count = 0;
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             residents[count] = i;
             count++;
         }
@@ -331,7 +331,7 @@ BOOL FaceCast::Choose() {
     int n = 0;
     while (n < 4) {
         u32 character = gSceneMemory.mCharacters[(u8)n];
-        if (character >= 100 || !func_0202c3dc(&gGameData, character)) {
+        if (character >= 100 || !GameData_CharacterExists(&gGameData, character)) {
             break;
         }
         mChosen[n] = character;
@@ -355,7 +355,7 @@ BOOL FaceCast::Choose() {
 
 void FaceCast::ReadCharacters() {
     for (u16 i = 0; i < mCount; i++) {
-        func_0202c264(&gGameData, mChosen[i], &mFaces[i]);
+        GameData_ReadCharacter(&gGameData, mChosen[i], &mFaces[i]);
         mFaces[i].MakeFace();
         MakeCharacterSpeechTexts(&mSpeechTexts[i], &mFaces[i]);
     }

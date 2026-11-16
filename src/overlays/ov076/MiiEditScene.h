@@ -282,7 +282,7 @@ public:
     /* 0x05810 */ Camera *mCamera;              // gCamera
     /* 0x05814 */ int mCameraFrame;             // UpdateCamera moves the camera while it is under 40
     /* 0x05818 */ VecFx32 mCameraGoal;
-    /* 0x05824 */ int mUnknown5824;            // The saved character's index (func_0202c264, func_0202c28c)
+    /* 0x05824 */ int mUnknown5824;            // The saved character's index (GameData_ReadCharacter, GameData_WriteCharacter)
     /* 0x05828 */ BOOL mUnknown5828;           // While set, Update turns the character until its angle is 0x4000
     /* 0x0582C */ MiiEditProgressSprite mProgressSprite;
     /* 0x058DC */ BOOL mUnknown58DC;            // Draw shows mProgressSprite while these two are set and 58E4 is not

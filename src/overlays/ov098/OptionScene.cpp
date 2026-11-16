@@ -513,7 +513,7 @@ void OptionScene::Update() {
         }
         break;
     case STATE_SAVING_CLOCK:
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
             func_020349cc(&mWindow, 0x24);
         }
@@ -527,7 +527,7 @@ void OptionScene::Update() {
         }
         break;
     case STATE_ERASING:
-        if (!func_0202cd38(&gGameData)) {
+        if (!GameData_IsSaving(&gGameData)) {
             mWindow.mUnknownSetBeforeClose = 0xF;
             func_020349cc(&mWindow, 0x24);
         }
@@ -635,7 +635,7 @@ void OptionScene::SetState(int state) {
         func_02034720(&mWindow, 0x12, 1);
         func_02035460(data_02123440, &mDate, &mTime, FALSE);
         func_0202c8f8(&gGameData, 0);
-        if (!func_0202cd48(&gGameData)) {
+        if (!GameData_StartSave(&gGameData)) {
             gSceneManager.RequestScene(0xC2);
         }
         break;

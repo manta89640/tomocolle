@@ -28,12 +28,12 @@ struct SavedGame {
     /* 0x4C */ u8 mBuilding; // Its low two bits: which building the plain apartment scene (id 0x11) shows
 };
 extern SavedGame gGameData;
-BOOL func_0202c3dc(SavedGame *game, int index); // Whether the saved character with that index exists
-int func_0202c414(SavedGame *game, int index);  // Its room number (SavedCharacter::mRoom), 0xFF without save data
-u8 func_0202c468(SavedGame *game, int index);   // Its event (SavedCharacter::mLongActState)
-int func_0202c490(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mLongActPartner)
-s64 func_0202c4b8(SavedGame *game, int index);  // The time its next event starts at
-s64 func_0202c4e4(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
+BOOL GameData_CharacterExists(SavedGame *game, int index); // Whether the saved character with that index exists
+int GameData_GetCharacterRoomNumber(SavedGame *game, int index);  // Its room number (SavedCharacter::mRoom), 0xFF without save data
+u8 GameData_GetCharacterEvent(SavedGame *game, int index);   // Its event (SavedCharacter::mLongActState)
+int GameData_GetCharacterEventPartner(SavedGame *game, int index);  // Its event's partner (SavedCharacter::mLongActPartner)
+s64 GameData_GetCharacterEventEnd(SavedGame *game, int index);  // The time its next event starts at
+s64 GameData_GetCharacterAwayUntil(SavedGame *game, int index);  // The time its event ends at (SavedCharacter::mEventEnd)
 
 // For each kind of relation, how much each reaction changes the affinity by, halved (a1)
 extern const s8 *data_021135c8[];
@@ -167,8 +167,8 @@ extern "C" {
 
 
 // The saved game's characters, by index
-void func_0202c264(SavedGame *savedGame, int index, SavedCharacter *character); // Reads one
-void func_0202c28c(SavedGame *savedGame, int index, SavedCharacter *character); // Writes one
+void GameData_ReadCharacter(SavedGame *savedGame, int index, SavedCharacter *character); // Reads one
+void GameData_WriteCharacter(SavedGame *savedGame, int index, SavedCharacter *character); // Writes one
 
 // Copies the character's name out as a string
 void MiiData_GetName(SavedCharacter *character, wchar_t *name);
@@ -216,15 +216,15 @@ void RoomScene::StartLoading() {
     StartNextEvents(mClock.mSeconds, &mClock.mTime);
 
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i)) {
+        if (GameData_CharacterExists(&gGameData, i)) {
             mResidents[mResidentCount] = i;
             mResidentCount++;
-            mFront.mResidents[func_0202c414(&gGameData, i)] = i;
+            mFront.mResidents[GameData_GetCharacterRoomNumber(&gGameData, i)] = i;
         }
     }
 
     last = gSceneMemory.mCharacters[0];
-    if (last < 100 && func_0202c3dc(&gGameData, last)) {
+    if (last < 100 && GameData_CharacterExists(&gGameData, last)) {
         ChooseCharacters(last);
     } else {
         ChooseCharacters(0);
@@ -330,8 +330,8 @@ void RoomScene::ChooseCharacters(int resident) {
             mCharacters[1].mIndex = 2;
         }
     } else {
-        if (SavedCharacter::IsLongActPairedState(func_0202c468(&gGameData, resident))) {
-            other = func_0202c490(&gGameData, resident);
+        if (SavedCharacter::IsLongActPairedState(GameData_GetCharacterEvent(&gGameData, resident))) {
+            other = GameData_GetCharacterEventPartner(&gGameData, resident);
         } else {
             other = mResidents[0];
             if (other == resident) {
@@ -825,7 +825,7 @@ void RoomScene::UpdateInput() {
             mIdleFrames++;
             if (mIdleFrames > 3600 && mResidentCount >= 2) {
                 int count = mResidentCount;
-                int room = func_0202c414(&gGameData, mResidents[MATH_Rand16(&gRandom, count)]);
+                int room = GameData_GetCharacterRoomNumber(&gGameData, mResidents[MATH_Rand16(&gRandom, count)]);
                 if ((u16)room != mFront.mSelectedRoom) {
                     mIdleFrames = 0;
                     mCamera.SetState(4, 0x474);
@@ -966,10 +966,10 @@ void RoomScene::ChangeRoom() {
     SaveCharacters();
 
     for (i = 0; i < 2; i++) {
-        if (func_0202c3dc(&gGameData, mCharacters[i].mIndex)) {
+        if (GameData_CharacterExists(&gGameData, mCharacters[i].mIndex)) {
             mFront.DrawWindow(mCharacters[i].mRoomNumber);
             if (((SavedCharacter *)(&mCharacters[i]))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[i].mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mCharacters[i].mLongActPartner));
             }
         }
     }
@@ -1319,25 +1319,25 @@ void RoomScene::UpdateEvent() {
             mScanIndex = 0;
             int index = StartRandomEvent(now);
             if (index >= 0) {
-                mFront.DrawWindow(func_0202c414(&gGameData, index));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
             }
         } else {
-            if (func_0202c3dc(&gGameData, mScanIndex)) {
-                if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+            if (GameData_CharacterExists(&gGameData, mScanIndex)) {
+                if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                     SavedCharacter temp;
                     StartDueEvent(now, &temp);
-                    if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                    if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                     }
-                } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                     int partner = EndDueEvent();
                     if (partner >= 0) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                     }
                 } else if (IsOutingOver(mScanIndex, now)) {
                     UpdateAbsentCharacter(now);
                 }
-                mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
             }
             mScanIndex++;
         }
@@ -1355,29 +1355,29 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         StartDueEvent(now, &temp);
                         // The resident's new event has it at home
                         if (mScanIndex == mCharacters[0].mIndex && !((SavedCharacter *)(&mCharacters[0]))->IsAway()) {
                             SetEventState(EVENT_CHOOSE);
                         }
-                        if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                        if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
-                    mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                 }
                 mScanIndex++;
             }
@@ -1403,13 +1403,13 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
                     refresh = TRUE;
 
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         SavedCharacter *character = StartDueEvent(now, &temp);
 
@@ -1437,22 +1437,22 @@ void RoomScene::UpdateEvent() {
                         }
 
                         if (mScanIndex != mCharacters[0].mIndex) {
-                            if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                             }
                         } else if (!((SavedCharacter *)(&mCharacters[0]))->IsAway() && ((SavedCharacter *)(&mCharacters[0]))->IsLongActAsPartner()) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, mCharacters[0].mLongActPartner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mCharacters[0].mLongActPartner));
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1489,13 +1489,13 @@ void RoomScene::UpdateEvent() {
                 mScanIndex = 0;
                 int index = StartRandomEvent(now);
                 if (index >= 0) {
-                    mFront.DrawWindow(func_0202c414(&gGameData, index));
+                    mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, index));
                 }
             } else {
-                if (func_0202c3dc(&gGameData, mScanIndex)) {
+                if (GameData_CharacterExists(&gGameData, mScanIndex)) {
                     refresh = TRUE;
 
-                    if (now >= func_0202c4b8(&gGameData, mScanIndex)) {
+                    if (now >= GameData_GetCharacterEventEnd(&gGameData, mScanIndex)) {
                         SavedCharacter temp;
                         StartDueEvent(now, &temp);
 
@@ -1514,20 +1514,20 @@ void RoomScene::UpdateEvent() {
                         }
 
                         if (mScanIndex != mCharacters[0].mIndex && mScanIndex != mCharacters[1].mIndex) {
-                            if (SavedCharacter::IsLongActWithPartnerState(func_0202c468(&gGameData, mScanIndex))) {
-                                mFront.DrawWindow(func_0202c414(&gGameData, func_0202c490(&gGameData, mScanIndex)));
+                            if (SavedCharacter::IsLongActWithPartnerState(GameData_GetCharacterEvent(&gGameData, mScanIndex))) {
+                                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, GameData_GetCharacterEventPartner(&gGameData, mScanIndex)));
                             }
                         }
-                    } else if (now >= func_0202c4e4(&gGameData, mScanIndex)) {
+                    } else if (now >= GameData_GetCharacterAwayUntil(&gGameData, mScanIndex)) {
                         int partner = EndDueEvent();
                         if (partner >= 0) {
-                            mFront.DrawWindow(func_0202c414(&gGameData, partner));
+                            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, partner));
                         }
                     } else if (IsOutingOver(mScanIndex, now)) {
                         UpdateAbsentCharacter(now);
                     }
                     if (refresh) {
-                        mFront.DrawWindow(func_0202c414(&gGameData, mScanIndex));
+                        mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mScanIndex));
                     }
                 }
                 mScanIndex++;
@@ -1722,9 +1722,9 @@ void RoomScene::UpdateEvent() {
             SetEventState(EVENT_NOBODY_HOME);
             mCamera.SetMode(1);
             mLight.SetState(4);
-            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
+            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -1749,9 +1749,9 @@ void RoomScene::UpdateEvent() {
                 StartEvent(mActorOther, 0);
             }
             mCamera.SetMode(2);
-            mFront.DrawWindow(func_0202c414(&gGameData, mActor->mIndex));
+            mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mIndex));
             if (((SavedCharacter *)(mActor))->IsLongActWithPartner()) {
-                mFront.DrawWindow(func_0202c414(&gGameData, mActor->mLongActPartner));
+                mFront.DrawWindow(GameData_GetCharacterRoomNumber(&gGameData, mActor->mLongActPartner));
             }
             SaveCharacter(mActor);
         }
@@ -3079,8 +3079,8 @@ void RoomScene::SaveCharacter(RoomCharacter *character) {
         return;
     }
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, character);
     }
 }
 
@@ -3096,8 +3096,8 @@ void RoomScene::LoadCharacter(RoomCharacter *character) {
         return;
     }
     u16 index = character->mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c264(&gGameData, index, character);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_ReadCharacter(&gGameData, index, character);
     } else {
         ((SavedCharacter *)(character))->Reset();
         ((SavedCharacter *)(character))->SetParameter(40, index & 7);
@@ -10870,9 +10870,9 @@ void Light_SetRotatedDirection(Light *light, u16 angleX, u16 angleY, u16 angleZ,
 extern Light gLights[];
 
 // The saved game: what is known of a character by its index
-u8 func_0202c53c(SavedGame *game, int character);
-int func_0202c5b4(SavedGame *game, int character);
-int func_0202c58c(SavedGame *game, int character);
+u8 GameData_GetCharacterTroubleState(SavedGame *game, int character);
+int GameData_GetCharacterTroubleCategory(SavedGame *game, int character);
+int GameData_GetCharacterTroubleId(SavedGame *game, int character);
 struct Unknown02114d78Entry {
     u32 mUnknown0 : 8;
     int mUnknown4;
@@ -11285,8 +11285,8 @@ void RoomCharacter::ClearSpeechTexts() {
 // @0x02169d90
 void RoomCharacter::Save() {
     u16 index = mIndex;
-    if (func_0202c3dc(&gGameData, index)) {
-        func_0202c28c(&gGameData, index, this);
+    if (GameData_CharacterExists(&gGameData, index)) {
+        GameData_WriteCharacter(&gGameData, index, this);
     }
 }
 
@@ -12204,10 +12204,10 @@ int ApartmentFront::GetWindowKind(int room) {
     if (character == 0xFF) {
         return WINDOW_EMPTY;
     }
-    int unknown1 = func_0202c468(&gGameData, character);
-    u8 unknown2 = func_0202c53c(&gGameData, character);
-    int unknown3 = func_0202c5b4(&gGameData, character);
-    int unknown4 = data_02114d78[unknown3][func_0202c58c(&gGameData, character)].mUnknown0;
+    int unknown1 = GameData_GetCharacterEvent(&gGameData, character);
+    u8 unknown2 = GameData_GetCharacterTroubleState(&gGameData, character);
+    int unknown3 = GameData_GetCharacterTroubleCategory(&gGameData, character);
+    int unknown4 = data_02114d78[unknown3][GameData_GetCharacterTroubleId(&gGameData, character)].mUnknown0;
     if (SavedCharacter::IsAwayState(unknown1)) {
         return WINDOW_2;
     }

@@ -66,7 +66,7 @@ BOOL ScreenControl_BlendFadeIn(ScreenControl *screens, int planes, int step);
 BOOL ScreenControl_BlendFadeOut(ScreenControl *screens, int planes, int step);
 
 int MiiData_GetSex(CharacterRecord *mii); // 0 for a man
-void func_0202c264(GameData *game, int index, SavedCharacter *character); // Copies a saved character out
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character); // Copies a saved character out
 }
 
 #endif // OV039_MAINPROGRAM_H

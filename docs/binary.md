@@ -641,7 +641,7 @@ Measured:
   table. Two of them call a constructor that is the overlay's own: overlay 69's camera (0x0214AB6C) and overlay 106's
   clock (0x0214A624). The compiler emits such a constructor as C1 and C2; the link keeps the one the main program
   calls, so the ROM has one copy.
-- Overlays 69 and 106 ask for scene 0xC2 when the main program's write (`func_0202cd48`) fails.
+- Overlays 69 and 106 ask for scene 0xC2 when the main program's write (`GameData_StartSave`) fails.
 - `PreStartScene` reads `gGameData+8` as the outcome of loading the save data (0: it goes on; 1: it goes on as on
   a first start, clearing the flag below; 2: the data is broken and initialised; 3 and 4: it stops), and
   `gGameData+0xB1` as a flag: when it is set, it lists the residents and runs the main program's functions around
@@ -719,9 +719,9 @@ Measured:
   | 14 | 0x7D | overlay 77 |
   | 19 | 0x71 | overlay 85 |
 
-  The step after 23 stays 24: it ends the tutorial. Of the saved characters that exist (`func_0202c3dc`, indices 0
-  to 99), the first two are read (`func_0202c264`), have `ClearLongAct` and `ClearTrouble` applied and are written
-  back (`func_0202c28c`). Then saved character 0 is read, cleared of trouble and given trouble id 0 of category 9 in
+  The step after 23 stays 24: it ends the tutorial. Of the saved characters that exist (`GameData_CharacterExists`, indices 0
+  to 99), the first two are read (`GameData_ReadCharacter`), have `ClearLongAct` and `ClearTrouble` applied and are written
+  back (`GameData_WriteCharacter`). Then saved character 0 is read, cleared of trouble and given trouble id 0 of category 9 in
   state 1, ending at 0x7FFFFFFFFFFFFFFF (never), and written back; the scene asks for scene 0x5F, the island.
   Step 0 cannot occur (the jump table's entry 0 returns).
 - The scenes that ask for scene 0x69 are those of the tutorial: `PreStartScene` (overlay 106) on a first start,
@@ -1308,7 +1308,7 @@ Measured:
   `FS_LoadOverlay(0x63)`, virtual table at `0x0214AA20`) shows statistics over the 100 saved characters with the
   etc messages 0x185 to 0x1A1: the number of residents, their average age to a tenth (the birth year is 12 bits at
   0x50 of a saved character, 0xFFF when not given; month and day are func_02098dac's properties 0x26 and 0x27; the
-  age is taken against `Clock_GetDate`), the ratio of men to women (func_0202c604 is set for women, by the
+  age is taken against `Clock_GetDate`), the ratio of men to women (GameData_GetCharacterSex is set for women, by the
   numbers' order in "男女比"), reduced by their greatest common divisor, zero to five stars of comfort from the byte
   at 0xFB of each character, the troubles solved (`gGameData` 0xC2, "悩み事解決数"), and one of 17 types of
   mansion (0x18F + type): the summed personalities (0 to 15) give a point on two axes, its direction one of eight
@@ -1608,7 +1608,7 @@ Measured:
   (message 0x104).
 - The scene's characters are three of the main program's 0x2B18-byte class that several scenes hold
   (`SceneCharacter`, constructor `0x0203E168`, destructor `0x0203E188`); a resident's first 0x2A4 bytes
-  (`CharacterRecord`, the record `func_0202c264` reads) are copied into them by the record's implicit assignment,
+  (`CharacterRecord`, the record `GameData_ReadCharacter` reads) are copied into them by the record's implicit assignment,
   whose member-by-member copy shows the record's members (arrays of 5 and 6 bytes, s64 at 0x21C, 0x228, 0x230,
   0x23C, 32- and 40-byte structures).
 
@@ -1767,8 +1767,8 @@ Measured:
 - StartLoading mounts `Scn/Scene/SceneMiiEdit2_LZ.bin` (`E00`), `Cmn/Kbd/SoftKeyboard_LZ.bin` (`KBD`), the etc and
   common messages (`TBM`, `T02`), `Mdl/Spl/SplEditEffect_LZ.bin` and `Mdl/Ica/ica_mii_edit_LZ.bin`.
 - Init switches on the scene id. For 0x42 and 0x44 it takes a resident's index from `data_0213ba74`+0x20 and reads
-  that saved character into the scene's character at +0x710 (`func_0202c264`, through `0x0214B670`). For 0x43 and 0x6F
-  it takes the first of the 100 save slots that `func_0202c354` reports free, and stops (`OS_Terminate`) when none
+  that saved character into the scene's character at +0x710 (`GameData_ReadCharacter`, through `0x0214B670`). For 0x43 and 0x6F
+  it takes the first of the 100 save slots that `GameData_IsCharacterSlotUsed` reports free, and stops (`OS_Terminate`) when none
   is. It then sets the character up with a fresh Mii and today's date. **Inferred**: 0x43 and 0x6F make a new Mii,
   and 0x42 and 0x44 edit an existing one. How 0x42 and 0x44, and 0x43 and 0x6F, differ is not established.
 - The layout, from the constructor and the destructor: six sprite buttons at +0x158; a character (`CharacterBase`
@@ -1817,7 +1817,7 @@ Measured, from the first third of the file (to `0x0214EDB8`):
 
 - **The scene's own functions.** `MiiEditScene::LoadCharacter` reads the saved character into the scene's character and
   `MiiEditScene::LoadModel` loads its model ("B0I"), by sex. `MiiEditScene::SaveCharacter` writes the character back
-  (`func_0202c28c` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
+  (`GameData_WriteCharacter` with the index at +0x5824): it sets one of eight flag bits of the record's +0x210 and the 7 bits
   at +0x54 (overlay 109's `mInterior`) from the personality's row (`data_020fba28`) and the sex, and for scenes 0x43,
   0x44 and 0x6F resets some of the record's fields. The four functions beside `MiiEditScene::ShowControls` show or hide the
   scene's buttons and texts with one of the lower screen's backgrounds ("BG_down", "BG_down_editface",
@@ -2191,7 +2191,7 @@ three 12-byte, five 16-byte (the last a local array of `SetKind`), an `int[5]`, 
 
 ### The shops' stock
 
-Measured: the saved game holds two records of 0x34 bytes (func_0202c864 reads one, func_0202c878 writes one): a
+Measured: the saved game holds two records of 0x34 bytes (GameData_GetShopStock reads one, GameData_SetShopStock writes one): a
 date, then five clothes, five goods of kind 1, five of kind 4, three interiors and one more good, which the item
 files' pickers choose (gap66-b's ChooseClothes, ChooseItemsNot1000, ChooseItems, and 0x020A5A28 for the interiors;
 on the very first day the first five goods are a fixed list). `UpdateShopStocks`, called only by the shop scenes
@@ -2229,7 +2229,7 @@ January and February) and whose x follows the time of day.
 
 ### What decides the island's next facility
 
-Measured, `IslandProgress` (0x2C bytes): `Count` counts the saved characters by sex (func_0202c604 is the
+Measured, `IslandProgress` (0x2C bytes): `Count` counts the saved characters by sex (GameData_GetCharacterSex is the
 character's `MiiData_GetSex`), those with a full date of birth, the residents in all, the items of kinds 4 to 6 the
 player owns, the money (gGameData's capped counter, which this settles as the money), the used entries of two lists
 of ten in the saved game and the troubles solved. `GetNewFacility` goes through the island's state bytes
@@ -2241,7 +2241,7 @@ a stage above the saved one. Overlay 72's map asks the four `Has*` tests before 
 ### The saved songs
 
 Measured: `SongEntry` is a song of 0x40 bytes as the saved game keeps it, with the number it is kept under;
-func_0202c934 stores one (`Save`), func_0202c920 copies one out (`Load`). Its 21 notes at 0x16 are 16 bits each, a
+GameData_SetSong stores one (`Save`), GameData_GetSong copies one out (`Load`). Its 21 notes at 0x16 are 16 bits each, a
 kind in the low three bits and a 9-bit value; `SetNotesFromSlot` (overlay 109, for songs received over the air)
 replaces the values of the notes of kinds 1 to 4 from the table of the song's slot (`0x020F9414`, 0xE0 bytes a
 slot) through `data_020f9408`.
