@@ -4737,12 +4737,12 @@ data_020fbaac kind:data(any) addr:0x020fbaac
 data_020fbaf4 kind:data(any) addr:0x020fbaf4
 data_020fbb7c kind:data(any) addr:0x020fbb7c
 data_020fbc2c kind:data(any) addr:0x020fbc2c
-data_020fbcdc kind:data(any) addr:0x020fbcdc
-gStr_B kind:data(any) addr:0x020fbd10
-gStr_5 kind:data(any) addr:0x020fbd18
-data_020fbd48 kind:data(any) addr:0x020fbd48
-data_020fbd78 kind:data(any) addr:0x020fbd78
-data_020fbda8 kind:data(any) addr:0x020fbda8
+sClothesSeasons kind:data(any) addr:0x020fbcdc
+sFixedItems kind:data(any) addr:0x020fbd10
+sItemSeasons kind:data(any) addr:0x020fbd1c
+sItemSeasons2 kind:data(any) addr:0x020fbd4c
+sItemSeasons3 kind:data(any) addr:0x020fbd7c
+sItemSeasons4 kind:data(any) addr:0x020fbdac
 data_020fbddc kind:data(any) addr:0x020fbddc
 data_020fbde8 kind:data(any) addr:0x020fbde8
 data_020fbe00 kind:data(any) addr:0x020fbe00
@@ -6105,7 +6105,6 @@ _ZTV4Item kind:data(any) addr:0x02114f78
 _ZTV11ClothesItem kind:data(any) addr:0x02114f9c
 _ZTV13InventoryItem kind:data(any) addr:0x02114fc0
 _ZTV9ItemModel kind:data(any) addr:0x02114fe4
-data_02115000 kind:data(any) addr:0x02115000
 gStr_Mdl_Item_item000_3D_LZ_bin kind:data(any) addr:0x02115024
 gStr_XXX_item_imd kind:data(any) addr:0x02115040
 gStr_Mdl_Item_item000_3D_LZ_bin_2 kind:data(any) addr:0x02115050

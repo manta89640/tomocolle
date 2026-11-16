@@ -33,8 +33,8 @@ static inline u16 Rand(u16 max) {
     return MATH_Rand16(&gRandom, max);
 }
 
-// The season of each month, 1 (spring) to 4 (winter)
-static const int sClothesSeasons[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+// The season of each month, 1 (spring) to 4 (winter); there is no month 0
+static const int sClothesSeasons[13] = {0xFFFF, 4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
 
 ClothesItem::ClothesItem() {
     mId = 0;
@@ -51,8 +51,8 @@ void ClothesItem::Settle() {
 
 // Whether clothes can be worn in a month: they have no season, or the month's is theirs, or one of their two
 static BOOL IsClothesInSeason(int clothes, int month) {
+    int season = sClothesSeasons[month];
     int type = data_020f3ff0[clothes].mSeason;
-    int season = sClothesSeasons[month - 1];
     BOOL result = TRUE;
     switch (type) {
     case 0:
@@ -85,8 +85,9 @@ static BOOL IsClothesInSeason(int clothes, int month) {
 }
 
 void ClothesList::Load() {
-    mCount = 0;
-    for (int i = 0; i < CLOTHES_SIZE; i++) {
+    int n = 0;
+    mCount = n;
+    for (int i = 0; i < CLOTHES_SIZE; i++, n++) {
         mItems[i].Clear();
         mItems[i].mId = i;
         BOOL owned = TRUE;
@@ -101,8 +102,8 @@ void ClothesList::Load() {
         mItems[i].mUnknown0C = count;
         mItems[i].mCount = count;
         mItems[i].mUnknown14 = value;
-        mCount++;
     }
+    mCount = n;
     for (int i = 0; i < mCount; i++) {
         mItems[i].Settle();
         mList[i] = &mItems[i];
@@ -161,8 +162,9 @@ void ClothesList::GetOwned(Item **list, int *count, int kind) {
     for (int i = 0; i < mCount; i++) {
         ClothesItem *item = mList[i];
         if (item->mOwned && kind == data_020f3ff0[item->mId].mKind) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -171,19 +173,17 @@ void ClothesList::GetOnOffer(Item **list, int *count, int kind) {
     *count = 0;
     int n = 0;
     for (int i = 0; i < mCount; i++) {
-        ClothesItem *item = mList[i];
-        BOOL owned = item->mOwned;
-        const ClothesInfo *info = &data_020f3ff0[item->mId];
         BOOL ok = TRUE;
-        ok &= kind == info->mKind;
-        ok &= info->mAvailable0 == 1;
+        ok &= kind == data_020f3ff0[mList[i]->mId].mKind;
+        ok &= data_020f3ff0[mList[i]->mId].mAvailable0 == 1;
         BOOL ok2 = TRUE;
-        if (!owned) {
-            ok2 = info->mAvailable2 == 1;
+        if (!mList[i]->mOwned && data_020f3ff0[mList[i]->mId].mAvailable2 != 1) {
+            ok2 = FALSE;
         }
         if (ok & ok2) {
-            list[n++] = item;
+            list[n] = mList[i];
             (*count)++;
+            n++;
         }
     }
 }
@@ -200,20 +200,20 @@ void ClothesList::GetOnOfferInSeason(Item **list, int *count, int kind, s64 time
     }
     int n = 0;
     for (int i = 0; i < mCount; i++) {
-        const ClothesInfo *info = &data_020f3ff0[mList[i]->mId];
         BOOL ok = TRUE;
-        ok &= kind == info->mKind;
-        ok &= info->mAvailable0 == 1;
+        ok &= kind == data_020f3ff0[mList[i]->mId].mKind;
+        ok &= data_020f3ff0[mList[i]->mId].mAvailable0 == 1;
         if (time != -1) {
-            if (info->mSeason == 0) {
+            if (data_020f3ff0[mList[i]->mId].mSeason == 0) {
                 ok = FALSE;
             } else {
                 ok &= IsClothesInSeason(mList[i]->mId, date.month);
             }
         }
         if (ok) {
-            list[n++] = mList[i];
+            list[n] = mList[i];
             (*count)++;
+            n++;
         }
     }
 }
@@ -224,8 +224,9 @@ void ClothesList::GetHeld(Item **list, int *count, int kind) {
     for (int i = 0; i < mCount; i++) {
         ClothesItem *item = mList[i];
         if (item->mCount > 0 && kind == data_020f3ff0[item->mId].mKind) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -243,7 +244,8 @@ BOOL ClothesList::HasAnyOwned() {
 
 // Reads the clothes the save data has into an array, from the first clothes on (the clothes 0 are not read)
 void LoadClothes(ClothesItem *items, int max, int *count) {
-    *count = 1;
+    *count = 0;
+    (*count)++;
     for (int i = 1; i < CLOTHES_SIZE && *count < max; i++) {
         int value = func_0202c784(&gGameData, i);
         if (value != -1) {
@@ -263,14 +265,18 @@ void LoadClothes(ClothesItem *items, int max, int *count) {
 
 // Writes an array of clothes to the save data, those that changed
 void SaveClothes(ClothesItem *items, int count) {
-    for (int i = 0; i < count; i++, items++) {
-        items->Settle();
-        u16 id = items->mId;
-        if (items->mOwned &&
-            (items->mUnknown14 != func_0202c784(&gGameData, id) || items->mCount != func_0202c770(&gGameData, id))) {
-            func_0202c798(&gGameData, id, items->mCount);
-            func_0202c7ac(&gGameData, id, items->mUnknown14);
-        } else if (!items->mOwned && func_0202c784(&gGameData, id) != -1) {
+    for (int i = 0; i < count; i++) {
+        items[i].Settle();
+        u16 id = items[i].mId;
+        if (items[i].mOwned) {
+            int value = items[i].mUnknown14;
+            if (value != func_0202c784(&gGameData, id) || items[i].mCount != func_0202c770(&gGameData, id)) {
+                func_0202c798(&gGameData, id, items[i].mCount);
+                func_0202c7ac(&gGameData, id, items[i].mUnknown14);
+                continue;
+            }
+        }
+        if (!items[i].mOwned && func_0202c784(&gGameData, id) != -1) {
             func_0202c798(&gGameData, id, 0);
             func_0202c7ac(&gGameData, id, -1);
         }
@@ -325,8 +331,8 @@ static s32 CompareClothesIds(void *a, void *b);
 // Chooses count different clothes at random by their weights, sorts them and returns the first
 u16 ChooseClothes(int availability, u16 *clothes, int count) {
     RTCDate date;
-    u32 buffer[SORT_BUFFER_SIZE];
     BOOL free[CLOTHES_SIZE];
+    u32 buffer[SORT_BUFFER_SIZE];
     Clock_GetDate(data_02123440, &date);
     for (int i = 0; i < CLOTHES_SIZE; i++) {
         free[i] = TRUE;
@@ -339,8 +345,8 @@ u16 ChooseClothes(int availability, u16 *clothes, int count) {
             }
         }
         u16 choice = Rand(total);
-        int sum = 0;
         u16 i = 0;
+        int sum = i;
         for (;;) {
             if (free[i] && data_020f3ff0[i].mAvailable2 != 1) {
                 sum += GetClothesWeight(i, availability, date.month);
@@ -378,7 +384,7 @@ void Item::Settle() {
 }
 
 BOOL Item::Add(int count) {
-    if (mCount + count > 99 || count + mUnknown0C < 0) {
+    if (count + mCount > 99 || count + mUnknown0C < 0) {
         return FALSE;
     }
     if (mOwned == FALSE) {
@@ -421,10 +427,11 @@ void Inventory::Save() {
         mItems[i].Settle();
     }
     for (int i = 0; i < INVENTORY_SAVED; i++) {
+        u16 id = mItems[i].mId;
         if (mItems[i].mOwned != FALSE) {
-            func_0202c7f0(&gGameData, mItems[i].mId, mItems[i].mCount);
+            func_0202c7f0(&gGameData, id, mItems[i].mCount);
         } else if (mItems[i].mOwned == FALSE) {
-            func_0202c7f0(&gGameData, mItems[i].mId, -1);
+            func_0202c7f0(&gGameData, id, -1);
         }
     }
 }
@@ -467,8 +474,9 @@ void Inventory::GetOwned(Item **list, int *count, int kind) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mOwned && kind == data_020f5f0c[item->mId].mKind) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -479,8 +487,9 @@ void Inventory::GetOwned(Item **list, int *count, int kind, u32 flags) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mOwned && kind == data_020f5f0c[item->mId].mKind && (flags & data_020f5f0c[item->mId].mFlags)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -491,8 +500,9 @@ void Inventory::GetOwnedKinds4And5(Item **list, int *count) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mOwned && (data_020f5f0c[item->mId].mKind == 4 || data_020f5f0c[item->mId].mKind == 5)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -503,8 +513,9 @@ void Inventory::GetOwnedKind3(Item **list, int *count) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mOwned && data_020f5f0c[item->mId].mKind == 3) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -515,8 +526,9 @@ void Inventory::GetOwnedKinds4And5Again(Item **list, int *count) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mOwned && (data_020f5f0c[item->mId].mKind == 4 || data_020f5f0c[item->mId].mKind == 5)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -527,8 +539,9 @@ void Inventory::GetHeld(Item **list, int *count, int kind, u32 flags) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mCount > 0 && kind == data_020f5f0c[item->mId].mKind && (flags & data_020f5f0c[item->mId].mFlags)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -539,8 +552,9 @@ void Inventory::GetHeldKinds4And5(Item **list, int *count) {
     for (int i = 0; i < mCount; i++) {
         InventoryItem *item = mList[i];
         if (item->mCount > 0 && (data_020f5f0c[item->mId].mKind == 4 || data_020f5f0c[item->mId].mKind == 5)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -552,8 +566,9 @@ void Inventory::GetListed(Item **list, int *count) {
         InventoryItem *item = mList[i];
         int kind = data_020f5f0c[item->mId].mKind;
         if (kind != 0 && (item->mOwned || kind == 2)) {
-            list[n++] = item;
+            list[n] = item;
             (*count)++;
+            n++;
         }
     }
 }
@@ -599,9 +614,9 @@ ItemModel::ItemModel() {
 void ItemModel::SetItem(const char *archiveName, int item) {
     STD_CopyString(mArchiveName, archiveName);
     MI_CpuCopy8(mArchiveName, mModelPath, 3);
-    mItem.mId = (u8)item;
+    mId = (u8)item;
     STD_CopyString(mArchivePath, "Mdl/Item/item");
-    STD_ConcatenateString(mArchivePath, mItem.GetModelName());
+    STD_ConcatenateString(mArchivePath, GetModelName());
     STD_ConcatenateString(mArchivePath, "_3D_LZ.bin");
 }
 
@@ -622,7 +637,7 @@ void ItemModel::LoadAnimation(int resourceId) {
 }
 
 void ItemModel::ResetScale() {
-    mBaseScale = ((u32)data_020f5f0c[mItem.mId].mScale << FX32_SHIFT) / 10;
+    mBaseScale = ((u32)data_020f5f0c[mId].mScale << FX32_SHIFT) / 10;
     mScale.x = mBaseScale;
     mScale.y = mBaseScale;
     mScale.z = mBaseScale;
@@ -688,16 +703,16 @@ static u8 GetItemWeight(int item, int availability, int kind, int season) {
     if (available && ofKind) {
         switch (gGameData.mUnknown4E[0]) {
         case 0:
-            weight = info->mWeights & 0xF;
+            weight = info->mWeight0;
             break;
         case 1:
-            weight = (info->mWeights >> 4) & 0xF;
+            weight = info->mWeight1;
             break;
         case 2:
-            weight = (info->mWeights >> 8) & 0xF;
+            weight = info->mWeight2;
             break;
         case 3:
-            weight = (info->mWeights >> 12) & 0xF;
+            weight = info->mWeight3;
             break;
         }
         if (info->mSeason != 0 && season != info->mSeason) {
@@ -715,26 +730,23 @@ static u8 GetItemWeightInGroup(int item, int availability, int kind, int season,
     return weight;
 }
 
-// The seasons of the months for the three choices of goods
-static const int sItemSeasons[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
-static const int sItemSeasons2[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
-static const int sItemSeasons3[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
-static const int sItemSeasons4[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
 
 // Chooses goods of a kind at random by their weights, other than one
 u16 ChooseItem(int availability, int kind, int exclude) {
+    // The season of each month
+    static const int sItemSeasons3[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     RTCDate date;
     Clock_GetDate(data_02123440, &date);
-    int total = 0;
     int season = sItemSeasons3[date.month - 1];
+    int total = 0;
     for (u16 i = 0; i < INVENTORY_SIZE; i++) {
         if (exclude != i) {
             total += GetItemWeight(i, availability, kind, season);
         }
     }
     u16 choice = Rand(total);
-    int sum = 0;
     u16 i = 0;
+    int sum = 0;
     for (;;) {
         if (i != exclude) {
             sum += GetItemWeight(i, availability, kind, season);
@@ -749,16 +761,18 @@ u16 ChooseItem(int availability, int kind, int exclude) {
 
 // The same among the goods of a group
 u16 ChooseItemInGroup(int availability, int kind, int group) {
+    // The season of each month
+    static const int sItemSeasons4[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     RTCDate date;
     Clock_GetDate(data_02123440, &date);
-    int total = 0;
     int season = sItemSeasons4[date.month - 1];
+    int total = 0;
     for (u16 i = 0; i < INVENTORY_SIZE; i++) {
         total += GetItemWeightInGroup(i, availability, kind, season, group);
     }
     u16 choice = Rand(total);
-    int sum = 0;
     u16 i = 0;
+    int sum = 0;
     for (;;) {
         sum += GetItemWeightInGroup(i, availability, kind, season, group);
         if (choice < sum) {
@@ -773,9 +787,11 @@ static s32 CompareItemIds(void *a, void *b);
 
 // Chooses count different goods at random by their weights, sorts them and returns the first
 u16 ChooseItems(int availability, int kind, u16 *items, int count) {
+    // The season of each month
+    static const int sItemSeasons2[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     RTCDate date;
-    u32 buffer[SORT_BUFFER_SIZE];
     BOOL free[INVENTORY_SIZE];
+    u32 buffer[SORT_BUFFER_SIZE];
     Clock_GetDate(data_02123440, &date);
     int season = sItemSeasons2[date.month - 1];
     for (int i = 0; i < INVENTORY_SIZE; i++) {
@@ -788,9 +804,12 @@ u16 ChooseItems(int availability, int kind, u16 *items, int count) {
                 total += GetItemWeight(i, availability, kind, season);
             }
         }
-        u16 choice = Rand(total);
-        int sum = 0;
-        u16 i = 0;
+        u16 choice;
+        int sum;
+        u16 i;
+        choice = Rand(total);
+        i = 0;
+        sum = 0;
         for (;;) {
             if (free[i]) {
                 sum += GetItemWeight(i, availability, kind, season);
@@ -809,9 +828,11 @@ u16 ChooseItems(int availability, int kind, u16 *items, int count) {
 
 // The same, leaving out the goods with flag 0x1000
 u16 ChooseItemsNot1000(int availability, int kind, u16 *items, int count) {
+    // The season of each month
+    static const int sItemSeasons[12] = {4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
     RTCDate date;
-    u32 buffer[SORT_BUFFER_SIZE];
     BOOL free[INVENTORY_SIZE];
+    u32 buffer[SORT_BUFFER_SIZE];
     Clock_GetDate(data_02123440, &date);
     int season = sItemSeasons[date.month - 1];
     for (int i = 0; i < INVENTORY_SIZE; i++) {
@@ -824,9 +845,12 @@ u16 ChooseItemsNot1000(int availability, int kind, u16 *items, int count) {
                 total += GetItemWeight(i, availability, kind, season);
             }
         }
-        u16 choice = Rand(total);
-        int sum = 0;
-        u16 i = 0;
+        u16 choice;
+        int sum;
+        u16 i;
+        choice = Rand(total);
+        i = 0;
+        sum = 0;
         for (;;) {
             if (free[i] && !(data_020f5f0c[i].mFlags & 0x1000)) {
                 sum += GetItemWeight(i, availability, kind, season);
@@ -843,10 +867,9 @@ u16 ChooseItemsNot1000(int availability, int kind, u16 *items, int count) {
     return items[0];
 }
 
-// Five goods that are always the same
-static const u16 sFixedItems[5] = {0x42, 0x7D, 0x36, 0x17, 0x35};
-
 u16 GetFixedItems(u16 *items, int count) {
+    // Five goods that are always the same
+    static const u16 sFixedItems[5] = {0x42, 0x7D, 0x36, 0x17, 0x35};
     for (int i = 0; i < count; i++) {
         items[i] = sFixedItems[i];
     }

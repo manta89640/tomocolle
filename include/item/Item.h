@@ -14,7 +14,10 @@
 struct ItemInfo {
     /* 0x00 */ u32 mPrice : 24;   // What GetPrice returns (250, 480, ...: the values look like prices)
     /*      */ u32 mSortKey : 8;  // The lists are sorted by it
-    /* 0x04 */ u32 mWeights : 16; // Four weights of four bits for the random choice, by gGameData.mUnknown4E[0]
+    /* 0x04 */ u32 mWeight0 : 4; // The weights for the random choice, by gGameData.mUnknown4E[0]
+    /*      */ u32 mWeight1 : 4;
+    /*      */ u32 mWeight2 : 4;
+    /*      */ u32 mWeight3 : 4;
     /*      */ u32 mScale : 8;    // The model's scale in tenths
     /*      */ u32 mUnknown04Bits24 : 8;
     /* 0x08 */ char mModelName[4]; // The number of its model, "Mdl/Item/item%s_3D_LZ.bin"
@@ -35,8 +38,9 @@ struct ClothesInfo {
     /*      */ u32 mSortKey : 9;
     /* 0x04 */ u8 mWeights[4];     // The weights for the random choice, by gGameData.mUnknown4E[0]
     /* 0x08 */ char mModelName[4]; // The number of its body model, "Mdl/Body/body%s"
-    /* 0x0C */ u32 mSeason : 4;    // 0: never; 1 to 4 one season; 5 to 7 two of them (see IsClothesInSeason)
-    /*      */ u32 mUnknown0CBits4 : 4;
+    /* 0x0C */ u32 mSeason : 4;    // 0: any; 1 to 4 one season; 5 to 7 two of them (see IsClothesInSeason)
+    /*      */ u32 mBodyColor : 3; // The character model writes '0' + it into "body_c0.ntfp"
+    /*      */ u32 mHasFemaleBody : 1; // The character model then loads "Mdl/Body/body<name>F"
     /*      */ u32 mAvailable0 : 1; // As ItemInfo's
     /*      */ u32 mAvailable1 : 1;
     /*      */ u32 mAvailable2 : 1;
@@ -102,10 +106,10 @@ public:
     virtual u32 GetPrice() { return data_020f5f0c[mId].mPrice; }
     virtual u32 GetPrice2() { return data_020f5f0c[mId].mPrice; }
     virtual const char *GetModelName() { return data_020f5f0c[mId].mModelName; }
-    virtual u8 GetWeight0() { return data_020f5f0c[mId].mWeights & 0xF; }
-    virtual u8 GetWeight1() { return (data_020f5f0c[mId].mWeights >> 4) & 0xF; }
-    virtual u8 GetWeight2() { return (data_020f5f0c[mId].mWeights >> 8) & 0xF; }
-    virtual u8 GetWeight3() { return (data_020f5f0c[mId].mWeights >> 12) & 0xF; }
+    virtual u8 GetWeight0() { return data_020f5f0c[mId].mWeight0; }
+    virtual u8 GetWeight1() { return data_020f5f0c[mId].mWeight1; }
+    virtual u8 GetWeight2() { return data_020f5f0c[mId].mWeight2; }
+    virtual u8 GetWeight3() { return data_020f5f0c[mId].mWeight3; }
 }; // 0x14
 
 #define INVENTORY_SIZE 255
@@ -155,14 +159,8 @@ public:
     /* 0x1C24 */ ClothesItem *mList[CLOTHES_SIZE];
 }; // 0x20D4
 
-// The item an ItemModel shows: an InventoryItem with a virtual table of its own and nothing else.
-class ModelItem : public InventoryItem {
-public:
-    ModelItem() {}
-};
-
-// The 3D model of a kind of goods.
-class ItemModel : public AnimModel {
+// The 3D model of a kind of goods, and the goods it shows.
+class ItemModel : public AnimModel, public InventoryItem {
 public:
     ItemModel();
 
@@ -172,7 +170,7 @@ public:
     void ResetScale();
     void SetScale(fx32 scale);
 
-    /* 0x0E0 */ ModelItem mItem;
+    /* 0x0E0 InventoryItem */
     /* 0x0F4 */ int mResourceId;
     /* 0x0F8 */ char mArchiveName[4];
     /* 0x0FC */ char mArchivePath[0x1E];
