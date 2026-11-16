@@ -16,6 +16,13 @@ void CharacterBodyTestScene::StartLoading() {
     ArchiveManager_MountCompressed(&gArchiveManager, "TG3", "Mdl/Body/body000_3D_LZ.bin", 0);
 }
 
+// Init does not match: the light-0 block (x stored, reloaded and stored again, as in the main program's scenes 6, 7
+// and 16 and overlay 3) differs by two stores in the original's order, x's before mEnabled's. Without the pragma the
+// registers differ too (0 is loaded late, the colour and the reload go to r2 and ip); with it every register and
+// instruction is the original's. Every order of the block's eight statements was tried with and without it, with
+// dir.x stored back before mEnabled the allocation flips.
+#pragma push
+#pragma opt_propagation off
 void CharacterBodyTestScene::Init() {
     func_0202b0e8(&data_02122824);
     data_0211d604.Show(1);
@@ -29,8 +36,8 @@ void CharacterBodyTestScene::Init() {
     light->mDirection.x = 0xFFF;
     fx16 x = light->mDirection.x;
     light->mColor = color;
-    light->mDirection.x = x;
     light->mEnabled = TRUE;
+    light->mDirection.x = x;
     light->mDirection.y = 0;
     light->mDirection.z = 0;
     ModelResources_SetModel(data_021223e4, 0, "TG3:/body.imd");
@@ -45,6 +52,8 @@ void CharacterBodyTestScene::Init() {
     NNS_GfdDumpLnkTexVramManager();
     func_02060c1c();
 }
+
+#pragma pop
 
 // Sets the line from the camera through the touched point. The point goes by value through an inline: that is what
 // leaves the original's dead copy of it on the stack.

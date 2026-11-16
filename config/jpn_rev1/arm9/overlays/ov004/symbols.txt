@@ -6,8 +6,8 @@ _ZN22CharacterBodyTestScene4ExitEv kind:function(arm,size=0x3c) addr:0x0214a0b4
 _ZN22CharacterBodyTestScene14UpdateTurnTestEv kind:function(arm,size=0xfc) addr:0x0214a0f0
 _ZN22CharacterBodyTestSceneD1Ev kind:function(arm,size=0x60) addr:0x0214a1ec
 _ZN22CharacterBodyTestSceneD0Ev kind:function(arm,size=0x68) addr:0x0214a24c
-data_ov004_0214a2b4 kind:data(any) addr:0x0214a2b4
-data_ov004_0214a2c0 kind:data(any) addr:0x0214a2c0
+sTurnTarget kind:data(any) addr:0x0214a2b4 local
+sLightColor kind:data(any) addr:0x0214a2c0 local
 _ZTV22CharacterBodyTestScene kind:data(any) addr:0x0214a2c4
 gStr_CA3_ov004 kind:data(any) addr:0x0214a2e8
 gStr_Scn_Scene_SceneTestG3d_3_LZ_bin_ov004 kind:data(any) addr:0x0214a2ec

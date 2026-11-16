@@ -732,6 +732,10 @@ Measured:
   camera's eye and the line's direction, `data_02122818`); both results are thrown away.
 - +0x2B2C is only cleared, in `Init`.
 
+Not done: `Init` (97%), the light-0 block of scenes 6, 7 and 16: with `#pragma opt_propagation off` every register
+matches and only the stores of x and `mEnabled` are in the other order (see decompiling.md, "Independent statements
+scheduled in another order"). Seven of the eight functions match; the unit is not complete.
+
 Inferred: a test of the character's body (its two models, its palette, its scale, its turning and its joints), from
 the same test archive as scene 6.
 
