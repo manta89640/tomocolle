@@ -22,6 +22,10 @@
 // sign's place (before the log, after y1, after p_h, after z) and forms (?:, if/else), n, the block's exponent and
 // the final n as three variables, -Cpp_exceptions on (the original objects have exception tables: the code is the
 // same with them), and the compiler's other optimisation levels.
+// Also tried (round 3): a climb over the doubles' declaration order (no effect at all); every set of one to three
+// of the opt_* pragmas; the sign as `s = one; s = c ? -one : s;`, or the present form followed by `s = s;`: either
+// puts t2's low word and the final n in r4 as in the original, but then s (r7:r6) and p_l's low word (r5) swap
+// places with the original's r6:r5 and r7, and no place of those statements, form of p_l, or cast undoes that.
 
 /* __ieee754_pow(x,y) return x**y
  *
