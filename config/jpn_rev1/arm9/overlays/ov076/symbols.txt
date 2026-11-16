@@ -7,26 +7,26 @@ _ZN12MiiEditScene6UpdateEv kind:function(arm,size=0x438) addr:0x0214a9b0
 _ZN12MiiEditScene4DrawEv kind:function(arm,size=0x278) addr:0x0214ade8
 _ZN12MiiEditScene4ExitEv kind:function(arm,size=0x18c) addr:0x0214b060
 _ZN12MiiEditScene19func_ov076_0214b1ecEi kind:function(arm,size=0x3f0) addr:0x0214b1ec
-func_ov076_0214b5dc kind:function(arm,size=0x94) addr:0x0214b5dc
-func_ov076_0214b670 kind:function(arm,size=0x24) addr:0x0214b670
-func_ov076_0214b694 kind:function(arm,size=0x1fc) addr:0x0214b694
+_ZN12MiiEditScene19func_ov076_0214b5dcEil kind:function(arm,size=0x94) addr:0x0214b5dc
+_ZN12MiiEditScene19func_ov076_0214b670Ei kind:function(arm,size=0x24) addr:0x0214b670
+_ZN12MiiEditScene19func_ov076_0214b694Ev kind:function(arm,size=0x1fc) addr:0x0214b694
 _ZN12MiiEditScene19func_ov076_0214b890Ev kind:function(arm,size=0x1f8) addr:0x0214b890
-func_ov076_0214ba88 kind:function(arm,size=0x9c) addr:0x0214ba88
-func_ov076_0214bb24 kind:function(arm,size=0xc0) addr:0x0214bb24
+_ZN12MiiEditScene19func_ov076_0214ba88Ei kind:function(arm,size=0x9c) addr:0x0214ba88
+_ZN12MiiEditScene19func_ov076_0214bb24Ev kind:function(arm,size=0xc0) addr:0x0214bb24
 _ZN12MiiEditScene19func_ov076_0214bbe4Ev kind:function(arm,size=0xc0) addr:0x0214bbe4
-func_ov076_0214bca4 kind:function(arm,size=0xc0) addr:0x0214bca4
-func_ov076_0214bd64 kind:function(arm,size=0x74) addr:0x0214bd64
+_ZN12MiiEditScene19func_ov076_0214bca4Ev kind:function(arm,size=0xc0) addr:0x0214bca4
+_ZN12MiiEditScene19func_ov076_0214bd64Ev kind:function(arm,size=0x74) addr:0x0214bd64
 _ZN12MiiEditScene19func_ov076_0214bdd8Ev kind:function(arm,size=0xa8) addr:0x0214bdd8
-func_ov076_0214be80 kind:function(arm,size=0x48) addr:0x0214be80
+_ZN15MiiEditSpriteB019func_ov076_0214be80Ei kind:function(arm,size=0x48) addr:0x0214be80
 _ZN15MiiEditSpriteB019func_ov076_0214bec8Ei kind:function(arm,size=0x58) addr:0x0214bec8
 _ZN12MiiEditScene19func_ov076_0214bf20EPKw kind:function(arm,size=0x2c) addr:0x0214bf20
-func_ov076_0214bf4c kind:function(arm,size=0x398) addr:0x0214bf4c
-func_ov076_0214c2e4 kind:function(arm,size=0x340) addr:0x0214c2e4
-func_ov076_0214c624 kind:function(arm,size=0x54) addr:0x0214c624
+_ZN12MiiEditPage019func_ov076_0214bf4cEP12MiiEditScene kind:function(arm,size=0x398) addr:0x0214bf4c
+_ZN12MiiEditPage019func_ov076_0214c2e4Ev kind:function(arm,size=0x340) addr:0x0214c2e4
+_ZN12MiiEditPage019func_ov076_0214c624Ei kind:function(arm,size=0x54) addr:0x0214c624
 _ZN12MiiEditPage04DrawEv kind:function(arm,size=0x2c) addr:0x0214c678
 _ZN12MiiEditPage04ExitEv kind:function(arm,size=0x2c) addr:0x0214c6a4
-func_ov076_0214c6d0 kind:function(arm,size=0x564) addr:0x0214c6d0
-func_ov076_0214cc34 kind:function(arm,size=0x1260) addr:0x0214cc34
+_ZN15MiiEditFacePage19func_ov076_0214c6d0EP12MiiEditScene kind:function(arm,size=0x564) addr:0x0214c6d0
+_ZN15MiiEditFacePage19func_ov076_0214cc34Ev kind:function(arm,size=0x1260) addr:0x0214cc34
 func_ov076_0214de94 kind:function(arm,size=0xf24) addr:0x0214de94
 _ZN15MiiEditFacePage4DrawEv kind:function(arm,size=0xc0) addr:0x0214edb8
 _ZN15MiiEditFacePage4ExitEv kind:function(arm,size=0x4) addr:0x0214ee78
@@ -43,8 +43,8 @@ func_ov076_0214faac kind:function(arm,size=0x4) addr:0x0214faac
 func_ov076_0214fab0 kind:function(arm,size=0x3b0) addr:0x0214fab0
 func_ov076_0214fe60 kind:function(arm,size=0x28) addr:0x0214fe60
 func_ov076_0214fe88 kind:function(arm,size=0x9ec) addr:0x0214fe88
-func_ov076_02150874 kind:function(arm,size=0x38) addr:0x02150874
-func_ov076_021508ac kind:function(arm,size=0x1660) addr:0x021508ac
+_ZN18MiiEditProfilePage19func_ov076_02150874EP12MiiEditScene kind:function(arm,size=0x38) addr:0x02150874
+_ZN18MiiEditProfilePage19func_ov076_021508acEv kind:function(arm,size=0x1660) addr:0x021508ac
 func_ov076_02151f0c kind:function(arm,size=0x1b80) addr:0x02151f0c
 _ZN18MiiEditProfilePage4DrawEv kind:function(arm,size=0x148) addr:0x02153a8c
 _ZN18MiiEditProfilePage4ExitEv kind:function(arm,size=0x120) addr:0x02153bd4
@@ -80,119 +80,107 @@ _ZN12MiiEditPage54DrawEv kind:function(arm,size=0x10) addr:0x021585f8
 _ZN12MiiEditPage54ExitEv kind:function(arm,size=0x10) addr:0x02158608
 _ZN12MiiEditSceneD1Ev kind:function(arm,size=0x94) addr:0x02158618
 _ZN12MiiEditSceneD0Ev kind:function(arm,size=0x9c) addr:0x021586ac
-sQuestionButtonPressedSequences kind:data(any) addr:0x02158748 local
-sQuestionButtonSequences kind:data(any) addr:0x0215874c local
+data_ov076_02158748 kind:data(any) addr:0x02158748
+data_ov076_0215874c kind:data(any) addr:0x0215874c
 data_ov076_02158750 kind:data(any) addr:0x02158750
-data_ov076_02158752 kind:data(any) addr:0x02158752
-gStr_L kind:data(any) addr:0x02158754
-gStr_0_ov076 kind:data(any) addr:0x02158764
-gStr_M_ov076 kind:data(any) addr:0x02158774
+data_ov076_02158754 kind:data(any) addr:0x02158754
+data_ov076_02158764 kind:data(any) addr:0x02158764
+data_ov076_02158774 kind:data(any) addr:0x02158774
 data_ov076_02158784 kind:data(any) addr:0x02158784
 data_ov076_02158788 kind:data(any) addr:0x02158788
-sQuestionButtonMessages kind:data(any) addr:0x021587f0 local
-data_ov076_021587f8 kind:data(any) addr:0x021587f8
-sQuestionTextPosition kind:data(any) addr:0x02158800 local
-data_ov076_02158808 kind:data(any) addr:0x02158808
-gStr_Ampersand_ov076 kind:data(any) addr:0x02158818
-sCharacterLabelSequences kind:data(any) addr:0x02158822 local
-sCharacterKnobSequences kind:data(any) addr:0x0215882c local
+data_ov076_021587f0 kind:data(any) addr:0x021587f0
+data_ov076_02158818 kind:data(any) addr:0x02158818
+data_ov076_02158822 kind:data(any) addr:0x02158822
+data_ov076_0215882c kind:data(any) addr:0x0215882c
 data_ov076_02158844 kind:data(any) addr:0x02158844
 data_ov076_02158850 kind:data(any) addr:0x02158850
-sPageCameraGoal kind:data(any) addr:0x0215885c local
-gStr_Parenthesis_ov076 kind:data(any) addr:0x02158868
+data_ov076_0215885c kind:data(any) addr:0x0215885c
+data_ov076_02158868 kind:data(any) addr:0x02158868
 data_ov076_02158874 kind:data(any) addr:0x02158874
-gStr_X_ov076 kind:data(any) addr:0x02158880
+data_ov076_02158880 kind:data(any) addr:0x02158880
 data_ov076_0215888c kind:data(any) addr:0x0215888c
-data_ov076_02158898 kind:data(any) addr:0x02158898
-data_ov076_021588a4 kind:data(any) addr:0x021588a4
+sLightDirection1 kind:data(any) addr:0x02158898
+sLightDirection0 kind:data(any) addr:0x021588a4
 data_ov076_021588b0 kind:data(any) addr:0x021588b0
-gText_Ha kind:data(any) addr:0x021588bc
+data_ov076_021588bc kind:data(any) addr:0x021588bc
 data_ov076_021588cc kind:data(any) addr:0x021588cc
-sQuestionWindowRect kind:data(any) addr:0x021588dc local
+data_ov076_021588dc kind:data(any) addr:0x021588dc
 data_ov076_021588ec kind:data(any) addr:0x021588ec
-sQuestionButtonPositions kind:data(any) addr:0x021588fc local
+data_ov076_021588fc kind:data(any) addr:0x021588fc
 data_ov076_0215890c kind:data(any) addr:0x0215890c
 data_ov076_0215891c kind:data(any) addr:0x0215891c
-gStr_P_ov076 kind:data(any) addr:0x0215892c
+data_ov076_0215892c kind:data(any) addr:0x0215892c
 data_ov076_0215893c kind:data(any) addr:0x0215893c
-sQuestionButtonSizes kind:data(any) addr:0x0215894c local
+data_ov076_0215894c kind:data(any) addr:0x0215894c
 data_ov076_0215895c kind:data(any) addr:0x0215895c
-sCharacterKnobKinds kind:data(any) addr:0x02158970 local
-gStr_GreaterThan_ov076 kind:data(any) addr:0x02158984
+data_ov076_02158970 kind:data(any) addr:0x02158970
+data_ov076_02158984 kind:data(any) addr:0x02158984
 data_ov076_0215899c kind:data(any) addr:0x0215899c
 data_ov076_021589b4 kind:data(any) addr:0x021589b4
 data_ov076_021589cc kind:data(any) addr:0x021589cc
 data_ov076_021589e4 kind:data(any) addr:0x021589e4
-gText_Ma_ov076 kind:data(any) addr:0x021589fc
-sPage5ButtonSounds kind:data(any) addr:0x02158a1c local
-sPage6ButtonSounds kind:data(any) addr:0x02158a3c local
-gStr_P_ov076_2 kind:data(any) addr:0x02158a5c
-gStr_P_ov076_3 kind:data(any) addr:0x02158a7c
-gStr_Colon_ov076 kind:data(any) addr:0x02158a9c
+data_ov076_021589fc kind:data(any) addr:0x021589fc
+data_ov076_02158a1c kind:data(any) addr:0x02158a1c
+data_ov076_02158a3c kind:data(any) addr:0x02158a3c
+data_ov076_02158a5c kind:data(any) addr:0x02158a5c
+data_ov076_02158a7c kind:data(any) addr:0x02158a7c
+data_ov076_02158a9c kind:data(any) addr:0x02158a9c
 data_ov076_02158abc kind:data(any) addr:0x02158abc
-gText_E_ov076 kind:data(any) addr:0x02158adc
-gStr_P_ov076_4 kind:data(any) addr:0x02158afc
+data_ov076_02158adc kind:data(any) addr:0x02158adc
+data_ov076_02158afc kind:data(any) addr:0x02158afc
 data_ov076_02158b1c kind:data(any) addr:0x02158b1c
-sProfileTextSlots kind:data(any) addr:0x02158b3c local
+data_ov076_02158b3c kind:data(any) addr:0x02158b3c
 data_ov076_02158b60 kind:data(any) addr:0x02158b60
-gStr_7 kind:data(any) addr:0x02158b88
-gText_Ka_ov076 kind:data(any) addr:0x02158b8c
-sCharacterLabelPositions kind:data(any) addr:0x02158bb0 local
+sSpriteB0Places kind:data(any) addr:0x02158b88
+data_ov076_02158bb0 kind:data(any) addr:0x02158bb0
 data_ov076_02158bd8 kind:data(any) addr:0x02158bd8
 data_ov076_02158c00 kind:data(any) addr:0x02158c00
-sCharacterKnobPositions kind:data(any) addr:0x02158c28 local
-sCharacterKnobSizes kind:data(any) addr:0x02158c50 local
+data_ov076_02158c28 kind:data(any) addr:0x02158c28
+data_ov076_02158c50 kind:data(any) addr:0x02158c50
 data_ov076_02158c78 kind:data(any) addr:0x02158c78
-gStr_Parenthesis_ov076_2 kind:data(any) addr:0x02158ca4
+data_ov076_02158ca4 kind:data(any) addr:0x02158ca4
 data_ov076_02158cd4 kind:data(any) addr:0x02158cd4
 data_ov076_02158d04 kind:data(any) addr:0x02158d04
 data_ov076_02158d34 kind:data(any) addr:0x02158d34
-gText_Ma_ov076_2 kind:data(any) addr:0x02158d64
+data_ov076_02158d64 kind:data(any) addr:0x02158d64
 data_ov076_02158d94 kind:data(any) addr:0x02158d94
-data_ov076_02158db4 kind:data(any) addr:0x02158db4
-gStr__ov076 kind:data(any) addr:0x02158dc4
+data_ov076_02158dc4 kind:data(any) addr:0x02158dc4
 data_ov076_02158df4 kind:data(any) addr:0x02158df4
-gStr_E00_Window_down_nsc_ov076 kind:data(any) addr:0x02158e30
+data_ov076_02158e30 kind:data(any) addr:0x02158e30
 data_ov076_02158e48 kind:data(any) addr:0x02158e48
 data_ov076_02158e60 kind:data(any) addr:0x02158e60
 data_ov076_02158e94 kind:data(any) addr:0x02158e94
-data_ov076_02158eb4 kind:data(any) addr:0x02158eb4
-gStr_P_ov076_5 kind:data(any) addr:0x02158ed4
-gText_Ma_ov076_3 kind:data(any) addr:0x02158f14
-gStr_Comma_ov076 kind:data(any) addr:0x02158f54
-gStr_Semicolon_ov076 kind:data(any) addr:0x02158f9c
-sProfileTextPositions kind:data(any) addr:0x02158fe4 local
-gStr_t_ov076 kind:data(any) addr:0x02159034
+data_ov076_02158ed4 kind:data(any) addr:0x02158ed4
+data_ov076_02158f14 kind:data(any) addr:0x02158f14
+data_ov076_02158f54 kind:data(any) addr:0x02158f54
+data_ov076_02158f9c kind:data(any) addr:0x02158f9c
+data_ov076_02158fe4 kind:data(any) addr:0x02158fe4
+data_ov076_02159034 kind:data(any) addr:0x02159034
 data_ov076_02159084 kind:data(any) addr:0x02159084
 data_ov076_021590dc kind:data(any) addr:0x021590dc
 data_ov076_0215913c kind:data(any) addr:0x0215913c
 data_ov076_0215919c kind:data(any) addr:0x0215919c
-gStr_Semicolon_ov076_2 kind:data(any) addr:0x021591fc
+data_ov076_021591fc kind:data(any) addr:0x021591fc
 data_ov076_0215925c kind:data(any) addr:0x0215925c
-sCharacterValueRects kind:data(any) addr:0x021592d0 local
+data_ov076_021592d0 kind:data(any) addr:0x021592d0
 data_ov076_02159350 kind:data(any) addr:0x02159350
 data_ov076_021593e0 kind:data(any) addr:0x021593e0
-gStr_D_ov076 kind:data(any) addr:0x02159480
+data_ov076_02159480 kind:data(any) addr:0x02159480
 data_ov076_02159530 kind:data(any) addr:0x02159530
 data_ov076_021595e0 kind:data(any) addr:0x021595e0
-gStr_Colon_ov076_2 kind:data(any) addr:0x021596a0
-gStr_Asterisk_ov076 kind:data(any) addr:0x02159788
-gStr_Exclamation_ov076 kind:data(any) addr:0x02159870
+data_ov076_021596a0 kind:data(any) addr:0x021596a0
+data_ov076_02159788 kind:data(any) addr:0x02159788
+data_ov076_02159870 kind:data(any) addr:0x02159870
 data_ov076_02159990 kind:data(any) addr:0x02159990
 data_ov076_02159ab0 kind:data(any) addr:0x02159ab0
 data_ov076_02159c10 kind:data(any) addr:0x02159c10
-data_ov076_02159c50 kind:data(any) addr:0x02159c50
-data_ov076_02159d10 kind:data(any) addr:0x02159d10
-data_ov076_02159d30 kind:data(any) addr:0x02159d30
-data_ov076_02159d50 kind:data(any) addr:0x02159d50
-data_ov076_02159d90 kind:data(any) addr:0x02159d90
 data_ov076_02159de0 kind:data(any) addr:0x02159de0
 __sinit_ov076_0215a020 kind:function(arm,size=0xc8) addr:0x0215a020
 .p__sinit_ov076_0215a020 kind:data(word) addr:0x0215a0e8
 data_ov076_0215a100 kind:data(any) addr:0x0215a100
 data_ov076_0215a102 kind:data(any) addr:0x0215a102
 data_ov076_0215a106 kind:data(any) addr:0x0215a106
-sSexMarks kind:data(any) addr:0x0215a10c local
+data_ov076_0215a10c kind:data(any) addr:0x0215a10c
 data_ov076_0215a120 kind:data(any) addr:0x0215a120
 data_ov076_0215a13c kind:data(any) addr:0x0215a13c
 gStr_E00_ov076 kind:data(any) addr:0x0215a25c
