@@ -248,7 +248,10 @@ lib/NitroSDK/libraries/fs/src/fs_command.c:
     .text       start:0x0200b558 end:0x0200b744
 
 lib/NitroSDK/libraries/fs/src/fs_command_default.c:
+    complete
     .text       start:0x0200b744 end:0x0200c0e4
+    .rodata     start:0x020b5478 end:0x020b549c
+    .data       start:0x020fc668 end:0x020fc66c
 
 lib/NitroSDK/libraries/fs/src/fs_archive.c:
     .text       start:0x0200c0e4 end:0x0200cbc8
@@ -257,7 +260,10 @@ lib/NitroSDK/libraries/fs/src/fs_file.c:
     .text       start:0x0200cbc8 end:0x0200d0d8
 
 lib/NitroSDK/libraries/fs/src/fs_rom.c:
+    complete
     .text       start:0x0200d0d8 end:0x0200d330
+    .data       start:0x020fc66c end:0x020fc670
+    .bss        start:0x0211b5dc end:0x0211b650
 
 lib/NitroSDK/libraries/fs/src/fs_overlay.c:
     .text       start:0x0200d330 end:0x0200d95c
@@ -268,7 +274,9 @@ lib/NitroSDK/libraries/cp/src/cp_context.c:
     .text       start:0x0200e1dc end:0x0200e258
 
 lib/NitroSDK/libraries/spi/src/tp.c:
+    complete
     .text       start:0x0200e258 end:0x0200eca8
+    .bss        start:0x0211b650 end:0x0211b68c
 
 lib/NitroSDK/libraries/spi/src/pm.c:
     complete

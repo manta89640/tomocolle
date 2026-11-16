@@ -493,15 +493,15 @@ FSi_TranslateCommand kind:function(arm,size=0x190) addr:0x0200b5b4
 FSi_StrNICmp kind:function(arm,size=0x50) addr:0x0200b744
 FSi_ReadTable kind:function(arm,size=0xc0) addr:0x0200b794 local
 FSi_SeekDirDirect kind:function(arm,size=0x34) addr:0x0200b854 local
-FSi_ReadFileCommand kind:function(arm,size=0x2c) addr:0x0200b888
-FSi_WriteFileCommand kind:function(arm,size=0x2c) addr:0x0200b8b4
-FSi_SeekDirCommand kind:function(arm,size=0x98) addr:0x0200b8e0
-FSi_ReadDirCommand kind:function(arm,size=0x12c) addr:0x0200b978
-FSi_FindPathCommand kind:function(arm,size=0x1e4) addr:0x0200baa4
-FSi_GetPathCommand kind:function(arm,size=0x3ac) addr:0x0200bc88
-FSi_OpenFileFastCommand kind:function(arm,size=0x80) addr:0x0200c034
-FSi_OpenFileDirectCommand kind:function(arm,size=0x28) addr:0x0200c0b4
-FSi_CloseFileCommand kind:function(arm,size=0x8) addr:0x0200c0dc
+FSi_ReadFileCommand kind:function(arm,size=0x2c) addr:0x0200b888 local
+FSi_WriteFileCommand kind:function(arm,size=0x2c) addr:0x0200b8b4 local
+FSi_SeekDirCommand kind:function(arm,size=0x98) addr:0x0200b8e0 local
+FSi_ReadDirCommand kind:function(arm,size=0x12c) addr:0x0200b978 local
+FSi_FindPathCommand kind:function(arm,size=0x1e4) addr:0x0200baa4 local
+FSi_GetPathCommand kind:function(arm,size=0x3ac) addr:0x0200bc88 local
+FSi_OpenFileFastCommand kind:function(arm,size=0x80) addr:0x0200c034 local
+FSi_OpenFileDirectCommand kind:function(arm,size=0x28) addr:0x0200c0b4 local
+FSi_CloseFileCommand kind:function(arm,size=0x8) addr:0x0200c0dc local
 FSi_GetPackedName kind:function(arm,size=0x58) addr:0x0200c0e4 local
 FSi_ReadMemCallback kind:function(arm,size=0x1c) addr:0x0200c13c local
 FSi_WriteMemCallback kind:function(arm,size=0x20) addr:0x0200c158 local
@@ -4216,7 +4216,7 @@ sTexStartAddrTable kind:data(any) addr:0x020b4924 local
 col_table$8275 kind:data(short[16]) addr:0x020b4984 local
 SNDi_DecibelTable kind:data(any) addr:0x020b4aa4
 VolumeTable kind:data(any) addr:0x020b51a4
-gText_Abu kind:data(any) addr:0x020b5478
+fsi_default_command kind:data(any) addr:0x020b5478
 data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
 data_020b5534 kind:data(any) addr:0x020b5534
@@ -4826,8 +4826,8 @@ sIsDispOn kind:data(any) addr:0x020fc64c
 GXi_DmaId kind:data(any) addr:0x020fc650
 OSi_IrqCallbackInfoIndex kind:data(any) addr:0x020fc654
 OSi_ConsoleTypeCache kind:data(any) addr:0x020fc664
-gStr_ColonSolidus kind:data(any) addr:0x020fc668
-gStr_rom kind:data(any) addr:0x020fc66c
+@8995 kind:data(any) addr:0x020fc668 local
+@8445 kind:data(any) addr:0x020fc66c local
 fsi_digest_key_ptr kind:data(any) addr:0x020fc670 local
 fsi_digest_key_len kind:data(any) addr:0x020fc674 local
 gStr_a_2 kind:data(any) addr:0x020fc678
@@ -6372,12 +6372,7 @@ sClrImgLCDCBlk kind:bss addr:0x021195c0 local
 sTex kind:bss addr:0x021195c4 local
 sTexLCDCBlk2 kind:bss addr:0x021195c8 local
 sSzTexBlk1 kind:bss addr:0x021195cc local
-data_021195d0 kind:bss addr:0x021195d0
-data_021195d4 kind:bss addr:0x021195d4
-data_021195d8 kind:bss addr:0x021195d8
-data_02119600 kind:bss addr:0x02119600
-data_02119604 kind:bss addr:0x02119604
-data_02119608 kind:bss addr:0x02119608
+OSi_IrqCallbackInfo kind:bss(size=0x60) addr:0x021195d0
 data_02119630 kind:bss addr:0x02119630
 OSi_SystemCallbackInSwitchThread kind:bss addr:0x02119634
 OSi_ThreadInfo kind:bss addr:0x02119658
@@ -6414,11 +6409,12 @@ arc_list kind:bss addr:0x0211b5c8
 current_dir_pos kind:bss addr:0x0211b5cc
 is_init kind:bss addr:0x0211b5d8
 fsi_card_lock_id kind:bss addr:0x0211b5dc
+fsi_default_dma_no kind:bss(size=0x4) addr:0x0211b5e0 local
 fsi_ovt9 kind:bss addr:0x0211b5e4
 fsi_ovt7 kind:bss addr:0x0211b5ec
 fsi_arc_rom kind:bss addr:0x0211b5f4
-data_0211b650 kind:bss addr:0x0211b650
-tpState kind:bss addr:0x0211b66c
+initial$8526 kind:bss(size=0x2) addr:0x0211b650 local
+tpState kind:bss(size=0x38) addr:0x0211b654 local
 PMi_IsInit kind:bss addr:0x0211b68c local
 PMi_LCDCount kind:bss addr:0x0211b690 local
 PMi_InitVBlankCount kind:bss addr:0x0211b694 local
