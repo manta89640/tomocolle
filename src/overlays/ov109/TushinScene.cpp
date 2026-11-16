@@ -1531,10 +1531,10 @@ void TushinScene::Leave() {
 }
 
 #pragma optimization_level 2
-// NOT MATCHING (optimization level 2): the parent timers are read through their own symbol instead of the .bss
-// pool's base (the .bss is not in the ROM's order yet); in two of the four calls of func_020a123c with the sort
-// key (pages 13 and 14/15) the original loads the key's offset before the list's address (registers swapped);
-// and `moveq r6, #67` is scheduled after `mov r5, #1` in the original.
+// NOT MATCHING (optimization level 2): register order only. In the four calls of func_020a123c with the sort key the
+// original loads the key's offset into r0 and forms the list's address through r2 (ours: r1, r0), and in the two
+// SetStringArg calls with a parent's name the parent index and the names' base swap r2/r3 in the mla. The same
+// call alone in a test file comes out as in the original: the surrounding code decides it, not the call's form.
 static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 // @0x0214f7ec
 void TushinScene::Update() {
@@ -2749,7 +2749,9 @@ int TushinScene::NextPageAfterReceive() {
 }
 
 // NOT MATCHING: the original derives the -1 for data_ov109_02153224 from a register holding 0 (mov r2, #0; sub r1, r2,
-// #1), and sets that 0 earlier (five instructions).
+// #1), and sets that 0 earlier (five instructions). mwcc derives a constant so when a register already holds a nearby
+// one (storing 0 first does it, but then the stores come out in the other order); a variable equal to 0 that is not
+// propagated would do it too (ItemTradeList::Receive), but none fits here.
 // @0x02152014
 int TushinScene::ReceiveWiiMii() {
     SavedCharacter character;
