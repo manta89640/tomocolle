@@ -2232,6 +2232,334 @@ void func_0206ebb0(VecFx32 *out, const VecFx32 *origin, u32 kind, int x, int y, 
              0x47 / 200;
 }
 
+// The state that func_0206ed94 and func_020705d4 share across calls (func_020715ac clears unk20 between pairs)
+typedef struct NFLMakeState {
+    u8 unk0[0x20];
+    int unk20;
+} NFLMakeState;
+
+void func_0206ed94(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state);
+void func_020705d4(GXDLInfo *dl, NFLMakePart *part, NFLObj *obj, const NFLCharData *data, NFLPatch *patch,
+                   NFLDLRef *ref, int n, NFLMakeState *state);
+
+void func_020715ac(NFLMakeCtx *ctx) {
+    NFLObj *obj = ctx->unk1C8;
+    const NFLCharData *data = ctx->unk1CC;
+    NFLMakeState state;
+
+    state.unk20 = 0;
+    func_0206ed94(&ctx->unk64, &ctx->unk78[4], obj, data, &obj->unk140, NULL, 0, &state);
+    func_0206ed94(&ctx->unk64, &ctx->unk78[5], obj, data, NULL, NULL, 0x20, &state);
+    state.unk20 = 0;
+    func_020705d4(&ctx->unk64, &ctx->unk78[0], obj, data, &obj->unk128, NULL, 0, &state);
+    func_020705d4(&ctx->unk64, &ctx->unk78[2], obj, data, &obj->unkF8, &obj->unk160, 0x20, &state);
+    state.unk20 = 0;
+    func_020705d4(&ctx->unk64, &ctx->unk78[1], obj, data, &obj->unk110, NULL, 0, &state);
+    func_020705d4(&ctx->unk64, &ctx->unk78[3], obj, data, &obj->unkE0, &obj->unk158, 0x20, &state);
+    if (data->moleType == 1) {
+        func_0206ed94(&ctx->unk64, &ctx->unk78[6], obj, data, NULL, NULL, 0, NULL);
+    }
+}
+
+void func_02074548(const NFLDrawContext *ctx, MtxFx43 *mtx, fx32 sinVal, fx32 cosVal);
+
+// Patches a face part's display list: its rotation, if it has a matrix command, and its texture and palette
+void func_02071730(NFLObj *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTexFmt fmt, GXTexSizeS s, GXTexSizeT t,
+                   u32 texAddr, u32 plttAddr) {
+    GXDLInfo dl;
+    MtxFx43 mtx;
+
+    if (patch->mtx.cmd != NULL && patch->mtx.param != NULL) {
+        dl.curr_cmd = patch->mtx.cmd;
+        dl.curr_param = patch->mtx.param;
+        func_02074548(obj, &mtx, sin, cos);
+        G3CS_MultMtx43(&dl, &mtx);
+    }
+    dl.curr_cmd = patch->tex.cmd;
+    dl.curr_param = patch->tex.param;
+    if (texAddr == 0) {
+        return;
+    }
+    if (fmt == GX_TEXFMT_DIRECT) {
+        G3CS_TexImageParam(&dl, fmt, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST, GX_TEXPLTTCOLOR0_TRNS,
+                           texAddr);
+        return;
+    }
+    G3CS_TexImageParam(&dl, GX_TEXFMT_PLTT16, GX_TEXGEN_NONE, s, t, GX_TEXREPEAT_ST, GX_TEXFLIP_ST,
+                       GX_TEXPLTTCOLOR0_TRNS, texAddr);
+    dl.curr_cmd = patch->pltt.cmd;
+    dl.curr_param = patch->pltt.param;
+    G3CS_TexPlttBase(&dl, plttAddr, fmt);
+}
+
+extern const u8 data_020b689c[];
+extern const u8 data_020b6884[];
+
+#pragma optimization_level 2
+#pragma opt_common_subs off
+void func_0207183c(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+
+    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk20, obj->unk24);
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+#pragma optimization_level 2
+#pragma opt_common_subs off
+void func_02071cdc(NFLObj *obj) {
+    fx16 sin;
+    fx16 cos;
+    fx32 y;
+    int type;
+    u16 idx;
+    fx32 v;
+
+    idx = (u16)(((obj->unk80[3] + data_020b689c[obj->unk80[4]] - 0x20) << 16) / 32);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    y = -(obj->unk80[2] * 0x10E1 - 0x22490);
+    type = obj->unk80[5];
+    func_02071730(obj, &obj->unk110, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    func_02071730(obj, &obj->unk128, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->unk10, obj->unk14);
+    idx = (u16)((obj->unk80[6] + data_020b6884[obj->unk80[7]] - 0x20) << 11);
+    sin = (fx16)FX_SinIdx(idx);
+    cos = (fx16)FX_CosIdx(idx);
+    func_02071730(obj, &obj->unkE0, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    func_02071730(obj, &obj->unkF8, -sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, 0, 0);
+    switch (type) {
+    case 2:
+    case 6:
+    case 7:
+        y += 0x1E60;
+        break;
+    }
+    if (obj->unkC4.x != 0) {
+        v = -y / 32;
+    } else {
+        v = y / 32;
+    }
+    obj->unk158.param[obj->unkD0] = v;
+    obj->unk160.param[obj->unkD0] = v;
+    sin = (fx16)FX_SinIdx(0);
+    cos = (fx16)FX_CosIdx(0);
+    func_02071730(obj, &obj->unk140, sin, cos, obj->unk90, GX_TEXSIZE_S32, GX_TEXSIZE_T32, data_02145360->unk10[1].unk0, obj->unk24);
+}
+#pragma opt_common_subs reset
+#pragma optimization_level reset
+
+int func_0206ddb8(NFLMakeCtx *ctx);
+int func_0206e650(NFLMakeCtx *ctx);
+void func_0206e724(NFLMakeCtx *ctx);
+
+int func_02071578(NFLMakeCtx *ctx) {
+    int result = func_0206ddb8(ctx);
+
+    if (result != 0) {
+        return result;
+    }
+    result = func_0206e650(ctx);
+    if (result != 0) {
+        return result;
+    }
+    func_0206e724(ctx);
+    return result;
+}
+
+NFLObj *func_02073060(int index);
+void func_0207183c(NFLObj *obj);
+void func_02071a78(NFLObj *obj);
+void func_02071cdc(NFLObj *obj);
+void func_02071f24(NFLObj *obj);
+void func_0207219c(NFLObj *obj);
+void func_02072418(NFLObj *obj);
+void func_02072694(NFLObj *obj);
+
+int func_020728fc(int index, int type) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return 9;
+    }
+    switch (type) {
+    case 5:
+        if (obj->unk16C & 0x20) {
+            func_02071a78(obj);
+            obj->unk168 = 5;
+            return 0;
+        }
+        break;
+    case 6:
+        if (obj->unk16C & 0x40) {
+            func_02071cdc(obj);
+            obj->unk168 = 6;
+            return 0;
+        }
+        break;
+    case 1:
+        if (obj->unk16C & 0x2) {
+            func_02071f24(obj);
+            obj->unk168 = 1;
+            return 0;
+        }
+        break;
+    case 2:
+        if (obj->unk16C & 0x4) {
+            func_0207219c(obj);
+            obj->unk168 = 2;
+            return 0;
+        }
+        break;
+    case 3:
+        if (obj->unk16C & 0x8) {
+            func_02072418(obj);
+            obj->unk168 = 3;
+            return 0;
+        }
+        break;
+    case 4:
+        if (obj->unk16C & 0x10) {
+            func_02072694(obj);
+            obj->unk168 = 4;
+            return 0;
+        }
+        break;
+    }
+    func_0207183c(obj);
+    obj->unk168 = 0;
+    return 0;
+}
+
+int func_02072a28(int index) {
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        return -1;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        return -1;
+    }
+    return obj->unk168;
+}
+
+// The resource stream's layout: where the work memory goes and how (unk8 is 3 or 7 in places)
+typedef struct NFLDesc {
+    u32 unk0;
+    u32 unk4;
+    u32 unk8;
+} NFLDesc;
+
+int func_02072c38(u8 *p);
+int func_02073584(void *p);
+extern const u8 data_020b68d0[];
+
+// The library's initialisation: main passes NFL_Res.dat's data as res
+int func_02072a58(NFLWork *work, void *res, void *buf, u32 size, const NFLDesc *desc, u8 flags, u8 max) {
+    u32 seed = 0;
+    int n = 0;
+    int i;
+    RTCDate date;
+    RTCTime time;
+    OSIntrMode enabled;
+    NFLWorkFrom74 *sub;
+
+    if (work == NULL || res == NULL || buf == NULL || desc == NULL) {
+        return 8;
+    }
+    if (size & 3) {
+        return 8;
+    }
+    func_02072c38((u8 *)work);
+    if (RTC_GetDateTime(&date, &time) == RTC_RESULT_SUCCESS) {
+        seed = RTC_ConvertDateTimeToSecond(&date, &time);
+    }
+    work->unk58 = seed;
+    work->unk5C = 0x5D588B65;
+    work->unk60 = 0x269EC3;
+    work->unk0 = desc->unk0;
+    work->unk4 = desc->unk4;
+    work->unk68 = desc->unk8;
+    work->unk71 = flags;
+    work->unk74 = NULL;
+    work->unk8C = 4;
+    work->unk90 = 2;
+    work->unk78 = buf;
+    work->unk7C = size;
+    work->unk80 = 0;
+    work->unk84 = 0;
+    work->unk88 = 0;
+    work->unk94 = 0;
+    work->unk98 = 0;
+    sub = (NFLWorkFrom74 *)&work->unk74;
+    for (i = 0; i < 5; i++) {
+        if (flags & data_020b68d0[i]) {
+            sub->unkA0[i].unk8 = 0;
+            n++;
+        } else {
+            sub->unkA0[i].unk8 = 7;
+        }
+    }
+    work->unk70 = max;
+    work->unk6C = NULL;
+    work->unkA0[0].unk8 = 0;
+    if (desc->unk8 == 7) {
+        work->unkA0[6].unk8 = 7;
+    } else {
+        work->unkA0[6].unk8 = 0;
+    }
+    if (desc->unk8 == 3) {
+        work->unk8 = desc->unk0 + ((n << 11) + 0x200) / 4;
+        work->unkC = desc->unk4 + 0x20;
+    } else {
+        work->unk8 = desc->unk0 + (n << 11) + 0x200;
+        work->unkC = desc->unk4;
+    }
+    enabled = OS_DisableInterrupts();
+    data_02145360 = work;
+    func_02073584(res);
+    OS_RestoreInterrupts(enabled);
+    return 0;
+}
+
 BOOL func_02072c1c(void) {
     return data_02145360 != NULL;
 }
@@ -2300,6 +2628,195 @@ int func_02072c5c(NFLObj *obj) {
     return 0;
 }
 
+int func_02072d8c(void) {
+    if (!func_02072c1c()) {
+        return 4;
+    }
+    data_02145360->unk70++;
+    return 0;
+}
+
+int func_02072dc0(NFLObj **removed) {
+    OSIntrMode enabled;
+    NFLObj *obj = NULL;
+    NFLWork *work;
+    NFLObj *prev;
+    int n;
+    NFLObj *cur;
+
+    enabled = OS_DisableInterrupts();
+    if (!func_02072c1c()) {
+        OS_RestoreInterrupts(enabled);
+        return 4;
+    }
+    work = data_02145360;
+    if (work->unk8C == 1 || work->unk8C == 3) {
+        OS_RestoreInterrupts(enabled);
+        return 6;
+    }
+    if (work->unk70 != 0) {
+        work->unk70--;
+    }
+    if (removed != NULL) {
+        *removed = NULL;
+    }
+    prev = data_02145360->unk6C;
+    if (prev != NULL) {
+        if (data_02145360->unk70 == 0) {
+            prev->unk170 = 4;
+            obj = prev;
+            data_02145360->unk6C = NULL;
+        } else {
+            cur = prev->next;
+            n = 1;
+            while (cur != NULL) {
+                if (cur->next == NULL) {
+                    if (n >= data_02145360->unk70) {
+                        cur->unk170 = 4;
+                        obj = cur;
+                        prev->next = NULL;
+                    }
+                    break;
+                }
+                prev = cur;
+                cur = cur->next;
+                n++;
+            }
+        }
+    }
+    if (obj != NULL) {
+        if (removed != NULL) {
+            *removed = obj;
+        }
+        work = data_02145360;
+        prev = work->unk74;
+        if (prev != NULL) {
+            if (prev == obj) {
+                work->unk74 = obj->unk17C;
+            } else {
+                for (cur = prev->unk17C; cur != NULL; cur = cur->unk17C) {
+                    if (cur == obj) {
+                        prev->unk17C = obj->unk17C;
+                        break;
+                    }
+                    prev = cur;
+                }
+            }
+        }
+    }
+    OS_RestoreInterrupts(enabled);
+    return 0;
+}
+
+int func_02072f34(int index) {
+    OSIntrMode enabled = OS_DisableInterrupts();
+    NFLObj *obj;
+
+    if (!func_02072c1c()) {
+        OS_RestoreInterrupts(enabled);
+        return 4;
+    }
+    if (data_02145360->unk8C == 1 || data_02145360->unk8C == 3) {
+        OS_RestoreInterrupts(enabled);
+        return 6;
+    }
+    obj = func_02073060(index);
+    if (obj == NULL) {
+        OS_RestoreInterrupts(enabled);
+        return 9;
+    }
+    obj->unk170 = 4;
+    OS_RestoreInterrupts(enabled);
+    return 0;
+}
+
+int func_02072fc4(void) {
+    int n;
+    NFLObj *obj;
+    NFLWork *work;
+    OSIntrMode enabled = OS_DisableInterrupts();
+
+    if (!func_02072c1c()) {
+        OS_RestoreInterrupts(enabled);
+        return -1;
+    }
+    work = data_02145360;
+    if (work->unk70 == 0) {
+        OS_RestoreInterrupts(enabled);
+        return -1;
+    }
+    n = 0;
+    for (obj = work->unk6C; obj != NULL; obj = obj->next) {
+        if (obj->unk170 == 4) {
+            OS_RestoreInterrupts(enabled);
+            return n;
+        }
+        n++;
+    }
+    OS_RestoreInterrupts(enabled);
+    return -1;
+}
+
+NFLObj *func_02073060(int index) {
+    int i;
+    NFLObj *obj;
+    NFLWork *work;
+    OSIntrMode enabled = OS_DisableInterrupts();
+
+    if (!func_02072c1c()) {
+        OS_RestoreInterrupts(enabled);
+        return NULL;
+    }
+    work = data_02145360;
+    if (index >= work->unk70) {
+        OS_RestoreInterrupts(enabled);
+        return NULL;
+    }
+    i = 0;
+    for (obj = work->unk6C; obj != NULL; obj = obj->next) {
+        if (i == index) {
+            OS_RestoreInterrupts(enabled);
+            return obj;
+        }
+        i++;
+    }
+    OS_RestoreInterrupts(enabled);
+    return NULL;
+}
+
+u16 func_020743a0(u16 max);
+
+// Makes a create ID from the time, a random number and the MAC address
+BOOL func_020730fc(NFLCreateId *id) {
+    u16 random;
+    s64 seconds;
+    u32 t;
+    RTCDate date;
+    RTCTime time;
+    u8 mac[6];
+
+    if (RTC_GetDateTime(&date, &time) == RTC_RESULT_SUCCESS) {
+        random = func_020743a0(4);
+        seconds = RTC_ConvertDateTimeToSecond(&date, &time);
+
+        if (seconds == -1) {
+            return FALSE;
+        }
+        t = seconds >> 5;
+        *(u16 *)&id->data[0] = 0;
+        id->data[2] = ((t & 0x30000) >> 16) | (random << 2);
+        id->data[3] = (t & 0xFF00) >> 8;
+        id->data[4] = t;
+        OS_GetMacAddress(mac);
+        id->data[5] = mac[3];
+        id->data[6] = mac[4];
+        id->data[7] = mac[5];
+    } else {
+        return FALSE;
+    }
+    return TRUE;
+}
+
 void func_020731b8(u8 *p) {
     int i;
 
@@ -2307,6 +2824,29 @@ void func_020731b8(u8 *p) {
     for (i = 1; i < 8; i++) {
         p[0x18 + i] = 0;
     }
+}
+
+extern const int data_020b68d8[];
+
+// Whether a Mii's data is valid: height and build at most 128, a favourite colour of the 12, a date that exists, and
+// a create ID
+BOOL func_020731e0(const NFLCharData *data) {
+    if (data->height > 0x80) {
+        return FALSE;
+    }
+    if (data->build > 0x80) {
+        return FALSE;
+    }
+    if (data->favoriteColor > 11) {
+        return FALSE;
+    }
+    if (data->birthMonth > 12) {
+        return FALSE;
+    }
+    if (data->birthDay > data_020b68d8[data->birthMonth]) {
+        return FALSE;
+    }
+    return !func_02073284(&data->createId);
 }
 
 BOOL func_02073264(const NFLCreateId *id) {
@@ -2365,6 +2905,56 @@ BOOL func_02073330(const NFLCreateId *a, const NFLCreateId *b) {
 void func_02073394(NFLCreateId *id) {
     *(u32 *)&id->data[0] = 0;
     *(u32 *)&id->data[4] = 0;
+}
+
+// What func_020733a4 makes of a Mii's data
+typedef struct NFLCharInfo {
+    /* 0x00 */ u16 name[11];
+    /* 0x16 */ u16 creatorName[11];
+    /* 0x2C */ NFLCreateId createId;
+    /* 0x34 */ u32 sex : 1;
+               u32 birthMonth : 4;
+               u32 birthDay : 5;
+               u32 favoriteColor : 4;
+               u32 unknown00Bit0 : 1;
+               u32 height : 7;
+               u32 build : 7;
+               u32 unk34Bits29 : 2;
+    /* 0x38 */ u16 unk38;
+} NFLCharInfo;
+
+u16 func_0206dcd0(int faceColor);
+
+int func_020733a4(NFLCharInfo *info, const NFLCharData *data) {
+    u8 height;
+    u8 build;
+
+    if (!func_020731e0(data)) {
+        return 7;
+    }
+    MI_CpuClear16(info->name, sizeof(info->name));
+    MI_CpuClear16(info->creatorName, sizeof(info->creatorName));
+    MI_CpuCopy16(data->name, info->name, sizeof(data->name));
+    MI_CpuCopy16(data->creatorName, info->creatorName, sizeof(data->creatorName));
+    MI_CpuCopy8(&data->createId, &info->createId, sizeof(NFLCreateId));
+    height = data->height;
+    build = data->build;
+    if (height > 0x7F) {
+        height = 0x7F;
+    }
+    if (build > 0x7F) {
+        build = 0x7F;
+    }
+    info->sex = data->sex;
+    info->birthMonth = data->birthMonth;
+    info->birthDay = data->birthDay;
+    info->favoriteColor = data->favoriteColor;
+    info->unknown00Bit0 = data->unk00Bit0;
+    info->height = height;
+    info->build = build;
+    info->unk34Bits29 = (*(const u32 *)&data->createId & 0x80000000) ? 0 : 3;
+    info->unk38 = func_0206dcd0(data->faceColor);
+    return 0;
 }
 
 u16 func_0206dd1c(int index);

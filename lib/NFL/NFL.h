@@ -79,6 +79,19 @@ typedef struct NFLDLPatch {
     BOOL unk8;
 } NFLDLPatch;
 
+// A command in a display list, to be patched later: where its command byte and its parameters are
+typedef struct NFLDLRef {
+    u8 *cmd;
+    u32 *param;
+} NFLDLRef;
+
+// The commands of a face part's display list that func_02071730 patches: a matrix, a texture and its palette
+typedef struct NFLPatch {
+    NFLDLRef mtx;
+    NFLDLRef tex;
+    NFLDLRef pltt;
+} NFLPatch;
+
 // An entry of NFLObj's two arrays at 0x1A4 and 0x228: a value from the Mii's data and a state (1 to 6 checked,
 // 7 set)
 typedef struct NFLObjEntry {
@@ -120,7 +133,8 @@ typedef struct NFLObj {
     u32 unk28;
     MtxFx43 unk2C;
     MtxFx33 unk5C; // Loaded as the vector matrix with G3_LoadMtx43
-    s16 unk80[8];
+    u16 unk80[8]; // From the Mii's data (func_0206ddb8): 2 eyebrowY, 3 eyeRotation, 4 eyeType, 5 faceType, 6
+                  // eyebrowRotation, 7 eyebrowType. u16: func_0207183c reads them with ldrh
     int unk90;
     NFLDLPatch unk94[4];
     VecFx32 unkC4;
@@ -131,7 +145,13 @@ typedef struct NFLObj {
     u32 unkD4;
     u32 unkD8;
     const NFLCharData *unkDC;
-    u8 unkE0[0x168 - 0xE0];
+    NFLPatch unkE0;
+    NFLPatch unkF8;
+    NFLPatch unk110;
+    NFLPatch unk128;
+    NFLPatch unk140;
+    NFLDLRef unk158;
+    NFLDLRef unk160;
     int unk168;
     u8 unk16C;
     u8 unk16D[3];
@@ -147,6 +167,15 @@ typedef struct NFLObj {
     u8 unk1D84[0x494];
 } NFLObj;
 
+// A part of NFLMakeCtx that func_0206ed94 and func_020705d4 make a face part's display list from
+typedef struct NFLMakePart {
+    fx32 unk0[8];
+    u32 unk20;
+    u32 unk24;
+    int unk28;
+    int unk2C;
+} NFLMakePart;
+
 // The state of func_0206d4f8 while it makes an NFLObj's display lists
 typedef struct NFLMakeCtx {
     VecFx32 unk0[3];
@@ -157,13 +186,7 @@ typedef struct NFLMakeCtx {
         u32 unk4;
     } unk2C[7];
     GXDLInfo unk64;
-    struct {
-        fx32 unk0[8];
-        u32 unk20;
-        u32 unk24;
-        int unk28;
-        int unk2C;
-    } unk78[7];
+    NFLMakePart unk78[7];
     NFLObj *unk1C8;
     const NFLCharData *unk1CC;
 } NFLMakeCtx;
@@ -215,6 +238,23 @@ typedef struct NFLWork {
     int unk12C;
 } NFLWork;
 
+// NFLWork from unk74 to its 0xF4 bytes' end. func_02072a58 reaches the entries off the address of unk74, as through a
+// pointer to a structure that begins there: so unk74 to the end is likely one structure of the original's
+typedef struct NFLWorkFrom74 {
+    NFLObj *unk74;
+    u8 *unk78;
+    u32 unk7C;
+    u32 unk80;
+    u32 unk84;
+    u32 unk88;
+    int unk8C;
+    int unk90;
+    u32 unk94;
+    u32 unk98;
+    u8 unk9C;
+    NFLWorkUnkA0 unkA0[7];
+} NFLWorkFrom74;
+
 extern NFLWork *data_02145360;
 
 int func_0206b0d8(NFLMakeCtx *ctx);
@@ -233,7 +273,7 @@ NFLObj *func_02073060(int index);
 BOOL func_020731e0(const NFLCharData *mii);
 BOOL func_020735dc(void);
 BOOL func_020735fc(void);
-int func_020715ac(NFLMakeCtx *ctx);
+void func_020715ac(NFLMakeCtx *ctx);
 int func_020728fc(int index, int unk);
 // What the display-list code passes the coordinate helpers (func_020743e4 on) is the object: how to map x, y and z to
 // its axes (the indices at 0xD0 to 0xD2) and which to negate (unkC4)
