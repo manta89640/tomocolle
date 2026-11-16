@@ -4393,7 +4393,7 @@ sNFLTexPlttBankBases kind:data(any) addr:0x020b7af4
 sNFLTexBankParts kind:data(any) addr:0x020b7b04
 sNFLFacePlttOffsets kind:data(any) addr:0x020b7b64
 sNFLFaceTexOffsets kind:data(any) addr:0x020b7b8c
-data_020b7be4 kind:data(any) addr:0x020b7be4 local
+@8594 kind:data(any) addr:0x020b7be4 local
 sDaysInMonth kind:data(any) addr:0x020b7e1c local
 sDefaultMiis kind:data(any) addr:0x020b7e50 local
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
@@ -4489,7 +4489,6 @@ data_020f5df8 kind:data(any) addr:0x020f5df8
 data_020f5e28 kind:data(any) addr:0x020f5e28
 data_020f5f0c kind:data(any) addr:0x020f5f0c
 data_020f72f8 kind:data(any) addr:0x020f72f8
-data_020f7300 kind:data(any) addr:0x020f7300
 data_020f730a kind:data(any) addr:0x020f730a
 data_020f730b kind:data(any) addr:0x020f730b
 data_020f730c kind:data(any) addr:0x020f730c

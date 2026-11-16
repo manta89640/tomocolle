@@ -56,7 +56,7 @@ from:0x02149ef8 kind:load to:0x0214a574 module:overlay(60)
 from:0x02149f00 kind:load to:0x021223e4 module:main
 from:0x02149f04 kind:load to:0x0214a690 module:overlay(60)
 from:0x02149f08 kind:load to:0x021227cc module:main
-from:0x02149f10 kind:load to:0x020f7300 module:main
+from:0x02149f10 kind:load to:0x020f72f8 add:0x8 module:main
 from:0x02149f14 kind:load to:0x021227d8 module:main
 from:0x02149f18 kind:load to:0x0214a6ac module:overlay(60)
 from:0x02149f1c kind:load to:0x02121ee4 module:main

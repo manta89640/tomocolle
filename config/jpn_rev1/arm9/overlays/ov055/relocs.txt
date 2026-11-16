@@ -104,7 +104,7 @@ from:0x0214a59c kind:load to:0x0214bbd4 module:overlay(55)
 from:0x0214a5a0 kind:load to:0x0214bdbc module:overlay(55)
 from:0x0214a5a4 kind:load to:0x02122764 module:main
 from:0x0214a5b8 kind:load to:0x021227cc module:main
-from:0x0214a5c0 kind:load to:0x020f7300 module:main
+from:0x0214a5c0 kind:load to:0x020f72f8 add:0x8 module:main
 from:0x0214a5c4 kind:load to:0x021227d8 module:main
 from:0x0214a5c8 kind:load to:0x0211fa10 module:main
 from:0x0214a5cc kind:load to:0x0214bf3c module:overlay(55)

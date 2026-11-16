@@ -69,7 +69,7 @@ from:0x0214a114 kind:load to:0x020f5f0c module:main
 from:0x0214a11c kind:load to:0x0214afb4 module:overlay(19)
 from:0x0214a120 kind:load to:0x0214adcc module:overlay(19)
 from:0x0214a124 kind:load to:0x021227cc module:main
-from:0x0214a12c kind:load to:0x020f7300 module:main
+from:0x0214a12c kind:load to:0x020f72f8 add:0x8 module:main
 from:0x0214a130 kind:load to:0x021227d8 module:main
 from:0x0214a138 kind:load to:0x02121834 module:main
 from:0x0214a13c kind:load to:0x0214afc4 module:overlay(19)

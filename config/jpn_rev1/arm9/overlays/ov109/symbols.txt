@@ -126,11 +126,8 @@ sListItemSizes kind:data(any) addr:0x021527d8 local
 sListWindowScreenName kind:data(any) addr:0x02152810 local
 sWindowScreenName kind:data(any) addr:0x02152828 local
 sLayouts kind:data(any) addr:0x02152840 local
-data_ov109_02152848 kind:data(any) addr:0x02152848
-data_ov109_0215284c kind:data(any) addr:0x0215284c
 sBackButtonStyles kind:data(any) addr:0x021528d0 local
 sLayoutMessages kind:data(any) addr:0x02152960 local
-gStr__ov109_4 kind:data(any) addr:0x0215296c
 sPageMessages kind:data(any) addr:0x021529f0 local
 sPageLayouts kind:data(any) addr:0x02152b00 local
 __sinit_TushinScene.cpp kind:function(arm,size=0xcc) addr:0x02152c10 local
@@ -228,23 +225,6 @@ sReceivedName kind:bss addr:0x02153240 local
 sSongs kind:bss addr:0x02153280 local
 sParents kind:bss addr:0x02153400 local
 sTransfer kind:bss addr:0x02153640 local
-data_ov109_0215368a kind:bss addr:0x0215368a
-data_ov109_02153698 kind:bss addr:0x02153698
-data_ov109_021536ae kind:bss addr:0x021536ae
-data_ov109_021536c4 kind:bss addr:0x021536c4
-data_ov109_021536e6 kind:bss addr:0x021536e6
-data_ov109_0215372e kind:bss addr:0x0215372e
-data_ov109_0215373c kind:bss addr:0x0215373c
-data_ov109_021537a0 kind:bss addr:0x021537a0
-data_ov109_02153808 kind:bss addr:0x02153808
-data_ov109_02153828 kind:bss addr:0x02153828
-data_ov109_02153840 kind:bss addr:0x02153840
-data_ov109_02153850 kind:bss addr:0x02153850
-data_ov109_0215385c kind:bss addr:0x0215385c
-data_ov109_02153868 kind:bss addr:0x02153868
-data_ov109_02153870 kind:bss addr:0x02153870
-data_ov109_0215387c kind:bss addr:0x0215387c
-data_ov109_02153890 kind:bss addr:0x02153890
 sMiiData kind:bss addr:0x02153980 local
 data_ov109_02154e6c kind:bss addr:0x02154e6c ambiguous
 data_ov109_02154f5c kind:bss addr:0x02154f5c ambiguous
