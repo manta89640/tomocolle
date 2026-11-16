@@ -1,8 +1,8 @@
-func_ov006_02149a40 kind:function(arm,size=0x114) addr:0x02149a40
-func_ov006_02149b54 kind:function(arm,size=0xe10) addr:0x02149b54
-func_ov006_0214a964 kind:function(arm,size=0x1ec) addr:0x0214a964
-func_ov006_0214ab50 kind:function(arm,size=0x280) addr:0x0214ab50
-func_ov006_0214add0 kind:function(arm,size=0x4c) addr:0x0214add0
+_ZN7Scene0F12StartLoadingEv kind:function(arm,size=0x114) addr:0x02149a40
+_ZN7Scene0F4InitEv kind:function(arm,size=0xe10) addr:0x02149b54
+_ZN7Scene0F6UpdateEv kind:function(arm,size=0x1ec) addr:0x0214a964
+_ZN7Scene0F4DrawEv kind:function(arm,size=0x280) addr:0x0214ab50
+_ZN7Scene0F4ExitEv kind:function(arm,size=0x4c) addr:0x0214add0
 func_ov006_0214ae1c kind:function(arm,size=0xe28) addr:0x0214ae1c
 func_ov006_0214bc44 kind:function(arm,size=0x18) addr:0x0214bc44
 func_ov006_0214bc5c kind:function(arm,size=0x5c) addr:0x0214bc5c
@@ -10,12 +10,12 @@ func_ov006_0214bcb8 kind:function(arm,size=0x158) addr:0x0214bcb8
 func_ov006_0214be10 kind:function(arm,size=0xcc) addr:0x0214be10
 func_ov006_0214bedc kind:function(arm,size=0xa0) addr:0x0214bedc
 func_ov006_0214bf7c kind:function(arm,size=0x44) addr:0x0214bf7c
-func_ov006_0214bfc0 kind:function(arm,size=0x64) addr:0x0214bfc0
+_ZN16Scene0FCharacterC1Ev kind:function(arm,size=0x64) addr:0x0214bfc0
 func_ov006_0214c024 kind:function(arm,size=0x34) addr:0x0214c024
 func_ov006_0214c058 kind:function(arm,size=0xa8) addr:0x0214c058
 func_ov006_0214c100 kind:function(arm,size=0xa8) addr:0x0214c100
 func_ov006_0214c1a8 kind:function(arm,size=0x18) addr:0x0214c1a8
-func_ov006_0214c1c0 kind:function(arm,size=0x24) addr:0x0214c1c0
+_ZN18Scene0FUnknown3BC4C1Ev kind:function(arm,size=0x24) addr:0x0214c1c0
 func_ov006_0214c1e4 kind:function(arm,size=0x20) addr:0x0214c1e4
 func_ov006_0214c204 kind:function(arm,size=0x14) addr:0x0214c204
 func_ov006_0214c218 kind:function(arm,size=0x18) addr:0x0214c218
@@ -29,12 +29,12 @@ func_ov006_0214c434 kind:function(arm,size=0x28) addr:0x0214c434
 func_ov006_0214c45c kind:function(arm,size=0x94) addr:0x0214c45c
 func_ov006_0214c4f0 kind:function(arm,size=0x3c) addr:0x0214c4f0
 func_ov006_0214c52c kind:function(arm,size=0xa0) addr:0x0214c52c
-func_ov006_0214c5cc kind:function(arm,size=0x44) addr:0x0214c5cc
+_ZN11Scene0FTextC1Ev kind:function(arm,size=0x44) addr:0x0214c5cc
 func_ov006_0214c610 kind:function(arm,size=0x94) addr:0x0214c610
 func_ov006_0214c6a4 kind:function(arm,size=0x38) addr:0x0214c6a4
 func_ov006_0214c6dc kind:function(arm,size=0x34) addr:0x0214c6dc
-func_ov006_0214c710 kind:function(arm,size=0x2c) addr:0x0214c710
-func_ov006_0214c73c kind:function(arm,size=0x34) addr:0x0214c73c
+_ZN7Scene0FD1Ev kind:function(arm,size=0x2c) addr:0x0214c710
+_ZN7Scene0FD0Ev kind:function(arm,size=0x34) addr:0x0214c73c
 data_ov006_0214c784 kind:data(any) addr:0x0214c784
 data_ov006_0214c794 kind:data(any) addr:0x0214c794
 gStr_B_ov006 kind:data(any) addr:0x0214c7a0
@@ -57,7 +57,7 @@ gStr_Mdl_Ica_ica_mii_save_LZ_bin_ov006 kind:data(any) addr:0x0214c8d4
 gStr_Mdl_Ica_ica_mii_edit_LZ_bin_ov006 kind:data(any) addr:0x0214c8f0
 gStr_Mdl_Ica_ica_mii_event_LZ_bin_ov006 kind:data(any) addr:0x0214c90c
 gStr_Mdl_Ica_ica_mii_contents_LZ_bin_ov006 kind:data(any) addr:0x0214c92c
-data_ov006_0214c954 kind:data(any) addr:0x0214c954 ambiguous
+_ZTV7Scene0F kind:data(any) addr:0x0214c94c
 gStr_Mdl_Ica_ica_mii_mii_touch_dry_LZ_bin_ov006 kind:data(any) addr:0x0214c970
 gStr_Mdl_Ica_ica_mii_mini_contents_LZ_bin_ov006 kind:data(any) addr:0x0214c998
 gStr_Mdl_Ica_ica_mii_mii_touch_cool_LZ_bin_ov006 kind:data(any) addr:0x0214c9c0

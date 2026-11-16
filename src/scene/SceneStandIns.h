@@ -41,7 +41,6 @@ SCENE_STAND_IN(MessageTestScene, 0x2D84); // 0x0203e564
 SCENE_STAND_IN(KeyboardTestScene, 0x6AF8); // 0x0203e620
 
 
-SCENE_STAND_IN(Scene0F, 0x6334); // 0x0203e748
 
 SCENE_STAND_IN(TtsTestScene, 0x6A858); // 0x0203e9ec
 

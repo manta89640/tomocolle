@@ -29,6 +29,7 @@ struct PaletteLoader {
 #include "../overlays/ov004/CharacterBodyTestScene.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
 #include "../overlays/ov001/NameSortTestScene.h"
+#include "../overlays/ov006/Scene0F.h"
 #include "../overlays/ov077/Scene17.h"
 #include "../overlays/ov007/Scene18.h"
 #include "../overlays/ov008/Scene19.h"
@@ -836,7 +837,15 @@ TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 
 NameSortTestScene::NameSortTestScene(int sceneId) : Scene(sceneId) {}
 
-// (Scene 0x0F; scenes 0x0E and 0x16: gap38-c's test scenes)
+Scene0F::Scene0F(int sceneId) : Scene(sceneId) {
+    mUnknown62C8[0] = 0;
+    mUnknown62C8[1] = 0;
+    mUnknown62C8[2] = 0;
+    mUnknown62C8[3] = 0;
+    mUnknown62C4 = 0;
+}
+
+// (Scenes 0x0E and 0x16: gap38-c's test scenes)
 
 Scene17::Scene17(int sceneId) : Scene(sceneId) {}
 
