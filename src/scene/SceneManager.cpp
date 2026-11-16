@@ -18,6 +18,11 @@
 // The scene classes of the constructors 0x0203de78..0x02040578 (gap38-a)
 #include "../overlays/ov000/TextTestScene.h"
 #include "../overlays/ov105/NintendoLogoScene.h"
+#include "../overlays/ov002/Scene02.h"
+#include "../overlays/ov003/Scene03.h"
+#include "../overlays/ov004/Scene04.h"
+#include "../overlays/ov005/TestDrawMiiScene.h"
+#include "../overlays/ov001/Scene0C.h"
 // End of gap38-a's scene classes
 
 // The scene classes of the constructors 0x02040578..0x0204830c (gap38-b)
@@ -767,6 +772,18 @@ Scene *SceneManager::CreateScene(int sceneId) {
 NintendoLogoScene::NintendoLogoScene(int sceneId) : Scene(sceneId) {}
 
 TextTestScene::TextTestScene(int sceneId) : Scene(sceneId) {}
+
+Scene02::Scene02(int sceneId) : Scene(sceneId) {}
+
+Scene03::Scene03(int sceneId) : Scene(sceneId) {}
+
+Scene04::Scene04(int sceneId) : Scene(sceneId) {}
+
+TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
+
+// (Scenes 0x06 to 0x08, 0x10, 0x09 to 0x0B: gap38-c's test scenes)
+
+Scene0C::Scene0C(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors 0x02040578..0x0204830c (gap38-b) ---------------------------------------------------------------
 

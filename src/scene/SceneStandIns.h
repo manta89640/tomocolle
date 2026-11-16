@@ -22,13 +22,9 @@
 
 
 
-SCENE_STAND_IN(Scene02, 0x4DDC); // func_0203df24
 
-SCENE_STAND_IN(Scene03, 0x1BC); // func_0203e0c4
 
-SCENE_STAND_IN(Scene04, 0x2B38); // func_0203e11c
 
-SCENE_STAND_IN(TestDrawMiiScene, 0x28F8); // func_0203e1e8
 
 SCENE_STAND_IN(DrawManTestScene, 0x272C); // func_0203e320
 
@@ -44,7 +40,6 @@ SCENE_STAND_IN(MessageTestScene, 0x2D84); // func_0203e564
 
 SCENE_STAND_IN(KeyboardTestScene, 0x6AF8); // func_0203e620
 
-SCENE_STAND_IN(Scene0C, 0x2434); // func_0203e6f0
 
 SCENE_STAND_IN(Scene0F, 0x6334); // func_0203e748
 
