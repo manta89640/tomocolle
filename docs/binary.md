@@ -376,7 +376,7 @@ the file is placed by that order, and by which object of that part of `.bss` has
 | `0x020B04C8` | 4 | ScreenControl's, the first file of the game code (`0x0202320C` on) | `bx lr`: `data_0211D604` (`ScreenControl`, 0xF8 bytes: `ScreenControl_Init` clears 0xD4 + 0x24) | inferred |
 | `0x020B04CC` | 4 | The archive manager's (`0x02024370` to `0x020249FC`) | `bx lr`: `gArchiveManager` (`ArchiveManager_Init` from `NitroStartUp`) | inferred |
 | `0x020B04D0` | 4 | The graphics manager's (`0x020249FC` on) | `bx lr`: `gGraphicsManager` (0x10A4 bytes: `GraphicsManager_Init` clears 0x140, 0xC0, 0xEA0 = 0x48 entries of 0x34 from 0x204) | inferred |
-| `0x020B04D4` | 0x18 | The main heap's (`0x0202678C`, `operator new`, to `0x02026A1C`) | `gMainHeap` (0x3C bytes): stores 0 at 0x1C and 0x20, the frame heap and its memory (`func_02026958` sets them, `func_02026998` clears them) | measured |
+| `0x020B04D4` | 0x18 | `src/MainHeap.cpp` (`0x0202678C`, `operator new`, to `0x02026A1C`) | `gMainHeap` (0x3C bytes): stores 0 at 0x1C and 0x20, the frame heap and its memory (`MainHeap::CreateFrameHeap` sets them, `MainHeap::DestroyFrameHeap` clears them) | measured |
 | `0x020B04EC` | 4 | `src/PadInput.cpp` (`0x02026A1C` to `0x02026B48`) | `bx lr`: `data_0211F9D4` (`PadInput`, 0x24 bytes), whose constructor is empty | measured: the file compiles to it |
 | `0x020B04F0` | 0x14 | The sprites' and OAM's (`0x02026B48` to `0x02027528`) | `gObjResourceManager` (0x19A8 bytes): tail call of its constructor `ObjResourceManager_Construct` (`0x0202709C`, out of line, in the middle of the file); no destructor | measured |
 | `0x020B0504` | 0x14 | The palette loader's (`0x02027528` to `0x02027A08`) | `data_021213B8` (0x420 bytes): stores 0 at 0x400 | measured |
@@ -427,7 +427,7 @@ Inferred from this:
 
 - Twelve file boundaries in that gap. The game code begins at `0x0202320C`. The archive manager is `0x02024370` to
   `0x020249FC`. The graphics code ends at `0x0202678C`: its last two functions, `0x02026754` and `0x02026770`, are
-  deleting destructors, which come at the end of a file. The heap is `0x0202678C` to `0x02026A1C`. The pad is
+  deleting destructors, which come at the end of a file. The heap is `0x0202678C` to `0x02026A1C` (cut and decompiled: `src/MainHeap.cpp`). The pad is
   `0x02026A1C` to `0x02026B48` (cut and decompiled: `src/PadInput.cpp`). The sprites and OAM are `0x02026B48` to `0x02027528`. The palettes are `0x02027528`
   to `0x02027A08`. The owner information is `0x02027A08` to `0x02027A7C` (cut and decompiled: `src/OwnerInfo.cpp`). The screens are `0x02027A7C` to
   `0x02028630`. Touch starts at `0x020287F8`. The characters start at `0x02028F20`. The models end at `0x0202B0A8`:

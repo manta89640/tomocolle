@@ -1002,20 +1002,20 @@ func_020266e8 kind:function(arm,size=0x6c) addr:0x020266e8
 func_02026754 kind:function(arm,size=0x1c) addr:0x02026754
 func_02026770 kind:function(arm,size=0x1c) addr:0x02026770
 _Znwm kind:function(arm,size=0x18) addr:0x0202678c
-func_020267a4 kind:function(arm,size=0x18) addr:0x020267a4
+_Znam kind:function(arm,size=0x18) addr:0x020267a4
 _ZdlPv kind:function(arm,size=0x18) addr:0x020267bc
 AllocFromMainHeap kind:function(arm,size=0x20) addr:0x020267d4
 func_020267f4 kind:function(arm,size=0x18) addr:0x020267f4
 func_0202680c kind:function(arm,size=0x18) addr:0x0202680c
 func_02026824 kind:function(arm,size=0x18) addr:0x02026824
 func_0202683c kind:function(arm,size=0x14) addr:0x0202683c
-MainHeap_Init kind:function(arm,size=0x60) addr:0x02026850
-func_020268b0 kind:function(arm,size=0x38) addr:0x020268b0
-func_020268e8 kind:function(arm,size=0x3c) addr:0x020268e8
-func_02026924 kind:function(arm,size=0x34) addr:0x02026924
-func_02026958 kind:function(arm,size=0x40) addr:0x02026958
-func_02026998 kind:function(arm,size=0x4c) addr:0x02026998
-func_020269e4 kind:function(arm,size=0x38) addr:0x020269e4
+_ZN8MainHeap4InitEv kind:function(arm,size=0x60) addr:0x02026850
+_ZN8MainHeap5AllocEm kind:function(arm,size=0x38) addr:0x020268b0
+_ZN8MainHeap5AllocEmi kind:function(arm,size=0x3c) addr:0x020268e8
+_ZN8MainHeap4FreeEPv kind:function(arm,size=0x34) addr:0x02026924
+_ZN8MainHeap15CreateFrameHeapEm kind:function(arm,size=0x40) addr:0x02026958
+_ZN8MainHeap16DestroyFrameHeapEv kind:function(arm,size=0x4c) addr:0x02026998
+_ZN8MainHeap18AllocFromFrameHeapEm kind:function(arm,size=0x38) addr:0x020269e4
 _ZN8PadInput4InitEv kind:function(arm,size=0x2c) addr:0x02026a1c
 _ZN8PadInput6UpdateEv kind:function(arm,size=0x100) addr:0x02026a48
 Sprite_Init kind:function(arm,size=0x100) addr:0x02026b48
@@ -4183,7 +4183,7 @@ DSProtect_RunNoCheck kind:function(arm,size=0xc8,dsprot_range=(0x020b047c..0x020
 __sinit_020b04c8 kind:function(arm,size=0x4) addr:0x020b04c8
 __sinit_020b04cc kind:function(arm,size=0x4) addr:0x020b04cc
 __sinit_020b04d0 kind:function(arm,size=0x4) addr:0x020b04d0
-__sinit_020b04d4 kind:function(arm,size=0x18) addr:0x020b04d4
+__sinit_MainHeap.cpp kind:function(arm,size=0x18) addr:0x020b04d4 local
 __sinit_PadInput.cpp kind:function(arm,size=0x4) addr:0x020b04ec local
 __sinit_020b04f0 kind:function(arm,size=0x14) addr:0x020b04f0
 __sinit_020b0504 kind:function(arm,size=0x14) addr:0x020b0504
@@ -4778,7 +4778,7 @@ sMacAddress kind:data(any) addr:0x020fc48c local
 .p__sinit_020b04c8 kind:data(word) addr:0x020fc494
 .p__sinit_020b04cc kind:data(word) addr:0x020fc498
 .p__sinit_020b04d0 kind:data(word) addr:0x020fc49c
-.p__sinit_020b04d4 kind:data(word) addr:0x020fc4a0
+.p__sinit_MainHeap.cpp kind:data(word) addr:0x020fc4a0 local
 .p__sinit_PadInput.cpp kind:data(word) addr:0x020fc4a4 local
 .p__sinit_020b04f0 kind:data(word) addr:0x020fc4a8
 .p__sinit_020b0504 kind:data(word) addr:0x020fc4ac
