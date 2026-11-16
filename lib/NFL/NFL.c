@@ -547,7 +547,7 @@ int NFLi_MakeBeardMesh(NFLMakeCtx *ctx) {
     G3C_Translate(&ctx->dl, translation.x, translation.y, translation.z);
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         if (type < 2) {
             G3C_TexCoord(&ctx->dl, 0, 0x8000);
         }
@@ -578,7 +578,7 @@ int NFLi_MakeBeardMesh(NFLMakeCtx *ctx) {
             y = vertex.y;
             z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -638,7 +638,7 @@ int NFLi_MakeFaceMesh(NFLMakeCtx *ctx) {
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         if (mii->faceTexture == 0) {
             G3C_TexCoord(&ctx->dl, 0x8000, 0);
         }
@@ -669,7 +669,7 @@ int NFLi_MakeFaceMesh(NFLMakeCtx *ctx) {
             y = vertex.y;
             z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     return 1;
 }
@@ -806,7 +806,7 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         if (!textured) {
             NFLi_PutTexCoord(&ctx->dl, 0x8000, 0x8000);
         }
@@ -837,7 +837,7 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
             prev.y = vertex.y;
             prev.z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -929,7 +929,7 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         if (!textured) {
             NFLi_PutTexCoord(&ctx->dl, 0, 0);
         }
@@ -960,7 +960,7 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
             prev.y = vertex.y;
             prev.z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -1034,7 +1034,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     }
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         NFLi_PutTexCoord(&ctx->dl, 0x8000, 0);
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
@@ -1059,7 +1059,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
             prev.y = vertex.y;
             prev.z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -1126,7 +1126,7 @@ int NFLi_MakeGlassesMesh(NFLMakeCtx *ctx) {
     G3C_Scale(&ctx->dl, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
             n = NFLi_ReadU8(&stream) * 3;
@@ -1152,7 +1152,7 @@ int NFLi_MakeGlassesMesh(NFLMakeCtx *ctx) {
             y = vertex.y;
             z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -1208,7 +1208,7 @@ int NFLi_MakeNoseMesh(NFLMakeCtx *ctx) {
     G3C_Scale(&ctx->dl, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
             n = NFLi_ReadU8(&stream) * 3;
@@ -1234,7 +1234,7 @@ int NFLi_MakeNoseMesh(NFLMakeCtx *ctx) {
             y = vertex.y;
             z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -1286,7 +1286,7 @@ int NFLi_MakeNoseSkinMesh(NFLMakeCtx *ctx) {
     G3C_Scale(&ctx->dl, scale, scale, scale);
     for (i = 0; i < polygons; i++) {
         count = NFLi_ReadU8(&stream);
-        func_02005124(&ctx->dl, NFLi_ReadPrimitive(&stream));
+        G3C_Begin(&ctx->dl, NFLi_ReadPrimitive(&stream));
         G3C_TexCoord(&ctx->dl, 0x8000, 0);
         for (j = 0; j < count; j++) {
             v = NFLi_ReadU8(&stream) * 3;
@@ -1310,7 +1310,7 @@ int NFLi_MakeNoseSkinMesh(NFLMakeCtx *ctx) {
             y = vertex.y;
             z = vertex.z;
         }
-        func_02005148(&ctx->dl);
+        G3C_End(&ctx->dl);
     }
     G3C_PopMtx(&ctx->dl, 1);
     return 1;
@@ -2662,7 +2662,7 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
     G3C_Vtx(dl, (fx16)vtx.x, (fx16)vtx.y, (fx16)vtx.z)
     s = texW << 12;
     if (kind == 1) {
-        func_02005124(dl, GX_BEGIN_QUAD_STRIP);
+        G3C_Begin(dl, GX_BEGIN_QUAD_STRIP);
         G3C_TexCoord(dl, s, 0);
         NFL_NORMAL(0x197, 0, 0xFEA);
         NFL_VTX(0x800, -0x800, -0xCC);
@@ -2680,7 +2680,7 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
         G3C_TexCoord(dl, 0, t);
         NFL_VTX(-0x800, 0x800, -0xCC);
     } else if (kind == 2) {
-        func_02005124(dl, GX_BEGIN_QUAD_STRIP);
+        G3C_Begin(dl, GX_BEGIN_QUAD_STRIP);
         G3C_TexCoord(dl, 0, 0);
         NFL_NORMAL(0x197, 0, 0xFEA);
         NFL_VTX(0x800, -0x800, -0xCC);
@@ -2698,7 +2698,7 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
         G3C_TexCoord(dl, 0, t);
         NFL_VTX(-0x800, 0x800, -0xCC);
     } else {
-        func_02005124(dl, GX_BEGIN_QUADS);
+        G3C_Begin(dl, GX_BEGIN_QUADS);
         G3C_TexCoord(dl, 0, 0);
         NFL_NORMAL(0, 0, 0xFFF);
         NFL_VTX(-0x800, -0x800, 0);
@@ -2712,7 +2712,7 @@ void NFLi_MakeMouthMolePart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const
     }
 #undef NFL_NORMAL
 #undef NFL_VTX
-    func_02005148(dl);
+    G3C_End(dl);
     G3C_PopMtx(dl, 1);
 }
 
@@ -2972,7 +2972,7 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
         s0 = texW << 12;
         break;
     }
-    func_02005124(dl, GX_BEGIN_QUADS);
+    G3C_Begin(dl, GX_BEGIN_QUADS);
     G3C_TexCoord(dl, s0, 0);
     NFLi_DLNormal(obj, dl, 0, 0, 0xFEA);
     NFLi_DLVtx(obj, dl, x0, -0x800, 0);
@@ -2982,7 +2982,7 @@ void NFLi_MakeEyeBrowPart(GXDLInfo *dl, NFLMakePart *part, NFLFace *obj, const N
     NFLi_DLVtx(obj, dl, x0 + FX32_ONE, 0x800, 0);
     G3C_TexCoord(dl, s0, texH << 12);
     NFLi_DLVtx(obj, dl, x0, 0x800, 0);
-    func_02005148(dl);
+    G3C_End(dl);
     G3C_PopMtx(dl, 1);
 }
 
@@ -4774,12 +4774,9 @@ int NFLi_CopyToTexPlttBank(int bank, const void *src, u32 offset, u32 size) {
     return 0;
 }
 
-int func_0200473c(void);
-int func_0200474c(void);
-
-// Copies to texture VRAM, in the banks func_0200473c gives for textures
+// Copies to texture VRAM, in the banks GX_GetBankForTex gives
 int NFLi_LoadTex(const void *src, u32 offset, u32 size) {
-    int bank = func_0200473c();
+    int bank = GX_GetBankForTex();
     int result;
 
     GX_BeginLoadTex();
@@ -4788,9 +4785,9 @@ int NFLi_LoadTex(const void *src, u32 offset, u32 size) {
     return result;
 }
 
-// Copies to texture palette VRAM, in the banks func_0200474c gives for palettes
+// Copies to texture palette VRAM, in the banks GX_GetBankForTexPltt gives
 int NFLi_LoadTexPltt(const void *src, u32 offset, u32 size) {
-    int bank = func_0200474c();
+    int bank = GX_GetBankForTexPltt();
     int result;
 
     GX_BeginLoadTexPltt();

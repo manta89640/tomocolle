@@ -297,9 +297,6 @@ typedef NFLFace NFLDrawContext;
 void NFLi_MapVecFx16(const NFLDrawContext *ctx, VecFx16 *out, const VecFx16 *in);
 void NFLi_MapVecFx32(const NFLDrawContext *ctx, VecFx32 *out, const VecFx32 *in);
 
-// G3C_Begin and G3C_End, by their code: not part of g3c.c's unit (0x02005124, 0x02005148)
-void func_02005124(GXDLInfo *info, GXBegin primitive);
-void func_02005148(GXDLInfo *info);
 
 
 #endif
