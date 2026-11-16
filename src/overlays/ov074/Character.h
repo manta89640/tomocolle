@@ -38,7 +38,7 @@ struct SavedCharacter {
     static BOOL IsLongActPairedState(int state);
     BOOL IsLongActWithPartner();
     static BOOL IsLongActWithPartnerState(int state);
-    BOOL IsTroubleOfCategory3Kind8To10();
+    BOOL IsInFightOrSeparationTrouble();
     int RandomFromCreateId(int max);
     void Reset();
     void SetMoodFromResult(int result, int detail);

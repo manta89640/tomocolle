@@ -17,8 +17,8 @@ struct SavedCharacter {
     void SetMoodFromResult(int result, int detail);
     void AddRelationMeter(int index, int change);
     void SetRelation(int index, u8 rank, u8 meter);
-    static BOOL IsRank678(int rank);
-    BOOL IsRank1249Or678(int rank);
+    static BOOL IsFightingRelation(int rank);
+    BOOL IsFriendlyOrFightingRelation(int rank);
     void EndLongAct(SavedCharacter *first, SavedCharacter *second);
     BOOL IsLongActPaired();
     void StartLongAct(int state, s64 now, RTCTime *time, SavedCharacter *first, SavedCharacter *second);
@@ -27,9 +27,9 @@ struct SavedCharacter {
     static bool IsTroubleStateActive(int state);
     static BOOL IsTroubleProgressFullAt(s64 now, s64 start, int progress);
     BOOL IsTroubleOfCategory34OrKind20();
-    BOOL IsTrouble3_4();
-    static BOOL IsTrouble3_4State(int state, int category, int id);
-    static int GetEncounterBonus(int base, int value);
+    BOOL IsAngryAfterFight();
+    static BOOL IsAngryAfterFightState(int state, int category, int id);
+    static int GetFightsAllowed(int fights, int residents);
     void EndTrouble(s64 now);
     void ClearTrouble();
     BOOL StartRandomTrouble(s64 now, int force, SavedCharacter *partner, int unused);
@@ -170,7 +170,7 @@ void StartRandomEvents(s64 now) {
             started = character.StartRandomTrouble(now, force, NULL, TRUE);
         }
         if (started) {
-            if (character.IsTrouble3_4()) {
+            if (character.IsAngryAfterFight()) {
                 SavedCharacter other;
                 SavedCharacter otherPartner;
                 int otherIndex = character.mMoodPartner;
@@ -478,8 +478,8 @@ int EncounterJudge::GetMeetingChange(SavedCharacter *first, SavedCharacter *seco
 }
 
 // Counts the other residents by their relation to the two (counts[0..9] for the first, counts[10..19] for the
-// second); *a counts those of whom SavedCharacter::IsTrouble3_4/IsTrouble3_4State hold, *b those both have a
-// relation with that SavedCharacter::IsRank1249Or678 holds for. Returns the number of residents.
+// second); *a counts those of whom SavedCharacter::IsAngryAfterFight/IsAngryAfterFightState hold, *b those both have a
+// relation with that SavedCharacter::IsFriendlyOrFightingRelation holds for. Returns the number of residents.
 int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *second, u8 *counts, s16 *a, s16 *b) {
     MI_CpuFill8(counts, 0, 20);
     *a = 0;
@@ -497,19 +497,19 @@ int EncounterJudge::CountAcquaintances(SavedCharacter *first, SavedCharacter *se
             counts[10 + second->mRelation[i]]++;
         }
         if (i == first->mIndex) {
-            if (first->IsTrouble3_4()) {
+            if (first->IsAngryAfterFight()) {
                 (*a)++;
             }
         } else if (i == second->mIndex) {
-            if (second->IsTrouble3_4()) {
+            if (second->IsAngryAfterFight()) {
                 (*a)++;
             }
         } else {
-            if (SavedCharacter::IsTrouble3_4State(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
+            if (SavedCharacter::IsAngryAfterFightState(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
                               func_0202c58c(&gGameData, i))) {
                 (*a)++;
             }
-            if (first->IsRank1249Or678(first->mRelation[i]) && second->IsRank1249Or678(second->mRelation[i])) {
+            if (first->IsFriendlyOrFightingRelation(first->mRelation[i]) && second->IsFriendlyOrFightingRelation(second->mRelation[i])) {
                 (*b)++;
             }
         }
@@ -607,14 +607,14 @@ int EncounterJudge::JudgeEnd(SavedCharacter *first, SavedCharacter *second, BOOL
         }
     }
     int result = GetRelationAfter(relation);
-    if (SavedCharacter::IsRank678(result)) {
+    if (SavedCharacter::IsFightingRelation(result)) {
         int residents = CountAcquaintances(first, second, counts, &a, &b);
         if (first->IsTroubleOfCategory34OrKind20() || second->IsTroubleOfCategory34OrKind20()) {
             result = 10;
         } else if (counts[6] != 0 || counts[16] != 0 || counts[7] != 0 || counts[17] != 0 || counts[8] != 0 ||
                    counts[18] != 0) {
             result = 10;
-        } else if (SavedCharacter::GetEncounterBonus(a, residents) <= 1) {
+        } else if (SavedCharacter::GetFightsAllowed(a, residents) <= 1) {
             result = 10;
         }
     }
@@ -759,7 +759,7 @@ void EncounterJudge::ApplyEnd(SavedCharacter *first, SavedCharacter *second, int
         second->ClearTrouble();
         first->mMood = 0;
         second->mMood = 0;
-    } else if (SavedCharacter::IsRank678(current)) {
+    } else if (SavedCharacter::IsFightingRelation(current)) {
         StartOuting(first, second, 3, 4, now);
         first->mMood = 2;
         second->mMood = 2;

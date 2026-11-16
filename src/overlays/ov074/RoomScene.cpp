@@ -1082,7 +1082,7 @@ int RoomScene::EndDueEvent() {
 
     partnerIndex = -1;
     partner = NULL;
-    if (character->mMoodLocked != 0 && ((SavedCharacter *)(character))->IsTroubleOfCategory3Kind8To10() && mResidentCount > 1) {
+    if (character->mMoodLocked != 0 && ((SavedCharacter *)(character))->IsInFightOrSeparationTrouble() && mResidentCount > 1) {
         partnerIndex = character->mMoodPartner;
         if (partnerIndex == mCharacters[0].mIndex) {
             partner = &mCharacters[0];

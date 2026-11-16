@@ -953,25 +953,25 @@ void SavedCharacter::ResetRelations() {
     MI_CpuFill8(mRelationRank, 0, sizeof(mRelationRank));
 }
 
-int SavedCharacter::FindOtherWithRank2478() {
+int SavedCharacter::FindCouplePartner() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsRank2478(mRelationRank[i])) {
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsCoupleRelation(mRelationRank[i])) {
             return i;
         }
     }
     return -1;
 }
 
-int SavedCharacter::FindOtherWithRank2Or4() {
+int SavedCharacter::FindLoverOrSpouse() {
     for (int i = 0; i < 100; i++) {
-        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsRank2Or4(mRelationRank[i])) {
+        if (func_0202c3dc(&gGameData, i) && i != mIndex && IsLoversOrSpouses(mRelationRank[i])) {
             return i;
         }
     }
     return -1;
 }
 
-int SavedCharacter::FindOtherWithRank9() {
+int SavedCharacter::FindBestFriend() {
     for (int i = 0; i < 100; i++) {
         if (func_0202c3dc(&gGameData, i) && i != mIndex && mRelationRank[i] == 9) {
             return i;
@@ -980,7 +980,7 @@ int SavedCharacter::FindOtherWithRank9() {
     return -1;
 }
 
-BOOL SavedCharacter::IsRank2478(int rank) {
+BOOL SavedCharacter::IsCoupleRelation(int rank) {
     switch (rank) {
     case 2:
     case 4:
@@ -991,7 +991,7 @@ BOOL SavedCharacter::IsRank2478(int rank) {
     return FALSE;
 }
 
-BOOL SavedCharacter::IsRank2Or4(int rank) {
+BOOL SavedCharacter::IsLoversOrSpouses(int rank) {
     switch (rank) {
     case 2:
     case 4:
@@ -1000,7 +1000,7 @@ BOOL SavedCharacter::IsRank2Or4(int rank) {
     return FALSE;
 }
 
-BOOL SavedCharacter::IsRank678(int rank) {
+BOOL SavedCharacter::IsFightingRelation(int rank) {
     switch (rank) {
     case 6:
     case 7:
@@ -1010,7 +1010,7 @@ BOOL SavedCharacter::IsRank678(int rank) {
     return FALSE;
 }
 
-BOOL SavedCharacter::IsRank124(int rank) {
+BOOL SavedCharacter::IsFriendsLoversOrSpouses(int rank) {
     switch (rank) {
     case 1:
     case 2:
@@ -1020,8 +1020,8 @@ BOOL SavedCharacter::IsRank124(int rank) {
     return FALSE;
 }
 
-BOOL SavedCharacter::IsRank1249Or678(int rank) {
-    if (IsRank678(rank)) {
+BOOL SavedCharacter::IsFriendlyOrFightingRelation(int rank) {
+    if (IsFightingRelation(rank)) {
         return TRUE;
     }
     switch (rank) {
@@ -1267,7 +1267,7 @@ bool SavedCharacter::IsTroubleStateActive(int state) {
     return state == 1 || state == 2;
 }
 
-BOOL SavedCharacter::IsInTroubleWithoutUnknown4Bits8() {
+BOOL SavedCharacter::IsInTroubleWithoutMood() {
     BOOL inTrouble = IsInTrouble() & 1;
     return inTrouble & (data_02114d78[mTroubleCategory][mTroubleId].mood == 0);
 }
@@ -1359,7 +1359,7 @@ BOOL SavedCharacter::IsTroubleOfCategory34OrKind20() {
     return FALSE;
 }
 
-BOOL SavedCharacter::IsTroubleOfCategory3Kind8To10() {
+BOOL SavedCharacter::IsInFightOrSeparationTrouble() {
     if (!IsInTrouble()) {
         return FALSE;
     }
@@ -1385,38 +1385,41 @@ BOOL SavedCharacter::IsTroubleOfCategory34OrKind18() {
     case 4:
         return TRUE;
     }
-    if (data_02114d78[category][mTroubleId].kind == 18) {
+    switch (data_02114d78[category][mTroubleId].kind) {
+    case 18:
         return TRUE;
     }
     return FALSE;
 }
 
-BOOL SavedCharacter::IsTrouble3_4() {
-    return IsTrouble3_4State(mTroubleState, mTroubleCategory, mTroubleId);
+BOOL SavedCharacter::IsAngryAfterFight() {
+    return IsAngryAfterFightState(mTroubleState, mTroubleCategory, mTroubleId);
 }
 
-BOOL SavedCharacter::IsTrouble3_4State(int state, int category, int id) {
+BOOL SavedCharacter::IsAngryAfterFightState(int state, int category, int id) {
     if (state != 0 && category == 3 && id == 4) {
         return TRUE;
     }
     return FALSE;
 }
 
-int SavedCharacter::GetEncounterBonus(int base, int value) {
-    int bonus = -base;
-    if (value <= 1) {
-        bonus = 0;
-    } else if (value <= 30) {
-        bonus += 2;
-    } else if (value <= 70) {
-        bonus += 4;
+// How many more fights the island allows: none up to one resident, then 2, 4 or 6 (above 30 and 70 residents),
+// less the fights going on; 0 when that is not more than one
+int SavedCharacter::GetFightsAllowed(int fights, int residents) {
+    int allowed = -fights;
+    if (residents <= 1) {
+        allowed = 0;
+    } else if (residents <= 30) {
+        allowed += 2;
+    } else if (residents <= 70) {
+        allowed += 4;
     } else {
-        bonus += 6;
+        allowed += 6;
     }
-    if (bonus <= 1) {
-        bonus = 0;
+    if (allowed <= 1) {
+        allowed = 0;
     }
-    return bonus;
+    return allowed;
 }
 
 inline int SavedCharacter::GetDaysBetween(RTCDate from, RTCDate to) {
@@ -1518,7 +1521,7 @@ void SavedCharacter::FailTrouble(s64 now, SavedCharacter *target) {
         now = mTroubleEnd;
     }
     SavedCharacter other;
-    if (IsTroubleOfCategory3Kind8To10() && target == NULL) {
+    if (IsInFightOrSeparationTrouble() && target == NULL) {
         u16 index = mTroubleTarget;
         target = &other;
         func_0202c264(&gGameData, index, target);
@@ -1633,8 +1636,8 @@ void SavedCharacter::StartLongAct(int state, s64 now, RTCTime *time, SavedCharac
             if (func_0202c3dc(&gGameData, i) && !func_0202c468(&gGameData, i) && i != mIndex &&
                 Is0Or1(func_0202c5dc(&gGameData, i))) {
                 u8 rank = mRelationRank[i];
-                if (!IsRank678(rank) && rank != 0 && rank != 3 && rank != 5) {
-                    if (IsRank2478(rank)) {
+                if (!IsFightingRelation(rank) && rank != 0 && rank != 3 && rank != 5) {
+                    if (IsCoupleRelation(rank)) {
                         special[0] = i;
                     }
                     if (rank == 9) {
@@ -1950,7 +1953,7 @@ BOOL SavedCharacter::StartTrouble(int category, int id, s64 now, BOOL shortened,
         int residents;
         int fights;
         CountFights(&residents, &fights);
-        if (!allowFight || GetEncounterBonus(fights, residents) <= 1) {
+        if (!allowFight || GetFightsAllowed(fights, residents) <= 1) {
             ok = FALSE;
         } else {
             int other = ChooseFightOpponent();
@@ -2128,7 +2131,7 @@ int SavedCharacter::ChooseFightOpponent() {
     int partner;
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
         if (func_0202c3dc(&gGameData, i) && i != mIndex && !func_0202c53c(&gGameData, i) &&
-            IsRank124(mRelationRank[i])) {
+            IsFriendsLoversOrSpouses(mRelationRank[i])) {
             others[count] = i;
             count++;
             if (mRelationRank[i] == RELATION_LOVERS || mRelationRank[i] == RELATION_SPOUSES) {
@@ -2190,7 +2193,7 @@ void SavedCharacter::CountFights(int *residents, int *fights) {
     for (int i = 0; i < 100; i++) {
         if (func_0202c3dc(&gGameData, i)) {
             (*residents)++;
-            if (IsTrouble3_4State(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
+            if (IsAngryAfterFightState(func_0202c53c(&gGameData, i), func_0202c5b4(&gGameData, i),
                                   func_0202c58c(&gGameData, i))) {
                 (*fights)++;
             }
@@ -2200,7 +2203,7 @@ void SavedCharacter::CountFights(int *residents, int *fights) {
 
 // Meeting one who is angry at it after a fight, the character is angry back until the other's trouble ends
 void SavedCharacter::BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacter *partner) {
-    if (!other->IsTrouble3_4()) {
+    if (!other->IsAngryAfterFight()) {
         return;
     }
     s64 end = other->mTroubleEnd;
@@ -2220,7 +2223,7 @@ void SavedCharacter::BecomeAngryAt(SavedCharacter *other, s64 now, SavedCharacte
 int SavedCharacter::ChooseLoveInterest() {
     u16 others[100];
     int count = 0;
-    if (FindOtherWithRank2478() != -1) {
+    if (FindCouplePartner() != -1) {
         return -1;
     }
     for (u16 i = 0; i < 100; i = (u16)(i + 1)) {
@@ -2251,7 +2254,7 @@ int SavedCharacter::ChooseCharacterByRelation() {
         if (!func_0202c3dc(&gGameData, i) || i == mIndex) {
             continue;
         }
-        if (IsRank2Or4(mRelationRank[i])) {
+        if (IsLoversOrSpouses(mRelationRank[i])) {
             partner = i;
         } else if (mRelationRank[i] == RELATION_BEST_FRIENDS) {
             bestFriend = i;
@@ -2274,6 +2277,7 @@ int SavedCharacter::ChooseCharacterByRelation() {
         }
     }
     int total = 0;
+    int sum = 0;
     for (int j = 0; j < 6; j++) {
         int weight = data_020f8d7c[j];
         switch (j) {
@@ -2314,7 +2318,6 @@ int SavedCharacter::ChooseCharacterByRelation() {
         return -1;
     }
     int random = MATH_Rand16(&gRandom, total);
-    int sum = 0;
     int j;
     for (j = 0; j < 6; j++) {
         int weight = data_020f8d7c[j];
@@ -2366,16 +2369,16 @@ int SavedCharacter::ChooseCharacterByRelation() {
         result = bestFriend;
         break;
     case 2:
-        result = groups[0][MATH_Rand16(&gRandom, counts[0])];
+        result = groups[0][Rand(counts[0])];
         break;
     case 3:
-        result = groups[1][MATH_Rand16(&gRandom, counts[1])];
+        result = groups[1][Rand(counts[1])];
         break;
     case 4:
-        result = groups[2][MATH_Rand16(&gRandom, counts[2])];
+        result = groups[2][Rand(counts[2])];
         break;
     case 5:
-        result = groups[3][MATH_Rand16(&gRandom, counts[3])];
+        result = groups[3][Rand(counts[3])];
         break;
     }
     return result;
