@@ -785,6 +785,45 @@ Measured:
   its deleting destructor.
 
 Inferred: a test of how a Mii looks in a room under a moving camera.
+## The character body test scene (overlay 4)
+
+Overlay 4 is scene 4, `CharacterBodyTestScene` (0x2B38 bytes; its constructor is the main program's
+`_ZN22CharacterBodyTestSceneC1Ei`, 0x0203e11c): one source file, `src/overlays/ov004/CharacterBodyTestScene.cpp`.
+
+| | Where | |
+| --- | --- | --- |
+| `.text` | `0x02149A40` to `0x0214A2B4` | The five scene functions, `UpdateTurnTest`, and the implicit destructor (D1, D0) |
+| `.rodata` | `0x0214A2B4` to `0x0214A2BC` | `sTurnTarget`, the point (1.0, 0) on the floor |
+| `.data` | `0x0214A2C0` to `0x0214A3E0` | `sLightColor` (a `GXRgb`, red 30), the virtual table, the strings in the order of use |
+
+Measured:
+
+- It mounts "Scn/Scene/SceneTestG3d_3_LZ.bin" as CA3, as the main program's `DrawManTestScene` (scene 6) does, and
+  "Mdl/Body/body000_3D_LZ.bin" as TG3. Resource 0 is TG3's `body.imd`, the body of one `SceneCharacter` at +0x10
+  (`Character::Init(0, 0, 0)`, its joints tracked and turnable: `mTrackLimbs`, `mTurnJoints`).
+- `Init` sets the clear colour to grey (15, 15, 15) with alpha 15, light 0 to point along x in `sLightColor`, and the
+  camera's y angle to 0x4000.
+- B steps +0x2B28 (`mBodyStep`) through four changes: TG3 mounted again with body000 and the model made again
+  (`CharacterModel::MakeModel`), the palette file `TG3:/body_c1.ntfp` sent to the body's palette in VRAM
+  (`func_02029d40`), TG3 mounted with body001 (`Mdl/Body/body001_3D_LZ.bin`) and the model made again, the palette
+  again.
+- With A held the pad rotates the body model about z and x (by 0x80) and turns the character (`Character::Turn`,
+  ±0x100); with X it scales the body in y and z (by 0x40, `mInvScale` kept as `FX_Inv` of `mScale`); with Y right
+  moves it along x, left along y, up and down scale it in x; with R held the pad moves the camera (`Camera_Translate`).
+  L starts the turn test (+0x2B34, `mTurnTest`): a frame later the character's `mTargetAngle` is set to the direction
+  of `sTurnTarget` from where it stands, and it turns towards it by `CharacterBase::StepAngle(mAngle, mTargetAngle,
+  3)` and `SetAngle` a step a frame until it faces it. Otherwise the pad turns the camera.
+- Touching the screen sets the touch line (`ModelResources_SetTouchLine`) and hit-tests two of the character's
+  joints, the body (`CharacterModel::HitTestJoint(int)`) and the left knee (`HitTestJoint` with the
+  camera's eye and the line's direction, `data_02122818`); both results are thrown away.
+- +0x2B2C is only cleared, in `Init`.
+
+Not done: `Init` (97%), the light-0 block of scenes 6, 7 and 16: with `#pragma opt_propagation off` every register
+matches and only the stores of x and `mEnabled` are in the other order (see decompiling.md, "Independent statements
+scheduled in another order"). Seven of the eight functions match; the unit is not complete.
+
+Inferred: a test of the character's body (its two models, its palette, its scale, its turning and its joints), from
+the same test archive as scene 6.
 
 ## WH, the wireless wrapper
 

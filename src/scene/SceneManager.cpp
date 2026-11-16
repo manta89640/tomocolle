@@ -20,7 +20,7 @@
 #include "../overlays/ov105/NintendoLogoScene.h"
 #include "../overlays/ov002/FaceTestScene.h"
 #include "../overlays/ov003/Scene03.h"
-#include "../overlays/ov004/Scene04.h"
+#include "../overlays/ov004/CharacterBodyTestScene.h"
 #include "../overlays/ov005/TestDrawMiiScene.h"
 #include "../overlays/ov001/NameSortTestScene.h"
 #include "../overlays/ov077/Scene17.h"
@@ -264,7 +264,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x04:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(4));
-        return new Scene04(sceneId);
+        return new CharacterBodyTestScene(sceneId);
     case 0x05:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(5));
@@ -822,7 +822,7 @@ FaceTestScene::FaceTestScene(int sceneId) : Scene(sceneId) {}
 
 Scene03::Scene03(int sceneId) : Scene(sceneId) {}
 
-Scene04::Scene04(int sceneId) : Scene(sceneId) {}
+CharacterBodyTestScene::CharacterBodyTestScene(int sceneId) : Scene(sceneId) {}
 
 TestDrawMiiScene::TestDrawMiiScene(int sceneId) : Scene(sceneId) {}
 

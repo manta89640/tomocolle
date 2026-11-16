@@ -1739,7 +1739,7 @@ _ZN13CharacterHeadC1Ev kind:function(arm,size=0x54) addr:0x0203dfcc
 _ZN9AnimModelC1Ev kind:function(arm,size=0x44) addr:0x0203e020
 _ZN13CharacterHeadD1Ev kind:function(arm,size=0x60) addr:0x0203e064
 _ZN7Scene03C1Ei kind:function(arm,size=0x58) addr:0x0203e0c4
-_ZN7Scene04C1Ei kind:function(arm,size=0x4c) addr:0x0203e11c
+_ZN22CharacterBodyTestSceneC1Ei kind:function(arm,size=0x4c) addr:0x0203e11c
 _ZN14SceneCharacterC1Ev kind:function(arm,size=0x20) addr:0x0203e168
 _ZN14SceneCharacterD1Ev kind:function(arm,size=0x60) addr:0x0203e188
 _ZN16TestDrawMiiSceneC1Ei kind:function(arm,size=0xc0) addr:0x0203e1e8
@@ -4293,8 +4293,8 @@ sMiiMenuRect kind:data(any) addr:0x020b5de0 local
 sButtonPositions kind:data(any) addr:0x020b5df0 local
 sButtonSizes kind:data(any) addr:0x020b5e00 local
 sSortMenuRect kind:data(any) addr:0x020b5e10 local
-@13138 kind:data(any) addr:0x020b5e20 local
-@13110 kind:data(any) addr:0x020b5e34 local
+@13140 kind:data(any) addr:0x020b5e20 local
+@13112 kind:data(any) addr:0x020b5e34 local
 sMiiMenuButtonPositions kind:data(any) addr:0x020b5e4c local
 sMiiMenuButtonSizes kind:data(any) addr:0x020b5e64 local
 sSortMessages kind:data(any) addr:0x020b5e7c local
@@ -5323,50 +5323,50 @@ gStr_NEW_2 kind:data(any) addr:0x02111864
 sMiiMenuTextPositions kind:data(any) addr:0x02111868 local
 sSortTextPositions kind:data(any) addr:0x02111880 local
 _ZTV16MiiListMenuScene kind:data(any) addr:0x021118b8
-@13305 kind:data(any) addr:0x021118dc local
-@13306 kind:data(any) addr:0x021118e0 local
-@13307 kind:data(any) addr:0x021118f8 local
-@13308 kind:data(any) addr:0x021118fc local
-@13309 kind:data(any) addr:0x02111918 local
-@13310 kind:data(any) addr:0x0211191c local
-@13386 kind:data(any) addr:0x02111934 local
-@13387 kind:data(any) addr:0x02111948 local
-@13388 kind:data(any) addr:0x0211195c local
-@13389 kind:data(any) addr:0x02111974 local
-@13390 kind:data(any) addr:0x02111988 local
-@13391 kind:data(any) addr:0x0211199c local
-@13392 kind:data(any) addr:0x021119b0 local
-@13393 kind:data(any) addr:0x021119cc local
-@13470 kind:data(any) addr:0x021119e4 local
-@13471 kind:data(any) addr:0x021119e8 local
+@13307 kind:data(any) addr:0x021118dc local
+@13308 kind:data(any) addr:0x021118e0 local
+@13309 kind:data(any) addr:0x021118f8 local
+@13310 kind:data(any) addr:0x021118fc local
+@13311 kind:data(any) addr:0x02111918 local
+@13312 kind:data(any) addr:0x0211191c local
+@13388 kind:data(any) addr:0x02111934 local
+@13389 kind:data(any) addr:0x02111948 local
+@13390 kind:data(any) addr:0x0211195c local
+@13391 kind:data(any) addr:0x02111974 local
+@13392 kind:data(any) addr:0x02111988 local
+@13393 kind:data(any) addr:0x0211199c local
+@13394 kind:data(any) addr:0x021119b0 local
+@13395 kind:data(any) addr:0x021119cc local
+@13472 kind:data(any) addr:0x021119e4 local
+@13473 kind:data(any) addr:0x021119e8 local
 _ZTV17G3SpriteTestScene kind:data(any) addr:0x021119ec
-@13185 kind:data(any) addr:0x02111a10 local
-@13186 kind:data(any) addr:0x02111a14 local
-@13187 kind:data(any) addr:0x02111a30 local
-@13188 kind:data(any) addr:0x02111a34 local
-@13200 kind:data(any) addr:0x02111a58 local
-@13201 kind:data(any) addr:0x02111a68 local
-@13214 kind:data(any) addr:0x02111a78 local
-@13215 kind:data(any) addr:0x02111a7c local
+@13187 kind:data(any) addr:0x02111a10 local
+@13188 kind:data(any) addr:0x02111a14 local
+@13189 kind:data(any) addr:0x02111a30 local
+@13190 kind:data(any) addr:0x02111a34 local
+@13202 kind:data(any) addr:0x02111a58 local
+@13203 kind:data(any) addr:0x02111a68 local
+@13216 kind:data(any) addr:0x02111a78 local
+@13217 kind:data(any) addr:0x02111a7c local
 sTabSequences kind:data(any) addr:0x02111a80 local
 sTabPressedSequences kind:data(any) addr:0x02111a94 local
 sSortTextPositions kind:data(any) addr:0x02111aa8 local
 _ZTV12MiiListScene kind:data(any) addr:0x02111ae0
-@13183 kind:data(any) addr:0x02111b04 local
-@13184 kind:data(any) addr:0x02111b08 local
-@13185 kind:data(any) addr:0x02111b20 local
-@13186 kind:data(any) addr:0x02111b24 local
-@13216 kind:data(any) addr:0x02111b3c local
-@13217 kind:data(any) addr:0x02111b50 local
-@13218 kind:data(any) addr:0x02111b64 local
-@13219 kind:data(any) addr:0x02111b78 local
-@13220 kind:data(any) addr:0x02111b8c local
-@13221 kind:data(any) addr:0x02111ba4 local
-@13222 kind:data(any) addr:0x02111bb8 local
-@13223 kind:data(any) addr:0x02111bcc local
-@13224 kind:data(any) addr:0x02111be0 local
-@13252 kind:data(any) addr:0x02111bf8 local
-@13253 kind:data(any) addr:0x02111bfc local
+@13185 kind:data(any) addr:0x02111b04 local
+@13186 kind:data(any) addr:0x02111b08 local
+@13187 kind:data(any) addr:0x02111b20 local
+@13188 kind:data(any) addr:0x02111b24 local
+@13218 kind:data(any) addr:0x02111b3c local
+@13219 kind:data(any) addr:0x02111b50 local
+@13220 kind:data(any) addr:0x02111b64 local
+@13221 kind:data(any) addr:0x02111b78 local
+@13222 kind:data(any) addr:0x02111b8c local
+@13223 kind:data(any) addr:0x02111ba4 local
+@13224 kind:data(any) addr:0x02111bb8 local
+@13225 kind:data(any) addr:0x02111bcc local
+@13226 kind:data(any) addr:0x02111be0 local
+@13254 kind:data(any) addr:0x02111bf8 local
+@13255 kind:data(any) addr:0x02111bfc local
 _ZTV14MapModelsScene kind:data(any) addr:0x02111c00
 gStr_M00_3 kind:data(any) addr:0x02111c24
 gStr_Mdl_Misc_map_sky_3D_LZ_bin kind:data(any) addr:0x02111c28

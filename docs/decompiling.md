@@ -475,6 +475,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A local declared in a block sits below the function's own locals: `__strtold`'s result union, moved into the block
   that builds it, went below the other arrays and gave the original's frame. A union holding a `long double` is
   8-aligned.
+- Dead copies of `FloorPos` points around an angle (`FX_Atan2Idx` of a target minus where a character stands): an
+  inline taking the target by value, `FloorPos delta = target - character->GetFloorPos(); return
+  FX_Atan2Idx(delta.z, delta.x);`, as overlays 74 and 96 have it (`AngleTo`); writing the same expression in the
+  function, with `Angle(...)`, `Sub` or named locals, put the four copies in other slots (overlay 4).
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
@@ -677,6 +681,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   leaves in r0.
 - An array walked by a pointer whose increment comes before the loop's compare is incremented in the body
   (`...; character++; }`); in the `for` header (`i++, character++`) it comes after the compare (overlay 1).
+- The test scenes' light-0 block (x stored, reloaded into a local and stored again; scenes 6, 7, 16, overlays 3
+  and 4), measured with the quick compiler: the compiler forwards the stored x to the read when the read is an
+  inline's argument, `dir.x = dir.x`, or when y or z is stored between, and keeps the reload only for a local
+  `fx16 x = dir.x;`. `#pragma opt_propagation off` around `Init` (found by ov003) gives the original's registers
+  (0 materialised early in r1); overlay 4 then differs only by the stores of x and `mEnabled` swapped, and an
+  exhaustive search of the block's statement orders, inline setters, global or pointer accesses and local types
+  found no source with x's first.
 
 **A value read once where the original reads it twice**
 - Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
