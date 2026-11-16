@@ -2955,19 +2955,14 @@ void RoomScene::UpdateMeeting() {
     StartMeeting(0, 1);
 }
 
-// Not matching yet: same size (0x6a0) and the same registers (the loop reads pair[i] at each use: with a
-// `character` local, first * 0x2d98 and the two characters took other registers); 19 instructions differ, in the
-// stack offsets only. The original has the place that the first loop clamps at sp+0x78, above posFirst (0x70) and
-// posSecond (0x68), and GetFloorPos's copy for it at sp+0x40; here the place is ClampOwnPosToRect4E4's local, below
-// them. Declared at the top of the function and assigned in the loop it is where it should be, but the assignment
-// from GetFloorPos costs a third copy (frame 0xa8), whether written directly or through an inline.
+// The distances are taken straight off GetFloorPos's results, and the loop's place is a local of its body: with
+// the two places as locals of the function the loop's place sits below them, and with a `character` local the
+// registers differ.
 // @0x02151554
 void RoomScene::StartMeeting(int first, int second) {
     RoomCharacter *pair[2];
-    FloorPos posFirst = mCharacters[first].GetFloorPos();
-    FloorPos posSecond = mCharacters[second].GetFloorPos();
-    fx32 distanceFirst = posFirst.LengthSq();
-    fx32 distanceSecond = posSecond.LengthSq();
+    fx32 distanceFirst = mCharacters[first].GetFloorPos().LengthSq();
+    fx32 distanceSecond = mCharacters[second].GetFloorPos().LengthSq();
     if (distanceFirst - distanceSecond <= 0) {
         pair[0] = &mCharacters[first];
         pair[1] = &mCharacters[second];
@@ -2979,7 +2974,8 @@ void RoomScene::StartMeeting(int first, int second) {
         func_02091598(&mCharacters[first], mCharacters[second].GetFloorPos());
         func_02091598(&mCharacters[second], mCharacters[first].GetFloorPos());
         for (int i = 0; i < 2; i++) {
-            if (pair[i]->ClampOwnPosToRect4E4()) {
+            FloorPos pos = pair[i]->GetFloorPos();
+            if (pair[i]->ClampToRect4E4(&pos)) {
                 pair[i]->SetState(1);
             }
         }

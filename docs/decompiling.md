@@ -324,13 +324,18 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A constant vector copied through a local and stored field by field (`VecFx32 target = sConst; mTarget.x =
   target.x; ...`) where a by-value setter, or the same code in an inline, gave three vector copies one another's
   slots (`WeddingCamera::Reset`, overlay 96).
+- A value used once, taken straight off a call's result (`f().LengthSq()`) rather than through a local: its copies
+  become temporaries below the function's locals, which let a later block's local take the slot above them
+  (`RoomScene::StartMeeting`, overlay 74).
 
 **Registers allocated differently**
 - A fresh `for (int i ...)` in every loop (overlays 98, 99); C-style declarations at the top, in the order the
   original spills them.
 - Write a loop the way another file writes the same loop: overlay 110's partner loop matched once it used overlay
   109's form (`continue`, and `mWindow.mTexts[i + 1]` at each use instead of a local).
-- Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`).
+- Pass a member's address again rather than a local pointer to it, or the reverse (`ReloadCharacter`). An array
+  element read again at each use (`pair[i]->...`) rather than through a local pointer gave the original's
+  callee-saved registers (`RoomScene::StartMeeting`).
 - `#pragma opt_common_subs off` around the one function (and `#pragma opt_common_subs reset` after it: `#pragma
   optimization_level reset` does not reset it) where two values swap registers whatever form the source takes (the
   Mii transfer's `func_02077f48`; overlay 109's `UpdateCharacters` with level 2). Pragmas the compiler does not
