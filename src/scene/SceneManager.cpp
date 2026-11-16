@@ -64,6 +64,7 @@ struct PaletteLoader {
 #include "../overlays/ov018/TestNg62Scene.h"
 #include "../overlays/ov019/TestNg63Scene.h"
 #include "../overlays/ov020/Scene3F.h"
+#include "../overlays/ov075/Scene40.h"
 #include "../overlays/ov021/TestNg69Scene.h"
 #include "../overlays/ov076/MiiEditScene.h"
 #include "../overlays/ov022/Scene45.h"
@@ -956,6 +957,9 @@ TestNg63Scene::TestNg63Scene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x3F, overlay 20
 Scene3F::Scene3F(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x40 and 0x6C, overlay 75
+Scene40::Scene40(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x41, overlay 21
 TestNg69Scene::TestNg69Scene(int sceneId) : Scene(sceneId) {}

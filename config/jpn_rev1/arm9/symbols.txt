@@ -1813,8 +1813,8 @@ _ZN13TestNg63SceneC1Ei kind:function(arm,size=0x14c) addr:0x02042634
 _ZN13TestNg63ModelD1Ev kind:function(arm,size=0x3c) addr:0x02042780
 _ZN7Scene3FC1Ei kind:function(arm,size=0x124) addr:0x020427bc
 _ZN7Scene40C1Ei kind:function(arm,size=0x8c0) addr:0x020428e0
-func_020431a0 kind:function(arm,size=0x2c) addr:0x020431a0
-func_020431cc kind:function(arm,size=0x3c) addr:0x020431cc
+_ZN16Scene40ItemModelC1Ev kind:function(arm,size=0x2c) addr:0x020431a0
+_ZN16Scene40ItemModelD1Ev kind:function(arm,size=0x3c) addr:0x020431cc
 _ZN13TestNg69SceneC1Ei kind:function(arm,size=0xe8) addr:0x02043208
 _ZN13TestNg69ModelD1Ev kind:function(arm,size=0x3c) addr:0x020432f0
 _ZN12MiiEditSceneC1Ei kind:function(arm,size=0x460) addr:0x0204332c
@@ -1931,7 +1931,7 @@ _ZN11ClothesItem9GetPrice2Ev kind:function(arm,size=0x24) addr:0x0204ad3c
 _ZN11ClothesItem8GetPriceEv kind:function(arm,size=0x24) addr:0x0204ad60
 func_0204ad84 kind:function(arm,size=0x4) addr:0x0204ad84
 _ZN20TestDrawMiiAnimModelD0Ev kind:function(arm,size=0x44) addr:0x0204ad88
-func_0204adcc kind:function(arm,size=0x44) addr:0x0204adcc
+_ZN16Scene40ItemModelD0Ev kind:function(arm,size=0x44) addr:0x0204adcc
 _ZN14TestNg134ModelD0Ev kind:function(arm,size=0x44) addr:0x0204ae10
 func_0204ae54 kind:function(arm,size=0x44) addr:0x0204ae54
 func_0204ae98 kind:function(arm,size=0x44) addr:0x0204ae98
@@ -5114,13 +5114,11 @@ data_02110a04 kind:data(any) addr:0x02110a04
 data_02110a20 kind:data(any) addr:0x02110a20
 data_02110a44 kind:data(any) addr:0x02110a44
 data_02110a60 kind:data(any) addr:0x02110a60
-data_02110a84 kind:data(any) addr:0x02110a84
-data_02110aa0 kind:data(any) addr:0x02110aa0
+_ZTV16Scene40ItemModel kind:data(any) addr:0x02110a7c
 _ZTV10AlbumItems kind:data(any) addr:0x02110abc
 data_02110b0c kind:data(any) addr:0x02110b0c
 data_02110b30 kind:data(any) addr:0x02110b30
-data_02110b54 kind:data(any) addr:0x02110b54
-data_02110b78 kind:data(any) addr:0x02110b78
+_ZTV12Scene40Items kind:data(any) addr:0x02110b4c
 _ZTV16DrawManTestScene kind:data(any) addr:0x02110b94
 gStr_DMN kind:data(any) addr:0x02110bb8
 gStr_Scn_Scene_SceneTestDrawMan_LZ_bin kind:data(any) addr:0x02110bbc
@@ -6341,7 +6339,7 @@ gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
 sScanResult kind:bss addr:0x0213b6c0 local
 sUserGameInfo kind:bss addr:0x0213b6e0 local
 gWirelessSession kind:bss addr:0x0213b700
-@14918 kind:bss addr:0x0213b704 local
+@14938 kind:bss addr:0x0213b704 local
 gSceneManager kind:bss addr:0x0213b710
 gSceneMemory kind:bss addr:0x0213ba74
 data_0213bab0 kind:bss addr:0x0213bab0
