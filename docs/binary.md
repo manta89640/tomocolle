@@ -218,7 +218,17 @@ ended or began one to eight functions early, and `fx.c`, `mi_wram.c`, `mi_init.c
 `gfd_FramePlttVramMan.c` are units now. Where two functions of an object have the same bytes, the object's order, or
 the data that points at them, told them apart, and so found three that dsd's signatures had named wrongly:
 `0x02004718` is `GX_DisableBankForLCDC` (it passes `&gGXState.lcdc`), `0x0205FDA4` is `NNSi_G2dSplitCharUTF16` and
-`0x0205E2EC` `NNS_G2dFontInitUTF16`. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
+`0x0205E2EC` `NNS_G2dFontInitUTF16`, and one more when its file was linked from source: `0x0205B9C4` is
+`NNS_G2dDrawCellAnimation`, not `NNS_G2dDrawCell` (the same bytes, but it calls `DrawCellAnimationImpl_`, which the
+linker otherwise drops). Linking a file from source checks what objdiff does not: a wrong name for a function with a
+twin, or a static that only a misnamed function calls, changes the ROM. With their data placed, `os_ownerInfo.c`,
+`tp.c`, `fs_rom.c`, `fs_command_default.c`, `card_common.c`, `g2d_Renderer.c`, `g2d_OAM.c` and the gfd files are
+complete; among what the data showed, `fs_command_default.c`'s table of commands (`0x020B5478`) had been named as text,
+and `card_common.c` gives the card thread the top of its 1 KB stack, `cardi_thread_stack + 0x400`, which dsd had taken
+for `card_rom.c`'s `cardi_rom_base`. Still incomplete: `os_irqHandler.c`, `os_irqTable.c` and `os_interrupt.c`, which
+need the DTCM's `OS_IRQTable` (`0x027E0000`) and `OSi_IrqThreadQueue` and the linker's `SDK_AUTOLOAD_DTCM_START` and
+`SDK_IRQ_STACKSIZE`; and `card_backup.c`, whose `[SDK+NINTENDO:BACKUP]` string is in a `.version` section, at
+`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
 (`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG` or `...BGCharacterData`/`...BGNCG`), which are byte for byte the
 same, and keep their address names.
 
