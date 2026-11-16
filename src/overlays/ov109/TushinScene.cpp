@@ -469,9 +469,9 @@ void TushinScene::Init() {
     sWiiSendResult = 0;
     sWiiReceiveResult = 0;
     MI_CpuFill8(sReceivedName, 0, sizeof(sReceivedName));
-    func_0203b7d4(data_0213b700, sParents, 3);
-    func_0203b7e0(data_0213b700, sParentTimers);
-    func_0203b76c(data_0213b700, 0);
+    gWirelessSession->SetParentBuffer(sParents, 3);
+    gWirelessSession->SetTimers(sParentTimers);
+    gWirelessSession->Reset(0);
     MI_CpuFill8(sParents, 0, sizeof(sParents));
     MI_CpuFill8(sParentTimers, 0, sizeof(sParentTimers));
     mMusicPlaying = 0;
@@ -1036,10 +1036,10 @@ void TushinScene::UpdateConnection() {
     }
     switch (WH_GetSystemState()) {
     case 1:
-        func_0203b898(data_0213b700);
-        func_0203b908(data_0213b700);
-        func_0203b948(data_0213b700);
-        if (func_0203b970(data_0213b700)) {
+        gWirelessSession->SetUserGameInfo();
+        gWirelessSession->UpdateScan();
+        gWirelessSession->UpdateMeasureChannel();
+        if (gWirelessSession->UpdateConnect()) {
             return;
         }
         mNextPage = 0x25;
@@ -1051,10 +1051,10 @@ void TushinScene::UpdateConnection() {
         return;
     }
     case 2:
-        if (func_0203b9b4(data_0213b700)) {
-            func_0203b9fc(data_0213b700);
-            WirelessManager *manager = data_0213b700;
-            func_0203ba20(manager, mParentNames[func_0203ba10(manager)]);
+        if (gWirelessSession->IsParentFound()) {
+            gWirelessSession->ClearParentFound();
+            WirelessSession *manager = gWirelessSession;
+            manager->GetFoundParentName(mParentNames[manager->GetFoundParent()]);
         }
         if (mPage != 5) {
             return;
@@ -1510,7 +1510,7 @@ void TushinScene::Disconnect(int kind) {
             return;
         }
         WH_Finalize();
-        func_0203b8b4(data_0213b700, 1);
+        gWirelessSession->RequestEnd(1);
         return;
     case 1:
     case 2:
@@ -1541,7 +1541,7 @@ static inline CharacterModel *GetModel(SceneCharacter *c) { return &c->mModel; }
 void TushinScene::Update() {
     UpdateSignal();
     CountFrame();
-    func_0203b800(data_0213b700);
+    gWirelessSession->UpdateEnd();
     UpdateMusic();
     UpdateCharacters();
     switch (mPage) {
@@ -1632,7 +1632,7 @@ void TushinScene::Update() {
         }
         if (WH_GetSystemState() != 0) {
             WH_Finalize();
-            func_0203b8b4(data_0213b700, 1);
+            gWirelessSession->RequestEnd(1);
         }
         sDisconnected = 0;
         lost = TRUE;
@@ -1719,7 +1719,7 @@ void TushinScene::Update() {
                 case 1:
                     mNextPage = 0x26;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     sWiiParentCount = 0;
                     data_ov109_0215320c = 0;
                     break;
@@ -1733,13 +1733,13 @@ void TushinScene::Update() {
                 switch (result) {
                 case 0:
                     mNextPage = 3;
-                    func_0203b7e8(data_0213b700);
+                    gWirelessSession->Initialize();
                     WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 1:
                     mNextPage = 4;
-                    func_0203b7e8(data_0213b700);
-                    func_0203b87c(data_0213b700);
+                    gWirelessSession->Initialize();
+                    gWirelessSession->SetSsid();
                     WH_SetReceiver(TushinScene_Receive);
                     break;
                 case 3:
@@ -1753,7 +1753,7 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 }
                 break;
             case 4:
@@ -1761,7 +1761,7 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 }
                 break;
             case 5:
@@ -1769,9 +1769,9 @@ void TushinScene::Update() {
                     mNextPage = 2;
                     close = 0x2C;
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
-                    func_0203bac4(data_0213b700, result);
+                    gWirelessSession->EndScan(result);
                     mNextPage = 6;
                 }
                 break;
@@ -1856,7 +1856,7 @@ void TushinScene::Update() {
                     close = 0x2C;
                     MiiTransfer_Cut();
                 } else if (result >= 0 && result < 3 && sParentTimers[result] > 0) {
-                    data_0213b700->mParent = result;
+                    gWirelessSession->mParent = result;
                     mConnectRequested = 1;
                     mNextPage = 0x28;
                 }
@@ -1941,7 +1941,7 @@ void TushinScene::Update() {
                 if (!IsWindowOpen(&mWindow) || mNextPage == 5) {
                     break;
                 }
-                if (func_0203b9c4(data_0213b700) <= 0) {
+                if (gWirelessSession->CountParents() <= 0) {
                     break;
                 }
                 mNextPage = 5;
@@ -2126,7 +2126,7 @@ void TushinScene::Update() {
                 if (mConnectRequested != 1) {
                     break;
                 }
-                MiiTransfer_Connect(mParentIds[data_0213b700->mParent]);
+                MiiTransfer_Connect(mParentIds[gWirelessSession->mParent]);
                 mConnectRequested = 0;
                 break;
             case 66:
@@ -2248,10 +2248,10 @@ void TushinScene::Update() {
                 }
                 switch (mNextPage) {
                 case 3:
-                    func_0203b940(data_0213b700, 1);
+                    gWirelessSession->RequestMeasureChannel(1);
                     break;
                 case 4:
-                    func_0203b900(data_0213b700, 1);
+                    gWirelessSession->RequestScan(1);
                     for (int i = 0; i < 3; i++) {
                         sParentTimers[i] = 0;
                         mParentIds[i] = 0;
@@ -2307,7 +2307,7 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 8:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
                     PlaySound(0xB);
                     mUnknown3F090 = 0;
                     break;
@@ -2330,23 +2330,23 @@ void TushinScene::Update() {
                     PlaySound(0xC);
                     break;
                 case 6:
-                    func_0203b968(data_0213b700, 1);
+                    gWirelessSession->RequestConnect(1);
                     mWait = 60;
                     break;
                 case 36:
                     WH_Finalize();
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     mWait = 60;
                     break;
                 case 37:
-                    func_0203b8b4(data_0213b700, 1);
+                    gWirelessSession->RequestEnd(1);
                     PlaySound(0xD);
                     break;
                 case 40:
                     mWait = 60;
                     break;
                 case 41:
-                    mWindow.mTexts[0].SetStringArg(mParentNames[data_0213b700->mParent], 0);
+                    mWindow.mTexts[0].SetStringArg(mParentNames[gWirelessSession->mParent], 0);
                     PlaySound(0xB);
                     break;
                 case 46:
@@ -2437,9 +2437,9 @@ void TushinScene::Draw() {
 
 // @0x02151620
 void TushinScene::Exit() {
-    if (GetMode() == 1 && WH_GetSystemState() != 0 && data_0213b700->mUnknown00 == 0) {
+    if (GetMode() == 1 && WH_GetSystemState() != 0 && gWirelessSession->mEndRequested == 0) {
         WH_Finalize();
-        func_0203b8b4(data_0213b700, 1);
+        gWirelessSession->RequestEnd(1);
     }
     if (mSortKey != mResidents.mUnknown11306) {
         gGameData.mMiiListSortKey = mResidents.mUnknown11306;
@@ -2460,8 +2460,8 @@ void TushinScene::Exit() {
     ArchiveManager_Unmount(&gArchiveManager, "STS");
     ArchiveManager_Unmount(&gArchiveManager, "BIC");
     if (GetMode() == 1) {
-        func_0203b8b4(data_0213b700, 1);
-        while (func_0203b800(data_0213b700) == 1) {
+        gWirelessSession->RequestEnd(1);
+        while (gWirelessSession->UpdateEnd() == 1) {
         }
         return;
     }

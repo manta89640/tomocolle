@@ -7,7 +7,11 @@
 
 #include <nitro.h>
 
+#include "wireless/WirelessSession.h"
+
 // ---- The scene manager and CreateScene (gap38-a) ----------------------------------------------------------------
+
+WirelessSession *gWirelessSession;
 
 // ---- Constructors 0x0203de78..0x02040578: scenes up to 0x26 (gap38-a) --------------------------------------------
 

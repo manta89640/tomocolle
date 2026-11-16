@@ -365,17 +365,18 @@ src/save/SaveBlocks.cpp:
     .text       start:0x020398e4 end:0x0203b748
     .rodata     start:0x020b5c5c end:0x020b5cfc
 
-src/wireless/WirelessScanner.cpp:
+src/wireless/WirelessSession.cpp:
+    complete
     .text       start:0x0203b748 end:0x0203bce0
     .rodata     start:0x020b5cfc end:0x020b5d04
-    .bss        start:0x0213b6c0 end:0x0213b704
+    .bss        start:0x0213b6b0 end:0x0213b700
 
 src/scene/SceneManager.cpp:
     .text       start:0x0203bce0 end:0x0204af20
     .init       start:0x020b06a0 end:0x020b06cc
     .ctor       start:0x020fc4e4 end:0x020fc4e8
     .data       start:0x02110860 end:0x02110b94
-    .bss        start:0x0213b704 end:0x0213ba74
+    .bss        start:0x0213b700 end:0x0213ba74
 
 src/scene/MiiListMenuScene.cpp:
     complete

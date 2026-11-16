@@ -1698,34 +1698,34 @@ func_0203b4e8 kind:function(arm,size=0xc) addr:0x0203b4e8
 func_0203b4f4 kind:function(arm,size=0x78) addr:0x0203b4f4
 func_0203b56c kind:function(arm,size=0x15c) addr:0x0203b56c
 func_0203b6c8 kind:function(arm,size=0x80) addr:0x0203b6c8
-func_0203b748 kind:function(arm,size=0x24) addr:0x0203b748
-func_0203b76c kind:function(arm,size=0x68) addr:0x0203b76c
-func_0203b7d4 kind:function(arm,size=0xc) addr:0x0203b7d4
-func_0203b7e0 kind:function(arm,size=0x8) addr:0x0203b7e0
-func_0203b7e8 kind:function(arm,size=0x18) addr:0x0203b7e8
-func_0203b800 kind:function(arm,size=0xc) addr:0x0203b800
-func_0203b80c kind:function(arm,size=0x70) addr:0x0203b80c
-func_0203b87c kind:function(arm,size=0x1c) addr:0x0203b87c
-func_0203b898 kind:function(arm,size=0x1c) addr:0x0203b898
-func_0203b8b4 kind:function(arm,size=0x8) addr:0x0203b8b4
-func_0203b8bc kind:function(arm,size=0x44) addr:0x0203b8bc
-func_0203b900 kind:function(arm,size=0x8) addr:0x0203b900
-func_0203b908 kind:function(arm,size=0x38) addr:0x0203b908
-func_0203b940 kind:function(arm,size=0x8) addr:0x0203b940
-func_0203b948 kind:function(arm,size=0x20) addr:0x0203b948
-func_0203b968 kind:function(arm,size=0x8) addr:0x0203b968
-func_0203b970 kind:function(arm,size=0x44) addr:0x0203b970
-func_0203b9b4 kind:function(arm,size=0x10) addr:0x0203b9b4
-func_0203b9c4 kind:function(arm,size=0x38) addr:0x0203b9c4
-func_0203b9fc kind:function(arm,size=0x14) addr:0x0203b9fc
-func_0203ba10 kind:function(arm,size=0x10) addr:0x0203ba10
-func_0203ba20 kind:function(arm,size=0x4c) addr:0x0203ba20
-func_0203ba6c kind:function(arm,size=0x40) addr:0x0203ba6c
-func_0203baac kind:function(arm,size=0x8) addr:0x0203baac
-func_0203bab4 kind:function(arm,size=0x8) addr:0x0203bab4
-func_0203babc kind:function(arm,size=0x8) addr:0x0203babc
-func_0203bac4 kind:function(arm,size=0x18) addr:0x0203bac4
-func_0203badc kind:function(arm,size=0x204) addr:0x0203badc
+_ZN15WirelessSessionC1Ev kind:function(arm,size=0x24) addr:0x0203b748
+_ZN15WirelessSession5ResetEt kind:function(arm,size=0x68) addr:0x0203b76c
+_ZN15WirelessSession15SetParentBufferEP9WMBssDesci kind:function(arm,size=0xc) addr:0x0203b7d4
+_ZN15WirelessSession9SetTimersEPi kind:function(arm,size=0x8) addr:0x0203b7e0
+_ZN15WirelessSession10InitializeEv kind:function(arm,size=0x18) addr:0x0203b7e8
+_ZN15WirelessSession9UpdateEndEv kind:function(arm,size=0xc) addr:0x0203b800
+_ZN15WirelessSession16MakeUserGameInfoEv kind:function(arm,size=0x70) addr:0x0203b80c
+_ZN15WirelessSession7SetSsidEv kind:function(arm,size=0x1c) addr:0x0203b87c
+_ZN15WirelessSession15SetUserGameInfoEv kind:function(arm,size=0x1c) addr:0x0203b898
+_ZN15WirelessSession10RequestEndEi kind:function(arm,size=0x8) addr:0x0203b8b4
+_ZN15WirelessSession11DoUpdateEndEv kind:function(arm,size=0x44) addr:0x0203b8bc
+_ZN15WirelessSession11RequestScanEi kind:function(arm,size=0x8) addr:0x0203b900
+_ZN15WirelessSession10UpdateScanEv kind:function(arm,size=0x38) addr:0x0203b908
+_ZN15WirelessSession21RequestMeasureChannelEi kind:function(arm,size=0x8) addr:0x0203b940
+_ZN15WirelessSession20UpdateMeasureChannelEv kind:function(arm,size=0x20) addr:0x0203b948
+_ZN15WirelessSession14RequestConnectEi kind:function(arm,size=0x8) addr:0x0203b968
+_ZN15WirelessSession13UpdateConnectEv kind:function(arm,size=0x44) addr:0x0203b970
+_ZN15WirelessSession13IsParentFoundEv kind:function(arm,size=0x10) addr:0x0203b9b4
+_ZN15WirelessSession12CountParentsEv kind:function(arm,size=0x38) addr:0x0203b9c4
+_ZN15WirelessSession16ClearParentFoundEv kind:function(arm,size=0x14) addr:0x0203b9fc
+_ZN15WirelessSession14GetFoundParentEv kind:function(arm,size=0x10) addr:0x0203ba10
+_ZN15WirelessSession18GetFoundParentNameEPw kind:function(arm,size=0x4c) addr:0x0203ba20
+_ZN15WirelessSession12ClearParentsEv kind:function(arm,size=0x40) addr:0x0203ba6c
+_ZN15WirelessSession10GetParentsEv kind:function(arm,size=0x8) addr:0x0203baac
+_ZN15WirelessSession14GetParentCountEv kind:function(arm,size=0x8) addr:0x0203bab4
+_ZN15WirelessSession9GetTimersEv kind:function(arm,size=0x8) addr:0x0203babc
+_ZN15WirelessSession7EndScanEi kind:function(arm,size=0x18) addr:0x0203bac4
+_ZN15WirelessSession13OnParentFoundEP9WMBssDesc kind:function(arm,size=0x204) addr:0x0203badc
 func_0203bce0 kind:function(arm,size=0x4) addr:0x0203bce0
 func_0203bce4 kind:function(arm,size=0x244) addr:0x0203bce4
 func_0203bf28 kind:function(arm,size=0xf0) addr:0x0203bf28
@@ -4274,7 +4274,7 @@ gStr_MaaMiiMuuMeeMoo kind:data(any) addr:0x020b5cbc
 gStr_tsumanogosakata kind:data(any) addr:0x020b5ccc
 gStr_TOMODACHI_FAIRY kind:data(any) addr:0x020b5cdc
 gStr_aadeeiKlLnnrrst kind:data(any) addr:0x020b5cec
-data_020b5cfc kind:data(any) addr:0x020b5cfc
+sScanMacAddress kind:data(any) addr:0x020b5cfc local
 gStr_head_h2 kind:data(any) addr:0x020b5d04
 gStr_human01_base_pl kind:data(any) addr:0x020b5d18
 data_020b5d2c kind:data(any) addr:0x020b5d2c
@@ -6375,11 +6375,11 @@ sRecvBuffer kind:bss addr:0x021392c0 local
 sDSInfo kind:bss addr:0x02139680 local
 sWMKeySetBuf kind:bss addr:0x02139ea0 local
 sWmBuffer kind:bss addr:0x0213a6c0 local
-data_0213b5c0 kind:bss addr:0x0213b5c0
-gSoundManager kind:bss addr:0x0213b5cc
-data_0213b6c0 kind:bss addr:0x0213b6c0
-data_0213b6e0 kind:bss addr:0x0213b6e0
-data_0213b700 kind:bss addr:0x0213b700
+@12764 kind:bss addr:0x0213b5c0 local
+gSoundManager kind:bss(size=0xe4) addr:0x0213b5cc
+sScanResult kind:bss addr:0x0213b6c0 local
+sUserGameInfo kind:bss addr:0x0213b6e0 local
+gWirelessSession kind:bss addr:0x0213b700
 data_0213b704 kind:bss addr:0x0213b704
 gSceneManager kind:bss addr:0x0213b710
 data_0213ba74 kind:bss addr:0x0213ba74

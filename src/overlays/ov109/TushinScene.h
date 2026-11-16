@@ -496,45 +496,16 @@ const u16 *MiiTransfer_GetParentUserGameInfo(int i);
 
 // --- Wireless (main program) ---
 
-struct WirelessManager {
-    /* 0x00 */ int mUnknown00;
-    /* 0x04 */ int mUnknown04;
-    /* 0x08 */ int mUnknown08;
-    /* 0x0C */ int mUnknown0C;
-    /* 0x10 */ int mUnknown10;
-    /* 0x14 */ int mUnknown14;
-    /* 0x18 */ int mPageAfterSave;
-    /* 0x1C */ int mParent; // The partner chosen, an index of the ones found
-};
+#include "wireless/WirelessSession.h"
+
 
 extern "C" {
-extern WirelessManager *data_0213b700;
-void func_0203b76c(WirelessManager *manager, int a);
-int func_0203b800(WirelessManager *manager);
-void func_0203b7e8(WirelessManager *manager);
-void func_0203b87c(WirelessManager *manager);
-void func_0203b900(WirelessManager *manager, int a);
-void func_0203b940(WirelessManager *manager, int a);
-void func_0203b968(WirelessManager *manager, int a);
-int func_0203b9c4(WirelessManager *manager);
-void func_0203bac4(WirelessManager *manager, int parent);
 void MiiTransfer_Start(void);
 void MiiTransfer_Cut(void);
 void MiiTransfer_Connect(u16 id);
 BOOL func_0202c37c(GameData *game);
 void func_0202d110(GameData *game, int index);
-void func_0203b8b4(WirelessManager *manager, int a);
 void MiiTransfer_Update(void);
-void func_0203b7d4(WirelessManager *manager, void *buffer, int a);
-void func_0203b7e0(WirelessManager *manager, void *buffer);
-void func_0203b898(WirelessManager *manager);
-void func_0203b908(WirelessManager *manager);
-void func_0203b948(WirelessManager *manager);
-BOOL func_0203b970(WirelessManager *manager);
-BOOL func_0203b9b4(WirelessManager *manager);
-void func_0203b9fc(WirelessManager *manager);
-int func_0203ba10(WirelessManager *manager);
-void func_0203ba20(WirelessManager *manager, wchar_t *name);
 extern u8 data_0212349c[];
 void MiiTransfer_Init(void *a, void *miiData, int count);
 void MiiTransfer_SetReceiveCallback(void (*callback)(int, int));

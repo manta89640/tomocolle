@@ -548,39 +548,8 @@ void WH_Reset(void);
 void WH_Finalize(void);
 }
 
-// The main program's layer over WH that finds and connects the other DS (functions 0x0203b748 to 0x0203bcd4; the
-// one instance is reached through data_0213b700). A stand-in.
-//
-// The name is descriptive, not the original: no name of this class survives in the ROM.
-struct WirelessSession {
-    /* 0x00 */ BOOL mActive;
-    /* 0x04 */ u8 mUnknown04[0x18];
-    /* 0x1C */ int mPartner; // Which of the parents found was chosen
-};
-
-extern "C" {
-extern WirelessSession *data_0213b700;
-void func_0203b7d4(WirelessSession *session, void *parents, int count); // Where the parents found are kept
-void func_0203b7e0(WirelessSession *session, int *timers);
-void func_0203b76c(WirelessSession *session, int unk);
-void func_0203b7e8(WirelessSession *session);
-BOOL func_0203b800(WirelessSession *session); // Updates it: TRUE while it is ending
-void func_0203b87c(WirelessSession *session);
-void func_0203b898(WirelessSession *session);
-void func_0203b8b4(WirelessSession *session, BOOL active);
-void func_0203b900(WirelessSession *session, BOOL unk);
-void func_0203b908(WirelessSession *session);
-void func_0203b940(WirelessSession *session, BOOL unk);
-void func_0203b948(WirelessSession *session);
-void func_0203b968(WirelessSession *session, BOOL unk);
-BOOL func_0203b970(WirelessSession *session);
-BOOL func_0203b9b4(WirelessSession *session); // A parent has been found
-int func_0203b9c4(WirelessSession *session);  // How many parents are found
-void func_0203b9fc(WirelessSession *session);
-int func_0203ba10(WirelessSession *session);  // The parent found last
-void func_0203ba20(WirelessSession *session, wchar_t *name);
-void func_0203bac4(WirelessSession *session, int partner);
-}
+// The main program's layer over WH that finds and connects the other DS
+#include "wireless/WirelessSession.h"
 
 // --- This overlay's classes ----------------------------------------------------------------------------------------
 
