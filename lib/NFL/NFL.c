@@ -2719,28 +2719,28 @@ extern const u32 data_020b7b64[];
 
 // The VRAM side of an object's palette streams (func_02075f50): ten of them here, where func_02075f50 fills eleven
 int func_02077300(NFLObj *obj, u32 *rest) {
-    NFLWork *work = data_02145360;
+    NFLWork *work = (NFLWork *)data_02145360;
     int result;
 
     if (work->unk68 != 7) {
-        NFLWorkUnkA0 *stream = obj->unk228;
         int i;
+        u8 *src;
+        NFLWorkUnkA0 *stream = obj->unk228;
 
         for (i = 0; i < 10; stream++, i++) {
             BOOL go = FALSE;
-            u8 *src;
             u32 dest;
             u32 size;
 
             switch (stream->unk8) {
             case 2:
                 dest = obj->unkD8 + data_020b7b64[i];
-                src = (u8 *)stream->unk0 + (u32)work->unk78;
                 if (i == 0) {
                     size = 16;
                 } else {
                     size = 32;
                 }
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
                 DC_FlushRange(src, size);
                 go = TRUE;
                 break;
@@ -2759,12 +2759,12 @@ int func_02077300(NFLObj *obj, u32 *rest) {
                 go = TRUE;
                 break;
             case 5:
-                src = (u8 *)stream->unk0 + (u32)work->unk78;
                 if (i == 0) {
                     size = 16 - obj->unk174;
                 } else {
                     size = 32 - obj->unk174;
                 }
+                src = (u8 *)stream->unk0 + (u32)work->unk78;
                 dest = obj->unk174 + (obj->unkD8 + data_020b7b64[i]);
                 DC_FlushRange(src, size);
                 go = TRUE;
