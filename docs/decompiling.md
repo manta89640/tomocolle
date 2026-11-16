@@ -287,6 +287,9 @@ default level gives that shape: not `volatile`, narrower or unsigned counters, o
 pragmas.
 NFL's `NFL_MakeFace` has that shape and also reloads a list link that level 2 alone keeps in a register: it matches
 with `#pragma opt_common_subs off` added (reset it after the function too: `optimization_level reset` does not).
+NFL's hair meshes have that shape too, but are not level 2: they are the default level with eight of the IR
+optimiser's passes off together, under `#pragma push`/`pop` (see "Arguments evaluated in another order"); level 2
+gave their loops but not their argument order or their boolean chains.
 
 Other per-function settings found the same way (overlay 109):
 
@@ -552,6 +555,10 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   to the lower callee-saved registers; with `#pragma optimization_level 2` and `opt_common_subs off` it gave
   `NFLi_ApplyExpression0` (lib/NFL) the original's order, the parameter in r8. A variable assigned a second time is
   coloured as a new value: there the second pair of assignments had to keep the casts too.
+- An element pointer taken from the index at the top of the loop body, `stream = &obj->texStreams[i];`, where a
+  pointer stepped in the `for` beside the counter (`stream++, i++`) gave the same instructions with four
+  callee-saved registers rotated (NFL's `NFLi_CopyFaceTextures`, 99.1% to 99.9%). In `NFLi_CopySharedTextures`
+  the same change made things worse, and declaring `source` before `stream` was what helped.
 - A loop counter and a value it is compared with in the original's registers: `int i; int choice;` at the block's
   top and `for (i = 0; ...)`, where `for (int i ...)` swaps them (the four choice loops of
   `MiiEditProfilePage::Update`).
@@ -566,6 +573,19 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
   order alone in a test function, and in the other once a switch that reassigns a local follows it. Neither
   temporaries, inlines, parameter types nor `opt_*` pragmas change it. Not solved.
+- Every argument of every call loaded last to first (`ldr r3; ldr r2; ldr r1; add r0; bl`), compares loading
+  their left operand first, and an `a == 5 || a == 7 || ...` test that is a chain of materialised booleans (one
+  register per `||`, all set to 1 up front) instead of a bit test: the function was compiled with the IR
+  optimiser's passes off, and its calls go through inline functions. Turn the passes off together, around the
+  function, with `#pragma push`, `#pragma opt_common_subs off`, `opt_propagation`, `opt_loop_invariants`,
+  `opt_strength_reduction`, `opt_rotateloops`, `opt_scalarize`, `opt_rebuildlogicals`,
+  `opt_collapselogicalselectionintobittest` (all `off`), then `#pragma pop`. One or two of them at a time show
+  nothing; `opt_prelinearize off` is an internal compiler error. In that mode an inlined call binds its arguments
+  to its parameters from the last to the first, so `static inline void NFLi_PutScale(GXDLInfo *dl, fx32 x, fx32 y,
+  fx32 z) { G3C_Scale(dl, x, y, z); }` gives the reversed loads where a direct call does not, and an SDK inline
+  (`MTX_Scale43`) does it by itself. With the passes on, the inlined arguments are put back in order, which is why
+  inline wrappers alone never showed it. The same mode keeps dead stores to a local whose address is taken, and a
+  vector's fields copied one by one on the stack (lib/NFL: `NFLi_MakeHairSkinMesh`, `NFLi_DLScale`).
 **Two registers holding one counter**
 - A second counter, incremented in a statement of its own after the call (`int number = 0; for (int i = 0; i <= 1;
   i++) { f(number, table[i]); number++; }`), gives the original's two registers; `number++` in the argument list

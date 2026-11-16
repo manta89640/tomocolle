@@ -1415,10 +1415,13 @@ Measured from the functions of `0x0206AAEC`-`0x0206EBB0` (the display-list build
   plane of its quadrant). The symbols that sat on their inner words were fields, now addends in `relocs.txt`.
 
 Measured on the compiler: `NFL_MakeFace` matches only under `#pragma optimization_level 2` with
-`#pragma opt_common_subs off`, and the three hair meshes (`NFLi_MakeFavoriteColorHairMesh`, `NFLi_MakeHairMesh`,
-`NFLi_MakeHairSkinMesh`) have level 2's unrotated loops but evaluate their calls' arguments from the last to the first,
-which nothing tried reproduces (levels 0-4, the `opt_*` pragmas, scheduling, size, C++, every 2.0, 3.0 and 4.0 build,
-other `-proc`).
+`#pragma opt_common_subs off`. The three hair meshes (`NFLi_MakeFavoriteColorHairMesh`, `NFLi_MakeHairMesh`,
+`NFLi_MakeHairSkinMesh`) and `NFLi_DLScale` load every call's arguments from the last to the first, keep their loops
+unrotated and test the hair type with a chain of materialised booleans. Inferred: they were compiled with eight of the
+IR optimiser's passes off (`opt_common_subs`, `opt_propagation`, `opt_loop_invariants`, `opt_strength_reduction`,
+`opt_rotateloops`, `opt_scalarize`, `opt_rebuildlogicals`, `opt_collapselogicalselectionintobittest`) and their
+display-list commands go through inline functions, whose arguments that mode binds last to first; with that,
+`NFLi_MakeHairSkinMesh` and `NFLi_DLScale` match. No other function of NFL loads its arguments in that order.
 
 The last third, `0x02073514` to `0x020776E4`, measured from its code (in `lib/NFL/NFL.c`):
 
