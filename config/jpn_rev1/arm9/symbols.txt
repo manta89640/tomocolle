@@ -102,16 +102,16 @@ GX_SetBankForSubOBJ kind:function(arm,size=0x70) addr:0x0200435c
 GX_SetBankForSubBGExtPltt kind:function(arm,size=0x80) addr:0x020043cc
 GX_SetBankForSubOBJExtPltt kind:function(arm,size=0x80) addr:0x0200444c
 resetBankForX_ kind:function(arm,size=0x34) addr:0x020044cc
-func_02004500 kind:function(arm,size=0x14) addr:0x02004500
-func_02004514 kind:function(arm,size=0x14) addr:0x02004514
+GX_ResetBankForBG kind:function(arm,size=0x14) addr:0x02004500
+GX_ResetBankForOBJ kind:function(arm,size=0x14) addr:0x02004514
 GX_ResetBankForBGExtPltt kind:function(arm,size=0x24) addr:0x02004528
 GX_ResetBankForOBJExtPltt kind:function(arm,size=0x24) addr:0x0200454c
 GX_ResetBankForTex kind:function(arm,size=0x14) addr:0x02004570
 GX_ResetBankForTexPltt kind:function(arm,size=0x14) addr:0x02004584
 GX_ResetBankForClearImage kind:function(arm,size=0x14) addr:0x02004598
-func_020045ac kind:function(arm,size=0x14) addr:0x020045ac
-func_020045c0 kind:function(arm,size=0x14) addr:0x020045c0
-func_020045d4 kind:function(arm,size=0x14) addr:0x020045d4
+GX_ResetBankForARM7 kind:function(arm,size=0x14) addr:0x020045ac
+GX_ResetBankForSubBG kind:function(arm,size=0x14) addr:0x020045c0
+GX_ResetBankForSubOBJ kind:function(arm,size=0x14) addr:0x020045d4
 GX_ResetBankForSubBGExtPltt kind:function(arm,size=0x28) addr:0x020045e8
 GX_ResetBankForSubOBJExtPltt kind:function(arm,size=0x28) addr:0x02004610
 disableBankForX_ kind:function(arm,size=0xe0) addr:0x02004638
@@ -186,22 +186,22 @@ GX_LoadOAM kind:function(arm,size=0x54) addr:0x02005850
 GXS_LoadOAM kind:function(arm,size=0x58) addr:0x020058a4
 GX_LoadOBJ kind:function(arm,size=0x58) addr:0x020058fc
 GXS_LoadOBJ kind:function(arm,size=0x58) addr:0x02005954
-func_020059ac kind:function(arm,size=0x60) addr:0x020059ac
-func_02005a0c kind:function(arm,size=0x60) addr:0x02005a0c
-func_02005a6c kind:function(arm,size=0x60) addr:0x02005a6c
-func_02005acc kind:function(arm,size=0x60) addr:0x02005acc
-func_02005b2c kind:function(arm,size=0x60) addr:0x02005b2c
-func_02005b8c kind:function(arm,size=0x60) addr:0x02005b8c
-func_02005bec kind:function(arm,size=0x60) addr:0x02005bec
-func_02005c4c kind:function(arm,size=0x60) addr:0x02005c4c
-func_02005cac kind:function(arm,size=0x60) addr:0x02005cac
-func_02005d0c kind:function(arm,size=0x60) addr:0x02005d0c
-func_02005d6c kind:function(arm,size=0x60) addr:0x02005d6c
-func_02005dcc kind:function(arm,size=0x60) addr:0x02005dcc
-func_02005e2c kind:function(arm,size=0x60) addr:0x02005e2c
-func_02005e8c kind:function(arm,size=0x60) addr:0x02005e8c
-func_02005eec kind:function(arm,size=0x60) addr:0x02005eec
-func_02005f4c kind:function(arm,size=0x60) addr:0x02005f4c
+GX_LoadBG0Scr kind:function(arm,size=0x60) addr:0x020059ac
+GXS_LoadBG0Scr kind:function(arm,size=0x60) addr:0x02005a0c
+GX_LoadBG1Scr kind:function(arm,size=0x60) addr:0x02005a6c
+GXS_LoadBG1Scr kind:function(arm,size=0x60) addr:0x02005acc
+GX_LoadBG2Scr kind:function(arm,size=0x60) addr:0x02005b2c
+GXS_LoadBG2Scr kind:function(arm,size=0x60) addr:0x02005b8c
+GX_LoadBG3Scr kind:function(arm,size=0x60) addr:0x02005bec
+GXS_LoadBG3Scr kind:function(arm,size=0x60) addr:0x02005c4c
+GX_LoadBG0Char kind:function(arm,size=0x60) addr:0x02005cac
+GXS_LoadBG0Char kind:function(arm,size=0x60) addr:0x02005d0c
+GX_LoadBG1Char kind:function(arm,size=0x60) addr:0x02005d6c
+GXS_LoadBG1Char kind:function(arm,size=0x60) addr:0x02005dcc
+GX_LoadBG2Char kind:function(arm,size=0x60) addr:0x02005e2c
+GXS_LoadBG2Char kind:function(arm,size=0x60) addr:0x02005e8c
+GX_LoadBG3Char kind:function(arm,size=0x60) addr:0x02005eec
+GXS_LoadBG3Char kind:function(arm,size=0x60) addr:0x02005f4c
 GX_BeginLoadBGExtPltt kind:function(arm,size=0xa0) addr:0x02005fac
 GX_LoadBGExtPltt kind:function(arm,size=0x70) addr:0x0200604c
 GX_EndLoadBGExtPltt kind:function(arm,size=0x48) addr:0x020060bc
@@ -547,11 +547,11 @@ FS_ClearOverlayImage kind:function(arm,size=0x3c) addr:0x0200d34c
 FS_GetOverlayFileID kind:function(arm,size=0x28) addr:0x0200d388
 FSi_LoadOverlayInfoCore kind:function(arm,size=0xf8) addr:0x0200d3b0
 FS_LoadOverlayInfo kind:function(arm,size=0xfc) addr:0x0200d4a8
-FS_LoadOverlayFile kind:function(arm,size=0x90) addr:0x0200d5a4
+FS_LoadOverlayImage kind:function(arm,size=0x90) addr:0x0200d5a4
 FSi_CompareDigest kind:function(arm,size=0x94) addr:0x0200d634
 FS_StartOverlay kind:function(arm,size=0xf4) addr:0x0200d6c8
 FS_EndOverlay kind:function(arm,size=0xf0) addr:0x0200d7bc
-FS_StopOverlay kind:function(arm,size=0x10) addr:0x0200d8ac
+FS_UnloadOverlayImage kind:function(arm,size=0x10) addr:0x0200d8ac
 FS_LoadOverlay kind:function(arm,size=0x54) addr:0x0200d8bc
 FS_UnloadOverlay kind:function(arm,size=0x4c) addr:0x0200d910
 func_0200d95c kind:function(arm,size=0x50) addr:0x0200d95c
@@ -2122,8 +2122,8 @@ func_02053c30 kind:function(arm,size=0x34) addr:0x02053c30
 NNS_SndInit kind:function(arm,size=0x88) addr:0x02053c64
 NNS_SndMain kind:function(arm,size=0x30) addr:0x02053cec
 NNS_SndSetMonoFlag kind:function(arm,size=0x20) addr:0x02053d1c
-func_02053d3c kind:function(arm,size=0x38) addr:0x02053d3c
-func_02053d74 kind:function(arm,size=0xc) addr:0x02053d74
+BeginSleep kind:function(arm,size=0x38) addr:0x02053d3c local
+EndSleep kind:function(arm,size=0xc) addr:0x02053d74 local
 NNS_SndLockChannel kind:function(arm,size=0x48) addr:0x02053d80
 NNS_SndUnlockChannel kind:function(arm,size=0x30) addr:0x02053dc8
 NNS_SndUnlockCapture kind:function(arm,size=0x1c) addr:0x02053df8
@@ -2183,12 +2183,12 @@ NNS_SndStrmStop kind:function(arm,size=0x1c) addr:0x02054e68
 NNS_SndStrmSetVolume kind:function(arm,size=0x6c) addr:0x02054e84
 NNS_SndStrmSetChannelVolume kind:function(arm,size=0x54) addr:0x02054ef0
 NNS_SndStrmSetChannelPan kind:function(arm,size=0x30) addr:0x02054f44
-func_02054f74 kind:function(arm,size=0x74) addr:0x02054f74
+ForceStopStrm kind:function(arm,size=0x74) addr:0x02054f74 local
 ShutdownStrm kind:function(arm,size=0x30) addr:0x02054fe8
 AlarmCallback kind:function(arm,size=0x10) addr:0x02055018
-func_02055028 kind:function(arm,size=0xb0) addr:0x02055028
-func_020550d8 kind:function(arm,size=0x4c) addr:0x020550d8
-func_02055124 kind:function(arm,size=0x70) addr:0x02055124
+StrmCallback kind:function(arm,size=0xb0) addr:0x02055028 local
+BeginSleep kind:function(arm,size=0x4c) addr:0x020550d8 local
+EndSleep kind:function(arm,size=0x70) addr:0x02055124 local
 NNSi_SndCaptureInit kind:function(arm,size=0x18) addr:0x02055194
 NNSi_SndCaptureMain kind:function(arm,size=0x88) addr:0x020551ac
 NNSi_SndCaptureStop kind:function(arm,size=0xf0) addr:0x02055234
@@ -2240,7 +2240,7 @@ LoadSeqArc kind:function(arm,size=0x6c) addr:0x020563f4
 LoadBank kind:function(arm,size=0x6c) addr:0x02056460
 LoadWaveArc kind:function(arm,size=0x6c) addr:0x020564cc
 LoadWaveArcTable kind:function(arm,size=0x108) addr:0x02056538
-func_02056640 kind:function(arm,size=0x58) addr:0x02056640
+DisposeCallback kind:function(arm,size=0x58) addr:0x02056640 local
 SeqDisposeCallback kind:function(arm,size=0x28) addr:0x02056698
 BankDisposeCallback kind:function(arm,size=0x30) addr:0x020566c0
 WaveArcDisposeCallback kind:function(arm,size=0x30) addr:0x020566f0
@@ -2268,8 +2268,8 @@ AllocPlayer kind:function(arm,size=0x8c) addr:0x02057044
 FreePlayer kind:function(arm,size=0x2c) addr:0x020570d0
 PrepareStrm kind:function(arm,size=0x270) addr:0x020570fc
 StopStrm kind:function(arm,size=0x58) addr:0x0205736c
-func_020573c4 kind:function(arm,size=0x98) addr:0x020573c4
-func_0205745c kind:function(arm,size=0x64) addr:0x0205745c
+ForceStopStrm kind:function(arm,size=0x98) addr:0x020573c4 local
+ShutdownPlayer kind:function(arm,size=0x64) addr:0x0205745c local
 AllocChannel kind:function(arm,size=0x38) addr:0x020574c0
 FreeChannel kind:function(arm,size=0x24) addr:0x020574f8
 CreateThread kind:function(arm,size=0x60) addr:0x0205751c
@@ -2277,8 +2277,8 @@ RemoveCommandByPlayer kind:function(arm,size=0x70) addr:0x0205757c
 ReadCommandBuffer kind:function(arm,size=0x50) addr:0x020575ec
 AllocCommandBuffer kind:function(arm,size=0x40) addr:0x0205763c
 FreeCommandBuffer kind:function(arm,size=0x2c) addr:0x0205767c
-func_020576a8 kind:function(arm,size=0x9c) addr:0x020576a8
-func_02057744 kind:function(arm,size=0x138) addr:0x02057744
+DisposeCallback kind:function(arm,size=0x9c) addr:0x020576a8 local
+StrmCallback kind:function(arm,size=0x138) addr:0x02057744 local
 OnDataEnd kind:function(arm,size=0x144) addr:0x0205787c
 MakeWaveData kind:function(arm,size=0x828) addr:0x020579c0
 SetupStreamFunction kind:function(arm,size=0x80) addr:0x020581e8
@@ -2315,15 +2315,15 @@ InsertMBlock kind:function(arm,size=0x30) addr:0x02058804
 InitMBlock kind:function(arm,size=0x2c) addr:0x02058834
 InitExpHeap kind:function(arm,size=0x74) addr:0x02058860
 AllocUsedBlockFromFreeBlock kind:function(arm,size=0x180) addr:0x020588d4
-func_02058a54 kind:function(arm,size=0xb4) addr:0x02058a54
-func_02058b08 kind:function(arm,size=0xb0) addr:0x02058b08
+AllocFromHead kind:function(arm,size=0xb4) addr:0x02058a54 local
+AllocFromTail kind:function(arm,size=0xb0) addr:0x02058b08 local
 RecycleRegion kind:function(arm,size=0xf0) addr:0x02058bb8
 NNS_FndCreateExpHeapEx kind:function(arm,size=0x38) addr:0x02058ca8
 NNS_FndAllocFromExpHeapEx kind:function(arm,size=0x30) addr:0x02058ce0
 NNS_FndFreeToExpHeap kind:function(arm,size=0x3c) addr:0x02058d10
 InitFrameHeap kind:function(arm,size=0x48) addr:0x02058d4c
-func_02058d94 kind:function(arm,size=0x5c) addr:0x02058d94
-func_02058df0 kind:function(arm,size=0x58) addr:0x02058df0
+AllocFromHead kind:function(arm,size=0x5c) addr:0x02058d94 local
+AllocFromTail kind:function(arm,size=0x58) addr:0x02058df0 local
 FreeHead kind:function(arm,size=0x14) addr:0x02058e48
 FreeTail kind:function(arm,size=0x2c) addr:0x02058e5c
 NNS_FndCreateFrmHeapEx kind:function(arm,size=0x38) addr:0x02058e88
@@ -2515,42 +2515,42 @@ func_0205ff54 kind:function(arm,size=0x20) addr:0x0205ff54
 GetNextIndex_ kind:function(arm,size=0x20) addr:0x0205ff74
 IsVramTransferTaskQueueFull_ kind:function(arm,size=0x18) addr:0x0205ff94
 IsVramTransferTaskQueueEmpty_ kind:function(arm,size=0x14) addr:0x0205ffac
-func_0205ffc0 kind:function(arm,size=0x2c) addr:0x0205ffc0
-func_0205ffec kind:function(arm,size=0x2c) addr:0x0205ffec
-func_02060018 kind:function(arm,size=0x24) addr:0x02060018
-func_0206003c kind:function(arm,size=0x24) addr:0x0206003c
-func_02060060 kind:function(arm,size=0xc) addr:0x02060060
-func_0206006c kind:function(arm,size=0xc) addr:0x0206006c
-func_02060078 kind:function(arm,size=0xc) addr:0x02060078
-func_02060084 kind:function(arm,size=0xc) addr:0x02060084
-func_02060090 kind:function(arm,size=0xc) addr:0x02060090
-func_0206009c kind:function(arm,size=0xc) addr:0x0206009c
-func_020600a8 kind:function(arm,size=0xc) addr:0x020600a8
-func_020600b4 kind:function(arm,size=0xc) addr:0x020600b4
-func_020600c0 kind:function(arm,size=0xc) addr:0x020600c0
-func_020600cc kind:function(arm,size=0xc) addr:0x020600cc
-func_020600d8 kind:function(arm,size=0xc) addr:0x020600d8
-func_020600e4 kind:function(arm,size=0xc) addr:0x020600e4
-func_020600f0 kind:function(arm,size=0x2c) addr:0x020600f0
-func_0206011c kind:function(arm,size=0x2c) addr:0x0206011c
-func_02060148 kind:function(arm,size=0xc) addr:0x02060148
-func_02060154 kind:function(arm,size=0xc) addr:0x02060154
-func_02060160 kind:function(arm,size=0xc) addr:0x02060160
-func_0206016c kind:function(arm,size=0xc) addr:0x0206016c
-func_02060178 kind:function(arm,size=0xc) addr:0x02060178
-func_02060184 kind:function(arm,size=0xc) addr:0x02060184
-func_02060190 kind:function(arm,size=0xc) addr:0x02060190
-func_0206019c kind:function(arm,size=0xc) addr:0x0206019c
-func_020601a8 kind:function(arm,size=0xc) addr:0x020601a8
-func_020601b4 kind:function(arm,size=0xc) addr:0x020601b4
-func_020601c0 kind:function(arm,size=0xc) addr:0x020601c0
-func_020601cc kind:function(arm,size=0xc) addr:0x020601cc
-func_020601d8 kind:function(arm,size=0xc) addr:0x020601d8
-func_020601e4 kind:function(arm,size=0xc) addr:0x020601e4
-func_020601f0 kind:function(arm,size=0x2c) addr:0x020601f0
-func_0206021c kind:function(arm,size=0x2c) addr:0x0206021c
-func_02060248 kind:function(arm,size=0xc) addr:0x02060248
-func_02060254 kind:function(arm,size=0xc) addr:0x02060254
+DoTransfer3dTex kind:function(arm,size=0x2c) addr:0x0205ffc0 local
+DoTransfer3dTexPltt kind:function(arm,size=0x2c) addr:0x0205ffec local
+DoTransfer3dClearImageColor kind:function(arm,size=0x24) addr:0x02060018 local
+DoTransfer3dClearImageDepth kind:function(arm,size=0x24) addr:0x0206003c local
+DoTransfer2dBG0CharMain kind:function(arm,size=0xc) addr:0x02060060 local
+DoTransfer2dBG1CharMain kind:function(arm,size=0xc) addr:0x0206006c local
+DoTransfer2dBG2CharMain kind:function(arm,size=0xc) addr:0x02060078 local
+DoTransfer2dBG3CharMain kind:function(arm,size=0xc) addr:0x02060084 local
+DoTransfer2dBG0ScrMain kind:function(arm,size=0xc) addr:0x02060090 local
+DoTransfer2dBG1ScrMain kind:function(arm,size=0xc) addr:0x0206009c local
+DoTransfer2dBG2ScrMain kind:function(arm,size=0xc) addr:0x020600a8 local
+DoTransfer2dBG3ScrMain kind:function(arm,size=0xc) addr:0x020600b4 local
+DoTransfer2dBG2BmpMain kind:function(arm,size=0xc) addr:0x020600c0 local
+DoTransfer2dBG3BmpMain kind:function(arm,size=0xc) addr:0x020600cc local
+DoTransfer2dObjPlttMain kind:function(arm,size=0xc) addr:0x020600d8 local
+DoTransfer2dBGPlttMain kind:function(arm,size=0xc) addr:0x020600e4 local
+DoTransfer2dObjExtPlttMain kind:function(arm,size=0x2c) addr:0x020600f0 local
+DoTransfer2dBGExtPlttMain kind:function(arm,size=0x2c) addr:0x0206011c local
+DoTransfer2dObjOamMain kind:function(arm,size=0xc) addr:0x02060148 local
+DoTransfer2dObjCharMain kind:function(arm,size=0xc) addr:0x02060154 local
+DoTransfer2dBG0CharSub kind:function(arm,size=0xc) addr:0x02060160 local
+DoTransfer2dBG1CharSub kind:function(arm,size=0xc) addr:0x0206016c local
+DoTransfer2dBG2CharSub kind:function(arm,size=0xc) addr:0x02060178 local
+DoTransfer2dBG3CharSub kind:function(arm,size=0xc) addr:0x02060184 local
+DoTransfer2dBG0ScrSub kind:function(arm,size=0xc) addr:0x02060190 local
+DoTransfer2dBG1ScrSub kind:function(arm,size=0xc) addr:0x0206019c local
+DoTransfer2dBG2ScrSub kind:function(arm,size=0xc) addr:0x020601a8 local
+DoTransfer2dBG3ScrSub kind:function(arm,size=0xc) addr:0x020601b4 local
+DoTransfer2dBG2BmpSub kind:function(arm,size=0xc) addr:0x020601c0 local
+DoTransfer2dBG3BmpSub kind:function(arm,size=0xc) addr:0x020601cc local
+DoTransfer2dObjPlttSub kind:function(arm,size=0xc) addr:0x020601d8 local
+DoTransfer2dBGPlttSub kind:function(arm,size=0xc) addr:0x020601e4 local
+DoTransfer2dObjExtPlttSub kind:function(arm,size=0x2c) addr:0x020601f0 local
+DoTransfer2dBGExtPlttSub kind:function(arm,size=0x2c) addr:0x0206021c local
+DoTransfer2dObjOamSub kind:function(arm,size=0xc) addr:0x02060248 local
+DoTransfer2dObjCharSub kind:function(arm,size=0xc) addr:0x02060254 local
 DoTransfer_ kind:function(arm,size=0x30) addr:0x02060260
 ResetTaskQueue_ kind:function(arm,size=0x18) addr:0x02060290
 NNSi_GfdPushVramTransferTaskQueue kind:function(arm,size=0x3c) addr:0x020602a8
@@ -2585,7 +2585,7 @@ NNS_G3dAnmObjCalcSizeRequired kind:function(arm,size=0x60) addr:0x02060df8
 NNS_G3dAnmObjInit kind:function(arm,size=0xa0) addr:0x02060e58
 NNS_G3dRenderObjInit kind:function(arm,size=0x54) addr:0x02060ef8
 addLink_ kind:function(arm,size=0xb8) addr:0x02060f4c
-func_02061004 kind:function(arm,size=0x68) addr:0x02061004
+updateHintVec_ kind:function(arm,size=0x68) addr:0x02061004 local
 NNS_G3dRenderObjAddAnmObj kind:function(arm,size=0x80) addr:0x0206106c
 removeLink_ kind:function(arm,size=0x74) addr:0x020610ec
 NNS_G3dRenderObjRemoveAnmObj kind:function(arm,size=0x54) addr:0x02061160
@@ -2613,8 +2613,8 @@ NNS_G3dReleaseMdlSet kind:function(arm,size=0x94) addr:0x02061a50
 NNS_G3dGlbInit kind:function(arm,size=0x154) addr:0x02061ae4
 NNS_G3dGlbFlushP kind:function(arm,size=0x3c) addr:0x02061c38
 NNS_G3dGlbFlushVP kind:function(arm,size=0x78) addr:0x02061c74
-func_02061cec kind:function(arm,size=0x30) addr:0x02061cec
-func_02061d1c kind:function(arm,size=0x30) addr:0x02061d1c
+NNS_G3dGlbSetBaseTrans kind:function(arm,size=0x30) addr:0x02061cec
+NNS_G3dGlbSetBaseScale kind:function(arm,size=0x30) addr:0x02061d1c
 NNS_G3dGlbLightVector kind:function(arm,size=0x3c) addr:0x02061d4c
 NNS_G3dGlbLightColor kind:function(arm,size=0x14) addr:0x02061d88
 NNS_G3dGlbGetInvV kind:function(arm,size=0x44) addr:0x02061d9c
@@ -2631,7 +2631,7 @@ NNSi_G3dAnmBlendJnt kind:function(arm,size=0x3ec) addr:0x020622ac
 NNSi_G3dAnmBlendVis kind:function(arm,size=0x88) addr:0x02062698
 G3dDrawInternal_Loop_ kind:function(arm,size=0x48) addr:0x02062720
 G3dDrawInternal_ kind:function(arm,size=0x19c) addr:0x02062768
-func_02062904 kind:function(arm,size=0x68) addr:0x02062904
+updateHintVec_ kind:function(arm,size=0x68) addr:0x02062904 local
 NNS_G3dDraw kind:function(arm,size=0xdc) addr:0x0206296c
 NNSi_G3dFuncSbc_NOP kind:function(arm,size=0x28) addr:0x02062a48
 NNSi_G3dFuncSbc_RET kind:function(arm,size=0x28) addr:0x02062a70
@@ -2714,35 +2714,35 @@ NNSi_G3dSendJointSRTBasic kind:function(arm,size=0x7c) addr:0x02068180
 NNSi_G3dGetJointScaleBasic kind:function(arm,size=0x40) addr:0x020681fc
 NNSi_G3dSendJointSRTMaya kind:function(arm,size=0xc4) addr:0x0206823c
 NNSi_G3dGetJointScaleMaya kind:function(arm,size=0x150) addr:0x02068300
-func_02068450 kind:function(arm,size=0x108) addr:0x02068450
-func_02068558 kind:function(arm,size=0xd0) addr:0x02068558
-func_02068628 kind:function(arm,size=0x7c) addr:0x02068628
-func_020686a4 kind:function(arm,size=0x48) addr:0x020686a4
-func_020686ec kind:function(arm,size=0xe0) addr:0x020686ec
-func_020687cc kind:function(arm,size=0xb8) addr:0x020687cc
-func_02068884 kind:function(arm,size=0x44) addr:0x02068884
-func_020688c8 kind:function(arm,size=0x24) addr:0x020688c8
-func_020688ec kind:function(arm,size=0x148) addr:0x020688ec
+texmtxCalc_flag_ kind:function(arm,size=0x108) addr:0x02068450 local
+texmtxCalc_flagS_ kind:function(arm,size=0xd0) addr:0x02068558 local
+texmtxCalc_flagR_ kind:function(arm,size=0x7c) addr:0x02068628 local
+texmtxCalc_flagRS_ kind:function(arm,size=0x48) addr:0x020686a4 local
+texmtxCalc_flagT_ kind:function(arm,size=0xe0) addr:0x020686ec local
+texmtxCalc_flagTS_ kind:function(arm,size=0xb8) addr:0x020687cc local
+texmtxCalc_flagTR_ kind:function(arm,size=0x44) addr:0x02068884 local
+texmtxCalc_flagTRS_ kind:function(arm,size=0x24) addr:0x020688c8 local
+NNSi_G3dSendTexSRTMaya kind:function(arm,size=0x148) addr:0x020688ec
 NNSi_G3dSendJointSRTSi3d kind:function(arm,size=0x12c) addr:0x02068a34
 NNSi_G3dGetJointScaleSi3d kind:function(arm,size=0x21c) addr:0x02068b60
 NNSi_G3dSendTexSRTSi3d kind:function(arm,size=0x1cc) addr:0x02068d7c
-func_02068f48 kind:function(arm,size=0x108) addr:0x02068f48
-func_02069050 kind:function(arm,size=0xe8) addr:0x02069050
-func_02069138 kind:function(arm,size=0x80) addr:0x02069138
-func_020691b8 kind:function(arm,size=0x48) addr:0x020691b8
-func_02069200 kind:function(arm,size=0xf8) addr:0x02069200
-func_020692f8 kind:function(arm,size=0xd8) addr:0x020692f8
-func_020693d0 kind:function(arm,size=0x50) addr:0x020693d0
-func_02069420 kind:function(arm,size=0x24) addr:0x02069420
-func_02069444 kind:function(arm,size=0x148) addr:0x02069444
-func_0206958c kind:function(arm,size=0x154) addr:0x0206958c
-func_020696e0 kind:function(arm,size=0xe0) addr:0x020696e0
-func_020697c0 kind:function(arm,size=0x84) addr:0x020697c0
-func_02069844 kind:function(arm,size=0x54) addr:0x02069844
-func_02069898 kind:function(arm,size=0xcc) addr:0x02069898
-func_02069964 kind:function(arm,size=0xa4) addr:0x02069964
-func_02069a08 kind:function(arm,size=0x40) addr:0x02069a08
-texmtxCalc_flagTRS_ kind:function(arm,size=0x24) addr:0x02069a48
+texmtxCalc_flag_ kind:function(arm,size=0x108) addr:0x02068f48 local
+texmtxCalc_flagS_ kind:function(arm,size=0xe8) addr:0x02069050 local
+texmtxCalc_flagR_ kind:function(arm,size=0x80) addr:0x02069138 local
+texmtxCalc_flagRS_ kind:function(arm,size=0x48) addr:0x020691b8 local
+texmtxCalc_flagT_ kind:function(arm,size=0xf8) addr:0x02069200 local
+texmtxCalc_flagTS_ kind:function(arm,size=0xd8) addr:0x020692f8 local
+texmtxCalc_flagTR_ kind:function(arm,size=0x50) addr:0x020693d0 local
+texmtxCalc_flagTRS_ kind:function(arm,size=0x24) addr:0x02069420 local
+NNSi_G3dSendTexSRT3dsMax kind:function(arm,size=0x148) addr:0x02069444
+texmtxCalc_flag_ kind:function(arm,size=0x154) addr:0x0206958c local
+texmtxCalc_flagS_ kind:function(arm,size=0xe0) addr:0x020696e0 local
+texmtxCalc_flagR_ kind:function(arm,size=0x84) addr:0x020697c0 local
+texmtxCalc_flagRS_ kind:function(arm,size=0x54) addr:0x02069844 local
+texmtxCalc_flagT_ kind:function(arm,size=0xcc) addr:0x02069898 local
+texmtxCalc_flagTS_ kind:function(arm,size=0xa4) addr:0x02069964 local
+texmtxCalc_flagTR_ kind:function(arm,size=0x40) addr:0x02069a08 local
+texmtxCalc_flagTRS_ kind:function(arm,size=0x24) addr:0x02069a48 local
 NNSi_G3dSendTexSRTXsi kind:function(arm,size=0x188) addr:0x02069a6c
 NFLi_ReadU8 kind:function(arm,size=0x14) addr:0x02069bf4
 NFLi_ReadU16 kind:function(arm,size=0x28) addr:0x02069c08
@@ -4353,7 +4353,7 @@ VTABLE_OBJ1D kind:data(any) addr:0x020b636c
 data_020b6378 kind:data(any) addr:0x020b6378
 data_020b6398 kind:data(any) addr:0x020b6398
 NNSiG2dBGCNTTable kind:data(any) addr:0x020b63d8
-data_020b63f8 kind:data(any) addr:0x020b63f8
+transFunc$8501 kind:data(any) addr:0x020b63f8 local
 data_020b6488 kind:data(any) addr:0x020b6488
 data_020b64b8 kind:data(any) addr:0x020b64b8
 data_020b64d8 kind:data(any) addr:0x020b64d8
@@ -5480,9 +5480,9 @@ data_02112024 kind:data(any) addr:0x02112024
 data_02112048 kind:data(any) addr:0x02112048
 data_02112054 kind:data(any) addr:0x02112054
 NNS_G3dFuncSbcTable kind:data(any) addr:0x02112060
-data_021120e0 kind:data(any) addr:0x021120e0
-data_02112100 kind:data(any) addr:0x02112100
-calcTexMtx_ kind:data(any) addr:0x02112120
+calcTexMtx_ kind:data(any) addr:0x021120e0 local
+calcTexMtx_ kind:data(any) addr:0x02112100 local
+calcTexMtx_ kind:data(any) addr:0x02112120 local
 sNFLPartPreparers kind:data(any) addr:0x02112140
 sNFLDefaultAxes kind:data(any) addr:0x0211215c
 sNFLSharedStreamSources kind:data(any) addr:0x0211216c
@@ -6446,7 +6446,7 @@ s_pUVFlipCorrectFunc kind:bss addr:0x02142378
 NNSi_G2dBGAreaOver kind:bss addr:0x02142394
 pTheInstance_ kind:bss addr:0x02142398
 data_0214239c kind:bss addr:0x0214239c
-s_VramTransferManager kind:bss addr:0x021423a8
+s_VramTransferManager kind:bss addr:0x021423a8 local
 data_021423bc kind:bss addr:0x021423bc
 data_021423c0 kind:bss addr:0x021423c0
 data_021423c4 kind:bss addr:0x021423c4
@@ -6468,15 +6468,7 @@ data_0214254c kind:bss addr:0x0214254c
 data_021425ac kind:bss addr:0x021425ac
 data_021425ec kind:bss addr:0x021425ec
 NNS_G3dRS kind:bss addr:0x02142650
-data_02142654 kind:bss addr:0x02142654
-data_02143454 kind:bss addr:0x02143454
-data_02143458 kind:bss addr:0x02143458
-data_0214345c kind:bss addr:0x0214345c
-data_02143460 kind:bss addr:0x02143460
-data_02143464 kind:bss addr:0x02143464
-data_02143468 kind:bss addr:0x02143468
-data_02143a54 kind:bss addr:0x02143a54
-data_02143a94 kind:bss addr:0x02143a94
+NNS_G3dRSOnGlb kind:bss addr:0x02142654
 NNS_G3dGeBuffer kind:bss addr:0x02145354
 NNS_G3dFlagGXDmaAsync kind:bss addr:0x02145358
 sNFLWork kind:bss addr:0x02145360

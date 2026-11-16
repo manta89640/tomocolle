@@ -518,6 +518,8 @@ lib/NitroSystem/libraries/gfd/src/VramManager/gfd_FrameTexVramMan.c:
 
 lib/NitroSystem/libraries/gfd/src/VramTransferMan/gfd_VramTransferManager.c:
     .text       start:0x0205ff74 end:0x0206042c
+    .rodata     start:0x020b63f8 end:0x020b6488
+    .bss        start:0x021423a8 end:0x021423bc
 
 lib/NitroSystem/libraries/gfd/src/VramManager/gfdi_LinkedListVramMan_Common.c:
     .text       start:0x0206042c end:0x02060890
@@ -578,16 +580,19 @@ lib/NitroSystem/libraries/g3d/src/cgtool/basic.c:
     .text       start:0x02068180 end:0x0206823c
 
 lib/NitroSystem/libraries/g3d/src/cgtool/maya.c:
-    .text       start:0x0206823c end:0x020688c8
+    .text       start:0x0206823c end:0x02068a34
+    .data       start:0x021120e0 end:0x02112100
 
 lib/NitroSystem/libraries/g3d/src/cgtool/si3d.c:
     .text       start:0x02068a34 end:0x02068f48
 
 lib/NitroSystem/libraries/g3d/src/cgtool/3dsmax.c:
-    .text       start:0x02068f48 end:0x02069420
+    .text       start:0x02068f48 end:0x0206958c
+    .data       start:0x02112100 end:0x02112120
 
 lib/NitroSystem/libraries/g3d/src/cgtool/xsi.c:
     .text       start:0x0206958c end:0x02069bf4
+    .data       start:0x02112120 end:0x02112140
 
 src/keyboard/KeyboardCore.cpp:
     complete
