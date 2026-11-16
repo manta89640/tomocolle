@@ -387,7 +387,11 @@ void FaceCast::SetTransform(int index, u16 id, int x, s8 y, u8 scale, u8 rotX, u
     }
 }
 
-// Gives a face the matrices of its transform
+// Gives a face the matrices of its transform.
+// 99.8%: in the first rotation the original loads the transform's offset into r0 and forms the element's address in
+// r1, where this uses r1 and r2 (the later rotations agree). Tried: the angle, sin and cos through locals, a pointer
+// or reference to the transform (declared at several places), u32 indices, the matrices declared in another order,
+// pragma sets (level 2, common subs, propagation, the eight passes, lifetimes).
 void FaceCast::ApplyTransform(int index) {
     MtxFx43 matrix;
     MtxFx33 rotation;
@@ -406,6 +410,11 @@ void FaceCast::ApplyTransform(int index) {
     mFaces[index].SetHeadMatrices(&matrix, &rotation);
 }
 
+// 27%: the original passes the position on from the parameter's own stack copy (z stored to the outgoing slot,
+// ldm of x and y), where this copies the VecFx32 to a temporary first. Tried: a local copy, *&, casts to the type or
+// a reference, a pointer to the parameter, an inline taking the transform by reference or the position by value,
+// the angles read first, and pragma sets (levels 0 to 2, common subs, propagation, scalarize, the eight passes).
+// The callee takes a VecFx32 by value (it spills r2 and r3 as a structure), so three fx32 parameters are not it.
 void FaceCast::SetTransform(int index, FaceTransform transform) {
     SetTransform(index, transform.mPosition, transform.mRotX, transform.mRotY, transform.mRotZ);
 }
@@ -500,6 +509,12 @@ void SceneRoom::Draw() {
 
 // Hides parts of the room: 0 those the style gives 0 or less, 1 those it gives 0 or more, 2 all; 3 sets the
 // parts' state 2
+// The z of a piece of the style's furniture. The index is a u32: with an int, the compiler strength-reduces the
+// piece's address in ShowParts' loop, where the original computes it from the counter at each use.
+static inline s16 GetPieceZ(u16 style, u32 i) {
+    return data_020f72f8[style].mParts[i].mUnknown8;
+}
+
 void SceneRoom::ShowParts(int mode) {
     for (int i = 0; i < 6; i++) {
         if (mParts.mParts[i].mUnknown000 < 0) {
@@ -507,12 +522,12 @@ void SceneRoom::ShowParts(int mode) {
         }
         switch (mode) {
         case 0:
-            if (data_020f72f8[mStyle].mParts[i].mUnknown8 <= 0) {
+            if (GetPieceZ(mStyle, i) <= 0) {
                 mParts.mParts[i].mModel.mVisible = FALSE;
             }
             break;
         case 1:
-            if (data_020f72f8[mStyle].mParts[i].mUnknown8 >= 0) {
+            if (GetPieceZ(mStyle, i) >= 0) {
                 mParts.mParts[i].mModel.mVisible = FALSE;
             }
             break;
