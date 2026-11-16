@@ -45,13 +45,17 @@
 #include "../overlays/ov090/RomanceScene.h"
 #include "../overlays/ov091/CityHallScene.h"
 #include "../overlays/ov072/MapScene.h"
+#include "../overlays/ov108/Scene69.h"
 #include "../overlays/ov093/Scene72.h"
 #include "../overlays/ov094/Scene74.h"
+#include "../overlays/ov038/TestNg111Scene.h"
 #include "../overlays/ov039/TestNg116Scene.h"
 #include "../overlays/ov041/Scene7B.h"
 #include "../overlays/ov043/Scene81.h"
 #include "../overlays/ov045/Scene88.h"
+#include "../overlays/ov050/Scene8D.h"
 #include "../overlays/ov052/Scene8F.h"
+#include "../overlays/ov057/TestNg137Scene.h"
 // End of gap38-b's scene classes
 
 extern "C" {
@@ -847,11 +851,17 @@ CityHallScene::CityHallScene(int sceneId) : Scene(sceneId) {}
 // Scenes 0x5F to 0x66, 0x6A, 0x6D and 0x6E, overlay 72
 MapScene::MapScene(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x69, overlay 108
+Scene69::Scene69(int sceneId) : Scene(sceneId) {}
+
 // Scene 0x72, overlay 93
 Scene72::Scene72(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x74 and 0x7E, overlay 94
 Scene74::Scene74(int sceneId) : Scene(sceneId) {}
+
+// Scene 0x76, overlay 38
+TestNg111Scene::TestNg111Scene(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x77, 0x78 and 0x79, overlay 39
 TestNg116Scene::TestNg116Scene(int sceneId) : Scene(sceneId) {}
@@ -865,7 +875,13 @@ Scene81::Scene81(int sceneId) : Scene(sceneId) {}
 // Scene 0x88, overlay 45
 Scene88::Scene88(int sceneId) : Scene(sceneId) {}
 
+// Scene 0x8D, overlay 50
+Scene8D::Scene8D(int sceneId) : Scene(sceneId) {}
+
 // Scenes 0x8F and 0x90, overlay 52
 Scene8F::Scene8F(int sceneId) : Scene(sceneId) {}
+
+// Scenes 0x95, 0x96, 0x97, 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0xA0, 0xA1 and 0xA2, overlay 57
+TestNg137Scene::TestNg137Scene(int sceneId) : Scene(sceneId) {}
 
 // ---- Constructors and the rest, 0x0204830c..0x0204af20 (gap38-c) -------------------------------------------------

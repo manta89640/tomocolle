@@ -7149,7 +7149,7 @@ from:0x02045b2c kind:load to:0x021153a0 module:main
 from:0x02045b30 kind:load to:0x021102e0 add:0x8 module:main
 from:0x02045b34 kind:load to:0x02115370 module:main
 from:0x02045b64 kind:load to:0x02110970 add:0x8 module:main
-from:0x02045b68 kind:load to:0x02149dc8 module:overlay(108)
+from:0x02045b68 kind:load to:0x02149dc0 add:0x8 module:overlay(108)
 from:0x02045b98 kind:arm_call to:0x02082eac module:main
 from:0x02045ba4 kind:arm_call to:0x0202d870 module:main
 from:0x02045bb4 kind:arm_call to:0x0202dd3c module:main
@@ -7223,7 +7223,7 @@ from:0x02046068 kind:arm_call to:0x0203117c module:main
 from:0x02046080 kind:arm_call to:0x02080e80 module:main
 from:0x0204608c kind:arm_call to:0x02081034 module:main
 from:0x0204609c kind:load to:0x02110970 add:0x8 module:main
-from:0x020460a0 kind:load to:0x0214a688 module:overlays(9,18,21,26,29,30,32,35,38,60,89)
+from:0x020460a0 kind:load to:0x0214a680 add:0x8 module:overlay(38)
 from:0x020460a4 kind:load to:0x0203e188 module:main
 from:0x020460ac kind:load to:0x0203e168 module:main
 from:0x020460f0 kind:arm_call to:0x02022d2c module:main
@@ -7462,7 +7462,7 @@ from:0x02047400 kind:arm_call to:0x0202e770 module:main
 from:0x02047420 kind:arm_call to:0x02022d2c module:main
 from:0x02047458 kind:arm_call to:0x0202a618 module:main
 from:0x02047468 kind:load to:0x02110970 add:0x8 module:main
-from:0x0204746c kind:load to:0x0214a4a8 module:overlays(5,9,16,21,50,62)
+from:0x0204746c kind:load to:0x0214a4a0 add:0x8 module:overlay(50)
 from:0x02047470 kind:load to:0x0203e188 module:main
 from:0x02047478 kind:load to:0x0203e168 module:main
 from:0x0204747c kind:load to:0x0202e46c module:main
@@ -7636,7 +7636,7 @@ from:0x02048200 kind:arm_call to:0x0203117c module:main
 from:0x0204821c kind:arm_call to:0x02031f1c module:main
 from:0x02048238 kind:arm_call to:0x0202e770 module:main
 from:0x02048254 kind:load to:0x02110970 add:0x8 module:main
-from:0x02048258 kind:load to:0x0214cba8 module:overlays(57,80,90)
+from:0x02048258 kind:load to:0x0214cba0 add:0x8 module:overlay(57)
 from:0x0204825c kind:load to:0x0203e188 module:main
 from:0x02048264 kind:load to:0x0203e168 module:main
 from:0x02048268 kind:load to:0x0202af98 module:main
