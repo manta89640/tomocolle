@@ -2324,6 +2324,41 @@ registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where 
 objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
 with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
 
+## Overlay 75: the touched Mii's states 0x44 to 0xB2
+
+Measured (0x02168354 to 0x021722c8, five functions, `src/overlays/ov075/Scene40.cpp`):
+
+- The scene's character (Scene40Character, at scene+0x6A22C) is a state machine of 210 states. Its UpdateState
+  (0x02161D94) copies mNextState (+0x2E8C) to mState (+0x2E84), calls the group function of the state's range (a
+  compare tree over 13 ranges) and counts mFrame (+0x2E98). SetState (0x02173E8C) keeps the old state in
+  mPrevState (+0x2E88), clears mStep (+0x2E90) and mFrame and sets mEntered (+0x2E94). +0x2E9C (mWait) holds the
+  frame count a step waits for.
+- Each state is `if (mEntered) { mEntered = FALSE; ...; return; }` followed by a switch over mStep. The groups are
+  0x44..0x47 (0x02168354), 0x48..0x4E (0x0216897C), 0x4F..0x66 (0x021690F4), 0x67..0x85 (0x0216B0FC) and
+  0x86..0xB2 (0x0216EA9C).
+- What the states say is in the trouble message file (Speak file 0, the context's TTM:/tmd_trouble_msg); what
+  the speech window shows of a present in the miitouch file (TEM) or the trouble file. By those:
+  - 0x44..0x4E: food it will not eat is given back (0x104 "I am full", 0x106 "I ate this a moment ago"); a
+    present is held up and named in the speech window: the tools 236..243 (miitouch 0xA5..0xAC, "presented a
+    Wii!" ...), a song genre (sSongGiftMessages, 0x0217B82C: 0x95..0x9A "presented enka!" ...; the genre's
+    SetSongSlot(genre, 0xFF) and a bit of the record's +0x299), an interior (0xB0), a word (0xB2).
+  - 0x4F..0x66: clothes (0x10A "I already have these clothes", or changing behind the curtain, the cover at
+    +0x2CDC, and reloading the body), interiors (0x116 "I already have this interior"; 0x10C..0x114 the liking of
+    the new room), and the generic present (0x11E).
+  - 0x67..0x85: what a present is used for: the camera (scene 0xBF), trying it out (scene 0x55), the bath (0xB0),
+    eating (2.5 times the eating animation, at least 80 frames), medicine (sound groups 0x75/0x76), the fan (0x54),
+    the music box (0xA3), cooking (0xAA), an experience (0x22), an outing alone (0x78) or with a partner (0x79).
+    gSceneMemory.mCharacters[0] gets the character's index for those scenes.
+  - 0x86..0xB2: standing after a touch; handing over a present; a level-up; the troubles' talks: a friend (scene
+    0xAF), a confession (0x5A), a fight (0xAB, 0xB2), making up and separations (0xB3, 0xB5), each outcome with a
+    sound group, a speech-window line (trouble messages 0x1A7..0x1B4) and a spoken line; the word the player
+    teaches (+0x2B30, stored into mMotto or mMottos[k] by the trouble's id).
+- The standing and walking animations by personality kind (gPersonalityKinds) and mood are two `const char *[4][5]`
+  tables, sWaitAnimations (0x02182D10: "wait00".."wait09") and sWalkAnimations (0x02182D60: "walk00".."walk10").
+
+Inferred: the states 0x89..0x8C are the character handing the player a present of its own (mGift.mMessage is the
+item given to the held model), and 0x8D, 0x8E a rise of its level (head icons 6 and 7).
+
 ## The characters
 
 The main program's character code, `0x0208EB18` to `0x0209E140`, which every scene with a resident uses: four units

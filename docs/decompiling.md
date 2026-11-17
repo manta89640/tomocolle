@@ -447,6 +447,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 `compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
 
 **An address reloaded at each use, where the original keeps it in a register**
+- A global's address loaded at the function's entry into a callee-saved register, before a switch, and used in
+  several of its cases: a local pointer initialised at the top (`Camera *camera = &gCamera;`, then
+  `camera->mEye.x`); the global written at each use is loaded in each case (overlay 75's character states).
 - Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)gSceneScratch;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
@@ -519,6 +522,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   operands the other way (`MiiEditFacePage::StepParameter`).
 
 **Stack slots in the wrong order, or a frame too large**
+- Dead copies of a by-value point that share ONE slot across the cases of a switch, beside a fresh slot per use:
+  the point is a local of the function (`FloorPos target;` at the top, set field by field in each case, then
+  `SetTargetFloorPos(target)`); the fresh slots are the by-value parameter's. An inline returning the point gives
+  two fresh slots per use (overlay 75's character states, five functions: one shape for every "walk to the
+  camera").
 - A struct zeroed through a pointer into one slot and copied with `ldm`/`stm` into another, whose address is passed:
   an inline that returns it, `RTCTime time = Midnight();` with `RTCTime t = {0, 0, 0}; return t;` inside
   (`GetDayNumber`, `src/shop/ShopStock.cpp`); a named local, a block or a by-value parameter put the two slots the
@@ -588,6 +596,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   the declarations' places did not find the original's order.
 
 **Registers allocated differently**
+- Measured with fin-sched's probe compiler (pre-RA virtual registers): an indexed load numbers its index register
+  before it generates the index's operands, so in `table[k][1]` (a 2D table, constant column folded into the
+  base) the product `k * 20` is numbered before `k`; colouring takes the highest number first, so `k` gets the
+  lower register (`ldr r2,[kinds]; mul r3,r2,r0; ldr r2,[t+4,r3]`). A local `k` with a second use keeps its own
+  (lower) number and reverses the two. With `table[k][mood]` (mla) the row address is numbered after `k`. Not
+  solved: overlay 75 has `ldr r3,[kinds]; mul r2,r3,r0` at four single-use sites, which no source form tried
+  gives (pointer forms, flat index, getters, locals at any scope, casts, a file-static table, ten opt_ pragmas).
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
   `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's
   `MiiEditFacePage::func_ov076_0214c6d0`). A member read at each use (`mScene->...`) instead of a local copy of the
@@ -757,6 +772,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   A non-inline definition instead comes before the destructors, as C1 and C2.
 
 **Branches and switches laid out differently**
+- `cmp #0; beq A; cmp #1; beq B; <return>` over a step counter is a switch of two cases; `if (step == 0) ...
+  else if (step == 1)` gives `cmp #0; bne`. A lone `cmp #1` left before a return with nothing using it is an empty
+  `case 1: break;` (overlay 75).
+- Two branches of an if/else that each end with a store to the same member and the function's return: the
+  original stores in each branch and returns there; written with one store after the if/else (or as a common
+  tail), the compiler merges the stores into one block with a branch. A `return;` at the end of the first branch
+  keeps them apart (overlay 75's state 0x8F).
 - A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
   if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
   a range test (`MiiEditScene::Update`).

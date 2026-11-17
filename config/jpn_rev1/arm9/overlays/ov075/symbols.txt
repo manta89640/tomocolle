@@ -523,7 +523,7 @@ data_ov075_0217b7c4 kind:data(any) addr:0x0217b7c4
 data_ov075_0217b7d6 kind:data(any) addr:0x0217b7d6
 data_ov075_0217b7ec kind:data(any) addr:0x0217b7ec
 data_ov075_0217b800 kind:data(any) addr:0x0217b800
-data_ov075_0217b82c kind:data(any) addr:0x0217b82c
+sSongGiftMessages kind:data(any) addr:0x0217b82c
 gStr_Question_ov075 kind:data(any) addr:0x0217b844
 data_ov075_0217b85c kind:data(any) addr:0x0217b85c
 data_ov075_0217b874 kind:data(any) addr:0x0217b874
@@ -668,9 +668,9 @@ _ZTV15Scene40UnknownA kind:data(any) addr:0x02182ca0
 _ZTV15Scene40UnknownB kind:data(any) addr:0x02182cb8
 _ZTV15Scene40ListView kind:data(any) addr:0x02182cd0
 _ZTV7Scene40 kind:data(any) addr:0x02182cec
-data_ov075_02182d10 kind:data(any) addr:0x02182d10
+sWaitAnimations kind:data(any) addr:0x02182d10
 data_ov075_02182d14 kind:data(any) addr:0x02182d14
-data_ov075_02182d60 kind:data(any) addr:0x02182d60
+sWalkAnimations kind:data(any) addr:0x02182d60
 data_ov075_02182d64 kind:data(any) addr:0x02182d64
 gStr_idle00_ov075 kind:data(any) addr:0x02182db0
 gStr_3HM_ov075 kind:data(any) addr:0x02182e10

@@ -21,10 +21,10 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
-extern const u32 data_ov075_0217b82c[];         // The message of each song slot given as a present
-extern const char *const data_ov075_02182d10[4][5]; // Animation names, by personality kind and mood
+extern const u32 sSongGiftMessages[6];        // "You presented enka!" ...: the message of each song genre given (miitouch file)
+extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const int gPersonalityKinds[16];
-extern const char *const data_ov075_02182d60[4][5]; // Walking animation names, by personality kind and mood
+extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
 void func_ov075_02177f54(Scene40Character *character);
 void func_ov075_02176958(Scene40Character *character);
@@ -392,7 +392,7 @@ void Scene40Character::UpdateStates48To4E() {
             int mode = SpeechWindow::MODE_FRAMES;
             switch (mGift.mGiftKind) {
             case 3:
-                message = data_ov075_0217b82c[mGift.mItem.InventoryItem::mId];
+                message = sSongGiftMessages[mGift.mItem.InventoryItem::mId];
                 SetSongSlot(mGift.mItem.InventoryItem::mId, 0xFF);
                 mUnknown299 |= 1 << (mGift.mItem.InventoryItem::mId & 0x1F);
                 break;
@@ -485,7 +485,7 @@ void Scene40Character::UpdateStates48To4E() {
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
             } else if (GetAnimation()->mFinished && mFrame > threeQuarters) {
-                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep++;
             }
             break;
@@ -574,7 +574,7 @@ void Scene40Character::UpdateStates4FTo66() {
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
             } else if (GetAnimation()->mFinished && mFrame > threeQuarters) {
-                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep++;
             }
             break;
@@ -778,7 +778,7 @@ void Scene40Character::UpdateStates4FTo66() {
             SetTargetFloorPos(mUnknown2EA0);
             if (!WalkToTarget(ScaleBySpeed(0x7A), 0x22, 4)) {
                 ResetSoundPhase(0);
-                BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep = 0;
                 MoveAlongAngle();
             } else {
@@ -788,7 +788,7 @@ void Scene40Character::UpdateStates4FTo66() {
                 MoveAlongAngle();
                 if (!TurnToWalkTarget(0x280, 0)) {
                     ResetSoundPhase(0);
-                    BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                    BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
                     mStep = 1;
                 } else {
                     BlendToNamedAnimation("idle00");
@@ -1011,7 +1011,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1040,7 +1040,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1069,7 +1069,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1098,7 +1098,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1127,7 +1127,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1156,7 +1156,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1262,7 +1262,7 @@ void Scene40Character::UpdateStates4FTo66() {
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
             } else if (GetAnimation()->mFinished && mFrame > threeQuarters) {
-                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep++;
             }
             break;
@@ -1481,7 +1481,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1809,7 +1809,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1838,7 +1838,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -1944,7 +1944,7 @@ void Scene40Character::UpdateStates67To85() {
             }
             mHeldItem->Hide();
             mHeldItem = NULL;
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
             mStep++;
             break;
         case 5:
@@ -1999,7 +1999,7 @@ void Scene40Character::UpdateStates67To85() {
             mContext->mSpeechWindow->mText[0].mHAlign = 1;
             mContext->mSpeechWindow->Show(0x1B0, SpeechWindow::MODE_MANUAL, 120);
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -2051,7 +2051,7 @@ void Scene40Character::UpdateStates67To85() {
             mContext->mSpeechWindow->mText[0].mHAlign = 1;
             mContext->mSpeechWindow->Show(0x1B1, SpeechWindow::MODE_MANUAL, 120);
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -2130,7 +2130,7 @@ void Scene40Character::UpdateStates67To85() {
             mContext->mSpeechWindow->mText[0].mHAlign = 1;
             mContext->mSpeechWindow->Show(0x1B2, SpeechWindow::MODE_MANUAL, 120);
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -2182,7 +2182,7 @@ void Scene40Character::UpdateStates67To85() {
             mContext->mSpeechWindow->mText[0].mHAlign = 1;
             mContext->mSpeechWindow->Show(0x1B3, SpeechWindow::MODE_MANUAL, 120);
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -2283,7 +2283,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2368,7 +2368,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2452,7 +2452,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2562,7 +2562,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2662,7 +2662,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2697,7 +2697,7 @@ void Scene40Character::UpdateStates67To85() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -2749,7 +2749,7 @@ void Scene40Character::UpdateStates86ToB2() {
             mEntered = FALSE;
             UpdateCameraAngle();
             if (IsFacingCamera()) {
-                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 UpdateAnimSpeed();
                 TurnHeadToCamera();
             } else {
@@ -2811,7 +2811,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             ResetHeadTurn();
-            BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             ResetSoundPhase(0);
             UpdateSpeedScales();
@@ -2831,7 +2831,7 @@ void Scene40Character::UpdateStates86ToB2() {
             mEntered = FALSE;
             mUnknown2B28 = 0;
             SetFace(8);
-            PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+            PlayAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
             UpdateAnimSpeed();
             mShadowVisible = TRUE;
             TurnHeadToCamera();
@@ -2848,7 +2848,7 @@ void Scene40Character::UpdateStates86ToB2() {
             mEntered = FALSE;
             mUnknown2B28 = 0;
             SetFace(8);
-            PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+            PlayAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
             UpdateAnimSpeed();
             mShadowVisible = TRUE;
             TurnHeadToCamera();
@@ -2955,12 +2955,12 @@ void Scene40Character::UpdateStates86ToB2() {
             mShadowVisible = TRUE;
             UpdateCameraAngle();
             if (IsFacingCameraClosely()) {
-                PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+                PlayAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
                 UpdateAnimSpeed();
                 mStep = 1;
                 return;
             } else {
-                PlayAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood], FALSE);
+                PlayAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
                 UpdateAnimSpeed();
                 ResetSoundPhase(0);
                 mUnknown2EA8 = mContext->mUnknown54->GetEyeFloorPos();
@@ -2972,7 +2972,7 @@ void Scene40Character::UpdateStates86ToB2() {
         switch (mStep) {
         case 0:
             if (TurnToWalkTarget(0x280, 0)) {
-                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep++;
             }
             MoveAlongAngle();
@@ -3032,7 +3032,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3063,7 +3063,7 @@ void Scene40Character::UpdateStates86ToB2() {
             mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
             mContext->mSpeechWindow->mText[0].mHAlign = 1;
             mContext->mSpeechWindow->Show(0x1A7, SpeechWindow::MODE_FRAMES, 120);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -3088,7 +3088,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3230,7 +3230,7 @@ void Scene40Character::UpdateStates86ToB2() {
             SetTargetFloorPos(mUnknown2EA0);
             if (!WalkToTarget(ScaleBySpeed(0x7A), 0x22, 4)) {
                 ResetSoundPhase(0);
-                BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
                 mStep = 0;
                 MoveAlongAngle();
             } else {
@@ -3240,7 +3240,7 @@ void Scene40Character::UpdateStates86ToB2() {
                 MoveAlongAngle();
                 if (!TurnToWalkTarget(0x280, 0)) {
                     ResetSoundPhase(0);
-                    BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                    BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
                     mStep = 1;
                 } else {
                     BlendToNamedAnimation("idle00");
@@ -3364,7 +3364,7 @@ void Scene40Character::UpdateStates86ToB2() {
             }
             SetFace(8);
             Speak(0, 0x176, 2);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             mStep++;
             break;
         case 1:
@@ -3419,7 +3419,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(10);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][1]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][1]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3473,7 +3473,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA3:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -3489,7 +3489,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA4:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -3520,7 +3520,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3553,7 +3553,7 @@ void Scene40Character::UpdateStates86ToB2() {
             }
             mContext->mSpeechWindow->Hide();
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             break;
@@ -3583,7 +3583,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3613,7 +3613,7 @@ void Scene40Character::UpdateStates86ToB2() {
             if (!GetAnimation()->mFinished) {
                 return;
             }
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -3726,7 +3726,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3765,7 +3765,7 @@ void Scene40Character::UpdateStates86ToB2() {
             if (!GetAnimation()->mFinished) {
                 return;
             }
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -3804,7 +3804,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3838,7 +3838,7 @@ void Scene40Character::UpdateStates86ToB2() {
                 return;
             }
             mContext->mSpeechWindow->Hide();
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             break;
@@ -3868,7 +3868,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -3898,7 +3898,7 @@ void Scene40Character::UpdateStates86ToB2() {
             if (!GetAnimation()->mFinished) {
                 return;
             }
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             mStep++;
             mFrame = 0;
@@ -4022,7 +4022,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(8);
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -4061,7 +4061,7 @@ void Scene40Character::UpdateStates86ToB2() {
             if (mFrame < 120) {
                 return;
             }
-            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
             Speak(0, 0x180, 0);
             mStep++;
             break;
