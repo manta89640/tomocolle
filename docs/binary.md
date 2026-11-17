@@ -1429,7 +1429,7 @@ names are the project's own: none survives), all built with 2.0 SP2 patch 2 (see
 
 | File | Code | Data | Functions |
 | --- | --- | --- | --- |
-| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 53 of 54 match |
+| `MiiTransfer.cpp`, the protocol | `0x020776E4`-`0x02078F58` | .bss `0x02145380`-`0x02145C00`, .rodata `0x020B7BE4`-`0x020B7E1C` | 54 of 54, complete |
 | `MiiTransferWH.cpp`, a second WH | `0x02078F58`-`0x02079DFC` | .bss `0x02145C00`-`0x02148680` | 45 of 45, complete |
 | `MiiTransferList.cpp`, the Mii records | `0x02079DFC`-`0x02079FA0` | .bss `0x02148680`-`0x02148688` | 7 of 7, complete |
 
@@ -1463,16 +1463,17 @@ Inferred: this is not the game's own code but a library built apart from it and 
 Nintendo's DS games take Miis from the Wii with: it is built with another compiler than the game around it (below),
 carries its own WH of another revision, has no debug strings, uses the Wii's Mii format, and only overlay 109 uses it.
 
-Not done: `MiiTransfer_UpdateSession` (the session's update) differs only in five branch offsets of a jump table (the unlisted
-states of case 3 branch to the function's end, where the original branches to the inner switch's break), with a
-comment above it, so `MiiTransfer.cpp` is not complete. The same output comes from every build from 114 to 137
-and under every one of the 78 `opt_*` pragmas that build knows, each on or off. Measured with the compiler:
-`MiiTransfer_OnPacketReceived` (WH's receiver) is compiled with `#pragma opt_common_subs off` (with it on, sSeq and its low bit swap registers in
-every form of the source), and `MiiTransfer_UpdateSession` is compiled at `#pragma optimization_level 2` with `opt_propagation off`
-(its loops are neither rotated nor strength reduced, and the 0 it passes to `WH_StartScan` stays in r4); the
-address is copied from a local array's initialiser, the 6-byte compiler object at 0x020B7BE4, and the 28 names are
-another local array's initialiser that nothing uses, which the compiler keeps and puts in the same section right
-after it, at 0x020B7BEA with no padding, as the ROM has them. Which statics of one size go where in .bss follows
+Measured with the compiler: `MiiTransfer_OnPacketReceived` (WH's receiver) is compiled with `#pragma opt_common_subs
+off` (with it on, sSeq and its low bit swap registers in every form of the source), and `MiiTransfer_UpdateSession` at
+`#pragma optimization_level 2` with `opt_propagation` and `opt_dead_assignments` off. Its loops are neither rotated nor
+strength reduced, and the 0 it passes to `WH_StartScan` stays in r4. The stores into its user-game-info buffer, which
+nothing reads, are kept. In case 3's jump table the unlisted states go to a lone branch after `WH_EndScan`
+(0x02077A2C): the inner switch's default held a dead assignment when the IR chained jumps, and the backend deleted it
+(decompiling.md, "Branches and switches"). The address is copied from a local array's initialiser, the 6-byte compiler
+object at 0x020B7BE4, and the 28 names are another local array's initialiser that nothing uses, which the compiler
+keeps and puts in the same section right after it, at 0x020B7BEA with no padding, as the ROM has them. All 54
+functions match and the file is complete.
+Which statics of one size go where in .bss follows
 from the order of all of the file's data objects, those two included; the declarations are ordered so that every
 static is at its ROM offset.
 
@@ -2143,19 +2144,20 @@ The middle third, `0x0206ED94` to `0x02073514`, measured from its code (in `lib/
   mustache) is put at the first's depth only if its centre is within a third of their summed sizes of the first's,
   else at depth offset 0.
 
-On the compiler: `NFLi_ApplyExpression0` and `NFLi_ApplyExpression6` match only under `#pragma optimization_level 2`
-with `#pragma opt_common_subs off`, as `NFL_MakeFace` does, and with each sine and cosine assigned through an `(fx16)`
-cast; without them the instructions are the same and the callee-saved registers are rotated. `NFLi_ApplyExpression2`
-and `3` match with `#pragma opt_propagation off` added and the eyebrow's clamp written on a copy of the rotation (the
-compares on the copy, the else adding `d` to the variable): the original adds `d` twice, which every level from 1 up
-folds into one sum when the clamp reads and writes one variable. `NFLi_ApplyExpression5` matches with
-`#pragma opt_dead_assignments off` instead of propagation off and its clamp in the same copy form: the original keeps
-the adds, branch and compare of a clamp whose result nothing uses (the eyes take the Mii's own rotation), and that
-pragma is the only setting found that keeps them with the level-2 scheduling (level 1 keeps them without it).
-Inferred from these: the expressions were not compiled under one setting. `NFLi_ApplyExpression1` and `4` still differ
-by the register of the clamped rotation (r3 where the original reuses the field's r4): no statement or declaration
-order, single `opt_*` pragma, clamp form (direct, copy, inline helper) or sine/cosine form tried moves it.
-`NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they match at the file's level.
+On the compiler: the seven expression functions were compiled under one setting, `#pragma optimization_level 2`
+with `opt_common_subs`, `opt_propagation` and `opt_dead_assignments` off (measured: kinds 0, 2, 3, 5 and 6 match under
+it, as they did under the three narrower settings found first). Their sources differ only where their code does:
+`NFLi_ApplyExpression0` and `6` assign each sine and cosine through an `(fx16)` cast; `2` and `3` write the eyebrow's
+clamp on a copy of the rotation (the compares on the copy, the else adding `d` to the variable), since the original adds
+`d` twice; `5` computes the eye's clamp the same way and drops it, keeping its adds, branch and compare (dead
+assignments are kept). `NFLi_ApplyExpression1` and `4` read the eye type's rotation for the final angle through a
+pointer to its entry (an inline accessor), the others index the table: measured with fin-sched's probe compiler and
+its model of the scheduler, the original's order of the block after the clamp is ours plus one dependence, the
+table load before the store of texFmt to the stack, which only a load through a pointer has (it may alias the
+stack). That later store is what leaves the clamped rotation in the field's register. All seven match.
+`NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they
+match at the file's level. The hair meshes match with the vertex kept in an `fx16[3]` (decompiling.md, "Arguments
+evaluated in another order"), and `NFLi_CopyToTexBank` is NitroSDK's `GX_LoadTexEx` with CPU copies.
 
 Inferred: this is NFL, the face library that `NFL_Res.dat` is the resource of (the file name, the Mii-face drawing
 and the create-ID ingredients). Not established: its files' bounds, which compiler built it (the Mii transfer after
