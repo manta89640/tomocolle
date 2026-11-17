@@ -1,6 +1,7 @@
 #include <wchar.h>
 
 #include "Scene40.h"
+#include "Scene40Pool.h"
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
 #include "SceneMemory.h"
@@ -20,7 +21,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_0217aea8(void *object);
 void func_ov075_021782cc(Scene40CharacterPartA *balloon, int resourceId, int unk, CharacterBase *face,
                          Scene40Character *character);
 void func_ov075_02178c34(Scene40CharacterPartB *cover, int kind);
@@ -51,6 +51,11 @@ extern const Scene40ChoiceSet sChoiceSets[];        // By set
 extern const int sTroubleChoiceSets[];              // The set of each kind of trouble
 extern const Scene40ChoiceSet sTroubleChoices[];    // Set 10's answers, by trouble id
 extern const Scene40ChoiceSet sSpecialChoiceSets[];
+
+// Puts a text canvas at a point in pixels (as src/shop/Shop.cpp's)
+static inline void SetCanvasPosition(ObjTextCanvas *canvas, ScreenPoint position) {
+    canvas->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
+}
 
 // A text button's text: cleared, and drawn again
 static inline void ClearButtonText(TextButton *button) { NNS_G2dCharCanvasClear(&button->mText.mCanvas, 0); }
@@ -502,6 +507,23 @@ void Scene40Meter::SetTarget(int value) {
     mTarget = value;
 }
 
+#define sSegmentMeterPosition SCENE40_POOL(ScreenPoint, 0x6C) // TEMP pool
+
+// Sets the meter's sprites up, 2 pixels a segment apart, at the default position, showing 0
+void Scene40SegmentMeter::Init(int resource, int sequence) {
+    Scene40Meter::Init();
+    ScreenPoint position = sSegmentMeterPosition;
+    mSpacing = 2;
+    for (int i = 0; i < 10; i++) {
+        Sprite_Init(&mSegments[i], resource, sequence, 0x80, 0x60, TRUE);
+        int offset = mSpacing * (i * 10 - 50);
+        mSegments[i].SetPosition(FxVec2((offset + position.x) << FX32_SHIFT, position.y << FX32_SHIFT));
+        mSegments[i].mOverwritePalette = 1;
+        Sprite_SetFrame(&mSegments[i], 0);
+        NNS_G2dStopAnimCtrl(NNS_G2dGetCellAnimationAnimCtrl(&mSegments[i].mAnim));
+    }
+}
+
 void Scene40SegmentMeter::Draw() {
     for (int i = 0; i < 10; i++) {
         Sprite_Draw(&mSegments[i]);
@@ -528,6 +550,25 @@ void Scene40SegmentMeter::SetVisible(BOOL visible) {
     for (int i = 0; i < 10; i++) {
         mSegments[i].mVisible = visible;
     }
+}
+
+#define sLevelTextPosition SCENE40_POOL(ScreenPoint, 0x2C) // TEMP pool
+static const ScreenPoint sLevelMeterPosition = {151, 33};
+
+// Level 1 with no points; the level's text box and the segments (resource 1, sequence 1)
+void Scene40LevelMeter::Init(int *charOffset) {
+    mLevel = mTargetLevel = 1;
+    mPoints = mTargetPoints = 0;
+    mTotal = mTargetTotal = mLevel * 100 + mPoints;
+    mDistance = 0;
+    mLevelText.Init(0x1000, 8, 2, *charOffset, 0, 1, 0, 0, NULL);
+    SetCanvasPosition(&mLevelText, sLevelTextPosition);
+    mLevelText.mColor = 8;
+    mLevelText.mSprite.mOverwritePalette = 0;
+    mLevelText.mSprite.mVisible = TRUE;
+    *charOffset += mLevelText.GetCharCount();
+    Scene40SegmentMeter::Init(1, 1);
+    Scene40SegmentMeter::SetPosition(sLevelMeterPosition);
 }
 
 // When the points arrive at the target, a full meter goes on to the next level
@@ -735,6 +776,29 @@ void Scene40Gift::Set(int kind, int id) {
 
 // --- The scene's counter ------------------------------------------------------------------------------------------
 
+#define sCounterTextPosition SCENE40_POOL(ScreenPoint, 0x184) // TEMP pool
+
+void Scene40CounterDisplay::Init(Scene40Context *context, int *charOffset) {
+    mContext = context;
+    mState = STATE_IDLE;
+    mFalling = FALSE;
+    mCounter = mContext->mUnknown10;
+    mShown = *mCounter;
+    mChange = 0;
+    Sprite_Init(&mIcon, 0, 25, 0x80, 0x60, TRUE);
+    mIcon.SetPosition(FxVec2(193 << FX32_SHIFT, 180 << FX32_SHIFT));
+    mIcon.mOverwritePalette = 1;
+    mText.mDrawFlags = NNS_G2D_VERTICALORIGIN_TOP | NNS_G2D_HORIZONTALORIGIN_RIGHT | NNS_G2D_HORIZONTALALIGN_LEFT;
+    mText.mTextX = 64;
+    mText.InitText(&gFonts[0].mFont, 16, 8, 2, *charOffset, -2, 1, 0, 0, 15, NULL, 2, NNS_G2D_CHARA_COLORMODE_16);
+    mText.mColor = 1;
+    NNS_G2dCharCanvasClear(&mText.mCanvas, 0);
+    SetCanvasPosition(&mText, sCounterTextPosition);
+    mText.mSprite.mOverwritePalette = 1;
+    *charOffset += mText.GetCharCount();
+    Redraw();
+}
+
 void Scene40CounterDisplay::Update() {
     switch (mState) {
     case STATE_IDLE:
@@ -818,7 +882,7 @@ void Scene40CounterDisplay::Redraw() {
 
 void Scene40Character::Init(int resourceId, int unk, u32 defaultMii) {
     Character::Init(resourceId, unk, defaultMii);
-    func_ov075_0217aea8(mUnknown2B18);
+    mMotion.Reset();
     mState = mNextState = 0;
     mEntered = TRUE;
     mHeldItem = NULL;

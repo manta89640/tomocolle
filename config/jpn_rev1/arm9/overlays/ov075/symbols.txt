@@ -244,12 +244,12 @@ _ZN12Scene40Meter15SetArriveSoundsEiii kind:function(arm,size=0x10) addr:0x0215e
 _ZN12Scene40Meter8SetStepsEii kind:function(arm,size=0xc) addr:0x0215e898
 _ZN12Scene40Meter8SetValueEi kind:function(arm,size=0x30) addr:0x0215e8a4
 _ZN12Scene40Meter9SetTargetEi kind:function(arm,size=0x1c) addr:0x0215e8d4
-func_ov075_0215e8f0 kind:function(arm,size=0xd0) addr:0x0215e8f0
+_ZN19Scene40SegmentMeter4InitEii kind:function(arm,size=0xd0) addr:0x0215e8f0
 _ZN19Scene40SegmentMeter4DrawEv kind:function(arm,size=0x28) addr:0x0215e9c0
 _ZN19Scene40SegmentMeter11SetPositionE11ScreenPoint kind:function(arm,size=0x6c) addr:0x0215e9e8
 _ZN19Scene40SegmentMeter4ShowEi kind:function(arm,size=0x70) addr:0x0215ea54
 _ZN19Scene40SegmentMeter10SetVisibleEi kind:function(arm,size=0x1c) addr:0x0215eac4
-func_ov075_0215eae0 kind:function(arm,size=0x130) addr:0x0215eae0
+_ZN17Scene40LevelMeter4InitEPi kind:function(arm,size=0x130) addr:0x0215eae0
 _ZN17Scene40LevelMeter6UpdateEv kind:function(arm,size=0x64) addr:0x0215ec10
 _ZN17Scene40LevelMeter4DrawEv kind:function(arm,size=0x1c) addr:0x0215ec74
 _ZN17Scene40LevelMeter8SetLevelEii kind:function(arm,size=0x50) addr:0x0215ec90
@@ -297,7 +297,7 @@ func_ov075_02161420 kind:function(arm,size=0x8) addr:0x02161420
 func_ov075_02161428 kind:function(arm,size=0x1c) addr:0x02161428
 func_ov075_02161444 kind:function(arm,size=0x28) addr:0x02161444
 func_ov075_0216146c kind:function(arm,size=0x10) addr:0x0216146c
-func_ov075_0216147c kind:function(arm,size=0x1bc) addr:0x0216147c
+_ZN21Scene40CounterDisplay4InitEP14Scene40ContextPi kind:function(arm,size=0x1bc) addr:0x0216147c
 _ZN21Scene40CounterDisplay6UpdateEv kind:function(arm,size=0x168) addr:0x02161638
 _ZN21Scene40CounterDisplay4DrawEv kind:function(arm,size=0x30) addr:0x021617a0
 _ZN21Scene40CounterDisplay3AddEi kind:function(arm,size=0x58) addr:0x021617d0
@@ -467,7 +467,7 @@ func_ov075_0217a958 kind:function(arm,size=0x434) addr:0x0217a958
 func_ov075_0217ad8c kind:function(arm,size=0x58) addr:0x0217ad8c
 func_ov075_0217ade4 kind:function(arm,size=0x58) addr:0x0217ade4
 func_ov075_0217ae3c kind:function(arm,size=0x6c) addr:0x0217ae3c
-func_ov075_0217aea8 kind:function(arm,size=0x48) addr:0x0217aea8
+_ZN13Scene40Motion5ResetEv kind:function(arm,size=0x48) addr:0x0217aea8
 func_ov075_0217aef0 kind:function(arm,size=0x30) addr:0x0217aef0
 func_ov075_0217af20 kind:function(arm,size=0x20) addr:0x0217af20
 func_ov075_0217af40 kind:function(arm,size=0x48) addr:0x0217af40
@@ -477,7 +477,7 @@ _ZN7Scene40D1Ev kind:function(arm,size=0x1ec) addr:0x0217b040
 _ZN7Scene40D0Ev kind:function(arm,size=0x1f4) addr:0x0217b22c
 data_ov075_0217b420 kind:data(any) addr:0x0217b420
 data_ov075_0217b474 kind:data(any) addr:0x0217b474
-data_ov075_0217b47c kind:data(any) addr:0x0217b47c
+sLevelMeterPosition kind:data(any) addr:0x0217b47c
 gText_Se_ov075 kind:data(any) addr:0x0217b484
 data_ov075_0217b4ac kind:data(any) addr:0x0217b4ac
 gText_Nu kind:data(any) addr:0x0217b4dc

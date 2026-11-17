@@ -9,6 +9,8 @@
 #include "item/Item.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40Physics.h"
+
 struct Scene40Context;
 class Scene40SpeechWindow;
 
@@ -126,9 +128,7 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ u8 mUnknown2B18[0x10]; // 0x18 bytes that 0x0217aea8 clears (a VecFx32 and three ints, as at
-    /* 0x2B28 */ int mUnknown2B28;      // Scene40ItemModel+0x12C): states 0x89, 0x8A and 0x8F clear this one
-    /* 0x2B2C */ int mUnknown2B2C;
+    /* 0x2B18 */ Scene40Motion mMotion;    // States 0x89, 0x8A and 0x8F clear its mUnknown10
     /* 0x2B30 */ wchar_t mTaughtWord[17];  // The word the player teaches (0x021741b8 copies in 16 characters);
                                            // state 0xB0 copies it into mMotto or one of mMottos
     /* 0x2B52 */ wchar_t mTaughtText[65];  // 0x021741f0 copies in 64 characters
