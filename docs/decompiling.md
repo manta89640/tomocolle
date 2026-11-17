@@ -439,6 +439,106 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   the two colour tables. The heap-sort model with the locals placed so (table, guard) reproduced every compile tried
   and found that order at once (a search over placements before, between and after the functions).
 
+## How the compiler orders and colours
+
+Read out of the game's compiler (2.0 sp2p3 `mwccarm.exe`: its scheduler at `0x4ff730`/`0x4ff8f0`, the ARM9 machine
+model at `0x4f5dc0`-`0x4f6140`, the allocator at `0x513780`-`0x513cf0`), compared with the decompiled source of the
+GameCube compiler (github `rayanht/mwcc`, `src/backend/Scheduler.c` and `Coloring.c`: the same algorithms), and
+measured. `tools/sched_probe.py show FILE` compiles a file with a patched copy of the compiler that logs, for every
+block it schedules, the dependence graph it built and every choice it made (with the pressure counter below);
+`tools/sched_probe.py check FILE` replays the log with the rules here. They reproduce the compiler cycle for cycle on
+more than 99% of the blocks of `SceneManager.cpp`, `SavedCharacter.cpp` and the scenes (what is left depends on which
+registers are live out of a block, which the log does not show). So these are the rules, not a fit; when code is
+scheduled differently from the original, the question is which input to them differs.
+
+**The passes.** Instruction selection (virtual registers, `v16` up, numbered as they are created), coalescing of
+copies, local optimisation, then the scheduler on virtual registers ("pre-RA"), register allocation, peephole, and
+the scheduler again ("post-RA"). The second run only takes blocks the first did not schedule: in practice blocks
+that were merged afterwards (with the epilogue, or by if-conversion). The unit is the basic block. A call does not
+end a block: it is a barrier (everything before it comes before it, everything after after it), so a function
+without branches is one block, and what happens in it depends on the whole function.
+
+**What is ready, and what goes first.** Single issue. An instruction is ready when all its predecessors have issued,
+their latencies have elapsed and the issue slot is free. Each cycle the scheduler takes the first ready instruction
+in block order (the order instruction selection produced, i.e. the source's evaluation order), and replaces it by a
+later ready one when, in this order of tests:
+1. the later one is critical (its latest start cycle, longest path to the block's end subtracted from the block's,
+   has passed) and the current choice is not; in a long block nearly everything is critical, so this rarely decides;
+2. it frees more successors (successors for which it is the last unissued predecessor);
+3. it is higher (longer latency path to the block's end);
+4. pre-RA only: it has the lower rank: copies 0; stores, compares and branches 1; arithmetic with register operands
+   (and calls) 2; loads 3; constants and addresses (`mov rX, #n`, `ldr rX, =sym`) 4.
+Otherwise the earlier one stays: ties go to source order.
+
+Example (`SceneManager::Init`, `ScreenLoader_SetPriority(&gScreenLoader, 0x1, 1)`, compiled `mov r1, #1; mov r2,
+r1`): by rule 2 `mov r1, #1` goes before `ldr r0, =gScreenLoader`, both of height 21, because only it frees the copy
+into r2. That is the original's order; ours has the address first because of the next rule.
+
+**Pressure mode** (pre-RA only, an ARM addition). A counter is kept while scheduling: +1 at each definition whose
+register still has a use ahead in the block, -1 when a register's last use in the block issues. Physical registers
+count too, and once per definition: every argument set-up in r0-r3, and every clobber of an argument register a call
+does not use, adds 1, and nothing takes it off until that register's last use in the whole block. So the counter
+climbs with every call in a long block (in `SceneManager::Init`, by 3 per `ScreenLoader_SetPriority`, to 41). From
+14 (the allocatable registers r0-r12, lr) on, the rules above are replaced: the ready instruction with the lowest
+pressure delta wins (16, less 1 + max(1, counter - 14) for each use that is its register's last, plus max(1, counter
+- 14) for each definition with uses ahead), and ties go to source order. Address and constant loads then all tie, and
+come out in source order instead of by height. This is why scheduling "flips with unrelated code earlier in the
+function": the counter at a statement depends on every call before it in the same block.
+
+**Latencies** (ARM9 model): `ldr` and literal loads 2, `ldrb`/`ldrh`/`ldrsb`/`ldrsh` 3, `mul`/`mla` 6,
+`smull`/`umull`/`smlal`/`umlal` 7, calls and branches 3, an operand shifted by a register +1, everything else 1. An
+instruction occupies the issue slot for the same number of cycles, except loads (1) and `ldm`/`stm` (one per
+register). A true or output dependence carries the producer's latency; an anti-dependence (a register read, then
+written) carries 0 but still orders.
+
+**Memory dependences** come from the optimiser's alias information, not from the registers: a store is ordered after
+every earlier load or store that may alias it, and a load after every earlier store. Two accesses through the same
+base expression at disjoint offsets are independent (`light->x` and `light->mEnabled`); through different base
+expressions they may alias, even two different globals (the stores to `gScreenControl` are ordered before the light
+stores in the test scenes). So writing a field through another pointer, or through the global instead of a local
+pointer, adds ordering edges and changes the schedule.
+
+**Evaluation order.** An addition generates its left operand, then its right, unless the right contains a call; there
+is no weighting. The tree is the optimiser's, which reassociates address arithmetic, so spellings of `t[a][b]` all
+come out alike. A register that a parent asks for (an indexed load's index, a call argument) is created before the
+operands that compute it, so it gets the lower number: in `Use(sTable[kinds[p]][1])` the product `kind * 20` is
+`v17` and `kind` is `v21`. A local survives coalescing (keeps its own number) only if it has another use. An inline
+function's argument is substituted at its uses when it has no side effects (constants, addresses, reads of a local
+whose address is never taken); other arguments are bound to temporaries, last argument first (fin-lib, from
+`CInline.c` and measured).
+
+**Colouring** is Chaitin's, as in the GameCube compiler: the graph is simplified in passes over the virtual registers
+in increasing number, each pass removing every node with fewer neighbours than registers; when none can be removed,
+the one with the lowest spill cost per neighbour is removed as a spill candidate and the passes start again. Nodes
+are then coloured in the reverse order of removal, each taking the lowest-numbered free register among the scratch
+registers and the callee-saved ones already taken; when none is free it takes the next callee-saved register, from r4
+up. So among values removed in the first pass the highest-numbered (created last) is coloured first; values that
+interfere with more (removed in a later pass) are coloured before those; a cheap spill candidate (a hoisted address
+used rarely) is coloured last. Measured: `a = g(); b = g(); c = g(); h(); use(a); use(b); use(c);` gives c r4, b r5,
+a r6 (and `a = g(); b = g();` b r4, a r5). Two values that swap registers with the same instructions were created in
+the other order, or have other neighbour counts.
+
+**Applied.**
+- The light-0 block of overlay 4's `CharacterBodyTestScene::Init` (x stored before `mEnabled` in the original). The
+  original order needs, after the store of x, the store of `mEnabled` chosen before the two argument loads of
+  `ModelResources_SetModel`, which are higher (14 against 12). In the compiled block the counter is 13 there, so the
+  loads win; at 14 the store would. A replay of the block's real graph over 3,000 orders of its fifteen instructions
+  never gives the original's order at our counter, and gives it at one more. A search over single added dependences
+  (every pair, latencies 0 to 3, replayed) finds exactly one family that gives the original's order with the source
+  order x-then-`mEnabled`: an edge of latency 0 from the `mEnabled` store to the `ldr r0, =gModelResources` (or to
+  the path's `ldr r2`). Latency 0 is an anti-dependence: in the original's virtual code the store read the register
+  that the argument load then writes, i.e. the 1 stored into `mEnabled` was already in the physical argument register
+  before allocation (as the 0 of y and z is r1, shared with the call's second argument, in ours). Which source does
+  that is not found yet; it is the question to answer for all six light blocks.
+- The method (fin-lib, on NFL): replay the logged graph with one dependence added at a time and compare with the
+  original's order; the edge that reproduces it names what the original's source had (there, a may-alias edge from a
+  table load through a pointer, `const u8 *entry = table + type; return *entry;`, matched two functions).
+- `SceneManager::Init` (four pairs of address and constant loads in the other order): ours is in pressure mode from
+  the fifth `ScreenLoader_SetPriority` on, and pressure mode puts addresses and constants in source order. Replayed
+  without pressure mode, the block gives the original's order everywhere but in the `gPaletteLoader` / `gPadInput`
+  stores. So the original's counter stayed below 14 there: its block, or the count of definitions in it, was
+  different.
+
 ## Matching techniques
 
 What made near-misses match, by symptom, with where each was found. Most are about the order in which the compiler
