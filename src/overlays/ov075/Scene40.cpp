@@ -27,11 +27,6 @@ extern const int gPersonalityKinds[16];
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
 void func_ov075_02176958(Scene40Character *character);
-void func_ov075_0217654c(Scene40Character *character);
-void func_ov075_0217680c(Scene40Character *character);
-void func_ov075_021768f0(Scene40Character *character);
-void func_ov075_02176924(Scene40Character *character);
-void func_ov075_021767b8(Scene40Character *character);
 void func_ov075_02176e74(Scene40Character *character);
 void func_ov075_02176eb8(Scene40Character *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
@@ -2758,7 +2753,7 @@ void Scene40Character::UpdateStates86ToB2() {
             }
         } else if (mFrame == 30) {
             func_ov075_02176958(this);
-            func_ov075_0217654c(this);
+            StartTroubleProgress();
             if (mUnknown2ED4) {
                 SetState(0x87);
             }
@@ -2776,11 +2771,11 @@ void Scene40Character::UpdateStates86ToB2() {
             SetState(0xAC);
         }
         if (mUnknown2ED8) {
-            func_ov075_0217680c(this);
+            GoToTogetherScene();
             return;
         }
         if (mUnknown2EDC) {
-            func_ov075_021768f0(this);
+            GoToScene3C();
             return;
         }
         if (!IsInTrouble()) {
@@ -2789,7 +2784,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (data_02114d78[mTroubleCategory][mTroubleId].kind != 6) {
             return;
         }
-        func_ov075_02176924(this);
+        GoToWedding();
         break;
     case 0x87:
         if (mEntered) {
@@ -2802,7 +2797,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (gSoundManager.GetSeqTick(0) < 548) {
             return;
         }
-        func_ov075_021767b8(this);
+        GoToScene51();
         break;
     case 0x88:
         if (mEntered) {

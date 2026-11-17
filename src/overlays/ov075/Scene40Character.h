@@ -142,6 +142,18 @@ public:
     void UpdateMouthByAnimation();
     BOOL MatchesTalk(const Scene40TalkEntry *entry, RTCDate *date, Scene40TalkConditions *conditions);
     void GetTalkConditions(RTCDate *date, RTCTime *time, Scene40TalkConditions *conditions);
+    void GetTalkArguments(const Scene40TalkEntry *entry, int *count, int *types, int *values);
+    void ChooseTouchTalk(u32 *message, int *count, int *types, int *values);
+    void ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values);
+    void TellNews();
+    void ClearLongActOfPair();
+    void ClearLongActOfPairFrom(s64 now);
+    BOOL UpdatePatDate();
+    void StartTroubleProgress();
+    void GoToScene51();
+    void GoToTogetherScene();
+    void GoToScene3C();
+    void GoToWedding();
 
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
