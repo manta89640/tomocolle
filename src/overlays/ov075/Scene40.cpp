@@ -26,7 +26,6 @@ extern const char *const sWaitAnimations[4][5]; // The standing animations ("wai
 extern const int gPersonalityKinds[16];
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02177f54(Scene40Character *character);
 void func_ov075_02176958(Scene40Character *character);
 void func_ov075_0217654c(Scene40Character *character);
 void func_ov075_0217680c(Scene40Character *character);
@@ -39,9 +38,7 @@ void MiiData_GetName(const void *mii, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 int func_ov075_0217520c(Scene40Character *character);
 void func_ov075_02174a14(Scene40Character *character);
-void func_ov075_02174ad0(Scene40Character *character);
 void func_ov075_02174c00(Scene40Character *character);
-void func_ov075_0217ade4(void *models, Scene40ItemModel **model);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
@@ -1413,7 +1410,7 @@ void Scene40Character::UpdateStates67To85() {
             }
             UpdateAnimSpeed();
             PlayAnimation("i_give01", TRUE);
-            func_ov075_0217ade4(mContext->mUnknown5C, &mHeldItem);
+            mContext->mPhysics->TakeFreeItem(&mHeldItem);
             mHeldItem->ChangeItem(250);
             mHeldItem->mVisible = FALSE;
             mStep++;
@@ -1695,7 +1692,7 @@ void Scene40Character::UpdateStates67To85() {
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             ResetHeadTurn();
-            func_ov075_02177f54(this);
+            StopHeadTurn();
             mUnknown24A = 0;
             mFrame = 0;
             mStep = 0;
@@ -1937,7 +1934,7 @@ void Scene40Character::UpdateStates67To85() {
         case 4:
             PlaceHeldItem();
             func_ov075_02174a14(this);
-            func_ov075_02174ad0(this);
+            UpdateMouthByAnimation();
             func_ov075_02174c00(this);
             if (mFrame < mWait) {
                 return;
@@ -2866,7 +2863,7 @@ void Scene40Character::UpdateStates86ToB2() {
             TurnHeadToCamera();
             UpdateAnimSpeed();
             PlayAnimation("i_give01", TRUE);
-            func_ov075_0217ade4(mContext->mUnknown5C, &mHeldItem);
+            mContext->mPhysics->TakeFreeItem(&mHeldItem);
             mHeldItem->ChangeItem(mGift.mMessage);
             mHeldItem->mVisible = FALSE;
             mFrame = 0;
@@ -2963,7 +2960,7 @@ void Scene40Character::UpdateStates86ToB2() {
                 PlayAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
                 UpdateAnimSpeed();
                 ResetSoundPhase(0);
-                mUnknown2EA8 = mContext->mUnknown54->GetEyeFloorPos();
+                mUnknown2EA8 = mContext->mCamera->GetEyeFloorPos();
                 SetTargetFloorPos(mUnknown2EA8);
                 mStep = 0;
             }

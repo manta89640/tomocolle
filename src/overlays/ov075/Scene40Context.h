@@ -17,9 +17,12 @@ class Room;
 class Scene40Camera;
 class Scene40Character;
 class Scene40Unknown30A8C;
+class Scene40Lights;
 class Scene40MessageSequence;
+class Scene40Physics;
 class Scene40ItemModel;
 class Scene40SpeechWindow;
+class Scene40Touch;
 class Sprite;
 class TtsPlayer;
 
@@ -45,10 +48,10 @@ struct Scene40Context {
     /* 0x44 */ MessageText *mText;             // scene+0x15DC0
     /* 0x48 */ IslandProgress *mIslandProgress;
     /* 0x4C */ Scene40Unknown30A8C *mClock;
-    /* 0x50 */ void *mUnknown50; // scene+0x69D2C
-    /* 0x54 */ Scene40Camera *mUnknown54; // scene+0x69DEC
-    /* 0x58 */ void *mUnknown58; // scene+0x69E10
-    /* 0x5C */ void *mUnknown5C; // scene+0x69E24
+    /* 0x50 */ Scene40Touch *mTouch;
+    /* 0x54 */ Scene40Camera *mCamera;
+    /* 0x58 */ Scene40Lights *mLights;
+    /* 0x5C */ Scene40Physics *mPhysics;
     /* 0x60 */ Scene40Character *mCharacter;
     /* 0x64 */ Scene40ItemModel *mItemModels; // The scene's three
     /* 0x68 */ Mannequin *mMannequin;

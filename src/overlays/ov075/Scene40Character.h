@@ -12,6 +12,8 @@
 #include "Scene40Balloon.h"
 #include "Scene40Cover.h"
 #include "Scene40ItemModel.h"
+#include "Scene40Physics.h"
+#include "Scene40Talk.h"
 
 struct Scene40Context;
 class Scene40SpeechWindow;
@@ -101,7 +103,7 @@ public:
     BOOL IsFacingCameraLoosely();
     BOOL IsFacingCamera();
     BOOL IsFacingCameraClosely();
-    void PlaceHeldItem(fx32 reach);
+    void PlaceHeldItem(fx32 scale);
     void Speak(int file, u32 message, int count, int *types, int *values, int mode);
     void TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
     u16 GetHeadPitchTo(VecFx32 *target);
@@ -124,6 +126,22 @@ public:
     BOOL HasSomethingToTell();
     BOOL IsDreaming();
     int ChooseActivity();
+    void SetTaughtWord(const wchar_t *word);
+    void SetTaughtText(const wchar_t *text);
+    void StopHeadTurn();
+    void FaceCamera();
+    void TurnHeadToHeldItem(int pitchLimit, int yawLimit);
+    void SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    void SnapHeadToCamera();
+    int GetAge(SavedCharacter *character, RTCDate *date);
+    void SetGift(Scene40Gift *gift);
+    BOOL WalkToMiddleIfAway();
+    BOOL WalkToCameraIfNotFacing();
+    BOOL TakeOfferedItem();
+    void PlaceCoverAtHands();
+    void UpdateMouthByAnimation();
+    BOOL MatchesTalk(const Scene40TalkEntry *entry, RTCDate *date, Scene40TalkConditions *conditions);
+    void GetTalkConditions(RTCDate *date, RTCTime *time, Scene40TalkConditions *conditions);
 
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
