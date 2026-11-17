@@ -1627,15 +1627,15 @@ _ZN13CharacterSave4SaveEiPFvPvE kind:function(arm,size=0x98) addr:0x02039ec8
 _ZN13CharacterSave17GetUnknown050Bit0Ev kind:function(arm,size=0x10) addr:0x02039f60
 _ZN13CharacterSave13GetRoomNumberEv kind:function(arm,size=0x8) addr:0x02039f70
 _ZN13CharacterSave11GetAffinityEi kind:function(arm,size=0xc) addr:0x02039f78
-_ZN13CharacterSave8GetEventEv kind:function(arm,size=0x8) addr:0x02039f84
-_ZN13CharacterSave15GetEventPartnerEv kind:function(arm,size=0x8) addr:0x02039f8c
-_ZN13CharacterSave11GetEventEndEv kind:function(arm,size=0x10) addr:0x02039f94
-_ZN13CharacterSave12GetAwayUntilEv kind:function(arm,size=0x10) addr:0x02039fa4
-_ZN13CharacterSave13GetUnknown228Ev kind:function(arm,size=0x10) addr:0x02039fb4
-_ZN13CharacterSave13GetMoodLockedEv kind:function(arm,size=0x8) addr:0x02039fc4
-_ZN13CharacterSave13GetUnknown23BEv kind:function(arm,size=0x8) addr:0x02039fcc
-_ZN13CharacterSave13GetUnknown226Ev kind:function(arm,size=0x8) addr:0x02039fd4
-_ZN13CharacterSave13GetUnknown227Ev kind:function(arm,size=0x8) addr:0x02039fdc
+_ZN13CharacterSave15GetLongActStateEv kind:function(arm,size=0x8) addr:0x02039f84
+_ZN13CharacterSave17GetLongActPartnerEv kind:function(arm,size=0x8) addr:0x02039f8c
+_ZN13CharacterSave13GetLongActEndEv kind:function(arm,size=0x10) addr:0x02039f94
+_ZN13CharacterSave13GetTroubleEndEv kind:function(arm,size=0x10) addr:0x02039fa4
+_ZN13CharacterSave15GetTroubleStartEv kind:function(arm,size=0x10) addr:0x02039fb4
+_ZN13CharacterSave15GetTroubleStateEv kind:function(arm,size=0x8) addr:0x02039fc4
+_ZN13CharacterSave18GetTroubleProgressEv kind:function(arm,size=0x8) addr:0x02039fcc
+_ZN13CharacterSave12GetTroubleIdEv kind:function(arm,size=0x8) addr:0x02039fd4
+_ZN13CharacterSave18GetTroubleCategoryEv kind:function(arm,size=0x8) addr:0x02039fdc
 _ZN13CharacterSave7GetMoodEv kind:function(arm,size=0x8) addr:0x02039fe4
 _ZN13CharacterSave6GetSexEv kind:function(arm,size=0x10) addr:0x02039fec
 _ZN13CharacterSave13GetUnknown299Ev kind:function(arm,size=0x8) addr:0x02039ffc
@@ -2038,7 +2038,7 @@ _ZN8FaceCast9DrawFacesEv kind:function(arm,size=0x48) addr:0x0204f098
 _ZN8FaceCast11ResetCameraEv kind:function(arm,size=0x24) addr:0x0204f0e0
 _ZN8FaceCast6ChooseEv kind:function(arm,size=0x170) addr:0x0204f104
 _ZN8FaceCast14ReadCharactersEv kind:function(arm,size=0x84) addr:0x0204f274
-_ZN8FaceCast12SetTransformEi7VecFx32ttt kind:function(arm,size=0x64) addr:0x0204f2f8
+_ZN8FaceCast12SetTransformEi12FacePositionlttt kind:function(arm,size=0x64) addr:0x0204f2f8
 _ZN8FaceCast12SetTransformEitiahhhh kind:function(arm,size=0xa4) addr:0x0204f35c
 _ZN8FaceCast14ApplyTransformEi kind:function(arm,size=0x160) addr:0x0204f400
 _ZN8FaceCast12SetTransformEi13FaceTransform kind:function(arm,size=0x48) addr:0x0204f560
@@ -3927,8 +3927,8 @@ _ZN12InteriorList4LoadEv kind:function(arm,size=0xb0) addr:0x020a4f58
 _ZN12InteriorList4SaveEv kind:function(arm,size=0x88) addr:0x020a5008
 _ZN12InteriorList4SortEv kind:function(arm,size=0x34) addr:0x020a5090
 _ZN12InteriorList13SortHeldFirstEv kind:function(arm,size=0x34) addr:0x020a50c4
-_Z16CompareInteriorsPvS_ kind:function(arm,size=0x38) addr:0x020a50f8
-_Z25CompareInteriorsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x020a5130
+_Z16CompareInteriorsPvS_ kind:function(arm,size=0x38) addr:0x020a50f8 local
+_Z25CompareInteriorsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x020a5130 local
 _ZN12InteriorList8GetOwnedEPP4ItemPi kind:function(arm,size=0x58) addr:0x020a5174
 _ZN12InteriorList14GetOwnedKind16EPP4ItemPi kind:function(arm,size=0x6c) addr:0x020a51cc
 _ZN12InteriorList10GetOnOfferEPP4ItemPi kind:function(arm,size=0xc0) addr:0x020a5238
@@ -3957,9 +3957,9 @@ _ZN4Room11ReloadPartsEi kind:function(arm,size=0xf4) addr:0x020a5854
 _ZN4Room10ReleaseAllEv kind:function(arm,size=0x18) addr:0x020a5948
 _ZN4Room6UpdateEv kind:function(arm,size=0x10) addr:0x020a5960
 _ZN4Room8SetScaleEl kind:function(arm,size=0x14) addr:0x020a5970
-_Z17GetInteriorWeightt kind:function(arm,size=0xa4) addr:0x020a5984
+_Z17GetInteriorWeightt kind:function(arm,size=0xa4) addr:0x020a5984 local
 _Z15ChooseInteriorsPhi kind:function(arm,size=0x1a4) addr:0x020a5a28
-_Z18CompareInteriorIdsPvS_ kind:function(arm,size=0x10) addr:0x020a5bcc
+_Z18CompareInteriorIdsPvS_ kind:function(arm,size=0x10) addr:0x020a5bcc local
 _ZN12InteriorItem10GetWeight3Ev kind:function(arm,size=0x28) addr:0x020a5bdc
 _ZN12InteriorItem10GetWeight2Ev kind:function(arm,size=0x28) addr:0x020a5c04
 _ZN12InteriorItem10GetWeight1Ev kind:function(arm,size=0x28) addr:0x020a5c2c
@@ -4739,9 +4739,9 @@ sTab4Positions kind:data(any) addr:0x020fbe64 local
 sTab0Positions kind:data(any) addr:0x020fbe8c local
 sTab2Positions kind:data(any) addr:0x020fbee4 local
 sTab1Positions kind:data(any) addr:0x020fbf4c local
-data_020fbfd4 kind:data(any) addr:0x020fbfd4
-sDoorSounds kind:data(any) addr:0x020fbfd6
-sEntranceName kind:data(any) addr:0x020fbfe8
+data_020fbfd4 kind:data(any) addr:0x020fbfd4 local
+sDoorSounds$13598 kind:data(any) addr:0x020fbfd6 local
+name$13205 kind:data(any) addr:0x020fbfe8 local
 sStageResidents kind:data(any) addr:0x020fbffc local
 sStageRooms kind:data(any) addr:0x020fc002 local
 sFloorRooms kind:data(any) addr:0x020fc00c local
@@ -6284,12 +6284,12 @@ sTabButtonPositions kind:data(any) addr:0x02115098 local
 @16832 kind:data(any) addr:0x021150b8 local
 _ZTV4Room kind:data(any) addr:0x021150c0
 _ZTV12InteriorItem kind:data(any) addr:0x021150e4
-gStr_ColonSolidus_2 kind:data(any) addr:0x02115108
-gStr_ColonSolidus_3 kind:data(any) addr:0x0211510c
-gStr_Mdl_Room kind:data(any) addr:0x02115110
-gStr_3D_LZ_bin_3 kind:data(any) addr:0x0211511c
-gStr_imd_2 kind:data(any) addr:0x02115128
-gStr_XXX_close_ica kind:data(any) addr:0x02115130
+@14382 kind:data(any) addr:0x02115108 local
+@14387 kind:data(any) addr:0x0211510c local
+@14391 kind:data(any) addr:0x02115110 local
+@14392 kind:data(any) addr:0x0211511c local
+@14393 kind:data(any) addr:0x02115128 local
+@14427 kind:data(any) addr:0x02115130 local
 sSeconds$14022 kind:data(any) addr:0x02115140 local
 gStr_Fw_BG_up_DAY_Chg_ncl kind:data(any) addr:0x021151a0
 gStr_Fw_BG_up_AM_Fine_ncl kind:data(any) addr:0x021151b8

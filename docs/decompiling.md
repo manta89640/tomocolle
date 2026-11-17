@@ -587,6 +587,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   gives it a slot among the function's own locals. A search over 128 combinations of fresh and reused copies and over
   the declarations' places did not find the original's order.
 
+- Two dead copies of a returned point at the top of the frame, above the function's other locals
+  (`Character::GetPointInFront`): the result declared first and ASSIGNED, `FloorPos result; ...; result =
+  GetFloorPos() - offset; return result;`. The assignment copies the value to a temporary and then to the variable;
+  an initialisation makes no copy. A local initialised from an inline's by-value return (`FloorPos offset =
+  Polar(distance, angle);`) is placed below that temporary, where one filled field by field is placed above it.
+  Found by the advisor (round 5).
+
 **Registers allocated differently**
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
   `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's
@@ -708,6 +715,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The operands of a `+` evaluated right first where the original evaluates the left first, the left one holding
   `x < 0 ? -x : x`: write the absolute value as a static inline function, `NFLi_Abs(x / 32)` (lib/NFL's mesh
   builders). Inline, the conditional seems to weigh less in the choice of which operand to evaluate first.
+**Loop invariants**
+- Two products of a loop-invariant sum rounded in the original's order (`RoomModels::Update`: the camera's x square
+  rounded before its z square): the sum written into one local before the loop, `fx32 distSq = FX_Mul(d.x, d.x) +
+  FX_Mul(d.z, d.z);`. Kept as two locals and added in the loop (`IsPartNear(xx + zz, i)`), the optimiser hoists the
+  sum itself and schedules the two products' rounding in another order, whatever the order of the locals or of the
+  operands.
 **Loops (MiiList.cpp)**
 - A search loop whose test is one predicated chain (`ldr; ldr; cmp; add; sub; cmple; addgt; bgt`), where `while
   (a > x || x > b + c - 1) n++;` is rotated: `for (;;) { count = c[n]; last = b[n] + c[n] - 1; if (!(b[n] > x || x >
@@ -816,6 +829,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   file as it will stay.
 
 **A value read once where the original reads it twice**
+- A value the original compares and returns from one load but reads again before a read-modify-write of the same
+  element (`ldrsb r1, [r4, r9]` for the tests and the result, then `ldrsb r0, [r4, r9]; add; strb` for the step): read
+  it through a const lvalue and write it through the plain one, `const s8 &phase = phases[slot]; if (phase == 0) {
+  result = phase; ...; phases[slot]++; }` (`Character::PlaySoundAtAnimPhase`). The compiler takes a load through a
+  `const` lvalue for another expression than the same load through a non-const one, so it does not forward it into the
+  step; any change of type does the same (through `u8 *` the step reloads with `ldrb`), but only the const reference
+  keeps the signed load. Locals, `+= 1`, a switch and the member instead of the pointer all forward or move the
+  address.
 - Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
   program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
   z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
@@ -869,6 +890,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `bmi`/`cmp` stay. Level 1 keeps the compares too, but not the original's scheduling.
 
 **A call's arguments**
+- A structure argument that the original loads with one `ldm` into r2 and r3, with the next word stored to the
+  outgoing slot by `ldr`/`str`, where ours copies the structure to a temporary below the stack pointer first (`sub r3,
+  sp, #8; ldm; stm; ldm r3, {r2, r3}`): the callee takes an 8-byte structure and a word, not a 12-byte one. The
+  compiler copies any structure argument that is split between the registers and the stack through such a temporary,
+  whatever the source form (a member of a by-value parameter, a parameter, a local, a class with a constructor); one
+  that fits in the registers it loads straight from its place (`FaceCast::SetTransform`, whose `FaceTransform` holds
+  an x, y position and a scale, not a VecFx32).
 - A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
   fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
   (`WirelessTestScene::Init`, the clock setter `Clock_SetDateTime`).

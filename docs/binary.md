@@ -1059,8 +1059,9 @@ Not done (each a near-miss of instruction order or registers, not of what the co
   `opt_common_subs` off or the eight IR passes off, still differs in 130 lines (shared epilogue, registers).
   `WirelessTestScene::Init` matched once the clock setter `Clock_SetDateTime` got its fourth argument (it reads r3; overlay
   98 passes it): the 0 in r3 is also the `date.week` stored. `Redraw` matched at level 2 with `opt_propagation` off.
-- `SceneHelpers.cpp`: `ApplyTransform` (two registers), `SetTransform(int,
-  FaceTransform)` (a copy of the position the original does not make) and `SceneRoom::ShowParts` (registers).
+- `SceneHelpers.cpp`: `ApplyTransform` (two registers) and `SceneRoom::ShowParts` (registers). `SetTransform(int,
+  FaceTransform)` matches: the setter it calls takes the x and y as a structure of two words and the scale apart
+  (measured: the argument is loaded by one `ldm` into r2 and r3, which a split 12-byte structure never is).
 
 ## The face test scene (overlay 2)
 
@@ -1916,6 +1917,10 @@ Measured:
   furniture is placed by) and six pieces of furniture (`RoomPart`, faded out between the camera and the room).
 - The list's `.rodata` ends at `0x020FBFD4`; the room's begins there with an unreferenced halfword `0xFFFF` (its
   objects sort by size: 2, 0x10, 0x14 bytes) and ends at `0x020FBFFC`.
+- `Room.cpp` is complete (109 of 109). Its `.data` (`0x021150C0`..`0x02115140`) is `Room`'s and `InteriorItem`'s
+  virtual tables and the strings of its functions, of which the door's animation path is `RoomDoor`'s C1 copy (the
+  link drops C2 and its string). The file also emits `Item`'s virtual table, whose copy in the ROM is the item
+  file's.
 
 The Mii list (`MiiList.cpp`, complete, 66 of 66), measured:
 - `MiiList` holds the 100 saved characters in the order of `mSortKey` and in up to 17 groups of that order (the
@@ -2333,7 +2338,7 @@ The class names are the project's own; the field names in quotes below are the g
 | Unit | Code | What |
 | --- | --- | --- |
 | `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
-| `Character.cpp` | to `0x02092178`, 73 functions, 69 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
+| `Character.cpp` | to `0x02092178`, 73 functions, 71 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
 | `CharacterSort.cpp` | to `0x020979A0`, 23 functions, all matching, complete | The resident list's orders: name normalization, collation, comparators |
 | `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 178 matching (Validate's string labels aside) | `SavedCharacter`: the record, its parameters, relations, long activities, troubles, tastes, reactions, birthday and biorhythm |
 
@@ -2404,6 +2409,22 @@ Measured:
 - **The collation**: `CharacterSort::GetCollationKey`, a switch of 522 characters (punctuation, Latin, Greek, kana,
   ...) to ranks, times ten plus five for a full-width letter; names are compared after normalizing in up to five
   rounds of decreasing strength.
+
+- **What is left of the character code (fin-char, round 5).** `Character::SetWalkTargetReflected` (77%): its
+  normalisation squares the rotated point as 64-bit operands (`umull` and `mla` pairs, not `smull`/`smlal`), which
+  `fx64 x = v.x; t = x * x;` gives. The original also keeps the offset in r5/r6 across `FX_Atan2Idx`, which ours does
+  when the angle helper takes the point by `const &`. Together these go from 187 to 145 differing lines; the
+  rotation's order and one copy still differ. `SetWalkTargetAwayFrom` (98.6%): the x and z
+  differences in the other scratch registers, and the copies in other slots. The SavedCharacter swaps
+  (`FailTrouble`, `StartTrouble`, `GetReactionWeight`, `GetTalkReactionWeight`, `ChooseWantedClothes`) reproduce in
+  one-function test files (scratchpad `fin-char/t_member.cpp`, `ft_lab.cpp`). No source form tried reaches the
+  backend differently: the IR canonicalises operand order, inline helpers and locals. They are left to the model of
+  the scheduler and colouring.
+- **The record as a base or as a member.** The Mii list copies a `SavedCharacter` as one 0x2A4-byte block and then
+  its own fields, which is how the compiler copies a member structure (a base class is copied field by field). Test
+  files of `GetReactionWeight` and `FailTrouble` compiled with `CharacterRecord` as the base and as a member at offset
+  0 give the same code byte for byte (fin-char, round 5): field accesses through `this` and the two-index trouble table
+  do not depend on it, so it explains none of the file's remaining differences, and the header keeps the base.
 
 Inferred:
 

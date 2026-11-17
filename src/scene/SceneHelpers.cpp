@@ -240,7 +240,7 @@ void FaceCast::Init(int capacity) {
     for (int i = 0; i < mCapacity; i++) {
         mTransforms[i].mPosition.x = 0;
         mTransforms[i].mPosition.y = 0;
-        mTransforms[i].mPosition.z = FX32_ONE;
+        mTransforms[i].mScale = FX32_ONE;
         mTransforms[i].mRotX = 0;
         mTransforms[i].mRotY = 0;
     }
@@ -361,10 +361,10 @@ void FaceCast::ReadCharacters() {
     }
 }
 
-void FaceCast::SetTransform(int index, VecFx32 position, u16 rotX, u16 rotY, u16 rotZ) {
+void FaceCast::SetTransform(int index, FacePosition position, fx32 scale, u16 rotX, u16 rotY, u16 rotZ) {
     mTransforms[index].mPosition.x = position.x;
     mTransforms[index].mPosition.y = position.y;
-    mTransforms[index].mPosition.z = position.z;
+    mTransforms[index].mScale = scale;
     mTransforms[index].mRotX = rotX;
     mTransforms[index].mRotY = rotY;
     mTransforms[index].mRotZ = rotZ;
@@ -376,7 +376,7 @@ void FaceCast::SetTransform(int index, u16 id, int x, s8 y, u8 scale, u8 rotX, u
     mTransforms[index].mId = id;
     mTransforms[index].mPosition.x = x << 7;
     mTransforms[index].mPosition.y = y << 7;
-    mTransforms[index].mPosition.z = scale << 6;
+    mTransforms[index].mScale = scale << 6;
     mTransforms[index].mRotX = rotX << 8;
     mTransforms[index].mRotY = rotY << 8;
     mTransforms[index].mRotZ = rotZ << 8;
@@ -404,19 +404,14 @@ void FaceCast::ApplyTransform(int index) {
     MTX_Concat33(&rotation, &turn, &rotation);
     MTX_RotZ33(&turn, FX_SinIdx(mTransforms[index].mRotZ), FX_CosIdx(mTransforms[index].mRotZ));
     MTX_Concat33(&rotation, &turn, &rotation);
-    MTX_ScaleApply33(&rotation, &rotation, mTransforms[index].mPosition.z, mTransforms[index].mPosition.z,
-                     mTransforms[index].mPosition.z);
+    MTX_ScaleApply33(&rotation, &rotation, mTransforms[index].mScale, mTransforms[index].mScale,
+                     mTransforms[index].mScale);
     MTX_TransApply43(&matrix, &matrix, mTransforms[index].mPosition.x, mTransforms[index].mPosition.y, 0);
     mFaces[index].SetHeadMatrices(&matrix, &rotation);
 }
 
-// 27%: the original passes the position on from the parameter's own stack copy (z stored to the outgoing slot,
-// ldm of x and y), where this copies the VecFx32 to a temporary first. Tried: a local copy, *&, casts to the type or
-// a reference, a pointer to the parameter, an inline taking the transform by reference or the position by value,
-// the angles read first, and pragma sets (levels 0 to 2, common subs, propagation, scalarize, the eight passes).
-// The callee takes a VecFx32 by value (it spills r2 and r3 as a structure), so three fx32 parameters are not it.
 void FaceCast::SetTransform(int index, FaceTransform transform) {
-    SetTransform(index, transform.mPosition, transform.mRotX, transform.mRotY, transform.mRotZ);
+    SetTransform(index, transform.mPosition, transform.mScale, transform.mRotX, transform.mRotY, transform.mRotZ);
 }
 
 void FaceCast::LipSync(const char *phoneme) {
