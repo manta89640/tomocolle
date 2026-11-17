@@ -203,7 +203,10 @@ Four files are another release than the fetched one, in code (the last only in h
 - **`card/src/card_spi.c`**: `CARDi_IdentifyBackupCore` (`0x020105CC`, 0x384 bytes against the fetched 0x348) knows
   one device more, a 128 KB EEPROM (size bit 17: 256-byte pages, three address bytes, five pages a program
   operation). Measured: everything else it sets is the fetched release's. It is the only function of the file the game
-  keeps.
+  keeps. The fetched repository's commit `ccbbcc8` adds that case under the define `SDK_PATCH3` (the SDK's patch 3
+  releases); its file, compiled with this unit's compiler and flags and `SDK_PATCH3`, gives the function word for
+  word, so `configure.py` fetches it with that define for this file alone. Inferred: the game's SDK has the patch 3
+  card library.
 - **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against the fetched 0x288) is the same
   hand-written routine, written out the way the SDK's other assembly is under the define
   `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS`, which `configure.py` gives the SDK's files. Measured: it keeps the
@@ -218,7 +221,8 @@ Four files are another release than the fetched one, in code (the last only in h
   define's name, made of conditional instructions in inline assembly, which the fetched repository's other assembly
   (`crt0.c`, `mi_memory.c`, `os_*.c`) already spells out the same way.
 
-The first three are built as `lib/overrides/` describes, `qsort.c` from the later commit's file (decompiling.md,
+`mi_dma.c` and `pm.c` are built as `lib/overrides/` describes (no later commit of the fetched repository, its pull
+requests included, changes either file), `card_spi.c` and `qsort.c` from the later commit's file (decompiling.md,
 "Where the game's release of a file differs").
 
 The small gaps between the units turned out to be functions of the files on either side, or small files of their own

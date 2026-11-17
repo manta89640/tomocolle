@@ -180,8 +180,8 @@ disassembly, and directives that say where it goes:
 `configure.py` compiles that in place of the fetched file, with the same compiler, flags and include directories, to
 the same object; the unit and its name are unchanged. The tracked file never holds lines of the fetched one. This is
 the coordinator's design of round 3, kept for the user to approve or replace. It is used by `mi/src/mi_dma.c` (one
-function the fetched release lacks), `spi/src/pm.c` (a later release, see binary.md, "Libraries") and
-`card/src/card_spi.c` (one function of a later release).
+function the fetched release lacks) and `spi/src/pm.c` (a later release, see binary.md, "Libraries"); no later commit
+of the fetched repository has either.
 
 Before writing an override, look for the game's release among later commits of the fetched repository: its history
 is small (`git clone --filter=blob:none` of it, then `git log -- <path>`). Where one has the file as the game has it,
@@ -191,7 +191,9 @@ hash, and compiles it in place of the repository's file, with the same compiler,
 repository's directory of the file is searched first, as for an override, and an override of the file applies to the
 fetched one). The repository's own pin stays: a later commit changes many other files, so moving it is a decision for
 all of them. `math/src/qsort.c` is built so, from `ccbbcc8`, the commit that writes `MATH_QSort`'s conditional
-instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries").
+instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries"). So is
+`card/src/card_spi.c`, from the same commit, compiled with `SDK_PATCH3`, the define under which that commit adds the
+game's 128 KB EEPROM: an entry of `FETCHED_FILES` may name defines for its file alone.
 
 The fetched file's other definitions stay. A static that only a removed or replaced function used is no longer
 emitted, which matters: with `-ipa file` the statics are pooled, so the file's pool is only right once every function

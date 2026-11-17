@@ -165,12 +165,21 @@ FETCHED = {
 # Each is fetched from the same repository at its own pinned commit, checked against its SHA-256, into
 # lib/fetched/<repository>/<commit>/ (ignored), and compiled in place of the repository's file. See docs/decompiling.md,
 # "Where the game's release of a file differs".
+# A third element, when there is one, is a list of defines that the file is compiled with besides its library's.
 FETCHED_FILES = {
     # MATH_QSort with each conditionally executed instruction written as a branch around it under
     # SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS, as the SDK's other assembly is (docs/binary.md, "Libraries")
     "lib/NitroSDK/libraries/math/src/qsort.c": (
         "ccbbcc8b6db4c4dbba3d503d2026978d78977840",
         "7ca9b28ce14f9609e6d0e7628e47217aff0940ce133afbdedc255b53488c442c",
+    ),
+    # CARDi_IdentifyBackupCore with the 128 KB EEPROM, which the same commit adds under SDK_PATCH3 (the define of
+    # the SDK's patch 3 releases): compiled so, the function is the game's word for word (docs/binary.md,
+    # "Libraries"). The define reaches only this file.
+    "lib/NitroSDK/libraries/card/src/card_spi.c": (
+        "ccbbcc8b6db4c4dbba3d503d2026978d78977840",
+        "5317c8b38b3c88ed40ab20474c0ffa0fae613da909166ffbf780c394f66620db",
+        ["SDK_PATCH3"],
     ),
 }
 FETCHED_FILES_DIR = Path("lib/fetched")
@@ -462,7 +471,7 @@ def fetch_repository(directory: Path, url: str, commit: str):
 
 def fetched_file(source: str) -> tuple[Path, str, str]:
     """Returns where a file of FETCHED_FILES goes, the URL it is fetched from and its SHA-256."""
-    commit, digest = FETCHED_FILES[source]
+    commit, digest = FETCHED_FILES[source][:2]
     directory = next(d for d in FETCHED if source.startswith(d + "/"))
     url, _ = FETCHED[directory]
     if not url.startswith("https://github.com/"):
@@ -763,7 +772,9 @@ def main():
             includes += [(msl_dir / settings.get("msl", settings["compiler"]) / d).as_posix()
                          for d in MSL_INCLUDE_DIRS]
             # The prefix file sees only the defines that come before it on the command line
-            flags = [*settings["flags"], *(f"-d {define}" for define in settings["defines"])]
+            defines = [*settings["defines"], *(FETCHED_FILES[name][2:3] or [[]])[0]] if name in FETCHED_FILES \
+                else settings["defines"]
+            flags = [*settings["flags"], *(f"-d {define}" for define in defines)]
             if "prefix" in settings:
                 flags.append(f"-prefix {settings['prefix']}")
             # Where the game's release of the file differs from the fetched one, the fetched file with the project's
