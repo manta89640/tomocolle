@@ -37,6 +37,10 @@ public:
         STATE_DONE = 17,
     };
 
+    void Init(Scene40Context *context, int *charOffset, Scene40MenuBar *menuBar, Scene40ProfilePage *profilePage);
+    void Update();
+    void UpdateStart();
+    void UpdateAnswer();
     void UpdateSecondAnswer();
     void UpdateFirstOfTwo();
     void UpdateSecondOfTwo();

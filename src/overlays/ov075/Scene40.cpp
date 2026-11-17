@@ -47,6 +47,7 @@ struct Scene40Scratch {
 }; // 0x70
 
 extern Scene40Scratch gSceneScratch;
+extern MATHRandContext16 gRandom;
 
 // A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
 // has it
@@ -81,6 +82,10 @@ struct Scene40Game {
     /* 0x4 */ u8 mUnknown4[4];
 }; // 0x8
 extern "C" const Scene40Game gStr_S_ov075[];
+
+// Where on the screen the mannequin and an item model are shown
+static const ScreenPoint sMannequinScreenPoint = {190, 172};
+static const ScreenPoint sItemScreenPoint = {190, 134};
 
 // Of ov075-a: static functions of this file (remove these declarations at the merge)
 void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
@@ -217,6 +222,194 @@ static inline void SetBodyScaleZ(fx32 z, Mannequin *body) {
     body->mInvScale.z = FX_Inv(z);
 }
 
+// --- The gift page (pages+0x1D94) ---------------------------------------------------------------------------------
+
+void Scene40GiftPage::Init(Scene40Context *context, Scene40CharacterTouch *touch, Scene40ProfilePage *profile,
+                           Scene40CounterDisplay *counter) {
+    mContext = context;
+    mCharacter = context->mCharacter;
+    mTouch = touch;
+    mProfilePage = profile;
+    mCounter = counter;
+    mLucky = FALSE;
+    mUnknown64 = 0;
+    mUnknown68 = -1;
+    mUnknown6C = 0;
+    mUnknown70 = 0;
+    mItem = -1;
+    mValue = 0;
+    mActive = TRUE;
+    mNextState = STATE_NONE;
+    mState = STATE_NONE;
+    mUnknown08 = 0;
+    mUnknown0C = 0;
+    mStep = 0;
+    mReaction = 0;
+}
+
+void Scene40GiftPage::Update() {
+    switch (mState = mNextState) {
+    case STATE_NONE:
+        break;
+    case STATE_REACT:
+        UpdateReact();
+        break;
+    case STATE_HOLD_ITEM:
+        UpdateHoldItem();
+        break;
+    case STATE_3:
+        Update3();
+        break;
+    case STATE_4:
+        Update4();
+        break;
+    case STATE_5:
+        Update5();
+        break;
+    case STATE_6:
+        Update6();
+        break;
+    case STATE_7:
+        Update7();
+        break;
+    case STATE_8:
+        Update8();
+        break;
+    case STATE_9:
+        break;
+    case STATE_WAIT_MESSAGES:
+        UpdateWaitMessages();
+        break;
+    case STATE_LEAVE_A:
+        UpdateLeaveA();
+        break;
+    case STATE_HOLD_THEN_B:
+        UpdateHoldThenB();
+        break;
+    case STATE_LEAVE_B:
+        UpdateLeaveB();
+        break;
+    case STATE_RESET:
+        mNextState = STATE_NONE;
+        mLucky = FALSE;
+        mUnknown64 = 0;
+        mUnknown68 = -1;
+        mUnknown70 = 0;
+        mItem = -1;
+        break;
+    }
+}
+
+// The player holds the item out to the character: it follows the screen point until the stylus comes down
+void Scene40GiftPage::UpdateHoldItem() {
+    mTouch->Update();
+    PlaceItemModel();
+    if (!mContext->mTouch->mPressed) {
+        return;
+    }
+    mItemModel->mMotion.mOffered = TRUE;
+    gSoundManager.StartSeqArc(1, 10, 3);
+    mNextState = STATE_3;
+}
+
+void Scene40GiftPage::UpdateWaitMessages() {
+    if (mContext->mMessageSequence->mReturnState == STATE_HOLD_THEN_B) {
+        mTouch->Update();
+        PlaceItemModel();
+    }
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
+        mNextState = sequence->mReturnState;
+        mUnknown08 = 0;
+    }
+}
+
+void Scene40GiftPage::UpdateLeaveA() {
+    switch (mStep) {
+    case 0:
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_A;
+        mNextState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 2;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        mContext->mCharacter->SetState(0xD0);
+        mStep++;
+        break;
+    case 2:
+        if (mContext->mCharacter->mState != 0xD1) {
+            return;
+        }
+        gSceneManager.RequestScene(0x69);
+        break;
+    }
+}
+
+void Scene40GiftPage::UpdateHoldThenB() {
+    mTouch->Update();
+    PlaceItemModel();
+    switch (mStep) {
+    case 0:
+        mContext->mMessageSequence->mReturnState = STATE_HOLD_THEN_B;
+        mNextState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 5;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        mNextState = STATE_HOLD_ITEM;
+        break;
+    }
+}
+
+void Scene40GiftPage::UpdateLeaveB() {
+    switch (mStep) {
+    case 0:
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_B;
+        mNextState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 6;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        gSceneManager.RequestScene(0x69);
+        break;
+    }
+}
+
+void Scene40GiftPage::Draw() {
+}
+
+void Scene40GiftPage::SetLucky(BOOL lucky) {
+    SetLucky(lucky, 1000);
+}
+
+// Lucky with a chance of chance in a thousand
+void Scene40GiftPage::SetLucky(BOOL lucky, int chance) {
+    if (chance > MATH_Rand16(&gRandom, 1000) && lucky) {
+        mLucky = TRUE;
+        return;
+    }
+    mLucky = FALSE;
+}
+
+void Scene40GiftPage::SetValue(int value) {
+    mValue = value;
+}
+
+void Scene40GiftPage::SetItem(int item, int value) {
+    mItem = item;
+    mValue = value;
+}
+
+void Scene40GiftPage::PlaceItemModel() {
+    Camera_UpdateEye(&gCamera);
+    VecFx32 position;
+    ProjectTouchBetween(&sItemScreenPoint, &position, 0x3000, 0x4000);
+    mItemModel->SetPosition(position);
+}
+
 // --- The present page (pages+0x1E1C) -------------------------------------------------------------------------------
 
 void Scene40PresentPage::Init(Scene40Context *context, Scene40CharacterTouch *touch) {
@@ -302,9 +495,6 @@ void Scene40PresentPage::Draw() {
 
 // --- The list page (pages+0x1F44) ----------------------------------------------------------------------------------
 
-// Where on the screen the mannequin and an item model are shown
-static const ScreenPoint sMannequinScreenPoint = {190, 172};
-static const ScreenPoint sItemScreenPoint = {190, 134};
 
 void Scene40ListPage::Init(Scene40Context *context, int *charOffset) {
     mContext = context;

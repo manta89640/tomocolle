@@ -24,16 +24,19 @@
 #include "Scene40Character.h"
 #include "Scene40Clock.h"
 #include "Scene40ItemModel.h"
+#include "Scene40Touch.h"
 #include "Scene40TouchPage.h"
 #include "Scene40ChoiceList.h"
 #include "Scene40MessageSequence.h"
 #include "Scene40Meter.h"
 #include "Scene40ProfilePage.h"
+#include "Scene40CounterDisplay.h"
 #include "Scene40ClothesList.h"
 #include "Scene40MenuBar.h"
 #include "Scene40SpeechWindow.h"
 #include "Scene40TalkPage.h"
 #include "Scene40PresentPage.h"
+#include "Scene40GiftPage.h"
 
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates
 // 0x6F908 bytes; the constructor is the main program's (0x020428E0, src/scene/SceneManager.cpp), which stores the
