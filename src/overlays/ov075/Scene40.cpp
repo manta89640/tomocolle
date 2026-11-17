@@ -510,24 +510,16 @@ void Scene40SegmentMeter::Draw() {
 
 void Scene40SegmentMeter::SetPosition(ScreenPoint position) {
     for (int i = 0; i < 10; i++) {
-        mSegments[i].SetPosition(FxVec2((position.x + mSpacing * (i * 10 - 50)) << FX32_SHIFT, position.y << FX32_SHIFT));
+        int offset = mSpacing * (i * 10 - 50);
+        mSegments[i].SetPosition(FxVec2((offset + position.x) << FX32_SHIFT, position.y << FX32_SHIFT));
     }
 }
 
 // Each segment shows up to 10 of the value, as its frame
 void Scene40SegmentMeter::Show(int value) {
-    if (value > 100) {
-        value = 100;
-    } else if (value < 0) {
-        value = 0;
-    }
+    value = MATH_CLAMP(value, 0, 100);
     for (int i = 0; i < 10; i++) {
-        int frame = value - i * 10;
-        if (frame > 10) {
-            frame = 10;
-        } else if (frame < 0) {
-            frame = 0;
-        }
+        int frame = MATH_CLAMP(value - i * 10, 0, 10);
         Sprite_SetFrame(&mSegments[i], (u16)frame);
     }
 }
@@ -741,6 +733,87 @@ void Scene40Gift::Set(int kind, int id) {
     }
 }
 
+// --- The scene's counter ------------------------------------------------------------------------------------------
+
+void Scene40CounterDisplay::Update() {
+    switch (mState) {
+    case STATE_IDLE:
+        break;
+    case STATE_START:
+        if (mShown < *mCounter) {
+            gSoundManager.StartSeqArc(1, 27, 4);
+            mState = STATE_COUNTING;
+            mFalling = FALSE;
+        } else if (mShown <= *mCounter) {
+            mState = STATE_ARRIVED;
+        } else {
+            gSoundManager.StartSeqArc(1, 27, 5);
+            mState = STATE_COUNTING;
+            mFalling = TRUE;
+        }
+        break;
+    case STATE_COUNTING:
+        if (mShown == *mCounter) {
+            gSoundManager.StopSeqArc(1, 0);
+            if (!mFalling) {
+                gSoundManager.StartSeqArc(1, 27, 6);
+            } else {
+                gSoundManager.StartSeqArc(1, 27, 7);
+            }
+            mState = STATE_ARRIVED;
+        } else if (mShown < *mCounter) {
+            mShown += 50;
+            if (mShown > *mCounter) {
+                mShown = *mCounter;
+            }
+            Redraw();
+            mFalling = FALSE;
+        } else if (mShown > *mCounter) {
+            mShown -= 50;
+            if (mShown < *mCounter) {
+                mShown = *mCounter;
+            }
+            Redraw();
+            mFalling = TRUE;
+        }
+        break;
+    case STATE_ARRIVED:
+        mState = STATE_IDLE;
+        break;
+    }
+}
+
+void Scene40CounterDisplay::Draw() {
+    if (mContext->mSpeechWindow->mShown) {
+        return;
+    }
+    mText.Draw();
+    Sprite_Draw(&mIcon);
+}
+
+// Changes the counter at once; the number shown follows
+void Scene40CounterDisplay::Add(int amount) {
+    *mCounter += amount;
+    *mCounter = MATH_CLAMP(*mCounter, 0, 9999999);
+    mChange = *mCounter - mShown;
+    Redraw();
+}
+
+void Scene40CounterDisplay::AddTimes60(int count) {
+    if (count < 0) {
+        count = 0;
+    }
+    Add(count * 60);
+}
+
+void Scene40CounterDisplay::Redraw() {
+    wchar_t text[10];
+    FormatNumberWithCommas(mShown, text, sizeof(text), 0, FALSE);
+    mText.mText = (const NNSG2dChar *)text;
+    NNS_G2dCharCanvasClear(&mText.mCanvas, 0);
+    mText.DrawText();
+}
+
 // --- The scene's character ------------------------------------------------------------------------------------------
 
 void Scene40Character::Init(int resourceId, int unk, u32 defaultMii) {
@@ -751,10 +824,10 @@ void Scene40Character::Init(int resourceId, int unk, u32 defaultMii) {
     mHeldItem = NULL;
     mLipSync = TRUE;
     mUnknown30A0 = 0;
-    mUnknown2ED0[0] = 0;
-    mUnknown2ED0[1] = 0;
-    mUnknown2ED0[2] = 0;
-    mUnknown2ED0[3] = 0;
+    mUnknown2ED0 = FALSE;
+    mUnknown2ED4 = FALSE;
+    mUnknown2ED8 = FALSE;
+    mUnknown2EDC = FALSE;
     mUnknown1C4Added[0] = FALSE;
     mUnknown1C4Added[1] = FALSE;
     mUnknown1C4Added[2] = FALSE;

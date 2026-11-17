@@ -126,7 +126,12 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ u8 mUnknown2B18[0xBC]; // An object of the overlay's (0x0217aea8 initialises it)
+    /* 0x2B18 */ u8 mUnknown2B18[0x10]; // 0x18 bytes that 0x0217aea8 clears (a VecFx32 and three ints, as at
+    /* 0x2B28 */ int mUnknown2B28;      // Scene40ItemModel+0x12C): states 0x89, 0x8A and 0x8F clear this one
+    /* 0x2B2C */ int mUnknown2B2C;
+    /* 0x2B30 */ wchar_t mTaughtWord[17];  // The word the player teaches (0x021741b8 copies in 16 characters);
+                                           // state 0xB0 copies it into mMotto or one of mMottos
+    /* 0x2B52 */ wchar_t mTaughtText[65];  // 0x021741f0 copies in 64 characters
     /* 0x2BD4 */ ItemModel *mHeldItem;  // The item it holds out or receives
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
@@ -145,8 +150,7 @@ public:
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
     /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
-    /* 0x2EA8 */ int mUnknown2EA8;
-    /* 0x2EAC */ int mUnknown2EAC;
+    /* 0x2EA8 */ FloorPos mUnknown2EA8; // State 0x8F walks to it (0x0217a48c of the context's mUnknown54)
     /* 0x2EB0 */ u16 mUnknown2EB0;
     /* 0x2EB2 */ u16 mCameraAngle; // mAngle less the angle to the camera's eye (0x02173f18)
     /* 0x2EB4 */ int mUnknown2EB4;
@@ -155,7 +159,10 @@ public:
     /* 0x2EC0 */ int mUnknown2EC0;
     /* 0x2EC4 */ BOOL mLipSync;    // Update moves the lips with the speech only while it is set
     /* 0x2EC8 */ u8 mUnknown2EC8[0x8];
-    /* 0x2ED0 */ int mUnknown2ED0[4];
+    /* 0x2ED0 */ BOOL mUnknown2ED0;   // State 0x86 (standing after a touch) tests these four: back to state 0,
+    /* 0x2ED4 */ BOOL mUnknown2ED4;   // sound group 0x37 and sequence 0x62 then state 0x87 at frame 30,
+    /* 0x2ED8 */ BOOL mUnknown2ED8;   // 0x0217680c,
+    /* 0x2EDC */ BOOL mUnknown2EDC;   // 0x021768f0
     /* 0x2EE0 */ int mUnknown2EE0[3];
     /* 0x2EEC */ BOOL mUnknown2EEC;   // The gift page sets it
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist

@@ -25,6 +25,7 @@
 #include "Scene40Character.h"
 #include "Scene40ChoiceList.h"
 #include "Scene40ClothesList.h"
+#include "Scene40CounterDisplay.h"
 #include "Scene40Meter.h"
 
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates

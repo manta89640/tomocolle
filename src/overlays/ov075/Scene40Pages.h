@@ -75,8 +75,8 @@ public:
     /* 0x32DBC [0x6390C] */ MessageText mText8;
     /* 0x333AC [0x63EFC] */ MessageText mTexts7[11];
     /* 0x374FC [0x6804C] */ MessageText mText9;
-    /* 0x37AEC [0x6863C] */ u8 mUnknown6863C[0xC88];
-    /* 0x38774 [0x692C4] */ ObjTextCanvas mCanvas;
+    /* 0x37AEC [0x6863C] */ u8 mUnknown6863C[0xBC4];
+    /* 0x386B0 [0x69200] */ Scene40CounterDisplay mCounter;
     /* 0x3892C [0x6947C] */ u8 mUnknown6947C[0x38];
     /* 0x38964 [0x694B4] */ Scene40Button mButton5;
     /* 0x38A5C [0x695AC] */ u8 mUnknown695AC[0xC];
