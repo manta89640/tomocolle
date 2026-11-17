@@ -14,7 +14,7 @@ struct Scene40Motion {
     /* 0x00 */ VecFx32 mVelocity;
     /* 0x0C */ BOOL mAtRest; // On the floor and not moving
     /* 0x10 */ BOOL mHeld;   // In a character's hands: it does not fall (Scene40Character::PlaceHeldItem sets it)
-    /* 0x14 */ int mUnknown14;
+    /* 0x14 */ BOOL mOffered; // Held out to the character by the player: the character takes it (TakeOfferedItem)
 }; // 0x18
 
 // The scene's falling and bouncing (scene+0x69E24): the character and the item models fall back to the floor with
@@ -28,6 +28,9 @@ public:
     void Update();
     void UpdateCharacter();
     void UpdateItems();
+    int GetItems(Scene40ItemModel **items, int *count, BOOL visible);
+    int TakeFreeItem(Scene40ItemModel **item);
+    static int GetFallFrames(fx32 height, fx32 velocity);
 
     /* 0x00 */ Scene40Character *mCharacter;
     /* 0x04 */ Scene40ItemModel *mItems[10];

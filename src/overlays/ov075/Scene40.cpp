@@ -255,6 +255,19 @@ BOOL Scene40Character::IsFacingCameraClosely() {
     return facing;
 }
 
+// Where a thing thrown from pos with a velocity lands on the floor
+FloorPos GetLandingPoint(VecFx32 pos, VecFx32 velocity) {
+    int frames = Scene40Physics::GetFallFrames(pos.y, velocity.y);
+    FloorPos landing;
+    landing.x = pos.x + velocity.x * frames;
+    landing.z = pos.z + velocity.z * frames;
+    return landing;
+}
+
+void Scene40Character::SetGift(Scene40Gift *gift) {
+    mGift.Set(gift->mKind, gift->mItem.InventoryItem::mId);
+}
+
 // What the record's liking of an item (SavedCharacter::GetLiking and the like, 0 to 17) gives: a reaction, 0 (the
 // least) to 4, and how much the gift satisfies, by the main program's tables. 18 and 19 are the goods it likes
 // most (mFavoriteItem) and least (mDislikedItem).
@@ -481,7 +494,8 @@ static const Scene40Activity sActivities[20] = {
 int Scene40Character::ChooseActivity() {
     int candidates[20];
     int count = 0;
-    for (int i = 0; i < 20; i++) {
+    int i;
+    for (i = 0; i < 20; i++) {
         if (sActivities[i].mEnabled == 1 && sActivities[i].mMinCharacters <= mCharacterCount) {
             candidates[count++] = i;
         }
@@ -1141,7 +1155,7 @@ void Scene40Motion::Reset() {
     mVelocity = zero;
     mAtRest = FALSE;
     mHeld = FALSE;
-    mUnknown14 = 0;
+    mOffered = FALSE;
 }
 
 // At rest: on the floor and not moving
@@ -1153,20 +1167,50 @@ void Scene40Motion::UpdateAtRest(VecFx32 *pos, VecFx32 *velocity) {
     mAtRest = atRest;
 }
 
+// The item models that are (or are not) visible
+int Scene40Physics::GetItems(Scene40ItemModel **items, int *count, BOOL visible) {
+    *count = 0;
+    for (int i = 0; i < mItemCount; i++) {
+        if (visible == mItems[i]->mVisible) {
+            items[(*count)++] = mItems[i];
+        }
+    }
+    return *count;
+}
+
+// One item model no one uses yet, marked used: 1 if there was one
+int Scene40Physics::TakeFreeItem(Scene40ItemModel **item) {
+    int taken = 0;
+    for (int i = 0; i < mItemCount; i++) {
+        if (!mItems[i]->mInUse) {
+            mItems[i]->mInUse = TRUE;
+            taken++;
+            *item = mItems[i];
+            break;
+        }
+    }
+    return taken;
+}
+
+// Frames until a thing at a height with an upward velocity reaches the floor, falling by 100 a frame
+int Scene40Physics::GetFallFrames(fx32 height, fx32 velocity) {
+    return FX_Div(-velocity - FX_Sqrt(FX_Mul(velocity, velocity) - FX_Mul(height * 2, -100)), -100) >> FX32_SHIFT;
+}
+
 // --- The item models --------------------------------------------------------------------------------------------
 
 void Scene40ItemModel::Load(int resourceId) {
     LoadModel(resourceId);
     mMotion.Reset();
-    mUnknown144 = 0;
+    mInUse = 0;
 }
 
 // Out of sight: transparent, at its normal size, and far away
 void Scene40ItemModel::Hide() {
     mVisible = FALSE;
     mMotion.mHeld = FALSE;
-    mMotion.mUnknown14 = 0;
-    mUnknown144 = 0;
+    mMotion.mOffered = 0;
+    mInUse = 0;
     Model_SetAlpha(this, 31);
     mPosition.x = 0x7FFFFFFF;
     mPosition.y = 0x7FFFFFFF;
@@ -1294,6 +1338,33 @@ void Scene40Character::PlaceHeldItem(fx32 scale) {
     mHeldItem->mMotion.mHeld = TRUE;
 }
 
+// The cover between the hands, on the floor, turned as the body
+void Scene40Character::PlaceCoverAtHands() {
+    MtxFx43 matrix;
+    MtxFx33 rotation;
+    GetJointMatrices(JOINT_R_HAND, &matrix, &rotation);
+    fx32 rightX = matrix._30;
+    fx32 rightZ = matrix._32;
+    GetJointMatrices(JOINT_L_HAND, &matrix, &rotation);
+    VecFx32 pos;
+    pos.x = (rightX + matrix._30) / 2;
+    pos.y = 0;
+    pos.z = (rightZ + matrix._32) / 2;
+    mCover.SetPosition(pos, mAnim.mRotY);
+}
+
+// The mouth open (face 7) from an eighth to half of the body's animation, closed (face 1) otherwise
+void Scene40Character::UpdateMouthByAnimation() {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    fx32 frames = ((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE;
+    fx32 frame = anim->mAnmObj->frame;
+    if (frame >= frames >> 3 && frame <= frames >> 1) {
+        SetFace(7);
+    } else {
+        SetFace(1);
+    }
+}
+
 // --- The character: what it was taught, its head and its speech --------------------------------------------------
 
 extern "C" {
@@ -1308,6 +1379,55 @@ void Scene40Character::SetTaughtWord(const wchar_t *word) {
 void Scene40Character::SetTaughtText(const wchar_t *text) {
     MI_CpuClear16(mTaughtText, sizeof(mTaughtText));
     wcsncpy(mTaughtText, text, 64);
+}
+
+// Outside the middle of the room (+-1 each way) it walks back to the middle, turned to the camera
+BOOL Scene40Character::WalkToMiddleIfAway() {
+    BOOL away = FALSE;
+    fx32 eyeX = gCamera.mEye.x;
+    fx32 eyeZ = gCamera.mEye.z;
+    if (mPos.x < -FX32_ONE || mPos.x > FX32_ONE || mPos.z < -FX32_ONE || mPos.z > FX32_ONE) {
+        mUnknown2EA0.x = 0;
+        mUnknown2EA0.z = 0;
+        mUnknown2EA8.x = eyeX;
+        mUnknown2EA8.z = eyeZ;
+        SetTargetFloorPos(mUnknown2EA0);
+        away = TRUE;
+    }
+    return away;
+}
+
+// Not turned to the camera: it walks towards it
+BOOL Scene40Character::WalkToCameraIfNotFacing() {
+    BOOL turning = FALSE;
+    fx32 eyeX = gCamera.mEye.x;
+    fx32 eyeZ = gCamera.mEye.z;
+    if (!IsFacingCamera()) {
+        mUnknown2EA8.x = eyeX;
+        mUnknown2EA8.z = eyeZ;
+        SetTargetFloorPos(mUnknown2EA8);
+        turning = TRUE;
+    }
+    return turning;
+}
+
+// Takes the visible item the player holds out (the last of them), if any
+BOOL Scene40Character::TakeOfferedItem() {
+    Scene40ItemModel *items[10];
+    int count;
+    int index;
+    BOOL found = FALSE;
+    mContext->mPhysics->GetItems(items, &count, TRUE);
+    for (int i = 0; i < count; i++) {
+        if (items[i]->mMotion.mOffered) {
+            index = i;
+            found = TRUE;
+        }
+    }
+    if (found) {
+        mHeldItem = items[index];
+    }
+    return found;
 }
 
 // The head stops turning and looks ahead
