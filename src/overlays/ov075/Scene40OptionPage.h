@@ -8,11 +8,12 @@
 #include "Scene40Character.h"
 #include "Scene40Context.h"
 
-// Page 9 of the pages (pages+0x214B0): three panels of options under a title (messages 137, 142, 156 of the scene's
-// own file): four, six and eight buttons, each with a text and a sprite, shown by the panels' mAvailable. Choosing
-// in the second panel makes a gift of kind 3 (its index), in the third one of kind 0 (an item of a table); another
-// state goes to scene 0x38 with the character's interior marked owned. Not decompiled yet: the fields are those its
-// functions and the controller show.
+// Page 9 of the pages (pages+0x214B0): three panels under a title (messages 137, 142, 156 of the scene's own file),
+// four, six and eight buttons, each with a text and a sprite that marks what is done (UpdateDone): the second panel
+// is the six bits of the character's 0x299, the third the eight goods 236 to 243 it has had (its 0x1C8 bits), the
+// first whether all of the second, all of the third, all the interiors of kind 13 are done, and whether it has a
+// motto. Choosing in the second panel makes a gift of kind 3 (its index), in the third one of kind 0 (the goods);
+// another state goes to scene 0x38 with the character's interior marked owned.
 //
 // The name is descriptive: no name of this class survives in the ROM.
 class Scene40OptionPage {
@@ -20,9 +21,14 @@ public:
     void Init(Scene40Context *context, int *charOffset); // 0x0215AF4C
     void Update();                                       // 0x0215B984
     void Draw();                                         // 0x0215BAC8
+    void UpdateChooseB();                                // 0x0215C184
+    void UpdateChooseC();                                // 0x0215C220
+    void UpdateGoToScene38();                            // 0x0215C2C4: the interior marked owned, the menu kept
+    void UpdateEndWithResult3();                             // 0x0215C36C
+    void UpdateWaitMessages();                           // 0x0215C388
     void ShowPanel(int panel);                           // 0x0215C3B0
-    void FindTrouble();                                  // 0x0215C6B4
-    BOOL IsAnyAvailable();                               // 0x0215C7F0: any of the first panel's options
+    void UpdateDone();                                   // 0x0215C6B4
+    BOOL IsAllDone();                                    // 0x0215C7F0: all four of the first panel
 
     /* 0x0000 */ int mState;
     /* 0x0004 */ int mNextState;
@@ -44,9 +50,9 @@ public:
     /* 0x838C */ Sprite mSpritesA[4];
     /* 0x863C */ Sprite mSpritesB[6];
     /* 0x8A44 */ Sprite mSpritesC[8];
-    /* 0x8FA4 */ BOOL mAvailableA[4];
-    /* 0x8FB4 */ BOOL mAvailableB[6];
-    /* 0x8FCC */ BOOL mAvailableC[8];
+    /* 0x8FA4 */ BOOL mDoneA[4];
+    /* 0x8FB4 */ BOOL mDoneB[6];
+    /* 0x8FCC */ BOOL mDoneC[8];
 }; // 0x8FEC
 
 #endif // OV075_SCENE40OPTIONPAGE_H

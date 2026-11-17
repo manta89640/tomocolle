@@ -997,6 +997,157 @@ void Scene40ListPage::GetGift(Scene40Gift *gift) {
     gift->Set(mGift.mKind, mGift.mItem.InventoryItem::mId);
 }
 
+// --- Page 9 (pages+0x214B0) ---------------------------------------------------------------------------------------
+
+void Scene40OptionPage::Draw() {
+    mTitle.Draw();
+    for (int i = 0; i < 4; i++) {
+        Sprite_Draw(&mSpritesA[i]);
+        mTextsA[i].Draw();
+        SpriteButton_Draw(&mButtonsA[i]);
+    }
+    SpriteButton_Draw(&mBackButton);
+    for (int i = 0; i < 6; i++) {
+        Sprite_Draw(&mSpritesB[i]);
+        mTextsB[i].Draw();
+        SpriteButton_Draw(&mButtonsB[i]);
+    }
+    for (int i = 0; i < 8; i++) {
+        Sprite_Draw(&mSpritesC[i]);
+        mTextsC[i].Draw();
+        SpriteButton_Draw(&mButtonsC[i]);
+    }
+}
+
+// The goods of the third panel
+static const int sOptionGoods[8] = {236, 241, 243, 242, 239, 240, 237, 238};
+
+void Scene40OptionPage::UpdateChooseB() {
+    if (SpriteButton_Update(&mBackButton)) {
+        mNextState = 7;
+        mFrames = 0;
+        mNextPanel = 2;
+    }
+    int chosen = -1;
+    for (int i = 0; i < 6; i++) {
+        if (SpriteButton_Update(&mButtonsB[i])) {
+            chosen = i;
+        }
+    }
+    if (chosen == -1) {
+        return;
+    }
+    mResult = 0;
+    mGift.Set(3, chosen);
+    mNextState = 10;
+    mFrames = 0;
+}
+
+void Scene40OptionPage::UpdateChooseC() {
+    if (SpriteButton_Update(&mBackButton)) {
+        mNextState = 7;
+        mFrames = 0;
+        mNextPanel = 2;
+    }
+    int chosen = -1;
+    for (int i = 0; i < 8; i++) {
+        if (SpriteButton_Update(&mButtonsC[i])) {
+            chosen = i;
+        }
+    }
+    if (chosen == -1) {
+        return;
+    }
+    mResult = 1;
+    mGift.Set(0, sOptionGoods[chosen]);
+    mNextState = 10;
+    mFrames = 0;
+}
+
+void Scene40OptionPage::UpdateEndWithResult3() {
+    mResult = 3;
+    mNextState = 10;
+    mFrames = 0;
+}
+
+void Scene40OptionPage::UpdateWaitMessages() {
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
+        mNextState = sequence->mReturnState;
+        mFrames = 0;
+    }
+}
+
+// The goods of the third panel the marks are of
+static const int sOptionDoneGoods[8] = {236, 241, 243, 242, 239, 240, 237, 238};
+
+// Marks what the character has done
+void Scene40OptionPage::UpdateDone() {
+    Scene40Character *character = mContext->mCharacter;
+    int count = 0;
+    for (int i = 0; i < 6; i++) {
+        if ((character->mUnknown299 >> (i & 31)) & 1) {
+            mDoneB[i] = TRUE;
+            count++;
+        }
+    }
+    if (count >= 6) {
+        mDoneA[0] = TRUE;
+    }
+    int had = 0;
+    for (int i = 0; i < 8; i++) {
+        int item = sOptionDoneGoods[i];
+        if ((character->mUnknown1C8.m[item >> 5] >> (item & 31)) & 1) {
+            mDoneC[i] = TRUE;
+            had++;
+        }
+    }
+    if (had >= 8) {
+        mDoneA[1] = TRUE;
+    }
+    BOOL all = TRUE;
+    for (int i = 0; i < 78; i++) {
+        if (!(character->mOwnedInteriors[i >> 5] & (1 << (i & 31))) && gInteriorTable[i].mKind == 13) {
+            all = FALSE;
+            break;
+        }
+    }
+    if (all) {
+        mDoneA[2] = TRUE;
+    }
+    if ((wcslen(character->mMotto) != 0 ? TRUE : FALSE)) {
+        mDoneA[3] = TRUE;
+    }
+}
+
+BOOL Scene40OptionPage::IsAllDone() {
+    BOOL all = TRUE;
+    for (int i = 0; i < 4; i++) {
+        if (!mDoneA[i]) {
+            all = FALSE;
+        }
+    }
+    return all;
+}
+
+void Scene40Button::SetSequences(u16 sequence, u16 pressedSequence, u16 doneSequence) {
+    mSequence = sequence;
+    mPressedSequence = pressedSequence;
+    mDoneSequence = doneSequence;
+    Sprite_SetSequence(this, mSequence, TRUE);
+}
+
+// A button marked done shows its done sequence
+void Scene40Button::SetDone(BOOL done) {
+    SpriteButton_Reset(this);
+    if (done) {
+        Sprite_SetSequence(this, mDoneSequence, TRUE);
+    } else {
+        Sprite_SetSequence(this, mSequence, TRUE);
+    }
+    mUnknownB8 = done;
+}
+
 // --- The list page's tabs ------------------------------------------------------------------------------------------
 
 static const u16 sListTabSequences[Scene40ListTabs::TAB_COUNT] = {41, 47, 43, 45};

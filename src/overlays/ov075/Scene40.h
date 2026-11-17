@@ -50,7 +50,11 @@
 // A button of the scene: the main program's SpriteButton (built with its C2, 0x0203115C) and a value of its own
 class Scene40Button : public SpriteButton {
 public:
-    /* 0xF4 */ int mUnknownF4;
+    void SetSequences(u16 sequence, u16 pressedSequence, u16 doneSequence);
+    void SetDone(BOOL done);
+
+    /* 0xF4 */ u16 mDoneSequence; // Shown when what the button stands for is done (page 9's marks)
+    /* 0xF6 */ u8 mUnknownF6[2];
 }; // 0xF8
 
 // The scene's list: the shops' ItemListView with the five virtual functions of the overlay's own (0x0215E028 to
