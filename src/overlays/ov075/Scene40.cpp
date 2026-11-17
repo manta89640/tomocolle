@@ -3,6 +3,8 @@
 #include "GameData.h"
 #include "SceneMemory.h"
 #include "Scene40Pool.h"
+#include "SceneManager.h"
+#include "sound/SoundManager.h"
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -811,6 +813,31 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     GetTalkArguments(entry, count, types, values);
 }
 
+// A long act with a partner ends for both: the partner's record is read, cleared and written back
+void Scene40Character::ClearLongActOfPair() {
+    if (IsLongActPaired()) {
+        SavedCharacter partner;
+        u8 index = mLongActPartner;
+        GameData_ReadCharacter(&gGameData, index, &partner);
+        partner.mIndex = index;
+        partner.ClearLongAct();
+        GameData_WriteCharacter(&gGameData, index, &partner);
+    }
+    ClearLongAct();
+}
+
+void Scene40Character::ClearLongActOfPairFrom(s64 now) {
+    if (IsLongActPaired()) {
+        SavedCharacter partner;
+        u8 index = mLongActPartner;
+        GameData_ReadCharacter(&gGameData, index, &partner);
+        partner.mIndex = index;
+        partner.ClearLongActFrom(now);
+        GameData_WriteCharacter(&gGameData, index, &partner);
+    }
+    ClearLongActFrom(now);
+}
+
 // Something to tell the player (the record's byte 0x24A: 1, 2 or 0xFE, the kind of talk; 0 or 0xFF for none)
 BOOL Scene40Character::HasSomethingToTell() {
     BOOL has = FALSE;
@@ -849,6 +876,31 @@ void Scene40Character::TellNews() {
     mUnknown24A = 0xFF;
 }
 
+// The date it was last patted ("PatYear", "PatMonth", "PatDay") becomes today: TRUE if it was another day
+BOOL Scene40Character::UpdatePatDate() {
+    RTCDate *today = &mContext->mClock->mDate;
+    BOOL changed = FALSE;
+    u32 year = today->year;
+    u32 month = today->month;
+    u32 day = today->day;
+    if (year != mPatYear || month != mPatMonth || day != mPatDay) {
+        mPatYear = year;
+        mPatMonth = month;
+        mPatDay = day;
+        changed = TRUE;
+    }
+    return changed;
+}
+
+// A trouble in state 1 starts to progress (state 2) from now
+void Scene40Character::StartTroubleProgress() {
+    if (mTroubleState != 1) {
+        return;
+    }
+    mTroubleState = 2;
+    mTroubleStart = mContext->mClock->mSeconds;
+}
+
 // The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
 // saved characters each needs
 struct Scene40Activity {
@@ -880,6 +932,57 @@ int Scene40Character::ChooseActivity() {
         }
     }
     return candidates[MATH_Rand16(&gRandom, count)];
+}
+
+// gSceneMemory as this file has it: one byte more, at +0x3C, which is the first of gSceneScratch, the buffer that
+// follows it (the stores address it from gSceneMemory, the clear from gSceneScratch)
+struct Scene40SceneMemory : public SceneMemory {
+    /* 0x3C */ u8 mNextMode; // 3 or 4 before scenes 0x31, 0x34 and 0x51
+};
+extern "C" u8 gSceneScratch[100];
+#define gSceneMemoryEx (*(Scene40SceneMemory *)&gSceneMemory)
+
+// The two characters of the next scene, a cleared scratch buffer and the scene's mode
+static inline void PrepareTogetherScene(int first, int second, int mode) {
+    gSceneMemoryEx.mCharacters[0] = first;
+    gSceneMemoryEx.mCharacters[1] = second;
+    MI_CpuFill8(gSceneScratch, 0, 100);
+    gSceneMemoryEx.mNextMode = mode;
+}
+
+// To scene 0x51 with the character and its trouble's target, mode 3
+void Scene40Character::GoToScene51() {
+    PrepareTogetherScene(mIndex, mTroubleTarget, 3);
+    gSceneManager.RequestScene(0x51);
+}
+
+// To one of three scenes of the character with its trouble's target (mode 4): 0x31 one time in three
+// when there are at least four characters, 0x51 one time in three, else 0x34
+void Scene40Character::GoToTogetherScene() {
+    PrepareTogetherScene(mIndex, mTroubleTarget, 4);
+    gSceneManager.SetSoundGroup(0x37);
+    gSoundManager.StartSeqIfNotPlaying(0, 100);
+    int choice = Rand(300);
+    if (choice < 100 && mCharacterCount >= 4) {
+        gSceneManager.RequestScene(0x31);
+    } else if (choice < 200) {
+        gSceneManager.RequestScene(0x51);
+    } else {
+        gSceneManager.RequestScene(0x34);
+    }
+}
+
+void Scene40Character::GoToScene3C() {
+    gSceneMemory.mCharacters[0] = mIndex;
+    gSceneMemory.mCharacters[1] = mTroubleTarget;
+    gSceneManager.RequestScene(0x3C);
+}
+
+// To the wedding (scene 0xAB, overlay 96) of the character and its trouble's target
+void Scene40Character::GoToWedding() {
+    gSceneMemory.mCharacters[0] = mIndex;
+    gSceneMemory.mCharacters[1] = mTroubleTarget;
+    gSceneManager.RequestScene(0xAB);
 }
 
 // The game keeps a bit for each activity that was proposed (gGameData+0x110)

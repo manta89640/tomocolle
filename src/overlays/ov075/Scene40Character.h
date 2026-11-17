@@ -147,6 +147,14 @@ public:
     void ChooseTouchTalk(u32 *message, int *count, int *types, int *values);
     void ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values);
     void TellNews();
+    void ClearLongActOfPair();
+    void ClearLongActOfPairFrom(s64 now);
+    BOOL UpdatePatDate();
+    void StartTroubleProgress();
+    void GoToScene51();
+    void GoToTogetherScene();
+    void GoToScene3C();
+    void GoToWedding();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
