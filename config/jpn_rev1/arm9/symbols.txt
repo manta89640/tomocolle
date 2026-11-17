@@ -3722,13 +3722,13 @@ _ZN11ClothesItemC2Ev kind:function(arm,size=0x28) addr:0x0209e140
 _ZN11ClothesItemC1Ev kind:function(arm,size=0x28) addr:0x0209e168
 _ZN11ClothesItem5ClearEv kind:function(arm,size=0x18) addr:0x0209e190
 _ZN11ClothesItem6SettleEv kind:function(arm,size=0xc) addr:0x0209e1a8
-_Z17IsClothesInSeasonii kind:function(arm,size=0x94) addr:0x0209e1b4
+_Z17IsClothesInSeasonii kind:function(arm,size=0x94) addr:0x0209e1b4 local
 _ZN11ClothesList4LoadEv kind:function(arm,size=0xc8) addr:0x0209e248
 _ZN11ClothesList4SaveEv kind:function(arm,size=0xb8) addr:0x0209e310
 _ZN11ClothesList4SortEv kind:function(arm,size=0x34) addr:0x0209e3c8
 _ZN11ClothesList13SortHeldFirstEv kind:function(arm,size=0x34) addr:0x0209e3fc
-_Z14CompareClothesPvS_ kind:function(arm,size=0x38) addr:0x0209e430
-_Z23CompareClothesHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x0209e468
+_Z14CompareClothesPvS_ kind:function(arm,size=0x38) addr:0x0209e430 local
+_Z23CompareClothesHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x0209e468 local
 _ZN11ClothesList8GetOwnedEPP4ItemPii kind:function(arm,size=0x80) addr:0x0209e4ac
 _ZN11ClothesList10GetOnOfferEPP4ItemPii kind:function(arm,size=0xcc) addr:0x0209e52c
 _ZN11ClothesList18GetOnOfferInSeasonEPP4ItemPiix kind:function(arm,size=0x164) addr:0x0209e5f8
@@ -3736,9 +3736,9 @@ _ZN11ClothesList7GetHeldEPP4ItemPii kind:function(arm,size=0x80) addr:0x0209e75c
 _ZN11ClothesList11HasAnyOwnedEv kind:function(arm,size=0x44) addr:0x0209e7dc
 _Z11LoadClothesP11ClothesItemiPi kind:function(arm,size=0x114) addr:0x0209e820
 _Z11SaveClothesP11ClothesItemi kind:function(arm,size=0xf4) addr:0x0209e934
-_Z16GetClothesWeightiii kind:function(arm,size=0x12c) addr:0x0209ea28
+_Z16GetClothesWeightiii kind:function(arm,size=0x12c) addr:0x0209ea28 local
 _Z13ChooseClothesiPti kind:function(arm,size=0x1ac) addr:0x0209eb54
-_Z17CompareClothesIdsPvS_ kind:function(arm,size=0x30) addr:0x0209ed00
+_Z17CompareClothesIdsPvS_ kind:function(arm,size=0x30) addr:0x0209ed00 local
 _ZN4Item5ClearEv kind:function(arm,size=0x14) addr:0x0209ed30
 _ZN4Item6SettleEv kind:function(arm,size=0x40) addr:0x0209ed44
 _ZN4Item3AddEi kind:function(arm,size=0x54) addr:0x0209ed84
@@ -3748,8 +3748,8 @@ _ZN9Inventory4LoadEv kind:function(arm,size=0xd0) addr:0x0209ee28
 _ZN9Inventory4SaveEv kind:function(arm,size=0x94) addr:0x0209eef8
 _ZN9Inventory4SortEv kind:function(arm,size=0x34) addr:0x0209ef8c
 _ZN9Inventory13SortHeldFirstEv kind:function(arm,size=0x34) addr:0x0209efc0
-_Z12CompareItemsPvS_ kind:function(arm,size=0x38) addr:0x0209eff4
-_Z21CompareItemsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x0209f02c
+_Z12CompareItemsPvS_ kind:function(arm,size=0x38) addr:0x0209eff4 local
+_Z21CompareItemsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x0209f02c local
 _ZN9Inventory8GetOwnedEPP4ItemPii kind:function(arm,size=0x80) addr:0x0209f070
 _ZN9Inventory8GetOwnedEPP4ItemPiim kind:function(arm,size=0x90) addr:0x0209f0f0
 _ZN9Inventory18GetOwnedKinds4And5EPP4ItemPi kind:function(arm,size=0x88) addr:0x0209f180
@@ -3769,14 +3769,14 @@ _ZN9ItemModel13LoadAnimationEi kind:function(arm,size=0x6c) addr:0x0209f790
 _ZN9ItemModel10ResetScaleEv kind:function(arm,size=0x50) addr:0x0209f7fc
 _ZN9ItemModel8SetScaleEl kind:function(arm,size=0x58) addr:0x0209f84c
 _Z9LoadItemsP13InventoryItemiPi kind:function(arm,size=0xd0) addr:0x0209f8a4
-_Z13GetItemWeightiiii kind:function(arm,size=0x144) addr:0x0209f974
-_Z20GetItemWeightInGroupiiiii kind:function(arm,size=0x38) addr:0x0209fab8
+_Z13GetItemWeightiiii kind:function(arm,size=0x144) addr:0x0209f974 local
+_Z20GetItemWeightInGroupiiiii kind:function(arm,size=0x38) addr:0x0209fab8 local
 _Z10ChooseItemiii kind:function(arm,size=0xf0) addr:0x0209faf0
 _Z17ChooseItemInGroupiii kind:function(arm,size=0xe4) addr:0x0209fbe0
 _Z11ChooseItemsiiPti kind:function(arm,size=0x184) addr:0x0209fcc4
 _Z18ChooseItemsNot1000iiPti kind:function(arm,size=0x1c8) addr:0x0209fe48
 _Z13GetFixedItemsPti kind:function(arm,size=0x38) addr:0x020a0010
-_Z14CompareItemIdsPvS_ kind:function(arm,size=0x30) addr:0x020a0048
+_Z14CompareItemIdsPvS_ kind:function(arm,size=0x30) addr:0x020a0048 local
 _ZN9ItemModelD0Ev kind:function(arm,size=0x44) addr:0x020a0078
 _ZN9Mannequin8InitHeadEii kind:function(arm,size=0x11c) addr:0x020a00bc
 _ZN9Mannequin8LoadHeadEii kind:function(arm,size=0x30) addr:0x020a01d8
@@ -4766,12 +4766,22 @@ gVoicePresets kind:data(any) addr:0x020fbaac
 sPersonalityPairs kind:data(any) addr:0x020fbaf4
 sMiiSetters kind:data(any) addr:0x020fbb7c
 sMiiGetters kind:data(any) addr:0x020fbc2c
-sClothesSeasons kind:data(any) addr:0x020fbcdc
-sFixedItems kind:data(any) addr:0x020fbd10
-sItemSeasons kind:data(any) addr:0x020fbd1c
-sItemSeasons2 kind:data(any) addr:0x020fbd4c
-sItemSeasons3 kind:data(any) addr:0x020fbd7c
-sItemSeasons4 kind:data(any) addr:0x020fbdac
+_ZZ14GetMonthSeasoniE15sClothesSeasons kind:data(any) addr:0x020fbcdc
+sFixedItems$13687 kind:data(any) addr:0x020fbd10 local
+sItemSeasons$13644 kind:data(any) addr:0x020fbd1c local
+sItemSeasons2$13601 kind:data(any) addr:0x020fbd4c local
+sItemSeasons3$13546 kind:data(any) addr:0x020fbd7c local
+sItemSeasons4$13574 kind:data(any) addr:0x020fbdac local
+_ZTV4Item kind:data(any) addr:0x02114f78
+_ZTV11ClothesItem kind:data(any) addr:0x02114f9c
+_ZTV13InventoryItem kind:data(any) addr:0x02114fc0
+_ZTV9ItemModel kind:data(any) addr:0x02114fe4
+@14568 kind:data(any) addr:0x02115024 local
+@14569 kind:data(any) addr:0x02115040 local
+@14584 kind:data(any) addr:0x02115050 local
+@14585 kind:data(any) addr:0x0211506c local
+@14589 kind:data(any) addr:0x0211507c local
+@14590 kind:data(any) addr:0x0211508c local
 sHeadScale kind:data(any) addr:0x020fbddc local
 sHeadModelScale kind:data(any) addr:0x020fbde8 local
 sUnknownOffset kind:data(any) addr:0x020fbdf4 local
@@ -6404,16 +6414,6 @@ gStr_TouchTalkMonth kind:data(any) addr:0x02114f38
 gStr_TouchTalkDay kind:data(any) addr:0x02114f48
 gStr_TouchTalkHour kind:data(any) addr:0x02114f58
 gStr_RelationBlood kind:data(any) addr:0x02114f68
-_ZTV4Item kind:data(any) addr:0x02114f78
-_ZTV11ClothesItem kind:data(any) addr:0x02114f9c
-_ZTV13InventoryItem kind:data(any) addr:0x02114fc0
-_ZTV9ItemModel kind:data(any) addr:0x02114fe4
-gStr_Mdl_Item_item000_3D_LZ_bin kind:data(any) addr:0x02115024
-gStr_XXX_item_imd kind:data(any) addr:0x02115040
-gStr_Mdl_Item_item000_3D_LZ_bin_2 kind:data(any) addr:0x02115050
-gStr_XXX_item_imd_2 kind:data(any) addr:0x0211506c
-gStr_Mdl_Item_item kind:data(any) addr:0x0211507c
-gStr_3D_LZ_bin_2 kind:data(any) addr:0x0211508c
 sTabButtonPositions kind:data(any) addr:0x02115098 local
 @16912 kind:data(any) addr:0x021150ac local
 @16913 kind:data(any) addr:0x021150b4 local

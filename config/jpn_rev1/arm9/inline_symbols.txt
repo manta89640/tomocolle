@@ -26,3 +26,4 @@ _ZN8G3SpriteD0Ev                        # 0x0202b6b8, the 3D sprites' file
 _ZN16WeddingCharacterD1Ev               # 0x02048748, src/scene/SceneManager.cpp
 _ZN8RoomPartD1Ev                        # 0x0203ef80, src/scene/SceneManager.cpp
 _ZTV4Item                               # 0x02114f78, src/item/Item.cpp (a virtual table, emitted alike)
+_ZZ14GetMonthSeasoniE15sClothesSeasons # 0x020fbcdc, src/character/SavedCharacter.cpp

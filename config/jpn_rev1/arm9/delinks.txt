@@ -1009,12 +1009,12 @@ src/character/CharacterSort.cpp:
 
 src/character/SavedCharacter.cpp:
     .text       start:0x020979a0 end:0x0209e140
-    .rodata     start:0x020fb8c0 end:0x020fbcdc
+    .rodata     start:0x020fb8c0 end:0x020fbd10
     .data       start:0x02114e3c end:0x02114f78
 
 src/item/Item.cpp:
     .text       start:0x0209e140 end:0x020a00bc
-    .rodata     start:0x020fbcdc end:0x020fbddc
+    .rodata     start:0x020fbd10 end:0x020fbddc
     .data       start:0x02114f78 end:0x02115098
 
 src/item/Mannequin.cpp:
