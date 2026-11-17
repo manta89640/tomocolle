@@ -13,7 +13,7 @@ struct Scene40Motion {
 
     /* 0x00 */ VecFx32 mVelocity;
     /* 0x0C */ BOOL mAtRest; // On the floor and not moving
-    /* 0x10 */ BOOL mUnknown10; // While set it does not move
+    /* 0x10 */ BOOL mHeld;   // In a character's hands: it does not fall (Scene40Character::PlaceHeldItem sets it)
     /* 0x14 */ int mUnknown14;
 }; // 0x18
 

@@ -36,7 +36,7 @@ void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character
 BOOL MiiData_GetSex(CharacterRecord *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as a string
 
-extern s8 gPersonalityKinds[];
+extern int gPersonalityKinds[]; // Each personality's kind, 0 to 3: the talk messages and touch animations by it
 extern SaveHeader gIslandState;
 int ModelResources_SetTouchLine(void *resources, int x, int y); // The line into the scene under a point of the touch screen // Each personality's kind, 0 to 3: the talk messages and touch animations by it
 }
@@ -60,28 +60,16 @@ struct WindowPoint;
 extern "C" {
 int func_ov075_02179290(Scene40Character *character);
 void func_ov075_021793fc(int unknown);
-void func_ov075_02174fe0(Scene40Character *character, s64 now);
-void func_ov075_02161cc0(Scene40Character *character, Scene40Context *context);
 void func_ov075_021753c8(Scene40Character *character);
-BOOL func_ov075_02173f04(Scene40Character *character);
 void func_0207b138(void *manager); // Updates a particle system's manager
 
 // The pages', by their offset in Scene40Pages
-void func_ov075_021582fc(void *page, Scene40Context *context, int *subCharOffset);
 void func_ov075_0215af4c(void *page, Scene40Context *context, int *subCharOffset);
 void func_ov075_02159c1c(void *page, Scene40Context *context, int *subCharOffset);
-void func_ov075_0215f180(void *page, Scene40Context *context, int *subCharOffset);
-void func_ov075_0215ff8c(void *page);
-void func_ov075_0215350c(void *page, Scene40Context *context, int *mainCharOffset, void *menu, void *statusPage);
 void func_ov075_02154aa4(void *page, Scene40Context *context, void *touch, void *statusPage, void *page386B0);
 void func_ov075_02157590(void *page, Scene40Context *context, void *touch);
-void func_ov075_0216147c(void *page, Scene40Context *context, int *mainCharOffset);
-void func_ov075_021617a0(void *page);
-void func_ov075_02154a94(void *page);
 void func_ov075_02157004(void *page);
 void func_ov075_021582c4(void *page);
-void func_ov075_0215fd8c(void *page);
-void func_ov075_02159418(void *page);
 void func_ov075_0215aef8(void *page);
 void func_ov075_0215bac8(void *page);
 

@@ -21,6 +21,12 @@
 #include "text/TextCanvas.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40Character.h"
+#include "Scene40ChoiceList.h"
+#include "Scene40ClothesList.h"
+#include "Scene40CounterDisplay.h"
+#include "Scene40Meter.h"
+#include "Scene40ProfilePage.h"
 #include "Scene40Camera.h"
 #include "Scene40Clock.h"
 #include "Scene40ItemModel.h"
@@ -48,10 +54,6 @@ public:
     /* 0xF4 */ int mUnknownF4;
 }; // 0xF8
 
-// The goods and clothes the scene shows, two bases: the constructor stores both of this class's tables (this
-// file's data, 0x02110B4C with the second at +0x2C) after both base constructors.
-class Scene40Items : public InventoryItem, public ClothesItem {}; // 0x2C
-
 // The scene's list: the shops' ItemListView with the five virtual functions of the overlay's own (0x0215E028 to
 // 0x0215E4E0, table 0x02182CD0). Its constructor is inline.
 class Scene40ListView : public ItemListView {
@@ -72,91 +74,16 @@ public:
     virtual void DrawRow(int row, int item);
     virtual void ClearRow(int row);
 
+    void Init();
+    void InitMarks(int resource, int sequence);
+
     /* 0x13F64 */ u32 mMarkKind;
     /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from
     /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
 }; // 0x14420
 
-// Three classes of the overlay whose constructors only store their tables (0x02182CA0, 0x02182CB8, 0x02182C88:
-// four entries each, the first two classes sharing the second and third). What their functions are is not known:
-// the virtual functions below stand for the tables' entries, in order, and are not names.
-class Scene40UnknownA {
-public:
-    Scene40UnknownA() {}
-
-    virtual void Virtual0();
-    virtual void Virtual1();
-    virtual void Virtual2();
-    virtual void Virtual3();
-
-    /* 0x004 */ u8 mUnknown004[0x710];
-}; // 0x714
-
-class Scene40UnknownB {
-public:
-    Scene40UnknownB() {}
-
-    virtual void Virtual0();
-    virtual void Virtual1();
-    virtual void Virtual2();
-    virtual void Virtual3();
-
-    /* 0x004 */ u8 mUnknown004[0x6F0];
-}; // 0x6F4
-
-class Scene40UnknownC {
-public:
-    Scene40UnknownC() {}
-
-    virtual void Virtual0();
-    virtual void Virtual1();
-    virtual void Virtual2();
-    virtual void Virtual3();
-
-    /* 0x004 */ u8 mUnknown004[0x640];
-}; // 0x644
-
 // The scene's lower-screen pages (the classes above are its members')
 #include "Scene40Pages.h"
-
-// Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
-// show is not known: the names say only where they are.
-class Scene40CharacterPartA {
-public:
-    void Draw();
-
-    /* 0x00 */ u8 mUnknown00[0x10];
-    /* 0x10 */ AnimModel mModel;
-    /* 0xF0 */ u8 mUnknownF0[0x8];
-}; // 0xF8
-
-class Scene40CharacterPartB {
-public:
-    void Draw();
-
-    /* 0x00 */ u8 mUnknown00[0x4];
-    /* 0x04 */ AnimModel mModel;
-}; // 0xE4
-
-// A character with two models, the goods and clothes it holds and two head icons
-class Scene40Character : public Character {
-public:
-    void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
-    void Update(BOOL speaking);
-
-    /* 0x2B18 */ u8 mUnknown2B18[0xC0];
-    /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
-    /* 0x2BDC */ u8 mUnknown2BDC[0x8];
-    /* 0x2BE4 */ Scene40CharacterPartA mPartA;
-    /* 0x2CDC */ Scene40CharacterPartB mPartB;
-    /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
-    /* 0x2DC4 */ Scene40Items mItems;
-    /* 0x2DF0 */ u8 mUnknown2DF0[0xC];
-    /* 0x2DFC */ HeadIcon mHeadIcons[2];
-    /* 0x2E7C */ u8 mUnknown2E7C[0x48];
-    /* 0x2EC4 */ BOOL mLipSync;         // Update moves the lips with the speech only while it is set
-    /* 0x2EC8 */ u8 mUnknown2EC8[0x230];
-}; // 0x30F8
 
 class Scene40 : public Scene {
 public:

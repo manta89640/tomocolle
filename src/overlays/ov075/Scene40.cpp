@@ -24,7 +24,6 @@ BOOL func_02031d00(SpriteButton *button);                         // Whether it 
 // Not decompiled yet
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
-void func_ov075_02178364(Scene40CharacterPartA *part);
 }
 
 // What this scene keeps in the main program's gSceneScratch (an array of bytes there) for the scenes it goes to
@@ -40,6 +39,13 @@ extern Scene40Scratch gSceneScratch;
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
+
+// An archive's name, as ArchiveManager_MountCompressed takes it: three characters
+struct ArchiveName {
+    char mName[4];
+};
+
+#define sItemArchiveName SCENE40_POOL(ArchiveName, 0x14) // TEMP pool: "IM?", the item models' archives with a digit
 
 // The saved game's flags and counters that the scene changes (defined at their place, 0x02150540)
 static void SetGameFlags(u32 flags, BOOL set);
@@ -135,7 +141,7 @@ void Scene40::StartLoading() {
     } else {
         mCharacter.Character::SetArchive("3HM");
     }
-    if (gGameData.mUnknownB2[0] < mCharacter.mSatisfyLevel) {
+    if ((int)gGameData.mUnknownB2[0] < (int)mCharacter.mSatisfyLevel) {
         gGameData.mUnknownB2[0] = mCharacter.mSatisfyLevel;
     }
 
@@ -182,15 +188,14 @@ void Scene40::StartLoading() {
     }
 
     // The three item models' archives: "IM0" to "IM2"
-    char archiveName[] = "IM?";
+    ArchiveName name;
+    ArchiveName archiveName = sItemArchiveName;
     for (int i = 0; i < 3; i++) {
-        char name[4];
-        name[0] = archiveName[0];
-        name[1] = archiveName[1];
-        name[2] = '0' + i;
-        name[3] = archiveName[3];
-        mItemModels[i].SetItem(name, 0);
-        ArchiveManager_MountCompressed(&gArchiveManager, mItemModels[i].mArchiveName, mItemModels[i].mArchivePath, 0);
+        name = archiveName;
+        name.mName[2] = '0' + i;
+        Scene40ItemModel *model = &mItemModels[i];
+        model->SetItem(name.mName, 0);
+        ArchiveManager_MountCompressed(&gArchiveManager, model->mArchiveName, model->mArchivePath, 0);
     }
     mMannequin.CharacterModel::SetArchive("3MM", 0, 0);
     ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin.mArchivePath, 0);
@@ -202,7 +207,8 @@ void Scene40::StartLoading() {
             keepMusic = TRUE;
         }
     } else if (CameFromSceneOfTable(gSceneManager.mPreviousSceneId)) {
-        if (gSceneScratch.mUnknown00 == 2 && gSceneScratch.mUnknown01 == 0) {
+        Scene40Scratch *scratch = &gSceneScratch;
+        if (scratch->mUnknown00 == 2 && scratch->mUnknown01 == 0) {
             keepMusic = TRUE;
         }
     }
@@ -256,7 +262,7 @@ void Scene40::Init() {
     InitLowerScreen();
     Init3d();
     mClock.Update();
-    func_ov075_02174fe0(&mCharacter, mClock.mSeconds);
+    mCharacter.SetUnknown23CFromFullness(mClock.mSeconds);
     mClothesList.Load();
     mClothesList.SortHeldFirst();
     mInventory.Load();
@@ -343,7 +349,7 @@ void Scene40::Init() {
     mContext.mMessageSequence = &mMessageSequence;
     mPages.Init(&mMainCharOffset, &mSubCharOffset, &mContext);
 
-    func_ov075_02161cc0(&mCharacter, &mContext);
+    mCharacter.SetContext(&mContext);
     mCharacter.SetVoiceOf(&mTtsPlayer);
     func_ov075_021753c8(&mCharacter);
     mCharacter.Update(FALSE);
@@ -812,7 +818,7 @@ void Scene40Pages::Init(int *mainCharOffset, int *subCharOffset, Scene40Context 
     mKeyboardLayout = 1;
     mTouch.Init(context->mTouch, context->mCharacter);
 
-    func_ov075_021582fc(OV075_PAGE(0x1F44), context, subCharOffset);
+    mListPage.Init(context, subCharOffset);
     if (end < *subCharOffset) {
         end = *subCharOffset;
     }
@@ -827,8 +833,8 @@ void Scene40Pages::Init(int *mainCharOffset, int *subCharOffset, Scene40Context 
         end = *subCharOffset;
     }
     *subCharOffset = start;
-    func_ov075_0215f180(OV075_PAGE(0x2A49C), context, subCharOffset);
-    func_ov075_0215ff8c(OV075_PAGE(0x2A49C));
+    mProfilePage.Init(context, subCharOffset);
+    mProfilePage.Refresh();
     if (end < *subCharOffset) {
         end = *subCharOffset;
     }
@@ -836,10 +842,10 @@ void Scene40Pages::Init(int *mainCharOffset, int *subCharOffset, Scene40Context 
 
     mMenuBar.Init(context);
     mTouchPage.Init(context, &mTouch, &mMenuBar);
-    func_ov075_0215350c(OV075_PAGE(0x180), context, mainCharOffset, &mMenuBar, OV075_PAGE(0x2A49C));
-    func_ov075_02154aa4(OV075_PAGE(0x1D94), context, &mTouch, OV075_PAGE(0x2A49C), OV075_PAGE(0x386B0));
+    mTalkPage.Init(context, mainCharOffset, &mMenuBar, &mProfilePage);
+    func_ov075_02154aa4(OV075_PAGE(0x1D94), context, &mTouch, &mProfilePage, &mCounter);
     func_ov075_02157590(OV075_PAGE(0x1E1C), context, &mTouch);
-    func_ov075_0216147c(OV075_PAGE(0x386B0), context, mainCharOffset);
+    mCounter.Init(context, mainCharOffset);
     *(int *)OV075_PAGE(0x20CD0) = end;
     *subCharOffset = end;
     mNextPage = PAGE_TOUCH;
@@ -894,10 +900,10 @@ void Scene40Pages::SetActive(BOOL active) {
     }
     mActive = active;
     mTouchPage.mActive = active;
-    *(BOOL *)OV075_PAGE(0x198) = active;
+    mTalkPage.mActive = active;
     *(BOOL *)OV075_PAGE(0x1DAC) = active;
     *(BOOL *)OV075_PAGE(0x1E30) = active;
-    *(BOOL *)OV075_PAGE(0x1F54) = active;
+    mListPage.mActive = active;
     *(BOOL *)OV075_PAGE(0x1AAC4) = active;
     *(BOOL *)OV075_PAGE(0x21504) = active;
 }
@@ -911,24 +917,24 @@ void Scene40Pages::HideMenu(BOOL hide) {
 
 // The page shown: the first four together with the touch page's, and the menu
 void Scene40Pages::Draw() {
-    func_ov075_021617a0(OV075_PAGE(0x386B0));
+    mCounter.Draw();
     switch (mPage) {
     case PAGE_TOUCH:
     case PAGE_1:
     case PAGE_2:
     case PAGE_3:
         mTouchPage.Draw();
-        func_ov075_02154a94(OV075_PAGE(0x180));
+        mTalkPage.Draw();
         func_ov075_02157004(OV075_PAGE(0x1D94));
         func_ov075_021582c4(OV075_PAGE(0x1E1C));
-        func_ov075_0215fd8c(OV075_PAGE(0x2A49C));
+        mProfilePage.Draw();
         mMenuBar.Draw();
         break;
     case PAGE_LIST_4:
     case PAGE_LIST_5:
     case PAGE_LIST_6:
     case PAGE_LIST_7:
-        func_ov075_02159418(&mListPage);
+        mListPage.Draw();
         break;
     case PAGE_8:
         func_ov075_0215aef8(OV075_PAGE(0x1AAB8));
@@ -956,7 +962,7 @@ int Scene40CharacterTouch::HitTest(const ScreenPoint *point) {
     if (mCharacter->HitTestJoint(3)) {
         parts |= PART_HEAD;
     }
-    if (func_ov075_02173f04(mCharacter)) {
+    if (mCharacter->IsBalloonTouched()) {
         parts |= PART_BODY;
     }
     if (parts == 0) {
@@ -1132,7 +1138,7 @@ void Scene40Character::Update(BOOL speaking) {
     func_ov075_02161988(this);
     mHeadIcons[0].Update();
     mHeadIcons[1].Update();
-    func_ov075_02178364(&mPartA);
+    mBalloon.Update();
     if (!speaking) {
         return;
     }
@@ -1151,16 +1157,8 @@ void Scene40Character::Update(BOOL speaking) {
 // and the report seems to pair one call with the other's.
 void Scene40Character::Draw() {
     Character::Draw();
-    mPartA.Draw();
-    mPartB.Draw();
-}
-
-void Scene40CharacterPartA::Draw() {
-    mModel.Draw();
-}
-
-void Scene40CharacterPartB::Draw() {
-    mModel.Draw();
+    mBalloon.Draw();
+    mCover.Draw();
 }
 
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------

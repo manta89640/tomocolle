@@ -19,7 +19,7 @@ public:
     void Update();
     void SetState(int state);
     void PlaceAround(VecFx32 *position, VecFx32 *target, VecFx32 *result);
-    void Turn(u16 angle);
+    void ViewFromFront();
     void SetPosition(VecFx32 position);
     void SetTarget(VecFx32 target);
     VecFx32 Approach(VecFx32 *goal, VecFx32 *current, int shift);

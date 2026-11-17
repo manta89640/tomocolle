@@ -34,7 +34,8 @@ struct Scene40Context {
     /* 0x08 */ Inventory *mInventory;
     /* 0x0C */ InteriorList *mInteriors;
     /* 0x10 */ int *mMoney;      // gGameData's capped counter, as the scene keeps it
-    /* 0x14 */ u8 mUnknown14[0x8]; // Not set by Init
+    /* 0x14 */ int mUnknown14; // Not set by Init
+    /* 0x18 */ int mUnknown18;
     /* 0x1C */ MessageFile *mCommonMessages;   // TCM:tmd_common_msg_JP.bmg
     /* 0x20 */ MessageFile *mTroubleMessages;  // TTM:tmd_trouble_msg_JP.bmg
     /* 0x24 */ MessageFile *mTalkMessages;     // TLM:tmd_talk_<personality>_msg_JP.bmg

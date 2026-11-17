@@ -54,7 +54,7 @@ public:
     /* 0x24 */ int mWait;
     /* 0x28 */ int mPrevious; // The entry before, or ENTRY_NONE
     /* 0x2C */ int mNext;
-    /* 0x30 */ u8 mUnknown30[0x4];
+    /* 0x30 */ int mReturnState; // What the page that started the chain goes on to when it is done (the pages set it)
     /* 0x34 */ wchar_t mName[11]; // The character's
     /* 0x4A */ u8 mUnknown4A[0x2];
 }; // 0x4C
