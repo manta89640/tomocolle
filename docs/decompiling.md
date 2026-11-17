@@ -320,6 +320,14 @@ Other per-function settings found the same way (overlay 109):
   off` is one). Check a pragma on a small file with `-w all` first; the `opt_*` names it knows are in the
   executable's strings (`strings mwccarm.exe | grep ^opt_`).
 - Builds 137, 138 and 139 compile overlay 109's near-misses identically, so they are not a version question.
+- A group of functions that are one design may need one setting, not one each: NFL's seven expression functions
+  had been matched with three settings (level 2 with common_subs off; with propagation off added; with
+  dead_assignments off added), each the part of `optimization_level 2` + `opt_common_subs`, `opt_propagation` and
+  `opt_dead_assignments` off that the function's code happened to show. All five that matched still match under the
+  union. Try the union of a family's settings before contorting one member's source.
+- Look for an SDK function the code was copied from: NFL's `NFLi_CopyToTexBank` matched as soon as it was written
+  as NitroSDK's `GX_LoadTexEx`, line for line (its three bases read and shifted in the SDK's order), where no
+  statement order of an independent form gave the literal pool's order and registers.
 - `#pragma opt_common_subs off` alone, at the default level, gave overlay 76's `MiiEditFacePage::SetParameter` its
   clamp `CLAMP(get(p) + delta, min, max)` as the original's: the range's ends reloaded from the stack after each call
   of the getter, where the default hoists one of them into a callee-saved register.
@@ -687,6 +695,19 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
 **Arguments evaluated in another order**
+- Which arguments of an inlined call are evaluated at the call and which inside the body (read in CInline.c's
+  `setup_inline_locals_and_arguments`, measured on lib/NFL): an argument free of side effects that is a constant, an
+  address, or a plain read of a local NOT marked address-taken is substituted into the body and evaluated where the
+  parameter is used. Every other argument is bound to a temporary first, last argument first (the initialisers are
+  prepended into one comma expression). A local is marked when `&x` is parsed (CExpr.c), but an array passed by its
+  name is not. So element 0 of an array (`v[0]`, offset 0, a plain read) is substituted while `v[1]` and `v[2]` are
+  bound. The hair meshes matched with the vertex as `fx16 vertex[3]` passed as `(VecFx16 *)vertex`: x is then
+  loaded after `&ctx->dl` is formed, where a `VecFx16` passed as `&vertex` binds all three before it.
+- The same IR order can come out in two orders: in a block where the pre-RA scheduler's pressure counter reaches 14,
+  it picks by register-pressure delta with ties in IR order, otherwise by height. One hair-mesh source gives the
+  original's `z, y, add, x` in the two textured meshes (counter 14) and `z, y, x, add` in the skin mesh (counter 11
+  or 12). fin-sched's probe compiler (`scratchpad/fin-sched/probe.py`) prints the counter and every choice; use it
+  before searching source forms for an order.
 - At a call whose argument is a load and whose other argument an address, mwcc sometimes forms the load first and
   sometimes the address, and which depends on the code around the call, not on the call: overlay 109's
   `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
@@ -757,6 +778,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   A non-inline definition instead comes before the destructors, as C1 and C2.
 
 **Branches and switches laid out differently**
+- A jump table whose unlisted values go to a lone `b end` block, while the listed cases' own breaks go straight to
+  the end (the Mii transfer's `MiiTransfer_UpdateSession`, case 3): the default's block held a statement when the IR
+  chained jumps. mwcc retargets a label only when the first real statement after it is a `goto` (`chain_label` in
+  IroJump.c and `COpt_Follow` in COptimizer.c of the decompiled GameCube compiler, the same front end): labels and
+  nops are skipped, anything else stops it. A dead assignment there (`default: { int state = sSessionState; break; }`)
+  is kept through those passes under `#pragma opt_dead_assignments off` and deleted by the backend, leaving the lone
+  branch. Without the pragma every vanishing body (`;`, `(void)0`, `i = i`, empty loops, empty inlines) is gone
+  before the chaining and changes nothing. The same pragma keeps stores into a local array nothing reads, which
+  otherwise needs `volatile`. Found with the advisor agent.
 - A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
   if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
   a range test (`MiiEditScene::Update`).
