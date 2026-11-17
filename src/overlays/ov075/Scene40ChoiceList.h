@@ -43,7 +43,7 @@ public:
     /* 0x1BD4 */ int mFinished;     // The button whose press played out in this frame, -1 for none
     /* 0x1BD8 */ BOOL mOpened;      // Set in the frame the buttons appear
     /* 0x1BDC */ BOOL mClosed;      // and in the frame the list is hidden
-    /* 0x1BE0 */ u8 mUnknown1BE0[0x4];
+    /* 0x1BE0 */ int mAnswer;       // The button pressed, as the talk page keeps it until the list has closed
     /* 0x1BE4 */ int mTimer;        // Frames since Open or Close
 }; // 0x1BE8
 

@@ -9,6 +9,7 @@
 #include "item/Item.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40ItemModel.h"
 #include "Scene40Physics.h"
 
 struct Scene40Context;
@@ -128,11 +129,10 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ Scene40Motion mMotion;    // States 0x89, 0x8A and 0x8F clear its mUnknown10
-    /* 0x2B30 */ wchar_t mTaughtWord[17];  // The word the player teaches (0x021741b8 copies in 16 characters);
-                                           // state 0xB0 copies it into mMotto or one of mMottos
-    /* 0x2B52 */ wchar_t mTaughtText[65];  // 0x021741f0 copies in 64 characters
-    /* 0x2BD4 */ ItemModel *mHeldItem;  // The item it holds out or receives
+    /* 0x2B18 */ Scene40Motion mMotion;
+    /* 0x2B30 */ wchar_t mTaughtWord[17];
+    /* 0x2B52 */ wchar_t mTaughtText[65];
+    /* 0x2BD4 */ Scene40ItemModel *mHeldItem;  // The item it holds out or receives
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x2BE0 */ Scene40Context *mContext;
@@ -164,7 +164,7 @@ public:
     /* 0x2ED8 */ BOOL mUnknown2ED8;   // 0x0217680c,
     /* 0x2EDC */ BOOL mUnknown2EDC;   // 0x021768f0
     /* 0x2EE0 */ int mUnknown2EE0[3];
-    /* 0x2EEC */ BOOL mUnknown2EEC;   // The gift page sets it
+    /* 0x2EEC */ BOOL mHoldingGift;   // The gift page sets it while the character holds the item it received
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist
     /* 0x2EF4 */ int mFriendCount;
     /* 0x2EF8 */ int mFriends[100];   // Their indices: rank 1 and a meter over 100

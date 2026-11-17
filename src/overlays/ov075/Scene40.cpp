@@ -16,6 +16,10 @@ BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
+void MiiData_GetName(CharacterRecord *character, wchar_t *name);
+void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
+int MiiData_GetSex(SavedCharacter *character);
 BOOL func_02031ccc(SpriteButton *button); // Whether the button's press has played out
 void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
@@ -56,6 +60,9 @@ extern const Scene40ChoiceSet sSpecialChoiceSets[];
 static inline void SetCanvasPosition(ObjTextCanvas *canvas, ScreenPoint position) {
     canvas->SetPosition(position.x << FX32_SHIFT, position.y << FX32_SHIFT);
 }
+
+// Clears a message text's canvas
+static inline void ClearMessageText(MessageText *text) { NNS_G2dCharCanvasClear(&text->mCanvas, 0); }
 
 // A text button's text: cleared, and drawn again
 static inline void ClearButtonText(TextButton *button) { NNS_G2dCharCanvasClear(&button->mText.mCanvas, 0); }
@@ -771,6 +778,329 @@ void Scene40Gift::Set(int kind, int id) {
         mGiftKind = 5;
         mMessage = 0xF5;
         return;
+    }
+}
+
+// --- The visited character's profile -------------------------------------------------------------------------------
+
+// The goods whose marks the profile shows when the character has had them (0x0217ba2c)
+extern const int sHadItemMarkItems[8];
+
+void Scene40ProfilePage::Update() {
+    mSatisfactionMeter.Update();
+    mTroubleMeter.Update();
+    ShowFullness();
+    switch (mScreen) {
+    case SCREEN_PROFILE:
+        if (!mSwitchable) {
+            return;
+        }
+        if (gPadInput.mTrigger & PAD_BUTTON_R) {
+            SwitchScreen();
+            gSoundManager.StartSeqArc(1, 10, 13);
+        } else if (gPadInput.mTrigger & PAD_BUTTON_L) {
+            SwitchScreen();
+            gSoundManager.StartSeqArc(1, 10, 12);
+        }
+        break;
+    case SCREEN_1:
+        UpdateScreen1();
+        break;
+    case SCREEN_2:
+        UpdateScreen2();
+        break;
+    case SCREEN_3:
+        UpdateScreen3();
+        break;
+    }
+}
+
+void Scene40ProfilePage::Draw() {
+    mTitle.Draw();
+    Sprite_Draw(&mMeterLabel);
+    switch (mMeterKind) {
+    case METER_SATISFACTION:
+        mSatisfactionMeter.Draw();
+        break;
+    case METER_TROUBLE:
+        mTroubleMeter.Draw();
+        break;
+    }
+    mFullnessMeter.Draw();
+    for (int i = 0; i < 3; i++) {
+        mFavoriteFoods[i].Draw();
+    }
+    mFavoriteItem.Draw();
+    mDislikedItem.Draw();
+    Sprite_Draw(&mPartnerSexIcon);
+    mPartnerName.Draw();
+    mBestFriendName.Draw();
+    for (int i = 0; i < 8; i++) {
+        Sprite_Draw(&mHadItemMarks[i]);
+    }
+    Sprite_Draw(&mSprite0020);
+    Sprite_Draw(&mSprite00CC);
+    Sprite_Draw(&mCompleteMark);
+    for (int i = 0; i < 11; i++) {
+        mTextBoxes760C[i].Draw();
+        mTexts8F10[i].Draw();
+    }
+    for (int i = 0; i < 5; i++) {
+        mTexts409C[i].Draw();
+    }
+    mText8920.Draw();
+    mTextD060.Draw();
+}
+
+// The trouble meter while the character has a trouble that progresses, else the satisfaction meter
+void Scene40ProfilePage::ChooseMeterKind() {
+    mMeterKind = METER_SATISFACTION;
+    if (mCharacter->IsProgressingTrouble()) {
+        mMeterKind = METER_TROUBLE;
+    }
+}
+
+void Scene40ProfilePage::ShowMeterLabel() {
+    switch (mMeterKind) {
+    case METER_SATISFACTION:
+        Sprite_SetSequence(&mMeterLabel, 24, TRUE);
+        break;
+    case METER_TROUBLE:
+        Sprite_SetSequence(&mMeterLabel, 25, TRUE);
+        break;
+    }
+}
+
+void Scene40ProfilePage::Refresh() {
+    ShowMeters();
+    ShowFullness();
+    ShowFavoriteFoods();
+    ShowFavoriteItem();
+    ShowDislikedItem();
+    ShowPartner();
+    ShowBestFriend();
+    ShowHadItemMarks();
+    wchar_t creator[11];
+    BOOL complete = TRUE;
+    MIi_CpuClear16(0, creator, sizeof(creator));
+    MiiData_GetCreatorName(mCharacter, creator);
+    SavedCharacter *character = mCharacter;
+    if (wcslen(character->mFamilyName) == 0 || wcslen(character->mName) == 0 || wcslen(creator) == 0 ||
+        character->mBirthYear == 0xFFF || character->GetParameter(PARAM_BIRTH_MONTH) == 0 ||
+        mCharacter->GetParameter(PARAM_BIRTH_DAY) == 0 || mCharacter->mBloodType == 4) {
+        complete = FALSE;
+    }
+    mCompleteMark.mVisible = complete;
+    RedrawTexts();
+}
+
+void Scene40ProfilePage::ShowMeters() {
+    if (mMeterKind == METER_TROUBLE) {
+        mTroubleMeter.SetValue(GetTroubleMeterValue());
+    }
+    mSatisfactionMeter.SetLevel(mCharacter->mSatisfyLevel, mCharacter->mSatisfyMeter);
+}
+
+// Starts the meters moving to the character's values now
+void Scene40ProfilePage::MoveMeters(BOOL beyondTop) {
+    if (mMeterKind == METER_TROUBLE) {
+        mTroubleMeter.SetTarget(GetTroubleMeterValue());
+        mTroubleMeter.mState = Scene40Meter::STATE_START;
+    }
+    mSatisfactionMeter.SetTargetLevel(mCharacter->mSatisfyLevel, mCharacter->mSatisfyMeter, beyondTop);
+    mSatisfactionMeter.mState = Scene40Meter::STATE_START;
+}
+
+void Scene40ProfilePage::ShowFullness() {
+    mFullnessMeter.SetValue(mCharacter->GetFullness(mContext->mClock->mSeconds));
+}
+
+// NOT MATCHING (4 bytes short): the original halves mTroubleProgress (a u8) as a signed int, with the sign fix-up
+// (add r0, r0, lsr #31) that ours leaves out as the compiler knows the byte is not negative; casts, a local int,
+// one variable for both branches and an inline taking int do not keep it.
+// The trouble meter shows 100 less half the trouble's progress (0 to 200)
+int Scene40ProfilePage::GetTroubleMeterValue() {
+    int value = 100;
+    if (mCharacter->IsProgressingTroubleInState2()) {
+        value = 100 - (int)mCharacter->GetTroubleProgress(mContext->mClock->mSeconds) / 2;
+    } else if (mCharacter->IsProgressingTrouble()) {
+        value = 100 - mCharacter->mTroubleProgress / 2;
+    }
+    return value;
+}
+
+void Scene40ProfilePage::ShowFavoriteFoods() {
+    for (int i = 0; i < 3; i++) {
+        u8 food = mCharacter->GetUnknown292(i);
+        if (food != 0xFF) {
+            mFavoriteFoods[i].mMessageFile = mContext->mItemMessages;
+            mFavoriteFoods[i].mMessage = food;
+            ClearMessageText(&mFavoriteFoods[i]);
+            mFavoriteFoods[i].DrawAll();
+        } else if (mShowUnknown) {
+            mFavoriteFoods[i].mMessageFile = mContext->mMiiTouchMessages;
+            mFavoriteFoods[i].mMessage = 15;
+            ClearMessageText(&mFavoriteFoods[i]);
+            mFavoriteFoods[i].DrawAll();
+        }
+    }
+}
+
+void Scene40ProfilePage::ShowFavoriteItem() {
+    u8 item = mCharacter->mFavoriteItem;
+    if (mCharacter->mUnknown1C8.m[item >> 5] & (1 << (item & 31))) {
+        mFavoriteItem.mMessageFile = mContext->mItemMessages;
+        mFavoriteItem.mMessage = item;
+        ClearMessageText(&mFavoriteItem);
+        mFavoriteItem.DrawAll();
+    } else if (mShowUnknown) {
+        mFavoriteItem.mMessageFile = mContext->mMiiTouchMessages;
+        mFavoriteItem.mMessage = 15;
+        ClearMessageText(&mFavoriteItem);
+        mFavoriteItem.DrawAll();
+    }
+}
+
+void Scene40ProfilePage::ShowDislikedItem() {
+    u8 item = mCharacter->mDislikedItem;
+    if (mCharacter->mUnknown1C8.m[item >> 5] & (1 << (item & 31))) {
+        mDislikedItem.mMessageFile = mContext->mItemMessages;
+        mDislikedItem.mMessage = item;
+        ClearMessageText(&mDislikedItem);
+        mDislikedItem.DrawAll();
+    } else if (mShowUnknown) {
+        mDislikedItem.mMessageFile = mContext->mMiiTouchMessages;
+        mDislikedItem.mMessage = 15;
+        ClearMessageText(&mDislikedItem);
+        mDislikedItem.DrawAll();
+    }
+}
+
+// The lover or spouse's name, and for a spouse the icon of their sex
+void Scene40ProfilePage::ShowPartner() {
+    int partner = mCharacter->FindCouplePartner();
+    if (partner != -1) {
+        SavedCharacter other;
+        wchar_t name[11];
+        GameData_ReadCharacter(&gGameData, partner, &other);
+        MiiData_GetName(&other, name);
+        mPartnerName.SetText((const char *)name);
+        mPartnerName.Redraw();
+        u8 rank = mCharacter->mRelationRank[partner];
+        if (rank != RELATION_SPOUSES && rank != RELATION_SPOUSES_FIGHTING) {
+            return;
+        }
+        if (MiiData_GetSex(&other) == 0) {
+            Sprite_SetSequence(&mPartnerSexIcon, 22, TRUE);
+        } else {
+            Sprite_SetSequence(&mPartnerSexIcon, 23, TRUE);
+        }
+    } else if (mShowUnknown) {
+        mPartnerName.SetText((const char *)mContext->mMiiTouchMessages->GetText(12));
+        mPartnerName.Redraw();
+    }
+}
+
+void Scene40ProfilePage::ShowBestFriend() {
+    int friendIndex = mCharacter->FindBestFriend();
+    if (friendIndex != -1) {
+        SavedCharacter other;
+        wchar_t name[11];
+        GameData_ReadCharacter(&gGameData, friendIndex, &other);
+        MiiData_GetName(&other, name);
+        mBestFriendName.SetText((const char *)name);
+        mBestFriendName.Redraw();
+    } else if (mShowUnknown) {
+        mBestFriendName.SetText((const char *)mContext->mMiiTouchMessages->GetText(12));
+        mBestFriendName.Redraw();
+    }
+}
+
+void Scene40ProfilePage::ShowHadItemMarks() {
+    for (int i = 0; i < 8; i++) {
+        int item = sHadItemMarkItems[i];
+        mHadItemMarks[i].mVisible = (mCharacter->mUnknown1C8.m[item >> 5] >> (item & 31)) & 1;
+    }
+}
+
+void Scene40ProfilePage::RedrawTexts() {
+    for (int i = 0; i < 3; i++) {
+        ClearMessageText(&mFavoriteFoods[i]);
+        mFavoriteFoods[i].DrawAll();
+    }
+    ClearMessageText(&mFavoriteItem);
+    mFavoriteItem.DrawAll();
+    ClearMessageText(&mDislikedItem);
+    mDislikedItem.DrawAll();
+    ShowMeters();
+    ShowPartner();
+    ShowBestFriend();
+}
+
+void Scene40ProfilePage::ShowTitle() {
+    wchar_t name[11];
+    mTitle.mMessage = 17;
+    MiiData_GetName(mCharacter, name);
+    mTitle.SetStringArg(name, 0);
+    ClearMessageText(&mTitle);
+    mTitle.DrawAll();
+}
+
+void Scene40ProfilePage::ShowRelationsTitle() {
+    wchar_t name[11];
+    mTitle.mMessage = 18;
+    MiiData_GetName(mCharacter, name);
+    mTitle.SetStringArg(name, 0);
+    ClearMessageText(&mTitle);
+    mTitle.DrawAll();
+    mText8920.mMessage = 19;
+    ClearMessageText(&mText8920);
+    mText8920.DrawAll();
+}
+
+void Scene40ProfilePage::ShowProfile() {
+    ShowProfileScreen();
+    mScreenIndex = 0;
+    if (mRelationsChanged) {
+        FindRelations();
+    }
+}
+
+void Scene40ProfilePage::SetSwitchable(BOOL switchable) {
+    mSwitchable = switchable;
+    if (switchable) {
+        Sprite_SetSequence(&mSprite00CC, 27, TRUE);
+    } else {
+        Sprite_SetSequence(&mSprite00CC, 28, TRUE);
+    }
+}
+
+void Scene40ProfilePage::UpdateScreen1() {
+    mScreen = SCREEN_PROFILE;
+    RedrawTexts();
+}
+
+void Scene40ProfilePage::UpdateScreen3() {
+    mScreen = SCREEN_PROFILE;
+    *(BOOL *)((u8 *)&mTextD060 + 0x64) = TRUE;
+    ClearMessageText(&mTextD060);
+    mTextD060.DrawAll();
+}
+
+// L and R: the next screen, after the last the profile again
+void Scene40ProfilePage::SwitchScreen() {
+    if (mScreenCount <= 0) {
+        return;
+    }
+    if (mScreenIndex < mScreenCount - 1) {
+        mScreenIndex = mScreenIndex + 1;
+    } else {
+        mScreenIndex = 0;
+    }
+    if (mScreenIndex < 1) {
+        ShowProfileScreen();
+    } else {
+        ShowRelationsScreen();
     }
 }
 
