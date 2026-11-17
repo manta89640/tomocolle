@@ -14,6 +14,7 @@ class MessageFile;
 class MessageText;
 class MessageWindow;
 class Room;
+class Scene40Camera;
 class Scene40Character;
 class Scene40Unknown30A8C;
 class Scene40MessageSequence;
@@ -45,7 +46,7 @@ struct Scene40Context {
     /* 0x48 */ IslandProgress *mIslandProgress;
     /* 0x4C */ Scene40Unknown30A8C *mClock;
     /* 0x50 */ void *mUnknown50; // scene+0x69D2C
-    /* 0x54 */ void *mUnknown54; // scene+0x69DEC
+    /* 0x54 */ Scene40Camera *mUnknown54; // scene+0x69DEC
     /* 0x58 */ void *mUnknown58; // scene+0x69E10
     /* 0x5C */ void *mUnknown5C; // scene+0x69E24
     /* 0x60 */ Scene40Character *mCharacter;

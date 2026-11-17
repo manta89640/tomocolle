@@ -9,6 +9,10 @@
 #include "item/Item.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40Balloon.h"
+#include "Scene40Cover.h"
+#include "Scene40ItemModel.h"
+
 struct Scene40Context;
 class Scene40SpeechWindow;
 
@@ -35,27 +39,6 @@ public:
                               // or 1, 2, 3 and 5 for the kinds 1 to 4
     /* 0x34 */ int mMessage;  // The message of kinds 1 to 4 (0xF7, 0xF9, 0xF4, 0xF5)
 }; // 0x38
-
-// Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
-// show is not known: the names say only where they are.
-class Scene40CharacterPartA {
-public:
-    void Draw();
-
-    /* 0x00 */ u8 mUnknown00[0x10];
-    /* 0x10 */ AnimModel mModel;
-    /* 0xF0 */ u8 mUnknownF0[0x8];
-}; // 0xF8
-
-class Scene40CharacterPartB {
-public:
-    void Draw();
-    void Switch(int which);                    // 0x02178d04
-    void SetPosition(VecFx32 pos, u16 angle);  // 0x02178e94
-
-    /* 0x00 */ u8 mUnknown00[0x4];
-    /* 0x04 */ AnimModel mModel;
-}; // 0xE4
 
 // The Mii the player visits: a Character with the scene's speech and messages, two head icons, a balloon over its
 // head and a cover (bed or curtain), and a present it may be given. Its behaviour is a state machine of 210 states
@@ -84,7 +67,7 @@ public:
     void ShowBed(VecFx32 position, u16 angle, GXRgb color);
     void SetContext(Scene40Context *context);
     void Update(BOOL speaking);
-    void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
+    void Draw(); // The character, then its balloon and its cover
     void UpdateState();
 
     // The states, a switch over a range of states each
@@ -104,14 +87,44 @@ public:
 
     void SetState(int state);
     void PlaceHeldItem();
-    void PlaceHeldItem(fx32 scale);
     void PlaceHeldItemInHand();
     void StartLongActWithTool(int item);
     void Speak(int file, u32 message, int type, int value, int mode);
     void Speak(int file, u32 message, int mode);
     void ResetHeadTurn();
     void TurnHeadToCamera();
-    void ShowBalloon(int content);
+    // ov075-e's (0x021722c8 to 0x02179728)
+    void ForceState(int state);
+    void ShowBalloon(int state);
+    BOOL IsBalloonTouched();
+    void UpdateCameraAngle();
+    BOOL IsFacingCameraLoosely();
+    BOOL IsFacingCamera();
+    BOOL IsFacingCameraClosely();
+    void PlaceHeldItem(fx32 reach);
+    void Speak(int file, u32 message, int count, int *types, int *values, int mode);
+    void TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    u16 GetHeadPitchTo(VecFx32 *target);
+    u16 GetHeadYawTo(VecFx32 *target);
+    u16 GetAngleTo(VecFx32 *target);
+    int GetGoodsSatisfaction(int item);
+    int GetGoodsReaction(int item);
+    int GetClothesSatisfaction(int clothes);
+    int GetClothesReaction(int clothes);
+    int GetInteriorReaction(int interior);
+    int GetInteriorSatisfaction(int interior);
+    BOOL RankLikedItem(int item);
+    void SetUnknown23CFromFullness(s64 now);
+    void AddUnknown1C4Once0();
+    void AddUnknown1C4Once1();
+    void AddUnknown1C4Once2();
+    void AddUnknown1C4ByTrouble();
+    void ClearMoodIfTroubleOfCategory4OrKind8();
+    void ClearMoodIfTroubleOfKind8();
+    BOOL HasSomethingToTell();
+    BOOL IsDreaming();
+    int ChooseActivity();
+
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
@@ -130,14 +143,17 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ u8 mUnknown2B18[0xBC]; // An object of the overlay's (0x0217aea8 initialises it)
-    /* 0x2BD4 */ ItemModel *mHeldItem;  // The item it holds out or receives
+    /* 0x2B18 */ u8 mUnknown2B18[0x10]; // An object of the overlay's (0x0217aea8 initialises it)
+    /* 0x2B28 */ int mUnknown2B28;
+    /* 0x2B2C */ int mUnknown2B2C;
+    /* 0x2B30 */ wchar_t mTaughtWord[17];
+    /* 0x2B52 */ wchar_t mTaughtText[65];
+    /* 0x2BD4 */ Scene40ItemModel *mHeldItem;  // The item it holds out or receives
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x2BE0 */ Scene40Context *mContext;
-    /* 0x2BE4 */ Scene40CharacterPartA mPartA;
-    /* 0x2CDC */ Scene40CharacterPartB mPartB;
-    /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
+    /* 0x2BE4 */ Scene40Balloon mBalloon;
+    /* 0x2CDC */ Scene40Cover mCover; // 0xE8: its last word is 0x2DC0
     /* 0x2DC4 */ Scene40Gift mGift;
     /* 0x2DFC */ HeadIcon mHeadIcons[2];
     /* 0x2E7C */ int mHeadIconPlaces[2];
@@ -149,8 +165,7 @@ public:
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
     /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
-    /* 0x2EA8 */ int mUnknown2EA8;
-    /* 0x2EAC */ int mUnknown2EAC;
+    /* 0x2EA8 */ FloorPos mUnknown2EA8;
     /* 0x2EB0 */ u16 mUnknown2EB0;
     /* 0x2EB2 */ u16 mCameraAngle; // mAngle less the angle to the camera's eye (0x02173f18)
     /* 0x2EB4 */ int mUnknown2EB4;
@@ -159,9 +174,12 @@ public:
     /* 0x2EC0 */ int mUnknown2EC0;
     /* 0x2EC4 */ BOOL mLipSync;    // Update moves the lips with the speech only while it is set
     /* 0x2EC8 */ u8 mUnknown2EC8[0x8];
-    /* 0x2ED0 */ int mUnknown2ED0[4];
+    /* 0x2ED0 */ BOOL mUnknown2ED0;
+    /* 0x2ED4 */ BOOL mUnknown2ED4;
+    /* 0x2ED8 */ BOOL mUnknown2ED8;
+    /* 0x2EDC */ BOOL mUnknown2EDC;
     /* 0x2EE0 */ int mUnknown2EE0[3];
-    /* 0x2EEC */ u8 mUnknown2EEC[0x4];
+    /* 0x2EEC */ BOOL mUnknown2EEC;   // The gift page sets it
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist
     /* 0x2EF4 */ int mFriendCount;
     /* 0x2EF8 */ int mFriends[100];   // Their indices: rank 1 and a meter over 100
@@ -169,9 +187,9 @@ public:
     /* 0x308C */ int mLover;          // Rank 2, -1 for none
     /* 0x3090 */ int mSpouse;         // Rank 4, -1 for none
     /* 0x3094 */ BOOL mUnknown3094;
-    /* 0x3098 */ int mUnknown3098;
-    /* 0x309C */ int mUnknown309C;
-    /* 0x30A0 */ int mUnknown30A0;
+    /* 0x3098 */ int mUnknown3098;    // The eating state 0x72 clears it
+    /* 0x309C */ int mUnknown309C;    // and sets it to the number of bites (3, or 80 / the animation's length + 1)
+    /* 0x30A0 */ int mUnknown30A0;    // State 0x52 sets it after the character changed into clothes it was given
     /* 0x30A4 */ u8 mUnknown30A4[0x44];
     /* 0x30E8 */ int mUnknown30E8;
     /* 0x30EC */ BOOL mUnknown1C4Added[3]; // Each of AddUnknown1C4(2), (5), (2) (0x0217507c, 0x021750ac, 0x021750dc) is made once a visit

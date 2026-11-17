@@ -1,11 +1,13 @@
 #include "Scene40.h"
 #include "Scene40Context.h"
 #include "Scene40SpeechWindow.h"
+#include "Scene40Camera.h"
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
 #include "SceneManager.h"
 #include "SceneMemory.h"
 #include "sound/SoundManager.h"
+#include <wchar.h>
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -19,31 +21,43 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
-void func_ov075_02178364(Scene40CharacterPartA *part);
-void func_ov075_0217af40(ItemModel *item); // Hides the held item's model and resets it
 extern const u32 data_ov075_0217b82c[];         // The message of each song slot given as a present
 extern const char *const data_ov075_02182d10[4][5]; // Animation names, by personality kind and mood
 extern const int gPersonalityKinds[16];
 extern const char *const data_ov075_02182d60[4][5]; // Walking animation names, by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_0217510c(Scene40Character *character);
-void func_ov075_02178f50(Scene40CharacterPartB *part);
-BOOL func_ov075_021791cc(Scene40CharacterPartB *part);
-void func_ov075_02179034(Scene40CharacterPartB *part);
-void func_ov075_021790ac(Scene40CharacterPartB *part);
-BOOL func_ov075_02179230(Scene40CharacterPartB *part);
 void func_ov075_02177f54(Scene40Character *character);
-void func_ov075_021751b4(Scene40Character *character);
-void func_ov075_0217513c(Scene40Character *character);
+void func_ov075_02176958(Scene40Character *character);
+void func_ov075_0217654c(Scene40Character *character);
+void func_ov075_0217680c(Scene40Character *character);
+void func_ov075_021768f0(Scene40Character *character);
+void func_ov075_02176924(Scene40Character *character);
+void func_ov075_021767b8(Scene40Character *character);
+void func_ov075_02176e74(Scene40Character *character);
+void func_ov075_02176eb8(Scene40Character *character);
+void MiiData_GetName(const void *mii, wchar_t *name);
+void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 int func_ov075_0217520c(Scene40Character *character);
 void func_ov075_02174a14(Scene40Character *character);
 void func_ov075_02174ad0(Scene40Character *character);
 void func_ov075_02174c00(Scene40Character *character);
-void func_ov075_0217ade4(void *models, ItemModel **model);
-void func_ov075_0217af88(ItemModel *model, int item);
+void func_ov075_0217ade4(void *models, Scene40ItemModel **model);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
+
+// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as SavedCharacter.cpp has it
+struct TroubleInfo {
+    u32 kind : 8;
+    u32 minutes : 16;
+    u32 weight : 8;
+    u32 unk4Bits0 : 8;
+    u32 mood : 8;
+    u32 cooldownMinutes : 12;
+    u32 hasTarget : 4;
+    u32 flags;
+}; // 0xC
+extern "C" TroubleInfo *data_02114d78[];
 
 static inline int Random(int max) {
     return MATH_Rand16(&gRandom, max);
@@ -152,7 +166,7 @@ void Scene40Character::Update(BOOL speaking) {
     func_ov075_02161988(this);
     mHeadIcons[0].Update();
     mHeadIcons[1].Update();
-    func_ov075_02178364(&mPartA);
+    mBalloon.Update();
     if (!speaking) {
         return;
     }
@@ -171,8 +185,8 @@ void Scene40Character::Update(BOOL speaking) {
 // and the report seems to pair one call with the other's.
 void Scene40Character::Draw() {
     Character::Draw();
-    mPartA.Draw();
-    mPartB.Draw();
+    mBalloon.Draw();
+    mCover.Draw();
 }
 
 // --- The scene's character's states 0x44 to 0xB2 (0x02168354 to 0x021722c8) ----------------------------------------
@@ -231,7 +245,7 @@ void Scene40Character::UpdateStates44To47() {
             }
             UpdateAnimSpeed();
             BlendToNamedAnimation("idle00");
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             mFrame = 0;
             mStep++;
@@ -306,7 +320,7 @@ void Scene40Character::UpdateStates44To47() {
             }
             UpdateAnimSpeed();
             BlendToNamedAnimation("idle00");
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             mFrame = 0;
             mStep++;
@@ -466,7 +480,7 @@ void Scene40Character::UpdateStates48To4E() {
                 PlaceHeldItem();
                 mHeldItem->SetScale(((half - mFrame) << FX32_SHIFT) / half);
             } else if (mFrame == half) {
-                func_ov075_0217af40(mHeldItem);
+                mHeldItem->Hide();
                 mHeldItem = NULL;
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
@@ -555,7 +569,7 @@ void Scene40Character::UpdateStates4FTo66() {
                 PlaceHeldItem();
                 mHeldItem->SetScale(((half - mFrame) << FX32_SHIFT) / half);
             } else if (mFrame == half) {
-                func_ov075_0217af40(mHeldItem);
+                mHeldItem->Hide();
                 mHeldItem = NULL;
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
@@ -633,9 +647,9 @@ void Scene40Character::UpdateStates4FTo66() {
             mEntered = FALSE;
             BlendToNamedAnimation("i_wait00");
             UpdateAnimSpeed();
-            mPartB.Switch(1);
-            mPartB.SetPosition(mPos, mAnim.mRotY);
-            func_ov075_02178f50(&mPartB);
+            mCover.SetKind(Scene40Cover::KIND_CURTAIN);
+            mCover.SetPosition(mPos, mAnim.mRotY);
+            mCover.Appear();
             gSoundManager.StartSeqArc(1, 10, 1);
             if (Random(100) < 50) {
                 mUnknown24E = 1;
@@ -645,12 +659,12 @@ void Scene40Character::UpdateStates4FTo66() {
         switch (mStep) {
         case 0:
             PlaceHeldItem();
-            if (!func_ov075_021791cc(&mPartB)) {
+            if (!mCover.HasAppeared()) {
                 return;
             }
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
-            func_ov075_02179034(&mPartB);
+            mCover.PlayWait();
             mFrame = 0;
             mStep++;
             break;
@@ -664,7 +678,7 @@ void Scene40Character::UpdateStates4FTo66() {
             }
             mClothesId = mGift.mItem.InventoryItem::mId;
             OwnClothes(mGift.mItem.InventoryItem::mId);
-            func_ov075_0217510c(this);
+            AddUnknown1C4ByTrouble();
             ModelResources_ReleaseModel(gModelResources, 0);
             ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
             SetArchive(mArchiveName);
@@ -685,16 +699,16 @@ void Scene40Character::UpdateStates4FTo66() {
             if (mFrame < mWait) {
                 return;
             }
-            func_ov075_021790ac(&mPartB);
+            mCover.Disappear();
             gSoundManager.StartSeqArc(1, 10, 0);
             mFrame = 0;
             mStep++;
             break;
         case 3:
-            if (!func_ov075_02179230(&mPartB)) {
+            if (!mCover.HasDisappeared()) {
                 return;
             }
-            mPartB.mModel.mVisible = FALSE;
+            mCover.mModel.mVisible = FALSE;
             mUnknown30A0 = TRUE;
             SetState(0x2E);
             break;
@@ -737,7 +751,7 @@ void Scene40Character::UpdateStates4FTo66() {
             mStep++;
             UpdateAnimSpeed();
             BlendToNamedAnimation("idle00");
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             break;
         case 3:
@@ -829,17 +843,17 @@ void Scene40Character::UpdateStates4FTo66() {
             if (mFrame < mWait) {
                 return;
             }
-            mPartB.Switch(1);
-            mPartB.SetPosition(mPos, mAnim.mRotY);
-            func_ov075_02178f50(&mPartB);
+            mCover.SetKind(Scene40Cover::KIND_CURTAIN);
+            mCover.SetPosition(mPos, mAnim.mRotY);
+            mCover.Appear();
             gSoundManager.StartSeqArc(1, 10, 1);
             mStep++;
             break;
         case 1:
-            if (!func_ov075_021791cc(&mPartB)) {
+            if (!mCover.HasAppeared()) {
                 return;
             }
-            func_ov075_02179034(&mPartB);
+            mCover.PlayWait();
             mFrame = 0;
             mStep++;
             break;
@@ -869,16 +883,16 @@ void Scene40Character::UpdateStates4FTo66() {
             if (mFrame < mWait) {
                 return;
             }
-            func_ov075_021790ac(&mPartB);
+            mCover.Disappear();
             gSoundManager.StartSeqArc(1, 10, 0);
             mFrame = 0;
             mStep++;
             break;
         case 4:
-            if (!func_ov075_02179230(&mPartB)) {
+            if (!mCover.HasDisappeared()) {
                 return;
             }
-            mPartB.mModel.mVisible = FALSE;
+            mCover.mModel.mVisible = FALSE;
             SetState(0);
             break;
         }
@@ -912,7 +926,7 @@ void Scene40Character::UpdateStates4FTo66() {
         if (mEntered) {
             mEntered = FALSE;
             PlayAnimation("i_hoist00", TRUE);
-            func_ov075_0217510c(this);
+            AddUnknown1C4ByTrouble();
             return;
         }
         PlaceHeldItemInHand();
@@ -976,7 +990,7 @@ void Scene40Character::UpdateStates4FTo66() {
             mStep++;
             UpdateAnimSpeed();
             BlendToNamedAnimation("idle00");
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             break;
         case 3:
@@ -1243,7 +1257,7 @@ void Scene40Character::UpdateStates4FTo66() {
                 PlaceHeldItem();
                 mHeldItem->SetScale(((half - mFrame) << FX32_SHIFT) / half);
             } else if (mFrame == half) {
-                func_ov075_0217af40(mHeldItem);
+                mHeldItem->Hide();
                 mHeldItem = NULL;
             } else if (mFrame == threeQuarters) {
                 gSoundManager.StartSeqArc(1, 26, 8);
@@ -1352,7 +1366,7 @@ void Scene40Character::UpdateStates67To85() {
             }
             mStep++;
             mFrame = 0;
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             SetNamedAnimation("idle00");
             break;
@@ -1400,7 +1414,7 @@ void Scene40Character::UpdateStates67To85() {
             UpdateAnimSpeed();
             PlayAnimation("i_give01", TRUE);
             func_ov075_0217ade4(mContext->mUnknown5C, &mHeldItem);
-            func_ov075_0217af88(mHeldItem, 250);
+            mHeldItem->ChangeItem(250);
             mHeldItem->mVisible = FALSE;
             mStep++;
             mFrame = 0;
@@ -1785,7 +1799,7 @@ void Scene40Character::UpdateStates67To85() {
             if (!mTtsPlayer->IsEngineIdle()) {
                 return;
             }
-            func_ov075_021751b4(this);
+            ClearMoodIfTroubleOfKind8();
             gSceneManager.RequestScene(0xB0);
             gSceneMemory.mCharacters[0] = mIndex;
             break;
@@ -1928,7 +1942,7 @@ void Scene40Character::UpdateStates67To85() {
             if (mFrame < mWait) {
                 return;
             }
-            func_ov075_0217af40(mHeldItem);
+            mHeldItem->Hide();
             mHeldItem = NULL;
             BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
             mStep++;
@@ -2344,7 +2358,7 @@ void Scene40Character::UpdateStates67To85() {
             if (!mTtsPlayer->IsEngineIdle()) {
                 return;
             }
-            func_ov075_021751b4(this);
+            ClearMoodIfTroubleOfKind8();
             gSceneManager.RequestScene(0xA3);
             gSceneMemory.mCharacters[0] = mIndex;
             break;
@@ -2630,7 +2644,7 @@ void Scene40Character::UpdateStates67To85() {
             if (!mTtsPlayer->IsEngineIdle()) {
                 return;
             }
-            func_ov075_0217513c(this);
+            ClearMoodIfTroubleOfCategory4OrKind8();
             int partner = func_ov075_0217520c(this);
             if (partner != -1) {
                 gSceneManager.RequestScene(0x79);
@@ -2715,11 +2729,1363 @@ void Scene40Character::UpdateStates67To85() {
     }
 }
 
-void Scene40CharacterPartA::Draw() {
+// The character's state when the player has touched it, and its talk about its troubles (the trouble messages
+// it speaks): 0x86 it stands facing the camera (or walks to face it, 0x88) and, after a while, goes on with what
+// it has to say; 0x89..0x8C it hands the player a present; 0x8D, 0x8E it levels up; 0x8F it walks back into place;
+// 0x90..0x92 asking how to talk to someone it wants as a friend ("How should I talk?", scene 0xAF), 0x93, 0x94
+// whether it became friends; 0x95..0x9C a confession ("How should I confess?", "Should I change first?" with the
+// curtain, scene 0x5A), 0x9C "Why do you object?" and its answers 0x9D..0xA0; 0xA1..0xA4 a fight ("Can I have a
+// moment?", scene 0xAB, "Then calm this anger", scene 0xB2), 0xA5..0xAB making up, separations and their outcomes
+// with a sound and a line in the speech window; 0xAD..0xB0 the word the player teaches it (0xAF repeats it, 0xB0
+// stores it as its motto); 0xB1 recovered from heartbreak.
+void Scene40Character::UpdateStates86ToB2() {
+    Camera *camera = &gCamera;
+    FloorPos target;
+    int brightness;
+
+    switch (mState) {
+    case 0x86:
+        if (mEntered) {
+            mEntered = FALSE;
+            UpdateCameraAngle();
+            if (IsFacingCamera()) {
+                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                UpdateAnimSpeed();
+                TurnHeadToCamera();
+            } else {
+                SetState(0x88);
+            }
+            if (mUnknown2ED4) {
+                gSceneManager.SetSoundGroup(0x37);
+                gSoundManager.StartSeqIfNotPlaying(0, 0x62);
+            }
+        } else if (mFrame == 30) {
+            func_ov075_02176958(this);
+            func_ov075_0217654c(this);
+            if (mUnknown2ED4) {
+                SetState(0x87);
+            }
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        if (mFrame < 60) {
+            return;
+        }
+        if (mUnknown2ED0) {
+            mUnknown2ED0 = FALSE;
+            SetState(0);
+        } else if (IsInTrouble() && data_02114d78[mTroubleCategory][mTroubleId].kind == 18) {
+            SetState(0xAC);
+        }
+        if (mUnknown2ED8) {
+            func_ov075_0217680c(this);
+            return;
+        }
+        if (mUnknown2EDC) {
+            func_ov075_021768f0(this);
+            return;
+        }
+        if (!IsInTrouble()) {
+            return;
+        }
+        if (data_02114d78[mTroubleCategory][mTroubleId].kind != 6) {
+            return;
+        }
+        func_ov075_02176924(this);
+        break;
+    case 0x87:
+        if (mEntered) {
+            mEntered = FALSE;
+            return;
+        }
+        if (mStep != 0) {
+            return;
+        }
+        if (gSoundManager.GetSeqTick(0) < 548) {
+            return;
+        }
+        func_ov075_021767b8(this);
+        break;
+    case 0x88:
+        if (mEntered) {
+            mEntered = FALSE;
+            ResetHeadTurn();
+            BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            ResetSoundPhase(0);
+            UpdateSpeedScales();
+            target.x = camera->mEye.x;
+            target.z = camera->mEye.z;
+            SetTargetFloorPos(target);
+            return;
+        }
+        if (TurnToWalkTarget(0x280, 0)) {
+            SetState(0x86);
+        }
+        MoveAlongAngle();
+        PlaySoundOnce(1, 0, 26);
+        break;
+    case 0x89:
+        if (mEntered) {
+            mEntered = FALSE;
+            mUnknown2B28 = 0;
+            SetFace(8);
+            PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+            UpdateAnimSpeed();
+            mShadowVisible = TRUE;
+            TurnHeadToCamera();
+            Speak(0, 0x1C9, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x8B);
+        break;
+    case 0x8A:
+        if (mEntered) {
+            mEntered = FALSE;
+            mUnknown2B28 = 0;
+            SetFace(8);
+            PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+            UpdateAnimSpeed();
+            mShadowVisible = TRUE;
+            TurnHeadToCamera();
+            Speak(0, 0x1CB, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x8B);
+        break;
+    case 0x8B:
+        if (mEntered) {
+            mEntered = FALSE;
+            TurnHeadToCamera();
+            UpdateAnimSpeed();
+            PlayAnimation("i_give01", TRUE);
+            func_ov075_0217ade4(mContext->mUnknown5C, &mHeldItem);
+            mHeldItem->ChangeItem(mGift.mMessage);
+            mHeldItem->mVisible = FALSE;
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (!GetAnimation()->mFinished) {
+                ModelAnimation *animation = GetAnimation();
+                int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
+                int quarter = frames / 4;
+                int half = frames / 2;
+                if (mFrame == quarter) {
+                    gSoundManager.StartSeqArc(1, 26, 8);
+                } else if (mFrame == half) {
+                    fx32 scale = ((mFrame - half + 1) << FX32_SHIFT) / (frames - half);
+                    mHeldItem->SetScale(scale);
+                    mHeldItem->mVisible = TRUE;
+                    PlaceHeldItem(scale);
+                } else if (mFrame > half) {
+                    fx32 scale = ((mFrame - half + 1) << FX32_SHIFT) / (frames - half);
+                    mHeldItem->SetScale(scale);
+                    PlaceHeldItem(scale);
+                }
+            } else {
+                PlayAnimation("i_give00", TRUE);
+                SetAnimSpeed(0xA66);
+                mHeldItem->SetScale(FX32_ONE);
+                PlaceHeldItem();
+                mFrame = 0;
+                mStep++;
+            }
+            break;
+        case 1:
+            PlaceHeldItem();
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            SetState(0x8C);
+            break;
+        }
+        break;
+    case 0x8C:
+        if (mEntered) {
+            mEntered = FALSE;
+        }
+        break;
+    case 0x8D:
+        if (mEntered) {
+            mEntered = FALSE;
+            PlayAnimation("levelup00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(2);
+            ResetHeadTurn();
+            mHeadIcons[0].Show();
+            mHeadIcons[0].mIconId = 6;
+            mHeadIcons[0].Reload();
+            mHeadIcons[0].SetMode(3);
+            mHeadIconPlaces[0] = ICON_AT_HEAD;
+            mHeadIcons[1].Show();
+            mHeadIcons[1].mIconId = 7;
+            mHeadIcons[1].Reload();
+            mHeadIcons[1].SetMode(3);
+            mHeadIconPlaces[1] = ICON_AT_BODY;
+            return;
+        }
+        if (mFrame == 1) {
+            gSoundManager.StartSeqArc(1, 27, 9);
+            gSoundManager.StopSeq(0, 1);
+        } else if (GetAnimation()->mFinished) {
+            SetFace(9);
+            SetState(0x8E);
+        }
+        break;
+    case 0x8E:
+        if (mEntered) {
+            mEntered = FALSE;
+        }
+        break;
+    case 0x8F:
+        if (mEntered) {
+            mEntered = FALSE;
+            mUnknown2B28 = 0;
+            SetFace(8);
+            mShadowVisible = TRUE;
+            UpdateCameraAngle();
+            if (IsFacingCameraClosely()) {
+                PlayAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood], FALSE);
+                UpdateAnimSpeed();
+                mStep = 1;
+                return;
+            } else {
+                PlayAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood], FALSE);
+                UpdateAnimSpeed();
+                ResetSoundPhase(0);
+                mUnknown2EA8 = mContext->mUnknown54->GetEyeFloorPos();
+                SetTargetFloorPos(mUnknown2EA8);
+                mStep = 0;
+            }
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (TurnToWalkTarget(0x280, 0)) {
+                BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+                mStep++;
+            }
+            MoveAlongAngle();
+            PlaySoundOnce(1, 0, 26);
+            break;
+        case 1:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep++;
+            break;
+        case 2:
+            if (mFrame >= 35) {
+                mStep++;
+            }
+            break;
+        case 3:
+            Speak(0, 0x1CD, 0);
+            mStep++;
+            break;
+        case 4:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x8B);
+            break;
+        }
+        break;
+    case 0x90:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x160, 2);
+        }
+        break;
+    case 0x91:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x162, 2);
+        }
+        break;
+    case 0x92:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x164, 2);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        gSceneManager.RequestScene(0xAF);
+        gSceneMemory.mCharacters[0] = mTroubleTarget;
+        gSceneMemory.mCharacters[1] = mIndex;
+        break;
+    case 0x93:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            gSoundManager.MoveSeqVolume(0, 0, 10);
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x6C);
+            gSoundManager.StartSeq(0, 0x7C);
+            gSoundManager.LoadGroup(0x4D);
+            PlayAnimation("happy00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(2);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1A7, SpeechWindow::MODE_FRAMES, 120);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (mFrame < 120) {
+                return;
+            }
+            Speak(0, 0x168, 0);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0x94:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 40) {
+                return;
+            }
+            Speak(0, 0x16A, 0);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0x95:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x16C, 2);
+        }
+        break;
+    case 0x96:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x16E, 2);
+        }
+        break;
+    case 0x97:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x170, 2);
+        }
+        break;
+    case 0x98:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x172, 0);
+            mStep = 0;
+            mFrame = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            gSoundManager.MoveSeqVolume(0, 0, 60);
+            break;
+        case 1:
+            brightness = mFrame * 2;
+            if (brightness > 16) {
+                brightness = 16;
+            } else if (brightness < 0) {
+                brightness = 0;
+            }
+            ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, brightness);
+            if (mFrame < 8) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (mFrame < 52) {
+                return;
+            }
+            gSceneManager.RequestScene(0x5A);
+            gSceneMemory.mCharacters[0] = mIndex;
+            gSceneMemory.mCharacters[1] = mTroubleTarget;
+            break;
+        }
+        break;
+    case 0x99:
+        if (mEntered) {
+            mEntered = FALSE;
+            mStep = 0;
+            mFrame = 0;
+            TurnHeadToCamera();
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 45) {
+                return;
+            }
+            Speak(0, 0x174, 0);
+            mStep++;
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            gSoundManager.MoveSeqVolume(0, 0, 60);
+            break;
+        case 2:
+            brightness = mFrame * 2;
+            if (brightness > 16) {
+                brightness = 16;
+            } else if (brightness < 0) {
+                brightness = 0;
+            }
+            ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, brightness);
+            if (mFrame < 8) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (mFrame < 52) {
+                return;
+            }
+            gSceneManager.RequestScene(0x5A);
+            gSceneMemory.mCharacters[0] = mIndex;
+            gSceneMemory.mCharacters[1] = mTroubleTarget;
+            break;
+        }
+        break;
+    case 0x9A:
+        if (mEntered) {
+            mEntered = FALSE;
+            ShowBalloon(3);
+            ResetHeadTurn();
+            mUnknown2EA0.x = 0;
+            mUnknown2EA0.z = 0;
+            SetTargetFloorPos(mUnknown2EA0);
+            if (!WalkToTarget(ScaleBySpeed(0x7A), 0x22, 4)) {
+                ResetSoundPhase(0);
+                BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                mStep = 0;
+                MoveAlongAngle();
+            } else {
+                target.x = camera->mEye.x;
+                target.z = camera->mEye.z;
+                SetTargetFloorPos(target);
+                MoveAlongAngle();
+                if (!TurnToWalkTarget(0x280, 0)) {
+                    ResetSoundPhase(0);
+                    BlendToNamedAnimation(data_ov075_02182d60[gPersonalityKinds[mPersonality]][mMood]);
+                    mStep = 1;
+                } else {
+                    BlendToNamedAnimation("idle00");
+                    mStep = 3;
+                }
+                MoveAlongAngle();
+            }
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            PlaySoundOnce(1, 0, 26);
+            if (WalkToTarget(ScaleBySpeed(0x7A), 0x22, 4)) {
+                target.x = camera->mEye.x;
+                target.z = camera->mEye.z;
+                SetTargetFloorPos(target);
+                mStep++;
+            }
+            MoveAlongAngle();
+            break;
+        case 1:
+            PlaySoundOnce(1, 0, 26);
+            if (TurnToWalkTarget(0x280, 0)) {
+                mStep++;
+            }
+            MoveAlongAngle();
+            break;
+        case 2:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            BlendToNamedAnimation("idle00");
+            mStep++;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            SetState(0x9B);
+            break;
+        }
+        break;
+    case 0x9B:
+        if (mEntered) {
+            mEntered = FALSE;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 20;
+            if (mFrame < mWait) {
+                return;
+            }
+            mCover.SetKind(Scene40Cover::KIND_CURTAIN);
+            mCover.SetPosition(mPos, mAnim.mRotY);
+            mCover.Appear();
+            gSoundManager.StartSeqArc(1, 10, 1);
+            mStep++;
+            break;
+        case 1:
+            if (!mCover.HasAppeared()) {
+                return;
+            }
+            mCover.PlayWait();
+            mFrame = 0;
+            mStep++;
+            break;
+        case 2:
+            mWait = 52;
+            if (mFrame == 10 || mFrame == 36) {
+                gSoundManager.StartSeqArc(1, 10, 2);
+            }
+            if (mFrame < mWait) {
+                return;
+            }
+            ModelResources_ReleaseModel(gModelResources, 0);
+            ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
+            SetArchive(mArchiveName);
+            ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
+            ModelResources_SetModel(gModelResources, 0, mModelPath);
+            MakeModel(0, 0);
+            UpdateBodyColors();
+            mFrame = 0;
+            mStep++;
+            break;
+        case 3:
+            mWait = 52;
+            if (mFrame == 10 || mFrame == 36) {
+                gSoundManager.StartSeqArc(1, 10, 2);
+            }
+            if (mFrame < mWait) {
+                return;
+            }
+            mCover.Disappear();
+            gSoundManager.StartSeqArc(1, 10, 0);
+            mFrame = 0;
+            mStep++;
+            break;
+        case 4:
+            if (!mCover.HasDisappeared()) {
+                return;
+            }
+            mCover.mModel.mVisible = FALSE;
+            SetState(0x99);
+            break;
+        }
+        break;
+    case 0x9C:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(13);
+            BlendToNamedAnimation("idle00");
+            mTtsPlayer->StopEngine();
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 45) {
+                return;
+            }
+            SetFace(8);
+            Speak(0, 0x176, 2);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            mStep++;
+            break;
+        case 1:
+            break;
+        }
+        break;
+    case 0x9D:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x178, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x33);
+        break;
+    case 0x9E:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x17A, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x33);
+        break;
+    case 0x9F:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x17C, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x33);
+        break;
+    case 0xA0:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x17E, 0);
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x33);
+        break;
+    case 0xA1:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(10);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][1]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 40;
+            if (mFrame < mWait) {
+                return;
+            }
+            mStep++;
+            Speak(0, 0x182, 0);
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            gSceneManager.RequestScene(0xAB);
+            gSceneMemory.mCharacters[0] = mIndex;
+            gSceneMemory.mCharacters[1] = mTroubleTarget;
+            break;
+        }
+        break;
+    case 0xA2:
+        if (mEntered) {
+            mEntered = FALSE;
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 10;
+            if (mFrame < mWait) {
+                return;
+            }
+            mStep++;
+            Speak(0, 0x184, 0);
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0);
+            break;
+        }
+        break;
+    case 0xA3:
+        if (mEntered) {
+            mEntered = FALSE;
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
+            TurnHeadToCamera();
+            mHeadIcons[0].SetMode(1);
+            mHeadIcons[1].SetMode(1);
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        if (mFrame < 72) {
+            return;
+        }
+        SetState(0xA4);
+        break;
+    case 0xA4:
+        if (mEntered) {
+            mEntered = FALSE;
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][0]);
+            TurnHeadToCamera();
+            mHeadIcons[0].SetMode(1);
+            mHeadIcons[1].SetMode(1);
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 40;
+            if (mFrame < mWait) {
+                return;
+            }
+            mStep++;
+            Speak(0, 0x186, 0);
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            gSceneManager.RequestScene(0xB2);
+            gSceneMemory.mCharacters[0] = mTroubleTarget;
+            gSceneMemory.mCharacters[1] = mIndex;
+            break;
+        }
+        break;
+    case 0xA5:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x6F);
+            gSoundManager.StartSeq(0, 0x7F);
+            gSoundManager.LoadGroup(0x4D);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1A9, SpeechWindow::MODE_MANUAL, 120);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (gSoundManager.CountPlayingSeq(0x7F) != 0) {
+                return;
+            }
+            mContext->mSpeechWindow->Hide();
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 4:
+            if (mFrame < 20) {
+                return;
+            }
+            Speak(0, 0x188, 0);
+            mStep++;
+            break;
+        case 5:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xA6:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x70);
+            gSoundManager.StartSeq(0, 0x80);
+            gSoundManager.LoadGroup(0x4D);
+            PlayAnimation("sign00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(4);
+            mStep++;
+            mFrame = 0;
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1AA, SpeechWindow::MODE_MANUAL, 120);
+            break;
+        case 1:
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (gSoundManager.CountPlayingSeq(0x80) != 0) {
+                return;
+            }
+            mContext->mSpeechWindow->Hide();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 4:
+            if (mFrame < 20) {
+                return;
+            }
+            Speak(0, 0x18A, 0);
+            mStep++;
+            break;
+        case 5:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xA7:
+        if (mEntered) {
+            mEntered = FALSE;
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 10;
+            if (mFrame < mWait) {
+                return;
+            }
+            mStep++;
+            Speak(0, 0x18C, 1, mTroubleTarget, 0);
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            gSoundManager.MoveSeqVolume(0, 0, 120);
+            break;
+        case 2:
+            brightness = mFrame * 2;
+            if (brightness > 16) {
+                brightness = 16;
+            } else if (brightness < 0) {
+                brightness = 0;
+            }
+            ScreenControl_SetBlendBrightness(&gScreenControl, 0x3F3F, brightness);
+            if (mFrame < 8) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (mFrame < 112) {
+                return;
+            }
+            gSceneManager.RequestScene(0xB3);
+            gSceneMemory.mCharacters[0] = mIndex;
+            gSceneMemory.mCharacters[1] = mTroubleTarget;
+            break;
+        }
+        break;
+    case 0xA8:
+        if (mEntered) {
+            mEntered = FALSE;
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 45;
+            if (mFrame < mWait) {
+                return;
+            }
+            mStep++;
+            Speak(0, 0x18E, 0);
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            gSceneManager.RequestScene(0xB5);
+            gSceneMemory.mCharacters[0] = mIndex;
+            gSceneMemory.mCharacters[1] = mTroubleTarget;
+            break;
+        }
+        break;
+    case 0xA9:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0: {
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x71);
+            gSoundManager.StartSeq(0, 0x81);
+            gSoundManager.LoadGroup(0x4D);
+            PlayAnimation("sign00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(4);
+            mStep++;
+            mFrame = 0;
+            SavedCharacter other;
+            wchar_t otherName[11];
+            wchar_t name[11];
+            GameData_ReadCharacter(&gGameData, mTroubleTarget, &other);
+            MiiData_GetName(this, name);
+            MiiData_GetName(&other, otherName);
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->SetStringArg(name, 0);
+            mContext->mSpeechWindow->SetStringArg(otherName, 1);
+            mContext->mSpeechWindow->Show(0x1AD, SpeechWindow::MODE_MANUAL, 120);
+            break;
+        }
+        case 1:
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (gSoundManager.CountPlayingSeq(0x81) != 0) {
+                return;
+            }
+            mContext->mSpeechWindow->Hide();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 4:
+            if (mFrame < 20) {
+                return;
+            }
+            Speak(0, 0x190, 0);
+            mStep++;
+            break;
+        case 5:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xAA:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x72);
+            gSoundManager.StartSeq(0, 0x82);
+            gSoundManager.LoadGroup(0x4D);
+            SetFace(8);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1AB, SpeechWindow::MODE_MANUAL, 120);
+            SetFace(8);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (gSoundManager.CountPlayingSeq(0x82) != 0) {
+                return;
+            }
+            mContext->mSpeechWindow->Hide();
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 4:
+            if (mFrame < 20) {
+                return;
+            }
+            Speak(0, 0x192, 0);
+            mStep++;
+            break;
+        case 5:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xAB:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x73);
+            gSoundManager.StartSeq(0, 0x83);
+            gSoundManager.LoadGroup(0x4D);
+            PlayAnimation("sign00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(4);
+            mStep++;
+            mFrame = 0;
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1AA, SpeechWindow::MODE_MANUAL, 120);
+            break;
+        case 1:
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (gSoundManager.CountPlayingSeq(0x83) != 0) {
+                return;
+            }
+            mContext->mSpeechWindow->Hide();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 3:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mStep++;
+            mFrame = 0;
+            break;
+        case 4:
+            if (mFrame < 20) {
+                return;
+            }
+            Speak(0, 0x194, 0);
+            mStep++;
+            break;
+        case 5:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xAC:
+        if (mEntered) {
+            mEntered = FALSE;
+        }
+        break;
+    case 0xAD:
+        if (mEntered) {
+            mEntered = FALSE;
+            func_ov075_02176e74(this);
+        }
+        break;
+    case 0xAE:
+        if (mEntered) {
+            mEntered = FALSE;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 30) {
+                return;
+            }
+            func_ov075_02176eb8(this);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xAF:
+        if (mEntered) {
+            mEntered = FALSE;
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 23;
+            if (mFrame < mWait) {
+                return;
+            }
+            if (wcslen(mTaughtWord) <= 13) {
+                Speak(0, 0x118, 6, 0, 2);
+            } else {
+                Speak(0, 0x11A, 6, 0, 2);
+            }
+            mStep++;
+            break;
+        case 1:
+            break;
+        }
+        break;
+    case 0xB0:
+        if (mEntered) {
+            mEntered = FALSE;
+            Speak(0, 0x11C, 0);
+            switch (mTroubleId) {
+            case 0:
+                wcscpy(mMotto, mTaughtWord);
+                break;
+            case 1:
+                wcscpy(mMottos[0], mTaughtWord);
+                break;
+            case 2:
+                wcscpy(mMottos[1], mTaughtWord);
+                break;
+            case 3:
+                wcscpy(mMottos[2], mTaughtWord);
+                break;
+            case 4:
+                wcscpy(mMottos[3], mTaughtWord);
+                break;
+            }
+            return;
+        }
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        SetState(0x33);
+        break;
+    case 0xB1:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mFrame = 0;
+            mStep = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            if (mFrame < 40) {
+                return;
+            }
+            gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, FALSE);
+            gSceneManager.SetSoundGroup(0x74);
+            gSoundManager.StartSeq(0, 0x84);
+            gSoundManager.LoadGroup(0x4D);
+            PlayAnimation("levelup00", TRUE);
+            SetAnimSpeed(FX32_ONE);
+            SetFace(1);
+            mStep++;
+            mFrame = 0;
+            break;
+        case 1:
+            if (!GetAnimation()->mFinished) {
+                return;
+            }
+            mContext->mSpeechWindow->mMessageFile = mContext->mTroubleMessages;
+            mContext->mSpeechWindow->mText[0].mHAlign = 1;
+            mContext->mSpeechWindow->Show(0x1B4, SpeechWindow::MODE_FRAMES, 120);
+            SetFace(8);
+            UpdateAnimSpeed();
+            mStep++;
+            mFrame = 0;
+            break;
+        case 2:
+            if (mFrame < 120) {
+                return;
+            }
+            BlendToNamedAnimation(data_ov075_02182d10[gPersonalityKinds[mPersonality]][mMood]);
+            Speak(0, 0x180, 0);
+            mStep++;
+            break;
+        case 3:
+            if (!mTtsPlayer->IsEngineIdle()) {
+                return;
+            }
+            SetState(0x33);
+            break;
+        }
+        break;
+    case 0xB2:
+        if (mEntered) {
+            mEntered = FALSE;
+        }
+        break;
+    }
+}
+
+void Scene40Balloon::Draw() {
     mModel.Draw();
 }
 
-void Scene40CharacterPartB::Draw() {
+void Scene40Cover::Draw() {
     mModel.Draw();
 }
 
