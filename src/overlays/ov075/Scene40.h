@@ -23,6 +23,7 @@
 #include "Scene40Context.h"
 #include "Scene40Character.h"
 #include "Scene40Clock.h"
+#include "Scene40ItemModel.h"
 #include "Scene40ChoiceList.h"
 #include "Scene40MessageSequence.h"
 #include "Scene40Meter.h"
@@ -46,14 +47,6 @@ class Scene40Button : public SpriteButton {
 public:
     /* 0xF4 */ int mUnknownF4;
 }; // 0xF8
-
-// A model of an item with fields of its own. Its constructor (0x020431A0) and D1 (0x020431CC) follow the scene's
-// constructor, for __cxa_vec_ctor; its table (0x02110A7C) is this file's data, its D0 (0x0204ADCC) at the file's
-// end.
-class Scene40ItemModel : public ItemModel {
-public:
-    /* 0x12C */ u8 mUnknown12C[0x1C];
-}; // 0x148
 
 // The scene's list: the shops' ItemListView with the five virtual functions of the overlay's own (0x0215E028 to
 // 0x0215E4E0, table 0x02182CD0). Its constructor is inline.

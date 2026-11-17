@@ -32,10 +32,6 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Of ov075-e
 int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
 void func_ov075_021762ac(Scene40Character *character);
-BOOL func_ov075_0217ade4(void *models, Scene40ItemModel **model);
-void func_ov075_0217af40(Scene40ItemModel *model);
-void func_ov075_0217af88(Scene40ItemModel *model, int item);
-void func_ov075_021750dc(Scene40Character *character);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
@@ -335,7 +331,7 @@ void Scene40ListPage::Update() {
 }
 
 void Scene40ListPage::Open() {
-    func_ov075_0217ade4(mContext->mPhysics, &mItemModel);
+    mContext->mPhysics->TakeFreeItem(&mItemModel);
     mContext->mSpeechWindow->Hide();
     PaletteLoader_SetBackdrop(&gPaletteLoader, 0x77DC, 0x100);
     if (mSortClothes) {
@@ -523,12 +519,12 @@ void Scene40ListPage::Choose() {
                 break;
             case MODE_DRESS:
                 mContext->mCharacter->mClothesId = (u16)mChosenId;
-                func_ov075_021750dc(mContext->mCharacter);
+                mContext->mCharacter->AddUnknown1C4Once2();
                 mContext->mCharacter->SetState(0x55);
                 break;
             case MODE_DRESS_2:
                 mContext->mCharacter->mClothesId = (u16)mChosenId;
-                func_ov075_021750dc(mContext->mCharacter);
+                mContext->mCharacter->AddUnknown1C4Once2();
                 mContext->mCharacter->SetState(0x9A);
                 break;
             }
@@ -583,7 +579,7 @@ void Scene40ListPage::Choose() {
 }
 
 void Scene40ListPage::Close() {
-    func_ov075_0217af40(mItemModel);
+    mItemModel->Hide();
     mItemModel = NULL;
     mMannequin->SetVisible(FALSE);
     mOkButton.mVisible = FALSE;
@@ -668,9 +664,9 @@ void Scene40ListPage::ShowItem(u16 id) {
     SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
     switch (mGift.mKind) {
     case 0:
-        func_ov075_0217af88(mItemModel, id);
+        mItemModel->ChangeItem(id);
         mItemModel->mVisible = TRUE;
-        *(BOOL *)&mItemModel->mUnknown12C[0x10] = TRUE; // TODO: ov075-e's field
+        mItemModel->mMotion.mHeld = TRUE;
         mMannequin->SetVisible(FALSE);
         mGift.Set(0, id);
         break;
@@ -1267,7 +1263,7 @@ void Scene40TalkPage::UpdateFourAnswers() {
 void Scene40TalkPage::UpdateWaitMessages() {
     Scene40MessageSequence *sequence = mContext->mMessageSequence;
     if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
-        mNextState = *(int *)sequence->mUnknown30;
+        mNextState = sequence->mReturnState;
     }
 }
 
@@ -1286,7 +1282,7 @@ void Scene40TalkPage::UpdateLeaveA() {
             return;
         }
         mContext->mCharacter->SetState(0);
-        *(int *)mContext->mMessageSequence->mUnknown30 = STATE_LEAVE_A;
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_A;
         mNextState = STATE_WAIT_MESSAGES;
         mContext->mMessageSequence->mEntry = 1;
         mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
@@ -1305,7 +1301,7 @@ void Scene40TalkPage::UpdateLeaveB() {
             return;
         }
         mContext->mCharacter->SetState(0);
-        *(int *)mContext->mMessageSequence->mUnknown30 = STATE_LEAVE_B;
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_B;
         mNextState = STATE_WAIT_MESSAGES;
         mContext->mMessageSequence->mEntry = 3;
         mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;

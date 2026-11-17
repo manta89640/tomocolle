@@ -9,6 +9,9 @@
 #include "item/Item.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40ItemModel.h"
+#include "Scene40Physics.h"
+
 struct Scene40Context;
 class Scene40SpeechWindow;
 
@@ -100,6 +103,52 @@ public:
     void UpdateStatesBDToC5();
     void UpdateStatesC6ToD1();
 
+    // ov075-e's (0x021722c8 to 0x02179728)
+    void ForceState(int state);
+    void ShowBalloon(int state);
+    BOOL IsBalloonTouched();
+    void UpdateCameraAngle();
+    BOOL IsFacingCameraLoosely();
+    BOOL IsFacingCamera();
+    BOOL IsFacingCameraClosely();
+    void PlaceHeldItem(fx32 scale);
+    void Speak(int file, u32 message, int count, int *types, int *values, int mode);
+    void TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    u16 GetHeadPitchTo(VecFx32 *target);
+    u16 GetHeadYawTo(VecFx32 *target);
+    u16 GetAngleTo(VecFx32 *target);
+    int GetGoodsSatisfaction(int item);
+    int GetGoodsReaction(int item);
+    int GetClothesSatisfaction(int clothes);
+    int GetClothesReaction(int clothes);
+    int GetInteriorReaction(int interior);
+    int GetInteriorSatisfaction(int interior);
+    BOOL RankLikedItem(int item);
+    void SetUnknown23CFromFullness(s64 now);
+    void AddUnknown1C4Once0();
+    void AddUnknown1C4Once1();
+    void AddUnknown1C4Once2();
+    void AddUnknown1C4ByTrouble();
+    void ClearMoodIfTroubleOfCategory4OrKind8();
+    void ClearMoodIfTroubleOfKind8();
+    BOOL HasSomethingToTell();
+    BOOL IsDreaming();
+    int ChooseActivity();
+    void SetTaughtWord(const wchar_t *word);
+    void SetTaughtText(const wchar_t *text);
+    void StopHeadTurn();
+    void FaceCamera();
+    void TurnHeadToHeldItem(int pitchLimit, int yawLimit);
+    void SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    void SnapHeadToCamera();
+    int GetAge(SavedCharacter *character, RTCDate *date);
+    void SetGift(Scene40Gift *gift);
+    BOOL WalkToMiddleIfAway();
+    BOOL WalkToCameraIfNotFacing();
+    BOOL TakeOfferedItem();
+    void PlaceCoverAtHands();
+    void UpdateMouthByAnimation();
+
     void SetState(int state);
     void PlaceHeldItem();
     void PlaceHeldItemInHand();
@@ -114,8 +163,11 @@ public:
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
         AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId)->mPlayOnce = once;
     }
-    void BlendToAnimation(const char *name) {
+    void BlendToNamedAnimation(const char *name) {
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
+    }
+    void SetNamedAnimation(const char *name) {
+        Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
     }
     ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
     void SetTargetFloorPos(FloorPos pos) {
@@ -123,8 +175,10 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ u8 mUnknown2B18[0xBC]; // An object of the overlay's (0x0217aea8 initialises it)
-    /* 0x2BD4 */ ItemModel *mHeldItem;  // The item it holds out or receives
+    /* 0x2B18 */ Scene40Motion mMotion;
+    /* 0x2B30 */ wchar_t mTaughtWord[17];
+    /* 0x2B52 */ wchar_t mTaughtText[65];
+    /* 0x2BD4 */ Scene40ItemModel *mHeldItem;  // The item it holds out or receives
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x2BE0 */ Scene40Context *mContext;
@@ -141,10 +195,8 @@ public:
     /* 0x2E94 */ BOOL mEntered;  // The state has just been set
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
-    /* 0x2EA0 */ int mUnknown2EA0;
-    /* 0x2EA4 */ int mUnknown2EA4;
-    /* 0x2EA8 */ int mUnknown2EA8;
-    /* 0x2EAC */ int mUnknown2EAC;
+    /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
+    /* 0x2EA8 */ FloorPos mUnknown2EA8; // State 0x8F walks to it (0x0217a48c of the context's mUnknown54)
     /* 0x2EB0 */ u16 mUnknown2EB0;
     /* 0x2EB2 */ u16 mCameraAngle; // mAngle less the angle to the camera's eye (0x02173f18)
     /* 0x2EB4 */ int mUnknown2EB4;
@@ -153,9 +205,12 @@ public:
     /* 0x2EC0 */ int mUnknown2EC0;
     /* 0x2EC4 */ BOOL mLipSync;    // Update moves the lips with the speech only while it is set
     /* 0x2EC8 */ u8 mUnknown2EC8[0x8];
-    /* 0x2ED0 */ int mUnknown2ED0[4];
+    /* 0x2ED0 */ BOOL mUnknown2ED0;   // State 0x86 (standing after a touch) tests these four: back to state 0,
+    /* 0x2ED4 */ BOOL mUnknown2ED4;   // sound group 0x37 and sequence 0x62 then state 0x87 at frame 30,
+    /* 0x2ED8 */ BOOL mUnknown2ED8;   // 0x0217680c,
+    /* 0x2EDC */ BOOL mUnknown2EDC;   // 0x021768f0
     /* 0x2EE0 */ int mUnknown2EE0[3];
-    /* 0x2EEC */ u8 mUnknown2EEC[0x4];
+    /* 0x2EEC */ BOOL mHoldingGift;   // The gift page sets it while the character holds the item it received
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist
     /* 0x2EF4 */ int mFriendCount;
     /* 0x2EF8 */ int mFriends[100];   // Their indices: rank 1 and a meter over 100
@@ -163,9 +218,9 @@ public:
     /* 0x308C */ int mLover;          // Rank 2, -1 for none
     /* 0x3090 */ int mSpouse;         // Rank 4, -1 for none
     /* 0x3094 */ BOOL mUnknown3094;
-    /* 0x3098 */ int mUnknown3098;
-    /* 0x309C */ int mUnknown309C;
-    /* 0x30A0 */ int mUnknown30A0;
+    /* 0x3098 */ int mUnknown3098;    // The eating state 0x72 clears it
+    /* 0x309C */ int mUnknown309C;    // and sets it to the number of bites (3, or 80 / the animation's length + 1)
+    /* 0x30A0 */ int mUnknown30A0;    // State 0x52 sets it after the character changed into clothes it was given
     /* 0x30A4 */ u8 mUnknown30A4[0x44];
     /* 0x30E8 */ int mUnknown30E8;
     /* 0x30EC */ BOOL mUnknown1C4Added[3]; // Each of AddUnknown1C4(2), (5), (2) (0x0217507c, 0x021750ac, 0x021750dc) is made once a visit
