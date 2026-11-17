@@ -142,9 +142,10 @@ its library's compiler and flags, from the `LIBRARIES` table in `configure.py`.
 each only if the ROM still matches when it is linked from the compiled object. It leaves a unit alone whose object
 has data that its entry in `delinks.txt` does not place yet.
 
-Placing that data is the next step for the library files, and is not done. `tools/place_data.py` works out where a
-file's data is from the addresses in its matched functions, and reports it, but what it writes is not usable yet:
-see its header.
+`tools/place_data.py` works out where a file's data is from the addresses in its matched functions, and with
+`--unit <source> --complete --apply` places one file's data, names its objects and marks it complete; the build then
+decides (see its header). One unit at a time, so, 38 library files were completed in round 5; what kept the others
+back is in binary.md, "Libraries".
 
 A library function that objdiff scores 0% is often already right and only has dsd's name: objdiff pairs functions by
 name, and dsd gives a file's statics address names. Before changing anything, compare the compiled object with

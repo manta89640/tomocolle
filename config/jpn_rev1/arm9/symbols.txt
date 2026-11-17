@@ -4215,11 +4215,11 @@ sTexPlttStartAddrTable kind:data(any) addr:0x020b4914 local
 sTexStartAddrTable kind:data(any) addr:0x020b4924 local
 col_table$8275 kind:data(short[16]) addr:0x020b4984 local
 SNDi_DecibelTable kind:data(any) addr:0x020b4aa4
-VolumeTable kind:data(any) addr:0x020b51a4
+VolumeTable kind:data(any) addr:0x020b51a4 local
 fsi_default_command kind:data(any) addr:0x020b5478
 data_020b549c kind:data(any) addr:0x020b549c
 data_020b54dc kind:data(any) addr:0x020b54dc
-table$8357 kind:data(any) addr:0x020b5534
+table$8357 kind:data(any) addr:0x020b5534 local
 __upper_mapC kind:data(any) addr:0x020b555c
 __ctype_mapC kind:data(any) addr:0x020b55dc
 @635 kind:data(any) addr:0x020b56dc local
@@ -4330,14 +4330,14 @@ sTab1Sequences kind:data(any) addr:0x020b60c4 local
 sTab1PressedSequences kind:data(any) addr:0x020b60d4 local
 sSortMenuScreenName kind:data(any) addr:0x020b60e4 local
 data_020b60fc kind:data(any) addr:0x020b60fc
-cAdpcmIndexTable kind:data(any) addr:0x020b610c
-cAdpcmStepSizeTable kind:data(any) addr:0x020b611c
+cAdpcmIndexTable kind:data(any) addr:0x020b610c local
+cAdpcmStepSizeTable kind:data(any) addr:0x020b611c local
 NNSi_objSizeHTbl kind:data(short[12]) addr:0x020b61d0
 NNSi_objSizeWTbl kind:data(short[12]) addr:0x020b61e8
-pltFmtTbl$8998 kind:data(any) addr:0x020b6208
-texSize_$8905 kind:data(any) addr:0x020b6210
-gxTexSizeSTbl kind:data(any) addr:0x020b6230
-gxTexSizeTTbl kind:data(any) addr:0x020b6260
+pltFmtTbl$8998 kind:data(any) addr:0x020b6208 local
+texSize_$8905 kind:data(any) addr:0x020b6210 local
+gxTexSizeSTbl kind:data(any) addr:0x020b6230 local
+gxTexSizeTTbl kind:data(any) addr:0x020b6260 local
 sBG256x16PlttModeTable kind:data(any) addr:0x020b6290
 addrTable$10321 kind:data(any) addr:0x020b62a0
 sBGAffineModeTable kind:data(any) addr:0x020b62b0
@@ -4858,10 +4858,10 @@ gStr_MOJ_Dummy_ncg kind:data(any) addr:0x020fc60c
 gStr_MOJ_Dummy_nce_2 kind:data(any) addr:0x020fc61c
 gStr_MOJ_Dummy_ncg_2 kind:data(any) addr:0x020fc62c
 gStr_sound_data_sdat kind:data(any) addr:0x020fc63c
-sIsDispOn kind:data(any) addr:0x020fc64c
+sIsDispOn kind:data(any) addr:0x020fc64c local
 GXi_DmaId kind:data(any) addr:0x020fc650
 OSi_IrqCallbackInfoIndex kind:data(any) addr:0x020fc654
-OSi_ConsoleTypeCache kind:data(any) addr:0x020fc664
+OSi_ConsoleTypeCache kind:data(any) addr:0x020fc664 local
 @8995 kind:data(any) addr:0x020fc668 local
 @8445 kind:data(any) addr:0x020fc66c local
 fsi_digest_key_ptr kind:data(any) addr:0x020fc670 local
@@ -4876,11 +4876,11 @@ data_020fc6fc kind:data(any) addr:0x020fc6fc
 gStr_abcdbcdecdefdefgefghfghighijhijkijkljklm kind:data(any) addr:0x020fc714
 gStr_0123456701234567012345670123456701234567 kind:data(any) addr:0x020fc750
 PMi_WaitBusyMethod kind:data(any) addr:0x020fc794 local
-sDayOfYear kind:data(any) addr:0x020fc798
+sDayOfYear kind:data(any) addr:0x020fc798 local
 cardi_rom_header_addr kind:data(any) addr:0x020fc7c8
-tgid_bak$8433 kind:data(any) addr:0x020fc7cc
-sjis2unicode_array kind:data(any) addr:0x020fc7d0
-unicode2sjis_array kind:data(any) addr:0x021021d0
+tgid_bak$8433 kind:data(any) addr:0x020fc7cc local
+sjis2unicode_array kind:data(any) addr:0x020fc7d0 local
+unicode2sjis_array kind:data(any) addr:0x021021d0 local
 __files kind:data(any) addr:0x0210f09c
 __float_huge kind:data(any) addr:0x0210f180
 __float_nan kind:data(any) addr:0x0210f184
@@ -5657,11 +5657,11 @@ gText_Tsuki kind:data(any) addr:0x02111dd0
 gText_Gatsu kind:data(any) addr:0x02111dd4
 gText_Hi kind:data(any) addr:0x02111ddc
 funcTbl$9085 kind:data(any) addr:0x02111de0 local
-defaultOam_ kind:data(any) addr:0x02111df4
+defaultOam_ kind:data(any) addr:0x02111df4 local
 firstSRTransformedMtxIdx_ kind:data(any) addr:0x02111dfc local
 currenVramTransferHandle_ kind:data(any) addr:0x02111e00 local
 mtxI_ kind:data(any) addr:0x02111e04 local
-zOffsetStep_ kind:data(any) addr:0x02111e1c
+zOffsetStep_ kind:data(any) addr:0x02111e1c local
 NNS_GfdDefaultFuncAllocTexVram kind:data(word) addr:0x02111e20
 NNS_GfdDefaultFuncFreeTexVram kind:data(word) addr:0x02111e24
 NNS_GfdDefaultFuncAllocPlttVram kind:data(word) addr:0x02111e28
@@ -6476,8 +6476,8 @@ data_02115480 kind:bss addr:0x02115480
 data_02115574 kind:bss addr:0x02115574
 data_02115800 kind:bss addr:0x02115800
 data_02115818 kind:bss addr:0x02115818
-sDispMode kind:bss addr:0x02119574
-GXi_VRamLockId kind:bss addr:0x02119576
+sDispMode kind:bss(size=0x2) addr:0x02119574 local
+GXi_VRamLockId kind:bss(size=0x2) addr:0x02119576
 gGXState kind:bss addr:0x02119578
 sSubBGExtPltt kind:bss addr:0x02119594 local
 sOBJExtPlttLCDCBlk kind:bss addr:0x02119598 local
@@ -6506,27 +6506,27 @@ OSi_UserExceptionHandlerArg kind:bss addr:0x021198bc local
 OSi_UserExceptionHandler kind:bss addr:0x021198c0 local
 OSi_ExceptionHookStack kind:bss addr:0x021198c4 local
 OSi_ExContext kind:bss addr:0x021198e4 local
-OSi_TimerReserved kind:bss addr:0x02119964
-OSi_UseTick kind:bss addr:0x02119968
+OSi_TimerReserved kind:bss(size=0x2) addr:0x02119964 local
+OSi_UseTick kind:bss(size=0x2) addr:0x02119968 local
 OSi_UseAlarm kind:bss addr:0x02119978
-OSi_UseVAlarm kind:bss addr:0x02119984
-OSi_IsResetOccurred kind:bss addr:0x02119998
-OSi_vramExclusive kind:bss addr:0x0211999c
-OSi_vramLockId kind:bss addr:0x021199a0
-MIi_GXDmaParams kind:bss addr:0x021199b4
-initialized$8261 kind:bss addr:0x021199d4
-sSndMutex kind:bss addr:0x021199d8
-sFreeList kind:bss addr:0x02119a00
-sWaitingCommandListQueue kind:bss addr:0x02119a24
-sSharedWork kind:bss addr:0x02119a60
-sCommandArray kind:bss addr:0x02119ce0
-sCallbackTable kind:bss addr:0x0211b4e0
-SNDi_SharedWork kind:bss addr:0x0211b540
-FifoCtrlInit kind:bss addr:0x0211b544
-FifoRecvCallbackTable kind:bss addr:0x0211b548
-arc_list kind:bss addr:0x0211b5c8
-current_dir_pos kind:bss addr:0x0211b5cc
-is_init kind:bss addr:0x0211b5d8
+OSi_UseVAlarm kind:bss(size=0x2) addr:0x02119984 local
+OSi_IsResetOccurred kind:bss(size=0x2) addr:0x02119998 local
+OSi_vramExclusive kind:bss(size=0x4) addr:0x0211999c local
+OSi_vramLockId kind:bss(size=0x12) addr:0x021199a0 local
+MIi_GXDmaParams kind:bss(size=0x20) addr:0x021199b4 local
+initialized$8261 kind:bss(size=0x4) addr:0x021199d4 local
+sSndMutex kind:bss(size=0x18) addr:0x021199d8 local
+sFreeList kind:bss(size=0x4) addr:0x02119a00 local
+sWaitingCommandListQueue kind:bss(size=0x24) addr:0x02119a24 local
+sSharedWork kind:bss(size=0x280) addr:0x02119a60 local
+sCommandArray kind:bss(size=0x1800) addr:0x02119ce0 local
+sCallbackTable kind:bss(size=0x60) addr:0x0211b4e0 local
+SNDi_SharedWork kind:bss(size=0x4) addr:0x0211b540
+FifoCtrlInit kind:bss(size=0x2) addr:0x0211b544 local
+FifoRecvCallbackTable kind:bss(size=0x80) addr:0x0211b548 local
+arc_list kind:bss(size=0x4) addr:0x0211b5c8 local
+current_dir_pos kind:bss(size=0xc) addr:0x0211b5cc
+is_init kind:bss(size=0x4) addr:0x0211b5d8 local
 fsi_card_lock_id kind:bss addr:0x0211b5dc
 fsi_default_dma_no kind:bss(size=0x4) addr:0x0211b5e0 local
 fsi_ovt9 kind:bss addr:0x0211b5e4
@@ -6542,28 +6542,28 @@ PMi_LCDUtilityParam kind:bss addr:0x0211b69c local
 PMi_PostSleepCallbackList kind:bss addr:0x0211b6a0 local
 PMi_PreSleepCallbackList kind:bss addr:0x0211b6a4 local
 PMi_Work kind:bss addr:0x0211b6a8 local
-rtcInitialized kind:bss addr:0x0211b6b8
-rtcWork kind:bss addr:0x0211b6c4
+rtcInitialized kind:bss(size=0x2) addr:0x0211b6b8 local
+rtcWork kind:bss(size=0x24) addr:0x0211b6c4 local
 CARDi_EnableFlag kind:bss addr:0x0211b700 local
 cardi_arg kind:bss addr:0x0211b720 local
 cardi_common kind:bss(size=0x220) addr:0x0211b780
 cardi_thread_stack kind:bss(size=0x400) addr:0x0211b9a0 local
 cardi_rom_base kind:bss addr:0x0211bda0
 rom_stat kind:bss addr:0x0211bdc0
-CARDi_IsPulledOutFlag kind:bss addr:0x0211bfe0
-wmInitialized kind:bss addr:0x0211c000
-bufMsgQ kind:bss addr:0x0211c008
-bufMsg kind:bss addr:0x0211c028
-cb_Port$8495 kind:bss addr:0x0211c050
-fifoBuf kind:bss addr:0x0211c0a0
-CTRDGi_EnableFlag kind:bss addr:0x0211caa0
-CTRDGi_Work kind:bss addr:0x0211caa4
-isInitialized$8283 kind:bss addr:0x0211cac0
-headerBuf kind:bss addr:0x0211cae0
-CTRDGTaskList$8279 kind:bss addr:0x0211cba0
-ctrdgi_task_work kind:bss addr:0x0211cc88
-ctrdgi_task_list kind:bss addr:0x0211cc8c
-ctrdg_task_stack kind:bss addr:0x0211ccb0
+CARDi_IsPulledOutFlag kind:bss(size=0x4) addr:0x0211bfe0 local
+wmInitialized kind:bss(size=0x2) addr:0x0211c000 local
+bufMsgQ kind:bss(size=0x20) addr:0x0211c008 local
+bufMsg kind:bss(size=0x28) addr:0x0211c028 local
+cb_Port$8495 kind:bss(size=0x44) addr:0x0211c050 local
+fifoBuf kind:bss(size=0xa00) addr:0x0211c0a0 local
+CTRDGi_EnableFlag kind:bss(size=0x4) addr:0x0211caa0 local
+CTRDGi_Work kind:bss(size=0x4) addr:0x0211caa4
+isInitialized$8283 kind:bss(size=0x4) addr:0x0211cac0 local
+headerBuf kind:bss(size=0xc0) addr:0x0211cae0 local
+CTRDGTaskList$8279 kind:bss(size=0xe8) addr:0x0211cba0 local
+ctrdgi_task_work kind:bss(size=0x4) addr:0x0211cc88 local
+ctrdgi_task_list kind:bss(size=0x24) addr:0x0211cc8c local
+ctrdg_task_stack kind:bss(size=0x400) addr:0x0211ccb0
 __console_exit kind:bss addr:0x0211d0b0
 __stdio_exit kind:bss addr:0x0211d0b4
 __atexit_curr_func kind:bss addr:0x0211d0b8 local
@@ -6691,8 +6691,8 @@ initialized$3280 kind:bss addr:0x0213c06c local
 sPreSleepCallback kind:bss addr:0x0213c070 local
 sPostSleepCallback kind:bss addr:0x0213c07c local
 sDriverInfo kind:bss addr:0x0213c0a0 local
-sCaptureLock kind:bss addr:0x0213e460
-sWaveOut kind:bss addr:0x0213e46c
+sCaptureLock kind:bss(size=0x4) addr:0x0213e460 local
+sWaveOut kind:bss(size=0x140) addr:0x0213e46c local
 data_0213e5ac kind:bss addr:0x0213e5ac
 sPrioList kind:bss addr:0x0213e5b8
 sSeqPlayer kind:bss addr:0x0213e5c4
@@ -6701,20 +6701,20 @@ bInitialized$2674 kind:bss addr:0x0213ee84 local
 sStrmList kind:bss addr:0x0213ee88 local
 buffer$2790 kind:bss addr:0x0213ee94 local
 sStrmChannel kind:bss addr:0x0213eed4 local
-sIsThreadCreated kind:bss addr:0x0213ef54
-sMesgQ kind:bss addr:0x0213ef5c
-sCapParam kind:bss addr:0x0213ef9c
-sCurrent kind:bss addr:0x0213f550
+sIsThreadCreated kind:bss(size=0x4) addr:0x0213ef54 local
+sMesgQ kind:bss(size=0x20) addr:0x0213ef5c local
+sCapParam kind:bss(size=0x54) addr:0x0213ef9c local
+sCurrent kind:bss(size=0x4) addr:0x0213f550 local
 waveArcHeader$3136 kind:bss addr:0x0213f554 local
-initialized$3243 kind:bss addr:0x0213f590
-sFreeCommandList kind:bss addr:0x0213f59c
-sDecodeBufferMutex kind:bss addr:0x0213f5a8
-sLoadCommandBuffer kind:bss addr:0x0213f5c0
-sStrmThread kind:bss addr:0x0213f740
-sStrmPlayer kind:bss addr:0x0213fc2c
-sDecodeBufferArea kind:bss addr:0x02140200
-sRootListInitialized kind:bss addr:0x02140400
-sRootList kind:bss addr:0x02140404
+initialized$3243 kind:bss(size=0x4) addr:0x0213f590 local
+sFreeCommandList kind:bss(size=0xc) addr:0x0213f59c local
+sDecodeBufferMutex kind:bss(size=0x18) addr:0x0213f5a8 local
+sLoadCommandBuffer kind:bss(size=0x180) addr:0x0213f5c0 local
+sStrmThread kind:bss(size=0x4ec) addr:0x0213f740 local
+sStrmPlayer kind:bss(size=0x5d0) addr:0x0213fc2c local
+sDecodeBufferArea kind:bss(size=0x200) addr:0x02140200 local
+sRootListInitialized kind:bss(size=0x4) addr:0x02140400 local
+sRootList kind:bss(size=0xc) addr:0x02140404 local
 numRegisterdInstance_ kind:bss(size=0x2) addr:0x02140410 local
 oamCache_ kind:bss(size=0xfc0) addr:0x02140414 local
 currentMtxCachePos_ kind:bss(size=0x2) addr:0x021413d4 local
@@ -6728,8 +6728,8 @@ mtxStack_ kind:bss(size=0x300) addr:0x02141564 local
 mtxStackFor2DHW_ kind:bss(size=0x300) addr:0x02141864 local
 mtxCacheBuffer_ kind:bss(size=0x400) addr:0x02141b64 local
 mcRenderState_ kind:bss(size=0x408) addr:0x02141f64 local
-s_pTaskRegisterFunc kind:bss addr:0x0214236c
-s_pUVFlipCorrectFunc kind:bss addr:0x02142378
+s_pTaskRegisterFunc kind:bss(size=0x4) addr:0x0214236c
+s_pUVFlipCorrectFunc kind:bss(size=0x4) addr:0x02142378 local
 NNSi_G2dBGAreaOver kind:bss addr:0x02142394
 pTheInstance_ kind:bss addr:0x02142398
 s_managerState_ kind:bss(size=0xc) addr:0x0214239c local
@@ -6739,8 +6739,8 @@ mgr_ kind:bss(size=0x14) addr:0x021423d8 local
 NNS_G3dGlb kind:bss addr:0x021423ec
 NNS_G3dRS kind:bss addr:0x02142650
 NNS_G3dRSOnGlb kind:bss addr:0x02142654
-NNS_G3dGeBuffer kind:bss addr:0x02145354
-NNS_G3dFlagGXDmaAsync kind:bss addr:0x02145358
+NNS_G3dGeBuffer kind:bss(size=0x4) addr:0x02145354 local
+NNS_G3dFlagGXDmaAsync kind:bss(size=0x4) addr:0x02145358 local
 sNFLWork kind:bss addr:0x02145360
 sSeq kind:bss(size=0x1) addr:0x02145380 local
 sCutRequested kind:bss(size=0x4) addr:0x02145384 local
@@ -6827,3 +6827,47 @@ sSunsetTimes kind:data(any) addr:0x020fc154 local
 sSunriseTimes kind:data(any) addr:0x020fc1e4 local
 sSeconds$14042 kind:data(any) addr:0x02115170 local
 _ZGVsSeconds$14042 kind:bss addr:0x02149a24 local
+CARD_UserCallback kind:bss(size=0x4) addr:0x0211bfe4 local
+CTRDGi_Lock kind:bss(size=0x4) addr:0x0211cac4 local
+isInitialized$8271 kind:bss(size=0x4) addr:0x0211cac8 local
+ctrdg_already_pullout kind:bss(size=0x4) addr:0x0211cacc local
+skipCheck kind:bss(size=0x4) addr:0x0211cad0 local
+isCartridgePullOut kind:bss(size=0x4) addr:0x0211cad4 local
+CTRDG_UserCallback kind:bss(size=0x4) addr:0x0211cad8
+OSi_IsInitReset kind:bss(size=0x2) addr:0x0211999a local
+OSi_NeedResetTimer kind:bss(size=0x4) addr:0x0211996c
+OSi_TickCounter kind:bss(size=0x8) addr:0x02119970
+OSi_PreviousVCount kind:bss(size=0x4) addr:0x02119988 local
+OSi_VFrameCount kind:bss(size=0x4) addr:0x0211998c local
+OSi_VAlarmQueue kind:bss(size=0x8) addr:0x02119990 local
+rtcTickInitialized kind:bss(size=0x2) addr:0x0211b6ba local
+rtcInitialTotalTicks kind:bss(size=0x8) addr:0x0211b6bc local
+sFinishedTag kind:bss(size=0x4) addr:0x02119a04 local
+sReserveList kind:bss(size=0x4) addr:0x02119a08 local
+sReserveListEnd kind:bss(size=0x4) addr:0x02119a0c local
+sFreeListEnd kind:bss(size=0x4) addr:0x02119a10 local
+sWaitingCommandListQueueRead kind:bss(size=0x4) addr:0x02119a14 local
+sWaitingCommandListQueueWrite kind:bss(size=0x4) addr:0x02119a18 local
+sWaitingCommandListCount kind:bss(size=0x4) addr:0x02119a1c local
+sCurrentTag kind:bss(size=0x4) addr:0x02119a20 local
+SNDi_DecibelSquareTable kind:data(any) addr:0x020b49a4
+PitchTable kind:data(any) addr:0x020b4ba4 local
+sjis_page$8352 kind:data(any) addr:0x020b5530 local
+wm9buf kind:bss(size=0x4) addr:0x0211c004 local
+s_numCellState kind:bss(size=0x4) addr:0x02142370 local
+s_pCellStateArray kind:bss(size=0x4) addr:0x02142374 local
+size$9105 kind:data(any) addr:0x020b6200 local
+size$9066 kind:data(any) addr:0x020b6204 local
+zOffset_ kind:bss(size=0x4) addr:0x0214237c local
+bAutoZOffsetAdd_ kind:bss(size=0x4) addr:0x02142380 local
+softwareSpreiteParamCache_ kind:bss(size=0x10) addr:0x02142384 local
+NNS_G3dFlagUseFastDma kind:bss(size=0x4) addr:0x0214535c local
+sCurEffectInfo kind:bss(size=0x4) addr:0x0213ef58 local
+sMesgBuf kind:bss(size=0x20) addr:0x0213ef7c local
+sEffectInfoBuffer kind:bss(size=0xa0) addr:0x0213eff0 local
+sThread kind:bss(size=0xc0) addr:0x0213f090 local
+sThreadStack kind:bss(size=0x400) addr:0x0213f150 local
+sAlarmLock kind:bss(size=0x4) addr:0x0213e464 local
+sChannelLock kind:bss(size=0x4) addr:0x0213e468 local
+sPrepareThread kind:bss(size=0x4) addr:0x0213f594 local
+sDecodeBuffer kind:bss(size=0x4) addr:0x0213f598 local

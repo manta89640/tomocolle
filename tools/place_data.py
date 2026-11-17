@@ -8,11 +8,11 @@ unit that match say where the data sections of its object went. A section is pla
 and a unit only when its placed sections of each kind lie end to end. The symbols that symbols.txt has in those
 ranges are renamed to the object's names for them, and marked local where the object's are.
 
-NOT READY TO APPLY. Without --apply it reports what it would place, which is sound: the ranges of neighbouring files
-come out end to end. With --apply the ROM no longer matches, for a reason that is understood but not handled yet: a
-file's data can start on a 32-byte boundary, with padding before it that the compiled object asks for and a delinked
-one does not. So a file's data can only be placed in the same step that marks the file complete, one file at a time,
-with both taken back if the ROM does not match. Until this does that, do not commit what it writes.
+Applied to all units at once the ROM no longer matches: a file's data can start on a 32-byte boundary, with
+padding before it that the compiled object asks for and a delinked one does not, so a file's data can only be placed
+in the same step that marks the file complete. --unit SOURCE --complete --apply does that for one file (placement,
+names, references and the complete line); keep it only if `ninja` then passes, and take the three config files back
+otherwise. Run so one unit at a time, it completed 38 of the 47 units it could place (round 5).
 """
 import argparse
 import collections
@@ -71,6 +71,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--version", default="jpn_rev1")
     parser.add_argument("--apply", action="store_true", help="edit delinks.txt and symbols.txt")
+    parser.add_argument("--unit", help="place the data of this source file only (with --complete, see the header)")
+    parser.add_argument("--complete", action="store_true", help="also mark the unit complete")
     args = parser.parse_args()
 
     config = ROOT / "config" / args.version / "arm9"
@@ -179,7 +181,7 @@ def main() -> int:
             if any(a not in names for a in by_address if start <= a < sections[-1][1]):
                 ok = False
                 break
-        if ok:
+        if ok and (args.unit is None or source == args.unit):
             placed_units[source] = entry
             renames.update(names)
 
@@ -203,7 +205,7 @@ def main() -> int:
     # address at face value: the end of an array is where the next file's data starts, which is not what is meant.
     offsets, anchors = {}, {}
     for site, source, index, offset in references:
-        if index not in section_address[source]:
+        if index not in section_address[source] or (args.unit is not None and source != args.unit):
             continue
         obj = units[source][0]
         inside = [(value, name, is_global) for name, value, _, kind, is_global, shndx in obj.symbols
@@ -274,6 +276,9 @@ def main() -> int:
     for source, entry in placed_units.items():
         match = re.search(rf"^{re.escape(source)}:\n((?:[ \t]+.*\n?)*)", delinks, re.M)
         added = "".join(f"    {kind:<11} start:{start:#010x} end:{end:#010x}\n" for kind, start, end in entry)
+        if args.complete and "complete" not in match[1]:
+            delinks = delinks[:match.start(1)] + "    complete\n" + delinks[match.start(1):]
+            match = re.search(rf"^{re.escape(source)}:\n((?:[ \t]+.*\n?)*)", delinks, re.M)
         delinks = delinks[:match.end(1)] + added + delinks[match.end(1):]
     delinks_path.write_text(delinks, encoding="utf-8")
     print(f"Placed the data of {len(placed_units)} units")
