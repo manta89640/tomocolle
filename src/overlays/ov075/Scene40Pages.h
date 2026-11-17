@@ -3,6 +3,8 @@
 
 // Included from Scene40.h, after the classes it holds.
 
+#include "Scene40TouchPage.h"
+
 // The scene's lower screen (scene+0x30B50 to scene+0x69D2C): ten pages, one shown at a time, and what they share.
 // Init (0x0214CA84) initialises every page from the scene's context, Update (0x0214CC34) runs the current page,
 // Draw (0x0214FC00) draws it. The scene switches the lower screen's graphics when a page asks for another layout
@@ -30,9 +32,51 @@ public:
 
 class Scene40Pages {
 public:
-    /* 0x00000 [0x30B50] */ u8 mUnknown30B50[0x124]; // An object of the overlay's: func_ov075_0214fc00 draws it
-    /* 0x00124 [0x30C74] */ Scene40Items mItems;
-    /* 0x00150 [0x30CA0] */ u8 mUnknown30CA0[0x50];
+    // The pages (mPage), by their objects
+    enum Page {
+        PAGE_TOUCH = 0,  // mTouchPage
+        PAGE_1 = 1,      // +0x180
+        PAGE_2 = 2,      // +0x1D94
+        PAGE_3 = 3,      // +0x1E1C
+        PAGE_LIST_4 = 4, // mListPage, 4 to 7
+        PAGE_LIST_5 = 5,
+        PAGE_LIST_6 = 6,
+        PAGE_LIST_7 = 7,
+        PAGE_8 = 8,      // +0x1AAB8
+        PAGE_9 = 9,      // +0x214B0
+    };
+
+    void Init(int *mainCharOffset, int *subCharOffset, Scene40Context *context);
+    void Update();
+    void UpdateTouchPage();
+    void UpdatePage1();
+    void UpdatePage2();
+    void UpdatePage3();
+    void UpdatePage4();
+    void UpdatePage5();
+    void UpdatePage6();
+    void UpdatePage7();
+    void UpdatePage8();
+    void UpdatePage9();
+    void Start(int entry);
+    void SetActive(BOOL active);
+    void HideMenu(BOOL hide);
+    void Draw();
+
+    /* 0x00000 [0x30B50] */ BOOL mWaitingForLayout; // The scene clears it when it has shown the layout asked for
+    /* 0x00004 [0x30B54] */ BOOL mActive;           // Cleared while the scene changes the upper screen
+    /* 0x00008 [0x30B58] */ int mRequestedLayout;   // 1 to 4 (Scene40::LoadLayout), or 0
+    /* 0x0000C [0x30B5C] */ int mListFrame;         // Which frame the list's layout shows
+    /* 0x00010 [0x30B60] */ int mKeyboardLayout;    // Which of five keyboards that layout shows
+    /* 0x00014 [0x30B64] */ int mPage;
+    /* 0x00018 [0x30B68] */ int mNextPage;
+    /* 0x0001C [0x30B6C] */ Scene40Context *mContext;
+    /* 0x00020 [0x30B70] */ Scene40Touch *mTracker;
+    /* 0x00024 [0x30B74] */ Scene40Character *mCharacter;
+    /* 0x00028 [0x30B78] */ Scene40SpeechWindow *mSpeechWindow;
+    /* 0x0002C [0x30B7C] */ Scene40CharacterTouch mTouch;
+    /* 0x000FC [0x30C4C] */ Scene40TouchPage mTouchPage;
+    /* 0x00180 [0x30CD0] */ u8 mUnknown30CD0[0x20];
     /* 0x001A0 [0x30CF0] */ TextButton mTextButtons[4];
     /* 0x01D60 [0x328B0] */ u8 mUnknown328B0[0x54];
     /* 0x01DB4 [0x32904] */ Scene40Items mItems2;
