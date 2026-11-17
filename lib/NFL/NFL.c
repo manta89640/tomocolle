@@ -3043,6 +3043,15 @@ void NFLi_PatchFacePart(NFLFace *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTex
 extern const u8 sNFLEyeTypeRotations[];
 extern const u8 sNFLEyebrowTypeRotations[];
 
+// An eye type's rotation from sNFLEyeTypeRotations, read through a pointer to its entry (kinds 1 and 4). Through the
+// pointer the load may alias the call's stack arguments, so the pre-RA scheduler stores texFmt only after it, as the
+// original does; indexed directly (the other kinds) the store goes first and the clamped rotation takes another register
+static inline int NFLi_GetTypeRotation(const u8 *table, int type) {
+    const u8 *entry = table + type;
+
+    return *entry;
+}
+
 // The expressions, which NFL_SetExpression applies by rewriting the face parts' commands. All seven were compiled
 // alike: optimisation level 2 without common subexpressions, propagation or dead-assignment elimination (the pragmas
 // around each). Under that one setting kinds 0, 2, 3, 5 and 6 match; the per-function settings found before (level 2
@@ -3204,14 +3213,10 @@ void NFLi_ApplyExpression6(NFLFace *obj) {
 
 // Kind 1: the eyes of shared slot 2 (eye type 48's texture), their rotation moved by sNFLEyeTypeRotations at the
 // rotation less at 48 and kept to 0..7.
-// Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
-// Tried (round 4): the clamp on a copy (as kinds 2, 3 and 5), with d a variable, through inline helpers; every order
-// of the first statements and of the declarations; the forms of idx, sin and cos; sin and cos computed in the call's
-// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4; round 5: kind 5's form of the clamp
-// (a copy, d a variable) in each of the 40 orders of its statements under the expressions' common setting, all giving
-// the same code. Behind the r3: the original's pre-RA schedule loads the call's stack arguments (texFmt, 2) and an
-// address (sNFLWork here, the sine table in kind 4) before rot's last use and stores texFmt late; ours, like kinds 2
-// and 3, stores texFmt at once. rot's colour follows from that schedule.
+// The final angle reads the eye type's rotation through NFLi_GetTypeRotation: measured with fin-sched's probe compiler,
+// the original's schedule of the block after the clamp is ours with one more dependence, the table load before the
+// store of texFmt to the stack, which a load through a pointer has and an indexed load of the array does not; that
+// order is what leaves the clamped rotation in the field's register (r4).
 #pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
@@ -3234,7 +3239,7 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + NFLi_GetTypeRotation(sNFLEyeTypeRotations, obj->exprFields[4]) - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[2].texAddr, obj->eyePlttAddr);
@@ -3399,8 +3404,7 @@ void NFLi_ApplyExpression3(NFLFace *obj) {
 #pragma pop
 
 // Kind 4: the face's own second eye texture (eye type 0x31), the rotation moved as kind 1's by the table at 49, the
-// eyebrows placed as for eyebrowY - 2.
-// Not matching yet: as NFLi_ApplyExpression1.
+// eyebrows placed as for eyebrowY - 2. The type's rotation is read as in kind 1.
 #pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
@@ -3423,7 +3427,7 @@ void NFLi_ApplyExpression4(NFLFace *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + NFLi_GetTypeRotation(sNFLEyeTypeRotations, obj->exprFields[4]) - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->expr4EyeTexAddr, obj->expr4EyePlttAddr);

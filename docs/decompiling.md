@@ -695,6 +695,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
 **Arguments evaluated in another order**
+- A stack argument stored late, with the loads and constants after it hoisted before an unrelated value's last use
+  (NFL's `NFLi_ApplyExpression1` and `4`): the store depended on an earlier load in the block. The scheduler orders a
+  store after every earlier load that may alias it; a load from an array indexed directly does not (the IR knows the
+  object), a load through a pointer does. Reading the table entry through an inline accessor that forms a pointer,
+  `const u8 *entry = table + type; return *entry;`, added the original's dependence (found by replaying the logged
+  block with one extra edge at a time in fin-sched's `replay.py`, which reproduced the original's order only with an
+  edge from that load to that store). A pointer variable set in an earlier block also aliases, but keeps the
+  address in a register where the original reloads it.
 - Which arguments of an inlined call are evaluated at the call and which inside the body (read in CInline.c's
   `setup_inline_locals_and_arguments`, measured on lib/NFL): an argument free of side effects that is a constant, an
   address, or a plain read of a local NOT marked address-taken is substituted into the body and evaluated where the

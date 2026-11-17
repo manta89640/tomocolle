@@ -2133,11 +2133,12 @@ it, as they did under the three narrower settings found first). Their sources di
 `NFLi_ApplyExpression0` and `6` assign each sine and cosine through an `(fx16)` cast; `2` and `3` write the eyebrow's
 clamp on a copy of the rotation (the compares on the copy, the else adding `d` to the variable), since the original adds
 `d` twice; `5` computes the eye's clamp the same way and drops it, keeping its adds, branch and compare (dead
-assignments are kept). `NFLi_ApplyExpression1` and `4` still differ by the register of the clamped rotation (r3 where
-the original reuses the field's r4). Measured with fin-sched's probe compiler: the colour follows the pre-RA schedule
-of the block after the clamp, in which our code stores texFmt to the stack at once (as `2` and `3` do) and the
-original stores it late, after loading the call's other stack arguments and an address. No source form tried changes
-that block's dependence graph or order. `NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they
+assignments are kept). `NFLi_ApplyExpression1` and `4` read the eye type's rotation for the final angle through a
+pointer to its entry (an inline accessor), the others index the table: measured with fin-sched's probe compiler and
+its model of the scheduler, the original's order of the block after the clamp is ours plus one dependence, the
+table load before the store of texFmt to the stack, which only a load through a pointer has (it may alias the
+stack). That later store is what leaves the clamped rotation in the field's register. All seven match.
+`NFLi_MakeMouthMolePart` and `NFLi_MakeEyeBrowPart` need none of this: they
 match at the file's level. The hair meshes match with the vertex kept in an `fx16[3]` (decompiling.md, "Arguments
 evaluated in another order"), and `NFLi_CopyToTexBank` is NitroSDK's `GX_LoadTexEx` with CPU copies.
 
