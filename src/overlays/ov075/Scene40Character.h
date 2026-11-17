@@ -146,6 +146,7 @@ public:
     void GetTalkArguments(const Scene40TalkEntry *entry, int *count, int *types, int *values);
     void ChooseTouchTalk(u32 *message, int *count, int *types, int *values);
     void ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values);
+    void TellNews();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {

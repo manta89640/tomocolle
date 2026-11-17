@@ -32,7 +32,8 @@ extern const char *const sWaitAnimations[4][5]; // The standing animations ("wai
 extern const int gPersonalityKinds[16];
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02176b80(Scene40Character *character);
+void func_ov075_02174a14(Scene40Character *character);
+void func_ov075_02174b38(Scene40Character *character, int item);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
@@ -1691,8 +1692,8 @@ static inline BOOL WillSayMotto(Scene40Character *character, int mood, const wch
 
 // 0x1A: stands, looks at the camera, and after 40 frames says its motto of the mood, if it has one and by a chance
 // of the mood (the first mood rarely), else something chosen for a touch (ChooseTouchTalk); back to state 0 when
-// the speech is over. 0x1B: walks round to face the camera, then 0x1C: faces it and waits for the speech (0x02176b80
-// at frame 30), then state 0.
+// the speech is over. 0x1B: walks round to face the camera, then 0x1C: faces it and waits for the speech (TellNews
+// at frame 30, TellNews), then state 0.
 void Scene40Character::UpdateStates1ATo1C() {
     Camera *camera = &gCamera;
     FloorPos pos;
@@ -1774,7 +1775,7 @@ void Scene40Character::UpdateStates1ATo1C() {
                 SetState(0x1B);
             }
         } else if (mFrame == 30) {
-            func_ov075_02176b80(this);
+            TellNews();
         }
         if (mTtsPlayer->IsEngineIdle() && mFrame >= 30) {
             SetState(0);
@@ -1782,6 +1783,198 @@ void Scene40Character::UpdateStates1ATo1C() {
         break;
     }
 }
+
+// 0x28: walks to the camera holding the food it was given; if it cannot eat (CanEat) 0x44, if it ate the same last
+// and is not hungry (fullness 20 or more) 0x46, else 0x29: waits, says 0x100, marks the goods as had, and for food
+// (gift kind 0) 0x2A eats ("i_eat00": bites over the animation's length, at most 80 frames), 0x2B finishes ("i_eat01",
+// Eat), 0x2C walks back to where it stood (the camera's side) and stands, then 0x2E; other gifts go to 0x4F. 0x2D:
+// greets ("greet01", says 0x102), then 0x30 when the speech is over.
+void Scene40Character::UpdateStates28To2D() {
+    Camera *camera = &gCamera;
+    FloorPos pos;
+    switch (mState) {
+    case 0x28:
+        if (mEntered) {
+            mEntered = FALSE;
+            ResetHeadTurn();
+            BlendToNamedAnimation("i_walk00");
+            UpdateAnimSpeed();
+            ResetSoundPhase(0);
+            UpdateSpeedScales();
+            pos.x = camera->mEye.x;
+            pos.z = camera->mEye.z;
+            SetTargetFloorPos(pos);
+            return;
+        }
+        PlaceHeldItem();
+        MoveAlongAngle();
+        PlaySoundOnce(1, 0, 26);
+        if (!TurnToWalkTarget(0x280, 0)) {
+            return;
+        }
+        if (gGoodsTable[mHeldItem->InventoryItem::mId].mKind == 1) {
+            s64 now = mContext->mClock->mSeconds;
+            if (!CanEat(now, mGift.mItem.InventoryItem::mId)) {
+                SetState(0x44);
+            } else if (mEatLastFood == mGift.mItem.InventoryItem::mId && GetFullness(now) >= 20) {
+                SetState(0x46);
+            } else {
+                SetState(0x29);
+            }
+        } else {
+            SetState(0x29);
+        }
+        break;
+    case 0x29:
+        if (mEntered) {
+            mEntered = FALSE;
+            BlendToNamedAnimation("i_wait00");
+            GetAnimation()->mPlayOnce = FALSE;
+            UpdateAnimSpeed();
+            Speak(0, 0x100, 0);
+            TurnHeadToCamera();
+            AddUnknown1C4ByTrouble();
+            mUnknown1C8.m[mGift.mItem.InventoryItem::mId >> 5] |= 1 << (mGift.mItem.InventoryItem::mId & 31);
+            return;
+        }
+        PlaceHeldItem();
+        if (!mTtsPlayer->IsEngineIdle()) {
+            return;
+        }
+        if (mGift.mGiftKind == 0) {
+            SetState(0x2A);
+        } else {
+            SetState(0x4F);
+        }
+        break;
+    case 0x2A:
+        if (mEntered) {
+            mEntered = FALSE;
+            BlendToNamedAnimation("i_eat00");
+            UpdateAnimSpeed();
+            ResetHeadTurn();
+            RankLikedItem(mGift.mItem.InventoryItem::mId);
+            mEatLastFood = mGift.mItem.InventoryItem::mId;
+            mWait = 80;
+            mStep = 0;
+            const ItemInfo *info = &gGoodsTable[mGift.mItem.InventoryItem::mId];
+            if (info->mFlags & 0x10000) {
+                if (Random(100) < 50) {
+                    mUnknown24E = 0;
+                }
+            }
+            return;
+        }
+        if (mStep == 0) {
+            ModelAnimation *animation = GetAnimation();
+            int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
+            int wait = frames * 25 / 10;
+            if (wait > 80) {
+                mWait = wait;
+                mUnknown3098 = 0;
+                mUnknown309C = 3;
+            } else {
+                mUnknown3098 = 0;
+                int bites = 80 / frames;
+                mUnknown309C = bites + 1;
+                mWait = bites * frames + frames / 2;
+            }
+            mStep++;
+        }
+        PlaceHeldItem();
+        func_ov075_02174a14(this);
+        UpdateMouthByAnimation();
+        func_ov075_02174b38(this, mGift.mItem.InventoryItem::mId);
+        if (mFrame < mWait) {
+            return;
+        }
+        mHeldItem->Hide();
+        mHeldItem = NULL;
+        SetState(0x2B);
+        break;
+    case 0x2B:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(1);
+            BlendToNamedAnimation("i_eat01");
+            GetAnimation()->mPlayOnce = TRUE;
+            return;
+        }
+        if (!GetAnimation()->mFinished) {
+            return;
+        }
+        Eat(mContext->mClock->mSeconds, mGift.mItem.InventoryItem::mId);
+        SetState(0x2C);
+        break;
+    case 0x2C:
+        if (mEntered) {
+            mEntered = FALSE;
+            pos.x = camera->mEye.x;
+            pos.z = camera->mEye.z;
+            SetTargetFloorPos(pos);
+            if (!TurnToWalkTarget(0x280, 0)) {
+                BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
+                ResetSoundPhase(0);
+                mStep = 0;
+                return;
+            }
+            BlendToNamedAnimation("idle00");
+            mStep = 2;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            MoveAlongAngle();
+            PlaySoundOnce(1, 0, 26);
+            if (!TurnToWalkTarget(0x280, 0)) {
+                return;
+            }
+            if (mBlendFrames > 0) {
+                mStep = 1;
+                return;
+            }
+            BlendToNamedAnimation("idle00");
+            mStep = 2;
+            return;
+        case 1:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            BlendToNamedAnimation("idle00");
+            mStep++;
+            break;
+        case 2:
+            if (mBlendFrames > 0) {
+                return;
+            }
+            mUnknown30A0 = TRUE;
+            SetState(0x2E);
+            break;
+        }
+        break;
+    case 0x2D:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(1);
+            BlendToNamedAnimation("greet01");
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = TRUE;
+            Speak(0, 0x102, 0);
+            return;
+        }
+        if (GetAnimation()->mFinished) {
+            BlendToNamedAnimation("idle00");
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            return;
+        }
+        if (mTtsPlayer->IsEngineIdle()) {
+            SetState(0x30);
+        }
+        break;
+    }
+}
+
 
 
 // --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
