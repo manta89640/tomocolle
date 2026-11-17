@@ -63,6 +63,18 @@ struct TroubleInfo {
 }; // 0xC
 extern TroubleInfo *data_02114d78[];
 
+// The trouble the character has
+static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
+    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
+}
+
+static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
+    if (character->IsInTrouble() && GetTrouble(character)->kind == kind) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // The bytes after gSceneMemory's 0x3C: the first of gSceneScratch, which this file reaches through gSceneMemory as
 // well (the literal is gSceneMemory's address and the offset is in the instruction)
 struct Scene40SceneMemory {
@@ -222,6 +234,339 @@ static inline void SetBodyScaleZ(fx32 z, Mannequin *body) {
     body->mInvScale.z = FX_Inv(z);
 }
 
+// --- The talk page (pages+0x180) ----------------------------------------------------------------------------------
+
+void Scene40TalkPage::UpdateSecondAnswer() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        GetSceneMemory().mTalkAnswers[1] = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    mContext->mCharacter->SetState(0x92);
+    mResult = 3;
+    mNextState = STATE_DONE;
+}
+
+void Scene40TalkPage::UpdateFirstOfTwo() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        GetSceneMemory().mTalkAnswers[0] = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    mContext->mCharacter->SetState(0x96);
+    mChoices.SetChoices(14);
+    mChoices.Open();
+    mNextState = STATE_SECOND_OF_TWO;
+}
+
+void Scene40TalkPage::UpdateSecondOfTwo() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        GetSceneMemory().mTalkAnswers[1] = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    mContext->mCharacter->SetState(0x97);
+    mChoices.SetChoices(15);
+    mChoices.Open();
+    mNextState = STATE_YES_NO;
+}
+
+void Scene40TalkPage::UpdateYesNo() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    switch (mChoices.mAnswer) {
+    case 0:
+        mResult = 5;
+        mNextState = STATE_DONE;
+        break;
+    case 1:
+        mContext->mCharacter->SetState(0x98);
+        mResult = 4;
+        mNextState = STATE_DONE;
+        break;
+    }
+    mProfilePage->SetSwitchable(FALSE);
+}
+
+void Scene40TalkPage::UpdateTroubleAnswer() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    int state = 0x9D;
+    switch (mChoices.mAnswer) {
+    case 0:
+        state = 0x9D;
+        break;
+    case 1:
+        state = 0x9E;
+        break;
+    case 2:
+        state = 0x9F;
+        break;
+    case 3:
+        state = 0xA0;
+        break;
+    }
+    mContext->mCharacter->SetState(state);
+    s64 now = mContext->mClock->mSeconds;
+    u16 target = mContext->mCharacter->mTroubleTarget;
+    mContext->mCharacter->ClearTrouble();
+    mContext->mCharacter->mTroubleCategory = 4;
+    mContext->mCharacter->mTroubleId = 3;
+    mContext->mCharacter->mTroubleState = 1;
+    mContext->mCharacter->mTroubleTarget = target;
+    Scene40Character *character = mContext->mCharacter;
+    character->mTroubleEnd = now + GetTrouble(character)->minutes * 60;
+    mContext->mCharacter->mMood = 3;
+    mContext->mCharacter->ResetTroubleProgress();
+    func_ov075_021762ac(mContext->mCharacter);
+    mContext->mUnknown18 = -100;
+    mResult = 9;
+    mNextState = STATE_DONE;
+}
+
+void Scene40TalkPage::UpdateWaitQuestion() {
+    if (mContext->mCharacter->mState != 0xAC) {
+        return;
+    }
+    mContext->mCharacter->SetState(0xAD);
+    mChoices.SetSpecialChoices(mContext->mCharacter->mUnknown2EE0[0]);
+    mChoices.Open();
+    mNextState = STATE_RELATION_ANSWER;
+}
+
+// The answer moves the character's relation meter with the trouble's target up or down by 40
+void Scene40TalkPage::UpdateRelationAnswer() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        mContext->mCharacter->mUnknown2EE0[2] = mChoices.mPressed;
+        Scene40Character *character = mContext->mCharacter;
+        int answer = mChoices.mPressed;
+        u16 target = character->mTroubleTarget;
+        int meter = character->mRelationMeter[target];
+        int value;
+        switch (answer) {
+        case 0:
+            value = meter + 40;
+            break;
+        case 1:
+            value = meter;
+            break;
+        case 2:
+            value = meter - 40;
+            break;
+        }
+        character->mRelationMeter[target] = value > 200 ? 200 : value < 0 ? 0 : value;
+        mProfilePage->mRelationsChanged = TRUE;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    mContext->mCharacter->SetState(0xAE);
+    Scene40Character *character = mContext->mCharacter;
+    character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
+    mContext->mCharacter->mTroubleState = 3;
+    AddTroublesSolved(1);
+    mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
+    mNextState = STATE_WAIT_CHARACTER;
+}
+
+void Scene40TalkPage::UpdateSolveOrNot() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    switch (mChoices.mAnswer) {
+    case 0: {
+        mContext->mCharacter->SetState(0xB0);
+        Scene40Character *character = mContext->mCharacter;
+        character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
+        mContext->mCharacter->mTroubleState = 3;
+        AddTroublesSolved(1);
+        mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
+        mNextState = STATE_WAIT_CHARACTER;
+        break;
+    }
+    case 1:
+        mContext->mSpeechWindow->Hide();
+        mResult = 2;
+        mNextState = STATE_DONE;
+        break;
+    case 2:
+        mContext->mCharacter->SetState(0);
+        mContext->mSpeechWindow->Hide();
+        mResult = 0;
+        mNextState = STATE_DONE;
+        break;
+    }
+}
+
+// Yes goes to one of the games, chosen by the character, with the character for it
+void Scene40TalkPage::UpdatePlayOrNot() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    switch (mChoices.mAnswer) {
+    case 0:
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        GetSceneMemory().mTalkAnswers[0] = 2;
+        GetSceneMemory().mCharacters[0] = mContext->mCharacter->mIndex;
+        gSceneManager.RequestScene(gStr_S_ov075[func_ov075_02176454(mContext->mCharacter)].mSceneId);
+        break;
+    case 1:
+        mContext->mCharacter->SetState(0);
+        mContext->mSpeechWindow->Hide();
+        mResult = 0;
+        mNextState = STATE_DONE;
+        break;
+    }
+}
+
+void Scene40TalkPage::UpdateFourAnswers() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    switch (mChoices.mAnswer) {
+    case 0:
+        mContext->mCharacter->SetState(0x69);
+        break;
+    case 1:
+        mContext->mCharacter->SetState(0x6A);
+        break;
+    case 2:
+        mContext->mCharacter->SetState(0x6B);
+        break;
+    case 3:
+        mContext->mCharacter->SetState(0x6C);
+        break;
+    }
+    Scene40Character *character = mContext->mCharacter;
+    if (character->IsInTrouble() && GetTrouble(character)->kind == 13) {
+        character = mContext->mCharacter;
+        character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
+        mContext->mCharacter->mTroubleState = 3;
+        mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
+        AddTroublesSolved(1);
+    } else {
+        mContext->mUnknown18 = 30;
+    }
+    mResult = 7;
+    mNextState = STATE_DONE;
+}
+
+void Scene40TalkPage::UpdateWaitMessages() {
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
+        mNextState = sequence->mReturnState;
+    }
+}
+
+void Scene40TalkPage::UpdateWaitCharacter() {
+    if (mContext->mCharacter->mState != 0x33) {
+        return;
+    }
+    mResult = 8;
+    mNextState = STATE_DONE;
+}
+
+void Scene40TalkPage::UpdateLeaveA() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0xC9) {
+            return;
+        }
+        mContext->mCharacter->SetState(0);
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_A;
+        mNextState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 1;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        gSceneManager.RequestScene(0x69);
+        break;
+    }
+}
+
+void Scene40TalkPage::UpdateLeaveB() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0xCD) {
+            return;
+        }
+        mContext->mCharacter->SetState(0);
+        mContext->mMessageSequence->mReturnState = STATE_LEAVE_B;
+        mNextState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 3;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        gSceneManager.RequestScene(0x69);
+        break;
+    }
+}
+
+void Scene40TalkPage::Draw() {
+    mChoices.Draw();
+}
+
 // --- The gift page (pages+0x1D94) ---------------------------------------------------------------------------------
 
 void Scene40GiftPage::Init(Scene40Context *context, Scene40CharacterTouch *touch, Scene40ProfilePage *profile,
@@ -232,7 +577,7 @@ void Scene40GiftPage::Init(Scene40Context *context, Scene40CharacterTouch *touch
     mProfilePage = profile;
     mCounter = counter;
     mLucky = FALSE;
-    mUnknown64 = 0;
+    mGotTarget = FALSE;
     mUnknown68 = -1;
     mUnknown6C = 0;
     mUnknown70 = 0;
@@ -292,7 +637,7 @@ void Scene40GiftPage::Update() {
     case STATE_RESET:
         mNextState = STATE_NONE;
         mLucky = FALSE;
-        mUnknown64 = 0;
+        mGotTarget = FALSE;
         mUnknown68 = -1;
         mUnknown70 = 0;
         mItem = -1;
@@ -401,6 +746,174 @@ void Scene40GiftPage::SetValue(int value) {
 void Scene40GiftPage::SetItem(int item, int value) {
     mItem = item;
     mValue = value;
+}
+
+// Whether the gift solves the character's trouble (kind 1 for goods, 3 for clothes); if so the trouble ends, and with
+// a count above 0 it counts as solved and makes the character lucky with a chance of 400 in a thousand
+BOOL Scene40GiftPage::SolveTrouble(Scene40Gift *gift, int count) {
+    s64 now = mContext->mClock->mSeconds;
+    BOOL solved = FALSE;
+    switch (gift->mGiftKind) {
+    case 0:
+        solved = IsInTroubleOfKind(mCharacter, 1);
+        break;
+    case 1:
+        solved = IsInTroubleOfKind(mCharacter, 3);
+        break;
+    }
+    if (solved) {
+        Scene40Character *character = mCharacter;
+        const TroubleInfo *trouble = GetTrouble(character);
+        if (trouble->hasTarget != 0 && gift->mItem.InventoryItem::mId == character->mTroubleTarget) {
+            if (trouble->kind == 1 && gift->mGiftKind == 0) {
+                mGotTarget = TRUE;
+            } else if (trouble->kind == 3 && gift->mGiftKind == 1) {
+                mGotTarget = TRUE;
+            }
+        }
+        mCharacter->mTroubleEnd = now + GetTrouble(mCharacter)->cooldownMinutes * 60;
+        mCharacter->mTroubleState = 3;
+        if (count > 0) {
+            AddTroublesSolved(1);
+            SetLucky(TRUE, 400);
+        }
+    }
+    return solved;
+}
+
+// The character's state for the item it was given (mItem: 0 to 19)
+void Scene40GiftPage::StartCharacterReaction() {
+    mCharacter->mUnknown2EB4 = mItem;
+    switch (mItem) {
+    case 18:
+        mCharacter->SetState(0x36);
+        break;
+    case 19:
+        mCharacter->SetState(0x37);
+        break;
+    case 0:
+        mCharacter->SetState(0x38);
+        break;
+    case 1:
+        mCharacter->SetState(0x39);
+        break;
+    case 2:
+        mCharacter->SetState(0x3A);
+        break;
+    case 3:
+        mCharacter->SetState(0x3B);
+        break;
+    case 4:
+        mCharacter->SetState(0x3C);
+        break;
+    case 5:
+        mCharacter->SetState(0x3D);
+        break;
+    case 6:
+        mCharacter->SetState(0x3E);
+        break;
+    case 7:
+        mCharacter->SetState(0x3F);
+        break;
+    case 8:
+        mCharacter->SetState(0x40);
+        break;
+    case 9:
+        mCharacter->SetState(0x41);
+        break;
+    case 10:
+        mCharacter->SetState(0x42);
+        break;
+    case 11:
+        mCharacter->SetState(0x43);
+        break;
+    case 12:
+        mCharacter->SetState(0x34);
+        break;
+    case 17:
+        mCharacter->SetState(0xCA);
+        break;
+    default:
+        mCharacter->SetState(0x31);
+        break;
+    }
+}
+
+// The music of the reaction to the item given (mItem), in its sound group
+void Scene40GiftPage::PlayReactionMusic() {
+    int sequence;
+    int group = 107;
+    switch (mItem) {
+    case 18:
+        sequence = 118;
+        break;
+    case 0:
+        sequence = 118;
+        break;
+    case 1:
+        sequence = 119;
+        break;
+    case 2:
+        sequence = 120;
+        break;
+    case 3:
+        sequence = 121;
+        break;
+    case 4:
+        sequence = 122;
+        break;
+    case 19:
+        sequence = 123;
+        break;
+    case 5:
+        sequence = 118;
+        break;
+    case 6:
+        sequence = 119;
+        break;
+    case 7:
+        sequence = 120;
+        break;
+    case 8:
+        sequence = 121;
+        break;
+    case 9:
+        sequence = 122;
+        break;
+    case 10:
+        sequence = 125;
+        break;
+    case 11:
+        sequence = 126;
+        break;
+    case 13:
+        sequence = 119;
+        break;
+    case 14:
+        sequence = 121;
+        break;
+    case 15:
+        sequence = 119;
+        break;
+    case 16:
+        sequence = 121;
+        break;
+    case 17:
+        sequence = 119;
+        break;
+    default:
+        sequence = 120;
+        break;
+    }
+    if (sequence == 125) {
+        group = 109;
+    } else if (sequence == 126) {
+        group = 110;
+    }
+    gSoundManager.SetSeqTrackMuteOnly(0, 0xFFFF, 0);
+    gSceneManager.SetSoundGroup(group);
+    gSoundManager.StartSeq(0, sequence);
+    gSoundManager.LoadGroup(77);
 }
 
 void Scene40GiftPage::PlaceItemModel() {
@@ -1401,344 +1914,6 @@ void Scene40SpeechWindow::Show(u32 message, int mode, int frames) {
         return;
     }
     SpeechWindow::Show(message, mode, frames);
-}
-
-// --- The talk page (pages+0x180) ----------------------------------------------------------------------------------
-
-// The trouble the character has
-static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
-    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
-}
-
-void Scene40TalkPage::UpdateSecondAnswer() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        MI_CpuFill8(&gSceneScratch, 0, 100);
-        GetSceneMemory().mTalkAnswers[1] = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    mContext->mCharacter->SetState(0x92);
-    mResult = 3;
-    mNextState = STATE_DONE;
-}
-
-void Scene40TalkPage::UpdateFirstOfTwo() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        MI_CpuFill8(&gSceneScratch, 0, 100);
-        GetSceneMemory().mTalkAnswers[0] = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    mContext->mCharacter->SetState(0x96);
-    mChoices.SetChoices(14);
-    mChoices.Open();
-    mNextState = STATE_SECOND_OF_TWO;
-}
-
-void Scene40TalkPage::UpdateSecondOfTwo() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        GetSceneMemory().mTalkAnswers[1] = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    mContext->mCharacter->SetState(0x97);
-    mChoices.SetChoices(15);
-    mChoices.Open();
-    mNextState = STATE_YES_NO;
-}
-
-void Scene40TalkPage::UpdateYesNo() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    switch (mChoices.mAnswer) {
-    case 0:
-        mResult = 5;
-        mNextState = STATE_DONE;
-        break;
-    case 1:
-        mContext->mCharacter->SetState(0x98);
-        mResult = 4;
-        mNextState = STATE_DONE;
-        break;
-    }
-    mProfilePage->SetSwitchable(FALSE);
-}
-
-void Scene40TalkPage::UpdateTroubleAnswer() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    int state = 0x9D;
-    switch (mChoices.mAnswer) {
-    case 0:
-        state = 0x9D;
-        break;
-    case 1:
-        state = 0x9E;
-        break;
-    case 2:
-        state = 0x9F;
-        break;
-    case 3:
-        state = 0xA0;
-        break;
-    }
-    mContext->mCharacter->SetState(state);
-    s64 now = mContext->mClock->mSeconds;
-    u16 target = mContext->mCharacter->mTroubleTarget;
-    mContext->mCharacter->ClearTrouble();
-    mContext->mCharacter->mTroubleCategory = 4;
-    mContext->mCharacter->mTroubleId = 3;
-    mContext->mCharacter->mTroubleState = 1;
-    mContext->mCharacter->mTroubleTarget = target;
-    Scene40Character *character = mContext->mCharacter;
-    character->mTroubleEnd = now + GetTrouble(character)->minutes * 60;
-    mContext->mCharacter->mMood = 3;
-    mContext->mCharacter->ResetTroubleProgress();
-    func_ov075_021762ac(mContext->mCharacter);
-    mContext->mUnknown18 = -100;
-    mResult = 9;
-    mNextState = STATE_DONE;
-}
-
-void Scene40TalkPage::UpdateWaitQuestion() {
-    if (mContext->mCharacter->mState != 0xAC) {
-        return;
-    }
-    mContext->mCharacter->SetState(0xAD);
-    mChoices.SetSpecialChoices(mContext->mCharacter->mUnknown2EE0[0]);
-    mChoices.Open();
-    mNextState = STATE_RELATION_ANSWER;
-}
-
-// The answer moves the character's relation meter with the trouble's target up or down by 40
-void Scene40TalkPage::UpdateRelationAnswer() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        mContext->mCharacter->mUnknown2EE0[2] = mChoices.mPressed;
-        Scene40Character *character = mContext->mCharacter;
-        int answer = mChoices.mPressed;
-        u16 target = character->mTroubleTarget;
-        int meter = character->mRelationMeter[target];
-        int value;
-        switch (answer) {
-        case 0:
-            value = meter + 40;
-            break;
-        case 1:
-            value = meter;
-            break;
-        case 2:
-            value = meter - 40;
-            break;
-        }
-        character->mRelationMeter[target] = value > 200 ? 200 : value < 0 ? 0 : value;
-        mProfilePage->mRelationsChanged = TRUE;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    mContext->mCharacter->SetState(0xAE);
-    Scene40Character *character = mContext->mCharacter;
-    character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
-    mContext->mCharacter->mTroubleState = 3;
-    AddTroublesSolved(1);
-    mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
-    mNextState = STATE_WAIT_CHARACTER;
-}
-
-void Scene40TalkPage::UpdateSolveOrNot() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    switch (mChoices.mAnswer) {
-    case 0: {
-        mContext->mCharacter->SetState(0xB0);
-        Scene40Character *character = mContext->mCharacter;
-        character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
-        mContext->mCharacter->mTroubleState = 3;
-        AddTroublesSolved(1);
-        mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
-        mNextState = STATE_WAIT_CHARACTER;
-        break;
-    }
-    case 1:
-        mContext->mSpeechWindow->Hide();
-        mResult = 2;
-        mNextState = STATE_DONE;
-        break;
-    case 2:
-        mContext->mCharacter->SetState(0);
-        mContext->mSpeechWindow->Hide();
-        mResult = 0;
-        mNextState = STATE_DONE;
-        break;
-    }
-}
-
-// Yes goes to one of the games, chosen by the character, with the character for it
-void Scene40TalkPage::UpdatePlayOrNot() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    switch (mChoices.mAnswer) {
-    case 0:
-        MI_CpuFill8(&gSceneScratch, 0, 100);
-        GetSceneMemory().mTalkAnswers[0] = 2;
-        GetSceneMemory().mCharacters[0] = mContext->mCharacter->mIndex;
-        gSceneManager.RequestScene(gStr_S_ov075[func_ov075_02176454(mContext->mCharacter)].mSceneId);
-        break;
-    case 1:
-        mContext->mCharacter->SetState(0);
-        mContext->mSpeechWindow->Hide();
-        mResult = 0;
-        mNextState = STATE_DONE;
-        break;
-    }
-}
-
-void Scene40TalkPage::UpdateFourAnswers() {
-    mChoices.Update();
-    if (mChoices.mPressed != -1) {
-        mChoices.mAnswer = mChoices.mPressed;
-        mChoices.Close();
-        mChoice = mChoices.mPressed;
-        return;
-    }
-    if (!mChoices.mClosed) {
-        return;
-    }
-    switch (mChoices.mAnswer) {
-    case 0:
-        mContext->mCharacter->SetState(0x69);
-        break;
-    case 1:
-        mContext->mCharacter->SetState(0x6A);
-        break;
-    case 2:
-        mContext->mCharacter->SetState(0x6B);
-        break;
-    case 3:
-        mContext->mCharacter->SetState(0x6C);
-        break;
-    }
-    Scene40Character *character = mContext->mCharacter;
-    if (character->IsInTrouble() && GetTrouble(character)->kind == 13) {
-        character = mContext->mCharacter;
-        character->mTroubleEnd = mContext->mClock->mSeconds + GetTrouble(character)->cooldownMinutes * 60;
-        mContext->mCharacter->mTroubleState = 3;
-        mContext->mUnknown18 = GetTrouble(mContext->mCharacter)->unk4Bits0;
-        AddTroublesSolved(1);
-    } else {
-        mContext->mUnknown18 = 30;
-    }
-    mResult = 7;
-    mNextState = STATE_DONE;
-}
-
-void Scene40TalkPage::UpdateWaitMessages() {
-    Scene40MessageSequence *sequence = mContext->mMessageSequence;
-    if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
-        mNextState = sequence->mReturnState;
-    }
-}
-
-void Scene40TalkPage::UpdateWaitCharacter() {
-    if (mContext->mCharacter->mState != 0x33) {
-        return;
-    }
-    mResult = 8;
-    mNextState = STATE_DONE;
-}
-
-void Scene40TalkPage::UpdateLeaveA() {
-    switch (mStep) {
-    case 0:
-        if (mContext->mCharacter->mState != 0xC9) {
-            return;
-        }
-        mContext->mCharacter->SetState(0);
-        mContext->mMessageSequence->mReturnState = STATE_LEAVE_A;
-        mNextState = STATE_WAIT_MESSAGES;
-        mContext->mMessageSequence->mEntry = 1;
-        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
-        mStep++;
-        break;
-    case 1:
-        gSceneManager.RequestScene(0x69);
-        break;
-    }
-}
-
-void Scene40TalkPage::UpdateLeaveB() {
-    switch (mStep) {
-    case 0:
-        if (mContext->mCharacter->mState != 0xCD) {
-            return;
-        }
-        mContext->mCharacter->SetState(0);
-        mContext->mMessageSequence->mReturnState = STATE_LEAVE_B;
-        mNextState = STATE_WAIT_MESSAGES;
-        mContext->mMessageSequence->mEntry = 3;
-        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
-        mStep++;
-        break;
-    case 1:
-        gSceneManager.RequestScene(0x69);
-        break;
-    }
-}
-
-void Scene40TalkPage::Draw() {
-    mChoices.Draw();
 }
 
 // --- The scene's menu (scene+0x6947C) ------------------------------------------------------------------------------

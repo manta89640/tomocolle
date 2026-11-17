@@ -56,6 +56,9 @@ public:
     void SetLucky(BOOL lucky, int chance);
     void SetValue(int value);
     void SetItem(int item, int value);
+    BOOL SolveTrouble(Scene40Gift *gift, int count);
+    void StartCharacterReaction();
+    void PlayReactionMusic();
     void PlaceItemModel();
 
     /* 0x00 */ int mState;
@@ -70,7 +73,7 @@ public:
     /* 0x58 */ int mItem;   // -1 for none
     /* 0x5C */ int mValue;
     /* 0x60 */ BOOL mLucky; // Set by SetLucky with a chance in a thousand
-    /* 0x64 */ int mUnknown64;
+    /* 0x64 */ BOOL mGotTarget; // The gift was the very item the trouble was about (its target)
     /* 0x68 */ int mUnknown68;
     /* 0x6C */ int mUnknown6C;
     /* 0x70 */ int mUnknown70;
