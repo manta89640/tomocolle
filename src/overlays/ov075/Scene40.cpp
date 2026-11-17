@@ -1598,6 +1598,323 @@ static inline void SetBodyScaleZ(fx32 z, Mannequin *body) {
 
 // --- The talk page (pages+0x180) ----------------------------------------------------------------------------------
 
+void Scene40TalkPage::Init(Scene40Context *context, int *charOffset, Scene40MenuBar *menuBar,
+                         Scene40ProfilePage *profilePage) {
+    mContext = context;
+    mChoices.Init(charOffset, mContext->mTroubleMessages);
+    mMenuBar = menuBar;
+    mProfilePage = profilePage;
+    mActive = TRUE;
+    mState = mNextState = STATE_NONE;
+    mChoice = 0;
+    mUnknown1C10 = TRUE;
+}
+
+void Scene40TalkPage::Update() {
+    switch (mState = mNextState) {
+    case STATE_NONE:
+        break;
+    case STATE_START:
+        UpdateStart();
+        break;
+    case STATE_ANSWER:
+        UpdateAnswer();
+        break;
+    case STATE_SECOND_ANSWER:
+        UpdateSecondAnswer();
+        break;
+    case STATE_FIRST_OF_TWO:
+        UpdateFirstOfTwo();
+        break;
+    case STATE_SECOND_OF_TWO:
+        UpdateSecondOfTwo();
+        break;
+    case STATE_YES_NO:
+        UpdateYesNo();
+        break;
+    case STATE_TROUBLE_ANSWER:
+        UpdateTroubleAnswer();
+        break;
+    case STATE_WAIT_QUESTION:
+        UpdateWaitQuestion();
+        break;
+    case STATE_RELATION_ANSWER:
+        UpdateRelationAnswer();
+        break;
+    case STATE_SOLVE_OR_NOT:
+        UpdateSolveOrNot();
+        break;
+    case STATE_PLAY_OR_NOT:
+        UpdatePlayOrNot();
+        break;
+    case STATE_FOUR_ANSWERS:
+        UpdateFourAnswers();
+        break;
+    case STATE_WAIT_MESSAGES:
+        UpdateWaitMessages();
+        break;
+    case STATE_WAIT_CHARACTER:
+        UpdateWaitCharacter();
+        break;
+    case STATE_LEAVE_A:
+        UpdateLeaveA();
+        break;
+    case STATE_LEAVE_B:
+        UpdateLeaveB();
+        break;
+    case STATE_DONE:
+        break;
+    }
+}
+
+// The topic selects the character's response and the next set of answers.
+void Scene40TalkPage::UpdateStart() {
+    switch (mTopic) {
+    case 0: {
+        mContext->mCharacter->SetState(0x86);
+        Scene40Character *character = mContext->mCharacter;
+        if (character->IsInTrouble() && GetTrouble(character)->kind == 18) {
+            if (!mContext->mCharacter->mUnknown2ED0) {
+                mNextState = STATE_WAIT_QUESTION;
+            } else {
+                mResult = 0;
+                mNextState = STATE_DONE;
+            }
+        } else {
+            mChoices.SetChoicesForTrouble(mContext->mCharacter->mTroubleCategory, mContext->mCharacter->mTroubleId);
+            if (!mContext->mCharacter->mUnknown2ED0) {
+                mChoices.Open();
+                mNextState = STATE_ANSWER;
+            } else {
+                mResult = 0;
+                mNextState = STATE_DONE;
+            }
+        }
+        break;
+    }
+    case 1:
+        mContext->mCharacter->SetState(0xAF);
+        mChoices.SetChoices(7);
+        mChoices.Open();
+        mNextState = STATE_SOLVE_OR_NOT;
+        break;
+    case 2:
+        mContext->mCharacter->SetState(0xB3);
+        mChoices.SetChoices(8);
+        mChoices.Open();
+        mNextState = STATE_PLAY_OR_NOT;
+        break;
+    case 3:
+        mContext->mCharacter->SetState(0x68);
+        mChoices.SetChoices(9);
+        mChoices.Open();
+        mNextState = STATE_FOUR_ANSWERS;
+        break;
+    case 4:
+        switch (gSceneMemory.mTutorialStep) {
+        case 9:
+            mContext->mCharacter->SetState(0xC7);
+            mStep = 0;
+            mNextState = STATE_LEAVE_A;
+            break;
+        case 17:
+            mContext->mCharacter->SetState(0xCB);
+            mStep = 0;
+            mNextState = STATE_LEAVE_B;
+            break;
+        case 22:
+            mContext->mCharacter->ChooseAfterTouch();
+            mContext->mCharacter->SetState(0xCE);
+            if (!mUnknown1C10) {
+                mResult = 0;
+            } else {
+                mResult = 10;
+                mUnknown1C10 = FALSE;
+            }
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    }
+}
+
+void Scene40TalkPage::UpdateAnswer() {
+    mChoices.Update();
+    if (mChoices.mPressed != -1) {
+        mChoices.mAnswer = mChoices.mPressed;
+        mChoices.Close();
+        mChoice = mChoices.mPressed;
+        return;
+    }
+    if (!mChoices.mClosed) {
+        return;
+    }
+    switch (mChoices.mTroubleKind) {
+    case 1:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 1;
+            mNextState = STATE_DONE;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 3:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 1;
+            mNextState = STATE_DONE;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 4:
+        switch (mChoices.mAnswer) {
+        case 0:
+            if ((int)MATH_Rand16(&gRandom, 200) < 100) {
+                mChoices.SetChoices(18);
+                mContext->mCharacter->SetState(0x90);
+            } else {
+                mChoices.SetChoices(19);
+                mContext->mCharacter->SetState(0x91);
+            }
+            mChoices.Open();
+            mNextState = STATE_SECOND_ANSWER;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 5:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mChoices.SetChoices(13);
+            mChoices.Open();
+            mContext->mCharacter->SetState(0x95);
+            mNextState = STATE_FIRST_OF_TWO;
+            break;
+        case 1:
+            mChoices.SetChoices(16);
+            mChoices.Open();
+            mContext->mCharacter->SetState(0x9C);
+            mNextState = STATE_TROUBLE_ANSWER;
+            break;
+        }
+        break;
+    case 8:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0xA2);
+            mContext->mCharacter->StartTroubleProgress();
+            mMenuBar->StartCall();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 9:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0xA7);
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0xA8);
+            break;
+        }
+        mProfilePage->SetSwitchable(FALSE);
+        break;
+    case 10:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0xA7);
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0xA8);
+            break;
+        }
+        mProfilePage->SetSwitchable(FALSE);
+        break;
+    case 12:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mSpeechWindow->Hide();
+            mResult = 2;
+            mNextState = STATE_DONE;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 13:
+        switch (mChoices.mAnswer) {
+        case 0:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 1;
+            mNextState = STATE_DONE;
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 17:
+        switch (mChoices.mAnswer) {
+        case 0:
+            MI_CpuFill8(&gSceneScratch, 0, 100);
+            GetSceneMemory().mTalkAnswers[0] = 1;
+            gSceneManager.RequestScene(sReturnScenesA[GetTrouble(mContext->mCharacter)->flags]);
+            break;
+        case 1:
+            mContext->mCharacter->SetState(0);
+            mContext->mSpeechWindow->Hide();
+            mResult = 0;
+            mNextState = STATE_DONE;
+            break;
+        }
+        break;
+    case 20:
+        if (mChoices.mAnswer != 0) {
+            return;
+        }
+        mContext->mCharacter->ClearTrouble();
+        gIslandState.SetUnknown44(4, 3);
+        gSceneManager.RequestScene(0x5F);
+        break;
+    }
+}
+
 void Scene40TalkPage::UpdateSecondAnswer() {
     mChoices.Update();
     if (mChoices.mPressed != -1) {
@@ -2351,6 +2668,236 @@ void Scene40PresentPage::Start() {
 void Scene40PresentPage::UpdateStart() {
     mCharacter->SetState(0xB4);
     mNextState = STATE_SHOW_BOXES;
+}
+
+// The box layout and scale factors, measured from the scene's read-only data.
+extern "C" {
+extern const ScreenPoint sPresentCenterPoint;
+extern const ScreenPoint sPresentBoxPoints[3];
+extern const fx32 sPresentBoxScales[3];
+BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
+extern VecFx32 gTouchLineDirection;
+int func_ov075_02179290(Scene40Character *character);
+void func_ov075_021793fc(int kind);
+}
+
+static inline void SetPresentPosition(Model *model, const VecFx32 &position) {
+    model->mPosition.x = position.x;
+    model->mPosition.y = position.y;
+    model->mPosition.z = position.z;
+}
+
+static inline void SetPresentScale(Model *model, fx32 scale) {
+    model->mScale.x = scale;
+    model->mScale.y = scale;
+    model->mScale.z = scale;
+}
+
+static inline void SetPresentAnimation(AnimModel *box, const char *name) {
+    box->SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)box->mUnknown04, RESOURCE_BCA0, name));
+}
+
+static inline ModelAnimation *GetPresentBoxAnimation(AnimModel *box, const char *name) {
+    return AnimModel_FindAnimation(box, RESOURCE_BCA0,
+                                  ResourceSet_FindIndexByName((void *)box->mUnknown04, RESOURCE_BCA0, name));
+}
+
+// The character has set out the boxes. Project their screen positions into the room and keep their hit radii.
+void Scene40PresentPage::UpdateShowBoxes() {
+    if (mCharacter->mState != 0xB6) {
+        return;
+    }
+    VecFx32 center;
+    MtxFx33 rotation;
+    VecFx32 position;
+    ProjectTouchBetween(&sPresentCenterPoint, &center, 0x3000, 0x4000);
+    MakeFacingMatrixX(&rotation, 0x2C7, 0xFC2);
+    for (int i = 0; i < 3; i++) {
+        ProjectTouchBetween(&sPresentBoxPoints[i], &position, 0x3000, 0x4000);
+        mScale = GetCameraDistanceScale(&center);
+        fx32 scale = FX_Mul(mScale, sPresentBoxScales[i]);
+        mBoxTouchRadii[i] = FX_Mul(scale, 0x733);
+        SetPresentPosition(mBoxes[i], position);
+        MI_Copy36B(&rotation, &mBoxes[i]->mRotation);
+        SetPresentScale(mBoxes[i], scale);
+        SetPresentAnimation(mBoxes[i], "open");
+        GetPresentBoxAnimation(mBoxes[i], "open")->mFinished = TRUE;
+        mBoxes[i]->mVisible = TRUE;
+    }
+    gSoundManager.StartSeqArc(1, 10, 9);
+    mNextState = STATE_CHOOSE;
+}
+
+void Scene40PresentPage::UpdateChoose() {
+    if (!gTouchInput.mTouched) {
+        return;
+    }
+    int chosen = -1;
+    for (int i = 0; i < 3; i++) {
+        VecFx32 offset;
+        fx32 radius = mBoxTouchRadii[i];
+        VecFx32 position = mBoxes[i]->mPosition;
+        position.y += mBoxTouchRadii[i];
+        VecFx32 direction = gTouchLineDirection;
+        VEC_Subtract(&gCamera.mEye, &position, &offset);
+        if (LineMeetsSphere(&offset, &direction, radius)) {
+            chosen = i;
+            break;
+        }
+    }
+    if (chosen == -1) {
+        return;
+    }
+    if (!mContext->mTtsPlayer->IsEngineIdle()) {
+        mContext->mTtsPlayer->StopEngine();
+        mCharacter->SetState(0xB7);
+    }
+    GetPresentBoxAnimation(mBoxes[chosen], "open")->mFinished = FALSE;
+    GetPresentBoxAnimation(mBoxes[chosen], "open")->mPlayOnce = TRUE;
+    mItemModels[chosen]->mMotion.mHeld = TRUE;
+    SetPresentPosition(mItemModels[chosen], mBoxes[chosen]->mPosition);
+    mItemModels[chosen]->SetScale(mScale);
+    mItemModels[chosen]->mVisible = TRUE;
+    gSoundManager.StartSeqArc(1, 10, 10);
+    mChosenBox = chosen;
+    mNextState = STATE_OPEN;
+    mStep = 0;
+}
+
+// Open the chosen box first, then the other two; wait for the last opening animation before lifting the items.
+void Scene40PresentPage::UpdateOpen() {
+    switch (mStep) {
+    case 0:
+        if (!GetPresentBoxAnimation(mBoxes[mChosenBox], "open")->mFinished) {
+            return;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (i == mChosenBox) {
+                continue;
+            }
+            GetPresentBoxAnimation(mBoxes[i], "open")->mFinished = FALSE;
+            GetPresentBoxAnimation(mBoxes[i], "open")->mPlayOnce = TRUE;
+            mItemModels[i]->mMotion.mHeld = TRUE;
+            SetPresentPosition(mItemModels[i], mBoxes[i]->mPosition);
+            mItemModels[i]->SetScale(mScale);
+            mItemModels[i]->mVisible = TRUE;
+            mOpenedBox = i;
+        }
+        gSoundManager.StartSeqArc(1, 10, 10);
+        mStep++;
+        break;
+    case 1:
+        if (!GetPresentBoxAnimation(mBoxes[mOpenedBox], "open")->mFinished) {
+            return;
+        }
+        mFrames = 0;
+        mWaitFrames = 20;
+        for (int i = 0; i < 3; i++) {
+            mItemPoints[i].x = sPresentBoxPoints[i].x;
+            mItemPoints[i].y = sPresentBoxPoints[i].y;
+        }
+        mNextState = STATE_RISE;
+        gSoundManager.StartSeqArc(1, 10, 11);
+        break;
+    }
+}
+
+static inline void SetPresentMarkPosition(Sprite *sprite, ScreenPoint point, fx32 size) {
+    point.y -= ((size * 5) >> FX32_SHIFT) + 10;
+    sprite->SetPosition(FxVec2(point.x << FX32_SHIFT, point.y << FX32_SHIFT));
+}
+
+// NOT MATCHING: behavior is transcribed; register allocation and stack copies still differ from the original.
+void Scene40PresentPage::UpdateRise() {
+    mFrames++;
+    VecFx32 position;
+    for (int i = 0; i < 3; i++) {
+        if (i == mChosenBox) {
+            mItemPoints[i].y -= 2;
+        } else {
+            mItemPoints[i].y--;
+        }
+        ProjectTouchBetween(&mItemPoints[i], &position, 0x3000, 0x4000);
+        SetPresentPosition(mItemModels[i], position);
+    }
+    int chosen = mChosenBox;
+    if (mContext->mInventory->mItems[mItems[chosen]].mOwned == FALSE) {
+        fx32 size = (gGoodsTable[mItemModels[chosen]->mId].mScale << FX32_SHIFT) / 10;
+        mSprite.mVisible = TRUE;
+        SetPresentMarkPosition(&mSprite, mItemPoints[chosen], size);
+    }
+    if (mFrames < 25) {
+        return;
+    }
+    for (int i = 0; i < 3; i++) {
+        mBoxes[i]->mVisible = FALSE;
+    }
+    mFrames = 0;
+    mWaitFrames = 30;
+    mNextState = STATE_GIVE;
+}
+
+void Scene40PresentPage::UpdateEnd() {
+    mFrames++;
+    switch (mStep) {
+    case 0:
+        if (gTouchInput.mTouched) {
+            mFrames = 0;
+            mStep++;
+            gSoundManager.StartSeqArc(1, 26, 13);
+            for (int i = 0; i < 3; i++) {
+                if (i != mChosenBox) {
+                    mItemModels[i]->mVisible = FALSE;
+                }
+            }
+        }
+        if (mFrames >= 0x7FFF) {
+            mContext->mHeadIcon->SetMode(1);
+        }
+        break;
+    case 1:
+        if (mFrames < 35) {
+            return;
+        }
+        gSoundManager.StartSeqArc(1, 26, 14);
+        mSprite.mVisible = FALSE;
+        for (int i = 0; i < 3; i++) {
+            mItemModels[i]->Hide();
+            mItemModels[i] = NULL;
+        }
+        mStep = 3;
+        mFrames = 0;
+        break;
+    case 2:
+        break;
+    case 3:
+        if (mFrames < 45) {
+            return;
+        }
+        mContext->mSpeechWindow->Hide();
+        func_ov075_021793fc(func_ov075_02179290(mCharacter));
+        gSoundManager.MoveSeqVolume(0, 127, 120);
+        gSoundManager.LoadGroup(77);
+        mCharacter->SetState(0);
+        if (GetGameFlags(0x400)) {
+            mNextState = STATE_DONE;
+        } else {
+            SetGameFlags(0x400, TRUE);
+            mContext->mMessageSequence->mReturnState = STATE_END;
+            mNextState = STATE_WAIT_MESSAGES;
+            mContext->mMessageSequence->mEntry = 20;
+            mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+            mStep++;
+        }
+        break;
+    case 4:
+        if (mFrames < 30) {
+            return;
+        }
+        mContext->mHeadIcon->SetMode(1);
+        mNextState = STATE_DONE;
+        break;
+    }
 }
 
 void Scene40PresentPage::UpdateWaitMessages() {

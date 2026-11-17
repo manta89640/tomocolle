@@ -479,7 +479,7 @@ data_ov075_0217b420 kind:data(any) addr:0x0217b420
 data_ov075_0217b474 kind:data(any) addr:0x0217b474
 sLevelMeterPosition kind:data(any) addr:0x0217b47c
 sMannequinScreenPoint kind:data(any) addr:0x0217b484
-data_ov075_0217b4ac kind:data(any) addr:0x0217b4ac
+sPresentCenterPoint kind:data(any) addr:0x0217b4ac
 gText_Nu kind:data(any) addr:0x0217b4dc
 data_ov075_0217b4e4 kind:data(any) addr:0x0217b4e4
 sListTabPressedSequences kind:data(any) addr:0x0217b514
@@ -494,7 +494,7 @@ sClothesTabPressedSequences kind:data(any) addr:0x0217b618
 sNoTouchPoint kind:data(any) addr:0x0217b624
 sUp kind:data(any) addr:0x0217b630
 data_ov075_0217b63c kind:data(any) addr:0x0217b63c
-data_ov075_0217b648 kind:data(any) addr:0x0217b648
+sPresentBoxScales kind:data(any) addr:0x0217b648
 sBalloonUp kind:data(any) addr:0x0217b654
 data_ov075_0217b660 kind:data(any) addr:0x0217b660
 sReturnScenesA kind:data(any) addr:0x0217b66c
@@ -524,7 +524,7 @@ data_ov075_0217b7d6 kind:data(any) addr:0x0217b7d6
 sClothesTabKinds kind:data(any) addr:0x0217b7ec
 data_ov075_0217b800 kind:data(any) addr:0x0217b800
 sSongGiftMessages kind:data(any) addr:0x0217b82c
-gStr_Question_ov075 kind:data(any) addr:0x0217b844
+sPresentBoxPoints kind:data(any) addr:0x0217b844
 data_ov075_0217b85c kind:data(any) addr:0x0217b85c
 data_ov075_0217b874 kind:data(any) addr:0x0217b874
 data_ov075_0217b88c kind:data(any) addr:0x0217b88c
