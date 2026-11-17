@@ -22,6 +22,7 @@ lib/NitroSDK/libraries/fx/src/fx_mtx43.c:
     .text       start:0x02001874 end:0x0200222c
 
 lib/NitroSDK/libraries/fx/src/fx_mtx44.c:
+    complete
     .text       start:0x0200222c end:0x02002c44
 
 lib/NitroSDK/libraries/fx/src/fx_cp.c:
@@ -180,6 +181,7 @@ lib/NitroSDK/libraries/os/src/os_vramExclusive.c:
     .text       start:0x02008f74 end:0x02009038
 
 lib/NitroSDK/libraries/os/src/os_terminate_proc.c:
+    complete
     .text       start:0x02009038 end:0x02009054
 
 lib/NitroSDK/libraries/mi/src/mi_wram.c:
@@ -245,6 +247,7 @@ lib/NitroSDK/libraries/pxi/src/pxi_fifo.c:
     .text       start:0x0200b248 end:0x0200b558
 
 lib/NitroSDK/libraries/fs/src/fs_command.c:
+    complete
     .text       start:0x0200b558 end:0x0200b744
 
 lib/NitroSDK/libraries/fs/src/fs_command_default.c:
