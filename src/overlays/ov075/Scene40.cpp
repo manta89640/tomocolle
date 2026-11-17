@@ -1336,6 +1336,44 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     RefreshMenu();
 }
 
+// The page forwards calling and availability to the menu it was given by Init.
+void Scene40TouchPage::StartCall() {
+    mMenu->StartCall();
+}
+
+void Scene40TouchPage::SetMenuDisabled(BOOL disabled) {
+    mMenu->SetDisabled(disabled);
+}
+
+// Only a request to hide changes the page; showing it again is handled by its state updates.
+void Scene40TouchPage::HideMenu(BOOL hide) {
+    if (!hide) {
+        return;
+    }
+    mMenuHidden = TRUE;
+    mMenu->SetVisible(FALSE);
+}
+
+void Scene40TouchPage::RefreshMenu() {
+    mMenu->Refresh();
+    for (int i = 0; i < 5; i++) {
+        mContext->mMenuAvailable[i] = mMenu->mAvailable[i];
+    }
+}
+
+void Scene40TouchPage::UpdateMenu() {
+    mMenu->UpdateAvailable();
+}
+
+void Scene40TouchPage::SetState(int state) {
+    mState = state;
+    mStep = 0;
+    mFrames = 0;
+    mUnknown10 = 0;
+}
+
+void Scene40TouchPage::Draw() {}
+
 // --- The scene's character ------------------------------------------------------------------------------------------
 
 // With speaking set, the lips follow the scene's speech

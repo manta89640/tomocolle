@@ -2538,6 +2538,13 @@ and an mActive flag the pages' SetActive writes; offsets below are the pages obj
 
 Inferred: gSceneScratch (0x0213BAB0) is a member of the original's SceneMemory, which ends at it: this code reaches
 its first bytes both by its own address and as gSceneMemory+0x3C.
+Measured on the touch page (`Scene40TouchPage`): `StartCall` (`0x02150AD4`), `SetMenuDisabled`
+(`0x02150AE4`) and `UpdateMenu` (`0x02150B54`) forward to the menu's `StartCall`, `SetDisabled` and
+`UpdateAvailable`. `HideMenu` (`0x02150AF4`) only acts for a true argument: it sets the hidden flag and hides
+the menu; false does nothing. `RefreshMenu` (`0x02150B18`) refreshes the menu and copies its first five
+availability flags to the context. `SetState` (`0x021530E4`) sets the state and clears the step, frames and
+unknown word at +0x10. `Draw` (`0x02153508`) is empty. All seven match in instructions and relocation targets.
+
 ## The Mii touch scene's character, profile and meters (overlay 75, 0x0215d818 to 0x02168354)
 
 Measured (from the code of overlay 75; offsets of the scene, `Scene40`, and of the page object `Scene40Pages` at
