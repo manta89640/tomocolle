@@ -1128,5 +1128,6 @@ src/island/IslandProgress.cpp:
     .text       start:0x020af224 end:0x020af9f0
 
 lib/DSProtect/DSProtect.c:
+    complete
     .text       start:0x020af9f0 end:0x020b04c8
     .rodata     start:0x020fc48c end:0x020fc494

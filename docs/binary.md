@@ -2319,10 +2319,24 @@ the marker word and branches over it; `DSPROTECT_END(marker)` branches over the 
 `DSProtect_EncryptRange`. Linked from source (the unit marked complete as a test), the plain ARM9 program was the
 original's word for word over `DSProtect_CheckMacAddress`'s two ranges.
 
-What is left (measured): 15 of the 17 functions compile to the original's bytes; `DSProtect_RC4Init` differs in
-registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where the original XORs four immediates.
-objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
-with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
+All 17 functions match and the unit is complete: linked from source, with dsd encrypting the ranges after the
+link, the ROM is the original's. What the last two showed (measured):
+
+- `DSProtect_CalcChecksum`'s polynomial is four XORs of one byte each (`^ 0xED000000 ^ 0x00B80000 ^ 0x00008300 ^
+  0x00000020`), as its code has four `eor` immediates in the loop: written as `0xEDB88320` the constant comes from
+  the pool and stays in a register, and the else branch, one instruction then, is made conditional. The compiler
+  folds a constant subexpression, not a chain `x ^ A ^ B` (left to right, no constant subtree), so the source had
+  four values.
+- `DSProtect_RC4Init`'s swap is an inline function called as `Swap(&state[j], &state[i])` (the store to `state[j]`
+  comes first), the key index moves on after the swap, and the sum is `state[i] + (j + key[k])` (the add's operands
+  in that order).
+- Both had the original's instructions with other registers before the last change: declaring `i` before `sum`
+  (CalcChecksum), and the swap as an inline function (RC4Init), gave its registers.
+
+objdiff scored the six encrypted functions at 96.7 to 98.9% though their bytes are equal: each marker word is `dcd`
+in the source, data with a `$d` mapping symbol, where the delinked object has none and shows a `bl`. The build now
+takes the `$d` off those words after the compile (`tools/dsprotect_markers.py`, from the `dsprot_range` of
+`symbols.txt`), so both sides read alike.
 
 ## The characters
 

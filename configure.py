@@ -300,6 +300,9 @@ LIBRARIES["lib/DSProtect/"] = {
     "flags": [*CC_FLAGS, "-lang=c99"],
     "defines": SDK_DEFINES,
     "includes": ["lib/DSProtect", *SDK_INCLUDES],
+    # The marker words around the encrypted ranges are data in the compiled object and code in the delinked one:
+    # this makes objdiff read them alike (see the tool)
+    "post": "tools/dsprotect_markers.py",
 }
 
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
@@ -702,7 +705,7 @@ def main():
            "Preprocessing $in")
     # A library's file, with the compiler, flags and include directories of its library
     n.rule("mwcc_lib", "$wrapper $cc $flags $includes -gccdep -MD -c $in -o $out "
-           "&& $python tools/fix_depfile.py $dep", "Compiling $in", depfile="$dep", deps="gcc")
+           "&& $python tools/fix_depfile.py $dep$post", "Compiling $in", depfile="$dep", deps="gcc")
     n.rule("fx_const", "$python $script $in $out", "Generating $out")
     # A fetched library file with the project's own definitions put in, from lib/overrides/ (see the tool)
     n.rule("override", "$python tools/override_functions.py $in $out", "Writing $out")
@@ -774,8 +777,16 @@ def main():
                 compile_source = build_dir / "override" / source
             if compile_source != source:
                 includes.insert(0, source.parent.as_posix())
-            n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py"], order_only=generated,
+            # A library's step after the compile, on the object (it is given the module's symbols.txt)
+            post, post_inputs = "", []
+            if "post" in settings:
+                symbols = config_dir / "arm9" / "symbols.txt"
+                post = f" && $python {settings['post']} {obj} {symbols}"
+                post_inputs = [settings["post"], symbols]
+            n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py", *post_inputs],
+                    order_only=generated,
                     variables={
+                        "post": post,
                         "cc": ("$sjiswrap " if settings.get("sjis") else "")
                         + shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),
                         "flags": " ".join(flags),

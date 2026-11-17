@@ -1105,6 +1105,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
+- **A constant XORed in as several immediates** (`eor` with one byte of it each, inside a loop) was written as a
+  chain, `x ^ 0xED000000 ^ 0x00B80000 ^ 0x00008300 ^ 0x00000020`: the compiler folds a constant subtree, not a left
+  to right chain, and one constant of more than 8 significant bits comes from the pool and stays in a register
+  (`DSProtect_CalcChecksum`).
+- **Registers that differ with the instructions equal** can come from the order of the declarations: swapping
+  `u32 sum; int i;` to `int i; u32 sum;` gave `DSProtect_CalcChecksum` the original's three scratch registers, with
+  nothing else changed. In `DSProtect_RC4Init` no order of the plain variables did, and an inline swap helper
+  (whose parameters are variables of their own) did: when no declaration order fits, look for a variable that the
+  source had and the transcription does not.
 
 ## Functions emitted in every file that uses them
 
@@ -1151,3 +1160,17 @@ object refers to with the original's. What it reports is one of:
 - **A real mistake**: the wrong function or object.
 
 The `@number` names of the speech engine's literals differ by design and can be ignored.
+
+The opposite error exists too: a function that equals the original scored below 100%. Measured (objdiff 3.8.3's
+source, and a pair of objects of three instructions): when objdiff compares two instructions whose bytes differ (a
+call is `eb000000` with its addend in the relocation in a compiled object, `ebfffffe` in a delinked one), it turns a
+relocation into a branch within the function whenever the symbol plus the addend falls inside the function. An ARM
+call's addend is the PC's -8, so a call to the function that starts within 8 bytes after the caller's end, the next
+function of the section, is read as a branch into the caller's last two instructions. If that is so in one object and
+not in the other (the report combines a compiled file's functions into one section in source order; the original has
+them in ROM order), the call scores as a wrong argument: 5 points of 100 per instruction, 99.5% for a function of ten
+instructions (`Scene40Character::Draw`, which calls `Scene40CharacterPartA::Draw`, defined right after it in the source
+and far away in the ROM). It does not depend on what the callee is, and it goes away when the source has the ROM's
+function order. `python3 tools/check_relocs.py --near-misses` lists every function the report scores below 100% whose
+bytes outside relocations and whose references are the original's; DS Protect's marker words were the only other
+cause found.

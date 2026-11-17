@@ -9,6 +9,14 @@ checked by this alone.
 
 A relocation against a section (a static object, a string) is compared by the symbol at that place of the section
 when there is one, and skipped when there is not.
+
+With --near-misses it lists the opposite error instead: functions that objdiff's report scores below 100% although
+their bytes outside relocations and the symbols their relocations refer to are the original's. objdiff turns a
+relocation into a branch within the function when the symbol it refers to, plus the addend, falls inside the
+function; for an ARM call the addend is the PC's -8, so a call to the function that starts within 8 bytes after the
+caller's end (the next function of the section) is taken for a branch into the caller's last two instructions. When
+that holds in one object and not in the other, the call scores as a wrong argument (99.5% for a function of ten
+instructions). See docs/decompiling.md, "A match is instructions and references".
 """
 import argparse
 import json
@@ -50,10 +58,61 @@ def targets(obj: Object, section: int, start: int, end: int) -> dict:
     return result
 
 
+def masked(obj: Object, section: int, start: int, end: int) -> bytes:
+    """Returns the bytes of a function with the words that relocations fill in zeroed."""
+    code = bytearray(obj.bytes_of(section)[start:end])
+    for where, _, _, _ in obj.relocs.get(section, ()):
+        if start <= where < end:
+            code[where - start:where - start + 4] = bytes(min(4, end - where))
+    return bytes(code)
+
+
+def near_misses(units: list, report: dict) -> int:
+    """Lists the functions scored below 100% that equal the original's in bytes and references."""
+    scores = {(u["name"], f["name"]): float(f.get("fuzzy_match_percent", 0))
+              for u in report["units"] for f in u.get("functions", [])}
+    found = 0
+    for unit in units:
+        target, base = unit.get("target_path"), unit.get("base_path")
+        if not target or not base or not (ROOT / target).exists() or not (ROOT / base).exists():
+            continue
+        original, compiled = Object(ROOT / target), Object(ROOT / base)
+        theirs, ours = functions(original), functions(compiled)
+        for name in sorted(set(theirs) & set(ours)):
+            score = scores.get((unit["name"], name))
+            if score is None or score >= 100:
+                continue
+            t_section, t_start, t_end = theirs[name]
+            o_section, o_start, o_end = ours[name]
+            if t_end - t_start != o_end - o_start:
+                continue
+            # Both sides' relocation sites are masked in both, so a site only one side has is not a difference
+            t_code = bytearray(masked(original, t_section, t_start, t_end))
+            o_code = bytearray(masked(compiled, o_section, o_start, o_end))
+            for code, obj, section, start, end in ((o_code, original, t_section, t_start, t_end),
+                                                   (t_code, compiled, o_section, o_start, o_end)):
+                for where, _, _, _ in obj.relocs.get(section, ()):
+                    if start <= where < end:
+                        code[where - start:where - start + 4] = bytes(min(4, end - where))
+            if t_code != o_code:
+                continue
+            t_targets = targets(original, t_section, t_start, t_end)
+            o_targets = targets(compiled, o_section, o_start, o_end)
+            if any(t_targets.get(o) is not None and o_targets.get(o) is not None and t_targets[o] != o_targets[o]
+                   for o in set(t_targets) | set(o_targets)):
+                continue
+            found += 1
+            print(f"{unit['name']}: {name} scores {score}% but equals the original")
+    print(f"{found} functions score below 100% and equal the original in bytes and references")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--unit", help="only units whose name contains this")
     parser.add_argument("--verbose", action="store_true", help="list every difference")
+    parser.add_argument("--near-misses", action="store_true",
+                        help="list the functions the report scores below 100%% that equal the original")
     parser.add_argument("--pair", nargs=2, type=Path, metavar=("ORIGINAL", "COMPILED"),
                         help="compare these two objects instead of the units of objdiff.json")
     args = parser.parse_args()
@@ -63,6 +122,9 @@ def main() -> int:
                   "base_path": args.pair[1].resolve()}]
     else:
         units = json.loads((ROOT / "objdiff.json").read_text())["units"]
+    if args.near_misses:
+        report = json.loads((ROOT / "build" / "jpn_rev1" / "report.json").read_text())
+        return near_misses([u for u in units if not args.unit or args.unit in u["name"]], report)
     bad_units = 0
     for unit in units:
         target, base = unit.get("target_path"), unit.get("base_path")
