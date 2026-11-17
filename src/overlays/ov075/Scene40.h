@@ -21,7 +21,12 @@
 #include "voice/TtsPlayer.h"
 
 #include "Scene40Character.h"
+#include "Scene40Camera.h"
 #include "Scene40Clock.h"
+#include "Scene40ItemModel.h"
+#include "Scene40Lights.h"
+#include "Scene40Physics.h"
+#include "Scene40Touch.h"
 
 #include "Scene40Context.h"
 
@@ -39,14 +44,6 @@ class Scene40Button : public SpriteButton {
 public:
     /* 0xF4 */ int mUnknownF4;
 }; // 0xF8
-
-// A model of an item with fields of its own. Its constructor (0x020431A0) and D1 (0x020431CC) follow the scene's
-// constructor, for __cxa_vec_ctor; its table (0x02110A7C) is this file's data, its D0 (0x0204ADCC) at the file's
-// end.
-class Scene40ItemModel : public ItemModel {
-public:
-    /* 0x12C */ u8 mUnknown12C[0x1C];
-}; // 0x148
 
 // The scene's list: the shops' ItemListView with the five virtual functions of the overlay's own (0x0215E028 to
 // 0x0215E4E0, table 0x02182CD0). Its constructor is inline.
@@ -150,7 +147,10 @@ public:
     /* 0x30A8C */ Scene40Clock mClock;
     /* 0x30AB0 */ Scene40Context mContext; // What the pages are given
     /* 0x30B50 */ Scene40Pages mPages;
-    /* 0x69D2C */ u8 mUnknown69D2C[0x128];
+    /* 0x69D2C */ Scene40Touch mTouch;
+    /* 0x69DEC */ Scene40Camera mCamera;
+    /* 0x69E10 */ Scene40Lights mLights;
+    /* 0x69E24 */ Scene40Physics mPhysics;
     /* 0x69E54 */ Scene40ItemModel mItemModels[3];
     /* 0x6A22C */ Scene40Character mCharacter;
     /* 0x6D324 */ CharacterBase mFace;

@@ -2,6 +2,7 @@
 #include "../../scene/MainProgram3d.h"
 #include "GameData.h"
 #include "SceneMemory.h"
+#include "Scene40Pool.h"
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -808,4 +809,387 @@ void Scene40Clock::UpdateIfArchiveIdle() {
         return;
     }
     mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
+}
+
+// --- The stylus -------------------------------------------------------------------------------------------------
+
+static inline Scene40TouchPoint ZeroPoint() {
+    Scene40TouchPoint point = {0, 0};
+    return point;
+}
+
+void Scene40Touch::Init() {
+    mPressed = FALSE;
+    mHeld = FALSE;
+    mReleased = FALSE;
+    mSmooth = FALSE;
+    Reset();
+    mUnknownB4 = 0;
+    mTaps = 0;
+    mTapFrames = 0;
+}
+
+void Scene40Touch::Reset() {
+    mPressPoint = ZeroPoint();
+    mPoint = ZeroPoint();
+    mReleasePoint = ZeroPoint();
+    mDirection = ZeroPoint();
+    mDistance = 0;
+    mHeldFrames = 0;
+    mVelocity = ZeroPoint();
+    mMoveIndex = 0;
+    for (int i = 0; i < 5; i++) {
+        mMoves[i] = ZeroPoint();
+    }
+    if (!mSmooth) {
+        return;
+    }
+    mPointCount = 0;
+    mPointIndex = 0;
+    for (int i = 0; i < 8; i++) {
+        mPoints[i].x = 0;
+        mPoints[i].y = 0;
+    }
+}
+
+// The mean of the last five moves
+Scene40TouchPoint Scene40Touch::GetVelocity() {
+    Scene40TouchPoint sum = ZeroPoint();
+    for (int i = 0; i < 5; i++) {
+        sum.x += mMoves[i].x;
+        sum.y += mMoves[i].y;
+    }
+    sum.x /= 5;
+    sum.y /= 5;
+    return sum;
+}
+
+// A tap counts when it comes 3 to 30 frames after the one before
+void Scene40Touch::CountTap() {
+    if (mTaps == 0) {
+        mTaps++;
+        mTapFrames = 0;
+        return;
+    }
+    if (mTapFrames >= 3 && mTapFrames <= 30) {
+        mTaps++;
+    }
+}
+
+// --- The camera -------------------------------------------------------------------------------------------------
+
+extern "C" {
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
+void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
+void Model_SetAlpha(Model *model, int alpha);
+}
+
+static const VecFx32 sCameraStartPosition = {0, 0x41D0, 0xC000};
+static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
+static const VecFx32 sCameraTarget = {0, 0x1999, 0};
+
+static inline void CopyVec(VecFx32 *dst, const VecFx32 *src) {
+    dst->x = src->x;
+    dst->y = src->y;
+    dst->z = src->z;
+}
+
+static inline void SetVec(VecFx32 *dst, VecFx32 src) {
+    dst->x = src.x;
+    dst->y = src.y;
+    dst->z = src.z;
+}
+
+static inline void SetCameraPosition(Camera *camera, VecFx32 position) {
+    camera->mPosition.x = position.x;
+    camera->mPosition.y = position.y;
+    camera->mPosition.z = position.z;
+}
+
+static inline void SetCameraTarget(Camera *camera, VecFx32 target) {
+    camera->mTarget.x = target.x;
+    camera->mTarget.y = target.y;
+    camera->mTarget.z = target.z;
+}
+
+// The shift is unsigned, as overlay 96's
+static inline VecFx32 ShiftVec(const VecFx32 &v, u32 shift) {
+    VecFx32 result;
+    result.x = v.x >> shift;
+    result.y = v.y >> shift;
+    result.z = v.z >> shift;
+    return result;
+}
+
+// (x, z) made one long, as VEC_Normalize does it (overlay 96's NormalizeXZ)
+static inline FloorPos NormalizeXZ(fx32 x, fx32 z) {
+    FloorPos result;
+    fx64 t = (fx64)x * x + (fx64)z * z;
+    CP_SetSqrt64((u64)(t << 2));
+    CP_SetDiv64_64(1LL << (FX32_SHIFT + FX32_SHIFT + FX64C_SHIFT), (u64)t);
+    s32 sqrt = (s32)CP_GetSqrtResult32();
+    t = CP_GetDivResult64();
+    t = t * sqrt;
+    result.x = (fx32)((t * x + (1LL << (32 + FX32_SHIFT))) >> (32 + FX32_SHIFT + 1));
+    result.z = (fx32)((t * z + (1LL << (32 + FX32_SHIFT))) >> (32 + FX32_SHIFT + 1));
+    return result;
+}
+
+static inline fx32 ClampFx(fx32 value, fx32 min, fx32 max) {
+    if (value > max) {
+        value = max;
+    } else if (value < min) {
+        value = min;
+    }
+    return value;
+}
+
+void Scene40Camera::Init(Scene40Character *character) {
+    mCamera = &gCamera;
+    Camera_Reset(mCamera);
+    SetCameraPosition(mCamera, sCameraStartPosition);
+    SetCameraTarget(mCamera, sCameraStartTarget);
+    mCamera->mAngleX = 0;
+    mCamera->mAngleY = 0;
+    mCamera->mAngleZ = 0;
+    Camera_UpdateEye(mCamera);
+    mCharacter = character;
+    CopyVec(&mPosition, &mCamera->mPosition);
+    CopyVec(&mTarget, &mCamera->mTarget);
+    mState = 1;
+}
+
+// Coming back from another scene: the camera as that scene left it, put 14 in front of the target
+void Scene40Camera::Reset(BOOL restore) {
+    if (!restore) {
+        return;
+    }
+    SetVec(&mPosition, gSceneMemory.mCameraPosition);
+    SetVec(&mTarget, gSceneMemory.mCameraTarget);
+    VEC_Subtract(&mPosition, &mTarget, &mPosition);
+    VecFx32 target = sCameraTarget;
+    mTarget.x = target.x;
+    mTarget.y = target.y;
+    mTarget.z = target.z;
+    PlaceAround(&mPosition, &mTarget, &mPosition);
+    CopyVec(&mCamera->mPosition, &mPosition);
+    CopyVec(&mCamera->mTarget, &mTarget);
+    Camera_UpdateEye(mCamera);
+}
+
+// Follows the character within the room, keeping the distance and the height
+void Scene40Camera::Update() {
+    switch (mState) {
+    case 0:
+        return;
+    case 1:
+        break;
+    default:
+        return;
+    }
+    VecFx32 middle;
+    VecFx32 position;
+    VecFx32 pos = mCharacter->mPos;
+    middle = pos;
+    middle.x = ClampFx(middle.x, -0x3000, 0x3000);
+    middle.z = ClampFx(middle.z, -0x3000, 0x3000);
+    middle.y = mTarget.y;
+    mTarget = Approach(&middle, &mTarget, 5);
+    PlaceAround(&mPosition, &middle, &position);
+    mPosition = Approach(&position, &mPosition, 5);
+    CopyVec(&mCamera->mTarget, &mTarget);
+    CopyVec(&mCamera->mPosition, &mPosition);
+}
+
+void Scene40Camera::SetState(int state) {
+    mState = state;
+}
+
+// result: 14 from the target, in the direction of position from it, at the height 0x41D0
+void Scene40Camera::PlaceAround(VecFx32 *position, VecFx32 *target, VecFx32 *result) {
+    FloorPos direction = NormalizeXZ(position->x - target->x, position->z - target->z);
+    result->x = target->x + direction.x * 14;
+    result->z = target->z + direction.z * 14;
+    result->y = 0x41D0;
+}
+
+// The camera in front of the character, looking at it
+void Scene40Camera::ViewFromFront() {
+    VecFx32 pos = mCharacter->mPos;
+    mTarget.x = pos.x;
+    mTarget.y = pos.y;
+    mTarget.z = pos.z;
+    mTarget.x = ClampFx(mTarget.x, -0x3000, 0x3000);
+    mTarget.z = ClampFx(mTarget.z, -0x3000, 0x3000);
+    mTarget.y = 0x1999;
+    u16 angle = mCharacter->mAngle;
+    mPosition.x = FX_Mul(FX_CosIdx(angle), FX32_CONST(200));
+    mPosition.z = FX_Mul(FX_SinIdx(angle), FX32_CONST(200));
+    PlaceAround(&mPosition, &mTarget, &mPosition);
+    CopyVec(&mCamera->mTarget, &mTarget);
+    CopyVec(&mCamera->mPosition, &mPosition);
+    Camera_UpdateEye(mCamera);
+}
+
+void Scene40Camera::SetPosition(VecFx32 position) {
+    mPosition.x = position.x;
+    mPosition.y = position.y;
+    mPosition.z = position.z;
+    CopyVec(&mCamera->mPosition, &mPosition);
+}
+
+void Scene40Camera::SetTarget(VecFx32 target) {
+    mTarget.x = target.x;
+    mTarget.y = target.y;
+    mTarget.z = target.z;
+    CopyVec(&mCamera->mTarget, &mTarget);
+}
+
+// A step from current towards goal: 1 / 2^shift of the way
+VecFx32 Scene40Camera::Approach(VecFx32 *goal, VecFx32 *current, int shift) {
+    VecFx32 offset;
+    VEC_Subtract(goal, current, &offset);
+    offset = ShiftVec(offset, shift);
+    VEC_Add(&offset, current, &offset);
+    return offset;
+}
+
+static inline FloorPos ToFloorPos(VecFx32 v) {
+    FloorPos pos;
+    pos.x = v.x;
+    pos.z = v.z;
+    return pos;
+}
+
+// Where the camera's eye is, on the floor
+FloorPos Scene40Camera::GetEyeFloorPos() {
+    VecFx32 eye = mCamera->mEye;
+    return ToFloorPos(eye);
+}
+
+// --- The lights -------------------------------------------------------------------------------------------------
+
+static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0, 0x5DC}};
+
+void Scene40Lights::Init(Camera *camera, Room *room) {
+    VecFx32 view;
+    mState = 0;
+    mCamera = camera;
+    mRoom = room;
+    VEC_Subtract(&mCamera->mPosition, &mCamera->mTarget, &view);
+    u16 angle = FX_Atan2Idx(view.x, view.z);
+    for (int i = 0; i < 2; i++) {
+        mLights[i] = &gLights[i];
+        Light_Reset(&gLights[i]);
+        mLights[i]->mColor = gInteriorTable[mRoom->mId].mLightColor;
+        Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
+    }
+}
+
+void Scene40Lights::Update() {
+    VecFx32 view;
+    switch (mState) {
+    case 0: {
+        VEC_Subtract(&mCamera->mEye, &mCamera->mTarget, &view);
+        u16 angle = FX_Atan2Idx(view.x, view.z);
+        for (int i = 0; i < 2; i++) {
+            Light_SetDirection(mLights[i], 6000, angle, 0, sLightDirections[i]);
+        }
+        break;
+    }
+    case 1:
+        SetColor(mRoom->GetLightColor());
+        mState = 0;
+        break;
+    }
+}
+
+void Scene40Lights::SetState(int state) {
+    mState = state;
+}
+
+void Scene40Lights::SetColor(u16 color) {
+    for (int i = 0; i < 2; i++) {
+        mLights[i]->mColor = color;
+    }
+}
+
+// --- Falling and bouncing ---------------------------------------------------------------------------------------
+
+void Scene40Physics::Init() {
+    mCharacter = NULL;
+    for (int i = 0; i < 10; i++) {
+        mItems[i] = NULL;
+    }
+    mItemCount = 0;
+}
+
+void Scene40Physics::AddItem(Scene40ItemModel *item) {
+    mItems[mItemCount++] = item;
+}
+
+void Scene40Physics::Update() {
+    UpdateCharacter();
+    UpdateItems();
+}
+
+void Scene40Motion::Reset() {
+    VecFx32 zero = {0, 0, 0};
+    mVelocity = zero;
+    mAtRest = FALSE;
+    mUnknown10 = FALSE;
+    mUnknown14 = 0;
+}
+
+// At rest: on the floor and not moving
+void Scene40Motion::UpdateAtRest(VecFx32 *pos, VecFx32 *velocity) {
+    BOOL atRest = TRUE;
+    if (pos->y != 0 || velocity->x != 0 || velocity->y != 0 || velocity->z != 0) {
+        atRest = FALSE;
+    }
+    mAtRest = atRest;
+}
+
+// --- The item models --------------------------------------------------------------------------------------------
+
+void Scene40ItemModel::Load(int resourceId) {
+    LoadModel(resourceId);
+    mMotion.Reset();
+    mUnknown144 = 0;
+}
+
+// Out of sight: transparent, at its normal size, and far away
+void Scene40ItemModel::Hide() {
+    mVisible = FALSE;
+    mMotion.mUnknown10 = FALSE;
+    mMotion.mUnknown14 = 0;
+    mUnknown144 = 0;
+    Model_SetAlpha(this, 31);
+    mPosition.x = 0x7FFFFFFF;
+    mPosition.y = 0x7FFFFFFF;
+    mPosition.z = 0x7FFFFFFF;
+    mScale.x = FX32_ONE;
+    mScale.y = FX32_ONE;
+    mScale.z = FX32_ONE;
+}
+
+// Shows another item: lets go of the old one's files, and loads the new one's (as overlay 96's WeddingGiftModel)
+void Scene40ItemModel::ChangeItem(int item) {
+    ModelResources_ReleaseModel(gModelResources, mResourceId);
+    ArchiveManager_Unmount(&gArchiveManager, mArchiveName);
+    SetItem(mArchiveName, item);
+    ArchiveManager_MountCompressed(&gArchiveManager, mArchiveName, mArchivePath, 1);
+    ModelResources_SetModel(gModelResources, mResourceId, mModelPath);
+    LoadAnimation(mResourceId);
+    ResetScale();
+}
+
+// Where a character looks at it: half a unit above it
+VecFx32 Scene40ItemModel::GetLookPoint() {
+    VecFx32 point = mPosition;
+    point.y += FX32_HALF;
+    return point;
 }
