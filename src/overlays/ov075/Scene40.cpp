@@ -28,14 +28,15 @@ void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, i
 void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
 // Not decompiled yet
+extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
+extern const int gPersonalityKinds[16];
+extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
+extern MATHRandContext16 gRandom;
+void func_ov075_02176b80(Scene40Character *character);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
-// The head icon of each mood
-extern const s16 sMoodHeadIcons[5];
-
-// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
-// has it
+// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as SavedCharacter.cpp has it
 struct TroubleInfo {
     u32 kind : 8;
     u32 minutes : 16;
@@ -47,6 +48,14 @@ struct TroubleInfo {
     u32 flags;
 }; // 0xC
 extern "C" const TroubleInfo *const data_02114d78[];
+
+static inline int Random(int max) {
+    return MATH_Rand16(&gRandom, max);
+}
+
+// The head icon of each mood
+extern const s16 sMoodHeadIcons[5];
+
 
 // The answers of the talk page
 extern const Scene40ChoiceSet sChoiceSets[];        // By set
@@ -1670,6 +1679,110 @@ void Scene40Character::UpdateState() {
     }
     mFrame++;
 }
+
+// Whether a character in a mood has a motto for it, and says it by a chance
+static inline BOOL HasText(const wchar_t *text) { return wcslen(text) != 0; }
+static inline BOOL HasMotto(Scene40Character *character, int mood, const wchar_t *motto) {
+    return character->mMood == mood && HasText(motto);
+}
+static inline BOOL WillSayMotto(Scene40Character *character, int mood, const wchar_t *motto, int chance) {
+    return HasMotto(character, mood, motto) && Random(100) < chance;
+}
+
+// 0x1A: stands, looks at the camera, and after 40 frames says its motto of the mood, if it has one and by a chance
+// of the mood (the first mood rarely), else something chosen for a touch (ChooseTouchTalk); back to state 0 when
+// the speech is over. 0x1B: walks round to face the camera, then 0x1C: faces it and waits for the speech (0x02176b80
+// at frame 30), then state 0.
+void Scene40Character::UpdateStates1ATo1C() {
+    Camera *camera = &gCamera;
+    FloorPos pos;
+    switch (mState) {
+    case 0x1A:
+        if (mEntered) {
+            mEntered = FALSE;
+            SetFace(8);
+            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            GetAnimation()->mPlayOnce = FALSE;
+            TurnHeadToCamera();
+            mStep = mFrame = 0;
+            return;
+        }
+        switch (mStep) {
+        case 0:
+            mWait = 40;
+            if (mFrame >= mWait) {
+                mStep++;
+            }
+            break;
+        case 1:
+            if (WillSayMotto(this, 0, mMotto, 20)) {
+                Speak(0, 0x11E, 8, 0, 0);
+            } else if (WillSayMotto(this, 1, mMottos[0], 80)) {
+                Speak(0, 0x11E, 9, 0, 0);
+            } else if (WillSayMotto(this, 2, mMottos[1], 80)) {
+                Speak(0, 0x11E, 10, 0, 0);
+            } else if (WillSayMotto(this, 3, mMottos[2], 80)) {
+                Speak(0, 0x11E, 11, 0, 0);
+            } else if (WillSayMotto(this, 4, mMottos[3], 80)) {
+                Speak(0, 0x11E, 12, 0, 0);
+            } else {
+                u32 message;
+                int count;
+                int types[2];
+                int values[2];
+                ChooseTouchTalk(&message, &count, types, values);
+                Speak(1, message, count, types, values, 0);
+            }
+            mStep++;
+            break;
+        case 2:
+            if (mTtsPlayer->IsEngineIdle()) {
+                SetState(0);
+            }
+            break;
+        }
+        break;
+    case 0x1B:
+        if (mEntered) {
+            mEntered = FALSE;
+            ResetHeadTurn();
+            BlendToNamedAnimation(sWalkAnimations[gPersonalityKinds[mPersonality]][mMood]);
+            UpdateAnimSpeed();
+            ResetSoundPhase(0);
+            UpdateSpeedScales();
+            pos.x = camera->mEye.x;
+            pos.z = camera->mEye.z;
+            SetTargetFloorPos(pos);
+            return;
+        }
+        if (TurnToWalkTarget(0x280, 0)) {
+            SetState(0x1C);
+        }
+        MoveAlongAngle();
+        PlaySoundOnce(1, 0, 26);
+        break;
+    case 0x1C:
+        if (mEntered) {
+            mEntered = FALSE;
+            UpdateCameraAngle();
+            if (IsFacingCamera()) {
+                BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood]);
+                UpdateAnimSpeed();
+                TurnHeadToCamera();
+            } else {
+                SetState(0x1B);
+            }
+        } else if (mFrame == 30) {
+            func_ov075_02176b80(this);
+        }
+        if (mTtsPlayer->IsEngineIdle() && mFrame >= 30) {
+            SetState(0);
+        }
+        break;
+    }
+}
+
 
 // --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
 

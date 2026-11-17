@@ -1131,6 +1131,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - A `while (x < table[i] && ++i < 7) {}` or `for (;;) { if (x >= table[i]) break; if (++i >= 7) break; }` search
   gives the original's predicated loop (`addlt; cmplt; blt`) where `while (x < table[i]) { if (++i >= 7) break; }`
   does not (`Scene40ProfilePage::GetMeterGrade`).
+- Booleans materialised again and again (`cmp; moveq #1; movne #0; cmp #0; beq`, then after a call `movne #1;
+  moveq #0` twice, then once more at the join) are nested inline functions returning BOOL, each `&&` inside one:
+  `HasText(t) { return wcslen(t) != 0; }`, `HasMotto(c, mood, t) { return c->mMood == mood && HasText(t); }`,
+  `WillSayMotto(...) { return HasMotto(...) && Random(100) < chance; }`, called as `if (WillSayMotto(...))`. The
+  same conditions written inline in the `if` give branches only, and the eight IR passes off change nothing there
+  (`Scene40Character::UpdateStates1ATo1C`, 0x02163758, matched so).
+- A global's address loaded at a function's entry and kept in a callee-saved register for one late use is a local
+  pointer to it at the top (`Camera *camera = &gCamera;`); and a local `FloorPos` whose dead copies sit above a
+  block's locals is declared at function scope, not in its case (the same function).
 - A text button's (or a page's) text cleared and drawn through inlines taking the button keeps a pointer to the
   button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
   mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).

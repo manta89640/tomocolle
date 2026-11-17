@@ -13,6 +13,7 @@
 #include "Scene40Cover.h"
 #include "Scene40ItemModel.h"
 #include "Scene40Physics.h"
+#include "Scene40Talk.h"
 
 struct Scene40Context;
 class Scene40SpeechWindow;
@@ -94,6 +95,57 @@ public:
     void Speak(int file, u32 message, int mode);
     void ResetHeadTurn();
     void TurnHeadToCamera();
+
+    // ov075-e's (0x021722c8 to 0x02179728)
+    void ForceState(int state);
+    void ShowBalloon(int state);
+    BOOL IsBalloonTouched();
+    void UpdateCameraAngle();
+    BOOL IsFacingCameraLoosely();
+    BOOL IsFacingCamera();
+    BOOL IsFacingCameraClosely();
+    void PlaceHeldItem(fx32 scale);
+    void Speak(int file, u32 message, int count, int *types, int *values, int mode);
+    void TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    u16 GetHeadPitchTo(VecFx32 *target);
+    u16 GetHeadYawTo(VecFx32 *target);
+    u16 GetAngleTo(VecFx32 *target);
+    int GetGoodsSatisfaction(int item);
+    int GetGoodsReaction(int item);
+    int GetClothesSatisfaction(int clothes);
+    int GetClothesReaction(int clothes);
+    int GetInteriorReaction(int interior);
+    int GetInteriorSatisfaction(int interior);
+    BOOL RankLikedItem(int item);
+    void SetUnknown23CFromFullness(s64 now);
+    void AddUnknown1C4Once0();
+    void AddUnknown1C4Once1();
+    void AddUnknown1C4Once2();
+    void AddUnknown1C4ByTrouble();
+    void ClearMoodIfTroubleOfCategory4OrKind8();
+    void ClearMoodIfTroubleOfKind8();
+    BOOL HasSomethingToTell();
+    BOOL IsDreaming();
+    int ChooseActivity();
+    void SetTaughtWord(const wchar_t *word);
+    void SetTaughtText(const wchar_t *text);
+    void StopHeadTurn();
+    void FaceCamera();
+    void TurnHeadToHeldItem(int pitchLimit, int yawLimit);
+    void SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    void SnapHeadToCamera();
+    int GetAge(SavedCharacter *character, RTCDate *date);
+    void SetGift(Scene40Gift *gift);
+    BOOL WalkToMiddleIfAway();
+    BOOL WalkToCameraIfNotFacing();
+    BOOL TakeOfferedItem();
+    void PlaceCoverAtHands();
+    void UpdateMouthByAnimation();
+    BOOL MatchesTalk(const Scene40TalkEntry *entry, RTCDate *date, Scene40TalkConditions *conditions);
+    void GetTalkConditions(RTCDate *date, RTCTime *time, Scene40TalkConditions *conditions);
+    void GetTalkArguments(const Scene40TalkEntry *entry, int *count, int *types, int *values);
+    void ChooseTouchTalk(u32 *message, int *count, int *types, int *values);
+    void ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values);
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
