@@ -11,6 +11,8 @@
 
 #include "Scene40Balloon.h"
 #include "Scene40Cover.h"
+#include "Scene40ItemModel.h"
+#include "Scene40Physics.h"
 
 struct Scene40Context;
 class Scene40SpeechWindow;
@@ -101,7 +103,7 @@ public:
     BOOL IsFacingCameraLoosely();
     BOOL IsFacingCamera();
     BOOL IsFacingCameraClosely();
-    void PlaceHeldItem(fx32 reach);
+    void PlaceHeldItem(fx32 scale);
     void Speak(int file, u32 message, int count, int *types, int *values, int mode);
     void TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
     u16 GetHeadPitchTo(VecFx32 *target);
@@ -124,6 +126,14 @@ public:
     BOOL HasSomethingToTell();
     BOOL IsDreaming();
     int ChooseActivity();
+    void SetTaughtWord(const wchar_t *word);
+    void SetTaughtText(const wchar_t *text);
+    void StopHeadTurn();
+    void FaceCamera();
+    void TurnHeadToHeldItem(int pitchLimit, int yawLimit);
+    void SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
+    void SnapHeadToCamera();
+    int GetAge(SavedCharacter *character, RTCDate *date);
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
@@ -139,8 +149,10 @@ public:
         mTarget.z = pos.z;
     }
 
-    /* 0x2B18 */ u8 mUnknown2B18[0xBC]; // An object of the overlay's (0x0217aea8 initialises it)
-    /* 0x2BD4 */ ItemModel *mHeldItem;  // The item it holds out or receives
+    /* 0x2B18 */ Scene40Motion mMotion;
+    /* 0x2B30 */ wchar_t mTaughtWord[17];
+    /* 0x2B52 */ wchar_t mTaughtText[65];
+    /* 0x2BD4 */ Scene40ItemModel *mHeldItem;  // The item it holds out or receives
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x2BE0 */ Scene40Context *mContext;

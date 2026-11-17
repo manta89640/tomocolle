@@ -1140,7 +1140,7 @@ void Scene40Motion::Reset() {
     VecFx32 zero = {0, 0, 0};
     mVelocity = zero;
     mAtRest = FALSE;
-    mUnknown10 = FALSE;
+    mHeld = FALSE;
     mUnknown14 = 0;
 }
 
@@ -1164,7 +1164,7 @@ void Scene40ItemModel::Load(int resourceId) {
 // Out of sight: transparent, at its normal size, and far away
 void Scene40ItemModel::Hide() {
     mVisible = FALSE;
-    mMotion.mUnknown10 = FALSE;
+    mMotion.mHeld = FALSE;
     mMotion.mUnknown14 = 0;
     mUnknown144 = 0;
     Model_SetAlpha(this, 31);
@@ -1192,4 +1192,239 @@ VecFx32 Scene40ItemModel::GetLookPoint() {
     VecFx32 point = mPosition;
     point.y += FX32_HALF;
     return point;
+}
+
+// --- The character: the item in its hands -----------------------------------------------------------------------
+
+static inline fx32 LengthSq(const VecFx32 *v) {
+    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
+}
+
+// Puts the held item in the right hand: the hand, or a little way from the elbow towards the hand if the hand is
+// nearer than that (PlaceHeldItem with the left hand left out)
+void Scene40Character::PlaceHeldItemInHand() {
+    VecFx32 middle;
+    VecFx32 rightHand;
+    VecFx32 rightArm;
+    VecFx32 rightOffset;
+    VecFx32 rightReach;
+    VecFx32 rightPoint;
+
+    if (mHeldItem == NULL) {
+        return;
+    }
+    mTrackLimbs = TRUE;
+    rightHand = GetJointPosition(JOINT_R_HAND);
+    rightArm = GetJointPosition(JOINT_R_ELBOW);
+
+    VEC_Subtract(&rightHand, &rightArm, &rightOffset);
+    VEC_Normalize(&rightOffset, &rightReach);
+    ScaleVec(0x999, &rightReach, &rightReach);
+    if (LengthSq(&rightReach) > LengthSq(&rightOffset)) {
+        VEC_Add(&rightArm, &rightReach, &rightPoint);
+        rightPoint.y = rightHand.y;
+    } else {
+        rightPoint = rightHand;
+    }
+    middle = rightPoint;
+    mHeldItem->SetPosition(middle);
+    mHeldItem->mMotion.mHeld = TRUE;
+}
+
+void Scene40Character::PlaceHeldItem() {
+    PlaceHeldItem(FX32_ONE);
+}
+
+// Puts the held item between the hands, each hand's point found as above. Goods 247 hang lower, by 0xD99 scaled.
+void Scene40Character::PlaceHeldItem(fx32 scale) {
+    VecFx32 middle;
+    VecFx32 rightHand;
+    VecFx32 leftHand;
+    VecFx32 rightArm;
+    VecFx32 leftArm;
+    VecFx32 rightOffset;
+    VecFx32 leftOffset;
+    VecFx32 rightReach;
+    VecFx32 leftReach;
+    VecFx32 rightPoint;
+    VecFx32 leftPoint;
+
+    if (mHeldItem == NULL) {
+        return;
+    }
+    mTrackLimbs = TRUE;
+    rightHand = GetJointPosition(JOINT_R_HAND);
+    rightArm = GetJointPosition(JOINT_R_ELBOW);
+    leftHand = GetJointPosition(JOINT_L_HAND);
+    leftArm = GetJointPosition(JOINT_L_ELBOW);
+
+    VEC_Subtract(&rightHand, &rightArm, &rightOffset);
+    VEC_Normalize(&rightOffset, &rightReach);
+    ScaleVec(0x999, &rightReach, &rightReach);
+    if (LengthSq(&rightReach) > LengthSq(&rightOffset)) {
+        VEC_Add(&rightArm, &rightReach, &rightPoint);
+        rightPoint.y = rightHand.y;
+    } else {
+        rightPoint = rightHand;
+    }
+
+    VEC_Subtract(&leftHand, &leftArm, &leftOffset);
+    VEC_Normalize(&leftOffset, &leftReach);
+    ScaleVec(0x999, &leftReach, &leftReach);
+    if (LengthSq(&leftReach) > LengthSq(&leftOffset)) {
+        VEC_Add(&leftArm, &leftReach, &leftPoint);
+        leftPoint.y = leftHand.y;
+    } else {
+        leftPoint = leftHand;
+    }
+
+    VEC_Add(&rightPoint, &leftPoint, &middle);
+    middle.x /= 2;
+    middle.y /= 2;
+    middle.z /= 2;
+    if (mHeldItem->mId == 247) {
+        if (scale == FX32_ONE) {
+            middle.y += -0xD99;
+        } else {
+            middle.y -= FX_Mul(scale, 0xD99);
+        }
+        middle.y = middle.y < 0 ? 0 : middle.y;
+    }
+    mHeldItem->SetPosition(middle);
+    mHeldItem->mMotion.mHeld = TRUE;
+}
+
+// --- The character: what it was taught, its head and its speech --------------------------------------------------
+
+extern "C" {
+wchar_t *wcsncpy(wchar_t *dst, const wchar_t *src, size_t n);
+}
+
+void Scene40Character::SetTaughtWord(const wchar_t *word) {
+    MI_CpuClear16(mTaughtWord, sizeof(mTaughtWord));
+    wcsncpy(mTaughtWord, word, 16);
+}
+
+void Scene40Character::SetTaughtText(const wchar_t *text) {
+    MI_CpuClear16(mTaughtText, sizeof(mTaughtText));
+    wcsncpy(mTaughtText, text, 64);
+}
+
+// The head stops turning and looks ahead
+void Scene40Character::StopHeadTurn() {
+    mHeadTurn = 0;
+    mHeadPitchNow = 0;
+    mHeadYawNow = 0;
+    mHeadRollNow = 0;
+}
+
+void Scene40Character::ResetHeadTurn() {
+    mHeadTurn = 1;
+    mHeadPitch = 0;
+    mHeadYaw = 0;
+    mHeadRoll = 0;
+}
+
+static inline u16 AngleTo(Character *character, FloorPos target) {
+    FloorPos delta = target - character->GetFloorPos();
+    return FX_Atan2Idx(delta.z, delta.x);
+}
+
+void Scene40Character::FaceCamera() {
+    FloorPos camera;
+    camera.x = gCamera.mEye.x;
+    camera.z = gCamera.mEye.z;
+    Character::SetAngle(AngleTo(this, camera));
+}
+
+// Turns the head towards a point, as far as the limits allow
+void Scene40Character::TurnHeadTo(VecFx32 *target, int pitchLimit, int yawLimit) {
+    u16 pitch = GetHeadPitchTo(target);
+    u16 yaw = GetHeadYawTo(target);
+    mHeadTurn = TRUE;
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
+    mHeadPitch = pitch;
+    mHeadYaw = yaw;
+    mHeadRoll = 0;
+}
+
+void Scene40Character::TurnHeadToCamera() {
+    TurnHeadTo(&gCamera.mEye, 0x2000, 0x3F00);
+}
+
+void Scene40Character::TurnHeadToHeldItem(int pitchLimit, int yawLimit) {
+    if (mHeldItem == NULL) {
+        return;
+    }
+    VecFx32 point = mHeldItem->GetLookPoint();
+    TurnHeadTo(&point, pitchLimit, yawLimit);
+}
+
+// The same, at once
+void Scene40Character::SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit) {
+    u16 pitch = GetHeadPitchTo(target);
+    u16 yaw = GetHeadYawTo(target);
+    mHeadTurn = TRUE;
+    CharacterBase::ClampHeadAngle(&pitch, pitchLimit);
+    CharacterBase::ClampHeadAngle(&yaw, yawLimit);
+    mHeadPitch = pitch;
+    mHeadYaw = yaw;
+    mHeadRoll = 0;
+    mHeadPitchNow = pitch;
+    mHeadYawNow = yaw;
+    mHeadRollNow = 0;
+}
+
+void Scene40Character::SnapHeadToCamera() {
+    SnapHeadTo(&gCamera.mEye, 0x2000, 0x3F00);
+}
+
+// The length of (x, z), by the hardware square root
+static inline fx32 SqrtXZ(fx32 x, fx32 z) {
+    fx64 t = (fx64)x * x + (fx64)z * z;
+    CP_SetSqrt64((u64)(t << 2));
+    return ((s32)CP_GetSqrtResult32() + 1) >> 1;
+}
+
+u16 Scene40Character::GetHeadPitchTo(VecFx32 *target) {
+    MtxFx43 matrix;
+    MtxFx33 rotation;
+    GetJointMatrices(0, &matrix, &rotation);
+    fx32 dz = target->z - mPos.z;
+    fx32 dx = target->x - mPos.x;
+    fx32 eyes = matrix._31 + 0xCCC;
+    return -FX_Atan2Idx(target->y - eyes, SqrtXZ(dx, dz));
+}
+
+void Scene40Character::Speak(int file, u32 message, int type, int value, int mode) {
+    Speak(file, message, 1, &type, &value, mode);
+}
+
+void Scene40Character::Speak(int file, u32 message, int mode) {
+    Speak(file, message, 0, 0, mode);
+}
+
+// How old a character is on a date: -1 without a birth year
+int Scene40Character::GetAge(SavedCharacter *character, RTCDate *date) {
+    int year = date->year + 2000;
+    int month = date->month;
+    int day = date->day;
+    int birthYear = character->mBirthYear;
+    int birthMonth = character->GetParameter(PARAM_BIRTH_MONTH);
+    int birthDay = character->GetParameter(PARAM_BIRTH_DAY);
+    if (birthYear == 0xFFF) {
+        return -1;
+    }
+    if (day < birthDay) {
+        month--;
+    }
+    if (month < birthMonth) {
+        year--;
+    }
+    int age = year - birthYear;
+    if (age < 0) {
+        age = -1;
+    }
+    return age;
 }
