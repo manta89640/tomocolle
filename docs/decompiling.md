@@ -1106,6 +1106,29 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
 
+### Evaluation order and colouring rules measured on overlay 75's pages
+
+Each was found on one function and checked on a second where the shape recurs:
+
+- **An inlined call binds its arguments last to first, and a member call binds `this` last.** `PlaceMannequin`
+  sets the body's size per axis through an inline: with the mannequin pointer as the helper's *last* parameter the
+  pointer is read before the size is computed, as in the original; as a member function (`this` first) or with the
+  size computed into a local first, the table is read before the pointer. The by-value position copy is the same
+  helper style (`SetBodyPosition(Mannequin *, VecFx32)`).
+- **`a | (b != 0)` with calls compares as soon as it can.** Written as one expression, the first call's result is
+  compared before the second call; the original keeps the raw value across the call and compares after: the values
+  are assigned to locals first (`Scene40ListTabs::UpdateAvailable`).
+- **A switch gives branches where if/else gives conditional moves**, for three cases that each assign a value
+  (`UpdateRelationAnswer`); and a switch case that only re-assigns the default keeps its own branch in the jump
+  table (`UpdateTroubleAnswer`).
+- **A redundant `else if (x >= N)` after `if (x < N)`** is the source of a conditional return (`poplt`) right after
+  the branch target: the compiler reuses the first compare for the second test (`Scene40CallButton::UpdateCall`).
+- **Register colouring follows variables, not values.** A second loop with a counter of its own colours its two
+  registers as the original; reusing the first loop's counter swaps them (`Scene40OptionPage::UpdateDone`). A table
+  read twice, rather than named in a local, gives the original's registers (`Scene40MenuBar::Init`).
+- **A u16 field set from an int is cast**: `mClothesId = (u16)mChosenId` gives the original's `lsl #16; lsr #16`
+  before the bitfield insert.
+
 ## Functions emitted in every file that uses them
 
 Measured (fix-link, test files under the game's compiler and flags, and the ROM):

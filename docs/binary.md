@@ -2471,3 +2471,22 @@ in a table that the analysis took for a number): the first try lost code from th
 overlays. So the linker script names every symbol of the delinked objects in a `FORCE_ACTIVE` list, which keeps the
 original whole, and stripping only acts on compiled objects. With that, the ROM matches, and a library file linked
 from its compiled object comes out with exactly the functions the game has.
+
+## Visiting a Mii: the lower-screen pages of overlay 75 (0x02153EE4 to 0x0215D8E4)
+
+Measured from the code (ov075-b's range; the scene, its controller and its other pages are described by the other
+ranges' agents). The pages are members of one object at scene+0x30B50 (Scene40Pages), each with mState/mNextState
+and an mActive flag the pages' SetActive writes; offsets below are the pages object's.
+
+| Page | At | Size | What its code does |
+| --- | --- | --- | --- |
+| Talk (page 1) | +0x180 | 0x1C14 | A question in the choice list (+0x1C); the answer kept for the next scene in the two bytes after gSceneMemory's 0x3C, or acted on: ends or solves the character's trouble (cooldown, AddTroublesSolved), moves the relation meter with the trouble's target by +40/0/-40, goes to a game scene (table 0x0217BBC0) |
+| Gift (page 2) | +0x1D94 | 0x88 | The character's reaction to what it is given (30 kinds, 0x02154BE0); the player holds the item out until the stylus comes down; SetLucky draws a chance in a thousand |
+| Present (page 3) | +0x1E1C | 0x128 | Three boxes (the scene's models) with a goods item of each group (ChooseItemInGroup(1, 4, n)); the box touched opens and its item is the player's |
+| List (pages 4 to 7) | +0x1F44 | 0x18B74 | The player's goods, clothes and interiors to give (four list tabs, goods filter tabs {1, 2, 8, 16}, five clothes tabs), or the character's own clothes to dress it in; a shop button per list (scenes 0x68, 0x2F, 0x1E, 0x35) |
+| Keyboard (page 8) | +0x1AAB8 | 0x69F8 | The soft keyboard; the word typed is made speakable and spoken |
+| Page 9 | +0x214B0 | 0x8FEC | Three panels (4, 6, 8 buttons) marking what the character has done: the bits of its 0x299, the goods 236 to 243 it has had, the interiors of kind 13, a motto |
+| Menu | +0x3892C | 0x8B0 | Seven buttons, five down the left edge (the first calls for attention after 120 frames once the speech has ended) and two at the top right, each shown when what it offers is there |
+
+Inferred: gSceneScratch (0x0213BAB0) is a member of the original's SceneMemory, which ends at it: this code reaches
+its first bytes both by its own address and as gSceneMemory+0x3C.
