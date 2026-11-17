@@ -3927,8 +3927,8 @@ _ZN12InteriorList4LoadEv kind:function(arm,size=0xb0) addr:0x020a4f58
 _ZN12InteriorList4SaveEv kind:function(arm,size=0x88) addr:0x020a5008
 _ZN12InteriorList4SortEv kind:function(arm,size=0x34) addr:0x020a5090
 _ZN12InteriorList13SortHeldFirstEv kind:function(arm,size=0x34) addr:0x020a50c4
-_Z16CompareInteriorsPvS_ kind:function(arm,size=0x38) addr:0x020a50f8
-_Z25CompareInteriorsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x020a5130
+_Z16CompareInteriorsPvS_ kind:function(arm,size=0x38) addr:0x020a50f8 local
+_Z25CompareInteriorsHeldFirstPvS_ kind:function(arm,size=0x44) addr:0x020a5130 local
 _ZN12InteriorList8GetOwnedEPP4ItemPi kind:function(arm,size=0x58) addr:0x020a5174
 _ZN12InteriorList14GetOwnedKind16EPP4ItemPi kind:function(arm,size=0x6c) addr:0x020a51cc
 _ZN12InteriorList10GetOnOfferEPP4ItemPi kind:function(arm,size=0xc0) addr:0x020a5238
@@ -3957,9 +3957,9 @@ _ZN4Room11ReloadPartsEi kind:function(arm,size=0xf4) addr:0x020a5854
 _ZN4Room10ReleaseAllEv kind:function(arm,size=0x18) addr:0x020a5948
 _ZN4Room6UpdateEv kind:function(arm,size=0x10) addr:0x020a5960
 _ZN4Room8SetScaleEl kind:function(arm,size=0x14) addr:0x020a5970
-_Z17GetInteriorWeightt kind:function(arm,size=0xa4) addr:0x020a5984
+_Z17GetInteriorWeightt kind:function(arm,size=0xa4) addr:0x020a5984 local
 _Z15ChooseInteriorsPhi kind:function(arm,size=0x1a4) addr:0x020a5a28
-_Z18CompareInteriorIdsPvS_ kind:function(arm,size=0x10) addr:0x020a5bcc
+_Z18CompareInteriorIdsPvS_ kind:function(arm,size=0x10) addr:0x020a5bcc local
 _ZN12InteriorItem10GetWeight3Ev kind:function(arm,size=0x28) addr:0x020a5bdc
 _ZN12InteriorItem10GetWeight2Ev kind:function(arm,size=0x28) addr:0x020a5c04
 _ZN12InteriorItem10GetWeight1Ev kind:function(arm,size=0x28) addr:0x020a5c2c
@@ -4739,9 +4739,9 @@ sTab4Positions kind:data(any) addr:0x020fbe64 local
 sTab0Positions kind:data(any) addr:0x020fbe8c local
 sTab2Positions kind:data(any) addr:0x020fbee4 local
 sTab1Positions kind:data(any) addr:0x020fbf4c local
-data_020fbfd4 kind:data(any) addr:0x020fbfd4
-sDoorSounds kind:data(any) addr:0x020fbfd6
-sEntranceName kind:data(any) addr:0x020fbfe8
+data_020fbfd4 kind:data(any) addr:0x020fbfd4 local
+sDoorSounds$13598 kind:data(any) addr:0x020fbfd6 local
+name$13205 kind:data(any) addr:0x020fbfe8 local
 sStageResidents kind:data(any) addr:0x020fbffc local
 sStageRooms kind:data(any) addr:0x020fc002 local
 sFloorRooms kind:data(any) addr:0x020fc00c local
@@ -6284,12 +6284,12 @@ sTabButtonPositions kind:data(any) addr:0x02115098 local
 @16832 kind:data(any) addr:0x021150b8 local
 _ZTV4Room kind:data(any) addr:0x021150c0
 _ZTV12InteriorItem kind:data(any) addr:0x021150e4
-gStr_ColonSolidus_2 kind:data(any) addr:0x02115108
-gStr_ColonSolidus_3 kind:data(any) addr:0x0211510c
-gStr_Mdl_Room kind:data(any) addr:0x02115110
-gStr_3D_LZ_bin_3 kind:data(any) addr:0x0211511c
-gStr_imd_2 kind:data(any) addr:0x02115128
-gStr_XXX_close_ica kind:data(any) addr:0x02115130
+@14382 kind:data(any) addr:0x02115108 local
+@14387 kind:data(any) addr:0x0211510c local
+@14391 kind:data(any) addr:0x02115110 local
+@14392 kind:data(any) addr:0x0211511c local
+@14393 kind:data(any) addr:0x02115128 local
+@14427 kind:data(any) addr:0x02115130 local
 sSeconds$14022 kind:data(any) addr:0x02115140 local
 gStr_Fw_BG_up_DAY_Chg_ncl kind:data(any) addr:0x021151a0
 gStr_Fw_BG_up_AM_Fine_ncl kind:data(any) addr:0x021151b8
