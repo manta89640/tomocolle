@@ -724,12 +724,13 @@ static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) 
     G3C_TexPlttBase(dl, addr, texFmt);
 }
 
+// The three hair meshes keep the mapped vertex in an array of three fx16, not a VecFx16: an array passed by its
+// name does not mark the local as address-taken, so an inline's argument vertex[0] (an element at offset 0, a plain
+// read of an unaliased local) is substituted into the inline's body instead of bound to a temporary, and the vertex
+// call loads x after forming &ctx->dl (z and y are bound, last to first). The pre-RA scheduler keeps that order where
+// its pressure counter is at 14 (the textured meshes) and puts the three loads first where it is lower (the skin
+// mesh), which is why one source gave the original's two orders.
 // The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
-// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
-// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
-// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
-// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -748,7 +749,7 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -822,23 +823,23 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
@@ -848,11 +849,6 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
 #pragma pop
 
 // The hair's other mesh, for the types with a texture of their own
-// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
-// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
-// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
-// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -871,7 +867,7 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -948,23 +944,23 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
@@ -991,7 +987,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -1047,23 +1043,23 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
             n = NFLi_ReadU8(&stream) * 3;
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
