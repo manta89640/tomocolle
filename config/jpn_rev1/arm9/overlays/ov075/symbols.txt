@@ -391,7 +391,7 @@ _ZN16Scene40Character11GoToScene51Ev kind:function(arm,size=0x54) addr:0x021767b
 _ZN16Scene40Character17GoToTogetherSceneEv kind:function(arm,size=0xe4) addr:0x0217680c
 _ZN16Scene40Character11GoToScene3CEv kind:function(arm,size=0x34) addr:0x021768f0
 _ZN16Scene40Character11GoToWeddingEv kind:function(arm,size=0x34) addr:0x02176924
-_ZN16Scene40Character17SpeakAboutTroubleEi kind:function(arm,size=0x228) addr:0x02176958
+_ZN16Scene40Character17SpeakAboutTroubleEv kind:function(arm,size=0x228) addr:0x02176958
 _ZN16Scene40Character8TellNewsEv kind:function(arm,size=0xa8) addr:0x02176b80
 _ZN16Scene40Character17GetTroubleMessageEv kind:function(arm,size=0xa4) addr:0x02176c28
 _ZN16Scene40Character20SpeakTroubleProgressEv kind:function(arm,size=0x24) addr:0x02176ccc
@@ -663,9 +663,9 @@ sTouchTalks kind:data(any) addr:0x02182c48
 sNewsTalks2 kind:data(any) addr:0x02182c58
 sFirstTalks kind:data(any) addr:0x02182c68
 sNewsTalksFE kind:data(any) addr:0x02182c78
-_ZTV15Scene40UnknownC kind:data(any) addr:0x02182c88
-_ZTV15Scene40UnknownA kind:data(any) addr:0x02182ca0
-_ZTV15Scene40UnknownB kind:data(any) addr:0x02182cb8
+_ZTV18Scene40SpriteMeter kind:data(any) addr:0x02182c88
+_ZTV17Scene40LevelMeter kind:data(any) addr:0x02182ca0
+_ZTV19Scene40SegmentMeter kind:data(any) addr:0x02182cb8
 _ZTV15Scene40ListView kind:data(any) addr:0x02182cd0
 _ZTV7Scene40 kind:data(any) addr:0x02182cec
 sWaitAnimations kind:data(any) addr:0x02182d10

@@ -47,6 +47,11 @@ public:
 // talked to, with the menu (0x02150930 to 0x02153508).
 class Scene40TouchPage {
 public:
+    enum {
+        STATE_START = 1, // By mEntry
+        STATE_DONE = 18, // mResult is ready
+    };
+
     void Init(Scene40Context *context, Scene40CharacterTouch *touch, Scene40MenuBar *menu);
     void Update();
     void StartCall();
@@ -57,13 +62,13 @@ public:
     void SetState(int state);
     void Draw();
 
-    /* 0x00 */ int mUnknown00;
+    /* 0x00 */ int mLastState; // mState as Update began: the controller reads it (STATE_DONE: mResult is ready)
     /* 0x04 */ int mState;
-    /* 0x08 */ int mUnknown08; // SetState clears these three
-    /* 0x0C */ int mUnknown0C;
+    /* 0x08 */ int mStep;     // SetState clears these three
+    /* 0x0C */ int mFrames;   // Frames in the state
     /* 0x10 */ int mUnknown10;
-    /* 0x14 */ u8 mUnknown14[0x4];
-    /* 0x18 */ int mUnknown18;
+    /* 0x14 */ int mResult;   // What the controller does next (UpdateTouchPage)
+    /* 0x18 */ int mEntry;    // How the page starts (STATE_START): what the controller sets
     /* 0x1C */ BOOL mActive; // The pages' SetActive sets it
     /* 0x20 */ int mUnknown20;
     /* 0x24 */ BOOL mMenuHidden;

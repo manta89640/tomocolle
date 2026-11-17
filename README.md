@@ -19,10 +19,9 @@ The ROM is taken apart into its 114 modules (the main program, its two autoloads
 together by the original linker, and every module comes out identical. That is the baseline the rest stands on: any
 piece of it can now be replaced by source, and the build says at once whether the result still matches.
 
-Of the game's 7,356 functions (1.96 MB of code), 1,293 are identified as code of the SDK, NitroSystem and the
-compiler's library, and named. The SDK and NitroSystem ones are split into 155 files and built from source:
-1,148 of their functions match, and 42 of the files are linked into the ROM from their compiled objects in place
-of the original's bytes. Of the game's own code, the first six functions are decompiled. See
+Of the game's 7,356 functions (1.96 MB of code), 4,694 match, covering 50.52% of the code. Of the 407 units,
+242 are complete and linked from source. Overlay 75's combined scene, pages and character work accounts for 330
+matching functions out of 478; the remaining source and data placement are still in progress. See
 [ByteMatch](https://bytematch.dev/manta89640/tomocolle) for the current numbers.
 
 ## Building

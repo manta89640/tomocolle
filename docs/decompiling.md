@@ -567,6 +567,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 `compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
 
 **An address reloaded at each use, where the original keeps it in a register**
+- A global's address loaded at the function's entry into a callee-saved register, before a switch, and used in
+  several of its cases: a local pointer initialised at the top (`Camera *camera = &gCamera;`, then
+  `camera->mEye.x`); the global written at each use is loaded in each case (overlay 75's character states).
 - Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)gSceneScratch;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
@@ -639,6 +642,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   operands the other way (`MiiEditFacePage::StepParameter`).
 
 **Stack slots in the wrong order, or a frame too large**
+- Dead copies of a by-value point that share ONE slot across the cases of a switch, beside a fresh slot per use:
+  the point is a local of the function (`FloorPos target;` at the top, set field by field in each case, then
+  `SetTargetFloorPos(target)`); the fresh slots are the by-value parameter's. An inline returning the point gives
+  two fresh slots per use (overlay 75's character states, five functions: one shape for every "walk to the
+  camera").
 - A struct zeroed through a pointer into one slot and copied with `ldm`/`stm` into another, whose address is passed:
   an inline that returns it, `RTCTime time = Midnight();` with `RTCTime t = {0, 0, 0}; return t;` inside
   (`GetDayNumber`, `src/shop/ShopStock.cpp`); a named local, a block or a by-value parameter put the two slots the
@@ -715,6 +723,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   Found by the advisor (round 5).
 
 **Registers allocated differently**
+- Measured with fin-sched's probe compiler (pre-RA virtual registers): an indexed load numbers its index register
+  before it generates the index's operands, so in `table[k][1]` (a 2D table, constant column folded into the
+  base) the product `k * 20` is numbered before `k`; colouring takes the highest number first, so `k` gets the
+  lower register (`ldr r2,[kinds]; mul r3,r2,r0; ldr r2,[t+4,r3]`). A local `k` with a second use keeps its own
+  (lower) number and reverses the two. With `table[k][mood]` (mla) the row address is numbered after `k`. Not
+  solved: overlay 75 has `ldr r3,[kinds]; mul r2,r3,r0` at four single-use sites, which no source form tried
+  gives (pointer forms, flat index, getters, locals at any scope, casts, a file-static table, ten opt_ pragmas).
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
   `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's
   `MiiEditFacePage::func_ov076_0214c6d0`). A member read at each use (`mScene->...`) instead of a local copy of the
@@ -920,6 +935,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   branch. Without the pragma every vanishing body (`;`, `(void)0`, `i = i`, empty loops, empty inlines) is gone
   before the chaining and changes nothing. The same pragma keeps stores into a local array nothing reads, which
   otherwise needs `volatile`. Found with the advisor agent.
+- `cmp #0; beq A; cmp #1; beq B; <return>` over a step counter is a switch of two cases; `if (step == 0) ...
+  else if (step == 1)` gives `cmp #0; bne`. A lone `cmp #1` left before a return with nothing using it is an empty
+  `case 1: break;` (overlay 75).
+- Two branches of an if/else that each end with a store to the same member and the function's return: the
+  original stores in each branch and returns there; written with one store after the if/else (or as a common
+  tail), the compiler merges the stores into one block with a branch. A `return;` at the end of the first branch
+  keeps them apart (overlay 75's state 0x8F).
 - A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
   if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
   a range test (`MiiEditScene::Update`).
@@ -1307,6 +1329,43 @@ Each was found on one function and checked on a second where the shape recurs:
   read twice, rather than named in a local, gives the original's registers (`Scene40MenuBar::Init`).
 - **A u16 field set from an int is cast**: `mClothesId = (u16)mChosenId` gives the original's `lsl #16; lsr #16`
   before the bitfield insert.
+**Found on overlay 75's character, meters and pages (ov075-c, round 5)**
+- A clamp whose instructions are right but whose registers are rotated is the SDK's `MATH_CLAMP` (a nested
+  conditional expression whose result is a fresh temporary, so the loop's hoisted constants become its operands),
+  where an if/else on the variable itself colours them otherwise (`Scene40SegmentMeter::Show`, found by the advisor).
+  Try `MATH_CLAMP`/`MATH_MIN`/`MATH_MAX` before permuting declarations.
+- A third test of an if/else-if chain on the same two values: `else if (mTarget < mValue)` keeps a compare of its
+  own, `else if (mValue > mTarget)` reuses the flags of the test before (`popge` after `bge`) (`Scene40Meter::Update`).
+  With one operand read through a pointer (`*mCounter`) the flags are reused either way.
+- A member array read through a local pointer to it (`MtxFx43 *matrices = mJointMatrices; matrices[3]._30`) keeps
+  the array's address apart from the element's offset (`add 0x860; add 0x2000; ldr [#0xbc]`), where indexing the
+  member folds both into one offset (`Scene40Character::PlaceHeadIconAt*`). An inline accessor returning
+  `&mJointMatrices[joint]` folds as well.
+- One counter declared at the top and used by two loops keeps, in the second loop (which calls nothing), the
+  callee-saved register the first loop needed; a fresh `int i` per loop gives the second a scratch register
+  (`Scene40ClothesList::LoadOwnedBy`).
+- A value added from one of two constants chosen in an if/else (`lineHeight = 28; ... else lineHeight = 14;
+  height += lineHeight;`) hoists both constants into registers and moves one into a temporary, as the original;
+  `height += 28` in each branch does not (`Scene40ProfilePage::FindRelations`).
+- A by-value `VecFx32` setter that copies its parameter into a local before storing the fields gives three stack
+  copies (the call's result, the parameter, the local), as `Scene40Character::ShowBed` has them.
+- mwcc calls a direct member object's virtual function through its table (`ldr r3, [r0]; ldr r3, [r3, #4]; blx`):
+  it does not devirtualise, so a member whose calls go through a table is still a plain member, not a pointer.
+- A `while (x < table[i] && ++i < 7) {}` or `for (;;) { if (x >= table[i]) break; if (++i >= 7) break; }` search
+  gives the original's predicated loop (`addlt; cmplt; blt`) where `while (x < table[i]) { if (++i >= 7) break; }`
+  does not (`Scene40ProfilePage::GetMeterGrade`).
+- Booleans materialised again and again (`cmp; moveq #1; movne #0; cmp #0; beq`, then after a call `movne #1;
+  moveq #0` twice, then once more at the join) are nested inline functions returning BOOL, each `&&` inside one:
+  `HasText(t) { return wcslen(t) != 0; }`, `HasMotto(c, mood, t) { return c->mMood == mood && HasText(t); }`,
+  `WillSayMotto(...) { return HasMotto(...) && Random(100) < chance; }`, called as `if (WillSayMotto(...))`. The
+  same conditions written inline in the `if` give branches only, and the eight IR passes off change nothing there
+  (`Scene40Character::UpdateStates1ATo1C`, 0x02163758, matched so).
+- A global's address loaded at a function's entry and kept in a callee-saved register for one late use is a local
+  pointer to it at the top (`Camera *camera = &gCamera;`); and a local `FloorPos` whose dead copies sit above a
+  block's locals is declared at function scope, not in its case (the same function).
+- A text button's (or a page's) text cleared and drawn through inlines taking the button keeps a pointer to the
+  button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
+  mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).
 
 ## Functions emitted in every file that uses them
 

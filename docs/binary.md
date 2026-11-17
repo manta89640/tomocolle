@@ -2337,6 +2337,41 @@ registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where 
 objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
 with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
 
+## Overlay 75: the touched Mii's states 0x44 to 0xB2
+
+Measured (0x02168354 to 0x021722c8, five functions, `src/overlays/ov075/Scene40.cpp`):
+
+- The scene's character (Scene40Character, at scene+0x6A22C) is a state machine of 210 states. Its UpdateState
+  (0x02161D94) copies mNextState (+0x2E8C) to mState (+0x2E84), calls the group function of the state's range (a
+  compare tree over 13 ranges) and counts mFrame (+0x2E98). SetState (0x02173E8C) keeps the old state in
+  mPrevState (+0x2E88), clears mStep (+0x2E90) and mFrame and sets mEntered (+0x2E94). +0x2E9C (mWait) holds the
+  frame count a step waits for.
+- Each state is `if (mEntered) { mEntered = FALSE; ...; return; }` followed by a switch over mStep. The groups are
+  0x44..0x47 (0x02168354), 0x48..0x4E (0x0216897C), 0x4F..0x66 (0x021690F4), 0x67..0x85 (0x0216B0FC) and
+  0x86..0xB2 (0x0216EA9C).
+- What the states say is in the trouble message file (Speak file 0, the context's TTM:/tmd_trouble_msg); what
+  the speech window shows of a present in the miitouch file (TEM) or the trouble file. By those:
+  - 0x44..0x4E: food it will not eat is given back (0x104 "I am full", 0x106 "I ate this a moment ago"); a
+    present is held up and named in the speech window: the tools 236..243 (miitouch 0xA5..0xAC, "presented a
+    Wii!" ...), a song genre (sSongGiftMessages, 0x0217B82C: 0x95..0x9A "presented enka!" ...; the genre's
+    SetSongSlot(genre, 0xFF) and a bit of the record's +0x299), an interior (0xB0), a word (0xB2).
+  - 0x4F..0x66: clothes (0x10A "I already have these clothes", or changing behind the curtain, the cover at
+    +0x2CDC, and reloading the body), interiors (0x116 "I already have this interior"; 0x10C..0x114 the liking of
+    the new room), and the generic present (0x11E).
+  - 0x67..0x85: what a present is used for: the camera (scene 0xBF), trying it out (scene 0x55), the bath (0xB0),
+    eating (2.5 times the eating animation, at least 80 frames), medicine (sound groups 0x75/0x76), the fan (0x54),
+    the music box (0xA3), cooking (0xAA), an experience (0x22), an outing alone (0x78) or with a partner (0x79).
+    gSceneMemory.mCharacters[0] gets the character's index for those scenes.
+  - 0x86..0xB2: standing after a touch; handing over a present; a level-up; the troubles' talks: a friend (scene
+    0xAF), a confession (0x5A), a fight (0xAB, 0xB2), making up and separations (0xB3, 0xB5), each outcome with a
+    sound group, a speech-window line (trouble messages 0x1A7..0x1B4) and a spoken line; the word the player
+    teaches (+0x2B30, stored into mMotto or mMottos[k] by the trouble's id).
+- The standing and walking animations by personality kind (gPersonalityKinds) and mood are two `const char *[4][5]`
+  tables, sWaitAnimations (0x02182D10: "wait00".."wait09") and sWalkAnimations (0x02182D60: "walk00".."walk10").
+
+Inferred: the states 0x89..0x8C are the character handing the player a present of its own (mGift.mMessage is the
+item given to the held model), and 0x8D, 0x8E a rise of its level (head icons 6 and 7).
+
 ## The characters
 
 The main program's character code, `0x0208EB18` to `0x0209E140`, which every scene with a resident uses: four units
@@ -2503,3 +2538,39 @@ and an mActive flag the pages' SetActive writes; offsets below are the pages obj
 
 Inferred: gSceneScratch (0x0213BAB0) is a member of the original's SceneMemory, which ends at it: this code reaches
 its first bytes both by its own address and as gSceneMemory+0x3C.
+## The Mii touch scene's character, profile and meters (overlay 75, 0x0215d818 to 0x02168354)
+
+Measured (from the code of overlay 75; offsets of the scene, `Scene40`, and of the page object `Scene40Pages` at
+scene+0x30B50):
+
+- **The character** (`Scene40Character`, scene+0x6A22C, 0x30F8 bytes) is a `Character` plus the scene's speech
+  (TtsPlayer, a SpeechWindow and the pages' context), a thought balloon (0x2BE4) and a cover (bed or curtain,
+  0x2CDC), the present it is given (`Scene40Gift`, 0x2DC4), two head icons (0x2DFC) each placed at the head (with
+  the head's yaw), the body joint, the feet or the right hand (0x2E7C), and a state machine: `UpdateState`
+  (0x02161D94) copies the requested state (0x2E8C) to the current one (0x2E84), runs the function of its range
+  (13 functions, 0x00..0x19 to 0xC6..0xD1, at 0x02161E88 .. 0x021733A4) and counts the frames in the state (0x2E98).
+  `SetState` (0x02173E8C) only requests a state and sets the "entered" flag (0x2E94) that the state's first frame
+  clears. The state functions start animations by name (`ResourceSet_FindIndexByName` on the body model's
+  resource set): "hold00", "land00", "press00", "happy00", "sit00", "sleep01", "sleep02", "spraw00", "i_sit00",
+  "i_wait00", "i_walk00", "i_eat00", "i_eat01", "greet01", "c_react00..03", "call00", "sign00", "wait02"; the
+  standing and walking ones come from two tables of names by personality kind and mood (0x02182D10, 0x02182D60).
+- **The profile page** (pages+0x2A49C, 0xE214 bytes, 0x0215F180 .. 0x0216146C) shows the visited character's
+  satisfaction (SatisfyLevel, SatisfyMeter) or trouble meter (100 - progress / 2), its fullness meter
+  (`GetFullness` at the scene clock's seconds), its favourite foods (`GetUnknown292(0..2)`), favourite and disliked
+  goods once the record's bit for them (0x1C8) is set, its lover or spouse and best friend, eight marks for goods
+  it has had (0x0217BA2C) and a mark when its profile is complete. L and R switch to the relation pages: the
+  characters it has a relation rank with, sorted by rank (0x0217BB08 gives each rank's place) and meter, grouped by
+  rank with a title each (0x0217BA70) and a line each (0x0217C618: by group and by the meter's grade of 0x0217B8F4),
+  cut into pages of 180 pixels.
+- **The meters** (tables 0x02182C88, 0x02182CA0, 0x02182CB8) move a value of 0 to 100 to a target by a step a
+  frame, with sounds 0/1 of archive 27 while they move and 2/3 when they arrive: ten sprites side by side, the same
+  with a level ("Ｌｖ" and a number) whose full meter rolls over into the next level, or one sprite of 33 frames.
+- **The counter** (pages+0x386B0) shows the scene's copy of the game's capped counter (0..9,999,999) with commas,
+  counting there 50 a frame (sounds 4/5, then 6/7, of archive 27).
+- **The talk page's answers** (talk page+0x1C): up to four text buttons, from the answer sets at 0x0217CBB8
+  ({count, four messages}), by the kind of the character's trouble (0x0217C010 by `data_02114d78[category][id]`'s
+  kind, set 10's answers by trouble id at 0x0217BE70) or another table (0x0217C0C4).
+
+Inferred: the profile page is what the player sees of the visited Mii on the upper screen (its title is message 17
+of the scene's own message file with the Mii's name); the counter is the player's money (only that the scene
+keeps a copy of GameData's capped counter and clamps it as `SetCappedCounter` does is measured).

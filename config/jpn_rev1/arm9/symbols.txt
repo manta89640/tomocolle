@@ -4545,9 +4545,9 @@ gText_4 kind:data(any) addr:0x020f8db0
 gStr_LessThan kind:data(any) addr:0x020f8dbc
 data_020f8dec kind:data(any) addr:0x020f8dec
 data_020f8e1c kind:data(any) addr:0x020f8e1c
-data_020f8e58 kind:data(any) addr:0x020f8e58
-data_020f8e68 kind:data(any) addr:0x020f8e68
-data_020f8e78 kind:data(any) addr:0x020f8e78
+gClothesSatisfactions kind:data(any) addr:0x020f8e58
+gInteriorSatisfactions kind:data(any) addr:0x020f8e68
+gGoodsSatisfactions kind:data(any) addr:0x020f8e78
 gStr_LessThan_2 kind:data(any) addr:0x020f8e8c
 data_020f8eb4 kind:data(any) addr:0x020f8eb4
 data_020f8f08 kind:data(any) addr:0x020f8f08

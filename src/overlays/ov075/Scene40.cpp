@@ -1,6 +1,19 @@
 #include "Scene40.h"
-
+#include "MainProgram.h"
+#include "../../scene/MainProgram3d.h"
+#include "GameData.h"
+#include "SceneManager.h"
+#include "SceneMemory.h"
+#include "ScreenControl.h"
+#include "sound/SoundManager.h"
 #include <wchar.h>
+#include "save/SaveBlocks.h"
+#include "Scene40Pool.h"
+#include "text/TextUtil.h"
+#include "Scene40Context.h"
+#include "Scene40SpeechWindow.h"
+#include "Scene40Camera.h"
+
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -15,14 +28,14 @@ void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled);
 BOOL func_02031d00(SpriteButton *button);                         // Whether it is selected (mUnknownB0)
 
 // Not decompiled yet
-void func_ov075_02161988(Scene40Character *character);
-void func_ov075_02161d94(Scene40Character *character);
 }
 
 // What this scene keeps in the main program's gSceneScratch (an array of bytes there) for the scenes it goes to
 struct Scene40Scratch {
-    /* 0x00 */ u8 mUnknown00;
-    /* 0x01 */ u8 mUnknown01;
+    /* 0x00 */ union {
+        u16 mShopItem;
+        struct { u8 mUnknown00; u8 mUnknown01; };
+    };
     /* 0x02 */ u8 mUnknown02[2];
     /* 0x04 */ BOOL mMenuAvailable[5]; // The menu's first five buttons, as Scene40MenuBar::Refresh takes them back
     /* 0x18 */ u8 mUnknown18[0x58];
@@ -1310,9 +1323,9 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     mTracker = mContext->mTouch;
     mTouch = touch;
     mState = 0;
-    mUnknown00 = 0;
-    mUnknown08 = 0;
-    mUnknown18 = 0;
+    mLastState = 0;
+    mStep = 0;
+    mEntry = 0;
     mUnknown20 = 0;
     mMenuHidden = FALSE;
     mActive = TRUE;
@@ -1328,14 +1341,14 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
 // With speaking set, the lips follow the scene's speech
 void Scene40Character::Update(BOOL speaking) {
     Character::Update();
-    func_ov075_02161988(this);
+    PlaceHeadIcons();
     mHeadIcons[0].Update();
     mHeadIcons[1].Update();
     mBalloon.Update();
     if (!speaking) {
         return;
     }
-    func_ov075_02161d94(this);
+    UpdateState();
     if (mTtsPlayer->IsEngineIdle()) {
         return;
     }
@@ -1427,8 +1440,6 @@ BOOL SpriteButton_IsTouched(SpriteButton *button);                // Whether the
 void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled);
 BOOL func_02031d00(SpriteButton *button);
 void TextButton_SetOverwritePalette(TextButton *button, int palette); // Of the button and its text
-int MiiData_GetSex(const CharacterRecord *mii);
-void MiiData_GetName(const CharacterRecord *mii, wchar_t *name);
 int MiiData_GetFavoriteColor(const CharacterRecord *mii);
 GXRgb NFL_GetFavoriteColor(int index);
 void Camera_UpdateEye(Camera *camera);                         // Whether it is selected (mUnknownB0)
@@ -1437,11 +1448,7 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Of ov075-c
 // Of ov075-e
 int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
-void func_ov075_021762ac(Scene40Character *character);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_02161988(Scene40Character *character);
-void func_ov075_02161d94(Scene40Character *character);
-void func_ov075_02178364(Scene40CharacterPartA *part);
 }
 
 extern MATHRandContext16 gRandom;
@@ -1460,7 +1467,7 @@ struct TroubleInfo {
 };
 
 // 0xC
-extern TroubleInfo *data_02114d78[];
+extern "C" const TroubleInfo *const data_02114d78[];
 
 // The trouble the character has
 static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
@@ -1480,7 +1487,7 @@ struct Scene40SceneMemory {
     /* 0x00 */ u8 mUnknown00[0x20];
     /* 0x20 */ u8 mCharacters[12];
     /* 0x2C */ u16 mUnknown2C[8];
-    /* 0x3C */ u8 mTalkAnswers[2]; // The talk page's answers, for the scene it goes to
+    /* 0x3C */ union { u8 mTalkAnswers[2]; u8 mNextMode; }; // The talk page's answers, for the scene it goes to
 };
 
 // 0x3E
@@ -1668,7 +1675,7 @@ void Scene40TalkPage::UpdateTroubleAnswer() {
     character->mTroubleEnd = now + GetTrouble(character)->minutes * 60;
     mContext->mCharacter->mMood = 3;
     mContext->mCharacter->ResetTroubleProgress();
-    func_ov075_021762ac(mContext->mCharacter);
+    mContext->mCharacter->ClearLongActOfPair();
     mContext->mUnknown18 = -100;
     mResult = 9;
     mNextState = STATE_DONE;
@@ -3491,13 +3498,9 @@ void Scene40MenuBar::SetRightDisabled(BOOL disabled) {
     }
 }
 
-void Scene40CharacterPartA::Draw() {
-    mModel.Draw();
-}
 
-void Scene40CharacterPartB::Draw() {
-    mModel.Draw();
-}
+
+
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -3510,7 +3513,6 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
-int MiiData_GetSex(SavedCharacter *character);
 BOOL func_02031ccc(SpriteButton *button);
 BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);
 struct ScreenLoader;
@@ -3520,7 +3522,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
 // Not decompiled yet
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
-extern const int gPersonalityKinds[16];
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
 void func_ov075_02174a14(Scene40Character *character);
@@ -4762,7 +4763,7 @@ void Scene40CounterDisplay::Init(Scene40Context *context, int *charOffset) {
     mContext = context;
     mState = STATE_IDLE;
     mFalling = FALSE;
-    mCounter = mContext->mUnknown10;
+    mCounter = mContext->mMoney;
     mShown = *mCounter;
     mChange = 0;
     Sprite_Init(&mIcon, 0, 25, 0x80, 0x60, TRUE);
@@ -5309,22 +5310,11 @@ void Scene40Character::UpdateStates28To2D() {
 
 // --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
 
-Scene40Unknown30A8C::Scene40Unknown30A8C() {
-    MI_CpuClear32(&mDate, sizeof(mDate));
-    MI_CpuClear32(&mTime, sizeof(mTime));
-    mSeconds = 0;
-}
 
-void Scene40Unknown30A8C::Read() {
-    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
-}
 
-void Scene40Unknown30A8C::ReadIfIdle() {
-    if (!ArchiveManager_IsIdle(&gArchiveManager)) {
-        return;
-    }
-    mSeconds = Clock_GetDateTime(gGameClock[0], &mDate, &mTime);
-}
+
+
+
 
 extern "C" {
 void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws the particles
@@ -5336,16 +5326,10 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_02161988(Scene40Character *character);
-void func_ov075_02161d94(Scene40Character *character);
 extern const u32 sSongGiftMessages[6];        // "You presented enka!" ...: the message of each song genre given (miitouch file)
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
-extern const int gPersonalityKinds[16];
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02176958(Scene40Character *character);
-void func_ov075_02176e74(Scene40Character *character);
-void func_ov075_02176eb8(Scene40Character *character);
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 int func_ov075_0217520c(Scene40Character *character);
@@ -7926,7 +7910,7 @@ void Scene40Character::UpdateStates86ToB2() {
                 gSoundManager.StartSeqIfNotPlaying(0, 0x62);
             }
         } else if (mFrame == 30) {
-            func_ov075_02176958(this);
+            SpeakAboutTrouble();
             StartTroubleProgress();
             if (mUnknown2ED4) {
                 SetState(0x87);
@@ -7995,7 +7979,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0x89:
         if (mEntered) {
             mEntered = FALSE;
-            mUnknown2B28 = 0;
+            mMotion.mHeld = 0;
             SetFace(8);
             PlayAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
             UpdateAnimSpeed();
@@ -8012,7 +7996,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0x8A:
         if (mEntered) {
             mEntered = FALSE;
-            mUnknown2B28 = 0;
+            mMotion.mHeld = 0;
             SetFace(8);
             PlayAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][mMood], FALSE);
             UpdateAnimSpeed();
@@ -8116,7 +8100,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0x8F:
         if (mEntered) {
             mEntered = FALSE;
-            mUnknown2B28 = 0;
+            mMotion.mHeld = 0;
             SetFace(8);
             mShadowVisible = TRUE;
             UpdateCameraAngle();
@@ -9107,7 +9091,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xAD:
         if (mEntered) {
             mEntered = FALSE;
-            func_ov075_02176e74(this);
+            SpeakAboutTarget2();
         }
         break;
     case 0xAE:
@@ -9120,7 +9104,7 @@ void Scene40Character::UpdateStates86ToB2() {
             if (mFrame < 30) {
                 return;
             }
-            func_ov075_02176eb8(this);
+            SpeakAboutTarget3();
             mStep++;
             mFrame = 0;
             break;
@@ -9464,17 +9448,12 @@ BOOL Scene40Character::RankLikedItem(int item) {
 }
 
 // The main program's table of troubles (by category, then id), as far as this file reads it
-struct Scene40TroubleInfo {
-    /* 0x0 */ u32 mKind : 8;
-    /*     */ u32 mUnknown0Bits8 : 24;
-    /* 0x4 */ u32 mUnknown4;
-    /* 0x8 */ u32 mUnknown8;
-};
+
 
 // 0xC
 
 extern "C" {
-extern const Scene40TroubleInfo *const data_02114d78[];
+
 }
 
 // In a trouble of kind 1 while still full, mUnknown23C is put back by an hour for every tenth of fullness, and one
@@ -9482,7 +9461,7 @@ void Scene40Character::SetUnknown23CFromFullness(s64 now) {
     if (!IsInTrouble()) {
         return;
     }
-    if (data_02114d78[mTroubleCategory][mTroubleId].mKind != 1) {
+    if (data_02114d78[mTroubleCategory][mTroubleId].kind != 1) {
         return;
     }
     if (GetFullness(now) <= 0) {
@@ -9529,7 +9508,7 @@ void Scene40Character::ClearMoodIfTroubleOfCategory4OrKind8() {
         return;
     }
     if ((IsInTrouble() && mTroubleCategory == 4) ||
-        (IsInTrouble() && data_02114d78[mTroubleCategory][mTroubleId].mKind == 8)) {
+        (IsInTrouble() && data_02114d78[mTroubleCategory][mTroubleId].kind == 8)) {
         mMood = 0;
     }
 }
@@ -9541,17 +9520,49 @@ void Scene40Character::ClearMoodIfTroubleOfKind8() {
     if (!IsInTrouble()) {
         return;
     }
-    if (data_02114d78[mTroubleCategory][mTroubleId].mKind == 8) {
+    if (data_02114d78[mTroubleCategory][mTroubleId].kind == 8) {
         mMood = 0;
     }
+}
+
+// --- The character's trouble ---------------------------------------------------------------------------------
+
+// The trouble talks' messages: by trouble id (for the progressing trouble), by relation and meter, ...
+static const int sTroubleProgressMessages[7] = {242, 244, 246, 248, 250, 252, 254};
+
+// The message about the trouble: by category, from the category's first message, two for each trouble
+int Scene40Character::GetTroubleMessage() {
+    int id = mTroubleId;
+    switch (mTroubleCategory) {
+    case 0:
+        return id * 2;
+    case 1:
+        return id * 2 + 0xD0;
+    case 2:
+        return id * 2 + 0x78;
+    case 3:
+        return id * 2 + 0xB8;
+    case 4:
+        return id * 2 + 0xE0;
+    case 5:
+        return id * 2 + 0xC6;
+    case 6:
+        return id * 2 + 0xD8;
+    case 8:
+        return id * 2 + 0xB6;
+    case 9:
+        return id * 2 + 0xEE;
+    }
+}
+
+void Scene40Character::SpeakTroubleProgress() {
+    Speak(0, sTroubleProgressMessages[mTroubleId], 0);
 }
 
 // --- The character's talk ---------------------------------------------------------------------------------------
 
 extern "C" {
 // The personalities' kinds (0 to 3), by personality
-extern const int gPersonalityKinds[];
-int MiiData_GetSex(SavedCharacter *character);
 }
 
 // The tools an entry can require to have been had (Scene40TalkEntry::mItem: goods rows, by the record's bits at
@@ -10032,7 +10043,7 @@ int Scene40Character::ChooseActivity() {
 static inline void PrepareTogetherScene(int first, int second, int mode) {
     gSceneMemoryEx.mCharacters[0] = first;
     gSceneMemoryEx.mCharacters[1] = second;
-    MI_CpuFill8(gSceneScratch, 0, 100);
+    MI_CpuFill8(&gSceneScratch, 0, 100);
     gSceneMemoryEx.mNextMode = mode;
 }
 
