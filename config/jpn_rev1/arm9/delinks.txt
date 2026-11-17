@@ -387,6 +387,7 @@ src/PadInput.cpp:
     .bss        start:0x0211f9d4 end:0x0211f9f8
 
 src/PaletteLoader.cpp:
+    complete
     .text       start:0x02027528 end:0x02027a08
     .init       start:0x020b0504 end:0x020b0518
     .ctor       start:0x020fc4ac end:0x020fc4b0
