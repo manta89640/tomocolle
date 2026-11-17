@@ -15,6 +15,9 @@ BOOL ArchiveManager_IsIdle(ArchiveLoader *loader);
 extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
+BOOL func_02031ccc(SpriteButton *button); // Whether the button's press has played out
+void TextButton_SetOverwritePalette(TextButton *button, int palette);
+
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_0217aea8(void *object);
@@ -28,6 +31,30 @@ void func_ov075_02178364(Scene40CharacterPartA *part);
 
 // The head icon of each mood
 extern const s16 sMoodHeadIcons[5];
+
+// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
+// has it
+struct TroubleInfo {
+    u32 kind : 8;
+    u32 minutes : 16;
+    u32 weight : 8;
+    u32 unk4Bits0 : 8;
+    u32 mood : 8;
+    u32 cooldownMinutes : 12;
+    u32 hasTarget : 4;
+    u32 flags;
+}; // 0xC
+extern "C" const TroubleInfo *const data_02114d78[];
+
+// The answers of the talk page
+extern const Scene40ChoiceSet sChoiceSets[];        // By set
+extern const int sTroubleChoiceSets[];              // The set of each kind of trouble
+extern const Scene40ChoiceSet sTroubleChoices[];    // Set 10's answers, by trouble id
+extern const Scene40ChoiceSet sSpecialChoiceSets[];
+
+// A text button's text: cleared, and drawn again
+static inline void ClearButtonText(TextButton *button) { NNS_G2dCharCanvasClear(&button->mText.mCanvas, 0); }
+static inline void DrawButtonText(TextButton *button) { button->mText.DrawAll(); }
 
 // A model's scale, given by value. The copy of the parameter is the original's: ShowBed has the call's result,
 // the parameter and this copy on its stack.
@@ -132,7 +159,153 @@ void Scene40::Exit() {
     }
 }
 
+// --- The talk page's answers --------------------------------------------------------------------------------------
+
+void Scene40ChoiceList::Init(int *charOffset, MessageFile *file) {
+    mState = STATE_HIDDEN;
+    mCount = 0;
+    mSet = 0;
+    mPressed = -1;
+    mFinished = -1;
+    mOpened = FALSE;
+    mClosed = FALSE;
+    mTimer = 0;
+    for (int i = 0; i < 4; i++) {
+        Sprite_Init(&mButtons[i], 0, 15, 0x80, 0x60, TRUE);
+        SpriteButton_SetSequences(&mButtons[i], 15, 16);
+        mButtons[i].SetPosition(FxVec2(208 << FX32_SHIFT, (i * 24 + 64) << FX32_SHIFT));
+        SpriteButton_SetTouchRect(&mButtons[i], 96, 20);
+        *charOffset += TextButton_SetMessage(&mButtons[i], file, 480, &gFonts[0].mFont, 16, *charOffset);
+        SpriteButton_Reset(&mButtons[i]);
+        SpriteButton_SetKind(&mButtons[i], 4);
+        TextButton_SetOverwritePalette(&mButtons[i], 1);
+        mButtons[i].mVisible = FALSE;
+        mButtons[i].mUnknownDC = TRUE;
+        mButtons[i].mSounds.mSounds[0] = 10;
+        mButtons[i].mSounds.mSounds[2] = 0;
+    }
+}
+
+void Scene40ChoiceList::Update() {
+    mPressed = -1;
+    mFinished = -1;
+    mOpened = FALSE;
+    mClosed = FALSE;
+    switch (mState) {
+    case STATE_HIDDEN:
+        break;
+    case STATE_CHOOSING:
+        for (int i = 0; i < mCount; i++) {
+            if (SpriteButton_Update(&mButtons[i])) {
+                mPressed = i;
+            }
+            if (func_02031ccc(&mButtons[i])) {
+                mFinished = i;
+            }
+        }
+        break;
+    case STATE_OPENING:
+        if (mTimer >= 100) {
+            mState = STATE_CHOOSING;
+            mOpened = TRUE;
+            for (int i = 0; i < mCount; i++) {
+                SpriteButton_Reset(&mButtons[i]);
+                mButtons[i].mVisible = TRUE;
+            }
+        }
+        mTimer++;
+        break;
+    case STATE_CLOSING:
+        if (mTimer == 15) {
+            for (int i = 0; i < mCount; i++) {
+                mButtons[i].mVisible = FALSE;
+            }
+        } else if (mTimer > 15) {
+            mState = STATE_HIDDEN;
+            mClosed = TRUE;
+        }
+        mTimer++;
+        break;
+    }
+}
+
+void Scene40ChoiceList::Draw() {
+    for (int i = 0; i < mCount; i++) {
+        TextButton_Draw(&mButtons[i]);
+    }
+}
+
+// The buttons are 24 pixels apart, the last at y 136 however many there are. The three functions that place them
+// write the position each in its own way (SetPosition of an FxVec2 or SetPositionFromVec): each form leaves the
+// position's dead copies in other stack slots, and these are the forms that give the original's.
+void Scene40ChoiceList::SetChoices(int set) {
+    mSet = set;
+    mCount = sChoiceSets[set].mCount;
+    for (int i = 0; i < mCount; i++) {
+        ClearButtonText(&mButtons[i]);
+        mButtons[i].mText.mMessage = sChoiceSets[mSet].mMessages[i];
+        DrawButtonText(&mButtons[i]);
+        mButtons[i].SetPosition(FxVec2(208 << FX32_SHIFT, ((i + (4 - mCount)) * 24 + 64) << FX32_SHIFT));
+    }
+}
+
+// The answers to a trouble: the set of its kind; set 10 has answers of the trouble's own
+void Scene40ChoiceList::SetChoicesForTrouble(int category, int id) {
+    mTroubleKind = data_02114d78[category][id].kind;
+    mSet = sTroubleChoiceSets[mTroubleKind];
+    mCount = sChoiceSets[mSet].mCount;
+    if (mSet == 10) {
+        for (int i = 0; i < mCount; i++) {
+            ClearButtonText(&mButtons[i]);
+            mButtons[i].mText.mMessage = sTroubleChoices[id].mMessages[i];
+            DrawButtonText(&mButtons[i]);
+            mButtons[i].SetPositionFromVec(208 << FX32_SHIFT, ((i + (4 - mCount)) * 24 + 64) << FX32_SHIFT);
+        }
+    } else {
+        for (int i = 0; i < mCount; i++) {
+            ClearButtonText(&mButtons[i]);
+            mButtons[i].mText.mMessage = sChoiceSets[mSet].mMessages[i];
+            DrawButtonText(&mButtons[i]);
+            mButtons[i].SetPositionFromVec(208 << FX32_SHIFT, ((i + (4 - mCount)) * 24 + 64) << FX32_SHIFT);
+        }
+    }
+}
+
+void Scene40ChoiceList::SetSpecialChoices(int index) {
+    mSet = 23;
+    mCount = sSpecialChoiceSets[index].mCount;
+    for (int i = 0; i < mCount; i++) {
+        ClearButtonText(&mButtons[i]);
+        mButtons[i].mText.mMessage = sSpecialChoiceSets[index].mMessages[i];
+        DrawButtonText(&mButtons[i]);
+        mButtons[i].SetPosition(FxVec2(208 << FX32_SHIFT, ((i + (4 - mCount)) * 24 + 64) << FX32_SHIFT));
+    }
+}
+
+void Scene40ChoiceList::Open() {
+    mTimer = 0;
+    mState = STATE_OPENING;
+}
+
+void Scene40ChoiceList::Close() {
+    mTimer = 0;
+    mState = STATE_CLOSING;
+}
+
 // --- The scene's list: the shops' item list with a mark beside each row ------------------------------------------
+
+void Scene40ListView::Init() {
+    ItemListView::Init();
+    mMarkKind = MARK_NONE;
+}
+
+void Scene40ListView::InitMarks(int resource, int sequence) {
+    for (int i = 0; i < mRowCount; i++) {
+        Sprite_Init(&mMarks[i], resource, sequence, 0x80, 0x60, TRUE);
+        mMarks[i].SetPosition(FxVec2(0, 0));
+        mMarks[i].mOverwritePalette = 3;
+    }
+}
 
 void Scene40ListView::Draw() {
     for (int i = 0; i < mRowCount; i++) {
@@ -172,6 +345,50 @@ void Scene40ListView::DrawRow(int row, int item) {
 void Scene40ListView::ClearRow(int row) {
     ItemListView::ClearRow(row);
     mMarks[row].mVisible = FALSE;
+}
+
+// --- The clothes the character owns, for the list page -------------------------------------------------------------
+
+void Scene40ClothesList::LoadOwnedBy(SavedCharacter *character) {
+    int i;
+    mCount = 0;
+    for (i = 0; i < CLOTHES_SIZE; i++) {
+        mItems[i].Clear();
+    }
+    mCount = CLOTHES_SIZE;
+    for (i = 0; i < mCount; i++) {
+        mItems[i].mId = i;
+        if ((character->mOwnedClothes.m[i >> 5] >> (i & 31)) & 1) {
+            mItems[i].mOwned = TRUE;
+            mItems[i].mUnknown0C = 1;
+            mItems[i].mCount = 1;
+        }
+        mList[i] = &mItems[i];
+    }
+}
+
+void Scene40ClothesList::GetOwned(Item **list, int *count, int kind) {
+    *count = 0;
+    int n = 0;
+    for (int i = 0; i < mCount; i++) {
+        ClothesItem *item = mList[i];
+        if (item->mOwned && kind == gClothesTable[item->mId].mKind) {
+            list[n] = item;
+            (*count)++;
+            n++;
+        }
+    }
+}
+
+static s32 CompareClothesSortKeys(void *a, void *b);
+
+void Scene40ClothesList::Sort() {
+    u32 buffer[200];
+    MATH_QSort(mList, mCount, sizeof(ClothesItem *), CompareClothesSortKeys, buffer);
+}
+
+static s32 CompareClothesSortKeys(void *a, void *b) {
+    return gClothesTable[(*(ClothesItem **)a)->mId].mSortKey - gClothesTable[(*(ClothesItem **)b)->mId].mSortKey;
 }
 
 // --- The meters of the character's status page -------------------------------------------------------------------

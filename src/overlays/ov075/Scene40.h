@@ -23,6 +23,8 @@
 #include "Scene40Context.h"
 
 #include "Scene40Character.h"
+#include "Scene40ChoiceList.h"
+#include "Scene40ClothesList.h"
 #include "Scene40Meter.h"
 
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates
@@ -67,6 +69,9 @@ public:
     virtual void Refresh();
     virtual void DrawRow(int row, int item);
     virtual void ClearRow(int row);
+
+    void Init();
+    void InitMarks(int resource, int sequence);
 
     /* 0x13F64 */ u32 mMarkKind;
     /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from

@@ -114,8 +114,11 @@ public:
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
         AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId)->mPlayOnce = once;
     }
-    void BlendToAnimation(const char *name) {
+    void BlendToNamedAnimation(const char *name) {
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
+    }
+    void SetNamedAnimation(const char *name) {
+        Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
     }
     ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
     void SetTargetFloorPos(FloorPos pos) {
@@ -141,8 +144,7 @@ public:
     /* 0x2E94 */ BOOL mEntered;  // The state has just been set
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
-    /* 0x2EA0 */ int mUnknown2EA0;
-    /* 0x2EA4 */ int mUnknown2EA4;
+    /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
     /* 0x2EA8 */ int mUnknown2EA8;
     /* 0x2EAC */ int mUnknown2EAC;
     /* 0x2EB0 */ u16 mUnknown2EB0;
@@ -155,7 +157,7 @@ public:
     /* 0x2EC8 */ u8 mUnknown2EC8[0x8];
     /* 0x2ED0 */ int mUnknown2ED0[4];
     /* 0x2EE0 */ int mUnknown2EE0[3];
-    /* 0x2EEC */ u8 mUnknown2EEC[0x4];
+    /* 0x2EEC */ BOOL mUnknown2EEC;   // The gift page sets it
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist
     /* 0x2EF4 */ int mFriendCount;
     /* 0x2EF8 */ int mFriends[100];   // Their indices: rank 1 and a meter over 100
@@ -163,9 +165,9 @@ public:
     /* 0x308C */ int mLover;          // Rank 2, -1 for none
     /* 0x3090 */ int mSpouse;         // Rank 4, -1 for none
     /* 0x3094 */ BOOL mUnknown3094;
-    /* 0x3098 */ int mUnknown3098;
-    /* 0x309C */ int mUnknown309C;
-    /* 0x30A0 */ int mUnknown30A0;
+    /* 0x3098 */ int mUnknown3098;    // The eating state 0x72 clears it
+    /* 0x309C */ int mUnknown309C;    // and sets it to the number of bites (3, or 80 / the animation's length + 1)
+    /* 0x30A0 */ int mUnknown30A0;    // State 0x52 sets it after the character changed into clothes it was given
     /* 0x30A4 */ u8 mUnknown30A4[0x44];
     /* 0x30E8 */ int mUnknown30E8;
     /* 0x30EC */ BOOL mUnknown1C4Added[3]; // Each of AddUnknown1C4(2), (5), (2) (0x0217507c, 0x021750ac, 0x021750dc) is made once a visit
