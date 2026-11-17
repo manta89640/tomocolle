@@ -20,7 +20,10 @@ void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
 int MiiData_GetSex(SavedCharacter *character);
-BOOL func_02031ccc(SpriteButton *button); // Whether the button's press has played out
+BOOL func_02031ccc(SpriteButton *button);
+struct ScreenLoader;
+extern ScreenLoader gScreenLoader;
+void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e); // Whether the button's press has played out
 void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
 // Not decompiled yet
@@ -785,6 +788,10 @@ void Scene40Gift::Set(int kind, int id) {
 
 // The goods whose marks the profile shows when the character has had them (0x0217ba2c)
 extern const int sHadItemMarkItems[8];
+extern const u32 sRelationMessages[][7];        // By relation group; [6] is the one while in a trouble of kind
+                                                // 9 or 10 (0x0217c618; dsd's symbol at 0x0217c630 is [0][6])
+extern const int sRelationRankKeys[];           // By RelationRank (0x0217bb08)
+extern const int sMeterGrades[];                // Falling thresholds of the relation meter (0x0217b8f4)
 
 void Scene40ProfilePage::Update() {
     mSatisfactionMeter.Update();
@@ -803,14 +810,14 @@ void Scene40ProfilePage::Update() {
             gSoundManager.StartSeqArc(1, 10, 12);
         }
         break;
-    case SCREEN_1:
-        UpdateScreen1();
+    case SCREEN_REDRAW:
+        UpdateRedraw();
         break;
-    case SCREEN_2:
-        UpdateScreen2();
+    case SCREEN_RELATIONS:
+        UpdateRelations();
         break;
-    case SCREEN_3:
-        UpdateScreen3();
+    case SCREEN_NO_RELATIONS:
+        UpdateNoRelations();
         break;
     }
 }
@@ -1075,12 +1082,91 @@ void Scene40ProfilePage::SetSwitchable(BOOL switchable) {
     }
 }
 
-void Scene40ProfilePage::UpdateScreen1() {
+// The profile: its parts shown, the relations' hidden, and the upper screen's background
+void Scene40ProfilePage::ShowProfileScreen() {
+    mScreen = SCREEN_REDRAW;
+    ShowTitle();
+    mSprite0020.mVisible = TRUE;
+    mMeterLabel.mVisible = TRUE;
+    switch (mMeterKind) {
+    case METER_SATISFACTION:
+        mSatisfactionMeter.SetVisible(TRUE);
+        break;
+    case METER_TROUBLE:
+        mTroubleMeter.SetVisible(TRUE);
+        break;
+    }
+    mFullnessMeter.SetVisible(TRUE);
+    for (int i = 0; i < 3; i++) {
+        mFavoriteFoods[i].mSprite.mVisible = TRUE;
+    }
+    mFavoriteItem.mSprite.mVisible = TRUE;
+    mDislikedItem.mSprite.mVisible = TRUE;
+    mPartnerSexIcon.mVisible = TRUE;
+    mPartnerName.mSprite.mVisible = TRUE;
+    mBestFriendName.mSprite.mVisible = TRUE;
+    ShowHadItemMarks();
+    for (int i = 0; i < 5; i++) {
+        mTexts409C[i].mSprite.mVisible = FALSE;
+    }
+    for (int i = 0; i < 11; i++) {
+        mTextBoxes760C[i].mSprite.mVisible = FALSE;
+        mTexts8F10[i].mSprite.mVisible = FALSE;
+    }
+    mText8920.mSprite.mVisible = FALSE;
+    mTextD060.mSprite.mVisible = FALSE;
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_up.nsc", 0x100, 0, 0, 0, 0, -1);
+    mUnknownE148 = 0;
+    mUnknownE14C = 0;
+}
+
+// The relations (or, without any, a message): the profile's parts hidden
+void Scene40ProfilePage::ShowRelationsScreen() {
+    if (mHasRelations) {
+        mScreen = SCREEN_RELATIONS;
+    } else {
+        mScreen = SCREEN_NO_RELATIONS;
+    }
+    ShowRelationsTitle();
+    mSprite0020.mVisible = FALSE;
+    mMeterLabel.mVisible = FALSE;
+    switch (mMeterKind) {
+    case METER_SATISFACTION:
+        mSatisfactionMeter.SetVisible(FALSE);
+        break;
+    case METER_TROUBLE:
+        mTroubleMeter.SetVisible(FALSE);
+        break;
+    }
+    mFullnessMeter.SetVisible(FALSE);
+    for (int i = 0; i < 3; i++) {
+        mFavoriteFoods[i].mSprite.mVisible = FALSE;
+    }
+    mFavoriteItem.mSprite.mVisible = FALSE;
+    mDislikedItem.mSprite.mVisible = FALSE;
+    mPartnerSexIcon.mVisible = FALSE;
+    mPartnerName.mSprite.mVisible = FALSE;
+    mBestFriendName.mSprite.mVisible = FALSE;
+    for (int i = 0; i < 8; i++) {
+        mHadItemMarks[i].mVisible = FALSE;
+    }
+    for (int i = 0; i < 5; i++) {
+        mTexts409C[i].mSprite.mVisible = FALSE;
+    }
+    for (int i = 0; i < 11; i++) {
+        mTextBoxes760C[i].mSprite.mVisible = FALSE;
+        mTexts8F10[i].mSprite.mVisible = FALSE;
+    }
+    mText8920.mSprite.mVisible = FALSE;
+    ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_relation.nsc", 0x100, 0, 0, 0, 0, -1);
+}
+
+void Scene40ProfilePage::UpdateRedraw() {
     mScreen = SCREEN_PROFILE;
     RedrawTexts();
 }
 
-void Scene40ProfilePage::UpdateScreen3() {
+void Scene40ProfilePage::UpdateNoRelations() {
     mScreen = SCREEN_PROFILE;
     *(BOOL *)((u8 *)&mTextD060 + 0x64) = TRUE;
     ClearMessageText(&mTextD060);
@@ -1102,6 +1188,54 @@ void Scene40ProfilePage::SwitchScreen() {
     } else {
         ShowRelationsScreen();
     }
+}
+
+// NOT MATCHING: the trouble table's address, category and id take r1, r2, r3 in the original, r2, r3, r1 here;
+// a pointer to the entry, a pointer to the row, the character or the id in locals leave them so.
+// The message of a relation group's line: groups 0 and 2 have their seventh while the character is in a trouble
+// of kind 9 or 10
+u32 Scene40ProfilePage::GetRelationMessage(int group, int index) {
+    if ((group == 0 || group == 2) && mCharacter->IsInTrouble()) {
+        switch (data_02114d78[mCharacter->mTroubleCategory][mCharacter->mTroubleId].kind) {
+        case 9:
+        case 10:
+            return sRelationMessages[group][6];
+        }
+    }
+    return sRelationMessages[group][index];
+}
+
+// Sorts the relations by rank (in the order of sRelationRankKeys) and, within a rank, by the meter, highest first
+int Scene40ProfilePage::GetRelationSortKey(int rank, int meter) {
+    return sRelationRankKeys[rank] - 1 - meter;
+}
+
+int Scene40ProfilePage::GetSortKeyGroup(int key) {
+    return key >> 14;
+}
+
+// The meter a sort key was made of
+int Scene40ProfilePage::GetSortKeyMeter(int key) {
+    return ((GetSortKeyGroup(key) + 1) << 14) - key - 1;
+}
+
+// The grade of a meter: how many of sMeterGrades' (falling) thresholds it is below, at most 7
+int Scene40ProfilePage::GetMeterGrade(int meter) {
+    int grade = 0;
+    for (;;) {
+        if (meter >= sMeterGrades[grade]) {
+            break;
+        }
+        grade++;
+        if (grade >= 7) {
+            break;
+        }
+    }
+    return grade;
+}
+
+static s32 CompareRelations(void *a, void *b) {
+    return ((Scene40Relation *)a)->mSortKey - ((Scene40Relation *)b)->mSortKey;
 }
 
 // --- The scene's counter ------------------------------------------------------------------------------------------

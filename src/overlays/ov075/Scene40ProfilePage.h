@@ -34,9 +34,9 @@ public:
 
     enum Screen {
         SCREEN_PROFILE,
-        SCREEN_1,
-        SCREEN_2,
-        SCREEN_3,
+        SCREEN_REDRAW,       // The profile, its texts drawn again in the next frame
+        SCREEN_RELATIONS,
+        SCREEN_NO_RELATIONS, // The relations screen without any: a message
     };
 
     void Init(Scene40Context *context, int *charOffset);
@@ -62,16 +62,21 @@ public:
     void SetSwitchable(BOOL switchable);
     void ShowProfileScreen();
     void ShowRelationsScreen();
-    void UpdateScreen1();
-    void UpdateScreen2();
-    void UpdateScreen3();
+    void UpdateRedraw();
+    void UpdateRelations();
+    void UpdateNoRelations();
     void SwitchScreen();
     void FindRelations();
+    u32 GetRelationMessage(int group, int index);
+    static int GetRelationSortKey(int rank, int meter);
+    static int GetSortKeyGroup(int key);
+    static int GetSortKeyMeter(int key);
+    static int GetMeterGrade(int meter);
 
     /* 0x0000 */ int mScreen;
     /* 0x0004 */ int mScreenIndex;  // Which of the mScreenCount screens L and R show: 0 the profile
     /* 0x0008 */ int mScreenCount;
-    /* 0x000C */ int mUnknown000C;
+    /* 0x000C */ BOOL mHasRelations;
     /* 0x0010 */ BOOL mSwitchable;    // L and R switch the screens
     /* 0x0014 */ Scene40Context *mContext;
     /* 0x0018 */ SavedCharacter *mCharacter; // The visited character
