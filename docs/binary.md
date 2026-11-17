@@ -2338,7 +2338,7 @@ The class names are the project's own; the field names in quotes below are the g
 | Unit | Code | What |
 | --- | --- | --- |
 | `CharacterModel.cpp` | `0x0208EB18` to `0x0208FCF8`, 30 functions, all matching | The body: `CharacterModel` |
-| `Character.cpp` | to `0x02092178`, 73 functions, 70 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
+| `Character.cpp` | to `0x02092178`, 73 functions, 71 matching | `CharacterBase` (the Mii face), `CharacterHead`, `Character` |
 | `CharacterSort.cpp` | to `0x020979A0`, 23 functions, all matching, complete | The resident list's orders: name normalization, collation, comparators |
 | `SavedCharacter.cpp` | to `0x0209E140`, 183 functions, 178 matching (Validate's string labels aside) | `SavedCharacter`: the record, its parameters, relations, long activities, troubles, tastes, reactions, birthday and biorhythm |
 
@@ -2414,9 +2414,7 @@ Measured:
   normalisation squares the rotated point as 64-bit operands (`umull` and `mla` pairs, not `smull`/`smlal`), which
   `fx64 x = v.x; t = x * x;` gives. The original also keeps the offset in r5/r6 across `FX_Atan2Idx`, which ours does
   when the angle helper takes the point by `const &`. Together these go from 187 to 145 differing lines; the
-  rotation's order and one copy still differ. `GetPointInFront` (91.6%): the original has two more copies of the
-  result at the TOP of its frame, above `offset`. In every form tried the compiler keeps copies of a result only for a
-  variable assigned twice, and puts the temporaries below the locals. `SetWalkTargetAwayFrom` (98.6%): the x and z
+  rotation's order and one copy still differ. `SetWalkTargetAwayFrom` (98.6%): the x and z
   differences in the other scratch registers, and the copies in other slots. The SavedCharacter swaps
   (`FailTrouble`, `StartTrouble`, `GetReactionWeight`, `GetTalkReactionWeight`, `ChooseWantedClothes`) reproduce in
   one-function test files (scratchpad `fin-char/t_member.cpp`, `ft_lab.cpp`). No source form tried reaches the

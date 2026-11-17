@@ -587,6 +587,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   gives it a slot among the function's own locals. A search over 128 combinations of fresh and reused copies and over
   the declarations' places did not find the original's order.
 
+- Two dead copies of a returned point at the top of the frame, above the function's other locals
+  (`Character::GetPointInFront`): the result declared first and ASSIGNED, `FloorPos result; ...; result =
+  GetFloorPos() - offset; return result;`. The assignment copies the value to a temporary and then to the variable;
+  an initialisation makes no copy. A local initialised from an inline's by-value return (`FloorPos offset =
+  Polar(distance, angle);`) is placed below that temporary, where one filled field by field is placed above it.
+  Found by the advisor (round 5).
+
 **Registers allocated differently**
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
   `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's

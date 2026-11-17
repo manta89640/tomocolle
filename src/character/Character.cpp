@@ -812,12 +812,21 @@ int Character::PlaySoundOnce(int player, int index, int seqArc) {
     return PlaySoundAtAnimPhase(0, player, seqArc, index, 10);
 }
 
-FloorPos Character::GetPointInFront(fx32 distance) {
-    u16 angle = -mAnim.mRotY;
+// The point at a distance in a direction on the floor
+static inline FloorPos Polar(fx32 distance, u16 angle) {
     FloorPos offset;
     offset.x = FX_Mul(distance, FX_CosIdx(angle));
     offset.z = FX_Mul(distance, FX_SinIdx(angle));
-    FloorPos result = GetFloorPos() - offset;
+    return offset;
+}
+
+// The point at a distance in front of the character. `result` is declared first and assigned (not initialised): the
+// assignment's temporary and the variable are the two copies of the result at the top of the original's frame.
+FloorPos Character::GetPointInFront(fx32 distance) {
+    FloorPos result;
+    u16 angle = -mAnim.mRotY;
+    FloorPos offset = Polar(distance, angle);
+    result = GetFloorPos() - offset;
     return result;
 }
 
