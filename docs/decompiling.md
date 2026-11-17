@@ -142,9 +142,10 @@ its library's compiler and flags, from the `LIBRARIES` table in `configure.py`.
 each only if the ROM still matches when it is linked from the compiled object. It leaves a unit alone whose object
 has data that its entry in `delinks.txt` does not place yet.
 
-Placing that data is the next step for the library files, and is not done. `tools/place_data.py` works out where a
-file's data is from the addresses in its matched functions, and reports it, but what it writes is not usable yet:
-see its header.
+`tools/place_data.py` works out where a file's data is from the addresses in its matched functions, and with
+`--unit <source> --complete --apply` places one file's data, names its objects and marks it complete; the build then
+decides (see its header). One unit at a time, so, 38 library files were completed in round 5; what kept the others
+back is in binary.md, "Libraries".
 
 A library function that objdiff scores 0% is often already right and only has dsd's name: objdiff pairs functions by
 name, and dsd gives a file's statics address names. Before changing anything, compare the compiled object with
@@ -180,8 +181,8 @@ disassembly, and directives that say where it goes:
 `configure.py` compiles that in place of the fetched file, with the same compiler, flags and include directories, to
 the same object; the unit and its name are unchanged. The tracked file never holds lines of the fetched one. This is
 the coordinator's design of round 3, kept for the user to approve or replace. It is used by `mi/src/mi_dma.c` (one
-function the fetched release lacks), `spi/src/pm.c` (a later release, see binary.md, "Libraries") and
-`card/src/card_spi.c` (one function of a later release).
+function the fetched release lacks) and `spi/src/pm.c` (a later release, see binary.md, "Libraries"); no later commit
+of the fetched repository has either.
 
 Before writing an override, look for the game's release among later commits of the fetched repository: its history
 is small (`git clone --filter=blob:none` of it, then `git log -- <path>`). Where one has the file as the game has it,
@@ -191,7 +192,9 @@ hash, and compiles it in place of the repository's file, with the same compiler,
 repository's directory of the file is searched first, as for an override, and an override of the file applies to the
 fetched one). The repository's own pin stays: a later commit changes many other files, so moving it is a decision for
 all of them. `math/src/qsort.c` is built so, from `ccbbcc8`, the commit that writes `MATH_QSort`'s conditional
-instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries").
+instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries"). So is
+`card/src/card_spi.c`, from the same commit, compiled with `SDK_PATCH3`, the define under which that commit adds the
+game's 128 KB EEPROM: an entry of `FETCHED_FILES` may name defines for its file alone.
 
 The fetched file's other definitions stay. A static that only a removed or replaced function used is no longer
 emitted, which matters: with `-ipa file` the statics are pooled, so the file's pool is only right once every function
@@ -199,7 +202,12 @@ that uses one of them is the game's. Remove what the game's release does not hav
 
 A file whose code is partly in the ITCM (`os_irqHandler.c`, `mi_dma.c`) is one unit: its entry in the main program's
 `delinks.txt` names an `.itcm` range beside its `.text`, and dsd's section migration takes that range out of the ITCM
-module (`.dtcm` works the same way for the DTCM's `.bss`). `dsd json delinks` and `dsd objdiff` do not migrate and so
+module (`.dtcm` works the same way for the DTCM's `.bss`). The SDK's own linker script defined symbols that its files refer to and dsd's script does not
+(`SDK_AUTOLOAD_DTCM_START`, `SDK_IRQ_STACKSIZE`, `SDK_OVERLAY_DIGEST` and others): `LINKER_SYMBOLS` in `configure.py`
+has them with the original's values, and `tools/force_active.py` writes them at the end of the script, with
+`AutoloadCallback`, which `dsd rom config` looks up, as an alias of crt0's `_start_AutoloadDoneCallback`.
+`tools/check_relocs.py` takes a reference to such a symbol for the original's reference to the symbol at its address.
+`dsd json delinks` and `dsd objdiff` do not migrate and so
 still list the ITCM's old gap; `tools/migrated_gaps.py` finds it, and `configure.py` and `tools/objdiff_config.py`
 leave it out.
 
@@ -266,9 +274,13 @@ The order that the code itself suggests:
   `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
-  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). A constructor's string
-  literals come twice, once for each constructor the compiler emits (`C2`, then `C1`); the ROM keeps only `C1`'s,
-  the second set, which the tool does not know: name those by hand (`Keyboard.cpp`).
+  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). It lays out only the
+  sections the link keeps: those reachable through the object's relocations from a function `symbols.txt` has, or
+  from the static initialiser. So a constructor's string literals, which come twice, once for each constructor the
+  compiler emits (`C2`, then `C1`), are laid out once, as the ROM has them (`Keyboard.cpp`), and so are the objects
+  of a function the link strips. A header change renumbers the names of every complete unit that includes the
+  header: `python3 tools/stale_names.py --apply` (after `ninja`) renames them in `symbols.txt`; neither the ROM
+  nor `dsd check symbols` notices stale ones, `tools/check_relocs.py` does.
 - **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
   array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
   with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
@@ -405,9 +417,9 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   are declared) and scoring against the ROM's string order found `TextUtil.cpp`'s three kana arrays, all 255 strings
   in place, in one pass of a few hundred candidates; the model then held under the build. An uncalled function
   that reads the arrays keeps them in the object (`KanaTables_Unused`), and the link drops it.
-- `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
-  rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
-  replace the range's lines in place.
+- `tools/name_unit_data.py` leaves out the sections the link will drop (with `--all` it lays them out too, after the
+  range). `--apply` rewrites `symbols.txt` in another order; to keep the order, take its printed names for the range
+  and replace the range's lines in place.
 - Anonymous strings of an initialiser (a table of pointers to literals) cannot be permuted, since the table's order
   is fixed: make them named arrays (`static wchar_t sNgWord05[] = L"...";`, non-`const` to stay in `.data`), declared
   where the literals were, and the same-size permutation applies to them. Overlay 109's 44 strings went into the
@@ -1133,6 +1145,15 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
+- **A constant XORed in as several immediates** (`eor` with one byte of it each, inside a loop) was written as a
+  chain, `x ^ 0xED000000 ^ 0x00B80000 ^ 0x00008300 ^ 0x00000020`: the compiler folds a constant subtree, not a left
+  to right chain, and one constant of more than 8 significant bits comes from the pool and stays in a register
+  (`DSProtect_CalcChecksum`).
+- **Registers that differ with the instructions equal** can come from the order of the declarations: swapping
+  `u32 sum; int i;` to `int i; u32 sum;` gave `DSProtect_CalcChecksum` the original's three scratch registers, with
+  nothing else changed. In `DSProtect_RC4Init` no order of the plain variables did, and an inline swap helper
+  (whose parameters are variables of their own) did: when no declaration order fits, look for a variable that the
+  source had and the transcription does not.
 
 ## Functions emitted in every file that uses them
 
@@ -1178,4 +1199,19 @@ object refers to with the original's. What it reports is one of:
   is the complete (`C1`) or the base (`C2`) one.
 - **A real mistake**: the wrong function or object.
 
-The `@number` names of the speech engine's literals differ by design and can be ignored.
+The speech engine's literals, which `relocs.txt` referred to as offsets from one symbol at the start of each file's
+data, have their own symbols now, by the compiled names, so its references compare like the rest.
+
+The opposite error exists too: a function that equals the original scored below 100%. Measured (objdiff 3.8.3's
+source, and a pair of objects of three instructions): when objdiff compares two instructions whose bytes differ (a
+call is `eb000000` with its addend in the relocation in a compiled object, `ebfffffe` in a delinked one), it turns a
+relocation into a branch within the function whenever the symbol plus the addend falls inside the function. An ARM
+call's addend is the PC's -8, so a call to the function that starts within 8 bytes after the caller's end, the next
+function of the section, is read as a branch into the caller's last two instructions. If that is so in one object and
+not in the other (the report combines a compiled file's functions into one section in source order; the original has
+them in ROM order), the call scores as a wrong argument: 5 points of 100 per instruction, 99.5% for a function of ten
+instructions (`Scene40Character::Draw`, which calls `Scene40CharacterPartA::Draw`, defined right after it in the source
+and far away in the ROM). It does not depend on what the callee is, and it goes away when the source has the ROM's
+function order. `python3 tools/check_relocs.py --near-misses` lists every function the report scores below 100% whose
+bytes outside relocations and whose references are the original's; DS Protect's marker words were the only other
+cause found.

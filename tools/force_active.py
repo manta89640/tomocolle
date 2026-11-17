@@ -44,6 +44,8 @@ def main() -> int:
     parser.add_argument("lcf", type=Path, help="linker script from dsd")
     parser.add_argument("output", type=Path)
     parser.add_argument("--objects", type=Path, required=True, help="file that lists the delinked objects to keep whole")
+    parser.add_argument("--define", action="append", default=[], metavar="NAME=VALUE",
+                        help="a symbol to define at the end of the SECTIONS block (one the original's script had)")
     args = parser.parse_args()
 
     symbols = []
@@ -60,7 +62,12 @@ def main() -> int:
     if marker not in script:
         print(f"{args.lcf} has no {marker}", file=sys.stderr)
         return 1
-    args.output.write_text(script.replace(marker, block + marker, 1), encoding="utf-8")
+    script = script.replace(marker, block + marker, 1)
+    if args.define:
+        end = script.rstrip().rindex("}")
+        lines = "".join(f"    {d.split('=', 1)[0]} = {d.split('=', 1)[1]};\n" for d in args.define)
+        script = script[:end] + lines + script[end:]
+    args.output.write_text(script, encoding="utf-8")
     return 0
 
 

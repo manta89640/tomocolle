@@ -203,7 +203,10 @@ Four files are another release than the fetched one, in code (the last only in h
 - **`card/src/card_spi.c`**: `CARDi_IdentifyBackupCore` (`0x020105CC`, 0x384 bytes against the fetched 0x348) knows
   one device more, a 128 KB EEPROM (size bit 17: 256-byte pages, three address bytes, five pages a program
   operation). Measured: everything else it sets is the fetched release's. It is the only function of the file the game
-  keeps.
+  keeps. The fetched repository's commit `ccbbcc8` adds that case under the define `SDK_PATCH3` (the SDK's patch 3
+  releases); its file, compiled with this unit's compiler and flags and `SDK_PATCH3`, gives the function word for
+  word, so `configure.py` fetches it with that define for this file alone. Inferred: the game's SDK has the patch 3
+  card library.
 - **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against the fetched 0x288) is the same
   hand-written routine, written out the way the SDK's other assembly is under the define
   `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS`, which `configure.py` gives the SDK's files. Measured: it keeps the
@@ -218,7 +221,8 @@ Four files are another release than the fetched one, in code (the last only in h
   define's name, made of conditional instructions in inline assembly, which the fetched repository's other assembly
   (`crt0.c`, `mi_memory.c`, `os_*.c`) already spells out the same way.
 
-The first three are built as `lib/overrides/` describes, `qsort.c` from the later commit's file (decompiling.md,
+`mi_dma.c` and `pm.c` are built as `lib/overrides/` describes (no later commit of the fetched repository, its pull
+requests included, changes either file), `card_spi.c` and `qsort.c` from the later commit's file (decompiling.md,
 "Where the game's release of a file differs").
 
 The small gaps between the units turned out to be functions of the files on either side, or small files of their own
@@ -238,9 +242,17 @@ and `card_common.c` gives the card thread the top of its 1 KB stack, `cardi_thre
 for `card_rom.c`'s `cardi_rom_base`. Still incomplete: `os_irqHandler.c`, `os_irqTable.c` and `os_interrupt.c`, which
 need the DTCM's `OS_IRQTable` (`0x027E0000`) and `OSi_IrqThreadQueue` and the linker's `SDK_AUTOLOAD_DTCM_START` and
 `SDK_IRQ_STACKSIZE`; and `card_backup.c`, whose `[SDK+NINTENDO:BACKUP]` string is in a `.version` section, at
-`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
-(`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG` or `...BGCharacterData`/`...BGNCG`), which are byte for byte the
-same, and keep their address names.
+`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are the BG pair,
+`NNS_G2dGetUnpackedBGCharacterData` (`0x020594DC`) and `NNS_G2dUnpackBGNCG` (`0x02059518`), and the file is complete.
+Measured: the OBJ pair (`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG`) compiles to the same bytes, with
+assertions off; in the object the BG pair is separated by `NNS_G2dGetUnpackedCharacterPosInfo`, which the link strips,
+so the order does not tell them apart either, and no other linked object refers to either name. What the callers pass
+does: both callers (the keyboard's `KeyboardCore_GetUnpackedCharData` and the character loader's `0x020290B8`, which
+loads `Obj_down.ncg` and `BG_down.ncg` alike) hand it every kind of NCGR file the game has, and of the game's 631
+NCGR files five of the keyboard's are 25 characters wide, one 31, and two 256-colour ones 32, all with 2D mapping:
+`NNS_G2dUnpackNCG` asserts a width of 32 (16 colours) or 16 (256) for 2D-mapped characters, `NNS_G2dUnpackBGNCG`
+only that the format is characters, which every file is. Inferred: in the game's debug builds the OBJ pair would
+have stopped on the keyboard's files, so the game calls the BG pair.
 
 The ITCM is `OS_IrqHandler`, `OS_IrqHandler_ThreadSwitch` (`os_irqHandler.c`) and `MIi_DmaSetParams` with its three
 variants (`mi_dma.c`), compiled from the fetched files, where they are assembly functions in the ITCM's section. Each
@@ -2324,10 +2336,24 @@ the marker word and branches over it; `DSPROTECT_END(marker)` branches over the 
 `DSProtect_EncryptRange`. Linked from source (the unit marked complete as a test), the plain ARM9 program was the
 original's word for word over `DSProtect_CheckMacAddress`'s two ranges.
 
-What is left (measured): 15 of the 17 functions compile to the original's bytes; `DSProtect_RC4Init` differs in
-registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where the original XORs four immediates.
-objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
-with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
+All 17 functions match and the unit is complete: linked from source, with dsd encrypting the ranges after the
+link, the ROM is the original's. What the last two showed (measured):
+
+- `DSProtect_CalcChecksum`'s polynomial is four XORs of one byte each (`^ 0xED000000 ^ 0x00B80000 ^ 0x00008300 ^
+  0x00000020`), as its code has four `eor` immediates in the loop: written as `0xEDB88320` the constant comes from
+  the pool and stays in a register, and the else branch, one instruction then, is made conditional. The compiler
+  folds a constant subexpression, not a chain `x ^ A ^ B` (left to right, no constant subtree), so the source had
+  four values.
+- `DSProtect_RC4Init`'s swap is an inline function called as `Swap(&state[j], &state[i])` (the store to `state[j]`
+  comes first), the key index moves on after the swap, and the sum is `state[i] + (j + key[k])` (the add's operands
+  in that order).
+- Both had the original's instructions with other registers before the last change: declaring `i` before `sum`
+  (CalcChecksum), and the swap as an inline function (RC4Init), gave its registers.
+
+objdiff scored the six encrypted functions at 96.7 to 98.9% though their bytes are equal: each marker word is `dcd`
+in the source, data with a `$d` mapping symbol, where the delinked object has none and shows a `bl`. The build now
+takes the `$d` off those words after the compile (`tools/dsprotect_markers.py`, from the `dsprot_range` of
+`symbols.txt`), so both sides read alike.
 
 ## The characters
 
