@@ -3047,10 +3047,17 @@ void NFLi_PatchFacePart(NFLFace *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTex
 extern const u8 sNFLEyeTypeRotations[];
 extern const u8 sNFLEyebrowTypeRotations[];
 
-// The expressions, which NFL_SetExpression applies by rewriting the face parts' commands: kind 0,
-// the Mii's own eyes, eyebrows and mouth
+// The expressions, which NFL_SetExpression applies by rewriting the face parts' commands. All seven were compiled
+// alike: optimisation level 2 without common subexpressions, propagation or dead-assignment elimination (the pragmas
+// around each). Under that one setting kinds 0, 2, 3, 5 and 6 match; the per-function settings found before (level 2
+// with common_subs off for 0 and 6, propagation off added for 2 and 3, dead_assignments off for 5) were each the part
+// of it that the function showed.
+// Kind 0: the Mii's own eyes, eyebrows and mouth
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression0(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3089,15 +3096,16 @@ void NFLi_ApplyExpression0(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own: the rotation moved by
 // sNFLEyeTypeRotations as in kinds 1 and 4 and kept to 0..7 goes unused, and the eyes take the Mii's rotation.
-// The original keeps that clamp's compares and drops only its moves, which is what opt_dead_assignments off gives
-// with the clamp written on a copy (newRot) and the else adding d again.
+// The original keeps that clamp's compares and drops only its moves: the dead assignments are kept in the IR (the
+// pragma) and the clamp is written on a copy (newRot), the else adding d again, so only the moves die in the backend.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
 #pragma opt_dead_assignments off
 void NFLi_ApplyExpression5(NFLFace *obj) {
     fx16 sin;
@@ -3150,13 +3158,14 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_dead_assignments reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 6: the mouth of shared slot 1
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression6(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3195,19 +3204,23 @@ void NFLi_ApplyExpression6(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[1].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 1: the eyes of shared slot 2 (eye type 48's texture), their rotation moved by sNFLEyeTypeRotations at the
 // rotation less at 48 and kept to 0..7.
 // Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
 // Tried (round 4): the clamp on a copy (as kinds 2, 3 and 5), with d a variable, through inline helpers; every order
 // of the first statements and of the declarations; the forms of idx, sin and cos; sin and cos computed in the call's
-// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4. Behind the r3: the original loads
-// the call's stack arguments (texFmt, 2) and the sine table's address before rot's last use, which ours does after.
+// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4; round 5: kind 5's form of the clamp
+// (a copy, d a variable) in each of the 40 orders of its statements under the expressions' common setting, all giving
+// the same code. Behind the r3: the original's pre-RA schedule loads the call's stack arguments (texFmt, 2) and an
+// address (sNFLWork here, the sine table in kind 4) before rot's last use and stores texFmt late; ours, like kinds 2
+// and 3, stores texFmt at once. rot's colour follows from that schedule.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression1(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3253,15 +3266,15 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 2: the eyes turned 2 steps more (kept to 0..7), the eyebrows 2 more (to 0..11), the mouth of shared slot 3.
 // The eyebrow's sum is tested on a copy of the rotation and added again in the else: the original adds d twice.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression2(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3320,15 +3333,15 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[3].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4; an eyebrow rotation past 11 is set
 // to 0
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression3(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3387,16 +3400,16 @@ void NFLi_ApplyExpression3(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[4].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 4: the face's own second eye texture (eye type 0x31), the rotation moved as kind 1's by the table at 49, the
 // eyebrows placed as for eyebrowY - 2.
 // Not matching yet: as NFLi_ApplyExpression1.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression4(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3442,9 +3455,7 @@ void NFLi_ApplyExpression4(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 int NFLi_PrepareFacePartTextures(NFLMakeCtx *ctx);
 int NFLi_AllocExpressionTextures(NFLMakeCtx *ctx);
