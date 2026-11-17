@@ -156,6 +156,9 @@ LD_FLAGS = [
 LINKER_SYMBOLS = {
     "SDK_AUTOLOAD_DTCM_START": "ADDR(DTCM)",            # 0x027E0000, where OS_IRQTable is
     "SDK_SECTION_ARENA_DTCM_START": "DTCM_BSS_END",     # 0x027E0080, the end of the DTCM's .bss
+    "SDK_SECTION_ARENA_ITCM_START": "ITCM_BSS_END",     # 0x01FF8320, the end of the ITCM
+    "SDK_SECTION_ARENA_EX_START": "0x023E0000",         # The debugger's extended memory, a constant of the script
+    "SDK_MAIN_ARENA_LO": "0x02184000",                  # The end of the largest overlay (overlay 75's .bss)
     "SDK_IRQ_STACKSIZE": "0x400",
     "SDK_SYS_STACKSIZE": "0",
     # The overlays' digest table, empty: the end of the static .data before its 32-byte alignment. dsd's layout has

@@ -111,10 +111,14 @@ lib/NitroSDK/libraries/os/src/os_interrupt.c:
     .text       start:0x02006a58 end:0x02006d00
 
 lib/NitroSDK/libraries/os/src/os_spinLock.c:
+    complete
     .text       start:0x02006d00 end:0x020070b4
+    .bss        start:0x02119630 end:0x02119634
 
 lib/NitroSDK/libraries/os/src/os_thread.c:
+    complete
     .text       start:0x020070b4 end:0x02007ad4
+    .bss        start:0x02119634 end:0x021198b0
 
 lib/NitroSDK/libraries/os/src/os_context.c:
     complete
@@ -142,7 +146,9 @@ lib/NitroSDK/libraries/os/src/os_init.c:
     .text       start:0x02008114 end:0x0200817c
 
 lib/NitroSDK/libraries/os/src/os_arena.c:
+    complete
     .text       start:0x0200817c end:0x02008534
+    .bss        start:0x021198b0 end:0x021198b8
 
 lib/NitroSDK/libraries/os/src/os_tcm.c:
     complete
@@ -171,7 +177,9 @@ lib/NitroSDK/libraries/os/src/os_tick.c:
     .bss        start:0x02119968 end:0x02119978
 
 lib/NitroSDK/libraries/os/src/os_alarm.c:
+    complete
     .text       start:0x0200893c end:0x02008d38
+    .bss        start:0x02119978 end:0x02119984
 
 lib/NitroSDK/libraries/os/src/os_valarm.c:
     complete

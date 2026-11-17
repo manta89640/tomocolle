@@ -6495,12 +6495,12 @@ sTex kind:bss addr:0x021195c4 local
 sTexLCDCBlk2 kind:bss addr:0x021195c8 local
 sSzTexBlk1 kind:bss addr:0x021195cc local
 OSi_IrqCallbackInfo kind:bss(size=0x60) addr:0x021195d0
-isInitialized$8285 kind:bss addr:0x02119630
-OSi_SystemCallbackInSwitchThread kind:bss addr:0x02119634
-OSi_ThreadInfo kind:bss addr:0x02119658
-OSi_IdleThread kind:bss addr:0x02119668
-OSi_LauncherThread kind:bss addr:0x02119728
-OSi_Initialized kind:bss addr:0x021198b0
+isInitialized$8285 kind:bss(size=0x4) addr:0x02119630 local
+OSi_SystemCallbackInSwitchThread kind:bss(size=0x4) addr:0x02119634
+OSi_ThreadInfo kind:bss(size=0x10) addr:0x02119658
+OSi_IdleThread kind:bss(size=0xc0) addr:0x02119668
+OSi_LauncherThread kind:bss(size=0xc0) addr:0x02119728
+OSi_Initialized kind:bss(size=0x4) addr:0x021198b0 local
 OSi_DebuggerHandler kind:bss addr:0x021198b8 local
 OSi_UserExceptionHandlerArg kind:bss addr:0x021198bc local
 OSi_UserExceptionHandler kind:bss addr:0x021198c0 local
@@ -6508,7 +6508,7 @@ OSi_ExceptionHookStack kind:bss addr:0x021198c4 local
 OSi_ExContext kind:bss addr:0x021198e4 local
 OSi_TimerReserved kind:bss(size=0x2) addr:0x02119964 local
 OSi_UseTick kind:bss(size=0x2) addr:0x02119968 local
-OSi_UseAlarm kind:bss addr:0x02119978
+OSi_UseAlarm kind:bss(size=0x2) addr:0x02119978 local
 OSi_UseVAlarm kind:bss(size=0x2) addr:0x02119984 local
 OSi_IsResetOccurred kind:bss(size=0x2) addr:0x02119998 local
 OSi_vramExclusive kind:bss(size=0x4) addr:0x0211999c local
@@ -6871,3 +6871,14 @@ sAlarmLock kind:bss(size=0x4) addr:0x0213e464 local
 sChannelLock kind:bss(size=0x4) addr:0x0213e468 local
 sPrepareThread kind:bss(size=0x4) addr:0x0213f594 local
 sDecodeBuffer kind:bss(size=0x4) addr:0x0213f598 local
+OSi_AlarmQueue kind:bss(size=0x8) addr:0x0211997c local
+OSi_RescheduleCount kind:bss(size=0x4) addr:0x02119638
+OSi_CurrentThreadPtr kind:bss(size=0x4) addr:0x0211963c
+OSi_IsThreadInitialized kind:bss(size=0x4) addr:0x02119640
+OSi_SystemStackBuffer kind:bss(size=0x4) addr:0x02119644 local
+killThreadStatus kind:bss(size=0x4) addr:0x02119648 local
+exitThreadStatus kind:bss(size=0x4) addr:0x0211964c local
+OSi_StackForDestructor kind:bss(size=0x4) addr:0x02119650
+OSi_ThreadIdCount kind:bss(size=0x4) addr:0x02119654 local
+OSi_IdleThreadStack kind:bss(size=0xc8) addr:0x021197e8
+OSi_MainExArenaEnabled kind:bss(size=0x4) addr:0x021198b4

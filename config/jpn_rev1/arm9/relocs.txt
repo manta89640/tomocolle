@@ -567,7 +567,7 @@ from:0x02007490 kind:load to:0x027e0000 module:dtcm
 from:0x020074a0 kind:load to:0x02119658 module:main
 from:0x020074a8 kind:load to:0x02119668 module:main
 from:0x020074ac kind:load to:0x02007a54 module:main
-from:0x020074b0 kind:load to:0x021198b0 module:main
+from:0x020074b0 kind:load to:0x021197e8 add:0xc8 module:main
 from:0x020074c8 kind:arm_call to:0x02008d94 module:main
 from:0x020074d0 kind:arm_call to:0x020070b4 module:main
 from:0x020074f0 kind:arm_call to:0x020071fc module:main
