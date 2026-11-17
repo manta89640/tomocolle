@@ -34,9 +34,9 @@ public:
 
     enum Screen {
         SCREEN_PROFILE,
-        SCREEN_1,
-        SCREEN_2,
-        SCREEN_3,
+        SCREEN_REDRAW,       // The profile, its texts drawn again in the next frame
+        SCREEN_RELATIONS,
+        SCREEN_NO_RELATIONS, // The relations screen without any: a message
     };
 
     void Init(Scene40Context *context, int *charOffset);
@@ -62,16 +62,21 @@ public:
     void SetSwitchable(BOOL switchable);
     void ShowProfileScreen();
     void ShowRelationsScreen();
-    void UpdateScreen1();
-    void UpdateScreen2();
-    void UpdateScreen3();
+    void UpdateRedraw();
+    void UpdateRelations();
+    void UpdateNoRelations();
     void SwitchScreen();
     void FindRelations();
+    u32 GetRelationMessage(int group, int index);
+    static int GetRelationSortKey(int rank, int meter);
+    static int GetSortKeyGroup(int key);
+    static int GetSortKeyMeter(int key);
+    static int GetMeterGrade(int meter);
 
     /* 0x0000 */ int mScreen;
     /* 0x0004 */ int mScreenIndex;  // Which of the mScreenCount screens L and R show: 0 the profile
     /* 0x0008 */ int mScreenCount;
-    /* 0x000C */ int mUnknown000C;
+    /* 0x000C */ BOOL mHasRelations;
     /* 0x0010 */ BOOL mSwitchable;    // L and R switch the screens
     /* 0x0014 */ Scene40Context *mContext;
     /* 0x0018 */ SavedCharacter *mCharacter; // The visited character
@@ -91,21 +96,22 @@ public:
     /* 0x3364 */ Scene40SegmentMeter mTroubleMeter;
     /* 0x3A58 */ Scene40SpriteMeter mFullnessMeter;
     /* 0x3B3C */ Sprite mHadItemMarks[8];  // One for each of sHadItemMarkItems that it has had
-    /* 0x409C */ MessageText mTexts409C[9];
-    /* 0x760C */ ObjTextBox mTextBoxes760C[11];
+    /* 0x409C */ MessageText mGroupTitles[9];     // The relations screen's group titles (five used)
+    /* 0x760C */ ObjTextBox mRelationNames[11];  // and its lines: a name
     /* 0x8920 */ MessageText mText8920;     // The relations screen's title
-    /* 0x8F10 */ MessageText mTexts8F10[11];
+    /* 0x8F10 */ MessageText mRelationTexts[11];  // and what they are to each other
     /* 0xD060 */ MessageText mTextD060;     // Message 19 of the relations screen
     /* 0xD650 */ BOOL mRelationsChanged;      // ShowProfile finds the relations again while it is set (the talk page sets it)
     /* 0xD654 */ Scene40Relation mRelations[100];
     /* 0xE144 */ int mRelationCount;
-    /* 0xE148 */ int mUnknownE148;
-    /* 0xE14C */ int mUnknownE14C;
-    /* 0xE150 */ int mUnknownE150;
-    /* 0xE154 */ int mUnknownE154[9];
-    /* 0xE178 */ int mUnknownE178[9];
-    /* 0xE19C */ int mUnknownE19C[9];
-    /* 0xE1C0 */ int mUnknownE1C0[20];
+    /* 0xE148 */ int mFirstGroup;     // The relations are grouped by rank (GetSortKeyGroup of their sort keys)
+    /* 0xE14C */ int mPage;           // The relations' page shown
+    /* 0xE150 */ int mLastGroup;
+    /* 0xE154 */ int mGroups[9];      // The groups there are, in order
+    /* 0xE178 */ int mGroupCounts[9]; // By group
+    /* 0xE19C */ int mGroupStarts[9]; // By group: its first relation
+    /* 0xE1C0 */ int mPageStarts[20]; // The first relation of each page: a page holds 180 pixels of lines, 14 a
+                                      // relation and 28 for one that ends a group
     /* 0xE210 */ BOOL mShowUnknown;          // Show "unknown" (message 15 or 12) where there is nothing to show
 }; // 0xE214
 
