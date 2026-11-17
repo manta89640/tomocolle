@@ -373,7 +373,7 @@ _ZN16Scene40Character25ClearMoodIfTroubleOfKind8Ev kind:function(arm,size=0x58) 
 func_ov075_0217520c kind:function(arm,size=0x1bc) addr:0x0217520c
 func_ov075_021753c8 kind:function(arm,size=0x128) addr:0x021753c8
 _ZN16Scene40Character15ChooseTouchTalkEPmPiS1_S1_ kind:function(arm,size=0x3e4) addr:0x021754f0
-func_ov075_021758d4 kind:function(arm,size=0x3dc) addr:0x021758d4
+_ZN16Scene40Character14ChooseNewsTalkEiPmPiS1_S1_ kind:function(arm,size=0x3dc) addr:0x021758d4
 _ZN16Scene40Character16GetTalkArgumentsEPK16Scene40TalkEntryPiS3_S3_ kind:function(arm,size=0x290) addr:0x02175cb0
 _ZN16Scene40Character11MatchesTalkEPK16Scene40TalkEntryP7RTCDateP21Scene40TalkConditions kind:function(arm,size=0x158) addr:0x02175f40
 _ZN16Scene40Character17GetTalkConditionsEP7RTCDateP7RTCTimeP21Scene40TalkConditions kind:function(arm,size=0x1fc) addr:0x02176098
@@ -392,14 +392,14 @@ func_ov075_0217680c kind:function(arm,size=0xe4) addr:0x0217680c
 func_ov075_021768f0 kind:function(arm,size=0x34) addr:0x021768f0
 func_ov075_02176924 kind:function(arm,size=0x34) addr:0x02176924
 func_ov075_02176958 kind:function(arm,size=0x228) addr:0x02176958
-func_ov075_02176b80 kind:function(arm,size=0xa8) addr:0x02176b80
+_ZN16Scene40Character8TellNewsEv kind:function(arm,size=0xa8) addr:0x02176b80
 func_ov075_02176c28 kind:function(arm,size=0xa4) addr:0x02176c28
 func_ov075_02176ccc kind:function(arm,size=0x24) addr:0x02176ccc
 func_ov075_02176cf0 kind:function(arm,size=0x134) addr:0x02176cf0
 func_ov075_02176e24 kind:function(arm,size=0x50) addr:0x02176e24
 func_ov075_02176e74 kind:function(arm,size=0x44) addr:0x02176e74
 func_ov075_02176eb8 kind:function(arm,size=0x58) addr:0x02176eb8
-func_ov075_02176f10 kind:function(arm,size=0x74c) addr:0x02176f10
+_ZN16Scene40Character5SpeakEimiPiS0_i kind:function(arm,size=0x74c) addr:0x02176f10
 _ZN16Scene40Character5SpeakEimiii kind:function(arm,size=0x3c) addr:0x0217765c
 _ZN16Scene40Character5SpeakEimi kind:function(arm,size=0x24) addr:0x02177698
 _ZN16Scene40Character6GetAgeEP14SavedCharacterP7RTCDate kind:function(arm,size=0x6c) addr:0x021776bc
@@ -495,7 +495,7 @@ data_ov075_0217b624 kind:data(any) addr:0x0217b624
 data_ov075_0217b630 kind:data(any) addr:0x0217b630
 data_ov075_0217b63c kind:data(any) addr:0x0217b63c
 data_ov075_0217b648 kind:data(any) addr:0x0217b648
-data_ov075_0217b654 kind:data(any) addr:0x0217b654
+sBalloonUp kind:data(any) addr:0x0217b654
 data_ov075_0217b660 kind:data(any) addr:0x0217b660
 gStr_Y kind:data(any) addr:0x0217b66c
 data_ov075_0217b678 kind:data(any) addr:0x0217b678

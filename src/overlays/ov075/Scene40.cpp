@@ -194,6 +194,12 @@ void func_0202a5a4(AnimModel *model, fx32 frame);
 BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
 extern VecFx32 gTouchLineDirection; // The direction of the line through the touched point
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
+void Camera_Reset(Camera *camera);
+void Camera_UpdateEye(Camera *camera);
+void Light_Reset(Light *light);
+void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
+void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
+void Model_SetAlpha(Model *model, int alpha);
 }
 
 #define RESOURCE_BTA0 0x30415442 // Texture SRT animation
@@ -834,6 +840,63 @@ void Scene40Balloon::Update() {
     UpdatePosition();
 }
 
+// The length of (x, z), by the hardware square root
+static inline fx32 SqrtXZ(fx32 x, fx32 z) {
+    fx64 t = (fx64)x * x + (fx64)z * z;
+    CP_SetSqrt64((u64)(t << 2));
+    return ((s32)CP_GetSqrtResult32() + 1) >> 1;
+}
+
+static const VecFx32 sBalloonUp = {0, FX32_ONE, 0};
+
+static inline VecFx32 GetPos(Character *character) {
+    return character->mPos;
+}
+
+// Over the character's head, beside it as seen from the camera (on the other side when it dreams, lying down),
+// turned to the camera; the face in it looks at the camera
+void Scene40Balloon::UpdatePosition() {
+    if (mState == STATE_HIDDEN) {
+        return;
+    }
+    VecFx32 offset;
+    VecFx32 side;
+    VecFx32 up = sBalloonUp;
+    VecFx32 toCamera;
+    VecFx32 head;
+    Camera *camera = &gCamera;
+    if (mContent == CONTENT_DREAM) {
+        head = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK);
+        VEC_Subtract(&head, &camera->mEye, &toCamera);
+        VEC_CrossProduct(&up, &toCamera, &side);
+        VEC_Normalize(&side, &offset);
+        ScaleVec(-0xCCC, &offset, &offset);
+        offset.y += 0x1666;
+        VEC_Add(&offset, &head, &mModel.mPosition);
+        mModel.mRotY = FX_Atan2Idx(-toCamera.z, toCamera.x) + 0x4000;
+    } else {
+        head = GetPos(mCharacter);
+        head.y = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK).y;
+        VEC_Subtract(&head, &camera->mEye, &toCamera);
+        VEC_CrossProduct(&up, &toCamera, &side);
+        VEC_Normalize(&side, &offset);
+        ScaleVec(0x1666, &offset, &offset);
+        offset.y += 0x14CC;
+        VEC_Add(&offset, &head, &mModel.mPosition);
+        mModel.mRotY = FX_Atan2Idx(-toCamera.z, toCamera.x) - 0x4000;
+    }
+    VecFx32 eye = camera->mEye;
+    fx32 y = mModel.mPosition.y;
+    u16 pitch = FX_Atan2Idx(eye.y - y, SqrtXZ(eye.x - mFace->mFaceOffset.x, eye.z - mFace->mFaceOffset.z));
+    u16 yaw = -FX_Atan2Idx(eye.z - mFace->mFaceOffset.z, eye.x - mFace->mFaceOffset.x);
+    mFace->mHeadPitchNow = -pitch;
+    mFace->mHeadYawNow = yaw + 0x4000;
+    MtxFx43 *matrix = &mFace->mHeadMatrix;
+    matrix->_30 = mModel.mPosition.x;
+    matrix->_31 = mModel.mPosition.y - 0x666;
+    matrix->_32 = mModel.mPosition.z;
+}
+
 void Scene40Balloon::Draw() {
     mModel.Draw();
 }
@@ -1168,15 +1231,6 @@ void Scene40Touch::CountTap() {
 }
 
 // --- The camera -------------------------------------------------------------------------------------------------
-
-extern "C" {
-void Camera_Reset(Camera *camera);
-void Camera_UpdateEye(Camera *camera);
-void Light_Reset(Light *light);
-void Light_SetDirection(Light *light, int unk, u16 angle, int unk2, VecFx32 direction);
-void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
-void Model_SetAlpha(Model *model, int alpha);
-}
 
 static const VecFx32 sCameraStartPosition = {0, 0x41D0, 0xC000};
 static const VecFx32 sCameraStartTarget = {0, 0x1999, 0};
@@ -1775,13 +1829,6 @@ void Scene40Character::SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit)
 
 void Scene40Character::SnapHeadToCamera() {
     SnapHeadTo(&gCamera.mEye, 0x2000, 0x3F00);
-}
-
-// The length of (x, z), by the hardware square root
-static inline fx32 SqrtXZ(fx32 x, fx32 z) {
-    fx64 t = (fx64)x * x + (fx64)z * z;
-    CP_SetSqrt64((u64)(t << 2));
-    return ((s32)CP_GetSqrtResult32() + 1) >> 1;
 }
 
 u16 Scene40Character::GetHeadPitchTo(VecFx32 *target) {
