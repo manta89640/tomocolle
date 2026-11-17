@@ -19,9 +19,25 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 
 BOOL SpriteButton_IsTouched(SpriteButton *button);                // Whether the stylus came down on it
 void SpriteButton_SetDisabled(SpriteButton *button, BOOL disabled);
-BOOL func_02031d00(SpriteButton *button);                         // Whether it is selected (mUnknownB0)
+BOOL func_02031d00(SpriteButton *button);
+void TextButton_SetOverwritePalette(TextButton *button, int palette); // Of the button and its text
+int MiiData_GetSex(const CharacterRecord *mii);
+void MiiData_GetName(const CharacterRecord *mii, wchar_t *name);
+int MiiData_GetFavoriteColor(const CharacterRecord *mii);
+GXRgb NFL_GetFavoriteColor(int index);
+void Camera_UpdateEye(Camera *camera);                         // Whether it is selected (mUnknownB0)
 
 // Not decompiled yet
+// Of ov075-a (functions of the touch interaction, used by the pages)
+void func_ov075_0215023c(const ScreenPoint *point, VecFx32 *position, fx32 near, fx32 far); // The point in the world
+fx32 func_ov075_02150440(const VecFx32 *position);
+void func_ov075_021504e8(MtxFx33 *rotation, fx32 sin, fx32 cos);
+// Of ov075-c
+// Of ov075-e
+BOOL func_ov075_0217ade4(void *models, Scene40ItemModel **model);
+void func_ov075_0217af40(Scene40ItemModel *model);
+void func_ov075_0217af88(Scene40ItemModel *model, int item);
+void func_ov075_021750dc(Scene40Character *character);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 void func_ov075_02161988(Scene40Character *character);
 void func_ov075_02161d94(Scene40Character *character);
@@ -30,7 +46,8 @@ void func_ov075_02178364(Scene40CharacterPartA *part);
 
 // What this scene keeps in the main program's gSceneScratch (an array of bytes there) for the scenes it goes to
 struct Scene40Scratch {
-    /* 0x00 */ int mUnknown00;
+    /* 0x00 */ u16 mShopItem; // The item bought in the shop the list page's button went to, 0xFFFF for none
+    /* 0x02 */ u8 mUnknown02[2];
     /* 0x04 */ BOOL mMenuAvailable[5]; // The menu's first five buttons, as Scene40MenuBar::Refresh takes them back
     /* 0x18 */ u8 mUnknown18[0x58];
 }; // 0x70
@@ -130,6 +147,544 @@ void Scene40::Exit() {
         ArchiveManager_Unmount(&gArchiveManager, mItemModels[i].mArchiveName);
         ModelResources_ReleaseModel(gModelResources, i + 14);
     }
+}
+
+static inline const ItemInfo *GetGoodsInfo(u16 id) {
+    return &gGoodsTable[id];
+}
+
+static inline const ClothesInfo *GetClothesInfo(u16 id) {
+    return &gClothesTable[id];
+}
+
+// The body's place and size. The mannequin comes last: an inlined call binds its arguments last to first, and the
+// original reads the pointer before it computes the size (as a member function, `this` binds last and does not match)
+static inline void SetBodyPosition(Mannequin *body, VecFx32 position) {
+    body->mPos.x = position.x;
+    body->mPos.y = position.y;
+    body->mPos.z = position.z;
+}
+
+static inline void SetBodyScaleX(fx32 x, Mannequin *body) {
+    body->mScale.x = x;
+    body->mInvScale.x = FX_Inv(x);
+}
+
+static inline void SetBodyScaleY(fx32 y, Mannequin *body) {
+    body->mScale.y = y;
+    body->mInvScale.y = FX_Inv(y);
+}
+
+static inline void SetBodyScaleZ(fx32 z, Mannequin *body) {
+    body->mScale.z = z;
+    body->mInvScale.z = FX_Inv(z);
+}
+
+// --- The list page (pages+0x1F44) ----------------------------------------------------------------------------------
+
+// Where on the screen the mannequin and an item model are shown
+static const ScreenPoint sMannequinScreenPoint = {190, 172};
+static const ScreenPoint sItemScreenPoint = {190, 134};
+
+void Scene40ListPage::Init(Scene40Context *context, int *charOffset) {
+    mContext = context;
+    mNextState = STATE_NONE;
+    mState = STATE_NONE;
+    mMode = MODE_GIVE;
+    mTab = 0;
+    mActive = TRUE;
+    mChosenId = 0;
+    mChosen = FALSE;
+    mItemCount = 0;
+    mSortGoods = FALSE;
+    mSortClothes = FALSE;
+    mSortInteriors = FALSE;
+    mClothesList = context->mClothesList;
+    mInventory = context->mInventory;
+    mInteriors = context->mInteriors;
+    mMannequin = context->mMannequin;
+    mGift.Set(0, 0);
+
+    mTitle.InitObjForMessage(mContext->mMiiTouchMessages, 188, &gFonts[0].mFont, 0x1000, *charOffset, 0, 1, 0, 0, 15,
+                             NULL);
+    mTitle.mMessageFile = mContext->mMiiTouchMessages;
+    mTitle.SetPositionFromVec((128 - mTitle.mCanvas.areaWidth * 8 / 2) << FX32_SHIFT,
+                              (15 - mTitle.mCanvas.areaHeight * 8 / 2) << FX32_SHIFT);
+    mTitle.mSprite.mOverwritePalette = 1;
+    mTitle.mHAlign = mTitle.mMessageFile->GetAlignment(mTitle.mMessage);
+    *charOffset += mTitle.GetCharCount();
+    mTitle.mSprite.mVisible = FALSE;
+
+    mList.Init();
+    mList.SetBackground(0x100, 56);
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x77DC, 0x100);
+    mList.InitRows(2, 8, 9, charOffset);
+    mList.InitCounts(charOffset);
+    mList.InitMarks(2, 36);
+    mList.InitUpButton(2, 2, 3);
+    mList.InitDownButton(2, 4, 5);
+    mList.InitScrollBar(2, 6, 7);
+    mList.SetUpScrollBar(2, 6, 7);
+    mList.mCharacter = context->mCharacter;
+    mList.SetMessageFile(context->mItemMessages);
+    mList.SetMode(ItemListView::MODE_COUNT);
+    mList.mMarkKind = Scene40ListView::MARK_NONE;
+    mList.SetVisible(FALSE);
+
+    mListTabs.Init(2);
+    mGoodsTabs.Init(2);
+    mClothesTabs.Init(2);
+
+    Sprite_Init(&mOkButton, 2, 10, 128, 96, TRUE);
+    SpriteButton_SetSequences(&mOkButton, 10, 11);
+    mOkButton.SetPositionFromVec(192 << FX32_SHIFT, 173 << FX32_SHIFT);
+    SpriteButton_SetTouchRect(&mOkButton, 72, 30);
+    *charOffset += TextButton_SetMessage(&mOkButton, context->mTroubleMessages, 476, &gFonts[2].mFont, 0x1000, *charOffset);
+    SpriteButton_Reset(&mOkButton);
+    SpriteButton_SetKind(&mOkButton, 4);
+    mOkButton.mUnknownDC = TRUE;
+    mOkButton.mSounds.mSounds[0] = 10;
+    mOkButton.mSounds.mSounds[2] = 0;
+    TextButton_SetOverwritePalette(&mOkButton, 1);
+    mOkButton.mVisible = FALSE;
+
+    Sprite_Init(&mShopButton, 2, 10, 128, 96, TRUE);
+    SpriteButton_SetSequences(&mShopButton, 10, 11);
+    mShopButton.SetPositionFromVec(64 << FX32_SHIFT, 173 << FX32_SHIFT);
+    SpriteButton_SetTouchRect(&mShopButton, 72, 30);
+    *charOffset += TextButton_SetMessage(&mShopButton, context->mTroubleMessages, 478, &gFonts[2].mFont, 0x1000, *charOffset);
+    SpriteButton_Reset(&mShopButton);
+    SpriteButton_SetKind(&mShopButton, 4);
+    mShopButton.mUnknownDC = TRUE;
+    mShopButton.mSounds.mSounds[0] = 10;
+    mShopButton.mSounds.mSounds[2] = 0;
+    TextButton_SetOverwritePalette(&mShopButton, 1);
+    mShopButton.mVisible = FALSE;
+
+    Sprite_Init(&mCloseButton, 2, 0, 128, 96, TRUE);
+    SpriteButton_SetSequences(&mCloseButton, 0, 1);
+    mCloseButton.SetPositionFromVec(242 << FX32_SHIFT, 13 << FX32_SHIFT);
+    SpriteButton_SetTouchRect(&mCloseButton, 24, 22);
+    SpriteButton_Reset(&mCloseButton);
+    SpriteButton_SetKind(&mCloseButton, 4);
+    mCloseButton.mUnknownDC = TRUE;
+    mCloseButton.mSounds.mSounds[0] = 12;
+    mCloseButton.mSounds.mSounds[2] = 0;
+    mCloseButton.mOverwritePalette = 1;
+    mCloseButton.mVisible = FALSE;
+}
+
+void Scene40ListPage::Update() {
+    switch (mState = mNextState) {
+    case STATE_NONE:
+        break;
+    case STATE_OPEN:
+        Open();
+        break;
+    case STATE_CHOOSE:
+        Choose();
+        break;
+    case STATE_CHOSEN:
+        mNextState = STATE_CLOSE;
+        break;
+    case STATE_CLOSE:
+        Close();
+        break;
+    }
+}
+
+void Scene40ListPage::Open() {
+    func_ov075_0217ade4(mContext->mUnknown5C, &mItemModel);
+    mContext->mSpeechWindow->Hide();
+    PaletteLoader_SetBackdrop(&gPaletteLoader, 0x77DC, 0x100);
+    if (mSortClothes) {
+        mClothesList->SortHeldFirst();
+        mSortClothes = FALSE;
+    }
+    if (mSortGoods) {
+        mInventory->SortHeldFirst();
+        mSortGoods = FALSE;
+    }
+    if (mSortInteriors) {
+        mInteriors->SortHeldFirst();
+        mSortInteriors = FALSE;
+    }
+
+    switch (mMode) {
+    case MODE_GIVE:
+    case MODE_GIVE_FROM_SHOP: {
+        mTitle.mSprite.mVisible = FALSE;
+        mCloseButton.mVisible = TRUE;
+        mListTabs.UpdateAvailable(mContext);
+        mListTabs.SetVisible(TRUE);
+        mListTabs.Select(mTab);
+        mOkButton.mVisible = TRUE;
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
+        NNS_G2dCharCanvasClear(&mOkButton.mText.mCanvas, 0);
+        mOkButton.mText.mMessage = 476;
+        mOkButton.mText.DrawAll();
+        NNS_G2dCharCanvasClear(&mShopButton.mText.mCanvas, 0);
+        mShopButton.mText.DrawAll();
+        mList.SetMode(ItemListView::MODE_COUNT);
+        mList.SetVisible(TRUE);
+        mList.mTouchable = TRUE;
+        int tab = 0;
+        int filterTab = 0;
+        if (mMode == MODE_GIVE_FROM_SHOP) {
+            mContext->mCharacter->SetState(0);
+            u16 *bought = &gSceneScratch.mShopItem;
+            int item = *bought;
+            int shownTab = mTab;
+            if (item != 0xFFFF) {
+                switch (shownTab) {
+                case 0:
+                    filterTab = Scene40GoodsTabs::FindTab(GetGoodsInfo(item)->mFlags);
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    filterTab = Scene40ClothesTabs::FindTab(GetClothesInfo(item)->mKind);
+                    break;
+                case 3:
+                    break;
+                }
+            }
+            ShowList(shownTab, filterTab);
+            if (item != 0xFFFF) {
+                int index = mList.FindItem(item);
+                if (index != -1) {
+                    mList.Select(index);
+                    mList.ScrollToSelected();
+                    ShowItem(*bought);
+                }
+            }
+        } else {
+            Scene40Character *character = mContext->mCharacter;
+            if (character->mTroubleState == 2) {
+                switch (character->mTroubleCategory) {
+                case 0:
+                    break;
+                case 1:
+                    tab = 1;
+                    break;
+                case 2:
+                    tab = 2;
+                    if (MiiData_GetSex(character) != 0) {
+                        filterTab = 1;
+                    }
+                    break;
+                case 8:
+                    tab = 3;
+                    break;
+                }
+            }
+            mTab = tab;
+            mListTabs.Select(tab);
+            ShowList(tab, filterTab);
+        }
+        break;
+    }
+    case MODE_DRESS:
+    case MODE_DRESS_2: {
+        wchar_t name[12];
+        MiiData_GetName(mContext->mCharacter, name);
+        mTitle.SetStringArg(name, 0);
+        mTitle.mSprite.mVisible = TRUE;
+        NNS_G2dCharCanvasClear(&mTitle.mCanvas, 0);
+        mTitle.DrawAll();
+        mShopButton.mVisible = FALSE;
+        mCloseButton.mVisible = mMode == MODE_DRESS ? TRUE : FALSE;
+        mListTabs.SetVisible(FALSE);
+        mGoodsTabs.SetVisible(FALSE);
+        mClothesTabs.SetVisible(TRUE);
+        mOwnClothes.LoadOwnedBy(mContext->mCharacter);
+        mOwnClothes.Sort();
+        if (MiiData_GetSex(mContext->mCharacter) == 0) {
+            mClothesTabs.Select(0);
+            mOwnClothes.GetOwned(mItems, &mItemCount, 0);
+        } else {
+            mClothesTabs.Select(1);
+            mOwnClothes.GetOwned(mItems, &mItemCount, 1);
+        }
+        mOkButton.mVisible = TRUE;
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
+        NNS_G2dCharCanvasClear(&mOkButton.mText.mCanvas, 0);
+        mOkButton.mText.mMessage = 479;
+        mOkButton.mText.DrawAll();
+        mList.SetMode(ItemListView::MODE_NAME);
+        mList.SetMessageFile(mContext->mCostumeMessages);
+        mList.mMarkKind = Scene40ListView::MARK_NONE;
+        mList.SetVisible(TRUE);
+        mList.SetItems(mItems, mItemCount);
+        mList.mTouchable = TRUE;
+        mGift.Set(1, 0);
+        break;
+    }
+    }
+    mNextState = STATE_CHOOSE;
+}
+
+void Scene40ListPage::Choose() {
+    mListTabs.Update();
+    if (mListTabs.mPressed != 0) {
+        ShowList(mListTabs.mSelected, -1);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
+    }
+    mGoodsTabs.Update();
+    if (mGoodsTabs.mPressed != -1) {
+        mInventory->GetOwned(mItems, &mItemCount, 1, mGoodsTabs.GetFilter());
+        mList.SetItems(mItems, mItemCount);
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
+    }
+    mClothesTabs.Update();
+    if (mClothesTabs.mPressed != -1) {
+        switch (mMode) {
+        case MODE_GIVE:
+        case MODE_GIVE_FROM_SHOP:
+            mClothesList->GetOwned(mItems, &mItemCount, mClothesTabs.GetKind());
+            mList.SetItems(mItems, mItemCount);
+            break;
+        case MODE_DRESS:
+        case MODE_DRESS_2:
+            mOwnClothes.GetOwned(mItems, &mItemCount, mClothesTabs.GetKind());
+            mList.SetItems(mItems, mItemCount);
+            break;
+        }
+        SpriteButton_SetDisabled(&mOkButton, TRUE);
+    }
+    mList.Update();
+    if (mList.mTouched && mList.mSelected != -1) {
+        ShowItem(mList.mItems[mList.mSelected]->mId);
+    }
+
+    if (mActive && SpriteButton_Update(&mOkButton)) {
+        if (mList.mSelected != -1) {
+            Item *item = mList.mItems[mList.mSelected];
+            mChosenId = item->mId;
+            switch (mMode) {
+            case MODE_GIVE:
+            case MODE_GIVE_FROM_SHOP:
+                item->Add(-1);
+                if (item->mCount <= 0) {
+                    switch (mListTabs.mSelected) {
+                    case 0:
+                    case 1:
+                        mSortGoods = TRUE;
+                        break;
+                    case 2:
+                        mSortClothes = TRUE;
+                        break;
+                    case 3:
+                        mSortInteriors = TRUE;
+                        break;
+                    }
+                }
+                break;
+            case MODE_DRESS:
+                mContext->mCharacter->mClothesId = (u16)mChosenId;
+                func_ov075_021750dc(mContext->mCharacter);
+                mContext->mCharacter->SetState(0x55);
+                break;
+            case MODE_DRESS_2:
+                mContext->mCharacter->mClothesId = (u16)mChosenId;
+                func_ov075_021750dc(mContext->mCharacter);
+                mContext->mCharacter->SetState(0x9A);
+                break;
+            }
+            mChosen = TRUE;
+        } else {
+            mChosen = FALSE;
+        }
+        mNextState = STATE_CHOSEN;
+    }
+    if (mActive && SpriteButton_Update(&mCloseButton)) {
+        mChosen = FALSE;
+        mNextState = STATE_CHOSEN;
+    }
+    if (mActive && SpriteButton_Update(&mShopButton)) {
+        gSceneMemory.mUnknown2C[0] = 0xFFFF;
+        if (mList.mSelected != -1) {
+            gSceneMemory.mUnknown2C[0] = mList.mItems[mList.mSelected]->mId;
+        }
+        switch (mListTabs.mSelected) {
+        case 0:
+            if (gIslandState.GetUnknown44(3) == 2) {
+                gIslandState.SetUnknown44(3, 1);
+            }
+            gSceneManager.RequestScene(0x68);
+            break;
+        case 1:
+            if (gIslandState.GetUnknown44(8) == 2) {
+                gIslandState.SetUnknown44(8, 1);
+            }
+            gSceneManager.RequestScene(0x2F);
+            break;
+        case 2:
+            if (gIslandState.GetUnknown44(10) == 2) {
+                gIslandState.SetUnknown44(10, 1);
+            }
+            gSceneManager.RequestScene(0x1E);
+            break;
+        case 3:
+            if (gIslandState.GetUnknown44(11) == 2) {
+                gIslandState.SetUnknown44(11, 1);
+            }
+            gSceneManager.RequestScene(0x35);
+            break;
+        }
+    }
+    if (mMannequin->mHead.mVisible) {
+        PlaceMannequin();
+    }
+    if (mItemModel->mVisible) {
+        PlaceItemModel();
+    }
+}
+
+void Scene40ListPage::Close() {
+    func_ov075_0217af40(mItemModel);
+    mItemModel = NULL;
+    mMannequin->SetVisible(FALSE);
+    mOkButton.mVisible = FALSE;
+    mShopButton.mVisible = FALSE;
+    mCloseButton.mVisible = FALSE;
+    mListTabs.SetVisible(FALSE);
+    mGoodsTabs.SetVisible(FALSE);
+    mClothesTabs.SetVisible(FALSE);
+    mList.SetVisible(FALSE);
+    mContext->mSpeechWindow->Hide();
+    mNextState = STATE_NONE;
+}
+
+void Scene40ListPage::Draw() {
+    mTitle.Draw();
+    mList.Draw();
+    TextButton_Draw(&mOkButton);
+    TextButton_Draw(&mShopButton);
+    SpriteButton_Draw(&mCloseButton);
+    mListTabs.Draw();
+    mGoodsTabs.Draw();
+    mClothesTabs.Draw();
+}
+
+// The list of a tab: filterTab chooses the goods' filter or the kind of clothes, -1 for the first (for clothes, the
+// character's sex's)
+void Scene40ListPage::ShowList(int tab, int filterTab) {
+    if (filterTab == -1) {
+        filterTab = 0;
+        if (tab == 2 && MiiData_GetSex(mContext->mCharacter) != 0) {
+            filterTab = 1;
+        }
+    }
+    switch (tab) {
+    case 0:
+        mGoodsTabs.SetVisible(TRUE);
+        mGoodsTabs.Select(filterTab);
+        mClothesTabs.SetVisible(FALSE);
+        mInventory->GetOwned(mItems, &mItemCount, 1, mGoodsTabs.GetFilter());
+        mList.SetMessageFile(mContext->mItemMessages);
+        mList.mMarkKind = Scene40ListView::MARK_ITEMS;
+        mList.SetItems(mItems, mItemCount);
+        mShopButton.mVisible = mContext->mSceneId == 0x40 ? TRUE : FALSE;
+        mGift.Set(0, 0);
+        break;
+    case 1:
+        mGoodsTabs.SetVisible(FALSE);
+        mClothesTabs.SetVisible(FALSE);
+        mInventory->GetOwned(mItems, &mItemCount, 3);
+        mList.SetMessageFile(mContext->mItemMessages);
+        mList.mMarkKind = Scene40ListView::MARK_ITEMS;
+        mList.SetItems(mItems, mItemCount);
+        mShopButton.mVisible = FALSE;
+        mGift.Set(0, 0);
+        break;
+    case 2:
+        mGoodsTabs.SetVisible(FALSE);
+        mClothesTabs.SetVisible(TRUE);
+        mClothesTabs.Select(filterTab);
+        mClothesList->GetOwned(mItems, &mItemCount, mClothesTabs.GetKind());
+        mList.SetMessageFile(mContext->mCostumeMessages);
+        mList.mMarkKind = Scene40ListView::MARK_CLOTHES;
+        mList.SetItems(mItems, mItemCount);
+        mShopButton.mVisible = gIslandState.GetUnknown44(10) ? TRUE : FALSE;
+        mGift.Set(1, 0);
+        break;
+    case 3:
+        mGoodsTabs.SetVisible(FALSE);
+        mClothesTabs.SetVisible(FALSE);
+        mInteriors->GetOwnedFrom8(mItems, &mItemCount);
+        mList.SetMessageFile(mContext->mRoomMessages);
+        mList.mMarkKind = Scene40ListView::MARK_INTERIORS;
+        mList.SetItems(mItems, mItemCount);
+        mShopButton.mVisible = gIslandState.GetUnknown44(11) ? TRUE : FALSE;
+        mGift.Set(2, 0);
+        break;
+    }
+}
+
+// Shows the item touched: goods on an item model, clothes on the mannequin
+void Scene40ListPage::ShowItem(u16 id) {
+    SpriteButton_SetDisabled(&mOkButton, mList.mItems[mList.mSelected]->mCount <= 0);
+    switch (mGift.mKind) {
+    case 0:
+        func_ov075_0217af88(mItemModel, id);
+        mItemModel->mVisible = TRUE;
+        *(BOOL *)&mItemModel->mUnknown12C[0x10] = TRUE; // TODO: ov075-e's field
+        mMannequin->SetVisible(FALSE);
+        mGift.Set(0, id);
+        break;
+    case 1:
+        DressMannequin(id);
+        mMannequin->SetVisible(TRUE);
+        mItemModel->mVisible = FALSE;
+        mGift.Set(1, id);
+        break;
+    case 2:
+        mItemModel->mVisible = FALSE;
+        mMannequin->SetVisible(FALSE);
+        mGift.Set(2, id);
+        break;
+    }
+}
+
+void Scene40ListPage::DressMannequin(u16 clothes) {
+    ModelResources_ReleaseModel(gModelResources, 12);
+    ArchiveManager_Unmount(&gArchiveManager, "3MM");
+    mMannequin->SetArchive("3MM", clothes, MiiData_GetSex(mContext->mCharacter));
+    ArchiveManager_MountCompressed(&gArchiveManager, "3MM", mMannequin->mArchivePath, TRUE);
+    ModelResources_SetModel(gModelResources, 12, mMannequin->mModelPath);
+    mMannequin->MakeModel(12, 0);
+    mMannequin->SetPaletteColors(NFL_GetFavoriteColor(MiiData_GetFavoriteColor(mContext->mCharacter)), 0x5FBE);
+    mMannequin->SetAnimFlags(TRUE, TRUE);
+}
+
+// Puts the mannequin where the screen point shows, turned a little and sized by its distance from the camera
+void Scene40ListPage::PlaceMannequin() {
+    VecFx32 position;
+    func_ov075_0215023c(&sMannequinScreenPoint, &position, 0x3000, 0x4000);
+    fx32 distance = func_ov075_02150440(&position);
+    MtxFx33 rotation;
+    func_ov075_021504e8(&rotation, -0x1F3, 0xFE1);
+    MI_Copy36B(&rotation, &mMannequin->mAnim.mRotation);
+    fx32 scale = FX_Mul(distance, 0xF33);
+    SetBodyPosition(mMannequin, position);
+    SetBodyScaleX(FX_Mul(scale, gMannequinBodyScale.x), mMannequin);
+    SetBodyScaleY(FX_Mul(scale, gMannequinBodyScale.y), mMannequin);
+    SetBodyScaleZ(FX_Mul(scale, gMannequinBodyScale.z), mMannequin);
+    mMannequin->mHeadScale.x = FX_Mul(scale, gMannequinHeadScale.x);
+    mMannequin->mHeadScale.y = FX_Mul(scale, gMannequinHeadScale.y);
+    mMannequin->mHeadScale.z = FX_Mul(scale, gMannequinHeadScale.z);
+}
+
+void Scene40ListPage::PlaceItemModel() {
+    Camera_UpdateEye(&gCamera);
+    VecFx32 position;
+    func_ov075_0215023c(&sItemScreenPoint, &position, 0x3000, 0x4000);
+    mItemModel->SetPosition(position);
+}
+
+void Scene40ListPage::GetGift(Scene40Gift *gift) {
+    gift->Set(mGift.mKind, mGift.mItem.InventoryItem::mId);
 }
 
 // --- The list page's tabs ------------------------------------------------------------------------------------------

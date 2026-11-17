@@ -22,6 +22,8 @@
 
 #include "Scene40Context.h"
 #include "Scene40Character.h"
+#include "Scene40ChoiceList.h"
+#include "Scene40ClothesList.h"
 #include "Scene40MenuBar.h"
 #include "Scene40SpeechWindow.h"
 
@@ -67,6 +69,9 @@ public:
     virtual void Refresh();
     virtual void DrawRow(int row, int item);
     virtual void ClearRow(int row);
+
+    void Init();
+    void InitMarks(int resource, int sequence);
 
     /* 0x13F64 */ u32 mMarkKind;
     /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from
