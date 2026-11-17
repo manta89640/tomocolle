@@ -2410,6 +2410,18 @@ Measured:
   ...) to ranks, times ten plus five for a full-width letter; names are compared after normalizing in up to five
   rounds of decreasing strength.
 
+- **What is left of the character code (fin-char, round 5).** `Character::SetWalkTargetReflected` (77%): its
+  normalisation squares the rotated point as 64-bit operands (`umull` and `mla` pairs, not `smull`/`smlal`), which
+  `fx64 x = v.x; t = x * x;` gives. The original also keeps the offset in r5/r6 across `FX_Atan2Idx`, which ours does
+  when the angle helper takes the point by `const &`. Together these go from 187 to 145 differing lines; the
+  rotation's order and one copy still differ. `GetPointInFront` (91.6%): the original has two more copies of the
+  result at the TOP of its frame, above `offset`. In every form tried the compiler keeps copies of a result only for a
+  variable assigned twice, and puts the temporaries below the locals. `SetWalkTargetAwayFrom` (98.6%): the x and z
+  differences in the other scratch registers, and the copies in other slots. The SavedCharacter swaps
+  (`FailTrouble`, `StartTrouble`, `GetReactionWeight`, `GetTalkReactionWeight`, `ChooseWantedClothes`) reproduce in
+  one-function test files (scratchpad `fin-char/t_member.cpp`, `ft_lab.cpp`). No source form tried reaches the
+  backend differently: the IR canonicalises operand order, inline helpers and locals. They are left to the model of
+  the scheduler and colouring.
 - **The record as a base or as a member.** The Mii list copies a `SavedCharacter` as one 0x2A4-byte block and then
   its own fields, which is how the compiler copies a member structure (a base class is copied field by field). Test
   files of `GetReactionWeight` and `FailTrouble` compiled with `CharacterRecord` as the base and as a member at offset
