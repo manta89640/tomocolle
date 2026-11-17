@@ -217,6 +217,89 @@ static inline void SetBodyScaleZ(fx32 z, Mannequin *body) {
     body->mInvScale.z = FX_Inv(z);
 }
 
+// --- The present page (pages+0x1E1C) -------------------------------------------------------------------------------
+
+void Scene40PresentPage::Init(Scene40Context *context, Scene40CharacterTouch *touch) {
+    mContext = context;
+    mCharacter = context->mCharacter;
+    mBoxes[0] = context->mModels[0];
+    mBoxes[1] = context->mModels[1];
+    mBoxes[2] = context->mModels[2];
+    mActive = TRUE;
+    Sprite_Init(&mSprite, 0, 30, 128, 96, TRUE);
+    mSprite.mVisible = FALSE;
+    mSprite.mOverwritePalette = 1;
+    mTouch = touch;
+    mUnknown124 = FALSE;
+}
+
+void Scene40PresentPage::Update() {
+    mState = mNextState;
+    mTouch->Update();
+    switch (mState) {
+    case STATE_NONE:
+        break;
+    case STATE_START:
+        UpdateStart();
+        break;
+    case STATE_SHOW_BOXES:
+        UpdateShowBoxes();
+        break;
+    case STATE_CHOOSE:
+        UpdateChoose();
+        break;
+    case STATE_OPEN:
+        UpdateOpen();
+        break;
+    case STATE_RISE:
+        UpdateRise();
+        break;
+    case STATE_GIVE:
+        UpdateGive();
+        break;
+    case STATE_END:
+        UpdateEnd();
+        break;
+    case STATE_WAIT_MESSAGES:
+        UpdateWaitMessages();
+        break;
+    case STATE_DONE:
+        mUnknown124 = FALSE;
+        break;
+    }
+}
+
+// Puts an item of each group in the boxes
+void Scene40PresentPage::Start() {
+    mNextState = STATE_START;
+    for (int i = 0; i < 3; i++) {
+        mItems[i] = ChooseItemInGroup(1, 4, i);
+        if (mContext->mPhysics->TakeFreeItem(&mItemModels[i])) {
+            mItemModels[i]->ChangeItem(mItems[i]);
+        }
+    }
+}
+
+void Scene40PresentPage::UpdateStart() {
+    mCharacter->SetState(0xB4);
+    mNextState = STATE_SHOW_BOXES;
+}
+
+void Scene40PresentPage::UpdateWaitMessages() {
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState == Scene40MessageSequence::STATE_DONE) {
+        mNextState = sequence->mReturnState;
+        mFrames = 0;
+    }
+}
+
+void Scene40PresentPage::Draw() {
+    for (int i = 0; i < 3; i++) {
+        mBoxes[i]->Draw();
+    }
+    Sprite_Draw(&mSprite);
+}
+
 // --- The list page (pages+0x1F44) ----------------------------------------------------------------------------------
 
 // Where on the screen the mannequin and an item model are shown
