@@ -14,8 +14,6 @@ s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_02161988(Scene40Character *character);
-void func_ov075_02161d94(Scene40Character *character);
 }
 
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
@@ -117,14 +115,14 @@ void Scene40::Exit() {
 // With speaking set, the lips follow the scene's speech
 void Scene40Character::Update(BOOL speaking) {
     Character::Update();
-    func_ov075_02161988(this);
+    PlaceHeadIcons();
     mHeadIcons[0].Update();
     mHeadIcons[1].Update();
     mBalloon.Update();
     if (!speaking) {
         return;
     }
-    func_ov075_02161d94(this);
+    UpdateState();
     if (mTtsPlayer->IsEngineIdle()) {
         return;
     }
@@ -453,6 +451,285 @@ void Scene40Character::ClearMoodIfTroubleOfKind8() {
     if (data_02114d78[mTroubleCategory][mTroubleId].mKind == 8) {
         mMood = 0;
     }
+}
+
+// --- The character's talk ---------------------------------------------------------------------------------------
+
+extern "C" {
+// The personalities' kinds (0 to 3), by personality
+extern const int gPersonalityKinds[];
+int MiiData_GetSex(SavedCharacter *character);
+}
+
+// The tools an entry can require to have been had (Scene40TalkEntry::mItem: goods rows, by the record's bits at
+// 0x1C8)
+static const int sTalkItems[9] = {0, 236, 241, 243, 242, 239, 240, 237, 238};
+static const int sPersonalityBits[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768};
+static const int sMonthBits[13] = {156, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
+static const int sHourBits[24] = {8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4};
+static const int sWeekdayBits[7] = {1, 2, 4, 8, 16, 32, 64};
+// The days since the last meeting at which each step of Scene40TalkConditions::mElapsed begins
+static const u16 sElapsedDays[9] = {0, 0, 7, 14, 21, 28, 51, 81, 111};
+
+// Whether an entry's conditions all hold
+BOOL Scene40Character::MatchesTalk(const Scene40TalkEntry *entry, RTCDate *date, Scene40TalkConditions *conditions) {
+    BOOL matches = TRUE;
+    if (!(entry->mSexes & conditions->mSex)) {
+        matches = FALSE;
+    }
+    if (!(entry->mPersonalities & conditions->mPersonality)) {
+        matches = FALSE;
+    }
+    if (!(entry->mMoods & conditions->mMood)) {
+        matches = FALSE;
+    }
+    if (!(entry->mMonths & conditions->mMonth)) {
+        matches = FALSE;
+    }
+    if (!(entry->mHours & conditions->mHour)) {
+        matches = FALSE;
+    }
+    if (!(entry->mWeekdays & conditions->mWeekday)) {
+        matches = FALSE;
+    }
+    if (entry->mDay != 0 && entry->mDay != date->day) {
+        matches = FALSE;
+    }
+    if (entry->mNeedsCharacters == 1 && conditions->mHasCharacters == FALSE) {
+        matches = FALSE;
+    }
+    if (entry->mNeedsFriends == 1 && conditions->mHasFriends == FALSE) {
+        matches = FALSE;
+    }
+    if (entry->mNeedsLover == 1 && conditions->mHasLover == FALSE) {
+        matches = FALSE;
+    }
+    if (entry->mNeedsSpouse == 1 && conditions->mHasSpouse == FALSE) {
+        matches = FALSE;
+    }
+    if (entry->mItem != 0) {
+        int item = sTalkItems[entry->mItem];
+        if (!((mUnknown1C8.m[item >> 5] >> (item & 31)) & 1)) {
+            matches = FALSE;
+        }
+    }
+    if (entry->mElapsed != 0 && entry->mElapsed != conditions->mElapsed) {
+        matches = FALSE;
+    }
+    return matches;
+}
+
+static inline RTCTime Midnight() {
+    RTCTime time = {0, 0, 0};
+    return time;
+}
+
+// What the entries are tested against: the character's sex, mood and personality, the month, hour and day of the
+// week, how long since the last meeting, and its relations
+void Scene40Character::GetTalkConditions(RTCDate *date, RTCTime *time, Scene40TalkConditions *conditions) {
+    mPersonality = GetPersonality();
+    if (MiiData_GetSex(this) == 0) {
+        conditions->mSex = 1;
+    }
+    if (MiiData_GetSex(this) == 1) {
+        conditions->mSex = 2;
+    }
+    conditions->mPersonality = sPersonalityBits[mPersonality];
+    switch (mMood) {
+    case 0:
+        conditions->mMood = 1;
+        break;
+    case 1:
+        conditions->mMood = 2;
+        break;
+    case 2:
+        conditions->mMood = 4;
+        break;
+    case 3:
+        conditions->mMood = 8;
+        break;
+    case 4:
+        conditions->mMood = 16;
+        break;
+    }
+    conditions->mMonth = sMonthBits[date->month];
+    conditions->mHour = sHourBits[time->hour];
+    conditions->mWeekday = sWeekdayBits[date->week];
+    RTCDate meet;
+    RTCTime midnight = Midnight();
+    GetMeetDate(&meet);
+    s64 met = RTC_ConvertDateTimeToSecond(&meet, &midnight);
+    int days = (RTC_ConvertDateTimeToSecond(date, time) - met) / 86400;
+    if (days < 0) {
+        days = 0;
+    }
+    for (int i = 8; i >= 0; i--) {
+        if (sElapsedDays[i] <= days) {
+            conditions->mElapsed = i;
+            break;
+        }
+    }
+    conditions->mHasCharacters = mCharacterCount >= 3;
+    conditions->mHasFriends = mFriendCount >= 2;
+    conditions->mHasLover = mLover != -1;
+    conditions->mHasSpouse = mSpouse != -1;
+}
+
+extern "C" {
+// INTERIM: the talk tables by personality kind, with their entry counts (the file's data, laid out at the end)
+extern const Scene40TalkEntry *const sFirstTalks[4];   // The first time the player touches the character
+extern const int sFirstTalkCounts[4];
+extern const Scene40TalkEntry *const sTouchTalks[4];   // Being touched
+extern const int sTouchTalkCounts[4];
+extern const Scene40TalkEntry *const sRecentTalks[4];  // One time in ten, when they met within the week
+extern const int sRecentTalkCounts[4];
+extern const Scene40TalkEntry *const sNewsTalks1[4];   // Something to tell (record byte 0x24A) of kind 1
+extern const int sNewsTalk1Counts[4];
+extern const Scene40TalkEntry *const sNewsTalks2[4];   // of kind 2
+extern const int sNewsTalk2Counts[4];
+extern const Scene40TalkEntry *const sNewsTalksFE[4];  // of kind 0xFE (and 2 when its birthday is set)
+extern const int sNewsTalkFECounts[4];
+}
+
+// A random number below max, compared as an int
+static inline int Rand(int max) {
+    return MATH_Rand16(&gRandom, max);
+}
+
+// The two arguments of a message: up to two, while the entry has a type for them. Two friends are picked at
+// random for types 16 and 17.
+void Scene40Character::GetTalkArguments(const Scene40TalkEntry *entry, int *count, int *types, int *values) {
+    int friends[2] = {0, 0};
+    u16 foods[256];
+    int n;
+    int wanted = 2;
+    for (int i = 0; i < mFriendCount; i++) {
+        if (Rand(mFriendCount - i) < wanted) {
+            friends[2 - wanted] = mFriends[i];
+            wanted--;
+        }
+    }
+    if (Rand(100) < 50) {
+        int other = friends[0];
+        friends[0] = friends[1];
+        friends[1] = other;
+    }
+    for (*count = 0; (*count == 0 ? entry->mArgType0 : entry->mArgType1) != 0 && *count < 2; (*count)++) {
+        types[*count] = *count == 0 ? entry->mArgType0 : entry->mArgType1;
+        switch (types[*count]) {
+        case 1:
+        case 4:
+        case 7:
+        case 10:
+        case 15:
+            values[*count] = mIndex;
+            break;
+        case 14:
+            values[*count] = 0;
+            break;
+        case 13:
+            n = 0;
+            for (int item = 0; item < 255; item++) {
+                int kind = gGoodsTable[(u16)item].mKind;
+                if (kind == 1 || kind == 4) {
+                    foods[n++] = item;
+                }
+            }
+            values[*count] = foods[Rand(n)];
+            break;
+        case 2:
+        case 3:
+        case 5:
+        case 6:
+        case 8:
+        case 9:
+        case 11:
+        case 12:
+            values[*count] = 0;
+            break;
+        case 16:
+            values[*count] = friends[0];
+            break;
+        case 17:
+            values[*count] = friends[1];
+            break;
+        case 18:
+            values[*count] = mLover;
+            break;
+        case 19:
+            values[*count] = mSpouse;
+            break;
+        default:
+            values[*count] = 0;
+            break;
+        }
+    }
+}
+
+// What the character says when touched: the first time, its first-meeting talk (and the record's bit 0x54.20 is
+// set); one time in ten, when they met within the week, a talk of those; otherwise a touch talk. An entry whose
+// conditions hold is chosen at random, or the first first-meeting talk if none does.
+void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int *values) {
+    RTCDate date;
+    RTCTime time;
+    Scene40TalkConditions conditions;
+    const Scene40TalkEntry *entry;
+    Scene40Clock *clock = mContext->mClock;
+    date.year = clock->mDate.year;
+    date.month = clock->mDate.month;
+    date.day = clock->mDate.day;
+    date.week = clock->mDate.week;
+    clock = mContext->mClock;
+    time.hour = clock->mTime.hour;
+    time.minute = clock->mTime.minute;
+    time.second = clock->mTime.second;
+    GetTalkConditions(&date, &time, &conditions);
+    if (!mUnknown054Bit20) {
+        int found[33];
+        int n = 0;
+        int total = sFirstTalkCounts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sFirstTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sFirstTalks[gPersonalityKinds[mPersonality]][found[MATH_Rand16(&gRandom, n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+        mUnknown054Bit20++;
+    } else if (MATH_Rand16(&gRandom, 10) != 0 || conditions.mElapsed != 1) {
+        int found[65];
+        int n = 0;
+        int total = sTouchTalkCounts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sTouchTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sTouchTalks[gPersonalityKinds[mPersonality]][found[MATH_Rand16(&gRandom, n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+    } else {
+        int found[48];
+        int n = 0;
+        int total = sRecentTalkCounts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sRecentTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sRecentTalks[gPersonalityKinds[mPersonality]][found[MATH_Rand16(&gRandom, n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+    }
+    *message = entry->mMessage;
+    GetTalkArguments(entry, count, types, values);
 }
 
 // Something to tell the player (the record's byte 0x24A: 1, 2 or 0xFE, the kind of talk; 0 or 0xFF for none)
