@@ -825,12 +825,12 @@ void Scene40Pages::Init(int *mainCharOffset, int *subCharOffset, Scene40Context 
         end = *subCharOffset;
     }
     *subCharOffset = start;
-    func_ov075_0215af4c(OV075_PAGE(0x214B0), context, subCharOffset);
+    mOptionPage.Init(context, subCharOffset);
     if (end < *subCharOffset) {
         end = *subCharOffset;
     }
     *subCharOffset = start;
-    func_ov075_02159c1c(OV075_PAGE(0x1AAB8), context, subCharOffset);
+    mKeyboardPage.Init(context, subCharOffset);
     if (end < *subCharOffset) {
         end = *subCharOffset;
     }
@@ -845,10 +845,10 @@ void Scene40Pages::Init(int *mainCharOffset, int *subCharOffset, Scene40Context 
     mMenuBar.Init(context);
     mTouchPage.Init(context, &mTouch, &mMenuBar);
     mTalkPage.Init(context, mainCharOffset, &mMenuBar, &mProfilePage);
-    func_ov075_02154aa4(OV075_PAGE(0x1D94), context, &mTouch, &mProfilePage, &mCounter);
-    func_ov075_02157590(OV075_PAGE(0x1E1C), context, &mTouch);
+    mGiftPage.Init(context, &mTouch, &mProfilePage, &mCounter);
+    mPresentPage.Init(context, &mTouch);
     mCounter.Init(context, mainCharOffset);
-    *(int *)OV075_PAGE(0x20CD0) = end;
+    mKeyboardPage.mObjCharOffset = end;
     *subCharOffset = end;
     mNextPage = PAGE_TOUCH;
     mPage = PAGE_TOUCH;
@@ -903,11 +903,11 @@ void Scene40Pages::SetActive(BOOL active) {
     mActive = active;
     mTouchPage.mActive = active;
     mTalkPage.mActive = active;
-    *(BOOL *)OV075_PAGE(0x1DAC) = active;
-    *(BOOL *)OV075_PAGE(0x1E30) = active;
+    mGiftPage.mActive = active;
+    mPresentPage.mActive = active;
     mListPage.mActive = active;
-    *(BOOL *)OV075_PAGE(0x1AAC4) = active;
-    *(BOOL *)OV075_PAGE(0x21504) = active;
+    mKeyboardPage.mActive = active;
+    mOptionPage.mActive = active;
 }
 
 void Scene40Pages::HideMenu(BOOL hide) {
@@ -927,8 +927,8 @@ void Scene40Pages::Draw() {
     case PAGE_3:
         mTouchPage.Draw();
         mTalkPage.Draw();
-        func_ov075_02157004(OV075_PAGE(0x1D94));
-        func_ov075_021582c4(OV075_PAGE(0x1E1C));
+        mGiftPage.Draw();
+        mPresentPage.Draw();
         mProfilePage.Draw();
         mMenuBar.Draw();
         break;
@@ -939,10 +939,10 @@ void Scene40Pages::Draw() {
         mListPage.Draw();
         break;
     case PAGE_8:
-        func_ov075_0215aef8(OV075_PAGE(0x1AAB8));
+        mKeyboardPage.Draw();
         break;
     case PAGE_9:
-        func_ov075_0215bac8(OV075_PAGE(0x214B0));
+        mOptionPage.Draw();
         break;
     }
 }

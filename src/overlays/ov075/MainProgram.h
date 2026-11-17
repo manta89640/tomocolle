@@ -65,16 +65,6 @@ void func_ov075_021793fc(int unknown);
 void func_ov075_021753c8(Scene40Character *character);
 void func_0207b138(void *manager); // Updates a particle system's manager
 
-// The pages', by their offset in Scene40Pages
-void func_ov075_0215af4c(void *page, Scene40Context *context, int *subCharOffset);
-void func_ov075_02159c1c(void *page, Scene40Context *context, int *subCharOffset);
-void func_ov075_02154aa4(void *page, Scene40Context *context, void *touch, void *statusPage, void *page386B0);
-void func_ov075_02157590(void *page, Scene40Context *context, void *touch);
-void func_ov075_02157004(void *page);
-void func_ov075_021582c4(void *page);
-void func_ov075_0215aef8(void *page);
-void func_ov075_0215bac8(void *page);
-
 }
 
 // The scenes after which the visit starts with page entry 23 (with data_ov075_0217b66c and data_ov075_0217ba94)
@@ -95,7 +85,5 @@ struct Scene40PresentEntry {
 }; // 0xC
 
 
-// A page of Scene40Pages whose class is not written yet, by its offset
-#define OV075_PAGE(offset) ((void *)((u8 *)this + (offset)))
 
 #endif // OV075_MAINPROGRAM_H
