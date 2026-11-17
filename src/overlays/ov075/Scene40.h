@@ -22,10 +22,15 @@
 
 #include "Scene40Context.h"
 #include "Scene40Character.h"
+#include "Scene40Clock.h"
 #include "Scene40ChoiceList.h"
+#include "Scene40MessageSequence.h"
+#include "Scene40Meter.h"
+#include "Scene40ProfilePage.h"
 #include "Scene40ClothesList.h"
 #include "Scene40MenuBar.h"
 #include "Scene40SpeechWindow.h"
+#include "Scene40TalkPage.h"
 
 // Overlay 75, scenes 0x40 and 0x6C (not decompiled). The scene factory (CreateScene) loads overlay 75 and allocates
 // 0x6F908 bytes; the constructor is the main program's (0x020428E0, src/scene/SceneManager.cpp), which stores the
@@ -77,19 +82,6 @@ public:
     /* 0x13F68 */ SavedCharacter *mCharacter; // Whose record the marks are read from
     /* 0x13F6C */ Sprite mMarks[7];           // One beside each row, as the shops' list has them
 }; // 0x14420
-
-// The scene's clock (what the overlay's 0x02179728 constructs): the date and time last read and the same moment in
-// seconds, as overlay 74's Clock has them in another order.
-class Scene40Unknown30A8C {
-public:
-    Scene40Unknown30A8C();
-    void Read();       // 0x02179764: reads the date and time now
-    void ReadIfIdle(); // 0x02179790: the same, but only while the archive manager is idle
-
-    /* 0x00 */ RTCDate mDate; // Exit gives it to the character as the date they last met
-    /* 0x10 */ RTCTime mTime;
-    /* 0x1C */ s64 mSeconds; // The same moment in seconds, as the main program's Clock_GetDateTime returns it
-}; // 0x24
 
 // Three classes of the overlay whose constructors only store their tables (0x02182CA0, 0x02182CB8, 0x02182C88:
 // four entries each, the first two classes sharing the second and third). What their functions are is not known:
@@ -164,7 +156,7 @@ public:
     /* 0x309B4 */ int mUnknown309B4;       // Exit gives it to GameData::SetCappedCounter
     /* 0x309B8 */ u8 mUnknown309B8[0x2C];
     /* 0x309E4 */ MessageFile mMessageFiles[7];
-    /* 0x30A8C */ Scene40Unknown30A8C mUnknown30A8C;
+    /* 0x30A8C */ Scene40Clock mClock;
     /* 0x30AB0 */ Scene40Context mContext; // What the pages are given
     /* 0x30B50 */ Scene40Pages mPages;
     /* 0x69D2C */ u8 mUnknown69D2C[0x128];
