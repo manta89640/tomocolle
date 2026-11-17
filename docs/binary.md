@@ -242,9 +242,17 @@ and `card_common.c` gives the card thread the top of its 1 KB stack, `cardi_thre
 for `card_rom.c`'s `cardi_rom_base`. Still incomplete: `os_irqHandler.c`, `os_irqTable.c` and `os_interrupt.c`, which
 need the DTCM's `OS_IRQTable` (`0x027E0000`) and `OSi_IrqThreadQueue` and the linker's `SDK_AUTOLOAD_DTCM_START` and
 `SDK_IRQ_STACKSIZE`; and `card_backup.c`, whose `[SDK+NINTENDO:BACKUP]` string is in a `.version` section, at
-`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
-(`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG` or `...BGCharacterData`/`...BGNCG`), which are byte for byte the
-same, and keep their address names.
+`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are the BG pair,
+`NNS_G2dGetUnpackedBGCharacterData` (`0x020594DC`) and `NNS_G2dUnpackBGNCG` (`0x02059518`), and the file is complete.
+Measured: the OBJ pair (`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG`) compiles to the same bytes, with
+assertions off; in the object the BG pair is separated by `NNS_G2dGetUnpackedCharacterPosInfo`, which the link strips,
+so the order does not tell them apart either, and no other linked object refers to either name. What the callers pass
+does: both callers (the keyboard's `KeyboardCore_GetUnpackedCharData` and the character loader's `0x020290B8`, which
+loads `Obj_down.ncg` and `BG_down.ncg` alike) hand it every kind of NCGR file the game has, and of the game's 631
+NCGR files five of the keyboard's are 25 characters wide, one 31, and two 256-colour ones 32, all with 2D mapping:
+`NNS_G2dUnpackNCG` asserts a width of 32 (16 colours) or 16 (256) for 2D-mapped characters, `NNS_G2dUnpackBGNCG`
+only that the format is characters, which every file is. Inferred: in the game's debug builds the OBJ pair would
+have stopped on the keyboard's files, so the game calls the BG pair.
 
 The ITCM is `OS_IrqHandler`, `OS_IrqHandler_ThreadSwitch` (`os_irqHandler.c`) and `MIi_DmaSetParams` with its three
 variants (`mi_dma.c`), compiled from the fetched files, where they are assembly functions in the ITCM's section. Each

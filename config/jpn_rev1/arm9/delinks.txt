@@ -728,6 +728,7 @@ lib/NitroSystem/libraries/g2d/src/load/g2d_NOB_load.c:
     .text       start:0x020593ac end:0x020594dc
 
 lib/NitroSystem/libraries/g2d/src/load/g2d_NCG_load.c:
+    complete
     .text       start:0x020594dc end:0x02059528
 
 lib/NitroSystem/libraries/g2d/src/load/g2d_NCL_load.c:

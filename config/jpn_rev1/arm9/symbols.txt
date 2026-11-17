@@ -2346,8 +2346,8 @@ UnPackExtendedData_ kind:function(arm,size=0x10) addr:0x020593cc local
 NNS_G2dGetUnpackedCellBank kind:function(arm,size=0x3c) addr:0x020593dc
 NNS_G2dGetCellDataByIdx kind:function(arm,size=0x28) addr:0x02059418
 NNS_G2dUnpackNCE kind:function(arm,size=0x9c) addr:0x02059440
-func_020594dc kind:function(arm,size=0x3c) addr:0x020594dc
-func_02059518 kind:function(arm,size=0x10) addr:0x02059518
+NNS_G2dGetUnpackedBGCharacterData kind:function(arm,size=0x3c) addr:0x020594dc
+NNS_G2dUnpackBGNCG kind:function(arm,size=0x10) addr:0x02059518
 NNS_G2dGetUnpackedPaletteData kind:function(arm,size=0x3c) addr:0x02059528
 NNS_G2dUnpackNCL kind:function(arm,size=0x10) addr:0x02059564
 NNS_G2dGetUnpackedScreenData kind:function(arm,size=0x34) addr:0x02059574
@@ -4397,14 +4397,14 @@ sNFLFaceTexOffsets kind:data(any) addr:0x020b7b8c
 sDaysInMonth kind:data(any) addr:0x020b7e1c local
 sDefaultMiis kind:data(any) addr:0x020b7e50 local
 data_020b7ee4 kind:data(any) addr:0x020b7ee4
-space$12976 kind:data(any) addr:0x020b7eec local
-blank$12800 kind:data(any) addr:0x020b7ef0 local
-width$12798 kind:data(any) addr:0x020b7ef4 local
-height$12802 kind:data(any) addr:0x020b7ef8 local
-@13178 kind:data(any) addr:0x020b7efc local
-@12851 kind:data(any) addr:0x020b7f08 local
-@12853 kind:data(any) addr:0x020b7f1c local
-@12849 kind:data(any) addr:0x020b7f30 local
+space$12974 kind:data(any) addr:0x020b7eec local
+blank$12798 kind:data(any) addr:0x020b7ef0 local
+width$12796 kind:data(any) addr:0x020b7ef4 local
+height$12800 kind:data(any) addr:0x020b7ef8 local
+@13176 kind:data(any) addr:0x020b7efc local
+@12849 kind:data(any) addr:0x020b7f08 local
+@12851 kind:data(any) addr:0x020b7f1c local
+@12847 kind:data(any) addr:0x020b7f30 local
 sButtonPositions kind:data(any) addr:0x020b7f44 local
 sButtonRect kind:data(any) addr:0x020b7f54 local
 @13403 kind:data(any) addr:0x020b7f64 local
