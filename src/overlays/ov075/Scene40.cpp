@@ -34,7 +34,7 @@ void func_ov075_02176924(Scene40Character *character);
 void func_ov075_021767b8(Scene40Character *character);
 void func_ov075_02176e74(Scene40Character *character);
 void func_ov075_02176eb8(Scene40Character *character);
-void MiiData_GetName(const void *mii, wchar_t *name);
+void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 int func_ov075_0217520c(Scene40Character *character);
 void func_ov075_02174a14(Scene40Character *character);
@@ -54,7 +54,7 @@ struct TroubleInfo {
     u32 hasTarget : 4;
     u32 flags;
 }; // 0xC
-extern "C" TroubleInfo *data_02114d78[];
+extern "C" const TroubleInfo *const data_02114d78[];
 
 static inline int Random(int max) {
     return MATH_Rand16(&gRandom, max);
