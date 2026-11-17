@@ -120,6 +120,9 @@ public:
     /* 0x004 */ u8 mUnknown004[0x640];
 }; // 0x644
 
+#include "Scene40KeyboardPage.h"
+#include "Scene40OptionPage.h"
+
 // The scene's lower-screen pages (the classes above are its members')
 #include "Scene40Pages.h"
 
