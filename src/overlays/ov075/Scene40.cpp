@@ -738,6 +738,79 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
     GetTalkArguments(entry, count, types, values);
 }
 
+// Something to tell, of a kind (the record's byte 0x24A): kind 2 becomes 0xFE when the Mii has a birthday set
+void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values) {
+    RTCDate date;
+    RTCTime time;
+    Scene40TalkConditions conditions;
+    const Scene40TalkEntry *entry;
+    int found[393];
+    Scene40Clock *clock = mContext->mClock;
+    date.year = clock->mDate.year;
+    date.month = clock->mDate.month;
+    date.day = clock->mDate.day;
+    date.week = clock->mDate.week;
+    clock = mContext->mClock;
+    time.hour = clock->mTime.hour;
+    time.minute = clock->mTime.minute;
+    time.second = clock->mTime.second;
+    GetTalkConditions(&date, &time, &conditions);
+    int n = 0;
+    if (kind == 2) {
+        int month = GetParameter(PARAM_BIRTH_MONTH);
+        int day = GetParameter(PARAM_BIRTH_DAY);
+        if (month != 0 && day != 0) {
+            kind = 0xFE;
+        }
+    }
+    switch (kind) {
+    case 1: {
+        int total = sNewsTalk1Counts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sNewsTalks1[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sNewsTalks1[gPersonalityKinds[mPersonality]][found[Rand(n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+        break;
+    }
+    case 2: {
+        int total = sNewsTalk2Counts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sNewsTalks2[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sNewsTalks2[gPersonalityKinds[mPersonality]][found[Rand(n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+        break;
+    }
+    case 0xFE: {
+        int total = sNewsTalkFECounts[gPersonalityKinds[mPersonality]];
+        for (int i = 0; i < total; i++) {
+            if (MatchesTalk(&sNewsTalksFE[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
+                found[n++] = i;
+            }
+        }
+        if (n > 0) {
+            entry = &sNewsTalksFE[gPersonalityKinds[mPersonality]][found[Rand(n)]];
+        } else {
+            entry = sFirstTalks[gPersonalityKinds[mPersonality]];
+        }
+        break;
+    }
+    }
+    *message = entry->mMessage;
+    GetTalkArguments(entry, count, types, values);
+}
+
 // Something to tell the player (the record's byte 0x24A: 1, 2 or 0xFE, the kind of talk; 0 or 0xFF for none)
 BOOL Scene40Character::HasSomethingToTell() {
     BOOL has = FALSE;
@@ -751,6 +824,29 @@ BOOL Scene40Character::HasSomethingToTell() {
 // and 0xF, SavedCharacter::SetUnknown246ByChance): the balloon then shows a dream
 BOOL Scene40Character::IsDreaming() {
     return mUnknown246 != 0;
+}
+
+// Says what it has to tell (the speech's file 1), and has nothing to tell any more. Kind 1 keeps the year in
+// the record's byte 0x2A3.
+void Scene40Character::TellNews() {
+    if (!HasSomethingToTell()) {
+        return;
+    }
+    u32 message;
+    int count;
+    int types[2];
+    int values[2];
+    ChooseNewsTalk(mUnknown24A, &message, &count, types, values);
+    Speak(1, message, count, types, values, 0);
+    switch (mUnknown24A) {
+    case 1:
+        mUnknown2A3 = mContext->mClock->mDate.year;
+        break;
+    case 2:
+    case 0xFE:
+        break;
+    }
+    mUnknown24A = 0xFF;
 }
 
 // The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
@@ -1872,3 +1968,9 @@ int Scene40Character::GetAge(SavedCharacter *character, RTCDate *date) {
     }
     return age;
 }
+
+// --- The file's static initialiser ------------------------------------------------------------------------------
+
+// A text position of the profile page (read by 0x0215f180), a copy of a pool point: initialised at run time by the
+// file's static initialiser, so it is in .data, zero in the ROM
+// (not written yet)
