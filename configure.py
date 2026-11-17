@@ -149,6 +149,23 @@ LD_FLAGS = [
     "-m _start",            # The entry function, crt0.c's
 ]
 
+# Symbols that the original link's script defined (the SDK's ARM9-TS.lcf.template) and that dsd's does not: the SDK's
+# files refer to them, so a file of the SDK linked from source needs them (os_*.c, crt0.c, fs_overlay.c). The values
+# are the original's, read from the words the delinked code has where the compiled code refers to each. Written into
+# the linker script by tools/force_active.py, after dsd's sections, so the labels of dsd's script can be used.
+LINKER_SYMBOLS = {
+    "SDK_AUTOLOAD_DTCM_START": "ADDR(DTCM)",            # 0x027E0000, where OS_IRQTable is
+    "SDK_SECTION_ARENA_DTCM_START": "DTCM_BSS_END",     # 0x027E0080, the end of the DTCM's .bss
+    "SDK_IRQ_STACKSIZE": "0x400",
+    "SDK_SYS_STACKSIZE": "0",
+    # The overlays' digest table, empty: the end of the static .data before its 32-byte alignment. dsd's layout has
+    # the alignment's 8 bytes in a gap object of their own, so the address is given as the original's.
+    "SDK_OVERLAY_DIGEST": "0x02115478",
+    "SDK_OVERLAY_DIGEST_END": "0x02115478",
+    # dsd rom config finds the autoload callback by its own name; crt0.c's is _start_AutoloadDoneCallback
+    "AutoloadCallback": "_start_AutoloadDoneCallback",
+}
+
 INCLUDE_DIRS = ["include"]
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -718,7 +735,8 @@ def main():
     n.rule("fx_const", "$python $script $in $out", "Generating $out")
     # A fetched library file with the project's own definitions put in, from lib/overrides/ (see the tool)
     n.rule("override", "$python tools/override_functions.py $in $out", "Writing $out")
-    n.rule("force_active", "$python tools/force_active.py $lcf $out --objects $out.rsp", "Writing $out",
+    defines = " ".join(shlex.quote(f"--define={name}={value}") for name, value in LINKER_SYMBOLS.items())
+    n.rule("force_active", f"$python tools/force_active.py $lcf $out --objects $out.rsp {defines}", "Writing $out",
            rspfile="$out.rsp", rspfile_content="$in_newline")
     n.rule("mwld", "$wrapper $mwld $ld_flags @$objects $lcf -o $out", "Linking $out")
     n.rule("rom_config", "$dsd rom config --elf $in --config $config", "Configuring the ROM")

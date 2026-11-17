@@ -20,6 +20,7 @@ instructions). See docs/decompiling.md, "A match is instructions and references"
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -107,6 +108,21 @@ def near_misses(units: list, report: dict) -> int:
     return 0
 
 
+def script_symbols() -> tuple[dict, dict]:
+    """The symbols the linker script defines (the SDK's SDK_* and the like), name -> address, and the addresses of
+    every symbol of the linked program, name -> set. The original refers to such an address by the name symbols.txt
+    has there (SDK_AUTOLOAD_DTCM_START is OS_IRQTable's address), and that is the same reference."""
+    lcf, elf = ROOT / "build/jpn_rev1/arm9_link.lcf", ROOT / "build/jpn_rev1/arm9.o"
+    if not lcf.exists() or not elf.exists():
+        return {}, {}
+    names = set(re.findall(r"^\s+([A-Za-z_]\w*) = [^;]+;$", lcf.read_text(encoding="utf-8"), re.M))
+    addresses = {}
+    for name, value, _, _, _, _ in Object(elf).symbols:
+        if name:
+            addresses.setdefault(name, set()).add(value & ~1)
+    return {n: min(addresses[n]) for n in names if n in addresses}, addresses
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--unit", help="only units whose name contains this")
@@ -125,6 +141,7 @@ def main() -> int:
     if args.near_misses:
         report = json.loads((ROOT / "build" / "jpn_rev1" / "report.json").read_text())
         return near_misses([u for u in units if not args.unit or args.unit in u["name"]], report)
+    script, addresses = script_symbols()
     bad_units = 0
     for unit in units:
         target, base = unit.get("target_path"), unit.get("base_path")
@@ -146,6 +163,8 @@ def main() -> int:
                 a, b = t_targets.get(offset), o_targets.get(offset)
                 if a is None or b is None or a == b:
                     continue
+                if b in script and script[b] in addresses.get(a, ()):
+                    continue  # A symbol of the linker script, at the address the original's symbol has
                 differences.append((name, offset, a, b))
         if differences:
             bad_units += 1

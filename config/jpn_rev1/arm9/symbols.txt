@@ -20,7 +20,7 @@ _start kind:function(arm,size=0x154) addr:0x02000800
 INITi_CpuClear32 kind:function(arm,size=0x1c) addr:0x02000954 local
 MIi_UncompressBackward kind:function(arm,size=0xac) addr:0x02000970
 do_autoload kind:function(arm,size=0x90) addr:0x02000a1c local
-AutoloadCallback kind:function(arm,size=0x4) addr:0x02000aac
+_start_AutoloadDoneCallback kind:function(arm,size=0x4) addr:0x02000aac
 init_cp15 kind:function(arm,size=0xe8) addr:0x02000ab0 local
 OSi_ReferSymbol kind:function(arm,size=0x4) addr:0x02000b98
 BuildInfo kind:data(any) addr:0x02000b9c

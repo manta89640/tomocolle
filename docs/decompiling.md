@@ -202,7 +202,12 @@ that uses one of them is the game's. Remove what the game's release does not hav
 
 A file whose code is partly in the ITCM (`os_irqHandler.c`, `mi_dma.c`) is one unit: its entry in the main program's
 `delinks.txt` names an `.itcm` range beside its `.text`, and dsd's section migration takes that range out of the ITCM
-module (`.dtcm` works the same way for the DTCM's `.bss`). `dsd json delinks` and `dsd objdiff` do not migrate and so
+module (`.dtcm` works the same way for the DTCM's `.bss`). The SDK's own linker script defined symbols that its files refer to and dsd's script does not
+(`SDK_AUTOLOAD_DTCM_START`, `SDK_IRQ_STACKSIZE`, `SDK_OVERLAY_DIGEST` and others): `LINKER_SYMBOLS` in `configure.py`
+has them with the original's values, and `tools/force_active.py` writes them at the end of the script, with
+`AutoloadCallback`, which `dsd rom config` looks up, as an alias of crt0's `_start_AutoloadDoneCallback`.
+`tools/check_relocs.py` takes a reference to such a symbol for the original's reference to the symbol at its address.
+`dsd json delinks` and `dsd objdiff` do not migrate and so
 still list the ITCM's old gap; `tools/migrated_gaps.py` finds it, and `configure.py` and `tools/objdiff_config.py`
 leave it out.
 
