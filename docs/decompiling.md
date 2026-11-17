@@ -1106,6 +1106,35 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
 
+**Found on overlay 75's character, meters and pages (ov075-c, round 5)**
+- A clamp whose instructions are right but whose registers are rotated is the SDK's `MATH_CLAMP` (a nested
+  conditional expression whose result is a fresh temporary, so the loop's hoisted constants become its operands),
+  where an if/else on the variable itself colours them otherwise (`Scene40SegmentMeter::Show`, found by the advisor).
+  Try `MATH_CLAMP`/`MATH_MIN`/`MATH_MAX` before permuting declarations.
+- A third test of an if/else-if chain on the same two values: `else if (mTarget < mValue)` keeps a compare of its
+  own, `else if (mValue > mTarget)` reuses the flags of the test before (`popge` after `bge`) (`Scene40Meter::Update`).
+  With one operand read through a pointer (`*mCounter`) the flags are reused either way.
+- A member array read through a local pointer to it (`MtxFx43 *matrices = mJointMatrices; matrices[3]._30`) keeps
+  the array's address apart from the element's offset (`add 0x860; add 0x2000; ldr [#0xbc]`), where indexing the
+  member folds both into one offset (`Scene40Character::PlaceHeadIconAt*`). An inline accessor returning
+  `&mJointMatrices[joint]` folds as well.
+- One counter declared at the top and used by two loops keeps, in the second loop (which calls nothing), the
+  callee-saved register the first loop needed; a fresh `int i` per loop gives the second a scratch register
+  (`Scene40ClothesList::LoadOwnedBy`).
+- A value added from one of two constants chosen in an if/else (`lineHeight = 28; ... else lineHeight = 14;
+  height += lineHeight;`) hoists both constants into registers and moves one into a temporary, as the original;
+  `height += 28` in each branch does not (`Scene40ProfilePage::FindRelations`).
+- A by-value `VecFx32` setter that copies its parameter into a local before storing the fields gives three stack
+  copies (the call's result, the parameter, the local), as `Scene40Character::ShowBed` has them.
+- mwcc calls a direct member object's virtual function through its table (`ldr r3, [r0]; ldr r3, [r3, #4]; blx`):
+  it does not devirtualise, so a member whose calls go through a table is still a plain member, not a pointer.
+- A `while (x < table[i] && ++i < 7) {}` or `for (;;) { if (x >= table[i]) break; if (++i >= 7) break; }` search
+  gives the original's predicated loop (`addlt; cmplt; blt`) where `while (x < table[i]) { if (++i >= 7) break; }`
+  does not (`Scene40ProfilePage::GetMeterGrade`).
+- A text button's (or a page's) text cleared and drawn through inlines taking the button keeps a pointer to the
+  button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
+  mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).
+
 ## Functions emitted in every file that uses them
 
 Measured (fix-link, test files under the game's compiler and flags, and the ROM):

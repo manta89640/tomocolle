@@ -2471,3 +2471,40 @@ in a table that the analysis took for a number): the first try lost code from th
 overlays. So the linker script names every symbol of the delinked objects in a `FORCE_ACTIVE` list, which keeps the
 original whole, and stripping only acts on compiled objects. With that, the ROM matches, and a library file linked
 from its compiled object comes out with exactly the functions the game has.
+
+## The Mii touch scene's character, profile and meters (overlay 75, 0x0215d818 to 0x02168354)
+
+Measured (from the code of overlay 75; offsets of the scene, `Scene40`, and of the page object `Scene40Pages` at
+scene+0x30B50):
+
+- **The character** (`Scene40Character`, scene+0x6A22C, 0x30F8 bytes) is a `Character` plus the scene's speech
+  (TtsPlayer, a SpeechWindow and the pages' context), a thought balloon (0x2BE4) and a cover (bed or curtain,
+  0x2CDC), the present it is given (`Scene40Gift`, 0x2DC4), two head icons (0x2DFC) each placed at the head (with
+  the head's yaw), the body joint, the feet or the right hand (0x2E7C), and a state machine: `UpdateState`
+  (0x02161D94) copies the requested state (0x2E8C) to the current one (0x2E84), runs the function of its range
+  (13 functions, 0x00..0x19 to 0xC6..0xD1, at 0x02161E88 .. 0x021733A4) and counts the frames in the state (0x2E98).
+  `SetState` (0x02173E8C) only requests a state and sets the "entered" flag (0x2E94) that the state's first frame
+  clears. The state functions start animations by name (`ResourceSet_FindIndexByName` on the body model's
+  resource set): "hold00", "land00", "press00", "happy00", "sit00", "sleep01", "sleep02", "spraw00", "i_sit00",
+  "i_wait00", "i_walk00", "i_eat00", "i_eat01", "greet01", "c_react00..03", "call00", "sign00", "wait02"; the
+  standing and walking ones come from two tables of names by personality kind and mood (0x02182D10, 0x02182D60).
+- **The profile page** (pages+0x2A49C, 0xE214 bytes, 0x0215F180 .. 0x0216146C) shows the visited character's
+  satisfaction (SatisfyLevel, SatisfyMeter) or trouble meter (100 - progress / 2), its fullness meter
+  (`GetFullness` at the scene clock's seconds), its favourite foods (`GetUnknown292(0..2)`), favourite and disliked
+  goods once the record's bit for them (0x1C8) is set, its lover or spouse and best friend, eight marks for goods
+  it has had (0x0217BA2C) and a mark when its profile is complete. L and R switch to the relation pages: the
+  characters it has a relation rank with, sorted by rank (0x0217BB08 gives each rank's place) and meter, grouped by
+  rank with a title each (0x0217BA70) and a line each (0x0217C618: by group and by the meter's grade of 0x0217B8F4),
+  cut into pages of 180 pixels.
+- **The meters** (tables 0x02182C88, 0x02182CA0, 0x02182CB8) move a value of 0 to 100 to a target by a step a
+  frame, with sounds 0/1 of archive 27 while they move and 2/3 when they arrive: ten sprites side by side, the same
+  with a level ("Ｌｖ" and a number) whose full meter rolls over into the next level, or one sprite of 33 frames.
+- **The counter** (pages+0x386B0) shows the scene's copy of the game's capped counter (0..9,999,999) with commas,
+  counting there 50 a frame (sounds 4/5, then 6/7, of archive 27).
+- **The talk page's answers** (talk page+0x1C): up to four text buttons, from the answer sets at 0x0217CBB8
+  ({count, four messages}), by the kind of the character's trouble (0x0217C010 by `data_02114d78[category][id]`'s
+  kind, set 10's answers by trouble id at 0x0217BE70) or another table (0x0217C0C4).
+
+Inferred: the profile page is what the player sees of the visited Mii on the upper screen (its title is message 17
+of the scene's own message file with the Mii's name); the counter is the player's money (only that the scene
+keeps a copy of GameData's capped counter and clamps it as `SetCappedCounter` does is measured).
