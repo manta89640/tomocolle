@@ -9,6 +9,8 @@
 #include "item/Item.h"
 #include "voice/TtsPlayer.h"
 
+#include "Scene40Balloon.h"
+#include "Scene40Cover.h"
 #include "Scene40ItemModel.h"
 #include "Scene40Physics.h"
 
@@ -39,25 +41,6 @@ public:
     /* 0x34 */ int mMessage;  // The message of kinds 1 to 4 (0xF7, 0xF9, 0xF4, 0xF5)
 }; // 0x38
 
-// Two objects of the scene's character, each with a model that its Draw draws (0x02178700, 0x02178cf0). What they
-// show is not known: the names say only where they are.
-class Scene40CharacterPartA {
-public:
-    void Draw();
-
-    /* 0x00 */ u8 mUnknown00[0x10];
-    /* 0x10 */ AnimModel mModel;
-    /* 0xF0 */ u8 mUnknownF0[0x8];
-}; // 0xF8
-
-class Scene40CharacterPartB {
-public:
-    void Draw();
-
-    /* 0x00 */ u8 mUnknown00[0x4];
-    /* 0x04 */ AnimModel mModel;
-}; // 0xE4
-
 // The Mii the player visits: a Character with the scene's speech and messages, two head icons, a balloon over its
 // head and a cover (bed or curtain), and a present it may be given. Its behaviour is a state machine of 210 states
 // (mState): UpdateState runs the group function of the state's range, each a switch over its states, as overlay 74's
@@ -85,7 +68,7 @@ public:
     void ShowBed(VecFx32 position, u16 angle, GXRgb color);
     void SetContext(Scene40Context *context);
     void Update(BOOL speaking);
-    void Draw(); // The character, then the two objects with a model each at 0x2BE4 and 0x2CDC
+    void Draw(); // The character, then its balloon and its cover
     void UpdateState();
 
     // The states, a switch over a range of states each
@@ -136,9 +119,8 @@ public:
     /* 0x2BD8 */ TtsPlayer *mTtsPlayer; // The scene's, for the lip movement
     /* 0x2BDC */ Scene40SpeechWindow *mSpeechWindow;
     /* 0x2BE0 */ Scene40Context *mContext;
-    /* 0x2BE4 */ Scene40CharacterPartA mPartA;
-    /* 0x2CDC */ Scene40CharacterPartB mPartB;
-    /* 0x2DC0 */ u8 mUnknown2DC0[0x4];
+    /* 0x2BE4 */ Scene40Balloon mBalloon;
+    /* 0x2CDC */ Scene40Cover mCover; // 0xE8: its last word is 0x2DC0
     /* 0x2DC4 */ Scene40Gift mGift;
     /* 0x2DFC */ HeadIcon mHeadIcons[2];
     /* 0x2E7C */ int mHeadIconPlaces[2];

@@ -21,6 +21,7 @@ void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void MiiData_GetCreatorName(CharacterRecord *character, wchar_t *name);
 int MiiData_GetSex(SavedCharacter *character);
 BOOL func_02031ccc(SpriteButton *button);
+BOOL GameData_IsCharacterSlotUsed(GameData *game, int index);
 struct ScreenLoader;
 extern ScreenLoader gScreenLoader;
 void *ScreenLoader_LoadFile(ScreenLoader *loader, const char *name, int plane, int a, int b, int c, int d, int e); // Whether the button's press has played out
@@ -28,12 +29,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 
 // Not decompiled yet
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
-void func_ov075_021782cc(Scene40CharacterPartA *balloon, int resourceId, int unk, CharacterBase *face,
-                         Scene40Character *character);
-void func_ov075_02178c34(Scene40CharacterPartB *cover, int kind);
-void func_ov075_02178e94(Scene40CharacterPartB *cover, VecFx32 position, u16 angle);
-void func_ov075_02178f38(Scene40CharacterPartB *cover, GXRgb color);
-void func_ov075_02178364(Scene40CharacterPartA *part);
 }
 
 // The head icon of each mood
@@ -791,7 +786,8 @@ extern const int sHadItemMarkItems[8];
 extern const u32 sRelationMessages[][7];        // By relation group; [6] is the one while in a trouble of kind
                                                 // 9 or 10 (0x0217c618; dsd's symbol at 0x0217c630 is [0][6])
 extern const int sRelationRankKeys[];           // By RelationRank (0x0217bb08)
-extern const int sMeterGrades[];                // Falling thresholds of the relation meter (0x0217b8f4)
+extern const int sMeterGrades[];
+extern const u32 sGroupTitleMessages[];          // By relation group (0x0217ba70)                // Falling thresholds of the relation meter (0x0217b8f4)
 
 void Scene40ProfilePage::Update() {
     mSatisfactionMeter.Update();
@@ -849,11 +845,11 @@ void Scene40ProfilePage::Draw() {
     Sprite_Draw(&mSprite00CC);
     Sprite_Draw(&mCompleteMark);
     for (int i = 0; i < 11; i++) {
-        mTextBoxes760C[i].Draw();
-        mTexts8F10[i].Draw();
+        mRelationNames[i].Draw();
+        mRelationTexts[i].Draw();
     }
     for (int i = 0; i < 5; i++) {
-        mTexts409C[i].Draw();
+        mGroupTitles[i].Draw();
     }
     mText8920.Draw();
     mTextD060.Draw();
@@ -1107,17 +1103,17 @@ void Scene40ProfilePage::ShowProfileScreen() {
     mBestFriendName.mSprite.mVisible = TRUE;
     ShowHadItemMarks();
     for (int i = 0; i < 5; i++) {
-        mTexts409C[i].mSprite.mVisible = FALSE;
+        mGroupTitles[i].mSprite.mVisible = FALSE;
     }
     for (int i = 0; i < 11; i++) {
-        mTextBoxes760C[i].mSprite.mVisible = FALSE;
-        mTexts8F10[i].mSprite.mVisible = FALSE;
+        mRelationNames[i].mSprite.mVisible = FALSE;
+        mRelationTexts[i].mSprite.mVisible = FALSE;
     }
     mText8920.mSprite.mVisible = FALSE;
     mTextD060.mSprite.mVisible = FALSE;
     ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_up.nsc", 0x100, 0, 0, 0, 0, -1);
-    mUnknownE148 = 0;
-    mUnknownE14C = 0;
+    mFirstGroup = 0;
+    mPage = 0;
 }
 
 // The relations (or, without any, a message): the profile's parts hidden
@@ -1151,11 +1147,11 @@ void Scene40ProfilePage::ShowRelationsScreen() {
         mHadItemMarks[i].mVisible = FALSE;
     }
     for (int i = 0; i < 5; i++) {
-        mTexts409C[i].mSprite.mVisible = FALSE;
+        mGroupTitles[i].mSprite.mVisible = FALSE;
     }
     for (int i = 0; i < 11; i++) {
-        mTextBoxes760C[i].mSprite.mVisible = FALSE;
-        mTexts8F10[i].mSprite.mVisible = FALSE;
+        mRelationNames[i].mSprite.mVisible = FALSE;
+        mRelationTexts[i].mSprite.mVisible = FALSE;
     }
     mText8920.mSprite.mVisible = FALSE;
     ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_relation.nsc", 0x100, 0, 0, 0, 0, -1);
@@ -1164,6 +1160,77 @@ void Scene40ProfilePage::ShowRelationsScreen() {
 void Scene40ProfilePage::UpdateRedraw() {
     mScreen = SCREEN_PROFILE;
     RedrawTexts();
+}
+
+#define sFirstGroupTitlePosition SCENE40_POOL(ScreenPoint, 0x13C) // TEMP pool
+
+// Draws the relations' page mScreenIndex - 1: a title for each group, its relations' names and what they are
+void Scene40ProfilePage::UpdateRelations() {
+    mScreen = SCREEN_PROFILE;
+    int titles = 0;
+    mFirstGroup = mGroups[mPage];
+    mText8920.mSprite.mVisible = TRUE;
+    SetCanvasPosition(&mGroupTitles[titles], sFirstGroupTitlePosition);
+    mGroupTitles[titles].mSprite.mVisible = TRUE;
+    mGroupTitles[titles].mMessage = sGroupTitleMessages[mFirstGroup];
+    mGroupTitles[titles].mColor = 8;
+    ClearMessageText(&mGroupTitles[titles]);
+    mGroupTitles[titles].DrawAll();
+    titles++;
+    BOOL groupEnded = FALSE;
+    int lines = 0;
+    int y = 36;
+    while (y < 180 && mPageStarts[mScreenIndex - 1] + lines < mRelationCount) {
+        if (groupEnded) {
+            if (mGroups[mPage] <= mLastGroup) {
+                mFirstGroup = mGroups[mPage];
+                mGroupTitles[titles].mSprite.SetPosition(FxVec2(20 << FX32_SHIFT, (y - 14) << FX32_SHIFT));
+                mGroupTitles[titles].mSprite.mVisible = TRUE;
+                mGroupTitles[titles].mMessage = sGroupTitleMessages[mFirstGroup];
+                mGroupTitles[titles].mColor = 8;
+                ClearMessageText(&mGroupTitles[titles]);
+                mGroupTitles[titles].DrawAll();
+                titles++;
+            }
+            groupEnded = FALSE;
+        }
+        mRelationNames[lines].mSprite.SetPosition(FxVec2(28 << FX32_SHIFT, y << FX32_SHIFT));
+        mRelationTexts[lines].mSprite.SetPosition(FxVec2(138 << FX32_SHIFT, y << FX32_SHIFT));
+        int lineHeight;
+        lines++;
+        if (mPageStarts[mScreenIndex - 1] + lines == mGroupStarts[mFirstGroup] + mGroupCounts[mFirstGroup]) {
+            mPage++;
+            groupEnded = TRUE;
+            lineHeight = 28;
+        } else {
+            lineHeight = 14;
+        }
+        y += lineHeight;
+    }
+    for (; titles < 5; titles++) {
+        mGroupTitles[titles].mSprite.mVisible = FALSE;
+    }
+    int i = 0;
+    for (int relation = mPageStarts[mScreenIndex - 1]; i < 11 && i < lines && relation < mRelationCount; relation++) {
+        mRelationNames[i].SetText((const char *)mRelations[relation].mName);
+        int group = GetSortKeyGroup(mRelations[relation].mSortKey);
+        mRelationTexts[i].mMessage =
+            GetRelationMessage(group, GetMeterGrade(GetSortKeyMeter(mRelations[relation].mSortKey)));
+        mRelationTexts[i].mColor = 8;
+        mRelationNames[i].Redraw();
+        mRelationNames[i].mSprite.mVisible = TRUE;
+        ClearMessageText(&mRelationTexts[i]);
+        mRelationTexts[i].DrawAll();
+        mRelationTexts[i].mSprite.mVisible = TRUE;
+        i++;
+    }
+    if (i >= 11) {
+        return;
+    }
+    for (; i < 11; i++) {
+        mRelationNames[i].mSprite.mVisible = FALSE;
+        mRelationTexts[i].mSprite.mVisible = FALSE;
+    }
 }
 
 void Scene40ProfilePage::UpdateNoRelations() {
@@ -1188,6 +1255,86 @@ void Scene40ProfilePage::SwitchScreen() {
     } else {
         ShowRelationsScreen();
     }
+}
+
+static s32 CompareRelations(void *a, void *b);
+
+// Lists the characters the visited one has a relation with, sorted, grouped by rank and cut into pages
+void Scene40ProfilePage::FindRelations() {
+    mRelationCount = 0;
+    mRelationsChanged = FALSE;
+    for (int i = 0; i < 100; i++) {
+        if (!GameData_IsCharacterSlotUsed(&gGameData, i)) {
+            continue;
+        }
+        if (i == mCharacter->mIndex || mCharacter->mRelationRank[i] == RELATION_NONE) {
+            continue;
+        }
+        MIi_CpuClear16(0, mRelations[mRelationCount].mName, sizeof(mRelations[0].mName));
+        SavedCharacter other;
+        GameData_ReadCharacter(&gGameData, i, &other);
+        MiiData_GetName(&other, mRelations[mRelationCount].mName);
+        mRelations[mRelationCount].mSortKey =
+            GetRelationSortKey(mCharacter->mRelationRank[i], mCharacter->mRelationMeter[i]);
+        mRelations[mRelationCount].mIndex = i;
+        mRelationCount++;
+    }
+    u32 buffer[200];
+    MATH_QSort(mRelations, mRelationCount, sizeof(Scene40Relation), CompareRelations, buffer);
+    for (int i = 0; i < 9; i++) {
+        mGroups[i] = 0;
+        mGroupCounts[i] = 0;
+        mGroupStarts[i] = 0;
+    }
+    int group = -1;
+    int n = -1;
+    for (int i = 0; i < mRelationCount; i++) {
+        int g = GetSortKeyGroup(mRelations[i].mSortKey);
+        if (group < g) {
+            n++;
+            while (group < g) {
+                group++;
+            }
+            mGroups[n] = group;
+            mGroupStarts[group] = i;
+        }
+        mGroupCounts[mGroups[n]]++;
+    }
+    mLastGroup = group;
+    if (mRelationCount > 0) {
+        mHasRelations = TRUE;
+        mScreenCount = 1;
+        int k = 0;
+        int current = mGroups[0];
+        mFirstGroup = current;
+        int page = 0;
+        for (int start = 0; start < mRelationCount;) {
+            mPageStarts[page] = start;
+            int lines = 0;
+            int height = 36;
+            do {
+                int lineHeight;
+                lines++;
+                if (start + lines == mGroupStarts[current] + mGroupCounts[current]) {
+                    k++;
+                    if (mGroups[k] <= mLastGroup) {
+                        current = mGroups[k];
+                    }
+                    lineHeight = 28;
+                } else {
+                    lineHeight = 14;
+                }
+                height += lineHeight;
+            } while (height < 180);
+            mScreenCount++;
+            start += lines;
+            page++;
+        }
+    } else {
+        mHasRelations = FALSE;
+        mScreenCount = 2;
+    }
+    mPage = 0;
 }
 
 // NOT MATCHING: the trouble table's address, category and id take r1, r2, r3 in the original, r2, r3, r1 here;
@@ -1437,23 +1584,23 @@ void Scene40Character::ShowMoodHeadIcon() {
 }
 
 void Scene40Character::InitBalloon(int resourceId, int unk, CharacterBase *face) {
-    func_ov075_021782cc(&mPartA, resourceId, unk, face, this);
+    mBalloon.Init(resourceId, unk, face, this);
 }
 
 // 0: the bed, 1: the dressing curtain
 void Scene40Character::InitCover(int kind) {
-    func_ov075_02178c34(&mPartB, kind);
+    mCover.Init(kind);
 }
 
 // Puts the bed where the character lies down, at the character's scale
 void Scene40Character::ShowBed(VecFx32 position, u16 angle, GXRgb color) {
-    if (*(int *)mPartB.mUnknown00 != 0) {
+    if (mCover.mKind != Scene40Cover::KIND_BED) {
         return;
     }
-    func_ov075_02178e94(&mPartB, position, angle);
-    func_ov075_02178f38(&mPartB, color);
-    mPartB.mModel.mVisible = TRUE;
-    SetModelScale(&mPartB.mModel, GetHeldItemScale());
+    mCover.SetPosition(position, angle);
+    mCover.SetDiffuse(color);
+    mCover.mModel.mVisible = TRUE;
+    SetModelScale(&mCover.mModel, GetHeldItemScale());
 }
 
 void Scene40Character::SetContext(Scene40Context *context) {
@@ -1468,7 +1615,7 @@ void Scene40Character::Update(BOOL speaking) {
     PlaceHeadIcons();
     mHeadIcons[0].Update();
     mHeadIcons[1].Update();
-    func_ov075_02178364(&mPartA);
+    mBalloon.Update();
     if (!speaking) {
         return;
     }
@@ -1487,8 +1634,8 @@ void Scene40Character::Update(BOOL speaking) {
 // and the report seems to pair one call with the other's.
 void Scene40Character::Draw() {
     Character::Draw();
-    mPartA.Draw();
-    mPartB.Draw();
+    mBalloon.Draw();
+    mCover.Draw();
 }
 
 // Runs the group function of the state's range
@@ -1522,14 +1669,6 @@ void Scene40Character::UpdateState() {
         UpdateStatesC6ToD1();
     }
     mFrame++;
-}
-
-void Scene40CharacterPartA::Draw() {
-    mModel.Draw();
-}
-
-void Scene40CharacterPartB::Draw() {
-    mModel.Draw();
 }
 
 // --- The scene's clock, at 0x30A8C --------------------------------------------------------------------------------
