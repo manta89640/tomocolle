@@ -40,6 +40,11 @@ public:
     /* 0xC9 */ u8 mMusicVolume;  // 0 to 3, for sequences and streams (default 3)
     /* 0xCA */ u8 mEffectVolume; // 0 to 3, for sequence archive entries (default 3)
     /* 0xCB */ u8 mVoiceVolume;  // 0 to 3, for the speech synthesizer (default 3)
+    /* 0xCC */ u32 mUnknownCC;   // Flags that overlay 75 sets, clears and tests a bit at a time
+    /* 0xD0 */ u8 mUnknownD0[0x40];
+    // A bit for each of the things a visited character can propose to do (overlay 75's sActivities) that one
+    // has proposed
+    /* 0x110 */ u32 mActivitiesProposed;
 };
 
 extern GameData gGameData;
