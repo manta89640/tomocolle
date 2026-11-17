@@ -268,9 +268,13 @@ The order that the code itself suggests:
   `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
-  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). A constructor's string
-  literals come twice, once for each constructor the compiler emits (`C2`, then `C1`); the ROM keeps only `C1`'s,
-  the second set, which the tool does not know: name those by hand (`Keyboard.cpp`).
+  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). It lays out only the
+  sections the link keeps: those reachable through the object's relocations from a function `symbols.txt` has, or
+  from the static initialiser. So a constructor's string literals, which come twice, once for each constructor the
+  compiler emits (`C2`, then `C1`), are laid out once, as the ROM has them (`Keyboard.cpp`), and so are the objects
+  of a function the link strips. A header change renumbers the names of every complete unit that includes the
+  header: `python3 tools/stale_names.py --apply` (after `ninja`) renames them in `symbols.txt`; neither the ROM
+  nor `dsd check symbols` notices stale ones, `tools/check_relocs.py` does.
 - **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
   array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
   with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
@@ -407,9 +411,9 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   are declared) and scoring against the ROM's string order found `TextUtil.cpp`'s three kana arrays, all 255 strings
   in place, in one pass of a few hundred candidates; the model then held under the build. An uncalled function
   that reads the arrays keeps them in the object (`KanaTables_Unused`), and the link drops it.
-- `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
-  rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
-  replace the range's lines in place.
+- `tools/name_unit_data.py` leaves out the sections the link will drop (with `--all` it lays them out too, after the
+  range). `--apply` rewrites `symbols.txt` in another order; to keep the order, take its printed names for the range
+  and replace the range's lines in place.
 - Anonymous strings of an initialiser (a table of pointers to literals) cannot be permuted, since the table's order
   is fixed: make them named arrays (`static wchar_t sNgWord05[] = L"...";`, non-`const` to stay in `.data`), declared
   where the literals were, and the same-size permutation applies to them. Overlay 109's 44 strings went into the
@@ -1161,7 +1165,8 @@ object refers to with the original's. What it reports is one of:
   is the complete (`C1`) or the base (`C2`) one.
 - **A real mistake**: the wrong function or object.
 
-The `@number` names of the speech engine's literals differ by design and can be ignored.
+The speech engine's literals, which `relocs.txt` referred to as offsets from one symbol at the start of each file's
+data, have their own symbols now, by the compiled names, so its references compare like the rest.
 
 The opposite error exists too: a function that equals the original scored below 100%. Measured (objdiff 3.8.3's
 source, and a pair of objects of three instructions): when objdiff compares two instructions whose bytes differ (a
