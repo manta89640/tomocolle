@@ -18,14 +18,24 @@ public:
         PART_NONE = 1 << 3, // None of them
     };
 
+    // Where the stylus is in the room, at three depths: on the plane through the character, then between the
+    // camera's eye and target at 4:3 and at 1:2 of the way from the target
+    struct Depth {
+        /* 0x00 */ VecFx32 mOrigin;  // The plane's point (the character's position, for the first)
+        /* 0x0C */ VecFx32 mPress;   // Where the stylus came down
+        /* 0x18 */ VecFx32 mHold;    // Where it is
+        /* 0x24 */ VecFx32 mRelease; // Where it went up
+        /* 0x30 */ VecFx32 mFlick;   // Which way it was flicked, and how fast
+    }; // 0x3C
+
     void Init(Scene40Touch *tracker, Scene40Character *character);
     void Update();
     void Clear();
-    int HitTest(const ScreenPoint *point);
+    int HitTest(const Scene40TouchPoint *point);
 
     /* 0x00 */ Scene40Touch *mTracker; // The scene's (scene+0x69D2C)
     /* 0x04 */ Scene40Character *mCharacter;
-    /* 0x08 */ u8 mUnknown08[0xB4];
+    /* 0x08 */ Depth mDepths[3];
     /* 0xBC */ int mPartAtPress;  // What the stylus came down on
     /* 0xC0 */ int mPart;         // What it is on
     /* 0xC4 */ int mPartsTouched; // All it has been on since it came down

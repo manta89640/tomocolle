@@ -51,6 +51,8 @@ struct ArchiveName {
 static void SetGameFlags(u32 flags, BOOL set);
 static u32 GetGameFlags(u32 flags);
 static void AddTroublesSolved(int count);
+static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint);
+static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
 
 
 // The scenes after which the visit starts with the pages' entry 23 (CameFromSceneOfTables)
@@ -952,8 +954,116 @@ void Scene40CharacterTouch::Init(Scene40Touch *tracker, Scene40Character *charac
     mCharacter = character;
 }
 
+static inline Scene40TouchPoint Add(Scene40TouchPoint a, Scene40TouchPoint b) {
+    Scene40TouchPoint sum;
+    sum.x = a.x + b.x;
+    sum.y = a.y + b.y;
+    return sum;
+}
+
+static inline Scene40TouchPoint Sub(Scene40TouchPoint a, Scene40TouchPoint b) {
+    Scene40TouchPoint difference;
+    difference.x = a.x - b.x;
+    difference.y = a.y - b.y;
+    return difference;
+}
+
+static inline u32 LengthSq(Scene40TouchPoint a) {
+    return a.x * a.x + a.y * a.y;
+}
+
+static inline Scene40TouchPoint ToFx(Scene40TouchPoint a) {
+    Scene40TouchPoint fx;
+    fx.x = a.x << FX32_SHIFT;
+    fx.y = a.y << FX32_SHIFT;
+    return fx;
+}
+
+// Where the stylus is in the room, and which way it strokes and is flicked
+void Scene40CharacterTouch::Update() {
+    if (mTracker->mPressed) {
+        Clear();
+        mStroke = 0;
+        VecFx32 origin = mCharacter->CharacterModel::mPos;
+        mDepths[0].mOrigin.x = origin.x;
+        mDepths[0].mOrigin.y = origin.y;
+        mDepths[0].mOrigin.z = origin.z;
+        Scene40TouchPoint point = mTracker->mPressPoint;
+        mPartAtPress = HitTest(&point);
+        ProjectTouch(&point, &mDepths[0].mPress, &mDepths[0].mOrigin);
+        ProjectTouchBetween(&point, &mDepths[1].mPress, FX32_CONST(3), FX32_CONST(4));
+        ProjectTouchBetween(&point, &mDepths[2].mPress, FX32_CONST(2), FX32_CONST(1));
+    } else if (mTracker->mHeld) {
+        Scene40TouchPoint point = mTracker->mPoint;
+        if (LengthSq(Sub(mTracker->mPoint, mTracker->mPressPoint)) > 20 * 20) {
+            Scene40TouchPoint move = ToFx(Sub(mTracker->mPoint, mTracker->mPressPoint));
+            u16 angle = FX_Atan2Idx(move.y, move.x);
+            if (angle >= 0xB000 && angle < 0xD000) {
+                mStroke = 1;
+            } else if (angle >= 0x3000 && angle < 0x5000) {
+                mStroke = 2;
+            } else if (angle >= 0x7000 && angle < 0x9000) {
+                mStroke = 3;
+            } else if (angle >= 0xF000 || angle < 0x1000) {
+                mStroke = 4;
+            } else if (angle >= 0x9000 && angle < 0xB000) {
+                mStroke = 5;
+            } else if (angle >= 0xD000 && angle < 0xF000) {
+                mStroke = 6;
+            } else if (angle >= 0x5000 && angle < 0x7000) {
+                mStroke = 7;
+            } else if (angle >= 0x1000 && angle < 0x3000) {
+                mStroke = 8;
+            }
+        }
+        mPart = HitTest(&point);
+        mPartsTouched |= HitTest(&point);
+        ProjectTouch(&point, &mDepths[0].mHold, &mDepths[0].mOrigin);
+        ProjectTouchBetween(&point, &mDepths[1].mHold, FX32_CONST(3), FX32_CONST(4));
+        ProjectTouchBetween(&point, &mDepths[2].mHold, FX32_CONST(2), FX32_CONST(1));
+    } else if (mTracker->mReleased) {
+        Scene40TouchPoint point = mTracker->mReleasePoint;
+        ProjectTouch(&point, &mDepths[0].mRelease, &mDepths[0].mOrigin);
+        ProjectTouchBetween(&point, &mDepths[1].mRelease, FX32_CONST(3), FX32_CONST(4));
+        ProjectTouchBetween(&point, &mDepths[2].mRelease, FX32_CONST(2), FX32_CONST(1));
+
+        // Where the flick would have taken the stylus in a frame, and so which way and how fast it went
+        Scene40TouchPoint flicked = Add(mTracker->mReleasePoint, mTracker->mVelocity);
+        VecFx32 flicked0, flicked1;
+        ProjectTouch(&flicked, &flicked0, &mDepths[0].mOrigin);
+        ProjectTouchBetween(&flicked, &flicked1, FX32_CONST(3), FX32_CONST(4));
+        VEC_Subtract(&flicked0, &mDepths[0].mRelease, &mDepths[0].mFlick);
+        VEC_Subtract(&flicked1, &mDepths[1].mRelease, &mDepths[1].mFlick);
+
+        // Thrown away from the camera as well, by how high
+        VecFx32 away0, away1;
+        VEC_Subtract(&mDepths[0].mRelease, &gCamera.mEye, &away0);
+        VEC_Subtract(&mDepths[1].mRelease, &gCamera.mEye, &away1);
+        VEC_Normalize(&away0, &away0);
+        VEC_Normalize(&away1, &away1);
+        fx32 speed0 = MATH_CLAMP(mDepths[0].mFlick.y / 2, 0, 500);
+        fx32 speed1 = MATH_CLAMP(mDepths[1].mFlick.y / 2, 1200, 1300);
+        mDepths[0].mFlick.x += FX_Mul(speed0, away0.x);
+        mDepths[0].mFlick.z += FX_Mul(speed0, away0.z);
+        mDepths[1].mFlick.x += FX_Mul(speed1, away1.x);
+        mDepths[1].mFlick.z += FX_Mul(speed1, away1.z);
+    }
+}
+
+void Scene40CharacterTouch::Clear() {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 5; j++) {
+            VecFx32 zero = {0, 0, 0};
+            (&mDepths[i].mOrigin)[j] = zero;
+        }
+    }
+    mPartAtPress = 0;
+    mPart = 0;
+    mPartsTouched = 0;
+}
+
 // What of the character is under a point of the touch screen
-int Scene40CharacterTouch::HitTest(const ScreenPoint *point) {
+int Scene40CharacterTouch::HitTest(const Scene40TouchPoint *point) {
     int parts = 0;
     ModelResources_SetTouchLine(gModelResources, point->x, point->y);
     if (mCharacter->HitTestFace()) {
@@ -969,6 +1079,76 @@ int Scene40CharacterTouch::HitTest(const ScreenPoint *point) {
         parts = PART_NONE;
     }
     return parts;
+}
+
+// --- Where the stylus is in the room ---------------------------------------------------------------------------
+
+// The point on the line into the room under a point of the touch screen that lies in the vertical plane through
+// planePoint facing the camera; without one (the line in the plane), a fixed point
+static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint) {
+    Camera *const camera = &gCamera;
+    VecFx32 line, near, far, normal, side;
+    NNS_G3dScrPosToWorldLine(point->x, point->y, &near, &far);
+    VEC_Subtract(&far, &near, &line);
+    const VecFx32 up = {0, FX32_ONE, 0};
+    VecFx32 view, toPlane;
+    VEC_Subtract(&camera->mTarget, &camera->mEye, &view);
+    VEC_CrossProduct(&up, &view, &side);
+    VEC_CrossProduct(&up, &side, &normal);
+    VEC_Subtract(planePoint, &near, &toPlane);
+    fx32 distance = VEC_DotProduct(&toPlane, &normal);
+    fx32 step = VEC_DotProduct(&line, &normal);
+    if (step != 0) {
+        fx32 t = FX_Div(distance, step);
+        out->x = FX_Mul(line.x, t) + near.x;
+        out->y = FX_Mul(line.y, t) + near.y;
+        out->z = FX_Mul(line.z, t) + near.z;
+        return;
+    }
+    const VecFx32 fallback = {0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF};
+    out->x = fallback.x;
+    out->y = fallback.y;
+    out->z = fallback.z;
+}
+
+// The same with the plane through a point between the camera's target and eye, by their weights
+static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight) {
+    Camera *const camera = &gCamera;
+    VecFx32 planePoint, target, eye;
+    ScaleVec(eyeWeight, &camera->mEye, &eye);
+    ScaleVec(targetWeight, &camera->mTarget, &target);
+    VEC_Add(&target, &eye, &planePoint);
+    int sum = (targetWeight + eyeWeight) >> FX32_SHIFT;
+    planePoint.x /= sum;
+    planePoint.y /= sum;
+    planePoint.z /= sum;
+    ProjectTouch(point, out, &planePoint);
+}
+
+// A twelfth of the distance from the camera's eye
+static fx32 GetCameraDistanceScale(const VecFx32 *pos) {
+    VecFx32 offset;
+    VEC_Subtract(pos, &gCamera.mEye, &offset);
+    return FX_Mul(VEC_Mag(&offset), FX32_CONST(1) / 12);
+}
+
+// The camera's rotation, turned about x or y by an angle's sine and cosine: what faces the camera so turned
+static void MakeFacingMatrixX(MtxFx33 *mtx, fx32 sin, fx32 cos) {
+    MtxFx43 rot;
+    const MtxFx43 *invView = NNS_G3dGlbGetInvV();
+    MI_Copy36B(invView, mtx);
+    MTX_RotX43(&rot, sin, cos);
+    MTX_Concat43(&rot, invView, &rot);
+    MI_Copy36B(&rot, mtx);
+}
+
+static void MakeFacingMatrixY(MtxFx33 *mtx, fx32 sin, fx32 cos) {
+    MtxFx43 rot;
+    const MtxFx43 *invView = NNS_G3dGlbGetInvV();
+    MI_Copy36B(invView, mtx);
+    MTX_RotY43(&rot, sin, cos);
+    MTX_Concat43(&rot, invView, &rot);
+    MI_Copy36B(&rot, mtx);
 }
 
 // --- The saved game's flags and counters that the scene changes --------------------------------------------------

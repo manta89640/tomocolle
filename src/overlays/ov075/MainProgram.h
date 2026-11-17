@@ -38,7 +38,9 @@ void MiiData_GetName(CharacterRecord *character, wchar_t *name); // Its name, as
 
 extern int gPersonalityKinds[]; // Each personality's kind, 0 to 3: the talk messages and touch animations by it
 extern SaveHeader gIslandState;
-int ModelResources_SetTouchLine(void *resources, int x, int y); // The line into the scene under a point of the touch screen // Each personality's kind, 0 to 3: the talk messages and touch animations by it
+int ModelResources_SetTouchLine(void *resources, int x, int y);
+void ScaleVec(fx32 scale, const VecFx32 *in, VecFx32 *out);
+s32 _s32_div_f(s32 a, s32 b); // The line into the scene under a point of the touch screen // Each personality's kind, 0 to 3: the talk messages and touch animations by it
 }
 
 // gSceneMemory and gSceneScratch are one block of the main program's .bss (0x0213BA74, 0x3C + 0x70 bytes), which
