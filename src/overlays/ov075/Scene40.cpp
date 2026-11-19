@@ -45,6 +45,30 @@ struct Scene40Scratch {
 
 extern Scene40Scratch gSceneScratch;
 
+// The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
+// saved characters each needs
+struct Scene40Activity {
+    /* 0x0 */ int mScene;
+    /* 0x4 */ u8 mMinCharacters;
+    /* 0x5 */ u8 mUnknown5;
+    /* 0x6 */ u8 mUnknown6;
+    /* 0x7 */ u8 mUnknown7;
+    /* 0x8 */ u8 mUnknown8;
+    /* 0x9 */ u8 mEnabled;
+};
+
+// 0xC
+
+static const Scene40Activity sActivities[20] = {
+    {24, 2, 0, 9, 0, 0, 1},    {28, 2, 0, 166, 0, 0, 1},  {43, 2, 1, 14, 1, 0, 1},   {50, 4, 0, 218, 0, 0, 1},
+    {54, 1, 1, 24, 1, 0, 1},   {55, 3, 0, 169, 0, 0, 1},  {58, 1, 0, 35, 0, 0, 1},   {61, 2, 1, 104, 0, 0, 1},
+    {76, 2, 0, 167, 0, 0, 1},  {77, 2, 0, 151, 0, 0, 1},  {80, 1, 0, 0, 0, 1, 1},    {82, 1, 0, 164, 0, 0, 1},
+    {118, 1, 0, 125, 0, 0, 1}, {123, 3, 0, 220, 0, 0, 1}, {136, 1, 0, 219, 0, 0, 1}, {139, 1, 0, 189, 0, 0, 1},
+    {141, 1, 0, 153, 0, 0, 1}, {143, 5, 1, 0, 0, 1, 1},   {144, 5, 1, 0, 0, 1, 1},   {145, 2, 0, 0, 0, 1, 1},
+};
+
+void MarkActivityProposed(int activity);
+
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
 
@@ -62,9 +86,9 @@ static u32 GetGameFlags(u32 flags);
 
 static void AddTroublesSolved(int count);
 
-static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint);
+static void ProjectTouch(const ScreenPoint *point, VecFx32 *out, const VecFx32 *planePoint);
 
-static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
+static void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
 
 // The scenes after which the visit starts with the pages' entry 23 (CameFromSceneOfTables)
 static const int sReturnScenesA[3] = {89, 59, 124};
@@ -78,26 +102,26 @@ static const int sFadePlanes[4][4] = {{0, 16191, 16191, 16191}, {16191, 0, 16128
 
 // The scenes after which the visit starts with the pages' entry 24, and what the touch page does for each
 static const Scene40PresentEntry sPresentScenes[20] = {
-    {24, 2, 0, 9, 0, 0, 1, {0, 0}},
-    {28, 2, 0, 166, 0, 0, 1, {0, 0}},
-    {43, 2, 1, 14, 1, 0, 1, {0, 0}},
-    {50, 4, 0, 218, 0, 0, 1, {0, 0}},
-    {54, 1, 1, 24, 1, 0, 1, {0, 0}},
-    {55, 3, 0, 169, 0, 0, 1, {0, 0}},
-    {58, 1, 0, 35, 0, 0, 1, {0, 0}},
-    {61, 2, 1, 104, 0, 0, 1, {0, 0}},
-    {76, 2, 0, 167, 0, 0, 1, {0, 0}},
-    {77, 2, 0, 151, 0, 0, 1, {0, 0}},
-    {80, 1, 0, 0, 0, 1, 1, {0, 0}},
-    {82, 1, 0, 164, 0, 0, 1, {0, 0}},
-    {118, 1, 0, 125, 0, 0, 1, {0, 0}},
-    {123, 3, 0, 220, 0, 0, 1, {0, 0}},
-    {136, 1, 0, 219, 0, 0, 1, {0, 0}},
-    {139, 1, 0, 189, 0, 0, 1, {0, 0}},
-    {141, 1, 0, 153, 0, 0, 1, {0, 0}},
-    {143, 5, 1, 0, 0, 1, 1, {0, 0}},
-    {144, 5, 1, 0, 0, 1, 1, {0, 0}},
-    {145, 2, 0, 0, 0, 1, 1, {0, 0}},
+    {24, 2, 0, 9, 0, 1, {0, 0}},
+    {28, 2, 0, 166, 0, 1, {0, 0}},
+    {43, 2, 1, 270, 0, 1, {0, 0}},
+    {50, 4, 0, 218, 0, 1, {0, 0}},
+    {54, 1, 1, 280, 0, 1, {0, 0}},
+    {55, 3, 0, 169, 0, 1, {0, 0}},
+    {58, 1, 0, 35, 0, 1, {0, 0}},
+    {61, 2, 1, 104, 0, 1, {0, 0}},
+    {76, 2, 0, 167, 0, 1, {0, 0}},
+    {77, 2, 0, 151, 0, 1, {0, 0}},
+    {80, 1, 0, 0, 1, 1, {0, 0}},
+    {82, 1, 0, 164, 0, 1, {0, 0}},
+    {118, 1, 0, 125, 0, 1, {0, 0}},
+    {123, 3, 0, 220, 0, 1, {0, 0}},
+    {136, 1, 0, 219, 0, 1, {0, 0}},
+    {139, 1, 0, 189, 0, 1, {0, 0}},
+    {141, 1, 0, 153, 0, 1, {0, 0}},
+    {143, 5, 1, 0, 1, 1, {0, 0}},
+    {144, 5, 1, 0, 1, 1, {0, 0}},
+    {145, 2, 0, 0, 1, 1, {0, 0}},
 };
 
 // The scene's two message windows' rectangles
@@ -145,6 +169,48 @@ static const Scene40MessageSequence::Entry sMessageEntries[21] = {
     {19, 0, 181, 30, 0, 0, 21},
     {20, 0, 182, 30, 0, 0, 21},
 };
+
+// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
+// has it
+struct TroubleInfo {
+    u32 kind : 8;
+    u32 minutes : 16;         // How long it lasts at most
+    u32 weight : 8;           // Its weight in the random choice (ChooseTrouble)
+    u32 unk4Bits0 : 8;
+    u32 mood : 8;             // The mood it puts the character in (SetTroubleMood), 0 to 4
+    u32 cooldownMinutes : 12; // Added to mTroubleEnd once it is over
+    u32 hasTarget : 4;        // Not 0: about a character or an item, which StartTrouble chooses (mTroubleTarget)
+    u32 flags;                // Food troubles: the kinds of food; clothes troubles: the kinds of clothes
+}; // 0xC
+extern "C" const TroubleInfo *const data_02114d78[];
+
+// The trouble the character has
+static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
+    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
+}
+
+static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
+    if (character->IsInTrouble() && GetTrouble(character)->kind == kind) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// Sets a vector field by field, from a copy
+static inline void SetVecFields(VecFx32 *dst, VecFx32 src) {
+    dst->x = src.x;
+    dst->y = src.y;
+    dst->z = src.z;
+}
+
+static inline const ItemInfo *GetGoodsInfo(u16 id) {
+    return &gGoodsTable[id];
+}
+
+static inline const ClothesInfo *GetClothesInfo(u16 id) {
+    return &gClothesTable[id];
+}
+
 
 // --- The scene -----------------------------------------------------------------------------------------------------
 
@@ -231,7 +297,7 @@ void Scene40::StartLoading() {
 
     BOOL keepMusic = FALSE;
     if (gSceneManager.mPreviousSceneId == 0x38) {
-        if (GetSceneScratchByte0() == 0) {
+        if (GetSceneMemory().mNextMode == 0) {
             keepMusic = TRUE;
         }
     } else if (CameFromSceneOfTable(gSceneManager.mPreviousSceneId)) {
@@ -492,6 +558,109 @@ int Scene40::GetLayout(int request) {
     return layout;
 }
 
+// Loads the upper screen's backgrounds and sprites of a layout (request 1 to 4: LAYOUT_SMT_UP to LAYOUT_SMT_DOWN)
+// over the state InitLowerScreen saved, and returns the layout
+int Scene40::LoadLayout(int request) {
+    int layout = LAYOUT_SMT_UP;
+    switch (request) {
+    case 0:
+        break;
+    case 1:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_up.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1111);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
+        gScreenControl.mUnknown44 = 0;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_SMT_UP;
+        break;
+    case 2:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+        switch (mPages.mListFrame) {
+        case 0:
+            ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_Touch_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 1:
+            ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_Touchtxt_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        }
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        gScreenControl.Set(0x1311);
+        PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "LTL:/Obj_Touch_list.nce", 0x1000, 2);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_LIST;
+        break;
+    case 3:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x2F00, 0, 0, 0, -1);
+        switch (mPages.mKeyboardLayout) {
+        case 0:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 1:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_16.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 2:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_6.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 3:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_8.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 4:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_Q.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        }
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 2);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x200, 3);
+        G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000,
+                          GX_BG_CHARBASE_0x08000, GX_BG_EXTPLTT_01);
+        gScreenControl.Set(0x1311);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_KEYBOARD;
+        break;
+    case 4:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1111);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_present.ncl", 0x1000, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_present.ncg", 0x1000, 0, 0, 0, -1);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_present.nce", 0x1000, 4);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_SMT_DOWN;
+        break;
+    }
+    return layout;
+}
+
 // For the first nine frames the room and the character are updated from here as well
 void Scene40::Draw() {
     MessageWindow_Draw(&mWindows[0]);
@@ -706,7 +875,7 @@ void Scene40::Start() {
             break;
         }
     } else if (gSceneManager.mPreviousSceneId == 0x40) {
-        switch (GetSceneScratchByte0()) {
+        switch (GetSceneMemory().mNextMode) {
         case 0:
             mScreenState = LAYOUT_SMT_UP;
             LoadLayout(1);
@@ -889,36 +1058,634 @@ void Scene40Pages::Update() {
         case PAGE_TOUCH:
             UpdateTouchPage();
             break;
-        case PAGE_1:
-            UpdatePage1();
+        case PAGE_TALK:
+            UpdateTalkPage();
             break;
-        case PAGE_2:
-            UpdatePage2();
+        case PAGE_GIFT:
+            UpdateGiftPage();
             break;
-        case PAGE_3:
-            UpdatePage3();
+        case PAGE_PRESENT:
+            UpdatePresentPage();
             break;
-        case PAGE_LIST_4:
-            UpdatePage4();
+        case PAGE_LIST_GIVE:
+            UpdateListGivePage();
             break;
-        case PAGE_LIST_5:
-            UpdatePage5();
+        case PAGE_LIST_GIVE_FROM_SHOP:
+            UpdateListGiveFromShopPage();
             break;
-        case PAGE_LIST_6:
-            UpdatePage6();
+        case PAGE_LIST_DRESS:
+            UpdateListDressPage();
             break;
-        case PAGE_LIST_7:
-            UpdatePage7();
+        case PAGE_LIST_DRESS_2:
+            UpdateListDress2Page();
             break;
-        case PAGE_8:
-            UpdatePage8();
+        case PAGE_KEYBOARD:
+            UpdateKeyboardPage();
             break;
-        case PAGE_9:
-            UpdatePage9();
+        case PAGE_OPTIONS:
+            UpdateOptionPage();
             break;
         }
     }
     mMenuBar.Update();
+}
+
+// The touch page: when it is done, what it asked for (its mResult)
+void Scene40Pages::UpdateTouchPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mTouchPage.Update();
+    if (mTouchPage.mLastState != Scene40TouchPage::STATE_DONE) {
+        return;
+    }
+    switch (mTouchPage.mResult) {
+    case 0:
+        if (mContext->mSceneId == 0x40) {
+            mTalkPage.mTopic = 0;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        } else if (mContext->mSceneId == 0x6C) {
+            mTalkPage.mTopic = 4;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        }
+        mTouchPage.SetMenuDisabled(TRUE);
+        break;
+    case 1:
+        if (mContext->mSceneId == 0x40) {
+            mTalkPage.mTopic = 0;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        } else if (mContext->mSceneId == 0x6C) {
+            mTalkPage.mTopic = 4;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        }
+        break;
+    case 2:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(mContext->mUnknown14, mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 3:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 6;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 4:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 9;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 5:
+        mListPage.mMode = Scene40ListPage::MODE_GIVE;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 0;
+        mNextPage = PAGE_LIST_GIVE;
+        break;
+    case 6:
+        mListPage.mMode = Scene40ListPage::MODE_DRESS;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 1;
+        mNextPage = PAGE_LIST_DRESS;
+        break;
+    case 7:
+        wcscpy(mKeyboardPage.mText2, mCharacter->mMotto);
+        mKeyboardPage.mUnknown0008 = 0;
+        mKeyboardPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mKeyboardLayout = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 8:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(0, 30);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 9:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(3, -30);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 10:
+        mKeyboardPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mKeyboardLayout = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 11:
+        mOptionPage.UpdateDone();
+        mOptionPage.mUnknown000C = 0;
+        mOptionPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 4;
+        mNextPage = PAGE_OPTIONS;
+        break;
+    case 12:
+        mPresentPage.mUnknown124 = TRUE;
+        mPresentPage.Start();
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_PRESENT;
+        break;
+    case 13:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 28;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 14:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 17;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 15:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 29;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    }
+}
+
+// The talk page: when it is done, what its answer leads to (its mResult)
+void Scene40Pages::UpdateTalkPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mTalkPage.Update();
+    if (mTalkPage.mState != Scene40TalkPage::STATE_DONE) {
+        return;
+    }
+    switch (mTalkPage.mResult) {
+    case 0:
+        mTouchPage.SetMenuDisabled(FALSE);
+        mTouchPage.mEntry = 0;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mNextPage = PAGE_TOUCH;
+        break;
+    case 1:
+        mListPage.mMode = Scene40ListPage::MODE_GIVE;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 0;
+        mNextPage = PAGE_LIST_GIVE;
+        break;
+    case 2:
+        // A word to teach: the keyboard by the trouble
+        switch (mCharacter->mTroubleId) {
+        case 0:
+            mKeyboardPage.mUnknown0008 = 1;
+            mKeyboardLayout = 1;
+            break;
+        case 1:
+            mKeyboardPage.mUnknown0008 = 4;
+            mKeyboardLayout = 3;
+            break;
+        case 2:
+            mKeyboardPage.mUnknown0008 = 5;
+            mKeyboardLayout = 3;
+            break;
+        case 3:
+            mKeyboardPage.mUnknown0008 = 6;
+            mKeyboardLayout = 3;
+            break;
+        case 4:
+            mKeyboardPage.mUnknown0008 = 7;
+            mKeyboardLayout = 3;
+            break;
+        }
+        mKeyboardPage.mNextState = 1;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 5:
+        mListPage.mMode = Scene40ListPage::MODE_DRESS_2;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 1;
+        mNextPage = PAGE_LIST_DRESS_2;
+        break;
+    case 6:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(mContext->mUnknown14, mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 7:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 5;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 8:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 6;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 9:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 8;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 10:
+        mTouchPage.mEntry = 13;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mNextPage = PAGE_TOUCH;
+        break;
+    }
+}
+
+// The gift page: when it is done, the option page (if the gift was the one asked for and the first panel is not
+// all done), the reaction to finishing it, or back to the touch page
+void Scene40Pages::UpdateGiftPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mGiftPage.Update();
+    if (mGiftPage.mState != Scene40GiftPage::STATE_RESET) {
+        return;
+    }
+    BOOL gotTarget = mGiftPage.mUnknown6C;
+    BOOL allDone = FALSE;
+    if (gotTarget) {
+        mOptionPage.UpdateDone();
+        allDone = mOptionPage.IsAllDone();
+    }
+    if (gotTarget) {
+        if (!allDone) {
+            mOptionPage.mUnknown000C = 0;
+            mOptionPage.mNextState = 1;
+            mWaitingForLayout = TRUE;
+            mRequestedLayout = 4;
+            mNextPage = PAGE_OPTIONS;
+            return;
+        }
+        mGiftPage.mReaction = 7;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        PlayMusic(mCharacter->ChooseMusic());
+        gSoundManager.MoveSeqVolume(0, 127, 120);
+        gSoundManager.LoadGroup(77);
+        return;
+    }
+    mProfilePage.SetSwitchable(TRUE);
+    mTouchPage.mEntry = 2;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mNextPage = PAGE_TOUCH;
+}
+
+// The present page: when it is done, back to the touch page
+void Scene40Pages::UpdatePresentPage() {
+    mProfilePage.Update();
+    mPresentPage.Update();
+    if (mPresentPage.mState != Scene40PresentPage::STATE_DONE) {
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 2;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mNextPage = PAGE_TOUCH;
+}
+
+// The list of what to give: once chosen, back to the scene's own upper screen; once closed, the gift's reaction
+void Scene40Pages::UpdateListGivePage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    if (mListPage.mChosen) {
+        Scene40Gift gift;
+        int reaction;
+        int value;
+        mListPage.GetGift(&gift);
+        GetGiftReaction(&gift, &reaction, &value);
+        mGiftPage.mReaction = 0;
+        mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+        mGiftPage.SetItem(reaction, value);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mNextPage = PAGE_GIFT;
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 0;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListGiveFromShopPage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 1;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(TRUE);
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListDressPage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    if (mListPage.mChosen) {
+        mTouchPage.mEntry = 1;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(TRUE);
+        mNextPage = PAGE_TOUCH;
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 0;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(TRUE);
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListDress2Page() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    mTouchPage.mEntry = 1;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(FALSE);
+    mNextPage = PAGE_TOUCH;
+}
+
+// The keyboard: once typed, back to the scene's upper screen (or the option page's); once closed, what was typed
+// goes to the character: a motto (with a present for it) or a word it is taught
+void Scene40Pages::UpdateKeyboardPage() {
+    mKeyboardPage.Update();
+    if (mKeyboardPage.mState == 3) {
+        switch (mKeyboardPage.mUnknown0008) {
+        case 0:
+        case 1:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            mRequestedLayout = 1;
+            mWaitingForLayout = TRUE;
+            break;
+        case 2:
+            switch (mKeyboardPage.mUnknown0010) {
+            case 0:
+                mRequestedLayout = 1;
+                mWaitingForLayout = TRUE;
+                break;
+            case 1:
+                mRequestedLayout = 4;
+                mWaitingForLayout = TRUE;
+                break;
+            }
+            break;
+        }
+    } else if (mKeyboardPage.mState == 4) {
+    switch (mKeyboardPage.mUnknown0008) {
+    case 0:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0: {
+            wcscpy(mCharacter->mMotto, mKeyboardPage.mText);
+            Scene40Gift gift;
+            gift.Set(4, 0);
+            mGiftPage.mReaction = 1;
+            mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+            mGiftPage.SetItem(0, 0);
+            mGiftPage.mNextState = 1;
+            mGiftPage.mStep = 0;
+            mGiftPage.mUnknown08 = 0;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(FALSE);
+            mNextPage = PAGE_GIFT;
+            break;
+        }
+        case 1:
+            mTouchPage.SetMenuDisabled(FALSE);
+            mTouchPage.mEntry = 0;
+            mTouchPage.mState = Scene40TouchPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TOUCH;
+            break;
+        }
+        break;
+    case 1:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0:
+            mCharacter->SetTaughtWord(mKeyboardPage.mText);
+            mTalkPage.mTopic = 1;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TALK;
+            break;
+        case 1:
+            mCharacter->SetState(0);
+            mTouchPage.SetMenuDisabled(FALSE);
+            mTouchPage.mEntry = 0;
+            mTouchPage.mState = Scene40TouchPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TOUCH;
+            break;
+        }
+        break;
+    case 2:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0: {
+            wcscpy(mCharacter->mMotto, mKeyboardPage.mText);
+            Scene40Gift gift;
+            gift.Set(4, 0);
+            mGiftPage.mReaction = 2;
+            mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+            mGiftPage.SetItem(0, 0);
+            mGiftPage.mNextState = 1;
+            mGiftPage.mStep = 0;
+            mGiftPage.mUnknown08 = 0;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(FALSE);
+            mNextPage = PAGE_GIFT;
+            break;
+        }
+        case 1:
+            mOptionPage.mUnknown000C = 0;
+            mOptionPage.mNextState = 1;
+            mNextPage = PAGE_OPTIONS;
+            break;
+        }
+        break;
+    case 3:
+        mTouchPage.SetMenuDisabled(FALSE);
+        mTouchPage.mEntry = 0;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(TRUE);
+        mNextPage = PAGE_TOUCH;
+        break;
+    }
+    }
+}
+
+// The option page: once chosen, back to the scene's upper screen; once closed, the present chosen (a reaction),
+// or the keyboard for a motto
+void Scene40Pages::UpdateOptionPage() {
+    mOptionPage.Update();
+    if (mOptionPage.mState == 10) {
+        switch (mOptionPage.mResult) {
+        case 0:
+        case 1:
+            mRequestedLayout = 1;
+            mWaitingForLayout = TRUE;
+            break;
+        case 2:
+            break;
+        case 3:
+            mRequestedLayout = 3;
+            mKeyboardLayout = 1;
+            mWaitingForLayout = TRUE;
+            break;
+        }
+    } else if (mOptionPage.mState == 11) {
+    switch (mOptionPage.mResult) {
+    case 0:
+    case 1: {
+        Scene40Gift gift;
+        gift.Set(mOptionPage.mGift.mKind, mOptionPage.mGift.mItem.InventoryItem::mId);
+        mGiftPage.mReaction = 2;
+        mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+        mGiftPage.SetItem(0, 0);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mNextPage = PAGE_GIFT;
+        break;
+    }
+    case 2:
+        break;
+    case 3:
+        mKeyboardPage.mUnknown0008 = 2;
+        mKeyboardPage.mNextState = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    }
+    }
 }
 
 // The pages take touches only while the scene is not changing the upper screen
@@ -943,14 +1710,129 @@ void Scene40Pages::HideMenu(BOOL hide) {
     mTouchPage.HideMenu(TRUE);
 }
 
+// Whether the gift is the goods the character's trouble asks for: the very item, or one of the kinds it names
+BOOL Scene40Pages::IsWishedGoods(SavedCharacter *character, Scene40Gift *gift) {
+    BOOL wished = FALSE;
+    if (character->IsInTrouble() &&
+        data_02114d78[character->mTroubleCategory][character->mTroubleId].kind == 1) {
+        if (data_02114d78[character->mTroubleCategory][character->mTroubleId].hasTarget) {
+            if (gift->mItem.InventoryItem::mId == character->mTroubleTarget) {
+                wished = TRUE;
+            }
+        } else {
+            u32 flags = GetGoodsInfo(gift->mItem.InventoryItem::mId)->mFlags;
+            u32 wanted = data_02114d78[character->mTroubleCategory][character->mTroubleId].flags;
+            u32 asked = flags & wanted;
+            u32 missing = ~flags & wanted;
+            if (asked != 0 && missing == 0) {
+                wished = TRUE;
+            } else if (asked != 0) {
+                wished = TRUE;
+            }
+        }
+    }
+    return wished;
+}
+
+// The same for clothes, of the kinds the trouble names
+BOOL Scene40Pages::IsWishedClothes(SavedCharacter *character, Scene40Gift *gift) {
+    BOOL wished = FALSE;
+    Scene40Character *visited = mCharacter;
+    if (visited->IsInTrouble() && data_02114d78[visited->mTroubleCategory][visited->mTroubleId].kind == 3) {
+        if (data_02114d78[character->mTroubleCategory][character->mTroubleId].hasTarget) {
+            if (gift->mItem.InventoryItem::mId == character->mTroubleTarget) {
+                wished = TRUE;
+            }
+        } else {
+            u32 styles = GetClothesInfo(gift->mItem.InventoryItem::mId)->mStyles;
+            u32 wanted = data_02114d78[mCharacter->mTroubleCategory][mCharacter->mTroubleId].flags;
+            u32 asked = styles & wanted;
+            u32 missing = ~styles & wanted;
+            if (asked != 0 && missing == 0) {
+                wished = TRUE;
+            } else if (asked != 0) {
+                wished = TRUE;
+            }
+        }
+    }
+    return wished;
+}
+
+// How the character reacts to a gift and what it is worth to it: its favourite goods are worth at least what the
+// trouble promises when they are the goods it asks for; goods or clothes it asks for are worth that
+void Scene40Pages::GetGiftReaction(Scene40Gift *gift, int *reaction, int *value) {
+    switch (gift->mGiftKind) {
+    case 0:
+        if (mCharacter->mFavoriteItem == gift->mItem.InventoryItem::mId) {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            int satisfaction = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+            int promised = 0;
+            if (IsWishedGoods(mCharacter, gift)) {
+                promised = GetTrouble(mCharacter)->unk4Bits0;
+            }
+            if (satisfaction < promised) {
+                satisfaction = promised;
+            }
+            *value = satisfaction;
+        } else if (mCharacter->mDislikedItem == gift->mItem.InventoryItem::mId) {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+        } else if (IsWishedGoods(mCharacter, gift)) {
+            *reaction = 0;
+            *value = GetTrouble(mCharacter)->unk4Bits0;
+        } else {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+        }
+        break;
+    case 1:
+        if (IsWishedClothes(mCharacter, gift)) {
+            *reaction = 5;
+            *value = GetTrouble(mCharacter)->unk4Bits0;
+        } else {
+            *reaction = mCharacter->GetClothesReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetClothesSatisfaction(gift->mItem.InventoryItem::mId);
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 16:
+        *reaction = 2;
+        *value = 0;
+        break;
+    }
+}
+
+// Back from one of the games 0x82 to 0x87 that was played to the end: the character forgets which it was
+BOOL Scene40Pages::TakeGameResult() {
+    Scene40Scratch *const scratch = &gSceneScratch;
+    BOOL taken = FALSE;
+    switch (gSceneManager.mPreviousSceneId) {
+    case 0x82:
+    case 0x83:
+    case 0x84:
+    case 0x85:
+    case 0x86:
+    case 0x87:
+        if (scratch->mUnknown01 == 0) {
+            taken = TRUE;
+            mCharacter->ResetUnknown24E();
+        }
+        break;
+    }
+    return taken;
+}
+
 // The page shown: the first four together with the touch page's, and the menu
 void Scene40Pages::Draw() {
     mCounter.Draw();
     switch (mPage) {
     case PAGE_TOUCH:
-    case PAGE_1:
-    case PAGE_2:
-    case PAGE_3:
+    case PAGE_TALK:
+    case PAGE_GIFT:
+    case PAGE_PRESENT:
         mTouchPage.Draw();
         mTalkPage.Draw();
         mGiftPage.Draw();
@@ -958,16 +1840,16 @@ void Scene40Pages::Draw() {
         mProfilePage.Draw();
         mMenuBar.Draw();
         break;
-    case PAGE_LIST_4:
-    case PAGE_LIST_5:
-    case PAGE_LIST_6:
-    case PAGE_LIST_7:
+    case PAGE_LIST_GIVE:
+    case PAGE_LIST_GIVE_FROM_SHOP:
+    case PAGE_LIST_DRESS:
+    case PAGE_LIST_DRESS_2:
         mListPage.Draw();
         break;
-    case PAGE_8:
+    case PAGE_KEYBOARD:
         mKeyboardPage.Draw();
         break;
-    case PAGE_9:
+    case PAGE_OPTIONS:
         mOptionPage.Draw();
         break;
     }
@@ -980,26 +1862,26 @@ void Scene40CharacterTouch::Init(Scene40Touch *tracker, Scene40Character *charac
     mCharacter = character;
 }
 
-static inline Scene40TouchPoint Add(Scene40TouchPoint a, Scene40TouchPoint b) {
-    Scene40TouchPoint sum;
+static inline ScreenPoint Add(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint sum;
     sum.x = a.x + b.x;
     sum.y = a.y + b.y;
     return sum;
 }
 
-static inline Scene40TouchPoint Sub(Scene40TouchPoint a, Scene40TouchPoint b) {
-    Scene40TouchPoint difference;
+static inline ScreenPoint Sub(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint difference;
     difference.x = a.x - b.x;
     difference.y = a.y - b.y;
     return difference;
 }
 
-static inline u32 LengthSq(Scene40TouchPoint a) {
+static inline u32 LengthSq(ScreenPoint a) {
     return a.x * a.x + a.y * a.y;
 }
 
-static inline Scene40TouchPoint ToFx(Scene40TouchPoint a) {
-    Scene40TouchPoint fx;
+static inline ScreenPoint ToFx(ScreenPoint a) {
+    ScreenPoint fx;
     fx.x = a.x << FX32_SHIFT;
     fx.y = a.y << FX32_SHIFT;
     return fx;
@@ -1014,15 +1896,15 @@ void Scene40CharacterTouch::Update() {
         mDepths[0].mOrigin.x = origin.x;
         mDepths[0].mOrigin.y = origin.y;
         mDepths[0].mOrigin.z = origin.z;
-        Scene40TouchPoint point = mTracker->mPressPoint;
+        ScreenPoint point = mTracker->mPressPoint;
         mPartAtPress = HitTest(&point);
         ProjectTouch(&point, &mDepths[0].mPress, &mDepths[0].mOrigin);
         ProjectTouchBetween(&point, &mDepths[1].mPress, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mPress, FX32_CONST(2), FX32_CONST(1));
     } else if (mTracker->mHeld) {
-        Scene40TouchPoint point = mTracker->mPoint;
+        ScreenPoint point = mTracker->mPoint;
         if (LengthSq(Sub(mTracker->mPoint, mTracker->mPressPoint)) > 20 * 20) {
-            Scene40TouchPoint move = ToFx(Sub(mTracker->mPoint, mTracker->mPressPoint));
+            ScreenPoint move = ToFx(Sub(mTracker->mPoint, mTracker->mPressPoint));
             u16 angle = FX_Atan2Idx(move.y, move.x);
             if (angle >= 0xB000 && angle < 0xD000) {
                 mStroke = 1;
@@ -1048,13 +1930,13 @@ void Scene40CharacterTouch::Update() {
         ProjectTouchBetween(&point, &mDepths[1].mHold, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mHold, FX32_CONST(2), FX32_CONST(1));
     } else if (mTracker->mReleased) {
-        Scene40TouchPoint point = mTracker->mReleasePoint;
+        ScreenPoint point = mTracker->mReleasePoint;
         ProjectTouch(&point, &mDepths[0].mRelease, &mDepths[0].mOrigin);
         ProjectTouchBetween(&point, &mDepths[1].mRelease, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mRelease, FX32_CONST(2), FX32_CONST(1));
 
         // Where the flick would have taken the stylus in a frame, and so which way and how fast it went
-        Scene40TouchPoint flicked = Add(mTracker->mReleasePoint, mTracker->mVelocity);
+        ScreenPoint flicked = Add(mTracker->mReleasePoint, mTracker->mVelocity);
         VecFx32 flicked0, flicked1;
         ProjectTouch(&flicked, &flicked0, &mDepths[0].mOrigin);
         ProjectTouchBetween(&flicked, &flicked1, FX32_CONST(3), FX32_CONST(4));
@@ -1089,7 +1971,7 @@ void Scene40CharacterTouch::Clear() {
 }
 
 // What of the character is under a point of the touch screen
-int Scene40CharacterTouch::HitTest(const Scene40TouchPoint *point) {
+int Scene40CharacterTouch::HitTest(const ScreenPoint *point) {
     int parts = 0;
     ModelResources_SetTouchLine(gModelResources, point->x, point->y);
     if (mCharacter->HitTestFace()) {
@@ -1111,7 +1993,7 @@ int Scene40CharacterTouch::HitTest(const Scene40TouchPoint *point) {
 
 // The point on the line into the room under a point of the touch screen that lies in the vertical plane through
 // planePoint facing the camera; without one (the line in the plane), a fixed point
-static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint) {
+static void ProjectTouch(const ScreenPoint *point, VecFx32 *out, const VecFx32 *planePoint) {
     Camera *const camera = &gCamera;
     VecFx32 line, near, far, normal, side;
     NNS_G3dScrPosToWorldLine(point->x, point->y, &near, &far);
@@ -1138,7 +2020,7 @@ static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const Vec
 }
 
 // The same with the plane through a point between the camera's target and eye, by their weights
-static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight) {
+static void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight) {
     Camera *const camera = &gCamera;
     VecFx32 planePoint, target, eye;
     ScaleVec(eyeWeight, &camera->mEye, &eye);
@@ -1154,7 +2036,7 @@ static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx
 // A twelfth of the distance from the camera's eye
 static fx32 GetCameraDistanceScale(const VecFx32 *pos) {
     VecFx32 offset;
-    VEC_Subtract(pos, &gCamera.mEye, &offset);
+    VEC_Subtract(&gCamera.mEye, pos, &offset);
     return FX_Mul(VEC_Mag(&offset), FX32_CONST(1) / 12);
 }
 
@@ -1181,10 +2063,11 @@ static void MakeFacingMatrixY(MtxFx33 *mtx, fx32 sin, fx32 cos) {
 
 // Sets or clears bits of gGameData's flags at 0xCC
 static void SetGameFlags(u32 flags, BOOL set) {
+    GameData *const game = &gGameData;
     if (set) {
-        gGameData.mUnknownCC |= flags;
+        game->mUnknownCC |= flags;
     } else {
-        gGameData.mUnknownCC &= ~flags;
+        game->mUnknownCC &= ~flags;
     }
 }
 
@@ -1326,14 +2209,77 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     mLastState = 0;
     mStep = 0;
     mEntry = 0;
-    mUnknown20 = 0;
+    mTouching = FALSE;
     mMenuHidden = FALSE;
     mActive = TRUE;
     mUnknown60 = 0;
-    mUnknown64 = 0;
-    mUnknown68 = 0;
+    mRubSoundX = FALSE;
+    mRubSoundY = FALSE;
     mMenu = menu;
     RefreshMenu();
+}
+
+// The state the controller gave, then one frame of it
+void Scene40TouchPage::Update() {
+    mTouch->Update();
+    int state = mState;
+    mLastState = state;
+    switch (state) {
+    case STATE_START:
+        UpdateStart();
+        break;
+    case STATE_IDLE:
+        UpdateIdle();
+        break;
+    case STATE_DRAGGED:
+        UpdateDragged();
+        break;
+    case STATE_PRESSED_DOWN:
+        UpdatePressedDown();
+        break;
+    case STATE_RUBBED:
+        UpdateRubbed();
+        break;
+    case STATE_WAIT_IDLE:
+        UpdateWaitIdle();
+        break;
+    case STATE_IDLE_RIGHT_MENU:
+        UpdateIdleRightMenu();
+        break;
+    case STATE_PROPOSE:
+        UpdatePropose();
+        break;
+    case STATE_WAIT_9:
+        UpdateWait9();
+        break;
+    case STATE_10:
+        Update10();
+        break;
+    case STATE_11:
+        Update11();
+        break;
+    case STATE_12:
+        Update12();
+        break;
+    case STATE_13:
+        Update13();
+        break;
+    case STATE_14:
+        Update14();
+        break;
+    case STATE_WAIT_MESSAGES:
+        UpdateWaitMessages();
+        break;
+    case STATE_MESSAGES_0:
+        UpdateMessages0();
+        break;
+    case STATE_MESSAGES_4:
+        UpdateMessages4();
+        break;
+    case STATE_DONE:
+        break;
+    }
+    mFrames++;
 }
 
 // The page forwards calling and availability to the menu it was given by Init.
@@ -1365,11 +2311,775 @@ void Scene40TouchPage::UpdateMenu() {
     mMenu->UpdateAvailable();
 }
 
+// How the page starts, by the controller's entry: the menu, the character's state and the page's first state
+void Scene40TouchPage::UpdateStart() {
+    mTouching = FALSE;
+    mCharacter->mBalloon.mUnknown08 = FALSE;
+    switch (mEntry) {
+    case 0:
+        SetState(STATE_IDLE);
+        break;
+    case 1:
+        mMenu->SetDisabled(TRUE);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 2:
+        UpdateMenu();
+        SetState(STATE_12);
+        break;
+    case 3:
+        mCharacter->SetState(26);
+        SetState(STATE_IDLE);
+        break;
+    case 4:
+        mCharacter->SetState(0);
+        SetState(STATE_IDLE);
+        break;
+    case 5:
+        mMenu->SetLeftDisabled(TRUE);
+        SetState(STATE_IDLE_RIGHT_MENU);
+        break;
+    case 7:
+        mMenu->SetLeftDisabled(TRUE);
+        SetState(STATE_IDLE_RIGHT_MENU);
+        break;
+    case 6:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(18);
+        SetState(STATE_WAIT_9);
+        PlaceGift();
+        break;
+    case 8:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(20);
+        SetState(STATE_11);
+        break;
+    case 9: {
+        // The room's interior counts as the character's own
+        mCharacter->SetState(0);
+        int interior = mCharacter->mInterior;
+        mCharacter->mOwnedInteriors[interior >> 5] |= 1 << (interior & 31);
+        UpdateMenu();
+        SetState(STATE_12);
+        break;
+    }
+    case 10:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(0xA1);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 11:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(0x6E);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 12:
+        mCharacter->SetState(0xC6);
+        mCharacter->mUnknown054Bit20 = (u8)(mCharacter->mUnknown054Bit20 + 1);
+        mStep = 0;
+        SetState(STATE_MESSAGES_0);
+        break;
+    case 13:
+        mStep = 0;
+        SetState(STATE_MESSAGES_4);
+        break;
+    }
+}
+
+// The menu and the stylus: a button of the menu, or the stylus down, held and up on the character
+void Scene40TouchPage::UpdateIdle() {
+    mMenu->SetEnabled(mActive);
+    if (mMenu->mTouchedButton != -1) {
+        UpdateMenuChoice();
+    } else if (mContext->mTouch->mPressed) {
+        mTouching = TRUE;
+        UpdatePress();
+    } else if (mContext->mTouch->mHeld && mTouching) {
+        UpdateHold();
+    }
+    if (mContext->mTouch->mReleased && mTouching) {
+        UpdateRelease();
+        mTouching = FALSE;
+    }
+    Unused02151ab0();
+}
+
+// A button of the menu: the list to give (5), the clothes (6), the motto (7) for the controller, or another scene
+void Scene40TouchPage::UpdateMenuChoice() {
+    if (mMenu->mPressedButton == 0) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 5;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 1) {
+        gSceneMemory.mCharacters[(u8)mCharacter->mIndex] = 0;
+        gSceneManager.RequestScene(0x5B);
+    } else if (mMenu->mPressedButton == 2) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 6;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 3) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 7;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 4) {
+        int interior = mCharacter->mInterior;
+        mCharacter->mOwnedInteriors[interior >> 5] |= 1 << (interior & 31);
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        for (int i = 0; i < 5; i++) {
+            gSceneScratch.mMenuAvailable[i] = mContext->mMenuAvailable[i];
+        }
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x38);
+    } else if (mMenu->mPressedButton == 5) {
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        gSceneScratch.mUnknown01 = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x1A);
+    } else if (mMenu->mPressedButton == 6) {
+        if (mCharacter->IsLongActPaired() && mCharacter->mUnknown3094) {
+            mCharacter->ClearLongActOfPairFrom(mContext->mClock->mSeconds);
+        }
+        gSceneManager.RequestScene(0x11);
+    }
+}
+
+// The stylus comes down: on the balloon over the head (the character talks, or tells what it has to tell), on the
+// face or the head (the sprite under the stylus), or beside the character (it turns its head there)
+void Scene40TouchPage::UpdatePress() {
+    if (mActive && (mTouch->mPartAtPress & Scene40CharacterTouch::PART_BODY) && mCharacter->mBalloon.mState == 1) {
+        mCharacter->ShowBalloon(3);
+        mCharacter->mBalloon.mUnknown08 = TRUE;
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        BOOL inTrouble = mCharacter->IsInTrouble();
+        BOOL hasNews = mCharacter->HasSomethingToTell();
+        if (inTrouble) {
+            gSoundManager.StartSeqArc(1, 26, 10);
+            int category = mCharacter->mTroubleCategory;
+            if (category == 0 || category == 1 || category == 2 || category == 8 ||
+                (data_02114d78[category][mCharacter->mTroubleId].kind == 11 && mCharacter->mTroubleId != 1 &&
+                 mCharacter->mTroubleId != 4)) {
+                StartCall();
+            }
+            mCharacter->ChooseAfterTouch();
+            if (mCharacter->mUnknown2ED0) {
+                mMenu->SetEnabled(FALSE);
+                mResult = 1;
+                SetState(STATE_DONE);
+            } else {
+                mMenu->SetEnabled(FALSE);
+                mResult = 0;
+                SetState(STATE_DONE);
+            }
+        } else if (hasNews) {
+            gSoundManager.StartSeqArc(1, 26, 9);
+            mCharacter->SetState(28);
+            mCharacter->mBalloon.mUnknown08 = FALSE;
+        }
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+        mContext->mSprite->mVisible = TRUE;
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        ScreenPoint point = mContext->mTouch->mPressPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_HEAD) {
+        mContext->mSprite->mVisible = TRUE;
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        ScreenPoint point = mContext->mTouch->mPressPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_NONE) {
+        if (mCharacter->mState == 0) {
+            VecFx32 target;
+            SetVecFields(&target, mTouch->mDepths[2].mPress);
+            mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+            mCharacter->SetState(10);
+        } else if (mCharacter->mState == 6) {
+            VecFx32 target;
+            SetVecFields(&target, mTouch->mDepths[2].mPress);
+            mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+            mCharacter->SetState(13);
+        }
+    }
+}
+
+// The stylus held on the character: a stroke on the face (down: the character is patted and the camera turns to
+// it; up: it is tickled), a long rub on the face, the scene's sprite following the stylus on the face or the head;
+// beside the character, its head following the stylus
+void Scene40TouchPage::UpdateHold() {
+    BOOL handled = FALSE;
+    if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+        switch (mTouch->mStroke) {
+        case 1: {
+            VecFx32 pos = mCharacter->CharacterModel::mPos;
+            if ((mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) && pos.x > -0x3800 && pos.x < 0x3800 &&
+                pos.z > -0x3800 && pos.z < 0x3800) {
+                gSoundManager.StartSeqArc(1, 35, 2);
+                mCharacter->SetState(1);
+                mCharacter->FaceCamera();
+                mCharacter->AddUnknown1C4Once0();
+                mContext->mCamera->SetState(0);
+                Sprite_SetSequence(mContext->mSprite, 27, TRUE);
+                SetState(STATE_DRAGGED);
+                handled = TRUE;
+            }
+            break;
+        }
+        case 2:
+            if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+                gSoundManager.StartSeqArc(1, 35, 5);
+                mCharacter->SetState(3);
+                mCharacter->AddUnknown1C4Once0();
+                SetState(STATE_PRESSED_DOWN);
+                handled = TRUE;
+            }
+            break;
+        }
+        if ((mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) && !handled && mTracker->mDistance > 80) {
+            if (mCharacter->mState == 0) {
+                mCharacter->SetState(7);
+                SetState(STATE_RUBBED);
+                handled = TRUE;
+            } else if (mCharacter->mState == 6) {
+                mCharacter->SetState(8);
+                SetState(STATE_RUBBED);
+                handled = TRUE;
+            }
+        }
+        mContext->mSprite->mVisible = TRUE;
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+        mContext->mSprite->mVisible = TRUE;
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_BODY) {
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        mContext->mSprite->mVisible = FALSE;
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_NONE) {
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        mContext->mSprite->mVisible = FALSE;
+    }
+    if (handled) {
+        return;
+    }
+    if ((u32)(mCharacter->mState - 10) <= 12 - 10) {
+        VecFx32 target;
+        SetVecFields(&target, mTouch->mDepths[2].mHold);
+        mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+        if (mTracker->mHeldFrames < 10) {
+            mCharacter->SetState(11);
+        } else {
+            mCharacter->SetState(12);
+        }
+    } else if ((u32)(mCharacter->mState - 13) <= 15 - 13) {
+        VecFx32 target;
+        SetVecFields(&target, mTouch->mDepths[2].mHold);
+        mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+        if (mTracker->mHeldFrames < 10) {
+            mCharacter->SetState(14);
+        } else {
+            mCharacter->SetState(15);
+        }
+    }
+}
+
+// The stylus goes up: a flick across the face (or head) from beside the character in one of four ways makes it
+// react (its states 4, 5, 22, 23); a tap without moving on the head or the face plays a game, by whether it faces
+// the camera and its mood; otherwise its head stops following the stylus
+void Scene40TouchPage::UpdateRelease() {
+    BOOL handled = FALSE;
+    if (((mTouch->mPartsTouched & Scene40CharacterTouch::PART_NONE) &&
+         (mTouch->mPartsTouched & Scene40CharacterTouch::PART_FACE)) ||
+        ((mTouch->mPartsTouched & Scene40CharacterTouch::PART_NONE) &&
+         (mTouch->mPartsTouched & Scene40CharacterTouch::PART_HEAD))) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        switch (mTouch->mStroke) {
+        case 1:
+            if (mCharacter->mState != 4 && velocity.y < -5) {
+                mCharacter->SetState(4);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 2:
+            if (velocity.y > 5 && mCharacter->mState != 6 && mCharacter->mState != 13 && mCharacter->mState != 14 &&
+                mCharacter->mState != 15) {
+                mCharacter->SetState(5);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 3:
+            if (velocity.x < -5) {
+                mCharacter->SetState(22);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 4:
+            if (velocity.x > 5) {
+                mCharacter->SetState(23);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        }
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        if (MATH_ABS(velocity.x) + MATH_ABS(velocity.y) < 2 && !mMenuHidden) {
+            mCharacter->UpdateCameraAngle();
+            if (mCharacter->IsFacingCameraLoosely()) {
+                if (IsCharacterNotIn2Or24Or25()) {
+                    PlayGame3B();
+                    handled = TRUE;
+                }
+            } else if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                PlayGame87();
+                handled = TRUE;
+            }
+        }
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        if (MATH_ABS(velocity.x) + MATH_ABS(velocity.y) < 1 && !mMenuHidden) {
+            mCharacter->UpdateCameraAngle();
+            if (mCharacter->IsFacingCameraLoosely()) {
+                if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                    PlayGame();
+                    handled = TRUE;
+                }
+            } else if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                PlayGame87();
+                handled = TRUE;
+            }
+        }
+    }
+    if (!handled) {
+        if (mCharacter->mState == 11) {
+            mCharacter->SetState(10);
+        } else if (mCharacter->mState == 12) {
+            mCharacter->SetState(0);
+        } else if (mCharacter->mState == 14) {
+            mCharacter->SetState(13);
+        } else if (mCharacter->mState == 15) {
+            mCharacter->SetState(6);
+        }
+    }
+    mContext->mSprite->mVisible = FALSE;
+}
+
+// Does nothing (the idle state calls it last)
+void Scene40TouchPage::Unused02151ab0() {}
+
+// The character dragged by the stylus: it hangs from the point under the stylus by its neck. Pulled out of the
+// room (beyond 3.7 across) it is dropped where it is; pushed down into the floor it lands on its feet (its state 3,
+// the page's state 4); let go, it is thrown with the stylus's flick
+void Scene40TouchPage::UpdateDragged() {
+    VecFx32 fling;
+    VecFx32 pos;
+    BOOL letGo = FALSE;
+    if (mTracker->mHeld) {
+        pos = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK);
+        VEC_Subtract(&pos, &mCharacter->CharacterModel::mPos, &pos);
+        VEC_Subtract(&mTouch->mDepths[0].mHold, &pos, &pos);
+        pos.y -= 0x800;
+        if (pos.x < -0x3B33 || pos.x > 0x3B33 || pos.z < -0x3B33 || pos.z > 0x3B33) {
+            VecFx32 zero = {0, 0, 0};
+            fling = zero;
+            letGo = TRUE;
+        } else if (pos.y < -0x1EB) {
+            Sprite_Init(mContext->mSprite, 0, 26, 128, 96, TRUE);
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+            gSoundManager.StartSeqArc(1, 35, 5);
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            mCharacter->SetPos(pos);
+            mCharacter->SetState(3);
+            SetState(STATE_PRESSED_DOWN);
+        } else {
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            mCharacter->SetPos(pos);
+            {
+                VecFx32 zero = {0, 0, 0};
+                SetVecFields(&mCharacter->mMotion.mVelocity, zero);
+            }
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        }
+    } else if (mTracker->mReleased) {
+        SetVecFields(&fling, mTouch->mDepths[0].mFlick);
+        letGo = TRUE;
+    }
+    if (letGo) {
+        mTouching = FALSE;
+        mCharacter->SetState(2);
+        mContext->mCamera->SetState(1);
+        mContext->mSprite->mVisible = FALSE;
+        SetVecFields(&mCharacter->mMotion.mVelocity, fling);
+        if (fling.y > 204) {
+            gSoundManager.StartSeqArc(1, 35, 3);
+        }
+        SetState(STATE_IDLE);
+    }
+}
+
+// The character pressed down under the stylus: moved off it onto the body or beside it, the character stands up
+// again (the stylus let go likewise); pulled up by more than 0.1 above where it would hang, it is dragged again
+void Scene40TouchPage::UpdatePressedDown() {
+    if (mTracker->mHeld && mTouching) {
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        VecFx32 pos;
+        pos = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK);
+        VEC_Subtract(&pos, &mCharacter->CharacterModel::mPos, &pos);
+        VEC_Subtract(&mTouch->mDepths[0].mHold, &pos, &pos);
+        pos.y -= 0x800;
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_BODY) || (mTouch->mPart & Scene40CharacterTouch::PART_NONE)) {
+            mTouching = FALSE;
+            mContext->mSprite->mVisible = FALSE;
+            mCharacter->SetState(0);
+            mContext->mCamera->SetState(1);
+            SetState(STATE_IDLE);
+        } else if (pos.y > 0x199) {
+            gSoundManager.StartSeqArc(1, 35, 2);
+            mCharacter->SetState(1);
+            mCharacter->FaceCamera();
+            mContext->mCamera->SetState(0);
+            Sprite_SetSequence(mContext->mSprite, 27, TRUE);
+            SetState(STATE_DRAGGED);
+        }
+    } else if (mTracker->mReleased) {
+        mTouching = FALSE;
+        mContext->mSprite->mVisible = FALSE;
+        mCharacter->SetState(0);
+        mContext->mCamera->SetState(1);
+        SetState(STATE_IDLE);
+    }
+}
+
+// The face rubbed: the head wobbles with each move of the stylus, with a sound for a fast move across or up and
+// down; moved onto the body or beside the character, or let go, the rub ends (in the character's state 9, the menu
+// shown, it may end in a date to pat it again: the talk page with result 2)
+void Scene40TouchPage::UpdateRubbed() {
+    BOOL done = FALSE;
+    if (mTracker->mHeld && mTouching) {
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_BODY) || (mTouch->mPart & Scene40CharacterTouch::PART_NONE)) {
+            done = TRUE;
+        } else {
+            int dx = gTouchInput.mPoint.x - gTouchInput.mLastPoint.x;
+            int dy = gTouchInput.mPoint.y - gTouchInput.mLastPoint.y;
+            if ((dx < -1 || dx > 1)) {
+                mCharacter->mHeadRollNow = -dx * 100;
+            }
+            if ((dy < -1 || dy > 1)) {
+                mCharacter->mHeadPitchNow = dy * 100 + 0x800;
+            }
+            if ((dx < -3 || dx > 3) && !mRubSoundX) {
+                mRubSoundX = TRUE;
+                gSoundManager.StartSeqArc(1, 35, 6);
+            } else if (dx >= -2 && dx <= 2) {
+                mRubSoundX = FALSE;
+            }
+            // (dx == 0 gives one compare; the original tests the two sides)
+            if ((dy < -4 || dy > 4) && dx <= 0 && dx >= 0 && !mRubSoundY) {
+                mRubSoundY = TRUE;
+                gSoundManager.StartSeqArc(1, 35, 6);
+            } else if (dy >= -3 && dy <= 3) {
+                mRubSoundY = FALSE;
+            }
+        }
+    } else if (mTracker->mReleased) {
+        done = TRUE;
+    }
+    if (done) {
+        mTouching = FALSE;
+        mContext->mSprite->mVisible = FALSE;
+        mContext->mCamera->SetState(1);
+        mRubSoundX = FALSE;
+        mRubSoundY = FALSE;
+        if (mCharacter->mState == 9 && !mMenuHidden) {
+            mCharacter->AddUnknown1C4Once1();
+            if (mCharacter->UpdatePatDate()) {
+                mContext->mUnknown18 = 10;
+                mContext->mUnknown14 = 12;
+                mMenu->SetEnabled(FALSE);
+                mResult = 2;
+                SetState(STATE_DONE);
+            } else {
+                mCharacter->SetState(53);
+                SetState(STATE_IDLE);
+            }
+        } else {
+            mCharacter->SetState(0);
+            SetState(STATE_IDLE);
+        }
+    }
+}
+
+// The idle state with the menu's left part disabled: its right buttons (another scene, the apartment), the balloon
+// (state 8), the scene's sprite over the face or head; let go over the face of a character in long act 18, it goes
+// to scene 0x8E
+void Scene40TouchPage::UpdateIdleRightMenu() {
+    mMenu->SetEnabled(mActive);
+    if (mMenu->mPressedButton == 6) {
+        gSceneManager.RequestScene(0x11);
+    } else if (mMenu->mPressedButton == 5) {
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        gSceneScratch.mUnknown01 = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x1A);
+    } else if (mContext->mTouch->mPressed) {
+        if (mActive && (mTouch->mPartAtPress & Scene40CharacterTouch::PART_BODY) &&
+            mCharacter->mBalloon.mState == 1) {
+            mCharacter->ShowBalloon(3);
+            mMenu->SetRightDisabled(TRUE);
+            gSoundManager.StartSeqArc(1, 26, 11);
+            SetState(STATE_PROPOSE);
+        } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+            mContext->mSprite->mVisible = TRUE;
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            ScreenPoint point = mContext->mTouch->mPressPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) { // Where it is, not where it came down
+            mContext->mSprite->mVisible = TRUE;
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            ScreenPoint point = mContext->mTouch->mPressPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        }
+    } else if (mContext->mTouch->mHeld) {
+        if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+            mContext->mSprite->mVisible = TRUE;
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+            mContext->mSprite->mVisible = TRUE;
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_BODY) {
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            mContext->mSprite->mVisible = FALSE;
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_NONE) {
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            mContext->mSprite->mVisible = FALSE;
+        }
+    } else if (mContext->mTouch->mReleased) {
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_FACE) && mCharacter->mLongActState == 18) {
+            MI_CpuFill8(&gSceneScratch, 0, 100);
+            GetSceneMemory().mNextMode = 0;
+            gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+            gSceneManager.RequestScene(0x8E);
+        }
+        mContext->mSprite->mVisible = FALSE;
+    }
+}
+
+// After 45 frames: the scene of an activity the character proposes, with it alone
+void Scene40TouchPage::UpdatePropose() {
+    mWaitFrames = 45;
+    if (mFrames < mWaitFrames) {
+        return;
+    }
+    for (u8 i = 0; i < 12; i++) {
+        gSceneMemory.mCharacters[i] = 0xFF;
+    }
+    gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+    int activity = mCharacter->ChooseActivity();
+    MarkActivityProposed(activity);
+    gSceneManager.RequestScene(sActivities[activity].mScene);
+}
+
+void Scene40TouchPage::UpdateWaitIdle() {
+    if (mCharacter->mState != 0) {
+        return;
+    }
+    mMenu->SetDisabled(FALSE);
+    SetState(STATE_IDLE);
+}
+
+void Scene40TouchPage::UpdateWait9() {
+    if (mCharacter->mState != 17) {
+        return;
+    }
+    mCharacter->ClearUnknown246();
+    if (mUnknown60) {
+        SetState(STATE_10);
+        return;
+    }
+    mMenu->SetRightDisabled(FALSE);
+    SetState(STATE_IDLE_RIGHT_MENU);
+}
+
+void Scene40TouchPage::UpdateWaitMessages() {
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState != Scene40MessageSequence::STATE_DONE) {
+        return;
+    }
+    mState = sequence->mReturnState;
+    mFrames = 0;
+}
+
+void Scene40TouchPage::UpdateMessages0() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0) {
+            return;
+        }
+        mContext->mMessageSequence->mReturnState = STATE_MESSAGES_0;
+        mState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 0;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        SetState(STATE_IDLE);
+        break;
+    }
+}
+
+void Scene40TouchPage::UpdateMessages4() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0) {
+            return;
+        }
+        mMenu->Choose(0);
+        mContext->mMessageSequence->mReturnState = STATE_MESSAGES_4;
+        mState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 4;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        SetState(STATE_IDLE);
+        break;
+    }
+}
+
 void Scene40TouchPage::SetState(int state) {
     mState = state;
     mStep = 0;
     mFrames = 0;
-    mUnknown10 = 0;
+    mWaitFrames = 0;
+}
+
+// Coming back from a scene that gives the character something (sPresentScenes): the gift, taken by one of the
+// scene's item models, placed a little to the side of the character and in front of it, and held there
+void Scene40TouchPage::PlaceGift() {
+    int index = FindPresentScene(gSceneManager.mPreviousSceneId);
+    mUnknown60 = FALSE;
+    if (sPresentScenes[index].mGiftKind == 2) {
+        return;
+    }
+    mUnknown60 = TRUE;
+    int kind = 1;
+    if (sPresentScenes[index].mGiftKind == 0) {
+        kind = 0;
+    }
+    if (!sPresentScenes[index].mFromMemory) {
+        mGift.Set(kind, sPresentScenes[index].mItem);
+    } else {
+        mGift.Set(kind, gSceneMemory.mUnknown2C[0]);
+    }
+    mContext->mPhysics->TakeFreeItem(&mContext->mItemModels);
+    mContext->mItemModels->ChangeItem(mGift.mMessage);
+    mContext->mItemModels->mVisible = TRUE;
+    mContext->mItemModels->mMotion.mHeld = TRUE;
+    mContext->mItemModels->mMotion.mOffered = TRUE;
+
+    VecFx32 placed, sideUnit, front, side;
+    const VecFx32 up = {0, FX32_ONE, 0};
+    VecFx32 toCharacter;
+    VecFx32 position = mCharacter->CharacterModel::mPos;
+    VEC_Subtract(&position, &gCamera.mEye, &toCharacter);
+    VEC_CrossProduct(&up, &toCharacter, &side);
+    VEC_Normalize(&side, &sideUnit);
+    ScaleVec(FX32_ONE, &sideUnit, &sideUnit);
+    VEC_Add(&sideUnit, &position, &placed);
+    VEC_Normalize(&toCharacter, &front);
+    ScaleVec(-FX32_CONST(1.2), &front, &front);
+    VEC_Add(&front, &placed, &placed);
+    placed.y = 0;
+    SetVecFields(&mContext->mItemModels->mPosition, placed);
+}
+
+BOOL Scene40TouchPage::IsCharacterMood0Or1() {
+    return SavedCharacter::Is0Or1(mCharacter->mMood);
+}
+
+BOOL Scene40TouchPage::IsCharacterNotIn2Or24Or25() {
+    if (mCharacter->mState == 2 || mCharacter->mState == 24 || mCharacter->mState == 25) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// One of the games: by the character's game (scenes 0x82 to 0x86), or 0xB7 or 0xB9 at even odds
+void Scene40TouchPage::PlayGame() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    BOOL requested = FALSE;
+    GetSceneMemory().mNextMode = 0;
+    if (mCharacter->mUnknown24E != 0xFF) {
+        requested = TRUE;
+        switch (mCharacter->mUnknown24E) {
+        case 0:
+            gSceneManager.RequestScene(0x82);
+            break;
+        case 2:
+            gSceneManager.RequestScene(0x83);
+            break;
+        case 3:
+            gSceneManager.RequestScene(0x84);
+            break;
+        case 4:
+            gSceneManager.RequestScene(0x85);
+            break;
+        case 5:
+            gSceneManager.RequestScene(0x86);
+            break;
+        default:
+            requested = FALSE;
+            break;
+        }
+    }
+    if (!requested) {
+        if ((int)MATH_Rand16(&gRandom, 1000) < 500) {
+            gSceneManager.RequestScene(0xB7);
+        } else {
+            gSceneManager.RequestScene(0xB9);
+        }
+    }
+    mCharacter->AddUnknown1C4Once0();
+}
+
+void Scene40TouchPage::PlayGame3B() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    GetSceneMemory().mNextMode = 0;
+    gSceneManager.RequestScene(0x3B);
+    mCharacter->AddUnknown1C4Once0();
+}
+
+void Scene40TouchPage::PlayGame87() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    GetSceneMemory().mNextMode = 0;
+    if (mCharacter->mUnknown24E == 1) {
+        gSceneManager.RequestScene(0x87);
+    } else {
+        gSceneManager.RequestScene(0xB8);
+    }
+    mCharacter->AddUnknown1C4Once0();
+}
+
+// The index of a scene in sPresentScenes, or -1
+int Scene40TouchPage::FindPresentScene(int sceneId) {
+    int index = -1;
+    for (int i = 0; i < 20; i++) {
+        if (sceneId == sPresentScenes[i].mSceneId) {
+            index = i;
+        }
+    }
+    return index;
 }
 
 void Scene40TouchPage::Draw() {}
@@ -1486,58 +3196,19 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Of ov075-c
 // Of ov075-e
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
+int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
 }
 
 extern MATHRandContext16 gRandom;
 
-// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
-// has it
-struct TroubleInfo {
-    u32 kind : 8;
-    u32 minutes : 16;         // How long it lasts at most
-    u32 weight : 8;           // Its weight in the random choice (ChooseTrouble)
-    u32 unk4Bits0 : 8;
-    u32 mood : 8;             // The mood it puts the character in (SetTroubleMood), 0 to 4
-    u32 cooldownMinutes : 12; // Added to mTroubleEnd once it is over
-    u32 hasTarget : 4;        // Not 0: about a character or an item, which StartTrouble chooses (mTroubleTarget)
-    u32 flags;                // Food troubles: the kinds of food; clothes troubles: the kinds of clothes
-};
 
-// 0xC
-extern "C" const TroubleInfo *const data_02114d78[];
-
-// The trouble the character has
 // The kind (0 to 3) of a personality, converted in place
 static inline int ToPersonalityKind(int personality) {
     personality = gPersonalityKinds[personality];
     return personality;
 }
 
-static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
-    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
-}
 
-static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
-    if (character->IsInTrouble() && GetTrouble(character)->kind == kind) {
-        return TRUE;
-    }
-    return FALSE;
-}
-
-// The bytes after gSceneMemory's 0x3C: the first of gSceneScratch, which this file reaches through gSceneMemory as
-// well (the literal is gSceneMemory's address and the offset is in the instruction)
-struct Scene40SceneMemory {
-    /* 0x00 */ u8 mUnknown00[0x20];
-    /* 0x20 */ u8 mCharacters[12];
-    /* 0x2C */ u16 mUnknown2C[8];
-    /* 0x3C */ union { u8 mTalkAnswers[2]; u8 mNextMode; }; // The talk page's answers, for the scene it goes to
-};
-
-// 0x3E
-
-static inline Scene40SceneMemory &GetSceneMemory() {
-    return (Scene40SceneMemory &)gSceneMemory;
-}
 
 // A game the talk page can go to (gStr_S_ov075, 0x0217BBC0; 0x02176454 chooses one)
 struct Scene40Game {
@@ -1553,30 +3224,10 @@ static const ScreenPoint sMannequinScreenPoint = {190, 172};
 
 static const ScreenPoint sItemScreenPoint = {190, 134};
 
-// Of ov075-a: static functions of this file (remove these declarations at the merge)
-void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
-
-fx32 GetCameraDistanceScale(const VecFx32 *pos);
-
-void MakeFacingMatrixX(MtxFx33 *mtx, fx32 sin, fx32 cos);
-
-void MakeFacingMatrixY(MtxFx33 *mtx, fx32 sin, fx32 cos);
-
-void SetGameFlags(u32 flags, BOOL set);
-
-u32 GetGameFlags(u32 flags);
 
 void AddTroublesSolved(int count);
 
 extern SaveHeader gIslandState;
-
-static inline const ItemInfo *GetGoodsInfo(u16 id) {
-    return &gGoodsTable[id];
-}
-
-static inline const ClothesInfo *GetClothesInfo(u16 id) {
-    return &gClothesTable[id];
-}
 
 // The body's place and size. The mannequin comes last: an inlined call binds its arguments last to first, and the
 // original reads the pointer before it computes the size (as a member function, `this` binds last and does not match)
@@ -4113,6 +5764,8 @@ extern const char *const sWaitAnimations[4][5]; // The standing animations ("wai
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
+void func_ov075_02174a14(Scene40Character *character);
+void func_ov075_02174b38(Scene40Character *character, int item);
 }
 
 static inline int Random(int max) {
@@ -5915,7 +7568,6 @@ extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
 // Not decompiled yet
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 extern const u32 sSongGiftMessages[6];        // "You presented enka!" ...: the message of each song genre given (miitouch file)
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
@@ -9832,7 +11484,6 @@ extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
 // Not decompiled yet
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
 // --- ov075-e: the character's helpers, its balloon and cover, the scene's clock, input, camera, lights, effects ---
@@ -11074,28 +12725,6 @@ void Scene40Character::StartTroubleProgress() {
     mTroubleStart = mContext->mClock->mSeconds;
 }
 
-// The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
-// saved characters each needs
-struct Scene40Activity {
-    /* 0x0 */ int mScene;
-    /* 0x4 */ u8 mMinCharacters;
-    /* 0x5 */ u8 mUnknown5;
-    /* 0x6 */ u8 mUnknown6;
-    /* 0x7 */ u8 mUnknown7;
-    /* 0x8 */ u8 mUnknown8;
-    /* 0x9 */ u8 mEnabled;
-};
-
-// 0xC
-
-static const Scene40Activity sActivities[20] = {
-    {24, 2, 0, 9, 0, 0, 1},    {28, 2, 0, 166, 0, 0, 1},  {43, 2, 1, 14, 1, 0, 1},   {50, 4, 0, 218, 0, 0, 1},
-    {54, 1, 1, 24, 1, 0, 1},   {55, 3, 0, 169, 0, 0, 1},  {58, 1, 0, 35, 0, 0, 1},   {61, 2, 1, 104, 0, 0, 1},
-    {76, 2, 0, 167, 0, 0, 1},  {77, 2, 0, 151, 0, 0, 1},  {80, 1, 0, 0, 0, 1, 1},    {82, 1, 0, 164, 0, 0, 1},
-    {118, 1, 0, 125, 0, 0, 1}, {123, 3, 0, 220, 0, 0, 1}, {136, 1, 0, 219, 0, 0, 1}, {139, 1, 0, 189, 0, 0, 1},
-    {141, 1, 0, 153, 0, 0, 1}, {143, 5, 1, 0, 0, 1, 1},   {144, 5, 1, 0, 0, 1, 1},   {145, 2, 0, 0, 0, 1, 1},
-};
-
 // One of the activities that are enabled and that there are enough characters for, at random
 int Scene40Character::ChooseActivity() {
     int candidates[20];
@@ -11532,8 +13161,8 @@ BOOL Scene40Cover::HasDisappeared() {
 
 // --- The stylus -------------------------------------------------------------------------------------------------
 
-static inline Scene40TouchPoint ZeroPoint() {
-    Scene40TouchPoint point = {0, 0};
+static inline ScreenPoint ZeroPoint() {
+    ScreenPoint point = {0, 0};
     return point;
 }
 
@@ -11553,15 +13182,15 @@ static inline const ScreenPoint &GetTouchPoint() {
     return gTouchInput.mUnknown4C ? gTouchInput.mLastPoint : gTouchInput.mPoint;
 }
 
-static inline Scene40TouchPoint AddPoints(Scene40TouchPoint a, Scene40TouchPoint b) {
-    Scene40TouchPoint sum;
+static inline ScreenPoint AddPoints(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint sum;
     sum.x = a.x + b.x;
     sum.y = a.y + b.y;
     return sum;
 }
 
-static inline Scene40TouchPoint SubtractPoints(ScreenPoint a, ScreenPoint b) {
-    Scene40TouchPoint difference;
+static inline ScreenPoint SubtractPoints(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint difference;
     difference.x = a.x - b.x;
     difference.y = a.y - b.y;
     return difference;
@@ -11598,7 +13227,7 @@ void Scene40Touch::Update() {
     }
     if (gTouchInput.mTp.touch) {
         mHeld = TRUE;
-        Scene40TouchPoint point;
+        ScreenPoint point;
         const ScreenPoint &touch = GetTouchPoint();
         point.x = touch.x;
         point.y = touch.y;
@@ -11617,7 +13246,7 @@ void Scene40Touch::Update() {
             mDirection.y = -1;
         }
         mPoint = AddPoints(point, mDirection);
-        Scene40TouchPoint move = SubtractPoints(gTouchInput.mPoint, gTouchInput.mLastPoint);
+        ScreenPoint move = SubtractPoints(gTouchInput.mPoint, gTouchInput.mLastPoint);
         if (Abs(move.x) > 1) {
             mDistance += Abs(move.x);
         }
@@ -11642,7 +13271,7 @@ void Scene40Touch::Update() {
         if (mPointCount > 8) {
             mPointCount = 8;
         }
-        Scene40TouchPoint sum = Scene40TouchPoint();
+        ScreenPoint sum = ScreenPoint();
         for (int i = 0; i < mPointCount; i++) {
             sum.x += mPoints[i].x;
             sum.y += mPoints[i].y;
@@ -11690,8 +13319,8 @@ void Scene40Touch::Reset() {
 }
 
 // The mean of the last five moves
-Scene40TouchPoint Scene40Touch::GetVelocity() {
-    Scene40TouchPoint sum = ZeroPoint();
+ScreenPoint Scene40Touch::GetVelocity() {
+    ScreenPoint sum = ZeroPoint();
     for (int i = 0; i < 5; i++) {
         sum.x += mMoves[i].x;
         sum.y += mMoves[i].y;

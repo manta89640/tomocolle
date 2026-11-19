@@ -2540,6 +2540,41 @@ overlays. So the linker script names every symbol of the delinked objects in a `
 original whole, and stripping only acts on compiled objects. With that, the ROM matches, and a library file linked
 from its compiled object comes out with exactly the functions the game has.
 
+## Visiting a Mii: the scene and its pages' controller (overlay 75, 0x02149A40 to 0x02153EE4)
+
+Measured (ov075-a's range; `src/overlays/ov075/Scene40.cpp`, headers `Scene40.h`, `Scene40Pages.h`,
+`Scene40Context.h`, `Scene40TouchPage.h`, `Scene40MessageSequence.h`):
+
+- **The scene** (`Scene40`, scenes 0x40 and 0x6C, 0x6F908 bytes) visits one saved character
+  (`GetVisitedIndex`: gSceneMemory.mCharacters[0], or in scene 0x6C, the tutorial's, the first or second by the
+  tutorial's step). `StartLoading` brings the residents' day up to date when it comes from the apartment (scene
+  0x11), chooses the day's "touch talk" characters (`ChooseTouchTalkers`), reads the character, mounts its room and
+  the archives: TCM/TTM/TIM/TDM/TRM/TEM messages, the talk messages and touch animations by the personality's kind
+  (cool, dry, nagomi, nori), the present box (3PM), balloon (3HB), mannequin head (3MH), bed or curtain (3HT),
+  effects (EFT), keyboard (KBD), the scene (SMT), the list (LTL) and three item models IM0 to IM2.
+- `Init` opens the seven message files (scene+0x309E4: common, trouble, talk, item, costume, room, miitouch), sets
+  up the lower screen, the 3D, the clock, the lists, the money (gGameData's capped counter, given back by `Exit`),
+  the speech window, two message windows (one per engine) and the message chain (scene+0x2C908,
+  `Scene40MessageSequence`: 21 entries at 0x0217D3DC, each window, message, delays, name argument and next), fills
+  the **context** (scene+0x30AB0, `Scene40Context`: the addresses of the scene's members the pages use) and starts
+  the pages by the scene the game comes from (`Start`: 0x68/0x1E/0x35 the list, 0x1A, 0x5B, the game scenes ...;
+  `Scene40Pages::Start` takes an entry 0 to 27).
+- `Update` runs every member, then changes the **upper screen's layout** when a page asks: four layouts, named by
+  the files `LoadLayout` loads (SMT BG_up, LTL BG_list with a frame by `mListFrame`, KBD with one of five
+  keyboards by `mKeyboardLayout`, SMT BG_down with the presents' sprites); states 4 (fade out by
+  `sFadePlanes[new][old]`), 5 (load), 6 (fade in), and the pages are inactive meanwhile.
+- **The pages' controller** (`Scene40Pages`, scene+0x30B50 to +0x69D2C) holds the ten pages, the stylus-on-the-
+  character tracker (`Scene40CharacterTouch`, +0x2C: what the stylus is on (face, head joint, body, nothing), the
+  eighth of a turn a stroke goes, and where press, hold, release and flick are in the room at three depths) and the
+  menu. Its `Update` runs the current page (`mPage`); each page handler waits for its page's done state and goes on
+  by the page's result: the touch page (page 0) to the talk, the gift reactions, the list in four modes (give, give
+  from a shop, dress, dress again), the keyboard (the character's motto, or a word to teach by the trouble), the
+  option page or the present page; the list's chosen gift to the gift page with `GetGiftReaction` (reaction and
+  value by the goods' or clothes' satisfaction, the trouble's promised value when the gift is what the trouble
+  asks for: `IsWishedGoods`, `IsWishedClothes`).
+- Inferred: scene id 0x6C is the tutorial's visit; the "SMT up"/"down" layouts are the upper screen's own and the
+  presents' (the option and present pages ask for the latter).
+
 ## Visiting a Mii: the lower-screen pages of overlay 75 (0x02153EE4 to 0x0215D8E4)
 
 Measured from the code (ov075-b's range; the scene, its controller and its other pages are described by the other

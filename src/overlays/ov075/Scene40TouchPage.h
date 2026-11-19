@@ -31,7 +31,7 @@ public:
     void Init(Scene40Touch *tracker, Scene40Character *character);
     void Update();
     void Clear();
-    int HitTest(const Scene40TouchPoint *point);
+    int HitTest(const ScreenPoint *point);
 
     /* 0x00 */ Scene40Touch *mTracker; // The scene's (scene+0x69D2C)
     /* 0x04 */ Scene40Character *mCharacter;
@@ -47,9 +47,25 @@ public:
 // talked to, with the menu (0x02150930 to 0x02153508).
 class Scene40TouchPage {
 public:
-    enum {
-        STATE_START = 1, // By mEntry
-        STATE_DONE = 18, // mResult is ready
+    enum State {
+        STATE_START = 1,          // By mEntry (UpdateStart)
+        STATE_IDLE = 2,           // The menu, and the stylus on the character
+        STATE_DRAGGED = 3,        // The character hangs from the stylus by its head
+        STATE_PRESSED_DOWN = 4,   // The character pressed down to the floor under the stylus
+        STATE_RUBBED = 5,         // The face rubbed: the head wobbles with the stylus
+        STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
+        STATE_IDLE_RIGHT_MENU = 7, // The idle state with only the menu's right buttons (5 and 6) and the balloon
+        STATE_PROPOSE = 8,        // The balloon tapped in state 7: after 45 frames the character proposes an activity
+        STATE_WAIT_9 = 9,         // Waits for the character's state 17
+        STATE_10 = 10,
+        STATE_11 = 11,
+        STATE_12 = 12,
+        STATE_13 = 13,
+        STATE_14 = 14,
+        STATE_WAIT_MESSAGES = 15, // Waits for the scene's message chain, then its return state
+        STATE_MESSAGES_0 = 16,    // Message chain 0 once the character is idle, then the idle state
+        STATE_MESSAGES_4 = 17,    // The same with chain 4, after choosing the menu's first button
+        STATE_DONE = 18,          // mResult is ready
     };
 
     void Init(Scene40Context *context, Scene40CharacterTouch *touch, Scene40MenuBar *menu);
@@ -59,24 +75,52 @@ public:
     void HideMenu(BOOL hide);
     void RefreshMenu();
     void UpdateMenu();
+    void UpdateStart();
+    void UpdateIdle();
+    void UpdateMenuChoice();
+    void UpdatePress();
+    void UpdateHold();
+    void UpdateRelease();
+    void Unused02151ab0();
+    void UpdateDragged();
+    void UpdatePressedDown();
+    void UpdateRubbed();
+    void UpdateWaitIdle();
+    void UpdateIdleRightMenu();
+    void UpdatePropose();
+    void UpdateWait9();
+    void Update10();
+    void Update11();
+    void Update12();
+    void Update13();
+    void Update14();
+    void UpdateWaitMessages();
+    void UpdateMessages0();
+    void UpdateMessages4();
     void SetState(int state);
+    void PlaceGift();
+    BOOL IsCharacterMood0Or1();
+    BOOL IsCharacterNotIn2Or24Or25();
+    void PlayGame();
+    void PlayGame3B();
+    void PlayGame87();
+    int FindPresentScene(int sceneId);
     void Draw();
 
     /* 0x00 */ int mLastState; // mState as Update began: the controller reads it (STATE_DONE: mResult is ready)
     /* 0x04 */ int mState;
     /* 0x08 */ int mStep;     // SetState clears these three
     /* 0x0C */ int mFrames;   // Frames in the state
-    /* 0x10 */ int mUnknown10;
+    /* 0x10 */ int mWaitFrames; // How long a state waits (mFrames counts up to it)
     /* 0x14 */ int mResult;   // What the controller does next (UpdateTouchPage)
     /* 0x18 */ int mEntry;    // How the page starts (STATE_START): what the controller sets
     /* 0x1C */ BOOL mActive; // The pages' SetActive sets it
-    /* 0x20 */ int mUnknown20;
+    /* 0x20 */ BOOL mTouching; // The stylus came down on the page (not on the menu) and has not gone up
     /* 0x24 */ BOOL mMenuHidden;
-    /* 0x28 */ Scene40Items mItems;
-    /* 0x54 */ u8 mUnknown54[0xC];
+    /* 0x28 */ Scene40Gift mGift; // What the character is given after a scene (PlaceGift)
     /* 0x60 */ int mUnknown60;
-    /* 0x64 */ int mUnknown64;
-    /* 0x68 */ int mUnknown68;
+    /* 0x64 */ BOOL mRubSoundX; // The rub's sound played for a move across, until the stylus slows down
+    /* 0x68 */ BOOL mRubSoundY; // The same for a move up or down
     /* 0x6C */ u8 mUnknown6C[0x4];
     /* 0x70 */ Scene40MenuBar *mMenu;
     /* 0x74 */ Scene40Touch *mTracker;
