@@ -10923,22 +10923,28 @@ int Scene40Character::ChooseOutingPartner() {
         int best = -1;
         u32 bestMeter = 119;
         for (int i = 0; i < 100; i++) {
-            if (GameData_CharacterExists(&gGameData, i) &&
-                MiiData_GetSex(this) == GameData_GetCharacterSex(&gGameData, i) && i != mIndex &&
-                mRelationRank[i] == RELATION_FRIENDS && mRelationMeter[i] > bestMeter) {
-                best = i;
-                bestMeter = mRelationMeter[i];
+            if (GameData_CharacterExists(&gGameData, i)) {
+                int sex = MiiData_GetSex(this);
+                int other = GameData_GetCharacterSex(&gGameData, i);
+                if (other == sex && i != mIndex && mRelationRank[i] == RELATION_FRIENDS &&
+                    mRelationMeter[i] > bestMeter) {
+                    best = i;
+                    bestMeter = mRelationMeter[i];
+                }
             }
         }
         if (best != -1) {
             u16 candidates[100];
             int count = 0;
             for (int i = 0; i < 100; i++) {
-                if (GameData_CharacterExists(&gGameData, i) &&
-                    MiiData_GetSex(this) == GameData_GetCharacterSex(&gGameData, i) && i != mIndex &&
-                    mRelationRank[i] == RELATION_FRIENDS && mRelationMeter[i] == mRelationMeter[best]) {
-                    candidates[count] = i;
-                    count++;
+                if (GameData_CharacterExists(&gGameData, i)) {
+                    int sex = MiiData_GetSex(this);
+                    int other = GameData_GetCharacterSex(&gGameData, i);
+                    if (other == sex && i != mIndex && mRelationRank[i] == RELATION_FRIENDS &&
+                        mRelationMeter[i] == mRelationMeter[best]) {
+                        candidates[count] = i;
+                        count++;
+                    }
                 }
             }
             partner = candidates[Random(count)];
@@ -11770,10 +11776,17 @@ static inline FloorPos ToFloorPos(VecFx32 v) {
     return pos;
 }
 
+// By value: each use makes the original's copy of the eye
+static inline VecFx32 GetEye(Camera *camera) {
+    return camera->mEye;
+}
+
 // Where the camera's eye is, on the floor
 FloorPos Scene40Camera::GetEyeFloorPos() {
-    VecFx32 eye = mCamera->mEye;
-    return ToFloorPos(eye);
+    FloorPos pos;
+    pos.x = GetEye(mCamera).x;
+    pos.z = GetEye(mCamera).z;
+    return pos;
 }
 
 // --- The lights -------------------------------------------------------------------------------------------------
@@ -11905,6 +11918,93 @@ void Scene40Physics::UpdateCharacter() {
     mCharacter->mMotion.SetVelocity(velocity);
 }
 
+static inline fx32 LengthSq(const VecFx32 *v) {
+    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
+}
+
+// NOT MATCHING (the code is the original's but for three stack slots): the original has the push at sp+48, the
+// zero vector it is copied from at sp+24 and the one the velocity is cleared with at sp+36; here they are at
+// 36, 48 and 24. Tried: the push initialised directly (no copy), declared before its zero, an inline returning the
+// zero vector (one temporary more), the push and a VEC_Set vector at the loop's scope.
+// The item models' fall, as the character's, for each that is shown and not held. The walls are 16 units from the
+// middle; an item beyond them is pushed back by the square of how far it is out. On the floor it bounces (with a
+// quarter of its speed inside the walls, 0.4 outside) and makes a sound, and rests once it is slow.
+void Scene40Physics::UpdateItems() {
+    for (int i = 0; i < mItemCount; i++) {
+        if (!mItems[i]->mVisible) {
+            continue;
+        }
+        if (mItems[i]->mMotion.mHeld) {
+            continue;
+        }
+        VecFx32 pos = mItems[i]->mPosition;
+        VecFx32 velocity = mItems[i]->mMotion.mVelocity;
+        mItems[i]->mMotion.UpdateAtRest(&pos, &velocity);
+        if (mItems[i]->mMotion.mAtRest) {
+            continue;
+        }
+        VEC_Add(&pos, &velocity, &pos);
+        if (pos.x < -0x4000 || pos.x > 0x4000 || pos.z < -0x4000 || pos.z > 0x4000) {
+            VecFx32 zero = {0, 0, 0};
+            VecFx32 push = zero;
+            if (pos.x < -0x4000) {
+                push.x = -(pos.x + 0x4000);
+            } else if (pos.x > 0x4000) {
+                push.x = -(pos.x - 0x4000);
+            }
+            if (pos.z < -0x4000) {
+                push.z = -(pos.z + 0x4000);
+            } else if (pos.z > 0x4000) {
+                push.z = -(pos.z - 0x4000);
+            }
+            push.x >>= 9;
+            push.z >>= 9;
+            push.x = (push.x < 0 ? -1 : 1) * (push.x * push.x);
+            push.z = (push.z < 0 ? -1 : 1) * (push.z * push.z);
+            VEC_Add(&pos, &push, &pos);
+        }
+        if (pos.y <= 0 && velocity.y <= 0) {
+            if (pos.x < -0x4000 || pos.x > 0x4000 || pos.z < -0x4000 || pos.z > 0x4000) {
+                ScaleVec(0x666, &velocity, &velocity);
+            } else {
+                ScaleVec(0x400, &velocity, &velocity);
+            }
+            velocity.y = -velocity.y;
+            if (LengthSq(&velocity) < 24) {
+                VecFx32 zero = {0, 0, 0};
+                velocity = zero;
+                mItems[i]->mMotion.mAtRest = TRUE;
+            }
+            pos.y = 0;
+            gSoundManager.StartSeqArc(1, 10, 5);
+        } else {
+            if (pos.x >= 0x4000 && velocity.x > 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.x = 0x4000;
+                velocity.x = -velocity.x;
+            }
+            if (pos.x <= -0x4000 && velocity.x < 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.x = -0x4000;
+                velocity.x = -velocity.x;
+            }
+            if (pos.z >= 0x4000 && velocity.z > 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.z = 0x4000;
+                velocity.z = -velocity.z;
+            }
+            if (pos.z <= -0x4000 && velocity.z < 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.z = -0x4000;
+                velocity.z = -velocity.z;
+            }
+            velocity.y -= 100;
+        }
+        mItems[i]->SetPosition(pos);
+        mItems[i]->mMotion.SetVelocity(velocity);
+    }
+}
+
 // The item models that are (or are not) visible
 int Scene40Physics::GetItems(Scene40ItemModel **items, int *count, BOOL visible) {
     *count = 0;
@@ -11977,10 +12077,6 @@ VecFx32 Scene40ItemModel::GetLookPoint() {
 }
 
 // --- The character: the item in its hands -----------------------------------------------------------------------
-
-static inline fx32 LengthSq(const VecFx32 *v) {
-    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
-}
 
 // Puts the held item in the right hand: the hand, or a little way from the elbow towards the hand if the hand is
 // nearer than that (PlaceHeldItem with the left hand left out)
