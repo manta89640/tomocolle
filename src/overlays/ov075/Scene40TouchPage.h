@@ -47,9 +47,25 @@ public:
 // talked to, with the menu (0x02150930 to 0x02153508).
 class Scene40TouchPage {
 public:
-    enum {
-        STATE_START = 1, // By mEntry
-        STATE_DONE = 18, // mResult is ready
+    enum State {
+        STATE_START = 1,          // By mEntry (UpdateStart)
+        STATE_IDLE = 2,           // The menu, and the stylus on the character
+        STATE_3 = 3,
+        STATE_4 = 4,
+        STATE_5 = 5,
+        STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
+        STATE_7 = 7,
+        STATE_8 = 8,
+        STATE_WAIT_9 = 9,         // Waits for the character's state 17
+        STATE_10 = 10,
+        STATE_11 = 11,
+        STATE_12 = 12,
+        STATE_13 = 13,
+        STATE_14 = 14,
+        STATE_WAIT_MESSAGES = 15, // Waits for the scene's message chain, then its return state
+        STATE_MESSAGES_0 = 16,    // Message chain 0 once the character is idle, then the idle state
+        STATE_MESSAGES_4 = 17,    // The same with chain 4, after choosing the menu's first button
+        STATE_DONE = 18,          // mResult is ready
     };
 
     void Init(Scene40Context *context, Scene40CharacterTouch *touch, Scene40MenuBar *menu);
@@ -59,6 +75,24 @@ public:
     void HideMenu(BOOL hide);
     void RefreshMenu();
     void UpdateMenu();
+    void UpdateStart();
+    void UpdateIdle();
+    void Unused02151ab0();
+    void Update3();
+    void Update4();
+    void Update5();
+    void UpdateWaitIdle();
+    void Update7();
+    void Update8();
+    void UpdateWait9();
+    void Update10();
+    void Update11();
+    void Update12();
+    void Update13();
+    void Update14();
+    void UpdateWaitMessages();
+    void UpdateMessages0();
+    void UpdateMessages4();
     void SetState(int state);
     void Draw();
 

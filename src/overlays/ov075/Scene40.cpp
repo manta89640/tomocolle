@@ -2194,6 +2194,69 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     RefreshMenu();
 }
 
+// The state the controller gave, then one frame of it
+void Scene40TouchPage::Update() {
+    mTouch->Update();
+    int state = mState;
+    mLastState = state;
+    switch (state) {
+    case STATE_START:
+        UpdateStart();
+        break;
+    case STATE_IDLE:
+        UpdateIdle();
+        break;
+    case STATE_3:
+        Update3();
+        break;
+    case STATE_4:
+        Update4();
+        break;
+    case STATE_5:
+        Update5();
+        break;
+    case STATE_WAIT_IDLE:
+        UpdateWaitIdle();
+        break;
+    case STATE_7:
+        Update7();
+        break;
+    case STATE_8:
+        Update8();
+        break;
+    case STATE_WAIT_9:
+        UpdateWait9();
+        break;
+    case STATE_10:
+        Update10();
+        break;
+    case STATE_11:
+        Update11();
+        break;
+    case STATE_12:
+        Update12();
+        break;
+    case STATE_13:
+        Update13();
+        break;
+    case STATE_14:
+        Update14();
+        break;
+    case STATE_WAIT_MESSAGES:
+        UpdateWaitMessages();
+        break;
+    case STATE_MESSAGES_0:
+        UpdateMessages0();
+        break;
+    case STATE_MESSAGES_4:
+        UpdateMessages4();
+        break;
+    case STATE_DONE:
+        break;
+    }
+    mFrames++;
+}
+
 // The page forwards calling and availability to the menu it was given by Init.
 void Scene40TouchPage::StartCall() {
     mMenu->StartCall();
@@ -2221,6 +2284,76 @@ void Scene40TouchPage::RefreshMenu() {
 
 void Scene40TouchPage::UpdateMenu() {
     mMenu->UpdateAvailable();
+}
+
+// Does nothing (the idle state calls it last)
+void Scene40TouchPage::Unused02151ab0() {}
+
+void Scene40TouchPage::UpdateWaitIdle() {
+    if (mCharacter->mState != 0) {
+        return;
+    }
+    mMenu->SetDisabled(FALSE);
+    SetState(STATE_IDLE);
+}
+
+void Scene40TouchPage::UpdateWait9() {
+    if (mCharacter->mState != 17) {
+        return;
+    }
+    mCharacter->ClearUnknown246();
+    if (mUnknown60) {
+        SetState(STATE_10);
+        return;
+    }
+    mMenu->SetRightDisabled(FALSE);
+    SetState(STATE_7);
+}
+
+void Scene40TouchPage::UpdateWaitMessages() {
+    Scene40MessageSequence *sequence = mContext->mMessageSequence;
+    if (sequence->mLastState != Scene40MessageSequence::STATE_DONE) {
+        return;
+    }
+    mState = sequence->mReturnState;
+    mFrames = 0;
+}
+
+void Scene40TouchPage::UpdateMessages0() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0) {
+            return;
+        }
+        mContext->mMessageSequence->mReturnState = STATE_MESSAGES_0;
+        mState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 0;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        SetState(STATE_IDLE);
+        break;
+    }
+}
+
+void Scene40TouchPage::UpdateMessages4() {
+    switch (mStep) {
+    case 0:
+        if (mContext->mCharacter->mState != 0) {
+            return;
+        }
+        mMenu->Choose(0);
+        mContext->mMessageSequence->mReturnState = STATE_MESSAGES_4;
+        mState = STATE_WAIT_MESSAGES;
+        mContext->mMessageSequence->mEntry = 4;
+        mContext->mMessageSequence->mState = Scene40MessageSequence::STATE_START;
+        mStep++;
+        break;
+    case 1:
+        SetState(STATE_IDLE);
+        break;
+    }
 }
 
 void Scene40TouchPage::SetState(int state) {
