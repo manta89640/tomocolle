@@ -4112,7 +4112,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02174b38(Scene40Character *character, int item);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
@@ -5804,7 +5803,7 @@ void Scene40Character::UpdateStates28To2D() {
         PlaceHeldItem();
         ShrinkHeldItemByBite();
         UpdateMouthByAnimation();
-        func_ov075_02174b38(this, mGift.mItem.InventoryItem::mId);
+        PlayEatSound(mGift.mItem.InventoryItem::mId);
         if (mFrame < mWait) {
             return;
         }
@@ -5919,7 +5918,6 @@ extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk
 extern MATHRandContext16 gRandom;
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
-int func_ov075_0217520c(Scene40Character *character);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
@@ -8380,7 +8378,7 @@ void Scene40Character::UpdateStates67To85() {
                 return;
             }
             ClearMoodIfTroubleOfCategory4OrKind8();
-            int partner = func_ov075_0217520c(this);
+            int partner = ChooseOutingPartner();
             if (partner != -1) {
                 gSceneManager.RequestScene(0x79);
                 gSceneMemory.mCharacters[0] = mIndex;
@@ -10778,6 +10776,70 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     GetTalkArguments(entry, count, types, values);
 }
 
+// A progressing trouble whose progress is full is over (state 4): it ends after its cooldown, the mood clears, and
+// a long act with a partner ends
+void Scene40Character::FinishTroubleIfFull(s64 now) {
+    BOOL full = FALSE;
+    if (IsProgressingTrouble()) {
+        if (mTroubleState == 2) {
+            if (IsTroubleProgressFull(now)) {
+                full = TRUE;
+            }
+        } else if (mTroubleState == 1) {
+            if (IsTroubleProgressFullAt(now, now, mTroubleProgress)) {
+                full = TRUE;
+            }
+        }
+    }
+    if (!full) {
+        return;
+    }
+    mTroubleState = 4;
+    mTroubleEnd = now + GetTrouble(this)->cooldownMinutes * 60;
+    mMood = 0;
+    ClearLongActOfPair();
+}
+
+extern "C" int GameData_GetCharacterSex(GameData *game, int index);
+
+// Who goes out with the character (scene 0x79; none: scene 0x78 alone): not in a trouble of category 4; its
+// spouse, lover or best friend; else one of the friends of its own sex it likes most (meter above 119), at random
+int Scene40Character::ChooseOutingPartner() {
+    int partner = -1;
+    if (IsInTrouble() && mTroubleCategory == 4) {
+    } else if (mSpouse != -1) {
+        partner = mSpouse;
+    } else if (mLover != -1) {
+        partner = mLover;
+    } else if (mBestFriend != -1) {
+        partner = mBestFriend;
+    } else {
+        int best = -1;
+        u32 bestMeter = 119;
+        for (int i = 0; i < 100; i++) {
+            if (GameData_CharacterExists(&gGameData, i) &&
+                MiiData_GetSex(this) == GameData_GetCharacterSex(&gGameData, i) && i != mIndex &&
+                mRelationRank[i] == RELATION_FRIENDS && mRelationMeter[i] > bestMeter) {
+                best = i;
+                bestMeter = mRelationMeter[i];
+            }
+        }
+        if (best != -1) {
+            u16 candidates[100];
+            int count = 0;
+            for (int i = 0; i < 100; i++) {
+                if (GameData_CharacterExists(&gGameData, i) &&
+                    MiiData_GetSex(this) == GameData_GetCharacterSex(&gGameData, i) && i != mIndex &&
+                    mRelationRank[i] == RELATION_FRIENDS && mRelationMeter[i] == mRelationMeter[best]) {
+                    candidates[count++] = i;
+                }
+            }
+            partner = candidates[Random(count)];
+        }
+    }
+    return partner;
+}
+
 // A long act with a partner ends for both: the partner's record is read, cleared and written back
 void Scene40Character::ClearLongActOfPair() {
     if (IsLongActPaired()) {
@@ -11900,6 +11962,24 @@ void Scene40Character::ShrinkHeldItemByBite() {
     fx32 scale = FX_Div(mHeldItem->mScale.x, mHeldItem->mBaseScale);
     scale -= ((frame / length + 1) * FX32_ONE) / ((bites + 1) * bites / 2);
     mHeldItem->SetScale(scale);
+}
+
+// At each bite's middle frame, the sound of eating the goods: by the goods' flags (0x2000000 and 0x10)
+void Scene40Character::PlayEatSound(int item) {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    if (mFrame % length != length / 2) {
+        return;
+    }
+    const ItemInfo *info = &gGoodsTable[(u16)item];
+    u32 flags = info->mFlags;
+    if (flags & 0x2000000) {
+        gSoundManager.StartSeqArc(1, 0x21, 1);
+    } else if (flags & 0x10) {
+        gSoundManager.StartSeqArc(1, 0x21, 2);
+    } else {
+        gSoundManager.StartSeqArc(1, 0x21, 0);
+    }
 }
 
 // At each bite's middle frame, the bite's sound (the last bite's another)

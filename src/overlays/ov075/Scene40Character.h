@@ -166,6 +166,9 @@ public:
     int ChooseGame();
     void FindRelations();
     int ChooseMusic();
+    void PlayEatSound(int item);
+    void FinishTroubleIfFull(s64 now);
+    int ChooseOutingPartner();
     void PlayBiteSound();
     void ShrinkHeldItemByBite();
 
