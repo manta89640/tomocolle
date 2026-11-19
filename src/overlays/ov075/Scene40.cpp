@@ -2280,6 +2280,81 @@ void Scene40TouchPage::UpdateMenu() {
     mMenu->UpdateAvailable();
 }
 
+// How the page starts, by the controller's entry: the menu, the character's state and the page's first state
+void Scene40TouchPage::UpdateStart() {
+    mUnknown20 = 0;
+    mCharacter->mBalloon.mUnknown08 = FALSE;
+    switch (mEntry) {
+    case 0:
+        SetState(STATE_IDLE);
+        break;
+    case 1:
+        mMenu->SetDisabled(TRUE);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 2:
+        UpdateMenu();
+        SetState(STATE_12);
+        break;
+    case 3:
+        mCharacter->SetState(26);
+        SetState(STATE_IDLE);
+        break;
+    case 4:
+        mCharacter->SetState(0);
+        SetState(STATE_IDLE);
+        break;
+    case 5:
+        mMenu->SetLeftDisabled(TRUE);
+        SetState(STATE_7);
+        break;
+    case 7:
+        mMenu->SetLeftDisabled(TRUE);
+        SetState(STATE_7);
+        break;
+    case 6:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(18);
+        SetState(STATE_WAIT_9);
+        PlaceGift();
+        break;
+    case 8:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(20);
+        SetState(STATE_11);
+        break;
+    case 9: {
+        // The room's interior counts as the character's own
+        mCharacter->SetState(0);
+        int interior = mCharacter->mInterior;
+        mCharacter->mOwnedInteriors[interior >> 5] |= 1 << (interior & 31);
+        UpdateMenu();
+        SetState(STATE_12);
+        break;
+    }
+    case 10:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(0xA1);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 11:
+        mMenu->SetDisabled(TRUE);
+        mCharacter->SetState(0x6E);
+        SetState(STATE_WAIT_IDLE);
+        break;
+    case 12:
+        mCharacter->SetState(0xC6);
+        mCharacter->mUnknown054Bit20 = (u8)(mCharacter->mUnknown054Bit20 + 1);
+        mStep = 0;
+        SetState(STATE_MESSAGES_0);
+        break;
+    case 13:
+        mStep = 0;
+        SetState(STATE_MESSAGES_4);
+        break;
+    }
+}
+
 // Does nothing (the idle state calls it last)
 void Scene40TouchPage::Unused02151ab0() {}
 
