@@ -12491,11 +12491,12 @@ struct ButtonSequences {
 };
 
 // By kind of button
-static const ButtonSequences sButtonSequences[3] = { { 2, 3 }, { 0, 1 }, { 0, 0 } };
+static const ButtonSequences sButtonSequences[2] = { { 2, 3 }, { 0, 1 } };
 static const ButtonPosition sButtonPositions[2] = { { 128, 177 }, { 242, 13 } };
-static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
-static const ScreenRect sButtonRect1 = { -16, -16, 34, 34 };
-static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
+// The rectangle that takes a touch: of a button of another kind, of kind 0, of kind 1. One array, not three objects:
+// the ROM has the three after the 44-byte tables of the file's pool of constants, where only a 48-byte object sorts
+// (overlay 73 keeps the third though it has no button of kind 1).
+static const ScreenRect sButtonRects[3] = { { -32, -24, 66, 56 }, { -34, -12, 70, 26 }, { -16, -16, 34, 34 } };
 
 // @0x0216c980
 TouchSprite::TouchSprite() {
@@ -12534,14 +12535,14 @@ void TouchButton::Init(int kind) {
     Sprite_Init(this, 0, sButtonSequences[kind].mNormal, mX, mY, FALSE);
     mState = STATE_IDLE;
     if (kind == 0) {
-        mTouchRect = &sButtonRect0;
+        mTouchRect = &sButtonRects[1];
         MessageText *label = mLabel;
         label->SetPositionFromVec((mX - label->mCanvas.areaWidth * 4) << FX32_SHIFT,
                                    (mY - label->mCanvas.areaHeight * 4) << FX32_SHIFT);
     } else if (kind == 1) {
-        mTouchRect = &sButtonRect1;
+        mTouchRect = &sButtonRects[2];
     } else {
-        mTouchRect = &sButtonRectOther;
+        mTouchRect = &sButtonRects[0];
     }
 }
 

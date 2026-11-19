@@ -138,10 +138,10 @@ data_ov073_02150c00 kind:data(any) addr:0x02150c00
 data_ov073_02150c0c kind:data(any) addr:0x02150c0c
 sScrollPerFloor kind:data(any) addr:0x02150c30 local
 sCursorTouchRect kind:data(any) addr:0x02150c40 local
+sButtonTouchRect kind:data(any) addr:0x02150c50 local
 sWindowRect kind:data(any) addr:0x02150c60 local
 sClockSequences kind:data(any) addr:0x02150c70 local
-sButtonRectOther kind:data(any) addr:0x02150c88 local
-sButtonRect0 kind:data(any) addr:0x02150c98 local
+sButtonRects kind:data(any) addr:0x02150c88 local
 sRoomCounts kind:data(any) addr:0x02150cb8 local
 sWindowScreenName kind:data(any) addr:0x02150cbc local
 sSkyPictures kind:data(any) addr:0x02150cd4 local

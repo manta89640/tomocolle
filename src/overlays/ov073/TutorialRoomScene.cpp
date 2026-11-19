@@ -38,29 +38,31 @@ struct ButtonSequences {
 static FloorRect gWalkArea = { -FX32_CONST(2.5), -FX32_CONST(2.5), -gWalkArea.x * 2, -gWalkArea.z * 2 };
 // The order of these declarations is the one that puts each in its place in .rodata (see docs/decompiling.md, "How
 // a file's data is laid out"): objects of one size can be declared in any order, and only this one gives the ROM's.
-// The message window's button: where it is
-static const WindowPoint sWindowButtonPosition = { 128, 149 };
+// Where the message window's text is
+static const WindowPoint sWindowTextPosition = { 38, 33 };
 // Where a character coming in by the door walks to (the door is at z -9.0): state 10 inside the door and then to
 // the front of the room, state 12 to the doorstep and then past the door
-static const FloorPos sInsideDoor = { 0, -0x4800 };
-// Where each kind of touch button is (the tutorial has kind 0 only)
-static const ButtonPosition sButtonPositions[1] = { { 128, 177 } };
-static const FloorPos sRoomFront = { 0, -0x1000 };
 static const FloorPos sPastDoor = { 0, -0x3666 };
+static const FloorPos sInsideDoor = { 0, -0x4800 };
 // The message window's button: how large
 static const WindowPoint sWindowButtonSize = { 94, 30 };
+// Where each kind of touch button is (the tutorial has kind 0 only)
+static const ButtonPosition sButtonPositions[1] = { { 128, 177 } };
+static const FloorPos sDoorstep = { 0, -0x6000 };
 // The screen (tile map) of the message window's background: the two uses share one address
 static const char sWindowScreenName[] = "MLT:/Window_down2.nsc";
-static const FloorPos sDoorstep = { 0, -0x6000 };
-// The rectangle around the cursor on the building front that takes a touch
-static const ScreenRect sCursorTouchRect = { -16, -12, 34, 26 };
-// How fast the camera's orbit slows down, and its fastest, in elevation (x) and direction (y). The values are
-// folded into TutorialRoomCamera::UpdateOrbit; the objects stay in .rodata, as in the ROM
-static const VecFx32 sOrbitMaxSpeed = { 0x40000, 0x100000, 0 };
+static const FloorPos sRoomFront = { 0, -0x1000 };
 // How far the building front scrolls per floor, by building size
 static const fx32 sScrollPerFloor[4] = { 0x16000, 0x16000, 0x19000, 0x1C000 };
-// The rectangles of the touch button that take a touch: of kind 0, and of the others
-static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
+// The rectangle around the cursor on the building front that takes a touch
+static const ScreenRect sCursorTouchRect = { -16, -12, 34, 26 };
+// The rectangle around the building's button that takes a touch: only TutorialBuildingButton::Contains reads it,
+// which nothing calls (the link dropped it), but the ROM's pool has it
+static const ScreenRect sButtonTouchRect = { -22, -18, 46, 38 };
+// The rectangle that takes a touch, by kind of touch button: another kind, kind 0, kind 1. One array, not three
+// objects: the ROM has the three after the 22-byte sequences, where only a 48-byte object sorts, and keeps the third
+// though the tutorial has no button of kind 1
+static const ScreenRect sButtonRects[3] = { { -32, -24, 66, 56 }, { -34, -12, 70, 26 }, { -16, -16, 34, 34 } };
 // The id of the head icon of each mood (mood 0 shows none)
 static const s16 sMoodHeadIcons[5] = { 4, 5, 0, 1, 7 };
 // Which of the seven pictures of the sky each time of day shows
@@ -69,10 +71,8 @@ static const s8 sSkyPictures[32] = {
 };
 // How many rooms a building of each size has
 static const u8 sRoomCounts[4] = { 24, 48, 72, 100 };
-// Where the message window's text is
-static const WindowPoint sWindowTextPosition = { 38, 33 };
-static const VecFx32 sOrbitFriction = { 0x4000, 0x7000, 0 };
-static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
+// The message window's button: where it is
+static const WindowPoint sWindowButtonPosition = { 128, 149 };
 // The rectangle of the message window, in pixels
 static const ScreenRect sWindowRect = { 20, 20, 216, 152 };
 // The animation sequence and the position of each sprite of the clock
@@ -204,8 +204,8 @@ void TutorialRoomScene::Init() {
     gScreenControl.Show(0x11);
     ScreenControl_SetBlendAlpha(&gScreenControl, 2, 0x11, 8, 8);
 
-    mEtcMessages.Open("TEM:/tmd_etc_msg_JP.bmg");
-    mCommonMessages.Open("TCM:/tmd_common_msg_JP.bmg");
+    mEtcMessages.Open("TEM:tmd_etc_msg_JP.bmg");
+    mCommonMessages.Open("TCM:tmd_common_msg_JP.bmg");
     mRoomMessages.Open("TMM:/tmd_mainroom_msg_JP.bmg");
     mRoom.Refresh();
     mRoom.Load(3);
@@ -1889,8 +1889,13 @@ void TutorialRoomCamera::UpdateOrbit() {
         mInput.y = 0;
         mInput.z = 0;
     }
-    ApplyInput(&mOrbitSpeed.x, mInput.x, sOrbitFriction.x, sOrbitMaxSpeed.x);
-    ApplyInput(&mOrbitSpeed.y, mInput.y, sOrbitFriction.y, sOrbitMaxSpeed.y);
+    // How fast the orbit can go, and how fast it slows down, in elevation (x) and direction (y). The values are folded;
+    // the objects stay in .rodata, as in the ROM, which has them after the characters' 12-byte initialisers: so they
+    // are declared here, not with the file's statics at the top
+    static const VecFx32 maxSpeed = { 0x40000, 0x100000, 0 };
+    static const VecFx32 friction = { 0x4000, 0x7000, 0 };
+    ApplyInput(&mOrbitSpeed.x, mInput.x, friction.x, maxSpeed.x);
+    ApplyInput(&mOrbitSpeed.y, mInput.y, friction.y, maxSpeed.y);
     VEC_Add(&mOrbit, &mOrbitSpeed, &mOrbit);
     mInput.x = 0;
     mInput.y = 0;
@@ -2112,6 +2117,17 @@ void TutorialBuildingButton::Update() {
 // @0x0214f5fc
 void TutorialBuildingButton::SetState(int state) {
     mState = state;
+}
+
+// Not in the ROM: overlay 74's BuildingButton::Contains, which the tutorial never calls, so the link dropped it. The
+// file had it: the rectangle it reads, sButtonTouchRect, is in the ROM's pool of constants at 0x02150C50, and nothing
+// that the link kept refers to it.
+BOOL TutorialBuildingButton::Contains(ScreenPoint point) {
+    ScreenRect rect = sButtonTouchRect;
+    ScreenPoint position = GetPixelPosition();
+    rect.x += position.x;
+    rect.y += position.y;
+    return ScreenRect_Contains(&rect, &point) != 0;
 }
 
 // --- TutorialApartmentFront ---
@@ -2538,12 +2554,12 @@ void TutorialTouchButton::Init(int kind) {
     Sprite_Init(this, 0, sButtonSequences[kind].mNormal, mX, mY, FALSE);
     mState = STATE_IDLE;
     if (kind == 0) {
-        mTouchRect = &sButtonRect0;
+        mTouchRect = &sButtonRects[1];
         MessageText *label = mLabel;
         label->SetPositionFromVec((mX - label->mCanvas.areaWidth * 4) << FX32_SHIFT,
                                    (mY - label->mCanvas.areaHeight * 4) << FX32_SHIFT);
     } else {
-        mTouchRect = &sButtonRectOther;
+        mTouchRect = &sButtonRects[0];
     }
 }
 

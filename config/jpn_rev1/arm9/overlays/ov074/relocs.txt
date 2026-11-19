@@ -4008,8 +4008,8 @@ from:0x0216ca94 kind:arm_call to:0x02026b48 module:main
 from:0x0216cb1c kind:load to:0x0216d4f4 module:overlay(74)
 from:0x0216cb20 kind:load to:0x0216d4f4 add:0x4 module:overlay(74)
 from:0x0216cb24 kind:load to:0x0216d46c module:overlay(74)
-from:0x0216cb28 kind:load to:0x0216d5d8 module:overlay(74)
-from:0x0216cb2c kind:load to:0x0216d5e8 module:overlay(74)
+from:0x0216cb28 kind:load to:0x0216d5c8 add:0x10 module:overlay(74)
+from:0x0216cb2c kind:load to:0x0216d5c8 add:0x20 module:overlay(74)
 from:0x0216cb30 kind:load to:0x0216d5c8 module:overlay(74)
 from:0x0216cb78 kind:arm_call to:0x02026e3c module:main
 from:0x0216cbd4 kind:arm_call to:0x02026e3c module:main
