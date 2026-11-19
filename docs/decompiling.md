@@ -1367,6 +1367,34 @@ Each was found on one function and checked on a second where the shape recurs:
   button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
   mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).
 
+**Found on overlay 75's scene and pages' controller (ov075-a, round 5)**
+- **`T *const p = &gGlobal;` keeps the global's address; `T *p = &gGlobal;` is propagated.** A plain local pointer
+  to a global becomes one literal per field address (`gCamera+0x2C`, `gCamera+0x20`); declared `* const`, it is
+  one literal loaded at the top, held in a callee-saved register across calls, the fields formed by `add` or by
+  the load's offset. Measured three times: `ProjectTouch` / `ProjectTouchBetween` (the camera), `SetGameFlags`
+  (`GameData *const game`: one base for the if-converted orr/bic and the store) and `TakeGameResult` (the scratch).
+  `#pragma opt_propagation off` keeps the base too but recolours other code in the function, so it is not the
+  original's form; overlay 110's camera setters, which use the pragma, are candidates for the `const` form.
+- **A struct assignment of a char-array struct** (`struct ArchiveName { char mName[4]; }; name = sTemplate;
+  name.mName[2] = '0' + i;`) gives in-order `ldrb` of the template and `and rX, rY, #255` copies held in registers;
+  char arrays copied element by element reload with `ldrsb` instead (`Scene40::StartLoading`). The destination
+  declared before the template takes the higher stack slot.
+- **A zero vector declared inside a loop body** re-stores the stack temporary every iteration and propagates only
+  `.x` into the destination store; declared outside the loop, the stores are hoisted (`Scene40CharacterTouch::
+  Clear`). A local `const VecFx32 up = {...}` is copied from `.rodata` with `ldm`/`stm`; a file `static const` of
+  the same value is folded into immediates.
+- **Locals are given stack slots by declaration order** (the first declared at the highest address): eight vectors
+  declared in the original's slot order matched `ProjectTouch` at once.
+- **A sparse switch needs its empty case to keep the jump table**: cases 0, 1 and 3 compile to compares, with
+  `case 2: break;` to the original's four-entry table (`Scene40Pages::UpdateOptionPage`, `UpdateKeyboardPage`).
+- **The scene's constructor is a probe of the original's member nesting.** Scene40's implicit constructor
+  (main 0x020428E0) inlines every member's; with ItemListView's list view a member of the pages' controller
+  directly it recolours the inlined loops (99.8%), flat in the scene or inside a list-page class it matches. Each
+  class introduced over a range of members was checked so; the destructor (ov075 0x0217B040) matches with the
+  final nesting.
+- **A member's address is rematerialised, pointer arithmetic is not**: `&this->mPage` is formed again at each use,
+  `(u8 *)this + 0x2A49C` is kept in a register (`Scene40Pages::Init` before its pages had classes).
+
 ## Functions emitted in every file that uses them
 
 Measured (fix-link, test files under the game's compiler and flags, and the ROM):
