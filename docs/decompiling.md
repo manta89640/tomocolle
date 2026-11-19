@@ -1367,6 +1367,23 @@ Each was found on one function and checked on a second where the shape recurs:
   button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
   mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).
 
+**Rules measured on overlay 75's character code (ov075-e)**
+- Animation-by-name calls (`m.SetAnimation(type, ResourceSet_FindIndexByName(m.mUnknown04, type, "name"))`) match
+  only through an inline member `PlayAnimation(type, name)`: an inline binds its arguments last to first, so the
+  name's literal is loaded and pooled before the type. Two characters handed to the next scene loaded in reverse
+  order came from the same rule (an inline `PrepareTogetherScene(first, second, mode)`).
+- A range test on a `u8` field (`id == 2 || id == 3`) is done in u8 arithmetic (`add #254; and #255`); the
+  original's `sub; cmp; movls` came from an inline accessor returning the field as an `int`.
+- A BOOL-returning inline (`IsInTroubleOfKind`) materialises the BOOL (`moveq #1; movne #0`) where the original
+  tests the condition directly.
+- An extra field-by-field copy of a vector before a by-value call came from a function cut down from a sibling
+  (`middle = rightPoint;` left over from the two-hand version of `PlaceHeldItem`).
+- `x = gPersonalityKinds[x]` (a variable reassigned in place, or an inline converting its parameter in place) gives
+  a constant-column table lookup the original's registers: a second definition keeps a local's virtual register as
+  a second use does (found by the advisor).
+- Ending a state's case with an if/else instead of early returns sends a switch's default to the function's common
+  exit, as the original's.
+
 ## Functions emitted in every file that uses them
 
 Measured (fix-link, test files under the game's compiler and flags, and the ROM):
