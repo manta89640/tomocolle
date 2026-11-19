@@ -155,6 +155,14 @@ public:
     void GoToTogetherScene();
     void GoToScene3C();
     void GoToWedding();
+    void ChooseAfterTouch();
+    void SpeakAboutTrouble(int mode);
+    int GetTroubleMessage();
+    void SpeakTroubleProgress();
+    void FindTargetRelation();
+    void SpeakAboutTarget();
+    void SpeakAboutTarget2();
+    void SpeakAboutTarget3();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {

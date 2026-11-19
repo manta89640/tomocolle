@@ -461,6 +461,40 @@ void Scene40Character::ClearMoodIfTroubleOfKind8() {
     }
 }
 
+// --- The character's trouble ---------------------------------------------------------------------------------
+
+// The trouble talks' messages: by trouble id (for the progressing trouble), by relation and meter, ...
+static const int sTroubleProgressMessages[7] = {242, 244, 246, 248, 250, 252, 254};
+
+// The message about the trouble: by category, from the category's first message, two for each trouble
+int Scene40Character::GetTroubleMessage() {
+    int id = mTroubleId;
+    switch (mTroubleCategory) {
+    case 0:
+        return id * 2;
+    case 1:
+        return id * 2 + 0xD0;
+    case 2:
+        return id * 2 + 0x78;
+    case 3:
+        return id * 2 + 0xB8;
+    case 4:
+        return id * 2 + 0xE0;
+    case 5:
+        return id * 2 + 0xC6;
+    case 6:
+        return id * 2 + 0xD8;
+    case 8:
+        return id * 2 + 0xB6;
+    case 9:
+        return id * 2 + 0xEE;
+    }
+}
+
+void Scene40Character::SpeakTroubleProgress() {
+    Speak(0, sTroubleProgressMessages[mTroubleId], 0);
+}
+
 // --- The character's talk ---------------------------------------------------------------------------------------
 
 extern "C" {
