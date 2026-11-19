@@ -11548,6 +11548,124 @@ void Scene40Touch::Init() {
     mTapFrames = 0;
 }
 
+// Where the stylus is, or was last while mUnknown4C is set
+static inline const ScreenPoint &GetTouchPoint() {
+    return gTouchInput.mUnknown4C ? gTouchInput.mLastPoint : gTouchInput.mPoint;
+}
+
+static inline Scene40TouchPoint AddPoints(Scene40TouchPoint a, Scene40TouchPoint b) {
+    Scene40TouchPoint sum;
+    sum.x = a.x + b.x;
+    sum.y = a.y + b.y;
+    return sum;
+}
+
+static inline Scene40TouchPoint SubtractPoints(ScreenPoint a, ScreenPoint b) {
+    Scene40TouchPoint difference;
+    difference.x = a.x - b.x;
+    difference.y = a.y - b.y;
+    return difference;
+}
+
+static inline int Abs(int value) {
+    return value < 0 ? -value : value;
+}
+
+// Every frame. When the stylus goes down: a new press, where, and the tap count. While it is down: which way the
+// point moved (the point then follows the stylus by that one pixel), how far it moved this frame (added to the
+// distance when more than a pixel, and kept among the last five moves), and, while mSmooth is set, the point as
+// the mean of the last eight. When it goes up: where, and the mean of the last moves as its velocity.
+//
+// NOT MATCHING (the code is the original's but for two stack slots): the original has GetVelocity's result at sp+56
+// and the zero point the sum starts from at sp+48; here they are the other way round. Tried: an inline returning
+// the zero point (the temporary goes below every other one), a named zero local in the block (above the sum).
+void Scene40Touch::Update() {
+    mPressed = FALSE;
+    mHeld = FALSE;
+    mReleased = FALSE;
+    mTapFrames++;
+    if (mTapFrames > 30) {
+        mTaps = 0;
+    }
+    if (gTouchInput.mTouched) {
+        Reset();
+        mPressed = TRUE;
+        const ScreenPoint &point = GetTouchPoint();
+        mPressPoint.x = point.x;
+        mPressPoint.y = point.y;
+        CountTap();
+        return;
+    }
+    if (gTouchInput.mTp.touch) {
+        mHeld = TRUE;
+        Scene40TouchPoint point;
+        const ScreenPoint &touch = GetTouchPoint();
+        point.x = touch.x;
+        point.y = touch.y;
+        if (point.x < mPoint.x) {
+            mDirection.x = 1;
+        } else if (point.x == mPoint.x) {
+            mDirection.x = 0;
+        } else if (point.x > mPoint.x) {
+            mDirection.x = -1;
+        }
+        if (point.y < mPoint.y) {
+            mDirection.y = 1;
+        } else if (point.y == mPoint.y) {
+            mDirection.y = 0;
+        } else if (point.y > mPoint.y) {
+            mDirection.y = -1;
+        }
+        mPoint = AddPoints(point, mDirection);
+        Scene40TouchPoint move = SubtractPoints(gTouchInput.mPoint, gTouchInput.mLastPoint);
+        if (Abs(move.x) > 1) {
+            mDistance += Abs(move.x);
+        }
+        if (Abs(move.y) > 1) {
+            mDistance += Abs(move.y);
+        }
+        mHeldFrames++;
+        mMoves[mMoveIndex++] = move;
+        if (mMoveIndex % 5 == 0) {
+            mMoveIndex = 0;
+        }
+        if (!mSmooth) {
+            return;
+        }
+        mPoints[mPointIndex].x = mPoint.x << FX32_SHIFT;
+        mPoints[mPointIndex].y = mPoint.y << FX32_SHIFT;
+        mPointIndex++;
+        if (mPointIndex >= 8) {
+            mPointIndex = 0;
+        }
+        mPointCount++;
+        if (mPointCount > 8) {
+            mPointCount = 8;
+        }
+        Scene40TouchPoint sum = Scene40TouchPoint();
+        for (int i = 0; i < mPointCount; i++) {
+            sum.x += mPoints[i].x;
+            sum.y += mPoints[i].y;
+        }
+        if (mPointCount == 8) {
+            mPoint.x = sum.x >> (FX32_SHIFT + 3);
+            mPoint.y = sum.y >> (FX32_SHIFT + 3);
+            return;
+        }
+        mPoint.x = (sum.x / mPointCount) >> FX32_SHIFT;
+        mPoint.y = (sum.y / mPointCount) >> FX32_SHIFT;
+        return;
+    }
+    if (!gTouchInput.mUnknown4C && gPadInput.mUnknown20) { // PadInput::mActive: the buttons were read this frame
+        return;
+    }
+    mReleased = TRUE;
+    const ScreenPoint &point = GetTouchPoint();
+    mReleasePoint.x = point.x;
+    mReleasePoint.y = point.y;
+    mVelocity = GetVelocity();
+}
+
 void Scene40Touch::Reset() {
     mPressPoint = ZeroPoint();
     mPoint = ZeroPoint();
