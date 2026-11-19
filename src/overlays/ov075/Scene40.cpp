@@ -45,6 +45,30 @@ struct Scene40Scratch {
 
 extern Scene40Scratch gSceneScratch;
 
+// The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
+// saved characters each needs
+struct Scene40Activity {
+    /* 0x0 */ int mScene;
+    /* 0x4 */ u8 mMinCharacters;
+    /* 0x5 */ u8 mUnknown5;
+    /* 0x6 */ u8 mUnknown6;
+    /* 0x7 */ u8 mUnknown7;
+    /* 0x8 */ u8 mUnknown8;
+    /* 0x9 */ u8 mEnabled;
+};
+
+// 0xC
+
+static const Scene40Activity sActivities[20] = {
+    {24, 2, 0, 9, 0, 0, 1},    {28, 2, 0, 166, 0, 0, 1},  {43, 2, 1, 14, 1, 0, 1},   {50, 4, 0, 218, 0, 0, 1},
+    {54, 1, 1, 24, 1, 0, 1},   {55, 3, 0, 169, 0, 0, 1},  {58, 1, 0, 35, 0, 0, 1},   {61, 2, 1, 104, 0, 0, 1},
+    {76, 2, 0, 167, 0, 0, 1},  {77, 2, 0, 151, 0, 0, 1},  {80, 1, 0, 0, 0, 1, 1},    {82, 1, 0, 164, 0, 0, 1},
+    {118, 1, 0, 125, 0, 0, 1}, {123, 3, 0, 220, 0, 0, 1}, {136, 1, 0, 219, 0, 0, 1}, {139, 1, 0, 189, 0, 0, 1},
+    {141, 1, 0, 153, 0, 0, 1}, {143, 5, 1, 0, 0, 1, 1},   {144, 5, 1, 0, 0, 1, 1},   {145, 2, 0, 0, 0, 1, 1},
+};
+
+void MarkActivityProposed(int activity);
+
 // Overlay 75: scenes 0x40 and 0x6C, the scene of touching a Mii ("Scn/Scene/SceneMiiTouch_LZ.bin"). One source
 // file by its one static initialiser. Most of it is not decompiled yet.
 
@@ -2222,8 +2246,8 @@ void Scene40TouchPage::Update() {
     case STATE_IDLE_RIGHT_MENU:
         UpdateIdleRightMenu();
         break;
-    case STATE_8:
-        Update8();
+    case STATE_PROPOSE:
+        UpdatePropose();
         break;
     case STATE_WAIT_9:
         UpdateWait9();
@@ -2812,7 +2836,7 @@ void Scene40TouchPage::UpdateIdleRightMenu() {
             mCharacter->ShowBalloon(3);
             mMenu->SetRightDisabled(TRUE);
             gSoundManager.StartSeqArc(1, 26, 11);
-            SetState(STATE_8);
+            SetState(STATE_PROPOSE);
         } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
             mContext->mSprite->mVisible = TRUE;
             Sprite_SetSequence(mContext->mSprite, 26, TRUE);
@@ -2849,6 +2873,21 @@ void Scene40TouchPage::UpdateIdleRightMenu() {
         }
         mContext->mSprite->mVisible = FALSE;
     }
+}
+
+// After 45 frames: the scene of an activity the character proposes, with it alone
+void Scene40TouchPage::UpdatePropose() {
+    mWaitFrames = 45;
+    if (mFrames < mWaitFrames) {
+        return;
+    }
+    for (u8 i = 0; i < 12; i++) {
+        gSceneMemory.mCharacters[i] = 0xFF;
+    }
+    gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+    int activity = mCharacter->ChooseActivity();
+    MarkActivityProposed(activity);
+    gSceneManager.RequestScene(sActivities[activity].mScene);
 }
 
 void Scene40TouchPage::UpdateWaitIdle() {
@@ -2922,7 +2961,7 @@ void Scene40TouchPage::SetState(int state) {
     mState = state;
     mStep = 0;
     mFrames = 0;
-    mUnknown10 = 0;
+    mWaitFrames = 0;
 }
 
 // Coming back from a scene that gives the character something (sPresentScenes): the gift, taken by one of the
@@ -12192,28 +12231,6 @@ void Scene40Character::StartTroubleProgress() {
     mTroubleState = 2;
     mTroubleStart = mContext->mClock->mSeconds;
 }
-
-// The things the character can propose to do (each a scene of its own, which overlay 75 requests), and how many
-// saved characters each needs
-struct Scene40Activity {
-    /* 0x0 */ int mScene;
-    /* 0x4 */ u8 mMinCharacters;
-    /* 0x5 */ u8 mUnknown5;
-    /* 0x6 */ u8 mUnknown6;
-    /* 0x7 */ u8 mUnknown7;
-    /* 0x8 */ u8 mUnknown8;
-    /* 0x9 */ u8 mEnabled;
-};
-
-// 0xC
-
-static const Scene40Activity sActivities[20] = {
-    {24, 2, 0, 9, 0, 0, 1},    {28, 2, 0, 166, 0, 0, 1},  {43, 2, 1, 14, 1, 0, 1},   {50, 4, 0, 218, 0, 0, 1},
-    {54, 1, 1, 24, 1, 0, 1},   {55, 3, 0, 169, 0, 0, 1},  {58, 1, 0, 35, 0, 0, 1},   {61, 2, 1, 104, 0, 0, 1},
-    {76, 2, 0, 167, 0, 0, 1},  {77, 2, 0, 151, 0, 0, 1},  {80, 1, 0, 0, 0, 1, 1},    {82, 1, 0, 164, 0, 0, 1},
-    {118, 1, 0, 125, 0, 0, 1}, {123, 3, 0, 220, 0, 0, 1}, {136, 1, 0, 219, 0, 0, 1}, {139, 1, 0, 189, 0, 0, 1},
-    {141, 1, 0, 153, 0, 0, 1}, {143, 5, 1, 0, 0, 1, 1},   {144, 5, 1, 0, 0, 1, 1},   {145, 2, 0, 0, 0, 1, 1},
-};
 
 // One of the activities that are enabled and that there are enough characters for, at random
 int Scene40Character::ChooseActivity() {

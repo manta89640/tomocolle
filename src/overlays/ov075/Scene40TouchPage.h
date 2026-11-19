@@ -55,7 +55,7 @@ public:
         STATE_RUBBED = 5,         // The face rubbed: the head wobbles with the stylus
         STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
         STATE_IDLE_RIGHT_MENU = 7, // The idle state with only the menu's right buttons (5 and 6) and the balloon
-        STATE_8 = 8,
+        STATE_PROPOSE = 8,        // The balloon tapped in state 7: after 45 frames the character proposes an activity
         STATE_WAIT_9 = 9,         // Waits for the character's state 17
         STATE_10 = 10,
         STATE_11 = 11,
@@ -87,7 +87,7 @@ public:
     void UpdateRubbed();
     void UpdateWaitIdle();
     void UpdateIdleRightMenu();
-    void Update8();
+    void UpdatePropose();
     void UpdateWait9();
     void Update10();
     void Update11();
@@ -111,7 +111,7 @@ public:
     /* 0x04 */ int mState;
     /* 0x08 */ int mStep;     // SetState clears these three
     /* 0x0C */ int mFrames;   // Frames in the state
-    /* 0x10 */ int mUnknown10;
+    /* 0x10 */ int mWaitFrames; // How long a state waits (mFrames counts up to it)
     /* 0x14 */ int mResult;   // What the controller does next (UpdateTouchPage)
     /* 0x18 */ int mEntry;    // How the page starts (STATE_START): what the controller sets
     /* 0x1C */ BOOL mActive; // The pages' SetActive sets it
