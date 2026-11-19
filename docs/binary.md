@@ -556,11 +556,12 @@ match.
   close-up mode, its `TouchSprite` and `TouchButton` four bytes smaller, and the building front cannot be touched.
 - The program is linked as one, so two classes cannot share a name: overlay 73's are named with the prefix
   `Tutorial` in the source.
-- Measured: the compiler heap-sorts a file's data objects by size and pools the four-byte-aligned constants of
-  `.rodata` in that order (details in `docs/notes/ov073.md`). Overlay 73's file gives the constants that the code reads
-  off the pool's start (its 8-byte points) the ROM's offsets, but the rest of its `.rodata` and its `.data` are in
-  the ROM in an order that is not by size, which our compiler does not give: the data does not match, and the unit
-  is not complete.
+- Measured: overlay 73's `.rodata` is the ROM's byte for byte (compared after a link with the unit complete): the
+  touch button's rectangles are one 48-byte array, `sButtonTouchRect` is kept by `TutorialBuildingButton::Contains`,
+  which the link dropped, and the camera's orbit limits are local statics of `UpdateOrbit`. Its `.data` is not: the
+  ROM has the construction table of `MessageText` first, before `gWalkArea`, and those of `ObjTextCanvas` and
+  `BgTextCanvas` after the VTT, out of size order, where our object (and so the link) has them sorted. Not explained;
+  the unit is not complete.
 
 Inferred, from several measurements that agree: each of the two overlays is ONE source file. Overlay 73's small
 constants are in one pool that functions throughout it address by offset; overlay 74 has one static initialiser,
@@ -575,13 +576,18 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 - What is not reproduced: the order of the anonymous strings `"00"` to `"10"` of `sHeldItemDigits` (the ROM has
   10, 02, 08, 06, 04, 09, 01, 03, 07, 05, 00; ours depends on the numbers the compiler gives anonymous objects, and
   no simple hash of them explains either order), and `.rodata`.
-- `.rodata`: a file's 4-aligned constants go into one section sorted by size, read at the section's address plus an
-  offset; a 1-aligned array gets a section of its own. In the ROM, `0x0216D404` to `0x0216D484` is sixteen 8-byte
-  objects at the start of such a pool (what dsd took for a 13-entry table `gRoomPoints`, `sButtonSequences`, and two
-  more points), then the 10-, 12-, 16-, 20-, 22- and 44-byte ones in order of size up to `0x0216D5C8`; after them
-  come `sButtonRectOther`, `sButtonRect0`, `sButtonRect1`, `sHeldItemHasPattern`, `sSkyPictures` and
-  `sClockPositions`, outside that order. Most of the small ones are local initialisers (`FloorPos p = { x, z };`)
-  in the original: `StartPairEvent` matches but for the offset of such a constant.
+- `.rodata` (fin-ovl, round 5): `0x0216D404` to `0x0216D5F8` is one pool, sorted by size: sixteen 8-byte objects
+  (fifteen point initialisers of `StartPairEvent`, `UpdateSoloStates1DTo3F` (1), `UpdateStatesCAToE0` (2),
+  `UpdateStates106To10B` (8) and `UpdateStates10CTo112` (3), what dsd took for "gRoomPoints", and
+  `sButtonSequences` of two entries), `gMoodHeadIcons` (10), seven 12-byte vectors (five initialisers of the two
+  door state functions and `RoomCamera::UpdateOrbit`'s two folded limits), six 16-byte objects, `gMoodFaces` (20),
+  `sClockSequences` (22), the two encounter tables (44 each) and `sButtonRects` (48). Defined in the file
+  (`scratchpad/fin-ovl/RoomScene.step1.cpp`), every function keeps its code and the pool has the ROM's objects and
+  size, but not the ROM's order within the 8-, 12- and 16-byte groups and of `sHeldItemDigits`' strings: with the
+  initialisers where their functions are, no placement of the named statics found reproduces it (best searches: 7
+  objects out of place; 6 with one stripped object of any size added). Making all 20 points named statics declared
+  at the top would let it be solved mechanically, but that is not plausible source, so the externs stay and the
+  unit stays incomplete. What the model lacks is not known.
 
 Not done:
 
