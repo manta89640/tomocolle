@@ -524,7 +524,7 @@ Inferred from this:
 
 Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tmd_mainroom_msg_JP.bmg`. Measured:
 254 functions, 146 KB, of which 104 KB is 15 functions of 2 to 13 KB each. Decompiled in
-`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 250 functions match.
+`src/overlays/ov074/RoomScene.cpp`, one unit that claims every section of the overlay; 251 functions match.
 
 | Range | Holds |
 | --- | --- |
@@ -548,7 +548,7 @@ Overlay 74 is the apartment: the scene `ScenePlayRoom2` with the messages of `tm
   `HeldItem`'s deleting destructor is in the overlay.
 
 Overlay 73 is the tutorial's apartment (`ScenePlayRoomTut`, scene id 0x6B): 133 functions, 29 KB. Decompiled in
-`src/overlays/ov073/` as one file, `TutorialRoomScene.cpp`, which `delinks.txt` gives every section: 131 of 133
+`src/overlays/ov073/` as one file, `TutorialRoomScene.cpp`, which `delinks.txt` gives every section: 132 of 133
 match.
 
 - 78 of its functions are byte for byte overlay 74's, but it is not the same code throughout: its character
@@ -591,8 +591,8 @@ The data of overlay 74, measured (by compiling test files with the game's flags,
 
 Not done:
 
-- 5 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the
-  callee-saved registers named differently), `StartPairEvent` (the offset of a pooled constant), `GetAngleAround`
+- 4 functions that are written and differ, each with a comment saying how: in overlay 74 `ChooseReactions` (the
+  callee-saved registers named differently), `GetAngleAround`
   (one copy and two registers of one vector, 95%) and `ApartmentFront::UpdateCursorTarget`; in overlay 73
   `TutorialApartmentFront::UpdateCursorTarget`. Both copies of `ClockDisplay::Refresh` match since the hour's ones
   digit is subtracted in place (`hour -= tens * 10;`, as overlay 72's `MapClockDisplay::Refresh`). Both copies of

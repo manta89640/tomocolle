@@ -2603,13 +2603,11 @@ void RoomScene::StartEvent(RoomCharacter *character, int phase) {
     }
 }
 
-// Not matching yet: 2 instructions, the offsets of the two loads of the point in case 0x2a (#0 and #4 here, #8 and
-// #12 in the original). The point is a local initialiser, an anonymous constant of the file's pool of small
-// constants (0x0216d404 is the pool's address, not a table: see gRoomPoints in RoomCharacter.h), which the
-// original copies once to a stack slot and reads from there after the first FX_Atan2Idx, as this does. Its offset
-// is its place in the pool, which only the whole file's small constants, written as the original had them, give.
-// Before (gRoomPoints[1] of an extern table): not const, 4 bytes short; const, 15 instructions in the order of the
-// loads.
+// The point of case 0x2a is a local initialiser, an anonymous constant of the file's pool of small constants
+// (0x0216d404 is the pool's address, not a table: see gRoomPoints in RoomCharacter.h), which the original copies
+// once to a stack slot and reads from there after the first FX_Atan2Idx, as this does. Its offset in the pool (8) is
+// the ROM's since sButtonRects and sButtonSequences have their real sizes; the object at the pool's start is still
+// another one than the ROM's, until the other points of the pool are written as the original had them.
 // @0x02150538
 void RoomScene::StartPairEvent(int phase) {
     RoomCharacter *pair[2];
