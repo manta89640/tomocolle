@@ -10193,6 +10193,109 @@ void Scene40Character::SpeakAboutTarget2() {
     Speak(0, sTargetMessages2[mUnknown2EE0[0]], 1, mTroubleTarget, 2);
 }
 
+static const int sTargetMessages3[5][5][3] = {
+    {{630, 640, 650}, {632, 642, 652}, {634, 644, 654}, {636, 646, 656}, {638, 648, 658}},
+    {{675, 685, 695}, {677, 687, 697}, {679, 689, 699}, {681, 691, 701}, {683, 693, 703}},
+    {{720, 730, 740}, {722, 732, 742}, {724, 734, 744}, {726, 736, 746}, {728, 738, 748}},
+    {{765, 775, 785}, {767, 777, 787}, {769, 779, 789}, {771, 781, 791}, {773, 783, 793}},
+    {{802, 804, 806}, {802, 804, 806}, {802, 804, 806}, {802, 804, 806}, {802, 804, 806}},
+};
+
+void Scene40Character::SpeakAboutTarget3() {
+    Speak(0, sTargetMessages3[mUnknown2EE0[0]][mUnknown2EE0[1]][mUnknown2EE0[2]], 1, mTroubleTarget, 0);
+}
+
+// What happens after the character was touched (state 0x86), by its trouble: mUnknown2ED8 for trouble 1 and
+// mUnknown2EDC for trouble 4 while they progress, mUnknown2ED4 for trouble 1 before; mUnknown2ED0 when the
+// trouble's kind has no answers to choose from (sChoiceSets by sTroubleChoiceSets)
+void Scene40Character::ChooseAfterTouch() {
+    if (IsProgressingTroubleInState2()) {
+        switch (mTroubleId) {
+        case 1:
+            if (Random(100) < 100) {
+                mUnknown2ED8 = TRUE;
+                mUnknown2ED0 = FALSE;
+            }
+            return;
+        case 4:
+            if (Random(100) < 100) {
+                mUnknown2EDC = TRUE;
+                mUnknown2ED0 = FALSE;
+            }
+            return;
+        default:
+            mUnknown2ED0 = sChoiceSets[sTroubleChoiceSets[GetTrouble(this)->kind]].mCount == 0;
+            return;
+        }
+    }
+    if (IsProgressingTrouble() && mTroubleId == 1) {
+        mUnknown2ED4 = TRUE;
+        mUnknown2ED0 = FALSE;
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 18) {
+        FindTargetRelation();
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 6) {
+        mUnknown2ED0 = FALSE;
+        return;
+    }
+    mUnknown2ED0 = sChoiceSets[sTroubleChoiceSets[GetTrouble(this)->kind]].mCount == 0;
+}
+
+// Speaks about its trouble: how it is going, about the target of a trouble of kind 18, or the trouble's message
+// with the target as its argument
+void Scene40Character::SpeakAboutTrouble() {
+    if (!IsInTrouble()) {
+        return;
+    }
+    int mode;
+    if (mUnknown2ED0) {
+        mode = 0;
+    } else {
+        mode = 2;
+    }
+    if (IsProgressingTroubleInState2()) {
+        SpeakTroubleProgress();
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 18) {
+        if (mUnknown2EE0[0] != -1) {
+            SpeakAboutTarget();
+            return;
+        }
+        Speak(0, 0x328, 0);
+        ClearTrouble();
+        return;
+    }
+    if (GetTrouble(this)->hasTarget == 1) {
+        switch (GetTrouble(this)->kind) {
+        case 1:
+        case 2:
+            Speak(0, GetTroubleMessage(), 4, mTroubleTarget, mode);
+            break;
+        case 3:
+            Speak(0, GetTroubleMessage(), 5, mTroubleTarget, mode);
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            Speak(0, GetTroubleMessage(), 1, mTroubleTarget, mode);
+            break;
+        case 11:
+            Speak(0, GetTroubleMessage(), mode);
+            break;
+        }
+    } else {
+        Speak(0, GetTroubleMessage(), mode);
+    }
+}
+
 // --- The character's talk ---------------------------------------------------------------------------------------
 
 extern "C" {
