@@ -172,6 +172,13 @@ static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
     return FALSE;
 }
 
+// Sets a vector field by field, from a copy
+static inline void SetVecFields(VecFx32 *dst, VecFx32 src) {
+    dst->x = src.x;
+    dst->y = src.y;
+    dst->z = src.z;
+}
+
 static inline const ItemInfo *GetGoodsInfo(u16 id) {
     return &gGoodsTable[id];
 }
@@ -2414,6 +2421,63 @@ void Scene40TouchPage::UpdateMenuChoice() {
     }
 }
 
+// The stylus comes down: on the balloon over the head (the character talks, or tells what it has to tell), on the
+// face or the head (the sprite under the stylus), or beside the character (it turns its head there)
+void Scene40TouchPage::UpdatePress() {
+    if (mActive && (mTouch->mPartAtPress & Scene40CharacterTouch::PART_BODY) && mCharacter->mBalloon.mState == 1) {
+        mCharacter->ShowBalloon(3);
+        mCharacter->mBalloon.mUnknown08 = TRUE;
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        BOOL inTrouble = mCharacter->IsInTrouble();
+        BOOL hasNews = mCharacter->HasSomethingToTell();
+        if (inTrouble) {
+            gSoundManager.StartSeqArc(1, 26, 10);
+            int category = mCharacter->mTroubleCategory;
+            if (category == 0 || category == 1 || category == 2 || category == 8 ||
+                (data_02114d78[category][mCharacter->mTroubleId].kind == 11 && mCharacter->mTroubleId != 1 &&
+                 mCharacter->mTroubleId != 4)) {
+                StartCall();
+            }
+            mCharacter->ChooseAfterTouch();
+            if (mCharacter->mUnknown2ED0) {
+                mMenu->SetEnabled(FALSE);
+                mResult = 1;
+                SetState(STATE_DONE);
+            } else {
+                mMenu->SetEnabled(FALSE);
+                mResult = 0;
+                SetState(STATE_DONE);
+            }
+        } else if (hasNews) {
+            gSoundManager.StartSeqArc(1, 26, 9);
+            mCharacter->SetState(28);
+            mCharacter->mBalloon.mUnknown08 = FALSE;
+        }
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+        mContext->mSprite->mVisible = TRUE;
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        ScreenPoint point = mContext->mTouch->mPressPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_HEAD) {
+        mContext->mSprite->mVisible = TRUE;
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        ScreenPoint point = mContext->mTouch->mPressPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_NONE) {
+        if (mCharacter->mState == 0) {
+            VecFx32 target;
+            SetVecFields(&target, mTouch->mDepths[2].mPress);
+            mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+            mCharacter->SetState(10);
+        } else if (mCharacter->mState == 6) {
+            VecFx32 target;
+            SetVecFields(&target, mTouch->mDepths[2].mPress);
+            mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+            mCharacter->SetState(13);
+        }
+    }
+}
+
 // Does nothing (the idle state calls it last)
 void Scene40TouchPage::Unused02151ab0() {}
 
@@ -2489,13 +2553,6 @@ void Scene40TouchPage::SetState(int state) {
     mStep = 0;
     mFrames = 0;
     mUnknown10 = 0;
-}
-
-// Sets a vector field by field, from a copy
-static inline void SetVecFields(VecFx32 *dst, VecFx32 src) {
-    dst->x = src.x;
-    dst->y = src.y;
-    dst->z = src.z;
 }
 
 // Coming back from a scene that gives the character something (sPresentScenes): the gift, taken by one of the
