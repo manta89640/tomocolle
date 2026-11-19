@@ -271,9 +271,7 @@ gMoodFaces kind:data(any) addr:0x0216d544
 sClockSequences kind:data(any) addr:0x0216d558
 gEncounterMessages kind:data(any) addr:0x0216d570
 gEncounterEndMessages kind:data(any) addr:0x0216d59c
-sButtonRectOther kind:data(any) addr:0x0216d5c8
-sButtonRect0 kind:data(any) addr:0x0216d5d8
-sButtonRect1 kind:data(any) addr:0x0216d5e8
+sButtonRects kind:data(any) addr:0x0216d5c8
 sHeldItemHasPattern kind:data(any) addr:0x0216d5f8
 sSkyPictures kind:data(any) addr:0x0216d604
 sClockPositions kind:data(any) addr:0x0216d624

@@ -809,7 +809,7 @@ from:0x02150340 kind:load to:0x02150bc0 module:overlay(73)
 from:0x02150344 kind:load to:0x02150bc0 add:0x4 module:overlay(73)
 from:0x02150348 kind:load to:0x02150ba4 module:overlay(73)
 from:0x0215034c kind:load to:0x02150c88 module:overlay(73)
-from:0x02150350 kind:load to:0x02150c98 module:overlay(73)
+from:0x02150350 kind:load to:0x02150c88 add:0x10 module:overlay(73)
 from:0x02150398 kind:arm_call to:0x02026e3c module:main
 from:0x021503f4 kind:arm_call to:0x02026e3c module:main
 from:0x0215043c kind:arm_call to:0x02026ec4 module:main

@@ -458,6 +458,28 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   seven file statics at the top that keeps the guards right, and both came right with `sSunsetTimes` declared between
   the two colour tables. The heap-sort model with the locals placed so (table, guard) reproduced every compile tried
   and found that order at once (a search over placements before, between and after the functions).
+- An anonymous local aggregate initialiser (`FloorPos p = { 0, 0x3000 };`, `const` or not) goes on the list where
+  its function is in the source, exactly as a named static declared just before that function would: measured with
+  test files (one function's objects between two statics come out between them) and on overlay 74, where replacing
+  all 20 of its point initialisers by statics declared before their functions gave the same layout. Not after all
+  named objects, as overlay 73's early notes had it. (Local `const` *scalars*, overlay 39, are another matter.)
+- The model holds for a whole large file: overlay 74's 12,800 lines, with its virtual tables, VTT and construction
+  tables taken as created at the end of the file (in the order `RoomScene`, `TimedMessage`, the construction tables of
+  `MessageText`, `ObjTextCanvas`, `BgTextCanvas`, the VTT, `ApartmentRoom`, `HeldItem`), reproduce the compiled object
+  exactly, every group of one size included (fin-ovl: the file cut at each class boundary and compiled, each prefix
+  checked against the model).
+- What looks like objects out of size order after a pool may be ONE larger object: overlays 73 and 74 have three
+  16-byte touch rectangles after their pools' 44- and 22-byte tables, which is where one `ScreenRect sButtonRects[3]`
+  (48 bytes) sorts; the code takes `&sButtonRects[1]` and the like, three literals that dsd made three symbols.
+- A pooled object that nothing in the ROM refers to was read by a function the link dropped, and the file had that
+  function: overlay 73's `sButtonTouchRect` belongs to `BuildingButton::Contains`, which overlay 74 has and the
+  tutorial never calls (`TutorialBuildingButton::Contains`, written and stripped). With it, overlay 73's `.rodata` is
+  the ROM's byte for byte.
+- The search over declaration orders is a needle in a haystack: a model run takes microseconds
+  (scratchpad tool `lay.c`, simulated annealing over the creation order), but the heap's permutation changes
+  wholesale with any move, so annealing does not even recover a known solution after three objects are moved. What
+  works is to make every object of a group freely assignable (named, declared before all its users), solve only the
+  objects whose order is fixed (an initialiser's strings, the tables), and then reassign names by one compile.
 
 ## How the compiler orders and colours
 

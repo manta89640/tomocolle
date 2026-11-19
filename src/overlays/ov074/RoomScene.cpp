@@ -2603,13 +2603,11 @@ void RoomScene::StartEvent(RoomCharacter *character, int phase) {
     }
 }
 
-// Not matching yet: 2 instructions, the offsets of the two loads of the point in case 0x2a (#0 and #4 here, #8 and
-// #12 in the original). The point is a local initialiser, an anonymous constant of the file's pool of small
-// constants (0x0216d404 is the pool's address, not a table: see gRoomPoints in RoomCharacter.h), which the
-// original copies once to a stack slot and reads from there after the first FX_Atan2Idx, as this does. Its offset
-// is its place in the pool, which only the whole file's small constants, written as the original had them, give.
-// Before (gRoomPoints[1] of an extern table): not const, 4 bytes short; const, 15 instructions in the order of the
-// loads.
+// The point of case 0x2a is a local initialiser, an anonymous constant of the file's pool of small constants
+// (0x0216d404 is the pool's address, not a table: see gRoomPoints in RoomCharacter.h), which the original copies
+// once to a stack slot and reads from there after the first FX_Atan2Idx, as this does. Its offset in the pool (8) is
+// the ROM's since sButtonRects and sButtonSequences have their real sizes; the object at the pool's start is still
+// another one than the ROM's, until the other points of the pool are written as the original had them.
 // @0x02150538
 void RoomScene::StartPairEvent(int phase) {
     RoomCharacter *pair[2];
@@ -12491,11 +12489,12 @@ struct ButtonSequences {
 };
 
 // By kind of button
-static const ButtonSequences sButtonSequences[3] = { { 2, 3 }, { 0, 1 }, { 0, 0 } };
+static const ButtonSequences sButtonSequences[2] = { { 2, 3 }, { 0, 1 } };
 static const ButtonPosition sButtonPositions[2] = { { 128, 177 }, { 242, 13 } };
-static const ScreenRect sButtonRect0 = { -34, -12, 70, 26 };
-static const ScreenRect sButtonRect1 = { -16, -16, 34, 34 };
-static const ScreenRect sButtonRectOther = { -32, -24, 66, 56 };
+// The rectangle that takes a touch: of a button of another kind, of kind 0, of kind 1. One array, not three objects:
+// the ROM has the three after the 44-byte tables of the file's pool of constants, where only a 48-byte object sorts
+// (overlay 73 keeps the third though it has no button of kind 1).
+static const ScreenRect sButtonRects[3] = { { -32, -24, 66, 56 }, { -34, -12, 70, 26 }, { -16, -16, 34, 34 } };
 
 // @0x0216c980
 TouchSprite::TouchSprite() {
@@ -12534,14 +12533,14 @@ void TouchButton::Init(int kind) {
     Sprite_Init(this, 0, sButtonSequences[kind].mNormal, mX, mY, FALSE);
     mState = STATE_IDLE;
     if (kind == 0) {
-        mTouchRect = &sButtonRect0;
+        mTouchRect = &sButtonRects[1];
         MessageText *label = mLabel;
         label->SetPositionFromVec((mX - label->mCanvas.areaWidth * 4) << FX32_SHIFT,
                                    (mY - label->mCanvas.areaHeight * 4) << FX32_SHIFT);
     } else if (kind == 1) {
-        mTouchRect = &sButtonRect1;
+        mTouchRect = &sButtonRects[2];
     } else {
-        mTouchRect = &sButtonRectOther;
+        mTouchRect = &sButtonRects[0];
     }
 }
 
