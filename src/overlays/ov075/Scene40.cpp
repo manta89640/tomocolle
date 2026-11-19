@@ -2559,6 +2559,90 @@ void Scene40TouchPage::UpdateHold() {
     }
 }
 
+// The stylus goes up: a flick across the face (or head) from beside the character in one of four ways makes it
+// react (its states 4, 5, 22, 23); a tap without moving on the head or the face plays a game, by whether it faces
+// the camera and its mood; otherwise its head stops following the stylus
+void Scene40TouchPage::UpdateRelease() {
+    BOOL handled = FALSE;
+    if (((mTouch->mPartsTouched & Scene40CharacterTouch::PART_NONE) &&
+         (mTouch->mPartsTouched & Scene40CharacterTouch::PART_FACE)) ||
+        ((mTouch->mPartsTouched & Scene40CharacterTouch::PART_NONE) &&
+         (mTouch->mPartsTouched & Scene40CharacterTouch::PART_HEAD))) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        switch (mTouch->mStroke) {
+        case 1:
+            if (mCharacter->mState != 4 && velocity.y < -5) {
+                mCharacter->SetState(4);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 2:
+            if (velocity.y > 5 && mCharacter->mState != 6 && mCharacter->mState != 13 && mCharacter->mState != 14 &&
+                mCharacter->mState != 15) {
+                mCharacter->SetState(5);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 3:
+            if (velocity.x < -5) {
+                mCharacter->SetState(22);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        case 4:
+            if (velocity.x > 5) {
+                mCharacter->SetState(23);
+                mCharacter->AddUnknown1C4Once0();
+                handled = TRUE;
+            }
+            break;
+        }
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        if (MATH_ABS(velocity.x) + MATH_ABS(velocity.y) < 2 && !mMenuHidden) {
+            mCharacter->UpdateCameraAngle();
+            if (mCharacter->IsFacingCameraLoosely()) {
+                if (IsCharacterNotIn2Or24Or25()) {
+                    PlayGame3B();
+                    handled = TRUE;
+                }
+            } else if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                PlayGame87();
+                handled = TRUE;
+            }
+        }
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+        ScreenPoint velocity = mTracker->mVelocity;
+        if (MATH_ABS(velocity.x) + MATH_ABS(velocity.y) < 1 && !mMenuHidden) {
+            mCharacter->UpdateCameraAngle();
+            if (mCharacter->IsFacingCameraLoosely()) {
+                if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                    PlayGame();
+                    handled = TRUE;
+                }
+            } else if (IsCharacterMood0Or1() && IsCharacterNotIn2Or24Or25()) {
+                PlayGame87();
+                handled = TRUE;
+            }
+        }
+    }
+    if (!handled) {
+        if (mCharacter->mState == 11) {
+            mCharacter->SetState(10);
+        } else if (mCharacter->mState == 12) {
+            mCharacter->SetState(0);
+        } else if (mCharacter->mState == 14) {
+            mCharacter->SetState(13);
+        } else if (mCharacter->mState == 15) {
+            mCharacter->SetState(6);
+        }
+    }
+    mContext->mSprite->mVisible = FALSE;
+}
+
 // Does nothing (the idle state calls it last)
 void Scene40TouchPage::Unused02151ab0() {}
 
