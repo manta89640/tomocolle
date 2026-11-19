@@ -254,7 +254,7 @@ void Scene40::StartLoading() {
         gSoundManager.StopSeq(0, 1);
         return;
     }
-    func_ov075_021793fc(func_ov075_02179290(&mCharacter));
+    PlayMusic(mCharacter.ChooseMusic());
 }
 
 void Scene40::Init() {
@@ -379,7 +379,7 @@ void Scene40::Init() {
 
     mCharacter.SetContext(&mContext);
     mCharacter.SetVoiceOf(&mTtsPlayer);
-    func_ov075_021753c8(&mCharacter);
+    mCharacter.FindRelations();
     mCharacter.Update(FALSE);
     Unused0214a884();
     Start();
@@ -2682,8 +2682,6 @@ extern const ScreenPoint sPresentBoxPoints[3];
 extern const fx32 sPresentBoxScales[3];
 BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
 extern VecFx32 gTouchLineDirection;
-int func_ov075_02179290(Scene40Character *character);
-void func_ov075_021793fc(int kind);
 }
 
 static inline void SetPresentPosition(Model *model, const VecFx32 &position) {
@@ -2880,7 +2878,7 @@ void Scene40PresentPage::UpdateEnd() {
             return;
         }
         mContext->mSpeechWindow->Hide();
-        func_ov075_021793fc(func_ov075_02179290(mCharacter));
+        PlayMusic(mCharacter->ChooseMusic());
         gSoundManager.MoveSeqVolume(0, 127, 120);
         gSoundManager.LoadGroup(77);
         mCharacter->SetState(0);
@@ -10109,6 +10107,132 @@ void Scene40Character::ClearMoodIfTroubleOfKind8() {
     }
 }
 
+static inline int TroubleIdOf(SavedCharacter *character) {
+    return character->mTroubleId;
+}
+
+// The scene's music by the character: 1 asleep, 10 sad (4 in a trouble of kind 6), 11 for mood 2, 5 to 9 and 12
+// by the trouble for mood 3, 13 for mood 4; otherwise 3 in a trouble of kind 1, 2 in a trouble with no mood, 0
+int Scene40Character::ChooseMusic() {
+    if (mLongActState == 18 || mLongActState == 15) {
+        return 1;
+    }
+    int mood = mMood;
+    if (mood == 1) {
+        if (IsInTrouble() && GetTrouble(this)->kind == 6) {
+            return 4;
+        }
+        return 10;
+    }
+    if (mood == 2) {
+        return 11;
+    }
+    if (mood == 3) {
+        if (mTroubleCategory == 1 && (TroubleIdOf(this) == 2 || TroubleIdOf(this) == 3)) {
+            return 5;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 0) {
+            return 6;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 3) {
+            return 7;
+        }
+        if (mTroubleCategory == 4 && (TroubleIdOf(this) == 1 || TroubleIdOf(this) == 5 || TroubleIdOf(this) == 6)) {
+            return 8;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 2) {
+            return 9;
+        }
+        return 12;
+    }
+    if (mood == 4) {
+        return 13;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 1) {
+        return 3;
+    }
+    if (IsInTroubleWithoutMood()) {
+        return 2;
+    }
+    return 0;
+}
+
+// Plays the scene's music of that kind: the room's sequence with some of its tracks muted, or another sequence
+void PlayMusic(int music) {
+    switch (music) {
+    case 0:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C0, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 1:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C7, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 2:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1BC, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 3:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x187, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 4:
+        gSceneManager.SetSoundGroup(15);
+        gSoundManager.StartSeq(0, 24);
+        gSoundManager.StartSeq(1, 25);
+        gSoundManager.MoveSeqVolume(1, 0, 0);
+        break;
+    case 5:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C0, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 127);
+        break;
+    case 6:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x66);
+        break;
+    case 7:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x66);
+        break;
+    case 8:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x63);
+        break;
+    case 9:
+        gSceneManager.SetSoundGroup(0x38);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x65);
+        break;
+    case 10:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x43, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 11:
+        gSceneManager.SetSoundGroup(11);
+        gSoundManager.StartSeqIfNotPlaying(0, 18);
+        break;
+    case 12:
+        gSceneManager.SetSoundGroup(10);
+        gSoundManager.StartSeqIfNotPlaying(0, 17);
+        break;
+    case 13:
+        gSceneManager.SetSoundGroup(12);
+        gSoundManager.StartSeqIfNotPlaying(0, 19);
+        break;
+    }
+}
+
 // --- The character's trouble ---------------------------------------------------------------------------------
 
 // The trouble talks' messages: by trouble id (for the progressing trouble), by relation and meter, ...
@@ -10677,6 +10801,39 @@ void Scene40Character::ClearLongActOfPairFrom(s64 now) {
         GameData_WriteCharacter(&gGameData, index, &partner);
     }
     ClearLongActFrom(now);
+}
+
+// The saved characters, and the character's friends it likes (rank 1, meter above 100), best friend, lover and
+// spouse (meter above 50), for the talk's conditions and arguments
+void Scene40Character::FindRelations() {
+    mCharacterCount = 0;
+    mFriendCount = 0;
+    mBestFriend = -1;
+    mLover = -1;
+    mSpouse = -1;
+    for (int i = 0; i < 100; i++) {
+        mFriends[i] = -1;
+    }
+    for (int i = 0; i < 100; i++) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
+            continue;
+        }
+        mCharacterCount++;
+        if (i == mIndex) {
+            continue;
+        }
+        int rank = mRelationRank[i];
+        if (rank == RELATION_FRIENDS && mRelationMeter[i] > 100) {
+            mFriends[mFriendCount] = i;
+            mFriendCount++;
+        } else if (rank == RELATION_BEST_FRIENDS && mRelationMeter[i] > 50) {
+            mBestFriend = i;
+        } else if (rank == RELATION_LOVERS && mRelationMeter[i] > 50) {
+            mLover = i;
+        } else if (rank == RELATION_SPOUSES && mRelationMeter[i] > 50) {
+            mSpouse = i;
+        }
+    }
 }
 
 // Something to tell the player (the record's byte 0x24A: 1, 2 or 0xFE, the kind of talk; 0 or 0xFF for none)

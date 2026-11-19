@@ -164,6 +164,8 @@ public:
     void SpeakAboutTarget2();
     void SpeakAboutTarget3();
     int ChooseGame();
+    void FindRelations();
+    int ChooseMusic();
     void PlayBiteSound();
     void ShrinkHeldItemByBite();
 

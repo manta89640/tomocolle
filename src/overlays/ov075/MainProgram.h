@@ -59,10 +59,10 @@ struct Scene40Context;
 struct ScreenRect;
 struct WindowPoint;
 
+// Plays the scene's music of a kind (Scene40Character::ChooseMusic)
+void PlayMusic(int music);
+
 extern "C" {
-int func_ov075_02179290(Scene40Character *character);
-void func_ov075_021793fc(int unknown);
-void func_ov075_021753c8(Scene40Character *character);
 void func_0207b138(void *manager); // Updates a particle system's manager
 
 }
