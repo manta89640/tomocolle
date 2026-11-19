@@ -10776,6 +10776,97 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     GetTalkArguments(entry, count, types, values);
 }
 
+// Given one of the tools (goods 236 to 243) in a good mood, the character starts the long act of that tool for
+// its duration from now; with a partner, the partner starts its own part of it (or stops, for tool 243)
+void Scene40Character::StartLongActWithTool(int item) {
+    if (!Is0Or1(mMood)) {
+        return;
+    }
+    int act = 0;
+    int partnerAct = 0;
+    BOOL paired = IsLongActPaired();
+    mUnknown3094 = FALSE;
+    switch (item) {
+    case 236:
+        if (paired) {
+            act = 0x2A;
+            partnerAct = 0x29;
+        } else {
+            act = 5;
+        }
+        break;
+    case 241:
+        if (paired) {
+            act = 0x1E;
+            partnerAct = 0x1D;
+        } else {
+            act = 10;
+        }
+        break;
+    case 243:
+        act = 4;
+        break;
+    case 242:
+        if (paired) {
+            act = 0x20;
+            partnerAct = 0x1F;
+        } else {
+            act = 9;
+        }
+        break;
+    case 239:
+        if (paired) {
+            act = 0x24;
+            partnerAct = 0x23;
+        } else {
+            act = 12;
+        }
+        break;
+    case 240:
+        if (paired) {
+            act = 0x22;
+            partnerAct = 0x21;
+        } else {
+            act = 1;
+        }
+        break;
+    case 237:
+        if (paired) {
+            act = 0x28;
+            partnerAct = 0x27;
+        } else {
+            act = 16;
+        }
+        break;
+    case 238:
+        if (paired) {
+            act = 0x26;
+            partnerAct = 0x25;
+        } else {
+            act = 8;
+        }
+        break;
+    }
+    s64 now = mContext->mClock->mSeconds;
+    s64 end = now + GetLongActDuration(act, 3);
+    mLongActState = act;
+    mLongActEnd = end;
+    if (!paired) {
+        return;
+    }
+    SavedCharacter partner;
+    u8 index = mLongActPartner;
+    GameData_ReadCharacter(&gGameData, index, &partner);
+    partner.mIndex = index;
+    if (item == 243) {
+        partner.ClearLongAct();
+    } else {
+        partner.mLongActState = partnerAct;
+        partner.mLongActEnd = end;
+    }
+    GameData_WriteCharacter(&gGameData, index, &partner);
+}
+
 // A progressing trouble whose progress is full is over (state 4): it ends after its cooldown, the mood clears, and
 // a long act with a partner ends
 void Scene40Character::FinishTroubleIfFull(s64 now) {
