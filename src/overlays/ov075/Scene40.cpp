@@ -1506,7 +1506,7 @@ void Scene40Pages::UpdateKeyboardPage() {
         case 7:
             mRequestedLayout = 1;
             mWaitingForLayout = TRUE;
-            return;
+            break;
         case 2:
             switch (mKeyboardPage.mUnknown0010) {
             case 0:
@@ -1520,11 +1520,7 @@ void Scene40Pages::UpdateKeyboardPage() {
             }
             break;
         }
-        return;
-    }
-    if (mKeyboardPage.mState != 4) {
-        return;
-    }
+    } else if (mKeyboardPage.mState == 4) {
     switch (mKeyboardPage.mUnknown0008) {
     case 0:
         switch (mKeyboardPage.mUnknown0010) {
@@ -1611,6 +1607,7 @@ void Scene40Pages::UpdateKeyboardPage() {
         mNextPage = PAGE_TOUCH;
         break;
     }
+    }
 }
 
 // The option page: once chosen, back to the scene's upper screen; once closed, the present chosen (a reaction),
@@ -1632,11 +1629,7 @@ void Scene40Pages::UpdateOptionPage() {
             mWaitingForLayout = TRUE;
             break;
         }
-        return;
-    }
-    if (mOptionPage.mState != 11) {
-        return;
-    }
+    } else if (mOptionPage.mState == 11) {
     switch (mOptionPage.mResult) {
     case 0:
     case 1: {
@@ -1660,6 +1653,7 @@ void Scene40Pages::UpdateOptionPage() {
         mKeyboardPage.mNextState = 1;
         mNextPage = PAGE_KEYBOARD;
         break;
+    }
     }
 }
 
