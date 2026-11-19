@@ -1485,7 +1485,6 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Not decompiled yet
 // Of ov075-c
 // Of ov075-e
-int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
@@ -2139,7 +2138,7 @@ void Scene40TalkPage::UpdatePlayOrNot() {
         MI_CpuFill8(&gSceneScratch, 0, 100);
         GetSceneMemory().mTalkAnswers[0] = 2;
         GetSceneMemory().mCharacters[0] = mContext->mCharacter->mIndex;
-        gSceneManager.RequestScene(gStr_S_ov075[func_ov075_02176454(mContext->mCharacter)].mSceneId);
+        gSceneManager.RequestScene(gStr_S_ov075[mContext->mCharacter->ChooseGame()].mSceneId);
         break;
     case 1:
         mContext->mCharacter->SetState(0);
@@ -4109,7 +4108,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02174a14(Scene40Character *character);
 void func_ov075_02174b38(Scene40Character *character, int item);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
@@ -5800,7 +5798,7 @@ void Scene40Character::UpdateStates28To2D() {
             mStep++;
         }
         PlaceHeldItem();
-        func_ov075_02174a14(this);
+        ShrinkHeldItemByBite();
         UpdateMouthByAnimation();
         func_ov075_02174b38(this, mGift.mItem.InventoryItem::mId);
         if (mFrame < mWait) {
@@ -5918,8 +5916,6 @@ extern MATHRandContext16 gRandom;
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
 int func_ov075_0217520c(Scene40Character *character);
-void func_ov075_02174a14(Scene40Character *character);
-void func_ov075_02174c00(Scene40Character *character);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
@@ -7671,9 +7667,9 @@ void Scene40Character::UpdateStates67To85() {
         }
         case 4:
             PlaceHeldItem();
-            func_ov075_02174a14(this);
+            ShrinkHeldItemByBite();
             UpdateMouthByAnimation();
-            func_ov075_02174c00(this);
+            PlayBiteSound();
             if (mFrame < mWait) {
                 return;
             }
@@ -10144,6 +10140,59 @@ void Scene40Character::SpeakTroubleProgress() {
     Speak(0, sTroubleProgressMessages[mTroubleId], 0);
 }
 
+// What the character says about its trouble's target: by the relation to it (mUnknown2EE0[0], 0 to 4), the meter
+// (mUnknown2EE0[1], 0 to 4) and a third choice (mUnknown2EE0[2], 0 to 2)
+static const int sTargetMessages[5][5] = {
+    {615, 617, 619, 621, 623}, {660, 662, 664, 666, 668}, {705, 707, 709, 711, 713},
+    {750, 752, 754, 756, 758}, {795, 795, 795, 795, 795},
+};
+static const int sTargetMessages2[5] = {625, 670, 715, 760, 797};
+
+// Its relation to the trouble's target (spouse 0, lover 1, best friend 2, friend 3, none 4, else -1) and how much
+// it likes the target (0 the most to 4); with no such character or relation, the trouble talk has nothing to say
+void Scene40Character::FindTargetRelation() {
+    u16 target = mTroubleTarget;
+    if (!GameData_CharacterExists(&gGameData, target)) {
+        mUnknown2EE0[0] = -1;
+    } else {
+        switch (mRelationRank[target]) {
+        case RELATION_SPOUSES:
+            mUnknown2EE0[0] = 0;
+            break;
+        case RELATION_LOVERS:
+            mUnknown2EE0[0] = 1;
+            break;
+        case RELATION_BEST_FRIENDS:
+            mUnknown2EE0[0] = 2;
+            break;
+        case RELATION_FRIENDS:
+            mUnknown2EE0[0] = 3;
+            break;
+        case RELATION_NONE:
+            mUnknown2EE0[0] = 4;
+            break;
+        default:
+            mUnknown2EE0[0] = -1;
+            break;
+        }
+        mUnknown2EE0[1] = (199 - mRelationMeter[target]) / 40;
+        mUnknown2EE0[1] = MATH_CLAMP(mUnknown2EE0[1], 0, 4);
+    }
+    if (mUnknown2EE0[0] == -1) {
+        mUnknown2ED0 = TRUE;
+    } else {
+        mUnknown2ED0 = FALSE;
+    }
+}
+
+void Scene40Character::SpeakAboutTarget() {
+    Speak(0, sTargetMessages[mUnknown2EE0[0]][mUnknown2EE0[1]], 1, mTroubleTarget, 2);
+}
+
+void Scene40Character::SpeakAboutTarget2() {
+    Speak(0, sTargetMessages2[mUnknown2EE0[0]], 1, mTroubleTarget, 2);
+}
+
 // --- The character's talk ---------------------------------------------------------------------------------------
 
 extern "C" {
@@ -10665,6 +10714,29 @@ void Scene40Character::GoToWedding() {
     gSceneMemory.mCharacters[0] = mIndex;
     gSceneMemory.mCharacters[1] = mTroubleTarget;
     gSceneManager.RequestScene(0xAB);
+}
+
+// One of the seven games of the talk page that there are enough characters for, at random by their weights
+int Scene40Character::ChooseGame() {
+    int total = 0;
+    for (int i = 0; i < 7; i++) {
+        if (gStr_S_ov075[i].mUnknown4[0] <= mCharacterCount) {
+            total += gStr_S_ov075[i].mUnknown4[1];
+        }
+    }
+    int choice = Rand(total);
+    int i = 0;
+    int sum = 0;
+    for (;;) {
+        if (gStr_S_ov075[i].mUnknown4[0] <= mCharacterCount) {
+            sum += gStr_S_ov075[i].mUnknown4[1];
+        }
+        if (choice < sum) {
+            break;
+        }
+        i++;
+    }
+    return i;
 }
 
 // The game keeps a bit for each activity that was proposed (gGameData+0x110)
@@ -11549,6 +11621,36 @@ void Scene40Character::UpdateMouthByAnimation() {
         SetFace(7);
     } else {
         SetFace(1);
+    }
+}
+
+// While it eats (mUnknown309C bites, one every length of the body's animation), the held item shrinks at each
+// bite's middle frame by a growing share
+void Scene40Character::ShrinkHeldItemByBite() {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    int frame = mFrame;
+    if (frame % length != length / 2) {
+        return;
+    }
+    int bites = mUnknown309C;
+    fx32 scale = FX_Div(mHeldItem->mScale.x, mHeldItem->mBaseScale);
+    scale -= ((frame / length + 1) * FX32_ONE) / ((bites + 1) * bites / 2);
+    mHeldItem->SetScale(scale);
+}
+
+// At each bite's middle frame, the bite's sound (the last bite's another)
+void Scene40Character::PlayBiteSound() {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    int frame = mFrame;
+    if (frame % length != length / 2) {
+        return;
+    }
+    if (frame + length > mWait) {
+        gSoundManager.StartSeqArc(1, 0x21, 4);
+    } else {
+        gSoundManager.StartSeqArc(1, 0x21, 3);
     }
 }
 

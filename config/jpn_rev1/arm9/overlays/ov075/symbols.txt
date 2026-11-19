@@ -351,10 +351,10 @@ _ZN16Scene40Character19PlaceHeldItemInHandEv kind:function(arm,size=0x1e8) addr:
 _ZN16Scene40Character13PlaceHeldItemEv kind:function(arm,size=0x10) addr:0x02174584
 _ZN16Scene40Character13PlaceHeldItemEl kind:function(arm,size=0x3e4) addr:0x02174594
 _ZN16Scene40Character17PlaceCoverAtHandsEv kind:function(arm,size=0x9c) addr:0x02174978
-func_ov075_02174a14 kind:function(arm,size=0xbc) addr:0x02174a14
+_ZN16Scene40Character20ShrinkHeldItemByBiteEv kind:function(arm,size=0xbc) addr:0x02174a14
 _ZN16Scene40Character22UpdateMouthByAnimationEv kind:function(arm,size=0x68) addr:0x02174ad0
 func_ov075_02174b38 kind:function(arm,size=0xc8) addr:0x02174b38
-func_ov075_02174c00 kind:function(arm,size=0xa0) addr:0x02174c00
+_ZN16Scene40Character13PlayBiteSoundEv kind:function(arm,size=0xa0) addr:0x02174c00
 func_ov075_02174ca0 kind:function(arm,size=0xd8) addr:0x02174ca0
 _ZN16Scene40Character20GetGoodsSatisfactionEi kind:function(arm,size=0x100) addr:0x02174d78
 _ZN16Scene40Character16GetGoodsReactionEi kind:function(arm,size=0x18) addr:0x02174e78
@@ -383,7 +383,7 @@ _ZN16Scene40Character22ClearLongActOfPairFromEx kind:function(arm,size=0x80) add
 _ZN16Scene40Character10IsDreamingEv kind:function(arm,size=0x14) addr:0x02176394
 _ZN16Scene40Character14ChooseActivityEv kind:function(arm,size=0x90) addr:0x021763a8
 _Z20MarkActivityProposedi kind:function(arm,size=0x1c) addr:0x02176438
-func_ov075_02176454 kind:function(arm,size=0xa8) addr:0x02176454
+_ZN16Scene40Character10ChooseGameEv kind:function(arm,size=0xa8) addr:0x02176454
 _ZN16Scene40Character13UpdatePatDateEv kind:function(arm,size=0x50) addr:0x021764fc
 _ZN16Scene40Character20StartTroubleProgressEv kind:function(arm,size=0x34) addr:0x0217654c
 _ZN16Scene40Character16ChooseAfterTouchEv kind:function(arm,size=0x238) addr:0x02176580
@@ -522,7 +522,7 @@ gStr__ov075_3 kind:data(any) addr:0x0217b7b4
 sElapsedDays kind:data(any) addr:0x0217b7c4
 data_ov075_0217b7d6 kind:data(any) addr:0x0217b7d6
 sClothesTabKinds kind:data(any) addr:0x0217b7ec
-data_ov075_0217b800 kind:data(any) addr:0x0217b800
+sTargetMessages2 kind:data(any) addr:0x0217b800
 sSongGiftMessages kind:data(any) addr:0x0217b82c
 sPresentBoxPoints kind:data(any) addr:0x0217b844
 data_ov075_0217b85c kind:data(any) addr:0x0217b85c
@@ -570,7 +570,7 @@ data_ov075_0217bfbc kind:data(any) addr:0x0217bfbc
 sTroubleChoiceSets kind:data(any) addr:0x0217c010
 sHourBits kind:data(any) addr:0x0217c064
 sSpecialChoiceSets kind:data(any) addr:0x0217c0c4
-data_ov075_0217c128 kind:data(any) addr:0x0217c128
+sTargetMessages kind:data(any) addr:0x0217c128
 data_ov075_0217c18c kind:data(any) addr:0x0217c18c
 data_ov075_0217c210 kind:data(any) addr:0x0217c210
 data_ov075_0217c294 kind:data(any) addr:0x0217c294

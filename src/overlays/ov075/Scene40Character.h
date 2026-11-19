@@ -163,6 +163,9 @@ public:
     void SpeakAboutTarget();
     void SpeakAboutTarget2();
     void SpeakAboutTarget3();
+    int ChooseGame();
+    void PlayBiteSound();
+    void ShrinkHeldItemByBite();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
