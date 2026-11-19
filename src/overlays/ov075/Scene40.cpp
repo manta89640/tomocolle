@@ -11997,6 +11997,67 @@ void Scene40Character::PlayBiteSound() {
     }
 }
 
+// Ends the body animation (marks it finished) once it reaches mAnimStopFrame
+void Scene40Character::StopAnimationAtFrame() {
+    if (!mAnimStopping) {
+        return;
+    }
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    fx32 frame = FX_Div(anim->mAnmObj->frame, anim->mUnknown10);
+    switch (mAnimStopKind) {
+    case 0:
+    case 1:
+        if (mAnimStopFrame <= frame) {
+            anim->mFinished = TRUE;
+            mAnimStopping = FALSE;
+        }
+        break;
+    case 2:
+        break;
+    }
+}
+
+// Turns the character a step each frame for mSpinFrames frames, and slides it along mMoveAngle
+void Scene40Character::UpdateSpinAndSlide() {
+    if (mSpinning) {
+        switch (mSpinDirection) {
+        case 0:
+            Turn(0x2000);
+            if (++mSpinFrame >= mSpinFrames) {
+                mSpinning = FALSE;
+            }
+            break;
+        case 1:
+            Turn(0xE000);
+            if (++mSpinFrame >= mSpinFrames) {
+                mSpinning = FALSE;
+            }
+            break;
+        }
+    }
+    if (mSliding) {
+        u16 angle = mMoveAngle;
+        fx32 dx = FX_Mul(FX_CosIdx(angle), 0x49);
+        fx32 dz = FX_Mul(FX_SinIdx(angle), 0x49);
+        mPos.x += dx;
+        mPos.z += dz;
+    }
+}
+
+// Moves the scene's camera and its target by a step each frame
+void Scene40Character::MoveCamera() {
+    if (!mCameraMoving) {
+        return;
+    }
+    VecFx32 position = mContext->mCamera->mPosition;
+    VecFx32 target = mContext->mCamera->mTarget;
+    VEC_Add(&position, &mCameraPositionStep, &position);
+    VEC_Add(&target, &mCameraTargetStep, &target);
+    mContext->mCamera->SetPosition(position);
+    mContext->mCamera->SetTarget(target);
+    Camera_UpdateEye(mContext->mCamera->mCamera);
+}
+
 // --- The character: what it was taught, its head and its speech --------------------------------------------------
 
 extern "C" {
