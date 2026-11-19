@@ -77,6 +77,10 @@ public:
     void UpdateMenu();
     void UpdateStart();
     void UpdateIdle();
+    void UpdateMenuChoice();
+    void UpdatePress();
+    void UpdateHold();
+    void UpdateRelease();
     void Unused02151ab0();
     void Update3();
     void Update4();
@@ -111,7 +115,7 @@ public:
     /* 0x14 */ int mResult;   // What the controller does next (UpdateTouchPage)
     /* 0x18 */ int mEntry;    // How the page starts (STATE_START): what the controller sets
     /* 0x1C */ BOOL mActive; // The pages' SetActive sets it
-    /* 0x20 */ int mUnknown20;
+    /* 0x20 */ BOOL mTouching; // The stylus came down on the page (not on the menu) and has not gone up
     /* 0x24 */ BOOL mMenuHidden;
     /* 0x28 */ Scene40Gift mGift; // What the character is given after a scene (PlaceGift)
     /* 0x60 */ int mUnknown60;

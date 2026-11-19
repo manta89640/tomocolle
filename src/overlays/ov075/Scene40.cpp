@@ -2178,7 +2178,7 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     mLastState = 0;
     mStep = 0;
     mEntry = 0;
-    mUnknown20 = 0;
+    mTouching = FALSE;
     mMenuHidden = FALSE;
     mActive = TRUE;
     mUnknown60 = 0;
@@ -2282,7 +2282,7 @@ void Scene40TouchPage::UpdateMenu() {
 
 // How the page starts, by the controller's entry: the menu, the character's state and the page's first state
 void Scene40TouchPage::UpdateStart() {
-    mUnknown20 = 0;
+    mTouching = FALSE;
     mCharacter->mBalloon.mUnknown08 = FALSE;
     switch (mEntry) {
     case 0:
@@ -2352,6 +2352,65 @@ void Scene40TouchPage::UpdateStart() {
         mStep = 0;
         SetState(STATE_MESSAGES_4);
         break;
+    }
+}
+
+// The menu and the stylus: a button of the menu, or the stylus down, held and up on the character
+void Scene40TouchPage::UpdateIdle() {
+    mMenu->SetEnabled(mActive);
+    if (mMenu->mTouchedButton != -1) {
+        UpdateMenuChoice();
+    } else if (mContext->mTouch->mPressed) {
+        mTouching = TRUE;
+        UpdatePress();
+    } else if (mContext->mTouch->mHeld && mTouching) {
+        UpdateHold();
+    }
+    if (mContext->mTouch->mReleased && mTouching) {
+        UpdateRelease();
+        mTouching = FALSE;
+    }
+    Unused02151ab0();
+}
+
+// A button of the menu: the list to give (5), the clothes (6), the motto (7) for the controller, or another scene
+void Scene40TouchPage::UpdateMenuChoice() {
+    if (mMenu->mPressedButton == 0) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 5;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 1) {
+        gSceneMemory.mCharacters[(u8)mCharacter->mIndex] = 0;
+        gSceneManager.RequestScene(0x5B);
+    } else if (mMenu->mPressedButton == 2) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 6;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 3) {
+        mMenu->SetEnabled(FALSE);
+        mResult = 7;
+        SetState(STATE_DONE);
+    } else if (mMenu->mPressedButton == 4) {
+        int interior = mCharacter->mInterior;
+        mCharacter->mOwnedInteriors[interior >> 5] |= 1 << (interior & 31);
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        for (int i = 0; i < 5; i++) {
+            gSceneScratch.mMenuAvailable[i] = mContext->mMenuAvailable[i];
+        }
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x38);
+    } else if (mMenu->mPressedButton == 5) {
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        gSceneScratch.mUnknown01 = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x1A);
+    } else if (mMenu->mPressedButton == 6) {
+        if (mCharacter->IsLongActPaired() && mCharacter->mUnknown3094) {
+            mCharacter->ClearLongActOfPairFrom(mContext->mClock->mSeconds);
+        }
+        gSceneManager.RequestScene(0x11);
     }
 }
 
