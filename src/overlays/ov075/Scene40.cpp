@@ -2219,8 +2219,8 @@ void Scene40TouchPage::Update() {
     case STATE_WAIT_IDLE:
         UpdateWaitIdle();
         break;
-    case STATE_7:
-        Update7();
+    case STATE_IDLE_RIGHT_MENU:
+        UpdateIdleRightMenu();
         break;
     case STATE_8:
         Update8();
@@ -2313,11 +2313,11 @@ void Scene40TouchPage::UpdateStart() {
         break;
     case 5:
         mMenu->SetLeftDisabled(TRUE);
-        SetState(STATE_7);
+        SetState(STATE_IDLE_RIGHT_MENU);
         break;
     case 7:
         mMenu->SetLeftDisabled(TRUE);
-        SetState(STATE_7);
+        SetState(STATE_IDLE_RIGHT_MENU);
         break;
     case 6:
         mMenu->SetDisabled(TRUE);
@@ -2793,6 +2793,64 @@ void Scene40TouchPage::UpdateRubbed() {
     }
 }
 
+// The idle state with the menu's left part disabled: its right buttons (another scene, the apartment), the balloon
+// (state 8), the scene's sprite over the face or head; let go over the face of a character in long act 18, it goes
+// to scene 0x8E
+void Scene40TouchPage::UpdateIdleRightMenu() {
+    mMenu->SetEnabled(mActive);
+    if (mMenu->mPressedButton == 6) {
+        gSceneManager.RequestScene(0x11);
+    } else if (mMenu->mPressedButton == 5) {
+        gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+        MI_CpuFill8(&gSceneScratch, 0, 100);
+        gSceneScratch.mUnknown00 = 1;
+        gSceneScratch.mUnknown01 = mCharacter->mIndex;
+        gSceneManager.RequestScene(0x1A);
+    } else if (mContext->mTouch->mPressed) {
+        if (mActive && (mTouch->mPartAtPress & Scene40CharacterTouch::PART_BODY) &&
+            mCharacter->mBalloon.mState == 1) {
+            mCharacter->ShowBalloon(3);
+            mMenu->SetRightDisabled(TRUE);
+            gSoundManager.StartSeqArc(1, 26, 11);
+            SetState(STATE_8);
+        } else if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+            mContext->mSprite->mVisible = TRUE;
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            ScreenPoint point = mContext->mTouch->mPressPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) { // Where it is, not where it came down
+            mContext->mSprite->mVisible = TRUE;
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            ScreenPoint point = mContext->mTouch->mPressPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        }
+    } else if (mContext->mTouch->mHeld) {
+        if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+            mContext->mSprite->mVisible = TRUE;
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+            mContext->mSprite->mVisible = TRUE;
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_BODY) {
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            mContext->mSprite->mVisible = FALSE;
+        } else if (mTouch->mPart & Scene40CharacterTouch::PART_NONE) {
+            Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+            mContext->mSprite->mVisible = FALSE;
+        }
+    } else if (mContext->mTouch->mReleased) {
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_FACE) && mCharacter->mLongActState == 18) {
+            MI_CpuFill8(&gSceneScratch, 0, 100);
+            GetSceneMemory().mNextMode = 0;
+            gSceneMemory.mCharacters[0] = mCharacter->mIndex;
+            gSceneManager.RequestScene(0x8E);
+        }
+        mContext->mSprite->mVisible = FALSE;
+    }
+}
+
 void Scene40TouchPage::UpdateWaitIdle() {
     if (mCharacter->mState != 0) {
         return;
@@ -2811,7 +2869,7 @@ void Scene40TouchPage::UpdateWait9() {
         return;
     }
     mMenu->SetRightDisabled(FALSE);
-    SetState(STATE_7);
+    SetState(STATE_IDLE_RIGHT_MENU);
 }
 
 void Scene40TouchPage::UpdateWaitMessages() {

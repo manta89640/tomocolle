@@ -54,7 +54,7 @@ public:
         STATE_PRESSED_DOWN = 4,   // The character pressed down to the floor under the stylus
         STATE_RUBBED = 5,         // The face rubbed: the head wobbles with the stylus
         STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
-        STATE_7 = 7,
+        STATE_IDLE_RIGHT_MENU = 7, // The idle state with only the menu's right buttons (5 and 6) and the balloon
         STATE_8 = 8,
         STATE_WAIT_9 = 9,         // Waits for the character's state 17
         STATE_10 = 10,
@@ -86,7 +86,7 @@ public:
     void UpdatePressedDown();
     void UpdateRubbed();
     void UpdateWaitIdle();
-    void Update7();
+    void UpdateIdleRightMenu();
     void Update8();
     void UpdateWait9();
     void Update10();
