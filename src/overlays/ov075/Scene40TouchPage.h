@@ -94,6 +94,13 @@ public:
     void UpdateMessages0();
     void UpdateMessages4();
     void SetState(int state);
+    void PlaceGift();
+    BOOL IsCharacterMood0Or1();
+    BOOL IsCharacterNotIn2Or24Or25();
+    void PlayGame();
+    void PlayGame3B();
+    void PlayGame87();
+    int FindPresentScene(int sceneId);
     void Draw();
 
     /* 0x00 */ int mLastState; // mState as Update began: the controller reads it (STATE_DONE: mResult is ready)

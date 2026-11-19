@@ -266,7 +266,7 @@ void Scene40::StartLoading() {
 
     BOOL keepMusic = FALSE;
     if (gSceneManager.mPreviousSceneId == 0x38) {
-        if (GetSceneScratchByte0() == 0) {
+        if (GetSceneMemory().mNextMode == 0) {
             keepMusic = TRUE;
         }
     } else if (CameFromSceneOfTable(gSceneManager.mPreviousSceneId)) {
@@ -844,7 +844,7 @@ void Scene40::Start() {
             break;
         }
     } else if (gSceneManager.mPreviousSceneId == 0x40) {
-        switch (GetSceneScratchByte0()) {
+        switch (GetSceneMemory().mNextMode) {
         case 0:
             mScreenState = LAYOUT_SMT_UP;
             LoadLayout(1);
@@ -2363,6 +2363,84 @@ void Scene40TouchPage::SetState(int state) {
     mUnknown10 = 0;
 }
 
+BOOL Scene40TouchPage::IsCharacterMood0Or1() {
+    return SavedCharacter::Is0Or1(mCharacter->mMood);
+}
+
+BOOL Scene40TouchPage::IsCharacterNotIn2Or24Or25() {
+    if (mCharacter->mState == 2 || mCharacter->mState == 24 || mCharacter->mState == 25) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// One of the games: by the character's game (scenes 0x82 to 0x86), or 0xB7 or 0xB9 at even odds
+void Scene40TouchPage::PlayGame() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    BOOL requested = FALSE;
+    GetSceneMemory().mNextMode = 0;
+    if (mCharacter->mUnknown24E != 0xFF) {
+        requested = TRUE;
+        switch (mCharacter->mUnknown24E) {
+        case 0:
+            gSceneManager.RequestScene(0x82);
+            break;
+        case 2:
+            gSceneManager.RequestScene(0x83);
+            break;
+        case 3:
+            gSceneManager.RequestScene(0x84);
+            break;
+        case 4:
+            gSceneManager.RequestScene(0x85);
+            break;
+        case 5:
+            gSceneManager.RequestScene(0x86);
+            break;
+        default:
+            requested = FALSE;
+            break;
+        }
+    }
+    if (!requested) {
+        if ((int)MATH_Rand16(&gRandom, 1000) < 500) {
+            gSceneManager.RequestScene(0xB7);
+        } else {
+            gSceneManager.RequestScene(0xB9);
+        }
+    }
+    mCharacter->AddUnknown1C4Once0();
+}
+
+void Scene40TouchPage::PlayGame3B() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    GetSceneMemory().mNextMode = 0;
+    gSceneManager.RequestScene(0x3B);
+    mCharacter->AddUnknown1C4Once0();
+}
+
+void Scene40TouchPage::PlayGame87() {
+    MI_CpuFill8(&gSceneScratch, 0, 100);
+    GetSceneMemory().mNextMode = 0;
+    if (mCharacter->mUnknown24E == 1) {
+        gSceneManager.RequestScene(0x87);
+    } else {
+        gSceneManager.RequestScene(0xB8);
+    }
+    mCharacter->AddUnknown1C4Once0();
+}
+
+// The index of a scene in sPresentScenes, or -1
+int Scene40TouchPage::FindPresentScene(int sceneId) {
+    int index = -1;
+    for (int i = 0; i < 20; i++) {
+        if (sceneId == sPresentScenes[i].mSceneId) {
+            index = i;
+        }
+    }
+    return index;
+}
+
 void Scene40TouchPage::Draw() {}
 
 // --- The scene's character ------------------------------------------------------------------------------------------
@@ -2477,26 +2555,11 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Of ov075-c
 // Of ov075-e
 int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
 extern MATHRandContext16 gRandom;
 
 
-// The bytes after gSceneMemory's 0x3C: the first of gSceneScratch, which this file reaches through gSceneMemory as
-// well (the literal is gSceneMemory's address and the offset is in the instruction)
-struct Scene40SceneMemory {
-    /* 0x00 */ u8 mUnknown00[0x20];
-    /* 0x20 */ u8 mCharacters[12];
-    /* 0x2C */ u16 mUnknown2C[8];
-    /* 0x3C */ union { u8 mTalkAnswers[2]; u8 mNextMode; }; // The talk page's answers, for the scene it goes to
-};
-
-// 0x3E
-
-static inline Scene40SceneMemory &GetSceneMemory() {
-    return (Scene40SceneMemory &)gSceneMemory;
-}
 
 // A game the talk page can go to (gStr_S_ov075, 0x0217BBC0; 0x02176454 chooses one)
 struct Scene40Game {
@@ -5055,7 +5118,6 @@ extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk
 extern MATHRandContext16 gRandom;
 void func_ov075_02174a14(Scene40Character *character);
 void func_ov075_02174b38(Scene40Character *character, int item);
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
 static inline int Random(int max) {
@@ -6854,7 +6916,6 @@ extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
 // Not decompiled yet
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 extern const u32 sSongGiftMessages[6];        // "You presented enka!" ...: the message of each song genre given (miitouch file)
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
@@ -10777,7 +10838,6 @@ extern int gGameClock[];
 s64 Clock_GetDateTime(int offset, RTCDate *date, RTCTime *time); // The date and time now, and the same in seconds
 
 // Not decompiled yet
-void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
 // --- ov075-e: the character's helpers, its balloon and cover, the scene's clock, input, camera, lights, effects ---

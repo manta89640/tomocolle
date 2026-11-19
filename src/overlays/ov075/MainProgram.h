@@ -44,11 +44,19 @@ s32 _s32_div_f(s32 a, s32 b); // The line into the scene under a point of the to
 }
 
 // gSceneMemory and gSceneScratch are one block of the main program's .bss (0x0213BA74, 0x3C + 0x70 bytes), which
-// src/scene/EmptyScene.cpp defines as two objects. This overlay's code reads the scratch's first byte off
-// gSceneMemory's address (gSceneMemory + 0x3C) in one place and off gSceneScratch's in others, so its source saw the
-// scratch as part of gSceneMemory; stated here as that address, since the shared header has the two apart.
-static inline u8 GetSceneScratchByte0() {
-    return ((u8 *)&gSceneMemory)[0x3C];
+// src/scene/EmptyScene.cpp defines as two objects. This overlay reads the scratch's first bytes off gSceneMemory's
+// address (gSceneMemory + 0x3C) as well as off its own, so its source saw them as part of gSceneMemory.
+// The bytes after gSceneMemory's 0x3C: the first of gSceneScratch, which this file reaches through gSceneMemory as
+// well (the literal is gSceneMemory's address and the offset is in the instruction)
+struct Scene40SceneMemory {
+    /* 0x00 */ u8 mUnknown00[0x20];
+    /* 0x20 */ u8 mCharacters[12];
+    /* 0x2C */ u16 mUnknown2C[8];
+    /* 0x3C */ union { u8 mTalkAnswers[2]; u8 mNextMode; }; // The talk page's answers, for the scene it goes to
+}; // 0x3E
+
+static inline Scene40SceneMemory &GetSceneMemory() {
+    return (Scene40SceneMemory &)gSceneMemory;
 }
 
 // --- The overlay's own, not decompiled yet (other agents' ranges): by address until named ---------------------
