@@ -31,7 +31,7 @@ public:
     void Init(Scene40Touch *tracker, Scene40Character *character);
     void Update();
     void Clear();
-    int HitTest(const Scene40TouchPoint *point);
+    int HitTest(const ScreenPoint *point);
 
     /* 0x00 */ Scene40Touch *mTracker; // The scene's (scene+0x69D2C)
     /* 0x04 */ Scene40Character *mCharacter;

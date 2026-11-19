@@ -62,9 +62,9 @@ static u32 GetGameFlags(u32 flags);
 
 static void AddTroublesSolved(int count);
 
-static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint);
+static void ProjectTouch(const ScreenPoint *point, VecFx32 *out, const VecFx32 *planePoint);
 
-static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
+static void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
 
 // The scenes after which the visit starts with the pages' entry 23 (CameFromSceneOfTables)
 static const int sReturnScenesA[3] = {89, 59, 124};
@@ -980,26 +980,26 @@ void Scene40CharacterTouch::Init(Scene40Touch *tracker, Scene40Character *charac
     mCharacter = character;
 }
 
-static inline Scene40TouchPoint Add(Scene40TouchPoint a, Scene40TouchPoint b) {
-    Scene40TouchPoint sum;
+static inline ScreenPoint Add(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint sum;
     sum.x = a.x + b.x;
     sum.y = a.y + b.y;
     return sum;
 }
 
-static inline Scene40TouchPoint Sub(Scene40TouchPoint a, Scene40TouchPoint b) {
-    Scene40TouchPoint difference;
+static inline ScreenPoint Sub(ScreenPoint a, ScreenPoint b) {
+    ScreenPoint difference;
     difference.x = a.x - b.x;
     difference.y = a.y - b.y;
     return difference;
 }
 
-static inline u32 LengthSq(Scene40TouchPoint a) {
+static inline u32 LengthSq(ScreenPoint a) {
     return a.x * a.x + a.y * a.y;
 }
 
-static inline Scene40TouchPoint ToFx(Scene40TouchPoint a) {
-    Scene40TouchPoint fx;
+static inline ScreenPoint ToFx(ScreenPoint a) {
+    ScreenPoint fx;
     fx.x = a.x << FX32_SHIFT;
     fx.y = a.y << FX32_SHIFT;
     return fx;
@@ -1014,15 +1014,15 @@ void Scene40CharacterTouch::Update() {
         mDepths[0].mOrigin.x = origin.x;
         mDepths[0].mOrigin.y = origin.y;
         mDepths[0].mOrigin.z = origin.z;
-        Scene40TouchPoint point = mTracker->mPressPoint;
+        ScreenPoint point = mTracker->mPressPoint;
         mPartAtPress = HitTest(&point);
         ProjectTouch(&point, &mDepths[0].mPress, &mDepths[0].mOrigin);
         ProjectTouchBetween(&point, &mDepths[1].mPress, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mPress, FX32_CONST(2), FX32_CONST(1));
     } else if (mTracker->mHeld) {
-        Scene40TouchPoint point = mTracker->mPoint;
+        ScreenPoint point = mTracker->mPoint;
         if (LengthSq(Sub(mTracker->mPoint, mTracker->mPressPoint)) > 20 * 20) {
-            Scene40TouchPoint move = ToFx(Sub(mTracker->mPoint, mTracker->mPressPoint));
+            ScreenPoint move = ToFx(Sub(mTracker->mPoint, mTracker->mPressPoint));
             u16 angle = FX_Atan2Idx(move.y, move.x);
             if (angle >= 0xB000 && angle < 0xD000) {
                 mStroke = 1;
@@ -1048,13 +1048,13 @@ void Scene40CharacterTouch::Update() {
         ProjectTouchBetween(&point, &mDepths[1].mHold, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mHold, FX32_CONST(2), FX32_CONST(1));
     } else if (mTracker->mReleased) {
-        Scene40TouchPoint point = mTracker->mReleasePoint;
+        ScreenPoint point = mTracker->mReleasePoint;
         ProjectTouch(&point, &mDepths[0].mRelease, &mDepths[0].mOrigin);
         ProjectTouchBetween(&point, &mDepths[1].mRelease, FX32_CONST(3), FX32_CONST(4));
         ProjectTouchBetween(&point, &mDepths[2].mRelease, FX32_CONST(2), FX32_CONST(1));
 
         // Where the flick would have taken the stylus in a frame, and so which way and how fast it went
-        Scene40TouchPoint flicked = Add(mTracker->mReleasePoint, mTracker->mVelocity);
+        ScreenPoint flicked = Add(mTracker->mReleasePoint, mTracker->mVelocity);
         VecFx32 flicked0, flicked1;
         ProjectTouch(&flicked, &flicked0, &mDepths[0].mOrigin);
         ProjectTouchBetween(&flicked, &flicked1, FX32_CONST(3), FX32_CONST(4));
@@ -1089,7 +1089,7 @@ void Scene40CharacterTouch::Clear() {
 }
 
 // What of the character is under a point of the touch screen
-int Scene40CharacterTouch::HitTest(const Scene40TouchPoint *point) {
+int Scene40CharacterTouch::HitTest(const ScreenPoint *point) {
     int parts = 0;
     ModelResources_SetTouchLine(gModelResources, point->x, point->y);
     if (mCharacter->HitTestFace()) {
@@ -1111,7 +1111,7 @@ int Scene40CharacterTouch::HitTest(const Scene40TouchPoint *point) {
 
 // The point on the line into the room under a point of the touch screen that lies in the vertical plane through
 // planePoint facing the camera; without one (the line in the plane), a fixed point
-static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const VecFx32 *planePoint) {
+static void ProjectTouch(const ScreenPoint *point, VecFx32 *out, const VecFx32 *planePoint) {
     Camera *const camera = &gCamera;
     VecFx32 line, near, far, normal, side;
     NNS_G3dScrPosToWorldLine(point->x, point->y, &near, &far);
@@ -1138,7 +1138,7 @@ static void ProjectTouch(const Scene40TouchPoint *point, VecFx32 *out, const Vec
 }
 
 // The same with the plane through a point between the camera's target and eye, by their weights
-static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight) {
+static void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight) {
     Camera *const camera = &gCamera;
     VecFx32 planePoint, target, eye;
     ScaleVec(eyeWeight, &camera->mEye, &eye);
@@ -1154,7 +1154,7 @@ static void ProjectTouchBetween(const Scene40TouchPoint *point, VecFx32 *out, fx
 // A twelfth of the distance from the camera's eye
 static fx32 GetCameraDistanceScale(const VecFx32 *pos) {
     VecFx32 offset;
-    VEC_Subtract(pos, &gCamera.mEye, &offset);
+    VEC_Subtract(&gCamera.mEye, pos, &offset);
     return FX_Mul(VEC_Mag(&offset), FX32_CONST(1) / 12);
 }
 
@@ -1181,10 +1181,11 @@ static void MakeFacingMatrixY(MtxFx33 *mtx, fx32 sin, fx32 cos) {
 
 // Sets or clears bits of gGameData's flags at 0xCC
 static void SetGameFlags(u32 flags, BOOL set) {
+    GameData *const game = &gGameData;
     if (set) {
-        gGameData.mUnknownCC |= flags;
+        game->mUnknownCC |= flags;
     } else {
-        gGameData.mUnknownCC &= ~flags;
+        game->mUnknownCC &= ~flags;
     }
 }
 
@@ -1548,18 +1549,6 @@ static const ScreenPoint sMannequinScreenPoint = {190, 172};
 
 static const ScreenPoint sItemScreenPoint = {190, 134};
 
-// Of ov075-a: static functions of this file (remove these declarations at the merge)
-void ProjectTouchBetween(const ScreenPoint *point, VecFx32 *out, fx32 targetWeight, fx32 eyeWeight);
-
-fx32 GetCameraDistanceScale(const VecFx32 *pos);
-
-void MakeFacingMatrixX(MtxFx33 *mtx, fx32 sin, fx32 cos);
-
-void MakeFacingMatrixY(MtxFx33 *mtx, fx32 sin, fx32 cos);
-
-void SetGameFlags(u32 flags, BOOL set);
-
-u32 GetGameFlags(u32 flags);
 
 void AddTroublesSolved(int count);
 
@@ -11021,8 +11010,8 @@ BOOL Scene40Cover::HasDisappeared() {
 
 // --- The stylus -------------------------------------------------------------------------------------------------
 
-static inline Scene40TouchPoint ZeroPoint() {
-    Scene40TouchPoint point = {0, 0};
+static inline ScreenPoint ZeroPoint() {
+    ScreenPoint point = {0, 0};
     return point;
 }
 
@@ -11061,8 +11050,8 @@ void Scene40Touch::Reset() {
 }
 
 // The mean of the last five moves
-Scene40TouchPoint Scene40Touch::GetVelocity() {
-    Scene40TouchPoint sum = ZeroPoint();
+ScreenPoint Scene40Touch::GetVelocity() {
+    ScreenPoint sum = ZeroPoint();
     for (int i = 0; i < 5; i++) {
         sum.x += mMoves[i].x;
         sum.y += mMoves[i].y;
