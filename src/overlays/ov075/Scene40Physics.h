@@ -10,6 +10,11 @@ class Scene40ItemModel;
 struct Scene40Motion {
     void Reset();
     void UpdateAtRest(VecFx32 *pos, VecFx32 *velocity);
+    void SetVelocity(VecFx32 velocity) {
+        mVelocity.x = velocity.x;
+        mVelocity.y = velocity.y;
+        mVelocity.z = velocity.z;
+    }
 
     /* 0x00 */ VecFx32 mVelocity;
     /* 0x0C */ BOOL mAtRest; // On the floor and not moving

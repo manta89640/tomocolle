@@ -60,6 +60,13 @@ public:
     void SetScaleFromBody(u32 height, u32 build);
     VecFx32 GetHeldItemScale();
 
+    // By value, as the Mii touch scene's physics sets it (overlay 75, 0x0217a6f4)
+    void SetPos(VecFx32 pos) {
+        mPos.x = pos.x;
+        mPos.y = pos.y;
+        mPos.z = pos.z;
+    }
+
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;
     /* 0x0EC */ VecFx32 mScale;              // Of the body, from the Mii's height and build

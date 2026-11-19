@@ -254,7 +254,7 @@ void Scene40::StartLoading() {
         gSoundManager.StopSeq(0, 1);
         return;
     }
-    func_ov075_021793fc(func_ov075_02179290(&mCharacter));
+    PlayMusic(mCharacter.ChooseMusic());
 }
 
 void Scene40::Init() {
@@ -379,7 +379,7 @@ void Scene40::Init() {
 
     mCharacter.SetContext(&mContext);
     mCharacter.SetVoiceOf(&mTtsPlayer);
-    func_ov075_021753c8(&mCharacter);
+    mCharacter.FindRelations();
     mCharacter.Update(FALSE);
     Unused0214a884();
     Start();
@@ -1485,7 +1485,6 @@ void Camera_UpdateEye(Camera *camera);                         // Whether it is 
 // Not decompiled yet
 // Of ov075-c
 // Of ov075-e
-int func_ov075_02176454(Scene40Character *character); // Chooses one of gStr_S_ov075
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
@@ -1508,6 +1507,12 @@ struct TroubleInfo {
 extern "C" const TroubleInfo *const data_02114d78[];
 
 // The trouble the character has
+// The kind (0 to 3) of a personality, converted in place
+static inline int ToPersonalityKind(int personality) {
+    personality = gPersonalityKinds[personality];
+    return personality;
+}
+
 static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
     return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
 }
@@ -2139,7 +2144,7 @@ void Scene40TalkPage::UpdatePlayOrNot() {
         MI_CpuFill8(&gSceneScratch, 0, 100);
         GetSceneMemory().mTalkAnswers[0] = 2;
         GetSceneMemory().mCharacters[0] = mContext->mCharacter->mIndex;
-        gSceneManager.RequestScene(gStr_S_ov075[func_ov075_02176454(mContext->mCharacter)].mSceneId);
+        gSceneManager.RequestScene(gStr_S_ov075[mContext->mCharacter->ChooseGame()].mSceneId);
         break;
     case 1:
         mContext->mCharacter->SetState(0);
@@ -2677,8 +2682,6 @@ extern const ScreenPoint sPresentBoxPoints[3];
 extern const fx32 sPresentBoxScales[3];
 BOOL LineMeetsSphere(const VecFx32 *origin, const VecFx32 *dir, fx32 radius);
 extern VecFx32 gTouchLineDirection;
-int func_ov075_02179290(Scene40Character *character);
-void func_ov075_021793fc(int kind);
 }
 
 static inline void SetPresentPosition(Model *model, const VecFx32 &position) {
@@ -2875,7 +2878,7 @@ void Scene40PresentPage::UpdateEnd() {
             return;
         }
         mContext->mSpeechWindow->Hide();
-        func_ov075_021793fc(func_ov075_02179290(mCharacter));
+        PlayMusic(mCharacter->ChooseMusic());
         gSoundManager.MoveSeqVolume(0, 127, 120);
         gSoundManager.LoadGroup(77);
         mCharacter->SetState(0);
@@ -4109,8 +4112,6 @@ void TextButton_SetOverwritePalette(TextButton *button, int palette);
 extern const char *const sWaitAnimations[4][5]; // The standing animations ("wait00".."wait09"), by personality kind and mood
 extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk00".."walk10"), by personality kind and mood
 extern MATHRandContext16 gRandom;
-void func_ov075_02174a14(Scene40Character *character);
-void func_ov075_02174b38(Scene40Character *character, int item);
 void func_ov075_0214fc00(void *object);                       // Draws the object at 0x30B50 of the scene
 }
 
@@ -4506,6 +4507,10 @@ void Scene40SegmentMeter::SetVisible(BOOL visible) {
 #define sLevelTextPosition SCENE40_POOL(ScreenPoint, 0x2C) // TEMP pool
 
 static const ScreenPoint sLevelMeterPosition = {151, 33};
+
+// The profile page's trouble meter stands where the level meter's segments do. A copy made at run time by the file's
+// static initialiser (0x02182aa4), so it is in .data and zero in the ROM; Scene40ProfilePage::Init passes it.
+static ScreenPoint sTroubleMeterPosition = sLevelMeterPosition;
 
 // Level 1 with no points; the level's text box and the segments (resource 1, sequence 1)
 void Scene40LevelMeter::Init(int *charOffset) {
@@ -5800,9 +5805,9 @@ void Scene40Character::UpdateStates28To2D() {
             mStep++;
         }
         PlaceHeldItem();
-        func_ov075_02174a14(this);
+        ShrinkHeldItemByBite();
         UpdateMouthByAnimation();
-        func_ov075_02174b38(this, mGift.mItem.InventoryItem::mId);
+        PlayEatSound(mGift.mItem.InventoryItem::mId);
         if (mFrame < mWait) {
             return;
         }
@@ -5917,9 +5922,6 @@ extern const char *const sWalkAnimations[4][5]; // The walking animations ("walk
 extern MATHRandContext16 gRandom;
 void MiiData_GetName(CharacterRecord *character, wchar_t *name);
 void GameData_ReadCharacter(GameData *game, int index, SavedCharacter *character);
-int func_ov075_0217520c(Scene40Character *character);
-void func_ov075_02174a14(Scene40Character *character);
-void func_ov075_02174c00(Scene40Character *character);
 void ScreenControl_SetBlendAlpha(ScreenControl *screens, int a, int b, int c, int d);
 void ScreenControl_SetBlendBrightness(ScreenControl *screens, int planes, int level);
 }
@@ -7671,15 +7673,15 @@ void Scene40Character::UpdateStates67To85() {
         }
         case 4:
             PlaceHeldItem();
-            func_ov075_02174a14(this);
+            ShrinkHeldItemByBite();
             UpdateMouthByAnimation();
-            func_ov075_02174c00(this);
+            PlayBiteSound();
             if (mFrame < mWait) {
                 return;
             }
             mHeldItem->Hide();
             mHeldItem = NULL;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             mStep++;
             break;
         case 5:
@@ -8380,7 +8382,7 @@ void Scene40Character::UpdateStates67To85() {
                 return;
             }
             ClearMoodIfTroubleOfCategory4OrKind8();
-            int partner = func_ov075_0217520c(this);
+            int partner = ChooseOutingPartner();
             if (partner != -1) {
                 gSceneManager.RequestScene(0x79);
                 gSceneMemory.mCharacters[0] = mIndex;
@@ -9154,7 +9156,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(10);
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][1]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][1]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -9208,7 +9210,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA3:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -9224,7 +9226,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA4:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -9746,12 +9748,9 @@ void Scene40Character::UpdateStates86ToB2() {
                 wcscpy(mMottos[3], mTaughtWord);
                 break;
             }
-            return;
+        } else if (mTtsPlayer->IsEngineIdle()) {
+            SetState(0x33);
         }
-        if (!mTtsPlayer->IsEngineIdle()) {
-            return;
-        }
-        SetState(0x33);
         break;
     case 0xB1:
         if (mEntered) {
@@ -10110,6 +10109,132 @@ void Scene40Character::ClearMoodIfTroubleOfKind8() {
     }
 }
 
+static inline int TroubleIdOf(SavedCharacter *character) {
+    return character->mTroubleId;
+}
+
+// The scene's music by the character: 1 asleep, 10 sad (4 in a trouble of kind 6), 11 for mood 2, 5 to 9 and 12
+// by the trouble for mood 3, 13 for mood 4; otherwise 3 in a trouble of kind 1, 2 in a trouble with no mood, 0
+int Scene40Character::ChooseMusic() {
+    if (mLongActState == 18 || mLongActState == 15) {
+        return 1;
+    }
+    int mood = mMood;
+    if (mood == 1) {
+        if (IsInTrouble() && GetTrouble(this)->kind == 6) {
+            return 4;
+        }
+        return 10;
+    }
+    if (mood == 2) {
+        return 11;
+    }
+    if (mood == 3) {
+        if (mTroubleCategory == 1 && (TroubleIdOf(this) == 2 || TroubleIdOf(this) == 3)) {
+            return 5;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 0) {
+            return 6;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 3) {
+            return 7;
+        }
+        if (mTroubleCategory == 4 && (TroubleIdOf(this) == 1 || TroubleIdOf(this) == 5 || TroubleIdOf(this) == 6)) {
+            return 8;
+        }
+        if (mTroubleCategory == 4 && mTroubleId == 2) {
+            return 9;
+        }
+        return 12;
+    }
+    if (mood == 4) {
+        return 13;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 1) {
+        return 3;
+    }
+    if (IsInTroubleWithoutMood()) {
+        return 2;
+    }
+    return 0;
+}
+
+// Plays the scene's music of that kind: the room's sequence with some of its tracks muted, or another sequence
+void PlayMusic(int music) {
+    switch (music) {
+    case 0:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C0, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 1:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C7, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 2:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1BC, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 3:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x187, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 4:
+        gSceneManager.SetSoundGroup(15);
+        gSoundManager.StartSeq(0, 24);
+        gSoundManager.StartSeq(1, 25);
+        gSoundManager.MoveSeqVolume(1, 0, 0);
+        break;
+    case 5:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x1C0, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 127);
+        break;
+    case 6:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x66);
+        break;
+    case 7:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x66);
+        break;
+    case 8:
+        gSceneManager.SetSoundGroup(0x39);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x63);
+        break;
+    case 9:
+        gSceneManager.SetSoundGroup(0x38);
+        gSoundManager.StartSeqIfNotPlaying(0, 0x65);
+        break;
+    case 10:
+        gSceneManager.SetSoundGroup(9);
+        gSoundManager.StartSeqIfNotPlaying(0, 11);
+        gSoundManager.SetSeqTrackMuteOnly(0, 0x43, TRUE);
+        gSoundManager.SetSeqTrackModDepth(0, 0xFF, 0);
+        break;
+    case 11:
+        gSceneManager.SetSoundGroup(11);
+        gSoundManager.StartSeqIfNotPlaying(0, 18);
+        break;
+    case 12:
+        gSceneManager.SetSoundGroup(10);
+        gSoundManager.StartSeqIfNotPlaying(0, 17);
+        break;
+    case 13:
+        gSceneManager.SetSoundGroup(12);
+        gSoundManager.StartSeqIfNotPlaying(0, 19);
+        break;
+    }
+}
+
 // --- The character's trouble ---------------------------------------------------------------------------------
 
 // The trouble talks' messages: by trouble id (for the progressing trouble), by relation and meter, ...
@@ -10142,6 +10267,162 @@ int Scene40Character::GetTroubleMessage() {
 
 void Scene40Character::SpeakTroubleProgress() {
     Speak(0, sTroubleProgressMessages[mTroubleId], 0);
+}
+
+// What the character says about its trouble's target: by the relation to it (mUnknown2EE0[0], 0 to 4), the meter
+// (mUnknown2EE0[1], 0 to 4) and a third choice (mUnknown2EE0[2], 0 to 2)
+static const int sTargetMessages[5][5] = {
+    {615, 617, 619, 621, 623}, {660, 662, 664, 666, 668}, {705, 707, 709, 711, 713},
+    {750, 752, 754, 756, 758}, {795, 795, 795, 795, 795},
+};
+static const int sTargetMessages2[5] = {625, 670, 715, 760, 797};
+
+// Its relation to the trouble's target (spouse 0, lover 1, best friend 2, friend 3, none 4, else -1) and how much
+// it likes the target (0 the most to 4); with no such character or relation, the trouble talk has nothing to say
+void Scene40Character::FindTargetRelation() {
+    u16 target = mTroubleTarget;
+    if (!GameData_CharacterExists(&gGameData, target)) {
+        mUnknown2EE0[0] = -1;
+    } else {
+        switch (mRelationRank[target]) {
+        case RELATION_SPOUSES:
+            mUnknown2EE0[0] = 0;
+            break;
+        case RELATION_LOVERS:
+            mUnknown2EE0[0] = 1;
+            break;
+        case RELATION_BEST_FRIENDS:
+            mUnknown2EE0[0] = 2;
+            break;
+        case RELATION_FRIENDS:
+            mUnknown2EE0[0] = 3;
+            break;
+        case RELATION_NONE:
+            mUnknown2EE0[0] = 4;
+            break;
+        default:
+            mUnknown2EE0[0] = -1;
+            break;
+        }
+        mUnknown2EE0[1] = (199 - mRelationMeter[target]) / 40;
+        mUnknown2EE0[1] = MATH_CLAMP(mUnknown2EE0[1], 0, 4);
+    }
+    if (mUnknown2EE0[0] == -1) {
+        mUnknown2ED0 = TRUE;
+    } else {
+        mUnknown2ED0 = FALSE;
+    }
+}
+
+void Scene40Character::SpeakAboutTarget() {
+    Speak(0, sTargetMessages[mUnknown2EE0[0]][mUnknown2EE0[1]], 1, mTroubleTarget, 2);
+}
+
+void Scene40Character::SpeakAboutTarget2() {
+    Speak(0, sTargetMessages2[mUnknown2EE0[0]], 1, mTroubleTarget, 2);
+}
+
+static const int sTargetMessages3[5][5][3] = {
+    {{630, 640, 650}, {632, 642, 652}, {634, 644, 654}, {636, 646, 656}, {638, 648, 658}},
+    {{675, 685, 695}, {677, 687, 697}, {679, 689, 699}, {681, 691, 701}, {683, 693, 703}},
+    {{720, 730, 740}, {722, 732, 742}, {724, 734, 744}, {726, 736, 746}, {728, 738, 748}},
+    {{765, 775, 785}, {767, 777, 787}, {769, 779, 789}, {771, 781, 791}, {773, 783, 793}},
+    {{802, 804, 806}, {802, 804, 806}, {802, 804, 806}, {802, 804, 806}, {802, 804, 806}},
+};
+
+void Scene40Character::SpeakAboutTarget3() {
+    Speak(0, sTargetMessages3[mUnknown2EE0[0]][mUnknown2EE0[1]][mUnknown2EE0[2]], 1, mTroubleTarget, 0);
+}
+
+// What happens after the character was touched (state 0x86), by its trouble: mUnknown2ED8 for trouble 1 and
+// mUnknown2EDC for trouble 4 while they progress, mUnknown2ED4 for trouble 1 before; mUnknown2ED0 when the
+// trouble's kind has no answers to choose from (sChoiceSets by sTroubleChoiceSets)
+void Scene40Character::ChooseAfterTouch() {
+    if (IsProgressingTroubleInState2()) {
+        switch (mTroubleId) {
+        case 1:
+            if (Random(100) < 100) {
+                mUnknown2ED8 = TRUE;
+                mUnknown2ED0 = FALSE;
+            }
+            return;
+        case 4:
+            if (Random(100) < 100) {
+                mUnknown2EDC = TRUE;
+                mUnknown2ED0 = FALSE;
+            }
+            return;
+        default:
+            mUnknown2ED0 = sChoiceSets[sTroubleChoiceSets[GetTrouble(this)->kind]].mCount == 0;
+            return;
+        }
+    }
+    if (IsProgressingTrouble() && mTroubleId == 1) {
+        mUnknown2ED4 = TRUE;
+        mUnknown2ED0 = FALSE;
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 18) {
+        FindTargetRelation();
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 6) {
+        mUnknown2ED0 = FALSE;
+        return;
+    }
+    mUnknown2ED0 = sChoiceSets[sTroubleChoiceSets[GetTrouble(this)->kind]].mCount == 0;
+}
+
+// Speaks about its trouble: how it is going, about the target of a trouble of kind 18, or the trouble's message
+// with the target as its argument
+void Scene40Character::SpeakAboutTrouble() {
+    if (!IsInTrouble()) {
+        return;
+    }
+    int mode;
+    if (mUnknown2ED0) {
+        mode = 0;
+    } else {
+        mode = 2;
+    }
+    if (IsProgressingTroubleInState2()) {
+        SpeakTroubleProgress();
+        return;
+    }
+    if (IsInTrouble() && GetTrouble(this)->kind == 18) {
+        if (mUnknown2EE0[0] != -1) {
+            SpeakAboutTarget();
+            return;
+        }
+        Speak(0, 0x328, 0);
+        ClearTrouble();
+        return;
+    }
+    if (GetTrouble(this)->hasTarget == 1) {
+        switch (GetTrouble(this)->kind) {
+        case 1:
+        case 2:
+            Speak(0, GetTroubleMessage(), 4, mTroubleTarget, mode);
+            break;
+        case 3:
+            Speak(0, GetTroubleMessage(), 5, mTroubleTarget, mode);
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            Speak(0, GetTroubleMessage(), 1, mTroubleTarget, mode);
+            break;
+        case 11:
+            Speak(0, GetTroubleMessage(), mode);
+            break;
+        }
+    } else {
+        Speak(0, GetTroubleMessage(), mode);
+    }
 }
 
 // --- The character's talk ---------------------------------------------------------------------------------------
@@ -10326,7 +10607,8 @@ void Scene40Character::GetTalkArguments(const Scene40TalkEntry *entry, int *coun
             for (int item = 0; item < 255; item++) {
                 int kind = gGoodsTable[(u16)item].mKind;
                 if (kind == 1 || kind == 4) {
-                    foods[n++] = item;
+                    foods[n] = item;
+                    n++;
                 }
             }
             values[*count] = foods[Rand(n)];
@@ -10382,9 +10664,11 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         int found[33];
         int n = 0;
         int total = sFirstTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sFirstTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10392,14 +10676,16 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         } else {
             entry = sFirstTalks[gPersonalityKinds[mPersonality]];
         }
-        mUnknown054Bit20++;
+        mUnknown054Bit20 = (u8)(mUnknown054Bit20 + 1);
     } else if (MATH_Rand16(&gRandom, 10) != 0 || conditions.mElapsed != 1) {
         int found[65];
         int n = 0;
         int total = sTouchTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sTouchTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10411,9 +10697,11 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         int found[48];
         int n = 0;
         int total = sRecentTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sRecentTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10444,6 +10732,7 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     time.second = clock->mTime.second;
     GetTalkConditions(&date, &time, &conditions);
     int n = 0;
+    int total;
     if (kind == 2) {
         int month = GetParameter(PARAM_BIRTH_MONTH);
         int day = GetParameter(PARAM_BIRTH_DAY);
@@ -10453,10 +10742,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     }
     switch (kind) {
     case 1: {
-        int total = sNewsTalk1Counts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalk1Counts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalks1[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10467,10 +10757,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
         break;
     }
     case 2: {
-        int total = sNewsTalk2Counts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalk2Counts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalks2[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10481,10 +10772,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
         break;
     }
     case 0xFE: {
-        int total = sNewsTalkFECounts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalkFECounts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalksFE[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10497,6 +10789,168 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     }
     *message = entry->mMessage;
     GetTalkArguments(entry, count, types, values);
+}
+
+// Given one of the tools (goods 236 to 243) in a good mood, the character starts the long act of that tool for
+// its duration from now; with a partner, the partner starts its own part of it (or stops, for tool 243)
+void Scene40Character::StartLongActWithTool(int item) {
+    if (!Is0Or1(mMood)) {
+        return;
+    }
+    int act = 0;
+    int partnerAct = 0;
+    BOOL paired = IsLongActPaired();
+    mUnknown3094 = FALSE;
+    switch (item) {
+    case 236:
+        if (paired) {
+            act = 0x2A;
+            partnerAct = 0x29;
+        } else {
+            act = 5;
+        }
+        break;
+    case 241:
+        if (paired) {
+            act = 0x1E;
+            partnerAct = 0x1D;
+        } else {
+            act = 10;
+        }
+        break;
+    case 243:
+        act = 4;
+        break;
+    case 242:
+        if (paired) {
+            act = 0x20;
+            partnerAct = 0x1F;
+        } else {
+            act = 9;
+        }
+        break;
+    case 239:
+        if (paired) {
+            act = 0x24;
+            partnerAct = 0x23;
+        } else {
+            act = 12;
+        }
+        break;
+    case 240:
+        if (paired) {
+            act = 0x22;
+            partnerAct = 0x21;
+        } else {
+            act = 1;
+        }
+        break;
+    case 237:
+        if (paired) {
+            act = 0x28;
+            partnerAct = 0x27;
+        } else {
+            act = 16;
+        }
+        break;
+    case 238:
+        if (paired) {
+            act = 0x26;
+            partnerAct = 0x25;
+        } else {
+            act = 8;
+        }
+        break;
+    }
+    s64 now = mContext->mClock->mSeconds;
+    s64 end = now + GetLongActDuration(act, 3);
+    mLongActState = act;
+    mLongActEnd = end;
+    if (!paired) {
+        return;
+    }
+    SavedCharacter partner;
+    u8 index = mLongActPartner;
+    GameData_ReadCharacter(&gGameData, index, &partner);
+    partner.mIndex = index;
+    if (item == 243) {
+        partner.ClearLongAct();
+    } else {
+        partner.mLongActState = partnerAct;
+        partner.mLongActEnd = end;
+    }
+    GameData_WriteCharacter(&gGameData, index, &partner);
+}
+
+// A progressing trouble whose progress is full is over (state 4): it ends after its cooldown, the mood clears, and
+// a long act with a partner ends
+void Scene40Character::FinishTroubleIfFull(s64 now) {
+    BOOL full = FALSE;
+    if (IsProgressingTrouble()) {
+        if (mTroubleState == 2) {
+            if (IsTroubleProgressFull(now)) {
+                full = TRUE;
+            }
+        } else if (mTroubleState == 1) {
+            if (IsTroubleProgressFullAt(now, now, mTroubleProgress)) {
+                full = TRUE;
+            }
+        }
+    }
+    if (!full) {
+        return;
+    }
+    mTroubleState = 4;
+    mTroubleEnd = now + GetTrouble(this)->cooldownMinutes * 60;
+    mMood = 0;
+    ClearLongActOfPair();
+}
+
+extern "C" int GameData_GetCharacterSex(GameData *game, int index);
+
+// Who goes out with the character (scene 0x79; none: scene 0x78 alone): not in a trouble of category 4; its
+// spouse, lover or best friend; else one of the friends of its own sex it likes most (meter above 119), at random
+int Scene40Character::ChooseOutingPartner() {
+    int partner = -1;
+    if (IsInTrouble() && mTroubleCategory == 4) {
+    } else if (mSpouse != -1) {
+        partner = mSpouse;
+    } else if (mLover != -1) {
+        partner = mLover;
+    } else if (mBestFriend != -1) {
+        partner = mBestFriend;
+    } else {
+        int best = -1;
+        u32 bestMeter = 119;
+        for (int i = 0; i < 100; i++) {
+            if (GameData_CharacterExists(&gGameData, i)) {
+                int sex = MiiData_GetSex(this);
+                int other = GameData_GetCharacterSex(&gGameData, i);
+                if (other == sex && i != mIndex && mRelationRank[i] == RELATION_FRIENDS &&
+                    mRelationMeter[i] > bestMeter) {
+                    best = i;
+                    bestMeter = mRelationMeter[i];
+                }
+            }
+        }
+        if (best != -1) {
+            u16 candidates[100];
+            int count = 0;
+            for (int i = 0; i < 100; i++) {
+                if (GameData_CharacterExists(&gGameData, i)) {
+                    int sex = MiiData_GetSex(this);
+                    int other = GameData_GetCharacterSex(&gGameData, i);
+                    if (other == sex && i != mIndex && mRelationRank[i] == RELATION_FRIENDS &&
+                        mRelationMeter[i] == mRelationMeter[best]) {
+                        candidates[count] = i;
+                        count++;
+                    }
+                }
+            }
+            partner = candidates[Random(count)];
+        }
+    }
+    return partner;
 }
 
 // A long act with a partner ends for both: the partner's record is read, cleared and written back
@@ -10522,6 +10976,39 @@ void Scene40Character::ClearLongActOfPairFrom(s64 now) {
         GameData_WriteCharacter(&gGameData, index, &partner);
     }
     ClearLongActFrom(now);
+}
+
+// The saved characters, and the character's friends it likes (rank 1, meter above 100), best friend, lover and
+// spouse (meter above 50), for the talk's conditions and arguments
+void Scene40Character::FindRelations() {
+    mCharacterCount = 0;
+    mFriendCount = 0;
+    mBestFriend = -1;
+    mLover = -1;
+    mSpouse = -1;
+    for (int i = 0; i < 100; i++) {
+        mFriends[i] = -1;
+    }
+    for (int i = 0; i < 100; i++) {
+        if (!GameData_CharacterExists(&gGameData, i)) {
+            continue;
+        }
+        mCharacterCount++;
+        if (i == mIndex) {
+            continue;
+        }
+        int rank = mRelationRank[i];
+        if (rank == RELATION_FRIENDS && mRelationMeter[i] > 100) {
+            mFriends[mFriendCount] = i;
+            mFriendCount++;
+        } else if (rank == RELATION_BEST_FRIENDS && mRelationMeter[i] > 50) {
+            mBestFriend = i;
+        } else if (rank == RELATION_LOVERS && mRelationMeter[i] > 50) {
+            mLover = i;
+        } else if (rank == RELATION_SPOUSES && mRelationMeter[i] > 50) {
+            mSpouse = i;
+        }
+    }
 }
 
 // Something to tell the player (the record's byte 0x24A: 1, 2 or 0xFE, the kind of talk; 0 or 0xFF for none)
@@ -10616,7 +11103,8 @@ int Scene40Character::ChooseActivity() {
     int i;
     for (i = 0; i < 20; i++) {
         if (sActivities[i].mEnabled == 1 && sActivities[i].mMinCharacters <= mCharacterCount) {
-            candidates[count++] = i;
+            candidates[count] = i;
+            count++;
         }
     }
     return candidates[MATH_Rand16(&gRandom, count)];
@@ -10665,6 +11153,29 @@ void Scene40Character::GoToWedding() {
     gSceneMemory.mCharacters[0] = mIndex;
     gSceneMemory.mCharacters[1] = mTroubleTarget;
     gSceneManager.RequestScene(0xAB);
+}
+
+// One of the seven games of the talk page that there are enough characters for, at random by their weights
+int Scene40Character::ChooseGame() {
+    int total = 0;
+    for (int i = 0; i < 7; i++) {
+        if (gStr_S_ov075[i].mUnknown4[0] <= mCharacterCount) {
+            total += gStr_S_ov075[i].mUnknown4[1];
+        }
+    }
+    int choice = Rand(total);
+    int i = 0;
+    int sum = 0;
+    for (;;) {
+        if (gStr_S_ov075[i].mUnknown4[0] <= mCharacterCount) {
+            sum += gStr_S_ov075[i].mUnknown4[1];
+        }
+        if (choice < sum) {
+            break;
+        }
+        i++;
+    }
+    return i;
 }
 
 // The game keeps a bit for each activity that was proposed (gGameData+0x110)
@@ -11037,6 +11548,124 @@ void Scene40Touch::Init() {
     mTapFrames = 0;
 }
 
+// Where the stylus is, or was last while mUnknown4C is set
+static inline const ScreenPoint &GetTouchPoint() {
+    return gTouchInput.mUnknown4C ? gTouchInput.mLastPoint : gTouchInput.mPoint;
+}
+
+static inline Scene40TouchPoint AddPoints(Scene40TouchPoint a, Scene40TouchPoint b) {
+    Scene40TouchPoint sum;
+    sum.x = a.x + b.x;
+    sum.y = a.y + b.y;
+    return sum;
+}
+
+static inline Scene40TouchPoint SubtractPoints(ScreenPoint a, ScreenPoint b) {
+    Scene40TouchPoint difference;
+    difference.x = a.x - b.x;
+    difference.y = a.y - b.y;
+    return difference;
+}
+
+static inline int Abs(int value) {
+    return value < 0 ? -value : value;
+}
+
+// Every frame. When the stylus goes down: a new press, where, and the tap count. While it is down: which way the
+// point moved (the point then follows the stylus by that one pixel), how far it moved this frame (added to the
+// distance when more than a pixel, and kept among the last five moves), and, while mSmooth is set, the point as
+// the mean of the last eight. When it goes up: where, and the mean of the last moves as its velocity.
+//
+// NOT MATCHING (the code is the original's but for two stack slots): the original has GetVelocity's result at sp+56
+// and the zero point the sum starts from at sp+48; here they are the other way round. Tried: an inline returning
+// the zero point (the temporary goes below every other one), a named zero local in the block (above the sum).
+void Scene40Touch::Update() {
+    mPressed = FALSE;
+    mHeld = FALSE;
+    mReleased = FALSE;
+    mTapFrames++;
+    if (mTapFrames > 30) {
+        mTaps = 0;
+    }
+    if (gTouchInput.mTouched) {
+        Reset();
+        mPressed = TRUE;
+        const ScreenPoint &point = GetTouchPoint();
+        mPressPoint.x = point.x;
+        mPressPoint.y = point.y;
+        CountTap();
+        return;
+    }
+    if (gTouchInput.mTp.touch) {
+        mHeld = TRUE;
+        Scene40TouchPoint point;
+        const ScreenPoint &touch = GetTouchPoint();
+        point.x = touch.x;
+        point.y = touch.y;
+        if (point.x < mPoint.x) {
+            mDirection.x = 1;
+        } else if (point.x == mPoint.x) {
+            mDirection.x = 0;
+        } else if (point.x > mPoint.x) {
+            mDirection.x = -1;
+        }
+        if (point.y < mPoint.y) {
+            mDirection.y = 1;
+        } else if (point.y == mPoint.y) {
+            mDirection.y = 0;
+        } else if (point.y > mPoint.y) {
+            mDirection.y = -1;
+        }
+        mPoint = AddPoints(point, mDirection);
+        Scene40TouchPoint move = SubtractPoints(gTouchInput.mPoint, gTouchInput.mLastPoint);
+        if (Abs(move.x) > 1) {
+            mDistance += Abs(move.x);
+        }
+        if (Abs(move.y) > 1) {
+            mDistance += Abs(move.y);
+        }
+        mHeldFrames++;
+        mMoves[mMoveIndex++] = move;
+        if (mMoveIndex % 5 == 0) {
+            mMoveIndex = 0;
+        }
+        if (!mSmooth) {
+            return;
+        }
+        mPoints[mPointIndex].x = mPoint.x << FX32_SHIFT;
+        mPoints[mPointIndex].y = mPoint.y << FX32_SHIFT;
+        mPointIndex++;
+        if (mPointIndex >= 8) {
+            mPointIndex = 0;
+        }
+        mPointCount++;
+        if (mPointCount > 8) {
+            mPointCount = 8;
+        }
+        Scene40TouchPoint sum = Scene40TouchPoint();
+        for (int i = 0; i < mPointCount; i++) {
+            sum.x += mPoints[i].x;
+            sum.y += mPoints[i].y;
+        }
+        if (mPointCount == 8) {
+            mPoint.x = sum.x >> (FX32_SHIFT + 3);
+            mPoint.y = sum.y >> (FX32_SHIFT + 3);
+            return;
+        }
+        mPoint.x = (sum.x / mPointCount) >> FX32_SHIFT;
+        mPoint.y = (sum.y / mPointCount) >> FX32_SHIFT;
+        return;
+    }
+    if (!gTouchInput.mUnknown4C && gPadInput.mUnknown20) { // PadInput::mActive: the buttons were read this frame
+        return;
+    }
+    mReleased = TRUE;
+    const ScreenPoint &point = GetTouchPoint();
+    mReleasePoint.x = point.x;
+    mReleasePoint.y = point.y;
+    mVelocity = GetVelocity();
+}
+
 void Scene40Touch::Reset() {
     mPressPoint = ZeroPoint();
     mPoint = ZeroPoint();
@@ -11265,10 +11894,17 @@ static inline FloorPos ToFloorPos(VecFx32 v) {
     return pos;
 }
 
+// By value: each use makes the original's copy of the eye
+static inline VecFx32 GetEye(Camera *camera) {
+    return camera->mEye;
+}
+
 // Where the camera's eye is, on the floor
 FloorPos Scene40Camera::GetEyeFloorPos() {
-    VecFx32 eye = mCamera->mEye;
-    return ToFloorPos(eye);
+    FloorPos pos;
+    pos.x = GetEye(mCamera).x;
+    pos.z = GetEye(mCamera).z;
+    return pos;
 }
 
 // --- The lights -------------------------------------------------------------------------------------------------
@@ -11354,6 +11990,139 @@ void Scene40Motion::UpdateAtRest(VecFx32 *pos, VecFx32 *velocity) {
     mAtRest = atRest;
 }
 
+// The character's fall: nothing while it is held or at rest. It comes to rest when it reaches the floor going down;
+// off the room's walls (14 units from the middle, in x and in z) it bounces back with a quarter of its speed, and
+// it gains 100 downwards a frame.
+void Scene40Physics::UpdateCharacter() {
+    if (mCharacter->mMotion.mHeld) {
+        return;
+    }
+    VecFx32 pos = mCharacter->mPos;
+    VecFx32 velocity = mCharacter->mMotion.mVelocity;
+    mCharacter->mMotion.UpdateAtRest(&pos, &velocity);
+    if (mCharacter->mMotion.mAtRest) {
+        return;
+    }
+    VEC_Add(&pos, &velocity, &pos);
+    if (pos.y <= 0 && velocity.y <= 0) {
+        mCharacter->mMotion.mAtRest = TRUE;
+        VecFx32 zero = {0, 0, 0};
+        velocity = zero;
+        pos.y = 0;
+    } else {
+        if (pos.x >= 0x3800 && velocity.x > 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.x = -velocity.x;
+            pos.x = 0x3800;
+        }
+        if (pos.x <= -0x3800 && velocity.x < 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.x = -velocity.x;
+            pos.x = -0x3800;
+        }
+        if (pos.z >= 0x3800 && velocity.z > 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.z = -velocity.z;
+            pos.z = 0x3800;
+        }
+        if (pos.z <= -0x3800 && velocity.z < 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.z = -velocity.z;
+            pos.z = -0x3800;
+        }
+        velocity.y -= 100;
+    }
+    mCharacter->SetPos(pos);
+    mCharacter->mMotion.SetVelocity(velocity);
+}
+
+static inline fx32 LengthSq(const VecFx32 *v) {
+    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
+}
+
+// NOT MATCHING (the code is the original's but for three stack slots): the original has the push at sp+48, the
+// zero vector it is copied from at sp+24 and the one the velocity is cleared with at sp+36; here they are at
+// 36, 48 and 24. Tried: the push initialised directly (no copy), declared before its zero, an inline returning the
+// zero vector (one temporary more), the push and a VEC_Set vector at the loop's scope.
+// The item models' fall, as the character's, for each that is shown and not held. The walls are 16 units from the
+// middle; an item beyond them is pushed back by the square of how far it is out. On the floor it bounces (with a
+// quarter of its speed inside the walls, 0.4 outside) and makes a sound, and rests once it is slow.
+void Scene40Physics::UpdateItems() {
+    for (int i = 0; i < mItemCount; i++) {
+        if (!mItems[i]->mVisible) {
+            continue;
+        }
+        if (mItems[i]->mMotion.mHeld) {
+            continue;
+        }
+        VecFx32 pos = mItems[i]->mPosition;
+        VecFx32 velocity = mItems[i]->mMotion.mVelocity;
+        mItems[i]->mMotion.UpdateAtRest(&pos, &velocity);
+        if (mItems[i]->mMotion.mAtRest) {
+            continue;
+        }
+        VEC_Add(&pos, &velocity, &pos);
+        if (pos.x < -0x4000 || pos.x > 0x4000 || pos.z < -0x4000 || pos.z > 0x4000) {
+            VecFx32 zero = {0, 0, 0};
+            VecFx32 push = zero;
+            if (pos.x < -0x4000) {
+                push.x = -(pos.x + 0x4000);
+            } else if (pos.x > 0x4000) {
+                push.x = -(pos.x - 0x4000);
+            }
+            if (pos.z < -0x4000) {
+                push.z = -(pos.z + 0x4000);
+            } else if (pos.z > 0x4000) {
+                push.z = -(pos.z - 0x4000);
+            }
+            push.x >>= 9;
+            push.z >>= 9;
+            push.x = (push.x < 0 ? -1 : 1) * (push.x * push.x);
+            push.z = (push.z < 0 ? -1 : 1) * (push.z * push.z);
+            VEC_Add(&pos, &push, &pos);
+        }
+        if (pos.y <= 0 && velocity.y <= 0) {
+            if (pos.x < -0x4000 || pos.x > 0x4000 || pos.z < -0x4000 || pos.z > 0x4000) {
+                ScaleVec(0x666, &velocity, &velocity);
+            } else {
+                ScaleVec(0x400, &velocity, &velocity);
+            }
+            velocity.y = -velocity.y;
+            if (LengthSq(&velocity) < 24) {
+                VecFx32 zero = {0, 0, 0};
+                velocity = zero;
+                mItems[i]->mMotion.mAtRest = TRUE;
+            }
+            pos.y = 0;
+            gSoundManager.StartSeqArc(1, 10, 5);
+        } else {
+            if (pos.x >= 0x4000 && velocity.x > 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.x = 0x4000;
+                velocity.x = -velocity.x;
+            }
+            if (pos.x <= -0x4000 && velocity.x < 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.x = -0x4000;
+                velocity.x = -velocity.x;
+            }
+            if (pos.z >= 0x4000 && velocity.z > 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.z = 0x4000;
+                velocity.z = -velocity.z;
+            }
+            if (pos.z <= -0x4000 && velocity.z < 0) {
+                ScaleVec(0x400, &velocity, &velocity);
+                pos.z = -0x4000;
+                velocity.z = -velocity.z;
+            }
+            velocity.y -= 100;
+        }
+        mItems[i]->SetPosition(pos);
+        mItems[i]->mMotion.SetVelocity(velocity);
+    }
+}
+
 // The item models that are (or are not) visible
 int Scene40Physics::GetItems(Scene40ItemModel **items, int *count, BOOL visible) {
     *count = 0;
@@ -11426,10 +12195,6 @@ VecFx32 Scene40ItemModel::GetLookPoint() {
 }
 
 // --- The character: the item in its hands -----------------------------------------------------------------------
-
-static inline fx32 LengthSq(const VecFx32 *v) {
-    return FX_Mul(v->x, v->x) + FX_Mul(v->y, v->y) + FX_Mul(v->z, v->z);
-}
 
 // Puts the held item in the right hand: the hand, or a little way from the elbow towards the hand if the hand is
 // nearer than that (PlaceHeldItem with the left hand left out)
@@ -11550,6 +12315,115 @@ void Scene40Character::UpdateMouthByAnimation() {
     } else {
         SetFace(1);
     }
+}
+
+// While it eats (mUnknown309C bites, one every length of the body's animation), the held item shrinks at each
+// bite's middle frame by a growing share
+void Scene40Character::ShrinkHeldItemByBite() {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    int frame = mFrame;
+    if (frame % length != length / 2) {
+        return;
+    }
+    int bites = mUnknown309C;
+    fx32 scale = FX_Div(mHeldItem->mScale.x, mHeldItem->mBaseScale);
+    scale -= ((frame / length + 1) * FX32_ONE) / ((bites + 1) * bites / 2);
+    mHeldItem->SetScale(scale);
+}
+
+// At each bite's middle frame, the sound of eating the goods: by the goods' flags (0x2000000 and 0x10)
+void Scene40Character::PlayEatSound(int item) {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    if (mFrame % length != length / 2) {
+        return;
+    }
+    const ItemInfo *info = &gGoodsTable[(u16)item];
+    u32 flags = info->mFlags;
+    if (flags & 0x2000000) {
+        gSoundManager.StartSeqArc(1, 0x21, 1);
+    } else if (flags & 0x10) {
+        gSoundManager.StartSeqArc(1, 0x21, 2);
+    } else {
+        gSoundManager.StartSeqArc(1, 0x21, 0);
+    }
+}
+
+// At each bite's middle frame, the bite's sound (the last bite's another)
+void Scene40Character::PlayBiteSound() {
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    int length = (((NNSG3dResAnmCommon *)anim->mAnmObj->resAnm)->numFrame * FX32_ONE) / (int)anim->mUnknown10 + 1;
+    int frame = mFrame;
+    if (frame % length != length / 2) {
+        return;
+    }
+    if (frame + length > mWait) {
+        gSoundManager.StartSeqArc(1, 0x21, 4);
+    } else {
+        gSoundManager.StartSeqArc(1, 0x21, 3);
+    }
+}
+
+// Ends the body animation (marks it finished) once it reaches mAnimStopFrame
+void Scene40Character::StopAnimationAtFrame() {
+    if (!mAnimStopping) {
+        return;
+    }
+    ModelAnimation *anim = AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId);
+    fx32 frame = FX_Div(anim->mAnmObj->frame, anim->mUnknown10);
+    switch (mAnimStopKind) {
+    case 0:
+    case 1:
+        if (mAnimStopFrame <= frame) {
+            anim->mFinished = TRUE;
+            mAnimStopping = FALSE;
+        }
+        break;
+    case 2:
+        break;
+    }
+}
+
+// Turns the character a step each frame for mSpinFrames frames, and slides it along mMoveAngle
+void Scene40Character::UpdateSpinAndSlide() {
+    if (mSpinning) {
+        switch (mSpinDirection) {
+        case 0:
+            Turn(0x2000);
+            if (++mSpinFrame >= mSpinFrames) {
+                mSpinning = FALSE;
+            }
+            break;
+        case 1:
+            Turn(0xE000);
+            if (++mSpinFrame >= mSpinFrames) {
+                mSpinning = FALSE;
+            }
+            break;
+        }
+    }
+    if (mSliding) {
+        u16 angle = mMoveAngle;
+        fx32 dx = FX_Mul(FX_CosIdx(angle), 0x49);
+        fx32 dz = FX_Mul(FX_SinIdx(angle), 0x49);
+        mPos.x += dx;
+        mPos.z += dz;
+    }
+}
+
+// Moves the scene's camera and its target by a step each frame
+void Scene40Character::MoveCamera() {
+    if (!mCameraMoving) {
+        return;
+    }
+    VecFx32 position = mContext->mCamera->mPosition;
+    VecFx32 target = mContext->mCamera->mTarget;
+    VEC_Add(&position, &mCameraPositionStep, &position);
+    VEC_Add(&target, &mCameraTargetStep, &target);
+    mContext->mCamera->SetPosition(position);
+    mContext->mCamera->SetTarget(target);
+    Camera_UpdateEye(mContext->mCamera->mCamera);
 }
 
 // --- The character: what it was taught, its head and its speech --------------------------------------------------
@@ -11731,6 +12605,4 @@ int Scene40Character::GetAge(SavedCharacter *character, RTCDate *date) {
 
 // --- The file's static initialiser ------------------------------------------------------------------------------
 
-// A text position of the profile page (read by 0x0215f180), a copy of a pool point: initialised at run time by the
-// file's static initialiser, so it is in .data, zero in the ROM
-// (not written yet)
+// The compiler writes it for sTroubleMeterPosition, the file's one object initialised at run time.

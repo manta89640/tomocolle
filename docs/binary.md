@@ -2601,3 +2601,47 @@ scene+0x30B50):
 Inferred: the profile page is what the player sees of the visited Mii on the upper screen (its title is message 17
 of the scene's own message file with the Mii's name); the counter is the player's money (only that the scene
 keeps a copy of GameData's capped counter and clamps it as `SetCappedCounter` does is measured).
+
+## The Mii touch scene's helpers, talk and data (overlay 75, 0x021722c8 to the end)
+
+Measured (overlay 75, `src/overlays/ov075/Scene40.cpp`, one file: one static initialiser, the five virtual tables
+together at 0x02182C88, one `.rodata` pool from 0x0217B420 and then the objects of 64 bytes and more in
+ascending size, with `u8` arrays at their list places):
+
+- **The balloon** (`Scene40Balloon`, character+0x2BE4): model resource 2, "3HB:/balloon.imd"
+  (Mdl/Misc/Tch/mii_tch_balloon). States hidden, shown, appear, disappear; what it shows is chosen from the
+  character: a trouble ("wait_etc"), a trouble of category 4 about another character, whose face (the scene's
+  second face, scene+0x6D324) is drawn in it ("wait_plain"), something to tell (the record's byte 0x24A,
+  "wait_dot"), or a dream when asleep (long act 18 or 15) with the record's byte 0x246 set ("wait_dream"; the
+  main program sets that byte by chance when the character falls asleep).
+- **The cover** (`Scene40Cover`, character+0x2CDC, 0xE8 bytes): model resource 4 of archive "3HT", either the bed
+  (goods "Mdl/Goods/gd10", textures "bed01"/"bed02"; long act 18) or the dressing curtain
+  ("mii_tch_curtain_3D_LZ.bin" — the remount's path has no directory — with "appear00" played forwards to close
+  and backwards to open, and "wait00").
+- **The talk**: tables of 12-byte entries (`Scene40TalkEntry`, `Scene40Talk.h`) by personality kind, each with an
+  `int[4]` of counts: first meeting (`sFirstTalks`, the record's bit 0x54.20 not set), touch (`sTouchTalks`),
+  one in ten within a week of the last meeting (`sRecentTalks`), and things to tell by the kind in the record's
+  byte 0x24A (`sNewsTalks1`, `sNewsTalks2`, `sNewsTalksFE`, 2 becoming 0xFE when the birthday is set). An entry
+  is a message and masks of personality, sex, mood, month, hour (morning 5-10, day 11-17, evening 18-23, night
+  0-4), weekday, a day of the month, three characters / two friends / a lover / a spouse, one of the tools
+  (goods 236 to 243) had, and the steps of days since the last meeting (0, 7, 14, 21, 28, 51, 81, 111), and the
+  types of two arguments (the character, a random food, two random friends, the lover, the spouse).
+- **The trouble talk**: `GetTroubleMessage` (two messages per trouble from each category's first),
+  `sTroubleProgressMessages`, and the target talk by relation (spouse 0, lover 1, best friend 2, friend 3,
+  none 4) and meter (0..4): `sTargetMessages` [5][5], `sTargetMessages2` [5], `sTargetMessages3` [5][5][3].
+- **The scene's members 0x69D2C..0x69E54**: the stylus tracker (`Scene40Touch`), the camera and lights (copies
+  of overlay 96's `WeddingCamera` and `WeddingLights` for one character) and the falling and bouncing of the
+  character and the item models (`Scene40Physics`, with `Scene40Motion` in each: velocity, at rest, held,
+  offered by the player).
+- **Music**: `Scene40Character::ChooseMusic` (14 kinds by long act, mood and trouble) and `PlayMusic`.
+- **`gGameData+0x110`** is a bit for each of the 20 activities (`sActivities`) the character proposed.
+- **`gSceneMemory+0x3C`** is gSceneScratch[0]: this overlay addresses the byte from gSceneMemory and the buffer by
+  its own symbol (the mode for scenes 0x31, 0x34, 0x51).
+- **The static initialiser** copies the pool point at +0x5C into the 8-byte object at 0x02182C20 (`.data`, zero
+  in the ROM), which the profile page reads.
+
+Inferred: the names are descriptive; none survives in the ROM.
+
+Not done: the data's layout (the file's statics in the compiler's size order), and the static initialiser's
+object (a test compile with it, `static const ScreenPoint s = <pool read>`, hung the compiler under wine once:
+not retried).

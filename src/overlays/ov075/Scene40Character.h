@@ -163,6 +163,17 @@ public:
     void SpeakAboutTarget();
     void SpeakAboutTarget2();
     void SpeakAboutTarget3();
+    int ChooseGame();
+    void FindRelations();
+    int ChooseMusic();
+    void PlayEatSound(int item);
+    void FinishTroubleIfFull(s64 now);
+    int ChooseOutingPartner();
+    void StopAnimationAtFrame();
+    void UpdateSpinAndSlide();
+    void MoveCamera();
+    void PlayBiteSound();
+    void ShrinkHeldItemByBite();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
@@ -226,7 +237,19 @@ public:
     /* 0x3098 */ int mUnknown3098;    // The eating state 0x72 clears it
     /* 0x309C */ int mUnknown309C;    // and sets it to the number of bites (3, or 80 / the animation's length + 1)
     /* 0x30A0 */ int mUnknown30A0;    // State 0x52 sets it after the character changed into clothes it was given
-    /* 0x30A4 */ u8 mUnknown30A4[0x44];
+    /* 0x30A4 */ int mUnknown30A4;
+    /* 0x30A8 */ int mAnimStopKind;       // 0 and 1: StopAnimationAtFrame ends the body animation at mAnimStopFrame
+    /* 0x30AC */ fx32 mAnimStopFrame;
+    /* 0x30B0 */ BOOL mAnimStopping;
+    /* 0x30B4 */ BOOL mSliding;           // UpdateSpinAndSlide moves it along mMoveAngle
+    /* 0x30B8 */ BOOL mSpinning;          // and turns it by 0x2000 a frame (mSpinDirection 0) or back (1)
+    /* 0x30BC */ int mSpinFrame;
+    /* 0x30C0 */ int mSpinFrames;
+    /* 0x30C4 */ int mSpinDirection;
+    /* 0x30C8 */ BOOL mCameraMoving;      // MoveCamera adds the two offsets to the camera every frame
+    /* 0x30CC */ VecFx32 mCameraPositionStep;
+    /* 0x30D8 */ VecFx32 mCameraTargetStep;
+    /* 0x30E4 */ int mUnknown30E4;
     /* 0x30E8 */ int mUnknown30E8;
     /* 0x30EC */ BOOL mUnknown1C4Added[3]; // Each of AddUnknown1C4(2), (5), (2) (0x0217507c, 0x021750ac, 0x021750dc) is made once a visit
 }; // 0x30F8

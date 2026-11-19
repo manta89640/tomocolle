@@ -351,11 +351,11 @@ _ZN16Scene40Character19PlaceHeldItemInHandEv kind:function(arm,size=0x1e8) addr:
 _ZN16Scene40Character13PlaceHeldItemEv kind:function(arm,size=0x10) addr:0x02174584
 _ZN16Scene40Character13PlaceHeldItemEl kind:function(arm,size=0x3e4) addr:0x02174594
 _ZN16Scene40Character17PlaceCoverAtHandsEv kind:function(arm,size=0x9c) addr:0x02174978
-func_ov075_02174a14 kind:function(arm,size=0xbc) addr:0x02174a14
+_ZN16Scene40Character20ShrinkHeldItemByBiteEv kind:function(arm,size=0xbc) addr:0x02174a14
 _ZN16Scene40Character22UpdateMouthByAnimationEv kind:function(arm,size=0x68) addr:0x02174ad0
-func_ov075_02174b38 kind:function(arm,size=0xc8) addr:0x02174b38
-func_ov075_02174c00 kind:function(arm,size=0xa0) addr:0x02174c00
-func_ov075_02174ca0 kind:function(arm,size=0xd8) addr:0x02174ca0
+_ZN16Scene40Character12PlayEatSoundEi kind:function(arm,size=0xc8) addr:0x02174b38
+_ZN16Scene40Character13PlayBiteSoundEv kind:function(arm,size=0xa0) addr:0x02174c00
+_ZN16Scene40Character19FinishTroubleIfFullEx kind:function(arm,size=0xd8) addr:0x02174ca0
 _ZN16Scene40Character20GetGoodsSatisfactionEi kind:function(arm,size=0x100) addr:0x02174d78
 _ZN16Scene40Character16GetGoodsReactionEi kind:function(arm,size=0x18) addr:0x02174e78
 _ZN16Scene40Character22GetClothesSatisfactionEi kind:function(arm,size=0x18) addr:0x02174e90
@@ -370,8 +370,8 @@ _ZN16Scene40Character18AddUnknown1C4Once2Ev kind:function(arm,size=0x30) addr:0x
 _ZN16Scene40Character22AddUnknown1C4ByTroubleEv kind:function(arm,size=0x30) addr:0x0217510c
 _ZN16Scene40Character36ClearMoodIfTroubleOfCategory4OrKind8Ev kind:function(arm,size=0x78) addr:0x0217513c
 _ZN16Scene40Character25ClearMoodIfTroubleOfKind8Ev kind:function(arm,size=0x58) addr:0x021751b4
-func_ov075_0217520c kind:function(arm,size=0x1bc) addr:0x0217520c
-func_ov075_021753c8 kind:function(arm,size=0x128) addr:0x021753c8
+_ZN16Scene40Character19ChooseOutingPartnerEv kind:function(arm,size=0x1bc) addr:0x0217520c
+_ZN16Scene40Character13FindRelationsEv kind:function(arm,size=0x128) addr:0x021753c8
 _ZN16Scene40Character15ChooseTouchTalkEPmPiS1_S1_ kind:function(arm,size=0x3e4) addr:0x021754f0
 _ZN16Scene40Character14ChooseNewsTalkEiPmPiS1_S1_ kind:function(arm,size=0x3dc) addr:0x021758d4
 _ZN16Scene40Character16GetTalkArgumentsEPK16Scene40TalkEntryPiS3_S3_ kind:function(arm,size=0x290) addr:0x02175cb0
@@ -383,7 +383,7 @@ _ZN16Scene40Character22ClearLongActOfPairFromEx kind:function(arm,size=0x80) add
 _ZN16Scene40Character10IsDreamingEv kind:function(arm,size=0x14) addr:0x02176394
 _ZN16Scene40Character14ChooseActivityEv kind:function(arm,size=0x90) addr:0x021763a8
 _Z20MarkActivityProposedi kind:function(arm,size=0x1c) addr:0x02176438
-func_ov075_02176454 kind:function(arm,size=0xa8) addr:0x02176454
+_ZN16Scene40Character10ChooseGameEv kind:function(arm,size=0xa8) addr:0x02176454
 _ZN16Scene40Character13UpdatePatDateEv kind:function(arm,size=0x50) addr:0x021764fc
 _ZN16Scene40Character20StartTroubleProgressEv kind:function(arm,size=0x34) addr:0x0217654c
 _ZN16Scene40Character16ChooseAfterTouchEv kind:function(arm,size=0x238) addr:0x02176580
@@ -404,9 +404,9 @@ _ZN16Scene40Character5SpeakEimiii kind:function(arm,size=0x3c) addr:0x0217765c
 _ZN16Scene40Character5SpeakEimi kind:function(arm,size=0x24) addr:0x02177698
 _ZN16Scene40Character6GetAgeEP14SavedCharacterP7RTCDate kind:function(arm,size=0x6c) addr:0x021776bc
 func_ov075_02177728 kind:function(arm,size=0x5c0) addr:0x02177728
-func_ov075_02177ce8 kind:function(arm,size=0x88) addr:0x02177ce8
-func_ov075_02177d70 kind:function(arm,size=0x11c) addr:0x02177d70
-func_ov075_02177e8c kind:function(arm,size=0xc8) addr:0x02177e8c
+_ZN16Scene40Character20StopAnimationAtFrameEv kind:function(arm,size=0x88) addr:0x02177ce8
+_ZN16Scene40Character18UpdateSpinAndSlideEv kind:function(arm,size=0x11c) addr:0x02177d70
+_ZN16Scene40Character10MoveCameraEv kind:function(arm,size=0xc8) addr:0x02177e8c
 _ZN16Scene40Character12StopHeadTurnEv kind:function(arm,size=0x20) addr:0x02177f54
 _ZN16Scene40Character13ResetHeadTurnEv kind:function(arm,size=0x24) addr:0x02177f74
 _ZN16Scene40Character10FaceCameraEv kind:function(arm,size=0x78) addr:0x02177f98
@@ -435,8 +435,8 @@ _ZN12Scene40Cover8PlayWaitEv kind:function(arm,size=0x78) addr:0x02179034
 _ZN12Scene40Cover9DisappearEv kind:function(arm,size=0x120) addr:0x021790ac
 _ZN12Scene40Cover11HasAppearedEv kind:function(arm,size=0x64) addr:0x021791cc
 _ZN12Scene40Cover14HasDisappearedEv kind:function(arm,size=0x60) addr:0x02179230
-func_ov075_02179290 kind:function(arm,size=0x16c) addr:0x02179290
-func_ov075_021793fc kind:function(arm,size=0x32c) addr:0x021793fc
+_ZN16Scene40Character11ChooseMusicEv kind:function(arm,size=0x16c) addr:0x02179290
+_Z9PlayMusici kind:function(arm,size=0x32c) addr:0x021793fc
 _ZN12Scene40ClockC1Ev kind:function(arm,size=0x3c) addr:0x02179728
 _ZN12Scene40Clock6UpdateEv kind:function(arm,size=0x2c) addr:0x02179764
 _ZN12Scene40Clock19UpdateIfArchiveIdleEv kind:function(arm,size=0x40) addr:0x02179790
@@ -522,7 +522,7 @@ gStr__ov075_3 kind:data(any) addr:0x0217b7b4
 sElapsedDays kind:data(any) addr:0x0217b7c4
 data_ov075_0217b7d6 kind:data(any) addr:0x0217b7d6
 sClothesTabKinds kind:data(any) addr:0x0217b7ec
-data_ov075_0217b800 kind:data(any) addr:0x0217b800
+sTargetMessages2 kind:data(any) addr:0x0217b800
 sSongGiftMessages kind:data(any) addr:0x0217b82c
 sPresentBoxPoints kind:data(any) addr:0x0217b844
 data_ov075_0217b85c kind:data(any) addr:0x0217b85c
@@ -570,7 +570,7 @@ data_ov075_0217bfbc kind:data(any) addr:0x0217bfbc
 sTroubleChoiceSets kind:data(any) addr:0x0217c010
 sHourBits kind:data(any) addr:0x0217c064
 sSpecialChoiceSets kind:data(any) addr:0x0217c0c4
-data_ov075_0217c128 kind:data(any) addr:0x0217c128
+sTargetMessages kind:data(any) addr:0x0217c128
 data_ov075_0217c18c kind:data(any) addr:0x0217c18c
 data_ov075_0217c210 kind:data(any) addr:0x0217c210
 data_ov075_0217c294 kind:data(any) addr:0x0217c294
@@ -584,7 +584,7 @@ data_ov075_0217c52e kind:data(any) addr:0x0217c52e
 data_ov075_0217c530 kind:data(any) addr:0x0217c530
 sRelationMessages kind:data(any) addr:0x0217c618
 gStr_Dollar_ov075 kind:data(any) addr:0x0217c630
-data_ov075_0217c714 kind:data(any) addr:0x0217c714
+sTargetMessages3 kind:data(any) addr:0x0217c714
 data_ov075_0217c840 kind:data(any) addr:0x0217c840
 data_ov075_0217c9cc kind:data(any) addr:0x0217c9cc
 sChoiceSets kind:data(any) addr:0x0217cbb8
@@ -614,8 +614,8 @@ data_ov075_0217ef28 kind:data(any) addr:0x0217ef28
 data_ov075_0217fb88 kind:data(any) addr:0x0217fb88
 data_ov075_021809a4 kind:data(any) addr:0x021809a4
 data_ov075_02181838 kind:data(any) addr:0x02181838
-__sinit_ov075_02182aa4 kind:function(arm,size=0x24) addr:0x02182aa4
-.p__sinit_ov075_02182aa4 kind:data(word) addr:0x02182ac8
+__sinit_Scene40.cpp kind:function(arm,size=0x24) addr:0x02182aa4 local
+.p__sinit_Scene40.cpp kind:data(word) addr:0x02182ac8 local
 gStr_walk07_ov075 kind:data(any) addr:0x02182ae0
 gStr_walk01_ov075 kind:data(any) addr:0x02182ae8
 gStr_walk10 kind:data(any) addr:0x02182af0
@@ -656,7 +656,7 @@ gStr_walk09_ov075_3 kind:data(any) addr:0x02182c00
 gStr_wait02_ov075_6 kind:data(any) addr:0x02182c08
 gStr_walk03_ov075_5 kind:data(any) addr:0x02182c10
 gStr_wait00_ov075_3 kind:data(any) addr:0x02182c18
-data_ov075_02182c20 kind:data(any) addr:0x02182c20
+sTroubleMeterPosition kind:data(any) addr:0x02182c20
 sRecentTalks kind:data(any) addr:0x02182c28
 sNewsTalks1 kind:data(any) addr:0x02182c38
 sTouchTalks kind:data(any) addr:0x02182c48
