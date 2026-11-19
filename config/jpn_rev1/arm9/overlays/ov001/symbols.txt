@@ -9,4 +9,4 @@ _ZN17NameSortTestScene9PrintNameEiPKwi kind:function(arm,size=0x4) addr:0x02149e
 _ZN17NameSortTestSceneD1Ev kind:function(arm,size=0x4) addr:0x02149ed8
 _ZN17NameSortTestSceneD0Ev kind:function(arm,size=0x14) addr:0x02149edc
 _ZTV17NameSortTestScene kind:data(any) addr:0x02149f00
-@13522 kind:data(any) addr:0x02149f24 local
+@13603 kind:data(any) addr:0x02149f24 local

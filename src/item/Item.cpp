@@ -33,8 +33,10 @@ static inline u16 Rand(u16 max) {
     return MATH_Rand16(&gRandom, max);
 }
 
-// The season of each month, 1 (spring) to 4 (winter); there is no month 0
-static const int sClothesSeasons[13] = {0xFFFF, 4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+inline int GetMonthSeason(int month) {
+    static const int sClothesSeasons[13] = {0xFFFF, 4, 4, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4};
+    return sClothesSeasons[month];
+}
 
 ClothesItem::ClothesItem() {
     mId = 0;
@@ -51,7 +53,7 @@ void ClothesItem::Settle() {
 
 // Whether clothes can be worn in a month: they have no season, or the month's is theirs, or one of their two
 static BOOL IsClothesInSeason(int clothes, int month) {
-    int season = sClothesSeasons[month];
+    int season = GetMonthSeason(month);
     int type = gClothesTable[clothes].mSeason;
     BOOL result = TRUE;
     switch (type) {

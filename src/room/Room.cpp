@@ -368,11 +368,9 @@ void RoomModels::SetPartScales(fx32 scale) {
     }
 }
 
-// Not matching yet (98.8%): in STATE_FADE_NEAR the original multiplies z*z and x*x first and rounds x*x first
-// (xx in r8, zz in r7, then IsPartNear(xx + zz)), as STATE_HIDE_NEAR does; here zz is rounded between the two
-// products and the registers follow. Tried (miilist): the squares in either order, declared apart or together,
-// const, as int/u32, through locals for diff.x/z, written out instead of FX_Mul, inside the call, both operand
-// orders of the sum, diff and the squares at function scope, mStep read into a local.
+// The squared distance from the camera to its target is computed once, as one sum, before the loops: with the two
+// squares kept apart and added in the loops, the compiler hoists the sum itself and rounds the products in another
+// order.
 void RoomModels::Update() {
     switch (mState) {
     case STATE_IDLE:
@@ -388,15 +386,14 @@ void RoomModels::Update() {
     case STATE_HIDE_NEAR: {
         VecFx32 diff;
         VEC_Subtract((VecFx32 *)((u8 *)mCamera + 0x20), (VecFx32 *)((u8 *)mCamera + 0x2C), &diff);
-        fx32 zz = FX_Mul(diff.z, diff.z);
-        fx32 xx = FX_Mul(diff.x, diff.x);
+        fx32 distSq = FX_Mul(diff.x, diff.x) + FX_Mul(diff.z, diff.z);
         for (int i = 0; i < ROOM_PART_COUNT; i++) {
             if (mParts[i].mResourceId >= 0) {
                 fx32 x = mParts[i].mPosition.x;
                 fx32 z = mParts[i].mPosition.z;
                 if (mParts[i].mPosition.y >= mNearY && FX_Mul(x, x) + FX_Mul(z, z) < mNearDistanceSq) {
                     mParts[i].mState = RoomPart::STATE_SHOW;
-                } else if (IsPartNear(xx + zz, i)) {
+                } else if (IsPartNear(distSq, i)) {
                     mParts[i].mState = RoomPart::STATE_HIDE;
                 } else {
                     mParts[i].mState = RoomPart::STATE_SHOW;
@@ -408,8 +405,7 @@ void RoomModels::Update() {
     case STATE_FADE_NEAR: {
         VecFx32 diff;
         VEC_Subtract((VecFx32 *)((u8 *)mCamera + 0x20), (VecFx32 *)((u8 *)mCamera + 0x2C), &diff);
-        fx32 zz = FX_Mul(diff.z, diff.z);
-        fx32 xx = FX_Mul(diff.x, diff.x);
+        fx32 distSq = FX_Mul(diff.x, diff.x) + FX_Mul(diff.z, diff.z);
         if (mStep < 2) {
             mStep++;
             for (int i = 0; i < ROOM_PART_COUNT; i++) {
@@ -418,7 +414,7 @@ void RoomModels::Update() {
                     fx32 z = mParts[i].mPosition.z;
                     if (mParts[i].mPosition.y >= mNearY && FX_Mul(x, x) + FX_Mul(z, z) < mNearDistanceSq) {
                         mParts[i].mState = RoomPart::STATE_OPAQUE;
-                    } else if (IsPartNear(zz + xx, i)) {
+                    } else if (IsPartNear(distSq, i)) {
                         mParts[i].mState = RoomPart::STATE_CLEAR;
                     } else {
                         mParts[i].mState = RoomPart::STATE_OPAQUE;
@@ -432,7 +428,7 @@ void RoomModels::Update() {
                     fx32 z = mParts[i].mPosition.z;
                     if (mParts[i].mPosition.y >= mNearY && FX_Mul(x, x) + FX_Mul(z, z) < mNearDistanceSq) {
                         mParts[i].mState = RoomPart::STATE_OPAQUE;
-                    } else if (IsPartNear(zz + xx, i)) {
+                    } else if (IsPartNear(distSq, i)) {
                         if (mParts[i].mState != RoomPart::STATE_FADE_OUT) {
                             mParts[i].mState = RoomPart::STATE_FADE_OUT;
                         }
@@ -956,4 +952,12 @@ u8 ChooseInteriors(u8 *interiors, int count) {
 
 static s32 CompareInteriorIds(void *a, void *b) {
     return *(u8 *)a - *(u8 *)b;
+}
+
+// The file's .rodata begins with a halfword 0xFFFF that no code of the game reads: the data of a function the link
+// dropped. This stand-in keeps it in the object, and the link drops the stand-in in turn.
+static const u16 data_020fbfd4[1] = {0xFFFF};
+
+extern "C" u16 Room_Unused(int i) {
+    return data_020fbfd4[i];
 }

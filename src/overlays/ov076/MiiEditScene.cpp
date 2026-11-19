@@ -4547,10 +4547,9 @@ void MiiEditCharacterPage::Update() {
     ScreenPoint point;
     int i;
     int j;
-    int y;
     point = *(gTouchInput.mUnknown4C ? &gTouchInput.mLastPoint : &gTouchInput.mPoint);
     for (i = 0; i < 5; i++) {
-        y = data_ov076_02158c28[i].y;
+        int y = data_ov076_02158c28[i].y;
         for (j = 0; j < 8; j++) {
             ScreenRect rect = data_ov076_021592d0[j];
             rect.y += y;

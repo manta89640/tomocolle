@@ -13,6 +13,7 @@
 #include "Scene40Cover.h"
 #include "Scene40ItemModel.h"
 #include "Scene40Physics.h"
+#include "Scene40Talk.h"
 
 struct Scene40Context;
 class Scene40SpeechWindow;
@@ -134,14 +135,45 @@ public:
     void SnapHeadTo(VecFx32 *target, int pitchLimit, int yawLimit);
     void SnapHeadToCamera();
     int GetAge(SavedCharacter *character, RTCDate *date);
+    void SetGift(Scene40Gift *gift);
+    BOOL WalkToMiddleIfAway();
+    BOOL WalkToCameraIfNotFacing();
+    BOOL TakeOfferedItem();
+    void PlaceCoverAtHands();
+    void UpdateMouthByAnimation();
+    BOOL MatchesTalk(const Scene40TalkEntry *entry, RTCDate *date, Scene40TalkConditions *conditions);
+    void GetTalkConditions(RTCDate *date, RTCTime *time, Scene40TalkConditions *conditions);
+    void GetTalkArguments(const Scene40TalkEntry *entry, int *count, int *types, int *values);
+    void ChooseTouchTalk(u32 *message, int *count, int *types, int *values);
+    void ChooseNewsTalk(int kind, u32 *message, int *count, int *types, int *values);
+    void TellNews();
+    void ClearLongActOfPair();
+    void ClearLongActOfPairFrom(s64 now);
+    BOOL UpdatePatDate();
+    void StartTroubleProgress();
+    void GoToScene51();
+    void GoToTogetherScene();
+    void GoToScene3C();
+    void GoToWedding();
+    void ChooseAfterTouch();
+    void SpeakAboutTrouble(); // The function reads no argument besides this
+    int GetTroubleMessage();
+    void SpeakTroubleProgress();
+    void FindTargetRelation();
+    void SpeakAboutTarget();
+    void SpeakAboutTarget2();
+    void SpeakAboutTarget3();
 
     // Starts the 'BCA0' animation of that name, blended from the one before (once: play it once)
     void PlayAnimation(const char *name, BOOL once) {
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
         AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId)->mPlayOnce = once;
     }
-    void BlendToAnimation(const char *name) {
+    void BlendToNamedAnimation(const char *name) {
         Character::BlendToAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
+    }
+    void SetNamedAnimation(const char *name) {
+        Character::SetAnimation(RESOURCE_BCA0, ResourceSet_FindIndexByName((void *)mAnim.mUnknown04, RESOURCE_BCA0, name));
     }
     ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
     void SetTargetFloorPos(FloorPos pos) {
@@ -168,10 +200,8 @@ public:
     /* 0x2E94 */ BOOL mEntered;  // The state has just been set
     /* 0x2E98 */ int mFrame;     // Frames in the state, or in the step
     /* 0x2E9C */ int mWait;      // Frames a step waits
-    /* 0x2EA0 */ int mUnknown2EA0;
-    /* 0x2EA4 */ int mUnknown2EA4;
-    /* 0x2EA8 */ int mUnknown2EA8;
-    /* 0x2EAC */ int mUnknown2EAC;
+    /* 0x2EA0 */ FloorPos mUnknown2EA0; // State 0x55 walks to it (the middle of the room, which it sets)
+    /* 0x2EA8 */ FloorPos mUnknown2EA8; // State 0x8F walks to it (0x0217a48c of the context's mUnknown54)
     /* 0x2EB0 */ u16 mUnknown2EB0;
     /* 0x2EB2 */ u16 mCameraAngle; // mAngle less the angle to the camera's eye (0x02173f18)
     /* 0x2EB4 */ int mUnknown2EB4;
@@ -180,9 +210,12 @@ public:
     /* 0x2EC0 */ int mUnknown2EC0;
     /* 0x2EC4 */ BOOL mLipSync;    // Update moves the lips with the speech only while it is set
     /* 0x2EC8 */ u8 mUnknown2EC8[0x8];
-    /* 0x2ED0 */ int mUnknown2ED0[4];
+    /* 0x2ED0 */ BOOL mUnknown2ED0;   // State 0x86 (standing after a touch) tests these four: back to state 0,
+    /* 0x2ED4 */ BOOL mUnknown2ED4;   // sound group 0x37 and sequence 0x62 then state 0x87 at frame 30,
+    /* 0x2ED8 */ BOOL mUnknown2ED8;   // 0x0217680c,
+    /* 0x2EDC */ BOOL mUnknown2EDC;   // 0x021768f0
     /* 0x2EE0 */ int mUnknown2EE0[3];
-    /* 0x2EEC */ u8 mUnknown2EEC[0x4];
+    /* 0x2EEC */ BOOL mHoldingGift;   // The gift page sets it while the character holds the item it received
     /* 0x2EF0 */ int mCharacterCount; // Saved characters that exist
     /* 0x2EF4 */ int mFriendCount;
     /* 0x2EF8 */ int mFriends[100];   // Their indices: rank 1 and a meter over 100
@@ -190,9 +223,9 @@ public:
     /* 0x308C */ int mLover;          // Rank 2, -1 for none
     /* 0x3090 */ int mSpouse;         // Rank 4, -1 for none
     /* 0x3094 */ BOOL mUnknown3094;
-    /* 0x3098 */ int mUnknown3098;
-    /* 0x309C */ int mUnknown309C;
-    /* 0x30A0 */ int mUnknown30A0;
+    /* 0x3098 */ int mUnknown3098;    // The eating state 0x72 clears it
+    /* 0x309C */ int mUnknown309C;    // and sets it to the number of bites (3, or 80 / the animation's length + 1)
+    /* 0x30A0 */ int mUnknown30A0;    // State 0x52 sets it after the character changed into clothes it was given
     /* 0x30A4 */ u8 mUnknown30A4[0x44];
     /* 0x30E8 */ int mUnknown30E8;
     /* 0x30EC */ BOOL mUnknown1C4Added[3]; // Each of AddUnknown1C4(2), (5), (2) (0x0217507c, 0x021750ac, 0x021750dc) is made once a visit

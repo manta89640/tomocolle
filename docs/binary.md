@@ -203,7 +203,10 @@ Four files are another release than the fetched one, in code (the last only in h
 - **`card/src/card_spi.c`**: `CARDi_IdentifyBackupCore` (`0x020105CC`, 0x384 bytes against the fetched 0x348) knows
   one device more, a 128 KB EEPROM (size bit 17: 256-byte pages, three address bytes, five pages a program
   operation). Measured: everything else it sets is the fetched release's. It is the only function of the file the game
-  keeps.
+  keeps. The fetched repository's commit `ccbbcc8` adds that case under the define `SDK_PATCH3` (the SDK's patch 3
+  releases); its file, compiled with this unit's compiler and flags and `SDK_PATCH3`, gives the function word for
+  word, so `configure.py` fetches it with that define for this file alone. Inferred: the game's SDK has the patch 3
+  card library.
 - **`math/src/qsort.c`**: `MATH_QSort` (`0x020141F4`, 0x2F0 bytes against the fetched 0x288) is the same
   hand-written routine, written out the way the SDK's other assembly is under the define
   `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS`, which `configure.py` gives the SDK's files. Measured: it keeps the
@@ -218,7 +221,8 @@ Four files are another release than the fetched one, in code (the last only in h
   define's name, made of conditional instructions in inline assembly, which the fetched repository's other assembly
   (`crt0.c`, `mi_memory.c`, `os_*.c`) already spells out the same way.
 
-The first three are built as `lib/overrides/` describes, `qsort.c` from the later commit's file (decompiling.md,
+`mi_dma.c` and `pm.c` are built as `lib/overrides/` describes (no later commit of the fetched repository, its pull
+requests included, changes either file), `card_spi.c` and `qsort.c` from the later commit's file (decompiling.md,
 "Where the game's release of a file differs").
 
 The small gaps between the units turned out to be functions of the files on either side, or small files of their own
@@ -238,9 +242,17 @@ and `card_common.c` gives the card thread the top of its 1 KB stack, `cardi_thre
 for `card_rom.c`'s `cardi_rom_base`. Still incomplete: `os_irqHandler.c`, `os_irqTable.c` and `os_interrupt.c`, which
 need the DTCM's `OS_IRQTable` (`0x027E0000`) and `OSi_IrqThreadQueue` and the linker's `SDK_AUTOLOAD_DTCM_START` and
 `SDK_IRQ_STACKSIZE`; and `card_backup.c`, whose `[SDK+NINTENDO:BACKUP]` string is in a `.version` section, at
-`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are either the OBJ or the BG pair
-(`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG` or `...BGCharacterData`/`...BGNCG`), which are byte for byte the
-same, and keep their address names.
+`0x02000BC0` after the build info, which dsd's sections do not describe. `g2d_NCG_load.c`'s two functions are the BG pair,
+`NNS_G2dGetUnpackedBGCharacterData` (`0x020594DC`) and `NNS_G2dUnpackBGNCG` (`0x02059518`), and the file is complete.
+Measured: the OBJ pair (`NNS_G2dGetUnpackedCharacterData`/`NNS_G2dUnpackNCG`) compiles to the same bytes, with
+assertions off; in the object the BG pair is separated by `NNS_G2dGetUnpackedCharacterPosInfo`, which the link strips,
+so the order does not tell them apart either, and no other linked object refers to either name. What the callers pass
+does: both callers (the keyboard's `KeyboardCore_GetUnpackedCharData` and the character loader's `0x020290B8`, which
+loads `Obj_down.ncg` and `BG_down.ncg` alike) hand it every kind of NCGR file the game has, and of the game's 631
+NCGR files five of the keyboard's are 25 characters wide, one 31, and two 256-colour ones 32, all with 2D mapping:
+`NNS_G2dUnpackNCG` asserts a width of 32 (16 colours) or 16 (256) for 2D-mapped characters, `NNS_G2dUnpackBGNCG`
+only that the format is characters, which every file is. Inferred: in the game's debug builds the OBJ pair would
+have stopped on the keyboard's files, so the game calls the BG pair.
 
 The ITCM is `OS_IrqHandler`, `OS_IrqHandler_ThreadSwitch` (`os_irqHandler.c`) and `MIi_DmaSetParams` with its three
 variants (`mi_dma.c`), compiled from the fetched files, where they are assembly functions in the ITCM's section. Each
@@ -888,6 +900,7 @@ Not done in this range: `SceneManager::Init` (92.6%: six loads and constants sch
 Every scene constructor of 0x00 to 0x26 matches: `Scene1E`'s since its part at +0x1C8 is the shops' `ShopCounter`,
 `RoomScene`'s, `TutorialRoomScene`'s and `VoteScene`'s since overlays 73 and 74 moved onto the shared headers and
 `G3Sprite`'s destructor became inline (below).
+
 
 - **The drawing canvas** (`DrawingCanvas`, `include/DrawingCanvas.h`, measured): `0x02025A9C`/`0x02025B5C` are C2
   and C1 of a 0x2B4-byte class that draws lines into a 128 by 96 pixel rectangle of a background's 4-bit
@@ -2324,6 +2337,41 @@ registers and `DSProtect_CalcChecksum` keeps its polynomial in a register where 
 objdiff scores the six matched encrypted functions at 96.7 to 98.9%: each marker word is `dcd` in the source, data
 with a `$d` mapping symbol, where the delinked object, having no mapping for it, shows a `bl`; the bytes are equal.
 
+## Overlay 75: the touched Mii's states 0x44 to 0xB2
+
+Measured (0x02168354 to 0x021722c8, five functions, `src/overlays/ov075/Scene40.cpp`):
+
+- The scene's character (Scene40Character, at scene+0x6A22C) is a state machine of 210 states. Its UpdateState
+  (0x02161D94) copies mNextState (+0x2E8C) to mState (+0x2E84), calls the group function of the state's range (a
+  compare tree over 13 ranges) and counts mFrame (+0x2E98). SetState (0x02173E8C) keeps the old state in
+  mPrevState (+0x2E88), clears mStep (+0x2E90) and mFrame and sets mEntered (+0x2E94). +0x2E9C (mWait) holds the
+  frame count a step waits for.
+- Each state is `if (mEntered) { mEntered = FALSE; ...; return; }` followed by a switch over mStep. The groups are
+  0x44..0x47 (0x02168354), 0x48..0x4E (0x0216897C), 0x4F..0x66 (0x021690F4), 0x67..0x85 (0x0216B0FC) and
+  0x86..0xB2 (0x0216EA9C).
+- What the states say is in the trouble message file (Speak file 0, the context's TTM:/tmd_trouble_msg); what
+  the speech window shows of a present in the miitouch file (TEM) or the trouble file. By those:
+  - 0x44..0x4E: food it will not eat is given back (0x104 "I am full", 0x106 "I ate this a moment ago"); a
+    present is held up and named in the speech window: the tools 236..243 (miitouch 0xA5..0xAC, "presented a
+    Wii!" ...), a song genre (sSongGiftMessages, 0x0217B82C: 0x95..0x9A "presented enka!" ...; the genre's
+    SetSongSlot(genre, 0xFF) and a bit of the record's +0x299), an interior (0xB0), a word (0xB2).
+  - 0x4F..0x66: clothes (0x10A "I already have these clothes", or changing behind the curtain, the cover at
+    +0x2CDC, and reloading the body), interiors (0x116 "I already have this interior"; 0x10C..0x114 the liking of
+    the new room), and the generic present (0x11E).
+  - 0x67..0x85: what a present is used for: the camera (scene 0xBF), trying it out (scene 0x55), the bath (0xB0),
+    eating (2.5 times the eating animation, at least 80 frames), medicine (sound groups 0x75/0x76), the fan (0x54),
+    the music box (0xA3), cooking (0xAA), an experience (0x22), an outing alone (0x78) or with a partner (0x79).
+    gSceneMemory.mCharacters[0] gets the character's index for those scenes.
+  - 0x86..0xB2: standing after a touch; handing over a present; a level-up; the troubles' talks: a friend (scene
+    0xAF), a confession (0x5A), a fight (0xAB, 0xB2), making up and separations (0xB3, 0xB5), each outcome with a
+    sound group, a speech-window line (trouble messages 0x1A7..0x1B4) and a spoken line; the word the player
+    teaches (+0x2B30, stored into mMotto or mMottos[k] by the trouble's id).
+- The standing and walking animations by personality kind (gPersonalityKinds) and mood are two `const char *[4][5]`
+  tables, sWaitAnimations (0x02182D10: "wait00".."wait09") and sWalkAnimations (0x02182D60: "walk00".."walk10").
+
+Inferred: the states 0x89..0x8C are the character handing the player a present of its own (mGift.mMessage is the
+item given to the held model), and 0x8D, 0x8E a rise of its level (head icons 6 and 7).
+
 ## The characters
 
 The main program's character code, `0x0208EB18` to `0x0209E140`, which every scene with a resident uses: four units
@@ -2471,3 +2519,65 @@ in a table that the analysis took for a number): the first try lost code from th
 overlays. So the linker script names every symbol of the delinked objects in a `FORCE_ACTIVE` list, which keeps the
 original whole, and stripping only acts on compiled objects. With that, the ROM matches, and a library file linked
 from its compiled object comes out with exactly the functions the game has.
+
+## Visiting a Mii: the lower-screen pages of overlay 75 (0x02153EE4 to 0x0215D8E4)
+
+Measured from the code (ov075-b's range; the scene, its controller and its other pages are described by the other
+ranges' agents). The pages are members of one object at scene+0x30B50 (Scene40Pages), each with mState/mNextState
+and an mActive flag the pages' SetActive writes; offsets below are the pages object's.
+
+| Page | At | Size | What its code does |
+| --- | --- | --- | --- |
+| Talk (page 1) | +0x180 | 0x1C14 | A question in the choice list (+0x1C); the answer kept for the next scene in the two bytes after gSceneMemory's 0x3C, or acted on: ends or solves the character's trouble (cooldown, AddTroublesSolved), moves the relation meter with the trouble's target by +40/0/-40, goes to a game scene (table 0x0217BBC0) |
+| Gift (page 2) | +0x1D94 | 0x88 | The character's reaction to what it is given (30 kinds, 0x02154BE0); the player holds the item out until the stylus comes down; SetLucky draws a chance in a thousand |
+| Present (page 3) | +0x1E1C | 0x128 | Three boxes (the scene's models) with a goods item of each group (ChooseItemInGroup(1, 4, n)); the box touched opens and its item is the player's |
+| List (pages 4 to 7) | +0x1F44 | 0x18B74 | The player's goods, clothes and interiors to give (four list tabs, goods filter tabs {1, 2, 8, 16}, five clothes tabs), or the character's own clothes to dress it in; a shop button per list (scenes 0x68, 0x2F, 0x1E, 0x35) |
+| Keyboard (page 8) | +0x1AAB8 | 0x69F8 | The soft keyboard; the word typed is made speakable and spoken |
+| Page 9 | +0x214B0 | 0x8FEC | Three panels (4, 6, 8 buttons) marking what the character has done: the bits of its 0x299, the goods 236 to 243 it has had, the interiors of kind 13, a motto |
+| Menu | +0x3892C | 0x8B0 | Seven buttons, five down the left edge (the first calls for attention after 120 frames once the speech has ended) and two at the top right, each shown when what it offers is there |
+
+Inferred: gSceneScratch (0x0213BAB0) is a member of the original's SceneMemory, which ends at it: this code reaches
+its first bytes both by its own address and as gSceneMemory+0x3C.
+Measured on the touch page (`Scene40TouchPage`): `StartCall` (`0x02150AD4`), `SetMenuDisabled`
+(`0x02150AE4`) and `UpdateMenu` (`0x02150B54`) forward to the menu's `StartCall`, `SetDisabled` and
+`UpdateAvailable`. `HideMenu` (`0x02150AF4`) only acts for a true argument: it sets the hidden flag and hides
+the menu; false does nothing. `RefreshMenu` (`0x02150B18`) refreshes the menu and copies its first five
+availability flags to the context. `SetState` (`0x021530E4`) sets the state and clears the step, frames and
+unknown word at +0x10. `Draw` (`0x02153508`) is empty. All seven match in instructions and relocation targets.
+
+## The Mii touch scene's character, profile and meters (overlay 75, 0x0215d818 to 0x02168354)
+
+Measured (from the code of overlay 75; offsets of the scene, `Scene40`, and of the page object `Scene40Pages` at
+scene+0x30B50):
+
+- **The character** (`Scene40Character`, scene+0x6A22C, 0x30F8 bytes) is a `Character` plus the scene's speech
+  (TtsPlayer, a SpeechWindow and the pages' context), a thought balloon (0x2BE4) and a cover (bed or curtain,
+  0x2CDC), the present it is given (`Scene40Gift`, 0x2DC4), two head icons (0x2DFC) each placed at the head (with
+  the head's yaw), the body joint, the feet or the right hand (0x2E7C), and a state machine: `UpdateState`
+  (0x02161D94) copies the requested state (0x2E8C) to the current one (0x2E84), runs the function of its range
+  (13 functions, 0x00..0x19 to 0xC6..0xD1, at 0x02161E88 .. 0x021733A4) and counts the frames in the state (0x2E98).
+  `SetState` (0x02173E8C) only requests a state and sets the "entered" flag (0x2E94) that the state's first frame
+  clears. The state functions start animations by name (`ResourceSet_FindIndexByName` on the body model's
+  resource set): "hold00", "land00", "press00", "happy00", "sit00", "sleep01", "sleep02", "spraw00", "i_sit00",
+  "i_wait00", "i_walk00", "i_eat00", "i_eat01", "greet01", "c_react00..03", "call00", "sign00", "wait02"; the
+  standing and walking ones come from two tables of names by personality kind and mood (0x02182D10, 0x02182D60).
+- **The profile page** (pages+0x2A49C, 0xE214 bytes, 0x0215F180 .. 0x0216146C) shows the visited character's
+  satisfaction (SatisfyLevel, SatisfyMeter) or trouble meter (100 - progress / 2), its fullness meter
+  (`GetFullness` at the scene clock's seconds), its favourite foods (`GetUnknown292(0..2)`), favourite and disliked
+  goods once the record's bit for them (0x1C8) is set, its lover or spouse and best friend, eight marks for goods
+  it has had (0x0217BA2C) and a mark when its profile is complete. L and R switch to the relation pages: the
+  characters it has a relation rank with, sorted by rank (0x0217BB08 gives each rank's place) and meter, grouped by
+  rank with a title each (0x0217BA70) and a line each (0x0217C618: by group and by the meter's grade of 0x0217B8F4),
+  cut into pages of 180 pixels.
+- **The meters** (tables 0x02182C88, 0x02182CA0, 0x02182CB8) move a value of 0 to 100 to a target by a step a
+  frame, with sounds 0/1 of archive 27 while they move and 2/3 when they arrive: ten sprites side by side, the same
+  with a level ("Ｌｖ" and a number) whose full meter rolls over into the next level, or one sprite of 33 frames.
+- **The counter** (pages+0x386B0) shows the scene's copy of the game's capped counter (0..9,999,999) with commas,
+  counting there 50 a frame (sounds 4/5, then 6/7, of archive 27).
+- **The talk page's answers** (talk page+0x1C): up to four text buttons, from the answer sets at 0x0217CBB8
+  ({count, four messages}), by the kind of the character's trouble (0x0217C010 by `data_02114d78[category][id]`'s
+  kind, set 10's answers by trouble id at 0x0217BE70) or another table (0x0217C0C4).
+
+Inferred: the profile page is what the player sees of the visited Mii on the upper screen (its title is message 17
+of the scene's own message file with the Mii's name); the counter is the player's money (only that the scene
+keeps a copy of GameData's capped counter and clamps it as `SetCappedCounter` does is measured).

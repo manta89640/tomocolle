@@ -21,7 +21,7 @@ public:
     VecFx32 GetLookPoint();
 
     /* 0x12C */ Scene40Motion mMotion;
-    /* 0x144 */ int mUnknown144;
+    /* 0x144 */ BOOL mInUse; // Taken by Scene40Physics::TakeFreeItem
 }; // 0x148
 
 #endif // OV075_SCENE40ITEMMODEL_H

@@ -142,9 +142,10 @@ its library's compiler and flags, from the `LIBRARIES` table in `configure.py`.
 each only if the ROM still matches when it is linked from the compiled object. It leaves a unit alone whose object
 has data that its entry in `delinks.txt` does not place yet.
 
-Placing that data is the next step for the library files, and is not done. `tools/place_data.py` works out where a
-file's data is from the addresses in its matched functions, and reports it, but what it writes is not usable yet:
-see its header.
+`tools/place_data.py` works out where a file's data is from the addresses in its matched functions, and with
+`--unit <source> --complete --apply` places one file's data, names its objects and marks it complete; the build then
+decides (see its header). One unit at a time, so, 38 library files were completed in round 5; what kept the others
+back is in binary.md, "Libraries".
 
 A library function that objdiff scores 0% is often already right and only has dsd's name: objdiff pairs functions by
 name, and dsd gives a file's statics address names. Before changing anything, compare the compiled object with
@@ -180,8 +181,8 @@ disassembly, and directives that say where it goes:
 `configure.py` compiles that in place of the fetched file, with the same compiler, flags and include directories, to
 the same object; the unit and its name are unchanged. The tracked file never holds lines of the fetched one. This is
 the coordinator's design of round 3, kept for the user to approve or replace. It is used by `mi/src/mi_dma.c` (one
-function the fetched release lacks), `spi/src/pm.c` (a later release, see binary.md, "Libraries") and
-`card/src/card_spi.c` (one function of a later release).
+function the fetched release lacks) and `spi/src/pm.c` (a later release, see binary.md, "Libraries"); no later commit
+of the fetched repository has either.
 
 Before writing an override, look for the game's release among later commits of the fetched repository: its history
 is small (`git clone --filter=blob:none` of it, then `git log -- <path>`). Where one has the file as the game has it,
@@ -191,7 +192,9 @@ hash, and compiles it in place of the repository's file, with the same compiler,
 repository's directory of the file is searched first, as for an override, and an override of the file applies to the
 fetched one). The repository's own pin stays: a later commit changes many other files, so moving it is a decision for
 all of them. `math/src/qsort.c` is built so, from `ccbbcc8`, the commit that writes `MATH_QSort`'s conditional
-instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries").
+instructions out as branches under `SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS` (binary.md, "Libraries"). So is
+`card/src/card_spi.c`, from the same commit, compiled with `SDK_PATCH3`, the define under which that commit adds the
+game's 128 KB EEPROM: an entry of `FETCHED_FILES` may name defines for its file alone.
 
 The fetched file's other definitions stay. A static that only a removed or replaced function used is no longer
 emitted, which matters: with `-ipa file` the statics are pooled, so the file's pool is only right once every function
@@ -199,7 +202,12 @@ that uses one of them is the game's. Remove what the game's release does not hav
 
 A file whose code is partly in the ITCM (`os_irqHandler.c`, `mi_dma.c`) is one unit: its entry in the main program's
 `delinks.txt` names an `.itcm` range beside its `.text`, and dsd's section migration takes that range out of the ITCM
-module (`.dtcm` works the same way for the DTCM's `.bss`). `dsd json delinks` and `dsd objdiff` do not migrate and so
+module (`.dtcm` works the same way for the DTCM's `.bss`). The SDK's own linker script defined symbols that its files refer to and dsd's script does not
+(`SDK_AUTOLOAD_DTCM_START`, `SDK_IRQ_STACKSIZE`, `SDK_OVERLAY_DIGEST` and others): `LINKER_SYMBOLS` in `configure.py`
+has them with the original's values, and `tools/force_active.py` writes them at the end of the script, with
+`AutoloadCallback`, which `dsd rom config` looks up, as an alias of crt0's `_start_AutoloadDoneCallback`.
+`tools/check_relocs.py` takes a reference to such a symbol for the original's reference to the symbol at its address.
+`dsd json delinks` and `dsd objdiff` do not migrate and so
 still list the ITCM's old gap; `tools/migrated_gaps.py` finds it, and `configure.py` and `tools/objdiff_config.py`
 leave it out.
 
@@ -266,9 +274,13 @@ The order that the code itself suggests:
   `dsd check symbols` wants every symbol of the unit's range by the name the linked program has. The numbers
   change when the file's code does, or a header it includes; the check names the new one.
   `tools/name_unit_data.py` lays a compiled object's data out from the start of each range and writes those names
-  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). A constructor's string
-  literals come twice, once for each constructor the compiler emits (`C2`, then `C1`); the ROM keeps only `C1`'s,
-  the second set, which the tool does not know: name those by hand (`Keyboard.cpp`).
+  into `symbols.txt` (the save screens, overlays 69, 106 and 107, were completed with it). It lays out only the
+  sections the link keeps: those reachable through the object's relocations from a function `symbols.txt` has, or
+  from the static initialiser. So a constructor's string literals, which come twice, once for each constructor the
+  compiler emits (`C2`, then `C1`), are laid out once, as the ROM has them (`Keyboard.cpp`), and so are the objects
+  of a function the link strips. A header change renumbers the names of every complete unit that includes the
+  header: `python3 tools/stale_names.py --apply` (after `ninja`) renames them in `symbols.txt`; neither the ROM
+  nor `dsd check symbols` notices stale ones, `tools/check_relocs.py` does.
 - **What else `dsd check symbols` asks of a complete unit** (overlays 96 and 110): a symbol dsd made inside an
   array or a string (a field the code addresses directly, `data_ov110_0214f654` in `sWindowButtons`) has to go,
   with its references in `relocs.txt` rewritten as `to:<array> add:<offset>`; the `kind:bss` placeholders of
@@ -320,6 +332,14 @@ Other per-function settings found the same way (overlay 109):
   off` is one). Check a pragma on a small file with `-w all` first; the `opt_*` names it knows are in the
   executable's strings (`strings mwccarm.exe | grep ^opt_`).
 - Builds 137, 138 and 139 compile overlay 109's near-misses identically, so they are not a version question.
+- A group of functions that are one design may need one setting, not one each: NFL's seven expression functions
+  had been matched with three settings (level 2 with common_subs off; with propagation off added; with
+  dead_assignments off added), each the part of `optimization_level 2` + `opt_common_subs`, `opt_propagation` and
+  `opt_dead_assignments` off that the function's code happened to show. All five that matched still match under the
+  union. Try the union of a family's settings before contorting one member's source.
+- Look for an SDK function the code was copied from: NFL's `NFLi_CopyToTexBank` matched as soon as it was written
+  as NitroSDK's `GX_LoadTexEx`, line for line (its three bases read and shifted in the SDK's order), where no
+  statement order of an independent form gave the literal pool's order and registers.
 - `#pragma opt_common_subs off` alone, at the default level, gave overlay 76's `MiiEditFacePage::SetParameter` its
   clamp `CLAMP(get(p) + delta, min, max)` as the original's: the range's ends reloaded from the stack after each call
   of the getter, where the default hoists one of them into a callee-saved register.
@@ -405,9 +425,9 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   are declared) and scoring against the ROM's string order found `TextUtil.cpp`'s three kana arrays, all 255 strings
   in place, in one pass of a few hundred candidates; the model then held under the build. An uncalled function
   that reads the arrays keeps them in the object (`KanaTables_Unused`), and the link drops it.
-- `tools/name_unit_data.py --apply` lays out sections the link will drop too (it puts them after the range), and
-  rewrites `symbols.txt` in another order; for a file with such tables, take its printed names for the range and
-  replace the range's lines in place.
+- `tools/name_unit_data.py` leaves out the sections the link will drop (with `--all` it lays them out too, after the
+  range). `--apply` rewrites `symbols.txt` in another order; to keep the order, take its printed names for the range
+  and replace the range's lines in place.
 - Anonymous strings of an initialiser (a table of pointers to literals) cannot be permuted, since the table's order
   is fixed: make them named arrays (`static wchar_t sNgWord05[] = L"...";`, non-`const` to stay in `.data`), declared
   where the literals were, and the same-size permutation applies to them. Overlay 109's 44 strings went into the
@@ -439,6 +459,106 @@ best searches leave overlay 72's strings (50 of 134 objects) and WH-in-C (56 of 
   the two colour tables. The heap-sort model with the locals placed so (table, guard) reproduced every compile tried
   and found that order at once (a search over placements before, between and after the functions).
 
+## How the compiler orders and colours
+
+Read out of the game's compiler (2.0 sp2p3 `mwccarm.exe`: its scheduler at `0x4ff730`/`0x4ff8f0`, the ARM9 machine
+model at `0x4f5dc0`-`0x4f6140`, the allocator at `0x513780`-`0x513cf0`), compared with the decompiled source of the
+GameCube compiler (github `rayanht/mwcc`, `src/backend/Scheduler.c` and `Coloring.c`: the same algorithms), and
+measured. `tools/sched_probe.py show FILE` compiles a file with a patched copy of the compiler that logs, for every
+block it schedules, the dependence graph it built and every choice it made (with the pressure counter below);
+`tools/sched_probe.py check FILE` replays the log with the rules here. They reproduce the compiler cycle for cycle on
+more than 99% of the blocks of `SceneManager.cpp`, `SavedCharacter.cpp` and the scenes (what is left depends on which
+registers are live out of a block, which the log does not show). So these are the rules, not a fit; when code is
+scheduled differently from the original, the question is which input to them differs.
+
+**The passes.** Instruction selection (virtual registers, `v16` up, numbered as they are created), coalescing of
+copies, local optimisation, then the scheduler on virtual registers ("pre-RA"), register allocation, peephole, and
+the scheduler again ("post-RA"). The second run only takes blocks the first did not schedule: in practice blocks
+that were merged afterwards (with the epilogue, or by if-conversion). The unit is the basic block. A call does not
+end a block: it is a barrier (everything before it comes before it, everything after after it), so a function
+without branches is one block, and what happens in it depends on the whole function.
+
+**What is ready, and what goes first.** Single issue. An instruction is ready when all its predecessors have issued,
+their latencies have elapsed and the issue slot is free. Each cycle the scheduler takes the first ready instruction
+in block order (the order instruction selection produced, i.e. the source's evaluation order), and replaces it by a
+later ready one when, in this order of tests:
+1. the later one is critical (its latest start cycle, longest path to the block's end subtracted from the block's,
+   has passed) and the current choice is not; in a long block nearly everything is critical, so this rarely decides;
+2. it frees more successors (successors for which it is the last unissued predecessor);
+3. it is higher (longer latency path to the block's end);
+4. pre-RA only: it has the lower rank: copies 0; stores, compares and branches 1; arithmetic with register operands
+   (and calls) 2; loads 3; constants and addresses (`mov rX, #n`, `ldr rX, =sym`) 4.
+Otherwise the earlier one stays: ties go to source order.
+
+Example (`SceneManager::Init`, `ScreenLoader_SetPriority(&gScreenLoader, 0x1, 1)`, compiled `mov r1, #1; mov r2,
+r1`): by rule 2 `mov r1, #1` goes before `ldr r0, =gScreenLoader`, both of height 21, because only it frees the copy
+into r2. That is the original's order; ours has the address first because of the next rule.
+
+**Pressure mode** (pre-RA only, an ARM addition). A counter is kept while scheduling: +1 at each definition whose
+register still has a use ahead in the block, -1 when a register's last use in the block issues. Physical registers
+count too, and once per definition: every argument set-up in r0-r3, and every clobber of an argument register a call
+does not use, adds 1, and nothing takes it off until that register's last use in the whole block. So the counter
+climbs with every call in a long block (in `SceneManager::Init`, by 3 per `ScreenLoader_SetPriority`, to 41). From
+14 (the allocatable registers r0-r12, lr) on, the rules above are replaced: the ready instruction with the lowest
+pressure delta wins (16, less 1 + max(1, counter - 14) for each use that is its register's last, plus max(1, counter
+- 14) for each definition with uses ahead), and ties go to source order. Address and constant loads then all tie, and
+come out in source order instead of by height. This is why scheduling "flips with unrelated code earlier in the
+function": the counter at a statement depends on every call before it in the same block.
+
+**Latencies** (ARM9 model): `ldr` and literal loads 2, `ldrb`/`ldrh`/`ldrsb`/`ldrsh` 3, `mul`/`mla` 6,
+`smull`/`umull`/`smlal`/`umlal` 7, calls and branches 3, an operand shifted by a register +1, everything else 1. An
+instruction occupies the issue slot for the same number of cycles, except loads (1) and `ldm`/`stm` (one per
+register). A true or output dependence carries the producer's latency; an anti-dependence (a register read, then
+written) carries 0 but still orders.
+
+**Memory dependences** come from the optimiser's alias information, not from the registers: a store is ordered after
+every earlier load or store that may alias it, and a load after every earlier store. Two accesses through the same
+base expression at disjoint offsets are independent (`light->x` and `light->mEnabled`); through different base
+expressions they may alias, even two different globals (the stores to `gScreenControl` are ordered before the light
+stores in the test scenes). So writing a field through another pointer, or through the global instead of a local
+pointer, adds ordering edges and changes the schedule.
+
+**Evaluation order.** An addition generates its left operand, then its right, unless the right contains a call; there
+is no weighting. The tree is the optimiser's, which reassociates address arithmetic, so spellings of `t[a][b]` all
+come out alike. A register that a parent asks for (an indexed load's index, a call argument) is created before the
+operands that compute it, so it gets the lower number: in `Use(sTable[kinds[p]][1])` the product `kind * 20` is
+`v17` and `kind` is `v21`. A local survives coalescing (keeps its own number) only if it has another use. An inline
+function's argument is substituted at its uses when it has no side effects (constants, addresses, reads of a local
+whose address is never taken); other arguments are bound to temporaries, last argument first (fin-lib, from
+`CInline.c` and measured).
+
+**Colouring** is Chaitin's, as in the GameCube compiler: the graph is simplified in passes over the virtual registers
+in increasing number, each pass removing every node with fewer neighbours than registers; when none can be removed,
+the one with the lowest spill cost per neighbour is removed as a spill candidate and the passes start again. Nodes
+are then coloured in the reverse order of removal, each taking the lowest-numbered free register among the scratch
+registers and the callee-saved ones already taken; when none is free it takes the next callee-saved register, from r4
+up. So among values removed in the first pass the highest-numbered (created last) is coloured first; values that
+interfere with more (removed in a later pass) are coloured before those; a cheap spill candidate (a hoisted address
+used rarely) is coloured last. Measured: `a = g(); b = g(); c = g(); h(); use(a); use(b); use(c);` gives c r4, b r5,
+a r6 (and `a = g(); b = g();` b r4, a r5). Two values that swap registers with the same instructions were created in
+the other order, or have other neighbour counts.
+
+**Applied.**
+- The light-0 block of overlay 4's `CharacterBodyTestScene::Init` (x stored before `mEnabled` in the original). The
+  original order needs, after the store of x, the store of `mEnabled` chosen before the two argument loads of
+  `ModelResources_SetModel`, which are higher (14 against 12). In the compiled block the counter is 13 there, so the
+  loads win; at 14 the store would. A replay of the block's real graph over 3,000 orders of its fifteen instructions
+  never gives the original's order at our counter, and gives it at one more. A search over single added dependences
+  (every pair, latencies 0 to 3, replayed) finds exactly one family that gives the original's order with the source
+  order x-then-`mEnabled`: an edge of latency 0 from the `mEnabled` store to the `ldr r0, =gModelResources` (or to
+  the path's `ldr r2`). Latency 0 is an anti-dependence: in the original's virtual code the store read the register
+  that the argument load then writes, i.e. the 1 stored into `mEnabled` was already in the physical argument register
+  before allocation (as the 0 of y and z is r1, shared with the call's second argument, in ours). Which source does
+  that is not found yet; it is the question to answer for all six light blocks.
+- The method (fin-lib, on NFL): replay the logged graph with one dependence added at a time and compare with the
+  original's order; the edge that reproduces it names what the original's source had (there, a may-alias edge from a
+  table load through a pointer, `const u8 *entry = table + type; return *entry;`, matched two functions).
+- `SceneManager::Init` (four pairs of address and constant loads in the other order): ours is in pressure mode from
+  the fifth `ScreenLoader_SetPriority` on, and pressure mode puts addresses and constants in source order. Replayed
+  without pressure mode, the block gives the original's order everywhere but in the `gPaletteLoader` / `gPadInput`
+  stores. So the original's counter stayed below 14 there: its block, or the count of definitions in it, was
+  different.
+
 ## Matching techniques
 
 What made near-misses match, by symptom, with where each was found. Most are about the order in which the compiler
@@ -447,6 +567,9 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 `compare_object.py` masks the bytes of calls and has called a function equal that objdiff did not.
 
 **An address reloaded at each use, where the original keeps it in a register**
+- A global's address loaded at the function's entry into a callee-saved register, before a switch, and used in
+  several of its cases: a local pointer initialised at the top (`Camera *camera = &gCamera;`, then
+  `camera->mEye.x`); the global written at each use is loaded in each case (overlay 75's character states).
 - Write through a pointer made by a cast: `GXRgb *colors = (GXRgb *)gSceneScratch;`. A plain local pointer to the
   global is dropped and the address reloaded (`MapScene::Exit`).
 - `#pragma opt_propagation off` around the function keeps constants and addresses in callee-saved registers across
@@ -519,6 +642,11 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   operands the other way (`MiiEditFacePage::StepParameter`).
 
 **Stack slots in the wrong order, or a frame too large**
+- Dead copies of a by-value point that share ONE slot across the cases of a switch, beside a fresh slot per use:
+  the point is a local of the function (`FloorPos target;` at the top, set field by field in each case, then
+  `SetTargetFloorPos(target)`); the fresh slots are the by-value parameter's. An inline returning the point gives
+  two fresh slots per use (overlay 75's character states, five functions: one shape for every "walk to the
+  camera").
 - A struct zeroed through a pointer into one slot and copied with `ldm`/`stm` into another, whose address is passed:
   an inline that returns it, `RTCTime time = Midnight();` with `RTCTime t = {0, 0, 0}; return t;` inside
   (`GetDayNumber`, `src/shop/ShopStock.cpp`); a named local, a block or a by-value parameter put the two slots the
@@ -587,7 +715,21 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   gives it a slot among the function's own locals. A search over 128 combinations of fresh and reused copies and over
   the declarations' places did not find the original's order.
 
+- Two dead copies of a returned point at the top of the frame, above the function's other locals
+  (`Character::GetPointInFront`): the result declared first and ASSIGNED, `FloorPos result; ...; result =
+  GetFloorPos() - offset; return result;`. The assignment copies the value to a temporary and then to the variable;
+  an initialisation makes no copy. A local initialised from an inline's by-value return (`FloorPos offset =
+  Polar(distance, angle);`) is placed below that temporary, where one filled field by field is placed above it.
+  Found by the advisor (round 5).
+
 **Registers allocated differently**
+- Measured with fin-sched's probe compiler (pre-RA virtual registers): an indexed load numbers its index register
+  before it generates the index's operands, so in `table[k][1]` (a 2D table, constant column folded into the
+  base) the product `k * 20` is numbered before `k`; colouring takes the highest number first, so `k` gets the
+  lower register (`ldr r2,[kinds]; mul r3,r2,r0; ldr r2,[t+4,r3]`). A local `k` with a second use keeps its own
+  (lower) number and reverses the two. With `table[k][mood]` (mla) the row address is numbered after `k`. Not
+  solved: overlay 75 has `ldr r3,[kinds]; mul r2,r3,r0` at four single-use sites, which no source form tried
+  gives (pointer forms, flat index, getters, locals at any scope, casts, a file-static table, ten opt_ pragmas).
 - A value written out at each use instead of kept in a named local: `(u16)(i * 2)` in both calls, not
   `int sequence = i * 2`, put the button offset and the sequence in the original's registers (overlay 76's
   `MiiEditFacePage::func_ov076_0214c6d0`). A member read at each use (`mScene->...`) instead of a local copy of the
@@ -687,6 +829,27 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   GetIndex()` reads `mIndex` off the element's address, as the original does (overlay 109's `UpdateSending`).
 
 **Arguments evaluated in another order**
+- A stack argument stored late, with the loads and constants after it hoisted before an unrelated value's last use
+  (NFL's `NFLi_ApplyExpression1` and `4`): the store depended on an earlier load in the block. The scheduler orders a
+  store after every earlier load that may alias it; a load from an array indexed directly does not (the IR knows the
+  object), a load through a pointer does. Reading the table entry through an inline accessor that forms a pointer,
+  `const u8 *entry = table + type; return *entry;`, added the original's dependence (found by replaying the logged
+  block with one extra edge at a time in fin-sched's `replay.py`, which reproduced the original's order only with an
+  edge from that load to that store). A pointer variable set in an earlier block also aliases, but keeps the
+  address in a register where the original reloads it.
+- Which arguments of an inlined call are evaluated at the call and which inside the body (read in CInline.c's
+  `setup_inline_locals_and_arguments`, measured on lib/NFL): an argument free of side effects that is a constant, an
+  address, or a plain read of a local NOT marked address-taken is substituted into the body and evaluated where the
+  parameter is used. Every other argument is bound to a temporary first, last argument first (the initialisers are
+  prepended into one comma expression). A local is marked when `&x` is parsed (CExpr.c), but an array passed by its
+  name is not. So element 0 of an array (`v[0]`, offset 0, a plain read) is substituted while `v[1]` and `v[2]` are
+  bound. The hair meshes matched with the vertex as `fx16 vertex[3]` passed as `(VecFx16 *)vertex`: x is then
+  loaded after `&ctx->dl` is formed, where a `VecFx16` passed as `&vertex` binds all three before it.
+- The same IR order can come out in two orders: in a block where the pre-RA scheduler's pressure counter reaches 14,
+  it picks by register-pressure delta with ties in IR order, otherwise by height. One hair-mesh source gives the
+  original's `z, y, add, x` in the two textured meshes (counter 14) and `z, y, x, add` in the skin mesh (counter 11
+  or 12). fin-sched's probe compiler (`scratchpad/fin-sched/probe.py`) prints the counter and every choice; use it
+  before searching source forms for an order.
 - At a call whose argument is a load and whose other argument an address, mwcc sometimes forms the load first and
   sometimes the address, and which depends on the code around the call, not on the call: overlay 109's
   `AnimModel_FindAnimation(&mCharacters[i].mModel, ..., mCharacters[i].mModel.mAnimId)` comes out in the original's
@@ -708,6 +871,12 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The operands of a `+` evaluated right first where the original evaluates the left first, the left one holding
   `x < 0 ? -x : x`: write the absolute value as a static inline function, `NFLi_Abs(x / 32)` (lib/NFL's mesh
   builders). Inline, the conditional seems to weigh less in the choice of which operand to evaluate first.
+**Loop invariants**
+- Two products of a loop-invariant sum rounded in the original's order (`RoomModels::Update`: the camera's x square
+  rounded before its z square): the sum written into one local before the loop, `fx32 distSq = FX_Mul(d.x, d.x) +
+  FX_Mul(d.z, d.z);`. Kept as two locals and added in the loop (`IsPartNear(xx + zz, i)`), the optimiser hoists the
+  sum itself and schedules the two products' rounding in another order, whatever the order of the locals or of the
+  operands.
 **Loops (MiiList.cpp)**
 - A search loop whose test is one predicated chain (`ldr; ldr; cmp; add; sub; cmple; addgt; bgt`), where `while
   (a > x || x > b + c - 1) n++;` is rotated: `for (;;) { count = c[n]; last = b[n] + c[n] - 1; if (!(b[n] > x || x >
@@ -757,6 +926,22 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   A non-inline definition instead comes before the destructors, as C1 and C2.
 
 **Branches and switches laid out differently**
+- A jump table whose unlisted values go to a lone `b end` block, while the listed cases' own breaks go straight to
+  the end (the Mii transfer's `MiiTransfer_UpdateSession`, case 3): the default's block held a statement when the IR
+  chained jumps. mwcc retargets a label only when the first real statement after it is a `goto` (`chain_label` in
+  IroJump.c and `COpt_Follow` in COptimizer.c of the decompiled GameCube compiler, the same front end): labels and
+  nops are skipped, anything else stops it. A dead assignment there (`default: { int state = sSessionState; break; }`)
+  is kept through those passes under `#pragma opt_dead_assignments off` and deleted by the backend, leaving the lone
+  branch. Without the pragma every vanishing body (`;`, `(void)0`, `i = i`, empty loops, empty inlines) is gone
+  before the chaining and changes nothing. The same pragma keeps stores into a local array nothing reads, which
+  otherwise needs `volatile`. Found with the advisor agent.
+- `cmp #0; beq A; cmp #1; beq B; <return>` over a step counter is a switch of two cases; `if (step == 0) ...
+  else if (step == 1)` gives `cmp #0; bne`. A lone `cmp #1` left before a return with nothing using it is an empty
+  `case 1: break;` (overlay 75).
+- Two branches of an if/else that each end with a store to the same member and the function's return: the
+  original stores in each branch and returns there; written with one store after the if/else (or as a common
+  tail), the compiler merges the stores into one block with a branch. A `return;` at the end of the first branch
+  keeps them apart (overlay 75's state 0x8F).
 - A chain `cmp #0; cmpne #6; cmpne #5` in an order that is not sorted: a sequence of `if (x == 0) return;
   if (x == 6) return; ...`. A switch sorts the cases (or builds a jump table), and `||` turns adjacent constants into
   a range test (`MiiEditScene::Update`).
@@ -816,6 +1001,14 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   file as it will stay.
 
 **A value read once where the original reads it twice**
+- A value the original compares and returns from one load but reads again before a read-modify-write of the same
+  element (`ldrsb r1, [r4, r9]` for the tests and the result, then `ldrsb r0, [r4, r9]; add; strb` for the step): read
+  it through a const lvalue and write it through the plain one, `const s8 &phase = phases[slot]; if (phase == 0) {
+  result = phase; ...; phases[slot]++; }` (`Character::PlaySoundAtAnimPhase`). The compiler takes a load through a
+  `const` lvalue for another expression than the same load through a non-const one, so it does not forward it into the
+  step; any change of type does the same (through `u8 *` the step reloads with `ldrb`), but only the const reference
+  keeps the signed load. Locals, `+= 1`, a switch and the member instead of the pointer all forward or move the
+  address.
 - Not solved: light 0's setup in the test scenes (overlay 5's `TestDrawMiiScene::Init`, overlay 3, three of the main
   program's test scenes) stores the direction's x (and the colour), reads them back and stores them again with y and
   z. Written so, the compiler drops the read and the second store of x, a load followed by a store of the same value;
@@ -869,6 +1062,13 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   `bmi`/`cmp` stay. Level 1 keeps the compares too, but not the original's scheduling.
 
 **A call's arguments**
+- A structure argument that the original loads with one `ldm` into r2 and r3, with the next word stored to the
+  outgoing slot by `ldr`/`str`, where ours copies the structure to a temporary below the stack pointer first (`sub r3,
+  sp, #8; ldm; stm; ldm r3, {r2, r3}`): the callee takes an 8-byte structure and a word, not a 12-byte one. The
+  compiler copies any structure argument that is split between the registers and the stack through such a temporary,
+  whatever the source form (a member of a by-value parameter, a parameter, a local, a class with a constructor); one
+  that fits in the registers it loads straight from its place (`FaceCast::SetTransform`, whose `FaceTransform` holds
+  an x, y position and a scale, not a VecFx32).
 - A constant stored next to a call's argument set-up in r3 though the call takes three arguments: the callee takes a
   fourth (read its prologue for `mov rN, r3`), and the constant is that argument, shared with the store
   (`WirelessTestScene::Init`, the clock setter `Clock_SetDateTime`).
@@ -994,6 +1194,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   link keeps the one called, so the unit can still be complete.
 
 **Moving an overlay onto the shared headers** (overlays 73, 74, 96, 109 and 110, measured)
+
 - Work by comparison with the overlay's own compile from before the change, not with the original: compile the
   file once before (the quick compiler is enough), then after each step compare every function
   (`tools/compare_object.py new.o old.o`) and the bytes of `.data`/`.rodata`/`.bss` (`objdump -s`). Functions
@@ -1105,6 +1306,66 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
 - The order of a file's static `char` arrays (the joint names) follows no declaration order of the functions that use
   them; declaring them at file scope in an order found by one compile (read which slot each lands in, give each slot
   the ROM's name) placed all twelve.
+
+### Evaluation order and colouring rules measured on overlay 75's pages
+
+Each was found on one function and checked on a second where the shape recurs:
+
+- **An inlined call binds its arguments last to first, and a member call binds `this` last.** `PlaceMannequin`
+  sets the body's size per axis through an inline: with the mannequin pointer as the helper's *last* parameter the
+  pointer is read before the size is computed, as in the original; as a member function (`this` first) or with the
+  size computed into a local first, the table is read before the pointer. The by-value position copy is the same
+  helper style (`SetBodyPosition(Mannequin *, VecFx32)`).
+- **`a | (b != 0)` with calls compares as soon as it can.** Written as one expression, the first call's result is
+  compared before the second call; the original keeps the raw value across the call and compares after: the values
+  are assigned to locals first (`Scene40ListTabs::UpdateAvailable`).
+- **A switch gives branches where if/else gives conditional moves**, for three cases that each assign a value
+  (`UpdateRelationAnswer`); and a switch case that only re-assigns the default keeps its own branch in the jump
+  table (`UpdateTroubleAnswer`).
+- **A redundant `else if (x >= N)` after `if (x < N)`** is the source of a conditional return (`poplt`) right after
+  the branch target: the compiler reuses the first compare for the second test (`Scene40CallButton::UpdateCall`).
+- **Register colouring follows variables, not values.** A second loop with a counter of its own colours its two
+  registers as the original; reusing the first loop's counter swaps them (`Scene40OptionPage::UpdateDone`). A table
+  read twice, rather than named in a local, gives the original's registers (`Scene40MenuBar::Init`).
+- **A u16 field set from an int is cast**: `mClothesId = (u16)mChosenId` gives the original's `lsl #16; lsr #16`
+  before the bitfield insert.
+**Found on overlay 75's character, meters and pages (ov075-c, round 5)**
+- A clamp whose instructions are right but whose registers are rotated is the SDK's `MATH_CLAMP` (a nested
+  conditional expression whose result is a fresh temporary, so the loop's hoisted constants become its operands),
+  where an if/else on the variable itself colours them otherwise (`Scene40SegmentMeter::Show`, found by the advisor).
+  Try `MATH_CLAMP`/`MATH_MIN`/`MATH_MAX` before permuting declarations.
+- A third test of an if/else-if chain on the same two values: `else if (mTarget < mValue)` keeps a compare of its
+  own, `else if (mValue > mTarget)` reuses the flags of the test before (`popge` after `bge`) (`Scene40Meter::Update`).
+  With one operand read through a pointer (`*mCounter`) the flags are reused either way.
+- A member array read through a local pointer to it (`MtxFx43 *matrices = mJointMatrices; matrices[3]._30`) keeps
+  the array's address apart from the element's offset (`add 0x860; add 0x2000; ldr [#0xbc]`), where indexing the
+  member folds both into one offset (`Scene40Character::PlaceHeadIconAt*`). An inline accessor returning
+  `&mJointMatrices[joint]` folds as well.
+- One counter declared at the top and used by two loops keeps, in the second loop (which calls nothing), the
+  callee-saved register the first loop needed; a fresh `int i` per loop gives the second a scratch register
+  (`Scene40ClothesList::LoadOwnedBy`).
+- A value added from one of two constants chosen in an if/else (`lineHeight = 28; ... else lineHeight = 14;
+  height += lineHeight;`) hoists both constants into registers and moves one into a temporary, as the original;
+  `height += 28` in each branch does not (`Scene40ProfilePage::FindRelations`).
+- A by-value `VecFx32` setter that copies its parameter into a local before storing the fields gives three stack
+  copies (the call's result, the parameter, the local), as `Scene40Character::ShowBed` has them.
+- mwcc calls a direct member object's virtual function through its table (`ldr r3, [r0]; ldr r3, [r3, #4]; blx`):
+  it does not devirtualise, so a member whose calls go through a table is still a plain member, not a pointer.
+- A `while (x < table[i] && ++i < 7) {}` or `for (;;) { if (x >= table[i]) break; if (++i >= 7) break; }` search
+  gives the original's predicated loop (`addlt; cmplt; blt`) where `while (x < table[i]) { if (++i >= 7) break; }`
+  does not (`Scene40ProfilePage::GetMeterGrade`).
+- Booleans materialised again and again (`cmp; moveq #1; movne #0; cmp #0; beq`, then after a call `movne #1;
+  moveq #0` twice, then once more at the join) are nested inline functions returning BOOL, each `&&` inside one:
+  `HasText(t) { return wcslen(t) != 0; }`, `HasMotto(c, mood, t) { return c->mMood == mood && HasText(t); }`,
+  `WillSayMotto(...) { return HasMotto(...) && Random(100) < chance; }`, called as `if (WillSayMotto(...))`. The
+  same conditions written inline in the `if` give branches only, and the eight IR passes off change nothing there
+  (`Scene40Character::UpdateStates1ATo1C`, 0x02163758, matched so).
+- A global's address loaded at a function's entry and kept in a callee-saved register for one late use is a local
+  pointer to it at the top (`Camera *camera = &gCamera;`); and a local `FloorPos` whose dead copies sit above a
+  block's locals is declared at function scope, not in its case (the same function).
+- A text button's (or a page's) text cleared and drawn through inlines taking the button keeps a pointer to the
+  button, with the field stores in between made through the indexed member (`ClearButtonText(&mButtons[i]);
+  mButtons[i].mText.mMessage = m; DrawButtonText(&mButtons[i]);`, `Scene40ChoiceList::SetChoices`).
 
 ## Functions emitted in every file that uses them
 
