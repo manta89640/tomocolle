@@ -156,7 +156,7 @@ public:
     void GoToScene3C();
     void GoToWedding();
     void ChooseAfterTouch();
-    void SpeakAboutTrouble(int mode);
+    void SpeakAboutTrouble(); // The function reads no argument besides this
     int GetTroubleMessage();
     void SpeakTroubleProgress();
     void FindTargetRelation();

@@ -149,6 +149,26 @@ LD_FLAGS = [
     "-m _start",            # The entry function, crt0.c's
 ]
 
+# Symbols that the original link's script defined (the SDK's ARM9-TS.lcf.template) and that dsd's does not: the SDK's
+# files refer to them, so a file of the SDK linked from source needs them (os_*.c, crt0.c, fs_overlay.c). The values
+# are the original's, read from the words the delinked code has where the compiled code refers to each. Written into
+# the linker script by tools/force_active.py, after dsd's sections, so the labels of dsd's script can be used.
+LINKER_SYMBOLS = {
+    "SDK_AUTOLOAD_DTCM_START": "ADDR(DTCM)",            # 0x027E0000, where OS_IRQTable is
+    "SDK_SECTION_ARENA_DTCM_START": "DTCM_BSS_END",     # 0x027E0080, the end of the DTCM's .bss
+    "SDK_SECTION_ARENA_ITCM_START": "ITCM_BSS_END",     # 0x01FF8320, the end of the ITCM
+    "SDK_SECTION_ARENA_EX_START": "0x023E0000",         # The debugger's extended memory, a constant of the script
+    "SDK_MAIN_ARENA_LO": "0x02184000",                  # The end of the largest overlay (overlay 75's .bss)
+    "SDK_IRQ_STACKSIZE": "0x400",
+    "SDK_SYS_STACKSIZE": "0",
+    # The overlays' digest table, empty: the end of the static .data before its 32-byte alignment. dsd's layout has
+    # the alignment's 8 bytes in a gap object of their own, so the address is given as the original's.
+    "SDK_OVERLAY_DIGEST": "0x02115478",
+    "SDK_OVERLAY_DIGEST_END": "0x02115478",
+    # dsd rom config finds the autoload callback by its own name; crt0.c's is _start_AutoloadDoneCallback
+    "AutoloadCallback": "_start_AutoloadDoneCallback",
+}
+
 INCLUDE_DIRS = ["include"]
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -165,12 +185,21 @@ FETCHED = {
 # Each is fetched from the same repository at its own pinned commit, checked against its SHA-256, into
 # lib/fetched/<repository>/<commit>/ (ignored), and compiled in place of the repository's file. See docs/decompiling.md,
 # "Where the game's release of a file differs".
+# A third element, when there is one, is a list of defines that the file is compiled with besides its library's.
 FETCHED_FILES = {
     # MATH_QSort with each conditionally executed instruction written as a branch around it under
     # SP1P3_BUG_FOR_CONDITIONAL_ASM_INSTRUCTIONS, as the SDK's other assembly is (docs/binary.md, "Libraries")
     "lib/NitroSDK/libraries/math/src/qsort.c": (
         "ccbbcc8b6db4c4dbba3d503d2026978d78977840",
         "7ca9b28ce14f9609e6d0e7628e47217aff0940ce133afbdedc255b53488c442c",
+    ),
+    # CARDi_IdentifyBackupCore with the 128 KB EEPROM, which the same commit adds under SDK_PATCH3 (the define of
+    # the SDK's patch 3 releases): compiled so, the function is the game's word for word (docs/binary.md,
+    # "Libraries"). The define reaches only this file.
+    "lib/NitroSDK/libraries/card/src/card_spi.c": (
+        "ccbbcc8b6db4c4dbba3d503d2026978d78977840",
+        "5317c8b38b3c88ed40ab20474c0ffa0fae613da909166ffbf780c394f66620db",
+        ["SDK_PATCH3"],
     ),
 }
 FETCHED_FILES_DIR = Path("lib/fetched")
@@ -300,6 +329,9 @@ LIBRARIES["lib/DSProtect/"] = {
     "flags": [*CC_FLAGS, "-lang=c99"],
     "defines": SDK_DEFINES,
     "includes": ["lib/DSProtect", *SDK_INCLUDES],
+    # The marker words around the encrypted ranges are data in the compiled object and code in the delinked one:
+    # this makes objdiff read them alike (see the tool)
+    "post": "tools/dsprotect_markers.py",
 }
 
 # MSL's C library, the compiler's own: the game links it from the archive of CodeWarrior for DS 2.0, whose objects say
@@ -459,7 +491,7 @@ def fetch_repository(directory: Path, url: str, commit: str):
 
 def fetched_file(source: str) -> tuple[Path, str, str]:
     """Returns where a file of FETCHED_FILES goes, the URL it is fetched from and its SHA-256."""
-    commit, digest = FETCHED_FILES[source]
+    commit, digest = FETCHED_FILES[source][:2]
     directory = next(d for d in FETCHED if source.startswith(d + "/"))
     url, _ = FETCHED[directory]
     if not url.startswith("https://github.com/"):
@@ -702,11 +734,12 @@ def main():
            "Preprocessing $in")
     # A library's file, with the compiler, flags and include directories of its library
     n.rule("mwcc_lib", "$wrapper $cc $flags $includes -gccdep -MD -c $in -o $out "
-           "&& $python tools/fix_depfile.py $dep", "Compiling $in", depfile="$dep", deps="gcc")
+           "&& $python tools/fix_depfile.py $dep$post", "Compiling $in", depfile="$dep", deps="gcc")
     n.rule("fx_const", "$python $script $in $out", "Generating $out")
     # A fetched library file with the project's own definitions put in, from lib/overrides/ (see the tool)
     n.rule("override", "$python tools/override_functions.py $in $out", "Writing $out")
-    n.rule("force_active", "$python tools/force_active.py $lcf $out --objects $out.rsp", "Writing $out",
+    defines = " ".join(shlex.quote(f"--define={name}={value}") for name, value in LINKER_SYMBOLS.items())
+    n.rule("force_active", f"$python tools/force_active.py $lcf $out --objects $out.rsp {defines}", "Writing $out",
            rspfile="$out.rsp", rspfile_content="$in_newline")
     n.rule("mwld", "$wrapper $mwld $ld_flags @$objects $lcf -o $out", "Linking $out")
     n.rule("rom_config", "$dsd rom config --elf $in --config $config", "Configuring the ROM")
@@ -760,7 +793,9 @@ def main():
             includes += [(msl_dir / settings.get("msl", settings["compiler"]) / d).as_posix()
                          for d in MSL_INCLUDE_DIRS]
             # The prefix file sees only the defines that come before it on the command line
-            flags = [*settings["flags"], *(f"-d {define}" for define in settings["defines"])]
+            defines = [*settings["defines"], *(FETCHED_FILES[name][2:3] or [[]])[0]] if name in FETCHED_FILES \
+                else settings["defines"]
+            flags = [*settings["flags"], *(f"-d {define}" for define in defines)]
             if "prefix" in settings:
                 flags.append(f"-prefix {settings['prefix']}")
             # Where the game's release of the file differs from the fetched one, the fetched file with the project's
@@ -774,8 +809,16 @@ def main():
                 compile_source = build_dir / "override" / source
             if compile_source != source:
                 includes.insert(0, source.parent.as_posix())
-            n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py"], order_only=generated,
+            # A library's step after the compile, on the object (it is given the module's symbols.txt)
+            post, post_inputs = "", []
+            if "post" in settings:
+                symbols = config_dir / "arm9" / "symbols.txt"
+                post = f" && $python {settings['post']} {obj} {symbols}"
+                post_inputs = [settings["post"], symbols]
+            n.build([obj], "mwcc_lib", [compile_source], implicit=["tools/fix_depfile.py", *post_inputs],
+                    order_only=generated,
                     variables={
+                        "post": post,
                         "cc": ("$sjiswrap " if settings.get("sjis") else "")
                         + shlex.quote(str(compilers_dir / settings["compiler"] / "mwccarm.exe")),
                         "flags": " ".join(flags),

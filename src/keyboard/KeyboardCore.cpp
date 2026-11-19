@@ -65,7 +65,6 @@ extern "C" {
 // --- Not in this file, and not named yet ---
 void *ArchiveManager_GetFileByName(void *archive, const char *fileName);
 extern u8 gArchiveManager[];
-BOOL func_020594dc(void *file, NNSG2dCharacterData **charData);
 
 // The input code before this file
 void func_020813fc(void);
@@ -235,7 +234,7 @@ extern "C" BOOL KeyboardCore_GetUnpackedCharData(void *file, NNSG2dCharacterData
     if ((u32)*charData < (u32)(*charData)->pRawData) {
         return FALSE;
     }
-    func_020594dc(file, charData);
+    NNS_G2dGetUnpackedBGCharacterData(file, charData);
     return TRUE;
 }
 

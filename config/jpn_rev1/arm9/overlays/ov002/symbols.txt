@@ -6,12 +6,12 @@ _ZN13FaceTestScene4ExitEv kind:function(arm,size=0x48) addr:0x02149fc8
 _ZN13FaceTestSceneD1Ev kind:function(arm,size=0x84) addr:0x0214a010
 _ZN13FaceTestSceneD0Ev kind:function(arm,size=0x8c) addr:0x0214a094
 _ZTV13FaceTestScene kind:data(any) addr:0x0214a140
-@14022 kind:data(any) addr:0x0214a164 local
-@14023 kind:data(any) addr:0x0214a168 local
-@14024 kind:data(any) addr:0x0214a188 local
-@14025 kind:data(any) addr:0x0214a18c local
-@14033 kind:data(any) addr:0x0214a1a4 local
-@14034 kind:data(any) addr:0x0214a1b4 local
-@14035 kind:data(any) addr:0x0214a1c4 local
-@14109 kind:data(any) addr:0x0214a1d4 local
-@14110 kind:data(any) addr:0x0214a1d8 local
+@14104 kind:data(any) addr:0x0214a164 local
+@14105 kind:data(any) addr:0x0214a168 local
+@14106 kind:data(any) addr:0x0214a188 local
+@14107 kind:data(any) addr:0x0214a18c local
+@14115 kind:data(any) addr:0x0214a1a4 local
+@14116 kind:data(any) addr:0x0214a1b4 local
+@14117 kind:data(any) addr:0x0214a1c4 local
+@14191 kind:data(any) addr:0x0214a1d4 local
+@14192 kind:data(any) addr:0x0214a1d8 local

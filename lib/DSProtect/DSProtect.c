@@ -81,8 +81,17 @@ void DSProtect_EncryptRange(u32 *end) {
     DSProtect_SyncCaches(FALSE);
 }
 
-// RC4's key schedule, but with the permutation walked from its end. Not matched: the instructions are the original's
-// but for the registers of the index, the swap's two values and a constant, and the order of the last two.
+// Swaps two bytes. An inline helper: the key schedule's swap is its body, with the arguments in this order (the
+// store to state[j] comes first in the original)
+static inline void DSProtect_SwapBytes(u8 *a, u8 *b) {
+    u8 t = *a;
+    *a = *b;
+    *b = t;
+}
+
+// RC4's key schedule, but with the permutation walked from its end. The sum is written as the code adds it, the
+// state's byte to the sum of j and the key's byte; "k" is declared before "j" and moves on after the swap, as the
+// original's registers and order say.
 void DSProtect_RC4Init(DSProtectRC4 *rc4, const u8 *key, u32 keyLength) {
     u32 k = 0;
     u32 j = 0;
@@ -93,14 +102,12 @@ void DSProtect_RC4Init(DSProtectRC4 *rc4, const u8 *key, u32 keyLength) {
         rc4->state[i] = i;
     }
     for (i = 255; i >= 0; i--) {
-        u8 t = rc4->state[i];
-        j = (j + key[k] + t) & 0xFF;
+        j = (rc4->state[i] + (j + key[k])) & 0xFF;
+        DSProtect_SwapBytes(&rc4->state[j], &rc4->state[i]);
         k++;
         if (k >= keyLength) {
             k = 0;
         }
-        rc4->state[i] = rc4->state[j];
-        rc4->state[j] = t;
     }
 }
 
@@ -281,11 +288,13 @@ void DSProtect_ReadRom(void *dst, u32 src, u32 size) {
     OS_ReleaseLockID(lockId);
 }
 
-// A CRC-32 (polynomial 0xEDB88320) but for the test of the low bit, which is inverted. Not matched: the original XORs
-// the polynomial in four immediates in the loop where this source keeps it in a register.
+// A CRC-32 (polynomial 0xEDB88320) but for the test of the low bit, which is inverted. The original XORs the
+// polynomial in four immediates, one byte each, in the loop: written as one constant it is loaded from the pool and
+// kept in a register (and the one-instruction else is made conditional). So the source did not have it as one value:
+// here it is four, as the code has them. "i" is declared before "sum" for the original's registers.
 u32 DSProtect_CalcChecksum(const u8 *data, u32 size) {
-    u32 sum;
     int i;
+    u32 sum;
     DSPROTECT_BEGIN(0xEB000D2C, begin)
     sum = 0xFFFFFFFF;
     while (size-- != 0) {
@@ -294,7 +303,7 @@ u32 DSProtect_CalcChecksum(const u8 *data, u32 size) {
             if (sum & 1) {
                 sum >>= 1;
             } else {
-                sum = (sum >> 1) ^ 0xEDB88320;
+                sum = (sum >> 1) ^ 0xED000000 ^ 0x00B80000 ^ 0x00008300 ^ 0x00000020;
             }
         }
     }

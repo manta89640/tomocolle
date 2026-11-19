@@ -724,12 +724,13 @@ static inline void NFLi_PutTexPlttBase(GXDLInfo *dl, u32 addr, GXTexFmt texFmt) 
     G3C_TexPlttBase(dl, addr, texFmt);
 }
 
+// The three hair meshes keep the mapped vertex in an array of three fx16, not a VecFx16: an array passed by its
+// name does not mark the local as address-taken, so an inline's argument vertex[0] (an element at offset 0, a plain
+// read of an unaliased local) is substituted into the inline's body instead of bound to a temporary, and the vertex
+// call loads x after forming &ctx->dl (z and y are bound, last to first). The pre-RA scheduler keeps that order where
+// its pressure counter is at 14 (the textured meshes) and puts the three loads first where it is lower (the skin
+// mesh), which is why one source gave the original's two orders.
 // The hair's mesh of category 0x12, untextured in the favourite colour; hair types 0x22 and 0x39 take a texture
-// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
-// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
-// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
-// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -748,7 +749,7 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -822,23 +823,23 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
@@ -848,11 +849,6 @@ int NFLi_MakeFavoriteColorHairMesh(NFLMakeCtx *ctx) {
 #pragma pop
 
 // The hair's other mesh, for the types with a texture of their own
-// Not matching by one instruction: the original forms &ctx->dl between the loads of y and x for the first
-// vertex's G3C_Vtx, where ours forms it after them (NFLi_MakeHairSkinMesh, the same code, matches). Tried (round
-// 4): the 24 parameter orders and 63 parameter-type sets of an inline for that call, the call made directly or
-// through a vector pointer, casts on its arguments, the j == 0 test reversed or flattened, without the texture
-// coordinates, dropping any one of the eight pragmas or adding any other, and every 3.0 build.
 #pragma push
 #pragma opt_common_subs off
 #pragma opt_propagation off
@@ -871,7 +867,7 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -948,23 +944,23 @@ int NFLi_MakeHairMesh(NFLMakeCtx *ctx) {
             }
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
@@ -991,7 +987,7 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
     MtxFx43 mtx;
     const u8 *stream;
     VecFx16 prev;
-    VecFx16 vertex;
+    fx16 vertex[3];
     VecFx16 normal;
     int i;
     u8 polygons;
@@ -1047,23 +1043,23 @@ int NFLi_MakeHairSkinMesh(NFLMakeCtx *ctx) {
             n = NFLi_ReadU8(&stream) * 3;
             NFLi_MapVecFx16(obj, &normal, (const VecFx16 *)&normals[n]);
             NFLi_PutNormal(&ctx->dl, normal.x, normal.y, normal.z);
-            NFLi_MapVecFx16(obj, &vertex, (const VecFx16 *)&vertices[v]);
+            NFLi_MapVecFx16(obj, (VecFx16 *)vertex, (const VecFx16 *)&vertices[v]);
             if (j > 0) {
-                if (prev.x == vertex.x) {
-                    NFLi_PutVtxYZ(&ctx->dl, vertex.y, vertex.z);
-                } else if (prev.y == vertex.y) {
-                    NFLi_PutVtxXZ(&ctx->dl, vertex.x, vertex.z);
-                } else if (prev.z == vertex.z) {
-                    NFLi_PutVtxXY(&ctx->dl, vertex.x, vertex.y);
+                if (prev.x == vertex[0]) {
+                    NFLi_PutVtxYZ(&ctx->dl, vertex[1], vertex[2]);
+                } else if (prev.y == vertex[1]) {
+                    NFLi_PutVtxXZ(&ctx->dl, vertex[0], vertex[2]);
+                } else if (prev.z == vertex[2]) {
+                    NFLi_PutVtxXY(&ctx->dl, vertex[0], vertex[1]);
                 } else {
-                    NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                    NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
                 }
             } else {
-                NFLi_PutVtx(&ctx->dl, vertex.x, vertex.y, vertex.z);
+                NFLi_PutVtx(&ctx->dl, vertex[0], vertex[1], vertex[2]);
             }
-            prev.x = vertex.x;
-            prev.y = vertex.y;
-            prev.z = vertex.z;
+            prev.x = vertex[0];
+            prev.y = vertex[1];
+            prev.z = vertex[2];
         }
         G3C_End(&ctx->dl);
     }
@@ -3047,10 +3043,26 @@ void NFLi_PatchFacePart(NFLFace *obj, NFLPatch *patch, fx16 sin, fx16 cos, GXTex
 extern const u8 sNFLEyeTypeRotations[];
 extern const u8 sNFLEyebrowTypeRotations[];
 
-// The expressions, which NFL_SetExpression applies by rewriting the face parts' commands: kind 0,
-// the Mii's own eyes, eyebrows and mouth
+// An eye type's rotation from sNFLEyeTypeRotations, read through a pointer to its entry (kinds 1 and 4). Through the
+// pointer the load may alias the call's stack arguments, so the pre-RA scheduler stores texFmt only after it, as the
+// original does; indexed directly (the other kinds) the store goes first and the clamped rotation takes another register
+static inline int NFLi_GetTypeRotation(const u8 *table, int type) {
+    const u8 *entry = table + type;
+
+    return *entry;
+}
+
+// The expressions, which NFL_SetExpression applies by rewriting the face parts' commands. All seven were compiled
+// alike: optimisation level 2 without common subexpressions, propagation or dead-assignment elimination (the pragmas
+// around each). Under that one setting kinds 0, 2, 3, 5 and 6 match; the per-function settings found before (level 2
+// with common_subs off for 0 and 6, propagation off added for 2 and 3, dead_assignments off for 5) were each the part
+// of it that the function showed.
+// Kind 0: the Mii's own eyes, eyebrows and mouth
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression0(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3089,15 +3101,16 @@ void NFLi_ApplyExpression0(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 5: the eyes of shared slot 0 (eye type 26's texture), turned as the Mii's own: the rotation moved by
 // sNFLEyeTypeRotations as in kinds 1 and 4 and kept to 0..7 goes unused, and the eyes take the Mii's rotation.
-// The original keeps that clamp's compares and drops only its moves, which is what opt_dead_assignments off gives
-// with the clamp written on a copy (newRot) and the else adding d again.
+// The original keeps that clamp's compares and drops only its moves: the dead assignments are kept in the IR (the
+// pragma) and the clamp is written on a copy (newRot), the else adding d again, so only the moves die in the backend.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
 #pragma opt_dead_assignments off
 void NFLi_ApplyExpression5(NFLFace *obj) {
     fx16 sin;
@@ -3150,13 +3163,14 @@ void NFLi_ApplyExpression5(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_dead_assignments reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 6: the mouth of shared slot 1
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
+#pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression6(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3195,19 +3209,19 @@ void NFLi_ApplyExpression6(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[1].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 1: the eyes of shared slot 2 (eye type 48's texture), their rotation moved by sNFLEyeTypeRotations at the
 // rotation less at 48 and kept to 0..7.
-// Not matching yet: the code is the original's, but the clamped rotation is kept in r3 where the original reuses r4.
-// Tried (round 4): the clamp on a copy (as kinds 2, 3 and 5), with d a variable, through inline helpers; every order
-// of the first statements and of the declarations; the forms of idx, sin and cos; sin and cos computed in the call's
-// arguments; each opt_* pragma alone, opt_dead_assignments off, levels 1, 3 and 4. Behind the r3: the original loads
-// the call's stack arguments (texFmt, 2) and the sine table's address before rot's last use, which ours does after.
+// The final angle reads the eye type's rotation through NFLi_GetTypeRotation: measured with fin-sched's probe compiler,
+// the original's schedule of the block after the clamp is ours with one more dependence, the table load before the
+// store of texFmt to the stack, which a load through a pointer has and an indexed load of the array does not; that
+// order is what leaves the clamped rotation in the field's register (r4).
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression1(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3225,7 +3239,7 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + NFLi_GetTypeRotation(sNFLEyeTypeRotations, obj->exprFields[4]) - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[2].texAddr, obj->eyePlttAddr);
@@ -3253,15 +3267,15 @@ void NFLi_ApplyExpression1(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 2: the eyes turned 2 steps more (kept to 0..7), the eyebrows 2 more (to 0..11), the mouth of shared slot 3.
 // The eyebrow's sum is tested on a copy of the rotation and added again in the else: the original adds d twice.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression2(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3320,15 +3334,15 @@ void NFLi_ApplyExpression2(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[3].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 3: the eyes and eyebrows turned 2 steps less, the mouth of shared slot 4; an eyebrow rotation past 11 is set
 // to 0
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression3(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3387,16 +3401,15 @@ void NFLi_ApplyExpression3(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, sNFLWork->sharedTex[4].texAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 // Kind 4: the face's own second eye texture (eye type 0x31), the rotation moved as kind 1's by the table at 49, the
-// eyebrows placed as for eyebrowY - 2.
-// Not matching yet: as NFLi_ApplyExpression1.
+// eyebrows placed as for eyebrowY - 2. The type's rotation is read as in kind 1.
+#pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 void NFLi_ApplyExpression4(NFLFace *obj) {
     fx16 sin;
     fx16 cos;
@@ -3414,7 +3427,7 @@ void NFLi_ApplyExpression4(NFLFace *obj) {
     } else if (rot > 7) {
         rot = 7;
     }
-    idx = (u16)(((rot + sNFLEyeTypeRotations[obj->exprFields[4]] - 0x20) << 16) / 32);
+    idx = (u16)(((rot + NFLi_GetTypeRotation(sNFLEyeTypeRotations, obj->exprFields[4]) - 0x20) << 16) / 32);
     sin = (fx16)FX_SinIdx(idx);
     cos = (fx16)FX_CosIdx(idx);
     NFLi_PatchFacePart(obj, &obj->eyePatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->expr4EyeTexAddr, obj->expr4EyePlttAddr);
@@ -3442,9 +3455,7 @@ void NFLi_ApplyExpression4(NFLFace *obj) {
     cos = (fx16)FX_CosIdx(0);
     NFLi_PatchFacePart(obj, &obj->mouthPatch, sin, cos, obj->texFmt, GX_TEXSIZE_S32, GX_TEXSIZE_T32, obj->mouthTexAddr, obj->mouthPlttAddr);
 }
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma optimization_level reset
+#pragma pop
 
 int NFLi_PrepareFacePartTextures(NFLMakeCtx *ctx);
 int NFLi_AllocExpressionTextures(NFLMakeCtx *ctx);
@@ -4743,43 +4754,43 @@ typedef struct NFLTexBank {
 
 extern const NFLTexBank sNFLTexBankParts[];
 
-// Copies size bytes of texture image to offset of the texture slots, through the LCDC, as GX_LoadTex does (and in
-// its shape: the first part's base, the second's, the first's size, the copy split over the two parts)
-// Not matching: the instructions and callee-saved registers are the original's, but the original loads the fields'
-// addresses in the order second, first, size (its literal pool +2, +0, +4), which with any statement order that loads
-// them so gives the size and first base the other two registers; here the size is read first (pool +2, +4, +0).
+// Copies size bytes of texture image to offset of the texture slots, through the LCDC: NitroSDK's GX_LoadTexEx line for
+// line (its three bases read in its order, the copy split over the two parts the same way), with CPU copies and
+// cache flushes where the SDK uses DMA
 int NFLi_CopyToTexBank(int bank, const void *src, u32 offset, u32 size) {
-    u32 szBlk1 = sNFLTexBankParts[bank].firstSize;
-    u32 blk2 = sNFLTexBankParts[bank].secondBase << 12;
-    u32 blk1 = sNFLTexBankParts[bank].firstBase;
-    u32 end = offset + size;
-    void *temp;
+    u32 base1, base2, szBlk1;
+    void *pLCDC;
     int result;
 
-    result = NFLi_CheckTexBank(bank, offset, end);
+    base1 = (u32)(sNFLTexBankParts[bank].firstBase << 12);
+    base2 = (u32)(sNFLTexBankParts[bank].secondBase << 12);
+    szBlk1 = (u32)(sNFLTexBankParts[bank].firstSize << 12);
+
+    result = NFLi_CheckTexBank(bank, offset, offset + size);
     if (result != 0) {
         return result;
     }
-    if (blk2 == 0) {
-        temp = (void *)(offset + (blk1 << 12));
-    } else if (end < szBlk1 << 12) {
-        temp = (void *)(offset + (blk1 << 12));
-    } else if (offset >= szBlk1 << 12) {
-        temp = (void *)(blk2 + offset - (szBlk1 << 12));
+    if (0 == base2) {
+        pLCDC = (void *)(base1 + offset);
     } else {
-        void *temp2 = (void *)blk2;
-        u32 temp1 = (szBlk1 << 12) - offset;
+        if (offset + size < szBlk1) {
+            pLCDC = (void *)(base1 + offset);
+        } else if (offset >= szBlk1) {
+            pLCDC = (void *)(base2 + offset - szBlk1);
+        } else {
+            void *pLCDC2 = (void *)base2;
+            u32 sz = szBlk1 - offset;
+            pLCDC = (void *)(base1 + offset);
 
-        temp = (void *)(offset + (blk1 << 12));
-        MIi_CpuCopy32(src, temp, temp1);
-        DC_FlushRange(temp, temp1);
-        size -= temp1;
-        MIi_CpuCopy32((const u8 *)src + temp1, temp2, size);
-        DC_FlushRange(temp2, size);
-        return 0;
+            MIi_CpuCopy32(src, pLCDC, sz);
+            DC_FlushRange(pLCDC, sz);
+            MIi_CpuCopy32((u8 *)src + sz, pLCDC2, size - sz);
+            DC_FlushRange(pLCDC2, size - sz);
+            return 0;
+        }
     }
-    MIi_CpuCopy32(src, temp, size);
-    DC_FlushRange(temp, size);
+    MIi_CpuCopy32(src, pLCDC, size);
+    DC_FlushRange(pLCDC, size);
     return 0;
 }
 

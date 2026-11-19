@@ -233,39 +233,39 @@ u8 CharacterSave::GetAffinity(int index) {
     return mBody.mRecord.mRelationMeter[index];
 }
 
-u8 CharacterSave::GetEvent() {
+u8 CharacterSave::GetLongActState() {
     return mBody.mRecord.mLongActState;
 }
 
-u8 CharacterSave::GetEventPartner() {
+u8 CharacterSave::GetLongActPartner() {
     return mBody.mRecord.mLongActPartner;
 }
 
-s64 CharacterSave::GetEventEnd() {
+s64 CharacterSave::GetLongActEnd() {
     return mBody.mRecord.mLongActEnd;
 }
 
-s64 CharacterSave::GetAwayUntil() {
+s64 CharacterSave::GetTroubleEnd() {
     return mBody.mRecord.mTroubleEnd;
 }
 
-s64 CharacterSave::GetUnknown228() {
+s64 CharacterSave::GetTroubleStart() {
     return mBody.mRecord.mTroubleStart;
 }
 
-u8 CharacterSave::GetMoodLocked() {
+u8 CharacterSave::GetTroubleState() {
     return mBody.mRecord.mTroubleState;
 }
 
-u8 CharacterSave::GetUnknown23B() {
+u8 CharacterSave::GetTroubleProgress() {
     return mBody.mRecord.mTroubleProgress;
 }
 
-u8 CharacterSave::GetUnknown226() {
+u8 CharacterSave::GetTroubleId() {
     return mBody.mRecord.mTroubleId;
 }
 
-u8 CharacterSave::GetUnknown227() {
+u8 CharacterSave::GetTroubleCategory() {
     return mBody.mRecord.mTroubleCategory;
 }
 

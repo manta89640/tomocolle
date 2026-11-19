@@ -207,15 +207,19 @@ extern "C" void MiiTransfer_InitSession(void) {
     sRecvPacket.unk1 = 0;
 }
 
-// The session's update. DOES NOT MATCH, by five branches only: every instruction and register is the ROM's, but in the
-// jump table of case 3 the unlisted states branch to the function's end where the original branches to the inner
-// switch's break (0x02077A2C); other case orders and fall-throughs tried give the same. Compiled at optimization level
-// 2 without propagation, as the ROM has it: loops neither rotated nor strength reduced, the 0 for WH_StartScan kept in
-// r4 (a variable, i, shared with the loop and the length), and the copy of the address from a local initialiser.
+// The session's update. Compiled at optimization level 2 without propagation, as the ROM has it: loops neither rotated
+// nor strength reduced, the 0 for WH_StartScan kept in r4 (a variable, i, shared with the loop and the length), and the
+// copy of the address from a local initialiser. Dead assignments are kept too (opt_dead_assignments off): in the jump
+// table of case 3 the unlisted states go to a lone branch after WH_EndScan where every listed case goes straight to
+// the end. The IR's jump chaining (IroJump.c's chain_label) retargets a label only when its block is `label; goto`.
+// The default's block held a dead assignment then, kept by the pragma until the backend deleted it, and so was not
+// chained. What the dead statement was is not known (a value for a debug print the final ROM leaves out, perhaps):
+// any dead assignment gives the same code. The same setting keeps the stores into userGameInfo, which nothing reads.
 #pragma optimization_level 2
 #pragma opt_propagation off
+#pragma opt_dead_assignments off
 extern "C" void MiiTransfer_UpdateSession(void) {
-    volatile u8 userGameInfo[0x16];
+    u8 userGameInfo[0x16];
     int i;
 
     switch (sSessionState) {
@@ -267,6 +271,10 @@ extern "C" void MiiTransfer_UpdateSession(void) {
         case WH_SYSSTATE_SCANNING:
             WH_EndScan();
             break;
+        default: {
+            int state = sSessionState; // dead: see above
+            break;
+        }
         case WH_SYSSTATE_BUSY:
             break;
         }
@@ -312,6 +320,7 @@ extern "C" void MiiTransfer_UpdateSession(void) {
         sSessionState = 6;
     }
 }
+#pragma opt_dead_assignments reset
 #pragma optimization_level reset
 
 extern "C" void MiiTransfer_UpdateSessionReceive(void) {
