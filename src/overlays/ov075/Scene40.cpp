@@ -2478,6 +2478,87 @@ void Scene40TouchPage::UpdatePress() {
     }
 }
 
+// The stylus held on the character: a stroke on the face (down: the character is patted and the camera turns to
+// it; up: it is tickled), a long rub on the face, the scene's sprite following the stylus on the face or the head;
+// beside the character, its head following the stylus
+void Scene40TouchPage::UpdateHold() {
+    BOOL handled = FALSE;
+    if (mTouch->mPart & Scene40CharacterTouch::PART_FACE) {
+        switch (mTouch->mStroke) {
+        case 1: {
+            VecFx32 pos = mCharacter->CharacterModel::mPos;
+            if ((mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) && pos.x > -0x3800 && pos.x < 0x3800 &&
+                pos.z > -0x3800 && pos.z < 0x3800) {
+                gSoundManager.StartSeqArc(1, 35, 2);
+                mCharacter->SetState(1);
+                mCharacter->FaceCamera();
+                mCharacter->AddUnknown1C4Once0();
+                mContext->mCamera->SetState(0);
+                Sprite_SetSequence(mContext->mSprite, 27, TRUE);
+                SetState(STATE_3);
+                handled = TRUE;
+            }
+            break;
+        }
+        case 2:
+            if (mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) {
+                gSoundManager.StartSeqArc(1, 35, 5);
+                mCharacter->SetState(3);
+                mCharacter->AddUnknown1C4Once0();
+                SetState(STATE_4);
+                handled = TRUE;
+            }
+            break;
+        }
+        if ((mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) && !handled && mTracker->mDistance > 80) {
+            if (mCharacter->mState == 0) {
+                mCharacter->SetState(7);
+                SetState(STATE_5);
+                handled = TRUE;
+            } else if (mCharacter->mState == 6) {
+                mCharacter->SetState(8);
+                SetState(STATE_5);
+                handled = TRUE;
+            }
+        }
+        mContext->mSprite->mVisible = TRUE;
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_HEAD) {
+        mContext->mSprite->mVisible = TRUE;
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_BODY) {
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        mContext->mSprite->mVisible = FALSE;
+    } else if (mTouch->mPart & Scene40CharacterTouch::PART_NONE) {
+        Sprite_SetSequence(mContext->mSprite, 26, TRUE);
+        mContext->mSprite->mVisible = FALSE;
+    }
+    if (handled) {
+        return;
+    }
+    if ((u32)(mCharacter->mState - 10) <= 12 - 10) {
+        VecFx32 target;
+        SetVecFields(&target, mTouch->mDepths[2].mHold);
+        mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+        if (mTracker->mHeldFrames < 10) {
+            mCharacter->SetState(11);
+        } else {
+            mCharacter->SetState(12);
+        }
+    } else if ((u32)(mCharacter->mState - 13) <= 15 - 13) {
+        VecFx32 target;
+        SetVecFields(&target, mTouch->mDepths[2].mHold);
+        mCharacter->TurnHeadTo(&target, 0x2000, 0x3F00);
+        if (mTracker->mHeldFrames < 10) {
+            mCharacter->SetState(14);
+        } else {
+            mCharacter->SetState(15);
+        }
+    }
+}
+
 // Does nothing (the idle state calls it last)
 void Scene40TouchPage::Unused02151ab0() {}
 
