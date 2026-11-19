@@ -2189,8 +2189,8 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     mMenuHidden = FALSE;
     mActive = TRUE;
     mUnknown60 = 0;
-    mUnknown64 = 0;
-    mUnknown68 = 0;
+    mRubSoundX = FALSE;
+    mRubSoundY = FALSE;
     mMenu = menu;
     RefreshMenu();
 }
@@ -2213,8 +2213,8 @@ void Scene40TouchPage::Update() {
     case STATE_PRESSED_DOWN:
         UpdatePressedDown();
         break;
-    case STATE_5:
-        Update5();
+    case STATE_RUBBED:
+        UpdateRubbed();
         break;
     case STATE_WAIT_IDLE:
         UpdateWaitIdle();
@@ -2513,11 +2513,11 @@ void Scene40TouchPage::UpdateHold() {
         if ((mTouch->mPartAtPress & Scene40CharacterTouch::PART_FACE) && !handled && mTracker->mDistance > 80) {
             if (mCharacter->mState == 0) {
                 mCharacter->SetState(7);
-                SetState(STATE_5);
+                SetState(STATE_RUBBED);
                 handled = TRUE;
             } else if (mCharacter->mState == 6) {
                 mCharacter->SetState(8);
-                SetState(STATE_5);
+                SetState(STATE_RUBBED);
                 handled = TRUE;
             }
         }
@@ -2729,6 +2729,67 @@ void Scene40TouchPage::UpdatePressedDown() {
         mCharacter->SetState(0);
         mContext->mCamera->SetState(1);
         SetState(STATE_IDLE);
+    }
+}
+
+// The face rubbed: the head wobbles with each move of the stylus, with a sound for a fast move across or up and
+// down; moved onto the body or beside the character, or let go, the rub ends (in the character's state 9, the menu
+// shown, it may end in a date to pat it again: the talk page with result 2)
+void Scene40TouchPage::UpdateRubbed() {
+    BOOL done = FALSE;
+    if (mTracker->mHeld && mTouching) {
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_BODY) || (mTouch->mPart & Scene40CharacterTouch::PART_NONE)) {
+            done = TRUE;
+        } else {
+            int dx = gTouchInput.mPoint.x - gTouchInput.mLastPoint.x;
+            int dy = gTouchInput.mPoint.y - gTouchInput.mLastPoint.y;
+            if ((dx < -1 || dx > 1)) {
+                mCharacter->mHeadRollNow = -dx * 100;
+            }
+            if ((dy < -1 || dy > 1)) {
+                mCharacter->mHeadPitchNow = dy * 100 + 0x800;
+            }
+            if ((dx < -3 || dx > 3) && !mRubSoundX) {
+                mRubSoundX = TRUE;
+                gSoundManager.StartSeqArc(1, 35, 6);
+            } else if (dx >= -2 && dx <= 2) {
+                mRubSoundX = FALSE;
+            }
+            // (dx == 0 gives one compare; the original tests the two sides)
+            if ((dy < -4 || dy > 4) && dx <= 0 && dx >= 0 && !mRubSoundY) {
+                mRubSoundY = TRUE;
+                gSoundManager.StartSeqArc(1, 35, 6);
+            } else if (dy >= -3 && dy <= 3) {
+                mRubSoundY = FALSE;
+            }
+        }
+    } else if (mTracker->mReleased) {
+        done = TRUE;
+    }
+    if (done) {
+        mTouching = FALSE;
+        mContext->mSprite->mVisible = FALSE;
+        mContext->mCamera->SetState(1);
+        mRubSoundX = FALSE;
+        mRubSoundY = FALSE;
+        if (mCharacter->mState == 9 && !mMenuHidden) {
+            mCharacter->AddUnknown1C4Once1();
+            if (mCharacter->UpdatePatDate()) {
+                mContext->mUnknown18 = 10;
+                mContext->mUnknown14 = 12;
+                mMenu->SetEnabled(FALSE);
+                mResult = 2;
+                SetState(STATE_DONE);
+            } else {
+                mCharacter->SetState(53);
+                SetState(STATE_IDLE);
+            }
+        } else {
+            mCharacter->SetState(0);
+            SetState(STATE_IDLE);
+        }
     }
 }
 

@@ -52,7 +52,7 @@ public:
         STATE_IDLE = 2,           // The menu, and the stylus on the character
         STATE_DRAGGED = 3,        // The character hangs from the stylus by its head
         STATE_PRESSED_DOWN = 4,   // The character pressed down to the floor under the stylus
-        STATE_5 = 5,
+        STATE_RUBBED = 5,         // The face rubbed: the head wobbles with the stylus
         STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
         STATE_7 = 7,
         STATE_8 = 8,
@@ -84,7 +84,7 @@ public:
     void Unused02151ab0();
     void UpdateDragged();
     void UpdatePressedDown();
-    void Update5();
+    void UpdateRubbed();
     void UpdateWaitIdle();
     void Update7();
     void Update8();
@@ -119,8 +119,8 @@ public:
     /* 0x24 */ BOOL mMenuHidden;
     /* 0x28 */ Scene40Gift mGift; // What the character is given after a scene (PlaceGift)
     /* 0x60 */ int mUnknown60;
-    /* 0x64 */ int mUnknown64;
-    /* 0x68 */ int mUnknown68;
+    /* 0x64 */ BOOL mRubSoundX; // The rub's sound played for a move across, until the stylus slows down
+    /* 0x68 */ BOOL mRubSoundY; // The same for a move up or down
     /* 0x6C */ u8 mUnknown6C[0x4];
     /* 0x70 */ Scene40MenuBar *mMenu;
     /* 0x74 */ Scene40Touch *mTracker;
