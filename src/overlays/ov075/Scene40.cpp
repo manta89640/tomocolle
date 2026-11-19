@@ -11859,6 +11859,52 @@ void Scene40Motion::UpdateAtRest(VecFx32 *pos, VecFx32 *velocity) {
     mAtRest = atRest;
 }
 
+// The character's fall: nothing while it is held or at rest. It comes to rest when it reaches the floor going down;
+// off the room's walls (14 units from the middle, in x and in z) it bounces back with a quarter of its speed, and
+// it gains 100 downwards a frame.
+void Scene40Physics::UpdateCharacter() {
+    if (mCharacter->mMotion.mHeld) {
+        return;
+    }
+    VecFx32 pos = mCharacter->mPos;
+    VecFx32 velocity = mCharacter->mMotion.mVelocity;
+    mCharacter->mMotion.UpdateAtRest(&pos, &velocity);
+    if (mCharacter->mMotion.mAtRest) {
+        return;
+    }
+    VEC_Add(&pos, &velocity, &pos);
+    if (pos.y <= 0 && velocity.y <= 0) {
+        mCharacter->mMotion.mAtRest = TRUE;
+        VecFx32 zero = {0, 0, 0};
+        velocity = zero;
+        pos.y = 0;
+    } else {
+        if (pos.x >= 0x3800 && velocity.x > 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.x = -velocity.x;
+            pos.x = 0x3800;
+        }
+        if (pos.x <= -0x3800 && velocity.x < 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.x = -velocity.x;
+            pos.x = -0x3800;
+        }
+        if (pos.z >= 0x3800 && velocity.z > 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.z = -velocity.z;
+            pos.z = 0x3800;
+        }
+        if (pos.z <= -0x3800 && velocity.z < 0) {
+            ScaleVec(0x400, &velocity, &velocity);
+            velocity.z = -velocity.z;
+            pos.z = -0x3800;
+        }
+        velocity.y -= 100;
+    }
+    mCharacter->SetPos(pos);
+    mCharacter->mMotion.SetVelocity(velocity);
+}
+
 // The item models that are (or are not) visible
 int Scene40Physics::GetItems(Scene40ItemModel **items, int *count, BOOL visible) {
     *count = 0;
