@@ -113,8 +113,7 @@ public:
     /* 0x1C */ BOOL mActive; // The pages' SetActive sets it
     /* 0x20 */ int mUnknown20;
     /* 0x24 */ BOOL mMenuHidden;
-    /* 0x28 */ Scene40Items mItems;
-    /* 0x54 */ u8 mUnknown54[0xC];
+    /* 0x28 */ Scene40Gift mGift; // What the character is given after a scene (PlaceGift)
     /* 0x60 */ int mUnknown60;
     /* 0x64 */ int mUnknown64;
     /* 0x68 */ int mUnknown68;

@@ -78,26 +78,26 @@ static const int sFadePlanes[4][4] = {{0, 16191, 16191, 16191}, {16191, 0, 16128
 
 // The scenes after which the visit starts with the pages' entry 24, and what the touch page does for each
 static const Scene40PresentEntry sPresentScenes[20] = {
-    {24, 2, 0, 9, 0, 0, 1, {0, 0}},
-    {28, 2, 0, 166, 0, 0, 1, {0, 0}},
-    {43, 2, 1, 14, 1, 0, 1, {0, 0}},
-    {50, 4, 0, 218, 0, 0, 1, {0, 0}},
-    {54, 1, 1, 24, 1, 0, 1, {0, 0}},
-    {55, 3, 0, 169, 0, 0, 1, {0, 0}},
-    {58, 1, 0, 35, 0, 0, 1, {0, 0}},
-    {61, 2, 1, 104, 0, 0, 1, {0, 0}},
-    {76, 2, 0, 167, 0, 0, 1, {0, 0}},
-    {77, 2, 0, 151, 0, 0, 1, {0, 0}},
-    {80, 1, 0, 0, 0, 1, 1, {0, 0}},
-    {82, 1, 0, 164, 0, 0, 1, {0, 0}},
-    {118, 1, 0, 125, 0, 0, 1, {0, 0}},
-    {123, 3, 0, 220, 0, 0, 1, {0, 0}},
-    {136, 1, 0, 219, 0, 0, 1, {0, 0}},
-    {139, 1, 0, 189, 0, 0, 1, {0, 0}},
-    {141, 1, 0, 153, 0, 0, 1, {0, 0}},
-    {143, 5, 1, 0, 0, 1, 1, {0, 0}},
-    {144, 5, 1, 0, 0, 1, 1, {0, 0}},
-    {145, 2, 0, 0, 0, 1, 1, {0, 0}},
+    {24, 2, 0, 9, 0, 1, {0, 0}},
+    {28, 2, 0, 166, 0, 1, {0, 0}},
+    {43, 2, 1, 270, 0, 1, {0, 0}},
+    {50, 4, 0, 218, 0, 1, {0, 0}},
+    {54, 1, 1, 280, 0, 1, {0, 0}},
+    {55, 3, 0, 169, 0, 1, {0, 0}},
+    {58, 1, 0, 35, 0, 1, {0, 0}},
+    {61, 2, 1, 104, 0, 1, {0, 0}},
+    {76, 2, 0, 167, 0, 1, {0, 0}},
+    {77, 2, 0, 151, 0, 1, {0, 0}},
+    {80, 1, 0, 0, 1, 1, {0, 0}},
+    {82, 1, 0, 164, 0, 1, {0, 0}},
+    {118, 1, 0, 125, 0, 1, {0, 0}},
+    {123, 3, 0, 220, 0, 1, {0, 0}},
+    {136, 1, 0, 219, 0, 1, {0, 0}},
+    {139, 1, 0, 189, 0, 1, {0, 0}},
+    {141, 1, 0, 153, 0, 1, {0, 0}},
+    {143, 5, 1, 0, 1, 1, {0, 0}},
+    {144, 5, 1, 0, 1, 1, {0, 0}},
+    {145, 2, 0, 0, 1, 1, {0, 0}},
 };
 
 // The scene's two message windows' rectangles
@@ -2361,6 +2361,53 @@ void Scene40TouchPage::SetState(int state) {
     mStep = 0;
     mFrames = 0;
     mUnknown10 = 0;
+}
+
+// Sets a vector field by field, from a copy
+static inline void SetVecFields(VecFx32 *dst, VecFx32 src) {
+    dst->x = src.x;
+    dst->y = src.y;
+    dst->z = src.z;
+}
+
+// Coming back from a scene that gives the character something (sPresentScenes): the gift, taken by one of the
+// scene's item models, placed a little to the side of the character and in front of it, and held there
+void Scene40TouchPage::PlaceGift() {
+    int index = FindPresentScene(gSceneManager.mPreviousSceneId);
+    mUnknown60 = FALSE;
+    if (sPresentScenes[index].mGiftKind == 2) {
+        return;
+    }
+    mUnknown60 = TRUE;
+    int kind = 1;
+    if (sPresentScenes[index].mGiftKind == 0) {
+        kind = 0;
+    }
+    if (!sPresentScenes[index].mFromMemory) {
+        mGift.Set(kind, sPresentScenes[index].mItem);
+    } else {
+        mGift.Set(kind, gSceneMemory.mUnknown2C[0]);
+    }
+    mContext->mPhysics->TakeFreeItem(&mContext->mItemModels);
+    mContext->mItemModels->ChangeItem(mGift.mMessage);
+    mContext->mItemModels->mVisible = TRUE;
+    mContext->mItemModels->mMotion.mHeld = TRUE;
+    mContext->mItemModels->mMotion.mOffered = TRUE;
+
+    VecFx32 placed, sideUnit, front, side;
+    const VecFx32 up = {0, FX32_ONE, 0};
+    VecFx32 toCharacter;
+    VecFx32 position = mCharacter->CharacterModel::mPos;
+    VEC_Subtract(&position, &gCamera.mEye, &toCharacter);
+    VEC_CrossProduct(&up, &toCharacter, &side);
+    VEC_Normalize(&side, &sideUnit);
+    ScaleVec(FX32_ONE, &sideUnit, &sideUnit);
+    VEC_Add(&sideUnit, &position, &placed);
+    VEC_Normalize(&toCharacter, &front);
+    ScaleVec(-FX32_CONST(1.2), &front, &front);
+    VEC_Add(&front, &placed, &placed);
+    placed.y = 0;
+    SetVecFields(&mContext->mItemModels->mPosition, placed);
 }
 
 BOOL Scene40TouchPage::IsCharacterMood0Or1() {

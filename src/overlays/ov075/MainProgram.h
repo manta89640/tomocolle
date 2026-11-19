@@ -84,11 +84,10 @@ struct Scene40SceneEntry {
 struct Scene40PresentEntry {
     /* 0x0 */ int mSceneId;
     /* 0x4 */ u8 mUnknown4;
-    /* 0x5 */ u8 mUnknown5;
-    /* 0x6 */ u8 mUnknown6;
-    /* 0x7 */ u8 mUnknown7;
-    /* 0x8 */ u8 mUnknown8;
-    /* 0x9 */ u8 mUnknown9;
+    /* 0x5 */ u8 mGiftKind;  // 0 goods, 1 clothes (Scene40Gift's kind), 2 none
+    /* 0x6 */ u16 mItem;     // The goods or clothes given, unless mFromMemory
+    /* 0x8 */ u8 mFromMemory; // The item is the one the scene left in gSceneMemory.mUnknown2C[0]
+    /* 0x9 */ u8 mUnknown9;   // 1: CameFromSceneOfPresentTable counts the scene
     /* 0xA */ u8 mUnknownA[2];
 }; // 0xC
 
