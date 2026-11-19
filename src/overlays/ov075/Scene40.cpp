@@ -527,6 +527,109 @@ int Scene40::GetLayout(int request) {
     return layout;
 }
 
+// Loads the upper screen's backgrounds and sprites of a layout (request 1 to 4: LAYOUT_SMT_UP to LAYOUT_SMT_DOWN)
+// over the state InitLowerScreen saved, and returns the layout
+int Scene40::LoadLayout(int request) {
+    int layout = LAYOUT_SMT_UP;
+    switch (request) {
+    case 0:
+        break;
+    case 1:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_up.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_up.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_up.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1111);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        PaletteLoader_SetBackdrop(&gPaletteLoader, 0, 0x101);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_up.nce", 0x1000, 1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_up.ncg", 0x1000, 0, 0, 0, -1);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_up.ncl", 0x1000, -1, -1, -1);
+        gScreenControl.mUnknown44 = 0;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_SMT_UP;
+        break;
+    case 2:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/BG_list.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/BG_list.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_list.nsc", 0x100, 0, 0, 0, 0, -1);
+        switch (mPages.mListFrame) {
+        case 0:
+            ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_Touch_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 1:
+            ScreenLoader_LoadFile(&gScreenLoader, "LTL:/BG_Touchtxt_frame.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        }
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x200, 2);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        gScreenControl.Set(0x1311);
+        PaletteLoader_LoadFile(&gPaletteLoader, "LTL:/Obj_list.ncl", 0x1000, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "LTL:/Obj_list.ncg", 0x1000, 0, 0, 0, -1);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "LTL:/Obj_Touch_list.nce", 0x1000, 2);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_LIST;
+        break;
+    case 3:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "KBD:/keyboardColor.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "KBD:/bg_keyboard.ncg", 0x2F00, 0, 0, 0, -1);
+        switch (mPages.mKeyboardLayout) {
+        case 0:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_10.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 1:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_16.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 2:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_6.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 3:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_8.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        case 4:
+            ScreenLoader_LoadFile(&gScreenLoader, "KBD:/bg_keyboard_Q.nsc", 0x200, 0, 0, 0, 0, -1);
+            break;
+        }
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 2);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x200, 3);
+        G2S_SetBG0Control(GX_BG_SCRSIZE_TEXT_256x256, GX_BG_COLORMODE_16, GX_BG_SCRBASE_0x3000,
+                          GX_BG_CHARBASE_0x08000, GX_BG_EXTPLTT_01);
+        gScreenControl.Set(0x1311);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_KEYBOARD;
+        break;
+    case 4:
+        GraphicsManager_RestoreState(gGraphicsManager, mSavedGraphics, 0x3F00);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x100, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/BG_down.ncl", 0x2F00, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/BG_down.ncg", 0x2F00, 0, 0, 0, -1);
+        ScreenLoader_LoadFile(&gScreenLoader, "SMT:/BG_down.nsc", 0x100, 0, 0, 0, 0, -1);
+        gScreenControl.Set(0x1111);
+        ScreenLoader_SetPriority(&gScreenLoader, 0x100, 3);
+        ScreenLoader_SetScrollX(&gScreenLoader, 0x2F00, 0);
+        ScreenLoader_SetScrollY(&gScreenLoader, 0x2F00, 0);
+        PaletteLoader_LoadFile(&gPaletteLoader, "SMT:/Obj_present.ncl", 0x1000, -1, -1, -1);
+        VramTransferQueue_LoadFile(&gVramTransferQueue, "SMT:/Obj_present.ncg", 0x1000, 0, 0, 0, -1);
+        ObjResourceManager_LoadCell(&gObjResourceManager, "SMT:/Obj_present.nce", 0x1000, 4);
+        gScreenControl.mUnknown44 = 1;
+        gScreenControl.mUnknown44Changed = TRUE;
+        layout = LAYOUT_SMT_DOWN;
+        break;
+    }
+    return layout;
+}
+
 // For the first nine frames the room and the character are updated from here as well
 void Scene40::Draw() {
     MessageWindow_Draw(&mWindows[0]);
