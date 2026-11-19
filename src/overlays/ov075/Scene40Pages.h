@@ -20,33 +20,37 @@ class Scene40Pages {
 public:
     // The pages (mPage), by their objects
     enum Page {
-        PAGE_TOUCH = 0,  // mTouchPage
-        PAGE_1 = 1,      // +0x180
-        PAGE_2 = 2,      // +0x1D94
-        PAGE_3 = 3,      // +0x1E1C
-        PAGE_LIST_4 = 4, // mListPage, 4 to 7
-        PAGE_LIST_5 = 5,
-        PAGE_LIST_6 = 6,
-        PAGE_LIST_7 = 7,
-        PAGE_8 = 8,      // +0x1AAB8
-        PAGE_9 = 9,      // +0x214B0
+        PAGE_TOUCH = 0,               // mTouchPage
+        PAGE_TALK = 1,                // mTalkPage
+        PAGE_GIFT = 2,                // mGiftPage: the character's reaction to a gift
+        PAGE_PRESENT = 3,             // mPresentPage: a present for the player
+        PAGE_LIST_GIVE = 4,           // mListPage, in the mode of the page less 4
+        PAGE_LIST_GIVE_FROM_SHOP = 5,
+        PAGE_LIST_DRESS = 6,
+        PAGE_LIST_DRESS_2 = 7,
+        PAGE_KEYBOARD = 8,            // mKeyboardPage
+        PAGE_OPTIONS = 9,             // mOptionPage
     };
 
     void Init(int *mainCharOffset, int *subCharOffset, Scene40Context *context);
     void Update();
     void UpdateTouchPage();
-    void UpdatePage1();
-    void UpdatePage2();
-    void UpdatePage3();
-    void UpdatePage4();
-    void UpdatePage5();
-    void UpdatePage6();
-    void UpdatePage7();
-    void UpdatePage8();
-    void UpdatePage9();
+    void UpdateTalkPage();
+    void UpdateGiftPage();
+    void UpdatePresentPage();
+    void UpdateListGivePage();
+    void UpdateListGiveFromShopPage();
+    void UpdateListDressPage();
+    void UpdateListDress2Page();
+    void UpdateKeyboardPage();
+    void UpdateOptionPage();
     void Start(int entry);
     void SetActive(BOOL active);
     void HideMenu(BOOL hide);
+    BOOL IsWishedGoods(SavedCharacter *character, Scene40Gift *gift);
+    BOOL IsWishedClothes(SavedCharacter *character, Scene40Gift *gift);
+    void GetGiftReaction(Scene40Gift *gift, int *reaction, int *value);
+    BOOL TakeGameResult();
     void Draw();
 
     /* 0x00000 [0x30B50] */ BOOL mWaitingForLayout; // The scene clears it when it has shown the layout asked for

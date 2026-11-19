@@ -889,36 +889,640 @@ void Scene40Pages::Update() {
         case PAGE_TOUCH:
             UpdateTouchPage();
             break;
-        case PAGE_1:
-            UpdatePage1();
+        case PAGE_TALK:
+            UpdateTalkPage();
             break;
-        case PAGE_2:
-            UpdatePage2();
+        case PAGE_GIFT:
+            UpdateGiftPage();
             break;
-        case PAGE_3:
-            UpdatePage3();
+        case PAGE_PRESENT:
+            UpdatePresentPage();
             break;
-        case PAGE_LIST_4:
-            UpdatePage4();
+        case PAGE_LIST_GIVE:
+            UpdateListGivePage();
             break;
-        case PAGE_LIST_5:
-            UpdatePage5();
+        case PAGE_LIST_GIVE_FROM_SHOP:
+            UpdateListGiveFromShopPage();
             break;
-        case PAGE_LIST_6:
-            UpdatePage6();
+        case PAGE_LIST_DRESS:
+            UpdateListDressPage();
             break;
-        case PAGE_LIST_7:
-            UpdatePage7();
+        case PAGE_LIST_DRESS_2:
+            UpdateListDress2Page();
             break;
-        case PAGE_8:
-            UpdatePage8();
+        case PAGE_KEYBOARD:
+            UpdateKeyboardPage();
             break;
-        case PAGE_9:
-            UpdatePage9();
+        case PAGE_OPTIONS:
+            UpdateOptionPage();
             break;
         }
     }
     mMenuBar.Update();
+}
+
+// The touch page: when it is done, what it asked for (its mResult)
+void Scene40Pages::UpdateTouchPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mTouchPage.Update();
+    if (mTouchPage.mLastState != Scene40TouchPage::STATE_DONE) {
+        return;
+    }
+    switch (mTouchPage.mResult) {
+    case 0:
+        if (mContext->mSceneId == 0x40) {
+            mTalkPage.mTopic = 0;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        } else if (mContext->mSceneId == 0x6C) {
+            mTalkPage.mTopic = 4;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        }
+        mTouchPage.SetMenuDisabled(TRUE);
+        break;
+    case 1:
+        if (mContext->mSceneId == 0x40) {
+            mTalkPage.mTopic = 0;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        } else if (mContext->mSceneId == 0x6C) {
+            mTalkPage.mTopic = 4;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mNextPage = PAGE_TALK;
+        }
+        break;
+    case 2:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(mContext->mUnknown14, mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 3:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 6;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 4:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mTouchPage.SetMenuDisabled(TRUE);
+        mGiftPage.mReaction = 9;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 5:
+        mListPage.mMode = Scene40ListPage::MODE_GIVE;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 0;
+        mNextPage = PAGE_LIST_GIVE;
+        break;
+    case 6:
+        mListPage.mMode = Scene40ListPage::MODE_DRESS;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 1;
+        mNextPage = PAGE_LIST_DRESS;
+        break;
+    case 7:
+        wcscpy(mKeyboardPage.mText2, mCharacter->mMotto);
+        mKeyboardPage.mUnknown0008 = 0;
+        mKeyboardPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mKeyboardLayout = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 8:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(0, 30);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 9:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(3, -30);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 10:
+        mKeyboardPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mKeyboardLayout = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 11:
+        mOptionPage.UpdateDone();
+        mOptionPage.mUnknown000C = 0;
+        mOptionPage.mNextState = 1;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 4;
+        mNextPage = PAGE_OPTIONS;
+        break;
+    case 12:
+        mPresentPage.mUnknown124 = TRUE;
+        mPresentPage.Start();
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_PRESENT;
+        break;
+    case 13:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 28;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 14:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 17;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    case 15:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 29;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mTouchPage.SetMenuDisabled(TRUE);
+        mNextPage = PAGE_GIFT;
+        break;
+    }
+}
+
+// The talk page: when it is done, what its answer leads to (its mResult)
+void Scene40Pages::UpdateTalkPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mTalkPage.Update();
+    if (mTalkPage.mState != Scene40TalkPage::STATE_DONE) {
+        return;
+    }
+    switch (mTalkPage.mResult) {
+    case 0:
+        mTouchPage.SetMenuDisabled(FALSE);
+        mTouchPage.mEntry = 0;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mNextPage = PAGE_TOUCH;
+        break;
+    case 1:
+        mListPage.mMode = Scene40ListPage::MODE_GIVE;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 0;
+        mNextPage = PAGE_LIST_GIVE;
+        break;
+    case 2:
+        // A word to teach: the keyboard by the trouble
+        switch (mCharacter->mTroubleId) {
+        case 0:
+            mKeyboardPage.mUnknown0008 = 1;
+            mKeyboardLayout = 1;
+            break;
+        case 1:
+            mKeyboardPage.mUnknown0008 = 4;
+            mKeyboardLayout = 3;
+            break;
+        case 2:
+            mKeyboardPage.mUnknown0008 = 5;
+            mKeyboardLayout = 3;
+            break;
+        case 3:
+            mKeyboardPage.mUnknown0008 = 6;
+            mKeyboardLayout = 3;
+            break;
+        case 4:
+            mKeyboardPage.mUnknown0008 = 7;
+            mKeyboardLayout = 3;
+            break;
+        }
+        mKeyboardPage.mNextState = 1;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 3;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    case 5:
+        mListPage.mMode = Scene40ListPage::MODE_DRESS_2;
+        mListPage.mTab = 0;
+        mListPage.mNextState = Scene40ListPage::STATE_OPEN;
+        mWaitingForLayout = TRUE;
+        mRequestedLayout = 2;
+        mListFrame = 1;
+        mNextPage = PAGE_LIST_DRESS_2;
+        break;
+    case 6:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 4;
+        mGiftPage.SetItem(mContext->mUnknown14, mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 7:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 5;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 8:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 6;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 9:
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mGiftPage.mReaction = 8;
+        mGiftPage.SetValue(mContext->mUnknown18);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        break;
+    case 10:
+        mTouchPage.mEntry = 13;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mNextPage = PAGE_TOUCH;
+        break;
+    }
+}
+
+// The gift page: when it is done, the option page (if the gift was the one asked for and the first panel is not
+// all done), the reaction to finishing it, or back to the touch page
+void Scene40Pages::UpdateGiftPage() {
+    mProfilePage.Update();
+    mCounter.Update();
+    mGiftPage.Update();
+    if (mGiftPage.mState != Scene40GiftPage::STATE_RESET) {
+        return;
+    }
+    BOOL gotTarget = mGiftPage.mUnknown6C;
+    BOOL allDone = FALSE;
+    if (gotTarget) {
+        mOptionPage.UpdateDone();
+        allDone = mOptionPage.IsAllDone();
+    }
+    if (gotTarget) {
+        if (!allDone) {
+            mOptionPage.mUnknown000C = 0;
+            mOptionPage.mNextState = 1;
+            mWaitingForLayout = TRUE;
+            mRequestedLayout = 4;
+            mNextPage = PAGE_OPTIONS;
+            return;
+        }
+        mGiftPage.mReaction = 7;
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mNextPage = PAGE_GIFT;
+        func_ov075_021793fc(func_ov075_02179290(mCharacter));
+        gSoundManager.MoveSeqVolume(0, 127, 120);
+        gSoundManager.LoadGroup(77);
+        return;
+    }
+    mProfilePage.SetSwitchable(TRUE);
+    mTouchPage.mEntry = 2;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mNextPage = PAGE_TOUCH;
+}
+
+// The present page: when it is done, back to the touch page
+void Scene40Pages::UpdatePresentPage() {
+    mProfilePage.Update();
+    mPresentPage.Update();
+    if (mPresentPage.mState != Scene40PresentPage::STATE_DONE) {
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 2;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mNextPage = PAGE_TOUCH;
+}
+
+// The list of what to give: once chosen, back to the scene's own upper screen; once closed, the gift's reaction
+void Scene40Pages::UpdateListGivePage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    if (mListPage.mChosen) {
+        Scene40Gift gift;
+        int reaction;
+        int value;
+        mListPage.GetGift(&gift);
+        GetGiftReaction(&gift, &reaction, &value);
+        mGiftPage.mReaction = 0;
+        mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+        mGiftPage.SetItem(reaction, value);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mNextPage = PAGE_GIFT;
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 0;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListGiveFromShopPage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 1;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(TRUE);
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListDressPage() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    if (mListPage.mChosen) {
+        mTouchPage.mEntry = 1;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(TRUE);
+        mNextPage = PAGE_TOUCH;
+        return;
+    }
+    mTouchPage.SetMenuDisabled(FALSE);
+    mTouchPage.mEntry = 0;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(TRUE);
+    mNextPage = PAGE_TOUCH;
+}
+
+void Scene40Pages::UpdateListDress2Page() {
+    mListPage.Update();
+    if (mListPage.mState == Scene40ListPage::STATE_CHOSEN) {
+        mRequestedLayout = 1;
+        mWaitingForLayout = TRUE;
+        return;
+    }
+    if (mListPage.mState != Scene40ListPage::STATE_CLOSE) {
+        return;
+    }
+    mTouchPage.mEntry = 1;
+    mTouchPage.mState = Scene40TouchPage::STATE_START;
+    mProfilePage.ShowProfile();
+    mProfilePage.SetSwitchable(FALSE);
+    mNextPage = PAGE_TOUCH;
+}
+
+// The keyboard: once typed, back to the scene's upper screen (or the option page's); once closed, what was typed
+// goes to the character: a motto (with a present for it) or a word it is taught
+void Scene40Pages::UpdateKeyboardPage() {
+    mKeyboardPage.Update();
+    if (mKeyboardPage.mState == 3) {
+        switch (mKeyboardPage.mUnknown0008) {
+        case 0:
+        case 1:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            mRequestedLayout = 1;
+            mWaitingForLayout = TRUE;
+            return;
+        case 2:
+            switch (mKeyboardPage.mUnknown0010) {
+            case 0:
+                mRequestedLayout = 1;
+                mWaitingForLayout = TRUE;
+                break;
+            case 1:
+                mRequestedLayout = 4;
+                mWaitingForLayout = TRUE;
+                break;
+            }
+            break;
+        }
+        return;
+    }
+    if (mKeyboardPage.mState != 4) {
+        return;
+    }
+    switch (mKeyboardPage.mUnknown0008) {
+    case 0:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0: {
+            wcscpy(mCharacter->mMotto, mKeyboardPage.mText);
+            Scene40Gift gift;
+            gift.Set(4, 0);
+            mGiftPage.mReaction = 1;
+            mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+            mGiftPage.SetItem(0, 0);
+            mGiftPage.mNextState = 1;
+            mGiftPage.mStep = 0;
+            mGiftPage.mUnknown08 = 0;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(FALSE);
+            mNextPage = PAGE_GIFT;
+            break;
+        }
+        case 1:
+            mTouchPage.SetMenuDisabled(FALSE);
+            mTouchPage.mEntry = 0;
+            mTouchPage.mState = Scene40TouchPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TOUCH;
+            break;
+        }
+        break;
+    case 1:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0:
+            mCharacter->SetTaughtWord(mKeyboardPage.mText);
+            mTalkPage.mTopic = 1;
+            mTalkPage.mNextState = Scene40TalkPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TALK;
+            break;
+        case 1:
+            mCharacter->SetState(0);
+            mTouchPage.SetMenuDisabled(FALSE);
+            mTouchPage.mEntry = 0;
+            mTouchPage.mState = Scene40TouchPage::STATE_START;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(TRUE);
+            mNextPage = PAGE_TOUCH;
+            break;
+        }
+        break;
+    case 2:
+        switch (mKeyboardPage.mUnknown0010) {
+        case 0: {
+            wcscpy(mCharacter->mMotto, mKeyboardPage.mText);
+            Scene40Gift gift;
+            gift.Set(4, 0);
+            mGiftPage.mReaction = 2;
+            mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+            mGiftPage.SetItem(0, 0);
+            mGiftPage.mNextState = 1;
+            mGiftPage.mStep = 0;
+            mGiftPage.mUnknown08 = 0;
+            mProfilePage.ShowProfile();
+            mProfilePage.SetSwitchable(FALSE);
+            mNextPage = PAGE_GIFT;
+            break;
+        }
+        case 1:
+            mOptionPage.mUnknown000C = 0;
+            mOptionPage.mNextState = 1;
+            mNextPage = PAGE_OPTIONS;
+            break;
+        }
+        break;
+    case 3:
+        mTouchPage.SetMenuDisabled(FALSE);
+        mTouchPage.mEntry = 0;
+        mTouchPage.mState = Scene40TouchPage::STATE_START;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(TRUE);
+        mNextPage = PAGE_TOUCH;
+        break;
+    }
+}
+
+// The option page: once chosen, back to the scene's upper screen; once closed, the present chosen (a reaction),
+// or the keyboard for a motto
+void Scene40Pages::UpdateOptionPage() {
+    mOptionPage.Update();
+    if (mOptionPage.mState == 10) {
+        switch (mOptionPage.mResult) {
+        case 0:
+        case 1:
+            mRequestedLayout = 1;
+            mWaitingForLayout = TRUE;
+            break;
+        case 2:
+            break;
+        case 3:
+            mRequestedLayout = 3;
+            mKeyboardLayout = 1;
+            mWaitingForLayout = TRUE;
+            break;
+        }
+        return;
+    }
+    if (mOptionPage.mState != 11) {
+        return;
+    }
+    switch (mOptionPage.mResult) {
+    case 0:
+    case 1: {
+        Scene40Gift gift;
+        gift.Set(mOptionPage.mGift.mKind, mOptionPage.mGift.mItem.InventoryItem::mId);
+        mGiftPage.mReaction = 2;
+        mGiftPage.mGift.Set(gift.mKind, gift.mItem.InventoryItem::mId);
+        mGiftPage.SetItem(0, 0);
+        mGiftPage.mNextState = 1;
+        mGiftPage.mStep = 0;
+        mGiftPage.mUnknown08 = 0;
+        mProfilePage.ShowProfile();
+        mProfilePage.SetSwitchable(FALSE);
+        mNextPage = PAGE_GIFT;
+        break;
+    }
+    case 2:
+        break;
+    case 3:
+        mKeyboardPage.mUnknown0008 = 2;
+        mKeyboardPage.mNextState = 1;
+        mNextPage = PAGE_KEYBOARD;
+        break;
+    }
 }
 
 // The pages take touches only while the scene is not changing the upper screen
@@ -948,9 +1552,9 @@ void Scene40Pages::Draw() {
     mCounter.Draw();
     switch (mPage) {
     case PAGE_TOUCH:
-    case PAGE_1:
-    case PAGE_2:
-    case PAGE_3:
+    case PAGE_TALK:
+    case PAGE_GIFT:
+    case PAGE_PRESENT:
         mTouchPage.Draw();
         mTalkPage.Draw();
         mGiftPage.Draw();
@@ -958,16 +1562,16 @@ void Scene40Pages::Draw() {
         mProfilePage.Draw();
         mMenuBar.Draw();
         break;
-    case PAGE_LIST_4:
-    case PAGE_LIST_5:
-    case PAGE_LIST_6:
-    case PAGE_LIST_7:
+    case PAGE_LIST_GIVE:
+    case PAGE_LIST_GIVE_FROM_SHOP:
+    case PAGE_LIST_DRESS:
+    case PAGE_LIST_DRESS_2:
         mListPage.Draw();
         break;
-    case PAGE_8:
+    case PAGE_KEYBOARD:
         mKeyboardPage.Draw();
         break;
-    case PAGE_9:
+    case PAGE_OPTIONS:
         mOptionPage.Draw();
         break;
     }
