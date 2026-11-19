@@ -59,6 +59,12 @@ public:
     static void InitCallbacks(NNSG3dRS *rs);
     void SetScaleFromBody(u32 height, u32 build);
     VecFx32 GetHeldItemScale();
+    // Field by field, from a copy (the touch page of overlay 75 sets a dragged character's position so)
+    void SetPos(VecFx32 pos) {
+        mPos.x = pos.x;
+        mPos.y = pos.y;
+        mPos.z = pos.z;
+    }
 
     /* 0x000 */ AnimModel mAnim;
     /* 0x0E0 */ VecFx32 mPos;

@@ -2207,11 +2207,11 @@ void Scene40TouchPage::Update() {
     case STATE_IDLE:
         UpdateIdle();
         break;
-    case STATE_3:
-        Update3();
+    case STATE_DRAGGED:
+        UpdateDragged();
         break;
-    case STATE_4:
-        Update4();
+    case STATE_PRESSED_DOWN:
+        UpdatePressedDown();
         break;
     case STATE_5:
         Update5();
@@ -2495,7 +2495,7 @@ void Scene40TouchPage::UpdateHold() {
                 mCharacter->AddUnknown1C4Once0();
                 mContext->mCamera->SetState(0);
                 Sprite_SetSequence(mContext->mSprite, 27, TRUE);
-                SetState(STATE_3);
+                SetState(STATE_DRAGGED);
                 handled = TRUE;
             }
             break;
@@ -2505,7 +2505,7 @@ void Scene40TouchPage::UpdateHold() {
                 gSoundManager.StartSeqArc(1, 35, 5);
                 mCharacter->SetState(3);
                 mCharacter->AddUnknown1C4Once0();
-                SetState(STATE_4);
+                SetState(STATE_PRESSED_DOWN);
                 handled = TRUE;
             }
             break;
@@ -2645,6 +2645,92 @@ void Scene40TouchPage::UpdateRelease() {
 
 // Does nothing (the idle state calls it last)
 void Scene40TouchPage::Unused02151ab0() {}
+
+// The character dragged by the stylus: it hangs from the point under the stylus by its neck. Pulled out of the
+// room (beyond 3.7 across) it is dropped where it is; pushed down into the floor it lands on its feet (its state 3,
+// the page's state 4); let go, it is thrown with the stylus's flick
+void Scene40TouchPage::UpdateDragged() {
+    VecFx32 fling;
+    VecFx32 pos;
+    BOOL letGo = FALSE;
+    if (mTracker->mHeld) {
+        pos = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK);
+        VEC_Subtract(&pos, &mCharacter->CharacterModel::mPos, &pos);
+        VEC_Subtract(&mTouch->mDepths[0].mHold, &pos, &pos);
+        pos.y -= 0x800;
+        if (pos.x < -0x3B33 || pos.x > 0x3B33 || pos.z < -0x3B33 || pos.z > 0x3B33) {
+            VecFx32 zero = {0, 0, 0};
+            fling = zero;
+            letGo = TRUE;
+        } else if (pos.y < -0x1EB) {
+            Sprite_Init(mContext->mSprite, 0, 26, 128, 96, TRUE);
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+            gSoundManager.StartSeqArc(1, 35, 5);
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            mCharacter->SetPos(pos);
+            mCharacter->SetState(3);
+            SetState(STATE_PRESSED_DOWN);
+        } else {
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            mCharacter->SetPos(pos);
+            {
+                VecFx32 zero = {0, 0, 0};
+                SetVecFields(&mCharacter->mMotion.mVelocity, zero);
+            }
+            ScreenPoint point = mContext->mTouch->mPoint;
+            mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        }
+    } else if (mTracker->mReleased) {
+        SetVecFields(&fling, mTouch->mDepths[0].mFlick);
+        letGo = TRUE;
+    }
+    if (letGo) {
+        mTouching = FALSE;
+        mCharacter->SetState(2);
+        mContext->mCamera->SetState(1);
+        mContext->mSprite->mVisible = FALSE;
+        SetVecFields(&mCharacter->mMotion.mVelocity, fling);
+        if (fling.y > 204) {
+            gSoundManager.StartSeqArc(1, 35, 3);
+        }
+        SetState(STATE_IDLE);
+    }
+}
+
+// The character pressed down under the stylus: moved off it onto the body or beside it, the character stands up
+// again (the stylus let go likewise); pulled up by more than 0.1 above where it would hang, it is dragged again
+void Scene40TouchPage::UpdatePressedDown() {
+    if (mTracker->mHeld && mTouching) {
+        ScreenPoint point = mContext->mTouch->mPoint;
+        mContext->mSprite->SetPositionFromVec(point.x << FX32_SHIFT, point.y << FX32_SHIFT);
+        VecFx32 pos;
+        pos = mCharacter->GetJointPosition(CharacterModel::JOINT_NECK);
+        VEC_Subtract(&pos, &mCharacter->CharacterModel::mPos, &pos);
+        VEC_Subtract(&mTouch->mDepths[0].mHold, &pos, &pos);
+        pos.y -= 0x800;
+        if ((mTouch->mPart & Scene40CharacterTouch::PART_BODY) || (mTouch->mPart & Scene40CharacterTouch::PART_NONE)) {
+            mTouching = FALSE;
+            mContext->mSprite->mVisible = FALSE;
+            mCharacter->SetState(0);
+            mContext->mCamera->SetState(1);
+            SetState(STATE_IDLE);
+        } else if (pos.y > 0x199) {
+            gSoundManager.StartSeqArc(1, 35, 2);
+            mCharacter->SetState(1);
+            mCharacter->FaceCamera();
+            mContext->mCamera->SetState(0);
+            Sprite_SetSequence(mContext->mSprite, 27, TRUE);
+            SetState(STATE_DRAGGED);
+        }
+    } else if (mTracker->mReleased) {
+        mTouching = FALSE;
+        mContext->mSprite->mVisible = FALSE;
+        mCharacter->SetState(0);
+        mContext->mCamera->SetState(1);
+        SetState(STATE_IDLE);
+    }
+}
 
 void Scene40TouchPage::UpdateWaitIdle() {
     if (mCharacter->mState != 0) {

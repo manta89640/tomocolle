@@ -50,8 +50,8 @@ public:
     enum State {
         STATE_START = 1,          // By mEntry (UpdateStart)
         STATE_IDLE = 2,           // The menu, and the stylus on the character
-        STATE_3 = 3,
-        STATE_4 = 4,
+        STATE_DRAGGED = 3,        // The character hangs from the stylus by its head
+        STATE_PRESSED_DOWN = 4,   // The character pressed down to the floor under the stylus
         STATE_5 = 5,
         STATE_WAIT_IDLE = 6,      // Waits for the character's state 0, then the menu again
         STATE_7 = 7,
@@ -82,8 +82,8 @@ public:
     void UpdateHold();
     void UpdateRelease();
     void Unused02151ab0();
-    void Update3();
-    void Update4();
+    void UpdateDragged();
+    void UpdatePressedDown();
     void Update5();
     void UpdateWaitIdle();
     void Update7();
