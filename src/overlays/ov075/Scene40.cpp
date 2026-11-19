@@ -1507,6 +1507,12 @@ struct TroubleInfo {
 extern "C" const TroubleInfo *const data_02114d78[];
 
 // The trouble the character has
+// The kind (0 to 3) of a personality, converted in place
+static inline int ToPersonalityKind(int personality) {
+    personality = gPersonalityKinds[personality];
+    return personality;
+}
+
 static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
     return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
 }
@@ -7675,7 +7681,7 @@ void Scene40Character::UpdateStates67To85() {
             }
             mHeldItem->Hide();
             mHeldItem = NULL;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             mStep++;
             break;
         case 5:
@@ -9150,7 +9156,7 @@ void Scene40Character::UpdateStates86ToB2() {
         if (mEntered) {
             mEntered = FALSE;
             SetFace(10);
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][1]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][1]);
             UpdateAnimSpeed();
             GetAnimation()->mPlayOnce = FALSE;
             TurnHeadToCamera();
@@ -9204,7 +9210,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA3:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -9220,7 +9226,7 @@ void Scene40Character::UpdateStates86ToB2() {
     case 0xA4:
         if (mEntered) {
             mEntered = FALSE;
-            BlendToNamedAnimation(sWaitAnimations[gPersonalityKinds[mPersonality]][0]);
+            BlendToNamedAnimation(sWaitAnimations[ToPersonalityKind(mPersonality)][0]);
             TurnHeadToCamera();
             mHeadIcons[0].SetMode(1);
             mHeadIcons[1].SetMode(1);
@@ -9742,12 +9748,9 @@ void Scene40Character::UpdateStates86ToB2() {
                 wcscpy(mMottos[3], mTaughtWord);
                 break;
             }
-            return;
+        } else if (mTtsPlayer->IsEngineIdle()) {
+            SetState(0x33);
         }
-        if (!mTtsPlayer->IsEngineIdle()) {
-            return;
-        }
-        SetState(0x33);
         break;
     case 0xB1:
         if (mEntered) {
