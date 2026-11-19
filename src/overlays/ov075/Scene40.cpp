@@ -1297,9 +1297,9 @@ void Scene40TouchPage::Init(Scene40Context *context, Scene40CharacterTouch *touc
     mTracker = mContext->mTouch;
     mTouch = touch;
     mState = 0;
-    mUnknown00 = 0;
-    mUnknown08 = 0;
-    mUnknown18 = 0;
+    mLastState = 0;
+    mStep = 0;
+    mEntry = 0;
     mUnknown20 = 0;
     mMenuHidden = FALSE;
     mActive = TRUE;
