@@ -1911,6 +1911,20 @@ Four files of the main program after the character code (`include/item/`, `inclu
 | `src/list/MiiList.cpp` | `0x020A03E8`..`0x020A3C68` | the list of saved characters, its panel and tabs |
 | `src/room/Room.cpp` | `0x020A3C68`..`0x020A5CC4` | a resident's room: door, furniture, interiors |
 
+**Item.cpp's `.rodata`** (measured, round 5): the ROM has `sClothesSeasons` (13 ints, 0x34) at `0x020FBCDC`, then
+`sFixedItems` (`u16[5]`), 2 bytes of padding and the four `int[12]` local statics. One file's pool sorts the 0x34 table
+after the others whatever its declaration (`[]` bound, external linkage, all measured), and splitting the file at
+`0x0209ED30` (clothes / goods) gives the sections but leaves both files' same-size orders wrong. Written as the local
+static of an inline function (`GetMonthSeason`), the table gets a section of its own with binding 13, and the pool
+alone sorts as the ROM has it, the four tables in the ROM's slots; with the kept copy given to the file before
+(`SavedCharacter.cpp`'s range ends at `0x020FBD10`, `inline_symbols.txt`), linking `Item.cpp` from source puts all of its
+`.rodata` at the ROM's addresses. Inferred: the table is an inline function's static in a header that
+`SavedCharacter.cpp` also uses (from a function the link strips, as nothing there refers to it). What is left: the
+link puts the four virtual tables, all four binding 13 ("multidef" in the map), as InventoryItem, ClothesItem, Item,
+ItemModel, where the ROM has Item, ClothesItem, InventoryItem, ItemModel; the compiled object has them as ClothesItem,
+InventoryItem, Item, ItemModel whatever the table's form, so the order is the linker's, and how mwld orders
+multidef sections is the open question.
+
 Measured:
 - The character file ends at `0x0209E140`: `0x0209E0E8` and `0x0209E114` are one clamp template instantiated for
   `s16` and `u8`, called only by `0x02097D8C`, and such instances follow the last function of the file that uses
