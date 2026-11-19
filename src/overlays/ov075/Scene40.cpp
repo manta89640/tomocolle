@@ -146,6 +146,41 @@ static const Scene40MessageSequence::Entry sMessageEntries[21] = {
     {20, 0, 182, 30, 0, 0, 21},
 };
 
+// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
+// has it
+struct TroubleInfo {
+    u32 kind : 8;
+    u32 minutes : 16;         // How long it lasts at most
+    u32 weight : 8;           // Its weight in the random choice (ChooseTrouble)
+    u32 unk4Bits0 : 8;
+    u32 mood : 8;             // The mood it puts the character in (SetTroubleMood), 0 to 4
+    u32 cooldownMinutes : 12; // Added to mTroubleEnd once it is over
+    u32 hasTarget : 4;        // Not 0: about a character or an item, which StartTrouble chooses (mTroubleTarget)
+    u32 flags;                // Food troubles: the kinds of food; clothes troubles: the kinds of clothes
+}; // 0xC
+extern "C" const TroubleInfo *const data_02114d78[];
+
+// The trouble the character has
+static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
+    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
+}
+
+static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
+    if (character->IsInTrouble() && GetTrouble(character)->kind == kind) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline const ItemInfo *GetGoodsInfo(u16 id) {
+    return &gGoodsTable[id];
+}
+
+static inline const ClothesInfo *GetClothesInfo(u16 id) {
+    return &gClothesTable[id];
+}
+
+
 // --- The scene -----------------------------------------------------------------------------------------------------
 
 // The character to visit, its room, and the archives of the scene; after the apartment (scene 0x11) the residents'
@@ -1547,6 +1582,121 @@ void Scene40Pages::HideMenu(BOOL hide) {
     mTouchPage.HideMenu(TRUE);
 }
 
+// Whether the gift is the goods the character's trouble asks for: the very item, or one of the kinds it names
+BOOL Scene40Pages::IsWishedGoods(SavedCharacter *character, Scene40Gift *gift) {
+    BOOL wished = FALSE;
+    if (character->IsInTrouble() &&
+        data_02114d78[character->mTroubleCategory][character->mTroubleId].kind == 1) {
+        if (data_02114d78[character->mTroubleCategory][character->mTroubleId].hasTarget) {
+            if (gift->mItem.InventoryItem::mId == character->mTroubleTarget) {
+                wished = TRUE;
+            }
+        } else {
+            u32 flags = GetGoodsInfo(gift->mItem.InventoryItem::mId)->mFlags;
+            u32 wanted = data_02114d78[character->mTroubleCategory][character->mTroubleId].flags;
+            u32 asked = flags & wanted;
+            u32 missing = ~flags & wanted;
+            if (asked != 0 && missing == 0) {
+                wished = TRUE;
+            } else if (asked != 0) {
+                wished = TRUE;
+            }
+        }
+    }
+    return wished;
+}
+
+// The same for clothes, of the kinds the trouble names
+BOOL Scene40Pages::IsWishedClothes(SavedCharacter *character, Scene40Gift *gift) {
+    BOOL wished = FALSE;
+    Scene40Character *visited = mCharacter;
+    if (visited->IsInTrouble() && data_02114d78[visited->mTroubleCategory][visited->mTroubleId].kind == 3) {
+        if (data_02114d78[character->mTroubleCategory][character->mTroubleId].hasTarget) {
+            if (gift->mItem.InventoryItem::mId == character->mTroubleTarget) {
+                wished = TRUE;
+            }
+        } else {
+            u32 styles = GetClothesInfo(gift->mItem.InventoryItem::mId)->mStyles;
+            u32 wanted = data_02114d78[mCharacter->mTroubleCategory][mCharacter->mTroubleId].flags;
+            u32 asked = styles & wanted;
+            u32 missing = ~styles & wanted;
+            if (asked != 0 && missing == 0) {
+                wished = TRUE;
+            } else if (asked != 0) {
+                wished = TRUE;
+            }
+        }
+    }
+    return wished;
+}
+
+// How the character reacts to a gift and what it is worth to it: its favourite goods are worth at least what the
+// trouble promises when they are the goods it asks for; goods or clothes it asks for are worth that
+void Scene40Pages::GetGiftReaction(Scene40Gift *gift, int *reaction, int *value) {
+    switch (gift->mGiftKind) {
+    case 0:
+        if (mCharacter->mFavoriteItem == gift->mItem.InventoryItem::mId) {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            int satisfaction = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+            int promised = 0;
+            if (IsWishedGoods(mCharacter, gift)) {
+                promised = GetTrouble(mCharacter)->unk4Bits0;
+            }
+            if (satisfaction < promised) {
+                satisfaction = promised;
+            }
+            *value = satisfaction;
+        } else if (mCharacter->mDislikedItem == gift->mItem.InventoryItem::mId) {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+        } else if (IsWishedGoods(mCharacter, gift)) {
+            *reaction = 0;
+            *value = GetTrouble(mCharacter)->unk4Bits0;
+        } else {
+            *reaction = mCharacter->GetGoodsReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetGoodsSatisfaction(gift->mItem.InventoryItem::mId);
+        }
+        break;
+    case 1:
+        if (IsWishedClothes(mCharacter, gift)) {
+            *reaction = 5;
+            *value = GetTrouble(mCharacter)->unk4Bits0;
+        } else {
+            *reaction = mCharacter->GetClothesReaction(gift->mItem.InventoryItem::mId);
+            *value = mCharacter->GetClothesSatisfaction(gift->mItem.InventoryItem::mId);
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 16:
+        *reaction = 2;
+        *value = 0;
+        break;
+    }
+}
+
+// Back from one of the games 0x82 to 0x87 that was played to the end: the character forgets which it was
+BOOL Scene40Pages::TakeGameResult() {
+    Scene40Scratch *const scratch = &gSceneScratch;
+    BOOL taken = FALSE;
+    switch (gSceneManager.mPreviousSceneId) {
+    case 0x82:
+    case 0x83:
+    case 0x84:
+    case 0x85:
+    case 0x86:
+    case 0x87:
+        if (scratch->mUnknown01 == 0) {
+            taken = TRUE;
+            mCharacter->ResetUnknown24E();
+        }
+        break;
+    }
+    return taken;
+}
+
 // The page shown: the first four together with the touch page's, and the menu
 void Scene40Pages::Draw() {
     mCounter.Draw();
@@ -2096,33 +2246,6 @@ void func_ov075_0214fc00(void *object);                       // Draws the objec
 
 extern MATHRandContext16 gRandom;
 
-// A trouble (CharacterRecord::mTroubleCategory and mTroubleId index data_02114d78), as src/character/SavedCharacter.cpp
-// has it
-struct TroubleInfo {
-    u32 kind : 8;
-    u32 minutes : 16;         // How long it lasts at most
-    u32 weight : 8;           // Its weight in the random choice (ChooseTrouble)
-    u32 unk4Bits0 : 8;
-    u32 mood : 8;             // The mood it puts the character in (SetTroubleMood), 0 to 4
-    u32 cooldownMinutes : 12; // Added to mTroubleEnd once it is over
-    u32 hasTarget : 4;        // Not 0: about a character or an item, which StartTrouble chooses (mTroubleTarget)
-    u32 flags;                // Food troubles: the kinds of food; clothes troubles: the kinds of clothes
-};
-
-// 0xC
-extern "C" const TroubleInfo *const data_02114d78[];
-
-// The trouble the character has
-static inline const TroubleInfo *GetTrouble(SavedCharacter *character) {
-    return &data_02114d78[character->mTroubleCategory][character->mTroubleId];
-}
-
-static inline BOOL IsInTroubleOfKind(SavedCharacter *character, int kind) {
-    if (character->IsInTrouble() && GetTrouble(character)->kind == kind) {
-        return TRUE;
-    }
-    return FALSE;
-}
 
 // The bytes after gSceneMemory's 0x3C: the first of gSceneScratch, which this file reaches through gSceneMemory as
 // well (the literal is gSceneMemory's address and the offset is in the instruction)
@@ -2157,14 +2280,6 @@ static const ScreenPoint sItemScreenPoint = {190, 134};
 void AddTroublesSolved(int count);
 
 extern SaveHeader gIslandState;
-
-static inline const ItemInfo *GetGoodsInfo(u16 id) {
-    return &gGoodsTable[id];
-}
-
-static inline const ClothesInfo *GetClothesInfo(u16 id) {
-    return &gClothesTable[id];
-}
 
 // The body's place and size. The mannequin comes last: an inlined call binds its arguments last to first, and the
 // original reads the pointer before it computes the size (as a member function, `this` binds last and does not match)
