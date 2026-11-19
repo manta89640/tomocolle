@@ -4508,6 +4508,10 @@ void Scene40SegmentMeter::SetVisible(BOOL visible) {
 
 static const ScreenPoint sLevelMeterPosition = {151, 33};
 
+// The profile page's trouble meter stands where the level meter's segments do. A copy made at run time by the file's
+// static initialiser (0x02182aa4), so it is in .data and zero in the ROM; Scene40ProfilePage::Init passes it.
+static ScreenPoint sTroubleMeterPosition = sLevelMeterPosition;
+
 // Level 1 with no points; the level's text box and the segments (resource 1, sequence 1)
 void Scene40LevelMeter::Init(int *charOffset) {
     mLevel = mTargetLevel = 1;
@@ -10603,7 +10607,8 @@ void Scene40Character::GetTalkArguments(const Scene40TalkEntry *entry, int *coun
             for (int item = 0; item < 255; item++) {
                 int kind = gGoodsTable[(u16)item].mKind;
                 if (kind == 1 || kind == 4) {
-                    foods[n++] = item;
+                    foods[n] = item;
+                    n++;
                 }
             }
             values[*count] = foods[Rand(n)];
@@ -10659,9 +10664,11 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         int found[33];
         int n = 0;
         int total = sFirstTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sFirstTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10669,14 +10676,16 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         } else {
             entry = sFirstTalks[gPersonalityKinds[mPersonality]];
         }
-        mUnknown054Bit20++;
+        mUnknown054Bit20 = (u8)(mUnknown054Bit20 + 1);
     } else if (MATH_Rand16(&gRandom, 10) != 0 || conditions.mElapsed != 1) {
         int found[65];
         int n = 0;
         int total = sTouchTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sTouchTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10688,9 +10697,11 @@ void Scene40Character::ChooseTouchTalk(u32 *message, int *count, int *types, int
         int found[48];
         int n = 0;
         int total = sRecentTalkCounts[gPersonalityKinds[mPersonality]];
-        for (int i = 0; i < total; i++) {
+        int i = 0;
+        for (; i < total; i++) {
             if (MatchesTalk(&sRecentTalks[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10721,6 +10732,7 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     time.second = clock->mTime.second;
     GetTalkConditions(&date, &time, &conditions);
     int n = 0;
+    int total;
     if (kind == 2) {
         int month = GetParameter(PARAM_BIRTH_MONTH);
         int day = GetParameter(PARAM_BIRTH_DAY);
@@ -10730,10 +10742,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
     }
     switch (kind) {
     case 1: {
-        int total = sNewsTalk1Counts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalk1Counts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalks1[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10744,10 +10757,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
         break;
     }
     case 2: {
-        int total = sNewsTalk2Counts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalk2Counts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalks2[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10758,10 +10772,11 @@ void Scene40Character::ChooseNewsTalk(int kind, u32 *message, int *count, int *t
         break;
     }
     case 0xFE: {
-        int total = sNewsTalkFECounts[gPersonalityKinds[mPersonality]];
+        total = sNewsTalkFECounts[gPersonalityKinds[mPersonality]];
         for (int i = 0; i < total; i++) {
             if (MatchesTalk(&sNewsTalksFE[gPersonalityKinds[mPersonality]][i], &date, &conditions)) {
-                found[n++] = i;
+                found[n] = i;
+                n++;
             }
         }
         if (n > 0) {
@@ -10922,7 +10937,8 @@ int Scene40Character::ChooseOutingPartner() {
                 if (GameData_CharacterExists(&gGameData, i) &&
                     MiiData_GetSex(this) == GameData_GetCharacterSex(&gGameData, i) && i != mIndex &&
                     mRelationRank[i] == RELATION_FRIENDS && mRelationMeter[i] == mRelationMeter[best]) {
-                    candidates[count++] = i;
+                    candidates[count] = i;
+                    count++;
                 }
             }
             partner = candidates[Random(count)];
@@ -11081,7 +11097,8 @@ int Scene40Character::ChooseActivity() {
     int i;
     for (i = 0; i < 20; i++) {
         if (sActivities[i].mEnabled == 1 && sActivities[i].mMinCharacters <= mCharacterCount) {
-            candidates[count++] = i;
+            candidates[count] = i;
+            count++;
         }
     }
     return candidates[MATH_Rand16(&gRandom, count)];
@@ -12328,6 +12345,4 @@ int Scene40Character::GetAge(SavedCharacter *character, RTCDate *date) {
 
 // --- The file's static initialiser ------------------------------------------------------------------------------
 
-// A text position of the profile page (read by 0x0215f180), a copy of a pool point: initialised at run time by the
-// file's static initialiser, so it is in .data, zero in the ROM
-// (not written yet)
+// The compiler writes it for sTroubleMeterPosition, the file's one object initialised at run time.

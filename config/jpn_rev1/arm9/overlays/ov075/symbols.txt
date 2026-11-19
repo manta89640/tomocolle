@@ -614,8 +614,8 @@ data_ov075_0217ef28 kind:data(any) addr:0x0217ef28
 data_ov075_0217fb88 kind:data(any) addr:0x0217fb88
 data_ov075_021809a4 kind:data(any) addr:0x021809a4
 data_ov075_02181838 kind:data(any) addr:0x02181838
-__sinit_ov075_02182aa4 kind:function(arm,size=0x24) addr:0x02182aa4
-.p__sinit_ov075_02182aa4 kind:data(word) addr:0x02182ac8
+__sinit_Scene40.cpp kind:function(arm,size=0x24) addr:0x02182aa4 local
+.p__sinit_Scene40.cpp kind:data(word) addr:0x02182ac8 local
 gStr_walk07_ov075 kind:data(any) addr:0x02182ae0
 gStr_walk01_ov075 kind:data(any) addr:0x02182ae8
 gStr_walk10 kind:data(any) addr:0x02182af0
@@ -656,7 +656,7 @@ gStr_walk09_ov075_3 kind:data(any) addr:0x02182c00
 gStr_wait02_ov075_6 kind:data(any) addr:0x02182c08
 gStr_walk03_ov075_5 kind:data(any) addr:0x02182c10
 gStr_wait00_ov075_3 kind:data(any) addr:0x02182c18
-data_ov075_02182c20 kind:data(any) addr:0x02182c20
+sTroubleMeterPosition kind:data(any) addr:0x02182c20
 sRecentTalks kind:data(any) addr:0x02182c28
 sNewsTalks1 kind:data(any) addr:0x02182c38
 sTouchTalks kind:data(any) addr:0x02182c48
