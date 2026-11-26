@@ -454,7 +454,8 @@ void MakeUpScene::UpdateState() {
     case STATE_THINK:
         if (mEntered) {
             mEntered = FALSE;
-            mWait = (Random(5) != 0) * (Random(100) + 100) + 30;
+            BOOL wait = MATH_Rand16(&gRandom, 5) != 0;
+            mWait = wait * (MATH_Rand16(&gRandom, 100) + 100) + 30;
         } else if (mFrame >= mWait) {
             if (mMadeUp) {
                 SetState(STATE_ACCEPT);
@@ -503,11 +504,12 @@ void MakeUpScene::UpdateState() {
             mEntered = FALSE;
         } else if (gSceneManager.mPreviousSceneId == 0x40) {
             MI_CpuFill8(gSceneScratch, 0, 100);
+            u8 *scratch = gSceneScratch;
             if (mMadeUp) {
-                gSceneScratch[0] = 0;
+                scratch[0] = 0;
                 ApplyResult(mMadeUp);
             } else {
-                gSceneScratch[0] = 1;
+                scratch[0] = 1;
                 ApplyResult(mMadeUp);
             }
             gSceneMemory.mCharacters[0] = mCharacterIndices[1];
