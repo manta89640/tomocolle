@@ -713,7 +713,7 @@ Measured:
   for each, and the scene never reads `mSceneId`: whichever id started it, it goes on to 0x39. They differ only in
   who asks for them:
   - 0xB6: `SceneManager::Init` constructs it, as the game's first scene.
-  - 0x00: overlays 101 (`SceneAF`) and 103 (`DivorceScene`) ask for it when they finish, unless the scene manager's
+  - 0x00: overlays 101 (`FriendVisitScene`) and 103 (`DivorceScene`) ask for it when they finish, unless the scene manager's
     previous scene (`mPreviousSceneId`) is 0xAF (overlay 101) or 0x40 (overlay 103), when they ask for 0x40
     instead. Overlay 90 (`RomanceScene`, 0x0214B5A4) calls `RequestScene(0)` too, but with an address in its own
     `.rodata` (0x0214C478) as the scene manager.
