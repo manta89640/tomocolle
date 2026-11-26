@@ -11,7 +11,7 @@ _ZN15IslandNameMusic6UpdateEv kind:function(arm,size=0x70) addr:0x0214af64
 _ZN15IslandNameMusic9SetTargetEi kind:function(arm,size=0x50) addr:0x0214afd4
 _ZN15IslandNameSceneD1Ev kind:function(arm,size=0x48) addr:0x0214b024
 _ZN15IslandNameSceneD0Ev kind:function(arm,size=0x50) addr:0x0214b06c
-data_ov093_0214b0bc kind:data(any) addr:0x0214b0bc
+sTextFonts kind:data(any) addr:0x0214b0bc
 sLightDirection1 kind:data(any) addr:0x0214b0e4
 sLightDirection0 kind:data(any) addr:0x0214b0f0
 sMusicRampSteps kind:data(any) addr:0x0214b0fc
@@ -26,17 +26,17 @@ data_ov093_0214b2c8 kind:data(any) addr:0x0214b2c8 ambiguous
 sResourceArchives kind:data(any) addr:0x0214b2cc
 sResourceModels kind:data(any) addr:0x0214b2d4
 sGroundModels kind:data(any) addr:0x0214b2dc
-gStr_M01_ov093 kind:data(any) addr:0x0214b2ec
-gStr_M00_ov093 kind:data(any) addr:0x0214b2f0
-gStr_M01_board_imd_ov093 kind:data(any) addr:0x0214b2f4
-data_ov093_0214b304 kind:data(any) addr:0x0214b304
+sArchiveM01 kind:data(any) addr:0x0214b2ec
+sArchiveM00 kind:data(any) addr:0x0214b2f0
+sModelBoard kind:data(any) addr:0x0214b2f4
+sModelGround kind:data(any) addr:0x0214b304
 data_ov093_0214b308 kind:data(any) addr:0x0214b308 ambiguous
-gStr_Mdl_Map_map2_board_3D_LZ_bin_ov093 kind:data(any) addr:0x0214b314
-gStr_Mdl_Map_map2_ground3_3D_LZ_bin_ov093 kind:data(any) addr:0x0214b334
-gStr_Mdl_Map_map2_ground0_3D_LZ_bin_ov093 kind:data(any) addr:0x0214b354
-gStr_Mdl_Map_map2_ground0_3D_LZ_bin_ov093_2 kind:data(any) addr:0x0214b374
-gStr_Mdl_Map_map2_ground1_3D_LZ_bin kind:data(any) addr:0x0214b394
-gStr_Mdl_Map_map2_ground2_3D_LZ_bin_ov093 kind:data(any) addr:0x0214b3b4
+sPathBoard kind:data(any) addr:0x0214b314
+sPathGround3 kind:data(any) addr:0x0214b334
+sPathGround0 kind:data(any) addr:0x0214b354
+sPathGround0b kind:data(any) addr:0x0214b374
+sPathGround1 kind:data(any) addr:0x0214b394
+sPathGround2 kind:data(any) addr:0x0214b3b4
 data_ov093_0214b3d0 kind:data(any) addr:0x0214b3d0 ambiguous
 _ZTV15IslandNameScene kind:data(any) addr:0x0214b3d4
 gStr_KBD_ov093 kind:data(any) addr:0x0214b3f8

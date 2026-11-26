@@ -19,14 +19,15 @@ struct TextPosition {
     int y;
 };
 
-// The file's constants, as overlay 72 has them
+// The file's constants, as overlay 72 has them. The compiler sorts a file's data by size; objects of one size are
+// declared in the order that puts them at their places in the ROM.
 static const int sTextFonts[1] = {0};
-static const u32 sTextMessages[1] = {0x17B}; // "Enter the island's name"
+static char sArchiveM00[] = "M00";
 static const TextPosition sTextPositions[1] = {{128, 7}};
-static const VecFx32 sCameraPosition = {-0x199, 0x1266, 0x6333};
+static const VecFx32 sLightDirection0 = {800, -600, -4000};
 static const VecFx32 sCameraTarget = {0, -0x147, 0};
 static const VecFx32 sLightDirection1 = {0, -4000, 1500};
-static const VecFx32 sLightDirection0 = {800, -600, -4000};
+static const VecFx32 sCameraPosition = {-0x199, 0x1266, 0x6333};
 // The steps of the music's ramps: volume, pitch, tempo ratio, pan
 static const int sMusicRampSteps[4] = {1, 1, 2, 1};
 // The resource each model is drawn with: the ground, then a board for each building
@@ -45,18 +46,24 @@ static const int sModelMusic[13][4] = {
     {110, 0, 224, 24},   {100, -24, 216, -16}, {100, -24, 216, 16},
 };
 
+// The strings of the tables below are named so that their order can be chosen
+static char sArchiveM01[] = "M01";
 static GXRgb sLightColors[2] = {GX_RGB(31, 31, 31), GX_RGB(31, 31, 31)};
-// The archive of each model resource: its path (the ground's is chosen by month), its name and the model in it
-static const char *sResourcePaths[2] = {"Mdl/Map/map2_ground0_3D_LZ.bin", "Mdl/Map/map2_board_3D_LZ.bin"};
-static const char *sResourceArchives[2] = {"M00", "M01"};
-static const char *sResourceModels[2] = {"M00:/ground.imd", "M01:/board.imd"};
+static const u32 sTextMessages[1] = {0x17B}; // "Enter the island's name"
+static char sModelGround[] = "M00:/ground.imd";
+static char sModelBoard[] = "M01:/board.imd";
+static char sPathBoard[] = "Mdl/Map/map2_board_3D_LZ.bin";
+static char sPathGround0b[] = "Mdl/Map/map2_ground0_3D_LZ.bin";
+static char sPathGround1[] = "Mdl/Map/map2_ground1_3D_LZ.bin";
+static char sPathGround2[] = "Mdl/Map/map2_ground2_3D_LZ.bin";
+static char sPathGround3[] = "Mdl/Map/map2_ground3_3D_LZ.bin";
+static char sPathGround0[] = "Mdl/Map/map2_ground0_3D_LZ.bin";
+// The archive of each model resource: its name, its path (the ground's is chosen by month) and the model in it
+static const char *sResourceArchives[2] = {sArchiveM00, sArchiveM01};
+static const char *sResourceModels[2] = {sModelGround, sModelBoard};
+static const char *sResourcePaths[2] = {sPathGround0, sPathBoard};
 // The ground's model by season
-static const char *sGroundModels[4] = {
-    "Mdl/Map/map2_ground0_3D_LZ.bin",
-    "Mdl/Map/map2_ground1_3D_LZ.bin",
-    "Mdl/Map/map2_ground2_3D_LZ.bin",
-    "Mdl/Map/map2_ground3_3D_LZ.bin",
-};
+static const char *sGroundModels[4] = {sPathGround0b, sPathGround1, sPathGround2, sPathGround3};
 
 // Puts a text at a position in pixels
 static inline void SetTextPosition(MessageText *text, TextPosition position) {
