@@ -13,8 +13,8 @@ data_ov094_0214ae84 kind:data(any) addr:0x0214ae84
 data_ov094_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov094_0214aec4 kind:data(any) addr:0x0214aec4 ambiguous
 data_ov094_0214aee0 kind:data(any) addr:0x0214aee0 ambiguous
-sLightDirection0 kind:data(any) addr:0x0214af0c
-sLightDirection1 kind:data(any) addr:0x0214af24
+sLightDirection0 kind:data(any) addr:0x0214af0c local
+sLightDirection1 kind:data(any) addr:0x0214af24 local
 sKindTitles kind:data(any) addr:0x0214af30
 sButtonSounds kind:data(any) addr:0x0214af40
 sKindSounds kind:data(any) addr:0x0214af50

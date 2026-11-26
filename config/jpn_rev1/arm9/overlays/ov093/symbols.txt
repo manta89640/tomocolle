@@ -12,8 +12,8 @@ _ZN15IslandNameMusic9SetTargetEi kind:function(arm,size=0x50) addr:0x0214afd4
 _ZN15IslandNameSceneD1Ev kind:function(arm,size=0x48) addr:0x0214b024
 _ZN15IslandNameSceneD0Ev kind:function(arm,size=0x50) addr:0x0214b06c
 sTextFonts kind:data(any) addr:0x0214b0bc
-sLightDirection1 kind:data(any) addr:0x0214b0e4
-sLightDirection0 kind:data(any) addr:0x0214b0f0
+sLightDirection1 kind:data(any) addr:0x0214b0e4 local
+sLightDirection0 kind:data(any) addr:0x0214b0f0 local
 sMusicRampSteps kind:data(any) addr:0x0214b0fc
 sModelResources kind:data(any) addr:0x0214b10c
 sMonthGrounds kind:data(any) addr:0x0214b140
