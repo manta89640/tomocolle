@@ -26,6 +26,12 @@
 // program's (0x02048EDC, src/scene/SceneManager.cpp). The names are descriptive, not the original: no name of
 // these classes survives in the ROM.
 
+extern "C" {
+extern const int gPersonalityKinds[16];  // By mPersonality: the row of the two tables below
+extern const s16 gStandAnimations[4][5]; // Animation ids, by that row and by mMood: standing
+extern const s16 gWalkAnimations[4][5];  // The same: walking
+}
+
 class MakeUpCharacter;
 class MakeUpCamera;
 class MakeUpLights;
@@ -83,6 +89,7 @@ public:
     void HideHeadIcon();
 
     VecFx32 GetPos() { return mPos; }
+    s16 GetStandAnimation() { return gStandAnimations[gPersonalityKinds[mPersonality]][0]; }
     void SetTargetFloorPos(FloorPos pos) {
         mTarget.x = pos.x;
         mTarget.z = pos.z;
@@ -97,7 +104,7 @@ public:
 
     /* 0x2B18 */ int mCurrentState;
     /* 0x2B1C */ int mState;
-    /* 0x2B20 */ BOOL mUnknown2B20; // Cleared by SetState; the bows wait while it is set, but nothing sets it
+    /* 0x2B20 */ int mStep;         // The step of the state: the bows have only step 0
     /* 0x2B24 */ BOOL mEntered;     // The state has just been set
     /* 0x2B28 */ BOOL mDone;        // The state has done what it does: the scene goes on
     /* 0x2B2C */ int mFrame;        // Frames in the state

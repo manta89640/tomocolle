@@ -37,6 +37,15 @@ static inline int Random(int max) {
     return MATH_Rand16(&gRandom, max);
 }
 
+static inline s16 StandAnimation(int kind) {
+    return gStandAnimations[kind][0];
+}
+
+static inline s16 StandAnimationOf(int kind) {
+    kind = gPersonalityKinds[kind];
+    return gStandAnimations[kind][0];
+}
+
 static inline VecFx32 ZeroVec() {
     VecFx32 v = {0, 0, 0};
     return v;
@@ -155,7 +164,7 @@ void MakeUpScene::InitLowerScreen() {
 
     Sprite_Init(&mButton15EC8, 0, 4, 0x80, 0x60, TRUE);
     SpriteButton_SetSequences(&mButton15EC8, 4, 6);
-    mButton15EC8.SetPosition(FxVec2(sButton0Position.x << FX32_SHIFT, sButton0Position.y << FX32_SHIFT));
+    mButton15EC8.SetPositionFromVec(sButton0Position.x << FX32_SHIFT, sButton0Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton15EC8, sButton0Size.x, sButton0Size.y);
     SpriteButton_Reset(&mButton15EC8);
     SpriteButton_SetKind(&mButton15EC8, 4);
@@ -166,7 +175,7 @@ void MakeUpScene::InitLowerScreen() {
 
     Sprite_Init(&mButton15FBC, 0, 7, 0x80, 0x60, TRUE);
     SpriteButton_SetSequences(&mButton15FBC, 7, 8);
-    mButton15FBC.SetPosition(FxVec2(sButton1Position.x << FX32_SHIFT, sButton1Position.y << FX32_SHIFT));
+    mButton15FBC.SetPositionFromVec(sButton1Position.x << FX32_SHIFT, sButton1Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton15FBC, sButton1Size.x, sButton1Size.y);
     SpriteButton_Reset(&mButton15FBC);
     SpriteButton_SetKind(&mButton15FBC, 4);
@@ -177,7 +186,7 @@ void MakeUpScene::InitLowerScreen() {
 
     Sprite_Init(&mButton160B0, 0, 2, 0x80, 0x60, TRUE);
     SpriteButton_SetSequences(&mButton160B0, 2, 3);
-    mButton160B0.SetPosition(FxVec2(sButton2Position.x << FX32_SHIFT, sButton2Position.y << FX32_SHIFT));
+    mButton160B0.SetPositionFromVec(sButton2Position.x << FX32_SHIFT, sButton2Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton160B0, sButton2Size.x, sButton2Size.y);
     SpriteButton_Reset(&mButton160B0);
     SpriteButton_SetKind(&mButton160B0, 4);
@@ -188,7 +197,7 @@ void MakeUpScene::InitLowerScreen() {
 
     Sprite_Init(&mButton161A4, 0, 0, 0x80, 0x60, TRUE);
     SpriteButton_SetSequences(&mButton161A4, 0, 1);
-    mButton161A4.SetPosition(FxVec2(sButton3Position.x << FX32_SHIFT, sButton3Position.y << FX32_SHIFT));
+    mButton161A4.SetPositionFromVec(sButton3Position.x << FX32_SHIFT, sButton3Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton161A4, sButton3Size.x, sButton3Size.y);
     SpriteButton_Reset(&mButton161A4);
     SpriteButton_SetKind(&mButton161A4, 4);
@@ -241,8 +250,7 @@ void MakeUpScene::Init3d() {
         ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].mShadowVisible = TRUE;
         character->CharacterBase::SetFace(8);
-        character->Character::SetAnimation(RESOURCE_BCA0,
-                                           gStandAnimations[gPersonalityKinds[mCharacters[i].mPersonality]][0]);
+        character->Character::SetAnimation(RESOURCE_BCA0, StandAnimationOf(mCharacters[i].mPersonality));
     }
     SetCharacterPos(&mCharacters[0], ZeroVec());
     SetCharacterPos(&mCharacters[1], sSecondStartPosition);
@@ -529,8 +537,8 @@ void MakeUpScene::SetState(int state) {
 
 // Whether the two make up: by a chance of a quarter of how much they like each other, plus 25, in 100
 BOOL MakeUpScene::DecideMakeUp(MakeUpCharacter *first, MakeUpCharacter *second) {
-    int chance = (first->mRelationMeter[second->mIndex] + second->mRelationMeter[first->mIndex]) / 4 + 25;
-    return chance > Random(100);
+    int chance = (second->mRelationMeter[first->mIndex] + first->mRelationMeter[second->mIndex]) / 4 + 25;
+    return chance > MATH_Rand16(&gRandom, 100);
 }
 
 // What making up, or not, does to the two: friends, lovers or spouses again; or friends no more, or lovers and
@@ -677,7 +685,9 @@ void MakeUpCharacter::UpdateState() {
             Character::BlendToAnimation(RESOURCE_BCA0, 0x39);
             GetAnimation()->mPlayOnce = TRUE;
             CharacterBase::SetFace(8);
-        } else if (!mDone && !mUnknown2B20) {
+        } else if (!mDone) {
+            switch (mStep) {
+            case 0:
             if (mFrame == GetAnimationFrames() / 2) {
                 gSoundManager.StartSeqArc(1, 0x1F, 4);
             }
@@ -685,6 +695,8 @@ void MakeUpCharacter::UpdateState() {
                 Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
                 GetAnimation()->mPlayOnce = FALSE;
                 mDone = TRUE;
+            }
+            break;
             }
         }
         break;
@@ -694,7 +706,9 @@ void MakeUpCharacter::UpdateState() {
             Character::BlendToAnimation(RESOURCE_BCA0, 0x3A);
             GetAnimation()->mPlayOnce = TRUE;
             CharacterBase::SetFace(8);
-        } else if (!mDone && !mUnknown2B20) {
+        } else if (!mDone) {
+            switch (mStep) {
+            case 0:
             if (mFrame == GetAnimationFrames() / 2) {
                 gSoundManager.StartSeqArc(1, 0x1F, 2);
             }
@@ -702,6 +716,8 @@ void MakeUpCharacter::UpdateState() {
                 Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
                 GetAnimation()->mPlayOnce = FALSE;
                 mDone = TRUE;
+            }
+            break;
             }
         }
         break;
@@ -795,7 +811,7 @@ void MakeUpCharacter::UpdateState() {
 
 void MakeUpCharacter::SetState(int state) {
     mState = state;
-    mUnknown2B20 = FALSE;
+    mStep = FALSE;
     mEntered = TRUE;
     mDone = FALSE;
     mFrame = 0;
