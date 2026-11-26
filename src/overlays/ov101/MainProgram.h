@@ -49,8 +49,8 @@ extern const TroubleInfo *data_02114d78[];
 }
 
 // The kind of the character's trouble
-static inline u8 GetTroubleKind(SavedCharacter *character) {
-    return data_02114d78[character->mTroubleCategory][character->mTroubleId].mKind;
+static inline int GetTroubleKind(int category, int id) {
+    return data_02114d78[category][id].mKind;
 }
 
 // What the touch scene (overlay 75) leaves after gSceneMemory: the answers of its talk page (the first of

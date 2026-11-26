@@ -27,6 +27,15 @@ static const VecFx32 sVisitorStartVisit = {0, 0, -0x8000};
 static const VecFx32 sCameraTargetVisit = {0, 0x1999, 0};
 static const VecFx32 sLightDirections[2] = {{0x640, -0x258, -0xFA0}, {0, -0xFA0, 0x5DC}};
 
+static inline s16 StandAnimationOf(int kind) {
+    kind = gPersonalityKinds[kind];
+    return gStandAnimations[kind][0];
+}
+
+static inline s16 GetStandAnimation(FriendVisitCharacter *character) {
+    return gStandAnimations[gPersonalityKinds[character->mPersonality]][0];
+}
+
 // --- The scene ----------------------------------------------------------------------------------------------------
 
 void FriendVisitScene::StartLoading() {
@@ -126,7 +135,7 @@ void FriendVisitScene::InitLowerScreen() {
 
     Sprite_Init(&mButton, 0, 4, 128, 96, TRUE);
     SpriteButton_SetSequences(&mButton, 4, 6);
-    mButton.SetPosition(FxVec2(sButtonPosition.x << FX32_SHIFT, sButtonPosition.y << FX32_SHIFT));
+    mButton.SetPositionFromVec(sButtonPosition.x << FX32_SHIFT, sButtonPosition.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton, sButtonSize.x, sButtonSize.y);
     SpriteButton_Reset(&mButton);
     SpriteButton_SetKind(&mButton, 4);
@@ -137,7 +146,7 @@ void FriendVisitScene::InitLowerScreen() {
 
     Sprite_Init(&mButton15FC0, 0, 7, 128, 96, TRUE);
     SpriteButton_SetSequences(&mButton15FC0, 7, 8);
-    mButton15FC0.SetPosition(FxVec2(sButton15FC0Position.x << FX32_SHIFT, sButton15FC0Position.y << FX32_SHIFT));
+    mButton15FC0.SetPositionFromVec(sButton15FC0Position.x << FX32_SHIFT, sButton15FC0Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton15FC0, sButton15FC0Size.x, sButton15FC0Size.y);
     SpriteButton_Reset(&mButton15FC0);
     SpriteButton_SetKind(&mButton15FC0, 4);
@@ -148,7 +157,7 @@ void FriendVisitScene::InitLowerScreen() {
 
     Sprite_Init(&mButton160B4, 0, 2, 128, 96, TRUE);
     SpriteButton_SetSequences(&mButton160B4, 2, 3);
-    mButton160B4.SetPosition(FxVec2(sButton160B4Position.x << FX32_SHIFT, sButton160B4Position.y << FX32_SHIFT));
+    mButton160B4.SetPositionFromVec(sButton160B4Position.x << FX32_SHIFT, sButton160B4Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton160B4, sButton160B4Size.x, sButton160B4Size.y);
     SpriteButton_Reset(&mButton160B4);
     SpriteButton_SetKind(&mButton160B4, 4);
@@ -159,7 +168,7 @@ void FriendVisitScene::InitLowerScreen() {
 
     Sprite_Init(&mButton161A8, 0, 0, 128, 96, TRUE);
     SpriteButton_SetSequences(&mButton161A8, 0, 1);
-    mButton161A8.SetPosition(FxVec2(sButton161A8Position.x << FX32_SHIFT, sButton161A8Position.y << FX32_SHIFT));
+    mButton161A8.SetPositionFromVec(sButton161A8Position.x << FX32_SHIFT, sButton161A8Position.y << FX32_SHIFT);
     SpriteButton_SetTouchRect(&mButton161A8, sButton161A8Size.x, sButton161A8Size.y);
     SpriteButton_Reset(&mButton161A8);
     SpriteButton_SetKind(&mButton161A8, 4);
@@ -177,7 +186,6 @@ void FriendVisitScene::InitLowerScreen() {
 // The top screen: the room, the camera, the lights, the particles and the two characters
 void FriendVisitScene::Init3d() {
     void *animations;
-    VecFx32 positions[2] = {{0, 0, 0}, sVisitorStart};
 
     VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown48 = 1;
@@ -200,6 +208,11 @@ void FriendVisitScene::Init3d() {
     ModelResources_SetModel(gModelResources, 1, mCharacters[1].mModelPath);
     mCharacters[0].Character::Init(0, 0, 0);
     mCharacters[1].Character::Init(1, 0, 0);
+    VecFx32 positions[2];
+    VecFx32 zero = {0, 0, 0};
+    VecFx32 start = sVisitorStart;
+    positions[0] = zero;
+    positions[1] = start;
     for (int i = 0; i < 2; i++) {
         FriendVisitCharacter *character = &mCharacters[i];
         GameData_ReadCharacter(&gGameData, mCharacterIndices[i], character);
@@ -213,7 +226,7 @@ void FriendVisitScene::Init3d() {
         ResourceSet_SetArchive((void *)mCharacters[i].mAnim.mUnknown04, RESOURCE_BCA0, animations);
         mCharacters[i].mShadowVisible = TRUE;
         character->CharacterBase::SetFace(8);
-        character->Character::SetAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mCharacters[i].mPersonality]][0]);
+        character->Character::SetAnimation(RESOURCE_BCA0, StandAnimationOf(mCharacters[i].mPersonality));
         mCharacters[i].SetPos(positions[i]);
         character->Character::SetAngle(0x3800);
     }
@@ -341,14 +354,26 @@ void FriendVisitScene::UpdateSetOff() {
     }
 }
 
+static inline void SetWalkTarget(FriendVisitCharacter *character, FloorPos target) {
+    character->mWalkTarget = target;
+}
+
+static inline VecFx32 ZeroVec() {
+    VecFx32 v = {0, 0, 0};
+    return v;
+}
+
+static inline void SetTurnTarget(FriendVisitCharacter *c, FloorPos t) {
+    c->mTurnTarget = t;
+}
+
 // The visit: the second character rings, comes in and talks with the first
 void FriendVisitScene::UpdateVisit() {
     switch (mState) {
     case 0:
         if (mEntered) {
             mEntered = FALSE;
-            VecFx32 zero = {0, 0, 0};
-            mCharacters[0].SetPos(zero);
+            mCharacters[0].SetPos(ZeroVec());
             mCharacters[1].SetPos(sVisitorStartVisit);
             mCharacters[0].SetState(FriendVisitCharacter::STATE_STAND);
             mCharacters[1].SetState(FriendVisitCharacter::STATE_STAND);
@@ -376,7 +401,7 @@ void FriendVisitScene::UpdateVisit() {
     case 3: // The host turns to the visitor
         if (mEntered) {
             mEntered = FALSE;
-            mCharacters[0].mTurnTarget = mCharacters[1].GetFloorPos();
+            SetTurnTarget(&mCharacters[0], mCharacters[1].GetFloorPos());
             mCharacters[0].SetState(FriendVisitCharacter::STATE_TURN);
         } else if (mCharacters[0].mDone) {
             mCharacters[0].SetState(FriendVisitCharacter::STATE_STAND);
@@ -386,7 +411,7 @@ void FriendVisitScene::UpdateVisit() {
     case 4: // The visitor comes in
         if (mEntered) {
             mEntered = FALSE;
-            mCharacters[1].mWalkTarget = sDoorInside;
+            SetWalkTarget(&mCharacters[1], sDoorInside);
             mCharacters[1].SetState(FriendVisitCharacter::STATE_WALK_IN);
         } else if (mCharacters[1].mDone) {
             mCharacters[1].SetState(FriendVisitCharacter::STATE_STAND);
@@ -413,7 +438,7 @@ void FriendVisitScene::UpdateVisit() {
     case 7: // The visitor goes to the host
         if (mEntered) {
             mEntered = FALSE;
-            mCharacters[1].mWalkTarget = sMeetingPoint;
+            SetWalkTarget(&mCharacters[1], sMeetingPoint);
             mCharacters[1].SetState(FriendVisitCharacter::STATE_WALK_IN);
         } else if (mCharacters[1].mDone) {
             NextState();
@@ -454,20 +479,16 @@ void FriendVisitScene::UpdateVisit() {
         break;
     case 11: // They became friends: the icon between them
         if (mEntered) {
-            VecFx32 first;
-            VecFx32 second;
             mEntered = FALSE;
             mCharacters[0].SetState(FriendVisitCharacter::STATE_BOW2);
             mCharacters[1].SetState(FriendVisitCharacter::STATE_BOW2);
-            first = mCharacters[0].GetJointPosition(CharacterModel::JOINT_BODY);
-            second = mCharacters[1].GetJointPosition(CharacterModel::JOINT_BODY);
+            VecFx32 first = mCharacters[0].GetJointPosition(CharacterModel::JOINT_BODY);
+            VecFx32 second = mCharacters[1].GetJointPosition(CharacterModel::JOINT_BODY);
             VEC_Add(&first, &second, &first);
             first.x >>= 1;
             first.y >>= 1;
             first.z >>= 1;
-            mHeadIcons[0].mPos.x = first.x;
-            mHeadIcons[0].mPos.y = first.y;
-            mHeadIcons[0].mPos.z = first.z;
+            mHeadIcons[0].SetPos(first.x, first.y, first.z);
         } else {
             if (mFrame == 40) {
                 mHeadIcons[0].Show();
@@ -501,8 +522,14 @@ void FriendVisitScene::UpdateVisit() {
         if (mEntered) {
             mEntered = FALSE;
         } else if (mFrame >= 0) {
-            gSceneScratch[0] = mFriends ? 0 : 1;
-            ApplyOutcome(mFriends);
+            u8 *const scratch = gSceneScratch;
+            if (mFriends) {
+                scratch[0] = 0;
+                ApplyOutcome(mFriends);
+            } else {
+                scratch[0] = 1;
+                ApplyOutcome(mFriends);
+            }
             if (gSceneManager.mPreviousSceneId == 0xAF) {
                 gSceneManager.RequestScene(0x40);
             } else {
@@ -565,7 +592,7 @@ BOOL FriendVisitScene::DrawFriendship(FriendVisitCharacter *host, FriendVisitCha
         mMannerMatched = TRUE;
         chance += 30;
     }
-    u8 kind = GetTroubleKind(visitor);
+    int kind = GetTroubleKind(visitor->mTroubleCategory, visitor->mTroubleId);
     if (kind == 11) {
         chance += 20;
     }
@@ -584,10 +611,10 @@ BOOL FriendVisitScene::DrawFriendship(FriendVisitCharacter *host, FriendVisitCha
             }
         }
     }
-    u16 draw = Rand(100);
     if (hostFriends <= 0 || visitorFriends <= 0) {
         chance = 100;
     }
+    int draw = Rand(100);
     return chance > draw;
 }
 
@@ -600,7 +627,7 @@ void FriendVisitScene::ApplyOutcome(BOOL friends) {
         if (!mCharacters[1].IsInTrouble()) {
             return;
         }
-        u8 kind = GetTroubleKind(&mCharacters[1]);
+        int kind = GetTroubleKind(mCharacters[1].mTroubleCategory, mCharacters[1].mTroubleId);
         if (kind == 11) {
             mCharacters[1].EndTrouble(Clock_GetSeconds(gGameClock));
         } else if (kind == 4 && mCharacters[1].mTroubleTarget == mCharacters[0].mIndex) {
@@ -615,9 +642,6 @@ void FriendVisitScene::ApplyOutcome(BOOL friends) {
 
 // --- The characters ---------------------------------------------------------------------------------------------
 
-static inline s16 GetStandAnimation(FriendVisitCharacter *character) {
-    return gStandAnimations[gPersonalityKinds[character->mPersonality]][0];
-}
 
 static inline s16 GetWalkAnimation(FriendVisitCharacter *character) {
     return gWalkAnimations[gPersonalityKinds[character->mPersonality]][0];
@@ -949,7 +973,8 @@ u16 FriendVisitCharacter::GetHeadYawTo(VecFx32 *target) {
 // Keeps the head icon over the neck, turned with the head
 void FriendVisitCharacter::PlaceHeadIcon() {
     mHeadIcon.mAngle = 0x4000 - mAngle + mHeadYawNow;
-    mHeadIcon.SetPos(mJointMatrices[JOINT_NECK]._30, mJointMatrices[JOINT_NECK]._31, mJointMatrices[JOINT_NECK]._32);
+    MtxFx43 *matrices = mJointMatrices;
+    mHeadIcon.SetPos(matrices[JOINT_NECK]._30, matrices[JOINT_NECK]._31, matrices[JOINT_NECK]._32);
 }
 
 // --- The camera -------------------------------------------------------------------------------------------------
