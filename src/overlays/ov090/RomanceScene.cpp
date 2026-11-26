@@ -1457,11 +1457,19 @@ void RomanceMap::Clear() {
 }
 
 void RomanceMap::ClearPoints() {
-    mUnknown00C = FxVec2(0, 0);
-    mUnknown014 = FxVec2(0, 0);
-    mUnknown01C = FxVec2(0, 0);
-    mUnknown078 = 0;
-    mUnknown074 = 0;
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown00C = v;
+    }
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown014 = v;
+    }
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown01C = v;
+    }
+    mUnknown074 = mUnknown078 = 0;
     for (int i = 0; i < 10; i++) {
         mUnknown024[i].x = 0;
         mUnknown024[i].y = 0;

@@ -1273,11 +1273,19 @@ void ReconcileDebugMap::Reset() {
 }
 
 void ReconcileDebugMap::ClearPoints() {
-    mUnknown00C[0] = ZeroPoint();
-    mUnknown00C[1] = ZeroPoint();
-    mUnknown00C[2] = ZeroPoint();
-    mUnknown078 = 0;
-    mUnknown074 = 0;
+    {
+        ScreenPoint v = {0, 0};
+        mUnknown00C[0] = v;
+    }
+    {
+        ScreenPoint v = {0, 0};
+        mUnknown00C[1] = v;
+    }
+    {
+        ScreenPoint v = {0, 0};
+        mUnknown00C[2] = v;
+    }
+    mUnknown074 = mUnknown078 = 0;
     for (int i = 0; i < 10; i++) {
         mUnknown024[i].x = 0;
         mUnknown024[i].y = 0;
