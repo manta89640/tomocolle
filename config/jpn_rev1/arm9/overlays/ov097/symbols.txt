@@ -1,15 +1,15 @@
-func_ov097_02149a40 kind:function(arm,size=0x60) addr:0x02149a40
-func_ov097_02149aa0 kind:function(arm,size=0x74) addr:0x02149aa0
-func_ov097_02149b14 kind:function(arm,size=0x4f8) addr:0x02149b14
-func_ov097_0214a00c kind:function(arm,size=0x70) addr:0x0214a00c
-func_ov097_0214a07c kind:function(arm,size=0x24c) addr:0x0214a07c
-func_ov097_0214a2c8 kind:function(arm,size=0x8c) addr:0x0214a2c8
-func_ov097_0214a354 kind:function(arm,size=0x108) addr:0x0214a354
-func_ov097_0214a45c kind:function(arm,size=0x120) addr:0x0214a45c
-func_ov097_0214a57c kind:function(arm,size=0x4c) addr:0x0214a57c
-func_ov097_0214a5c8 kind:function(arm,size=0x108) addr:0x0214a5c8
-func_ov097_0214a6d0 kind:function(arm,size=0x70) addr:0x0214a6d0
-func_ov097_0214a740 kind:function(arm,size=0x78) addr:0x0214a740
+_ZN14Marriage2Scene12StartLoadingEv kind:function(arm,size=0x60) addr:0x02149a40
+_ZN14Marriage2Scene4ExitEv kind:function(arm,size=0x74) addr:0x02149aa0
+_ZN14Marriage2Scene4InitEv kind:function(arm,size=0x4f8) addr:0x02149b14
+_ZN14Marriage2Scene4DrawEv kind:function(arm,size=0x70) addr:0x0214a00c
+_ZN14Marriage2Scene6UpdateEv kind:function(arm,size=0x24c) addr:0x0214a07c
+_ZN14Marriage2Scene8SetStateEi kind:function(arm,size=0x8c) addr:0x0214a2c8
+_ZN14Marriage2Scene12MountPictureEii kind:function(arm,size=0x108) addr:0x0214a354
+_ZN14Marriage2Scene11ShowPictureEv kind:function(arm,size=0x120) addr:0x0214a45c
+_ZN14Marriage2Scene11SetFacePoseEiPKNS_8FacePoseE kind:function(arm,size=0x4c) addr:0x0214a57c
+_ZN14Marriage2Scene13ScrollCreditsEv kind:function(arm,size=0x108) addr:0x0214a5c8
+_ZN14Marriage2SceneD1Ev kind:function(arm,size=0x70) addr:0x0214a6d0
+_ZN14Marriage2SceneD0Ev kind:function(arm,size=0x78) addr:0x0214a740
 data_ov097_0214a7b8 kind:data(any) addr:0x0214a7b8
 data_ov097_0214a80c kind:data(any) addr:0x0214a80c ambiguous
 data_ov097_0214a838 kind:data(any) addr:0x0214a838 ambiguous
