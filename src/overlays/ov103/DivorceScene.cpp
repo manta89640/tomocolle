@@ -453,10 +453,14 @@ void DivorceScript::SetCharacters(DivorceCharacter *first, DivorceCharacter *sec
 
 // Runs the commands until one waits
 void DivorceScript::Update() {
-    while (Run(mIndex)) {
-        mIndex++;
-        mFrame = 0;
-    }
+    BOOL next;
+    do {
+        next = Run(mIndex);
+        if (next) {
+            mIndex++;
+            mFrame = 0;
+        }
+    } while (next);
     mFrame++;
 }
 
@@ -1308,13 +1312,6 @@ void DivorceLights::BlendColor(u16 from, u16 to, u16 *color, int frames) {
 
 // --- The debugging view -----------------------------------------------------------------------------------------
 
-static inline ScreenPoint ZeroPoint() {
-    ScreenPoint point;
-    point.x = 0;
-    point.y = 0;
-    return point;
-}
-
 void DivorceDebugView::Reset() {
     mUnknown000 = 0;
     mUnknown004 = 0;
@@ -1323,9 +1320,18 @@ void DivorceDebugView::Reset() {
 }
 
 void DivorceDebugView::ClearPoints() {
-    mUnknown00C = ZeroPoint();
-    mUnknown014 = ZeroPoint();
-    mUnknown01C = ZeroPoint();
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown00C = v;
+    }
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown014 = v;
+    }
+    {
+        NNSG2dFVec2 v = {0, 0};
+        mUnknown01C = v;
+    }
     mUnknown074 = mUnknown078 = 0;
     for (int i = 0; i < 10; i++) {
         mPoints[i].x = 0;

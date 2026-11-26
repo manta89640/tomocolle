@@ -197,9 +197,9 @@ public:
     /* 0x000 */ int mUnknown000;
     /* 0x004 */ int mUnknown004;
     /* 0x008 */ int mUnknown008;
-    /* 0x00C */ ScreenPoint mUnknown00C;
-    /* 0x014 */ ScreenPoint mUnknown014;
-    /* 0x01C */ ScreenPoint mUnknown01C;
+    /* 0x00C */ NNSG2dFVec2 mUnknown00C;
+    /* 0x014 */ NNSG2dFVec2 mUnknown014;
+    /* 0x01C */ NNSG2dFVec2 mUnknown01C;
     /* 0x024 */ ScreenPoint mPoints[10];
     /* 0x074 */ int mUnknown074;
     /* 0x078 */ int mUnknown078;
