@@ -144,7 +144,7 @@ struct PaletteLoader {
 #include "../overlays/ov099/InformationScene.h"
 #include "../overlays/ov101/FriendVisitScene.h"
 #include "../overlays/ov110/ItemTradeScene.h"
-#include "../overlays/ov102/SceneB2.h"
+#include "../overlays/ov102/MakeUpScene.h"
 #include "../overlays/ov103/DivorceScene.h"
 #include "../overlays/ov100/AlbumScene.h"
 #include "../overlays/ov104/ReconcileScene.h"
@@ -797,7 +797,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xB2:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(102));
-        return new SceneB2(sceneId);
+        return new MakeUpScene(sceneId);
     case 0xB3:
         SetSoundGroup(58);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(103));
@@ -1212,7 +1212,7 @@ FriendVisitScene::FriendVisitScene(int sceneId) : Scene(sceneId) {}
 ItemTradeScene::ItemTradeScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB2, overlay 102
-SceneB2::SceneB2(int sceneId) : Scene(sceneId) {}
+MakeUpScene::MakeUpScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB3, overlay 103
 DivorceScene::DivorceScene(int sceneId) : Scene(sceneId) {}
