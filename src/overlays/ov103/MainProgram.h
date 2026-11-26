@@ -112,6 +112,19 @@ void ParticleSystem_Draw(ParticleSystem *particles, int unknown); // Draws
 void func_0207b138(void *manager);                                // Updates
 }
 
+static inline const TroubleInfo *GetTroubleInfo(int category, int id) {
+    return &data_02114d78[category][id];
+}
+
+static inline int GetTroubleKind(int category, int id) {
+    return data_02114d78[category][id].mKind;
+}
+
+static inline int ToTroubleKind(int category, int id) {
+    id = data_02114d78[category][id].mKind;
+    return id;
+}
+
 // --- Inlines -------------------------------------------------------------------------------------------------------
 
 static inline u16 Rand(int max) {

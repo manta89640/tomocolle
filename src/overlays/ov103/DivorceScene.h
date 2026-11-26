@@ -160,7 +160,18 @@ public:
 // One command of the script: what it is and up to four arguments (a character, a vector, a message, frames)
 struct DivorceCommand {
     /* 0x00 */ int mCommand;
-    /* 0x04 */ int mArgs[4];
+    union {
+        /* 0x04 */ int mArgs[4];
+        /* 0x04 */ VecFx32 mVector; // The camera's position or target
+        struct {
+            /* 0x04 */ int mCharacter;
+            /* 0x08 */ VecFx32 mVector;
+        } mPlace;                    // A character's position
+        struct {
+            /* 0x04 */ int mCharacter;
+            /* 0x08 */ u16 mAngle;
+        } mTurn;                     // The way a character faces
+    };
 }; // 0x14
 
 // The scene's script: a list of commands that move the characters, the camera and the lights. Each frame it runs

@@ -292,15 +292,16 @@ void DivorceScene::Separate() {
     }
     if (separated && mCharacters[1].IsTroubleOfCategory34OrKind20()) {
         int category = mCharacters[1].mTroubleCategory;
+        int troubleKind;
         separated = FALSE;
-        if (category == 4) {
+        if (category == 4 || (troubleKind = ToTroubleKind(category, mCharacters[1].mTroubleId)) == 4) {
             separated = TRUE;
         } else {
-            int troubleKind = data_02114d78[category][mCharacters[1].mTroubleId].mKind;
-            if (troubleKind == 4) {
+            switch (troubleKind) {
+            case 9:
+            case 10:
                 separated = TRUE;
-            } else if (troubleKind == 9 || troubleKind == 10) {
-                separated = TRUE;
+                break;
             }
         }
     }
@@ -321,7 +322,7 @@ void DivorceScene::Separate() {
     mCharacters[1].mSatisfyMeter = 0;
     if (mCharacters[1].IsLongActPaired()) {
         SavedCharacter partner;
-        u8 index = mCharacters[1].mLongActPartner;
+        int index = mCharacters[1].mLongActPartner;
         if (mCharacters[0].mIndex == (u16)index) {
             mCharacters[0].ClearLongAct();
         } else {
@@ -464,15 +465,20 @@ void DivorceScript::Update() {
     mFrame++;
 }
 
+// The body's current animation, found from the model
+static inline ModelAnimation *GetBodyAnimation(CharacterModel &model) {
+    return AnimModel_FindAnimation(&model.mAnim, RESOURCE_BCA0, model.mAnimId);
+}
+
 // Runs one command; FALSE when the script has to wait in it
 BOOL DivorceScript::Run(int index) {
     BOOL next = TRUE;
     switch (sScript[index].mCommand) {
     case CMD_CAMERA_POSITION:
-        mCamera->SetPosition(*(VecFx32 *)sScript[index].mArgs);
+        mCamera->SetPosition(sScript[index].mVector);
         break;
     case CMD_CAMERA_TARGET:
-        mCamera->SetTarget(*(VecFx32 *)sScript[index].mArgs);
+        mCamera->SetTarget(sScript[index].mVector);
         Camera_UpdateEye(mCamera->mCamera);
         break;
     case CMD_CAMERA_STILL:
@@ -507,16 +513,16 @@ BOOL DivorceScript::Run(int index) {
         mRoom->mDoor.SetMotion(RoomDoor::MOTION_CLOSE);
         break;
     case CMD_SET_POSITION:
-        mCharacters[sScript[index].mArgs[0]]->SetPos(*(VecFx32 *)&sScript[index].mArgs[1]);
+        mCharacters[sScript[index].mArgs[0]]->SetPos(sScript[index].mPlace.mVector);
         break;
     case CMD_SET_ANGLE:
-        mCharacters[sScript[index].mArgs[0]]->Character::SetAngle(sScript[index].mArgs[1]);
+        mCharacters[sScript[index].mArgs[0]]->Character::SetAngle(sScript[index].mTurn.mAngle);
         break;
     case CMD_SET_POSITION_15:
-        mCharacters[sScript[index].mArgs[0]]->SetPos(*(VecFx32 *)&sScript[index].mArgs[1]);
+        mCharacters[sScript[index].mArgs[0]]->SetPos(sScript[index].mPlace.mVector);
         break;
     case CMD_SET_POSITION_16:
-        mCharacters[sScript[index].mArgs[0]]->SetPos(*(VecFx32 *)&sScript[index].mArgs[1]);
+        mCharacters[sScript[index].mArgs[0]]->SetPos(sScript[index].mPlace.mVector);
         break;
     case CMD_SET_STATE:
         mCharacters[sScript[index].mArgs[0]]->SetState(sScript[index].mArgs[1]);
@@ -524,13 +530,13 @@ BOOL DivorceScript::Run(int index) {
     case CMD_PLAY_ANIMATION: {
         int i = sScript[index].mArgs[0];
         mCharacters[i]->Character::BlendToAnimation(RESOURCE_BCA0, sScript[index].mArgs[1]);
-        mCharacters[i]->GetAnimation()->mPlayOnce = FALSE;
+        GetBodyAnimation(*mCharacters[i])->mPlayOnce = FALSE;
         break;
     }
     case CMD_PLAY_ANIMATION_ONCE: {
         int i = sScript[index].mArgs[0];
         mCharacters[i]->Character::BlendToAnimation(RESOURCE_BCA0, sScript[index].mArgs[1]);
-        mCharacters[i]->GetAnimation()->mPlayOnce = TRUE;
+        GetBodyAnimation(*mCharacters[i])->mPlayOnce = TRUE;
         break;
     }
     case CMD_SAY: {
@@ -669,7 +675,7 @@ BOOL DivorceScript::Run(int index) {
         }
         break;
     case CMD_WAIT_ANIMATION:
-        if (mCharacters[sScript[index].mArgs[0]]->GetAnimation()->mFinished) {
+        if (GetBodyAnimation(*mCharacters[sScript[index].mArgs[0]])->mFinished) {
             next = FALSE;
         }
         break;
@@ -819,16 +825,21 @@ void DivorceCharacter::UpdateState() {
             Character::BlendToAnimation(RESOURCE_BCA0, 0x18);
             GetAnimation()->mPlayOnce = TRUE;
             CharacterBase::SetFace(8);
-        } else if (!mDone && mStep == 0) {
-            ModelAnimation *animation = GetAnimation();
-            int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
-            if (mFrame == frames / 2) {
-                gSoundManager.StartSeqArc(1, 0x1F, 4);
+        } else if (!mDone) {
+            switch (mStep) {
+            case 0: {
+                ModelAnimation *animation = GetAnimation();
+                int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
+                if (mFrame == frames / 2) {
+                    gSoundManager.StartSeqArc(1, 0x1F, 4);
+                }
+                if (GetAnimation()->mFinished) {
+                    Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
+                    GetAnimation()->mPlayOnce = FALSE;
+                    mDone = TRUE;
+                }
+                break;
             }
-            if (GetAnimation()->mFinished) {
-                Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
-                GetAnimation()->mPlayOnce = FALSE;
-                mDone = TRUE;
             }
         }
         break;
@@ -839,16 +850,21 @@ void DivorceCharacter::UpdateState() {
             Character::BlendToAnimation(RESOURCE_BCA0, 0x19);
             GetAnimation()->mPlayOnce = TRUE;
             CharacterBase::SetFace(8);
-        } else if (!mDone && mStep == 0) {
-            ModelAnimation *animation = GetAnimation();
-            int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
-            if (mFrame == frames / 2) {
-                gSoundManager.StartSeqArc(1, 0x1F, 2);
+        } else if (!mDone) {
+            switch (mStep) {
+            case 0: {
+                ModelAnimation *animation = GetAnimation();
+                int frames = (((NNSG3dResJntAnm *)animation->mAnmObj->resAnm)->numFrame << FX32_SHIFT) / (fx32)animation->mUnknown10 + 1;
+                if (mFrame == frames / 2) {
+                    gSoundManager.StartSeqArc(1, 0x1F, 2);
+                }
+                if (GetAnimation()->mFinished) {
+                    Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
+                    GetAnimation()->mPlayOnce = FALSE;
+                    mDone = TRUE;
+                }
+                break;
             }
-            if (GetAnimation()->mFinished) {
-                Character::BlendToAnimation(RESOURCE_BCA0, gStandAnimations[gPersonalityKinds[mPersonality]][0]);
-                GetAnimation()->mPlayOnce = FALSE;
-                mDone = TRUE;
             }
         }
         break;
