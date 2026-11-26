@@ -153,7 +153,8 @@ void DivorceScene::Init() {
     mTtsPlayer.InitEngine();
     mSpeechText.mMessageFile = &mMessageFiles[1];
     mCharOffset += mWindow.Init(mCharOffset, &mMessageFiles[1], 4, 0x10, &mTtsPlayer, FALSE);
-    mWindow.mText[0].mHAlign = mWindow.mText[0].mVAlign = 1;
+    mWindow.mText[0].mVAlign = 1;
+    mWindow.mText[0].mHAlign = 1;
     mWindow.Hide();
     InitLowerScreen();
     Init3d();
