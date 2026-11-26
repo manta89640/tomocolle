@@ -36,7 +36,9 @@ void NNS_GfdDumpLnkPlttVramManager(void);
 // --- The camera and the lights ---
 
 struct Camera {
-    /* 0x00 */ u8 mUnknown00[0x14];
+    /* 0x00 */ int mUnknown00;
+    /* 0x04 */ int mUnknown04;
+    /* 0x08 */ u8 mUnknown08[0xC];
     /* 0x14 */ VecFx32 mPosition;
     /* 0x20 */ VecFx32 mEye;
     /* 0x2C */ VecFx32 mTarget;

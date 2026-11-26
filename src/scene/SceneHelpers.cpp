@@ -265,7 +265,7 @@ void FaceCast::SetupCamera() {
 
 #pragma opt_propagation reset
 
-void FaceCast::UpdateFaces() {
+void FaceCast::UpdateFaces(BOOL unused) {
     for (int i = 0; i < mCount; i++) {
         mFaces[i].UpdateFace();
     }
