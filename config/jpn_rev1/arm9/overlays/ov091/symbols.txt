@@ -1,57 +1,56 @@
-func_ov091_02149a40 kind:function(arm,size=0xc4) addr:0x02149a40
-func_ov091_02149b04 kind:function(arm,size=0x820) addr:0x02149b04
-func_ov091_0214a324 kind:function(arm,size=0x1cc) addr:0x0214a324
-func_ov091_0214a4f0 kind:function(arm,size=0x7c) addr:0x0214a4f0
-func_ov091_0214a56c kind:function(arm,size=0xa0) addr:0x0214a56c
-func_ov091_0214a60c kind:function(arm,size=0x60) addr:0x0214a60c
-func_ov091_0214a66c kind:function(arm,size=0x5c) addr:0x0214a66c
-func_ov091_0214a6c8 kind:function(arm,size=0x64) addr:0x0214a6c8
-data_ov091_0214a72c kind:data(any) addr:0x0214a72c
-data_ov091_0214a75c kind:data(any) addr:0x0214a75c
-data_ov091_0214a774 kind:data(any) addr:0x0214a774
-data_ov091_0214a78c kind:data(any) addr:0x0214a78c
-data_ov091_0214a79c kind:data(any) addr:0x0214a79c
-data_ov091_0214a7a8 kind:data(any) addr:0x0214a7a8 ambiguous
-gStr__ov091 kind:data(any) addr:0x0214a7ac
-gStr__ov091_2 kind:data(any) addr:0x0214a7bc
-data_ov091_0214a7cc kind:data(any) addr:0x0214a7cc
-data_ov091_0214a7ec kind:data(any) addr:0x0214a7ec
-data_ov091_0214a80c kind:data(any) addr:0x0214a80c
-data_ov091_0214a82c kind:data(any) addr:0x0214a82c
-data_ov091_0214a838 kind:data(any) addr:0x0214a838 ambiguous
-data_ov091_0214a848 kind:data(any) addr:0x0214a848 ambiguous
-data_ov091_0214a864 kind:data(any) addr:0x0214a864
-gStr_N83_Window_down_nsc_ov091 kind:data(any) addr:0x0214a89c
-gStr_FullStop_ov091 kind:data(any) addr:0x0214a8b4
-data_ov091_0214a8c8 kind:data(any) addr:0x0214a8c8 ambiguous
-gStr__ov091_3 kind:data(any) addr:0x0214a8f4
-data_ov091_0214a90c kind:data(any) addr:0x0214a90c ambiguous
-data_ov091_0214a948 kind:data(any) addr:0x0214a948 ambiguous
+_ZN13CityHallScene12StartLoadingEv kind:function(arm,size=0xc4) addr:0x02149a40
+_ZN13CityHallScene4InitEv kind:function(arm,size=0x820) addr:0x02149b04
+_ZN13CityHallScene6UpdateEv kind:function(arm,size=0x1cc) addr:0x0214a324
+_ZN13CityHallScene4DrawEv kind:function(arm,size=0x7c) addr:0x0214a4f0
+_ZN13CityHallScene4ExitEv kind:function(arm,size=0xa0) addr:0x0214a56c
+_ZN13CityHallScene8SetStateEi kind:function(arm,size=0x60) addr:0x0214a60c
+_ZN13CityHallSceneD1Ev kind:function(arm,size=0x5c) addr:0x0214a66c
+_ZN13CityHallSceneD0Ev kind:function(arm,size=0x64) addr:0x0214a6c8
+sTextButtonSequences kind:data(any) addr:0x0214a72c local
+sTextButtonMessages kind:data(any) addr:0x0214a730 local
+sTextButtonSizes kind:data(any) addr:0x0214a734 local
+sWindowButtonSize kind:data(any) addr:0x0214a73c local
+sTextButtonPositions kind:data(any) addr:0x0214a744 local
+sWindowButtonPosition kind:data(any) addr:0x0214a74c local
+sWindowTextPosition kind:data(any) addr:0x0214a754 local
+sLightDirection0 kind:data(any) addr:0x0214a75c local
+sCameraPosition kind:data(any) addr:0x0214a768 local
+sLightDirection1 kind:data(any) addr:0x0214a774 local
+sCameraTarget kind:data(any) addr:0x0214a780 local
+sButtonSequences kind:data(any) addr:0x0214a78c local
+sWindowRect kind:data(any) addr:0x0214a79c local
+sWindowButtonSounds kind:data(any) addr:0x0214a7ac local
+sTextButtonSounds kind:data(any) addr:0x0214a7bc local
+sTextMessages kind:data(any) addr:0x0214a7cc local
+sTextFonts kind:data(any) addr:0x0214a7ec local
+sButtonScenes kind:data(any) addr:0x0214a80c local
+sButtonPositions kind:data(any) addr:0x0214a82c local
+sButtonSizes kind:data(any) addr:0x0214a864 local
+sWindowScreenName kind:data(any) addr:0x0214a89c local
+sTextPositions kind:data(any) addr:0x0214a8b4 local
+sButtonSounds kind:data(any) addr:0x0214a8f4 local
 _ZTV13CityHallScene kind:data(any) addr:0x0214a980
-gStr_N83_ov091 kind:data(any) addr:0x0214a9a4
-data_ov091_0214a9a8 kind:data(any) addr:0x0214a9a8
-data_ov091_0214a9ac kind:data(any) addr:0x0214a9ac ambiguous
-gStr_TET_ov091 kind:data(any) addr:0x0214a9c8
-gStr_Msg_TmdEtcMsgJP_LZ_bin_ov091 kind:data(any) addr:0x0214a9cc
-gStr_TEC_ov091 kind:data(any) addr:0x0214a9e4
-gStr_Msg_TmdCommonMsgJP_LZ_bin_ov091 kind:data(any) addr:0x0214a9e8
-gStr_M00_ov091 kind:data(any) addr:0x0214aa04
-gStr_Mdl_Misc_cityhall_3D_LZ_bin kind:data(any) addr:0x0214aa08
-data_ov091_0214aa24 kind:data(any) addr:0x0214aa24
-data_ov091_0214aa28 kind:data(any) addr:0x0214aa28 ambiguous
-gStr_TEC_tmd_common_msg_JP_bmg kind:data(any) addr:0x0214aa3c
-gStr_M00_cityhall_imd kind:data(any) addr:0x0214aa58
-gStr_N83_BG_up_ncl_ov091 kind:data(any) addr:0x0214aa6c
-gStr_N83_BG_up_nsc_ov091 kind:data(any) addr:0x0214aa7c
-gStr_N83_BG_up_ncg_ov091 kind:data(any) addr:0x0214aa8c
-gStr_N83_BG_down_ncl_ov091 kind:data(any) addr:0x0214aa9c
-gStr_N83_BG_down_nsc_ov091 kind:data(any) addr:0x0214aab0
-data_ov091_0214aac4 kind:data(any) addr:0x0214aac4
-data_ov091_0214aacc kind:data(any) addr:0x0214aacc ambiguous
-gStr_N83_Obj_down_ncl_ov091 kind:data(any) addr:0x0214aad8
-gStr_N83_Obj_down_nce_ov091 kind:data(any) addr:0x0214aaec
-gStr_N83_Obj_down_ncg_ov091 kind:data(any) addr:0x0214ab00
-gStr_N83_ov091_2 kind:data(any) addr:0x0214ab14
-gStr_TET_ov091_2 kind:data(any) addr:0x0214ab18
-gStr_TEC_ov091_2 kind:data(any) addr:0x0214ab1c
-gStr_M00_ov091_2 kind:data(any) addr:0x0214ab20
+@14301 kind:data(any) addr:0x0214a9a4 local
+@14302 kind:data(any) addr:0x0214a9a8 local
+@14303 kind:data(any) addr:0x0214a9c8 local
+@14304 kind:data(any) addr:0x0214a9cc local
+@14305 kind:data(any) addr:0x0214a9e4 local
+@14306 kind:data(any) addr:0x0214a9e8 local
+@14307 kind:data(any) addr:0x0214aa04 local
+@14308 kind:data(any) addr:0x0214aa08 local
+@14415 kind:data(any) addr:0x0214aa24 local
+@14416 kind:data(any) addr:0x0214aa3c local
+@14417 kind:data(any) addr:0x0214aa58 local
+@14418 kind:data(any) addr:0x0214aa6c local
+@14419 kind:data(any) addr:0x0214aa7c local
+@14420 kind:data(any) addr:0x0214aa8c local
+@14421 kind:data(any) addr:0x0214aa9c local
+@14422 kind:data(any) addr:0x0214aab0 local
+@14423 kind:data(any) addr:0x0214aac4 local
+@14424 kind:data(any) addr:0x0214aad8 local
+@14425 kind:data(any) addr:0x0214aaec local
+@14426 kind:data(any) addr:0x0214ab00 local
+@14476 kind:data(any) addr:0x0214ab14 local
+@14477 kind:data(any) addr:0x0214ab18 local
+@14478 kind:data(any) addr:0x0214ab1c local
+@14479 kind:data(any) addr:0x0214ab20 local
