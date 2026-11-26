@@ -562,6 +562,12 @@ used rarely) is coloured last. Measured: `a = g(); b = g(); c = g(); h(); use(a)
 a r6 (and `a = g(); b = g();` b r4, a r5). Two values that swap registers with the same instructions were created in
 the other order, or have other neighbour counts.
 
+**A block scheduled twice** (overlay 103, inferred from `tools/sched_probe.py show`): `DivorceScene::Init`'s
+blocks were logged both before and after register allocation, and the second pass reordered address and constant
+loads that the first had put in the original's order. The block held a copy (`a = b = 1`, a chained assignment)
+that coalescing removed; written as two statements, the block was scheduled once and the function matched. When a
+function's first-pass order is the original's but the output is not, look for a copy that coalescing deletes.
+
 **Applied.**
 - The light-0 block of overlay 4's `CharacterBodyTestScene::Init` (x stored before `mEnabled` in the original). The
   original order needs, after the store of x, the store of `mEnabled` chosen before the two argument loads of
