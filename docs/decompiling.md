@@ -566,7 +566,9 @@ the other order, or have other neighbour counts.
 blocks were logged both before and after register allocation, and the second pass reordered address and constant
 loads that the first had put in the original's order. The block held a copy (`a = b = 1`, a chained assignment)
 that coalescing removed; written as two statements, the block was scheduled once and the function matched. When a
-function's first-pass order is the original's but the output is not, look for a copy that coalescing deletes.
+function's first-pass order is the original's but the output is not, look for a copy that coalescing deletes. The same
+split (`mVAlign = 1; mHAlign = 1;` for `mHAlign = mVAlign = 1`) matched `Init` in overlays 101, 102 and 104 at once
+(96-97% before), so a near-miss `Init` of a scene built from another's template is worth checking for it first.
 
 **Applied.**
 - The light-0 block of overlay 4's `CharacterBodyTestScene::Init` (x stored before `mEnabled` in the original). The
@@ -693,6 +695,16 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   function, with `Angle(...)`, `Sub` or named locals, put the four copies in other slots (overlay 4).
 - Slots follow the order of the caller's locals; an inline's locals and by-value copies sit below them. Declare them
   in the caller to move them up (`MapScene::Update`), or use an inline to move a copy down (`OptionScene::OpenWindow`).
+- **Locals of different sizes are not placed by declaration order alone** (measured on the debug map's
+  `UpdateMarks` of overlays 90, 103 and 104): moving four 8-byte `ScreenPoint` declarations above or below the
+  12-byte vectors changed nothing, and they always went below the vectors and the by-value temporaries. The
+  original had two of them above the temporaries, among the vectors: they were one 16-byte array, `ScreenPoint
+  points[2]` (element 0 at the lower address), and all three functions matched with it. That the compiler orders
+  locals by size is inferred from this one shape; when objects of one size refuse to move past another size,
+  try an array.
+- A global read for several fields (`gCamera.mPosition`, `gCamera.mTarget`) whose address the original loads once
+  and offsets (`ldr r5, =gCamera; add r1, r5, #20; add r5, r5, #44`) is read through `Camera *const camera =
+  &gCamera`; reading the global directly gives one literal per field.
 - A struct made only to pass by value costs a slot the original lacks: pass the `static const` itself (overlay 109's
   `SetUpWindow`, `SetUpList`). Where the original has the slot, make the local and pass its address, point first
   (`ScreenPoint point = *touch; ScreenRect rect = GetAmPmRect(); ScreenRect_Contains(&rect, &point);`,
