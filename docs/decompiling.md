@@ -1193,7 +1193,7 @@ variants and compare one function (`tools/compare_object.py --diff`), then confi
   once is an array of one (`MessageWindow mWindow[1]`); a single member gets no loop.
 - Members that the original addresses from the end pointer of the loop before them (`add r0, r5, #0x174` with r5
   the loop's end) are members of a part of their own that starts there; as plain members they are addressed from
-  `this` (`Scene74Part`, `RankingPart`).
+  `this` (`PersonalityPanels`, `RankingPart`).
 - A class whose table is another file's needs a non-inline virtual function declared (its key function), or a file
   that constructs it emits its table too (`Scene75Model::Draw`). A class with nothing virtual of its own gets its
   table emitted where it is constructed (`TestNg134Model`).

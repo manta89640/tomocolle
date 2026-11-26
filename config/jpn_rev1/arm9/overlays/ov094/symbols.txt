@@ -1,30 +1,30 @@
-func_ov094_02149a40 kind:function(arm,size=0xf8) addr:0x02149a40
-func_ov094_02149b38 kind:function(arm,size=0x54c) addr:0x02149b38
-func_ov094_0214a084 kind:function(arm,size=0x170) addr:0x0214a084
-func_ov094_0214a1f4 kind:function(arm,size=0x74) addr:0x0214a1f4
-func_ov094_0214a268 kind:function(arm,size=0x5c) addr:0x0214a268
-func_ov094_0214a2c4 kind:function(arm,size=0x4c4) addr:0x0214a2c4
-func_ov094_0214a788 kind:function(arm,size=0x3ec) addr:0x0214a788
-func_ov094_0214ab74 kind:function(arm,size=0x224) addr:0x0214ab74
-func_ov094_0214ad98 kind:function(arm,size=0x3c) addr:0x0214ad98
-func_ov094_0214add4 kind:function(arm,size=0x54) addr:0x0214add4
-func_ov094_0214ae28 kind:function(arm,size=0x5c) addr:0x0214ae28
+_ZN16PersonalityScene12StartLoadingEv kind:function(arm,size=0xf8) addr:0x02149a40
+_ZN16PersonalityScene4InitEv kind:function(arm,size=0x54c) addr:0x02149b38
+_ZN16PersonalityScene6UpdateEv kind:function(arm,size=0x170) addr:0x0214a084
+_ZN16PersonalityScene4DrawEv kind:function(arm,size=0x74) addr:0x0214a1f4
+_ZN16PersonalityScene4ExitEv kind:function(arm,size=0x5c) addr:0x0214a268
+_ZN17PersonalityPanels4InitEv kind:function(arm,size=0x4c4) addr:0x0214a2c4
+_ZN17PersonalityPanels6UpdateEv kind:function(arm,size=0x3ec) addr:0x0214a788
+_ZN17PersonalityPanels4DrawEv kind:function(arm,size=0x224) addr:0x0214ab74
+_ZN17PersonalityPanels14SetPersonalityEi kind:function(arm,size=0x3c) addr:0x0214ad98
+_ZN16PersonalitySceneD1Ev kind:function(arm,size=0x54) addr:0x0214add4
+_ZN16PersonalitySceneD0Ev kind:function(arm,size=0x5c) addr:0x0214ae28
 data_ov094_0214ae84 kind:data(any) addr:0x0214ae84
 data_ov094_0214ae88 kind:data(any) addr:0x0214ae88 ambiguous
 data_ov094_0214aec4 kind:data(any) addr:0x0214aec4 ambiguous
 data_ov094_0214aee0 kind:data(any) addr:0x0214aee0 ambiguous
-data_ov094_0214af0c kind:data(any) addr:0x0214af0c
-data_ov094_0214af24 kind:data(any) addr:0x0214af24
-data_ov094_0214af30 kind:data(any) addr:0x0214af30
-data_ov094_0214af40 kind:data(any) addr:0x0214af40
-data_ov094_0214af50 kind:data(any) addr:0x0214af50
-gStr_c_ov094 kind:data(any) addr:0x0214af60
+sLightDirection0 kind:data(any) addr:0x0214af0c
+sLightDirection1 kind:data(any) addr:0x0214af24
+sKindTitles kind:data(any) addr:0x0214af30
+sButtonSounds kind:data(any) addr:0x0214af40
+sKindSounds kind:data(any) addr:0x0214af50
+sKindTexts kind:data(any) addr:0x0214af60
 data_ov094_0214af68 kind:data(any) addr:0x0214af68 ambiguous
-data_ov094_0214af70 kind:data(any) addr:0x0214af70
-gStr__ov094 kind:data(any) addr:0x0214af80
+sPersonalityKinds kind:data(any) addr:0x0214af70
+sPersonalityTitles kind:data(any) addr:0x0214af80
 data_ov094_0214af98 kind:data(any) addr:0x0214af98 ambiguous
-gStr_e_ov094 kind:data(any) addr:0x0214afc0
-_ZTV7Scene74 kind:data(any) addr:0x0214b020
+sPersonalityTexts kind:data(any) addr:0x0214afc0
+_ZTV16PersonalityScene kind:data(any) addr:0x0214b020
 gStr_SCD_ov094 kind:data(any) addr:0x0214b044
 gStr_Scn_Scene_SceneCharDistribution_LZ_bin_ov094 kind:data(any) addr:0x0214b048
 gStr_TBM_ov094 kind:data(any) addr:0x0214b070

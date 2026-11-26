@@ -113,7 +113,7 @@ struct PaletteLoader {
 #include "../overlays/ov108/TutorialStepScene.h"
 #include "../overlays/ov088/Scene67.h"
 #include "../overlays/ov093/Scene72.h"
-#include "../overlays/ov094/Scene74.h"
+#include "../overlays/ov094/PersonalityScene.h"
 #include "../overlays/ov037/Scene75.h"
 #include "../overlays/ov038/TestNg111Scene.h"
 #include "../overlays/ov039/TravelScene.h"
@@ -646,7 +646,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0x7E:
         SetSoundGroup(1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(94));
-        return new Scene74(sceneId);
+        return new PersonalityScene(sceneId);
     case 0x75:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(37));
@@ -1113,7 +1113,7 @@ TutorialStepScene::TutorialStepScene(int sceneId) : Scene(sceneId) {}
 Scene72::Scene72(int sceneId) : Scene(sceneId) {}
 
 // Scenes 0x74 and 0x7E, overlay 94
-Scene74::Scene74(int sceneId) : Scene(sceneId) {}
+PersonalityScene::PersonalityScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0x75, overlay 37
 Scene75::Scene75(int sceneId) : Scene(sceneId) {}
