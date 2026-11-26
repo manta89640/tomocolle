@@ -755,7 +755,10 @@ def main():
     n.rule("report", "$objdiff report generate -p . -o $out", "Generating $out")
     # Sends the report to ByteMatch as the progress of HEAD, for when CI has no base ROM to make it with
     n.rule("upload_report", f"$python tools/upload_report.py $in --version {version}", "Uploading $in", pool="console")
-    n.rule("disassemble", "$dsd dis --config-path $config --asm-path $asm_dir --ual && touch $out", "Disassembling")
+    # dsd dis does not migrate sections, so it reads a copy of the config without them (see tools/dis_config.py)
+    n.rule("disassemble", "$python tools/dis_config.py $config $dis_config_dir && "
+           "$dsd dis --config-path $dis_config_dir/$config_name --asm-path $asm_dir --ual && touch $out",
+           "Disassembling")
 
     n.build(["build.ninja"], "configure", implicit=["configure.py", *configs])
 
@@ -861,7 +864,9 @@ def main():
 
     # A listing of the whole game to read, not to assemble
     asm_ok = build_dir / "asm.ok"
-    n.build([asm_ok], "disassemble", configs, implicit=[extract_config], variables={"asm_dir": build_dir / "asm"})
+    n.build([asm_ok], "disassemble", configs, implicit=[extract_config, "tools/dis_config.py"],
+            variables={"asm_dir": build_dir / "asm", "dis_config_dir": build_dir / "dis_config",
+                       "config_name": arm9_config.name})
     n.build(["dis"], "phony", [asm_ok])
 
     n.default(["objdiff.json", "check", *compiled])

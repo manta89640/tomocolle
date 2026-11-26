@@ -209,7 +209,9 @@ has them with the original's values, and `tools/force_active.py` writes them at 
 `tools/check_relocs.py` takes a reference to such a symbol for the original's reference to the symbol at its address.
 `dsd json delinks` and `dsd objdiff` do not migrate and so
 still list the ITCM's old gap; `tools/migrated_gaps.py` finds it, and `configure.py` and `tools/objdiff_config.py`
-leave it out.
+leave it out. `dsd dis` does not migrate either, and stops at the `.itcm` ranges ("starts before base address"):
+`ninja dis` gives it a copy of the config without them, which `tools/dis_config.py` writes to
+`build/<version>/dis_config/`, so the listing shows that code in the ITCM.
 
 Linking strips what nothing refers to, as the original link did: a compiled file of a library holds many functions
 the game never calls. The objects that dsd delinks are exempt, since only as much of them is known to be referred to
