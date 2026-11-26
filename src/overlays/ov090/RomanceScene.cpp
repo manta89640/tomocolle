@@ -737,12 +737,12 @@ void RomanceScene::StartLoading() {
         int womenCount = 0;
         for (u16 i = 0; i < 100; i++) {
             if (GameData_CharacterExists(&gGameData, i)) {
-                if (GameData_GetCharacterSex(&gGameData, i)) {
-                    women[womenCount] = i;
-                    womenCount++;
-                } else {
+                if (!GameData_GetCharacterSex(&gGameData, i)) {
                     men[menCount] = i;
                     menCount++;
+                } else {
+                    women[womenCount] = i;
+                    womenCount++;
                 }
             }
         }
@@ -1218,7 +1218,7 @@ void RomanceScene::FindPartners() {
         mPartners[i] = -1;
         for (int j = 0; j < 100; j++) {
             if (GameData_CharacterExists(&gGameData, j) && j != mCharacters[i].mIndex) {
-                u8 rank = mCharacters[i].mRelationRank[j];
+                int rank = mCharacters[i].mRelationRank[j];
                 if (rank == RELATION_LOVERS || rank == RELATION_SPOUSES || rank == RELATION_LOVERS_FIGHTING ||
                     rank == RELATION_SPOUSES_FIGHTING) {
                     mHasPartner[i] = TRUE;
