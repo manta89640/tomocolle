@@ -94,11 +94,16 @@ void PersonalityScene::StartLoading() {
     mIslandProgress.Init(NULL, NULL);
 }
 
-// Not matched yet: the same instructions in another schedule and other registers. The original picks the character's
-// personality load before the call's "this" by height, so its pre-RA scheduler was not in pressure mode there
-// (docs/decompiling.md, "How the compiler orders and colours"): its block must start later than ours. Tried: a
-// one-iteration loop over the character (with a one-element position table), a local for the animation, light
-// helpers and pointers (the cast pointers below are the closest).
+// Not matched yet: the same instructions in another schedule and other registers, in three places (the character's
+// animation call, the button's sounds and position, the name text). In each the original's order is the
+// scheduler's by height, where ours is in pressure mode (docs/decompiling.md, "How the compiler orders and
+// colours"). Replaying our logged block (tools/sched_probe.py) gives the original's animation-call order only if the
+// block starts right after G3X_SetClearColor with little live. So the original seems to have a block boundary
+// there that our source lacks. Measured with test files: the pre-RA scheduler cuts a block at about 100 pcode
+// instructions counted before copies are coalesced, and one-iteration loops, labels, gotos, inline functions and
+// constant ifs make no boundary. Tried as well: compiler builds 114 to 139, -O3/-O4 with ,s/,p, and the pragmas
+// scheduling, optimize_for_size, optimization_level 1-4, opt_propagation, opt_common_subs, opt_dead_assignments,
+// opt_lifetimes. The name text outside a loop (as here) took it from 230 differing lines to 106.
 void PersonalityScene::Init() {
     VramManagers_Reset(&gVramManagerWork);
     gScreenControl.mUnknown44 = 1;
@@ -162,14 +167,12 @@ void PersonalityScene::Init() {
     mPanels.Init();
     mPanels.SetPersonality(mCharacters[0].GetPersonality());
 
-    for (int i = 0; i < 1; i++) {
-        wchar_t name[12];
-        mTexts[i].InitObjForMessage(&mMessageFiles[1], sNameMessages[i], &gFonts[0].mFont, 0x10, 0, 0, 1, 0, 0, 15, NULL);
-        SetCanvasPosition(&mTexts[i], sNamePositions[i]);
-        MiiData_GetName(&mCharacters[0], name);
-        mTexts[i].SetStringArg(name, 0);
-        mTexts[i].DrawAll();
-    }
+    wchar_t name[12];
+    mTexts[0].InitObjForMessage(&mMessageFiles[1], sNameMessages[0], &gFonts[0].mFont, 0x10, 0, 0, 1, 0, 0, 15, NULL);
+    SetCanvasPosition(&mTexts[0], sNamePositions[0]);
+    MiiData_GetName(&mCharacters[0], name);
+    mTexts[0].SetStringArg(name, 0);
+    mTexts[0].DrawAll();
     mScroll = 0;
 }
 
