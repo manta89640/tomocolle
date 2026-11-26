@@ -97,6 +97,7 @@ public:
     void UpdateHeadIcon();
 
     ModelAnimation *GetAnimation() { return AnimModel_FindAnimation(&mAnim, RESOURCE_BCA0, mAnimId); }
+    VecFx32 GetPos() { return mPos; }
     void SetPos(VecFx32 pos) {
         mPos.x = pos.x;
         mPos.y = pos.y;

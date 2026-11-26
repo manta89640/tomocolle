@@ -1493,20 +1493,27 @@ void RomanceMap::Init(int resource, Character *first, Character *second) {
     mUnknown330 = 4;
 }
 
+static inline VecFx32 PositionOf(Character *character) { return character->mPos; }
+
 void RomanceMap::PlaceSprites() {
-    ScreenPoint camera, target, first, second;
-    VecFx32 cameraPosition = gCamera.mPosition;
-    VecFx32 cameraTarget = gCamera.mTarget;
-    ToScreen(&camera, &cameraPosition);
-    ToScreen(&target, &cameraTarget);
-    VecFx32 firstPosition = mFirst->mPos;
-    VecFx32 secondPosition = mSecond->mPos;
-    ToScreen(&first, &firstPosition);
-    ToScreen(&second, &secondPosition);
-    mCameraSprite.SetPosition(FxVec2(camera.x << FX32_SHIFT, camera.y << FX32_SHIFT));
-    mTargetSprite.SetPosition(FxVec2(target.x << FX32_SHIFT, target.y << FX32_SHIFT));
-    mFirstSprite.SetPosition(FxVec2(first.x << FX32_SHIFT, first.y << FX32_SHIFT));
-    mSecondSprite.SetPosition(FxVec2(second.x << FX32_SHIFT, second.y << FX32_SHIFT));
+    Camera *const camera = &gCamera;
+    VecFx32 cameraPosition = camera->mPosition;
+    VecFx32 cameraTarget = camera->mTarget;
+    VecFx32 second;
+    VecFx32 first;
+    ScreenPoint points[2];
+    ScreenPoint cameraPoint;
+    ScreenPoint targetPoint;
+    ToScreen(&cameraPoint, &cameraPosition);
+    ToScreen(&targetPoint, &cameraTarget);
+    first = PositionOf(mFirst);
+    second = PositionOf(mSecond);
+    ToScreen(&points[0], &first);
+    ToScreen(&points[1], &second);
+    mCameraSprite.SetPositionFromVec(cameraPoint.x << FX32_SHIFT, cameraPoint.y << FX32_SHIFT);
+    mTargetSprite.SetPositionFromVec(targetPoint.x << FX32_SHIFT, targetPoint.y << FX32_SHIFT);
+    mFirstSprite.SetPositionFromVec(points[0].x << FX32_SHIFT, points[0].y << FX32_SHIFT);
+    mSecondSprite.SetPositionFromVec(points[1].x << FX32_SHIFT, points[1].y << FX32_SHIFT);
 }
 
 // A point of the floor as a pixel of the lower screen, the floor's origin at its centre

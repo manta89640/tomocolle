@@ -1419,24 +1419,24 @@ static inline void PlaceMark(ObjTextBox *box, ScreenPoint point) {
 
 // Puts the marks of the camera, its target and the two characters on the map
 void DivorceDebugView::UpdateMarks() {
-    VecFx32 cameraPosition = gCamera.mPosition;
-    VecFx32 cameraTarget = gCamera.mTarget;
+    Camera *const camera = &gCamera;
+    VecFx32 cameraPosition = camera->mPosition;
+    VecFx32 cameraTarget = camera->mTarget;
     VecFx32 second;
     VecFx32 first;
-    ScreenPoint secondPoint;
-    ScreenPoint firstPoint;
+    ScreenPoint points[2];
     ScreenPoint cameraPoint;
     ScreenPoint targetPoint;
     ToScreen(&cameraPoint, &cameraPosition);
     ToScreen(&targetPoint, &cameraTarget);
     first = mFirst->GetPos();
     second = mSecond->GetPos();
-    ToScreen(&firstPoint, &first);
-    ToScreen(&secondPoint, &second);
+    ToScreen(&points[0], &first);
+    ToScreen(&points[1], &second);
     PlaceMark(&mMarks[0], cameraPoint);
     PlaceMark(&mMarks[1], targetPoint);
-    PlaceMark(&mMarks[2], firstPoint);
-    PlaceMark(&mMarks[3], secondPoint);
+    PlaceMark(&mMarks[2], points[0]);
+    PlaceMark(&mMarks[3], points[1]);
 }
 
 // Where a point of the floor is on the map, in pixels: (0, 0) at the screen's middle

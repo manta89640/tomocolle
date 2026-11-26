@@ -1350,25 +1350,24 @@ void ReconcileDebugMap::Init(ReconcileCharacter *first, ReconcileCharacter *seco
 
 // Puts the marks where the camera, its target and the two characters are
 void ReconcileDebugMap::PlaceMarks() {
-    ScreenPoint first;
-    ScreenPoint second;
-    ScreenPoint target;
-    ScreenPoint camera;
-    VecFx32 firstPos;
-    VecFx32 secondPos;
-    VecFx32 targetPos = gCamera.mTarget;
-    VecFx32 cameraPos = gCamera.mPosition;
-
-    ToScreen(&camera, &cameraPos);
-    ToScreen(&target, &targetPos);
-    firstPos = mFirst->mPos;
-    secondPos = mSecond->mPos;
-    ToScreen(&first, &firstPos);
-    ToScreen(&second, &secondPos);
-    SetPixelPosition(&mMarks[0], camera);
-    SetPixelPosition(&mMarks[1], target);
-    SetPixelPosition(&mMarks[2], first);
-    SetPixelPosition(&mMarks[3], second);
+    Camera *const camera = &gCamera;
+    VecFx32 cameraPosition = camera->mPosition;
+    VecFx32 cameraTarget = camera->mTarget;
+    VecFx32 second;
+    VecFx32 first;
+    ScreenPoint points[2];
+    ScreenPoint cameraPoint;
+    ScreenPoint targetPoint;
+    ToScreen(&cameraPoint, &cameraPosition);
+    ToScreen(&targetPoint, &cameraTarget);
+    first = mFirst->GetPos();
+    second = mSecond->GetPos();
+    ToScreen(&points[0], &first);
+    ToScreen(&points[1], &second);
+    SetPixelPosition(&mMarks[0], cameraPoint);
+    SetPixelPosition(&mMarks[1], targetPoint);
+    SetPixelPosition(&mMarks[2], points[0]);
+    SetPixelPosition(&mMarks[3], points[1]);
 }
 
 // Where a point of the room (x, z) is on the map: the room's centre at (128, 96)
