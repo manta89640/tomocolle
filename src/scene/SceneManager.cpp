@@ -147,7 +147,7 @@ struct PaletteLoader {
 #include "../overlays/ov102/SceneB2.h"
 #include "../overlays/ov103/SceneB3.h"
 #include "../overlays/ov100/AlbumScene.h"
-#include "../overlays/ov104/SceneB5.h"
+#include "../overlays/ov104/ReconcileScene.h"
 #include "../overlays/ov060/SceneB7.h"
 #include "../overlays/ov061/TestNg143Scene.h"
 #include "../overlays/ov062/SceneB9.h"
@@ -809,7 +809,7 @@ Scene *SceneManager::CreateScene(int sceneId) {
     case 0xB5:
         SetSoundGroup(66);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(104));
-        return new SceneB5(sceneId);
+        return new ReconcileScene(sceneId);
     case 0xB6:
         SetSoundGroup(-1);
         FS_LoadOverlay(MI_PROCESSOR_ARM9, OVERLAY_ID(105));
@@ -1221,7 +1221,7 @@ SceneB3::SceneB3(int sceneId) : Scene(sceneId) {}
 AlbumScene::AlbumScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB5, overlay 104
-SceneB5::SceneB5(int sceneId) : Scene(sceneId) {}
+ReconcileScene::ReconcileScene(int sceneId) : Scene(sceneId) {}
 
 // Scene 0xB7, overlay 60
 SceneB7::SceneB7(int sceneId) : Scene(sceneId) {}
