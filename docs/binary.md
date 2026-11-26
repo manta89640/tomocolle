@@ -952,7 +952,7 @@ Measured:
   without (message windows, buttons, texts, saved characters) by a loop, and an array of one still by a loop,
   so `MessageWindow mWindow[1]` and `MessageText mText[1]` where the ROM loops once. An inline constructor
   (MessageWindow, AnimModel, a Character's) is expanded in place. A run of members that the constructor addresses
-  from the end pointer of the previous loop is a part of its own (`Scene74Part`, `RankingPart`): written as plain
+  from the end pointer of the previous loop is a part of its own (`PersonalityPanels`, `RankingPart`): written as plain
   members, the compiler addresses them from `this`.
 - **Model classes of the overlays.** Several scenes hold arrays of a class of their overlay that holds an
   AnimModel (`TestNg69Model`, `Scene3CModel`, `Scene3EModel`: constructor in the overlay, destructor the main
